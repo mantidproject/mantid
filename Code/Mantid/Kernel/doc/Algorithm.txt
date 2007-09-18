@@ -1,0 +1,33 @@
+RJT, 12/09/07
+=============
+
+We have some method name changes w.r.t. the Gaudi version:
+	sysInitialize -> initialize
+	sysExecute    -> execute
+	sysFinalize   -> finalize
+	initialize    -> init
+	execute       -> exec
+	finalize      -> final
+	
+Our init, exec & final methods are protected.
+One thing to note is that although Gaudi initializes and finalizes sub-algorithms in the code for
+this class, it doesn't execute them anywhere. I don't know where that happens.
+
+We're not taking a number of methods from Gaudi:
+	sysReinitialize, sysBeginRun, sysEndRun, resetExecuted, beginRun, endRun
+		- these are IAlgorithm methods that we didn't want
+	isEnabled - don't see need for this. You'd only instantiate algorithms you definitely want.
+	filterPassed/setFilterPassed - these are event loop related.
+	
+Not put in yet:
+
+	Nothing relating to services has been put in yet.
+	setOutputLevel is one such method (its value is retrieved from the message service).
+	
+	Properties.
+	
+	IInterface methods - addRef, release, queryInterface (not even in IInterface yet).
+	
+We are keeping the subalgorithm concept.
+
+The Gaudi idea of an error count is related to having an event loop, so it's been left out.

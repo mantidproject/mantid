@@ -1,0 +1,26 @@
+RJT, 12/09/07
+=============
+
+For now, have created this as an empty interface to preserve the Gaudi structure.
+Will decide later what we want to have in our version.
+
+More information...
+
+At first glance, we thought the purpose of the IInterface class was just for garbage collection
+Here, though, is the justification for it in the GAUDI architecture document:
+
+	"all the interfaces (pure abstract classes in C++) will inherit from a common
+	ancestor called IInterface. This will allow us to provide a mechanism for querying an 
+	interface of a component for a reference to any other interface. This mechanism is very 
+	similar to the one provided by the COM component model of Microsoft."
+
+It does seem to also do the first thing, which would be much better done through the use of
+smart pointers. Here's a paragraph from the GAUDI user guide:
+
+	"We follow the convention that all interfaces should be derived from a basic interface 
+	IInterface. This interface defined 3 methods: addRef(), release() and queryInterface().
+	This methods allow the framework to manage the reference counting of the framework 
+	components and the possibility to obtain a different interface of a component using any
+	interface."
+
+See Section 16.3 of GAUDI user guide for more information on interfaces in Gaudi.
