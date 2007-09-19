@@ -214,6 +214,31 @@ namespace Mantid
     return m_subAlgms;
   }  
   
+  // IProperty implementation
+  // Empty for now - requires Property manager
+//  StatusCode Algorithm::setProperty(const Property& p) {
+//          return m_propertyMgr->setProperty(p);
+//  }
+  StatusCode Algorithm::setProperty(const std::string& s) {
+          return StatusCode::SUCCESS;
+  }
+  StatusCode Algorithm::setProperty(const std::string& n, const std::string& v) {
+          return StatusCode::SUCCESS;
+  }
+//  StatusCode Algorithm::getProperty(Property* p) const {
+//          return m_propertyMgr->getProperty(p);
+//  }
+//  const Property& Algorithm::getProperty( const std::string& name) const{
+//          return m_propertyMgr->getProperty(name);
+//  }
+  StatusCode Algorithm::getProperty(const std::string& n, std::string& v ) const {
+          return StatusCode::SUCCESS;
+  }
+//  const std::vector<Property*>& Algorithm::getProperties( ) const {
+//          return m_propertyMgr->getProperties();
+//  }
+
+  
   /**
    ** Protected Member Functions
    **/

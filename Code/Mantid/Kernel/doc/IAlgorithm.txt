@@ -23,3 +23,8 @@ For the initial version, I'm using a (very) simplified StatusCode class.
 Why is the return type of the 'version' method a string?
 
 Added a virtual destructor, which is missing from the original file.
+
+RJT, 19/09/07
+=============
+
+IAlgorithm now inherits from IProperty (which inherits from INamedInterface, for now at least).

@@ -1,5 +1,4 @@
-RJT, 12/09/07
+RJT, 19/09/07
 =============
 
-For now, have created this as an empty interface to preserve the Gaudi structure.
-Will decide later what we want to have in our version.
+Essentially identical to the Gaudi v19.4 version.

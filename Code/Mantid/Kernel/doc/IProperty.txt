@@ -1,0 +1,6 @@
+RJT, 19/09/07
+=============
+
+We have decided to place the IProperty interface between INamedInterface & IAlgorithm.
+This means that a pointer to IAlgorithm has access to the public interface of IProperty, 
+which was not previously the case.

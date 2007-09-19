@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "INamedInterface.h"
-#include <string>
+#include "IProperty.h"
 
 namespace Mantid
 {
@@ -42,7 +41,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class IAlgorithm : virtual public INamedInterface {
+  class IAlgorithm : virtual public IProperty {
   public:
     // Retrieve interface ID
     //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }

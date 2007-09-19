@@ -21,4 +21,4 @@ it may be just too much trouble to drop or completely change it.
 
 I'm not sure it's a good idea to have the status set to 'success' by default - it leads to some
 code in other classes that's confusing if you don't know this. I think it would be better to 
-require that it be explicitly set.
+require that it be explicitly set. So I have.

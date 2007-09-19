@@ -5,9 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IInterface.h"
+#include <string>
 
 namespace Mantid
 {
+  // Interface ID
+  // static const InterfaceID IID_INamedInterface("INamedInterface",0,0);
+
 /** @class INamedInterface INamedInterface.h Kernel/INamedInterface.h
 
     INamedInterface extends IInterface with a method to give all implementing interfaces
@@ -38,8 +42,12 @@ namespace Mantid
 */
   class INamedInterface : virtual public IInterface {
   public:
-	// RJT: This class is just a stub for now
+    /// Retrieve the interface ID
+    // static const InterfaceID& interfaceID() { return IID_INamedInterface; }	
 	  
+    /// Retrieve the name of the instance.
+    virtual const std::string& name() const = 0;
+    
     /// Virtual destructor (always needed for abstract classes)
     virtual ~INamedInterface() {};
   };

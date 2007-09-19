@@ -57,9 +57,7 @@ namespace Mantid
     
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class Algorithm : virtual public IAlgorithm //,
-// RJT: I'll deal with IProperty later
-  //                    virtual public IProperty
+  class Algorithm : virtual public IAlgorithm
   {
   public:
 	  
@@ -80,7 +78,6 @@ namespace Mantid
 	   *  whereas "ApproxTrackFit" and "BestTrackFit" may be two instantiations 
 	   *  of the class configured to find tracks with different fit criteria. 
 	   */
-	  // RJT: This comes from INamedInterface in the Gaudi version...
 	  virtual const std::string& name() const;
 
 	  // IAlgorithm methods
@@ -138,6 +135,21 @@ namespace Mantid
 	  
 	  /// List of sub-algorithms. Returns a pointer to a vector of (sub) Algorithms
 	  std::vector<Algorithm*>* subAlgorithms() const;
+	  
+	  /// Implementation of IProperty::setProperty 
+//	  virtual StatusCode setProperty( const Property& p );
+	  /// Implementation of IProperty::setProperty
+	  virtual StatusCode setProperty( const std::string& s );
+	  /// Implementation of IProperty::setProperty
+	  virtual StatusCode setProperty( const std::string& n, const std::string& v);
+	  /// Implementation of IProperty::getProperty
+//	  virtual StatusCode getProperty(Property* p) const;
+	  /// Implementation of IProperty::getProperty 
+//	  virtual const Property& getProperty( const std::string& name) const;
+	  /// Implementation of IProperty::getProperty
+	  virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
+	  /// Implementation of IProperty::getProperties
+//	  virtual const std::vector<Property*>& getProperties( ) const;  
 	  
   protected:
 	  
