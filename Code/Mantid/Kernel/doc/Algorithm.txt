@@ -24,8 +24,6 @@ Not put in yet:
 	Nothing relating to services has been put in yet.
 	setOutputLevel is one such method (its value is retrieved from the message service).
 	
-	Properties.
-	
 	IInterface methods - addRef, release, queryInterface (not even in IInterface yet).
 	
 We are keeping the subalgorithm concept.
@@ -39,3 +37,9 @@ Instead of directly inheriting from both IAlgorithm & IProperty, we have decided
 IAlgorithm inherit from IProperty. This of course makes no difference to this class, but
 means that a pointer to IAlgorithm has access to the public interface of IProperty, which
 was not previously the case.
+
+RJT, 20/09/07
+=============
+
+Put in a very simple way to deal with properties - just a map, where the name and value are
+both strings. Properties that don't have values should just leave that string empty.

@@ -95,6 +95,28 @@ public:
     TS_ASSERT( testPointer->empty() );
 	}
 	
+	void testSetProprerty()
+	{
+    Mantid::Algorithm alg("Hello","1.1");
+    Mantid::StatusCode status = alg.setProperty("prop1");
+    TS_ASSERT( ! status.isFailure() );
+    status = alg.setProperty("prop2","val");
+    TS_ASSERT( ! status.isFailure() );    
+	}
+	
+	void testGetProperty()
+	{
+    Mantid::Algorithm alg("Hello","1.1");
+    Mantid::StatusCode status = alg.setProperty("prop1","yes");
+    std::string value;
+    status = alg.getProperty("ghjkgh",value);
+    TS_ASSERT( status.isFailure() );
+    status = alg.getProperty("prop1",value);
+    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT( ! value.compare("yes") );
+    
+	}
+	
 };
 
 #endif /*ALGORITHMTEST_H_*/

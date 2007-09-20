@@ -1,8 +1,7 @@
 /*
     Base class from which all concrete algorithm classes should be derived. 
     In order for a concrete algorithm class to do anything
-    useful the methods initialize(), execute() and finalize() 
-    should be overridden.   
+    useful the methods init(), exec() and final() should be overridden.   
 
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
@@ -91,7 +90,7 @@ namespace Mantid
     }
     // Unpleasant catch-all! Along with this, Gaudi version catches GaudiException & std::exception
     // but doesn't really do anything except (print fatal) messages.
-    catch (...) 
+    catch (...)
     {
       // Gaudi: A call to the auditor service is here
       // (1) perform the printout
@@ -220,10 +219,12 @@ namespace Mantid
 //          return m_propertyMgr->setProperty(p);
 //  }
   StatusCode Algorithm::setProperty(const std::string& s) {
-          return StatusCode::SUCCESS;
+    m_properties[s] = "";
+    return StatusCode::SUCCESS;
   }
   StatusCode Algorithm::setProperty(const std::string& n, const std::string& v) {
-          return StatusCode::SUCCESS;
+    m_properties[n] = v;
+    return StatusCode::SUCCESS;
   }
 //  StatusCode Algorithm::getProperty(Property* p) const {
 //          return m_propertyMgr->getProperty(p);
@@ -232,7 +233,12 @@ namespace Mantid
 //          return m_propertyMgr->getProperty(name);
 //  }
   StatusCode Algorithm::getProperty(const std::string& n, std::string& v ) const {
-          return StatusCode::SUCCESS;
+    // Check if key is in map & if not return with failure
+    if (m_properties.find(n) == m_properties.end()) return StatusCode::FAILURE;
+
+    // Retrieve the value corresponding to the key
+    v = m_properties.find(n)->second;
+    return StatusCode::SUCCESS;    
   }
 //  const std::vector<Property*>& Algorithm::getProperties( ) const {
 //          return m_propertyMgr->getProperties();

@@ -8,6 +8,8 @@
 #include "MsgStream.h"
 
 #include <vector>
+//#include <ext/hash_map>
+#include <map>
 
 #ifndef PACKAGE_VERSION
  #define PACKAGE_VERSION "unknown"
@@ -19,8 +21,7 @@ namespace Mantid
 
     Base class from which all concrete algorithm classes should be derived. 
     In order for a concrete algorithm class to do anything
-    useful the methods initialize(), execute() and finalize() 
-    should be overridden.
+    useful the methods init(), exec() and final() should be overridden.
     
     Further text from Gaudi file.......
     The base class provides utility methods for accessing 
@@ -91,12 +92,11 @@ namespace Mantid
 	   */
 	  virtual StatusCode initialize();
 	  
-	  /** The actions to be performed by the algorithm on an event. This method is
-	   * invoked once per event for top level algorithms by the application 
-	   *  manager.
-	   *  This method invokes execute() method. 
-	   *  For sub-algorithms either the sysExecute() method or execute() method 
-	   *  must be EXPLICITLY invoked by  the parent algorithm. 
+	  /** The actions to be performed by the algorithm on a dataset. This method is
+	   *  invoked for top level algorithms by the application manager.
+	   *  This method invokes exec() method. 
+	   *  For sub-algorithms either the execute() method or exec() method 
+	   *  must be EXPLICITLY invoked by  the parent algorithm.
 	   */
 	  virtual StatusCode execute();
 
@@ -125,6 +125,7 @@ namespace Mantid
 	   *  properties. Using this mechanism instead of creating daughter 
 	   *  algorithms directly via the new operator is prefered since then 
 	   *  the framework may take care of all of the necessary book-keeping.
+	   * 
 	   *  @param type The concrete algorithm class of the sub algorithm
 	   *  @param name The name to be given to the sub algorithm
 	   *  @param pSubAlg Set to point to the newly created algorithm object
@@ -173,7 +174,7 @@ namespace Mantid
 
 	  /// Set the Algorithm finalized state
 	  void setFinalized();
-
+	  
   private:
 
 	  /// Private Copy constructor: NO COPY ALLOWED
@@ -190,10 +191,15 @@ namespace Mantid
     bool        m_isExecuted;       ///< Algorithm is executed flag
 	  bool        m_isFinalized;      ///< Algorithm has been finalized flag
 	  
-	  // Dummy method so that I don't have to change code before our Message Service exists.
+	  // RJT: Dummy method so that I don't have to change code before our Message Service exists.
 	  int msgSvc() {return 0;}
+
+	  // RJT: Temporary way of storing properties for algorithms, in absence of Property class.
+	  // N.B. hash_map is not in the standard stl, hence the wierd namespace.
+//	  __gnu_cxx::hash_map< std::string, std::string > m_properties;
+	  std::map< std::string, std::string > m_properties;
+
   };
 }
-
 
 #endif /*ALGORITHM_H_*/
