@@ -50,6 +50,10 @@ public:
 	{
     Mantid::Algorithm alg("Hello","1.1");
     Mantid::StatusCode status = alg.execute();
+    TS_ASSERT( status.isFailure() );
+    TS_ASSERT( ! alg.isExecuted() );
+    status = alg.initialize();
+    status = alg.execute();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg.isExecuted() );
 	}

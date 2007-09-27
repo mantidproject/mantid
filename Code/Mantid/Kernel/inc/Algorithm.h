@@ -62,6 +62,9 @@ namespace Mantid
   {
   public:
 	  
+    // RJT: Default constructor for testing factory
+    Algorithm();
+    
 	  /** Constructor
 	   *  @param name    The algorithm object's name
 	   *  @param svcloc  A pointer to a service location service (RJT: not yet)

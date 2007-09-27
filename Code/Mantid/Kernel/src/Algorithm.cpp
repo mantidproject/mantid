@@ -31,6 +31,18 @@
 
 namespace Mantid
 {
+  Algorithm::Algorithm()
+  :
+  m_name("unknown"),
+  m_version("unknown"),
+  m_isInitialized(false),
+  m_isExecuted(false),
+  m_isFinalized(false)    
+  {
+    m_subAlgms = new std::vector<Algorithm *>();
+  }
+
+
   // Constructor
   Algorithm::Algorithm( const std::string& name, //ISvcLocator *pSvcLocator,
                         const std::string& version)
@@ -105,6 +117,9 @@ namespace Mantid
   
   StatusCode Algorithm::execute() 
   {
+    // Return a failure if the algorithm hasn't been initialized
+    if ( !isInitialized() ) return StatusCode::FAILURE;
+    
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try
     {
@@ -143,9 +158,9 @@ namespace Mantid
   
   StatusCode Algorithm::finalize() 
   {
-    // Bypass the finalialization if the algorithm hasn't been initialized or
-    // has already been finalialized.
-    if ( !isInitialized() || isFinalized() ) return StatusCode::SUCCESS;
+    // Bypass the finalization if the algorithm hasn't been initialized or
+    // has already been finalized.
+    if ( !isInitialized() || isFinalized() ) return StatusCode::FAILURE;
   
     // Invoke final() method of the derived class inside a try/catch clause
     try
