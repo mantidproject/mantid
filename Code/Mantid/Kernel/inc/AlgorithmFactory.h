@@ -54,12 +54,6 @@ namespace Mantid
 
     typedef IAlgorithm* (*AlgCreator)();
     
-    /// Virtual destructor
-    virtual ~AlgorithmFactory()
-    {
-      delete m_instance;
-    }
-
     /** Register the name and creator function of an algorithm
      * 
      *  @param name The algorithm type name
@@ -123,8 +117,23 @@ namespace Mantid
        
   private:
 
-    /// Private Constructor
+    /// Private Constructor for singleton class
     AlgorithmFactory() {}
+    
+    /** Private copy constructor
+     *  Prevents singleton being copied
+     */
+    AlgorithmFactory(const AlgorithmFactory&) {}
+    
+    /** Private destructor
+     *  Prevents client from calling 'delete' on the pointer handed 
+     *  out by Instance
+     */
+    virtual ~AlgorithmFactory()
+    {
+      delete m_instance;
+    }
+
     
     /// Pointer to the factory instance
     static AlgorithmFactory* m_instance;

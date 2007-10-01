@@ -37,6 +37,7 @@ public:
     TS_ASSERT( ! theName.compare("unknown") );
     status = factory->createAlgorithm("zzzzz", theAlg);
     TS_ASSERT( status.isFailure() );
+    Mantid::Algorithm *casted = dynamic_cast<Mantid::Algorithm*>(theAlg);
   }
   
   void testExistsAlgorithm()

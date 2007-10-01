@@ -178,6 +178,9 @@ namespace Mantid
 	  /// Set the Algorithm finalized state
 	  void setFinalized();
 	  
+//	  Workspace InputWorkspace;
+//	  Workspace OutputWorkspace;
+	  
   private:
 
 	  /// Private Copy constructor: NO COPY ALLOWED
