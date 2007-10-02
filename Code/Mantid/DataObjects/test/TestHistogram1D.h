@@ -1,6 +1,6 @@
 #ifndef TESTHISTOGRAM1D_
 #define TESTHISTOGRAM1D_
-#include "Histogram1D.h" 
+#include "../inc/Histogram1D.h" 
 #include <cxxtest/TestSuite.h>
 #include <vector> 
 #include <algorithm> 

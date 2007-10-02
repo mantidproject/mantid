@@ -1,6 +1,8 @@
-#include "Histogram1D.h"
+#include "../inc/Histogram1D.h"
+
 #include <iostream> 
 #include <stdexcept>
+
 namespace Mantid
 {
 

@@ -24,5 +24,6 @@ C_UPPER_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 Kernel/src \
+DataObjects/src \
 DataHandling/src \
 

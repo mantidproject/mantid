@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include subdir.mk
 -include Kernel/src/subdir.mk
+-include DataObjects/src/subdir.mk
 -include DataHandling/src/subdir.mk
 -include objects.mk
 
