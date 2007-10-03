@@ -77,5 +77,5 @@ private:
 	int _nhistogram;
 };
 
-}
+} // Namespace Mantid 
 #endif /*WORKSPACE2D_*/
