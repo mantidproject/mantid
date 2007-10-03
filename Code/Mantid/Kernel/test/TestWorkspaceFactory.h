@@ -11,14 +11,14 @@
 class Work1 : public Workspace
 {
 	public:
-	const std::string getID() const {return "Work1";}
+	const std::string id() const {return "Work1";}
 	static Workspace* create(){return new Work1;}
 };
 
 class Work2 : public Workspace
 {
 	public:
-	const std::string getID() const {return "Work2";}
+	const std::string id() const {return "Work2";}
 	static Workspace* create(){return new Work2;}
 };
 

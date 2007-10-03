@@ -1,7 +1,7 @@
 #ifndef WORKSPACE2D_
 #define WORKSPACE2D_
 
-#include "Workspace.h"
+#include "../../Kernel/inc/Workspace.h"
 #include "Histogram1D.h"
 
 /** @class Workspace2D Workspace2D.h
@@ -75,4 +75,7 @@ protected:
 private:
 	std::vector<Histogram1D> _data;
 	int _nhistogram;
+};
+
+}
 #endif /*WORKSPACE2D_*/

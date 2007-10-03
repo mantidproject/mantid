@@ -26,7 +26,4 @@ SUBDIRS := \
 Kernel/src \
 DataObjects/src \
 DataHandling/src \
-Build/Kernel/src \
-Build/DataObjects/src \
-Build/DataHandling/src \
 

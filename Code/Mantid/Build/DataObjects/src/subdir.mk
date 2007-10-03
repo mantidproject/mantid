@@ -5,15 +5,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../DataObjects/src/Histogram1D.cpp \
-../DataObjects/src/Workspace1D.cpp 
+../DataObjects/src/Workspace1D.cpp \
+../DataObjects/src/Workspace2D.cpp 
 
 OBJS += \
 ./DataObjects/src/Histogram1D.o \
-./DataObjects/src/Workspace1D.o 
+./DataObjects/src/Workspace1D.o \
+./DataObjects/src/Workspace2D.o 
 
 CPP_DEPS += \
 ./DataObjects/src/Histogram1D.d \
-./DataObjects/src/Workspace1D.d 
+./DataObjects/src/Workspace1D.d \
+./DataObjects/src/Workspace2D.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

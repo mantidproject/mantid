@@ -5,22 +5,22 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../Kernel/src/Algorithm.cpp \
-../Kernel/src/AlgorithmFactory.cpp \
 ../Kernel/src/AnalysisDataService.cpp \
+../Kernel/src/FrameworkManager.cpp \
 ../Kernel/src/Workspace.cpp \
 ../Kernel/src/WorkspaceFactory.cpp 
 
 OBJS += \
 ./Kernel/src/Algorithm.o \
-./Kernel/src/AlgorithmFactory.o \
 ./Kernel/src/AnalysisDataService.o \
+./Kernel/src/FrameworkManager.o \
 ./Kernel/src/Workspace.o \
 ./Kernel/src/WorkspaceFactory.o 
 
 CPP_DEPS += \
 ./Kernel/src/Algorithm.d \
-./Kernel/src/AlgorithmFactory.d \
 ./Kernel/src/AnalysisDataService.d \
+./Kernel/src/FrameworkManager.d \
 ./Kernel/src/Workspace.d \
 ./Kernel/src/WorkspaceFactory.d 
 

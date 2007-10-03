@@ -1,4 +1,4 @@
-#include "Workspace2D.h"
+#include "../inc/Workspace2D.h"
 #include <stdexcept> 
 
 namespace Mantid
