@@ -29,6 +29,11 @@
 
 #include "../inc/Algorithm.h"
 
+// Every Algorithm will have to register itself into the factory
+// Later, this base class will be abstract so the next line will go, but it's there for testing right now
+// The argument has to be the name of the class, it will also be the name in the factory
+//DECLARE_ALGORITHM(Algorithm)
+
 namespace Mantid
 {
   Algorithm::Algorithm()

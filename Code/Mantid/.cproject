@@ -46,7 +46,7 @@
 </toolChain>
 </folderInfo>
 <sourceEntries>
-<entry excluding="Kernel/src/FrameworkManager.cpp|Kernel/src/AlgorithmFactory.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry excluding="Kernel/src/FrameworkManager.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 </sourceEntries>
 </configuration>
 </storageModule>

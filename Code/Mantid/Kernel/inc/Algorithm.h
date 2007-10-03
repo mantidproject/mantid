@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IAlgorithm.h"
+#include "AlgorithmFactory.h"
 #include "MsgStream.h"
 
 #include <vector>
