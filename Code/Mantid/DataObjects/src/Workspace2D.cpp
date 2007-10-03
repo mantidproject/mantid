@@ -25,7 +25,7 @@ void Workspace2D::setHistogramNumber(int nhist)
 {
 	if (nhist<0) throw std::runtime_error("Workspace2D::setHistogramNumber, invalid histograms number <0");
 	_data.resize(nhist);
-	
+	_nhistogram=nhist; 
 }
 
 long int Workspace2D::getMemorySize() const 
