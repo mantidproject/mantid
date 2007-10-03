@@ -9,6 +9,9 @@ namespace Mantid
 
 Histogram1D::Histogram1D()
 {
+	_X=parray(new std::vector<double>);
+	_Y=parray(new std::vector<double>);
+	_E=parray(new std::vector<double>);
 	_nxbin=0;
 	_nybin=0;
 }
@@ -40,7 +43,7 @@ void Histogram1D::setX(const std::vector<double>& x)
 		_X.reset();
 		_X=parray(new std::vector<double>);
 	}
-	*_X=x;
+	*(_X)=x;
 	_nxbin=_X->size();
 	return;
 }
