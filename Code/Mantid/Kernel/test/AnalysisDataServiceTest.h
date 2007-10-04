@@ -20,16 +20,19 @@ public:
 	void testAdd()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    StatusCode status = theService->add("MySpace",new Workspace());
+    Workspace *space;
+    StatusCode status = theService->add("MySpace",space);
     TS_ASSERT( ! status.isFailure() );
-    status = theService->add("MySpace",new Workspace());
+    Workspace *space2;
+    status = theService->add("MySpace",space2);
     TS_ASSERT( status.isFailure() );
 	}
 
 	void testRemove()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    theService->add("MySpace",new Workspace());
+    Workspace *space;
+    theService->add("MySpace",space);
     StatusCode status = theService->remove("MySpace");
     TS_ASSERT( ! status.isFailure() );
     Workspace *work;

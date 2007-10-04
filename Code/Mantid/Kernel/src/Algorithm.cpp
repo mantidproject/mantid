@@ -28,21 +28,24 @@
 */
 
 #include "../inc/Algorithm.h"
+#include "../inc/AnalysisDataService.h"
 
 // Every Algorithm will have to register itself into the factory
 // Later, this base class will be abstract so the next line will go, but it's there for testing right now
 // The argument has to be the name of the class, it will also be the name in the factory
+// TODO
 //DECLARE_ALGORITHM(Algorithm)
 
 namespace Mantid
 {
   Algorithm::Algorithm()
   :
+  m_outputWorkspace(0),
   m_name("unknown"),
   m_version("unknown"),
   m_isInitialized(false),
   m_isExecuted(false),
-  m_isFinalized(false)    
+  m_isFinalized(false)
   {
     m_subAlgms = new std::vector<Algorithm *>();
   }
@@ -52,6 +55,7 @@ namespace Mantid
   Algorithm::Algorithm( const std::string& name, //ISvcLocator *pSvcLocator,
                         const std::string& version)
     : 
+    m_outputWorkspace(0),
     m_name(name),
     m_version(version),
     m_isInitialized(false),
@@ -78,14 +82,38 @@ namespace Mantid
   
   StatusCode Algorithm::initialize() 
   {
+    MsgStream log ( msgSvc() , name() + ".initialize()" );
+    
     // Bypass the initialization if the algorithm
     // has already been initialized.
     if ( m_isInitialized ) return StatusCode::SUCCESS;
     
     // Set the input and output workspaces
-    StatusCode status = getProperty("InputWorkspace", m_inputWorkspace);
+    std::string inputWorkspaceName;
+    StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
+    // If property not set print warning message and set pointer to null
     if ( status.isFailure() )
     {
+      log << MSG::INFO << "Input workspace property not set" << endreq;
+      m_inputWorkspace = 0;
+    }
+    else 
+    {
+      AnalysisDataService *data = AnalysisDataService::Instance();
+      StatusCode status = data->retrieve(inputWorkspaceName, m_inputWorkspace);
+      if ( status.isFailure() )
+      {
+        log << MSG::ERROR << "Input workspace doesn't exist" << endreq;
+        return status;
+      }
+    }
+    status = getProperty("OutputWorkspace", m_outputWorkspaceName);
+    // If property not set print warning message and set pointer to null
+    if ( status.isFailure() )
+    {
+      log << MSG::INFO << "Output workspace property not set" << endreq;
+      m_outputWorkspaceName = "";
+    }
     
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
@@ -99,7 +127,6 @@ namespace Mantid
       for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
         status = (*it)->initialize();
         if( status.isFailure() ) {
-          MsgStream log ( msgSvc() , name() + ".initialize()" );
           log << MSG::ERROR << " Error initializing one or several sub-algorithms"
               << endreq;
           return status;        
@@ -127,13 +154,31 @@ namespace Mantid
   
   StatusCode Algorithm::execute() 
   {
+    MsgStream log(0,"");
+    
     // Return a failure if the algorithm hasn't been initialized
     if ( !isInitialized() ) return StatusCode::FAILURE;
     
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try
     {
+      // Call the concrete algorithm's exec method
       StatusCode status = exec();
+
+      // Register the output workspace with the analysis data service
+      AnalysisDataService *data = AnalysisDataService::Instance();
+      if ( m_outputWorkspace )
+      {
+        StatusCode stat = data->add(m_outputWorkspaceName, m_outputWorkspace);
+        if ( stat.isFailure() )
+        {
+          log << MSG::ERROR << "Unable to register output workspace" << endreq;
+        }
+      }
+      else 
+      {
+        log << MSG::WARNING << "Output workspace has not been created" << endreq;
+      }
       setExecuted(true);
       
       // NOTE THAT THERE IS NO EXECUTION OF SUB-ALGORITHMS HERE.

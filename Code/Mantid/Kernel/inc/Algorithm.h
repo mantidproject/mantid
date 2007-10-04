@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IAlgorithm.h"
-#include "AlgorithmFactory.h"
+//#include "AlgorithmFactory.h"
+#include "WorkspaceFactory.h"
 #include "MsgStream.h"
 
 #include <vector>
@@ -18,6 +19,10 @@
 
 namespace Mantid
 {
+
+// Forward declaration
+class Workspace;
+
 /** @class Algorithm Algorithm.h Kernel/Algorithm.h
 
     Base class from which all concrete algorithm classes should be derived. 
@@ -40,7 +45,7 @@ namespace Mantid
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -179,8 +184,10 @@ namespace Mantid
 	  /// Set the Algorithm finalized state
 	  void setFinalized();
 	  
-//	  Workspace InputWorkspace;
-//	  Workspace OutputWorkspace;
+	  /** A pointer to the output workspace
+	   *  This workspace is actually created by the concrete algorithm
+	   */
+    Workspace* m_outputWorkspace;
 	  
   private:
 
@@ -197,6 +204,14 @@ namespace Mantid
 	  bool        m_isInitialized;    ///< Algorithm has been initialized flag
     bool        m_isExecuted;       ///< Algorithm is executed flag
 	  bool        m_isFinalized;      ///< Algorithm has been finalized flag
+
+	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
+	  Workspace* m_inputWorkspace;
+	  /** Name of workspace in which result should be placed. 
+	   *  Its name should be set via a property called "OutputWorkspace"
+	   *  Only the concrete algorithm can actually create the output workspace.
+	   */
+	  std::string m_outputWorkspaceName;
 	  
 	  // RJT: Dummy method so that I don't have to change code before our Message Service exists.
 	  int msgSvc() {return 0;}

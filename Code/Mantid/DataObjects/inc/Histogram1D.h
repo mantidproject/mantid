@@ -10,7 +10,7 @@ namespace Mantid
 10 	    @author Laurent C Chapon, ISIS, RAL
 12 	    @date 26/09/2007
 13 	    
-14 	    Copyright © 2007 ???RAL???
+14 	    Copyright ï¿½ 2007 ???RAL???
 15 	
 16 	    This file is part of Mantid.
 17 	

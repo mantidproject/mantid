@@ -7,7 +7,7 @@
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -62,7 +62,7 @@ StatusCode AnalysisDataService::add(std::string name, Workspace * space)
   return StatusCode::FAILURE;
 }
 
-// Removes a named workspace from the map
+// Removes a named workspace from the map and deletes it
 StatusCode AnalysisDataService::remove(std::string name)
 {
   Workspace* toBeRemoved;
@@ -72,7 +72,7 @@ StatusCode AnalysisDataService::remove(std::string name)
   // Remove the workspace from the map
   if (m_spaces->erase(name))
   {
-    // Delete the workspace itself
+    // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
     delete toBeRemoved;
     return StatusCode::SUCCESS;
   }
