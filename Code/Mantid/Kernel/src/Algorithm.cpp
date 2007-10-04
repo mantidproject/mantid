@@ -7,7 +7,7 @@
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -81,6 +81,11 @@ namespace Mantid
     // Bypass the initialization if the algorithm
     // has already been initialized.
     if ( m_isInitialized ) return StatusCode::SUCCESS;
+    
+    // Set the input and output workspaces
+    StatusCode status = getProperty("InputWorkspace", m_inputWorkspace);
+    if ( status.isFailure() )
+    {
     
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
