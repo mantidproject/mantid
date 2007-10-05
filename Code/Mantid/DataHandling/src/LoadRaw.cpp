@@ -5,7 +5,7 @@
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -29,9 +29,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "../inc/LoadRaw.h"
+#include "../../DataObjects/inc/Workspace2D.h"
+
+#include <iostream>
 
 extern "C" void open_file__(const char* fname, int* found, unsigned fname_len);
 extern "C" void getpari_(const char* fname, const char* item, int* val, 
+    int* len_in, int* len_out, int* errcode, unsigned len_fname, unsigned len_item);
+extern "C" void getparr_(const char* fname, const char* item, float* val, 
     int* len_in, int* len_out, int* errcode, unsigned len_fname, unsigned len_item);
 extern "C" void getdat_(const char* fname, const int& spec_no, const int& nspec, 
     int* idata, int& length, int& errcode, unsigned len_fname);
@@ -48,6 +53,7 @@ namespace Mantid
   {
     MsgStream log(0,"");
 
+    // Retrieve the filename from the properties
     StatusCode status = getProperty("Filename", m_filename);
     // Check that property has been set and retrieved successfully
     if ( status.isFailure() )
@@ -55,14 +61,14 @@ namespace Mantid
       log << "Filename property has not been set." << endreq;
       return status;
     }
-    
+        
     return StatusCode::SUCCESS;
   }
   
   StatusCode LoadRaw::exec()
   {
     MsgStream log(0,"");
-    
+        
     int found = 0;  
     // Call the FORTRAN function to open the RAW file
     open_file__( m_filename.c_str(), &found, strlen( m_filename.c_str() ) );
@@ -73,32 +79,55 @@ namespace Mantid
       return StatusCode::FAILURE;
     }
     
+    // Read the number of time channels from the RAW file (calling FORTRAN)
     int channelsPerSpectrum, lengthIn, lengthOut, errorCode;
     lengthIn = lengthOut = 1;
     getpari_(m_filename.c_str(), "NTC1", &channelsPerSpectrum, &lengthIn, &lengthOut,
        &errorCode, strlen( m_filename.c_str() ), strlen("NTC1"));
     if (errorCode) return StatusCode::FAILURE;
 
+    // Read in the number of spectra in the RAW file (calling FORTRAN)
     int numberOfSpectra;
     getpari_(m_filename.c_str(), "NSP1", &numberOfSpectra, &lengthIn, &lengthOut,
        &errorCode, strlen( m_filename.c_str() ), strlen("NSP1"));
     if (errorCode) return StatusCode::FAILURE;
     
-    lengthIn = channelsPerSpectrum + 1;
-    
-    int* iData = new int[lengthIn * numberOfSpectra];
-    int* iLocation = iData;     // Position pointer for stepping through memory
-    
+    // Read in the time bin boundaries (calling FORTRAN)
+    lengthIn = channelsPerSpectrum + 1;    
+    float* timeChannels = new float[lengthIn];
+    getparr_(m_filename.c_str(), "TIM1", timeChannels, &lengthIn, &lengthOut,
+                  &errorCode, strlen( m_filename.c_str() ), strlen("TIM1"));
+    if (errorCode) return StatusCode::FAILURE;
+    // Put the read in array into a vector (inside a shared pointer)
+    Histogram1D::parray timeChannelsVec(new std::vector<double>(timeChannels, timeChannels + lengthIn));
+
+    // Create the 2D workspace for the output
+    WorkspaceFactory *factory = WorkspaceFactory::Instance();
+    m_outputWorkspace = factory->createWorkspace("Workspace2D");
+    Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
+
+    localWorkspace->setHistogramNumber(numberOfSpectra);
+
+    int* spectrum = new int[lengthIn];
     for (int i = 1; i < numberOfSpectra; i++)
     {
-      getdat_(m_filename.c_str(), i, 1, iLocation, lengthIn, errorCode, strlen( m_filename.c_str() ));
-      iLocation += lengthIn;
+      // Read in a spectrum via the FORTRAN routine
+      getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
+      // Put it into a vector, discarding the 1st entry, which is rubbish
+      std::vector<double> v(spectrum + 1, spectrum + lengthIn);
+      // Populate the workspace
+      localWorkspace->setX(i, timeChannelsVec);
+      localWorkspace->setData(i, v);
+      // Later, should set all the errors to be sqrt(count)
+      //    Or perhaps have it as a method in Histogram1D
     }
     
     // Close the input data file
     close_data_file__();
     
-    delete[] iData;
+    // Clean up
+    delete[] timeChannels;
+    delete[] spectrum;
     return StatusCode::SUCCESS;
   }
   
