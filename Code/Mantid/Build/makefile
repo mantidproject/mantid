@@ -12,6 +12,7 @@ RM := rm -rf
 -include Kernel/src/subdir.mk
 -include DataObjects/src/subdir.mk
 -include DataHandling/src/subdir.mk
+-include Algorithms/src/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

@@ -106,7 +106,9 @@ namespace Mantid
     m_outputWorkspace = factory->createWorkspace("Workspace2D");
     Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
-    localWorkspace->setHistogramNumber(numberOfSpectra);
+    // Set number of histograms in 2D workspace
+    // First spectrum is garbage, hence the -1
+    localWorkspace->setHistogramNumber(numberOfSpectra - 1);
 
     int* spectrum = new int[lengthIn];
     for (int i = 1; i < numberOfSpectra; i++)
@@ -115,9 +117,9 @@ namespace Mantid
       getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
       // Put it into a vector, discarding the 1st entry, which is rubbish
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
-      // Populate the workspace
-      localWorkspace->setX(i, timeChannelsVec);
-      localWorkspace->setData(i, v);
+      // Populate the workspace. Loop starts from 1, hence i-1
+      localWorkspace->setX(i-1, timeChannelsVec);
+      localWorkspace->setData(i-1, v);
       // Later, should set all the errors to be sqrt(count)
       //    Or perhaps have it as a method in Histogram1D
     }

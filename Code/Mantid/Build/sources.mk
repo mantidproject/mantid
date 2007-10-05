@@ -26,4 +26,5 @@ SUBDIRS := \
 Kernel/src \
 DataObjects/src \
 DataHandling/src \
+Algorithms/src \
 

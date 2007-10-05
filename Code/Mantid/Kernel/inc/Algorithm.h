@@ -184,6 +184,9 @@ class Workspace;
 	  /// Set the Algorithm finalized state
 	  void setFinalized();
 	  
+	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
+	  Workspace* m_inputWorkspace;
+	  
 	  /** A pointer to the output workspace
 	   *  This workspace is actually created by the concrete algorithm
 	   */
@@ -205,8 +208,6 @@ class Workspace;
     bool        m_isExecuted;       ///< Algorithm is executed flag
 	  bool        m_isFinalized;      ///< Algorithm has been finalized flag
 
-	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
-	  Workspace* m_inputWorkspace;
 	  /** Name of workspace in which result should be placed. 
 	   *  Its name should be set via a property called "OutputWorkspace"
 	   *  Only the concrete algorithm can actually create the output workspace.
