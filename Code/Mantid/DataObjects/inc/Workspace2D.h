@@ -59,6 +59,8 @@ public:
 	void setData(int, const Mantid::Histogram1D::parray&);
 	//Set (Y,E) arrays with shared_ptr<vector<double> >
 	void setData(int, const Mantid::Histogram1D::parray&, const Mantid::Histogram1D::parray&);
+	/// Retrieve the number of Histogram1D's in the workspace
+	const int getHistogramNumber() const;
 	//Get methods return the histogram number 
 	const std::vector<double> getX(int) const;
 	const std::vector<double> getY(int) const;

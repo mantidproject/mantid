@@ -68,6 +68,12 @@ void Workspace2D::setData(int histnumber, const Mantid::Histogram1D::parray& y, 
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y,e);
 }
+
+const int Workspace2D::getHistogramNumber() const
+{
+  return _nhistogram;
+}
+
 const std::vector<double> Workspace2D::getX(int histnumber) const
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::getX, histogram number out of range");
