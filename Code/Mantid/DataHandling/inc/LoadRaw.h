@@ -10,12 +10,19 @@ namespace Mantid
 {
 /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
 
-    Loads an file in ISIS RAW format.
+    Loads an file in ISIS RAW format and stores it in a 2D workspace 
+    (Workspace2D class). LoadRaw is an algorithm and as such inherits
+    from the Algorithm class, via DataHandlingCommand, and overrides
+    the init(), exec() & final() methods.
+    
+    Required Properties:
+       Filename - the name of and path to the input RAW file
+       OutputWorkspace - the name of the workspace in which to store the imported data
 
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -37,15 +44,29 @@ namespace Mantid
   class LoadRaw : public DataHandlingCommand
   {
   public:
+    /// Default constructor
     LoadRaw();
+    /// Destructor
     ~LoadRaw() {}
     
   private:
+    /** Performs the initialisation task of retrieving and setting parameters
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     StatusCode init();
+    
+    /** Executes the algorithm, reading in the file and creating and populating
+     *  the output workspace
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     StatusCode exec();
+    
+    /// Does nothing at present
     StatusCode final();
     
-    // The name of the input file
+    /// The name and path of the input file
     std::string m_filename;
     
   };

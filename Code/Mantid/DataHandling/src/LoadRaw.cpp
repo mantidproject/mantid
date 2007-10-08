@@ -1,6 +1,13 @@
 /* @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
 
-    Loads an file in ISIS RAW format.
+    Loads an file in ISIS RAW format and stores it in a 2D workspace 
+    (Workspace2D class). LoadRaw is an algorithm and as such inherits
+    from the Algorithm class, via DataHandlingCommand, and overrides
+    the init(), exec() & final() methods.
+    
+    Required Properties:
+       Filename - the name of and path to the input RAW file
+       OutputWorkspace - the name of the workspace in which to store the imported data
 
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
@@ -31,8 +38,9 @@
 #include "../inc/LoadRaw.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 
-#include <iostream>
+#include <boost/shared_ptr.hpp>
 
+// Declaration of the FORTRAN functions used to access the RAW file
 extern "C" void open_file__(const char* fname, int* found, unsigned fname_len);
 extern "C" void getpari_(const char* fname, const char* item, int* val, 
     int* len_in, int* len_out, int* errcode, unsigned len_fname, unsigned len_item);
@@ -44,7 +52,7 @@ extern "C" void close_data_file__();
 
 namespace Mantid
 {
-  // Constructor
+  // Empty constructor
   LoadRaw::LoadRaw()
   {
   }
@@ -99,9 +107,11 @@ namespace Mantid
                   &errorCode, strlen( m_filename.c_str() ), strlen("TIM1"));
     if (errorCode) return StatusCode::FAILURE;
     // Put the read in array into a vector (inside a shared pointer)
-    Histogram1D::parray timeChannelsVec(new std::vector<double>(timeChannels, timeChannels + lengthIn));
+    boost::shared_ptr<std::vector<double> > timeChannelsVec
+                     (new std::vector<double>(timeChannels, timeChannels + lengthIn));
 
     // Create the 2D workspace for the output
+    // Get a pointer to the workspace factory (later will be shared)
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     m_outputWorkspace = factory->createWorkspace("Workspace2D");
     Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
@@ -135,6 +145,7 @@ namespace Mantid
   
   StatusCode LoadRaw::final()
   {
+    // Does nothing at present
     return StatusCode::SUCCESS;
   }
   
