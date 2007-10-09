@@ -1,0 +1,12 @@
+import os
+
+env=Environment()
+
+#CODE
+env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
+
+#TESTS 
+env.SConscript(['Tests/SConscript'])
+
+
+
