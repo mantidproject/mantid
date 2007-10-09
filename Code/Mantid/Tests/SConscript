@@ -34,9 +34,8 @@ f=open('../TestsToRun', 'r')
 
 for test in f:
 	doth = '../' + test.strip() 
-	print doth
 	temp= test.split('/')
 	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
-	print dotcpp
 	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
-	env.Program(dotcpp)
+	env.Program(dotcpp, LIBS=['Mantid', 'Get', 'g2c'], LIBPATH=['../', '../../Third_Party/lib/linux32/', '/usr/lib/gcc/i386-redhat-linux/3.4.6/'])
+	#env.Program('MyTests.cpp')
