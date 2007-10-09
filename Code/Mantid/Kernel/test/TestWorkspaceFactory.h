@@ -1,5 +1,6 @@
 #include <cxxtest/TestSuite.h> 
 #include "../inc/WorkspaceFactory.h" 
+#include "../inc/Workspace.h"
 
 // Class Workspaces for testing purposes 
 //class Workspace
@@ -8,18 +9,18 @@
 //	virtual const std::string getID() const=0;
 //};
 
-class Work1 : public Workspace
+class Work1 : public Mantid::Workspace
 {
 	public:
 	const std::string id() const {return "Work1";}
-	static Workspace* create(){return new Work1;}
+	static Mantid::Workspace* create(){return new Work1;}
 };
 
-class Work2 : public Workspace
+class Work2 : public Mantid::Workspace
 {
 	public:
 	const std::string id() const {return "Work2";}
-	static Workspace* create(){return new Work2;}
+	static Mantid::Workspace* create(){return new Work2;}
 };
 
 class testWorkspaceFactory : public CxxTest::TestSuite
@@ -43,14 +44,14 @@ class testWorkspaceFactory : public CxxTest::TestSuite
 		void testWFWorkspaceCreation()
 		{
 			factory->registerWorkspace("Work1",&Work1::create);
-			Workspace* test=factory->createWorkspace("Work1");
+			Mantid::Workspace* test=factory->createWorkspace("Work1");
 			Work1* w1=dynamic_cast<Work1*>(test);
 			TS_ASSERT(w1); //Created an object of type Work1.
 		}						
 		void testWFWorkspaceCreationThrows()
 		{
-		  TS_ASSERT_THROWS(Workspace* test=factory->createWorkspace("Dummy"),const std::runtime_error&);
-		  TS_ASSERT_THROWS(Workspace* test=factory->createWorkspace(""),const std::runtime_error&);
+		  TS_ASSERT_THROWS(Mantid::Workspace* test=factory->createWorkspace("Dummy"),const std::runtime_error&);
+		  TS_ASSERT_THROWS(Mantid::Workspace* test=factory->createWorkspace(""),const std::runtime_error&);
 		}
 		void testWFWorkspaceRegisterThrows()
 		{
