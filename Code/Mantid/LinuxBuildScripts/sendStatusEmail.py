@@ -2,8 +2,9 @@ import smtplib
 
 smtpserver = 'outbox.rl.ac.uk'
 
-RECIPIENTS = ['m.j.clarke@rl.ac.uk']
-SENDER = 'BuildServer1-DO_NOT_REPLY@rl.ac.uk'
+RECIPIENTS = ['m.j.clarke@rl.ac.uk']#, 'n.draper@rl.ac.uk', 'russell.taylor@rl.ac.uk','l.c.chapon@rl.ac.uk', 'f.a.akeroyd@rl.ac.uk', 'd.champion@rl.ac.uk', 's.ansell@rl.ac.uk', 'a.j.markvardsen@rl.ac.uk']
+#,'mantid-developers@mantidproject.org'
+SENDER = 'BuildServer1@mantidproject.org'
 
 mssg1 = open('../logs/scons.log', 'r').read()
 

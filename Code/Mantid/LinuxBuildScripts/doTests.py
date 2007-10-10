@@ -1,11 +1,13 @@
 import os
 
-f=open('TestsToRun', 'r')
+print os.getcwd()
+
+f=open('Build/TestsToRun', 'r')
 
 for test in f:
 	name = test.split('/')
-	os.popen('echo Tests/' + name[-1].strip().rstrip('.h') + ' >> ../logs/testResults.log')
-	os.popen('./Tests/' + name[-1].strip().rstrip('.h') + ' >> ../logs/testResults.log')
+	os.popen('echo ' + name[-1].strip().rstrip('.h') + ' >> ../logs/testResults.log')
+	os.popen('./Build/Tests/' + name[-1].strip().rstrip('.h') + ' >> ../logs/testResults.log')
 	
 
 	
