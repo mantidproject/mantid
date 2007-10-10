@@ -1,7 +1,5 @@
 import os
 
-print os.getcwd()
-
 f=open('Build/TestsToRun', 'r')
 
 for test in f:
