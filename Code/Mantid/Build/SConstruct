@@ -10,7 +10,7 @@ dirList = os.listdir(pathToRoot)
 
 for fname in dirList:
 	if os.path.isdir(pathToRoot + fname):
-		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Geometry':
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
 			#does folder contain /src?
 			if os.path.exists(pathToRoot + fname + codeFolder):
 				files = os.listdir(pathToRoot + fname + codeFolder)
