@@ -13,7 +13,7 @@ dirList = os.listdir(path)
 
 for fname in dirList:
 	if os.path.isdir(path + fname):
-		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Geometry':
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
 			#does folder contain /test?
 			if os.path.exists(path + fname + testfolder):
 				files = os.listdir(path + fname + testfolder)
