@@ -20,10 +20,10 @@ public:
 	void testAdd()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *space;
+    Workspace *space = 0;
     StatusCode status = theService->add("MySpace",space);
     TS_ASSERT( ! status.isFailure() );
-    Workspace *space2;
+    Workspace *space2 = 0;
     status = theService->add("MySpace",space2);
     TS_ASSERT( status.isFailure() );
 	}
@@ -31,11 +31,11 @@ public:
 	void testRemove()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *space;
+    Workspace *space = 0;
     theService->add("MySpace",space);
     StatusCode status = theService->remove("MySpace");
     TS_ASSERT( ! status.isFailure() );
-    Workspace *work;
+    Workspace *work = 0;
     status = theService->retrieve("MySpace", work);
     TS_ASSERT( status.isFailure() );
     status = theService->remove("ttttt");
@@ -45,9 +45,9 @@ public:
 	void testRetrieve()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *work;
+    Workspace *work = 0;
     theService->add("MySpace", work);
-    Workspace *workBack;
+    Workspace *workBack = 0;
     StatusCode status = theService->retrieve("MySpace", workBack);
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT_EQUALS(work, workBack);
