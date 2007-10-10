@@ -1,0 +1,34 @@
+import os
+
+#GET LIST OF CPPS
+codeFolder = '/src'
+listCpps = []
+pathToRoot = '../'
+
+#get list of directories in trunk
+dirList = os.listdir(pathToRoot)
+
+for fname in dirList:
+	if os.path.isdir(pathToRoot + fname):
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Geometry':
+			#does folder contain /src?
+			if os.path.exists(pathToRoot + fname + codeFolder):
+				files = os.listdir(pathToRoot + fname + codeFolder)
+				for file in files:
+					if file.endswith('.cpp'):
+						listCpps.append(pathToRoot + fname + codeFolder + '/' +  file)
+			
+			
+		
+
+env=Environment()
+
+#BUILD CODE
+#env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
+env.Library('Mantid', listCpps)
+
+#BUILD TESTS 
+env.SConscript(['Tests/SConscript'])
+
+
+
