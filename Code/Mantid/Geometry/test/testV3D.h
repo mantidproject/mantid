@@ -2,7 +2,7 @@
 #define MANTID_TESTV3D__
 
 #include <cxxtest/TestSuite.h>
-#include "V3D.h" 
+#include "../inc/V3D.h" 
 #include <cmath>
 
 class testV3D : public CxxTest::TestSuite

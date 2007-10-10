@@ -1,6 +1,6 @@
 #include <cmath> 
 #include <stdexcept>
-#include "V3D.h"
+#include "../inc/V3D.h"
 #include <vector>
 
 namespace Mantid
