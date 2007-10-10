@@ -14,24 +14,26 @@ class LoadRawTest : public CxxTest::TestSuite
 {
 public: 
   
-  void testInit()
+  LoadRawTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../../Test/HET15869.RAW";
-    StatusCode status = loader.setProperty("Filename", inputFile);
-    TS_ASSERT( ! status.isFailure() );
-    std::string result;
-    status = loader.getProperty("Filename", result);
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( ! result.compare(inputFile));
+    inputFile = "../../../../Test/HET15869.RAW";
+    loader.setProperty("Filename", inputFile);
 
     // Next 2 lines should be removed when auto-registration of workspaces implemented
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     factory->registerWorkspace("Workspace2D", Workspace2D::create );
     outputSpace = "outer";
-    status = loader.setProperty("OutputWorkspace", outputSpace);
+    loader.setProperty("OutputWorkspace", outputSpace);
+  }
+  
+  void testInit()
+  {
+    std::string result;
+    StatusCode status = loader.getProperty("Filename", result);
     TS_ASSERT( ! status.isFailure() );
-    
+    TS_ASSERT( ! result.compare(inputFile));
+
     status = loader.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( loader.isInitialized() );
@@ -39,6 +41,8 @@ public:
   
   void testExec()
   {
+    if ( !loader.isInitialized() ) loader.initialize();
+    
     StatusCode status = loader.execute();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( loader.isExecuted() );    
@@ -49,18 +53,22 @@ public:
     status = data->retrieve(outputSpace, output);
     TS_ASSERT( ! status.isFailure() );
     Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
-    // Should be 2583 for file HET15869.RAW
-    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2583);
+    // Should be 2584 for file HET15869.RAW
+    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->getX(99)) == (output2D->getX(1734)) );
     // Check two Y arrays have the same number of elements
     TS_ASSERT_EQUALS( output2D->getY(673).size(), output2D->getY(2111).size() );
     // Check one particular value
-    TS_ASSERT_EQUALS( output2D->getY(999)[777], 9);  
+    TS_ASSERT_EQUALS( output2D->getY(999)[777], 9);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->getE(999)[777], 3);
   }
   
   void testFinal()
   {
+    if ( !loader.isInitialized() ) loader.initialize();
+    
     // The final() method doesn't do anything at the moment, but test anyway
     StatusCode status = loader.finalize();
     TS_ASSERT( ! status.isFailure() );
@@ -69,6 +77,7 @@ public:
   
 private:
   LoadRaw loader;
+  std::string inputFile;
   std::string outputSpace;
   
 };

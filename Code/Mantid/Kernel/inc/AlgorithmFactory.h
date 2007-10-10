@@ -19,7 +19,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -56,7 +56,7 @@ namespace Mantid
     
     /** Register the name and creator function of an algorithm
      * 
-     *  @param name The algorithm type name
+     *  @param algtype The algorithm type name
      *  @param creator A pointer to the creator function for the algorithm
      *  @return A StatusCode object indicating whether the operation was successful
      */
@@ -71,7 +71,7 @@ namespace Mantid
     
     /** Removes a registered algorithm
      * 
-     *  @param name The algorithm type name
+     *  @param algtype The algorithm type name
      *  @return A StatusCode object indicating whether the operation was successful
      */
     StatusCode unsubscribe( const std::string algtype )

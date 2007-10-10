@@ -16,13 +16,15 @@ namespace Mantid
     the init(), exec() & final() methods.
     
     Required Properties:
-       Filename - the name of and path to the input RAW file
-       OutputWorkspace - the name of the workspace in which to store the imported data
+       <UL>
+       <LI> Filename - The name of and path to the input RAW file </LI>
+       <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+       </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 

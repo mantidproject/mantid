@@ -12,7 +12,7 @@
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -38,6 +38,7 @@
 #include "../inc/LoadRaw.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 
+#include <math.h>
 #include <boost/shared_ptr.hpp>
 
 // Declaration of the FORTRAN functions used to access the RAW file
@@ -117,21 +118,25 @@ namespace Mantid
     Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
     // Set number of histograms in 2D workspace
-    // First spectrum is garbage, hence the -1
-    localWorkspace->setHistogramNumber(numberOfSpectra - 1);
+    localWorkspace->setHistogramNumber(numberOfSpectra);
 
     int* spectrum = new int[lengthIn];
-    for (int i = 1; i < numberOfSpectra; i++)
+    // Loop over the spectra. Zeroth spectrum is garbage, so loop runs from 1 to NSP1
+    for (int i = 1; i <= numberOfSpectra; i++)
     {
       // Read in a spectrum via the FORTRAN routine
       getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
       // Put it into a vector, discarding the 1st entry, which is rubbish
+      // But note that the last (overflow) bin is kept
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
+      // Create and fill another vector for the errors, containing sqrt(count)
+      std::vector<double> e(lengthIn-1);
+      transform(v.begin(), v.end(), e.begin(), sqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(i-1, timeChannelsVec);
-      localWorkspace->setData(i-1, v);
-      // Later, should set all the errors to be sqrt(count)
-      //    Or perhaps have it as a method in Histogram1D
+      localWorkspace->setData(i-1, v, e);
+      // NOTE: Raw numbers go straight into the workspace 
+      //     - no account taken of bin widths/units etc.
     }
     
     // Close the input data file
