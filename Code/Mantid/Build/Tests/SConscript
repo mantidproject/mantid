@@ -3,7 +3,7 @@ import os
 print 'In SConscript'
 
 #GET LIST OF TESTS
-path = '../'
+path = '../../'
 testfolder = '/test'
 
 testsToRun = []
@@ -13,13 +13,13 @@ dirList = os.listdir(path)
 
 for fname in dirList:
 	if os.path.isdir(path + fname):
-		if os.path.isdir(fname) != '.svn' and os.path.isdir(fname) != 'LinuxBuildScripts' and os.path.isdir(fname) != 'Tests':
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Geometry':
 			#does folder contain /test?
 			if os.path.exists(path + fname + testfolder):
 				files = os.listdir(path + fname + testfolder)
 				for file in files:
 					if file.endswith('.h'):
-						testsToRun.append(fname + testfolder + '/' +  file + '\n')
+						testsToRun.append('../' + fname + testfolder + '/' +  file + '\n')
 			
 			
 		
@@ -37,5 +37,5 @@ for test in f:
 	temp= test.split('/')
 	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
 	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
-	env.Program(dotcpp, LIBS=['Mantid', 'Get', 'g2c'], LIBPATH=['../', '../../Third_Party/lib/linux32/', '/usr/lib/gcc/i386-redhat-linux/3.4.6/'])
+	env.Program(dotcpp, LIBS=['Mantid', 'Get', 'g2c'], LIBPATH=['../', '../../../Third_Party/lib/linux32/', '/usr/lib/gcc/i386-redhat-linux/3.4.6/'])
 	#env.Program('MyTests.cpp')
