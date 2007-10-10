@@ -1,11 +1,8 @@
 import os
 from socket import gethostname
 
-print 'In SConscript'
-
 libList = ['../'];
-print os.name
-print gethostname()
+
 if os.name == 'nt':
 	# assume this is nt
 	libList.append('../../../Third_Party/lib/win32/')
