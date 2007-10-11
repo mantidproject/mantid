@@ -1,6 +1,6 @@
 #!/bin/bash
 # Simple script to build and run the tests.
-# Have kept seperate from the makefile since that's automatically generated
+# Have kept separate from the makefile since that's automatically generated
 #   by Eclipse.
 #
 # Author: Russell Taylor, 19/09/07
@@ -17,7 +17,7 @@ cxxtestgen.pl --error-printer -o runner.cpp *.h
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -L ../../Build -lMantid
+g++ -o runner.exe runner.cpp -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c
 echo
 
 echo "Running the tests..."
