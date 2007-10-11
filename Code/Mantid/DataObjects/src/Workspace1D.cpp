@@ -58,15 +58,15 @@ void Workspace1D::setData(const Mantid::Histogram1D::parray& y, const Mantid::Hi
 {
 	_data.setData(y,e);
 }
-const std::vector<double> Workspace1D::getX() const
+const std::vector<double>& Workspace1D::getX() const
 {
 	return _data.getX();
 }
-const std::vector<double> Workspace1D::getY() const
+const std::vector<double>& Workspace1D::getY() const
 {
 	return _data.getY();
 }
-const std::vector<double> Workspace1D::getE() const
+const std::vector<double>& Workspace1D::getE() const
 {
 	return _data.getE();
 }

@@ -62,9 +62,9 @@ public:
 	/// Retrieve the number of Histogram1D's in the workspace
 	const int getHistogramNumber() const;
 	//Get methods return the histogram number 
-	const std::vector<double> getX(int) const;
-	const std::vector<double> getY(int) const;
-	const std::vector<double> getE(int) const;
+	const std::vector<double>& getX(int) const;
+	const std::vector<double>& getY(int) const;
+	const std::vector<double>& getE(int) const;
 	// Get the Memory footprint of the Workspace. If the data in the Histograms are shared, should
 	// return the fractional memory=real memory divides by number of use_count of shared_ptr. At present 
 	// just return the real memory without taking into account shared ownership. Needs modifying.

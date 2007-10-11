@@ -54,9 +54,9 @@ public:
 	//Set (Y,E) arrays with shared_ptr<vector<double> >
 	void setData(const Mantid::Histogram1D::parray&, const Mantid::Histogram1D::parray&);
 	//Get methods
-	const std::vector<double> getX() const;
-	const std::vector<double> getY() const;
-	const std::vector<double> getE() const;
+	const std::vector<double>& getX() const;
+	const std::vector<double>& getY() const;
+	const std::vector<double>& getE() const;
 	// Get the Memory footprint of the Workspace. If the data in the Histograms are shared, should
 	// return the fractional memory=real memory divides by number of use_count of shared_ptr. At present 
 	// just return the real memory without taking into account shared ownership. Needs modifying.

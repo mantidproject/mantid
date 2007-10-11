@@ -74,17 +74,17 @@ const int Workspace2D::getHistogramNumber() const
   return _nhistogram;
 }
 
-const std::vector<double> Workspace2D::getX(int histnumber) const
+const std::vector<double>& Workspace2D::getX(int histnumber) const
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::getX, histogram number out of range");
 	return _data[histnumber].getX();
 }
-const std::vector<double> Workspace2D::getY(int histnumber) const
+const std::vector<double>& Workspace2D::getY(int histnumber) const
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::getY, histogram number out of range");
 	return _data[histnumber].getY();
 }
-const std::vector<double> Workspace2D::getE(int histnumber) const
+const std::vector<double>& Workspace2D::getE(int histnumber) const
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setX, histogram number out of range");
 	return _data[histnumber].getE();	
