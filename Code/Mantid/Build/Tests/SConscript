@@ -1,4 +1,6 @@
 import os
+import platform
+
 from socket import gethostname
 
 libList = ['../'];
@@ -9,8 +11,8 @@ if os.name == 'nt':
 else:
 	#so this must be posix
 	libList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	if gethostname().startswith("linuxs1"):
-		# linuxs1 is a 64 bit installation of linux
+	
+	if platform.architecture()[0].startswith('64bit'):
 		libList.append('../../../Third_Party/lib/linux64/')
 		
 	else:
@@ -53,4 +55,3 @@ for test in f:
 	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
 	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
 	env.Program(dotcpp, LIBS=['Mantid', 'Get', 'g2c'], LIBPATH=libList)
-	#env.Program('MyTests.cpp')
