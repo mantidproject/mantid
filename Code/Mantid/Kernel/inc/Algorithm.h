@@ -45,7 +45,7 @@ class Workspace;
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -69,11 +69,12 @@ class Workspace;
   public:
 	  
     // RJT: Default constructor for testing factory
+    /// Default constructor
     Algorithm();
     
-	  /** Constructor
+	  /** Gaudi Constructor
 	   *  @param name    The algorithm object's name
-	   *  @param svcloc  A pointer to a service location service (RJT: not yet)
+	   *  @param version The version of the algorithm
 	   */
 	  Algorithm( const std::string& name, //ISvcLocator *svcloc, 
 	             const std::string& version=PACKAGE_VERSION );
@@ -214,10 +215,10 @@ class Workspace;
 	   */
 	  std::string m_outputWorkspaceName;
 	  
-	  // RJT: Dummy method so that I don't have to change code before our Message Service exists.
+	  /// Dummy method so that I can import Gaudi code unchanged before our message/logging service exists
 	  int msgSvc() {return 0;}
 
-	  // RJT: Temporary way of storing properties for algorithms, in absence of Property class.
+	  /// Temporary way of storing properties for algorithms, in the current absence of a Property class.
 	  // N.B. hash_map is not in the standard stl, hence the wierd namespace.
 //	  __gnu_cxx::hash_map< std::string, std::string > m_properties;
 	  std::map< std::string, std::string > m_properties;

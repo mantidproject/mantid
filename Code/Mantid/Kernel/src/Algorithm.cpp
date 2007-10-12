@@ -7,7 +7,7 @@
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 

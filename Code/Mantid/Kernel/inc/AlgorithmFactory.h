@@ -19,7 +19,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -52,6 +52,7 @@ namespace Mantid
       return m_instance;
     }
 
+    /// Makes it all work.
     typedef IAlgorithm* (*AlgCreator)();
     
     /** Register the name and creator function of an algorithm
@@ -137,7 +138,7 @@ namespace Mantid
     
     /// Pointer to the factory instance
     static AlgorithmFactory* m_instance;
-    
+    /// The map of name-creator function pairs
     typedef std::map<std::string, AlgCreator> Associations;
     /// Map holding the subscribed algorithms
     Associations m_algs;
@@ -151,6 +152,9 @@ namespace Mantid
   class ConcreteAlgorithmCreator
   {
   public:
+    /** Creates a new instance of a concrete algorithm
+     *  @return A pointer to the created algorithm
+     */ 
     static IAlgorithm* createInstance()
     {
       return new T();

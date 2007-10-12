@@ -11,7 +11,7 @@ namespace Mantid
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -44,6 +44,7 @@ namespace Mantid
     // I am going to require that that status is explicitly given in the constructor.
 //    StatusCode();
     
+    /// Constructor.
     StatusCode( unsigned long code, bool checked = false );
     
     /** Test for a status code of FAILURE.
@@ -57,7 +58,7 @@ namespace Mantid
 	unsigned long   d_code;      ///< The status code
   // RJT: Don't use these next two variables at present, but including them means I can leave the constructors unchanged
 	mutable bool    m_checked;   ///< If the Status code has been checked
-	int m_severity;
+	int m_severity;              ///< The seriousness of an error (unused)
     
   };
   

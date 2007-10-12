@@ -16,7 +16,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -41,6 +41,7 @@ namespace Mantid
     
     // RJT: Empty class so far
     
+    /// Virtual destructor
     virtual ~DataHandlingCommand() {}
   };
 

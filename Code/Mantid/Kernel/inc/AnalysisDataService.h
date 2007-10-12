@@ -22,7 +22,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -96,8 +96,9 @@ private:
   /// Pointer to the single instance
   static AnalysisDataService* m_instance;
   
-  /// Map holding the managed algorithms
+  /// Typedef for the map of the managed algorithms and their names
   typedef std::map<std::string, Workspace *> WorkspaceMap;
+  /// The map holding the managed algorithms
   WorkspaceMap * m_spaces;
 };
 

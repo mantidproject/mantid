@@ -5,9 +5,11 @@
 #ifndef MSGSTREAM_H_
 #define MSGSTREAM_H_
 
-// This code comes from the Gaudi file 'IMessageSvc.h' and is imported here so that statements
-// in Algorithm still work until we have a proper Message Service.
+/// This code comes from the Gaudi file 'IMessageSvc.h' and is imported here so that statements
+/// in Algorithm still work until we have a proper Message Service.
 namespace MSG   {
+/// This code comes from the Gaudi file 'IMessageSvc.h' and is imported here so that statements
+/// in Algorithm still work until we have a proper Message Service.
   enum Level   {
         NIL = 0,
         VERBOSE,
@@ -25,9 +27,14 @@ namespace MSG   {
 
 #include <iostream>
 
-
+/** @class MsgStream MsgStream.h Kernel/MsgStream.h
+ * 
+ *  THIS CLASS IS TEMPORARY
+ *  and is simply there so that code from Gaudi can be imported unchanged until we have a proper message service
+ */
 class MsgStream {
-public:    
+public:
+  /// Dummy (empty) constructor
   MsgStream(int i, std::string txt) 
   {
     // Do nothing

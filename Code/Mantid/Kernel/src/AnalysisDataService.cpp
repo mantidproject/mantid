@@ -7,7 +7,7 @@
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
