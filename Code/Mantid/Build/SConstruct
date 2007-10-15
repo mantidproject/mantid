@@ -1,4 +1,23 @@
 import os
+import platform
+
+from socket import gethostname
+
+#get library directories
+libList = ['../'];
+
+if os.name == 'nt':
+	# assume this is nt
+	libList.append('../../../Third_Party/lib/win32/')
+else:
+	#so this must be posix
+	libList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	
+	if platform.architecture()[0].startswith('64bit'):
+		libList.append('../../../Third_Party/lib/linux64/')
+		
+	else:
+		libList.append('../../../Third_Party/lib/linux32/')
 
 #GET LIST OF CPPS
 codeFolder = '/src'
@@ -23,9 +42,14 @@ for fname in dirList:
 
 env=Environment()
 
+
+# set header include paths
+env = Environment(CPPPATH='../../Third_Party/include')
+       
+
 #BUILD CODE
 #env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
-env.Library('Mantid', listCpps)
+env.Library('Mantid', listCpps, LIBPATH=libList)
 
 #BUILD TESTS 
 env.SConscript(['Tests/SConscript'])
