@@ -31,6 +31,7 @@
 #include "../inc/WorkspaceFactory.h"
 #include "../inc/AnalysisDataService.h"
 #include "../../DataHandling/inc/LoadRaw.h"
+#include "../../DataHandling/inc/SaveCSV.h"
 #include "../../Algorithms/inc/SimpleIntegration.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 #include "../../DataObjects/inc/Workspace1D.h"
@@ -65,6 +66,7 @@ void FrameworkManager::initialize()
   // Register all our algorithms and workspaces
   // These lines will disappear once automatic registration is implemented
   algFactory->subscribe("LoadRaw", ConcreteAlgorithmCreator<LoadRaw>::createInstance );
+  algFactory->subscribe("SaveCSV", ConcreteAlgorithmCreator<SaveCSV>::createInstance );
   algFactory->subscribe("SimpleIntegration", ConcreteAlgorithmCreator<SimpleIntegration>::createInstance );
   workFactory->registerWorkspace("Workspace2D", Workspace2D::create );
   workFactory->registerWorkspace("Workspace1D", Workspace1D::create );
