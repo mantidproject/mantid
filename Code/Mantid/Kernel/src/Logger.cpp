@@ -16,7 +16,7 @@ namespace Mantid
 	void Logger::fatal(const std::string& msg)
 	{
 		Poco::Logger& log = Poco::Logger::get(_name);
-		log.fatal(msg);
+		log.fatal(msg); 
 	}
 		
 	void Logger::critical(const std::string& msg)
