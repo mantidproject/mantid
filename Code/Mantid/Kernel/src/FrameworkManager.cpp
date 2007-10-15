@@ -65,22 +65,17 @@ void FrameworkManager::initialize()
   
   // Register all our algorithms and workspaces
   // These lines will disappear once automatic registration is implemented
-  algFactory->subscribe("LoadRaw", ConcreteAlgorithmCreator<LoadRaw>::createInstance );
-  algFactory->subscribe("SaveCSV", ConcreteAlgorithmCreator<SaveCSV>::createInstance );
-  algFactory->subscribe("SimpleIntegration", ConcreteAlgorithmCreator<SimpleIntegration>::createInstance );
-  workFactory->registerWorkspace("Workspace2D", Workspace2D::create );
-  workFactory->registerWorkspace("Workspace1D", Workspace1D::create );
+  algFactory->subscribe<LoadRaw>("LoadRaw");
+  algFactory->subscribe<SaveCSV>("SaveCSV");
+  algFactory->subscribe<SimpleIntegration>("SimpleIntegration");
+  workFactory->subscribe<Workspace2D>("Workspace2D");
+  workFactory->subscribe<Workspace1D>("Workspace1D");
 }
 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 {
-  IAlgorithm *alg;
   // Get the algorithm from the factory
-  StatusCode status = algFactory->createAlgorithm(algName, alg);
-  if (status.isFailure())
-  {
-    throw runtime_error("Unable to create algorithm " + algName);
-  }
+  IAlgorithm *alg = algFactory->create(algName);
   return alg;
 }
 

@@ -6,46 +6,38 @@
 #include "../inc/AlgorithmFactory.h"
 #include "../inc/Algorithm.h"
 
+using namespace Mantid;
+
 class AlgorithmFactoryTest : public CxxTest::TestSuite
 {
 public: 
 
-  void testSubscribe()
+  AlgorithmFactoryTest()
   {
-    Mantid::AlgorithmFactory *factory = Mantid::AlgorithmFactory::Instance();
-    Mantid::StatusCode status = factory->subscribe("myAlg", Mantid::ConcreteAlgorithmCreator<Mantid::Algorithm>::createInstance );   
-    TS_ASSERT( ! status.isFailure() );
+    factory = Mantid::AlgorithmFactory::Instance();
   }
   
-  void testUnsubscribe()
+  void testInstance()
   {
-    Mantid::AlgorithmFactory *factory = Mantid::AlgorithmFactory::Instance();
-    Mantid::StatusCode status = factory->subscribe("myAlg", Mantid::ConcreteAlgorithmCreator<Mantid::Algorithm>::createInstance );   
-    status = factory->unsubscribe("myAlg");
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( ! factory->existsAlgorithm("myAlg") );
+    AlgorithmFactory *tester = AlgorithmFactory::Instance();
+    TS_ASSERT_EQUALS( factory, tester);
   }
   
-  void testCreateAlgorithm()
+  void testReturnType()
   {
-    Mantid::AlgorithmFactory *factory = Mantid::AlgorithmFactory::Instance();
-    Mantid::StatusCode status = factory->subscribe("myAlg", Mantid::ConcreteAlgorithmCreator<Mantid::Algorithm>::createInstance );   
-    Mantid::IAlgorithm *theAlg;
-    status = factory->createAlgorithm("myAlg", theAlg);
-    TS_ASSERT( ! status.isFailure() );
-    std::string theName = theAlg->name();
-    TS_ASSERT( ! theName.compare("unknown") );
-    status = factory->createAlgorithm("zzzzz", theAlg);
-    TS_ASSERT( status.isFailure() );
-    Mantid::Algorithm *casted = dynamic_cast<Mantid::Algorithm*>(theAlg);
+    factory->subscribe<Algorithm>("myAlg");
+    IAlgorithm *alg;
+    TS_ASSERT_THROWS_NOTHING( alg = factory->create("myAlg") );
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Algorithm*>(alg) );
   }
   
-  void testExistsAlgorithm()
+  void testCast()
   {
-    Mantid::AlgorithmFactory *factory = Mantid::AlgorithmFactory::Instance();
-    Mantid::StatusCode status = factory->subscribe("myAlg", Mantid::ConcreteAlgorithmCreator<Mantid::Algorithm>::createInstance );   
-    TS_ASSERT( factory->existsAlgorithm("myAlg") );
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<DynamicFactory<IAlgorithm>*>(factory) );
   }
+  
+private:
+  AlgorithmFactory *factory;
   
 };
   

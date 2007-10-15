@@ -1,5 +1,5 @@
-#ifndef WORKSPACE1D_H_
-#define WORKSPACE1D_H_
+#ifndef MANTID_WORKSPACE1D_H_
+#define MANTID_WORKSPACE1D_H_
 
 #include "../../Kernel/inc/Workspace.h"
 #include "Histogram1D.h"
@@ -37,10 +37,11 @@ class Workspace1D: public Workspace
 {
 public:
 	const std::string id() const {return "Workspace1D";}
-	static Workspace* create()
-	{
-		return new Workspace1D;
-	}
+  Workspace1D();
+//	static Workspace* create()
+//	{
+//		return new Workspace1D;
+//	}
 	//Set X array with data vector
 	void setX(const std::vector<double>&);
 	//Set Y array with data vector, no associated error array
@@ -62,7 +63,6 @@ public:
 	// just return the real memory without taking into account shared ownership. Needs modifying.
   long int getMemorySize() const;
 protected:
-	Workspace1D();
 	Workspace1D(const Workspace1D&);
 	Workspace1D& operator=(const Workspace1D&);
 	virtual ~Workspace1D();
@@ -71,4 +71,4 @@ private:
 };
 }
 
-#endif /*WORKSPACE1D_H_*/
+#endif /*MANTID_WORKSPACE1D_H_*/

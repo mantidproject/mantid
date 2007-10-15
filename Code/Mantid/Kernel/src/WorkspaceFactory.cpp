@@ -1,51 +1,53 @@
+/*  The WorkspaceFactory class is in charge of the creation of all types
+    of workspaces. It inherits most of its implementation from
+    the Dynamic Factory base class.
+    It is implemented as a singleton class.
+    
+    @author Laurent C Chapon, ISIS, RAL
+    @author Russell Taylor, Tessella Support Services plc
+    @date 26/09/2007
+    
+    Copyright &copy; 2007 ???RAL???
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+*/
+
 #include "../inc/WorkspaceFactory.h"
-#include <stdexcept>
-#include <algorithm> 
 
 namespace Mantid
 {
 
-WorkspaceFactory* WorkspaceFactory::_instance=0;
+// Initialise the instance pointer to zero
+WorkspaceFactory* WorkspaceFactory::m_instance = 0;
 
 WorkspaceFactory::WorkspaceFactory()
 {
-	
 }
 
 WorkspaceFactory::~WorkspaceFactory()
 {
-	delete _instance;
+	delete m_instance;
 }
 
 WorkspaceFactory* WorkspaceFactory::Instance()
 {
-	if (!_instance) _instance=new WorkspaceFactory;
-	return _instance;
-}
-
-Workspace* WorkspaceFactory::createWorkspace(const std::string& rhs) const
-{
-	if (rhs.empty()) throw std::runtime_error("WorkspaceFactory::CreateWorkspace, empty string");
-	std::map<std::string,CreateWorkspaceCallback>::const_iterator it=_workmap.find(rhs);
-	if (it==_workmap.end())
-		throw std::runtime_error("WorkspaceFactory::CreateWorkspace, workspace type not known");
-	return (it->second)();
-}
-
-bool WorkspaceFactory::registerWorkspace(const std::string& s, CreateWorkspaceCallback c)
-{
-	if (s.empty()) throw std::runtime_error("WorkspaceFactory::RegisterWorkspace, empty string");
-	std::map<std::string,CreateWorkspaceCallback>::iterator it=_workmap.find(s);
-	if (it!=_workmap.end()) //Workspace type already registered
-	{
-		_workmap.erase(it);
-	}
-	return _workmap.insert(std::pair<std::string,CreateWorkspaceCallback>(s,c)).second;
-}
-
-bool WorkspaceFactory::unregisterWorkspace(const std::string& s)
-{
-		return _workmap.erase(s)==1;
+	if (!m_instance) m_instance=new WorkspaceFactory;
+	return m_instance;
 }
 
 } // Namespace Mantid

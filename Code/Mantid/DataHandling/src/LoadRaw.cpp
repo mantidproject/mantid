@@ -114,7 +114,7 @@ namespace Mantid
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    m_outputWorkspace = factory->createWorkspace("Workspace2D");
+    m_outputWorkspace = factory->create("Workspace2D");
     Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
     // Set number of histograms in 2D workspace

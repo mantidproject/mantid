@@ -1,5 +1,5 @@
-#ifndef WORKSPACE2D_
-#define WORKSPACE2D_
+#ifndef MANTID_WORKSPACE2D_
+#define MANTID_WORKSPACE2D_
 
 #include "../../Kernel/inc/Workspace.h"
 #include "Histogram1D.h"
@@ -40,10 +40,11 @@ class Workspace2D: public Workspace
 {
 public:
 	const std::string id() const {return "Workspace2D";}
-	static Workspace* create()
-	{
-		return new Workspace2D;
-	}
+  Workspace2D();
+//	static Workspace* create()
+//	{
+//		return new Workspace2D;
+//	}
 	// Set the number of Histogram1D
 	// This will resize the number of Histogram1D
 	void setHistogramNumber(int);
@@ -70,7 +71,6 @@ public:
 	// just return the real memory without taking into account shared ownership. Needs modifying.
   long int getMemorySize() const;
 protected:
-	Workspace2D();
 	Workspace2D(const Workspace2D&);
 	Workspace2D& operator=(const Workspace2D&);
 	virtual ~Workspace2D();
@@ -80,4 +80,4 @@ private:
 };
 
 } // Namespace Mantid 
-#endif /*WORKSPACE2D_*/
+#endif /*MANTID_WORKSPACE2D_*/

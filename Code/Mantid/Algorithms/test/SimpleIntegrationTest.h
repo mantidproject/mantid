@@ -19,11 +19,11 @@ public:
   { 
     // Next 2 lines should be removed when auto-registration of workspaces implemented
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    factory->registerWorkspace("Workspace1D", Workspace1D::create );
-    factory->registerWorkspace("Workspace2D", Workspace2D::create );
+    factory->subscribe<Workspace1D>("Workspace1D");
+    factory->subscribe<Workspace2D>("Workspace2D");
     
     // Set up a small workspace for testing
-    Workspace *space = factory->createWorkspace("Workspace2D");
+    Workspace *space = factory->create("Workspace2D");
     Workspace2D *space2D = dynamic_cast<Workspace2D*>(space);
     space2D->setHistogramNumber(5);
     double *a = new double[25];

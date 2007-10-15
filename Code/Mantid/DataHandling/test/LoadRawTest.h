@@ -22,7 +22,7 @@ public:
 
     // Next 2 lines should be removed when auto-registration of workspaces implemented
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    factory->registerWorkspace("Workspace2D", Workspace2D::create );
+    factory->subscribe<Workspace2D>("Workspace2D");
     outputSpace = "outer";
     loader.setProperty("OutputWorkspace", outputSpace);
   }

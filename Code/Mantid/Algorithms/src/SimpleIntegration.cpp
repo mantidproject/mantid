@@ -153,7 +153,7 @@ StatusCode SimpleIntegration::exec()
   
   // Create the 1D workspace for the output
   WorkspaceFactory *factory = WorkspaceFactory::Instance();
-  m_outputWorkspace = factory->createWorkspace("Workspace1D");
+  m_outputWorkspace = factory->create("Workspace1D");
   Workspace1D *localWorkspace = dynamic_cast<Workspace1D*>(m_outputWorkspace);
 
   // Populate the 1D workspace
