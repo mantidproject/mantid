@@ -13,10 +13,12 @@ buildSuccess = False
 sconsResult = ''
 testsPass = True
 mssgScons = ''
+mssgSconsErr = ''
 mssgTests = ''
 mssgSvn  = ''
+mssgDoxy = ''
 
-#Get scons result and log
+#Get scons result and errors
 f = open('../logs/scons.log','r')
 
 for line in f.readlines():
@@ -27,9 +29,10 @@ f.close()
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
+	
+mssgSconsErr = open('../logs/sconsErr.log','r').read()
 
-
-#Get tests result and log
+#Get tests result
 f = open('../logs/testResults.log','r')
 
 for line in f.readlines():
@@ -45,6 +48,8 @@ f.close()
 #Read svn log
 mssgSvn = open('../logs/svn.log','r').read()
 
+#Read doxygen log
+mssgDoxy = open('../logs/doxy.log','r').read()
 
 #Construct Message
 
@@ -53,11 +58,14 @@ message += 'Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
 message += mssgSvn + "\n"
 message += 'BUILD LOG\n\n'
-message += mssgScons + "\n"
+message += mssgScons + "\n\n"
+message += mssgSconsErr + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
 message += mssgTests + "\n"
 message += '------------------------------------------------------------------------\n'
+message += 'DOXYGEN LOG\n\n'
+message += mssgDoxy + "\n"
 
 #Create Subject
 subject = 'Subject: Build Report: '
