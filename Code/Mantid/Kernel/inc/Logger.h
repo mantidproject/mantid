@@ -7,6 +7,12 @@
 #include <exception>
 #include <map>
 
+//forward declaration
+namespace Poco
+{
+	class Logger;
+}
+
 namespace Mantid
 {
 /** @class Logger Logger.h Kernel/Logger.h
@@ -40,85 +46,98 @@ namespace Mantid
 	class Logger
 	{
 	public:	
+		/// If the Logger's log level is at least PRIO_FATAL,
+		/// creates a Message with priority PRIO_FATAL
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void fatal(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_FATAL,
-			/// creates a Message with priority PRIO_FATAL
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_CRITICAL,
+		/// creates a Message with priority PRIO_CRITICAL
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void critical(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_CRITICAL,
-			/// creates a Message with priority PRIO_CRITICAL
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_ERROR,
+		/// creates a Message with priority PRIO_ERROR
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void error(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_ERROR,
-			/// creates a Message with priority PRIO_ERROR
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_WARNING,
+		/// creates a Message with priority PRIO_WARNING
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void warning(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_WARNING,
-			/// creates a Message with priority PRIO_WARNING
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_NOTICE,
+		/// creates a Message with priority PRIO_NOTICE
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void notice(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_NOTICE,
-			/// creates a Message with priority PRIO_NOTICE
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_INFORMATION,
+		/// creates a Message with priority PRIO_INFORMATION
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void information(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_INFORMATION,
-			/// creates a Message with priority PRIO_INFORMATION
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_DEBUG,
+		/// creates a Message with priority PRIO_DEBUG
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void debug(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_DEBUG,
-			/// creates a Message with priority PRIO_DEBUG
-			/// and the given message text and sends it
-			/// to the attached channel.
 
+		/// If the Logger's log level is at least PRIO_TRACE,
+		/// creates a Message with priority PRIO_TRACE
+		/// and the given message text and sends it
+		/// to the attached channel.
+		/// @param msg The message to log.
 		void trace(const std::string& msg);
-			/// If the Logger's log level is at least PRIO_TRACE,
-			/// creates a Message with priority PRIO_TRACE
-			/// and the given message text and sends it
-			/// to the attached channel.
+
+		/// Logs the given message, followed by the data in buffer.
+		///
+		/// The data in buffer is written in canonical hex+ASCII form:
+		/// Offset (4 bytes) in hexadecimal, followed by sixteen 
+		/// space-separated, two column, hexadecimal bytes,
+		/// followed by the same sixteen bytes as ASCII characters.
+		/// For bytes outside the range 32 .. 127, a dot is printed.			
+		//void dump(const std::string& msg, const void* buffer, std::size_t length, Message::Priority prio = Message::PRIO_DEBUG);
 			
-		/*void dump(const std::string& msg, const void* buffer, std::size_t length, Message::Priority prio = Message::PRIO_DEBUG);
-			/// Logs the given message, followed by the data in buffer.
-			///
-			/// The data in buffer is written in canonical hex+ASCII form:
-			/// Offset (4 bytes) in hexadecimal, followed by sixteen 
-			/// space-separated, two column, hexadecimal bytes,
-			/// followed by the same sixteen bytes as ASCII characters.
-			/// For bytes outside the range 32 .. 127, a dot is printed.
-*/
+		/// Returns true if at least the given log level is set.
+		/// @param level The logging level 0=trace, 1=debug, 2=information, 3=notice, 4=warning, 5=error, 6=critical, 7=fatal
 		bool is(int level) const;
-			/// Returns true if at least the given log level is set.
-		
+
+		/// Returns a reference to the Logger with the given name.
+		/// If the Logger does not yet exist, it is created, based
+		/// on its parent logger.	
+		/// @param name The name of the logger to use - this is usually the class namename.	
 		static Logger& get(const std::string& name);
-			/// Returns a reference to the Logger with the given name.
-			/// If the Logger does not yet exist, it is created, based
-			/// on its parent logger.
-	
+
+		/// Shuts down the logging framework and releases all
+		/// Loggers.	
 		static void shutdown();
-			/// Shuts down the logging framework and releases all
-			/// Loggers.
-		
-		static const std::string ROOT; /// The name of the root logger ("").	
 		
 	protected:
+		///Protecxted Conctractor called by static get method
 		Logger(const std::string& name);
+		///protected destructor
 		~Logger();
 
 	private:
+		///no arg constructor
 		Logger();
-		Logger(const Logger&);
+
 		Logger& operator = (const Logger&);
+
+		Poco::Logger& _log;
 		
 		std::string _name;
 };
