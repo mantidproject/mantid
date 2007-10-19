@@ -11,6 +11,7 @@ if os.name == 'nt':
 else:
 	#so this must be posix
 	libList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	libList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	
 	if platform.architecture()[0].startswith('64bit'):
 		libList.append('../../../Third_Party/lib/linux64/')
