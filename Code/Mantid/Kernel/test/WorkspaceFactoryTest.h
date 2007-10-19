@@ -4,12 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "../inc/WorkspaceFactory.h"
-#include "../../DataObjects/inc/Workspace1D.h"
 
 using namespace Mantid;
 
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {
+	//private test class - using this removes the dependency on the DataObjects library
+	class WorkspaceTest: public Workspace
+	{
+	public:
+		const std::string id() const {return "WorkspaceTest";}
+	};
 public: 
 
   WorkspaceFactoryTest()
@@ -25,10 +30,10 @@ public:
   
   void testReturnType()
   {
-    factory->subscribe<Workspace1D>("work");
+    factory->subscribe<WorkspaceTest>("work");
     Workspace *space;
     TS_ASSERT_THROWS_NOTHING( space = factory->create("work") );
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Workspace1D*>(space) );
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space) );
   }
   
   void testCast()
