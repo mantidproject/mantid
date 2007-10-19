@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "../inc/Workspace.h"
 #include "../inc/WorkspaceFactory.h"
 
 using namespace Mantid;
