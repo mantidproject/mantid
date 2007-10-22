@@ -112,7 +112,7 @@ namespace Mantid
 		//void dump(const std::string& msg, const void* buffer, std::size_t length, Message::Priority prio = Message::PRIO_DEBUG);
 			
 		/// Returns true if at least the given log level is set.
-		/// @param level The logging level 0=trace, 1=debug, 2=information, 3=notice, 4=warning, 5=error, 6=critical, 7=fatal
+		/// @param level The logging level 8=trace, 7=debug, 6=information, 5=notice, 4=warning, 3=error, 2=critical, 1=fatal
 		bool is(int level) const;
 
 		/// Returns a reference to the Logger with the given name.
@@ -125,12 +125,13 @@ namespace Mantid
 		/// Loggers.	
 		static void shutdown();
 		
-	protected:
-		///Protecxted Conctractor called by static get method
-		Logger(const std::string& name);
-		///protected destructor
+		/// destructor
 		~Logger();
 
+	protected:
+		///Protected Constructor called by static get method
+		Logger(const std::string& name);
+		
 	private:
 		///no arg constructor
 		Logger();
@@ -142,8 +143,6 @@ namespace Mantid
 		std::string _name;
 };
 
-
-  
 }
 
 #endif /*MANTID_LOGGINGSERVICE_H_*/

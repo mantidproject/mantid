@@ -3,8 +3,8 @@
 
 namespace Mantid
 {
-	Logger::Logger(const std::string& name): _log(Poco::Logger::get(_name))
-	{
+	Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
+	{  
 		_name = name;
 	}
 
