@@ -2,13 +2,18 @@
 #define MANTID_TESTV3D__
 
 #include <cxxtest/TestSuite.h>
-#include "../inc/V3D.h" 
 #include <cmath>
+#include <ostream>
+#include <vector>
+
+#include "../inc/V3D.h" 
 
 class testV3D : public CxxTest::TestSuite
 {
 private:
-	Mantid::Geometry::V3D a,b,c;
+
+  Mantid::Geometry::V3D a,b,c;
+
 public:
 	void testEmptyConstructor()
 	{
@@ -81,6 +86,8 @@ public:
 		TS_ASSERT_EQUALS(c.X(),1.0);
 		TS_ASSERT_EQUALS(c.Y(),4.0);
 		TS_ASSERT_EQUALS(c.Z(),9.0);
+		a*=a;
+        // I want a TS_ASSERT here... a==c
 	}
 	void testDividesOperation()
 	{
@@ -130,10 +137,10 @@ public:
 	void testScaleMultiplies()
 	{
 		a(1.0,2.0,3.0);
-		b=a*2.0;
-		TS_ASSERT_EQUALS(b.X(),2.0);
-		TS_ASSERT_EQUALS(b.Y(),4.0);
-		TS_ASSERT_EQUALS(b.Z(),6.0);		
+		b=a * -2.0;
+		TS_ASSERT_EQUALS(b.X(),-2.0);
+		TS_ASSERT_EQUALS(b.Y(),-4.0);
+		TS_ASSERT_EQUALS(b.Z(),-6.0);		
 	}
 	void testScaleMultipliesEqual()
 	{
@@ -227,18 +234,19 @@ public:
 	}
 	void testNorm()
 	{
-		a(1.0,1.0,1.0);
-		TS_ASSERT_EQUALS(a.norm(),sqrt(3.0));
+		a(1.0,-5.0,8.0);
+		TS_ASSERT_EQUALS(a.norm(),sqrt(90.0));
 	}
 	void testNorm2()
 	{
-		a(1.0,1.0,1.0);
-		TS_ASSERT_EQUALS(a.norm2(),3.0);
+		a(1.0,-5.0,8.0);
+		TS_ASSERT_EQUALS(a.norm2(),90.0);
 	}
 	void testNormalize()
 	{
 		a(1.0,1.0,1.0);
-		b=a.normalize();
+		b=a;
+		b.normalize();
 		TS_ASSERT_EQUALS(b[0],1.0/sqrt(3.0));
 		TS_ASSERT_EQUALS(b[1],1.0/sqrt(3.0));
 		TS_ASSERT_EQUALS(b[2],1.0/sqrt(3.0));
