@@ -10,12 +10,18 @@ libList = []
 if os.name == 'nt':
 	# assume this is nt
 	libDirList.append('../../Third_Party/lib/win32/')
+	libDir = '../../Third_Party/lib/win32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.dll'):
+			libList.append(file.rstrip('.dll'))
+	
 else:
 	#so this must be posix
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	
-	libDir =''
+	#libDir =''
 	
 	if platform.architecture()[0].startswith('64bit'):
 		libDirList.append('../../Third_Party/lib/linux64/')
