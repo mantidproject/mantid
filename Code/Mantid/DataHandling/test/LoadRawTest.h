@@ -17,7 +17,7 @@ public:
   LoadRawTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/HET15869.RAW";
+    inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setProperty("Filename", inputFile);
 
     // Next 2 lines should be removed when auto-registration of workspaces implemented
