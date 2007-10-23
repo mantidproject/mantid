@@ -3,22 +3,32 @@ import platform
 
 from socket import gethostname
 
-#get library directories
-libList = ['../'];
+#get libraries and the library directories
+libDirList = ['../']
+libList = []
 
 if os.name == 'nt':
 	# assume this is nt
-	libList.append('../../../Third_Party/lib/win32/')
+	libDirList.append('../../Third_Party/lib/win32/')
 else:
 	#so this must be posix
-	libList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	libList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	
+	libDir =''
 	
 	if platform.architecture()[0].startswith('64bit'):
-		libList.append('../../../Third_Party/lib/linux64/')
+		libDirList.append('../../Third_Party/lib/linux64/')
+		libDir = '../../Third_Party/lib/linux64/'
 		
 	else:
-		libList.append('../../../Third_Party/lib/linux32/')
+		libDirList.append('../../Third_Party/lib/linux32/')
+		libDir = '../../Third_Party/lib/linux32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.so'):
+			libList.append(file.rstrip('.so').lstrip('lib'))
+
 
 #GET LIST OF CPPS
 codeFolder = '/src'
@@ -42,15 +52,16 @@ for fname in dirList:
 		
 
 env=Environment()
+env.Append( CCFLAGS = '-Wall')
 
 
 # set header include paths
-env = Environment(CPPPATH='../../Third_Party/include')
+env = Environment(CPPPATH='../../Third_Party/include/')
        
 
 #BUILD CODE
 #env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
-env.Library('Mantid', listCpps, LIBPATH=libList)
+env.Library('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList)
 
 #BUILD TESTS 
 env.SConscript(['Tests/SConscript'])
