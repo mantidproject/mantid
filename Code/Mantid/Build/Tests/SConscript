@@ -3,21 +3,30 @@ import platform
 
 from socket import gethostname
 
-libList = ['../'];
+libDirList = ['../']
+libList = ['Mantid', 'Get', 'g2c']
 
 if os.name == 'nt':
 	# assume this is nt
-	libList.append('../../../Third_Party/lib/win32/')
+	libDirList.append('../../../Third_Party/lib/win32/')
 else:
 	#so this must be posix
-	libList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	libList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	
+	libDir =''
 	
 	if platform.architecture()[0].startswith('64bit'):
-		libList.append('../../../Third_Party/lib/linux64/')
+		libDirList.append('../../../Third_Party/lib/linux64/')
+		libDir = '../../../Third_Party/lib/linux64/'
 		
 	else:
-		libList.append('../../../Third_Party/lib/linux32/')
+		libDirList.append('../../../Third_Party/lib/linux32/')
+		libDir = '../../../Third_Party/lib/linux32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.so'):
+			libList.append(file.rstrip('.so').lstrip('lib'))
 
 
 #GET LIST OF TESTS
@@ -46,7 +55,9 @@ f=open('../TestsToRun', 'w')
 f.writelines(testsToRun)
 f.close()
 
+#BUILD
 env=Environment()
+env.Append( CCFLAGS = '-Wall')
 
 f=open('../TestsToRun', 'r')
 
@@ -55,4 +66,4 @@ for test in f:
 	temp= test.split('/')
 	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
 	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
-	env.Program(dotcpp, LIBS=['Mantid', 'Get', 'g2c'], LIBPATH=libList)
+	env.Program(dotcpp, LIBS=libList, LIBPATH=libDirList)
