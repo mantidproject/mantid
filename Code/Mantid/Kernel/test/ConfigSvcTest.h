@@ -32,13 +32,13 @@ public:
 	  TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string"));
 
 	  //checking the level - this should be set to debug in the config file
-	  //therefore this should only return false for trace
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_DEBUG) == false); //debug
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_INFORMATION)); //information
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_WARNING)); //warning
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_ERROR)); //error
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_CRITICAL)); //critical
-	  TS_ASSERT(log1.is(Logger::Priority::PRIO_FATAL)); //fatal
+	  //therefore this should only return false for debug
+	  TS_ASSERT(log1.is(Logger::PRIO_DEBUG) == false); //debug
+	  TS_ASSERT(log1.is(Logger::PRIO_INFORMATION)); //information
+	  TS_ASSERT(log1.is(Logger::PRIO_WARNING)); //warning
+	  TS_ASSERT(log1.is(Logger::PRIO_ERROR)); //error
+	  TS_ASSERT(log1.is(Logger::PRIO_CRITICAL)); //critical
+	  TS_ASSERT(log1.is(Logger::PRIO_FATAL)); //fatal
 	  
   }
 
