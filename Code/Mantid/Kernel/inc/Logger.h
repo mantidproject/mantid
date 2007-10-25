@@ -46,17 +46,16 @@ namespace Mantid
 	class Logger
 	{
 	public:	
-	///An emuration of the priority levels of a log message.
-	enum Priority
-	{
-		PRIO_FATAL = 1,		  /// A fatal error. The application will most likely terminate. This is the highest priority.
-		PRIO_CRITICAL = 2,    /// A critical error. The application might not be able to continue running successfully.
-		PRIO_ERROR = 3,       /// An error. An operation did not complete successfully, but the application as a whole is not affected.
-		PRIO_WARNING = 4,     /// A warning. An operation completed with an unexpected result.
-		PRIO_INFORMATION = 6, /// An informational message, usually denoting the successful completion of an operation.
-		PRIO_DEBUG = 7,       /// A debugging message.This is the lowest priority.
-	};
-
+		///An emuration of the priority levels of a log message.
+		enum Priority
+		{
+			PRIO_FATAL = 1,		  /// A fatal error. The application will most likely terminate. This is the highest priority.
+			PRIO_CRITICAL = 2,    /// A critical error. The application might not be able to continue running successfully.
+			PRIO_ERROR = 3,       /// An error. An operation did not complete successfully, but the application as a whole is not affected.
+			PRIO_WARNING = 4,     /// A warning. An operation completed with an unexpected result.
+			PRIO_INFORMATION = 6, /// An informational message, usually denoting the successful completion of an operation.
+			PRIO_DEBUG = 7      /// A debugging message.This is the lowest priority.
+		};
 
 		/// If the Logger's log level is at least PRIO_FATAL,
 		/// creates a Message with priority PRIO_FATAL
