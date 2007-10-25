@@ -24,10 +24,8 @@ public:
 	  //attempt some logging
 	  Logger& log1 = Logger::get("logTest");
 
-	  TS_ASSERT_THROWS_NOTHING(log1.trace("a trace string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.information("an information string"));
-	  TS_ASSERT_THROWS_NOTHING(log1.notice("a notice string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.warning("a warning string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.error("an error string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.critical("a critical string"));
@@ -35,14 +33,12 @@ public:
 
 	  //checking the level - this should be set to debug in the config file
 	  //therefore this should only return false for trace
-	  TS_ASSERT(log1.is(8) == false); //trace
-	  TS_ASSERT(log1.is(7)); //debug
-	  TS_ASSERT(log1.is(6)); //information
-	  TS_ASSERT(log1.is(5)); //notice
-	  TS_ASSERT(log1.is(4)); //warning
-	  TS_ASSERT(log1.is(3)); //error
-	  TS_ASSERT(log1.is(2)); //critical
-	  TS_ASSERT(log1.is(1)); //fatal
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_DEBUG) == false); //debug
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_INFORMATION)); //information
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_WARNING)); //warning
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_ERROR)); //error
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_CRITICAL)); //critical
+	  TS_ASSERT(log1.is(Logger::Priority::PRIO_FATAL)); //fatal
 	  
   }
 

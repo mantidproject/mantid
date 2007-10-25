@@ -1,5 +1,6 @@
 #include "../inc/Logger.h"
 #include <Poco/Logger.h>
+#include <Poco/Message.h>
 
 namespace Mantid
 {
@@ -28,11 +29,6 @@ namespace Mantid
 		_log.warning(msg);
 	}
 
-	void Logger::notice(const std::string& msg)
-	{
-		_log.notice(msg);
-	}
-
 	void Logger::information(const std::string& msg)
 	{
 		_log.information(msg);
@@ -43,10 +39,11 @@ namespace Mantid
 		_log.debug(msg);
 	}
 
-	void Logger::trace(const std::string& msg)
+	void Logger::dump(const std::string& msg, const void* buffer, std::size_t length)
 	{
-		_log.trace(msg);
+		_log.dump(msg,buffer,length);
 	}
+		
 
 	bool Logger::is(int level) const
 	{
