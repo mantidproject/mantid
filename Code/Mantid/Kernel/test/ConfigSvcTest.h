@@ -61,6 +61,18 @@ public:
 	  TS_ASSERT_EQUALS(legCountString, "6");
   }
 
+   void TestCustomPropertyAsValue()
+  {
+	  //Mantid.legs is defined in the properties script as 6
+	  int value;
+	  int retVal = configSvc->getValue("mantid.legs",value);
+	  double dblValue;
+	  retVal = configSvc->getValue("mantid.legs",dblValue);
+
+	  TS_ASSERT_EQUALS(value, 6);
+	  TS_ASSERT_EQUALS(dblValue, 6.0);
+  }
+
   void TestMissingProperty()
   {
 	  //Mantid.noses is not defined in the properties script 

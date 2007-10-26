@@ -107,17 +107,13 @@ namespace Mantid
 		/// @returns the string value of the property
 		std::string getString(const std::string& keyName);
 
-		/// Searches for the string within the currently loaded configuaration values and returns to value as an integer.
+		/// Searches for the string within the currently loaded configuaration values and attempts to convert the values to the template type supplied.
 		///
 		/// @param keyName The case sensitive name of the property that you need the value of.
-		/// @returns the integer value of the property
-		int getInt(const std::string& keyName);
-		
-		/// Searches for the string within the currently loaded configuaration values and returns to value as a double.
-		///
-		/// @param keyName The case sensitive name of the property that you need the value of.
-		/// @returns the double value of the property
-		double getDouble(const std::string& keyName);
+		/// @param out The value if found
+		/// @returns A success flag - 0 on failure 1 on success
+		template<typename T>
+		int getValue(const std::string& keyName, T& out);
 
 		/// Searches for the string within the environment variables and returns to value as a string.
 		///

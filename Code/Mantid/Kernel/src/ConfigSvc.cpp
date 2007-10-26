@@ -1,4 +1,5 @@
 #include "../inc/ConfigSvc.h"
+#include "../inc/Support.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -79,15 +80,13 @@ namespace Mantid
 	{
 		return m_pConf->getString(keyName);
 	}
-	
-	int ConfigSvc::getInt(const std::string& keyName)
+
+	template<typename T>
+	int ConfigSvc::getValue(const std::string& keyName, T& out)
 	{
-		return 1;
-	}
-	
-	double ConfigSvc::getDouble(const std::string& keyName)
-	{
-		return 1.0;
+		std::string strValue = getString(keyName);
+		int result = Mantid::StrFunc::convert(strValue,out);
+		return result;
 	}
 
 	std::string ConfigSvc::getEnvironment(const std::string& keyName)	
@@ -134,4 +133,11 @@ namespace Mantid
 		return m_pSysConfig->getString("system.tempDir");
 	}
 */
+
+	
+/// \cond TEMPLATE 
+
+	template int ConfigSvc::getValue(const std::string&,double&);
+	template int ConfigSvc::getValue(const std::string&,std::string&);
+	template int ConfigSvc::getValue(const std::string&,int&);
 }
