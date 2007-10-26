@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include "Instantiator.h"
 #include "Logger.h"
 #include <map>
@@ -38,7 +39,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 template <class Base>
-class DynamicFactory
+class DLLExport DynamicFactory
 {
 public:
   /// A typedef for the instantiator

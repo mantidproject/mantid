@@ -31,7 +31,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 // RJT: Minimal implementation at this point.
-  class StatusCode 
+  class DLLExport StatusCode 
   {
   public:
     enum {

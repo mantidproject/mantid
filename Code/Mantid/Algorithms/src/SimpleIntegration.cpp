@@ -49,6 +49,8 @@
 #include <numeric>
 #include <math.h>
 
+DECLARE_ALGORITHM(SimpleIntegration)
+
 namespace Mantid
 {
 Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");

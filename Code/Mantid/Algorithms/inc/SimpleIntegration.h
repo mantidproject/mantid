@@ -1,5 +1,5 @@
-#ifndef SIMPLEINTEGRATION_H_
-#define SIMPLEINTEGRATION_H_
+#ifndef MANTID_SIMPLEINTEGRATION_H_
+#define MANTID_SIMPLEINTEGRATION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -89,4 +89,4 @@ private:
 
 }
 
-#endif /*SIMPLEINTEGRATION_H_*/
+#endif /*MANTID_SIMPLEINTEGRATION_H_*/

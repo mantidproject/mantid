@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include "StatusCode.h"
 #include "Workspace.h"
 #include "Logger.h"
@@ -42,7 +43,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class AnalysisDataService
+class DLLExport AnalysisDataService
 {
 public:
   

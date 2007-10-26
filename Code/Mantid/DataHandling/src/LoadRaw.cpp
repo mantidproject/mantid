@@ -51,6 +51,8 @@ extern "C" void getdat_(const char* fname, const int& spec_no, const int& nspec,
     int* idata, int& length, int& errcode, unsigned len_fname);
 extern "C" void close_data_file__();
 
+DECLARE_ALGORITHM(LoadRaw)
+
 namespace Mantid
 {
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");

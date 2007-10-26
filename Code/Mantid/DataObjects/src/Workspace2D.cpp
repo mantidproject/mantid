@@ -1,6 +1,8 @@
 #include "../inc/Workspace2D.h"
 #include <stdexcept> 
 
+DECLARE_WORKSPACE(Workspace2D)
+
 namespace Mantid
 {
 

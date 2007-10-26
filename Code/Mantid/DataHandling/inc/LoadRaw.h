@@ -1,5 +1,5 @@
-#ifndef LOADRAW_H_
-#define LOADRAW_H_
+#ifndef MANTID_LOADRAW_H_
+#define MANTID_LOADRAW_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -76,6 +76,6 @@ namespace Mantid
 	static Logger& g_log;
   };
 
-}
+} // namespace Mantid
 
-#endif /*LOADRAW_H_*/
+#endif /*MANTID_LOADRAW_H_*/

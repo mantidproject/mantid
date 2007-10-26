@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include "StatusCode.h"
 
 namespace Mantid
@@ -16,7 +17,7 @@ namespace Mantid
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 11/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -35,7 +36,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class IInterface
+class DLLExport IInterface
   {
   public:
 	  // RJT: This class is just a stub for now

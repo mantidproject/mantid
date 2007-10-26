@@ -1,6 +1,21 @@
 #ifndef MANTID_WORKSPACEFACTORY_H_
 #define MANTID_WORKSPACEFACTORY_H_
 
+/* Used to register classes into the factory. creates a global object in an 
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's 
+ * subscribe method.
+ */
+#define DECLARE_WORKSPACE(classname) \
+  namespace { \
+    Mantid::RegistrationHelper register_ws_##classname( \
+       ((Mantid::WorkspaceFactory::Instance()->subscribe<Mantid::classname>(#classname)) \
+       , 0)); \
+  }
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "DynamicFactory.h"
 
 namespace Mantid
@@ -42,7 +57,7 @@ class Workspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-class WorkspaceFactory : public DynamicFactory<Workspace>
+class DLLExport WorkspaceFactory : public DynamicFactory<Workspace>
 {
 public:
   

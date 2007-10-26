@@ -20,7 +20,7 @@ namespace Mantid
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 19/09/2007
     
-    Copyright © 2007 ???RAL???
+    Copyright ï¿½ 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -39,7 +39,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class IProperty : public INamedInterface {
+  class DLLExport IProperty : public INamedInterface {
   public:
     /// Retrieve interface ID
 //    static const InterfaceID& interfaceID() { return IID_IProperty; }

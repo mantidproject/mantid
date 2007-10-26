@@ -1,11 +1,12 @@
-#ifndef ALGORITHM_H_
-#define ALGORITHM_H_
+#ifndef MANTID_ALGORITHM_H_
+#define MANTID_ALGORITHM_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include "IAlgorithm.h"
-//#include "AlgorithmFactory.h"
+#include "AlgorithmFactory.h"
 #include "WorkspaceFactory.h"
 #include "Logger.h"
 
@@ -64,7 +65,7 @@ class Workspace;
     
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class Algorithm : virtual public IAlgorithm
+  class DLLExport Algorithm : virtual public IAlgorithm
   {
   public:
 	  
@@ -227,6 +228,7 @@ class Workspace;
 	  std::map< std::string, std::string > m_properties;
 
   };
-}
+  
+} // namespace Mantid
 
-#endif /*ALGORITHM_H_*/
+#endif /*MANTID_ALGORITHM_H_*/

@@ -32,6 +32,7 @@
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below
 
+DECLARE_ALGORITHM(SaveCSV)
 
 namespace Mantid
 {

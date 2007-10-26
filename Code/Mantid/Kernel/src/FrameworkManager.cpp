@@ -62,14 +62,6 @@ void FrameworkManager::initialize()
   algFactory = AlgorithmFactory::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
-  
-  // Register all our algorithms and workspaces
-  // These lines will disappear once automatic registration is implemented
-  algFactory->subscribe<LoadRaw>("LoadRaw");
-  algFactory->subscribe<SaveCSV>("SaveCSV");
-  algFactory->subscribe<SimpleIntegration>("SimpleIntegration");
-  workFactory->subscribe<Workspace2D>("Workspace2D");
-  workFactory->subscribe<Workspace1D>("Workspace1D");
 }
 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)

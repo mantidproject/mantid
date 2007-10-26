@@ -1,8 +1,17 @@
 #ifndef MANTID_ALGORITHMFACTORY_H_
 #define MANTID_ALGORITHMFACTORY_H_
 
-// TODO
-#define DECLARE_ALGORITHM(algorithmclass) 
+/* Used to register classes into the factory. creates a global object in an 
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's 
+ * subscribe method.
+ */
+#define DECLARE_ALGORITHM(classname) \
+  namespace { \
+    Mantid::RegistrationHelper register_alg_##classname( \
+       ((Mantid::AlgorithmFactory::Instance()->subscribe<Mantid::classname>(#classname)) \
+       , 0)); \
+  }
 
 //----------------------------------------------------------------------
 // Includes
@@ -47,7 +56,7 @@ class IAlgorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class AlgorithmFactory : public DynamicFactory<IAlgorithm>
+  class DLLExport AlgorithmFactory : public DynamicFactory<IAlgorithm>
   {
   public:
     

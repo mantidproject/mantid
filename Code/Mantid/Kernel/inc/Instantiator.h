@@ -31,7 +31,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 template <class Base>
-class AbstractInstantiator
+class DLLExport AbstractInstantiator
 /// The base class for instantiators
 {
 public:
@@ -62,7 +62,7 @@ private:
 // instances are to be instantiated must have a no-argument
 // constructor.
 template <class C, class Base>
-class Instantiator: public AbstractInstantiator<Base>
+class DLLExport Instantiator: public AbstractInstantiator<Base>
 {
 public:
   /// Creates the Instantiator.

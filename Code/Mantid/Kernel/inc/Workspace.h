@@ -1,5 +1,6 @@
 #ifndef WORKSPACE_H_
 #define WORKSPACE_H_
+#include "../../Kernel/inc/WorkspaceFactory.h"
 #include <string>
 #include <ostream> 
 #include "Logger.h"
@@ -37,7 +38,7 @@ namespace Mantid
  	*/
 
 
-class Workspace
+class DLLExport Workspace
 {
 public:
   // Return the workspace typeID 
