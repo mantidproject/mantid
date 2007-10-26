@@ -204,6 +204,8 @@ class Workspace;
 	  std::string m_name;            ///< Algorithm's name for identification
 	  std::string m_version;         ///< Algorithm's version
 	  std::vector<Algorithm *>* m_subAlgms; ///< Sub algorithms
+
+	  ///static refenence to the logger class
 	  static Logger& g_log;
 	  	  
 	  bool        m_isInitialized;    ///< Algorithm has been initialized flag

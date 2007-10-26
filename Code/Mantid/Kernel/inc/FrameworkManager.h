@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <vector>
+#include "Logger.h"
 
 namespace Mantid
 {
@@ -113,6 +114,10 @@ private:
    */
   std::vector<std::string> SplitString(const std::string& input, 
               const std::string& delimiter, bool includeEmpties = false);
+
+  
+  ///static reference to the logger class
+  static Logger& g_log;
   
   /// Pointer to the Algorithm Factory instance
   AlgorithmFactory *algFactory;

@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "StatusCode.h"
 #include "Workspace.h"
+#include "Logger.h"
 
 #include <string>
 #include <map>
@@ -92,6 +93,10 @@ private:
    *  out by Instance
    */
   ~AnalysisDataService();
+
+  
+  ///static reference to the logger class
+  static Logger& g_log;
   
   /// Pointer to the single instance
   static AnalysisDataService* m_instance;

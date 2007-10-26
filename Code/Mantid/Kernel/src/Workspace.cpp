@@ -2,6 +2,8 @@
 namespace Mantid
 {
 
+Logger& Workspace::g_log = Logger::get("Workspace");
+
 Workspace::Workspace()
 {
 }

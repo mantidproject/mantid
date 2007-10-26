@@ -31,6 +31,7 @@
 
 namespace Mantid
 {
+Logger& AnalysisDataService::g_log = Logger::get("AnalysisDataService");
 
 // Returns the single instance of the service
 AnalysisDataService* AnalysisDataService::Instance()

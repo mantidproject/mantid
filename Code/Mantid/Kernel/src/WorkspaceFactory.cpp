@@ -32,6 +32,8 @@
 namespace Mantid
 {
 
+Logger& WorkspaceFactory::g_log = Logger::get("WorkspaceFactory");
+
 // Initialise the instance pointer to zero
 WorkspaceFactory* WorkspaceFactory::m_instance = 0;
 

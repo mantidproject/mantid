@@ -62,6 +62,9 @@ private:
    *  out by Instance
    */
   virtual ~WorkspaceFactory();
+    
+  ///static reference to the logger class
+  static Logger& g_log;
 
   /// Pointer to the factory instance
   static WorkspaceFactory* m_instance;

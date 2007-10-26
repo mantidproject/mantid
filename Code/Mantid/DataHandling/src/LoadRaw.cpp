@@ -53,6 +53,8 @@ extern "C" void close_data_file__();
 
 namespace Mantid
 {
+  Logger& LoadRaw::g_log = Logger::get("LoadRaw");
+
   // Empty constructor
   LoadRaw::LoadRaw()
   {
@@ -60,14 +62,12 @@ namespace Mantid
 
   StatusCode LoadRaw::init()
   {
-    MsgStream log(0,"");
-
     // Retrieve the filename from the properties
     StatusCode status = getProperty("Filename", m_filename);
     // Check that property has been set and retrieved successfully
     if ( status.isFailure() )
     {     
-      log << "Filename property has not been set." << endreq;
+      g_log.information("Filename property has not been set.");
       return status;
     }
         
@@ -76,15 +76,14 @@ namespace Mantid
   
   StatusCode LoadRaw::exec()
   {
-    MsgStream log(0,"");
-        
+       
     int found = 0;  
     // Call the FORTRAN function to open the RAW file
     open_file__( m_filename.c_str(), &found, strlen( m_filename.c_str() ) );
     if ( ! found )
     {
       // Unable to open file
-      log << "Unable to open file " << m_filename << endreq;
+      g_log.error("Unable to open file " + m_filename);
       return StatusCode::FAILURE;
     }
     

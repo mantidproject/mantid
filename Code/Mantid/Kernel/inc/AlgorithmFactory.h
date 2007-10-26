@@ -8,6 +8,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DynamicFactory.h"
+#include "Logger.h"
 
 namespace Mantid
 {
@@ -60,6 +61,9 @@ class IAlgorithm;
     
     /// Private Constructor for singleton class
     AlgorithmFactory();
+	
+	///static reference to the logger class
+	static Logger& g_log;
     
     /** Private destructor
      *  Prevents client from calling 'delete' on the pointer handed 

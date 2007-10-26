@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DataHandlingCommand.h"
+#include "../../kernel/inc/Logger.h"
 
 namespace Mantid
 {
@@ -71,6 +72,8 @@ namespace Mantid
     /// The name and path of the input file
     std::string m_filename;
     
+	///static reference to the logger class
+	static Logger& g_log;
   };
 
 }

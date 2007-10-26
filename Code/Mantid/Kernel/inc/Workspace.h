@@ -2,6 +2,7 @@
 #define WORKSPACE_H_
 #include <string>
 #include <ostream> 
+#include "Logger.h"
 namespace Mantid
 {
 /** @class Workspace Workspace.h
@@ -59,8 +60,11 @@ protected:
 	Workspace& operator=(const Workspace&);
 
 private:
-  std::string _title;
+	std::string _title;
 	std::string _comment;
+  
+	///static reference to the logger class
+	static Logger& g_log;
 };
 
 } //Namespace Mantid

@@ -42,7 +42,7 @@ using namespace std;
 
 namespace Mantid
 {
-
+Logger& FrameworkManager::g_log = Logger::get("FrameworkManager");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------

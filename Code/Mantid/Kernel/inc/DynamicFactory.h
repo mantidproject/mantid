@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "Instantiator.h"
+#include "Logger.h"
 #include <map>
 #include <stdexcept>
 
@@ -124,6 +125,10 @@ private:
   DynamicFactory(const DynamicFactory&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   DynamicFactory& operator = (const DynamicFactory&);
+
+  
+  ///static reference to the logger class
+  static Logger& g_log;
 
   /// A typedef for the map of registered classes
   typedef std::map<std::string, AbstractFactory*> FactoryMap;
