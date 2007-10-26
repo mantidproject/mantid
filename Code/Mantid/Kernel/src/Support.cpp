@@ -3,7 +3,7 @@
 #include <cmath>
 #include <vector>
 
-#include "../inc/support.h"
+#include "../inc/Support.h"
 
 namespace Mantid
 {
