@@ -35,6 +35,8 @@
 
 namespace Mantid
 {
+  Logger& SaveCSV::g_log = Logger::get("SaveCSV");
+
   // Empty default constructor
 
   SaveCSV::SaveCSV() {}
@@ -46,8 +48,7 @@ namespace Mantid
 
   StatusCode SaveCSV::init()
   {
-    MsgStream log(0,"");
-
+    
     // Retrieve the filename from the properties
 
     StatusCode status = getProperty("Filename", m_filename);
@@ -57,7 +58,7 @@ namespace Mantid
 
     if ( status.isFailure() )
     {     
-      log << "Filename property has not been set." << endreq;
+      g_log.error("Filename property has not been set.");
       return status;
     }
     
@@ -96,8 +97,6 @@ namespace Mantid
   
   StatusCode SaveCSV::exec()
   {
-    MsgStream log(0,"");
-    
     const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(m_inputWorkspace);
 
 
@@ -115,7 +114,7 @@ namespace Mantid
   
     if (!outCSV_File)
     {
-      log << "Failed to open file:" << m_filename << endreq;
+      g_log.error("Failed to open file:" + m_filename);
       return StatusCode::FAILURE;
     }
     

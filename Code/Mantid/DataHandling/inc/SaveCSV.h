@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DataHandlingCommand.h"
+#include "../../Kernel/inc/Logger.h"
 
 namespace Mantid
 {
@@ -81,7 +82,10 @@ namespace Mantid
     std::string m_seperator;
     
     /// The line seperator for the CSV file
-    std::string m_lineSeperator;    
+    std::string m_lineSeperator;   
+
+	///static reference to the logger class
+	static Logger& g_log;
   };
 
 }
