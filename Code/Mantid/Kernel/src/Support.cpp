@@ -3,7 +3,7 @@
 #include <cmath>
 #include <vector>
 
-#include "..\inc\support.h"
+#include "../inc/support.h"
 
 namespace Mantid
 {
@@ -483,8 +483,6 @@ template int convert(const char*,int&);
 template int convPartNum(const std::string&,double&);
 template int convPartNum(const std::string&,int&);
 
-template int setValues(const std::string&,const std::vector<int>&,
-		      std::vector<double>&);
 
 /// \endcond TEMPLATE 
 }
