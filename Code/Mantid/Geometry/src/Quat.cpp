@@ -2,6 +2,12 @@
 #include <cmath>
 #include <boost/test/floating_point_comparison.hpp>
 
+
+namespace Mantid
+{
+namespace Geometry
+{
+
 boost::test_tools::close_at_tolerance<double> tol(1e-6);
 
 
@@ -174,3 +180,7 @@ double& Quat::operator[](const int Index)
 	      throw std::runtime_error("Quat::operator[] range error");
 	}
 }
+
+} // Namespace Geometry
+
+} // Namespce Mantid
