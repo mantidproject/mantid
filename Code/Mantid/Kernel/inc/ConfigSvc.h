@@ -61,7 +61,7 @@ namespace Mantid
 			   }
 
 			   template<typename Field>
-			   WrappedObject(const Field& F) : T(F)
+			   WrappedObject(Field& F) : T(F)
 			   {
 				   m_pPtr = static_cast<T*>(this);
 			   }

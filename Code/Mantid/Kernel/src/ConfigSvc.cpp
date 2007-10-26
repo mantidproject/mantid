@@ -2,6 +2,9 @@
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
+#include <sstream>
+#include <iostream>
+#include <string>
 
 namespace Mantid
 {
@@ -15,6 +18,9 @@ namespace Mantid
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
 		
 		m_pConf = 0;
+
+		//attempt to load the default properties filename
+		loadConfig("Mantid.Properties");
 	}
 
 	//destructor
@@ -28,11 +34,45 @@ namespace Mantid
 	void ConfigSvc::loadConfig(const std::string& filename)
 	{
 		delete m_pConf;
-		m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
 
-		//configure the logging framework
-		Poco::Util::LoggingConfigurator configurator;
-		configurator.configure(m_pConf);
+		try
+		{
+			m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
+		}
+		catch (std::exception e)
+		{
+			//there was a problem loading the file - it probably is not there
+			std::cerr << "Problem loading the logging file " << filename << " " << e.what();
+			
+			std::string propFile = 
+				"logging.loggers.root.level = debug\n"
+				"logging.loggers.root.channel.class = SplitterChannel\n"
+				"logging.loggers.root.channel.channel1 = consoleChannel\n"
+				"logging.loggers.root.channel.channel2 = fileChannel\n"
+				"logging.channels.consoleChannel.class = ConsoleChannel\n"
+				"logging.channels.consoleChannel.formatter = f1\n"
+				"logging.channels.fileChannel.class = FileChannel\n"
+				"logging.channels.fileChannel.path = sample.log\n"
+				"logging.channels.fileChannel.formatter.class = PatternFormatter\n"
+				"logging.channels.fileChannel.formatter.pattern = %s: {%p} %t\n"
+				"logging.formatters.f1.class = PatternFormatter\n"
+				"logging.formatters.f1.pattern = %s-[%p] %t\n"
+				"logging.formatters.f1.times = UTC\n";
+		
+			std::istringstream istr(propFile);
+			m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
+		}
+
+		try
+		{
+			//configure the logging framework
+			Poco::Util::LoggingConfigurator configurator;
+			configurator.configure(m_pConf);
+		}
+		catch (std::exception e)
+		{
+			std::cerr << "Trouble configuring the logging framework " << e.what();
+		}
 	}
 	
 	std::string ConfigSvc::getString(const std::string& keyName)
@@ -70,7 +110,7 @@ namespace Mantid
 		return m_pSysConfig->getString("system.nodeName");
 	}
 
-/*	Removed as the use of these throughs a debug assertion about an invlid heap pointer
+/*	Removed as the use of these throughs a debug assertion about an invalid heap pointer
 	File dbgheap.c
 	Expression _CrtIsValidHeapPointer(pUserData)
 
