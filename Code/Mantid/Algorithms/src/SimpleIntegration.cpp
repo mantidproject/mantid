@@ -51,6 +51,8 @@
 
 namespace Mantid
 {
+Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
+
 
 StatusCode SimpleIntegration::init()
 {
@@ -92,21 +94,19 @@ StatusCode SimpleIntegration::init()
 
 StatusCode SimpleIntegration::exec()
 {
-  MsgStream log(0,"");
-  
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
   if ( 0 > m_MinY > numberOfYBins)
   {
-    log << "StartY out of range! Set to 0." << endreq;
+    g_log.information("StartY out of range! Set to 0.");
     m_MinY = 0;
   }
   
   if ( !m_MaxY ) m_MaxY = numberOfYBins;
   if ( m_MaxY > numberOfYBins || m_MaxY < m_MinY ) 
   {
-    log << "EndY out of range! Set to max detector number" << endreq;
+    g_log.information("EndY out of range! Set to max detector number");
     m_MaxY = numberOfYBins;
   }
   
@@ -127,13 +127,13 @@ StatusCode SimpleIntegration::exec()
       const int numberOfXBins = YValues.size();
       if ( 0 > m_MinX > numberOfXBins)
       {
-        log << "StartX out of range! Set to 0" << endreq;
+        g_log.information("StartX out of range! Set to 0");
         m_MinX = 0;
       }
       if ( !m_MaxX ) m_MaxX = numberOfXBins;
       if ( m_MaxX > numberOfXBins || m_MaxX < m_MinX)
       {
-        log << "EndX out of range! Set to max number" << endreq;
+        g_log.information("EndX out of range! Set to max number");
         m_MaxX = numberOfXBins;
       }
     }
