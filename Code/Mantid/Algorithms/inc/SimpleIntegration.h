@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "../../Kernel/inc/Algorithm.h"
-#include "../../kernel/inc/Logger.h"
+#include "../../Kernel/inc/Logger.h"
 
 namespace Mantid
 {
@@ -82,6 +82,9 @@ private:
   int m_MinY;
   /// The Y bin to finish the integration at
   int m_MaxY;
+
+  ///static reference to the logger class
+  static Logger& g_log;
 };
 
 }
