@@ -7,7 +7,7 @@
 #include "IAlgorithm.h"
 //#include "AlgorithmFactory.h"
 #include "WorkspaceFactory.h"
-#include "MsgStream.h"
+#include "Logger.h"
 
 #include <vector>
 //#include <ext/hash_map>
@@ -204,9 +204,10 @@ class Workspace;
 	  std::string m_name;            ///< Algorithm's name for identification
 	  std::string m_version;         ///< Algorithm's version
 	  std::vector<Algorithm *>* m_subAlgms; ///< Sub algorithms
+	  static Logger& g_log;
 	  	  
 	  bool        m_isInitialized;    ///< Algorithm has been initialized flag
-    bool        m_isExecuted;       ///< Algorithm is executed flag
+	  bool        m_isExecuted;       ///< Algorithm is executed flag
 	  bool        m_isFinalized;      ///< Algorithm has been finalized flag
 
 	  /** Name of workspace in which result should be placed. 

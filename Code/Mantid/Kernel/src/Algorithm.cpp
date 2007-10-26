@@ -38,6 +38,8 @@
 
 namespace Mantid
 {
+  Logger& Algorithm::g_log = Logger::get("Algorithm");
+
   Algorithm::Algorithm()
   :
   m_outputWorkspace(0),
@@ -82,8 +84,6 @@ namespace Mantid
   
   StatusCode Algorithm::initialize() 
   {
-    MsgStream log ( msgSvc() , name() + ".initialize()" );
-    
     // Bypass the initialization if the algorithm
     // has already been initialized.
     if ( m_isInitialized ) return StatusCode::SUCCESS;
@@ -94,7 +94,7 @@ namespace Mantid
     // If property not set print warning message and set pointer to null
     if ( status.isFailure() )
     {
-      log << MSG::INFO << "Input workspace property not set" << endreq;
+      g_log.information("Input workspace property not set");
       m_inputWorkspace = 0;
     }
     else 
@@ -103,7 +103,7 @@ namespace Mantid
       StatusCode status = data->retrieve(inputWorkspaceName, m_inputWorkspace);
       if ( status.isFailure() )
       {
-        log << MSG::ERROR << "Input workspace doesn't exist" << endreq;
+        g_log.error("Input workspace doesn't exist");
         return status;
       }
     }
@@ -111,7 +111,7 @@ namespace Mantid
     // If property not set print warning message and set pointer to null
     if ( status.isFailure() )
     {
-      log << MSG::INFO << "Output workspace property not set" << endreq;
+      g_log.information("Output workspace property not set");
       m_outputWorkspaceName = "";
     }
     
@@ -127,8 +127,7 @@ namespace Mantid
       for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
         status = (*it)->initialize();
         if( status.isFailure() ) {
-          log << MSG::ERROR << " Error initializing one or several sub-algorithms"
-              << endreq;
+          g_log.error("Error initializing one or several sub-algorithms");
           return status;        
         }
       }
@@ -143,8 +142,7 @@ namespace Mantid
     {
       // Gaudi: A call to the auditor service is here
       // (1) perform the printout
-      MsgStream log ( msgSvc() , name() + ".initialize()" );
-      log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
+      g_log.fatal("UNKNOWN Exception is caught ");
       // Gaudi: 
     }
     
@@ -154,8 +152,6 @@ namespace Mantid
   
   StatusCode Algorithm::execute() 
   {
-    MsgStream log(0,"");
-    
     // Return a failure if the algorithm hasn't been initialized
     if ( !isInitialized() ) return StatusCode::FAILURE;
     
@@ -172,12 +168,12 @@ namespace Mantid
         StatusCode stat = data->add(m_outputWorkspaceName, m_outputWorkspace);
         if ( stat.isFailure() )
         {
-          log << MSG::ERROR << "Unable to register output workspace" << endreq;
+          g_log.error("Unable to register output workspace");
         }
       }
       else 
       {
-        log << MSG::WARNING << "Output workspace has not been created" << endreq;
+        g_log.warning("Output workspace has not been created");
       }
       setExecuted(true);
       
@@ -197,8 +193,7 @@ namespace Mantid
       // Gaudi sets the executed flag to true here despite the exception. Not sure why.
       setExecuted(true);
   
-      MsgStream log ( msgSvc() , name() + ".execute()" );
-      log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;
+      g_log.error("UNKNOWN Exception is caught ");
   
       // Gaudi calls exception service 'handle' method here
     }
@@ -229,9 +224,7 @@ namespace Mantid
         status = (*it)->finalize();
         // The next test isn't in Gaudi, which ignores the outcome of finalizing sub-algorithms
         if( status.isFailure() ) {
-          MsgStream log ( msgSvc() , name() + ".finalize()" );
-          log << MSG::ERROR << " Error finalizing one or several sub-algorithms"
-              << endreq;
+          g_log.error(" Error finalizing one or several sub-algorithms");
           return status;
         }
       }
@@ -255,8 +248,7 @@ namespace Mantid
     catch (...)
     {
       // (1) perform the printout
-      MsgStream log ( msgSvc() , name() + ".finalize()" );
-      log << MSG::FATAL << "UNKNOWN Exception is caught " << endreq;    
+      g_log.error("UNKNOWN Exception is caught ");    
     }
     
     // Only gets to here if an exception is encountered
