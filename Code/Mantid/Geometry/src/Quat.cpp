@@ -1,14 +1,15 @@
-#include "Quat.h" 
+#include "../inc/Quat.h" 
+#include "../inc/V3D.h"
 #include <cmath>
 #include <boost/test/floating_point_comparison.hpp>
-
+#include <stdexcept> 
 
 namespace Mantid
 {
 namespace Geometry
 {
-
-boost::test_tools::close_at_tolerance<double> tol(1e-6);
+	
+boost::test_tools::close_at_tolerance<double> quat_tol(boost::test_tools::percent_tolerance(1e-6));
 
 
 Quat::Quat():w(0),a(0),b(0),c(0)
@@ -20,7 +21,10 @@ Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(
  
 Quat::Quat(const Quat& _q)
 {
-	w=_q.w;a=_q.a;b=_q.b;c=_q.c;
+	w=_q.w;
+	a=_q.a;
+	b=_q.b;
+	c=_q.c;
 }
  
 Quat::Quat(const double _deg,const V3D& _axis)
@@ -36,6 +40,7 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	V3D temp(_axis);
 	temp.normalize();
 	w=s*temp[0];a=s*temp[1];b=s*temp[2];
+	return;
 }
  
 Quat::~Quat()
@@ -43,7 +48,9 @@ Quat::~Quat()
 
 void Quat::init() 
 {
-	w=1.0;a=b=c=0.0;
+	w=1.0;
+	a=b=c=0.0;
+	return;
 }
 
 Quat Quat::operator+(const Quat& _q) const
@@ -64,13 +71,16 @@ Quat Quat::operator-(const Quat& _q) const
  
 Quat& Quat::operator-=(const Quat& _q)
 {
-	w-=_q.w;a-=_q.a;b-=_q.b;c-=_q.c;
+	w-=_q.w;
+	a-=_q.a;
+	b-=_q.b;
+	c-=_q.c;
 	return *this;
 }
  
 Quat Quat::operator*(const Quat& _q) const
 {
-	T w1,a1,b1,c1;
+	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
 	a1=w*_q.a+_q.w*a+b*_q.c-_q.b*c;
 	b1=w*_q.b+_q.w*b-a*_q.c+c*_q.a;
@@ -80,7 +90,7 @@ Quat Quat::operator*(const Quat& _q) const
  
 Quat& Quat::operator*=(const Quat& _q) 
 {
-	T w1,a1,b1,c1;
+	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
 	a1=w*_q.a+_q.w*a+b*_q.c-_q.b*c;
 	b1=w*_q.b+_q.w*b-a*_q.c+c*_q.a;
@@ -91,7 +101,7 @@ Quat& Quat::operator*=(const Quat& _q)
  
 bool Quat::operator==(const Quat& q) const 
 {
-	return (tol(w,q.w) && tol(a,q.a) && tol(b,q.b) && tol(c,q.c));
+	return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
 } 
  
 bool Quat::operator!=(const Quat& _q) const
@@ -106,6 +116,7 @@ void Quat::normalize()
 	a*=overnorm;
 	b*=overnorm;
 	c*=overnorm;
+	return;
 }
  
 void Quat::conjugate()
@@ -113,6 +124,7 @@ void Quat::conjugate()
 	a*=-1.0;
 	b*=-1.0;
 	c*=-1.0;
+	return;
 }
  
 double Quat::norm() const
@@ -125,10 +137,11 @@ double Quat::norm2() const
 	return (w*w+a*a+b*b+c*c);
 }
  
-void Quat::inverse() const 
+void Quat::inverse()  
 {
 	conjugate();
 	normalize();
+	return;
 }
  
 void Quat::GLMatrix(double mat[16])  
@@ -153,9 +166,10 @@ void Quat::GLMatrix(double mat[16])
 	mat[10] = 1.0 - 2.0 * ( aa + bb );
 	mat[12]  = mat[13] = mat[14] = mat[3] = mat[7] = mat[11] = 0.0;
 	mat[15] = 1.0;
+	return;
 }
   
-double& Quat::operator[](const int Index) const
+const double& Quat::operator[](const int Index) const
 {
 	switch (Index)
 	    {
@@ -179,6 +193,19 @@ double& Quat::operator[](const int Index)
 	    default:
 	      throw std::runtime_error("Quat::operator[] range error");
 	}
+}
+
+void Quat::printSelf(std::ostream& os) const
+{
+	os << "[" << w << "," << a << "," << b << "," << c << "]";
+	return;
+
+}
+
+std::ostream& operator<<(std::ostream& os,const Quat& q)
+{
+	q.printSelf(os);
+	return os;
 }
 
 } // Namespace Geometry

@@ -57,7 +57,7 @@ class Quat
 		Quat(const double, const double, const double, const double); 
 		Quat(const Quat&);
 		//! Set quaternion form an angle in degrees and an axis
-		Quat(const double&, const V3D&);
+		Quat(const double, const V3D&);
 		Quat(const M33&);
 		~Quat();
 		void operator()(const double, const double, const double, const double);
