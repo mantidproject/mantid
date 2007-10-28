@@ -8,18 +8,24 @@ namespace Mantid
 {
 namespace Geometry
 {
-	
+
+// Use boost float comparison 	
 boost::test_tools::close_at_tolerance<double> quat_tol(boost::test_tools::percent_tolerance(1e-6));
 
 
-Quat::Quat():w(0),a(0),b(0),c(0)
+Quat::Quat():w(1),a(0),b(0),c(0)
+/*! Null Constructor
+ * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
+ */
 {
 }
 Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(_w),a(_a),b(_b),c(_c)
+//! Constructor with values
 {
 }
  
 Quat::Quat(const Quat& _q)
+//! Copy constructor
 {
 	w=_q.w;
 	a=_q.a;
@@ -28,11 +34,25 @@ Quat::Quat(const Quat& _q)
 }
  
 Quat::Quat(const double _deg,const V3D& _axis)
+/*! Constructor from an angle and axis.
+ * \param _deg :: angle of rotation
+ * \param _axis :: axis to rotate about
+ * 
+ * This construct a  quaternion to represent a rotation
+ * of an angle _deg around the _axis. The _axis does not need to be a unit vector
+ * */
 {
 	setAngleAxis(_deg,_axis);
 }
 
 void Quat::setAngleAxis(const double _deg, const V3D& _axis)
+/*! Constructor from an angle and axis.
+ * \param _deg :: angle of rotation
+ * \param _axis :: axis to rotate about
+ * 
+ * This construct a  quaternion to represent a rotation
+ * of an angle _deg around the _axis. The _axis does not need to be a unit vector
+ * */
 {
 	double deg2rad=M_PI/180.0;
 	w=cos(0.5*_deg*deg2rad);
@@ -44,9 +64,12 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 }
  
 Quat::~Quat()
+//! Destructor
 {}
 
 void Quat::init() 
+/*! Re-initialise a quaternion to identity.
+ */
 {
 	w=1.0;
 	a=b=c=0.0;
@@ -54,22 +77,39 @@ void Quat::init()
 }
 
 Quat Quat::operator+(const Quat& _q) const
+/*! Quaternion addition operator
+ * \param _q :: the quaternion to add
+ * \return *this+_q
+ */
 {
 	return Quat(w+_q.w,a+_q.a,b+_q.b,c+_q.c);
 }
  
 Quat& Quat::operator+=(const Quat& _q)
+/*! Quaternion self-addition operator
+ * \param _q :: the quaternion to add
+ * \return *this+=_q
+ */
 {
 	w+=_q.w;a+=_q.a;b+=_q.b;c+=_q.c;
 	return *this;
 }
  
 Quat Quat::operator-(const Quat& _q) const
+/*! Quaternion subtraction operator
+ * \param _q :: the quaternion to add
+ * \return *this-_q
+ */
+
 {
 	return Quat(w-_q.w,a-_q.a,b-_q.b,c-_q.c);
 }
  
 Quat& Quat::operator-=(const Quat& _q)
+/*! Quaternion self-substraction operator
+ * \param _q :: the quaternion to add
+ * \return *this-=_q
+ */
 {
 	w-=_q.w;
 	a-=_q.a;
@@ -79,6 +119,14 @@ Quat& Quat::operator-=(const Quat& _q)
 }
  
 Quat Quat::operator*(const Quat& _q) const
+/*! Quaternion multiplication operator
+ * \param _q :: the quaternion to multiply
+ * \return *this*_q
+ * 
+ *  Quaternion multiplication is non commutative
+ *  in the same way multiplication of rotation matrices 
+ *  isn't.
+ */
 {
 	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
@@ -89,6 +137,10 @@ Quat Quat::operator*(const Quat& _q) const
 }
  
 Quat& Quat::operator*=(const Quat& _q) 
+/*! Quaternion self-multiplication operator
+ * \param _q :: the quaternion to multiply
+ * \return *this*=_q
+ */
 {
 	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
@@ -100,16 +152,32 @@ Quat& Quat::operator*=(const Quat& _q)
 }
  
 bool Quat::operator==(const Quat& q) const 
+/*! Quaternion equal operator
+ * \param _q :: the quaternion to compare
+ * 
+ * Compare two quaternions at 1e-6%tolerance.
+ * Use boost close_at_tolerance method
+ */
 {
 	return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
 } 
  
 bool Quat::operator!=(const Quat& _q) const
 {
+/*! Quaternion non-equal operator
+ * \param _q :: the quaternion to compare
+ * 
+ * Compare two quaternions at 1e-6%tolerance.
+ *  Use boost close_at_tolerance method
+ */
 	return (!operator==(_q));
 } 
  
 void Quat::normalize()
+/*! Quaternion normalization
+ * 
+ * Divide all elements by the quaternion norm
+ */
 {
 	double overnorm=1.0/norm();
 	w*=overnorm;
@@ -120,6 +188,11 @@ void Quat::normalize()
 }
  
 void Quat::conjugate()
+/*! Quaternion complex conjugate
+ * 
+ *  Reverse the sign of the 3 imaginary components of the 
+ *  quaternion
+ */
 {
 	a*=-1.0;
 	b*=-1.0;
@@ -128,16 +201,25 @@ void Quat::conjugate()
 }
  
 double Quat::norm() const
+/*! Quaternion norm (length)
+ *  
+ */
 {
 	return sqrt(norm2());
 }
 
 double Quat::norm2() const
+/*! Quaternion norm squared 
+ *    
+ */
 {
 	return (w*w+a*a+b*b+c*c);
 }
  
 void Quat::inverse()  
+/*! Inverse a quaternion
+ *  
+ */
 {
 	conjugate();
 	normalize();
@@ -145,6 +227,8 @@ void Quat::inverse()
 }
  
 void Quat::GLMatrix(double mat[16])  
+/*! 
+ */
 {
 	double aa      = a * a;
 	double ab      = a * b;
