@@ -37,7 +37,7 @@
 #include "Line.h"
 #include "LineIntersectVisit.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 LineIntersectVisit::LineIntersectVisit

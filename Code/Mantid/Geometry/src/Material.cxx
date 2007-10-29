@@ -26,7 +26,7 @@
 #include "Material.h"
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 Material::Material() : 

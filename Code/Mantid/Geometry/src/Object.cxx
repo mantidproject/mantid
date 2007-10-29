@@ -35,7 +35,7 @@
 #include "Rules.h"
 #include "Object.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 const double OTolerance(1e-6);

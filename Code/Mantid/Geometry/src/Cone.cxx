@@ -32,7 +32,7 @@
 #include "Cone.h"
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 const double CTolerance(1e-6);

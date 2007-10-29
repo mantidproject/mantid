@@ -23,7 +23,7 @@
 #include "OutputLog.h"
 #include "Flux.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 Flux::Flux() : nCnt(0) 

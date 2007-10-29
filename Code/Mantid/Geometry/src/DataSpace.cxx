@@ -14,7 +14,7 @@
 #include "mathSupport.h"
 #include "DataSpace.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 DataSpace::DataSpace() :

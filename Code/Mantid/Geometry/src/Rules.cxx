@@ -26,7 +26,7 @@
 #include "Surface.h"
 #include "Rules.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 int

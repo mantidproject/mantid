@@ -34,7 +34,7 @@
 #include "Material.h"
 #include "SamGeometry.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 SamGeometry::SamGeometry()

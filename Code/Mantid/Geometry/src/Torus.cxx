@@ -29,7 +29,7 @@
 #include "Torus.h"
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 int 

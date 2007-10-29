@@ -29,7 +29,7 @@
 #include "Surface.h"
 #include "General.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 const double GTolerance(1e-6);

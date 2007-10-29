@@ -29,7 +29,7 @@
 #include "Surface.h"
 #include "Sphere.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
  
   const double STolerance(1e-6);

@@ -35,7 +35,7 @@
 #include "General.h"
 #include "Line.h"
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 const double LTolerance(1e-6);
