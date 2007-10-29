@@ -1,7 +1,7 @@
 #ifndef Surface_h
 #define Surface_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
   class BaseVisit;

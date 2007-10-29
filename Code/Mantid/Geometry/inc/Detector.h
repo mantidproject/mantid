@@ -1,7 +1,7 @@
 #ifndef Detector_h
 #define Detector_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

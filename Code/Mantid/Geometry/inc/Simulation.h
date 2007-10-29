@@ -1,7 +1,7 @@
 #ifndef Simulation_h
 #define Simulation_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

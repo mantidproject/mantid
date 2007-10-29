@@ -1,7 +1,7 @@
 #ifndef BnId_h
 #define BnId_h 
 
-namespace MonteCarlo 
+namespace Geometry
 {
 /*!
   \class  BnId

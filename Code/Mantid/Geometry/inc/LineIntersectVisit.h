@@ -2,7 +2,7 @@
 #define LineIntersectVisit_h
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

@@ -1,7 +1,7 @@
 #ifndef Sphere_h
 #define Sphere_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

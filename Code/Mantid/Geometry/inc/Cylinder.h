@@ -2,7 +2,7 @@
 #define Cylinder_h
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

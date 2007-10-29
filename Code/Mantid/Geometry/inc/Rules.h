@@ -1,7 +1,7 @@
 #ifndef Rules_h
 #define Rules_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 class Object;

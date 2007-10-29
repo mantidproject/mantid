@@ -2,7 +2,7 @@
 #define Torus_h
 
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 

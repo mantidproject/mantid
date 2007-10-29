@@ -1,7 +1,7 @@
 #ifndef Object_h
 #define Object_h
 
-namespace Graphics
+namespace Geometry
 {
 
 /*!

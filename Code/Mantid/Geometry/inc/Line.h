@@ -1,7 +1,7 @@
 #ifndef Line_h
 #define Line_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

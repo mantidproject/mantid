@@ -1,7 +1,7 @@
 #ifndef General_h
 #define General_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!

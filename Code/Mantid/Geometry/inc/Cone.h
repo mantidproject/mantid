@@ -1,7 +1,7 @@
 #ifndef Cone_h
 #define Cone_h
 
-namespace MonteCarlo 
+namespace Geometry 
 {
 
 /*!

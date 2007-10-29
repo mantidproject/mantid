@@ -2,7 +2,7 @@
 #define SamGeometry_h
 
 
-namespace MonteCarlo
+namespace Geometry
 {
   /*!
     \class SamGeometry

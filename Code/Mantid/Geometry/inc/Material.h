@@ -1,7 +1,7 @@
 #ifndef Material_h
 #define Material_h
 
-namespace MonteCarlo
+namespace Geometry
 {
   /*!
     \class Material

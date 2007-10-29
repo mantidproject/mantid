@@ -3,7 +3,7 @@
 
 //! Impliments a simple data storage space
 
-namespace MonteCarlo
+namespace Geometry
 {
 
   /*!

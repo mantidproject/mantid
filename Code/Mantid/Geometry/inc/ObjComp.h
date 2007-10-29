@@ -1,7 +1,7 @@
 #ifndef ObjComp_h
 #define ObjComp_h
 
-namespace Graphics
+namespace Geometry
 {
 
 class ObjComp

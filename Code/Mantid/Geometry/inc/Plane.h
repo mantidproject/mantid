@@ -1,7 +1,7 @@
 #ifndef Plane_h
 #define Plane_h
 
-namespace MonteCarlo
+namespace Geometry
 {
 
 /*!
