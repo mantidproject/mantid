@@ -29,7 +29,7 @@ namespace Mantid
     @author Nicholas Draper, Tessella Support Services plc
     @date 15/10/2007
     
-    Copyright ? 2007 ???RAL???
+    Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
 
@@ -180,10 +180,6 @@ namespace Mantid
 
 	};
 
-	/// \cond TEMPLATE 
-	template DLLExport int ConfigSvc::getValue(const std::string&, int&);
-	template DLLExport int ConfigSvc::getValue(const std::string&, double&);
-	/// \endcond TEMPLATE 
-}
+} // namespace Mantid
 
 #endif /*MANTID_CONFIGSVC_H_*/

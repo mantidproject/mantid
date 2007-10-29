@@ -10,6 +10,29 @@ namespace Mantid
 namespace  StrFunc
 {
 
+/// \cond TEMPLATE 
+
+template DLLExport int section(std::string&,double&);
+template DLLExport int section(std::string&,float&);
+template DLLExport int section(std::string&,int&);
+template DLLExport int section(std::string&,std::string&);
+
+template DLLExport int sectPartNum(std::string&,double&);
+template DLLExport int sectPartNum(std::string&,int&);
+template DLLExport int sectionMCNPX(std::string&,double&);
+
+template DLLExport int convert(const std::string&,double&);
+template DLLExport int convert(const std::string&,std::string&);
+template DLLExport int convert(const std::string&,int&);
+template DLLExport int convert(const char*,std::string&);
+template DLLExport int convert(const char*,double&);
+template DLLExport int convert(const char*,int&);
+
+template DLLExport int convPartNum(const std::string&,double&);
+template DLLExport int convPartNum(const std::string&,int&);
+
+/// \endcond TEMPLATE 
+
 void 
 printHex(std::ostream& OFS,const int n)
   /*!
@@ -460,6 +483,9 @@ getVAXnum(const float A)
          pow(2.0,expt);
   return (float) onum;
 }
+
+
+
 
 }
 };

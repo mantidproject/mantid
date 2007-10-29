@@ -63,30 +63,6 @@ DLLExport std::vector<std::string> StrParts(std::string);
 /// Convert a VAX number to x86 little eindien
 DLLExport float getVAXnum(const float);
 
-
-/// \cond TEMPLATE 
-
-template DLLExport int section(std::string&,double&);
-template DLLExport int section(std::string&,float&);
-template DLLExport int section(std::string&,int&);
-template DLLExport int section(std::string&,std::string&);
-
-template DLLExport int sectPartNum(std::string&,double&);
-template DLLExport int sectPartNum(std::string&,int&);
-template DLLExport int sectionMCNPX(std::string&,double&);
-
-template DLLExport int convert(const std::string&,double&);
-template DLLExport int convert(const std::string&,std::string&);
-template DLLExport int convert(const std::string&,int&);
-template DLLExport int convert(const char*,std::string&);
-template DLLExport int convert(const char*,double&);
-template DLLExport int convert(const char*,int&);
-
-template DLLExport int convPartNum(const std::string&,double&);
-template DLLExport int convPartNum(const std::string&,int&);
-
-/// \endcond TEMPLATE 
-
 }
 }
 
