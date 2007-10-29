@@ -58,31 +58,34 @@ class Quat
 		Quat(const Quat&);
 		//! Set quaternion form an angle in degrees and an axis
 		Quat(const double, const V3D&);
-		Quat(const M33&);
+		//Quat(const M33&);
 		~Quat();
+		Quat& operator=(const Quat&);
 		void operator()(const double, const double, const double, const double);
-		void operator()(const double, const double);
+		void operator()(const double, const V3D&);
 		//! Set quaternion from a 3x3 matrix
-		void operator()(const M33&);
+		//void operator()(const M33&);
 		void set(const double, const double, const double, const double);
 		void setAngleAxis(const double, const V3D&);
-		void setRotMatrix(const M33&);
+		//void setRotMatrix(const M33&);
 		//! Norm of a quaternion
-		double norm() const;
+		double len() const;
 		//! Norm squared
-		double norm2() const;
+		double len2() const;
 		//! Initialized to identity
 		void init();
 		//! Nornmalize
 		void normalize();
 		//! Take the complex conjugate
 		void conjugate();  
-		//! Inverse a quaternion (in the sense of rotaion inversion)
+		//! Inverse a quaternion (in the sense of rotayion inversion)
 		void inverse();
 		//! Convert quaternion rotation to an OpenGL matrix [4x4] matrix 
 		//! stored as an linear array of 16 double
 		//! The function glRotated must be called
 		void GLMatrix(double[16]);
+		//! Rotate a vector
+		void rotate(V3D&);
 		//! Overload operators
 		Quat  operator+(const Quat&) const;
 		Quat& operator+=(const Quat&);

@@ -44,7 +44,22 @@ Quat::Quat(const double _deg,const V3D& _axis)
 {
 	setAngleAxis(_deg,_axis);
 }
-
+Quat& Quat::operator=(const Quat& q)
+{
+	w=q.w;
+	a=q.a;
+	b=q.b;
+	c=q.c;
+	return *this;
+}
+void Quat::set(const double ww, const double aa, const double bb, const double cc)
+{
+	w=ww;
+	a=aa;
+	b=bb;
+	c=cc;
+	return;
+}
 void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 /*! Constructor from an angle and axis.
  * \param _deg :: angle of rotation
@@ -59,10 +74,19 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	double s=sin(0.5*_deg*deg2rad);
 	V3D temp(_axis);
 	temp.normalize();
-	w=s*temp[0];a=s*temp[1];b=s*temp[2];
+	a=s*temp[0];
+	b=s*temp[1];
+	c=s*temp[2];	
 	return;
 }
- 
+void Quat::operator()(const double ww, const double aa, const double bb, const double cc)
+{
+	this->set(ww,aa,bb,cc);
+}
+void Quat::operator()(const double angle, const V3D& axis)
+{
+	this->setAngleAxis(angle,axis);
+} 
 Quat::~Quat()
 //! Destructor
 {}
@@ -179,7 +203,7 @@ void Quat::normalize()
  * Divide all elements by the quaternion norm
  */
 {
-	double overnorm=1.0/norm();
+	double overnorm=1.0/len2();
 	w*=overnorm;
 	a*=overnorm;
 	b*=overnorm;
@@ -200,16 +224,16 @@ void Quat::conjugate()
 	return;
 }
  
-double Quat::norm() const
-/*! Quaternion norm (length)
+double Quat::len() const
+/*! Quaternion length
  *  
  */
 {
-	return sqrt(norm2());
+	return sqrt(len2());
 }
 
-double Quat::norm2() const
-/*! Quaternion norm squared 
+double Quat::len2() const
+/*! Quaternion norm (length squared) 
  *    
  */
 {
@@ -225,7 +249,20 @@ void Quat::inverse()
 	normalize();
 	return;
 }
- 
+void Quat::rotate(V3D& v)
+/*! 	Rotate a vector. 
+ *  \param v :: the vector to be rotated
+ *  
+ *   The quaternion needs to be normalized beforehand to
+ *   represent a rotation. If q is thequaternion, the rotation
+ *   is represented by q.v.v-1 where v-1 is the inverse of 
+ *   v. 
+ */
+ {
+ 	Quat qinvert(*this);
+ 	qinvert.inverse();
+ 	
+ }
 void Quat::GLMatrix(double mat[16])  
 /*! 
  */
