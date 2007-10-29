@@ -12,6 +12,12 @@ namespace Mantid
 	// Initialise the instance pointer to zero
 	ConfigSvc* ConfigSvc::m_instance=0;
 
+	ConfigSvc* ConfigSvc::Instance()
+	{
+		if (!m_instance) m_instance = new ConfigSvc;
+		return m_instance;
+	}
+
 	//private constructor
 	ConfigSvc::ConfigSvc()
 	{

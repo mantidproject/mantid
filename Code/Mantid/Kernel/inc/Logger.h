@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include <string>
 #include <exception>
 #include <map>
@@ -43,7 +44,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-	class Logger
+	class DLLExport Logger
 	{
 	public:	
 		///An emuration of the priority levels of a log message.

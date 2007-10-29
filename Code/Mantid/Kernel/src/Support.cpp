@@ -461,29 +461,5 @@ getVAXnum(const float A)
   return (float) onum;
 }
 
-
-/// \cond TEMPLATE 
-
-template int section(std::string&,double&);
-template int section(std::string&,float&);
-template int section(std::string&,int&);
-template int section(std::string&,std::string&);
-
-template int sectPartNum(std::string&,double&);
-template int sectPartNum(std::string&,int&);
-template int sectionMCNPX(std::string&,double&);
-
-template int convert(const std::string&,double&);
-template int convert(const std::string&,std::string&);
-template int convert(const std::string&,int&);
-template int convert(const char*,std::string&);
-template int convert(const char*,double&);
-template int convert(const char*,int&);
-
-template int convPartNum(const std::string&,double&);
-template int convPartNum(const std::string&,int&);
-
-
-/// \endcond TEMPLATE 
 }
 };

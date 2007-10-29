@@ -69,7 +69,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel.lib PocoFoundationd.lib  PocoUtild.lib"
+				AdditionalDependencies="kernel.lib PocoFoundationd.lib  PocoUtild.lib PocoXMLd.lib"
 				OutputFile="runner.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

@@ -1,6 +1,7 @@
 #ifndef MANTID_STRFUNC_SUPPORT_H_
 #define MANTID_STRFUNC_SUPPORT_H_
 
+#include "System.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -17,22 +18,22 @@ namespace Mantid
 namespace StrFunc
 {
 /// determine if a character group exists in a string
-int confirmStr(const std::string&,const std::string&);
+DLLExport int confirmStr(const std::string&,const std::string&);
 /// Get a word from a string
-int extractWord(std::string&,const std::string&,const int=4);
+DLLExport int extractWord(std::string&,const std::string&,const int=4);
 
 /// strip all spaces
-std::string removeSpace(const std::string&);
+DLLExport std::string removeSpace(const std::string&);
 /// strip pre/post spaces
-std::string fullBlock(const std::string&);
+DLLExport std::string fullBlock(const std::string&);
 /// strip trialling comments
-void stripComment(std::string&);
+DLLExport void stripComment(std::string&);
 /// Determines if a string is only spaces
-int isEmpty(const std::string&);
+DLLExport int isEmpty(const std::string&);
 /// Get a line and strip comments 
-std::string getLine(std::istream&,const int= 256);
+DLLExport std::string getLine(std::istream&,const int= 256);
 /// get a part of a long line
-int getPartLine(std::istream&,std::string&,std::string&,const int= 256);
+DLLExport int getPartLine(std::istream&,std::string&,std::string&,const int= 256);
 
 template<typename T> int convPartNum(const std::string&,T&);
 
@@ -57,10 +58,34 @@ template<typename T> int section(char*,T&);
 template<typename T> int sectionMCNPX(std::string&,T&);
 
 /// Split string into spc deliminated components
-std::vector<std::string> StrParts(std::string);
+DLLExport std::vector<std::string> StrParts(std::string);
 
 /// Convert a VAX number to x86 little eindien
-float getVAXnum(const float);
+DLLExport float getVAXnum(const float);
+
+
+/// \cond TEMPLATE 
+
+template DLLExport int section(std::string&,double&);
+template DLLExport int section(std::string&,float&);
+template DLLExport int section(std::string&,int&);
+template DLLExport int section(std::string&,std::string&);
+
+template DLLExport int sectPartNum(std::string&,double&);
+template DLLExport int sectPartNum(std::string&,int&);
+template DLLExport int sectionMCNPX(std::string&,double&);
+
+template DLLExport int convert(const std::string&,double&);
+template DLLExport int convert(const std::string&,std::string&);
+template DLLExport int convert(const std::string&,int&);
+template DLLExport int convert(const char*,std::string&);
+template DLLExport int convert(const char*,double&);
+template DLLExport int convert(const char*,int&);
+
+template DLLExport int convPartNum(const std::string&,double&);
+template DLLExport int convPartNum(const std::string&,int&);
+
+/// \endcond TEMPLATE 
 
 }
 }

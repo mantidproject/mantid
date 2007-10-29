@@ -18,7 +18,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			UseOfATL="2"
 			>
 			<Tool
@@ -52,12 +52,15 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
+				Name="VCLinkerTool"
 				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib"
 				AdditionalLibraryDirectories="../../Third_Party/lib/win32"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -67,6 +70,12 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -166,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Support.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>
@@ -233,6 +246,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\StatusCode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Support.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\System.h"
 				>
 			</File>
 			<File

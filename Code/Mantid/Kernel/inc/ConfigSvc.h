@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "System.h"
 #include <string>
 
 
@@ -47,7 +48,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-	class ConfigSvc
+	class DLLExport ConfigSvc
 	{
 		 /// Inner templated class to wrap the poco library objects that have protected desctructors and expose them as public
 		 template<typename T >
@@ -89,11 +90,7 @@ namespace Mantid
 		/// A static method which retrieves the single instance of the ConfigSvc
 		///
 		/// @returns A pointer to the instance
-		static ConfigSvc* Instance()
-		{
-		  if (!m_instance) m_instance = new ConfigSvc;
-		  return m_instance;
-		}
+		static ConfigSvc* Instance();
 
 		/// Loads the config file provided, any previous configuration is discarded.
 		/// If the file contains logging setup instructions then these will be used to setup the logging framework.
@@ -183,6 +180,10 @@ namespace Mantid
 
 	};
 
+	/// \cond TEMPLATE 
+	template DLLExport int ConfigSvc::getValue(const std::string&, int&);
+	template DLLExport int ConfigSvc::getValue(const std::string&, double&);
+	/// \endcond TEMPLATE 
 }
 
 #endif /*MANTID_CONFIGSVC_H_*/
