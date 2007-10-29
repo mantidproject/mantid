@@ -58,7 +58,7 @@ for fname in dirList:
 		
 
 env=Environment()
-env.Append( CCFLAGS = '-Wall')
+env.Append( CCFLAGS = ['-Wall', '-fPIC'])
 
 
 # set header include paths
@@ -67,7 +67,7 @@ env = Environment(CPPPATH='../../Third_Party/include/')
 
 #BUILD CODE
 #env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
-env.Library('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList)
+env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList)
 
 #BUILD TESTS 
 env.SConscript(['Tests/SConscript'])
