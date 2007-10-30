@@ -132,7 +132,7 @@ namespace Mantid
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
       std::vector<double> e(lengthIn-1);
-      transform(v.begin(), v.end(), e.begin(), sqrt);
+	  std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(i-1, timeChannelsVec);
       localWorkspace->setData(i-1, v, e);
@@ -148,6 +148,11 @@ namespace Mantid
     delete[] spectrum;
     return StatusCode::SUCCESS;
   }
+
+	double LoadRaw::dblSqrt(double in)
+	{
+		return sqrt(in);
+	}
   
   StatusCode LoadRaw::final()
   {

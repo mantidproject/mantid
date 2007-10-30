@@ -74,6 +74,9 @@ namespace Mantid
     
 	///static reference to the logger class
 	static Logger& g_log;
+
+	/// Personal wrapper for sqrt to allow msvs to compile
+	static double dblSqrt(double in);
   };
 
 } // namespace Mantid

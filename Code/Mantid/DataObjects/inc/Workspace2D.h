@@ -2,6 +2,7 @@
 #define MANTID_WORKSPACE2D_
 
 #include "../../Kernel/inc/Workspace.h"
+#include "../../Kernel/inc/Logger.h"
 #include "Histogram1D.h"
 
 /** @class Workspace2D Workspace2D.h
@@ -36,7 +37,7 @@
 namespace Mantid
 {
 
-class Workspace2D: public Workspace
+class DLLExport Workspace2D: public Workspace
 {
 public:
 	const std::string id() const {return "Workspace2D";}
