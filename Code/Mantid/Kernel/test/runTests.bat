@@ -14,6 +14,7 @@ echo "Compiling the test executable..."
 devenv CxxTest_2_Build.vcproj /BUILD "Debug|Win32"
 
 copy ..\..\..\Third_Party\lib\win32\*.dll .
+copy ..\..\debug\*.dll .
  
 REM echo "Running the tests..."
 runner.exe
