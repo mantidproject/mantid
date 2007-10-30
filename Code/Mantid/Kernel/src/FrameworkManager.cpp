@@ -30,13 +30,10 @@
 #include "../inc/AlgorithmFactory.h"
 #include "../inc/WorkspaceFactory.h"
 #include "../inc/AnalysisDataService.h"
-#include "../../DataHandling/inc/LoadRaw.h"
-#include "../../DataHandling/inc/SaveCSV.h"
-#include "../../Algorithms/inc/SimpleIntegration.h"
-#include "../../DataObjects/inc/Workspace2D.h"
-#include "../../DataObjects/inc/Workspace1D.h"
+#include "../inc/IAlgorithm.h"
 
-#include <stdexcept> 
+#include <stdexcept>
+#include <boost/tokenizer.hpp>
 
 using namespace std;
 
@@ -75,13 +72,16 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
 {
   // Use the previous method to create the algorithm
   IAlgorithm *alg = createAlgorithm(algName);
-  // Split up comma-separated properties into a vector
-  vector<string> propPairs = SplitString(propertiesArray, ",");
+  // Split up comma-separated properties
+  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+  boost::char_separator<char> sep(",");
+  tokenizer propPairs(propertiesArray, sep);
   // Iterate over the properties
-  for (vector<string>::const_iterator it = propPairs.begin(); it != propPairs.end(); ++it)
+  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
   {
-    // Split colon-separated name-value pairs
-    vector<string> property = SplitString(*it,":");
+    boost::char_separator<char> sep2(":");
+    tokenizer properties(*it,sep2);
+    vector<string> property(properties.begin(), properties.end());
     // Call the appropriate setProperty method on the algorithm
     if ( property.size() == 2)
     {
@@ -131,77 +131,5 @@ Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
   }
   return space;
 }
-
-//----------------------------------------------------------------------
-// Private member functions
-//----------------------------------------------------------------------
-
-std::vector<std::string> FrameworkManager::SplitString(const std::string& input,
-            const std::string& delimiter, bool includeEmpties)
-{
-  vector<string> results;
-  int iPos = 0;
-  int newPos = -1;
-  int sizeS2 = (int)delimiter.size();
-  int isize = (int)input.size();
-  
-  if( ( isize == 0 ) || ( sizeS2 == 0 ) )
-  {
-    results.push_back(input);
-    return results;
-  }
-
-  vector<int> positions;
-
-  newPos = input.find (delimiter, 0);
-  if( newPos < 0 )
-  { 
-    results.push_back(input);
-    return results; 
-  }
-
-  int numFound = 0;
-  while( newPos >= iPos )
-  {
-    numFound++;
-    positions.push_back(newPos);
-    iPos = newPos;
-    newPos = input.find (delimiter, iPos+sizeS2);
-  }
-
-  if( numFound == 0 )
-  {
-    results.push_back(input);
-    return results;
-  }
-  
-  for( int i=0; i <= (int)positions.size(); ++i )
-  {
-    string s("");
-    if( i == 0 ) 
-    { 
-      s = input.substr( i, positions[i] ); 
-    }
-    int offset = positions[i-1] + sizeS2;
-    if( offset < isize )
-    {
-      if( i == (int)positions.size() )
-      {
-        s = input.substr(offset);
-      }
-      else if( i > 0 )
-      {
-        s = input.substr( positions[i-1] + sizeS2, 
-                          positions[i] - positions[i-1] - sizeS2 );
-      }
-    }
-    if( includeEmpties || ( s.size() > 0 ) )
-    {
-      results.push_back(s);
-    }
-  }
-  return results;
-}
-
 
 } // Namespace Mantid

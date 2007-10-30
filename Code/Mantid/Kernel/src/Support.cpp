@@ -366,21 +366,6 @@ sectionMCNPX(std::string& A,T& out)
   return 0;
 }
 
-std::vector<std::string>
-StrParts(std::string Ln)
-  /*!
-    Splits the sting into parts that are space delminated.
-    \param Ln :: line component to strip
-    \returns vector of components
-  */
-{
-  std::vector<std::string> Out;
-  std::string Part;
-  while(section(Ln,Part))
-    Out.push_back(Part);
-  return Out;
-}
-
 template<typename T>
 int
 convPartNum(const std::string& A,T& out)

@@ -105,17 +105,6 @@ public:
 	Workspace* getWorkspace(const std::string& wsName);
 	
 private:
-
-  /** Utility function that splits a string into parts, delimited by a supplied string
-
-      @param input The string to be split.
-      @param delimiter The string at which to split the input
-      @param includeEmpties If false, excludes blank components from the result
-      @return A vector containing the components of the split string
-   */
-  std::vector<std::string> SplitString(const std::string& input, 
-              const std::string& delimiter, bool includeEmpties = false);
-
   
   ///static reference to the logger class
   static Logger& g_log;

@@ -57,9 +57,6 @@ template<typename T> int section(char*,T&);
 /// Convert and cut a string for MCNPX
 template<typename T> int sectionMCNPX(std::string&,T&);
 
-/// Split string into spc deliminated components
-DLLExport std::vector<std::string> StrParts(std::string);
-
 /// Convert a VAX number to x86 little eindien
 DLLExport float getVAXnum(const float);
 

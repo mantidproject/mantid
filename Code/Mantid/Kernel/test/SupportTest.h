@@ -92,19 +92,6 @@ public:
 	  TS_ASSERT_EQUALS(X,9.0);
 	}
 
-	void testStrParts()
-	  /*!
-		Applies a test to the StrParts function
-	  */
-	{ 
-	  std::string Y=" $var s566>s4332 dxx";
-	  std::vector<std::string> out=StrParts(Y);
-	  TS_ASSERT_EQUALS(out.size(),3);
-	  TS_ASSERT_EQUALS(out[0],"$var");
-	  TS_ASSERT_EQUALS(out[1],"s566>s4332");
-	  TS_ASSERT_EQUALS(out[2],"dxx");
-	}
-
 };
 
 #endif //MANTID_SUPPORTTEST_H_
