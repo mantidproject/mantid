@@ -42,10 +42,6 @@ template<typename T> int convert(const std::string&,T&);
 /// Convert a char* into a number
 template<typename T> int convert(const char*,T&);
 
-template<typename T> 
-int setValues(const std::string&,const std::vector<int>&,
-	      std::vector<T>&);
-
 /// Convert and cut a string
 template<typename T> int sectPartNum(std::string&,T&);
 

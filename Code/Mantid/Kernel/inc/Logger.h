@@ -138,10 +138,13 @@ namespace Mantid
 		///no arg constructor
 		Logger();
 
+		///Overload of = operator
 		Logger& operator = (const Logger&);
 
+		///internal handle to third party logging object
 		Poco::Logger& _log;
 		
+		///Name of this logging object
 		std::string _name;
 };
 

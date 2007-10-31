@@ -55,33 +55,45 @@ namespace Mantid
 		 class WrappedObject : public T
 		 {
 		 public:
+			   ///The template type of class that is being wrapped
 			   typedef T element_type;
+			   ///simple constructor
 			   WrappedObject()
 			   {
 				   m_pPtr = static_cast<T*>(this);
 			   }
 
+			   ///consturctor with a class to wrap
+			   /// @param Field the class to wrap
 			   template<typename Field>
 			   WrappedObject(Field& F) : T(F)
 			   {
 				   m_pPtr = static_cast<T*>(this);
 			   }
 
+			   ///copy constructor
 			   WrappedObject(const WrappedObject<T>& A) : T(A)
 			   {
 					m_pPtr = static_cast<T*>(this);
 			   }
 		       
+			   ///virtual destructor
 			   virtual ~WrappedObject()
 			   {}
 		       
+			   ///overloaded * operator returns the wrapped object pointer
 			   const T& operator*() const { return *m_pPtr; }
+			 
+			   ///overloaded * operator returns the wrapped object pointer
 			   T& operator*() { return m_pPtr; }
 
+			   ///overloaded -> operator returns the wrapped object pointer
 			   const T* operator->() const{ return m_pPtr; }
+			   ///overloaded -> operator returns the wrapped object pointer
 			   T* operator->() { return m_pPtr; }
 
 		 private:
+			   /// private pointer to the wrapped class
 			   T* m_pPtr;
 		 };
 

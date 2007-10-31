@@ -58,6 +58,7 @@ public:
   /// Creates a new instance of the class with the given name.
   /// The class must have been registered with registerClass.
   /// If the class name is unknown, a NotFoundException is thrown.
+  /// @param className the name of the class you wish to create
   Base* create(const std::string& className) const
   {
     
@@ -73,6 +74,7 @@ public:
   /// it when it's no longer used.
   /// If the class has already been registered, an ExistsException is thrown
   /// and the instantiator is deleted.
+  /// @param className the name of the class you wish to subscribe
   template <class C> 
   void subscribe(const std::string& className)
   {
@@ -84,6 +86,8 @@ public:
   /// it when it's no longer used.
   /// If the class has already been registered, an ExistsException is thrown
   /// and the instantiator is deleted.
+  /// @param className the name of the class you wish to subscribe
+  /// @param pAbstractFactory A pointer to an abstractFactory for this class
   void subscribe(const std::string& className, AbstractFactory* pAbstractFactory)
   {
     std::auto_ptr<AbstractFactory> ptr(pAbstractFactory);
@@ -97,6 +101,7 @@ public:
   /// Unregisters the given class and deletes the instantiator
   /// for the class.
   /// Throws a NotFoundException if the class has not been registered.
+  /// @param className the name of the class you wish to unsubscribe
   void unsubscribe(const std::string& className)
   {
     typename FactoryMap::iterator it = _map.find(className);
@@ -110,6 +115,8 @@ public:
   }
   
   /// Returns true if the given class is currently registered.
+  /// @param className the name of the class you wish to check
+  /// @returns true is the class is subscribed
   bool exists(const std::string& className) const
   {
     return _map.find(className) != _map.end();
