@@ -69,16 +69,8 @@ class Workspace;
   {
   public:
 	  
-    // RJT: Default constructor for testing factory
     /// Default constructor
     Algorithm();
-    
-	  /** Gaudi Constructor
-	   *  @param name    The algorithm object's name
-	   *  @param version The version of the algorithm
-	   */
-	  Algorithm( const std::string& name, //ISvcLocator *svcloc, 
-	             const std::string& version=PACKAGE_VERSION );
 	  
 	  /// Virtual destructor
 	  virtual ~Algorithm();
@@ -166,13 +158,12 @@ class Workspace;
   protected:
 	  
 	  // Equivalents of Gaudi's initialize, execute & finalize methods
-	  // Can these be made pure virtual???
-	  /// the default (empty) implementation of the init() method
-	  virtual StatusCode init () { return StatusCode::SUCCESS ; }
-	  /// the default (empty) implementation of the exec() method
-	  virtual StatusCode exec () { return StatusCode::SUCCESS ; }
-	  /// the default (empty) implementation of the final() method
-	  virtual StatusCode final() { return StatusCode::SUCCESS ; }
+	  /// Virtual method - must be overridden by concrete algorithm
+	  virtual StatusCode init () = 0;
+	  /// Virtual method - must be overridden by concrete algorithm
+	  virtual StatusCode exec () = 0;
+	  /// Virtual method - must be overridden by concrete algorithm
+	  virtual StatusCode final() = 0;
 	  
 
 	  /// Set the Algorithm initialized state
@@ -218,9 +209,6 @@ class Workspace;
 	   *  Only the concrete algorithm can actually create the output workspace.
 	   */
 	  std::string m_outputWorkspaceName;
-	  
-	  /// Dummy method so that I can import Gaudi code unchanged before our message/logging service exists
-	  int msgSvc() {return 0;}
 
 	  /// Temporary way of storing properties for algorithms, in the current absence of a Property class.
 	  // N.B. hash_map is not in the standard stl, hence the wierd namespace.

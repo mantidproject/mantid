@@ -30,12 +30,6 @@
 #include "../inc/Algorithm.h"
 #include "../inc/AnalysisDataService.h"
 
-// Every Algorithm will have to register itself into the factory
-// Later, this base class will be abstract so the next line will go, but it's there for testing right now
-// The argument has to be the name of the class, it will also be the name in the factory
-// TODO
-//DECLARE_ALGORITHM(Algorithm)
-
 namespace Mantid
 {
   Logger& Algorithm::g_log = Logger::get("Algorithm");
@@ -49,21 +43,6 @@ namespace Mantid
   m_isExecuted(false),
   m_isFinalized(false)
   {
-    m_subAlgms = new std::vector<Algorithm *>();
-  }
-
-
-  // Constructor
-  Algorithm::Algorithm( const std::string& name, //ISvcLocator *pSvcLocator,
-                        const std::string& version)
-    : 
-    m_outputWorkspace(0),
-    m_name(name),
-    m_version(version),
-    m_isInitialized(false),
-    m_isExecuted(false),
-    m_isFinalized(false)
-  { 
     m_subAlgms = new std::vector<Algorithm *>();
   }
   
@@ -114,6 +93,7 @@ namespace Mantid
       g_log.information("Output workspace property not set");
       m_outputWorkspaceName = "";
     }
+    m_outputWorkspace = 0;
     
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
@@ -178,7 +158,7 @@ namespace Mantid
       setExecuted(true);
       
       // NOTE THAT THERE IS NO EXECUTION OF SUB-ALGORITHMS HERE.
-      // DON'T AT PRESENT KNOW WHERE THAT TAKES PLACE.
+      // THIS HAS TO BE EXPLICITLY DONE BY THE PARENT ALGORITHM'S exec() METHOD.
       
       if ( status.isFailure() )
       {

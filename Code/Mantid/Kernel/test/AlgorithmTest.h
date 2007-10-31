@@ -5,85 +5,84 @@
 
 #include "../inc/Algorithm.h"
 
+namespace Mantid
+{
+
+class ToyAlgorithm : public Algorithm
+{
+public:
+  ToyAlgorithm() {}
+  virtual ~ToyAlgorithm() {}
+  StatusCode init() { return StatusCode::SUCCESS; }
+  StatusCode exec() { return StatusCode::SUCCESS; }
+  StatusCode final() { return StatusCode::SUCCESS; }
+};
+
+}
+
+DECLARE_ALGORITHM(ToyAlgorithm)
+
+using namespace Mantid;
+
 class AlgorithmTest : public CxxTest::TestSuite
 {
 public: 
   
 	void testAlgorithm()
 	{
-	  Mantid::Algorithm alg("Hello","1.1");
 	  std::string theName = alg.name();
-	  TS_ASSERT( ! theName.compare("Hello") );
+	  TS_ASSERT( ! theName.compare("unknown") );
 	  std::string theVersion = alg.version();
-	  TS_ASSERT( ! theVersion.compare("1.1") );
+	  TS_ASSERT( ! theVersion.compare("unknown") );
     TS_ASSERT( ! alg.isInitialized() );
 	  TS_ASSERT( ! alg.isExecuted() );
 	  TS_ASSERT( ! alg.isFinalized() );
 	  // Check this points to something
-    std::vector<Mantid::Algorithm*>* testPointer = alg.subAlgorithms();
+    std::vector<Algorithm*>* testPointer = alg.subAlgorithms();
 	  TS_ASSERT(testPointer);
 	}
 
 	void testName()
 	{
-	  Mantid::Algorithm alg("Hello","1.1");
 	  std::string theName = alg.name();
-	  TS_ASSERT( ! theName.compare("Hello") );
+	  TS_ASSERT( ! theName.compare("unknown") );
 	}
 
 	void testVersion()
 	{
-	  Mantid::Algorithm alg("Hello","1.1");
 	  std::string theVersion = alg.version();
-	  TS_ASSERT( ! theVersion.compare("1.1") );
+	  TS_ASSERT( ! theVersion.compare("unknown") );
 	}
 
 	void testInitialize()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
-    Mantid::StatusCode status = alg.initialize();
+    StatusCode status = alg.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg.isInitialized() );
 	}
 
 	void testExecute()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
-    Mantid::StatusCode status = alg.execute();
+	  ToyAlgorithm myAlg;
+	  StatusCode status = myAlg.execute();
     TS_ASSERT( status.isFailure() );
-    TS_ASSERT( ! alg.isExecuted() );
-    status = alg.initialize();
-    status = alg.execute();
+    TS_ASSERT( ! myAlg.isExecuted() );
+    status = myAlg.initialize();
+    status = myAlg.execute();
     TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT( myAlg.isExecuted() );
 	}
 
 	void testFinalize()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
+    ToyAlgorithm myAlg;
+    StatusCode status = myAlg.finalize();
+    TS_ASSERT( status.isFailure() );
     // Need to initialize otherwise the finalize method immediately returns
-    alg.initialize();
-    Mantid::StatusCode status = alg.finalize();
+    myAlg.initialize();
+    status = myAlg.finalize();
     TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( alg.isFinalized() );
-	}
-
-	void testIsInitialized()
-  {
-	  Mantid::Algorithm alg("Hello","1.1");
-	  TS_ASSERT( ! alg.isInitialized() );
-  }
-
-	void testIsExecuted()
-	{
-	  Mantid::Algorithm alg("Hello","1.1");
-	  TS_ASSERT( ! alg.isExecuted() );
-	}
-
-	void testIsFinalized()
-	{
-	  Mantid::Algorithm alg("Hello","1.1");
-	  TS_ASSERT( ! alg.isFinalized() );	    
+    TS_ASSERT( myAlg.isFinalized() );
 	}
 
 //	void testCreateSubAlgorithm()
@@ -93,16 +92,14 @@ public:
 
 	void testSubAlgorithm()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
-    std::vector<Mantid::Algorithm*>* testPointer = alg.subAlgorithms();
+    std::vector<Algorithm*>* testPointer = alg.subAlgorithms();
     // Check that the newly created vector is empty
     TS_ASSERT( testPointer->empty() );
 	}
 	
 	void testSetProprerty()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
-    Mantid::StatusCode status = alg.setProperty("prop1");
+    StatusCode status = alg.setProperty("prop1");
     TS_ASSERT( ! status.isFailure() );
     status = alg.setProperty("prop2","val");
     TS_ASSERT( ! status.isFailure() );    
@@ -110,16 +107,18 @@ public:
 	
 	void testGetProperty()
 	{
-    Mantid::Algorithm alg("Hello","1.1");
-    Mantid::StatusCode status = alg.setProperty("prop1","yes");
+    Mantid::StatusCode status = alg.setProperty("prop2","yes");
     std::string value;
     status = alg.getProperty("ghjkgh",value);
     TS_ASSERT( status.isFailure() );
-    status = alg.getProperty("prop1",value);
+    status = alg.getProperty("prop2",value);
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( ! value.compare("yes") );
     
 	}
+	
+private:
+  ToyAlgorithm alg;
 	
 };
 

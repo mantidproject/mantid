@@ -7,21 +7,24 @@
 #include "../inc/Algorithm.h"
 #include <stdexcept>
 
-using namespace Mantid;
-
 namespace Mantid
 {
 
-class ToyAlgorithm : public Algorithm
+class ToyAlgorithm2 : public Algorithm
 {
 public:
-  ToyAlgorithm() {}
-  virtual ~ToyAlgorithm() {}
+  ToyAlgorithm2() {}
+  virtual ~ToyAlgorithm2() {}
+  StatusCode init() { return StatusCode::SUCCESS; }
+  StatusCode exec() { return StatusCode::SUCCESS; }
+  StatusCode final() { return StatusCode::SUCCESS; }
 };
 
 }
 
-DECLARE_ALGORITHM(ToyAlgorithm)
+DECLARE_ALGORITHM(ToyAlgorithm2)
+
+using namespace Mantid;
 
 class FrameworkManagerTest : public CxxTest::TestSuite
 {
@@ -35,13 +38,13 @@ public:
 
 	void test_global_Mantid_FrameworkManager_createAlgorithm()
 	{
-	  TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm") )
+	  TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm2") )
 	  TS_ASSERT_THROWS( manager.createAlgorithm("aaaaaa"), std::runtime_error )
 	}
 
 	void test_global_Mantid_FrameworkManager_createAlgorithmWithProps()
 	{
-	  IAlgorithm *alg = manager.createAlgorithm("ToyAlgorithm","Prop:Val,P2:V2");
+	  IAlgorithm *alg = manager.createAlgorithm("ToyAlgorithm2","Prop:Val,P2:V2");
 	  std::string prop;
 	  StatusCode status = alg->getProperty("Prop",prop);
 	  TS_ASSERT ( ! status.isFailure() )
@@ -50,15 +53,15 @@ public:
     TS_ASSERT ( ! status.isFailure() )
     TS_ASSERT ( ! prop.compare("V2") )
 	  
-    TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm","") )
-    TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm","noValProp") )
-    TS_ASSERT_THROWS( manager.createAlgorithm("ToyAlgorithm","p1:p2:p3"), std::runtime_error )
+    TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm2","") )
+    TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm2","noValProp") )
+    TS_ASSERT_THROWS( manager.createAlgorithm("ToyAlgorithm2","p1:p2:p3"), std::runtime_error )
 	}
 
 	void testExec()
 	{
 	  // Switch to using a dummy algorithm when auto-registration implemented
-	  IAlgorithm *alg = manager.exec("ToyAlgorithm","Filename:../../../../Test/HET15869.RAW,OutputWorkspace:outer");
+	  IAlgorithm *alg = manager.exec("ToyAlgorithm2","Filename:../../../../Test/HET15869.RAW,OutputWorkspace:outer");
 	  TS_ASSERT( alg->isExecuted() )
 	}
 

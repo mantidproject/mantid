@@ -6,6 +6,23 @@
 #include "../inc/AlgorithmFactory.h"
 #include "../inc/Algorithm.h"
 
+namespace Mantid
+{
+
+class ToyAlg : public Algorithm
+{
+public:
+  ToyAlg() {}
+  virtual ~ToyAlg() {}
+  StatusCode init() { return StatusCode::SUCCESS; }
+  StatusCode exec() { return StatusCode::SUCCESS; }
+  StatusCode final() { return StatusCode::SUCCESS; }
+};
+
+}
+
+DECLARE_ALGORITHM(ToyAlg)
+
 using namespace Mantid;
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite
@@ -25,7 +42,7 @@ public:
   
   void testReturnType()
   {
-    factory->subscribe<Algorithm>("myAlg");
+    factory->subscribe<ToyAlg>("myAlg");
     IAlgorithm *alg;
     TS_ASSERT_THROWS_NOTHING( alg = factory->create("myAlg") );
     TS_ASSERT_THROWS_NOTHING( dynamic_cast<Algorithm*>(alg) );

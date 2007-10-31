@@ -43,8 +43,8 @@ namespace Mantid {
   {
   public:
     /// Constructor. Does nothing.
-    /// @param Takes an int
-    RegistrationHelper(int) 
+    /// @param i Takes an int
+    RegistrationHelper(int i) 
     { 
       // Does nothing 
     }
