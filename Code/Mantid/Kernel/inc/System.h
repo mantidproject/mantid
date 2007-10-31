@@ -26,6 +26,7 @@
 #define MANTID_SYSTEM_H_
 
 #ifdef _WIN32
+  #pragma warning( disable: 4251 )
   #define DLLExport __declspec( dllexport )
 #else
   #define DLLExport

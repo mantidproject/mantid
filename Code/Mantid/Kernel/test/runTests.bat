@@ -11,16 +11,26 @@ echo "Generating the source from the test header files..."
 python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp *.h
 
 echo "Compiling the test executable..."
-devenv CxxTest_2_Build.vcproj /BUILD "Debug|Win32"
+cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /EHsc /MTd /W3 /nologo /c /ZI /TP 
 
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib runner.obj
+
+echo "Copying in required dlls..."
 copy ..\..\..\Third_Party\lib\win32\*.dll .
 copy ..\..\debug\*.dll .
- 
-REM echo "Running the tests..."
+  
+echo "Running the tests..."
 runner.exe
+
 REM Remove the generated files to ensure that they're not inadvertently run
 REM   when something in the chain has failed.
-devenv CxxTest_2_Build.vcproj /CLEAN
+echo "Cleaning up..."
 del runner.cpp
-del BuildLog.htm
+del *.obj
+del *.pdb
 del *.dll
+del runner.lib
+del runner.ilk
+del runner.exp
+del vc80.idb
+del runner.exe
