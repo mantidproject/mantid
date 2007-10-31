@@ -6,20 +6,23 @@ from socket import gethostname
 #get libraries and the library directories
 libDirList = ['../']
 libList = []
+cflags = []
 
 if os.name == 'nt':
 	# assume this is nt
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
-			libList.append(file.rstrip('.dll'))
+			libList.append(file.replace('.dll',''))
 	
 else:
 	#so this must be posix
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	cflags = ['-Wall', '-fPIC']
 	
 	#libDir =''
 	
@@ -33,7 +36,7 @@ else:
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.so'):
-			libList.append(file.rstrip('.so').lstrip('lib'))
+			libList.append(file.replace('.so','').replace('lib','',1))
 
 
 #GET LIST OF CPPS
@@ -46,7 +49,7 @@ dirList = os.listdir(pathToRoot)
 
 for fname in dirList:
 	if os.path.isdir(pathToRoot + fname):
-		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
 			#does folder contain /src?
 			if os.path.exists(pathToRoot + fname + codeFolder):
 				files = os.listdir(pathToRoot + fname + codeFolder)
@@ -57,13 +60,9 @@ for fname in dirList:
 			
 		
 
-env=Environment()
-env.Append( CCFLAGS = ['-Wall', '-fPIC'])
-
-
 # set header include paths
 env = Environment(CPPPATH='../../Third_Party/include/')
-       
+env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
 #env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
