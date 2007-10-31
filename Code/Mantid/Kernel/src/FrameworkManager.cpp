@@ -27,7 +27,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "../inc/FrameworkManager.h"
-#include "../inc/AlgorithmFactory.h"
+#include "../inc/AlgorithmManager.h"
 #include "../inc/WorkspaceFactory.h"
 #include "../inc/AnalysisDataService.h"
 #include "../inc/IAlgorithm.h"
@@ -54,18 +54,22 @@ FrameworkManager::~FrameworkManager()
 
 void FrameworkManager::initialize()
 {
-  // Required services are: the algorithm factory
+  // Required services are: the algorithm Manager
   //     the analysis data service, the workspace factory
-  algFactory = AlgorithmFactory::Instance();
+  algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
 }
 
+void FrameworkManager::clear()
+{
+	algManager->clear();
+}
+
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 {
-  // Get the algorithm from the factory
-  IAlgorithm *alg = algFactory->create(algName);
-  return alg;
+   IAlgorithm *alg = algManager->createAlgorithm(algName);
+	return alg;
 }
 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
@@ -96,8 +100,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     {
       throw runtime_error("Misformed properties string");
     }
-  }
-  
+  }  
   return alg;
 }
 
@@ -105,14 +108,16 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
 {
   // Make use of the previous method for algorithm creation and property setting
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
+  
+  // this is now performed by the algorithm manager
   // Have to initialise a newly created algorithm before executing
-  StatusCode status = alg->initialize();
+ /* StatusCode status = alg->initialize();
   if (status.isFailure())
   {
     throw runtime_error("Unable to initialise algorithm " + algName);
-  }
+  } */
   // Now execute the algorithm
-  status = alg->execute();
+  StatusCode status = alg->execute();
   if (status.isFailure())
   {
     throw runtime_error("Unable to successfully execute algorithm " + algName);

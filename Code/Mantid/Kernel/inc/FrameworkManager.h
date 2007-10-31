@@ -17,7 +17,8 @@ namespace Mantid
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
-class AlgorithmFactory;
+//class AlgorithmFactory;
+class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
 
@@ -54,11 +55,13 @@ public:
   /// Default constructor
   FrameworkManager();
   /// Destructor
-	virtual ~FrameworkManager();
+	virtual ~FrameworkManager();	
 	
 	/// Creates all of the required services
 	void initialize();
-	
+	/// At the moment clears all memory associated with Algorithm Manager
+	/// may do more in the future
+	void clear();
 	/** Creates an instance of an algorithm
 	 * 
 	 *  @param algName The name of the algorithm required
@@ -109,8 +112,14 @@ private:
   ///static reference to the logger class
   static Logger& g_log;
   
+//the next lines will be removed and put in Algorithm Manager
   /// Pointer to the Algorithm Factory instance
-  AlgorithmFactory *algFactory;
+  //AlgorithmFactory *algFactory;
+
+  /// Pointer to the Algorithm Factory instance
+  AlgorithmManager *algManager;
+
+
   /// Pointer to the Workspace Factory instance
   WorkspaceFactory *workFactory;
   /// Pointer to the Analysis Data Service

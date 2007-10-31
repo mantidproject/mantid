@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "System.h"
 #include "IAlgorithm.h"
-#include "AlgorithmFactory.h"
+#include "AlgorithmManager.h"
 #include "WorkspaceFactory.h"
 #include "Logger.h"
 

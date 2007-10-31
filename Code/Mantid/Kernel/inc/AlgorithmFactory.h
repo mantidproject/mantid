@@ -1,18 +1,6 @@
 #ifndef MANTID_ALGORITHMFACTORY_H_
 #define MANTID_ALGORITHMFACTORY_H_
 
-/* Used to register classes into the factory. creates a global object in an 
- * anonymous namespace. The object itself does nothing, but the comma operator
- * is used in the call to its constructor to effect a call to the factory's 
- * subscribe method.
- */
-#define DECLARE_ALGORITHM(classname) \
-  namespace { \
-    Mantid::RegistrationHelper register_alg_##classname( \
-       ((Mantid::AlgorithmFactory::Instance()->subscribe<Mantid::classname>(#classname)) \
-       , 0)); \
-  }
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -64,21 +52,21 @@ class IAlgorithm;
      * 
      *  @returns A pointer to the factory instance
      */
-    static AlgorithmFactory* Instance();
+   static AlgorithmFactory* Instance();
     
-  private:
-    
-    /// Private Constructor for singleton class
-    AlgorithmFactory();
-	
-	///static reference to the logger class
-	static Logger& g_log;
-    
-    /** Private destructor
+  protected:    
+    /// Protected Constructor for singleton class
+    AlgorithmFactory();	    
+    /** Protected destructor
      *  Prevents client from calling 'delete' on the pointer handed 
      *  out by Instance
      */
     virtual ~AlgorithmFactory();
+
+  private:
+
+	///static reference to the logger class
+	static Logger& g_log;
 
     /// Pointer to the factory instance
     static AlgorithmFactory* m_instance;
