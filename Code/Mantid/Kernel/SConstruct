@@ -7,27 +7,40 @@ currPath = os.getcwd() + '/'
 
 #get libraries and the library directories
 libDirList = []
-libList = ['PocoUtil', 'PocoFoundation', 'PocoXML', 'boost_python-gcc41']
+libList = ['PocoUtil', 'PocoFoundation', 'PocoXML']
 
 if os.name == 'nt':
 	# assume this is nt
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
-			libList.append(file.rstrip('.dll'))
+			libList.append(file.replace('.dll',''))
 	
 else:
 	#so this must be posix
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	cflags = ['-Wall', '-fPIC']
+	
+	#libDir =''
 	
 	if platform.architecture()[0].startswith('64bit'):
-		libDirList.append(currPath + '../../Third_Party/lib/linux64/')
+		libDirList.append('../../Third_Party/lib/linux64/')
+		libDir = '../../Third_Party/lib/linux64/'
 		
 	else:
-		libDirList.append(currPath + '../../Third_Party/lib/linux32/')
+		libDirList.append('../../Third_Party/lib/linux32/')
+		libDir = '../../Third_Party/lib/linux32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.so'):
+			libList.append(file.replace('.so','').replace('lib','',1))
+		else:
+			if file.endswith('.a'):
+				libList.append(file.replace('.a','').replace('lib','',1))
 		
 normPath = []
 
@@ -44,7 +57,7 @@ for file in files:
 		listCpps.append(codeFolder + '/' +  file)
 			
 # set header include paths
-env = Environment(CPPPATH=['/home/mjc23/mantid/Code/Third_Party/include', '/usr/local/boost/default', '/usr/include/python2.5/'])
+env = Environment(CPPPATH=['../../Third_Party/include',  '/usr/include/python2.5/'])
 env.Append( CCFLAGS = ['-Wall', '-fPIC'])
 
 #BUILD CODE
