@@ -3,72 +3,51 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/FrameworkManager.h"
 #include "../inc/Algorithm.h"
 #include <stdexcept>
 
-using namespace Mantid;
 
 namespace Mantid
 {
-
-class ToyAlgorithm : public Algorithm
-{
-public:
-  ToyAlgorithm() 
-  {
-	int a=1;
-  }
-  virtual ~ToyAlgorithm() {}
-
-  StatusCode ToyAlgorithm::exec()
-  {
-	  int b=100;
-	  std::cout<< b << std::endl;
-	  return StatusCode::SUCCESS;
-  }
-
-
-};
-
+	class algmantest : public Algorithm
+	{
+	public:
+  
+		algmantest() {}
+		virtual ~algmantest() {}
+		StatusCode init() { return StatusCode::SUCCESS; }
+		StatusCode exec() { return StatusCode::SUCCESS; }
+		StatusCode final() { return StatusCode::SUCCESS; }		
+	};
 }
-DECLARE_ALGORITHM(ToyAlgorithm)
+
+DECLARE_ALGORITHM(algmantest)
+
+
+using namespace Mantid;
 
 class AlgorithmManagerTest : public CxxTest::TestSuite
 {
 public:
 
-	void testInitialize()
+	AlgorithmManagerTest()
+	{
+		manager = AlgorithmManager::Instance();
+	}
+
+	void testInstance()
 	{
 	  // Not really much to test
-		TS_ASSERT_THROWS_NOTHING( Algmanager.Instance() )
+    AlgorithmManager *tester = AlgorithmManager::Instance();
+    TS_ASSERT_EQUALS( manager, tester);
+	TS_ASSERT_THROWS_NOTHING( manager->createAlgorithm("algmantest") )
+	TS_ASSERT_THROWS( manager->createAlgorithm("aaaaaa"), std::runtime_error )
+
 	}
-
-	void test_global_Mantid_AlgorithmManager_createAlgorithm()
-	{
-	  TS_ASSERT_THROWS_NOTHING( Algmanager.createAlgorithm("ToyAlgorithm") )
-	  TS_ASSERT_THROWS( Algmanager.createAlgorithm("aaaaaa"), std::runtime_error )
-      TS_ASSERT_THROWS( Algmanager.createAlgorithm("ToyAlgorithm","p1:p2:p3"), std::runtime_error )
-	}
-
-	void test_global_Mantid_AlgorithmManager_createAlgorithmWithProps()
-	{
-	  IAlgorithm *alg = Algmanager.createAlgorithm("ToyAlgorithm","Prop:Val,P2:V2");
-	  std::string prop;
-	  StatusCode status = alg->getProperty("Prop",prop);
-	  TS_ASSERT ( ! status.isFailure() )
-	  TS_ASSERT ( ! prop.compare("Val") )
-    status = alg->getProperty("P2",prop);
-    TS_ASSERT ( ! status.isFailure() )
-    TS_ASSERT ( ! prop.compare("V2") )
-	  
-	}
-
-
 
 
 private:
-  AlgorithmManager Algmanager;
+  AlgorithmManager *manager;
 	
 };
 
