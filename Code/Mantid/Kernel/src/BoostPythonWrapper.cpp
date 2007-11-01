@@ -8,11 +8,8 @@
 using namespace boost::python;
 
 //Wrapper for Algorithm class - enables virtual functions to work properly
-class Mantid_Algorithm_Wrapper: public Mantid::Algorithm
+struct Mantid_Algorithm_Wrapper: Mantid::Algorithm
 {
-	
-public:
-	
     Mantid_Algorithm_Wrapper(PyObject* py_self_):
         Mantid::Algorithm(), py_self(py_self_) {}
 
@@ -119,6 +116,23 @@ public:
     PyObject* py_self;
 };
 
+struct Mantid_Workspace_Wrapper: Mantid::Workspace
+{
+    const std::string id() const {
+        return call_method< const std::string >(py_self, "id");
+    }
+
+    long int getMemorySize() const {
+        return call_method< long int >(py_self, "getMemorySize");
+    }
+
+    long int default_getMemorySize() const {
+        return Mantid::Workspace::getMemorySize();
+    }
+
+    PyObject* py_self;
+};
+
 
 
 //Definitions
@@ -151,6 +165,14 @@ BOOST_PYTHON_MODULE(libMantidKernel)
         .def("getProperty", (Mantid::StatusCode (Mantid::Algorithm::*)(const std::string&, std::string&) const)&Mantid::Algorithm::getProperty, (Mantid::StatusCode (Mantid_Algorithm_Wrapper::*)(const std::string&, std::string&) const)&Mantid_Algorithm_Wrapper::default_getProperty)
         //.def("createSubAlgorithm", &Mantid::Algorithm::createSubAlgorithm)
         .def("subAlgorithms", &Mantid::Algorithm::subAlgorithms, return_value_policy< manage_new_object >())
+    ;
+    class_< Mantid::Workspace, boost::noncopyable, Mantid_Workspace_Wrapper >("Workspace", no_init)
+        .def("id", pure_virtual(&Mantid::Workspace::id))
+        .def("getMemorySize", &Mantid::Workspace::getMemorySize, &Mantid_Workspace_Wrapper::default_getMemorySize)
+        .def("setTitle", &Mantid::Workspace::setTitle)
+        .def("setComment", &Mantid::Workspace::setComment)
+        .def("getComment", &Mantid::Workspace::getComment)
+        .def("getTitle", &Mantid::Workspace::getTitle)
     ;
 }
 
