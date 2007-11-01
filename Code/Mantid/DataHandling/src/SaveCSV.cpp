@@ -43,13 +43,20 @@ namespace Mantid
   SaveCSV::SaveCSV() {}
 
 
-  // Gets the name of the file to save the 1D workspace to, and the
-  // Seperator and LineSeperator if they are provided by the user.
-  // Note this could as well have been done in the exec() method.
-
   StatusCode SaveCSV::init()
+  {	
+    return StatusCode::SUCCESS;
+  }
+  
+  
+  // saves 1D workspace to disk 
+  
+  StatusCode SaveCSV::exec()
   {
-    
+    // Gets the name of the file to save the 1D workspace to, and the
+    // Seperator and LineSeperator if they are provided by the user.
+    // Note this could as well have been done in the exec() method.
+
     // Retrieve the filename from the properties
 
     StatusCode status = getProperty("Filename", m_filename);
@@ -89,15 +96,8 @@ namespace Mantid
       m_lineSeperator = "\n";
     } 
 
-	
-    return StatusCode::SUCCESS;
-  }
-  
-  
-  // saves 1D workspace to disk 
-  
-  StatusCode SaveCSV::exec()
-  {
+
+    
     const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(m_inputWorkspace);
 
 

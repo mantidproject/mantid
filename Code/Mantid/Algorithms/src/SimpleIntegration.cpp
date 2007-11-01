@@ -58,6 +58,11 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
 
 StatusCode SimpleIntegration::init()
 {
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SimpleIntegration::exec()
+{
   // Try and retrieve the optional properties
   // Since a property can only be a string at present, need to convert to int
   // No type checking - this code MUST be temporary
@@ -91,11 +96,6 @@ StatusCode SimpleIntegration::init()
     iss >> m_MaxY;
   }
   
-  return StatusCode::SUCCESS;
-}
-
-StatusCode SimpleIntegration::exec()
-{
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra

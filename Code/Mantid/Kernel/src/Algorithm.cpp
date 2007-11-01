@@ -66,35 +66,7 @@ namespace Mantid
     // Bypass the initialization if the algorithm
     // has already been initialized.
     if ( m_isInitialized ) return StatusCode::SUCCESS;
-    
-    // Set the input and output workspaces
-    std::string inputWorkspaceName;
-    StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
-    // If property not set print warning message and set pointer to null
-    if ( status.isFailure() )
-    {
-      g_log.information("Input workspace property not set");
-      m_inputWorkspace = 0;
-    }
-    else 
-    {
-      AnalysisDataService *data = AnalysisDataService::Instance();
-      StatusCode status = data->retrieve(inputWorkspaceName, m_inputWorkspace);
-      if ( status.isFailure() )
-      {
-        g_log.error("Input workspace doesn't exist");
-        return status;
-      }
-    }
-    status = getProperty("OutputWorkspace", m_outputWorkspaceName);
-    // If property not set print warning message and set pointer to null
-    if ( status.isFailure() )
-    {
-      g_log.information("Output workspace property not set");
-      m_outputWorkspaceName = "";
-    }
-    m_outputWorkspace = 0;
-    
+        
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
     {
@@ -134,6 +106,34 @@ namespace Mantid
   {
     // Return a failure if the algorithm hasn't been initialized
     if ( !isInitialized() ) return StatusCode::FAILURE;
+
+    // Set the input and output workspaces
+    std::string inputWorkspaceName;
+    StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
+    // If property not set print warning message and set pointer to null
+    if ( status.isFailure() )
+    {
+      g_log.information("Input workspace property not set");
+      m_inputWorkspace = 0;
+    }
+    else 
+    {
+      AnalysisDataService *data = AnalysisDataService::Instance();
+      StatusCode status = data->retrieve(inputWorkspaceName, m_inputWorkspace);
+      if ( status.isFailure() )
+      {
+        g_log.error("Input workspace doesn't exist");
+        return status;
+      }
+    }
+    status = getProperty("OutputWorkspace", m_outputWorkspaceName);
+    // If property not set print warning message and set pointer to null
+    if ( status.isFailure() )
+    {
+      g_log.information("Output workspace property not set");
+      m_outputWorkspaceName = "";
+    }
+    m_outputWorkspace = 0;
     
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try

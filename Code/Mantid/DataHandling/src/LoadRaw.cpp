@@ -64,6 +64,11 @@ namespace Mantid
 
   StatusCode LoadRaw::init()
   {
+    return StatusCode::SUCCESS;
+  }
+  
+  StatusCode LoadRaw::exec()
+  {
     // Retrieve the filename from the properties
     StatusCode status = getProperty("Filename", m_filename);
     // Check that property has been set and retrieved successfully
@@ -72,13 +77,7 @@ namespace Mantid
       g_log.information("Filename property has not been set.");
       return status;
     }
-        
-    return StatusCode::SUCCESS;
-  }
-  
-  StatusCode LoadRaw::exec()
-  {
-       
+    
     int found = 0;  
     // Call the FORTRAN function to open the RAW file
     open_file__( m_filename.c_str(), &found, strlen( m_filename.c_str() ) );
