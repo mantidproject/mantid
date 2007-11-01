@@ -34,6 +34,7 @@
 
 #include <stdexcept>
 #include <boost/tokenizer.hpp>
+#include <string>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ Logger& FrameworkManager::g_log = Logger::get("FrameworkManager");
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
-
+		
 FrameworkManager::FrameworkManager()
 {
 }
@@ -52,13 +53,14 @@ FrameworkManager::~FrameworkManager()
 {
 }
 
-void FrameworkManager::initialize()
+std::string FrameworkManager::initialize()
 {
   // Required services are: the algorithm Manager
   //     the analysis data service, the workspace factory
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
+  return "Framework Manager initialised!";
 }
 
 void FrameworkManager::clear()

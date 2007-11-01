@@ -1,0 +1,51 @@
+import os
+import platform
+
+from socket import gethostname
+
+currPath = os.getcwd() + '/'
+
+#get libraries and the library directories
+libDirList = []
+libList = ['PocoUtil', 'PocoFoundation', 'PocoXML', 'boost_python-gcc41']
+
+if os.name == 'nt':
+	# assume this is nt
+	libDirList.append('../../Third_Party/lib/win32/')
+	libDir = '../../Third_Party/lib/win32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.dll'):
+			libList.append(file.rstrip('.dll'))
+	
+else:
+	#so this must be posix
+	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	
+	if platform.architecture()[0].startswith('64bit'):
+		libDirList.append(currPath + '../../Third_Party/lib/linux64/')
+		
+	else:
+		libDirList.append(currPath + '../../Third_Party/lib/linux32/')
+		
+normPath = []
+
+for dir in libDirList:
+	normPath.append(os.path.abspath(dir))
+
+#GET LIST OF CPPS
+codeFolder = 'src'
+listCpps = []
+
+files = os.listdir(codeFolder)
+for file in files:
+	if file.endswith('.cpp'):
+		listCpps.append(codeFolder + '/' +  file)
+			
+# set header include paths
+env = Environment(CPPPATH=['/home/mjc23/mantid/Code/Third_Party/include', '/usr/local/boost/default', '/usr/include/python2.5/'])
+env.Append( CCFLAGS = ['-Wall', '-fPIC'])
+
+#BUILD CODE
+env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normPath)

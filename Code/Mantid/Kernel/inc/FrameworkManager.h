@@ -52,13 +52,14 @@ class AnalysisDataService;
 class DLLExport FrameworkManager
 {
 public:
+
   /// Default constructor
   FrameworkManager();
   /// Destructor
 	virtual ~FrameworkManager();	
 	
 	/// Creates all of the required services
-	void initialize();
+	std::string initialize();
 	/// At the moment clears all memory associated with Algorithm Manager
 	/// may do more in the future
 	void clear();

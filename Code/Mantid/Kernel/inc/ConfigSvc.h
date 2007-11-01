@@ -1,3 +1,4 @@
+
 #ifndef MANTID_CONFIGSVC_H_
 #define MANTID_CONFIGSVC_H_
 //----------------------------------------------------------------------
@@ -193,5 +194,6 @@ namespace Mantid
 	};
 
 } // namespace Mantid
+
 
 #endif /*MANTID_CONFIGSVC_H_*/

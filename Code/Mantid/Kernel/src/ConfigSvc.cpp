@@ -143,7 +143,9 @@ namespace Mantid
 	
 /// \cond TEMPLATE 
 
-	template DLLExport int ConfigSvc::getValue(const std::string&,double&);
-	template DLLExport int ConfigSvc::getValue(const std::string&,std::string&);
-	template DLLExport int ConfigSvc::getValue(const std::string&,int&);
+
+	template int ConfigSvc::getValue(const std::string&,double&);
+	template int ConfigSvc::getValue(const std::string&,std::string&);
+	template int ConfigSvc::getValue(const std::string&,int&);
+
 }
