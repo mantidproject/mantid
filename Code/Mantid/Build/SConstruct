@@ -1,17 +1,20 @@
+#For Framework
+
 import os
 import platform
+import sys
 
 from socket import gethostname
 
 #get libraries and the library directories
-libDirList = ['../']
-libList = []
+libDirList = ['../', '.']
+libList = ['python' + sys.version[0:sys.version.find(' ')]]
 cflags = []
 
 cppPaths = ['../../Third_Party/include/']
 
 if os.name == 'nt':
-	# assume this is nt
+	# assume this is Windows
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
 	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
@@ -22,10 +25,10 @@ if os.name == 'nt':
 	
 else:
 	#so this must be posix
-	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	#libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
-	cppPaths.append('/usr/include/python2.5/')
+	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
 	
 	#libDir =''
 	
@@ -70,4 +73,3 @@ env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
 env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
-
