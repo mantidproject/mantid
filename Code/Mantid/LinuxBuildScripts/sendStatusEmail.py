@@ -10,11 +10,16 @@ SENDER = 'BuildServer1@mantidproject.org'
 
 #Set up email content
 buildSuccess = False
+testsBuildSuccess = False
 sconsResult = ''
+testsResult = ''
 testsPass = True
+
 mssgScons = ''
 mssgSconsErr = ''
-mssgTests = ''
+mssgTestsBuild = ''
+mssgTestsErr = ''
+mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
 
@@ -32,6 +37,20 @@ if sconsResult.startswith('scons: done building targets.'):
 	
 mssgSconsErr = open('../logs/sconsErr.log','r').read()
 
+#Get tests scons result and errors
+f = open('../logs/testsBuild.log','r')
+
+for line in f.readlines():
+     testsResult = line
+     mssgTestsBuild = mssgTestsBuild + line
+     
+f.close()
+
+if testsResult.startswith('scons: done building targets.'):
+	testsBuildSuccess = True	
+	
+mssgTestsErr = open('../logs/testsBuildErr.log','r').read()
+
 #Get tests result
 f = open('../logs/testResults.log','r')
 
@@ -40,7 +59,7 @@ for line in f.readlines():
 	if line.startswith('Failed ')  != -1 and line.endswith(' test\n'):
 		#A test failed
 		testsPass = False
-	mssgTests = mssgTests + line
+	mssgTestsResults = mssgTestsResults + line
      
 f.close()
 
@@ -54,15 +73,20 @@ mssgDoxy = open('../logs/doxy.log','r').read()
 #Construct Message
 
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
-message += 'Build Passed: ' + str(buildSuccess) + "\n"
+message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
+message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
 message += mssgSvn + "\n"
-message += 'BUILD LOG\n\n'
+message += 'FRAMEWORK BUILD LOG\n\n'
 message += mssgScons + "\n\n"
 message += mssgSconsErr + "\n"
 message += '------------------------------------------------------------------------\n'
+message += 'TESTS BUILD LOG\n\n'
+message += mssgTestsBuild + "\n\n"
+message += mssgTestsErr + "\n"
+message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
-message += mssgTests + "\n"
+message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += mssgDoxy + "\n"
@@ -71,9 +95,14 @@ message += mssgDoxy + "\n"
 subject = 'Subject: Build Report: '
 
 if buildSuccess:
-	subject += '[Build Successful, '
+	subject += '[Framework Build Successful, '
 else:
-	subject += '[Build Failed, '
+	subject += '[Framework Build Failed, '
+	
+if testsBuildSuccess:
+	subject += 'Tests Build Successful, '
+else:
+	subject += 'Tests Build Failed, '
 	
 if testsPass:
 	subject += 'Tests Successful]\n'
