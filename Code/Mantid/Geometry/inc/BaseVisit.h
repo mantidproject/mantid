@@ -1,5 +1,8 @@
-#ifndef BaseVisit_h
-#define BaseVisit_h
+#ifndef Geometry_BaseVisit_h
+#define Geometry_BaseVisit_h
+
+namespace Mantid
+{
 
 namespace Geometry
 {
@@ -35,6 +38,8 @@ public:
 };
 
 
-} // NAMESPACE
+} // NAMESPACE Geometry
+
+} // NAMESPACE Mantid
 
 #endif

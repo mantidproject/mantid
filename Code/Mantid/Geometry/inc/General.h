@@ -1,6 +1,9 @@
 #ifndef General_h
 #define General_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -21,6 +24,8 @@ namespace Geometry
 class General : public Surface
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
  public:
     
@@ -40,5 +45,7 @@ class General : public Surface
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

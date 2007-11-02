@@ -3,6 +3,9 @@
 
 //! Impliments a simple data storage space
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -20,6 +23,8 @@ namespace Geometry
 class DataSpace
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   std::string Title;              ///< Title of the workspace
 
@@ -90,6 +95,8 @@ class DataSpace
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif
 

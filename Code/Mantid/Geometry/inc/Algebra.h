@@ -2,6 +2,9 @@
 #define Algebra_h
 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -19,6 +22,8 @@ namespace Geometry
 class Algebra
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   std::map<int,std::string> SurfMap;
   Acomp F;       ///< Factor
@@ -54,5 +59,7 @@ class Algebra
 };
 
 }  // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid
 
 #endif 

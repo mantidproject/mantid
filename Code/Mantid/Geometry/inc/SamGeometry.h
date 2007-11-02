@@ -2,6 +2,9 @@
 #define SamGeometry_h
 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
   /*!
@@ -28,6 +31,8 @@ class SamGeometry
   typedef std::map<int,const Material*> MATMAP;   ///< Map of Materials.
 
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   ISTORE Items;                     ///< Items;
   SMAP SNum;                        ///< SNum : Surface
@@ -69,6 +74,8 @@ class SamGeometry
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif
   

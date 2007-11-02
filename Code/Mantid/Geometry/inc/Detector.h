@@ -1,6 +1,9 @@
 #ifndef Detector_h
 #define Detector_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -19,6 +22,8 @@ namespace Geometry
 class Detector
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   typedef std::map<int,Flux> fMap;          ///< Storage of flux
 
@@ -73,5 +78,7 @@ class Detector
 };
 
 }   // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

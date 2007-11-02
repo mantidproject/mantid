@@ -1,6 +1,9 @@
 #ifndef Object_h
 #define Object_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -18,6 +21,8 @@ namespace Geometry
 class Object
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   int ObjName;       ///< Creation number
   int MatN;          ///< Material Number   ???
@@ -97,4 +102,6 @@ class Object
 };
 
 }   // NAMESPACE MonteCarlo
+}  // NAMESPACE Mantid
+
 #endif

@@ -72,6 +72,8 @@ namespace MapSupport
   class valEqual
     {
       private:
+
+  static Logger& PLog;           ///< The official logger
       
       const NumPart value;   ///< Value to check against map
    
@@ -185,6 +187,8 @@ namespace MapSupport
   class sndValue
     {
       private:
+
+  static Logger& PLog;           ///< The official logger
       
       const std::map<KeyPart,NumPart>& MRef;   ///< Map begin accessd
       
@@ -206,5 +210,7 @@ namespace MapSupport
     };
 };
 
+
+}  // NAMESPACE Mantid
 
 #endif

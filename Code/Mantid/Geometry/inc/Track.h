@@ -1,6 +1,9 @@
 #ifndef GeometryTrack_h
 #define GeometryTrack_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -64,6 +67,8 @@ class Track
 
  private:
 
+  static Logger& PLog;           ///< The official logger
+
 
   Geometry::Vec3D iPt;              ///< Start Point
   Geometry::Vec3D uVec;             ///< unit vector to direction
@@ -101,5 +106,7 @@ class Track
 
 
 } // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid
 
 #endif

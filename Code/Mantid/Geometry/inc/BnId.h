@@ -1,6 +1,9 @@
 #ifndef BnId_h
 #define BnId_h 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 /*!
@@ -26,6 +29,8 @@ class BnId
   friend std::ostream& operator<<(std::ostream&,const BnId&); 
 
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   int size;            ///< number of variables
   int PI;              ///< Prime Implicant
@@ -70,5 +75,7 @@ class BnId
 std::ostream& operator<<(std::ostream&,const BnId&);
 
 }   // NAMESPACE 
+
+}  // NAMESPACE Mantid
 
 #endif

@@ -1,6 +1,9 @@
 #ifndef Material_h
 #define Material_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
   /*!
@@ -18,6 +21,8 @@ namespace Geometry
 class Material
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   std::string Name;      ///< Name 
   double density;        ///< number density [atom/A^3]
@@ -61,5 +66,7 @@ class Material
 
 
 } // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

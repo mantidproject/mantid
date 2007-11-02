@@ -1,6 +1,9 @@
 #ifndef Acomp_h
 #define Acomp_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -28,6 +31,8 @@ namespace Geometry
 class Acomp 
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   int Intersect;                ///<  Union/Intersection (0,1)
   std::vector<int> Units;       ///< Units in list
@@ -103,7 +108,9 @@ std::ostream& operator<<(std::ostream&,const Acomp&);
 // int operator<(const Acomp&,const Acomp&);
 //int more_than(const Acomp&,const Acomp&);
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE Geometry
 
+
+}  // NAMESPACE Mantid
 
 #endif

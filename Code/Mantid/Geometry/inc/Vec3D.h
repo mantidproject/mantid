@@ -1,6 +1,13 @@
 #ifndef Vec3D_h
 #define Vec3D_h
 
+
+namespace Mantid
+{
+
+namespace Geometry 
+{
+
 /*!
   \class Vec3D
   \brief Basic 3D point class
@@ -11,9 +18,6 @@
   Simple Vec3D function based on x,y,z and providing
   simple dot and cross products
  */
-
-namespace Geometry 
-{
 
 class Vec3D
 {
@@ -82,7 +86,9 @@ class Vec3D
 std::ostream& operator<<(std::ostream&,const Vec3D&);
 std::istream& operator>>(std::istream&,Vec3D&);
 
-}
+} // NAMESPACE Geometry
+
+} // NAMESPACE Mantid
 
 #endif
 

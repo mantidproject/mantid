@@ -1,6 +1,9 @@
 #ifndef Simulation_h
 #define Simulation_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -19,6 +22,8 @@ namespace Geometry
 class Simulation
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   std::map<int,Material*> MList;         ///< Material List (key = MatNumber)
   std::map<int,Surface*> SurMap;         ///< Surface Map (key = Surface Num)
@@ -115,5 +120,7 @@ class Simulation
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

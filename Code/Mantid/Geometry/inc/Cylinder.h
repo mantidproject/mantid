@@ -2,6 +2,9 @@
 #define Cylinder_h
 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -19,6 +22,8 @@ namespace Geometry
 class Cylinder : public Surface
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
   Geometry::Vec3D Normal;        ///< Direction of centre line
@@ -71,5 +76,7 @@ class Cylinder : public Surface
 };
 
 }   // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

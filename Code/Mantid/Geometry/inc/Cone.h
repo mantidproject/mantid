@@ -1,6 +1,9 @@
 #ifndef Cone_h
 #define Cone_h
 
+namespace Mantid
+{
+
 namespace Geometry 
 {
 
@@ -20,6 +23,8 @@ namespace Geometry
 class Cone : public Surface
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
   
   Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
   Geometry::Vec3D Normal;        ///< Normal
@@ -68,5 +73,7 @@ class Cone : public Surface
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

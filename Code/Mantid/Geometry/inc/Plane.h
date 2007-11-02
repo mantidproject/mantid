@@ -1,6 +1,9 @@
 #ifndef Plane_h
 #define Plane_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -17,6 +20,8 @@ namespace Geometry
 class Plane : public Surface
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   const double PTolerance;      ///< Tolerance to the surfaces.
 
@@ -66,4 +71,6 @@ class Plane : public Surface
 };
 
 } // NAMESPACE MonteCarlo
+}  // NAMESPACE Mantid
+
 #endif

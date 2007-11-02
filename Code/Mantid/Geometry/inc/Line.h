@@ -1,6 +1,9 @@
 #ifndef Line_h
 #define Line_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -26,6 +29,8 @@ class Line
 {
   
  private:
+
+  static Logger& PLog;           ///< The official logger
 
 
   Geometry::Vec3D Origin;   ///< Orign point (on plane)
@@ -66,5 +71,7 @@ class Line
 };
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

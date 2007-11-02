@@ -1,7 +1,11 @@
 #ifndef VisitBase_h
 #define VisitBase_h
 
+namespace Mantid
+{
+
 namespace Visitors
+{
 
 class Surface;
 class Plane;
@@ -23,34 +27,8 @@ public:
 
 };
 
-class LineIntersectVisit : public BaseVisit
-  {
-    public:
-    
-     
-  };
-};
-
-class Dispatcher 
-{
-  virtual void LineDispatch(Cylinder& A,Line& A)
-    {
-      std::cout<<"LineDispatch for cylinder"
-    }
 }
 
-
-
-class VisitBase
-{
- private:
-  
- public:
-  
-  virtual void visit
-   
-};
-
-
+}
 
 #endif

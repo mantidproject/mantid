@@ -2,6 +2,9 @@
 #define LineIntersectVisit_h
 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -18,6 +21,8 @@ namespace Geometry
 class LineIntersectVisit : public BaseVisit
   {
   private:
+
+  static Logger& PLog;           ///< The official logger
     
     Line ATrack;
     std::vector<Geometry::Vec3D> PtOut;
@@ -54,5 +59,7 @@ class LineIntersectVisit : public BaseVisit
 
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid
 
 #endif

@@ -1,6 +1,9 @@
 #ifndef Sphere_h
 #define Sphere_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -17,7 +20,9 @@ namespace Geometry
 class Sphere : public Surface
 {
  private:
-  
+
+  static Logger& PLog;           ///< The official logger  
+
   Geometry::Vec3D Centre;        ///< Point for centre
   double Radius;                 ///< Radius of sphere
   
@@ -39,7 +44,7 @@ class Sphere : public Surface
 
   void setCentre(const Geometry::Vec3D&);              
   Geometry::Vec3D getCentre() const { return Centre; } ///< Get Centre
-  double getRadius() const { return Radius; } ///< Get Radius
+  double getRadius() const { return Radius; }          ///< Get Radius
   void setBaseEqn();
 
   void write(std::ostream&) const; 
@@ -48,6 +53,8 @@ class Sphere : public Surface
 
 };
 
-}
+}   // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid
  
 #endif
