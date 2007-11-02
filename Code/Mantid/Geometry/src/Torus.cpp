@@ -9,7 +9,8 @@
 #include <map>
 #include <stack>
 #include <algorithm>
-#include <boost/regex.hpp>
+
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -17,18 +18,12 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
-#include "support.h"
-#include "regexSupport.h"
+#include "Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
 #include "Torus.h"
-
-#include "Logger.h"
 
 namespace Mantid
 {
@@ -37,6 +32,7 @@ namespace Geometry
 {
 
 Logger& Torus::PLog = Logger::get("Torus");
+
 int 
 Torus::possibleLine(const std::string& Line)
   /*! 
@@ -49,8 +45,7 @@ Torus::possibleLine(const std::string& Line)
   */
 {
   // Split line
-  boost::regex divSea("\\s*(\\S+)");
-  std::vector<std::string> Items=StrFunc::StrParts(Line,divSea);
+  std::vector<std::string> Items=StrFunc::StrParts(Line);
   if (Items.size()<3)           //Indecyferable line
     return 0;
 
@@ -166,8 +161,7 @@ Torus::setSurface(const std::string& Pstr)
     \return : 0 on success, neg of failure 
   */
 {
-  boost::regex divSea("\\s*(\\S+)");
-  std::vector<std::string> Items=StrFunc::StrParts(Pstr,divSea);
+  std::vector<std::string> Items=StrFunc::StrParts(Pstr);
   if (Items.size()<8)           //Indecyferable line
     return -1;
 

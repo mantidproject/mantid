@@ -10,6 +10,8 @@
 #include <string>
 #include <algorithm>
 #include <boost/regex.hpp>
+
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -17,10 +19,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
-#include "support.h"
+#include "Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"
@@ -28,9 +27,13 @@
 #include "Surface.h"
 #include "Plane.h"
 
-namespace MonteCarlo
+namespace Mantid
 {
 
+namespace Geometry
+{
+
+Logger& Plane::PLog = Logger::get("Plane");
 int
 Plane::possibleLine(const std::string& Line)
   /*!
@@ -41,8 +44,7 @@ Plane::possibleLine(const std::string& Line)
   */
 {
   // Split line
-  boost::regex divSea("\\s*(\\S+)");
-  std::vector<std::string> Items=StrFunc::StrParts(Line,divSea);
+  std::vector<std::string> Items=StrFunc::StrParts(Line);
   if (Items.size()<2)           //Indecyferable lineSu
     return 0;
 
@@ -394,10 +396,8 @@ Plane::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	    }
 	  if (errNum)
 	    {
-	      errCnt++;                 // Not good....
-	      ELog::EMessages.Estream()
-		<<"Cylinder::importXML :: Failed on key: "<<KVal;
-	      ELog::EMessages.report(2);
+	      PLog.warning("importXML :: Key failed "+KVal);
+	      errCnt++;
 	    }
 	  // Post processing
 	  if (!singleFlag) 
@@ -425,3 +425,5 @@ Plane::procXML(XML::XMLcollect& XOut) const
 
 
 } // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

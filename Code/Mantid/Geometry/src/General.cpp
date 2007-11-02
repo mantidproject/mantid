@@ -19,11 +19,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
-#include "support.h"
-#include "regexSupport.h"
+#include "Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"
@@ -174,9 +170,7 @@ General::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	  if (errNum)
 	    {
 	      errCnt++;                 // Not good....
-	      ELog::EMessages.Estream()
-		<<"General::importXML :: Failed on key: "<<KVal;
-	      ELog::EMessages.report(2);
+	      PLog.warning("importXML :: Key failed "+KVal);
 	    }
 	  // Post processing
 	  if (!singleFlag) SK++;

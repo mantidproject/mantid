@@ -10,7 +10,6 @@
 #include <stack>
 #include <string>
 #include <algorithm>
-#include <boost/regex.hpp>
 
 #include "Logger.h"
 #include "Exception.h"
@@ -20,18 +19,13 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "GTKreport.h"
-#include "FileReport.h"
-#include "OutputLog.h"
-#include "support.h"
-#include "regexSupport.h"
+#include "Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "Line.h"
 #include "BaseVisit.h"
 #include "Surface.h"
 #include "Cone.h"
-
 
 namespace Mantid
 {
@@ -418,9 +412,7 @@ Cone::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	  if (errNum)
 	    {
 	      errCnt++;                 // Not good....
-	      ELog::EMessages.Estream()
-		<<"Cone::importXML :: Failed on key: "<<KVal;
-	      ELog::EMessages.report(2);
+	      PLog.warning("importXML :: Key failed "+KVal);
 	    }
 	  // Post processing
 	  if (!singleFlag) 
@@ -450,6 +442,6 @@ Cone::procXML(XML::XMLcollect& XOut) const
   return;
 }
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
