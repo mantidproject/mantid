@@ -8,6 +8,8 @@ libDirList = ['../']
 libList = []
 cflags = []
 
+cppPaths = ['../../Third_Party/include/']
+
 if os.name == 'nt':
 	# assume this is nt
 	libDirList.append('../../Third_Party/lib/win32/')
@@ -23,6 +25,7 @@ else:
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
+	cppPaths.append('/usr/include/python2.5/')
 	
 	#libDir =''
 	
@@ -36,7 +39,8 @@ else:
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.so'):
-			libList.append(file.replace('.so','').replace('lib','',1))
+			libList.append(file.replace('.so','')[3:])
+
 
 
 #GET LIST OF CPPS
@@ -61,15 +65,9 @@ for fname in dirList:
 		
 
 # set header include paths
-env = Environment(CPPPATH='../../Third_Party/include/')
+env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-#env.Library('Mantid', ['DataObjects/src/Histogram1D.cpp', 'DataObjects/src/Workspace1D.cpp', 'DataObjects/src/Workspace2D.cpp', 'Algorithms/src/SimpleIntegration.cpp', 'DataHandling/src/LoadRaw.cpp', 'Kernel/src/Algorithm.cpp', 'Kernel/src/AnalysisDataService.cpp', 'Kernel/src/FrameworkManager.cpp', 'Kernel/src/Workspace.cpp', 'Kernel/src/WorkspaceFactory.cpp'])
-env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList)
-
-#BUILD TESTS 
-env.SConscript(['Tests/SConscript'])
-
-
+env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
 
