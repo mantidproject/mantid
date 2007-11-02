@@ -8,7 +8,8 @@ from socket import gethostname
 
 #get libraries and the library directories
 libDirList = ['../', '.']
-libList = ['python' + sys.version[0:sys.version.find(' ')]]
+libList = ['python' + sys.version[0:3]]
+print libList
 cflags = []
 
 cppPaths = ['../../Third_Party/include/']
@@ -28,7 +29,7 @@ else:
 	#libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
-	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
+	cppPaths.append('/usr/include/python' + sys.version[0:3])
 	
 	#libDir =''
 	
