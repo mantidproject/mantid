@@ -27,7 +27,7 @@ namespace Mantid
 		m_pConf = 0;
 
 		//attempt to load the default properties filename
-		loadConfig("Mantid.Properties");
+		loadConfig("Mantid.properties");
 	}
 
 	//destructor
@@ -59,7 +59,7 @@ namespace Mantid
 				"logging.channels.consoleChannel.class = ConsoleChannel\n"
 				"logging.channels.consoleChannel.formatter = f1\n"
 				"logging.channels.fileChannel.class = FileChannel\n"
-				"logging.channels.fileChannel.path = sample.log\n"
+				"logging.channels.fileChannel.path = mantid.log\n"
 				"logging.channels.fileChannel.formatter.class = PatternFormatter\n"
 				"logging.channels.fileChannel.formatter.pattern = %s: {%p} %t\n"
 				"logging.formatters.f1.class = PatternFormatter\n"
