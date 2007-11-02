@@ -1,9 +1,11 @@
 #include <iostream>
+#include <iomanip>
+#include <fstream>
 #include <sstream>
 #include <cmath>
 #include <vector>
 
-#include "../inc/Support.h"
+#include "Support.h"
 
 namespace Mantid
 {
@@ -31,6 +33,14 @@ template DLLExport int convert(const char*,int&);
 template DLLExport int convPartNum(const std::string&,double&);
 template DLLExport int convPartNum(const std::string&,int&);
 
+template DLLExport int setValues(const std::string&,const std::vector<int>&,std::vector<double>&);
+
+template DLLExport int writeFile(const std::string&,const double,const std::vector<double>&);
+template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&,const std::vector<double>&);
+template DLLExport int writeFile(const std::string&,const std::vector<double>&,const std::vector<double>&);
+template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&);
+template DLLExport int writeFile(const std::string&,const std::vector<float>&,const std::vector<float>&,const std::vector<float>&);
+
 /// \endcond TEMPLATE 
 
 void 
@@ -52,6 +62,38 @@ printHex(std::ostream& OFS,const int n)
   OFS.flags(PrevFlags);
   return;
 } 
+
+
+std::string
+stripMultSpc(const std::string& Line)
+  /*!
+    Removes the multiple spaces in the line
+    \param Line :: Line to process
+    \return String with single space components
+  */
+{
+  std::string Out;
+  int spc(1);
+  int lastReal(-1);
+  for(unsigned int i=0;i<Line.length();i++)
+    {
+      if (!isblank(Line[i]))
+        {
+	  lastReal=i;
+	  spc=0;
+	  Out+=Line[i];
+	}
+      else if (!spc)
+        {
+	  spc=1;
+	  Out+=' ';
+	}
+    }
+  lastReal++;
+  if (lastReal<static_cast<int>(Out.length()))
+    Out.erase(lastReal);
+  return Out;
+}
 
 int
 extractWord(std::string& Line,const std::string& Word,const int cnt)
@@ -366,14 +408,70 @@ sectionMCNPX(std::string& A,T& out)
   return 0;
 }
 
+void
+writeMCNPX(const std::string& Line,std::ostream& OX)
+  /*!
+    Write out the line in the limited form for MCNPX
+    ie initial line from 0->72 after that 8 to 72
+    (split on a space or comma)
+    \param Line :: full MCNPX line
+    \param OX :: ostream to write to
+  */
+{
+  const int MaxLine(72);
+  std::string::size_type pos(0);
+  std::string X=Line.substr(0,MaxLine);
+  std::string::size_type posB=X.find_last_of(" ,");
+  int spc(0);
+  while (posB!=std::string::npos && 
+	 static_cast<int>(X.length())>=MaxLine-spc)
+    {
+      pos+=posB+1;
+      if (!isspace(X[posB]))
+	posB++;
+      const std::string Out=X.substr(0,posB);
+      if (!isEmpty(Out))
+        {
+	  if (spc)
+	    OX<<std::string(spc,' ');
+	  OX<<X.substr(0,posB)<<std::endl;
+	}
+      spc=8;
+      X=Line.substr(pos,MaxLine-spc);
+      posB=X.find_last_of(" ,");
+    }
+  if (!isEmpty(X))
+    {
+      if (spc)
+	OX<<std::string(spc,' ');
+      OX<<X<<std::endl;
+    }
+  return;
+}
+
+std::vector<std::string>
+StrParts(std::string Ln)
+  /*!
+    Splits the sting into parts that are space delminated.
+    \param Ln :: line component to strip
+    \returns vector of components
+  */
+{
+  std::vector<std::string> Out;
+  std::string Part;
+  while(section(Ln,Part))
+    Out.push_back(Part);
+  return Out;
+}
+
 template<typename T>
 int
 convPartNum(const std::string& A,T& out)
   /*!
     Takes a character string and evaluates 
     the first [typename T] object. The string is then 
-    erase upt to the end of number.
-    The diffierence between this and section is that
+    erase upto the end of number.
+    The diffierence between this and convert is that
     it allows trailing characters after the number. 
     \param out :: place for output
     \param A :: string to process
@@ -435,6 +533,89 @@ convert(const char* A,T& out)
   return convert(Cx,out);
 }
 
+template<template<typename T> class V,typename T> 
+int
+writeFile(const std::string& Fname,const T step, const V<T>& Y)
+  /*!
+    Write out the three vectors into a file of type dc 9
+    \param step :: parameter to control x-step (starts from zero)
+    \param Y :: Y column
+    \param Fname :: Name of the file
+    \returns 0 on success and -ve on failure
+  */
+{
+  V<T> Ex;   // Empty vector
+  V<T> X;    // Empty vector
+  for(unsigned int i=0;i<Y.size();i++)
+    X.push_back(i*step);
+
+  return writeFile(Fname,X,Y,Ex);
+}
+
+template<template<typename T> class V,typename T> 
+int
+writeFile(const std::string& Fname,const V<T>& X,
+	  const V<T>& Y)
+  /*!
+    Write out the three vectors into a file of type dc 9
+    \param X :: X column
+    \param Y :: Y column
+    \param Fname :: Name of the file
+    \returns 0 on success and -ve on failure
+  */
+{
+  V<T> Ex;   // Empty vector/list
+  return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
+}
+
+template<template<typename T> class V,typename T> 
+int
+writeFile(const std::string& Fname,const V<T>& X,
+	  const V<T>& Y,const V<T>& Err)
+  /*!
+    Write out the three container into a file of type dc 9
+    \param X :: X column
+    \param Y :: Y column
+    \param Err :: Err column
+    \param Fname :: Name of the file
+    \returns 0 on success and -ve on failure
+  */
+{
+  const int Npts(X.size()>Y.size() ? Y.size() : X.size());
+  const int Epts(Npts>static_cast<int>(Err.size()) ? Err.size() : Npts);
+
+  std::ofstream FX;
+
+  FX.open(Fname.c_str());
+  if (!FX.good())
+    return -1;
+
+  FX<<"# "<<Npts<<" "<<Epts<<std::endl;
+  FX.precision(10);
+  FX.setf(std::ios::scientific,std::ios::floatfield);
+  typename V<T>::const_iterator xPt=X.begin();
+  typename V<T>::const_iterator yPt=Y.begin();
+  typename V<T>::const_iterator ePt=(Epts ? Err.begin() : Y.begin());
+  
+  // Double loop to include/exclude a short error stack
+  int eCount=0;
+  for(;eCount<Epts;eCount++)
+    {
+      FX<<(*xPt)<<" "<<(*yPt)<<" "<<(*ePt)<<std::endl;
+      xPt++;
+      yPt++;
+      ePt++;
+    }
+  for(;eCount<Npts;eCount++)
+    {
+      FX<<(*xPt)<<" "<<(*yPt)<<" 0.0"<<std::endl;
+      xPt++;
+      yPt++;
+    }
+  FX.close();
+  return 0;
+}
+
 float
 getVAXnum(const float A) 
   /*!
@@ -469,8 +650,77 @@ getVAXnum(const float A)
   return (float) onum;
 }
 
+template<typename T> 
+int
+setValues(const std::string& Line,const std::vector<int>& Index,
+	  std::vector<T>& Out)
+  /*!  
+    Call to read in various values in position x1,x2,x3 from the
+    line. Note to avoid the dependency on crossSort this needs
+    to be call IN ORDER 
+    \param Line :: string to read
+    \param Index :: Indexes to read
+    \param Out :: OutValues [unchanged if not read]
+    \retval 0 :: success
+    \retval -ve on failure.
+  */
+{
+  if (Index.empty())
+    return 0;
+  
+  if(Out.size()!=Index.size())
+    return -1;
+//    throw ColErr::MisMatch<int>(Index.size(),Out.size(),
+//				"StrFunc::setValues");
 
-
-
+  std::string modLine=Line;
+  std::vector<int> sIndex(Index);     // Copy for sorting
+  std::vector<int> OPt(Index.size());
+  for(unsigned int i=0;i<Index.size();i++)
+    OPt[i]=i;
+      
+  
+  //  mathFunc::crossSort(sIndex,OPt);
+  
+  typedef std::vector<int>::const_iterator iVecIter;
+  std::vector<int>::const_iterator sc=sIndex.begin();
+  std::vector<int>::const_iterator oc=OPt.begin();
+  int cnt(0);
+  T value;
+  std::string dump;
+  while(sc!=sIndex.end() && *sc<0)
+    {
+      sc++;
+      oc++;
+    }
+  
+  while(sc!=sIndex.end())
+    {
+      if (*sc==cnt)
+        {
+	  if (!section(modLine,value))
+	    return -1-distance(static_cast<iVecIter>(sIndex.begin()),sc);  
+	  // this loop handles repeat units
+	  do
+	    {
+	      Out[*oc]=value;
+	      sc++;
+	      oc++;
+	    } while (sc!=sIndex.end() && *sc==cnt); 
+	}
+      else
+        {
+	  if (!section(modLine,dump))
+	    return -1-distance(static_cast<iVecIter>(sIndex.begin()),sc);  
+	}
+      cnt++;         // Add only to cnt [sc/oc in while loop]
+    }
+  // Success since loop only gets here if sc is exhaused.
+  return 0;       
 }
-};
+
+
+
+}  // NAMESPACE StrFunc
+
+}  // NAMESPACE Mantid

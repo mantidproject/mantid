@@ -42,6 +42,11 @@ template<typename T> int convert(const std::string&,T&);
 /// Convert a char* into a number
 template<typename T> int convert(const char*,T&);
 
+
+template<typename T> 
+int setValues(const std::string&,const std::vector<int>&,
+	      std::vector<T>&);
+
 /// Convert and cut a string
 template<typename T> int sectPartNum(std::string&,T&);
 
@@ -53,11 +58,26 @@ template<typename T> int section(char*,T&);
 /// Convert and cut a string for MCNPX
 template<typename T> int sectionMCNPX(std::string&,T&);
 
+/// Write file in standard MCNPX input form 
+void writeMCNPX(const std::string&,std::ostream&);
+
+/// Split tring into spc deliminated components
+std::vector<std::string> StrParts(std::string);
+
+/// Write a set of containers to a file
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string&,const T,const V<T>&);
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string&,const V<T>&,const V<T>&);
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string&,const V<T>&,const V<T>&,const V<T>&);
+
+
 /// Convert a VAX number to x86 little eindien
 DLLExport float getVAXnum(const float);
 
-}
-}
+}   // NAMESPACE StrFunc
+}   // NAMESPACE Mantid
 
 #endif //MANTID_STRFUNC_SUPPORT_H_
 
