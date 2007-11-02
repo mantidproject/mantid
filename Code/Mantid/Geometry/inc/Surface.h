@@ -1,5 +1,8 @@
-#ifndef Surface_h
-#define Surface_h
+#ifndef Geometry_Surface_h
+#define Geometry_Surface_h
+
+namespace Mantid
+{
 
 namespace Geometry
 {
@@ -21,6 +24,9 @@ class Surface
 {
  private:
   
+  static Logger& PLog;
+  
+
   int Name;        ///< Surface number (MCNPX identifier)
   
   double eqnValue(const Geometry::Vec3D&) const;
@@ -80,6 +86,8 @@ class Surface
 
 };
 
-}    // NAMESPACE MonteCarlo
+}    // NAMESPACE Geometry
+
+}    // NAMESPACE Mantid
 
 #endif
