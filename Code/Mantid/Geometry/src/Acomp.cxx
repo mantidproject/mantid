@@ -12,10 +12,8 @@
 #include <iterator>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
@@ -30,9 +28,13 @@
 #include "BnId.h"
 #include "Acomp.h"
 
+namespace Mantid
+{
+
 namespace Geometry 
 {
 
+Logger& Acomp::PLog = Logger::get("Acomp");
 // Friend function
 std::ostream&
 operator<<(std::ostream& OX,const Acomp& A) 
@@ -1810,3 +1812,5 @@ Acomp::displayDepth(const int dval) const
 }
 
 }  // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid

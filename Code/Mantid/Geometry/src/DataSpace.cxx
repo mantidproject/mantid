@@ -10,13 +10,18 @@
 #include <functional>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "support.h"
 #include "mathSupport.h"
 #include "DataSpace.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& DataSpace::PLog = Logger::get("DataSpace");
 DataSpace::DataSpace() :
   Title("Workspace"),Npts(0)
   /*!
@@ -672,3 +677,5 @@ DataSpace::calcTrans(const DataSpace& B,const double factor)
 }
 
 } // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

@@ -11,9 +11,14 @@
 #include <iterator>
 #include "BnId.h"
 
+#include "Logger.h"
+namespace Mantid
+{
+
 namespace Geometry 
 {
 
+Logger& BnId::PLog = Logger::get("BnId");
 std::ostream&
 operator<<(std::ostream& of,const BnId& A) 
 {
@@ -408,3 +413,5 @@ BnId::display() const
 }
 
 } // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid

@@ -12,6 +12,7 @@
 #include <complex>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -35,9 +36,13 @@
 #include "General.h"
 #include "Line.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Line::PLog = Logger::get("Line");
 const double LTolerance(1e-6);
 
 Line::Line() : Origin(),Direct()
@@ -348,3 +353,5 @@ Line::print() const
 }
 
 }   // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

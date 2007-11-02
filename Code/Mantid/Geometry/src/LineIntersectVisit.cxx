@@ -13,6 +13,7 @@
 #include <boost/regex.hpp>
 #include <boost/bind.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -37,9 +38,13 @@
 #include "Line.h"
 #include "LineIntersectVisit.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& LineIntersectVisit::PLog = Logger::get("LineIntersectVisit");
 LineIntersectVisit::LineIntersectVisit
   (const Geometry::Vec3D& Pt,const Geometry::Vec3D& uVec) :
     ATrack(Pt,uVec)
@@ -136,3 +141,5 @@ LineIntersectVisit::procTrack()
 
 }  // NAMESPACE MonteCarlo
 
+
+}  // NAMESPACE Mantid

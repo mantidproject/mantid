@@ -17,9 +17,14 @@
 #include "Acomp.h"
 #include "Algebra.h"
 
+#include "Logger.h"
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Algebra::PLog = Logger::get("Algebra");
 Algebra::Algebra() :
   F(0)
   /*!
@@ -355,3 +360,5 @@ Algebra::countLiterals() const
 }
 
 } // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

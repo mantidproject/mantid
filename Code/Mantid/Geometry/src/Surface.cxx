@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -29,9 +30,13 @@
 #include "BaseVisit.h"
 #include "Surface.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Surface::PLog = Logger::get("Surface");
 const double STolerance(1e-6);
 
 Surface::Surface() : 
@@ -417,3 +422,5 @@ Surface::writeXML(const std::string& Fname) const
 }
   
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

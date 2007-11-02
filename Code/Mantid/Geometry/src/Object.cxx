@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "FileReport.h"
 #include "GTKreport.h"
@@ -35,9 +36,13 @@
 #include "Rules.h"
 #include "Object.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Object::PLog = Logger::get("Object");
 const double OTolerance(1e-6);
 
 Object::Object() :
@@ -902,3 +907,5 @@ Object::procXML(XML::XMLcollect& XOut) const
 
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

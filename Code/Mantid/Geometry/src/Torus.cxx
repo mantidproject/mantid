@@ -28,10 +28,15 @@
 #include "Surface.h"
 #include "Torus.h"
 
+#include "Logger.h"
+
+namespace Mantid
+{
 
 namespace Geometry
 {
 
+Logger& Torus::PLog = Logger::get("Torus");
 int 
 Torus::possibleLine(const std::string& Line)
   /*! 
@@ -355,3 +360,5 @@ Torus::write(std::ostream& OX) const
 }
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

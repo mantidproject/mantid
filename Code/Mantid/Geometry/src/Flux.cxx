@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -23,9 +24,13 @@
 #include "OutputLog.h"
 #include "Flux.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Flux::PLog = Logger::get("Flux");
 Flux::Flux() : nCnt(0) 
   /*!
     Constructor
@@ -91,3 +96,5 @@ Flux::addEvent(const int index,const double D)
 
 
 }   // NAMESPACE Monte Carlo
+
+}  // NAMESPACE Mantid

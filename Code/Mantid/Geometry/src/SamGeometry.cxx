@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -34,9 +35,13 @@
 #include "Material.h"
 #include "SamGeometry.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& SamGeometry::PLog = Logger::get("SamGeometry");
 SamGeometry::SamGeometry()
   /*!
     Default Constructor
@@ -407,3 +412,5 @@ SamGeometry::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 }
 	  
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

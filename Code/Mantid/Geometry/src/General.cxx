@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -29,9 +30,13 @@
 #include "Surface.h"
 #include "General.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& General::PLog = Logger::get("General");
 const double GTolerance(1e-6);
 
 General::General() : Surface()
@@ -194,3 +199,5 @@ General::procXML(XML::XMLcollect& XOut) const
 }
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

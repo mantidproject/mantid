@@ -10,11 +10,16 @@
 #include "Vec3D.h"
 #include "Track.h"
 
+#include "Logger.h"
 const double surfaceTolerance(1e-5);       ///< Below this two point touch.
+
+namespace Mantid
+{
 
 namespace Geometry
 {
 
+Logger& Track::PLog = Logger::get("Track");
 TUnit::TUnit(const Geometry::Vec3D& A,const Geometry::Vec3D& B,
 	     const double D,const int ID) :
   PtA(A),PtB(B),Dist(D),Length(A.Distance(B)),ObjID(ID)
@@ -282,3 +287,5 @@ Track::buildLink()
 
 
 } // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid

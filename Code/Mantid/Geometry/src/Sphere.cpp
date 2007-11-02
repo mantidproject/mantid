@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -18,10 +19,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
-#include "support.h"
+#include "Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"
@@ -29,10 +27,14 @@
 #include "Surface.h"
 #include "Sphere.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
  
-  const double STolerance(1e-6);
+Logger& Sphere::PLog = Logger::get("Sphere");
+const double STolerance(1e-6);
 
 Sphere::Sphere() : Surface(),
   Centre(0,0,0),Radius(0.0)
@@ -283,9 +285,7 @@ Sphere::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	  if (errNum)
 	    {
 	      errCnt++;                 // Not good....
-	      ELog::EMessages.Estream()
-		<<"Sphere::importXML :: Failed on key: "<<KVal;
-	      ELog::EMessages.report(2);
+	      PLog.warning("importXML :: Key failed "+KVal);
 	    }
 	  // Post processing
 	  if (!singleFlag) 
@@ -324,3 +324,5 @@ Sphere::write(std::ostream& OX) const
 }
 
 }
+
+}  // NAMESPACE Mantid

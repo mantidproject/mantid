@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -31,9 +32,13 @@
 #include "Surface.h"
 #include "Cylinder.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Cylinder::PLog = Logger::get("Cylinder");
 const double CTolerance(1e-6);
 
 Cylinder::Cylinder() : Surface(),
@@ -464,3 +469,5 @@ Cylinder::procXML(XML::XMLcollect& XOut) const
 
 }   // NAMESPACE MonteCarlo
 
+
+}  // NAMESPACE Mantid

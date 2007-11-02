@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -26,9 +27,13 @@
 #include "Surface.h"
 #include "Rules.h"
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Rules::PLog = Logger::get("Rules");
 int
 Rule::addToKey(std::vector<int>& AV,const int passN)
   /*! 
@@ -750,3 +755,5 @@ Rule::Eliminate()
 }
 
 }  // NAMESPACE MonteCarlo
+
+}  // NAMESPACE Mantid

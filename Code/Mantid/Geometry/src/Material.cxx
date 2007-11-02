@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
+#include "Logger.h"
 #include "Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -26,9 +27,13 @@
 #include "Material.h"
 
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
+Logger& Material::PLog = Logger::get("Material");
 Material::Material() : 
   density(0),scoh(0.0),
   sinc(0.0),sabs(0.0)
@@ -261,3 +266,5 @@ Material::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 
 } // NAMESPACE MonteCarlo
 
+
+}  // NAMESPACE Mantid
