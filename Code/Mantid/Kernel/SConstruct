@@ -1,3 +1,5 @@
+#For MantidKernel
+
 import os
 import platform
 
@@ -6,8 +8,8 @@ from socket import gethostname
 currPath = os.getcwd() + '/'
 
 #get libraries and the library directories
-libDirList = []
-libList = ['PocoUtil', 'PocoFoundation', 'PocoXML']
+libDirList = ['lib']
+libList = ['python2.5']
 
 if os.name == 'nt':
 	# assume this is nt
@@ -21,8 +23,8 @@ if os.name == 'nt':
 	
 else:
 	#so this must be posix
-	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	#libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
 	
 	#libDir =''
@@ -62,3 +64,7 @@ env.Append( CCFLAGS = ['-Wall', '-fPIC'])
 
 #BUILD CODE
 env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normPath)
+
+libList.insert(0,'MantidKernel')
+
+env.Program('main.cpp', LIBS=libList, LIBPATH=normPath)
