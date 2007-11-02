@@ -15,16 +15,13 @@
 
 #include "Logger.h"
 #include "Exception.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "support.h"
+#include "Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"
@@ -270,9 +267,9 @@ Object::populate(const std::map<int,Surface*>& Smap)
 		}
 	      else 
 	        {
-		  ELog::EMessages.report("Error finding key:",1);
-		  throw ColErr::InContainerError<int>(KV->getKeyN(),"Object::populate");
-		}
+	    	  PLog.error("Error finding key");
+	    	  throw ColErr::InContainerError<int>(KV->getKeyN(),"Object::populate");
+	        }	
 	    }
 	  // Not a surface : Determine leaves etc and add to stack:
 	  else
@@ -875,9 +872,7 @@ Object::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	  if (errNum)
 	    {
 	      errCnt++;                 // Not good....
-	      ELog::EMessages.Estream()
-		<<"Object::importXML :: Failed on key: "<<KVal;
-	      ELog::EMessages.report(2);
+	      PLog.warning("importXML :: Key failed "+KVal);
 	    }
 	  // Post processing
 	  if (!singleFlag) 

@@ -9,9 +9,10 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-#include "BnId.h"
 
 #include "Logger.h"
+#include "BnId.h"
+
 namespace Mantid
 {
 
@@ -19,6 +20,7 @@ namespace Geometry
 {
 
 Logger& BnId::PLog = Logger::get("BnId");
+
 std::ostream&
 operator<<(std::ostream& of,const BnId& A) 
 {

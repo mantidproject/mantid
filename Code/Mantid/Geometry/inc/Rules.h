@@ -1,6 +1,9 @@
 #ifndef Rules_h
 #define Rules_h
 
+namespace Mantid
+{
+
 namespace Geometry
 {
 
@@ -20,6 +23,8 @@ class Surface;
 class Rule
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   Rule* Parent;                    ///< Parent object (for tree)
 
@@ -94,6 +99,8 @@ class Intersection : public Rule
 
  private:
    
+  static Logger& PLog;           ///< The official logger
+
   Rule* A;    ///< Rule 1 
   Rule* B;    ///< Rule 2 
   
@@ -140,7 +147,9 @@ class Union : public Rule
 {
 
  private:
-  
+
+  static Logger& PLog;           ///< The official logger  
+
   Rule* A;    ///< Leaf rule A
   Rule* B;    ///< Leaf rule B
   
@@ -188,6 +197,8 @@ class Union : public Rule
 class SurfPoint : public Rule
 {
  private:
+
+  static Logger& PLog;           ///< The official logger
 
   Surface* key;               ///< Actual Surface Base Object
   int keyN;                   ///< Key Number (identifer)
@@ -239,6 +250,8 @@ class CompObj : public Rule
 {
  private:
 
+  static Logger& PLog;           ///< The official logger
+
   int objN;                   ///< Object number
   Object* key;                ///< Object Pointer
   
@@ -288,6 +301,8 @@ class CompGrp : public Rule
 {
  private:
 
+  static Logger& PLog;           ///< The official logger
+
   Rule* A;
   
  public:
@@ -332,6 +347,8 @@ class BoolValue : public Rule
 {
  private:
 
+  static Logger& PLog;           ///< The official logger
+
   int status;          ///< Three values 0 False : 1 True : -1 doesn't matter
   
  public:
@@ -360,6 +377,8 @@ class BoolValue : public Rule
 
 };
 
-}  // NAMESPACE 
+}  // NAMESPACE  Geometry
+
+}  // NAMESPACE  Mantid
 
 #endif

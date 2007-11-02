@@ -1,6 +1,9 @@
 #ifndef regexSupport_h
 #define regexSupport_h
 
+namespace Mantid 
+{
+
 namespace StrFunc
 {
 /// Find if a pattern matches a string
@@ -37,6 +40,8 @@ template<typename T> int findComp(std::istream&,const boost::regex&,T&);
 /// Finds a pattern in a file
 template<typename T> int findPattern(std::istream&,const boost::regex&,T&,std::string&);
 
-};
+}
 
+
+} //NAMESPACE Mantid
 #endif

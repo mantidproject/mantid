@@ -10,14 +10,15 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
+
+#include "Logger.h"
 #include "Exception.h"
-#include "support.h"
+#include "Support.h"
 #include "MapSupport.h"
 #include "BnId.h"
 #include "Acomp.h"
 #include "Algebra.h"
 
-#include "Logger.h"
 namespace Mantid
 {
 
@@ -25,6 +26,7 @@ namespace Geometry
 {
 
 Logger& Algebra::PLog = Logger::get("Algebra");
+
 Algebra::Algebra() :
   F(0)
   /*!

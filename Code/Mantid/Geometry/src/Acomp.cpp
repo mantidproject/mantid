@@ -20,7 +20,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "support.h"
+#include "Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "RotCounter.h"

@@ -1,6 +1,5 @@
-#ifndef VarMap_h
-#define VarMap_h
-
+#ifndef MapSupport_h
+#define MapSupport_h
 
 /*!
   \namespace MapSupport
@@ -58,6 +57,7 @@ namespace MapSupport
       
     };
   
+
   /*!
     \class valEqual
     \brief Functor using second value as equal
@@ -72,8 +72,6 @@ namespace MapSupport
   class valEqual
     {
       private:
-
-  static Logger& PLog;           ///< The official logger
       
       const NumPart value;   ///< Value to check against map
    
@@ -120,7 +118,7 @@ namespace MapSupport
 
   /*!
     \class mapDelete
-    \brief Functor for deleting teh second component of a map
+    \brief Functor for deleting the second component of a map
     \author S. Ansell
     \date 2/9/05
     \version 1.0
@@ -141,6 +139,30 @@ namespace MapSupport
 	    delete A.second;
 	    A.second=0;
 	  }
+    };
+
+  /*!
+    \class mapSwap
+    \brief Functor for reversing a map
+    \author S. Ansell
+    \date August 2007
+    \version 1.0
+
+    This functor swaps the components in a map.
+  */
+  
+  template<typename KeyPart,typename BodyPart>
+  class mapSwap :
+    public std::unary_function<std::pair<BodyPart,KeyPart>,
+			       std::pair<KeyPart,BodyPart> >
+    {
+      public:
+
+      std::pair<BodyPart,KeyPart> 
+      operator()(const std::pair<KeyPart,BodyPart>& A) const
+	{
+	  return std::pair<BodyPart,KeyPart>(A.second,A.first);
+	}
     };
 
   /*!
@@ -184,11 +206,10 @@ namespace MapSupport
   */
 
   template<typename KeyPart,typename NumPart>
-  class sndValue
+  class sndValue :  
+  public std::unary_function<std::map<KeyPart,NumPart>, NumPart > 
     {
       private:
-
-  static Logger& PLog;           ///< The official logger
       
       const std::map<KeyPart,NumPart>& MRef;   ///< Map begin accessd
       
@@ -210,7 +231,5 @@ namespace MapSupport
     };
 };
 
-
-}  // NAMESPACE Mantid
 
 #endif
