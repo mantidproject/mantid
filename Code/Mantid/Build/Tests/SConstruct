@@ -7,7 +7,7 @@ import sys
 from socket import gethostname
 
 libDirList = ['../']
-libList = ['Mantid', 'Get', 'g2c', 'python' + sys.version[0:sys.version.find(' ')]]
+libList = ['Mantid', 'Get', 'g2c', 'python' + sys.version[0:3]]
 cppPaths = ['../../../Third_Party/include/']
 cflags = []
 
