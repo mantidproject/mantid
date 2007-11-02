@@ -1,0 +1,86 @@
+import os
+import platform
+
+from socket import gethostname
+
+libDirList = ['../']
+libList = ['Get', 'g2c', 'Mantid']
+cppPaths = ['../../../Third_Party/include/']
+cflags = []
+
+if os.name == 'nt':
+	# assume this is nt
+	libDirList.append('../../../Third_Party/lib/win32/')
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+
+else:
+	#so this must be posix
+	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+	libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
+	cflags = ['-Wall', '-fPIC']
+	cppPaths.append('/usr/include/python2.5/')
+		
+	libDir =''
+	
+	if platform.architecture()[0].startswith('64bit'):
+		libDirList.append('../../../Third_Party/lib/linux64/')
+		libDir = '../../../Third_Party/lib/linux64/'
+		
+	else:
+		libDirList.append('../../../Third_Party/lib/linux32/')
+		libDir = '../../../Third_Party/lib/linux32/'
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.so'):
+			libList.append(file.replace('.so','')[3:])
+
+print libList
+
+#GET LIST OF TESTS
+path = '../../'
+testfolder = '/test'
+
+testsToRun = []
+
+#get list of directories in trunk
+dirList = os.listdir(path)
+
+for fname in dirList:
+	if os.path.isdir(path + fname):
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build'  and fname != 'Geometry':
+			#does folder contain /test?
+			if os.path.exists(path + fname + testfolder):
+				files = os.listdir(path + fname + testfolder)
+				for file in files:
+					if file.endswith('.h'):
+						testsToRun.append('../' + fname + testfolder + '/' +  file + '\n')
+			
+			
+		
+
+f=open('../TestsToRun', 'w')
+f.writelines(testsToRun)
+f.close()
+
+#BUILD
+#normPath = []
+
+#for dir in libDirList:
+#	normPath.append(os.path.abspath(dir))
+
+print cppPaths
+
+env=Environment(CPPPATH=cppPaths)
+env.Append( CCFLAGS = cflags)
+
+f=open('../TestsToRun', 'r')
+
+
+#print normPath
+
+for test in f:
+	doth = '../' + test.strip() 
+	temp= test.split('/')
+	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
+	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
+	env.Program(dotcpp, LIBS=libList, LIBPATH=libDirList)
