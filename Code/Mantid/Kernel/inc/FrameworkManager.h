@@ -21,6 +21,7 @@ class Workspace;
 class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
+class ConfigSvc;
 
 // N.B. Framework Manager is responsible for deleting the algorithms created
 /** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
@@ -125,7 +126,9 @@ private:
   WorkspaceFactory *workFactory;
   /// Pointer to the Analysis Data Service
   AnalysisDataService *data;
-	
+  /// Pointer to the Configuration Service
+  ConfigSvc *config;
+  
 };
 
 } // Namespace Mantid

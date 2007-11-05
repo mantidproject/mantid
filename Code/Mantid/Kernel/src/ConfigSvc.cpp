@@ -49,7 +49,7 @@ namespace Mantid
 		catch (std::exception e)
 		{
 			//there was a problem loading the file - it probably is not there
-			std::cerr << "Problem loading the logging file " << filename << " " << e.what();
+			std::cerr << "Problem loading the logging file " << filename << " " << e.what() << std::endl;
 			
 			std::string propFile = 
 				"logging.loggers.root.level = debug\n"

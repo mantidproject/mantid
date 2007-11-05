@@ -17,10 +17,7 @@ public:
   
   SimpleIntegrationTest()
   { 
-    // Next 2 lines should be removed when auto-registration of workspaces implemented
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    factory->subscribe<Workspace1D>("Workspace1D");
-    factory->subscribe<Workspace2D>("Workspace2D");
     
     // Set up a small workspace for testing
     Workspace *space = factory->create("Workspace2D");
@@ -31,7 +28,7 @@ public:
     for (int i = 0; i < 25; ++i)
     {
       a[i]=i;
-      e[i]=sqrt(i);
+      e[i]=sqrt(double(i));
     }
     for (int j = 0; j < 5; ++j) {
       space2D->setData(j, *(new std::vector<double>(a+(5*j), a+(5*j)+5)),
