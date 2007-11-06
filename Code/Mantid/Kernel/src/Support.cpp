@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 
-#include "../inc/Support.h"
+#include "Support.h"
 
 namespace Mantid
 {
@@ -77,7 +77,8 @@ stripMultSpc(const std::string& Line)
   int lastReal(-1);
   for(unsigned int i=0;i<Line.length();i++)
     {
-      if (!isblank(Line[i]))
+      if (Line[i]!=' ' && Line[i]!='\t' &&
+    		Line[i]!='\r' &&  Line[i]!='\n')		
         {
 	  lastReal=i;
 	  spc=0;
