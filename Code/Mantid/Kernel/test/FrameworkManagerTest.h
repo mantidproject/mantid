@@ -7,8 +7,7 @@
 #include "../inc/Algorithm.h"
 #include <stdexcept>
 
-namespace Mantid
-{
+using namespace Mantid::Kernel;
 
 class ToyAlgorithm2 : public Algorithm
 {
@@ -19,8 +18,6 @@ public:
   StatusCode exec() { return StatusCode::SUCCESS; }
   StatusCode final() { return StatusCode::SUCCESS; }
 };
-
-}
 
 DECLARE_ALGORITHM(ToyAlgorithm2)
 

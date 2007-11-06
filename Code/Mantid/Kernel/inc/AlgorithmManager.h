@@ -1,30 +1,37 @@
-#ifndef ALGORITHMMANAGER_H_
-#define ALGORITHMMANAGER_H_
+#ifndef MANTID_KERNEL_ALGORITHMMANAGER_H_
+#define MANTID_KERNEL_ALGORITHMMANAGER_H_
 
 /* Used to register classes into the factory. creates a global object in an 
  * anonymous namespace. The object itself does nothing, but the comma operator
  * is used in the call to its constructor to effect a call to the factory's 
  * subscribe method.
  */
-#define DECLARE_ALGORITHM(classname) \
+#define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
   namespace { \
-    Mantid::RegistrationHelper register_alg_##classname( \
-       ((Mantid::AlgorithmManager::Instance()->subscribe<Mantid::classname>(#classname)) \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+       ((Mantid::Kernel::AlgorithmManager::Instance()->subscribe<ns::classname>(#classname)) \
        , 0)); \
   }
+
+#define DECLARE_ALGORITHM(classname) \
+  namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+       ((Mantid::Kernel::AlgorithmManager::Instance()->subscribe<classname>(#classname)) \
+       , 0)); \
+  }
+
+
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
 #include "AlgorithmFactory.h"
 #include <vector>
+
 namespace Mantid
 {
-
-//----------------------------------------------------------------------
-// Forward declarations
-//----------------------------------------------------------------------
-
+namespace Kernel
+{
 /** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
 
 	The Algorithm Manager class is responsible for controlling algorithm 
@@ -99,6 +106,7 @@ private:
 	static AlgorithmManager* m_instance;
 };
 
+} // namespace Kernel
 }  //Namespace Mantid
 
-#endif /* ALGORITHMMANAGER_H_ */
+#endif /* MANTID_KERNEL_ALGORITHMMANAGER_H_ */

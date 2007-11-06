@@ -32,14 +32,19 @@
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below
 
-DECLARE_ALGORITHM(SaveCSV)
+DECLARE_NAMESPACED_ALGORITHM(Mantid::DataHandling, SaveCSV)
 
 namespace Mantid
 {
+namespace DataHandling
+{
+
+  using namespace Kernel;
+  using DataObjects::Workspace1D;
+
   Logger& SaveCSV::g_log = Logger::get("SaveCSV");
 
   // Empty default constructor
-
   SaveCSV::SaveCSV() {}
 
 
@@ -122,7 +127,7 @@ namespace Mantid
     
     // write to file
     
-    for (int i = 0; i < xValue.size(); i++)
+    for (int i = 0; i < (int)xValue.size(); i++)
     {
       outCSV_File << std::setw(15) << xValue[i] << m_seperator << std::setw(15) << yValue[i] 
         << m_seperator << std::setw(15) << eValue[i] << m_lineSeperator;
@@ -143,4 +148,5 @@ namespace Mantid
     return StatusCode::SUCCESS;
   }
   
-}
+} // namespace DataHandling
+} // namespace Mantid

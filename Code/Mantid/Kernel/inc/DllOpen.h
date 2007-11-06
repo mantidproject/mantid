@@ -1,11 +1,15 @@
-#ifndef DLLOPEN_H_
-#define DLLOPEN_H_
+#ifndef MANTID_KERNEL_DLLOPEN_H_
+#define MANTID_KERNEL_DLLOPEN_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <string>
 
+namespace Mantid
+{
+namespace Kernel
+{
 /** @class DllOpen DllOpen.h 
 
     Simple class for opening shared libraries at run-time. Works for Windows and Linux.
@@ -54,4 +58,7 @@ private:
 	
 };
 
-#endif /*DLLOPEN_H_*/
+} // namespace Kernel
+} // namespace Mantid
+
+#endif /*MANTID_KERNEL_DLLOPEN_H_*/

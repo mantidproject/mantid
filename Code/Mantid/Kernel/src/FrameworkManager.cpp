@@ -41,6 +41,8 @@ using namespace std;
 
 namespace Mantid
 {
+namespace Kernel
+{
 Logger& FrameworkManager::g_log = Logger::get("FrameworkManager");
 //----------------------------------------------------------------------
 // Public member functions
@@ -141,4 +143,5 @@ Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
   return space;
 }
 
+} // namespace Kernel
 } // Namespace Mantid

@@ -1,8 +1,10 @@
-#ifndef HISTOGRAM1D_H_
-#define HISTOGRAM1D_H_
+#ifndef MANTID_DATAOBJECTS_HISTOGRAM1D_H_
+#define MANTID_DATAOBJECTS_HISTOGRAM1D_H_
 #include <boost/shared_ptr.hpp>
 #include <vector>
 namespace Mantid
+{
+namespace DataObjects
 {
 /** @class Histogram1D Histogram1D.h
 7 	
@@ -81,5 +83,6 @@ private:
 	parray _E;
 };
 
+} // namespace DataObjects
 }  //Namespace Mantid
-#endif /*Histogram1D_H_*/
+#endif /*MANTID_DATAOBJECTS_HISTOGRAM1D_H_*/

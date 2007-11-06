@@ -1,10 +1,12 @@
-#ifndef WORKSPACE_H_
-#define WORKSPACE_H_
+#ifndef MANTID_KERNEL_WORKSPACE_H_
+#define MANTID_KERNEL_WORKSPACE_H_
 #include "../../Kernel/inc/WorkspaceFactory.h"
 #include <string>
 #include <ostream> 
 #include "Logger.h"
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class Workspace Workspace.h
  	
@@ -68,5 +70,6 @@ private:
 	static Logger& g_log;
 };
 
+} // namespace Kernel
 } //Namespace Mantid
-#endif /*WORKSPACE_H_*/
+#endif /*MANTID_KERNEL_WORKSPACE_H_*/

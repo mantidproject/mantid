@@ -5,8 +5,7 @@
 
 #include "../inc/Algorithm.h"
 
-namespace Mantid
-{
+using namespace Mantid::Kernel;
 
 class ToyAlgorithm : public Algorithm
 {
@@ -18,11 +17,7 @@ public:
   StatusCode final() { return StatusCode::SUCCESS; }
 };
 
-}
-
 DECLARE_ALGORITHM(ToyAlgorithm)
-
-using namespace Mantid;
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
@@ -107,7 +102,7 @@ public:
 	
 	void testGetProperty()
 	{
-    Mantid::StatusCode status = alg.setProperty("prop2","yes");
+    StatusCode status = alg.setProperty("prop2","yes");
     std::string value;
     status = alg.getProperty("ghjkgh",value);
     TS_ASSERT( status.isFailure() );

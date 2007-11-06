@@ -6,6 +6,8 @@ using namespace std;
 
 namespace Mantid
 {
+namespace Kernel
+{
 	Logger& AlgorithmManager::g_log = Logger::get("AlgorithmManager");
 	// Initialise the instance pointer to zero
 	AlgorithmManager* AlgorithmManager::m_instance = 0;
@@ -59,4 +61,6 @@ namespace Mantid
 		}
 		list.clear();
 	}
+	
+} // namespace Kernel
 } // namespace Mantid

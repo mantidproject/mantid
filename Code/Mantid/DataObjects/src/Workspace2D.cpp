@@ -5,7 +5,9 @@ DECLARE_WORKSPACE(Workspace2D)
 
 namespace Mantid
 {
-
+namespace DataObjects
+{
+  
 Workspace2D::Workspace2D()
 {
 }
@@ -53,19 +55,19 @@ void Workspace2D::setData(int histnumber, const std::vector<double>& y, const st
 	_data[histnumber].setData(y,e);
 }
 
-void Workspace2D::setX(int histnumber, const Mantid::Histogram1D::parray& v)
+void Workspace2D::setX(int histnumber, const Histogram1D::parray& v)
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setX, histogram number out of range");
 	_data[histnumber].setX(v);
 }
 
-void Workspace2D::setData(int histnumber, const Mantid::Histogram1D::parray& y)
+void Workspace2D::setData(int histnumber, const Histogram1D::parray& y)
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y);
 }
 
-void Workspace2D::setData(int histnumber, const Mantid::Histogram1D::parray& y, const Mantid::Histogram1D::parray& e)
+void Workspace2D::setData(int histnumber, const Histogram1D::parray& y, const Histogram1D::parray& e)
 {
 	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y,e);
@@ -92,5 +94,5 @@ const std::vector<double>& Workspace2D::getE(int histnumber) const
 	return _data[histnumber].getE();	
 }
 
-
+} // namespace DataObjects
 } //NamespaceMantid

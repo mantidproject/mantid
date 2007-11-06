@@ -1,5 +1,5 @@
-#ifndef DATAHANDLINGCOMMAND_H_
-#define DATAHANDLINGCOMMAND_H_
+#ifndef MANTID_DATAHANDLING_DATAHANDLINGCOMMAND_H_
+#define MANTID_DATAHANDLING_DATAHANDLINGCOMMAND_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,6 +7,8 @@
 #include "../../Kernel/inc/Algorithm.h"
 
 namespace Mantid
+{
+namespace DataHandling
 {
 /** @class DataHandlingCommand DataHandlingCommand.h DataHandling/DataHandlingCommand.h
 
@@ -16,7 +18,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -35,7 +37,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class DataHandlingCommand : virtual public Algorithm
+  class DataHandlingCommand : virtual public Kernel::Algorithm
   {
   public:
     
@@ -45,6 +47,7 @@ namespace Mantid
     virtual ~DataHandlingCommand() {}
   };
 
-}
+} // namespace DataHandling
+} // namespace Mantid
 
-#endif /*DATAHANDLINGCOMMAND_H_*/
+#endif /*MANTID_DATAHANDLING_DATAHANDLINGCOMMAND_H_*/

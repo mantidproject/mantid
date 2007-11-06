@@ -5,6 +5,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 	Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
 	{  
 		_name = name;
@@ -135,6 +137,6 @@ namespace Mantid
 		return *pLogger;
 	}
 
+} // namespace Kernel
+} // Namespace Mantid
 
-	
-}

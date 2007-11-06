@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_H_
-#define MANTID_ALGORITHM_H_
+#ifndef MANTID_KERNEL_ALGORITHM_H_
+#define MANTID_KERNEL_ALGORITHM_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -19,6 +19,8 @@
 #endif
 
 namespace Mantid
+{
+namespace Kernel
 {
 
 // Forward declaration
@@ -217,6 +219,7 @@ class Workspace;
 
   };
   
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_H_*/
+#endif /*MANTID_KERNEL_ALGORITHM_H_*/

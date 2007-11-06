@@ -6,7 +6,7 @@
 #include "../inc/Workspace.h"
 #include "../inc/WorkspaceFactory.h"
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
 
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {
@@ -20,7 +20,7 @@ public:
 
   WorkspaceFactoryTest()
   {
-    factory = Mantid::WorkspaceFactory::Instance();
+    factory = WorkspaceFactory::Instance();
   }
   
   void testInstance()

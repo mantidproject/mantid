@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMFACTORY_H_
-#define MANTID_ALGORITHMFACTORY_H_
+#ifndef MANTID_KERNEL_ALGORITHMFACTORY_H_
+#define MANTID_KERNEL_ALGORITHMFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include "Logger.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 
 //----------------------------------------------------------------------
@@ -72,6 +74,7 @@ class IAlgorithm;
     static AlgorithmFactory* m_instance;
   };
 
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMFACTORY_H_*/
+#endif /*MANTID_KERNEL_ALGORITHMFACTORY_H_*/

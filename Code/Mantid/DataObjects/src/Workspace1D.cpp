@@ -4,6 +4,8 @@ DECLARE_WORKSPACE(Workspace1D)
 
 namespace Mantid
 {
+namespace DataObjects
+{
 
 Workspace1D::Workspace1D()
 {
@@ -46,17 +48,17 @@ void Workspace1D::setData(const std::vector<double>& y, const std::vector<double
 	_data.setData(y,e);
 }
 
-void Workspace1D::setX(const Mantid::Histogram1D::parray& v)
+void Workspace1D::setX(const Histogram1D::parray& v)
 {
 	_data.setX(v);
 }
 
-void Workspace1D::setData(const Mantid::Histogram1D::parray& y)
+void Workspace1D::setData(const Histogram1D::parray& y)
 {
 	_data.setData(y);
 }
 
-void Workspace1D::setData(const Mantid::Histogram1D::parray& y, const Mantid::Histogram1D::parray& e)
+void Workspace1D::setData(const Histogram1D::parray& y, const Histogram1D::parray& e)
 {
 	_data.setData(y,e);
 }
@@ -73,5 +75,5 @@ const std::vector<double>& Workspace1D::getE() const
 	return _data.getE();
 }
 
-
+} // namespace DataObjects
 } //NamespaceMantid

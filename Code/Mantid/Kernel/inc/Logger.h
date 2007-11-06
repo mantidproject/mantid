@@ -1,5 +1,5 @@
-#ifndef MANTID_LOGGINGSERVICE_H_
-#define MANTID_LOGGINGSERVICE_H_
+#ifndef MANTID_KERNEL_LOGGINGSERVICE_H_
+#define MANTID_KERNEL_LOGGINGSERVICE_H_
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -15,6 +15,8 @@ namespace Poco
 }
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class Logger Logger.h Kernel/Logger.h
 
@@ -148,6 +150,7 @@ namespace Mantid
 		std::string _name;
 };
 
-}
+} // namespace Kernel
+} // namespace Mantid
 
-#endif /*MANTID_LOGGINGSERVICE_H_*/
+#endif /*MANTID_KERNEL_LOGGINGSERVICE_H_*/

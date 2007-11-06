@@ -1,5 +1,5 @@
-#ifndef IPROPERTY_H_
-#define IPROPERTY_H_
+#ifndef MANTID_KERNEL_IPROPERTY_H_
+#define MANTID_KERNEL_IPROPERTY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,6 +7,8 @@
 #include "INamedInterface.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 // Declaration of the interface ID ( interface id, major version, minor version)
 // static const InterfaceID IID_IProperty("IProperty", 2 , 0); 
@@ -65,5 +67,6 @@ namespace Mantid
         
   };
 
-}
-#endif /*IPROPERTY_H_*/
+} // namespace Kernel
+} // namespace Mantid
+#endif /*MANTID_KERNEL_IPROPERTY_H_*/

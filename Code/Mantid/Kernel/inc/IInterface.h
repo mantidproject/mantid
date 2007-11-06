@@ -1,5 +1,5 @@
-#ifndef IINTERFACE_H_
-#define IINTERFACE_H_
+#ifndef MANTID_KERNEL_IINTERFACE_H_
+#define MANTID_KERNEL_IINTERFACE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include "StatusCode.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class IInterface IInterface.h Kernel/IInterface.h
 
@@ -44,6 +46,8 @@ class DLLExport IInterface
 	  /// Virtual destructor (always needed for abstract classes)
 	  virtual ~IInterface() {};
   };
-}
 
-#endif /*IINTERFACE_H_*/
+} // namespace Kernel
+} // namespace Mantid
+
+#endif /*MANTID_KERNEL_IINTERFACE_H_*/

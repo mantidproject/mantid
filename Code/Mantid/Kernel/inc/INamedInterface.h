@@ -1,5 +1,5 @@
-#ifndef INAMEDINTERFACE_H_
-#define INAMEDINTERFACE_H_
+#ifndef MANTID_KERNEL_INAMEDINTERFACE_H_
+#define MANTID_KERNEL_INAMEDINTERFACE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include <string>
 
 namespace Mantid
+{
+namespace Kernel
 {
   // Interface ID
   // static const InterfaceID IID_INamedInterface("INamedInterface",0,0);
@@ -52,6 +54,7 @@ namespace Mantid
     virtual ~INamedInterface() {};
   };
 
-}
+} // namespace Kernel
+} // namespace Mantid
 
-#endif /*INAMEDINTERFACE_H_*/
+#endif /*MANTID_KERNEL_INAMEDINTERFACE_H_*/

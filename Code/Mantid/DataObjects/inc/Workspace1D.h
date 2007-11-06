@@ -1,9 +1,10 @@
-#ifndef MANTID_WORKSPACE1D_H_
-#define MANTID_WORKSPACE1D_H_
+#ifndef MANTID_DATAOBJECTS_WORKSPACE1D_H_
+#define MANTID_DATAOBJECTS_WORKSPACE1D_H_
 
 #include "../../Kernel/inc/Workspace.h"
 #include "../../Kernel/inc/Logger.h"
 #include "Histogram1D.h"
+
 /** @class Workspace1D Workspace1D.h
  	
  			Workspace1D
@@ -33,8 +34,10 @@
  	
 namespace Mantid
 {
+namespace DataObjects
+{
 
-class DLLExport Workspace1D: public Workspace
+class DLLExport Workspace1D: public Kernel::Workspace
 {
 public:
 	const std::string id() const {return "Workspace1D";}
@@ -50,11 +53,11 @@ public:
 	//Set Y,E arrays with data vectors
 	void setData(const std::vector<double>&, const std::vector<double>&);
 	//Set X array with shared_ptr<vector>
-	void setX(const Mantid::Histogram1D::parray&);
+	void setX(const Histogram1D::parray&);
 	//Set Y array with shared_ptr<vector<double> >, no associated errors
-	void setData(const Mantid::Histogram1D::parray&);
+	void setData(const Histogram1D::parray&);
 	//Set (Y,E) arrays with shared_ptr<vector<double> >
-	void setData(const Mantid::Histogram1D::parray&, const Mantid::Histogram1D::parray&);
+	void setData(const Histogram1D::parray&, const Histogram1D::parray&);
 	//Get methods
 	const std::vector<double>& getX() const;
 	const std::vector<double>& getY() const;
@@ -70,6 +73,8 @@ protected:
 private:
 	Histogram1D _data;
 };
-}
 
-#endif /*MANTID_WORKSPACE1D_H_*/
+} // namespace DataObjects
+} // namespace Mantid
+
+#endif /*MANTID_DATAOBJECTS_WORKSPACE1D_H_*/

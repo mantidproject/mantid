@@ -5,6 +5,8 @@
 
 namespace Mantid
 {
+namespace DataObjects
+{
 
 
 Histogram1D::Histogram1D()
@@ -159,4 +161,5 @@ bool Histogram1D::isError() const
 	return _E->size()!=0;	
 }
 
+} // namespace DataObjects
 } // namespace Mantid

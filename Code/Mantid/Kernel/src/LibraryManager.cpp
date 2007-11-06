@@ -6,6 +6,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 	
 	LibraryManager* LibraryManager::instance = 0;
 	void* LibraryManager::module = 0;
@@ -53,5 +55,7 @@ namespace Mantid
 
 		destroyMyAlg(obj);
 	}
-}
+
+} // namespace Kernel
+} // namespace Mantid
 

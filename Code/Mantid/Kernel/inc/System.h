@@ -22,8 +22,8 @@
     
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-#ifndef MANTID_SYSTEM_H_
-#define MANTID_SYSTEM_H_
+#ifndef MANTID_KERNEL_SYSTEM_H_
+#define MANTID_KERNEL_SYSTEM_H_
 
 #ifdef _WIN32
   #pragma warning( disable: 4251 )
@@ -32,7 +32,10 @@
   #define DLLExport
 #endif
 
-namespace Mantid {
+namespace Mantid 
+{
+namespace Kernel
+{
 
   /** This class is simply used in the subscription of classes into the various
    *  factories in Mantid. The fact that the constructor takes an int means that
@@ -50,6 +53,7 @@ namespace Mantid {
     }
   };
 
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_SYSTEM_H_*/
+#endif /*MANTID_KERNEL_SYSTEM_H_*/

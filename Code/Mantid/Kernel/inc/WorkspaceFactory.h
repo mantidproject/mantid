@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKSPACEFACTORY_H_
-#define MANTID_WORKSPACEFACTORY_H_
+#ifndef MANTID_KERNEL_WORKSPACEFACTORY_H_
+#define MANTID_KERNEL_WORKSPACEFACTORY_H_
 
 /* Used to register classes into the factory. creates a global object in an 
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -8,8 +8,8 @@
  */
 #define DECLARE_WORKSPACE(classname) \
   namespace { \
-    Mantid::RegistrationHelper register_ws_##classname( \
-       ((Mantid::WorkspaceFactory::Instance()->subscribe<Mantid::classname>(#classname)) \
+    Mantid::Kernel::RegistrationHelper register_ws_##classname( \
+       ((Mantid::Kernel::WorkspaceFactory::Instance()->subscribe<Mantid::DataObjects::classname>(#classname)) \
        , 0)); \
   }
 
@@ -19,6 +19,8 @@
 #include "DynamicFactory.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 
 //----------------------------------------------------------------------
@@ -85,6 +87,7 @@ private:
   static WorkspaceFactory* m_instance;
 };
 
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_WORKSPACEFACTORY_H_*/
+#endif /*MANTID_KERNEL_WORKSPACEFACTORY_H_*/

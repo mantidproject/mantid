@@ -31,6 +31,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 Logger& AnalysisDataService::g_log = Logger::get("AnalysisDataService");
 
 // Returns the single instance of the service
@@ -102,4 +104,5 @@ AnalysisDataService::AnalysisDataService()
 // Initialise the instance pointer to zero
 AnalysisDataService* AnalysisDataService::m_instance = 0;
 
-}
+} // namespace Kernel
+} // namespace Mantid

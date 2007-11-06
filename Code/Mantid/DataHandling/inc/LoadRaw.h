@@ -1,5 +1,5 @@
-#ifndef MANTID_LOADRAW_H_
-#define MANTID_LOADRAW_H_
+#ifndef MANTID_DATAHANDLING_LOADRAW_H_
+#define MANTID_DATAHANDLING_LOADRAW_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include "../../Kernel/inc/Logger.h"
 
 namespace Mantid
+{
+namespace DataHandling
 {
 /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
 
@@ -25,7 +27,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -57,28 +59,29 @@ namespace Mantid
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    StatusCode init();
+    Kernel::StatusCode init();
     
     /** Executes the algorithm, reading in the file and creating and populating
      *  the output workspace
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    StatusCode exec();
+    Kernel::StatusCode exec();
     
     /// Does nothing at present
-    StatusCode final();
+    Kernel::StatusCode final();
     
     /// The name and path of the input file
     std::string m_filename;
     
-	///static reference to the logger class
-	static Logger& g_log;
+    ///static reference to the logger class
+    static Kernel::Logger& g_log;
 
-	/// Personal wrapper for sqrt to allow msvs to compile
-	static double dblSqrt(double in);
+    /// Personal wrapper for sqrt to allow msvs to compile
+    static double dblSqrt(double in);
   };
 
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_LOADRAW_H_*/
+#endif /*MANTID_DATAHANDLING_LOADRAW_H_*/

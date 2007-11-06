@@ -6,9 +6,6 @@
 #include "../inc/Algorithm.h"
 #include <stdexcept>
 
-
-namespace Mantid
-{
 	class algmantest : public Algorithm
 	{
 	public:
@@ -19,12 +16,11 @@ namespace Mantid
 		StatusCode exec() { return StatusCode::SUCCESS; }
 		StatusCode final() { return StatusCode::SUCCESS; }		
 	};
-}
 
 DECLARE_ALGORITHM(algmantest)
 
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
 
 class AlgorithmManagerTest : public CxxTest::TestSuite
 {

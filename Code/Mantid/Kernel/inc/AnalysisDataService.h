@@ -1,5 +1,5 @@
-#ifndef ANALYSISDATASERVICE_H_
-#define ANALYSISDATASERVICE_H_
+#ifndef MANTID_KERNEL_ANALYSISDATASERVICE_H_
+#define MANTID_KERNEL_ANALYSISDATASERVICE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,6 +13,8 @@
 #include <map>
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class AnalysisDataService AnalysisDataService.h Kernel/AnalysisDataService.h
 
@@ -108,8 +110,7 @@ private:
   WorkspaceMap * m_spaces;
 };
 
+} // namespace Kernel
+} // namespace Mantid
 
-
-}
-
-#endif /*ANALYSISDATASERVICE_H_*/
+#endif /*MANTID_KERNEL_ANALYSISDATASERVICE_H_*/

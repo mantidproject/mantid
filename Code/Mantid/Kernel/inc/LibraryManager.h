@@ -1,5 +1,5 @@
-#ifndef LIBRARY_MANAGER__H_
-#define LIBRARY_MANAGER_H_
+#ifndef MANTID_KERNEL_LIBRARY_MANAGER__H_
+#define MANTID_KERNEL_LIBRARY_MANAGER_H_
 
 #include <iostream>
 #include <string>
@@ -7,6 +7,8 @@
 #include "Algorithm.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 
 // the types of the class factories
@@ -31,7 +33,7 @@ private:
 
 };
 
-}
+} // namespace Kernel
+} // namespace Mantid
 
-
-#endif //ALGORITHM_PROVIDER_H_
+#endif //MANTID_KERNEL_ALGORITHM_PROVIDER_H_

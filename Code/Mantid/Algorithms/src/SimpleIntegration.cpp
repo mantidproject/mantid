@@ -49,12 +49,18 @@
 #include <numeric>
 #include <math.h>
 
-DECLARE_ALGORITHM(SimpleIntegration)
+DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms, SimpleIntegration)
 
 namespace Mantid
 {
-Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
+namespace Algorithms
+{
 
+using namespace Kernel;
+using DataObjects::Workspace1D;
+using DataObjects::Workspace2D;
+
+Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
 
 StatusCode SimpleIntegration::init()
 {
@@ -170,4 +176,5 @@ StatusCode SimpleIntegration::final()
   return StatusCode::SUCCESS;
 }
 
-}
+} // namespace Algorithm
+} // namespace Mantid

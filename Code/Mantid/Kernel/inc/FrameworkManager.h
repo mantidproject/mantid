@@ -1,5 +1,5 @@
-#ifndef FRAMEWORKMANAGER_H_
-#define FRAMEWORKMANAGER_H_
+#ifndef MANTID_KERNEL_FRAMEWORKMANAGER_H_
+#define MANTID_KERNEL_FRAMEWORKMANAGER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,6 +10,8 @@
 #include "Logger.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 
 //----------------------------------------------------------------------
@@ -131,6 +133,7 @@ private:
   
 };
 
-} // Namespace Mantid
+} // namespace Kernel
+} // namespace Mantid
 
-#endif /*FRAMEWORKMANAGER_H_*/
+#endif /*MANTID_KERNEL_FRAMEWORKMANAGER_H_*/

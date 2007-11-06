@@ -1,5 +1,5 @@
-#ifndef SAVECSV_H_
-#define SAVECSV_H_
+#ifndef MANTID_DATAHANDLING_SAVECSV_H_
+#define MANTID_DATAHANDLING_SAVECSV_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include "../../Kernel/inc/Logger.h"
 
 namespace Mantid
+{
+namespace DataHandling
 {
 /** @class SaveCSV SaveCSV.h DataHandling/SaveCSV.h
 
@@ -30,7 +32,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 15/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -63,17 +65,17 @@ namespace Mantid
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    StatusCode init();
+    Kernel::StatusCode init();
     
     /** Executes the algorithm, reading in the file and creating and populating
      *  the output workspace
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    StatusCode exec();
+    Kernel::StatusCode exec();
     
     /// Does nothing at present
-    StatusCode final();
+    Kernel::StatusCode final();
     
     /// The name of the file used for storing the workspace
     std::string m_filename;
@@ -84,10 +86,11 @@ namespace Mantid
     /// The line seperator for the CSV file
     std::string m_lineSeperator;   
 
-	///static reference to the logger class
-	static Logger& g_log;
+    ///static reference to the logger class
+    static Kernel::Logger& g_log;
   };
 
-}
+} // namespace DataHandling
+} // namespace Mantid
 
-#endif /*SAVECSV_H_*/
+#endif /*MANTID_DATAHANDLING_SAVECSV_H_*/

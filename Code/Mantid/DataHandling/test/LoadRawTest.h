@@ -8,7 +8,9 @@
 #include "../../DataObjects/inc/Workspace2D.h"
 #include "../../Kernel/inc/AnalysisDataService.h"
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
+using namespace Mantid::DataHandling;
+using Mantid::DataObjects::Workspace2D;
 
 class LoadRawTest : public CxxTest::TestSuite
 {
@@ -17,12 +19,9 @@ public:
   LoadRawTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
+    inputFile = "../../../../Test/HET15869.RAW";
     loader.setProperty("Filename", inputFile);
 
-    // Next 2 lines should be removed when auto-registration of workspaces implemented
-    WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    factory->subscribe<Workspace2D>("Workspace2D");
     outputSpace = "outer";
     loader.setProperty("OutputWorkspace", outputSpace);
   }

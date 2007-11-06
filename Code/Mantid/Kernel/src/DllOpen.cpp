@@ -42,6 +42,11 @@
 #include "windows.h"
 #include "../inc/DllOpen.h"
 
+namespace Mantid
+{
+namespace Kernel
+{
+
 void* DllOpen::OpenDll(const std::string& libName)
 {
 	std::string str = libName + ".dll";
@@ -63,6 +68,11 @@ void DllOpen::CloseDll(void* lib)
 #include "/usr/include/dlfcn.h"
 #include "../inc/DllOpen.h"
 
+namespace Mantid
+{
+namespace Kernel
+{
+
 void* DllOpen::OpenDll(const std::string& libName)
 {
 	std::string str = "lib" + libName + ".so";
@@ -80,3 +90,6 @@ void DllOpen::CloseDll(void* lib)
 }
 
 #endif
+
+} // namespace Kernel
+} // namespace Mantid

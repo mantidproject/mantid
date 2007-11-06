@@ -5,7 +5,7 @@
 
 #include "../inc/AnalysisDataService.h"
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite
 {

@@ -9,7 +9,9 @@
 #include "../../DataObjects/inc/Workspace2D.h"
 #include "../../DataObjects/inc/Workspace1D.h"
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
+using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 
 class SimpleIntegrationTest : public CxxTest::TestSuite
 {

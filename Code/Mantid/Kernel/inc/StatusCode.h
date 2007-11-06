@@ -1,7 +1,9 @@
-#ifndef STATUSCODE_H_
-#define STATUSCODE_H_
+#ifndef MANTID_KERNEL_STATUSCODE_H_
+#define MANTID_KERNEL_STATUSCODE_H_
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class StatusCode StatusCode.h Kernel/StatusCode.h
 
@@ -70,7 +72,7 @@ namespace Mantid
     return (d_code != SUCCESS );
   }
 
-  
-}
+} // namespace Kernel  
+} // namespace Mantid
 
-#endif /*STATUSCODE_H_*/
+#endif /*MANTID_KERNEL_STATUSCODE_H_*/

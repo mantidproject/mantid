@@ -7,7 +7,7 @@
 #include "../inc/Logger.h"
 #include <string>
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
 
 class ConfigSvcTest : public CxxTest::TestSuite
 {
@@ -15,7 +15,7 @@ public:
 
   ConfigSvcTest()
   {
-	  configSvc = Mantid::ConfigSvc::Instance();
+	  configSvc = ConfigSvc::Instance();
 	  configSvc->loadConfig("MantidTest.properties");
   }
 

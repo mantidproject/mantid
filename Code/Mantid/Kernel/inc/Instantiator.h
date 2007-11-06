@@ -1,7 +1,9 @@
-#ifndef MANTID_INSTANTIATOR_H_
-#define MANTID_INSTANTIATOR_H_
+#ifndef MANTID_KERNEL_INSTANTIATOR_H_
+#define MANTID_KERNEL_INSTANTIATOR_H_
 
 namespace Mantid 
+{
+namespace Kernel
 {
 /** @class Instantiator Instantiator.h Kernel/Instantiator.h
 
@@ -84,7 +86,7 @@ public:
   }
 };
 
-
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_INSTANTIATOR_H_*/
+#endif /*MANTID_KERNEL_INSTANTIATOR_H_*/

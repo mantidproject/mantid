@@ -6,8 +6,7 @@
 #include "../inc/AlgorithmFactory.h"
 #include "../inc/Algorithm.h"
 
-namespace Mantid
-{
+using namespace Mantid::Kernel;
 
 class ToyAlg : public Algorithm
 {
@@ -19,11 +18,7 @@ public:
   StatusCode final() { return StatusCode::SUCCESS; }
 };
 
-}
-
 DECLARE_ALGORITHM(ToyAlg)
-
-using namespace Mantid;
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite
 {
@@ -31,7 +26,7 @@ public:
 
   AlgorithmFactoryTest()
   {
-    factory = Mantid::AlgorithmFactory::Instance();
+    factory = AlgorithmFactory::Instance();
   }
   
   void testInstance()

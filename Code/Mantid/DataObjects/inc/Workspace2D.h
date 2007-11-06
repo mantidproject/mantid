@@ -1,5 +1,5 @@
-#ifndef MANTID_WORKSPACE2D_
-#define MANTID_WORKSPACE2D_
+#ifndef MANTID_DATAOBJECTS_WORKSPACE2D_H_
+#define MANTID_DATAOBJECTS_WORKSPACE2D_H_
 
 #include "../../Kernel/inc/Workspace.h"
 #include "../../Kernel/inc/Logger.h"
@@ -36,8 +36,10 @@
  	
 namespace Mantid
 {
+namespace DataObjects
+{
 
-class DLLExport Workspace2D: public Workspace
+class DLLExport Workspace2D: public Kernel::Workspace
 {
 public:
 	const std::string id() const {return "Workspace2D";}
@@ -56,11 +58,11 @@ public:
 	//Set Y,E arrays with data vectors
 	void setData(int, const std::vector<double>&, const std::vector<double>&);
 	//Set X array with shared_ptr<vector>
-	void setX(int, const Mantid::Histogram1D::parray&);
+	void setX(int, const Histogram1D::parray&);
 	//Set Y array with shared_ptr<vector<double> >, no associated errors
-	void setData(int, const Mantid::Histogram1D::parray&);
+	void setData(int, const Histogram1D::parray&);
 	//Set (Y,E) arrays with shared_ptr<vector<double> >
-	void setData(int, const Mantid::Histogram1D::parray&, const Mantid::Histogram1D::parray&);
+	void setData(int, const Histogram1D::parray&, const Histogram1D::parray&);
 	/// Retrieve the number of Histogram1D's in the workspace
 	const int getHistogramNumber() const;
 	//Get methods return the histogram number 
@@ -80,5 +82,6 @@ private:
 	int _nhistogram;
 };
 
+} // namespace DataObjects
 } // Namespace Mantid 
-#endif /*MANTID_WORKSPACE2D_*/
+#endif /*MANTID_DATAOBJECTS_WORKSPACE2D_H_*/

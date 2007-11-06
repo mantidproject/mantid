@@ -31,6 +31,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 
 Logger& WorkspaceFactory::g_log = Logger::get("WorkspaceFactory");
 
@@ -52,4 +54,5 @@ WorkspaceFactory* WorkspaceFactory::Instance()
 	return m_instance;
 }
 
+} // namespace Kernel
 } // Namespace Mantid

@@ -32,6 +32,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
   Logger& Algorithm::g_log = Logger::get("Algorithm");
 
   Algorithm::Algorithm()
@@ -307,4 +309,5 @@ namespace Mantid
     m_isFinalized = true;
   }
 
-}
+} // namespace Kernel
+} // namespace Mantid

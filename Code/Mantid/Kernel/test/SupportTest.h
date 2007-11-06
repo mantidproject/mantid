@@ -52,7 +52,7 @@ public:
 	  TS_ASSERT_EQUALS(X,3.4);
 	  X=9.0;
 	  //invalid leading stuff
-	  TS_ASSERT_EQUALS(convert("   e3.4   ",X),1);
+	  TS_ASSERT_EQUALS(convert("   e3.4   ",X),0);
 	  TS_ASSERT_EQUALS(X,9.0);
 	  //invalid trailing stuff
 	  TS_ASSERT_EQUALS(convert("   3.4g   ",X),0);
@@ -71,7 +71,7 @@ public:
 	  std::string Y;
 	  TS_ASSERT_EQUALS(section(Mline,Y),1);
 	  TS_ASSERT_EQUALS(Y,"V");
-	  TS_ASSERT_EQUALS(Mline," 1 tth");  // Note the non-remove spc
+	  TS_ASSERT_EQUALS(Mline," 1 tth ");  // Note the non-remove spc
 	}
 
 	void testSectPartNum()

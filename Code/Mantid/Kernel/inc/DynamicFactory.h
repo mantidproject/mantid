@@ -1,5 +1,5 @@
-#ifndef MANTID_DYNAMICFACTORY_H_
-#define MANTID_DYNAMICFACTORY_H_
+#ifndef MANTID_KERNEL_DYNAMICFACTORY_H_
+#define MANTID_KERNEL_DYNAMICFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,6 +11,8 @@
 #include <stdexcept>
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
@@ -144,7 +146,8 @@ private:
   FactoryMap _map;
 };
 
-} // Namespace Mantid
+} // namespace Kernel
+} // namespace Mantid
 
-#endif /*MANTID_DYNAMICFACTORY_H_*/
+#endif /*MANTID_KERNEL_DYNAMICFACTORY_H_*/
 

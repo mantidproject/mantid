@@ -9,7 +9,7 @@
 echo
 echo "Making sure that the Mantid library is built and up-to-date..."
 echo
-make -C ../../Build
+# make -C ../../Build
 echo
 
 echo "Generating the source from the test header files..."
@@ -17,7 +17,7 @@ cxxtestgen.pl --error-printer -o runner.cpp *.h
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c
+g++ -o runner.exe runner.cpp -L ../../Release -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML
 echo
 
 echo "Running the tests..."

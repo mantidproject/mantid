@@ -1,5 +1,5 @@
-#ifndef MANTID_SIMPLEINTEGRATION_H_
-#define MANTID_SIMPLEINTEGRATION_H_
+#ifndef MANTID_ALGORITHM_SIMPLEINTEGRATION_H_
+#define MANTID_ALGORITHM_SIMPLEINTEGRATION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,6 +8,8 @@
 #include "../../Kernel/inc/Logger.h"
 
 namespace Mantid
+{
+namespace Algorithms
 {
 /** @class SimpleIntegration SimpleIntegration.h Algorithms/SimpleIntegration.h
 
@@ -50,7 +52,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class SimpleIntegration : public Algorithm
+class SimpleIntegration : public Kernel::Algorithm
 {
 public:
   /// Default constructor
@@ -63,16 +65,16 @@ private:
    * 
    *  @return A StatusCode object indicating whether the operation was successful
    */
-  StatusCode init();
+  Kernel::StatusCode init();
   
   /** Executes the algorithm
    * 
    *  @return A StatusCode object indicating whether the operation was successful
    */
-  StatusCode exec();
+  Kernel::StatusCode exec();
   
   /// Does nothing at present
-  StatusCode final();
+  Kernel::StatusCode final();
   
   /// The X bin to start the integration from
   int m_MinX;
@@ -84,9 +86,10 @@ private:
   int m_MaxY;
 
   ///static reference to the logger class
-  static Logger& g_log;
+  static Kernel::Logger& g_log;
 };
 
-}
+} // namespace Algorithm
+} // namespace Mantid
 
-#endif /*MANTID_SIMPLEINTEGRATION_H_*/
+#endif /*MANTID_ALGORITHM_SIMPLEINTEGRATION_H_*/

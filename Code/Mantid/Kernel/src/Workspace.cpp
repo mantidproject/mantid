@@ -1,6 +1,8 @@
 #include "../inc/Workspace.h"
 namespace Mantid
 {
+namespace Kernel
+{
 
 Logger& Workspace::g_log = Logger::get("Workspace");
 
@@ -35,4 +37,5 @@ std::string Workspace::getComment() const
 	return _comment;
 }
 
+} // namespace Kernel
 } // Namespace Mantid

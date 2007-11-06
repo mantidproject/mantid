@@ -1,6 +1,6 @@
 
-#ifndef MANTID_CONFIGSVC_H_
-#define MANTID_CONFIGSVC_H_
+#ifndef MANTID_KERNEL_CONFIGSVC_H_
+#define MANTID_KERNEL_CONFIGSVC_H_
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -19,6 +19,8 @@ namespace Poco
 }
 
 namespace Mantid
+{
+namespace Kernel
 {
 /** @class ConfigSvc ConfigSvc.h Kernel/ConfigSvc.h
 
@@ -193,7 +195,7 @@ namespace Mantid
 
 	};
 
+} // namespace Kernel
 } // namespace Mantid
 
-
-#endif /*MANTID_CONFIGSVC_H_*/
+#endif /*MANTID_KERNEL_CONFIGSVC_H_*/

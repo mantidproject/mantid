@@ -2,6 +2,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 	Logger& AlgorithmFactory::g_log = Logger::get("AlgorithmFactory");
 
 	// Initialise the instance pointer to zero
@@ -22,4 +24,5 @@ namespace Mantid
 	  return m_instance;
 	}
 
-} // Namespace Mantid
+} // namespace Kernel
+} // namespace Mantid

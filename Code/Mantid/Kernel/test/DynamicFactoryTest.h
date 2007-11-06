@@ -5,7 +5,7 @@
 
 #include "../inc/DynamicFactory.h"
 
-using namespace Mantid;
+using namespace Mantid::Kernel;
 
 // Helper class
 class AFactory : public DynamicFactory<int>

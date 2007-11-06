@@ -9,6 +9,8 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
 	// Initialise the instance pointer to zero
 	ConfigSvc* ConfigSvc::m_instance=0;
 
@@ -91,7 +93,7 @@ namespace Mantid
 	int ConfigSvc::getValue(const std::string& keyName, T& out)
 	{
 		std::string strValue = getString(keyName);
-		int result = Mantid::StrFunc::convert(strValue,out);
+		int result = StrFunc::convert(strValue,out);
 		return result;
 	}
 
@@ -148,4 +150,5 @@ namespace Mantid
 	template int ConfigSvc::getValue(const std::string&,std::string&);
 	template int ConfigSvc::getValue(const std::string&,int&);
 
-}
+} // namespace Kernel
+} // namespace Mantid

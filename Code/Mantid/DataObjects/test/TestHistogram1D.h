@@ -6,11 +6,13 @@
 #include <algorithm> 
 #include <boost/shared_ptr.hpp>
 
+using Mantid::DataObjects::Histogram1D;
+
 class testHistogram1D : public CxxTest::TestSuite
 {
 private: 
 	int nel; // Number of elements in the array
-  Mantid::Histogram1D h, h2; // Two histograms
+  Histogram1D h, h2; // Two histograms
   std::vector<double> x1,y1,e1; // vectors 
   typedef boost::shared_ptr<std::vector<double> > parray;
   parray pa, pb; // Shared_ptr to vectors

@@ -1,5 +1,5 @@
-#ifndef IALGORITHM_H_
-#define IALGORITHM_H_
+#ifndef MANTID_KERNEL_IALGORITHM_H_
+#define MANTID_KERNEL_IALGORITHM_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,6 +7,8 @@
 #include "IProperty.h"
 
 namespace Mantid
+{
+namespace Kernel
 {
 // Declaration of the interface ID ( interface id, major version, minor version)
 // RJT: Have not yet imported the code for this (in IInterface.h in Gaudi)
@@ -77,6 +79,8 @@ namespace Mantid
     virtual bool isExecuted() const = 0;
 
   };
-}
 
-#endif /*IALGORITHM_H_*/
+} // namespace Kernel
+} // namespace Mantid
+
+#endif /*MANTID_KERNEL_IALGORITHM_H_*/

@@ -38,7 +38,7 @@
 #include "../inc/LoadRaw.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 
-#include <math.h>
+#include <cmath>
 #include <boost/shared_ptr.hpp>
 
 // Declaration of the FORTRAN functions used to access the RAW file
@@ -51,10 +51,16 @@ extern "C" void getdat_(const char* fname, const int& spec_no, const int& nspec,
     int* idata, int& length, int& errcode, unsigned len_fname);
 extern "C" void close_data_file__();
 
-DECLARE_ALGORITHM(LoadRaw)
+DECLARE_NAMESPACED_ALGORITHM(Mantid::DataHandling, LoadRaw)
 
 namespace Mantid
 {
+namespace DataHandling
+{
+
+  using namespace Kernel;
+  using DataObjects::Workspace2D;
+
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
   // Empty constructor
@@ -131,7 +137,7 @@ namespace Mantid
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
       std::vector<double> e(lengthIn-1);
-	  std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
+      std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(i-1, timeChannelsVec);
       localWorkspace->setData(i-1, v, e);
@@ -153,10 +159,11 @@ namespace Mantid
 		return sqrt(in);
 	}
   
-  StatusCode LoadRaw::final()
+	StatusCode LoadRaw::final()
   {
     // Does nothing at present
     return StatusCode::SUCCESS;
   }
   
-}
+} // namespace DataHandling
+} // namespace Mantid
