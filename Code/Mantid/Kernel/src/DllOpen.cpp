@@ -65,7 +65,7 @@ void DllOpen::CloseDll(void* lib)
 
 void* DllOpen::OpenDll(const std::string& libName)
 {
-	std::string str = "./lib" + libName + ".so";
+	std::string str = "lib" + libName + ".so";
 	return dlopen(str.c_str(), RTLD_NOW);
 }
 
