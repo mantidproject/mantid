@@ -6,6 +6,8 @@
 #include "../inc/Algorithm.h"
 #include <stdexcept>
 
+using namespace Mantid::Kernel;
+
 	class algmantest : public Algorithm
 	{
 	public:
