@@ -38,8 +38,6 @@ else:
 		if file.endswith('.so'):
 			libList.append(file.replace('.so','')[3:])
 
-print libList
-
 #GET LIST OF TESTS
 path = '../../'
 testfolder = '/test'
@@ -71,8 +69,6 @@ normPath = []
 
 for dir in libDirList:
 	normPath.append(os.path.abspath(dir))
-
-print normPath
 
 env=Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
