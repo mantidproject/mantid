@@ -19,7 +19,7 @@ public:
   LoadRawTest()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/HET15869.RAW";
+    inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setProperty("Filename", inputFile);
 
     outputSpace = "outer";
