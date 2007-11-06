@@ -21,7 +21,7 @@ else:
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	#libDirList.append('/usr/lib/python' sys.version[0:sys.version.find(' ')])
-	cflags = ['-Wall', '-fPIC']
+	cflags = ['-fPIC']
 	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
 		
 	libDir =''
