@@ -9,7 +9,6 @@ from socket import gethostname
 #get libraries and the library directories
 libDirList = ['../', '.']
 libList = ['python' + sys.version[0:3]]
-print libList
 cflags = []
 
 cppPaths = ['../../Third_Party/include/']
