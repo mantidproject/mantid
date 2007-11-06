@@ -52,7 +52,7 @@ namespace Algorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class SimpleIntegration : public Kernel::Algorithm
+class DLLExport SimpleIntegration : public Kernel::Algorithm
 {
 public:
   /// Default constructor

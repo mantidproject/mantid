@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../Third_Party/include"
+				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\wmx35332\VisualStudioWorkspace\Mantid\Kernel\inc&quot;;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="1"
 				DebugInformationFormat="3"
@@ -174,7 +174,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DllOpen.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LibraryManager.cpp"
 				>
 			</File>
 			<File
@@ -220,6 +228,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\DeclareUserAlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\DllOpen.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\DynamicFactory.h"
 				>
 			</File>
@@ -248,11 +264,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Logger.h"
+				RelativePath=".\inc\LibraryManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MsgStream.h"
+				RelativePath=".\inc\Logger.h"
 				>
 			</File>
 			<File

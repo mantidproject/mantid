@@ -146,9 +146,9 @@ namespace Kernel
 /// \cond TEMPLATE 
 
 
-	template int ConfigSvc::getValue(const std::string&,double&);
-	template int ConfigSvc::getValue(const std::string&,std::string&);
-	template int ConfigSvc::getValue(const std::string&,int&);
+	template DLLExport int ConfigSvc::getValue(const std::string&,double&);
+	template DLLExport int ConfigSvc::getValue(const std::string&,std::string&);
+	template DLLExport int ConfigSvc::getValue(const std::string&,int&);
 
 } // namespace Kernel
 } // namespace Mantid
