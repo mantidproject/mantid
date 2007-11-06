@@ -20,8 +20,11 @@ namespace Kernel
 	LibraryManager::~LibraryManager()
 	{
 		//Close lib
-		DllOpen::CloseDll(module);
-		module = 0;
+		if (module)
+		{
+			DllOpen::CloseDll(module);
+			module = 0;
+		}
 	}
 
 	LibraryManager* LibraryManager::Initialise(const std::string& libName)
@@ -31,7 +34,7 @@ namespace Kernel
 			instance = new LibraryManager;
 				
 			//Load dynamically loaded library
-			module = DllOpen::OpenDll(libName.c_str());
+			module = DllOpen::OpenDll(libName);
 			if (!module) 
 			{
 				std::cout << "Could not open library!\n";
