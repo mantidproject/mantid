@@ -33,7 +33,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 05/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -51,6 +51,7 @@ namespace Algorithms
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SimpleIntegration : public Kernel::Algorithm
 {
@@ -61,19 +62,9 @@ public:
 	virtual ~SimpleIntegration() {};
 	
 private:
-  /** Performs the initialisation task of retrieving and setting parameters
-   * 
-   *  @return A StatusCode object indicating whether the operation was successful
-   */
+  // Overridden Algorithm methods
   Kernel::StatusCode init();
-  
-  /** Executes the algorithm
-   * 
-   *  @return A StatusCode object indicating whether the operation was successful
-   */
   Kernel::StatusCode exec();
-  
-  /// Does nothing at present
   Kernel::StatusCode final();
   
   /// The X bin to start the integration from
@@ -85,7 +76,7 @@ private:
   /// The Y bin to finish the integration at
   int m_MaxY;
 
-  ///static reference to the logger class
+  /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
 
