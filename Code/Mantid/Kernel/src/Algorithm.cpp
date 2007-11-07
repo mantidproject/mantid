@@ -29,6 +29,8 @@
 
 #include "../inc/Algorithm.h"
 #include "../inc/AnalysisDataService.h"
+#include <iostream>
+#include <iomanip>
 
 namespace Mantid
 {
@@ -36,55 +38,106 @@ namespace Kernel
 {
   Logger& Algorithm::g_log = Logger::get("Algorithm");
 
-  Algorithm::Algorithm()
-  :
-  m_outputWorkspace(0),
-  m_name("unknown"),
-  m_version("unknown"),
-  m_isInitialized(false),
-  m_isExecuted(false),
-  m_isFinalized(false)
+  Algorithm::Algorithm() :
+    m_inputWorkspace(0),
+    m_outputWorkspace(0),
+    m_name("unknown"),
+    m_version("unknown"),
+    m_isInitialized(false),
+    m_isExecuted(false),
+    m_isFinalized(false)
   {
-    m_subAlgms = new std::vector<Algorithm *>();
+     std::cout<<"Algorithm logger == "<<
+	std::setbase(16)<<reinterpret_cast<long>(&Algorithm::g_log)
+		<<std::endl;
+     std::cout<<"Algorithm == "<<
+	 std::setbase(16)<<reinterpret_cast<long>(this)
+		<<std::endl;
+	  
   }
   
   Algorithm::~Algorithm()
   {
-    delete m_subAlgms;
+      std::cout<<"Deleting Algorithm "<<std::hex
+	<<reinterpret_cast<long>(this)<<std::endl;
   }
   
-  const std::string& Algorithm::name() const 
+  const std::string& 
+  Algorithm::name() const 
+      /*! 
+        The identifying name of the algorithm object. This is the name of a 
+	particular instantiation of an algorithm object as opposed to the name 
+	of the algorithm itself, e.g. "LinearTrackFit" may be the name of a 
+	concrete algorithm class, whereas "ApproxTrackFit" and 
+        "BestTrackFit" may be two instantiations of the class configured 
+         to find tracks with different fit criteria.
+         \return Name of Instance  
+      */
   {
     return m_name;
   }
   
-  const std::string& Algorithm::version() const 
+  const std::string& 
+  Algorithm::version() const 
+     /*!
+         \return Version string
+     */ 
   {
     return m_version;
   }
   
-  StatusCode Algorithm::initialize() 
+  StatusCode 
+  createSubAlgorithm( const std::string& type, const std::string& name, 
+                                    Algorithm*& pSubAlg )
+   /*! Create a sub algorithm.  A call to this method creates a child algorithm object.
+        Note that the returned pointer is to Algorithm 
+	 (as opposed to IAlgorithm), and thus the methods of IProperty 
+	 are also available for the direct setting of the sub-algorithm's
+	 properties. Using this mechanism instead of creating daughter 
+	algorithms directly via the new operator is prefered since then 
+	the framework can take care of all of the necessary book-keeping.
+	    
+	 \param type :: The concrete algorithm class of the sub algorithm
+	 \param name :: The name to be given to the sub algorithm
+	 \param pSubAlg :: Set to point to the newly created algorithm object
+         \retval  Success since nothing every happens.
+    */
+  {
+      return StatusCode::SUCCESS;	  
+  }
+  
+  StatusCode 
+  Algorithm::initialize() 
+   /** Initialization method invoked by the framework. This method is responsible
+	   *  for any bookkeeping of initialization required by the framework itself.
+	   *  It will in turn invoke the initialize() method of the derived algorithm,
+	   * and of any sub-algorithms which it creates. 
+	   */
   {
     // Bypass the initialization if the algorithm
     // has already been initialized.
-    if ( m_isInitialized ) return StatusCode::SUCCESS;
+    if ( m_isInitialized ) 
+	return StatusCode::SUCCESS;
         
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
     {
       // Invoke the initialize() method of the derived class
       StatusCode status = init();
-      if( status.isFailure() ) return StatusCode::FAILURE;
+      if( status.isFailure() ) 
+	 return StatusCode::FAILURE;
   
       // Now initialize any sub-algorithms
-      std::vector<Algorithm *>::iterator it;
-      for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
-        status = (*it)->initialize();
-        if( status.isFailure() ) {
-          g_log.error("Error initializing one or several sub-algorithms");
-          return status;        
+      std::vector<Algorithm*>::iterator it;
+      for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++) 
+	{
+          status = (*it)->initialize();
+           if( status.isFailure() ) 
+	     {
+                g_log.error("Error initializing one or several sub-algorithms");
+                return status;        
+             }
         }
-      }
       
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       setInitialized();
@@ -105,74 +158,68 @@ namespace Kernel
   }
   
   StatusCode Algorithm::execute() 
+   /** The actions to be performed by the algorithm on a dataset. This method is
+	   *  invoked for top level algorithms by the application manager.
+	   *  This method invokes exec() method. 
+	   *  For sub-algorithms either the execute() method or exec() method 
+	   *  must be EXPLICITLY invoked by  the parent algorithm.
+	   */
   {
     // Return a failure if the algorithm hasn't been initialized
-    if ( !isInitialized() ) return StatusCode::FAILURE;
+    if ( !isInitialized() ) 
+	return StatusCode::FAILURE;
 
     // Set the input and output workspaces
     std::string inputWorkspaceName;
     StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
-    // If property not set print warning message and set pointer to null
+     m_outputWorkspace = 0;
+     m_inputWorkspace = 0;
+     m_outputWorkspaceName = "";
+     AnalysisDataService* ADS = AnalysisDataService::Instance();
     if ( status.isFailure() )
-    {
-      g_log.information("Input workspace property not set");
-      m_inputWorkspace = 0;
-    }
-    else 
-    {
-      AnalysisDataService *data = AnalysisDataService::Instance();
-      StatusCode status = data->retrieve(inputWorkspaceName, m_inputWorkspace);
-      if ( status.isFailure() )
-      {
-        g_log.error("Input workspace doesn't exist");
-        return status;
-      }
-    }
+       g_log.information("Input workspace property not set");
+     else
+        {
+ 
+            status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
+             if (status.isFailure() )
+               {
+                   g_log.error("Input workspace doesn't exist");
+		    return status;
+                }
+	}
+   // Output Workspace:
     status = getProperty("OutputWorkspace", m_outputWorkspaceName);
-    // If property not set print warning message and set pointer to null
     if ( status.isFailure() )
-    {
-      g_log.information("Output workspace property not set");
-      m_outputWorkspaceName = "";
-    }
-    m_outputWorkspace = 0;
+       g_log.information("Output workspace property not set");
+  
     
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try
-    {
-      // Call the concrete algorithm's exec method
-      StatusCode status = exec();
+      {
+         // Call the concrete algorithm's exec method
+         StatusCode status = exec();
 
       // Register the output workspace with the analysis data service
-      AnalysisDataService *data = AnalysisDataService::Instance();
       if ( m_outputWorkspace )
-      {
-        StatusCode stat = data->add(m_outputWorkspaceName, m_outputWorkspace);
-        if ( stat.isFailure() )
         {
-          g_log.error("Unable to register output workspace");
-        }
-      }
-      else 
-      {
-        g_log.warning("Output workspace has not been created");
-      }
+          status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
+           if ( status.isFailure() ) 
+              g_log.error("Unable to register output workspace");
+         }
+   
       setExecuted(true);
       
       // NOTE THAT THERE IS NO EXECUTION OF SUB-ALGORITHMS HERE.
       // THIS HAS TO BE EXPLICITLY DONE BY THE PARENT ALGORITHM'S exec() METHOD.
       
-      if ( status.isFailure() )
-      {
-        // Gaudi calls the exception service error handler here, I will just return with failure.
-      }
-  
       return status;
     }
     // Gaudi also specifically catches GaudiException & std:exception.
     catch (...)
     {
-      // Gaudi sets the executed flag to true here despite the exception. Not sure why.
+      // Gaudi sets the executed flag to true here despite the exception. 
+       // This allows it to move to the next command or it just loops indefinately.
       setExecuted(true);
   
       g_log.error("UNKNOWN Exception is caught ");
@@ -188,37 +235,51 @@ namespace Kernel
     return StatusCode::FAILURE;
   }
   
-  StatusCode Algorithm::finalize() 
+  StatusCode 
+  Algorithm::finalize() 
+      /*! 
+         System finalization. This method invokes the finalize() method of a 
+	 concrete algorithm and the finalize() methods of all of that algorithm's 
+	 sub algorithms. 
+	*/ 
   {
     // Bypass the finalization if the algorithm hasn't been initialized or
     // has already been finalized.
-    if ( !isInitialized() || isFinalized() ) return StatusCode::FAILURE;
+    if ( !isInitialized() || isFinalized() ) 
+	return StatusCode::FAILURE;
   
     // Invoke final() method of the derived class inside a try/catch clause
     try
     {
-      StatusCode status = StatusCode::SUCCESS;
-      
+       StatusCode status(StatusCode::SUCCESS,true);
+
       // Finalize first any sub-algoithms (it can be done more than once)
       // Gaudi at some point had a bug if this wasn't done first.
-      std::vector<Algorithm *>::iterator it;
-      for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
-        status = (*it)->finalize();
+    
+	std::vector<Algorithm *>::iterator it;
+        for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++) 
+	{  
+             status = (*it)->finalize();
         // The next test isn't in Gaudi, which ignores the outcome of finalizing sub-algorithms
-        if( status.isFailure() ) {
-          g_log.error(" Error finalizing one or several sub-algorithms");
-          return status;
-        }
-      }
+	// THIS IS BECAUSE subAlgms MUST BE DELETED!!!!
+             if( status.isFailure() ) 
+		{
+                  g_log.error(" Error finalizing one or several sub-algorithms:"+(*it)->name());
+		  break;
+                }
+	}		
   
       // Invoke the final() method of the derived class
-      status = final();
-      if( status.isFailure() ) return status;
+      StatusCode Fstatus= final();
+      if( Fstatus.isFailure() ) 
+	  status=Fstatus;
   
       // Release all sub-algorithms (uses IInterface release method in Gaudi instead of direct delete)
-      for (it = m_subAlgms->begin(); it != m_subAlgms->end(); it++) {
-        delete *it;
-      }
+      for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++) 
+	{
+          delete (*it);
+        }
+	m_subAlgms.clear();
       
       // Indicate that this Algorithm has been finalized to prevent duplicate attempts
       setFinalized( );
@@ -230,43 +291,54 @@ namespace Kernel
     catch (...)
     {
       // (1) perform the printout
-      g_log.error("UNKNOWN Exception is caught ");    
+      g_log.error("UNKNOWN Exception is caught ");   
+      std::vector<Algorithm *>::iterator it;	    
+      for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++) 
+	 delete (*it);
+	m_subAlgms.clear();
     }
     
     // Only gets to here if an exception is encountered
     return StatusCode::FAILURE;
   }
   
-  bool Algorithm::isInitialized( ) const 
+  bool 
+  Algorithm::isInitialized( ) const 
+  /// Has the Algorithm already been initialized?s
   {
     return m_isInitialized;
   }
   
-  bool Algorithm::isExecuted() const 
+  bool 
+  Algorithm::isExecuted() const 
+   /// Has the Algorithm already been executed
   {
     return m_isExecuted;
   }
   
-  bool Algorithm::isFinalized( ) const
+  bool 
+  Algorithm::isFinalized( ) const
+  /// Has the Algorithm already been finalized?
   {
     return m_isFinalized;
   }
   
-  std::vector<Algorithm*>* Algorithm::subAlgorithms( ) const 
-  {
-    return m_subAlgms;
-  }  
-  
   // IProperty implementation
   // Empty for now - requires Property manager
-//  StatusCode Algorithm::setProperty(const Property& p) {
-//          return m_propertyMgr->setProperty(p);
-//  }
-  StatusCode Algorithm::setProperty(const std::string& s) {
+  //  StatusCode Algorithm::setProperty(const Property& p) {
+  //          return m_propertyMgr->setProperty(p);
+  //  }
+  StatusCode Algorithm::setProperty(const std::string& s) 
+    {
+      if (s.empty())
+         return StatusCode::FAILURE;
     m_properties[s] = "";
     return StatusCode::SUCCESS;
   }
-  StatusCode Algorithm::setProperty(const std::string& n, const std::string& v) {
+  StatusCode Algorithm::setProperty(const std::string& n, const std::string& v) 
+  { 
+      if (n.empty())
+         return StatusCode::FAILURE;
     m_properties[n] = v;
     return StatusCode::SUCCESS;
   }
@@ -276,9 +348,12 @@ namespace Kernel
 //  const Property& Algorithm::getProperty( const std::string& name) const{
 //          return m_propertyMgr->getProperty(name);
 //  }
-  StatusCode Algorithm::getProperty(const std::string& n, std::string& v ) const {
+  StatusCode 
+  Algorithm::getProperty(const std::string& n, std::string& v ) const 
+  {
     // Check if key is in map & if not return with failure
-    if (m_properties.find(n) == m_properties.end()) return StatusCode::FAILURE;
+    if (m_properties.find(n) == m_properties.end()) 
+	return StatusCode::FAILURE;
 
     // Retrieve the value corresponding to the key
     v = m_properties.find(n)->second;

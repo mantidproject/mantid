@@ -69,92 +69,44 @@ class Workspace;
 */
   class DLLExport Algorithm : virtual public IAlgorithm
   {
-  public:
+   public:
 	  
-    /// Default constructor
-    Algorithm();
-	  
-	  /// Virtual destructor
-	  virtual ~Algorithm();
+     Algorithm();
+     virtual ~Algorithm();
 
-	  /** The identifying name of the algorithm object. This is the name of a 
-	   *  particular instantiation of an algorithm object as opposed to the name 
-	   *  of the algorithm itself, e.g. "LinearTrackFit" may be the name of a 
-	   *  concrete algorithm class,
-	   *  whereas "ApproxTrackFit" and "BestTrackFit" may be two instantiations 
-	   *  of the class configured to find tracks with different fit criteria. 
-	   */
-	  virtual const std::string& name() const;
+	 
+      virtual const std::string& name() const;
 
 	  // IAlgorithm methods
 	  
-	  virtual const std::string& version() const;
+       virtual const std::string& version() const;
+       virtual StatusCode initialize();
+       virtual StatusCode execute();
+       virtual StatusCode finalize();	  
 	  
-	  /** Initialization method invoked by the framework. This method is responsible
-	   *  for any bookkeeping of initialization required by the framework itself.
-	   *  It will in turn invoke the initialize() method of the derived algorithm,
-	   * and of any sub-algorithms which it creates. 
-	   */
-	  virtual StatusCode initialize();
-	  
-	  /** The actions to be performed by the algorithm on a dataset. This method is
-	   *  invoked for top level algorithms by the application manager.
-	   *  This method invokes exec() method. 
-	   *  For sub-algorithms either the execute() method or exec() method 
-	   *  must be EXPLICITLY invoked by  the parent algorithm.
-	   */
-	  virtual StatusCode execute();
-
-	  /** System finalization. This method invokes the finalize() method of a 
-	   *  concrete algorithm and the finalize() methods of all of that algorithm's 
-	   *  sub algorithms. 
-	   */ 
-	  virtual StatusCode finalize();	  
-	  
-    /// Has the Algorithm already been initialized?
+    
     // Protected in Gaudi version
-	  virtual bool isInitialized() const;
+	virtual bool isInitialized() const;
+        virtual bool isExecuted() const;
+	 virtual bool isFinalized() const;
 
-    /// Has this algorithm been executed since the last reset?
-    virtual bool isExecuted() const;
-	  
-    /// Has the Algorithm already been finalized?
-    // Protected in Gaudi version
-    virtual bool isFinalized() const;
-
-    /** Create a sub algorithm. 
-	   *  A call to this method creates a child algorithm object.
-	   *  Note that the returned pointer is to Algorithm 
-	   *  (as opposed to IAlgorithm), and thus the methods of IProperty 
-	   *  are also available for the direct setting of the sub-algorithm's
-	   *  properties. Using this mechanism instead of creating daughter 
-	   *  algorithms directly via the new operator is prefered since then 
-	   *  the framework may take care of all of the necessary book-keeping.
-	   * 
-	   *  @param type The concrete algorithm class of the sub algorithm
-	   *  @param name The name to be given to the sub algorithm
-	   *  @param pSubAlg Set to point to the newly created algorithm object
-	   */
+    
     // Need Algorithm manager/factory before this can be implemented.
-	  StatusCode createSubAlgorithm( const std::string& type, 
-	                                 const std::string& name, Algorithm*& pSubAlg );
+	StatusCode createSubAlgorithm(const std::string&, 
+				const std::string&, Algorithm*& );
 	  
 	  /// List of sub-algorithms. Returns a pointer to a vector of (sub) Algorithms
-	  std::vector<Algorithm*>* subAlgorithms() const;
+	const std::vector<Algorithm*>& subAlgorithms() const { return m_subAlgms; }
+	std::vector<Algorithm*>& subAlgorithms()  { return m_subAlgms; }
 	  
-	  /// Implementation of IProperty::setProperty 
+	
 //	  virtual StatusCode setProperty( const Property& p );
-	  /// Implementation of IProperty::setProperty
-	  virtual StatusCode setProperty( const std::string& s );
+	  virtual StatusCode setProperty( const std::string&);
 	  /// Implementation of IProperty::setProperty
 	  virtual StatusCode setProperty( const std::string& n, const std::string& v);
-	  /// Implementation of IProperty::getProperty
 //	  virtual StatusCode getProperty(Property* p) const;
-	  /// Implementation of IProperty::getProperty 
 //	  virtual const Property& getProperty( const std::string& name) const;
-	  /// Implementation of IProperty::getProperty
 	  virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
-	  /// Implementation of IProperty::getProperties
 //	  virtual const std::vector<Property*>& getProperties( ) const;  
 	  
   protected:
@@ -180,12 +132,8 @@ class Workspace;
 	  void setFinalized();
 	  
 	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
-	  Workspace* m_inputWorkspace;
-	  
-	  /** A pointer to the output workspace
-	   *  This workspace is actually created by the concrete algorithm
-	   */
-    Workspace* m_outputWorkspace;
+	  Workspace* m_inputWorkspace;     
+	  Workspace* m_outputWorkspace;  /// OutputWorkspace :: Created by the concreate Algorithm
 	  
   private:
 
@@ -197,7 +145,7 @@ class Workspace;
 
 	  std::string m_name;            ///< Algorithm's name for identification
 	  std::string m_version;         ///< Algorithm's version
-	  std::vector<Algorithm *>* m_subAlgms; ///< Sub algorithms
+	  std::vector<Algorithm *> m_subAlgms; ///< Sub algorithms [
 
 	  ///static refenence to the logger class
 	  static Logger& g_log;
@@ -215,7 +163,7 @@ class Workspace;
 	  /// Temporary way of storing properties for algorithms, in the current absence of a Property class.
 	  // N.B. hash_map is not in the standard stl, hence the wierd namespace.
 //	  __gnu_cxx::hash_map< std::string, std::string > m_properties;
-	  std::map< std::string, std::string > m_properties;
+	  std::map<std::string, std::string > m_properties;
 
   };
   

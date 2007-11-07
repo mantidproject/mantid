@@ -47,14 +47,21 @@ namespace Kernel
 //    StatusCode();
     
     /// Constructor.
-    StatusCode( unsigned long code, bool checked = false );
+    StatusCode( unsigned long code, bool checked = false ) :
+         d_code(code),m_checked(checked), m_severity(0) {}
+
+		 
     
     /** Test for a status code of FAILURE.
     * N.B. This is a specific type of failure where there aren't any more
     * appropriate staus codes. To test for any failure use :
     * if ( !StatusCode.isSuccess() ) ...
     */
-    bool isFailure() const;
+    bool isFailure() const
+    {
+      m_checked = true;
+      return (d_code != SUCCESS );
+    }
     
   protected:     // Why protected & not private?
 	unsigned long   d_code;      ///< The status code
@@ -63,14 +70,6 @@ namespace Kernel
 	int m_severity;              ///< The seriousness of an error (unused)
     
   };
-  
-  inline StatusCode::StatusCode( unsigned long code, bool checked ) : 
-	  d_code(code),m_checked(checked), m_severity(0) {}
-  
-  inline bool StatusCode::isFailure() const {
-    m_checked = true;
-    return (d_code != SUCCESS );
-  }
 
 } // namespace Kernel  
 } // namespace Mantid
