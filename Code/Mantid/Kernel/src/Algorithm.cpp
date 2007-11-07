@@ -53,7 +53,6 @@ namespace Kernel
      std::cout<<"Algorithm == "<<
 	 std::setbase(16)<<reinterpret_cast<long>(this)
 		<<std::endl;
-	  
   }
   
   Algorithm::~Algorithm()
@@ -171,16 +170,19 @@ namespace Kernel
 
     // Set the input and output workspaces
     std::string inputWorkspaceName;
-    StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
+   
      m_outputWorkspace = 0;
      m_inputWorkspace = 0;
      m_outputWorkspaceName = "";
      AnalysisDataService* ADS = AnalysisDataService::Instance();
-    if ( status.isFailure() )
-       g_log.information("Input workspace property not set");
+    
+     StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
+     if ( status.isFailure() )
+       {
+          g_log.information("Algorthm:: Input workspace property not set ");
+       }
      else
         {
- 
             status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
              if (status.isFailure() )
                {
@@ -188,24 +190,23 @@ namespace Kernel
 		    return status;
                 }
 	}
-   // Output Workspace:
-    status = getProperty("OutputWorkspace", m_outputWorkspaceName);
-    if ( status.isFailure() )
-       g_log.information("Output workspace property not set");
-  
     
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try
       {
          // Call the concrete algorithm's exec method
          StatusCode status = exec();
-
+	      
       // Register the output workspace with the analysis data service
       if ( m_outputWorkspace )
         {
-          status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
-           if ( status.isFailure() ) 
-              g_log.error("Unable to register output workspace");
+            // Output Workspace:
+            status = getProperty("OutputWorkspace", m_outputWorkspaceName);
+	    if ( status.isFailure() )
+	      g_log.information("Output workspace property not set");
+             status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
+             if ( status.isFailure() ) 
+                g_log.error("Algorithm: Unable to register output workspace");
          }
    
       setExecuted(true);

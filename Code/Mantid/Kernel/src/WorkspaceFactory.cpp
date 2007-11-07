@@ -39,18 +39,16 @@ Logger& WorkspaceFactory::g_log = Logger::get("WorkspaceFactory");
 // Initialise the instance pointer to zero
 WorkspaceFactory* WorkspaceFactory::m_instance = 0;
 
-WorkspaceFactory::WorkspaceFactory()
-{
-}
+WorkspaceFactory::WorkspaceFactory() : DynamicFactory<Workspace>()
+{ }
 
 WorkspaceFactory::~WorkspaceFactory()
-{
-	delete m_instance;
-}
+{ }
 
 WorkspaceFactory* WorkspaceFactory::Instance()
 {
-	if (!m_instance) m_instance=new WorkspaceFactory;
+	if (!m_instance) 
+	   m_instance=new WorkspaceFactory;
 	return m_instance;
 }
 

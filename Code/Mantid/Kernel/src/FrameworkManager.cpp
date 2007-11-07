@@ -64,18 +64,18 @@ std::string FrameworkManager::initialize()
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
-  return "Framework Manager initialised!";
+  return std::string("Framework Manager initialised!");
 }
 
 void FrameworkManager::clear()
 {
-	algManager->clear();
+    algManager->clear();
 }
 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 {
-   IAlgorithm *alg = algManager->createAlgorithm(algName);
-	return alg;
+   IAlgorithm *alg = algManager->create(algName);
+   return alg;
 }
 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
@@ -84,6 +84,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
   IAlgorithm *alg = createAlgorithm(algName);
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	
   boost::char_separator<char> sep(",");
   tokenizer propPairs(propertiesArray, sep);
   // Iterate over the properties
@@ -94,23 +95,24 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     vector<string> property(properties.begin(), properties.end());
     // Call the appropriate setProperty method on the algorithm
     if ( property.size() == 2)
-    {
-      alg->setProperty(property[0],property[1]);
-    }
+      {
+         alg->setProperty(property[0],property[1]);
+       }
     else if ( property.size() == 1)
-    {
-      alg->setProperty(property[0]);
-    }
+      {
+        alg->setProperty(property[0]);
+      }
     // Throw if there's a problem with the string
     else
-    {
-      throw runtime_error("Misformed properties string");
-    }
+      {
+        throw runtime_error("Misformed properties string");
+      }
   }  
   return alg;
 }
 
-IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string& propertiesArray)
+IAlgorithm* 
+FrameworkManager::exec(const std::string& algName, const std::string& propertiesArray)
 {
   // Make use of the previous method for algorithm creation and property setting
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
@@ -125,14 +127,15 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
   // Now execute the algorithm
   StatusCode status = alg->execute();
   if (status.isFailure())
-  {
-    throw runtime_error("Unable to successfully execute algorithm " + algName);
-  }  
+    {
+	throw runtime_error("Unable to successfully execute algorithm " + algName);
+    }  
   
   return alg;
 }
 
-Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
+Workspace* 
+FrameworkManager::getWorkspace(const std::string& wsName)
 {
   Workspace *space;
   StatusCode status = data->retrieve(wsName, space);

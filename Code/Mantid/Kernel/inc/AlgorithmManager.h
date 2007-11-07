@@ -25,7 +25,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "AlgorithmFactory.h"
+#include "DynamicFactory.h"
 #include <vector>
 
 namespace Mantid
@@ -62,7 +62,7 @@ namespace Kernel
 	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class DLLExport AlgorithmManager  : public AlgorithmFactory
+class DLLExport AlgorithmManager  : public DynamicFactory<IAlgorithm>
 {
 public:
 
@@ -71,19 +71,14 @@ public:
 	 *  @returns A pointer to the Algorithm Manager instance
 	 */
 	static AlgorithmManager* Instance();
-
-
-	/** Creates an instance of an algorithm
-	 * 
-	 *  @param algName The name of the algorithm required
-	 *  @return A pointer to the created algorithm
-	 * 
-	 *  @throw runtime_error Thrown if algorithm requested is not registered
-	 */
-	IAlgorithm* createAlgorithm(const std::string& algName);
+	
+        // This manager
+	IAlgorithm* create(const std::string&);
+	IAlgorithm* createUnmanaged(const std::string&) const;
 
 	/// finalizes and deletes all registered algorithms
 	void clear();
+         int size() const { return regAlg.size(); }
 
 private:
 
@@ -94,16 +89,15 @@ private:
      *  Prevents client from calling 'delete' on the pointer handed 
      *  out by Instance
      */
-    virtual ~AlgorithmManager();
+    ~AlgorithmManager();
 
  ///static reference to the logger class
 	static Logger& g_log;
-  /// internal counter of registered algorithms
-	static int m_no_of_alg;
-  /// vector containing pointers to registered algorithms
-	std::vector<IAlgorithm*> list;
+ 
+	int no_of_alg;    ///< counter of registered algorithms
+	std::vector<IAlgorithm*> regAlg;   ///<  pointers to registered algorithms [policy???]
 	/// Pointer to the Algorithm Manager instance
-	static AlgorithmManager* m_instance;
+	static AlgorithmManager* m_instance;  
 };
 
 } // namespace Kernel

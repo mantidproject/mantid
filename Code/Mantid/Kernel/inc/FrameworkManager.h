@@ -59,13 +59,13 @@ public:
   /// Default constructor
   FrameworkManager();
   /// Destructor
-	virtual ~FrameworkManager();	
+   virtual ~FrameworkManager();	
 	
 	/// Creates all of the required services
-	std::string initialize();
+    std::string initialize();
 	/// At the moment clears all memory associated with Algorithm Manager
 	/// may do more in the future
-	void clear();
+     void clear();
 	/** Creates an instance of an algorithm
 	 * 
 	 *  @param algName The name of the algorithm required
@@ -73,7 +73,7 @@ public:
 	 * 
 	 *  @throw runtime_error Thrown if algorithm requested is not registered
 	 */
-	IAlgorithm* createAlgorithm(const std::string& algName);
+     IAlgorithm* createAlgorithm(const std::string& algName);
 
   /** Creates an instance of an algorithm and sets the properties provided
    * 
@@ -122,8 +122,6 @@ private:
 
   /// Pointer to the Algorithm Factory instance
   AlgorithmManager *algManager;
-
-
   /// Pointer to the Workspace Factory instance
   WorkspaceFactory *workFactory;
   /// Pointer to the Analysis Data Service

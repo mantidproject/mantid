@@ -18,7 +18,7 @@ namespace Kernel
 		{
 			_log.fatal(msg); 
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -31,7 +31,7 @@ namespace Kernel
 		{
 			_log.critical(msg);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -44,7 +44,7 @@ namespace Kernel
 		{
 			_log.error(msg);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -58,7 +58,7 @@ namespace Kernel
 		{
 			_log.warning(msg);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -71,7 +71,7 @@ namespace Kernel
 		{
 			_log.information(msg);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -84,7 +84,7 @@ namespace Kernel
 		{
 			_log.debug(msg);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -97,7 +97,7 @@ namespace Kernel
 		{
 			_log.dump(msg,buffer,length);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -111,7 +111,7 @@ namespace Kernel
 		{
 			return _log.is(level);
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
@@ -124,7 +124,7 @@ namespace Kernel
 		{
 			Poco::Logger::shutdown();
 		} 
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();

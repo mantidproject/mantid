@@ -1,4 +1,5 @@
 #include "../inc/Workspace.h"
+
 namespace Mantid
 {
 namespace Kernel
@@ -7,34 +8,42 @@ namespace Kernel
 Logger& Workspace::g_log = Logger::get("Workspace");
 
 Workspace::Workspace()
-{
-}
+{}
 
-Workspace::Workspace(const Workspace& w)
+Workspace::Workspace(const Workspace& A)  :
+     _title(A._title),_comment(A._comment)
+{}
+	
+Workspace& 
+Workspace::operator=(const Workspace& A)
 {
-	_comment=w._comment;
-}
-Workspace& Workspace::operator=(const Workspace& w)
-{
-  _comment=w._comment;
+     if (this!=&A)
+       {
+           _comment=A._comment;
+	    _title=A._title;
+       }	       
   return *this;
-}Workspace::~Workspace()
-{
 }
+Workspace::~Workspace()
+{}
+	
 void Workspace::setTitle(const std::string& t)
 {
-	_title=t;
+     _title=t;
 }void Workspace::setComment(const std::string& c)
 {
 	_comment=c;
 }
-std::string Workspace::getTitle() const
+const std::string& 
+Workspace::getTitle() const
 {
 	return _title;
 }
-std::string Workspace::getComment() const
+
+const std::string& 
+Workspace::getComment() const
 {
-	return _comment;
+    return _comment;
 }
 
 } // namespace Kernel

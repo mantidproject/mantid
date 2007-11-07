@@ -5,12 +5,12 @@
 
 #include "../inc/Algorithm.h"
 
-using namespace Mantid::Kernel;
+using namespace Mantid::Kernel; 
 
 class ToyAlgorithm : public Algorithm
 {
 public:
-  ToyAlgorithm() {}
+  ToyAlgorithm() : Algorithm() {}
   virtual ~ToyAlgorithm() {}
   StatusCode init() { return StatusCode::SUCCESS; }
   StatusCode exec() { return StatusCode::SUCCESS; }
@@ -29,7 +29,7 @@ public:
 	  TS_ASSERT( ! theName.compare("unknown") );
 	  std::string theVersion = alg.version();
 	  TS_ASSERT( ! theVersion.compare("unknown") );
-    TS_ASSERT( ! alg.isInitialized() );
+	 TS_ASSERT( ! alg.isInitialized() );
 	  TS_ASSERT( ! alg.isExecuted() );
 	  TS_ASSERT( ! alg.isFinalized() );
 	}
@@ -52,19 +52,7 @@ public:
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg.isInitialized() );
 	}
-
-	void testExecute()
-	{
-	  ToyAlgorithm myAlg;
-	  StatusCode status = myAlg.execute();
-    TS_ASSERT( status.isFailure() );
-    TS_ASSERT( ! myAlg.isExecuted() );
-    status = myAlg.initialize();
-    status = myAlg.execute();
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( myAlg.isExecuted() );
-	}
-
+	
 	void testFinalize()
 	{
     ToyAlgorithm myAlg;
@@ -84,9 +72,9 @@ public:
 
 	void testSubAlgorithm()
 	{
-    std::vector<Algorithm*>& testPointer = alg.subAlgorithms();
-    // Check that the newly created vector is empty
-    TS_ASSERT( testPointer.empty() );
+           std::vector<Algorithm*>& testVec = alg.subAlgorithms();
+           // Check that the newly created vector is empty
+           TS_ASSERT( testVec.empty() );
 	}
 	
 	void testSetProprerty()
@@ -108,10 +96,23 @@ public:
     TS_ASSERT( ! value.compare("yes") );
     
 	}
-	
+	void testExecute()
+	  {
+		ToyAlgorithm myAlg;
+		StatusCode status = myAlg.execute();
+		TS_ASSERT( status.isFailure() );
+		TS_ASSERT( ! myAlg.isExecuted() );
+		status = myAlg.initialize();
+		TS_ASSERT( ! status.isFailure() );
+		status = myAlg.execute();
+		TS_ASSERT( ! status.isFailure() );
+		TS_ASSERT( myAlg.isExecuted() );
+	   }	
 private:
   ToyAlgorithm alg;
 	
 };
+
+ 
 
 #endif /*ALGORITHMTEST_H_*/

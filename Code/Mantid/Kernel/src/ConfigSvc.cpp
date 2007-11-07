@@ -25,9 +25,7 @@ namespace Kernel
 	{
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
-		
 		m_pConf = 0;
-
 		//attempt to load the default properties filename
 		loadConfig("Mantid.properties");
 	}
@@ -36,7 +34,7 @@ namespace Kernel
 	ConfigSvc::~ConfigSvc()
 	{
 		delete m_pSysConfig;
-		delete m_pConf;
+		delete m_pConf;                // potential double delete???
 	}
 
 
@@ -46,9 +44,9 @@ namespace Kernel
 
 		try
 		{
-			m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
+		      m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
 		}
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
 			//there was a problem loading the file - it probably is not there
 			std::cerr << "Problem loading the logging file " << filename << " " << e.what() << std::endl;
@@ -78,9 +76,9 @@ namespace Kernel
 			Poco::Util::LoggingConfigurator configurator;
 			configurator.configure(m_pConf);
 		}
-		catch (std::exception e)
+		catch (std::exception& e)
 		{
-			std::cerr << "Trouble configuring the logging framework " << e.what();
+			std::cerr << "Trouble configuring the logging framework " << e.what()<<std::endl;
 		}
 	}
 	
@@ -149,6 +147,8 @@ namespace Kernel
 	template DLLExport int ConfigSvc::getValue(const std::string&,double&);
 	template DLLExport int ConfigSvc::getValue(const std::string&,std::string&);
 	template DLLExport int ConfigSvc::getValue(const std::string&,int&);
+
+/// \endcond TEMPLATE
 
 } // namespace Kernel
 } // namespace Mantid

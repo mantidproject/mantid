@@ -1,66 +1,94 @@
-#include "../inc/AlgorithmManager.h"
-#include "../inc/IAlgorithm.h"
-#include "../inc/StatusCode.h"
+#include <iomanip>
+#include <iostream>
+#include <vector>
 
-using namespace std;
+#include "IAlgorithm.h"
+#include "StatusCode.h"
+#include "AlgorithmManager.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
 	Logger& AlgorithmManager::g_log = Logger::get("AlgorithmManager");
-	// Initialise the instance pointer to zero
 	AlgorithmManager* AlgorithmManager::m_instance = 0;
-	int AlgorithmManager::m_no_of_alg=0;
 	
-	AlgorithmManager::AlgorithmManager()
+	AlgorithmManager::AlgorithmManager() : DynamicFactory<IAlgorithm>(),
+	   no_of_alg(0)
 	{
+		std::cout<<"AlgorithmManager == "<<std::setbase(16)
+			<<reinterpret_cast<long>(this)
+		        <<std::endl;	
 	}
 
 	AlgorithmManager::~AlgorithmManager()
 	{
-		delete m_instance;
+		std::cout<<"AlgorithmManager Delete == "<<std::setbase(16)
+			<<reinterpret_cast<long>(this)
+		        <<std::endl;	
+		clear();
+	}
+        
+	IAlgorithm* 
+	AlgorithmManager::createUnmanaged(const std::string& algName) const
+	  /*!
+    	   Creates an instance of an algorithm
+	  
+	   @param algName The name of the algorithm required
+	   @return A pointer to the created algorithm
+	   @throw runtime_error Thrown if algorithm requested is not registered
+	 */
+	{
+	    return DynamicFactory<IAlgorithm>::create(algName);                // Throws on fail:
 	}
 
-	IAlgorithm* AlgorithmManager::createAlgorithm(const std::string& algName)
+	IAlgorithm* AlgorithmManager::create(const std::string& algName)
+	  /*!
+    	   Creates an instance of an algorithm
+	  
+	   @param algName The name of the algorithm required
+	   @return A pointer to the created algorithm
+	 
+	   @throw runtime_error Thrown if algorithm requested is not registered
+	 */
 	{
-		list.push_back(this->create(algName));
-		StatusCode status = list[m_no_of_alg]->initialize();
-		if (status.isFailure())
+	   regAlg.push_back(DynamicFactory<IAlgorithm>::create(algName));                // Throws on fail:
+	   StatusCode status = regAlg.back()->initialize();
+	    if (status.isFailure())
 		{
-			throw runtime_error("Unable to initialise algorithm " + algName); 
+		    throw std::runtime_error("AglgorithmManager:: Unable to initialise algorithm " + algName); 
 		}
-		m_no_of_alg+=1;		
-		return list[m_no_of_alg-1];
+	    no_of_alg++;		
+	    return regAlg.back();
 	}
 
 	AlgorithmManager* AlgorithmManager::Instance()
 	{
-	  if (!m_instance) 
-	  {
-		  m_instance=new AlgorithmManager;	 
-			  }
+	     if (!m_instance) 
+		m_instance=new AlgorithmManager;	 
+		
 	  return m_instance;
 	}
 
 	void AlgorithmManager::clear()
+	    /// finalizes and deletes all registered algorithms
 	{
-		int st_size=list.size();
-		for (int loop=st_size-1;loop > -1;loop--)
-		{
-			if(list[loop] != NULL)
-				{
-					StatusCode status = list[loop]->finalize();
-					if (status.isFailure())
-						{
-							throw runtime_error("Unable to finalise algorithm " ); 
-						}
-					delete list[loop];
-					m_no_of_alg -= 1;
-				}
+	     int errOut(0);
+	     std::vector<IAlgorithm*>::iterator vc;
+	     for(vc=regAlg.begin();vc!=regAlg.end();vc++)
+	        {
+		      // no test for zero since impossible 
+		      StatusCode status = (*vc)->finalize();
+		       errOut+= status.isFailure();
+		       delete (*vc);
 		}
-		list.clear();
-	}
+	     regAlg.clear();
+	     no_of_alg=0;
+	     if (errOut)
+                throw std::runtime_error("AlgorithmManager:: Unable to finalise algorithm " ); 
+	return;
+     }
+	
 	
 } // namespace Kernel
 } // namespace Mantid

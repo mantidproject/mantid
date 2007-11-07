@@ -50,20 +50,22 @@ public:
 	// Set-up a string comment
 	void setComment(const std::string&);
 	// Get the workspace comment
-	std::string getComment() const;
+	const std::string& getComment() const;
 	// Get the workspace title
-	std::string getTitle() const;
+	const std::string& getTitle() const;
   // Get the footprint in memory.
 	virtual long int getMemorySize() const {return 0;} 
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
 	virtual ~Workspace();
+	
 protected:
 	Workspace();
 	Workspace(const Workspace&);
 	Workspace& operator=(const Workspace&);
 
 private:
-	std::string _title;
+
+        std::string _title;
 	std::string _comment;
   
 	///static reference to the logger class

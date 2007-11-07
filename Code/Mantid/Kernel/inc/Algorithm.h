@@ -80,9 +80,9 @@ class Workspace;
 	  // IAlgorithm methods
 	  
        virtual const std::string& version() const;
-       virtual StatusCode initialize();
-       virtual StatusCode execute();
-       virtual StatusCode finalize();	  
+       StatusCode initialize();
+       StatusCode execute();
+       StatusCode finalize();	  
 	  
     
     // Protected in Gaudi version
@@ -150,9 +150,9 @@ class Workspace;
 	  ///static refenence to the logger class
 	  static Logger& g_log;
 	  	  
-	  bool        m_isInitialized;    ///< Algorithm has been initialized flag
-	  bool        m_isExecuted;       ///< Algorithm is executed flag
-	  bool        m_isFinalized;      ///< Algorithm has been finalized flag
+	  bool  m_isInitialized;    ///< Algorithm has been initialized flag
+	  bool  m_isExecuted;       ///< Algorithm is executed flag
+	  bool  m_isFinalized;      ///< Algorithm has been finalized flag
 
 	  /** Name of workspace in which result should be placed. 
 	   *  Its name should be set via a property called "OutputWorkspace"

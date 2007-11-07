@@ -19,9 +19,11 @@ namespace Kernel
 /** @class AnalysisDataService AnalysisDataService.h Kernel/AnalysisDataService.h
 
     The Analysis data service stores instances of the Workspace objects and 
-    anything that derives from them.  This is the primary data service that
+    anything that derives from emplate class DynamicFactory<Mantid::Kernel::IAlgorithm>them.  This is the primary data service that
     the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
+
+     This is the manager/owner of Workspace* when registered.
     
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
@@ -49,28 +51,12 @@ class DLLExport AnalysisDataService
 {
 public:
   
-  /** Static method which retrieves the single instance of the Analysis data service
-   * 
-   *  @returns A pointer to the service instance
-   */
+ 
   static AnalysisDataService* Instance();
   
-	/** Add a pointer to a named workspace to the data service store.
-	 *  Upon addition, the data service assumes ownership of the workspace.
-	 * 
-	 *  @param name The user-given name for the workspace
-	 *  @param space A pointer to the workspace
-	 *  @return A StatusCode object indicating whether the operation was successful
-	 */
-	StatusCode add( std::string name, Workspace * space );
 	
-	/** Remove a workspace from the data service store.
-	 *  Upon removal, the workspace itself will be deleted.
-	 * 
-	 *  @param name The user-given name for the workspace
-	 *  @return A StatusCode object indicating whether the operation was successful
-	 */
-	StatusCode remove( std::string name );
+	StatusCode add( const std::string& name, Workspace * space );
+	StatusCode remove(const std::string& name );
 	
 	/** Retrieve a pointer to a workspace by name.
 	 * 
@@ -78,7 +64,7 @@ public:
 	 *  @param space Returns a pointer to the requested workspace
 	 *  @return A StatusCode object indicating whether the operation was successful
 	 */
-	StatusCode retrieve( std::string name, Workspace *& space );
+	StatusCode retrieve(const std::string& name, Workspace *& space );
 	
 	
 private:
@@ -99,15 +85,15 @@ private:
 
   
   ///static reference to the logger class
-  static Logger& g_log;
+ // static Logger& g_log;
   
   /// Pointer to the single instance
   static AnalysisDataService* m_instance;
   
   /// Typedef for the map of the managed algorithms and their names
-  typedef std::map<std::string, Workspace *> WorkspaceMap;
+  typedef std::map<std::string, Workspace*> WorkspaceMap;
   /// The map holding the managed algorithms
-  WorkspaceMap * m_spaces;
+  WorkspaceMap m_spaces;
 };
 
 } // namespace Kernel

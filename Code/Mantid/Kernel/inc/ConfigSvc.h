@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "System.h"
+#include <iostream>
+#include <iomanip>
 #include <string>
 
 
@@ -61,9 +63,11 @@ namespace Kernel
 			   ///The template type of class that is being wrapped
 			   typedef T element_type;
 			   ///simple constructor
-			   WrappedObject()
+			   WrappedObject() : T()
 			   {
 				   m_pPtr = static_cast<T*>(this);
+				   std::cout<<"Wrapped Object Null Hold: "<<std::hex
+	                             <<reinterpret_cast<long>(this)<<std::endl;
 			   }
 
 			   ///consturctor with a class to wrap
@@ -72,12 +76,15 @@ namespace Kernel
 			   WrappedObject(Field& F) : T(F)
 			   {
 				   m_pPtr = static_cast<T*>(this);
+				  std::cout<<"Wrapped Object Hold: "<<std::hex
+	                           <<reinterpret_cast<long>(this)<<std::endl;
 			   }
 
 			   ///copy constructor
 			   WrappedObject(const WrappedObject<T>& A) : T(A)
 			   {
-					m_pPtr = static_cast<T*>(this);
+				m_pPtr = static_cast<T*>(this);
+			
 			   }
 		       
 			   ///virtual destructor

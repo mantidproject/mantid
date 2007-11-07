@@ -13,9 +13,7 @@ namespace Kernel
 	void* LibraryManager::module = 0;
 
 	LibraryManager::LibraryManager()
-	{
-
-	}
+	{}
 
 	LibraryManager::~LibraryManager()
 	{

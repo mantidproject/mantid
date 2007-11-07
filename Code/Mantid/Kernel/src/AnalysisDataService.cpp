@@ -33,60 +33,72 @@ namespace Mantid
 {
 namespace Kernel
 {
-Logger& AnalysisDataService::g_log = Logger::get("AnalysisDataService");
+// Logger& AnalysisDataService::g_log = Logger::get("AnalysisDataService");
 
 // Returns the single instance of the service
 AnalysisDataService* AnalysisDataService::Instance()
+ /** Static method which retrieves the single instance of the Analysis data service
+   * 
+   *  @returns A pointer to the service instance
+   */
 {
   // Create the instance if not already created
-  if (!m_instance) m_instance = new AnalysisDataService;
+  if (!m_instance) 
+     m_instance = new AnalysisDataService;
   return m_instance;
 }
 
 // Destructor
 AnalysisDataService::~AnalysisDataService()
-{
-  // Delete the map of workspaces and the single instance of the service
-  delete m_spaces;
-  delete m_instance;
-}
+{ }
 
-// Adds a named workspace to the map
-StatusCode AnalysisDataService::add(std::string name, Workspace * space)
+/** Add a pointer to a named workspace to the data service store.
+	 *  Upon addition, the data service assumes ownership of the workspace.
+	 * 
+	 *  @param name The user-given name for the workspace
+	 *  @param space A pointer to the workspace
+	 *  @return A StatusCode object indicating whether the operation was successful
+	 */
+StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
 {
   // At the moment, you can't overwrite a workspace (i.e. pass in a name
   // that's already in the map with a pointer to a different workspace).
   // Also, there's nothing to stop the same workspace from being added
   // more than once with different names.
-  if (m_spaces->insert(WorkspaceMap::value_type(name, space)).second)
+  if (m_spaces.insert(WorkspaceMap::value_type(name, space)).second)
   {
     return StatusCode::SUCCESS;
   }
   return StatusCode::FAILURE;
 }
 
-// Removes a named workspace from the map and deletes it
-StatusCode AnalysisDataService::remove(std::string name)
-{
-  Workspace* toBeRemoved;
-  // Get a pointer to the workspace
-  StatusCode status = retrieve(name, toBeRemoved);
-  if (status.isFailure()) return status;
-  // Remove the workspace from the map
-  if (m_spaces->erase(name))
-  {
-    // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
-    delete toBeRemoved;
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
+
+
+/** Remove a workspace from the data service store.
+	 *  Upon removal, the workspace itself will be deleted.
+	 * 
+	 *  @param name The user-given name for the workspace
+	 *  @return A StatusCode object indicating whether the operation was successful
+	 */
+StatusCode AnalysisDataService::remove(const std::string& name)
+{ 
+  
+  // Get a iterator to the workspace and naem
+  WorkspaceMap::iterator it = m_spaces.find(name);
+  if (it!=m_spaces.end())
+     return StatusCode::FAILURE;	  
+   // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
+  delete it->second;
+  m_spaces.erase(it);
+  return StatusCode::SUCCESS;
 }
 
 // Retrieve a pointer to a workspace contained in the map
-StatusCode AnalysisDataService::retrieve(std::string name, Workspace *& space)
+
+StatusCode AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
 {
-  WorkspaceMap::const_iterator it = m_spaces->find(name);
-  if (m_spaces->end() != it)
+  WorkspaceMap::const_iterator it = m_spaces.find(name);
+  if (m_spaces.end() != it)
   {
     space = it->second;
     return StatusCode::SUCCESS;
@@ -95,10 +107,10 @@ StatusCode AnalysisDataService::retrieve(std::string name, Workspace *& space)
 }
 
 // Private constructor
-AnalysisDataService::AnalysisDataService()
+AnalysisDataService::AnalysisDataService() 
 {
   // Create the map to store the workspaces
-  m_spaces = new WorkspaceMap;
+
 }
 
 // Initialise the instance pointer to zero
