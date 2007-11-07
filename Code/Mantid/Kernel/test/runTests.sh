@@ -1,28 +1,29 @@
 #!/bin/bash
 # Simple script to build and run the tests.
-# Have kept separate from the makefile since that's automatically generated
-#   by Eclipse.
+# This script is optimised for linuxs1 (i.e. it probably won't work anywhere else!)
 #
-# Author: Russell Taylor, 19/09/07
+# You will need to have the directories containing the Mantid and Third Party 
+#   .so libraries in your LD_LIBRARY_PATH environment variable
+#
+# Author: Russell Taylor, 07/11/07
 #
 
-echo
-echo "Making sure that the Mantid library is built and up-to-date..."
-echo
-# make -C ../../Build
-echo
-
-echo "Generating the source from the test header files..."
+echo "Generating the source file from the test header files..."
+# Chaining all tests together can have effects that you don't think of
+#  - it's always a good idea to run your new/changed test on its own by replacing the *.h below with your test header file
 cxxtestgen.pl --error-printer -o runner.cpp *.h
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -L ../../Release -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML
+g++ -o runner.exe runner.cpp -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lPocoFoundationd -lPocoUtild -lPocoXMLd -lPocoNetd -lboost_python -lpython2.3
 echo
 
 echo "Running the tests..."
 ./runner.exe
+echo
 
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
+echo "Cleaning up..."
 rm -rf runner.*
+echo "Done."

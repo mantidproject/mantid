@@ -33,8 +33,8 @@ public:
 	  TS_ASSERT( ! alg.isExecuted() );
 	  TS_ASSERT( ! alg.isFinalized() );
 	  // Check this points to something
-    std::vector<Algorithm*>* testPointer = alg.subAlgorithms();
-	  TS_ASSERT(testPointer);
+    std::vector<Algorithm*> testPointer = alg.subAlgorithms();
+	  TS_ASSERT(&testPointer);
 	}
 
 	void testName()
@@ -87,9 +87,9 @@ public:
 
 	void testSubAlgorithm()
 	{
-    std::vector<Algorithm*>* testPointer = alg.subAlgorithms();
+    std::vector<Algorithm*> testSubs = alg.subAlgorithms();
     // Check that the newly created vector is empty
-    TS_ASSERT( testPointer->empty() );
+    TS_ASSERT( testSubs.empty() );
 	}
 	
 	void testSetProprerty()
