@@ -85,7 +85,7 @@ StatusCode AnalysisDataService::remove(const std::string& name)
   
   // Get a iterator to the workspace and naem
   WorkspaceMap::iterator it = m_spaces.find(name);
-  if (it!=m_spaces.end())
+  if (it==m_spaces.end())
      return StatusCode::FAILURE;	  
    // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
   delete it->second;

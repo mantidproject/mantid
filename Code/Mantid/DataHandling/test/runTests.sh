@@ -1,21 +1,28 @@
 #!/bin/bash
 # Simple script to build and run the tests.
+# Will run all tests in the directory if no arguments are supplied,
+#      or alternatively just the test files given as arguments.
+#
 # This script is optimised for linuxs1 (i.e. it probably won't work anywhere else!)
 #
 # You will need to have the directories containing the Mantid and Third Party 
-#   .so libraries in your LD_LIBRARY_PATH environment variable
+#      .so libraries in your LD_LIBRARY_PATH environment variable
 #
 # Author: Russell Taylor, 07/11/07
 #
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
-#  - it's always a good idea to run your new/changed test on its own by replacing the *.h below with your test header file
-cxxtestgen.pl --error-printer -o runner.cpp *.h
+#  - it's always a good idea to run your new/changed test on its own
+if [ $# -eq 0 ]; then
+	cxxtestgen.pl --error-printer -o runner.cpp *.h
+else
+	cxxtestgen.pl --error-printer -o runner.cpp $*
+fi
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lPocoFoundationd -lPocoUtild -lPocoXMLd -lPocoNetd -lboost_python -lpython2.3
+g++ -o runner.exe runner.cpp -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lpython2.3
 echo
 
 echo "Running the tests..."
