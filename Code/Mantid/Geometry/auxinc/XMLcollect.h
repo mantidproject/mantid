@@ -1,0 +1,141 @@
+#ifndef XMLcollect_h
+#define XMLcollect_h
+
+
+namespace XML
+{
+/*!
+  \class XMLcollect 
+  \brief XML holder for Spectrum information
+  \author S. Ansell
+  \version 1.0
+  \date December 2006
+  
+  This class holds an XML schema of any 
+  type but normally built against a class.
+  It can write out a set of XML information.
+  Its key component is Master, which holds the 
+  main XML tree. Additionally WorkGrp is used
+  as a placement pointer for extra speed
+
+  \todo Need the output buffered
+*/
+
+class XMLcollect 
+{
+ private:
+
+  std::string depthKey;               ///< Current depth layer
+  XMLgroup Master;                    ///< Master group
+  XMLgroup* WorkGrp;                  ///< Working group [Never Null]
+
+  std::string makeTimeString(const tm*) const;
+
+ public:
+
+  XMLcollect(); 
+  XMLcollect(const XMLcollect&);
+  XMLcollect& operator=(const XMLcollect&);
+  ~XMLcollect();
+
+  void clear();            
+
+  void addGrp(const std::string&);
+  int addNumGrp(const std::string&);
+  template<typename T> int addNumComp(const std::string&,const T&);
+  int addNumComp(const std::string&,const char*);
+  
+  // Non-file type One
+  template<template<typename T> class V,typename T> 
+  int addNumComp(const std::string&,const V<T>&);
+  // Non-file type
+  template<template<typename T> class V,typename T> 
+  int addNumComp(const std::string&,
+		 const V<T>&,const V<T>&);
+
+  template<template<typename T> class V,typename T> 
+  int addNumComp(const std::string&,
+		 const V<T>&,const V<T>&,const V<T>&);
+  // file type
+  template<template<typename T> class V,typename T> 
+  int addNumComp(const std::string&,const std::string&,
+		 const V<T>&,const V<T>&);
+
+  template<template<typename T> class V,typename T> 
+  int addNumComp(const std::string&,const std::string&,
+		 const V<T>&,const V<T>&,const V<T>&);
+
+
+  template<typename T> int addComp(const std::string&,const T&);
+  int addComp(const std::string&,const char*);
+
+  // One container
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,const V<T>&);
+
+  // Two container
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,const V<T>&,const V<T>&);
+
+  // Two container + file
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,const std::string&,const V<T>&,const V<T>&);
+
+
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,const V<T>&,const V<T>&,const V<T>&);
+
+  // Three Containers + file
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,const std::string&,
+	      const V<T>&,const V<T>&,const V<T>&);
+
+  // Four Containers
+  template<template<typename T> class V,typename T> 
+  int addComp(const std::string&,
+	      const V<T>&,const V<T>&,const V<T>&,const V<T>&);
+
+  // Attributes
+  void addAttribute(const std::string&,const char*);
+  template<typename T>
+  void addAttribute(const std::string&,const T&);
+  void addAttribute(const std::string&,const std::string&,const char*);
+  template<typename T>
+  void addAttribute(const std::string&,const std::string&,const T&);
+
+  // Add a comment
+  void addComment(const std::string&);  
+  void addComment(const std::vector<std::string>&);  
+
+  // Get/Find object
+  XMLobject* getObj(const std::string&,const int =0) const;
+  XMLobject* findObj(const std::string&,const int =0) const;
+  XMLgroup* getCurrent() { return WorkGrp; }
+  int setToKey(const std::string&,const int =0);
+
+  int getRepeatNumber() const { return WorkGrp->getRepNum(); }
+
+  const XMLobject* findParent(const XMLobject*) const; 
+  const XMLgroup* getCurrent() const { return WorkGrp; }
+
+  int deleteObj(XMLobject*);
+
+  void closeGrp();
+
+  void writeXML(std::ostream&) const;
+
+  int readObject(const std::string&);
+  int readObject(const std::string&,const std::string&);
+  int readObject(std::istream&,const std::string&);
+
+  int loadXML(const std::string&);
+  int loadXML(const std::string&,const std::string&);
+  int loadXML(std::istream&,const std::string&,
+	      const std::vector<std::string>&);
+
+
+};
+
+}   // NAMESPACE XML
+
+#endif
