@@ -4,9 +4,9 @@
 #include <boost/cstdint.hpp>
 
 // Includes ====================================================================
-#include <Algorithm.h>
-#include <FrameworkManager.h>
-#include <Workspace.h>
+#include "Algorithm.h"
+#include "FrameworkManager.h"
+#include "Workspace.h"
 
 // Using =======================================================================
 using namespace boost::python;
@@ -151,7 +151,6 @@ BOOST_PYTHON_MODULE(MantidKernel)
 BOOST_PYTHON_MODULE(libMantidKernel)
 {
 #endif	
-{
     class_< Mantid::Kernel::Algorithm, boost::noncopyable, Mantid_Kernel_Algorithm_Wrapper >("Algorithm", init<  >())
         .def("name", (const std::string& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::name, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
         .def("version", (const std::string& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::version, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
@@ -165,8 +164,8 @@ BOOST_PYTHON_MODULE(libMantidKernel)
         .def("setProperty", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)(const std::string&, const std::string&) )&Mantid::Kernel::Algorithm::setProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, const std::string&))&Mantid_Kernel_Algorithm_Wrapper::default_setProperty)
         .def("getProperty", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)(const std::string&, std::string&) const)&Mantid::Kernel::Algorithm::getProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, std::string&) const)&Mantid_Kernel_Algorithm_Wrapper::default_getProperty)
 //        .def("createSubAlgorithm", &Mantid::Kernel::Algorithm::createSubAlgorithm)
-        .def("subAlgorithms", (const std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
-        .def("subAlgorithms", (std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
+//        .def("subAlgorithms", (const std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
+//        .def("subAlgorithms", (std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
     ;
 
     class_< Mantid::Kernel::FrameworkManager >("FrameworkManager", init<  >())
