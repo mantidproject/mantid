@@ -107,15 +107,17 @@ namespace Kernel
 
 	bool Logger::is(int level) const
 	{
+		bool retVal = false;
 		try
 		{
-			return _log.is(level);
+			retVal = _log.is(level);
 		} 
 		catch (std::exception& e)
 		{
 			//failures in logging are not allowed to throw exceptions out of the logging class
 			std::cerr << e.what();
 		}
+		return retVal;
 	}
 
 	void Logger::shutdown()

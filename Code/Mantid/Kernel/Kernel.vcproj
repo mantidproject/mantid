@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\wmx35332\VisualStudioWorkspace\Mantid\Kernel\inc&quot;;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="1"
 				DebugInformationFormat="3"
@@ -158,10 +158,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\AlgorithmFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\AlgorithmManager.cpp"
 				>
 			</File>
@@ -175,6 +171,10 @@
 			</File>
 			<File
 				RelativePath=".\src\DllOpen.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Exception.cpp"
 				>
 			</File>
 			<File
@@ -212,10 +212,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AlgorithmFactory.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\AlgorithmManager.h"
 				>
 			</File>
@@ -237,6 +233,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\DynamicFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Exception.h"
 				>
 			</File>
 			<File
