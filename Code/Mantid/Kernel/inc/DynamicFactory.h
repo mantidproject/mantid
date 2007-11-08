@@ -41,7 +41,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 template <class Base>
-class DLLExport DynamicFactory
+class DynamicFactory
 {
 public:
   /// A typedef for the instantiator
@@ -49,23 +49,25 @@ public:
   
   /// Destroys the DynamicFactory and deletes the instantiators for 
   /// all registered classes.
-  virtual ~DynamicFactory();
+  virtual ~DynamicFactory()
+  {
+    for (typename FactoryMap::iterator it = _map.begin(); it != _map.end(); ++it)
+    {
+      delete it->second;
+    }
+  }
   
-  /*! 
-   Creates a new instance of the class with the given name.
+  /// Creates a new instance of the class with the given name.
   /// The class must have been registered with registerClass.
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className the name of the class you wish to create
-   \return base* :: Unmanage pointer to AbtractFactory derived 
-  */
   virtual Base* create(const std::string& className) const
-  {
-    
+  {   
     typename FactoryMap::const_iterator it = _map.find(className);
     if (it != _map.end())
       return it->second->createInstance();
-
-    throw std::runtime_error("DynamicFactory:"+className + " is not registered.");
+    else
+      throw std::runtime_error(className + " is not registered.");
   }
   
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -77,7 +79,7 @@ public:
   template <class C> 
   void subscribe(const std::string& className)
   {
-     subscribe(className, new Instantiator<C, Base>);
+    subscribe(className, new Instantiator<C, Base>);
   }
   
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -93,10 +95,10 @@ public:
     if (!className.empty() && it == _map.end())
       _map[className] = pAbstractFactory;
     else
-      {
-	 delete pAbstractFactory;
-         throw std::runtime_error("DynamicFactory:"+className + "is already registered.");
-      }
+    {
+      delete pAbstractFactory;
+      throw std::runtime_error(className + "is already registered.");
+    }
   }
   
   /// Unregisters the given class and deletes the instantiator
@@ -112,7 +114,7 @@ public:
       _map.erase(it);
     }
     else 
-      throw std::runtime_error("DynamicFactory:"+className + " is not registered.");
+      throw std::runtime_error(className + " is not registered.");
   }
   
   /// Returns true if the given class is currently registered.
@@ -126,7 +128,8 @@ public:
 protected:
   /// Protected constructor for base class
   DynamicFactory()
-  {  }  
+  {
+  }  
   
 private:
   /// Private copy constructor - NO COPY ALLOWED
@@ -134,11 +137,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   DynamicFactory& operator = (const DynamicFactory&);
 
-  
-  ///static reference to the logger class
-  static Logger& g_log;
-
-  /// A typedef for the map of registered classes
+    /// A typedef for the map of registered classes
   typedef std::map<std::string, AbstractFactory*> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;
@@ -148,4 +147,3 @@ private:
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_DYNAMICFACTORY_H_*/
-
