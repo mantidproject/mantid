@@ -5,6 +5,7 @@
 #include "IAlgorithm.h"
 #include "StatusCode.h"
 #include "AlgorithmManager.h"
+#include "Exception.h"
 
 namespace Mantid
 {
@@ -36,7 +37,7 @@ namespace Kernel
 	  
 	   @param algName The name of the algorithm required
 	   @return A pointer to the created algorithm
-	   @throw runtime_error Thrown if algorithm requested is not registered
+	   @throw NotFoundError Thrown if algorithm requested is not registered
 	 */
 	{
 	    return DynamicFactory<IAlgorithm>::create(algName);                // Throws on fail:
@@ -44,19 +45,19 @@ namespace Kernel
 
 	IAlgorithm* AlgorithmManager::create(const std::string& algName)
 	  /*!
-    	   Creates an instance of an algorithm
+		Creates an instance of an algorithm
 	  
 	   @param algName The name of the algorithm required
 	   @return A pointer to the created algorithm
-	 
-	   @throw runtime_error Thrown if algorithm requested is not registered
+       @throw NotFoundError Thrown if algorithm requested is not registered
+	   @throw std::runtime_error Thrown if properties string is ill-formed
 	 */
 	{
 	   regAlg.push_back(DynamicFactory<IAlgorithm>::create(algName));                // Throws on fail:
 	   StatusCode status = regAlg.back()->initialize();
 	    if (status.isFailure())
 		{
-		    throw std::runtime_error("AglgorithmManager:: Unable to initialise algorithm " + algName); 
+		    throw std::runtime_error("AglorithmManager:: Unable to initialise algorithm " + algName); 
 		}
 	    no_of_alg++;		
 	    return regAlg.back();

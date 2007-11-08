@@ -7,8 +7,8 @@
 #include "System.h"
 #include "Instantiator.h"
 #include "Logger.h"
+#include "Exception.h"
 #include <map>
-#include <stdexcept>
 
 namespace Mantid
 {
@@ -67,7 +67,7 @@ public:
     if (it != _map.end())
       return it->second->createInstance();
     else
-      throw std::runtime_error(className + " is not registered.");
+      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.", className);
   }
   
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -114,7 +114,7 @@ public:
       _map.erase(it);
     }
     else 
-      throw std::runtime_error(className + " is not registered.");
+      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.",className);
   }
   
   /// Returns true if the given class is currently registered.

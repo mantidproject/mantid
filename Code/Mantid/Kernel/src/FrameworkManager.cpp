@@ -32,8 +32,8 @@
 #include "../inc/AnalysisDataService.h"
 #include "../inc/ConfigSvc.h"
 #include "../inc/IAlgorithm.h"
+#include "Exception.h"
 
-#include <stdexcept>
 #include <boost/tokenizer.hpp>
 #include <string>
 
@@ -105,7 +105,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     // Throw if there's a problem with the string
     else
       {
-        throw runtime_error("Misformed properties string");
+		  throw std::invalid_argument("Misformed properties string");
       }
   }  
   return alg;
@@ -117,13 +117,6 @@ FrameworkManager::exec(const std::string& algName, const std::string& properties
   // Make use of the previous method for algorithm creation and property setting
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
   
-  // this is now performed by the algorithm manager
-  // Have to initialise a newly created algorithm before executing
- /* StatusCode status = alg->initialize();
-  if (status.isFailure())
-  {
-    throw runtime_error("Unable to initialise algorithm " + algName);
-  } */
   // Now execute the algorithm
   StatusCode status = alg->execute();
   if (status.isFailure())
@@ -141,7 +134,7 @@ FrameworkManager::getWorkspace(const std::string& wsName)
   StatusCode status = data->retrieve(wsName, space);
   if (status.isFailure())
   {
-    throw runtime_error("Unable to retrieve workspace " + wsName);
+	  throw Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
   return space;
 }

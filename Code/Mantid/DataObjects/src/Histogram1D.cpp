@@ -1,7 +1,7 @@
 #include "../inc/Histogram1D.h"
+#include "../../Kernel/inc/Exception.h"
 
 #include <iostream> 
-#include <stdexcept>
 
 namespace Mantid
 {
@@ -79,7 +79,7 @@ void Histogram1D::setData(const std::vector<double>& y)
 }
 void Histogram1D::setData(const std::vector<double>& y, const std::vector<double>& e)
 {
-	if (y.size()!=e.size()) throw std::runtime_error("Histogram1D::setData, Y and E should be of same sizes");
+	if (y.size()!=e.size()) throw std::invalid_argument("Histogram1D::setData, Y and E should be of same sizes");
 
 	if (!_Y.unique()) //Either not defined of multiple reference
 		{
@@ -103,7 +103,7 @@ void Histogram1D::setData(const parray& y)
 }
 void Histogram1D::setData(const parray& y, const parray& e)
 {
-	if (y->size()!=e->size()) throw std::runtime_error("Histogram1D::setData, Y and E should be of same sizes");
+	if (y->size()!=e->size()) throw std::invalid_argument("Histogram1D::setData, Y and E should be of same sizes");
 	_Y=y;	
 	_E=e;
 	_nybin=y->size();
@@ -133,24 +133,24 @@ const std::vector<double>& Histogram1D::getE() const
 
 double Histogram1D::getX(size_t bin) const
 {
-	if (bin<0 || bin>_X->size()-1) throw std::runtime_error("Histogram1D::getX, range error");
+	if (bin<0 || bin>_X->size()-1) throw std::range_error("Histogram1D::getX, range error");
 	return (*_X)[bin];
 }	
 
 double Histogram1D::getY(size_t bin) const
 {
-	if (bin<0 || bin>_Y->size()-1) throw std::runtime_error("Histogram1D::getY, range error");
+	if (bin<0 || bin>_Y->size()-1) throw std::range_error("Histogram1D::getY, range error");
 	return (*_Y)[bin];
 }
 double Histogram1D::getE(size_t bin) const
 {
-	if (bin<0 || bin>_E->size()-1) throw std::runtime_error("Histogram1D::getE, range error");
+	if (bin<0 || bin>_E->size()-1) throw std::range_error("Histogram1D::getE, range error");
 	return (*_E)[bin];
 }
 
 double* Histogram1D::operator[](size_t bin) const
 {
-	if (bin<0 || bin>_X->size()-1) throw std::runtime_error("Histogram1D::operator[], range error");
+	if (bin<0 || bin>_X->size()-1) throw std::range_error("Histogram1D::operator[], range error");
 	double* temp=new double[3];
 	*temp=(*_X)[bin];	*(temp+1)=(*_Y)[bin];
 	if (isError()) *(temp+2)=(*_E)[bin];

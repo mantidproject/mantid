@@ -90,7 +90,7 @@ class DLLExport FileError : public std::runtime_error
 };
 
 /// Marks code as not implemented yet.
-class NotImplementedError : public std::logic_error
+class DLLExport NotImplementedError : public std::logic_error
 {
  public:
   NotImplementedError(const std::string&);
@@ -102,7 +102,7 @@ class NotImplementedError : public std::logic_error
 };
 
 /// Exception for when an item is not found in a collection.
-class NotFoundError : public std::runtime_error
+class DLLExport NotFoundError : public std::runtime_error
 {
  private:
   const std::string objectName;
@@ -117,7 +117,7 @@ class NotFoundError : public std::runtime_error
 };
 
 /// Exception for when an item is already in a collection.
-class ExistsError : public std::runtime_error
+class DLLExport ExistsError : public std::runtime_error
 {
  private:
   const std::string objectName;

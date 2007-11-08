@@ -1,5 +1,5 @@
 #include "../inc/Workspace2D.h"
-#include <stdexcept> 
+#include "../../Kernel/inc/Exception.h"
 
 DECLARE_WORKSPACE(Workspace2D)
 
@@ -27,7 +27,7 @@ Workspace2D::~Workspace2D()
 
 void Workspace2D::setHistogramNumber(int nhist)
 {
-	if (nhist<0) throw std::runtime_error("Workspace2D::setHistogramNumber, invalid histograms number <0");
+	if (nhist<0) throw std::invalid_argument("Workspace2D::setHistogramNumber, invalid histograms number <0");
 	_data.resize(nhist);
 	_nhistogram=nhist; 
 }
@@ -39,37 +39,37 @@ long int Workspace2D::getMemorySize() const
 
 void Workspace2D::setX(int histnumber, const std::vector<double>& v)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setX, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setX, histogram number out of range");
 	_data[histnumber].setX(v);
 }
 
 void Workspace2D::setData(int histnumber, const std::vector<double>& y)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y);
 }
 
 void Workspace2D::setData(int histnumber, const std::vector<double>& y, const std::vector<double>& e)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");	
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setData, histogram number out of range");	
 	_data[histnumber].setData(y,e);
 }
 
 void Workspace2D::setX(int histnumber, const Histogram1D::parray& v)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setX, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setX, histogram number out of range");
 	_data[histnumber].setX(v);
 }
 
 void Workspace2D::setData(int histnumber, const Histogram1D::parray& y)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y);
 }
 
 void Workspace2D::setData(int histnumber, const Histogram1D::parray& y, const Histogram1D::parray& e)
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setData, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setData, histogram number out of range");
 	_data[histnumber].setData(y,e);
 }
 
@@ -80,17 +80,17 @@ const int Workspace2D::getHistogramNumber() const
 
 const std::vector<double>& Workspace2D::getX(int histnumber) const
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::getX, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::getX, histogram number out of range");
 	return _data[histnumber].getX();
 }
 const std::vector<double>& Workspace2D::getY(int histnumber) const
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::getY, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::getY, histogram number out of range");
 	return _data[histnumber].getY();
 }
 const std::vector<double>& Workspace2D::getE(int histnumber) const
 {
-	if (histnumber<0 || histnumber>_nhistogram-1) throw std::runtime_error("Workspace2D::setX, histogram number out of range");
+	if (histnumber<0 || histnumber>_nhistogram-1) throw std::range_error("Workspace2D::setX, histogram number out of range");
 	return _data[histnumber].getE();	
 }
 

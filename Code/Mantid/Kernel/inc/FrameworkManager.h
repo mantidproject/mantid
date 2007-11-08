@@ -70,7 +70,7 @@ public:
 	 *  @param algName The name of the algorithm required
 	 *  @return A pointer to the created algorithm
 	 * 
-	 *  @throw runtime_error Thrown if algorithm requested is not registered
+	 *  @throw NotFoundError Thrown if algorithm requested is not registered
 	 */
      IAlgorithm* createAlgorithm(const std::string& algName);
 
@@ -81,8 +81,8 @@ public:
    *                         form "Property1:Value1,Property2:Value2,..."
    *  @return A pointer to the created algorithm
    * 
-   *  @throw runtime_error Thrown if algorithm requested is not registered
-   *                       or if properties string is ill-formed
+   *  @throw NotFoundError Thrown if algorithm requested is not registered
+   *  @throw std::invalid_argument Thrown if properties string is ill-formed
    */	
 	IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
 	
@@ -95,9 +95,9 @@ public:
    *                         form "Property1:Value1,Property2:Value2,..."
    *  @return A pointer to the executed algorithm
    * 
-   *  @throw runtime_error Thrown if algorithm requested is not registered,
-   *                       if properties string is ill-formed or if
-   *                       algorithm cannot be initialised or executed
+   *  @throw NotFoundError Thrown if algorithm requested is not registered
+   *  @throw std::invalid_argument Thrown if properties string is ill-formed
+   *  @throw runtime_error Thrown if algorithm cannot be executed
    */ 
 	IAlgorithm* exec(const std::string& algName, const std::string& propertiesArray);
 	
@@ -106,7 +106,7 @@ public:
 	 *  @param wsName The name of the workspace
 	 *  @return A pointer to the workspace
 	 * 
-	 *  @throw runtime_error If workspace is not registered with analysis data service
+	 *  @throw NotFoundError If workspace is not registered with analysis data service
 	 */
 	Workspace* getWorkspace(const std::string& wsName);
 	
