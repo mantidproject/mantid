@@ -2,10 +2,20 @@
 
 import os
 import platform
+import sys
 
 from socket import gethostname
 
 currPath = os.getcwd() + '/'
+
+cppPaths = ['../../Third_Party/include',  '/usr/include/python' + sys.version[0:3]]
+
+dirpath=os.listdir('.')
+print dirpath
+for item in dirpath:
+	if (item=="inc" or item=="auxinc"):
+		cppPaths.append(item)
+
 
 #get libraries and the library directories
 libDirList = ['lib']
@@ -20,6 +30,9 @@ if os.name == 'nt':
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
 			libList.append(file.replace('.dll',''))
+		else:
+			if file.endswith('.lib'):
+				libList.append(file.replace('.lib',''))
 	
 else:
 	#so this must be posix
@@ -39,10 +52,11 @@ else:
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.so'):
-			libList.append(file.replace('.so','').replace('lib','',1))
-		else:
-			if file.endswith('.a'):
-				libList.append(file.replace('.a','').replace('lib','',1))
+			if (not file.endswith('d.so')):
+				libList.append(file.replace('.so','')[3:])
+			else:
+				if file.endswith('.a'):
+					libList.append(file.replace('.a','').replace('lib','',1))
 		
 normPath = []
 
@@ -59,12 +73,8 @@ for file in files:
 		listCpps.append(codeFolder + '/' +  file)
 			
 # set header include paths
-env = Environment(CPPPATH=['../../Third_Party/include',  '/usr/include/python2.5/'])
+env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = ['-Wall', '-fPIC'])
 
 #BUILD CODE
 env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normPath)
-
-libList.insert(0,'MantidKernel')
-
-env.Program('main.cpp', LIBS=libList, LIBPATH=normPath)
