@@ -1,0 +1,10 @@
+c = Class("Mantid::Kernel::Algorithm", "Algorithm.h")
+set_policy(c.name, return_value_policy(copy_const_reference))
+set_policy(c.version, return_value_policy(copy_const_reference))
+
+d = Class("Mantid::Kernel::FrameworkManager", "FrameworkManager.h")
+set_policy(d.createAlgorithm, return_value_policy(manage_new_object))
+set_policy(d.exec, return_value_policy(manage_new_object))
+set_policy(d.getWorkspace, return_value_policy(manage_new_object))
+
+e = Class("Mantid::Kernel::Workspace", "Workspace.h")
