@@ -5,16 +5,48 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
-#include <System.h>
+#include "System.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
-/** @class Exception Exception.h Kernel/Exception.h
-
-    The Exception classes provide an exception strucure to be used throughout Mantid.
+/** @file
+	The File contains all of the exception classes used by Mantid that are extended from the std:exception classes.
 	All exceptions inherit from std:exception.
+
+	The exception tree is
+	<ul>
+		<li><b>std::exception</b> - Superclass of all standard exception, never thrown itself
+		<ul>
+			<li><b>std::bad_alloc</b> - Thrown when new runs out of memory</li>
+			<li><b>std::bad_exception</b> - Thrown if an exception is thrown which is not listed in a function's exception specification.</li>
+			<li><b>std::bad_cast</b> - Thrown if you attempt an invalid dynamic_cast expression</li>
+			<li><b>std::bad_typeid</b> - Thrown if you use a NULL pointer in a typeid expression</li>
+			<li><b>std::logic_error</b> - Superclass for all logic errors, never thrown itself. Logic errors represent problems in the internal logic of a program; in theory, these are preventable, and even detectable before the program runs (e.g., violations of class invariants). 
+			<ul>
+				<li><b>std::length_error</b> - Thrown when an object is constructed that would exceed its maximum
+				permitted size (e.g., a string instance).</li>
+				<li><b>std::domain_error</b> - Thrown to report domain errors (domain in the mathematical sense).</li>
+				<li><b>std::out_of_range</b> - Thrown if an argument has a value which is not within the expected range
+				(e.g. boundary checks in string).</li>
+				<li><b>std::invalid_argument</b> - Thrown to report invalid arguments to functions.</li>
+				<li><b>NotImplementedError</b> - Thrown if accessing areas of code that are not implmented yet.</li>
+			</ul>
+			</li>
+			<li><b>std::runtime_error</b> - Superclass for all runtime errors, never thrown itself. Runtime errors represent problems outside the scope of a program; they cannot be easily predicted and can generally only be caught as the program executes. 
+			<ul>
+				<li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
+				<li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
+				<li><b>std::underflow_error</b> - Thrown to indicate arithmetic underflow.</li>
+				<li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
+				<li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
+				<li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
+			</ul>
+			</li>
+		</ul>
+		</li>
+	</ul>
     
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
@@ -39,165 +71,67 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Exception: public std::exception
+namespace Exception
 {
-public:
-	/// Creates an exception.
-	Exception(const std::string& msg);
-	/// Creates an exception.
-	Exception(const std::string& msg, const std::string& arg);
-	/// Creates an exception and stores a clone of the nested exception.
-	Exception(const std::string& msg, const Exception& nested);
 
-	/// Copy constructor.
-	Exception(const Exception& exc);
+/// Records the filename and the description of failure.
+class DLLExport FileError : public std::runtime_error
+{
+ private:
+  const std::string fileName;
 
-	/// Destroys the exception and deletes the nested exception.	
-	~Exception() throw();
-	/// Assignment operator.
-	Exception& operator = (const Exception& exc);
-	/// Returns a static string describing the exception.	
-	virtual const char* name() const throw();
-	/// Returns the name of the exception class.	
-	virtual const char* className() const throw();
-	/// Returns a static string describing the exception.
-	///
-	/// Same as name(), but for compatibility with std::exception.
-	virtual const char* what() const throw();
-	/// Returns a pointer to the nested exception, or
-	/// null if no nested exception exists.
-	const Exception* nested() const;
+ public:
+  FileError(const std::string&,const std::string&);
+  FileError(const FileError& A);
+  FileError& operator=(const FileError& A);
+  ~FileError() throw() {}
 
-	/// Returns the message text.			
-	const std::string& message() const;
-
-	/// Returns a string consisting of the
-	/// message name and the message text.		
-	std::string displayText() const;
-
-	/// Clones the exception
-	virtual Exception* clone() const;
-
-	/// (Re)Throws the exception.
-	virtual void rethrow() const;
-
-protected:
-	/// Standard constructor.
-	Exception();
-
-		
-private:
-	std::string _msg;
-	Exception*  _pNested;
+  const char* what() const throw();
 };
 
+/// Marks code as not implemented yet.
+class NotImplementedError : public std::logic_error
+{
+ public:
+  NotImplementedError(const std::string&);
+  NotImplementedError(const NotImplementedError& A);
+  NotImplementedError& operator=(const NotImplementedError& A);
+  ~NotImplementedError() throw() {}
 
-//
-// Macros for quickly declaring and implementing exception classes.
-// Unfortunately, we cannot use a template here because character
-// pointers (which we need for specifying the exception name)
-// are not allowed as template arguments.
-//
-#define MANTID_DECLARE_EXCEPTION(API, CLS, BASE) \
-	class API CLS: public BASE											\
-	{																	\
-	public:																\
-		CLS();															\
-		CLS(const std::string& msg);									\
-		CLS(const std::string& msg, const std::string& arg);			\
-		CLS(const std::string& msg, const Mantid::Kernel::Exception& exc);		\
-		CLS(const CLS& exc);											\
-		~CLS() throw();													\
-		CLS& operator = (const CLS& exc);								\
-		const char* name() const throw();								\
-		const char* className() const throw();							\
-		Mantid::Kernel::Exception* clone() const;									\
-		void rethrow() const;											\
-	};
+  const char* what() const throw();
+};
 
+/// Exception for when an item is not found in a collection.
+class NotFoundError : public std::runtime_error
+{
+ private:
+  const std::string objectName;
 
-#define MANTID_IMPLEMENT_EXCEPTION(CLS, BASE, NAME) \
-	CLS::CLS()																			\
-	{																					\
-	}																					\
-	CLS::CLS(const std::string& msg): BASE(msg)											\
-	{																					\
-	}																					\
-	CLS::CLS(const std::string& msg, const std::string& arg): BASE(msg, arg)			\
-	{																					\
-	}																					\
-	CLS::CLS(const std::string& msg, const Mantid::Kernel::Exception& exc): BASE(msg, exc)		\
-	{																					\
-	}																					\
-	CLS::CLS(const CLS& exc): BASE(exc)													\
-	{																					\
-	}																					\
-	CLS::~CLS() throw()																	\
-	{																					\
-	}																					\
-	CLS& CLS::operator = (const CLS& exc)												\
-	{																					\
-		BASE::operator = (exc);															\
-		return *this;																	\
-	}																					\
-	const char* CLS::name() const throw()												\
-	{																					\
-		return NAME;																	\
-	}																					\
-	const char* CLS::className() const throw()											\
-	{																					\
-		return typeid(*this).name();													\
-	}																					\
-	Mantid::Kernel::Exception* CLS::clone() const													\
-	{																					\
-		return new CLS(*this);															\
-	}																					\
-	void CLS::rethrow() const															\
-	{																					\
-		throw *this;																	\
-	}
+ public:
+  NotFoundError(const std::string&,const std::string&);
+  NotFoundError(const NotFoundError& A);
+  NotFoundError& operator=(const NotFoundError& A);
+  ~NotFoundError() throw() {}
 
+  const char* what() const throw();
+};
 
-//
-// Standard exception classes
-//
-MANTID_DECLARE_EXCEPTION(DLLExport, LogicException, Exception)
-MANTID_DECLARE_EXCEPTION(DLLExport, AssertionViolationException, LogicException)
-MANTID_DECLARE_EXCEPTION(DLLExport, NullPointerException, LogicException)
-MANTID_DECLARE_EXCEPTION(DLLExport, InvalidArgumentException, LogicException)
-MANTID_DECLARE_EXCEPTION(DLLExport, NotImplementedException, LogicException)
-MANTID_DECLARE_EXCEPTION(DLLExport, RangeException, LogicException)
+/// Exception for when an item is already in a collection.
+class ExistsError : public std::runtime_error
+{
+ private:
+  const std::string objectName;
 
-MANTID_DECLARE_EXCEPTION(DLLExport, RuntimeException, Exception)
-MANTID_DECLARE_EXCEPTION(DLLExport, NotFoundException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, ExistsException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, TimeoutException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, SystemException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, LibraryLoadException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, LibraryAlreadyLoadedException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, NoPermissionException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, OutOfMemoryException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, DataException, RuntimeException)
+ public:
+  ExistsError(const std::string&,const std::string&);
+  ExistsError(const ExistsError& A);
+  ExistsError& operator=(const ExistsError& A);
+  ~ExistsError() throw() {}
 
-MANTID_DECLARE_EXCEPTION(DLLExport, DataFormatException, DataException)
-MANTID_DECLARE_EXCEPTION(DLLExport, SyntaxException, DataException)
-MANTID_DECLARE_EXCEPTION(DLLExport, PathSyntaxException, SyntaxException)
-MANTID_DECLARE_EXCEPTION(DLLExport, IOException, RuntimeException)
-MANTID_DECLARE_EXCEPTION(DLLExport, FileException, IOException)
-MANTID_DECLARE_EXCEPTION(DLLExport, FileExistsException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, FileNotFoundException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, PathNotFoundException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, FileReadOnlyException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, FileAccessDeniedException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, CreateFileException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, OpenFileException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, WriteFileException, FileException)
-MANTID_DECLARE_EXCEPTION(DLLExport, ReadFileException, FileException)
+  const char* what() const throw();
+};
 
-MANTID_DECLARE_EXCEPTION(DLLExport, ApplicationException, Exception)
-MANTID_DECLARE_EXCEPTION(DLLExport, BadCastException, RuntimeException)
-
-
+} //namespace Exception
 } // namespace Kernel
 } // namespace Mantid
 
