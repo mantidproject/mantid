@@ -74,6 +74,8 @@ namespace Kernel
 		{
 			//configure the logging framework
 			Poco::Util::LoggingConfigurator configurator;
+			
+			//BUG? This line crashes the FrameworkManagerTest and ConfigSvcTest
 			configurator.configure(m_pConf);
 		}
 		catch (std::exception& e)
