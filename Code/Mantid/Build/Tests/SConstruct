@@ -76,8 +76,6 @@ env.Append( CCFLAGS = cflags)
 
 f=open('../TestsToRun', 'r')
 
-libDirList.append('/usr/X11R6/lib')
-libList.append('X11')
 for test in f:
 	doth = '../' + test.strip() 
 	temp= test.split('/')
