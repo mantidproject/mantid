@@ -21,7 +21,7 @@ else:
 	libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	#libDirList.append('/usr/lib/python' sys.version[0:sys.version.find(' ')])
-	cflags = ['-fPIC']
+	cflags = ['-fPIC','-g']
 	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
 		
 	libDir =''
@@ -36,7 +36,8 @@ else:
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.so'):
-			libList.append(file.replace('.so','')[3:])
+			if (not file.endswith('d.so')):
+				libList.append(file.replace('.so','')[3:])
 
 #GET LIST OF TESTS
 path = '../../'
@@ -75,10 +76,16 @@ env.Append( CCFLAGS = cflags)
 
 f=open('../TestsToRun', 'r')
 
-
+libDirList.append('/usr/X11R6/lib')
+libList.append('X11')
 for test in f:
 	doth = '../' + test.strip() 
 	temp= test.split('/')
 	dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
 	os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
 	env.Program(dotcpp, LIBS=libList, LIBPATH=libDirList)
+
+
+
+
+
