@@ -51,7 +51,8 @@ else:
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.so'):
-			libList.append(file.replace('.so','')[3:])
+			if (not file.endswith('d.so')):
+				libList.append(file.replace('.so','')[3:])
 
 
 
