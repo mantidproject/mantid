@@ -174,10 +174,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DynamicFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Exception.cpp"
 				>
 			</File>

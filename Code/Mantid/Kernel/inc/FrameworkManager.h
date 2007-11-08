@@ -19,7 +19,6 @@ namespace Kernel
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
-//class AlgorithmFactory;
 class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
@@ -62,7 +61,7 @@ public:
    virtual ~FrameworkManager();	
 	
 	/// Creates all of the required services
-    std::string initialize();
+    void initialize();
 	/// At the moment clears all memory associated with Algorithm Manager
 	/// may do more in the future
      void clear();

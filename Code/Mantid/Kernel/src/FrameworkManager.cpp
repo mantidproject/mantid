@@ -56,7 +56,7 @@ FrameworkManager::~FrameworkManager()
 {
 }
 
-std::string FrameworkManager::initialize()
+void FrameworkManager::initialize()
 {
   // Required services are: the config service, the algorithm manager
   //     the analysis data service, the workspace factory
@@ -64,7 +64,7 @@ std::string FrameworkManager::initialize()
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
-  return std::string("Framework Manager initialised!");
+  return;
 }
 
 void FrameworkManager::clear()
