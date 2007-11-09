@@ -1,4 +1,4 @@
-#include "../inc/Logger.h"
+#include "Logger.h"
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
 #include <iostream>
@@ -7,11 +7,17 @@ namespace Mantid
 {
 namespace Kernel
 {
-	Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
+  /// No argument constructor
+  Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
 	{  
 		_name = name;
 	}
 
+  /** If the Logger's log level is at least PRIO_FATAL, creates a Message with 
+   *  priority PRIO_FATAL and the given message text and sends it to the attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::fatal(const std::string& msg)
 	{
 		try
@@ -25,6 +31,11 @@ namespace Kernel
 		}
 	}
 		
+  /** If the Logger's log level is at least PRIO_CRITICAL, creates a Message with priority
+   *  PRIO_CRITICAL and the given message text and sends it to the attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::critical(const std::string& msg)
 	{
 		try
@@ -38,6 +49,11 @@ namespace Kernel
 		}
 	}
 
+  /** If the Logger's log level is at least PRIO_ERROR, creates a Message with priority
+   *  PRIO_ERROR and the given message text and sends it to the attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::error(const std::string& msg)
 	{
 		try
@@ -52,6 +68,11 @@ namespace Kernel
 		
 	}
 
+  /** If the Logger's log level is at least PRIO_WARNING, creates a Message with 
+   *  priority PRIO_WARNING and the given message text and sends it to the attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::warning(const std::string& msg)
 	{
 		try
@@ -65,6 +86,12 @@ namespace Kernel
 		}
 	}
 
+  /** If the Logger's log level is at least PRIO_INFORMATION, creates a Message with 
+   *  priority PRIO_INFORMATION and the given message text and sends it to the 
+   *  attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::information(const std::string& msg)
 	{
 		try
@@ -78,6 +105,11 @@ namespace Kernel
 		}
 	}
 
+  /** If the Logger's log level is at least PRIO_DEBUG, creates a Message with priority
+   *  PRIO_DEBUG and the given message text and sends it to the attached channel.
+   * 
+   *  @param msg The message to log.
+   */
 	void Logger::debug(const std::string& msg)
 	{
 		try
@@ -91,6 +123,19 @@ namespace Kernel
 		}
 	}
 
+  /** Logs the given message at debug level, followed by the data in buffer.
+   * 
+   *  The data in buffer is written in canonical hex+ASCII form:
+   *  Offset (4 bytes) in hexadecimal, followed by sixteen space-separated, 
+   *  two column, hexadecimal bytes, followed by the same sixteen bytes as 
+   *  ASCII characters.
+   *  For bytes outside the range 32 .. 127, a dot is printed.  
+   *  Note all Dump messages go out at Debug message level
+   * 
+   *  @param msg The message to log
+   *  @param buffer the binary data to log
+   *  @param length The length of the binaary data to log
+   */
 	void Logger::dump(const std::string& msg, const void* buffer, std::size_t length)
 	{
 		try
@@ -104,7 +149,9 @@ namespace Kernel
 		}
 	}
 		
-
+  /** Returns true if at least the given log level is set.
+   *  @param level The logging level it is best to use the Logger::Priority enum (7=debug, 6=information, 4=warning, 3=error, 2=critical, 1=fatal)
+   */
 	bool Logger::is(int level) const
 	{
 		bool retVal = false;
@@ -120,6 +167,7 @@ namespace Kernel
 		return retVal;
 	}
 
+  /// Shuts down the logging framework and releases all Loggers.  
 	void Logger::shutdown()
 	{
 		try
@@ -133,6 +181,11 @@ namespace Kernel
 		}
 	}
 
+  /** Returns a reference to the Logger with the given name.
+   *  If the Logger does not yet exist, it is created, based on its parent logger.
+   * 
+   *  @param name The name of the logger to use - this is usually the class namename. 
+   */
 	Logger& Logger::get(const std::string& name)
 	{
 		Logger* pLogger = new Logger(name);

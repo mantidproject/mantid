@@ -1,37 +1,12 @@
-/*  The main public API via which users interact with the Mantid framework.
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 05/10/2007
-    
-    Copyright &copy; 2007 ???RAL???
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "../inc/FrameworkManager.h"
-#include "../inc/AlgorithmManager.h"
-#include "../inc/WorkspaceFactory.h"
-#include "../inc/AnalysisDataService.h"
-#include "../inc/ConfigSvc.h"
-#include "../inc/IAlgorithm.h"
+#include "FrameworkManager.h"
+#include "AlgorithmManager.h"
+#include "WorkspaceFactory.h"
+#include "AnalysisDataService.h"
+#include "ConfigSvc.h"
+#include "IAlgorithm.h"
 #include "Exception.h"
 
 #include <boost/tokenizer.hpp>
@@ -43,19 +18,24 @@ namespace Mantid
 {
 namespace Kernel
 {
+
 Logger& FrameworkManager::g_log = Logger::get("FrameworkManager");
+
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
 		
+/// Default constructor
 FrameworkManager::FrameworkManager()
 {
 }
 
+/// Destructor
 FrameworkManager::~FrameworkManager()
 {
 }
 
+/// Creates all of the required services
 void FrameworkManager::initialize()
 {
   // Required services are: the config service, the algorithm manager
@@ -67,17 +47,37 @@ void FrameworkManager::initialize()
   return;
 }
 
+/** At the moment clears all memory associated with AlgorithmManager.
+ *  May do more in the future
+ */
 void FrameworkManager::clear()
 {
     algManager->clear();
 }
 
+/** Creates an instance of an algorithm
+ * 
+ *  @param algName The name of the algorithm required
+ *  @return A pointer to the created algorithm
+ * 
+ *  @throw NotFoundError Thrown if algorithm requested is not registered
+ */
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 {
    IAlgorithm *alg = algManager->create(algName);
    return alg;
 }
 
+/** Creates an instance of an algorithm and sets the properties provided
+ * 
+ *  @param algName The name of the algorithm required
+ *  @param propertiesArray A single string containing properties in the 
+ *                         form "Property1:Value1,Property2:Value2,..."
+ *  @return A pointer to the created algorithm
+ * 
+ *  @throw NotFoundError Thrown if algorithm requested is not registered
+ *  @throw std::invalid_argument Thrown if properties string is ill-formed
+ */ 
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
 {
   // Use the previous method to create the algorithm
@@ -95,24 +95,35 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     vector<string> property(properties.begin(), properties.end());
     // Call the appropriate setProperty method on the algorithm
     if ( property.size() == 2)
-      {
-         alg->setProperty(property[0],property[1]);
-       }
+    {
+      alg->setProperty(property[0],property[1]);
+    }
     else if ( property.size() == 1)
-      {
-        alg->setProperty(property[0]);
-      }
+    {
+      alg->setProperty(property[0]);
+    }
     // Throw if there's a problem with the string
     else
-      {
+    {
 		  throw std::invalid_argument("Misformed properties string");
-      }
+    }
   }  
   return alg;
 }
 
-IAlgorithm* 
-FrameworkManager::exec(const std::string& algName, const std::string& propertiesArray)
+/** Creates an instance of an algorithm, sets the properties provided and
+ *       then executes it.
+ * 
+ *  @param algName The name of the algorithm required
+ *  @param propertiesArray A single string containing properties in the 
+ *                         form "Property1:Value1,Property2:Value2,..."
+ *  @return A pointer to the executed algorithm
+ * 
+ *  @throw NotFoundError Thrown if algorithm requested is not registered
+ *  @throw std::invalid_argument Thrown if properties string is ill-formed
+ *  @throw runtime_error Thrown if algorithm cannot be executed
+ */ 
+IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string& propertiesArray)
 {
   // Make use of the previous method for algorithm creation and property setting
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
@@ -120,15 +131,21 @@ FrameworkManager::exec(const std::string& algName, const std::string& properties
   // Now execute the algorithm
   StatusCode status = alg->execute();
   if (status.isFailure())
-    {
-	throw runtime_error("Unable to successfully execute algorithm " + algName);
-    }  
+  {
+    throw runtime_error("Unable to successfully execute algorithm " + algName);
+  }  
   
   return alg;
 }
 
-Workspace* 
-FrameworkManager::getWorkspace(const std::string& wsName)
+/** Returns a shared pointer to the workspace requested
+ * 
+ *  @param wsName The name of the workspace
+ *  @return A pointer to the workspace
+ * 
+ *  @throw NotFoundError If workspace is not registered with analysis data service
+ */
+Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
 {
   Workspace *space;
   StatusCode status = data->retrieve(wsName, space);

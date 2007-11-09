@@ -21,7 +21,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 10/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -38,7 +38,8 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Base>
 class DynamicFactory
@@ -137,7 +138,7 @@ private:
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
   DynamicFactory& operator = (const DynamicFactory&);
 
-    /// A typedef for the map of registered classes
+  /// A typedef for the map of registered classes
   typedef std::map<std::string, AbstractFactory*> FactoryMap;
   /// The map holding the registered class names and their instantiators
   FactoryMap _map;

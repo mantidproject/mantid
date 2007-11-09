@@ -24,7 +24,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 11/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -41,43 +41,49 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport IAlgorithm : virtual public IProperty {
+  class DLLExport IAlgorithm : virtual public IProperty 
+  {
   public:
     // Retrieve interface ID
     //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
 
-    /** The version of the algorithm
-     */
+    /// The version of the algorithm
     virtual const std::string& version() const = 0;
     
     /// Virtual destructor (always needed for abstract classes)
     virtual ~IAlgorithm() {};	  
       
     /** Initialization method invoked by the framework. This method is responsible
-        for any bookkeeping of initialization required by the framework itself.
-        It will in turn invoke the initialize() method of the derived algorithm,
-        and of any sub-algorithms which it creates.
-    */
+     *  for any bookkeeping of initialization required by the framework itself.
+     *  It will in turn invoke the init() method of the derived algorithm,
+     *  and of any sub-algorithms which it creates.
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     virtual StatusCode initialize() = 0;
 
-    /** System execution. This method invokes the execute() method of a concrete algorithm.
+    /** System execution. This method invokes the exec() method of a concrete algorithm.
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
      */
     virtual StatusCode execute() = 0;
 
-    /** System finalization. This method invokes the finalize() method of a concrete
-        algorithm and the finalize() methods of all of that algorithm's sub algorithms.
+    /** System finalization. This method invokes the final() method of a concrete
+     *  algorithm and the final() methods of all of that algorithm's sub algorithms.
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
      */
     virtual StatusCode finalize() = 0;
 
-    /// check if the algorithm is initialized properly
+    /// Check whether the algorithm is initialized properly
     virtual bool isInitialized() const = 0; 
-    /// check if the algorithm is finalized properly 
+    /// Check whether the algorithm is finalized properly 
     virtual bool isFinalized() const = 0; 
-    /// check if th ealgorithm is already executed for the current event
+    /// Check whether the algorithm has already been executed
     virtual bool isExecuted() const = 0;
-
   };
 
 } // namespace Kernel

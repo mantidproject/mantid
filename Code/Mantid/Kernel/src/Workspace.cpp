@@ -1,4 +1,4 @@
-#include "../inc/Workspace.h"
+#include "Workspace.h"
 
 namespace Mantid
 {
@@ -7,41 +7,61 @@ namespace Kernel
 
 Logger& Workspace::g_log = Logger::get("Workspace");
 
+/// Default constructor
 Workspace::Workspace()
 {}
 
+/// Copy constructor
 Workspace::Workspace(const Workspace& A)  :
      _title(A._title),_comment(A._comment)
 {}
-	
-Workspace& 
-Workspace::operator=(const Workspace& A)
+
+/// Assignment operator
+Workspace& Workspace::operator=(const Workspace& A)
 {
-     if (this!=&A)
-       {
-           _comment=A._comment;
-	    _title=A._title;
-       }	       
+  if (this!=&A)
+  {
+    _comment=A._comment;
+    _title=A._title;
+  }	       
   return *this;
 }
-Workspace::~Workspace()
+
+/// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
+Workspace::~Workspace()
 {}
 	
+/** Set the title of the workspace
+ * 
+ *  @param t The title
+ */
 void Workspace::setTitle(const std::string& t)
 {
      _title=t;
-}void Workspace::setComment(const std::string& c)
+}
+/** Set the comment field of the workspace
+ * 
+ *  @param c The comment
+ */
+void Workspace::setComment(const std::string& c)
 {
 	_comment=c;
 }
-const std::string& 
-Workspace::getTitle() const
+
+/** Get the workspace title
+ * 
+ *  @return The title
+ */
+const std::string& Workspace::getTitle() const
 {
 	return _title;
 }
 
-const std::string& 
-Workspace::getComment() const
+/** Get the workspace comment
+ * 
+ *  @return The comment
+ */
+const std::string& Workspace::getComment() const
 {
     return _comment;
 }

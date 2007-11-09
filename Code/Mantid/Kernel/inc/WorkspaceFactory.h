@@ -39,7 +39,7 @@ class Workspace;
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -56,31 +56,23 @@ class Workspace;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class DLLExport WorkspaceFactory : public DynamicFactory<Workspace>
 {
 public:
   
-  /** A static method which retrieves the single instance of the Algorithm Factory
-   * 
-   *  @returns A pointer to the factory instance
-   */
+  // Returns the single instance of the factory
   static WorkspaceFactory* Instance();
   
 private:
   
-  /// Private Constructor for singleton class
+  // Private constructor and destructor for singleton class
   WorkspaceFactory();
-  
-  /** Private destructor
-   *  Prevents client from calling 'delete' on the pointer handed 
-   *  out by Instance
-   */
   virtual ~WorkspaceFactory();
     
-  ///static reference to the logger class
+  /// Static reference to the logger class
   static Logger& g_log;
 
   /// Pointer to the factory instance

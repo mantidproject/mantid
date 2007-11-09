@@ -1,6 +1,6 @@
-
 #ifndef MANTID_KERNEL_CONFIGSVC_H_
 #define MANTID_KERNEL_CONFIGSVC_H_
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -9,8 +9,9 @@
 #include <iomanip>
 #include <string>
 
-
-//forward declaration
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
 namespace Poco
 {
 	namespace Util
@@ -27,14 +28,14 @@ namespace Kernel
 /** @class ConfigSvc ConfigSvc.h Kernel/ConfigSvc.h
 
     The ConfigSvc class provides a simple facade to access the Configuration functionality of the Mantid Framework.
-	The class gathers information from config files and the system varaibles.  
-	This information is available to all the objects within the framework as well as being used to configure the logging framework.
-	This class currently uses the Logging functionality provided through the POCO (portable components library).
+	  The class gathers information from config files and the system variables.  
+	  This information is available to all the objects within the framework as well as being used to configure the logging framework.
+	  This class currently uses the Logging functionality provided through the POCO (portable components library).
     
     @author Nicholas Draper, Tessella Support Services plc
     @date 15/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -51,108 +52,81 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 	class DLLExport ConfigSvc
 	{
-		 /// Inner templated class to wrap the poco library objects that have protected desctructors and expose them as public
-		 template<typename T >
-		 class WrappedObject : public T
-		 {
-		 public:
-			   ///The template type of class that is being wrapped
-			   typedef T element_type;
-			   ///simple constructor
-			   WrappedObject() : T()
-			   {
-				   m_pPtr = static_cast<T*>(this);
-				   std::cout<<"Wrapped Object Null Hold: "<<std::hex
-	                             <<reinterpret_cast<long>(this)<<std::endl;
-			   }
+	  /** Inner templated class to wrap the poco library objects that have protected 
+	   *  desctructors and expose them as public.
+	   */
+	  template<typename T >
+	  class WrappedObject : public T
+	  {
+	  public:
+	    /// The template type of class that is being wrapped
+	    typedef T element_type;
+	    /// Simple constructor
+	    WrappedObject() : T()
+	    {
+	      m_pPtr = static_cast<T*>(this);
+	    }
 
-			   ///consturctor with a class to wrap
-			   /// @param Field the class to wrap
-			   template<typename Field>
-			   WrappedObject(Field& F) : T(F)
-			   {
-				   m_pPtr = static_cast<T*>(this);
-				  std::cout<<"Wrapped Object Hold: "<<std::hex
-	                           <<reinterpret_cast<long>(this)<<std::endl;
-			   }
+	    /** Constructor with a class to wrap
+	     *  @param Field The class to wrap
+	     */
+	    template<typename Field>
+	    WrappedObject(Field& F) : T(F)
+	    {
+	      m_pPtr = static_cast<T*>(this);
+	    }
 
-			   ///copy constructor
-			   WrappedObject(const WrappedObject<T>& A) : T(A)
-			   {
-				m_pPtr = static_cast<T*>(this);
-			
-			   }
+	    /// Copy constructor
+	    WrappedObject(const WrappedObject<T>& A) : T(A)
+	    {
+  				m_pPtr = static_cast<T*>(this);
+	    }
 		       
-			   ///virtual destructor
-			   virtual ~WrappedObject()
-			   {}
+	    /// Virtual destructor
+	    virtual ~WrappedObject()
+	    {}
 		       
-			   ///overloaded * operator returns the wrapped object pointer
-			   const T& operator*() const { return *m_pPtr; }
-			 
-			   ///overloaded * operator returns the wrapped object pointer
-			   T& operator*() { return m_pPtr; }
-
-			   ///overloaded -> operator returns the wrapped object pointer
-			   const T* operator->() const{ return m_pPtr; }
-			   ///overloaded -> operator returns the wrapped object pointer
-			   T* operator->() { return m_pPtr; }
+	    /// Overloaded * operator returns the wrapped object pointer
+	    const T& operator*() const { return *m_pPtr; }	    
+	    /// Overloaded * operator returns the wrapped object pointer
+	    T& operator*() { return m_pPtr; }
+	    /// Overloaded -> operator returns the wrapped object pointer
+	    const T* operator->() const{ return m_pPtr; }
+	    /// Overloaded -> operator returns the wrapped object pointer
+	    T* operator->() { return m_pPtr; }
 
 		 private:
-			   /// private pointer to the wrapped class
-			   T* m_pPtr;
-		 };
+		   /// Private pointer to the wrapped class
+		   T* m_pPtr;
+	  };
 
-
+	  // Back to the ConfigSvc class itself...
+	  
 	public:	
-		/// A static method which retrieves the single instance of the ConfigSvc
-		///
-		/// @returns A pointer to the instance
+	  // Returns the single instance of the service
 		static ConfigSvc* Instance();
 
-		/// Loads the config file provided, any previous configuration is discarded.
-		/// If the file contains logging setup instructions then these will be used to setup the logging framework.
-		///
-		/// @param filename The filename and optionally path of the file to load
+		// Loads a config file
 		void loadConfig(const std::string& filename);
 		
-		/// Searches for the string within the currently loaded configuaration values and returns to value as a string.
-		///
-		/// @param keyName The case sensitive name of the property that you need the value of.
-		/// @returns the string value of the property
+		// Searches for a configuration property
 		std::string getString(const std::string& keyName);
 
-		/// Searches for the string within the currently loaded configuaration values and attempts to convert the values to the template type supplied.
-		///
-		/// @param keyName The case sensitive name of the property that you need the value of.
-		/// @param out The value if found
-		/// @returns A success flag - 0 on failure 1 on success
+		// Searches for a configuration property and returns its value
 		template<typename T>
 		int getValue(const std::string& keyName, T& out);
 
-		/// Searches for the string within the environment variables and returns to value as a string.
-		///
-		/// @param keyName The name of the environment variable that you need the value of.
-		/// @returns the string value of the property
+		// Searches for the given environment variable and returns it as a string
 		std::string getEnvironment(const std::string& keyName);
 
-		/// Gets the name of the operation system
-		///
-		/// @returns the string value of the operation system version
+		// Getters for properties of the host system
 		std::string getOSName();
-
-		/// Gets the name of the computer running Mantid
-		///
-		/// @returns the string value of the name of the computer
 		std::string getComputerName();
-			
-		/// Gets the name of the operation system Architecture
-		///
-		/// @returns the string value of the operation system Architecture
 		std::string getOSArchitecture();
 
 /*		Removed as the use of these throughs a debug assertion about an invlid heap pointer
@@ -180,19 +154,15 @@ namespace Kernel
 		std::string getTempDir();
 */
 
-		/// Destructor
-		/// Prevents client from calling 'delete' on the pointer handed 
-		/// out by Instance
-		virtual ~ConfigSvc();
 	private:
-		/// Private Constructor for singleton class
+	  // Private constructors and destructor for singleton class
 		ConfigSvc();
-	    
-		/// Private copy constructor
-		/// Prevents singleton being copied
+		/// Private copy constructor. Prevents singleton being copied.
 		ConfigSvc(const ConfigSvc&) {}
 	    
-		/// the POCO file config object
+    virtual ~ConfigSvc();
+
+    /// the POCO file config object
 		WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
 		/// the POCO system Config Object
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;

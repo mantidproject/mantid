@@ -23,12 +23,12 @@ namespace Kernel
     the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
-     This is the manager/owner of Workspace* when registered.
+    This is the manager/owner of Workspace* when registered.
     
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -45,47 +45,29 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AnalysisDataService
 {
 public:
-  
- 
+   
+  // Returns the single instance of the service
   static AnalysisDataService* Instance();
   
-	
 	StatusCode add( const std::string& name, Workspace * space );
 	StatusCode remove(const std::string& name );
-	
-	/** Retrieve a pointer to a workspace by name.
-	 * 
-	 *  @param name The name of the desired workspace
-	 *  @param space Returns a pointer to the requested workspace
-	 *  @return A StatusCode object indicating whether the operation was successful
-	 */
-	StatusCode retrieve(const std::string& name, Workspace *& space );
-	
+	StatusCode retrieve(const std::string& name, Workspace *& space );	
 	
 private:
   
-  /// Private Constructor for singleton class
+  // Private constructors and destructor for singleton class
   AnalysisDataService();
-  
-  /** Private copy constructor
-   *  Prevents singleton being copied
-   */
-  AnalysisDataService(const AnalysisDataService&) {}
-  
-  /** Private destructor
-   *  Prevents client from calling 'delete' on the pointer handed 
-   *  out by Instance
-   */
+  AnalysisDataService(const AnalysisDataService&);
   ~AnalysisDataService();
 
-  
   ///static reference to the logger class
- // static Logger& g_log;
+  // static Logger& g_log;
   
   /// Pointer to the single instance
   static AnalysisDataService* m_instance;

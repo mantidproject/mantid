@@ -22,7 +22,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 19/09/2007
     
-    Copyright � 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -39,9 +39,11 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport IProperty : public INamedInterface {
+  class DLLExport IProperty : public INamedInterface 
+  {
   public:
     /// Retrieve interface ID
 //    static const InterfaceID& interfaceID() { return IID_IProperty; }
@@ -50,10 +52,24 @@ namespace Kernel
 // RJT: No Property class yet
 //    virtual StatusCode setProperty( const Property& p // Reference to the input property
 //                                  ) = 0;
-    /// Set the property by string 
+    
+    /** Set a property which has no value
+     * 
+     *  @param s A string containing the property
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     virtual StatusCode setProperty( const std::string& s ) = 0;
-    /// Set the property by std::string
+    
+    /** Set a property and its value
+     * 
+     *  @param n The property's name
+     *  @param v The property's value
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     virtual StatusCode setProperty( const std::string& n, const std::string& v ) = 0;
+    
     /// Get the property by property
 //    virtual StatusCode getProperty( Property* p       // Pointer to property to be set
 //                                  ) const = 0;
@@ -61,7 +77,16 @@ namespace Kernel
 //    virtual const Property& getProperty( const std::string& name  // Property name
 //                                  ) const = 0;
     /// Get the property by std::string
+    
+    /** Get the value of a named property
+     * 
+     *  @param n The name of the property
+     *  @param v Returns a reference to the value
+     * 
+     *  @return A StatusCode object indicating whether the operation was successful
+     */
     virtual StatusCode getProperty( const std::string& n, std::string& v ) const = 0;
+    
     /// Get list of properties
 //    virtual const std::vector<Property*>& getProperties( ) const = 0;
         
@@ -69,4 +94,5 @@ namespace Kernel
 
 } // namespace Kernel
 } // namespace Mantid
+
 #endif /*MANTID_KERNEL_IPROPERTY_H_*/

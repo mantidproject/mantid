@@ -23,7 +23,9 @@ namespace Mantid
 namespace Kernel
 {
 
+//----------------------------------------------------------------------
 // Forward declaration
+//----------------------------------------------------------------------
 class Workspace;
 
 /** @class Algorithm Algorithm.h Kernel/Algorithm.h
@@ -48,7 +50,7 @@ class Workspace;
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -65,45 +67,38 @@ class Workspace;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
   class DLLExport Algorithm : virtual public IAlgorithm
   {
    public:
-	  
      Algorithm();
      virtual ~Algorithm();
 
-	 
-      virtual const std::string& name() const;
+     virtual const std::string& name() const;
 
-	  // IAlgorithm methods
-	  
-       virtual const std::string& version() const;
-       StatusCode initialize();
-       StatusCode execute();
-       StatusCode finalize();	  
-	  
+     // IAlgorithm methods	  
+     virtual const std::string& version() const;
+     StatusCode initialize();
+     StatusCode execute();
+     StatusCode finalize();	  
+     virtual bool isInitialized() const;    // Protected in Gaudi version
+     virtual bool isExecuted() const;
+     virtual bool isFinalized() const;
     
-    // Protected in Gaudi version
-	virtual bool isInitialized() const;
-        virtual bool isExecuted() const;
-	 virtual bool isFinalized() const;
+     StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
+                                    Algorithm*& pSubAlg );
+	  
+     /// List of sub-algorithms (const version). Returns a pointer to a vector of (sub) Algorithms
+     const std::vector<Algorithm*>& subAlgorithms() const { return m_subAlgms; }
+     /// List of sub-algorithms. Returns a pointer to a vector of (sub) Algorithms
+     std::vector<Algorithm*>& subAlgorithms()  { return m_subAlgms; }
 
-    
-    // Need Algorithm manager/factory before this can be implemented.
-	StatusCode createSubAlgorithm(const std::string&, 
-				const std::string&, Algorithm*& );
-	  
-	  /// List of sub-algorithms. Returns a pointer to a vector of (sub) Algorithms
-	const std::vector<Algorithm*>& subAlgorithms() const { return m_subAlgms; }
-	std::vector<Algorithm*>& subAlgorithms()  { return m_subAlgms; }
-	  
-	
+     // IProperty methods
 //	  virtual StatusCode setProperty( const Property& p );
-	  virtual StatusCode setProperty( const std::string&);
-	  /// Implementation of IProperty::setProperty
-	  virtual StatusCode setProperty( const std::string& n, const std::string& v);
+	  virtual StatusCode setProperty( const std::string& );
+	  virtual StatusCode setProperty( const std::string& n, const std::string& v );
 //	  virtual StatusCode getProperty(Property* p) const;
 //	  virtual const Property& getProperty( const std::string& name) const;
 	  virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
@@ -119,35 +114,28 @@ class Workspace;
 	  /// Virtual method - must be overridden by concrete algorithm
 	  virtual StatusCode final() = 0;
 	  
-
-	  /// Set the Algorithm initialized state
 	  void setInitialized();
-
-	  /// Set the executed flag to the specified state
-	  // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
-	  //     Also don't know reason for different return type and argument.
 	  void setExecuted( bool state );
-
-	  /// Set the Algorithm finalized state
 	  void setFinalized();
 	  
 	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
-	  Workspace* m_inputWorkspace;     
-	  Workspace* m_outputWorkspace;  /// OutputWorkspace :: Created by the concreate Algorithm
+	  Workspace* m_inputWorkspace;
+	  /// Workspace containing the output of the algorithm. Created by the concrete algorithm.
+	  Workspace* m_outputWorkspace;
 	  
   private:
 
 	  /// Private Copy constructor: NO COPY ALLOWED
-	  Algorithm(const Algorithm& a);                 
+	  Algorithm( const Algorithm& a );                 
 
 	  /// Private asignment operator: NO ASSIGNMENT ALLOWED
-	  Algorithm& operator=(const Algorithm& rhs);
+	  Algorithm& operator=( const Algorithm& rhs );
 
-	  std::string m_name;            ///< Algorithm's name for identification
-	  std::string m_version;         ///< Algorithm's version
-	  std::vector<Algorithm *> m_subAlgms; ///< Sub algorithms [
+	  std::string m_name;                   ///< Algorithm's name for identification
+	  std::string m_version;                ///< Algorithm's version
+	  std::vector<Algorithm *> m_subAlgms;  ///< Sub algorithms
 
-	  ///static refenence to the logger class
+	  /// Static refenence to the logger class
 	  static Logger& g_log;
 	  	  
 	  bool  m_isInitialized;    ///< Algorithm has been initialized flag
@@ -155,7 +143,7 @@ class Workspace;
 	  bool  m_isFinalized;      ///< Algorithm has been finalized flag
 
 	  /** Name of workspace in which result should be placed. 
-	   *  Its name should be set via a property called "OutputWorkspace"
+	   *  Its name should be set via a property called "OutputWorkspace".
 	   *  Only the concrete algorithm can actually create the output workspace.
 	   */
 	  std::string m_outputWorkspaceName;

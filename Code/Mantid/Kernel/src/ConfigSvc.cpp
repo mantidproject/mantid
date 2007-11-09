@@ -1,5 +1,8 @@
-#include "../inc/ConfigSvc.h"
-#include "../inc/Support.h"
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "ConfigSvc.h"
+#include "Support.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -14,13 +17,17 @@ namespace Kernel
 	// Initialise the instance pointer to zero
 	ConfigSvc* ConfigSvc::m_instance=0;
 
+  /** A static method which retrieves the single instance of the ConfigSvc
+   *
+   * @returns A pointer to the instance
+   */
 	ConfigSvc* ConfigSvc::Instance()
 	{
 		if (!m_instance) m_instance = new ConfigSvc;
 		return m_instance;
 	}
 
-	//private constructor
+	/// Private constructor for singleton class
 	ConfigSvc::ConfigSvc()
 	{
 		//getting at system details
@@ -30,7 +37,9 @@ namespace Kernel
 		loadConfig("Mantid.properties");
 	}
 
-	//destructor
+  /** Private Destructor
+   *  Prevents client from calling 'delete' on the pointer handed out by Instance
+   */
 	ConfigSvc::~ConfigSvc()
 	{
 		delete m_pSysConfig;
@@ -38,13 +47,18 @@ namespace Kernel
 	}
 
 
+  /** Loads the config file provided, any previous configuration is discarded.
+   *  If the file contains logging setup instructions then these will be used to setup the logging framework.
+   *
+   *  @param filename The filename and optionally path of the file to load
+   */
 	void ConfigSvc::loadConfig(const std::string& filename)
 	{
 		delete m_pConf;
 
 		try
 		{
-		      m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
+		  m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
 		}
 		catch (std::exception& e)
 		{
@@ -84,11 +98,24 @@ namespace Kernel
 		}
 	}
 	
+  /** Searches for a string within the currently loaded configuaration values and 
+   *  returns the value as a string.
+   *
+   *  @param keyName The case sensitive name of the property that you need the value of.
+   *  @returns The string value of the property
+   */
 	std::string ConfigSvc::getString(const std::string& keyName)
 	{
 		return m_pConf->getString(keyName);
 	}
 
+  /** Searches for a string within the currently loaded configuaration values and 
+   *  attempts to convert the values to the template type supplied.
+   *
+   *  @param keyName The case sensitive name of the property that you need the value of.
+   *  @param out     The value if found
+   *  @returns A success flag - 0 on failure, 1 on success
+   */
 	template<typename T>
 	int ConfigSvc::getValue(const std::string& keyName, T& out)
 	{
@@ -97,21 +124,39 @@ namespace Kernel
 		return result;
 	}
 
+  /** Searches for the string within the environment variables and returns the 
+   *  value as a string.
+   *
+   *  @param keyName The name of the environment variable that you need the value of.
+   *  @returns The string value of the property
+   */
 	std::string ConfigSvc::getEnvironment(const std::string& keyName)	
 	{
 		return m_pSysConfig->getString("system.env." + keyName);
 	}
-
+	
+  /** Gets the name of the host operating system
+   *
+   *  @returns The name pf the OS version
+   */
 	std::string ConfigSvc::getOSName()
 	{
 		return m_pSysConfig->getString("system.osName");
 	}
 
+  /** Gets the name of the computer running Mantid
+   *
+   *  @returns The  name of the computer
+   */
 	std::string ConfigSvc::getOSArchitecture()
 	{
 		return m_pSysConfig->getString("system.osArchitecture");
 	}
 	
+  /** Gets the name of the operating system Architecture
+   *
+   * @returns The operating system architecture
+   */
 	std::string ConfigSvc::getComputerName()
 	{
 		return m_pSysConfig->getString("system.nodeName");
@@ -144,7 +189,6 @@ namespace Kernel
 
 	
 /// \cond TEMPLATE 
-
 
 	template DLLExport int ConfigSvc::getValue(const std::string&,double&);
 	template DLLExport int ConfigSvc::getValue(const std::string&,std::string&);

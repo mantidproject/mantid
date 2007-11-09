@@ -24,7 +24,6 @@ class WorkspaceFactory;
 class AnalysisDataService;
 class ConfigSvc;
 
-// N.B. Framework Manager is responsible for deleting the algorithms created
 /** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
 
     The main public API via which users interact with the Mantid framework.
@@ -32,7 +31,7 @@ class ConfigSvc;
     @author Russell Taylor, Tessella Support Services plc
     @date 05/10/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -49,76 +48,39 @@ class ConfigSvc;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport FrameworkManager
 {
 public:
 
-  /// Default constructor
   FrameworkManager();
-  /// Destructor
-   virtual ~FrameworkManager();	
+  virtual ~FrameworkManager();	
 	
 	/// Creates all of the required services
-    void initialize();
-	/// At the moment clears all memory associated with Algorithm Manager
-	/// may do more in the future
-     void clear();
-	/** Creates an instance of an algorithm
-	 * 
-	 *  @param algName The name of the algorithm required
-	 *  @return A pointer to the created algorithm
-	 * 
-	 *  @throw NotFoundError Thrown if algorithm requested is not registered
-	 */
-     IAlgorithm* createAlgorithm(const std::string& algName);
+  void initialize();
 
-  /** Creates an instance of an algorithm and sets the properties provided
-   * 
-   *  @param algName The name of the algorithm required
-   *  @param propertiesArray A single string containing properties in the 
-   *                         form "Property1:Value1,Property2:Value2,..."
-   *  @return A pointer to the created algorithm
-   * 
-   *  @throw NotFoundError Thrown if algorithm requested is not registered
-   *  @throw std::invalid_argument Thrown if properties string is ill-formed
-   */	
+  /// Clears all memory associated with the AlgorithmManager 
+  void clear();
+
+  /// Creates and instance of an algorithm
+  IAlgorithm* createAlgorithm(const std::string& algName);
+
+  /// Creates an instance of an algorithm and sets the properties provided
 	IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
-	
-	
-  /** Creates an instance of an algorithm, sets the properties provided and
-   *       then executes it.
-   * 
-   *  @param algName The name of the algorithm required
-   *  @param propertiesArray A single string containing properties in the 
-   *                         form "Property1:Value1,Property2:Value2,..."
-   *  @return A pointer to the executed algorithm
-   * 
-   *  @throw NotFoundError Thrown if algorithm requested is not registered
-   *  @throw std::invalid_argument Thrown if properties string is ill-formed
-   *  @throw runtime_error Thrown if algorithm cannot be executed
-   */ 
+		
+  /// Creates an instance of an algorithm, sets the properties provided & then executes it.
 	IAlgorithm* exec(const std::string& algName, const std::string& propertiesArray);
 	
-	/** Returns a shared pointer to the workspace requested
-	 * 
-	 *  @param wsName The name of the workspace
-	 *  @return A pointer to the workspace
-	 * 
-	 *  @throw NotFoundError If workspace is not registered with analysis data service
-	 */
+	/// Returns a shared pointer to the workspace requested
 	Workspace* getWorkspace(const std::string& wsName);
 	
 private:
   
-  ///static reference to the logger class
+  /// Static reference to the logger class
   static Logger& g_log;
   
-//the next lines will be removed and put in Algorithm Manager
-  /// Pointer to the Algorithm Factory instance
-  //AlgorithmFactory *algFactory;
-
   /// Pointer to the Algorithm Factory instance
   AlgorithmManager *algManager;
   /// Pointer to the Workspace Factory instance

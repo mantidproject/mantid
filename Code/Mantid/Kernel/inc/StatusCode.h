@@ -13,7 +13,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 12/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -30,7 +30,8 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 // RJT: Minimal implementation at this point.
   class DLLExport StatusCode 
@@ -49,25 +50,24 @@ namespace Kernel
     /// Constructor.
     StatusCode( unsigned long code, bool checked = false ) :
          d_code(code),m_checked(checked), m_severity(0) {}
-
-		 
     
     /** Test for a status code of FAILURE.
-    * N.B. This is a specific type of failure where there aren't any more
-    * appropriate staus codes. To test for any failure use :
-    * if ( !StatusCode.isSuccess() ) ...
-    */
+     *  N.B. This is a specific type of failure where there aren't any more
+     *  appropriate staus codes. To test for any failure use :
+     *  if ( !StatusCode.isSuccess() ) ...
+     *  @return True if the status is set to failure
+     */
     bool isFailure() const
     {
       m_checked = true;
       return (d_code != SUCCESS );
     }
     
-  protected:     // Why protected & not private?
-	unsigned long   d_code;      ///< The status code
-  // RJT: Don't use these next two variables at present, but including them means I can leave the constructors unchanged
-	mutable bool    m_checked;   ///< If the Status code has been checked
-	int m_severity;              ///< The seriousness of an error (unused)
+  protected:
+    unsigned long   d_code;      ///< The status code
+    // RJT: Don't use these next two variables at present, but including them means I can leave the constructors unchanged
+    mutable bool    m_checked;   ///< If the Status code has been checked
+    int m_severity;              ///< The seriousness of an error (unused)
     
   };
 
