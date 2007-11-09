@@ -8,10 +8,9 @@ from socket import gethostname
 
 currPath = os.getcwd() + '/'
 
-cppPaths = ['../../Third_Party/include',  '/usr/include/python' + sys.version[0:3]]
+cppPaths = ['../../Third_Party/include']
 
 dirpath=os.listdir('.')
-print dirpath
 for item in dirpath:
 	if (item=="inc" or item=="auxinc"):
 		cppPaths.append(item)
@@ -19,28 +18,30 @@ for item in dirpath:
 
 #get libraries and the library directories
 libDirList = ['lib']
-libList = ['python2.5']
+libList = []
+
+cflags=''
 
 if os.name == 'nt':
 	# assume this is nt
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
-	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+	cflags = ['-W3','/EHsc', '/MDd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+	
+	cppPaths.append('C:\Python25\include')
+	libDirList.append('C:\Python25\libs')
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
 			libList.append(file.replace('.dll',''))
 		else:
 			if file.endswith('.lib'):
-				libList.append(file.replace('.lib',''))
+				if file.startswith('lib'):
+					libList.append(file.replace('.lib',''))
 	
 else:
-	#so this must be posix
-	#libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
-	
-	#libDir =''
+	cppPaths.append('/usr/include/python' + sys.version[0:3])
 	
 	if platform.architecture()[0].startswith('64bit'):
 		libDirList.append('../../Third_Party/lib/linux64/')
@@ -74,7 +75,7 @@ for file in files:
 			
 # set header include paths
 env = Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = ['-Wall', '-fPIC'])
+env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
 env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normPath)
