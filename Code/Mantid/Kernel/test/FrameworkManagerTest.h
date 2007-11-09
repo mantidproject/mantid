@@ -52,7 +52,7 @@ public:
 	  
     TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm2","") )
     TS_ASSERT_THROWS_NOTHING( manager.createAlgorithm("ToyAlgorithm2","noValProp") )
-    TS_ASSERT_THROWS( manager.createAlgorithm("ToyAlgorithm2","p1:p2:p3"), std::runtime_error )
+    TS_ASSERT_THROWS( manager.createAlgorithm("ToyAlgorithm2","p1:p2:p3"), std::invalid_argument )
 	}
 
 	void testExec()

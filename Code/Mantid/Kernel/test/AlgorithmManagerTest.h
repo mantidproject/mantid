@@ -41,7 +41,6 @@ public:
 
 	AlgorithmManagerTest() 
 	{
-		std::cerr<<"build"<<std::endl;
 		manager = AlgorithmManager::Instance();
 	}
 
