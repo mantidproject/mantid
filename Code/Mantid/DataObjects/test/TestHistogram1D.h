@@ -106,35 +106,35 @@ public:
 	void testrangeexceptionX()
 	{
 		h.setX(x1);
-		TS_ASSERT_THROWS(h.getX(-1),const std::runtime_error&);
-		TS_ASSERT_THROWS(h.getX(nel),const std::runtime_error&);
+		TS_ASSERT_THROWS(h.getX(-1),const std::range_error&);
+		TS_ASSERT_THROWS(h.getX(nel),const std::range_error&);
 	}
 	void testrangeexceptionY()
 	{
 		h.setData(y1);
-		TS_ASSERT_THROWS(h.getY(-1),const std::runtime_error&);
-		TS_ASSERT_THROWS(h.getY(nel),const std::runtime_error&);
+		TS_ASSERT_THROWS(h.getY(-1),const std::range_error&);
+		TS_ASSERT_THROWS(h.getY(nel),const std::range_error&);
 	}
 	void testrangeexceptionE()
 	{
 		h.setData(y1,e1);
-		TS_ASSERT_THROWS(h.getE(-1),const std::runtime_error&);
-		TS_ASSERT_THROWS(h.getE(nel),const std::runtime_error&);
+		TS_ASSERT_THROWS(h.getE(-1),const std::range_error&);
+		TS_ASSERT_THROWS(h.getE(nel),const std::range_error&);
 	}
 	void testrangeexceptionoperatorbracket()
 	{
 		h.setX(x1);
 		h.setData(y1,e1);
-		TS_ASSERT_THROWS(h[-1],const std::runtime_error&);
-		TS_ASSERT_THROWS(h[nel],const std::runtime_error&);
+		TS_ASSERT_THROWS(h[-1],const std::range_error&);
+		TS_ASSERT_THROWS(h[nel],const std::range_error&);
 	}
 	void testsetdatadifferentsizesException()
 	{
 		e1.resize(nel+1);
-		TS_ASSERT_THROWS(h.setData(y1,e1),const std::runtime_error&);
+		TS_ASSERT_THROWS(h.setData(y1,e1),const std::invalid_argument&);
 		pb.reset();
 		pb=parray(new std::vector<double>(nel+1));
-		TS_ASSERT_THROWS(h.setData(pa,pb),const std::runtime_error&);
+		TS_ASSERT_THROWS(h.setData(pa,pb),const std::invalid_argument&);
 	}
 	
 	
