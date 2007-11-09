@@ -11,7 +11,7 @@
 #include <functional>
 #include <boost/shared_ptr.hpp>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"

@@ -9,7 +9,7 @@
 #include <stack>
 #include <string>
 #include <algorithm>
-#include "Exception.h"
+#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"

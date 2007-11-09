@@ -9,7 +9,7 @@
 #include <boost/shared_ptr.hpp>
 // #include <boost/traittypes.hpp>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "RefControl.h"
 #include "Matrix.h"
 #include "Vec3D.h"

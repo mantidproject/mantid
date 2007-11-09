@@ -12,7 +12,7 @@
 #include <iterator>
 
 #include "Logger.h"
-#include "Exception.h"
+#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"

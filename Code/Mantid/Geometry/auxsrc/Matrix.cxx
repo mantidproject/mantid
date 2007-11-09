@@ -7,7 +7,7 @@
 #include <complex>
 #include <vector>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "mathSupport.h"
 #include "Matrix.h"
 

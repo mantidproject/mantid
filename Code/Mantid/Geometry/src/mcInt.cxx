@@ -12,7 +12,7 @@
 #include <boost/regex.hpp>
 
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "FileReport.h"
 #include "GTKreport.h"
 #include "OutputLog.h"

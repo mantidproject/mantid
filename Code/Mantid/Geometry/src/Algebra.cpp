@@ -12,7 +12,7 @@
 #include <iterator>
 
 #include "Logger.h"
-#include "Exception.h"
+#include "AuxException.h"
 #include "Support.h"
 #include "MapSupport.h"
 #include "BnId.h"

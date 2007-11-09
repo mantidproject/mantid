@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "Exception.h"
+#include "AuxException.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "Track.h"

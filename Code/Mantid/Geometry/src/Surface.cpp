@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "Logger.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"

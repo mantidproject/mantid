@@ -2,7 +2,7 @@
 #include <sstream>
 #include <string>
 #include <stdexcept>
-#include "Exception.h"
+#include "AuxException.h"
 
 namespace ColErr
 {

@@ -11,7 +11,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "RefControl.h"
 #include "Matrix.h"
 #include "support.h"
