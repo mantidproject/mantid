@@ -7,7 +7,8 @@ import sys
 from socket import gethostname
 
 libDirList = ['../']
-libList = ['Mantid', 'Get', 'g2c', 'python' + sys.version[0:3]]
+# added boost_filesystem which is required for the test SaveCSVTest
+libList = ['Mantid', 'Get', 'g2c', 'python' + sys.version[0:3], 'boost_filesystem']
 cppPaths = ['../../../Third_Party/include/']
 cflags = []
 

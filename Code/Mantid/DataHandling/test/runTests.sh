@@ -22,8 +22,12 @@ fi
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lpython2.3
+# -lboost_filesystem added for the SaveCSVTest test
+g++ -o runner.exe runner.cpp -L../../Debug -L../../Build -L../../../Third_Party/lib/linux64 \
+     -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet \
+     -lboost_python -lpython2.3 -lboost_filesystem
 echo
+
 
 echo "Running the tests..."
 ./runner.exe
