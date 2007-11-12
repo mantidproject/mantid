@@ -75,7 +75,7 @@ namespace Kernel
 				"logging.channels.fileChannel.class = FileChannel\n"
 				"logging.channels.fileChannel.path = mantid.log\n"
 				"logging.channels.fileChannel.formatter.class = PatternFormatter\n"
-				"logging.channels.fileChannel.formatter.pattern = %s: {%p} %t\n"
+				"logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t\n"
 				"logging.formatters.f1.class = PatternFormatter\n"
 				"logging.formatters.f1.pattern = %s-[%p] %t\n"
 				"logging.formatters.f1.times = UTC\n";

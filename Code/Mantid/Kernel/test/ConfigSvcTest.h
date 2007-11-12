@@ -69,7 +69,6 @@ public:
 	  int retVal = configSvc->getValue("mantid.legs",value);
 	  double dblValue;
 	  retVal = configSvc->getValue("mantid.legs",dblValue);
- std::cerr << std::endl << "mantid.legs=" << dblValue << std::endl;
 
 	  TS_ASSERT_EQUALS(value, 6);
 	  TS_ASSERT_EQUALS(dblValue, 6.0);
