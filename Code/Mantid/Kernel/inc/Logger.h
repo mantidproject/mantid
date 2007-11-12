@@ -12,10 +12,12 @@
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+/// @cond Exclude from doxygen documentation
 namespace Poco
 {
 	class Logger;
 }
+/// @endcond
 
 namespace Mantid
 {

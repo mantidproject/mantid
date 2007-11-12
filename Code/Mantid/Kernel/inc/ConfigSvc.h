@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+/// @cond Exclude from doxygen documentation
 namespace Poco
 {
 	namespace Util
@@ -20,6 +21,7 @@ namespace Poco
 		class SystemConfiguration;
 	}
 }
+/// @endcond
 
 namespace Mantid
 {
