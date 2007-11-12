@@ -14,8 +14,8 @@ namespace Exception
 // FileError
 //-------------------------
 /** Constructor
-	@param Desc :: Function description
-	@param Fname :: Filename 
+	@param Desc Function description
+	@param FName Filename 
 */
 FileError::FileError(const std::string& Desc,const std::string& FName) :
 std::runtime_error(Desc),fileName(FName)
@@ -40,7 +40,7 @@ const char* FileError::what() const throw()
 // NotImplementedError
 //-------------------------
 /** Constructor
-	@param Desc :: Function description
+	@param Desc Function description
 */
 NotImplementedError::NotImplementedError(const std::string& Desc) :
 std::logic_error(Desc)
@@ -63,8 +63,8 @@ const char* NotImplementedError::what() const throw()
 // NotFoundError
 //-------------------------
 /** Constructor
-	@param Desc :: Function description
-	@param ObjectName :: the name of the search object
+	@param Desc Function description
+	@param ObjectName The name of the search object
 */
 NotFoundError::NotFoundError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)
@@ -89,8 +89,8 @@ const char* NotFoundError::what() const throw()
 // ExistsError
 //-------------------------
 /** Constructor
-	@param Desc :: Function description
-	@param ObjectName :: the name of the search object
+	@param Desc Function description
+	@param ObjectName The name of the search object
 */
 ExistsError::ExistsError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)

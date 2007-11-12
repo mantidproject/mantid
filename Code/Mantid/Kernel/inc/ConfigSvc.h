@@ -73,7 +73,7 @@ namespace Kernel
 	    }
 
 	    /** Constructor with a class to wrap
-	     *  @param Field The class to wrap
+	     *  @param F The object to wrap
 	     */
 	    template<typename Field>
 	    WrappedObject(Field& F) : T(F)

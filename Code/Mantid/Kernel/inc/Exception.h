@@ -11,8 +11,8 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @file
-	The File contains all of the exception classes used by Mantid that are extended from the std:exception classes.
+/**
+	The exception classes used by Mantid.
 	All exceptions inherit from std:exception.
 
 	The exception tree is
@@ -68,8 +68,8 @@ namespace Kernel
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+	  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 namespace Exception
 {
@@ -78,13 +78,17 @@ namespace Exception
 class DLLExport FileError : public std::runtime_error
 {
  private:
+  /// The name of the file relating to the error
   const std::string fileName;
+  /// The message returned by what()
   std::string outMessage;
 
  public:
   FileError(const std::string&,const std::string&);
   FileError(const FileError& A);
+  /// Assignment operator
   FileError& operator=(const FileError& A);
+  /// Destructor
   ~FileError() throw() {}
 
   const char* what() const throw();
@@ -96,7 +100,9 @@ class DLLExport NotImplementedError : public std::logic_error
  public:
   NotImplementedError(const std::string&);
   NotImplementedError(const NotImplementedError& A);
+  /// Assignment operator
   NotImplementedError& operator=(const NotImplementedError& A);
+  /// Destructor
   ~NotImplementedError() throw() {}
 
   const char* what() const throw();
@@ -106,13 +112,17 @@ class DLLExport NotImplementedError : public std::logic_error
 class DLLExport NotFoundError : public std::runtime_error
 {
  private:
+  /// The name of the search object
   const std::string objectName;
+  /// The message returned by what()
   std::string outMessage;
 
  public:
   NotFoundError(const std::string&,const std::string&);
   NotFoundError(const NotFoundError& A);
+  /// Assignment operator
   NotFoundError& operator=(const NotFoundError& A);
+  /// Destructor
   ~NotFoundError() throw() {}
 
   const char* what() const throw();
@@ -122,13 +132,17 @@ class DLLExport NotFoundError : public std::runtime_error
 class DLLExport ExistsError : public std::runtime_error
 {
  private:
+  /// The name of the search object
   const std::string objectName;
+  /// The message returned by what()
   std::string outMessage;
 
  public:
   ExistsError(const std::string&,const std::string&);
   ExistsError(const ExistsError& A);
+  /// Assignment operator
   ExistsError& operator=(const ExistsError& A);
+  /// Destructor
   ~ExistsError() throw() {}
 
   const char* what() const throw();

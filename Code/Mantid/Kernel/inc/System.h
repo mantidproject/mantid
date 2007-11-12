@@ -23,6 +23,12 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+// The documentation block below is for the main page of the doxygen documentation
+/** @mainpage Mantid
+ * 
+ */
+
 #ifndef MANTID_KERNEL_SYSTEM_H_
 #define MANTID_KERNEL_SYSTEM_H_
 

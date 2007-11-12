@@ -78,7 +78,7 @@ StatusCode AnalysisDataService::retrieve(const std::string& name, Workspace *& s
 // Private member functions
 //----------------------------------------------------------------------
 
-// Private constructor for singleton class
+/// Private constructor for singleton class
 AnalysisDataService::AnalysisDataService() 
 { }
 

@@ -43,15 +43,14 @@ template DLLExport int writeFile(const std::string&,const std::vector<float>&,co
 
 /// \endcond TEMPLATE 
 
-void 
-printHex(std::ostream& OFS,const int n)
-  /*!
-    Function to convert and number into hex
-    output (and leave the stream un-changed)
-    \param OFS :: Output stream
-    \param n :: integer to convert
-    \todo Change this to a stream operator
-  */
+/*!
+  Function to convert a number into hex
+  output (and leave the stream un-changed)
+  \param OFS :: Output stream
+  \param n :: Integer to convert
+  \todo Change this to a stream operator
+*/
+void printHex(std::ostream& OFS,const int n)
 {
   std::ios_base::fmtflags PrevFlags=OFS.flags();
   OFS<<"Ox";
@@ -63,14 +62,12 @@ printHex(std::ostream& OFS,const int n)
   return;
 } 
 
-
-std::string
-stripMultSpc(const std::string& Line)
-  /*!
-    Removes the multiple spaces in the line
-    \param Line :: Line to process
-    \return String with single space components
-  */
+/*!
+  Removes the multiple spaces in the line
+  \param Line :: Line to process
+  \return String with single space components
+*/
+std::string stripMultSpc(const std::string& Line)
 {
   std::string Out;
   int spc(1);
@@ -96,18 +93,17 @@ stripMultSpc(const std::string& Line)
   return Out;
 }
 
-int
-extractWord(std::string& Line,const std::string& Word,const int cnt)
-  /*!
-    Checks that as least cnt letters of 
-    works is part of the string. It is currently 
-    case sensative. It removes the Word if found
-    \param Line :: Line to process
-    \param Word :: Word to use
-    \param cnt :: Length of Word for significants [default =4]
-    \retval 1 on success (and changed Line) 
-    \retval 0 on failure 
-  */
+/*!
+  Checks that as least cnt letters of 
+  works is part of the string. It is currently 
+  case sensative. It removes the Word if found
+  \param Line :: Line to process
+  \param Word :: Word to use
+  \param cnt :: Length of Word for significants [default =4]
+  \retval 1 on success (and changed Line) 
+  \retval 0 on failure 
+*/
+int extractWord(std::string& Line,const std::string& Word,const int cnt)
 {
   if (Word.empty())
     return 0;
@@ -125,15 +121,14 @@ extractWord(std::string& Line,const std::string& Word,const int cnt)
   return 1;
 }
 
-int
-confirmStr(const std::string& S,const std::string& fullPhrase)
-  /*!
-    Check to see if S is the same as the
-    first part of a phrase. (case insensitive)
-    \param S :: string to check
-    \param fullPhrase :: complete phrase
-    \returns 1 on success 
-  */
+/*!
+  Check to see if S is the same as the
+  first part of a phrase. (case insensitive)
+  \param S :: string to check
+  \param fullPhrase :: complete phrase
+  \returns 1 on success 
+*/
+int confirmStr(const std::string& S,const std::string& fullPhrase)
 {
   const int nS(S.length());
   const int nC(fullPhrase.length());
@@ -145,19 +140,18 @@ confirmStr(const std::string& S,const std::string& fullPhrase)
   return 1;
 }
 
-int
-getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
-  /*!
-    Gets a line and determine if there is addition component to add
-    in the case of a very long line.
-    \param fh :: input stream to get line 
-    \param Out :: string up to last 'tab' or ' '
-    \param Excess :: string after 'tab or ' ' 
-    \param spc :: number of char to try to read 
-    \retval 1 :: more line to be found
-    \retval -1 :: Error with file
-    \retval 0  :: line finished.
-  */
+/*!
+  Gets a line and determine if there is addition component to add
+  in the case of a very long line.
+  \param fh :: input stream to get line 
+  \param Out :: string up to last 'tab' or ' '
+  \param Excess :: string after 'tab or ' ' 
+  \param spc :: number of char to try to read 
+  \retval 1 :: more line to be found
+  \retval -1 :: Error with file
+  \retval 0  :: line finished.
+*/
+int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
 {
   std::string Line;
   if (fh.good())
@@ -193,14 +187,13 @@ getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc)
   return -1;
 }
 
-std::string
-removeSpace(const std::string& CLine)
-  /*!
-    Removes all spaces from a string 
-    except those with in the form '\ '
-    \param CLine :: Line to strip
-    \return String without space
-  */
+/*!
+  Removes all spaces from a string 
+  except those with in the form '\ '
+  \param CLine :: Line to strip
+  \return String without space
+*/
+std::string removeSpace(const std::string& CLine)
 {
   std::string Out;
   char prev='x';
@@ -215,17 +208,14 @@ removeSpace(const std::string& CLine)
   return Out;
 }
 	
-
-std::string 
-getLine(std::istream& fh,const int spc)
-  /*!
-    Reads a line from the stream of max length spc.
-    Trailing comments are removed. (with # or ! character)
-    \param fh :: already open file handle
-    \param spc :: max number of characters to read 
-    \return String read.
-  */
-
+/*!
+  Reads a line from the stream of max length spc.
+  Trailing comments are removed. (with # or ! character)
+  \param fh :: already open file handle
+  \param spc :: max number of characters to read 
+  \return String read.
+*/
+std::string getLine(std::istream& fh,const int spc)
 {
   char* ss=new char[spc+1];
   std::string Line;
@@ -243,26 +233,24 @@ getLine(std::istream& fh,const int spc)
   return Line;
 }
 
-int
-isEmpty(const std::string& A)
-  /*!
-    Determines if a string is only spaces
-    \param A :: string to check
-    \returns 1 on an empty string , 0 on failure
-  */
+/*!
+  Determines if a string is only spaces
+  \param A :: string to check
+  \returns 1 on an empty string , 0 on failure
+*/
+int isEmpty(const std::string& A)
 {
   std::string::size_type pos=
     A.find_first_not_of(" \t");
   return (pos!=std::string::npos) ? 0 : 1;
 }
 
-void
-stripComment(std::string& A)
-  /*!
-    removes the string after the comment type of 
-    '$ ' or '!' or '#  '
-    \param A :: String to process
-  */
+/*!
+  removes the string after the comment type of 
+  '$ ' or '!' or '#  '
+  \param A :: String to process
+*/
+void stripComment(std::string& A)
 {
   std::string::size_type posA=A.find("$ ");
   std::string::size_type posB=A.find("# ");
@@ -276,14 +264,13 @@ stripComment(std::string& A)
   return;
 }
 
-std::string
-fullBlock(const std::string& A)
-  /*!
-    Returns the string from the first non-space to the 
-    last non-space 
-    \param A :: string to process
-    \returns shortened string
-  */
+/*!
+  Returns the string from the first non-space to the 
+  last non-space 
+  \param A :: string to process
+  \returns shortened string
+*/
+std::string fullBlock(const std::string& A)
 {
   std::string::size_type posA=A.find_first_not_of(" ");
   std::string::size_type posB=A.find_last_not_of(" ");
@@ -292,19 +279,18 @@ fullBlock(const std::string& A)
   return A.substr(posA,1+posB-posA);
 }
 
+/*!
+  Takes a character string and evaluates 
+  the first [typename T] object. The string is then 
+  erase upt to the end of number.
+  The diffierence between this and section is that
+  it allows trailing characters after the number. 
+  \param out :: place for output
+  \param A :: string to process
+  \returns 1 on success 0 on failure
+ */ 
 template<typename T>
-int
-sectPartNum(std::string& A,T& out)
-  /*!
-    Takes a character string and evaluates 
-    the first [typename T] object. The string is then 
-    erase upt to the end of number.
-    The diffierence between this and section is that
-    it allows trailing characters after the number. 
-    \param out :: place for output
-    \param A :: string to process
-    \returns 1 on success 0 on failure
-   */ 
+int sectPartNum(std::string& A,T& out)
 {
   if (A.empty())
     return 0;
@@ -322,17 +308,16 @@ sectPartNum(std::string& A,T& out)
   return 1; 
 }
 
+/*!
+  Takes a character string and evaluates 
+  the first [typename T] object. The string is then filled with
+  spaces upto the end of the [typename T] object
+  \param out :: place for output
+  \param cA :: char array for input and output. 
+  \returns 1 on success 0 on failure
+ */ 
 template<typename T>
-int 
-section(char* cA,T& out)
-  /*!
-    Takes a character string and evaluates 
-    the first [typename T] object. The string is then filled with
-    spaces upto the end of the [typename T] object
-    \param out :: place for output
-    \param cA :: char array for input and output. 
-    \returns 1 on success 0 on failure
-   */ 
+int section(char* cA,T& out)
 {
   if (!cA) return 0;
   std::string sA(cA);
@@ -345,17 +330,16 @@ section(char* cA,T& out)
   return 0;
 }
 
+/* 
+  takes a character string and evaluates 
+  the first <T> object. The string is then filled with
+  spaces upto the end of the <T> object
+  \param out :: place for output
+  \param A :: string for input and output. 
+  \return 1 on success 0 on failure
+*/
 template<typename T>
-int
-section(std::string& A,T& out)
-  /* 
-    takes a character string and evaluates 
-    the first <T> object. The string is then filled with
-    spaces upto the end of the <T> object
-    \param out :: place for output
-    \param A :: string for input and output. 
-    \return 1 on success 0 on failure
-  */
+int section(std::string& A,T& out)
 {
   if (A.empty()) return 0;
   std::istringstream cx;
@@ -374,20 +358,19 @@ section(std::string& A,T& out)
   return 1;
 }
 
+/* 
+  Takes a character string and evaluates 
+  the first [T] object. The string is then filled with
+  spaces upto the end of the [T] object.
+  This version deals with MCNPX numbers. Those
+  are numbers that are crushed together like
+  - 5.4938e+04-3.32923e-6
+  \param out :: place for output
+  \param A :: string for input and output. 
+  \return 1 on success 0 on failure
+*/
 template<typename T>
-int
-sectionMCNPX(std::string& A,T& out)
-  /* 
-    Takes a character string and evaluates 
-    the first [T] object. The string is then filled with
-    spaces upto the end of the [T] object.
-    This version deals with MCNPX numbers. Those
-    are numbers that are crushed together like
-    - 5.4938e+04-3.32923e-6
-    \param out :: place for output
-    \param A :: string for input and output. 
-    \return 1 on success 0 on failure
-  */
+int sectionMCNPX(std::string& A,T& out)
 {
   if (A.empty()) return 0;
   std::istringstream cx;
@@ -409,15 +392,14 @@ sectionMCNPX(std::string& A,T& out)
   return 0;
 }
 
-void
-writeMCNPX(const std::string& Line,std::ostream& OX)
-  /*!
-    Write out the line in the limited form for MCNPX
-    ie initial line from 0->72 after that 8 to 72
-    (split on a space or comma)
-    \param Line :: full MCNPX line
-    \param OX :: ostream to write to
-  */
+/*!
+  Write out the line in the limited form for MCNPX
+  ie initial line from 0->72 after that 8 to 72
+  (split on a space or comma)
+  \param Line :: full MCNPX line
+  \param OX :: ostream to write to
+*/
+void writeMCNPX(const std::string& Line,std::ostream& OX)
 {
   const int MaxLine(72);
   std::string::size_type pos(0);
@@ -450,13 +432,12 @@ writeMCNPX(const std::string& Line,std::ostream& OX)
   return;
 }
 
-std::vector<std::string>
-StrParts(std::string Ln)
-  /*!
-    Splits the sting into parts that are space delminated.
-    \param Ln :: line component to strip
-    \returns vector of components
-  */
+/*!
+  Splits the sting into parts that are space delminated.
+  \param Ln :: line component to strip
+  \returns vector of components
+*/
+std::vector<std::string> StrParts(std::string Ln)
 {
   std::vector<std::string> Out;
   std::string Part;
@@ -465,20 +446,19 @@ StrParts(std::string Ln)
   return Out;
 }
 
+/*!
+  Takes a character string and evaluates 
+  the first [typename T] object. The string is then 
+  erase upto the end of number.
+  The diffierence between this and convert is that
+  it allows trailing characters after the number. 
+  \param out :: place for output
+  \param A :: string to process
+  \retval number of char read on success
+  \retval 0 on failure
+ */ 
 template<typename T>
-int
-convPartNum(const std::string& A,T& out)
-  /*!
-    Takes a character string and evaluates 
-    the first [typename T] object. The string is then 
-    erase upto the end of number.
-    The diffierence between this and convert is that
-    it allows trailing characters after the number. 
-    \param out :: place for output
-    \param A :: string to process
-    \retval number of char read on success
-    \retval 0 on failure
-   */ 
+int convPartNum(const std::string& A,T& out)
 {
   if (A.empty()) return 0;
   std::istringstream cx;
@@ -493,15 +473,14 @@ convPartNum(const std::string& A,T& out)
   return xpt; 
 }
 
+/*!
+  Convert a string into a value 
+  \param A :: string to pass
+  \param out :: value if found
+  \returns 0 on failure 1 on success
+*/
 template<typename T>
-int
-convert(const std::string& A,T& out)
-  /*!
-    Convert a string into a value 
-    \param A :: string to pass
-    \param out :: value if found
-    \returns 0 on failure 1 on success
-  */
+int convert(const std::string& A,T& out)
 {
   if (A.empty()) return 0;
   std::istringstream cx;
@@ -518,15 +497,14 @@ convert(const std::string& A,T& out)
   return 1;
 }
 
+/*!
+  Convert a string into a value 
+  \param A :: string to pass
+  \param out :: value if found
+  \returns 0 on failure 1 on success
+*/
 template<typename T>
-int
-convert(const char* A,T& out)
-  /*!
-    Convert a string into a value 
-    \param A :: string to pass
-    \param out :: value if found
-    \returns 0 on failure 1 on success
-  */
+int convert(const char* A,T& out)
 {
   // No string, no conversion
   if (!A) return 0;
@@ -534,16 +512,15 @@ convert(const char* A,T& out)
   return convert(Cx,out);
 }
 
+/*!
+  Write out the three vectors into a file of type dc 9
+  \param step :: parameter to control x-step (starts from zero)
+  \param Y :: Y column
+  \param Fname :: Name of the file
+  \returns 0 on success and -ve on failure
+*/
 template<template<typename T> class V,typename T> 
-int
-writeFile(const std::string& Fname,const T step, const V<T>& Y)
-  /*!
-    Write out the three vectors into a file of type dc 9
-    \param step :: parameter to control x-step (starts from zero)
-    \param Y :: Y column
-    \param Fname :: Name of the file
-    \returns 0 on success and -ve on failure
-  */
+int writeFile(const std::string& Fname,const T step, const V<T>& Y)
 {
   V<T> Ex;   // Empty vector
   V<T> X;    // Empty vector
@@ -553,34 +530,30 @@ writeFile(const std::string& Fname,const T step, const V<T>& Y)
   return writeFile(Fname,X,Y,Ex);
 }
 
+/*!
+  Write out the three vectors into a file of type dc 9
+  \param X :: X column
+  \param Y :: Y column
+  \param Fname :: Name of the file
+  \returns 0 on success and -ve on failure
+*/
 template<template<typename T> class V,typename T> 
-int
-writeFile(const std::string& Fname,const V<T>& X,
-	  const V<T>& Y)
-  /*!
-    Write out the three vectors into a file of type dc 9
-    \param X :: X column
-    \param Y :: Y column
-    \param Fname :: Name of the file
-    \returns 0 on success and -ve on failure
-  */
+int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y)
 {
   V<T> Ex;   // Empty vector/list
   return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
 }
 
+/*!
+  Write out the three container into a file of type dc 9
+  \param X :: X column
+  \param Y :: Y column
+  \param Err :: Err column
+  \param Fname :: Name of the file
+  \returns 0 on success and -ve on failure
+*/
 template<template<typename T> class V,typename T> 
-int
-writeFile(const std::string& Fname,const V<T>& X,
-	  const V<T>& Y,const V<T>& Err)
-  /*!
-    Write out the three container into a file of type dc 9
-    \param X :: X column
-    \param Y :: Y column
-    \param Err :: Err column
-    \param Fname :: Name of the file
-    \returns 0 on success and -ve on failure
-  */
+int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y,const V<T>& Err)
 {
   const int Npts(X.size()>Y.size() ? Y.size() : X.size());
   const int Epts(Npts>static_cast<int>(Err.size()) ? Err.size() : Npts);
@@ -617,13 +590,12 @@ writeFile(const std::string& Fname,const V<T>& X,
   return 0;
 }
 
-float
-getVAXnum(const float A) 
-  /*!
-    Converts a vax number into a standard unix number
-    \param A :: float number as read from a VAX file
-    \returns float A in IEEE little eindian format
-  */
+/*!
+  Converts a vax number into a standard unix number
+  \param A :: float number as read from a VAX file
+  \returns float A in IEEE little eindian format
+*/
+float getVAXnum(const float A) 
 {
   union 
    {
@@ -651,20 +623,18 @@ getVAXnum(const float A)
   return (float) onum;
 }
 
+/*!  
+  Call to read in various values in position x1,x2,x3 from the
+  line. Note to avoid the dependency on crossSort this needs
+  to be call IN ORDER 
+  \param Line :: string to read
+  \param Index :: Indexes to read
+  \param Out :: OutValues [unchanged if not read]
+  \retval 0 :: success
+  \retval -ve on failure.
+*/
 template<typename T> 
-int
-setValues(const std::string& Line,const std::vector<int>& Index,
-	  std::vector<T>& Out)
-  /*!  
-    Call to read in various values in position x1,x2,x3 from the
-    line. Note to avoid the dependency on crossSort this needs
-    to be call IN ORDER 
-    \param Line :: string to read
-    \param Index :: Indexes to read
-    \param Out :: OutValues [unchanged if not read]
-    \retval 0 :: success
-    \retval -ve on failure.
-  */
+int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<T>& Out)
 {
   if (Index.empty())
     return 0;

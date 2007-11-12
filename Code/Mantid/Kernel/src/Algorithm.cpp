@@ -278,10 +278,10 @@ namespace Kernel
    * 
    *  @return        Success since nothing ever happens.
    */
-  StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
+  StatusCode Algorithm::createSubAlgorithm( const std::string& type, const std::string& name, 
                                  Algorithm*& pSubAlg )
   {
-    // TODO This method needs implementing now that we have an algorithm factory
+    /// @todo This method needs implementing now that we have an algorithm factory
     return StatusCode::SUCCESS;   
   }
   
