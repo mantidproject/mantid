@@ -8,10 +8,20 @@ REM
 REM Author: Nick Draper, 19/10/07
 REM
 echo "Generating the source from the test header files..."
-python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp *.h
+IF "%1" == "" GOTO BUILD_ALL ELSE GOTO BUILD_ONE
+:BUILD_ONE 
+ECHO Building only %1
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp %1
+GOTO COMPILE
 
+:BUILD_ALL 
+ECHO Building all .h files
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp *.h
+GOTO COMPILE
+
+:COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /EHsc /MTd /W3 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib runner.obj
 

@@ -41,7 +41,7 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
 			<Tool

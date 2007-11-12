@@ -79,6 +79,7 @@ class DLLExport FileError : public std::runtime_error
 {
  private:
   const std::string fileName;
+  std::string outMessage;
 
  public:
   FileError(const std::string&,const std::string&);
@@ -91,7 +92,7 @@ class DLLExport FileError : public std::runtime_error
 
 /// Marks code as not implemented yet.
 class DLLExport NotImplementedError : public std::logic_error
-{
+{ 
  public:
   NotImplementedError(const std::string&);
   NotImplementedError(const NotImplementedError& A);
@@ -106,6 +107,7 @@ class DLLExport NotFoundError : public std::runtime_error
 {
  private:
   const std::string objectName;
+  std::string outMessage;
 
  public:
   NotFoundError(const std::string&,const std::string&);
@@ -121,6 +123,7 @@ class DLLExport ExistsError : public std::runtime_error
 {
  private:
   const std::string objectName;
+  std::string outMessage;
 
  public:
   ExistsError(const std::string&,const std::string&);

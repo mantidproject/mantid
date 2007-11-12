@@ -19,7 +19,9 @@ namespace Exception
 */
 FileError::FileError(const std::string& Desc,const std::string& FName) :
 std::runtime_error(Desc),fileName(FName)
-{}
+{
+	outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
+}
  
 /// Copy constructor
 FileError::FileError(const FileError& A) :
@@ -31,9 +33,7 @@ FileError::FileError(const FileError& A) :
 */
 const char* FileError::what() const throw()
 {
-  std::stringstream cx;
-  cx<<std::runtime_error::what()<<" in "<<fileName;
-  return cx.str().c_str();
+	return outMessage.c_str();
 }
 
 //-------------------------
@@ -56,9 +56,7 @@ NotImplementedError::NotImplementedError(const NotImplementedError& A) :
 */
 const char* NotImplementedError::what() const throw()
 {
-  std::stringstream cx;
-  cx<<std::logic_error::what();
-  return cx.str().c_str();
+  return std::logic_error::what();
 }
 
 //-------------------------
@@ -70,7 +68,9 @@ const char* NotImplementedError::what() const throw()
 */
 NotFoundError::NotFoundError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)
-{}
+{ 
+	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+}
  
 /// Copy constructor
 NotFoundError::NotFoundError(const NotFoundError& A) :
@@ -82,9 +82,7 @@ NotFoundError::NotFoundError(const NotFoundError& A) :
 */
 const char* NotFoundError::what() const throw()
 {
-  std::stringstream cx;
-  cx<<std::runtime_error::what()<<" search object "<<objectName;;
-  return cx.str().c_str();
+	return outMessage.c_str();
 }
 
 //-------------------------
@@ -96,7 +94,9 @@ const char* NotFoundError::what() const throw()
 */
 ExistsError::ExistsError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)
-{}
+{
+	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+}
  
 /// Copy constructor
 ExistsError::ExistsError(const ExistsError& A) :
@@ -108,9 +108,7 @@ ExistsError::ExistsError(const ExistsError& A) :
 */
 const char* ExistsError::what() const throw()
 {
-  std::stringstream cx;
-  cx<<std::runtime_error::what()<<" search object "<<objectName;;
-  return cx.str().c_str();
+	return outMessage.c_str();
 }
 
 } // namespace Exception

@@ -6,6 +6,7 @@
 #include "../inc/ConfigSvc.h"
 #include "../inc/Logger.h"
 #include <string>
+#include <iostream>
 
 using namespace Mantid::Kernel;
 
@@ -39,7 +40,7 @@ public:
 	  TS_ASSERT(log1.is(Logger::PRIO_ERROR)); //error
 	  TS_ASSERT(log1.is(Logger::PRIO_CRITICAL)); //critical
 	  TS_ASSERT(log1.is(Logger::PRIO_FATAL)); //fatal
-	  
+
   }
 
   void TestSystemValues()
@@ -68,6 +69,7 @@ public:
 	  int retVal = configSvc->getValue("mantid.legs",value);
 	  double dblValue;
 	  retVal = configSvc->getValue("mantid.legs",dblValue);
+ std::cerr << std::endl << "mantid.legs=" << dblValue << std::endl;
 
 	  TS_ASSERT_EQUALS(value, 6);
 	  TS_ASSERT_EQUALS(dblValue, 6.0);
