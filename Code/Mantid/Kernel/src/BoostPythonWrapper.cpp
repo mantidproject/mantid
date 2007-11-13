@@ -7,6 +7,8 @@
 #include "Algorithm.h"
 #include "FrameworkManager.h"
 #include "Workspace.h"
+#include "LibraryManager.h"
+#include "FrameworkManager.h"
 
 // Using =======================================================================
 using namespace boost::python;
@@ -139,7 +141,6 @@ struct Mantid_Kernel_Workspace_Wrapper: Mantid::Kernel::Workspace
     PyObject* py_self;
 };
 
-
 }// namespace 
 
 
@@ -185,6 +186,11 @@ BOOST_PYTHON_MODULE(libMantidKernel)
         .def("setComment", &Mantid::Kernel::Workspace::setComment)
         .def("getComment", &Mantid::Kernel::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::Kernel::Workspace::getTitle, return_value_policy< copy_const_reference >())
+    ;
+    
+    class_< Mantid::Kernel::LibraryManager >("LibraryManager", init< const Mantid::Kernel::LibraryManager& >())
+        .def("Initialise", &Mantid::Kernel::LibraryManager::Initialise, return_value_policy< manage_new_object >())
+        .staticmethod("Initialise")
     ;
 
 }
