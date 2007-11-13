@@ -3,7 +3,6 @@
 #include <cmath> 
 #include <vector>
 
-
 // THIS IS VERY ERROR PRONE :: USE "V3D.h" and -I flag.
 #include "V3D.h"
 

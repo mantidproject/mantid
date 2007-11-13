@@ -47,7 +47,7 @@ public:
 		// of 45 degrees around the 111 axis.
 		Mantid::Geometry::Quat q1(90.0,v);
 		double c=1.0/sqrt(2.0);
-		double s=c/sqrt(3);
+		double s=c/sqrt(3.0);
 		TS_ASSERT_DELTA(q1[0],c,0.000001);
 		TS_ASSERT_DELTA(q1[1],s,0.000001);
 		TS_ASSERT_DELTA(q1[2],s,0.000001);
@@ -66,7 +66,7 @@ public:
 		Mantid::Geometry::V3D v(1,1,1);
 		q(90.0,v);
 	        double c=1.0/sqrt(2.0);
-		double s=c/sqrt(3);
+		double s=c/sqrt(3.0);
 		TS_ASSERT_DELTA(q[0],c,0.000001);
 		TS_ASSERT_DELTA(q[1],s,0.000001);
 		TS_ASSERT_DELTA(q[2],s,0.000001);

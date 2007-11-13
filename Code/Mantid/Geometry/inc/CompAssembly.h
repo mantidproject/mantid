@@ -1,8 +1,10 @@
 #ifndef COMPONENT_ASSEMBLY_
 #define COMPONENT_ASSEMBLY_
 #include <string> 
+#include <vector>
+#include "System.h"
 #include "Component.h"
-#include <vector> 
+
 namespace Mantid
 {
 namespace Geometry
@@ -37,7 +39,7 @@ namespace Geometry
       File change history is stored at: 
       <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   */
-class CompAssembly : public Component
+class DLLExport CompAssembly : public Component
 {
 	
 public:

@@ -1,11 +1,13 @@
 #ifndef MANTID_V3D_H_
 #define MANTID_V3D_H_
 
+#include "System.h"
+
 namespace Mantid
 {
 namespace Geometry
 {
-  class V3D
+  class DLLExport V3D
   /** @class V3D 
       @brief Class for 3D vectors. 
       @version A

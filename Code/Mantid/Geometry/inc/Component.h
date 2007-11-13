@@ -3,6 +3,7 @@
 #include <string>
 #include "V3D.h"
 #include "Quat.h"
+#include "System.h"
 
 namespace Mantid
 {
@@ -46,7 +47,7 @@ namespace Geometry
       File change history is stored at: 
       <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   */
-class Component
+class DLLExport Component
 {
 public:
 	virtual std::string type() const {return "LogicalComponent";}
@@ -61,7 +62,7 @@ public:
 	//Copy constructors
 	//! Copy constructor
 	Component(const Component&);
-	Component& operator=(const Component&);
+	//Component& operator=(const Component&);
 	//! Return a clone to the current object
 	virtual Component* clone() const;
 	virtual ~Component();

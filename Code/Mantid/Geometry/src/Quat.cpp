@@ -4,6 +4,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <stdexcept> 
 
+
 namespace Mantid
 {
 namespace Geometry

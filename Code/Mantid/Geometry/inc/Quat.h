@@ -2,6 +2,7 @@
 #define MANTID_QUAT_H_
 
 #include <iostream> 
+#include "System.h"
 
 namespace Mantid
 {
@@ -11,7 +12,7 @@ namespace Geometry
 class V3D; 
 class M33;
 
-class Quat
+class DLLExport Quat
 {
 	/** @class Quat Quat.h Geometry/Quat.h
 			@brief Class for quaternions 

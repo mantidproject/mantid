@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Kernel"
-	ProjectGUID="{902CB04F-8893-4FE8-83B8-09F9DB20A82A}"
-	RootNamespace="Kernel"
+	Name="Geometry"
+	ProjectGUID="{F1EB475D-8936-49E5-AC28-3B3830483487}"
+	RootNamespace="Geometry"
 	>
 	<Platforms>
 		<Platform
@@ -39,8 +39,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../../Third_Party/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
+				AdditionalIncludeDirectories="inc;auxinc;../Kernel/inc;../../Third_Party/include"
+				PreprocessorDefinitions="_USE_MATH_DEFINES"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -55,8 +55,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib"
-				AdditionalLibraryDirectories="../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -154,51 +152,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\Algorithm.cpp"
+				RelativePath=".\src\CompAssembly.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\AlgorithmManager.cpp"
+				RelativePath=".\src\Component.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\AnalysisDataService.cpp"
+				RelativePath=".\src\Quat.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConfigSvc.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\DllOpen.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Exception.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\FrameworkManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LibraryManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Logger.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Support.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Workspace.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\WorkspaceFactory.cpp"
+				RelativePath=".\src\V3D.cpp"
 				>
 			</File>
 		</Filter>
@@ -208,87 +174,155 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\Algorithm.h"
+				RelativePath=".\inc\Acomp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AlgorithmManager.h"
+				RelativePath=".\inc\Algebra.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AnalysisDataService.h"
+				RelativePath=".\inc\BaseVisit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ConfigSvc.h"
+				RelativePath=".\inc\BnId.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DeclareUserAlg.h"
+				RelativePath=".\inc\ChebPoly.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DllOpen.h"
+				RelativePath=".\inc\CompAssembly.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DynamicFactory.h"
+				RelativePath=".\inc\Component.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Exception.h"
+				RelativePath=".\inc\Cone.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\FrameworkManager.h"
+				RelativePath=".\inc\Cylinder.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IAlgorithm.h"
+				RelativePath=".\inc\DataSpace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IInterface.h"
+				RelativePath=".\inc\Detector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\INamedInterface.h"
+				RelativePath=".\inc\Element.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Instantiator.h"
+				RelativePath=".\inc\Flux.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IProperty.h"
+				RelativePath=".\inc\General.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LibraryManager.h"
+				RelativePath=".\inc\Line.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Logger.h"
+				RelativePath=".\inc\LineIntersectVisit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\StatusCode.h"
+				RelativePath=".\inc\LinkIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Support.h"
+				RelativePath=".\inc\MapSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\System.h"
+				RelativePath=".\inc\Material.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Workspace.h"
+				RelativePath=".\inc\ObjComp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\WorkspaceFactory.h"
+				RelativePath=".\inc\Object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Plane.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Property.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Quat.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\RefCon.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\regexSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Rules.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\SamGeometry.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Simulation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Sphere.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Surface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\surfaceFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Torus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Track.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Triple.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\V3D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Vec3D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\VisitBase.h"
 				>
 			</File>
 		</Filter>
