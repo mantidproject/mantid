@@ -12,25 +12,23 @@ namespace Kernel
 {
 
 // the types of the class factories
-typedef Algorithm* create_alg();
-typedef void destroy_alg(Algorithm*);
+//typedef Algorithm* create_alg();
+//typedef void destroy_alg(Algorithm*);
 
 class LibraryManager
 {
 public:
+	LibraryManager();
 	virtual ~LibraryManager();
 	
-	static LibraryManager* Initialise(const std::string&);
+	//Returns true if DLL is opened or already open
+	bool OpenLibrary(const std::string&);
 
-	Algorithm* CreateAlgorithm(const std::string&);
-	void DestroyAlgorithm(const std::string&, Algorithm*);
+	//Algorithm* CreateAlgorithm(const std::string&);
+	//void DestroyAlgorithm(const std::string&, Algorithm*);
 
 private:
-	static LibraryManager* instance;
-	static void* module;
-
-	LibraryManager();
-
+	void* module;
 };
 
 } // namespace Kernel

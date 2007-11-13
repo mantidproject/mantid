@@ -26,6 +26,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DynamicFactory.h"
+#include "IAlgorithm.h"
 #include <vector>
 
 namespace Mantid
@@ -67,6 +68,8 @@ public:
 
   /// A static method which retrieves the single instance of the Algorithm Manager
   static AlgorithmManager* Instance();
+
+~AlgorithmManager();
 	
   // Methods to create algorithm instances
 	IAlgorithm* create( const std::string& algName );
@@ -84,7 +87,7 @@ private:
 
 	// Private constructor & destructor for singleton class
 	AlgorithmManager();
-	~AlgorithmManager();
+
 
   /// Static reference to the logger class
 	static Logger& g_log;

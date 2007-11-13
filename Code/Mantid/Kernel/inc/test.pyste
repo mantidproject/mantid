@@ -15,4 +15,3 @@ set_policy(f.create, return_value_policy(manage_new_object))
 set_policy(f.createUnmanaged, return_value_policy(manage_new_object))
 
 g = Class("Mantid::Kernel::LibraryManager", "LibraryManager.h")
-set_policy(g.Initialise, return_value_policy(manage_new_object))

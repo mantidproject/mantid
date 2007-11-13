@@ -89,5 +89,5 @@ env.Append( CCFLAGS = cflags)
 env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normLibPath, RPATH=normLibPath)
 
 #Example for building against the kernel
-#libList.insert(0, 'MantidKernel')
-#env.Program('main.cpp', LIBS=libList, LIBPATH=normLibPath)
+libList.insert(0, 'MantidKernel')
+env.Program('main.cpp', LIBS=libList, LIBPATH=normLibPath)

@@ -188,9 +188,9 @@ BOOST_PYTHON_MODULE(libMantidKernel)
         .def("getTitle", &Mantid::Kernel::Workspace::getTitle, return_value_policy< copy_const_reference >())
     ;
     
-    class_< Mantid::Kernel::LibraryManager >("LibraryManager", init< const Mantid::Kernel::LibraryManager& >())
-        .def("Initialise", &Mantid::Kernel::LibraryManager::Initialise, return_value_policy< manage_new_object >())
-        .staticmethod("Initialise")
+    class_< Mantid::Kernel::LibraryManager >("LibraryManager", init<  >())
+        .def(init< const Mantid::Kernel::LibraryManager& >())
+        .def("OpenLibrary", &Mantid::Kernel::LibraryManager::OpenLibrary)
     ;
 
 }
