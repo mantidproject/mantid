@@ -30,6 +30,7 @@ if os.name == 'nt':
 	
 	cppPaths.append('C:\Python25\include')
 	libDirList.append('C:\Python25\libs')
+	libList.append('python25'
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
@@ -42,6 +43,8 @@ if os.name == 'nt':
 else:
 	cflags = ['-Wall', '-fPIC']
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
+	libDirList.append('/usr/lib/python' + sys.version[0:3])
+	libList.append('python' + sys.version[0:3])
 	
 	if platform.architecture()[0].startswith('64bit'):
 		libDirList.append('../../Third_Party/lib/linux64/')
@@ -59,10 +62,15 @@ else:
 				if file.endswith('.a'):
 					libList.append(file.replace('.a','').replace('lib','',1))
 		
-normPath = []
+normLibPath = []
 
 for dir in libDirList:
-	normPath.append(os.path.abspath(dir))
+	normLibPath.append(os.path.abspath(dir))
+
+normCppPaths = []
+
+for dir in cppPaths:
+	normCppPaths.append(os.path.abspath(dir))
 
 #GET LIST OF CPPS
 codeFolder = 'src'
@@ -74,8 +82,12 @@ for file in files:
 		listCpps.append(codeFolder + '/' +  file)
 			
 # set header include paths
-env = Environment(CPPPATH=cppPaths)
+env = Environment(CPPPATH=normCppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normPath)
+env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normLibPath, RPATH=normLibPath)
+
+#Example for building against the kernel
+#libList.insert(0, 'MantidKernel')
+#env.Program('main.cpp', LIBS=libList, LIBPATH=normLibPath)
