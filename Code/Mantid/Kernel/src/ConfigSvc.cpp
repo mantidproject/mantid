@@ -162,30 +162,42 @@ namespace Kernel
 		return m_pSysConfig->getString("system.nodeName");
 	}
 
-/*	Removed as the use of these throughs a debug assertion about an invalid heap pointer
-	File dbgheap.c
-	Expression _CrtIsValidHeapPointer(pUserData)
-
+  /** Gets the name of the operating system version
+   *
+   * @returns The operating system version
+   */
 	std::string ConfigSvc::getOSVersion()
 	{
 		return m_pSysConfig->getString("system.osVersion");
 	}
 	
+  /** Gets the absolute path of the current directory containing the dll
+   *
+   * @returns The absolute path of the current directory containing the dll
+   */
 	std::string ConfigSvc::getCurrentDir()
 	{
 		return m_pSysConfig->getString("system.currentDir");
 	}
-	
+	  
+  /** Gets the absolute path of the home directory 
+   *
+   * @returns The absolute path of the home directory 
+   */
 	std::string ConfigSvc::getHomeDir()
 	{
 		return m_pSysConfig->getString("system.homeDir");
 	}
 	
+  /** Gets the absolute path of the temp directory 
+   *
+   * @returns The absolute path of the temp directory 
+   */
 	std::string ConfigSvc::getTempDir()
 	{
 		return m_pSysConfig->getString("system.tempDir");
 	}
-*/
+
 
 	
 /// \cond TEMPLATE 

@@ -53,6 +53,10 @@ public:
 	  TS_ASSERT_LESS_THAN(0, osArch.length()); //check that the string is not empty
 	  std::string osCompName = configSvc->getComputerName();
 	  TS_ASSERT_LESS_THAN(0, osCompName.length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, configSvc->getOSVersion().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, configSvc->getCurrentDir().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, configSvc->getHomeDir().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, configSvc->getTempDir().length()); //check that the string is not empty
   }
 
   void TestCustomProperty()

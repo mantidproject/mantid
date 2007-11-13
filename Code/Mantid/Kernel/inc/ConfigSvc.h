@@ -130,31 +130,10 @@ namespace Kernel
 		std::string getOSName();
 		std::string getComputerName();
 		std::string getOSArchitecture();
-
-/*		Removed as the use of these throughs a debug assertion about an invlid heap pointer
-		File dbgheap.c
-		Expression _CrtIsValidHeapPointer(pUserData)
-
-		/// Gets the name of the operation system version
-		///
-		/// @returns the string value of the operation system version
 		std::string getOSVersion();	
-
-		/// Gets the path of the current directory
-		///
-		/// @returns the string value of the path of the current directory
 		std::string getCurrentDir();
-		
-		/// Gets the path of the home directory
-		///
-		/// @returns the string value of the path of the home directory
 		std::string getHomeDir();
-		
-		/// Gets the path of the temp directory
-		///
-		/// @returns the string value of the path of the temp directory
 		std::string getTempDir();
-*/
 
 	private:
 	  // Private constructors and destructor for singleton class
