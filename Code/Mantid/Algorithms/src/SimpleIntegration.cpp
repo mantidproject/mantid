@@ -10,16 +10,16 @@
 #include <math.h>
 
 // Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms, SimpleIntegration)
+//DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms, SimpleIntegration)
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
-using namespace Kernel;
-using DataObjects::Workspace1D;
-using DataObjects::Workspace2D;
+using namespace Mantid::Kernel;
+using Mantid::DataObjects::Workspace1D;
+using Mantid::DataObjects::Workspace2D;
 
 // Get a reference to the logger
 Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
@@ -72,6 +72,8 @@ StatusCode SimpleIntegration::exec()
     iss >> m_MaxY;
   }
   
+  /*
+  
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
@@ -80,6 +82,7 @@ StatusCode SimpleIntegration::exec()
     g_log.information("StartY out of range! Set to 0.");
     m_MinY = 0;
   }
+
   
   if ( !m_MaxY ) m_MaxY = numberOfYBins;
   if ( m_MaxY > numberOfYBins || m_MaxY < m_MinY ) 
@@ -127,6 +130,7 @@ StatusCode SimpleIntegration::exec()
     detectorNumber.push_back(i);
     sums.push_back(YSum);    
     errors.push_back(YError);
+
   }
   
   // Create the 1D workspace for the output
@@ -137,7 +141,9 @@ StatusCode SimpleIntegration::exec()
   // Populate the 1D workspace
   localWorkspace->setX(detectorNumber);
   localWorkspace->setData(sums, errors);
-  
+
+*/
+
   return StatusCode::SUCCESS;
 }
 
@@ -149,6 +155,9 @@ StatusCode SimpleIntegration::final()
 {
   return StatusCode::SUCCESS;
 }
+
+// Register the class into the algorithm factory
+DECLARE_ALGORITHM(SimpleIntegration)
 
 } // namespace Algorithm
 } // namespace Mantid

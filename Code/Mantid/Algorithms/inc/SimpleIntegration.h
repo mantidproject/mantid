@@ -53,19 +53,19 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SimpleIntegration : public Kernel::Algorithm
+class DLLExport SimpleIntegration : public Mantid::Kernel::Algorithm
 {
 public:
   /// Default constructor
-	SimpleIntegration() {};
+	SimpleIntegration() : Mantid::Kernel::Algorithm() {};
 	/// Destructor
 	virtual ~SimpleIntegration() {};
 	
 private:
   // Overridden Algorithm methods
-  Kernel::StatusCode init();
-  Kernel::StatusCode exec();
-  Kernel::StatusCode final();
+  Mantid::Kernel::StatusCode init();
+  Mantid::Kernel::StatusCode exec();
+  Mantid::Kernel::StatusCode final();
   
   /// The X bin to start the integration from
   int m_MinX;
@@ -77,8 +77,10 @@ private:
   int m_MaxY;
 
   /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  static Mantid::Kernel::Logger& g_log;
 };
+
+
 
 } // namespace Algorithm
 } // namespace Mantid
