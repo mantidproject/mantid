@@ -30,7 +30,7 @@ if os.name == 'nt':
 	
 	cppPaths.append('C:\Python25\include')
 	libDirList.append('C:\Python25\libs')
-	libList.append('python25'
+	libList.append('python25')
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
