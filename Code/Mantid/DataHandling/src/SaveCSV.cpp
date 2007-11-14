@@ -44,30 +44,37 @@ namespace DataHandling
 
   Logger& SaveCSV::g_log = Logger::get("SaveCSV");
 
-  // Empty default constructor
+
+  /// Empty default constructor
   SaveCSV::SaveCSV() {}
 
 
+  /** Initialisation method. Does nothing at present.
+   * 
+   *  @return A StatusCode object indicating whether the operation was successful
+   */
   StatusCode SaveCSV::init()
   {	
     return StatusCode::SUCCESS;
   }
   
   
-  // saves 1D workspace to disk 
-  
+  /** Executes the algorithm. Retrieve the Filename, Seperator and LineSeperator
+   *  properties and save 1D workspace to Filename. 
+   * 
+   *  @return A StatusCode object indicating whether the operation was successful
+   */
   StatusCode SaveCSV::exec()
   {
-    // Gets the name of the file to save the 1D workspace to, and the
-    // Seperator and LineSeperator if they are provided by the user.
-    // Note this could as well have been done in the exec() method.
+    // Gets the name of the file to save the 1D workspace to; and the
+    // Seperator and LineSeperator properties if they are provided by the user.
 
     // Retrieve the filename from the properties
 
     StatusCode status = getProperty("Filename", m_filename);
 
 
-    // Check that property has been set and retrieved successfully
+    // Check that this property has been set and retrieved successfully
 
     if ( status.isFailure() )
     {     
@@ -76,12 +83,12 @@ namespace DataHandling
     }
     
     
-    // Check if user have specified optional Seperator 
+    // Check if the user has specified the optional Seperator property 
     
     status = getProperty("Seperator", m_seperator);
 
 
-    // If Seperator not specified use default seperator
+    // If Seperator not specified then use default Seperator
 
     if ( status.isFailure() )
     {     
@@ -89,12 +96,12 @@ namespace DataHandling
     }    
         
 
-    // Check if user have specified optional LineSeperator 
+    // Check if the user has specified the optional LineSeperator property 
     
     status = getProperty("LineSeperator", m_lineSeperator);
 
 
-    // If Seperator not specified use default seperator
+    // If LineSeperator not specified then use default LineSeperator
 
     if ( status.isFailure() )
     {     
@@ -102,7 +109,6 @@ namespace DataHandling
     } 
 
 
-    
     const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(m_inputWorkspace);
 
 
@@ -139,12 +145,14 @@ namespace DataHandling
 
     return StatusCode::SUCCESS;
   }
+
   
-  
+  /** Finalisation method. Does nothing at present.
+   *
+   *  @return A StatusCode object indicating whether the operation was successful
+   */  
   StatusCode SaveCSV::final()
   {
-    // Does nothing at present
-
     return StatusCode::SUCCESS;
   }
   

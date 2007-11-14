@@ -63,16 +63,25 @@ namespace DataHandling
 
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
-  // Empty constructor
-  LoadRaw::LoadRaw()
-  {
-  }
+  /// Empty default constructor
+  LoadRaw::LoadRaw() { }
 
+
+  /** Initialisation method. Does nothing at present.
+   * 
+   *  @return A StatusCode object indicating whether the operation was successful
+   */
   StatusCode LoadRaw::init()
   {
     return StatusCode::SUCCESS;
   }
   
+
+  /** Executes the algorithm. Reading in the file and creating and populating
+   *  the output workspace
+   * 
+   *  @return A StatusCode object indicating whether the operation was successful
+   */
   StatusCode LoadRaw::exec()
   {
     // Retrieve the filename from the properties
@@ -154,14 +163,24 @@ namespace DataHandling
     return StatusCode::SUCCESS;
   }
 
+
+  /** Personal wrapper for sqrt to allow msvs to compile.
+   *
+   *  @param in Some number
+   *  @return The square-root of input parameter
+   */
 	double LoadRaw::dblSqrt(double in)
 	{
 		return sqrt(in);
 	}
-  
+
+
+  /** Finalisation method. Does nothing at present.
+   *
+   *  @return A StatusCode object indicating whether the operation was successful
+   */
 	StatusCode LoadRaw::final()
   {
-    // Does nothing at present
     return StatusCode::SUCCESS;
   }
   

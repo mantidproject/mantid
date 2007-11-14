@@ -61,20 +61,14 @@ namespace DataHandling
     ~SaveCSV() {}
     
   private:
-    /** Performs the initialisation task of retrieving and setting parameters
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
-     */
+
+    /// Overwrites Algorithm method. Does nothing at present
     Kernel::StatusCode init();
     
-    /** Executes the algorithm, reading in the file and creating and populating
-     *  the output workspace
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
-     */
+    /// Overwrites Algorithm method
     Kernel::StatusCode exec();
     
-    /// Does nothing at present
+    /// Overwrites Algorithm method. Does nothing at present
     Kernel::StatusCode final();
     
     /// The name of the file used for storing the workspace
