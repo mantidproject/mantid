@@ -166,7 +166,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ConfigSvc.cpp"
+				RelativePath=".\src\ConfigService.cpp"
 				>
 			</File>
 			<File
@@ -220,7 +220,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ConfigSvc.h"
+				RelativePath=".\inc\ConfigService.h"
 				>
 			</File>
 			<File

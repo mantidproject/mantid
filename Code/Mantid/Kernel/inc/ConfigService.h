@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_CONFIGSVC_H_
-#define MANTID_KERNEL_CONFIGSVC_H_
+#ifndef MANTID_KERNEL_CONFIGSERVICE_H_
+#define MANTID_KERNEL_CONFIGSERVICE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,9 +27,9 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @class ConfigSvc ConfigSvc.h Kernel/ConfigSvc.h
+/** @class ConfigService ConfigService.h Kernel/ConfigService.h
 
-    The ConfigSvc class provides a simple facade to access the Configuration functionality of the Mantid Framework.
+    The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
 	  The class gathers information from config files and the system variables.  
 	  This information is available to all the objects within the framework as well as being used to configure the logging framework.
 	  This class currently uses the Logging functionality provided through the POCO (portable components library).
@@ -57,7 +57,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport ConfigSvc
+	class DLLExport ConfigService
 	{
 	  /** Inner templated class to wrap the poco library objects that have protected 
 	   *  desctructors and expose them as public.
@@ -107,11 +107,11 @@ namespace Kernel
 		   T* m_pPtr;
 	  };
 
-	  // Back to the ConfigSvc class itself...
+	  // Back to the ConfigService class itself...
 	  
 	public:	
 	  // Returns the single instance of the service
-		static ConfigSvc* Instance();
+		static ConfigService* Instance();
 
 		// Loads a config file
 		void loadConfig(const std::string& filename);
@@ -137,11 +137,11 @@ namespace Kernel
 
 	private:
 	  // Private constructors and destructor for singleton class
-		ConfigSvc();
+		ConfigService();
 		/// Private copy constructor. Prevents singleton being copied.
-		ConfigSvc(const ConfigSvc&) {}
+		ConfigService(const ConfigService&) {}
 	    
-    virtual ~ConfigSvc();
+    virtual ~ConfigService();
 
     /// the POCO file config object
 		WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
@@ -149,11 +149,11 @@ namespace Kernel
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
 		/// Pointer to the factory instance
-		static ConfigSvc* m_instance;
+		static ConfigService* m_instance;
 
 	};
 
 } // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_CONFIGSVC_H_*/
+#endif /*MANTID_KERNEL_CONFIGSERVICE_H_*/

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "ConfigSvc.h"
+#include "ConfigService.h"
 #include "Support.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
@@ -15,20 +15,20 @@ namespace Mantid
 namespace Kernel
 {
 	// Initialise the instance pointer to zero
-	ConfigSvc* ConfigSvc::m_instance=0;
+	ConfigService* ConfigService::m_instance=0;
 
-  /** A static method which retrieves the single instance of the ConfigSvc
+  /** A static method which retrieves the single instance of the ConfigService
    *
    * @returns A pointer to the instance
    */
-	ConfigSvc* ConfigSvc::Instance()
+	ConfigService* ConfigService::Instance()
 	{
-		if (!m_instance) m_instance = new ConfigSvc;
+		if (!m_instance) m_instance = new ConfigService;
 		return m_instance;
 	}
 
 	/// Private constructor for singleton class
-	ConfigSvc::ConfigSvc()
+	ConfigService::ConfigService()
 	{
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -40,7 +40,7 @@ namespace Kernel
   /** Private Destructor
    *  Prevents client from calling 'delete' on the pointer handed out by Instance
    */
-	ConfigSvc::~ConfigSvc()
+	ConfigService::~ConfigService()
 	{
 		delete m_pSysConfig;
 		delete m_pConf;                // potential double delete???
@@ -52,7 +52,7 @@ namespace Kernel
    *
    *  @param filename The filename and optionally path of the file to load
    */
-	void ConfigSvc::loadConfig(const std::string& filename)
+	void ConfigService::loadConfig(const std::string& filename)
 	{
 		delete m_pConf;
 
@@ -89,7 +89,7 @@ namespace Kernel
 			//configure the logging framework
 			Poco::Util::LoggingConfigurator configurator;
 			
-			//BUG? This line crashes the FrameworkManagerTest and ConfigSvcTest
+			//BUG? This line crashes the FrameworkManagerTest and ConfigServiceTest
 			configurator.configure(m_pConf);
 		}
 		catch (std::exception& e)
@@ -104,7 +104,7 @@ namespace Kernel
    *  @param keyName The case sensitive name of the property that you need the value of.
    *  @returns The string value of the property
    */
-	std::string ConfigSvc::getString(const std::string& keyName)
+	std::string ConfigService::getString(const std::string& keyName)
 	{
 		return m_pConf->getString(keyName);
 	}
@@ -117,7 +117,7 @@ namespace Kernel
    *  @returns A success flag - 0 on failure, 1 on success
    */
 	template<typename T>
-	int ConfigSvc::getValue(const std::string& keyName, T& out)
+	int ConfigService::getValue(const std::string& keyName, T& out)
 	{
 		std::string strValue = getString(keyName);
 		int result = StrFunc::convert(strValue,out);
@@ -130,7 +130,7 @@ namespace Kernel
    *  @param keyName The name of the environment variable that you need the value of.
    *  @returns The string value of the property
    */
-	std::string ConfigSvc::getEnvironment(const std::string& keyName)	
+	std::string ConfigService::getEnvironment(const std::string& keyName)	
 	{
 		return m_pSysConfig->getString("system.env." + keyName);
 	}
@@ -139,7 +139,7 @@ namespace Kernel
    *
    *  @returns The name pf the OS version
    */
-	std::string ConfigSvc::getOSName()
+	std::string ConfigService::getOSName()
 	{
 		return m_pSysConfig->getString("system.osName");
 	}
@@ -148,7 +148,7 @@ namespace Kernel
    *
    *  @returns The  name of the computer
    */
-	std::string ConfigSvc::getOSArchitecture()
+	std::string ConfigService::getOSArchitecture()
 	{
 		return m_pSysConfig->getString("system.osArchitecture");
 	}
@@ -157,7 +157,7 @@ namespace Kernel
    *
    * @returns The operating system architecture
    */
-	std::string ConfigSvc::getComputerName()
+	std::string ConfigService::getComputerName()
 	{
 		return m_pSysConfig->getString("system.nodeName");
 	}
@@ -166,7 +166,7 @@ namespace Kernel
    *
    * @returns The operating system version
    */
-	std::string ConfigSvc::getOSVersion()
+	std::string ConfigService::getOSVersion()
 	{
 		return m_pSysConfig->getString("system.osVersion");
 	}
@@ -175,7 +175,7 @@ namespace Kernel
    *
    * @returns The absolute path of the current directory containing the dll
    */
-	std::string ConfigSvc::getCurrentDir()
+	std::string ConfigService::getCurrentDir()
 	{
 		return m_pSysConfig->getString("system.currentDir");
 	}
@@ -184,7 +184,7 @@ namespace Kernel
    *
    * @returns The absolute path of the home directory 
    */
-	std::string ConfigSvc::getHomeDir()
+	std::string ConfigService::getHomeDir()
 	{
 		return m_pSysConfig->getString("system.homeDir");
 	}
@@ -193,7 +193,7 @@ namespace Kernel
    *
    * @returns The absolute path of the temp directory 
    */
-	std::string ConfigSvc::getTempDir()
+	std::string ConfigService::getTempDir()
 	{
 		return m_pSysConfig->getString("system.tempDir");
 	}
@@ -202,9 +202,9 @@ namespace Kernel
 	
 /// \cond TEMPLATE 
 
-	template DLLExport int ConfigSvc::getValue(const std::string&,double&);
-	template DLLExport int ConfigSvc::getValue(const std::string&,std::string&);
-	template DLLExport int ConfigSvc::getValue(const std::string&,int&);
+	template DLLExport int ConfigService::getValue(const std::string&,double&);
+	template DLLExport int ConfigService::getValue(const std::string&,std::string&);
+	template DLLExport int ConfigService::getValue(const std::string&,int&);
 
 /// \endcond TEMPLATE
 

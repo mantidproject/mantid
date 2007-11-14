@@ -5,7 +5,7 @@
 #include "AlgorithmManager.h"
 #include "WorkspaceFactory.h"
 #include "AnalysisDataService.h"
-#include "ConfigSvc.h"
+#include "ConfigService.h"
 #include "IAlgorithm.h"
 #include "Exception.h"
 
@@ -40,7 +40,7 @@ void FrameworkManager::initialize()
 {
   // Required services are: the config service, the algorithm manager
   //     the analysis data service, the workspace factory
-  config = ConfigSvc::Instance();
+  config = ConfigService::Instance();
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();

@@ -1,5 +1,5 @@
 @echo off
-REM IF "%VCINSTALLDIR%"=="" SET PATH=%path%;C:\Mantid\Code\Third_Party\lib\win32
+IF "%VCINSTALLDIR%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;%PATH%
 IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
 REM Simple script to build and run the tests.
 REM Have kept separate from the makefile since that's automatically generated
@@ -24,10 +24,6 @@ echo "Compiling the test executable..."
 cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib runner.obj
-
-echo "Copying in required dlls..."
-copy ..\..\..\Third_Party\lib\win32\*.dll .
-copy ..\..\debug\*.dll .
   
 echo "Running the tests..."
 runner.exe
@@ -38,7 +34,6 @@ echo "Cleaning up..."
 del runner.cpp
 del *.obj
 del *.pdb
-del *.dll
 del runner.lib
 del runner.ilk
 del runner.exp

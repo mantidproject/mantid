@@ -1,22 +1,22 @@
-#ifndef MANTID_CONFIGSVCTEST_H_
-#define MANTID_CONFIGSVCTEST_H_
+#ifndef MANTID_CONFIGSERVICETEST_H_
+#define MANTID_CONFIGSERVICETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/ConfigSvc.h"
+#include "../inc/ConfigService.h"
 #include "../inc/Logger.h"
 #include <string>
 #include <iostream>
 
 using namespace Mantid::Kernel;
 
-class ConfigSvcTest : public CxxTest::TestSuite
+class ConfigServiceTest : public CxxTest::TestSuite
 {
 public: 
 
-  ConfigSvcTest()
+  ConfigServiceTest()
   {
-	  configSvc = ConfigSvc::Instance();
+	  configSvc = ConfigService::Instance();
 	  configSvc->loadConfig("MantidTest.properties");
   }
 
@@ -86,7 +86,7 @@ public:
   
  
 private:
-	ConfigSvc *configSvc;
+	ConfigService *configSvc;
 };
 
-#endif /*MANTID_CONFIGSVCTEST_H_*/
+#endif /*MANTID_CONFIGSERVICETEST_H_*/

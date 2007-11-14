@@ -22,7 +22,7 @@ class Workspace;
 class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
-class ConfigSvc;
+class ConfigService;
 
 /** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
 
@@ -88,7 +88,7 @@ private:
   /// Pointer to the Analysis Data Service
   AnalysisDataService *data;
   /// Pointer to the Configuration Service
-  ConfigSvc *config;
+  ConfigService *config;
   
 };
 
