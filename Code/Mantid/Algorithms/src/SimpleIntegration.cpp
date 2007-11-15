@@ -72,7 +72,7 @@ StatusCode SimpleIntegration::exec()
     iss >> m_MaxY;
   }
   
-  /*
+  
   
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
@@ -142,7 +142,7 @@ StatusCode SimpleIntegration::exec()
   localWorkspace->setX(detectorNumber);
   localWorkspace->setData(sums, errors);
 
-*/
+
 
   return StatusCode::SUCCESS;
 }
