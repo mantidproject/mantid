@@ -1392,7 +1392,6 @@ CompGrp::displayAddress() const
 
 }  // NAMESPACE Geometry
 
-}  // NAMESPACE Mantid
 
 
 /// \Cond TEMPLATE
@@ -1401,3 +1400,5 @@ template class DTriple<Mantid::Geometry::Rule*,int,Mantid::Geometry::Rule*>;
 
 /// \Endcond TEMPLATE
 
+
+}  // NAMESPACE Mantid

@@ -1,6 +1,9 @@
 #include <string>
 #include "Triple.h"
 
+namespace Mantid
+{
+
 template<typename T>
 Triple<T>::Triple() 
   /*!
@@ -282,8 +285,12 @@ DTriple<F,S,T>::operator>(const DTriple<F,S,T>& A) const
 
 /// \cond TEMPLATE
 
+namespace Geometry
+{
 class Rule;
-template class DTriple<Rule*,int,Rule*>;
+}
+
+template class DTriple<Geometry::Rule*,int,Geometry::Rule*>;
 template class DTriple<std::string,int,int>;
 template class DTriple<int,int,double>;
 template class DTriple<int,int,std::string>;
@@ -292,3 +299,5 @@ template class Triple<int>;
 template class Triple<double>;
 
 /// \endcond TEMPLATE
+
+} // Namespace Mantid

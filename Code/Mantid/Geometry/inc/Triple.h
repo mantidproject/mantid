@@ -1,6 +1,9 @@
 #ifndef Triple_h
 #define Triple_h
 
+namespace Mantid
+{
+
 /*!
   \class Triple
   \brief Triple of three identical types
@@ -70,4 +73,5 @@ class DTriple
 
 };
 
+}  // NAMESPACE Mantid
 #endif
