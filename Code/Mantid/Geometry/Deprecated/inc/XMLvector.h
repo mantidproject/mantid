@@ -1,6 +1,9 @@
 #ifndef XMLvector_h
 #define XMLvector_h
 
+namespace Mantid
+{
+
 namespace XML
 {
   /*!
@@ -44,5 +47,7 @@ class XMLvector : public XMLobject
 };
 
 }        // NAMESPACE XML
+
+}        // NAMESPACE Mantid
 
 #endif

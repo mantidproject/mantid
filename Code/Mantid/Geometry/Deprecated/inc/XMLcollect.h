@@ -1,6 +1,8 @@
 #ifndef XMLcollect_h
 #define XMLcollect_h
 
+namespace Mantid
+{
 
 namespace XML
 {
@@ -24,6 +26,8 @@ namespace XML
 class XMLcollect 
 {
  private:
+
+  static Kernel::Logger& PLog;  ///< The official logger  
 
   std::string depthKey;               ///< Current depth layer
   XMLgroup Master;                    ///< Master group
@@ -132,10 +136,11 @@ class XMLcollect
   int loadXML(const std::string&,const std::string&);
   int loadXML(std::istream&,const std::string&,
 	      const std::vector<std::string>&);
-
-
 };
 
+
 }   // NAMESPACE XML
+
+}   // NAMESPACE Mantid
 
 #endif

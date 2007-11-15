@@ -1,6 +1,9 @@
 #ifndef XMLread_h
 #define XMLread_h
 
+namespace Mantid
+{
+
 namespace XML
 {
 
@@ -71,6 +74,8 @@ class XMLread : public XMLobject
 
 std::ostream& operator<<(std::ostream&,const XMLread&);
 
-};
+}  // NAMESPACE XML
+
+}  // NAMESPACE Mantid
 
 #endif

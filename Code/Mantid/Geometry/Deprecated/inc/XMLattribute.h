@@ -1,6 +1,9 @@
 #ifndef XMLattribute_h
 #define XMLattribute_h
 
+namespace Mantid
+{
+
 namespace XML
 {
 
@@ -41,6 +44,8 @@ class XMLattribute
 
 std::ostream& operator<<(std::ostream&,const XMLattribute&);
 
-}  // NAMESPACE
+}   /// NAMESPACE XML
+
+}   /// NAMESPACE Mantid
 
 #endif

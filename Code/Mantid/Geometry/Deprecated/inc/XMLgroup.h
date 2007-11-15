@@ -1,6 +1,9 @@
 #ifndef XMLgroup_h
 #define XMLgroup_h
 
+namespace Mantid
+{
+
 namespace XML
 {
 
@@ -23,6 +26,8 @@ class XMLgroup : public XMLobject
   typedef std::multimap<std::string,int> holdType;
     
  private:
+  
+  static Kernel::Logger& PLog;  ///< The official logger  
 
   std::vector<XMLobject*> Grp;          ///< Orderd list of Objects
   holdType Index;                       ///< Map for searching for an object
@@ -70,7 +75,9 @@ class XMLgroup : public XMLobject
   
 };
 
-};   /// NAMESPACE
+}   /// NAMESPACE XML
+
+}   /// NAMESPACE Mantid
 
 #endif
 

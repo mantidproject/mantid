@@ -1,6 +1,9 @@
 #ifndef XMLcomp_h
 #define XMLcomp_h
 
+namespace Mantid
+{
+
 namespace XML
 {
 
@@ -47,6 +50,8 @@ class XMLcomp : public XMLobject
 
 std::ostream& operator<<(std::ostream&,const XMLattribute&);
 
-} // NAMESPACE MonteCarlo   
+} // NAMESPACE XML
+
+} // NAMESPACE Mantid
 
 #endif

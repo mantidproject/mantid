@@ -1,5 +1,5 @@
-#ifndef Matrix_h 
-#define Matrix_h
+#ifndef Geometry_Matrix_h 
+#define Geometry_Matrix_h
 
 namespace Mantid 
 {

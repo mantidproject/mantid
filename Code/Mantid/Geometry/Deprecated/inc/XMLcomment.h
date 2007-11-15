@@ -1,6 +1,8 @@
 #ifndef XMLcomment_h
 #define XMLcomment_h
 
+namespace Mantid
+{
 
 namespace XML
 {
@@ -58,6 +60,8 @@ class XMLcomment : public XMLobject
 
 std::ostream& operator<<(std::ostream&,const XMLcomment&);
 
-};
+} // NAMESPACE XML
+
+} // NAMESPACE Mantid
 
 #endif

@@ -1,5 +1,8 @@
-#ifndef XMLgrid_h
-#define XMLgrid_h
+#ifndef Mantid_XML_XMLgrid_h
+#define Mantid_XML_XMLgrid_h
+
+namespace Mantid
+{
 
 namespace XML
 {
@@ -45,6 +48,8 @@ class XMLgrid : public XMLobject
   
 };
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE XML
+
+}  // NAMESPACE Mantid
 
 #endif

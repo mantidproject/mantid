@@ -1,6 +1,9 @@
 #ifndef XMLnamespace_h
 #define XMLnamespace_h
 
+namespace Mantid
+{
+
 /*!
   \namespace XML
   \version 1.0
@@ -8,7 +11,6 @@
   \date December 2006
   \brief Holds the XML namespace objects
 */
-
 namespace XML
 {
 
@@ -35,6 +37,7 @@ std::string procString(const std::string&);
 
  int matchPath(const std::string&,const std::string&);
 
-};
+} // NAMESPACE XML
 
+} // NAMSPACE MAntid
 #endif

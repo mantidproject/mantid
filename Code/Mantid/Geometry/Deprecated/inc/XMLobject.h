@@ -1,6 +1,9 @@
 #ifndef XMLobject_h
 #define XMLobject_h
 
+namespace Mantid
+{
+
 namespace XML
 {
 
@@ -85,6 +88,8 @@ class XMLobject
 
 std::ostream& operator<<(std::ostream&,const XMLobject&);
 
-};
+}   /// NAMESPACE XML
+
+}   /// NAMESPACE Mantid
 
 #endif
