@@ -1,12 +1,13 @@
 #ifndef DETECTOR_H_
 #define DETECTOR_H_
+#include "System.h"
 #include "ObjComponent.h"
 #include <string>
 namespace Mantid
 {
 namespace Geometry
 {
-class Detector : public ObjComponent
+class DLLExport Detector : public ObjComponent
 {
 public:
 	virtual std::string type() const {return "DetectorComponent";}

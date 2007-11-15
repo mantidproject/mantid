@@ -4,10 +4,11 @@ namespace Mantid
 {
 namespace Geometry
 {
-Detector::Detector():ObjComponent()
+Detector::Detector():ObjComponent(),id(0)
 {
 }
-Detector::Detector(const std::string& n, Component* reference):ObjComponent(n,reference)
+
+Detector::Detector(const std::string& n, Component* reference):ObjComponent(n,reference),id(0)
 {
 }
 

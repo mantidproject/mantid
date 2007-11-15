@@ -1,5 +1,6 @@
 #ifndef OBJCOMPONENT_H_
 #define OBJCOMPONENT_H_
+#include "System.h"
 #include "Component.h"
 
 namespace Mantid
@@ -7,7 +8,7 @@ namespace Mantid
 namespace Geometry
 {
 	class GeomObj;
-class ObjComponent : public Component
+class DLLExport ObjComponent : public Component
 {
 public:
 	virtual std::string type() {return "PhysicalComponent";}

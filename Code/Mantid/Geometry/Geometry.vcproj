@@ -160,6 +160,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Detector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ObjComponent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Quat.cpp"
 				>
 			</File>
@@ -179,6 +187,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\Algebra.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -230,6 +242,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\auxinc\IndexIterator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Line.h"
 				>
 			</File>
@@ -250,7 +266,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\auxinc\Matrix.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\ObjComp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\ObjComponent.h"
 				>
 			</File>
 			<File
@@ -270,11 +294,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\readHET.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\RefCon.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\regexSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
@@ -323,6 +355,62 @@
 			</File>
 			<File
 				RelativePath=".\inc\VisitBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLattribute.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLcollect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLcomment.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLcomp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLgrid.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLgridSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLgroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLindex.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLnamespace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLobject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLpath.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLsupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 		</Filter>
