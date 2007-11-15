@@ -41,6 +41,12 @@ public:
 		det.setID(id2);
 		TS_ASSERT_EQUALS(det.getID(),id2);
 	}
+
+	void testType()
+	{
+		Detector det;
+		TS_ASSERT_EQUALS(det.type(),"DetectorComponent");
+	}
 };
 
 #endif

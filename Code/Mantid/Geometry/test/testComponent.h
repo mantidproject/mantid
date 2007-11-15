@@ -280,6 +280,12 @@ public:
 		TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001) 
 	}
 
+	void testType()
+	{
+		Component comp;
+		TS_ASSERT_EQUALS(comp.type(),"LogicalComponent");
+	}
+
 	};
 
 #endif
