@@ -6,8 +6,11 @@
 #include <algorithm>
 #include <numeric>
 
-#include "Exception.h"
+#include "AuxException.h"
 #include "mathSupport.h"
+
+namespace Mantid
+{
 
 int
 factorial(const int N)
@@ -672,6 +675,7 @@ mathFunc::Swap(T& A,T& B)
   return;
 }
 
+/// \cond TEMPLATE 
 
 template
 int solveQuadratic(const double*,
@@ -750,3 +754,7 @@ template void mathFunc::Swap(double&,double&);
 template int mathFunc::binSearch(const std::vector<double>::const_iterator&,
 				 const std::vector<double>::const_iterator&,
 				 const double&);
+
+/// \endcond TEMPLATE 
+
+}

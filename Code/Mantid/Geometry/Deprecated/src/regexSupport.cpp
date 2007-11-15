@@ -9,8 +9,11 @@
 #include <functional>
 #include <boost/regex.hpp>
 
-#include "support.h"
+#include "Support.h"
 #include "regexSupport.h"
+
+namespace Mantid
+{
 
 namespace StrFunc
 {
@@ -452,4 +455,6 @@ template int StrComp(const std::string&,const boost::regex&,std::string&,const i
 template int findComp(std::istream&,const boost::regex&,int&);
 
 /// \endcond TEMPLATE 
-};
+}  // NAMESPACE StrFunc
+
+} // NAMESPACE MAntid
