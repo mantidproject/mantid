@@ -34,7 +34,8 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Cylinder::PLog = Logger::get("Cylinder");
+Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
+
 const double CTolerance(1e-6);
 
 Cylinder::Cylinder() : Surface(),

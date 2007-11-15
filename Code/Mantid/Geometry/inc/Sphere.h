@@ -21,7 +21,7 @@ class Sphere : public Surface
 {
  private:
 
-  static Logger& PLog;           ///< The official logger  
+  static Kernel::Logger& PLog;           ///< The official logger  
 
   Geometry::Vec3D Centre;        ///< Point for centre
   double Radius;                 ///< Radius of sphere

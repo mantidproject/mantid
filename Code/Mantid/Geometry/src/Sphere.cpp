@@ -33,7 +33,7 @@ namespace Mantid
 namespace Geometry
 {
  
-Logger& Sphere::PLog = Logger::get("Sphere");
+Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 const double STolerance(1e-6);
 
 Sphere::Sphere() : Surface(),

@@ -21,11 +21,8 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "GTKreport.h"
-#include "FileReport.h"
-#include "OutputLog.h"
 #include "mathSupport.h"
-#include "support.h"
+#include "Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"
@@ -44,7 +41,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& LineIntersectVisit::PLog = Logger::get("LineIntersectVisit");
+Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit"));
 LineIntersectVisit::LineIntersectVisit
   (const Geometry::Vec3D& Pt,const Geometry::Vec3D& uVec) :
     ATrack(Pt,uVec)

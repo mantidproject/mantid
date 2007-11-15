@@ -5,12 +5,14 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+
+#include "Logger.h"
 #include "AuxException.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "Track.h"
 
-#include "Logger.h"
+
 const double surfaceTolerance(1e-5);       ///< Below this two point touch.
 
 namespace Mantid
@@ -19,7 +21,8 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Track::PLog = Logger::get("Track");
+Kernel::Logger& Track::PLog(Kernel::Logger::get("Track"));
+
 TUnit::TUnit(const Geometry::Vec3D& A,const Geometry::Vec3D& B,
 	     const double D,const int ID) :
   PtA(A),PtB(B),Dist(D),Length(A.Distance(B)),ObjID(ID)

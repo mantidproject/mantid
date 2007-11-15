@@ -34,7 +34,7 @@ class surfaceFactory
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
   typedef std::map<std::string,Surface*> MapType;     ///< Storage of surface pointers
   

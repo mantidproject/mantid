@@ -19,10 +19,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
-#include "support.h"
+#include "Support.h"
 #include "RefCon.h"
 #include "Material.h"
 
@@ -32,8 +29,8 @@ namespace Mantid
 
 namespace Geometry
 {
+Kernel::Logger& Material::PLog(Kernel::Logger::get("Material"));
 
-Logger& Material::PLog = Logger::get("Material");
 Material::Material() : 
   density(0),scoh(0.0),
   sinc(0.0),sabs(0.0)
@@ -250,10 +247,8 @@ Material::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 		}
 	      else
 	        {
-		  ELog::EMessages.Estream()
-		    <<"Material::importXML :: Key failed "<<KVal;
-		  ELog::EMessages.report(2);
 		  errCnt++;
+		  PLog.warning("importXML :: Key failed "+KVal);
 		}
 	    }
 	}

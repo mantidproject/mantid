@@ -31,7 +31,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Torus::PLog = Logger::get("Torus");
+Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
 int 
 Torus::possibleLine(const std::string& Line)

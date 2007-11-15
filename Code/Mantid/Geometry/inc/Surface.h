@@ -24,7 +24,7 @@ class Surface
 {
  private:
   
-  static Logger& PLog;
+  static Kernel::Logger& PLog;
   
 
   int Name;        ///< Surface number (MCNPX identifier)

@@ -22,7 +22,7 @@ class Object
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
   
   int ObjName;       ///< Creation number
   int MatN;          ///< Material Number   ???

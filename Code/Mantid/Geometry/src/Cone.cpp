@@ -33,7 +33,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Cone::PLog = Logger::get("Cone");
+Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
 const double CTolerance(1e-6);
 
 Cone::Cone() : Surface(),

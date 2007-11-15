@@ -32,7 +32,7 @@ class Acomp
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
   
   int Intersect;                ///<  Union/Intersection (0,1)
   std::vector<int> Units;       ///< Units in list

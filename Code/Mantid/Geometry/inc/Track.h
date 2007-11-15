@@ -67,7 +67,7 @@ class Track
 
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
 
   Geometry::Vec3D iPt;              ///< Start Point

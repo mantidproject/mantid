@@ -13,7 +13,7 @@
 #include <iterator>
 
 #include "Logger.h"
-#include "Exception.h"
+#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
@@ -33,7 +33,8 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Rules::PLog = Logger::get("Rules");
+Kernel::Logger& Rule::PLog(Kernel::Logger::get("Rule"));
+
 int
 Rule::addToKey(std::vector<int>& AV,const int passN)
   /*! 

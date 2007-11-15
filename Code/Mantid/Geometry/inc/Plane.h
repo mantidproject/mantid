@@ -21,7 +21,7 @@ class Plane : public Surface
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
   const double PTolerance;      ///< Tolerance to the surfaces.
 

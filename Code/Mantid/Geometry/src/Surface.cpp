@@ -35,7 +35,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Surface::PLog = Logger::get("Surface"); 
+Kernel::Logger& Surface::PLog = Kernel::Logger::get("Surface"); 
 
 const double STolerance(1e-6);
 

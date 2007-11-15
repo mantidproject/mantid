@@ -22,7 +22,7 @@ class Material
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
   
   std::string Name;      ///< Name 
   double density;        ///< number density [atom/A^3]

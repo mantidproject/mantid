@@ -32,7 +32,8 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& General::PLog = Logger::get("General");
+Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
+
 const double GTolerance(1e-6);
 
 General::General() : Surface()

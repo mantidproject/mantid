@@ -29,7 +29,7 @@ class Torus : public Surface
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
   const double TTolerance;      ///< Tolerance to the surfaces.
   

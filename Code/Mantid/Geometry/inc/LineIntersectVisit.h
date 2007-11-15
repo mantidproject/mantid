@@ -22,7 +22,7 @@ class LineIntersectVisit : public BaseVisit
   {
   private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
     
     Line ATrack;
     std::vector<Geometry::Vec3D> PtOut;

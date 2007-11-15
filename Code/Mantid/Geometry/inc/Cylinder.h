@@ -23,7 +23,7 @@ class Cylinder : public Surface
 {
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
   
   Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
   Geometry::Vec3D Normal;        ///< Direction of centre line

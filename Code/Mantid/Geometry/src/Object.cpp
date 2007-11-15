@@ -39,7 +39,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Object::PLog = Logger::get("Object");
+Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 const double OTolerance(1e-6);
 
 Object::Object() :

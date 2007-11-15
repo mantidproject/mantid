@@ -19,7 +19,7 @@ namespace Mantid
 namespace Geometry 
 {
 
-Logger& BnId::PLog = Logger::get("BnId");
+Kernel::Logger& BnId::PLog(Kernel::Logger::get("BnId"));
 
 std::ostream&
 operator<<(std::ostream& of,const BnId& A) 

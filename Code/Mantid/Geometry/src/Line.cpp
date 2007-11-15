@@ -20,11 +20,8 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
 #include "mathSupport.h"
-#include "support.h"
+#include "Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"
@@ -42,7 +39,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Line::PLog = Logger::get("Line");
+Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 const double LTolerance(1e-6);
 
 Line::Line() : Origin(),Direct()
@@ -68,16 +65,14 @@ Line::Line(const Line& A) :
    */
 {}
 
-/*Line*
+Line*
 Line::clone() const
-  /* ! 
+  /*! 
     Virtual copy constructor (not currently used)
-  * /
-
+  */
 {
   return new Line(*this);
 }
-*/
 
 Line&
 Line::operator=(const Line& A)

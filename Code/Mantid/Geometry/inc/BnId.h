@@ -30,7 +30,7 @@ class BnId
 
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
   int size;            ///< number of variables
   int PI;              ///< Prime Implicant

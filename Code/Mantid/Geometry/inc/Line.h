@@ -30,7 +30,7 @@ class Line
   
  private:
 
-  static Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;           ///< The official logger
 
 
   Geometry::Vec3D Origin;   ///< Orign point (on plane)
@@ -44,6 +44,7 @@ class Line
   Line();
   Line(const Geometry::Vec3D&,const Geometry::Vec3D&);
   Line(const Line&);
+  Line* clone() const;
   Line& operator=(const Line&);
   
   virtual ~Line();

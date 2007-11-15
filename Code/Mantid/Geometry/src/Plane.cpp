@@ -33,7 +33,8 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Plane::PLog = Logger::get("Plane");
+Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
+
 int
 Plane::possibleLine(const std::string& Line)
   /*!

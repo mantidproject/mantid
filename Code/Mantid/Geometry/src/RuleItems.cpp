@@ -12,7 +12,8 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Exception.h"
+#include "Logger.h"
+#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
@@ -29,8 +30,13 @@
 #include "Rules.h"
 #include "Object.h"
 
-namespace MonteCarlo
+namespace Mantid
 {
+
+namespace Geometry
+{
+
+Kernel::Logger& Intersection::PLog(Kernel::Logger::get("Intersection"));
 
 Intersection::Intersection() : Rule(),
   A(0),B(0)
@@ -330,6 +336,8 @@ Intersection::simplify()
 // -------------------------------------------------------------
 //         UNION
 //---------------------------------------------------------------
+
+Kernel::Logger& Union::PLog(Kernel::Logger::get("Union"));
 
 Union::Union() : 
   Rule(),A(0),B(0)
@@ -635,6 +643,7 @@ Union::displayAddress() const
 // -------------------------------------------------------------
 //         SURF KEYS
 //---------------------------------------------------------------
+Kernel::Logger& SurfPoint::PLog(Kernel::Logger::get("SurfPoint"));
 
 SurfPoint::SurfPoint() : Rule(),
   key(0),keyN(0),sign(1)
@@ -836,6 +845,7 @@ SurfPoint::displayAddress() const
 //----------------------------------------
 //       COMPOBJ
 //----------------------------------------
+Kernel::Logger& CompObj::PLog(Kernel::Logger::get("CompObj"));
 
 CompObj::CompObj() : Rule(),
   objN(0),key(0)
@@ -1020,6 +1030,7 @@ CompObj::displayAddress() const
 // BOOLVALUE
 // -----------------------------------------------
 
+Kernel::Logger& BoolValue::PLog(Kernel::Logger::get("BoolValue"));
 
 BoolValue::BoolValue() : Rule()
   /*!
@@ -1174,6 +1185,7 @@ BoolValue::displayAddress() const
 //----------------------------------------
 //       COMPGRP
 //----------------------------------------
+Kernel::Logger& CompGrp::PLog(Kernel::Logger::get("CompGrp"));
 
 CompGrp::CompGrp() : 
   Rule(),A(0)
@@ -1378,9 +1390,14 @@ CompGrp::displayAddress() const
 }
 
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid
+
 
 /// \Cond TEMPLATE
-template class DTriple<MonteCarlo::Rule*,int,MonteCarlo::Rule*>;
+
+template class DTriple<Mantid::Geometry::Rule*,int,Mantid::Geometry::Rule*>;
+
 /// \Endcond TEMPLATE
 

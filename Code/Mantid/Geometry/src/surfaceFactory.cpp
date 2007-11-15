@@ -9,6 +9,8 @@
 #include <stack>
 #include <string>
 #include <algorithm>
+
+#include "Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -16,12 +18,9 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "FileReport.h"
-#include "GTKreport.h"
-#include "OutputLog.h"
 #include "Matrix.h"
 #include "Vec3D.h"
-#include "support.h"
+#include "Support.h"
 #include "BaseVisit.h"
 #include "Surface.h"
 #include "Plane.h"
@@ -32,9 +31,13 @@
 #include "Torus.h"
 #include "surfaceFactory.h"
 
-namespace MonteCarlo
+namespace Mantid
 {
 
+namespace Geometry 
+{
+
+Kernel::Logger& surfaceFactory::PLog(Kernel::Logger::get("surfaceFactory"));
 surfaceFactory* surfaceFactory::FOBJ(0);
 
 
@@ -151,7 +154,7 @@ surfaceFactory::createSurfaceID(const std::string& Key) const
   return createSurface(mc->second);
 }
 
-}  // NAMESPACE MonteCarlo 
+}  // NAMESPACE Geometry
  
- 
+}  // NAMESPACE Mantid 
 

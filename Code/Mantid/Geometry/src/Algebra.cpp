@@ -25,7 +25,7 @@ namespace Mantid
 namespace Geometry
 {
 
-Logger& Algebra::PLog = Logger::get("Algebra");
+Kernel::Logger& Algebra::PLog(Kernel::Logger::get("Algebra"));
 
 Algebra::Algebra() :
   F(0)
