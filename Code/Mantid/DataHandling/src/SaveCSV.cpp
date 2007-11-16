@@ -28,6 +28,8 @@
 //----------------------------------------------------------------------
 #include "../inc/SaveCSV.h"
 #include "../../DataObjects/inc/Workspace1D.h"
+#include "../../DataObjects/inc/Workspace2D.h"
+#include "Exception.h" 
 
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below
@@ -41,6 +43,7 @@ namespace DataHandling
 
   using namespace Kernel;
   using DataObjects::Workspace1D;
+	using DataObjects::Workspace2D;
 
   Logger& SaveCSV::g_log = Logger::get("SaveCSV");
 
@@ -60,13 +63,14 @@ namespace DataHandling
   
   
   /** Executes the algorithm. Retrieve the Filename, Seperator and LineSeperator
-   *  properties and save 1D workspace to Filename. 
+   *  properties and save workspace to Filename. 
    * 
    *  @return A StatusCode object indicating whether the operation was successful
+	 *  @throw NotImplementedError Thrown if workspace to save is not a 1D or 2D workspace
    */
   StatusCode SaveCSV::exec()
   {
-    // Gets the name of the file to save the 1D workspace to; and the
+    // Gets the name of the file to save the workspace to; and the
     // Seperator and LineSeperator properties if they are provided by the user.
 
     // Retrieve the filename from the properties
@@ -109,16 +113,6 @@ namespace DataHandling
     } 
 
 
-    const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(m_inputWorkspace);
-
-
-    // Get info from 1D workspace
-
-    const std::vector<double>& xValue = localworkspace->getX();
-    const std::vector<double>& yValue = localworkspace->getY();
-    const std::vector<double>& eValue = localworkspace->getE();
-
-    
     // prepare to save to file
     
     std::ofstream outCSV_File(m_filename.c_str());
@@ -129,17 +123,133 @@ namespace DataHandling
       g_log.error("Failed to open file:" + m_filename);
       return StatusCode::FAILURE;
     }
+
+
+    // get workspace ID string. Used to differentiate between
+		// workspace1D and workspace2D in the if statement below
+		
+    const std::string workspaceID = m_inputWorkspace->id();
+		
+		
+		// seperating out code depending on the workspace ID
+
+		
+    if ( workspaceID == "Workspace1D" )
+		{
+		
+		  const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(m_inputWorkspace);
+
+
+      // Get info from 1D workspace
+
+      const std::vector<double>& xValue = localworkspace->getX();
+      const std::vector<double>& yValue = localworkspace->getY();
+      const std::vector<double>& eValue = localworkspace->getE();
+  
     
+      // write to file
     
-    // write to file
-    
-    for (int i = 0; i < (int)xValue.size(); i++)
+      for (int i = 0; i < (int)xValue.size(); i++)
+      {
+        outCSV_File << std::setw(15) << xValue[i] << m_seperator << std::setw(15) << yValue[i] 
+          << m_seperator << std::setw(15) << eValue[i] << m_lineSeperator;
+      }    
+	  }
+    else if ( workspaceID == "Workspace2D" )
     {
-      outCSV_File << std::setw(15) << xValue[i] << m_seperator << std::setw(15) << yValue[i] 
-        << m_seperator << std::setw(15) << eValue[i] << m_lineSeperator;
-    }    
-    
-    
+		  
+			const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
+			
+			
+			// Get info from 2D workspace
+			
+			const int numberOfHist = localworkspace->getHistogramNumber();
+
+
+      // Add first x-axis line to output file
+
+      {
+        const std::vector<double>& xValue = localworkspace->getX(0);
+			
+			  outCSV_File << "A";
+			
+        for (int j = 0; j < (int)xValue.size(); j++)
+			  {
+			    outCSV_File << std::setw(15) << xValue[j] << m_seperator;
+			  }
+	
+	      outCSV_File << m_lineSeperator;	
+	    }
+
+
+		  for (int i = 0; i < numberOfHist; i++)
+			{
+			  // check if x-axis has changed. If yes print out new x-axis line
+				
+				if (i > 0)
+				{
+				  const std::vector<double>& xValue = localworkspace->getX(i);
+					const std::vector<double>& xValuePrevious = localworkspace->getX(i-1);
+					
+				  if ( xValue != xValuePrevious )
+				  {
+			      outCSV_File << "A";
+			
+            for (int j = 0; j < (int)xValue.size(); j++)
+			      {
+			        outCSV_File << std::setw(15) << xValue[j] << m_seperator;
+			      }
+	
+	          outCSV_File << m_lineSeperator;
+				  }
+				}
+				
+				
+				// add y-axis line for histogram (detector) i
+			
+        const std::vector<double>& yValue = localworkspace->getY(i);
+				
+				outCSV_File << i;
+				
+				for (int j = 0; j < (int)yValue.size(); j++)
+        {
+          outCSV_File << std::setw(15) << yValue[j] << m_seperator;
+        }  
+				
+				outCSV_File << m_lineSeperator;
+		  }
+			
+			
+			// print out errors
+			
+			outCSV_File << "\nERRORS\n";			
+			
+		  for (int i = 0; i < numberOfHist; i++)
+			{
+        const std::vector<double>& eValue = localworkspace->getE(i);
+				
+				outCSV_File << i;
+				
+				for (int j = 0; j < (int)eValue.size(); j++)
+        {
+          outCSV_File << std::setw(15) << eValue[j] << m_seperator;
+        }  
+				
+				outCSV_File << m_lineSeperator;
+		  }			
+
+		
+		
+		}
+		else
+		{
+		  outCSV_File.close();  // and should probably delete file from disk as well
+			
+			throw Exception::NotImplementedError("SaveCVS currently only works for 1D and 2D workspaces.");
+		}
+		
+		
+		
     outCSV_File.close();
     
 
