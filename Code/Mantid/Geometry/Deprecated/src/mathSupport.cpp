@@ -84,62 +84,62 @@ invErf(const double P)
   return Sigma*F;
 }
 
-double 
-normalDist(const double x)
-  /*!
-    Calcuates the inverse normal distribution usign Halleys
-    method.
-    \param x :: value to calulate from (0>x>1)
-    \returns 0 if x>1.0 or  x<0.0
-    \retval normal distribute to machine pecision.
-  */
-{
-  const double a[]={ -3.969683028665376e+01, 2.209460984245205e+02,
-                    -2.759285104469687e+02, 1.383577518672690e+02,
-		   -3.066479806614716e+01, 2.506628277459239e+00 };
-  
-  const double b[]= { -5.447609879822406e+01, 1.615858368580409e+02,
-                  -1.556989798598866e+02, 6.680131188771972e+01,
-                  -1.328068155288572e+01 };
-
-  const double c[]= { -7.784894002430293e-03, -3.223964580411365e-01,
-		      -2.400758277161838e+00, -2.549732539343734e+00,
-		      4.374664141464968e+00, 2.938163982698783e+00 };
-
-  const double d[] = { 7.784695709041462e-03, 3.224671290700398e-01,
-		       2.445134137142996e+00, 3.754408661907416e+00 };
-
-  const double pLow(0.02425);
-  const double pHigh=(1.0-pLow);
-
-  double xOut;
-  
-  if (x>=1.0 || x<=0.0)
-    return 0.0;
-
-  if (x<pLow)
-    {
-      const double q = sqrt(-2.0*log(x));
-      xOut= (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
-    }
-  else if (x>pHigh)
-    {
-      const double q = sqrt(-2.0*log(1-x));
-      xOut= -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
-    }
-  else
-    {
-      const double q = x - 0.5;
-      const double r = q*q;
-      xOut= (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
-	(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
-    }
-
-
-  const double e = 0.5 * erfc(-xOut/sqrt(2)) - x;
-  const double u = e * sqrt(2*M_PI) * exp(xOut*xOut/2);
-  return xOut - u/(1 + xOut*u/2);
-}
+//double 
+//normalDista(const double x)
+//  /*!
+//    Calcuates the inverse normal distribution usign Halleys
+//    method.
+//    \param x :: value to calulate from (0>x>1)
+//    \returns 0 if x>1.0 or  x<0.0
+//    \retval normal distribute to machine pecision.
+//  */
+//{
+//  const double a[]={ -3.969683028665376e+01, 2.209460984245205e+02,
+//                    -2.759285104469687e+02, 1.383577518672690e+02,
+//		   -3.066479806614716e+01, 2.506628277459239e+00 };
+//  
+//  const double b[]= { -5.447609879822406e+01, 1.615858368580409e+02,
+//                  -1.556989798598866e+02, 6.680131188771972e+01,
+//                  -1.328068155288572e+01 };
+//
+//  const double c[]= { -7.784894002430293e-03, -3.223964580411365e-01,
+//		      -2.400758277161838e+00, -2.549732539343734e+00,
+//		      4.374664141464968e+00, 2.938163982698783e+00 };
+//
+//  const double d[] = { 7.784695709041462e-03, 3.224671290700398e-01,
+//		       2.445134137142996e+00, 3.754408661907416e+00 };
+//
+//  const double pLow(0.02425);
+//  const double pHigh=(1.0-pLow);
+//
+//  double xOut;
+//  
+//  if (x>=1.0 || x<=0.0)
+//    return 0.0;
+//
+//  if (x<pLow)
+//    {
+//      const double q = sqrt(-2.0*log(x));
+//      xOut= (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+//    }
+//  else if (x>pHigh)
+//    {
+//      const double q = sqrt(-2.0*log(1-x));
+//      xOut= -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+//    }
+//  else
+//    {
+//      const double q = x - 0.5;
+//      const double r = q*q;
+//      xOut= (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+//	(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+//    }
+//
+////This will NOT WORK DO NOT USE IT
+//  const double e = 0.5; // * erfc(-xOut/sqrt(2.0)) - x;
+//  const double u = e * sqrt(2*M_PI) * exp(xOut*xOut/2);
+//  return xOut - u/(1 + xOut*u/2);
+//}
 
 double 
 randomNormal() 
@@ -319,8 +319,12 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-  CQ.imag()= (b>=0) ?
+#if __GNU__
+  CQ.imag() = (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
+#else
+  CQ.imag((b>=0) ? -0.5*sqrt(-cf) : 0.5*sqrt(-cf));
+#endif
   OutAns.first= CQ/a;
   OutAns.second=c/CQ;
   return 2;
@@ -751,6 +755,7 @@ template void mathFunc::crossSort(std::vector<float>&,std::vector<float>&);
 template void mathFunc::Order(int&,int&);
 template void mathFunc::Order(double&,double&);
 template void mathFunc::Swap(double&,double&);
+
 template int mathFunc::binSearch(const std::vector<double>::const_iterator&,
 				 const std::vector<double>::const_iterator&,
 				 const double&);

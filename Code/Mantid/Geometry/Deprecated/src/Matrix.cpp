@@ -874,7 +874,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
     {
       big=0.0;
       for(j=0;j<nx;j++)
-        if ((temp=fabs(V[i][j])) > big) 
+      if ((temp=fabs(V[i][j])) > big) 
 	  big=temp;
 
       if (big == 0.0) 

@@ -1,15 +1,18 @@
 #ifndef mathSupport_h
 #define mathSupport_h
 
+#include <functional>
 
 namespace Mantid
 {
+
+#define fabs(x) std::fabs((x)*1.0)
 
 int factorial(const int);       ///< Get a factorial number 
 float ran();                    ///< Basic random number function
 float ran1(int&,const int=0);   ///< Support code for random number function 
 double randomNormal();          ///< Generates a normally distributed random number
-double normalDist(const double); ///< convert a number 0->1 into a normal distribute
+//double normalDista(const double); ///< convert a number 0->1 into a normal distribute
 double invErf(const double x);    ///< Inverse error function
 
 
