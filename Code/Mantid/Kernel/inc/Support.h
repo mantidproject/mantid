@@ -85,12 +85,12 @@ void writeMCNPX(const std::string& Line,std::ostream& OX);
 std::vector<std::string> StrParts(std::string Ln);
 
 /// Write a set of containers to a file
-template<template<typename T, typename A> class V,typename T, typename A> 
-int writeFile(const std::string& Fname,const T step,const V<T,A>& Y);
-template<template<typename T, typename A> class V,typename T, typename A> 
-int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y);
-template<template<typename T, typename A> class V,typename T, typename A> 
-int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err);
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string& Fname,const T step,const V<T>& Y);
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y);
+template<template<typename T> class V,typename T> 
+int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y,const V<T>& Err);
 
 
 /// Convert a VAX number to x86 little eindien
