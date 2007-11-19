@@ -77,7 +77,7 @@ StatusCode SimpleIntegration::exec()
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
-  if ( 0 > m_MinY > numberOfYBins)
+  if ( (0 > m_MinY) || (m_MinY > numberOfYBins))
   {
     g_log.information("StartY out of range! Set to 0.");
     m_MinY = 0;
@@ -106,7 +106,7 @@ StatusCode SimpleIntegration::exec()
     if ( i == m_MinY )
     {
       const int numberOfXBins = YValues.size();
-      if ( 0 > m_MinX > numberOfXBins)
+      if ( (0 > m_MinX) || (m_MinX > numberOfXBins))
       {
         g_log.information("StartX out of range! Set to 0");
         m_MinX = 0;

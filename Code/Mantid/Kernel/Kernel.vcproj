@@ -158,6 +158,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AlgorithmFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AlgorithmManager.cpp"
 				>
 			</File>
@@ -190,6 +194,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Property.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PropertyWithValue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Support.cpp"
 				>
 			</File>
@@ -209,6 +221,10 @@
 			>
 			<File
 				RelativePath=".\inc\Algorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\AlgorithmFactory.h"
 				>
 			</File>
 			<File
@@ -269,6 +285,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\Logger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Property.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\PropertyWithValue.h"
 				>
 			</File>
 			<File
