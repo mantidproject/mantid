@@ -1,7 +1,7 @@
 #ifndef DataSpace_h
 #define DataSpace_h
 
-//! Impliments a simple data storage space
+// Impliments a simple data storage space
 
 namespace Mantid
 {
