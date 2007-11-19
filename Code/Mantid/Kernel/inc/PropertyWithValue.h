@@ -103,8 +103,9 @@ public:
 	  if ( &right == this ) return *this;
 	  // Chain the base class assignment operator for clarity (although it does nothing)
 	  Property::operator=( right );
-	  // Make use of the assignment operator (below)
-	  *this = right;
+    // Include use of a validator when implemented
+	  m_value = right.m_value;
+	  m_isDefault = false;
 	  return *this;
 	}
 	
@@ -113,12 +114,12 @@ public:
 	 *  e.g., myProperty = 3;
 	 *  @param value The new value to assign to the property
 	 */
-	PropertyWithValue& operator=( const TYPE& value )
+  TYPE& operator=( const TYPE& value )
 	{
 	  // Include use of a validator when implemented
 	  m_value = value;
 	  m_isDefault = false;
-	  return *this;
+	  return m_value;
 	}
 	
 	/// Allows you to get the value of the property via an expression like myProperty()
@@ -139,6 +140,7 @@ private:
   /// The value of the property
   TYPE m_value;
   
+  /// Private default constructor
   PropertyWithValue();
 };
 

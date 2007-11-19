@@ -75,16 +75,70 @@ public:
     TS_ASSERT( typeid( int ) == *i.type_info()  )
     TS_ASSERT( i.isDefault() )
     TS_ASSERT_EQUALS( i, 1 )
+    
+    PropertyWithValue<double> d = *dProp;
+    TS_ASSERT( ! d.name().compare("doubleProp") )
+    TS_ASSERT( ! d.documentation().compare("") )
+    TS_ASSERT( typeid( double ) == *d.type_info()  )
+    TS_ASSERT( d.isDefault() )
+    TS_ASSERT_EQUALS( d, 9.99 )
+    
+    PropertyWithValue<std::string> s = *sProp;
+    TS_ASSERT( ! s.name().compare("stringProp") )
+    TS_ASSERT( ! s.documentation().compare("") )
+    TS_ASSERT( typeid( std::string ) == *s.type_info()  )
+    TS_ASSERT( s.isDefault() )
+    TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
 	}
 	
 	void testCopyAssignmentOperator()
 	{
-	  // TODO
+    PropertyWithValue<int> i("Prop1",5);
+    i = *iProp;
+    TS_ASSERT( ! i.name().compare("Prop1") )
+    TS_ASSERT( ! i.documentation().compare("") )
+    TS_ASSERT( ! i.isDefault() )
+    TS_ASSERT_EQUALS( i, 1 )
+    
+    PropertyWithValue<double> d("Prop2",5.5);
+    d = *dProp;
+    TS_ASSERT( ! d.name().compare("Prop2") )
+    TS_ASSERT( ! d.documentation().compare("") )
+    TS_ASSERT( ! d.isDefault() )
+    TS_ASSERT_EQUALS( d, 9.99 )
+    
+    PropertyWithValue<std::string> s("Prop3","test");
+    s = *sProp;
+    TS_ASSERT( ! s.name().compare("Prop3") )
+    TS_ASSERT( ! s.documentation().compare("") )
+    TS_ASSERT( ! s.isDefault() )
+    TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
 	}
 
 	void testAssignmentOperator()
 	{
-		// TODO: Implement test_global_Mantid_Kernel_PropertyWithValue_operator =() function.
+    PropertyWithValue<int> i("Prop1",5);
+	  TS_ASSERT_EQUALS( i = 2, 2 )
+	  PropertyWithValue<double> d("Prop2",5.5);
+    TS_ASSERT_EQUALS( d = 7.77, 7.77 )
+    PropertyWithValue<std::string> s("Prop3", "testing");
+    s = "test";
+    TS_ASSERT_EQUALS( s.operator()(), "test" )
+    
+    PropertyWithValue<int> ii("Prop1.1",6);
+    i = ii = 10;
+    TS_ASSERT_EQUALS( ii, 10 )
+    TS_ASSERT_EQUALS( i, 10 )
+    
+    PropertyWithValue<double> dd("Prop2.2",6.5);
+    d = dd = 1.111;
+    TS_ASSERT_EQUALS( dd, 1.111 )
+    TS_ASSERT_EQUALS( d, 1.111 )
+    
+    PropertyWithValue<std::string> ss("Prop3", "testing2");
+    s = ss = "tested";
+    TS_ASSERT_EQUALS( ss.operator()(), "tested" )
+    TS_ASSERT_EQUALS( s.operator()(), "tested" )
 	}
 
 	void testOperatorBrackets()
@@ -102,6 +156,36 @@ public:
     TS_ASSERT_EQUALS( d, 9.99 )
     std::string str(*sProp);
     TS_ASSERT( ! str.compare("theValue") )
+	}
+	
+	void testCasting()
+	{	  
+    TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) )
+    PropertyWithValue<int> i("Prop1",5);
+	  Property *p = dynamic_cast<Property*>(&i);
+    TS_ASSERT( ! p->name().compare("Prop1") )
+    TS_ASSERT( ! p->value().compare("5") )
+    TS_ASSERT( p->setValue("10") )
+    TS_ASSERT( ! p->value().compare("10") )
+    TS_ASSERT_EQUALS( i, 10 )
+	  
+    TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) )
+    PropertyWithValue<double> d("Prop2",5.5);
+    Property *pp = dynamic_cast<Property*>(&d);
+    TS_ASSERT( ! pp->name().compare("Prop2") )
+    TS_ASSERT( ! pp->value().compare("5.5") )
+    TS_ASSERT( pp->setValue("7.777") )
+    TS_ASSERT( ! pp->value().compare("7.777") )
+    TS_ASSERT_EQUALS( d, 7.777 )
+    
+    TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) )
+    PropertyWithValue<std::string> s("Prop3", "testing");
+    Property *ppp = dynamic_cast<Property*>(&s);
+    TS_ASSERT( ! ppp->name().compare("Prop3") )
+    TS_ASSERT( ! ppp->value().compare("testing") )
+    TS_ASSERT( ppp->setValue("newValue") )
+    TS_ASSERT( ! ppp->value().compare("newValue") )
+    TS_ASSERT_EQUALS( s.operator()(), "newValue" )
 	}
 
 private:
