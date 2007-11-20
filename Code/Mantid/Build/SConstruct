@@ -51,10 +51,10 @@ else:
 	
 	for ln in f:
 		if ln.startswith('BOOST_ROOT'):
-			boost_path=ln[11:]
+			boost_path=ln[11:].strip('\n')
 			print 'Boost root = ' + boost_path
 		elif ln.startswith('POCO_ROOT'):
-			poco_path=ln[10:]
+			poco_path=ln[10:].strip('\n')
 			print 'Poco root = ' + poco_path
 	
 	f.close()
