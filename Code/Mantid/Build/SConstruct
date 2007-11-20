@@ -10,17 +10,26 @@ from socket import gethostname
 libDirList = ['../', '.']
 libList = ['python' + sys.version[0:3]]
 cflags = []
+dirList = []
 
 cppPaths = ['../../Third_Party/include/']
-dirpath=os.listdir("..")
-for item in dirpath:
-        try:
-            for file in os.listdir("../"+item):
-                if (file=="inc" or file=="auxinc"):
-                    cppPaths.append("../"+item+"/"+file)
-        except:
-            pass
-        
+dirpath=os.listdir("../")
+while(len(dirpath)):
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir("../"+item):
+			fullPath="../"+item+"/"+file
+			if (item!='Geometry'):
+				if (file=="inc"):
+					cppPaths.append(fullPath)
+				elif (file=="src"):
+					dirList.append(item)
+					print "PATH == ",item
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])	
+	except:
+		pass
 
 if os.name == 'nt':
 	# assume this is Windows
@@ -34,39 +43,18 @@ if os.name == 'nt':
 	
 else:
 	#so this must be posix
-	#libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-	#libDirList.append('/usr/lib/gcc-lib/i386-redhat-linux/3.2.3/')
 	cflags = ['-Wall', '-fPIC']
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	
-	#libDir =''
-	
-	if platform.architecture()[0].startswith('64bit'):
-		libDirList.append('../../Third_Party/lib/linux64/')
-		libDir = '../../Third_Party/lib/linux64/'
-		
-	else:
-		libDirList.append('../../Third_Party/lib/linux32/')
-		libDir = '../../Third_Party/lib/linux32/'
-	
-	for file in os.listdir(libDir):
-		if file.endswith('.so'):
-			if (not file.endswith('d.so')):
-				libList.append(file.replace('.so','')[3:])
-
-
 
 #GET LIST OF CPPS
 codeFolder = '/src'
 listCpps = []
 pathToRoot = '../'
 
-#get list of directories in trunk
-dirList = os.listdir(pathToRoot)
-
 for fname in dirList:
+	print "dir:",fname 
 	if os.path.isdir(pathToRoot + fname):
-		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname!='Geometry':
+		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
 			#does folder contain /src?
 			if os.path.exists(pathToRoot + fname + codeFolder):
 				files = os.listdir(pathToRoot + fname + codeFolder)
@@ -82,4 +70,4 @@ env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
+env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
