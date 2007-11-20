@@ -11,8 +11,8 @@ libDirList = ['../', '.']
 libList = ['python' + sys.version[0:3]]
 cflags = []
 dirList = []
+cppPaths = []
 
-cppPaths = ['../../Third_Party/include/']
 dirpath=os.listdir("../")
 while(len(dirpath)):
 	try:
@@ -43,8 +43,26 @@ if os.name == 'nt':
 	
 else:
 	#so this must be posix
+	boost_path = ''
+	poco_path = ''
+
+	#Get paths
+	f=open('Scons_Linux.conf', 'r')
+	
+	for ln in f:
+		if ln.startswith('BOOST_ROOT'):
+			boost_path=ln[11:]
+			print 'Boost root = ' + boost_path
+		elif ln.startswith('POCO_ROOT'):
+			poco_path=ln[10:]
+			print 'Poco root = ' + poco_path
+	
+	f.close()
+	
 	cflags = ['-Wall', '-fPIC']
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
+	cppPaths.append(poco_path + 'Foundation/include')
+	cppPaths.append(poco_path + 'Util/include')
 
 #GET LIST OF CPPS
 codeFolder = '/src'
@@ -71,3 +89,4 @@ env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
 env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
+
