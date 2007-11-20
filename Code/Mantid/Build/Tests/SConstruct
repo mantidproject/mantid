@@ -27,11 +27,11 @@ else:
 	
 	for ln in f:
 		if ln.startswith('BOOST_ROOT'):
-			boost_path=ln[11]
-			print boost_path
+			boost_path=ln[11:]
+			print 'Boost root = ' + boost_path
 		elif ln.startswith('POCO_ROOT'):
-			poco_path=ln[9:]
-			print poco_path
+			poco_path=ln[10:]
+			print 'Poco root = ' + poco_path
 			
 		
 	f.close()
@@ -41,12 +41,14 @@ else:
 		libDirList.append(poco_path + 'lib/Linux/i686/')
 		libDirList.append(os.path.abspath('../../../Third_Party/lib/linux64/'))
 		libDirList.append(os.path.abspath('../'))
+		libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 	
 	elif platform.architecture()[0].startswith('32bit'):
 		libDirList.append(boost_path + 'lib')
 		libDirList.append(poco_path + 'lib/Linux/i686/')
 		libDirList.append(os.path.abspath('../../../Third_Party/lib/linux32/'))
 		libDirList.append(os.path.abspath('../'))
+		libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
 
 	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
 	cppPaths.append(poco_path +'Foundation/include/Poco/')
@@ -88,7 +90,7 @@ normPath = []
 
 for dir in libDirList:
 	normPath.append(os.path.abspath(dir))
-print cppPaths
+
 env=Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
