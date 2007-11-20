@@ -6,88 +6,62 @@ import sys
 
 from socket import gethostname
 
-currPath = os.getcwd() + '/'
-
-cppPaths = ['../../Third_Party/include']
-
-dirpath=os.listdir('.')
-for item in dirpath:
-	if (item=="inc" or item=="auxinc"):
-		cppPaths.append(item)
-
-
 #get libraries and the library directories
-libDirList = ['lib']
-libList = []
+libDirList = ['../', '.']
+libList = ['python' + sys.version[0:3]]
+cflags = []
 
-cflags=''
+cppPaths = [os.path.abspath('./inc')]
+
 
 if os.name == 'nt':
-	# assume this is nt
+	# assume this is Windows
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
-	cflags = ['-W3','/EHsc', '/MDd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
-	
-	cppPaths.append('C:\Python25\include')
-	libDirList.append('C:\Python25\libs')
-	libList.append('python25')
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
 			libList.append(file.replace('.dll',''))
-		else:
-			if file.endswith('.lib'):
-				if file.startswith('lib'):
-					libList.append(file.replace('.lib',''))
 	
 else:
+	#so this must be posix
+	boost_path = ''
+	poco_path = ''
+
+	#Get paths
+	f=open('../Build/Scons_Linux.conf', 'r')
+	
+	for ln in f:
+		if ln.startswith('BOOST_ROOT'):
+			boost_path=ln[11:]
+			print boost_path
+		elif ln.startswith('POCO_ROOT'):
+			poco_path=ln[10:]
+			print poco_path		
+	f.close()
+	
 	cflags = ['-Wall', '-fPIC']
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	libDirList.append('/usr/lib/python' + sys.version[0:3])
-	libList.append('python' + sys.version[0:3])
-	
-	if platform.architecture()[0].startswith('64bit'):
-		libDirList.append('../../Third_Party/lib/linux64/')
-		libDir = '../../Third_Party/lib/linux64/'
-		
-	else:
-		libDirList.append('../../Third_Party/lib/linux32/')
-		libDir = '../../Third_Party/lib/linux32/'
-	
-	for file in os.listdir(libDir):
-		if file.endswith('.so'):
-			if (not file.endswith('d.so')):
-				libList.append(file.replace('.so','')[3:])
-			else:
-				if file.endswith('.a'):
-					libList.append(file.replace('.a','').replace('lib','',1))
-		
-normLibPath = []
-
-for dir in libDirList:
-	normLibPath.append(os.path.abspath(dir))
-
-normCppPaths = []
-
-for dir in cppPaths:
-	normCppPaths.append(os.path.abspath(dir))
+	cppPaths.append(poco_path +'Foundation/include')
+	cppPaths.append(poco_path +'Util/include')
 
 #GET LIST OF CPPS
-codeFolder = 'src'
+codeFolder = os.path.abspath('./src')
 listCpps = []
+pathToRoot = '../'
 
-files = os.listdir(codeFolder)
-for file in files:
-	if file.endswith('.cpp'):
-		listCpps.append(codeFolder + '/' +  file)
-			
+print codeFolder
+if os.path.exists(codeFolder):
+	files = os.listdir(codeFolder)
+	for file in files:
+		if file.endswith('.cpp'):
+			print file
+			listCpps.append(codeFolder + '/' +  file)
+
 # set header include paths
-env = Environment(CPPPATH=normCppPaths)
+env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=libList, LIBPATH=normLibPath, RPATH=normLibPath)
-
-#Example for building against the kernel
-libList.insert(0, 'MantidKernel')
-env.Program('main.cpp', LIBS=libList, LIBPATH=normLibPath)
+env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
