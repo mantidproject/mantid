@@ -19,6 +19,7 @@ mssgScons = ''
 mssgSconsErr = ''
 mssgTestsBuild = ''
 mssgTestsErr = ''
+mssgTestsRunErr = ''
 mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
@@ -51,18 +52,26 @@ if testsResult.startswith('scons: done building targets.'):
 	
 mssgTestsErr = open('../logs/testsBuildErr.log','r').read()
 
+f = open('../logs/testsRunErr.log','r')
+
+for line in f.readlines():
+	temp = line
+	if temp.startswith('TestsScript.sh:'):
+		testsBuildSuccess = False
+		mssgTestsRunErr  = mssgTestsRunErr + temp[0:temp.find('>>')] + '\n'
+     
+f.close()
+
 #Get tests result
 f = open('../logs/testResults.log','r')
 
 for line in f.readlines():
-	print line
-	if line.startswith('Failed ')  != -1 and line.endswith(' test\n'):
+	if line.startswith('Failed ')  != -1 and line.endswith(' tests\n'):
 		#A test failed
 		testsPass = False
 	mssgTestsResults = mssgTestsResults + line
      
 f.close()
-
 
 #Read svn log
 mssgSvn = open('../logs/svn.log','r').read()
@@ -84,6 +93,7 @@ message += '--------------------------------------------------------------------
 message += 'TESTS BUILD LOG\n\n'
 message += mssgTestsBuild + "\n\n"
 message += mssgTestsErr + "\n"
+message += mssgTestsRunErr  + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
 message += mssgTestsResults + "\n"
