@@ -16,7 +16,6 @@ if os.name == 'nt':
 	# assume this is Windows
 	libDirList.append('../../../Third_Party/lib/win32/')
 	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
-
 else:
 
 	boost_path = ''
@@ -54,12 +53,14 @@ else:
 	cppPaths.append(poco_path +'Foundation/include/Poco/')
 	cppPaths.append(boost_path)
 		
-	libList.append('boost_filesystem')
+	libList.append('boost_filesystem-gcc41')
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
 	libList.append('boost_python-gcc41')
 	libList.append('boost_regex-gcc41')
+	
+	print libDirList
 
 
 #GET LIST OF TESTS
