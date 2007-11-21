@@ -1,0 +1,23 @@
+RJT, 20/11/07
+=============
+
+Regarding the IProperty interface methods....
+
+	setProperty (const Property &p)    - don't really understand the function of this method.
+										 It uses the Gaudi Property assign() method.
+	setProperty (const std::string &s) - this uses the output of Gaudi's Property::fillStream method where the property is 
+										 represented as 'name':value. I haven't included that method at present, so
+										 have left out this one as well.
+										 
+    setProperty (const std::string &n, const std::string &v) - Kept, but return type changed to void
+    getProperty (Property *p) const  ->  renamed checkProperty
+	getProperty (const std::string &name) const  - Kept
+	getProperty (const std::string &n, std::string &v)  ->  renamed getPropertyValue and string value is the return type
+	std::vector< Property * >& getProperties () const  - Kept
+
+	
+There's no concept of 'mandatoryness' in there yet.
+
+The Gaudi class has 'remote properties' - I don't.
+
+Our property manager class owns all its properties.

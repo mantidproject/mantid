@@ -128,7 +128,7 @@ public:
 	  return m_value;
 	}
 	
-	/** Allows you to get the value of the property simply by typing its name. (e.g. myProperty)
+	/** Allows you to get the value of the property simply by typing its name.
 	 *  Means you can use an expression like: int i = myProperty;
 	 */
 	operator const TYPE& () const
