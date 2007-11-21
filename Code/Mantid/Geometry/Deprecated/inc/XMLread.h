@@ -1,5 +1,5 @@
-#ifndef XMLread_h
-#define XMLread_h
+#ifndef XML_XMLread_h
+#define XML_XMLread_h
 
 namespace Mantid
 {
@@ -57,12 +57,12 @@ class XMLread : public XMLobject
   
 
   // Conversions (using StrFunc)
-  template<template<typename T> class V,typename T> 
-  int convertToContainer(V<T>&) const;
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int convertToContainer(V<T,A>&) const;
 
   // Containers with forgotten junk!
-  template<template<typename T> class V,typename T> 
-  int convertToContainer(const int ,V<T>&,V<T>&) const;
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int convertToContainer(const int ,V<T,A>&,V<T,A>&) const;
 
   template<typename T> 
   int convertToObject(T&) const;
@@ -74,8 +74,8 @@ class XMLread : public XMLobject
 
 std::ostream& operator<<(std::ostream&,const XMLread&);
 
-}  // NAMESPACE XML
+}   // NAMESPACE XML
 
-}  // NAMESPACE Mantid
+}   // NAMESPACE Mantid
 
 #endif

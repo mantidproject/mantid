@@ -34,8 +34,13 @@ namespace XML
 // --------------------------------------------------------
 
 
-template<template<typename T> class V, typename T>
-XMLvector<V,T>::XMLvector(XMLobject* B,const std::string& K) :
+// --------------------------------------------------------
+//                   XMLvector
+// --------------------------------------------------------
+
+
+template<template<typename T,typename A> class V, typename T,typename A>
+XMLvector<V,T,A>::XMLvector(XMLobject* B,const std::string& K) :
   XMLobject(B,K),empty(1)
   /*!
     Constructor with junk key (value is NOT set)
@@ -43,9 +48,9 @@ XMLvector<V,T>::XMLvector(XMLobject* B,const std::string& K) :
   */
 {}
 
-template<template<typename T> class V, typename T>
-XMLvector<V,T>::XMLvector(XMLobject* B,const std::string& K,
-			  const V<T>& Xvec,const V<T>& Yvec) :
+template<template<typename T,typename A> class V, typename T,typename A>
+XMLvector<V,T,A>::XMLvector(XMLobject* B,const std::string& K,
+			  const V<T,A>& Xvec,const V<T,A>& Yvec) :
   XMLobject(B,K),empty(0),X(Xvec),Y(Yvec)
   /*!
     Constructor with Key and Value
@@ -54,18 +59,20 @@ XMLvector<V,T>::XMLvector(XMLobject* B,const std::string& K,
   */
 {}
 
-template<template<typename T> class V, typename T>
-XMLvector<V,T>::XMLvector(const XMLvector<V,T>& A) :
+template<template<typename T,typename Alloc> 
+         class V, typename T,typename Alloc>
+XMLvector<V,T,Alloc>::XMLvector(const XMLvector<V,T,Alloc>& A) :
   XMLobject(A),empty(A.empty),X(A.X),Y(A.Y)
   /*!
     Standard copy constructor
-    \param A :: XMLvectory to copy
+    \param A :: XMLvector to copy
   */
 {}
 
-template<template<typename T> class V, typename T>
-XMLvector<V,T>&
-XMLvector<V,T>::operator=(const XMLvector<V,T>& A) 
+template<template<typename T,typename Alloc> 
+         class V, typename T,typename Alloc>
+XMLvector<V,T,Alloc>&
+XMLvector<V,T,Alloc>::operator=(const XMLvector<V,T,Alloc>& A) 
   /*!
     Standard assignment operator
     \param A :: Object to copy
@@ -82,28 +89,27 @@ XMLvector<V,T>::operator=(const XMLvector<V,T>& A)
   return *this;
 }
 
-
-template<template<typename T> class V, typename T>
-XMLvector<V,T>*
-XMLvector<V,T>::clone() const
+template<template<typename T,typename A> class V, typename T,typename A>
+XMLvector<V,T,A>*
+XMLvector<V,T,A>::clone() const
   /*!
     The clone function
     \return new copy of this
   */
 {
-  return new XMLvector<V,T>(*this);
+  return new XMLvector<V,T,A>(*this);
 }
 
-template<template<typename T> class V, typename T>
-XMLvector<V,T>::~XMLvector()
+template<template<typename T,typename A> class V, typename T,typename A>
+XMLvector<V,T,A>::~XMLvector()
   /*!
     Standard destructor
   */
 { }
 
-template<template<typename T> class V, typename T>
+template<template<typename T,typename A> class V, typename T,typename A>
 int
-XMLvector<V,T>::readObject(std::istream& FX)
+XMLvector<V,T,A>::readObject(std::istream& FX)
   /*!
     Generic read from a string
     \param FX :: Filestream to read from
@@ -143,9 +149,9 @@ XMLvector<V,T>::readObject(std::istream& FX)
   return 0;
 }
 
-template<template<typename T> class V, typename T>
+template<template<typename T,typename A> class V, typename T,typename A>
 void
-XMLvector<V,T>::writeXML(std::ostream& OX) const
+XMLvector<V,T,A>::writeXML(std::ostream& OX) const
   /*!
     Write out the object
     \param OX :: output stream
@@ -160,19 +166,20 @@ XMLvector<V,T>::writeXML(std::ostream& OX) const
       return;
     }
   OX<<"<"<<KeyOut<<Attr<<">"<<std::endl;
-  typename V<T>::const_iterator xc=X.begin();
-  typename V<T>::const_iterator yc;
+  typename V<T,A>::const_iterator xc=X.begin();
+  typename V<T,A>::const_iterator yc;
   for(yc=Y.begin();yc!=Y.end();xc++,yc++)
     OX<<(*xc)<<" "<<(*yc)<<std::endl;
   OX<<"</"<<KeyOut<<">"<<std::endl;
   return;
 }
+
   
 }    // NAMESPACE XML
 
 /// \cond TEMPLATE
 
-template class XML::XMLvector<std::vector,double>;
+template class XML::XMLvector<std::vector,double,std::allocator<double> >;
 
 /// \endcond TEMPLATE
 

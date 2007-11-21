@@ -27,7 +27,7 @@ class XMLcollect
 {
  private:
 
-  static Kernel::Logger& PLog;  ///< The official logger  
+  static Kernel::Logger& PLog;        ///< The official logger  
 
   std::string depthKey;               ///< Current depth layer
   XMLgroup Master;                    ///< Master group
@@ -50,54 +50,52 @@ class XMLcollect
   int addNumComp(const std::string&,const char*);
   
   // Non-file type One
-  template<template<typename T> class V,typename T> 
-  int addNumComp(const std::string&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addNumComp(const std::string&,const V<T,A>&);
   // Non-file type
-  template<template<typename T> class V,typename T> 
-  int addNumComp(const std::string&,
-		 const V<T>&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addNumComp(const std::string&,const V<T,A>&,const V<T,A>&);
 
-  template<template<typename T> class V,typename T> 
+  template<template<typename T,typename A> class V,typename T,typename A> 
   int addNumComp(const std::string&,
-		 const V<T>&,const V<T>&,const V<T>&);
+		 const V<T,A>&,const V<T,A>&,const V<T,A>&);
   // file type
-  template<template<typename T> class V,typename T> 
+  template<template<typename T,typename A> class V,typename T,typename A> 
   int addNumComp(const std::string&,const std::string&,
-		 const V<T>&,const V<T>&);
+		 const V<T,A>&,const V<T,A>&);
 
-  template<template<typename T> class V,typename T> 
+  template<template<typename T,typename A> class V,typename T,typename A> 
   int addNumComp(const std::string&,const std::string&,
-		 const V<T>&,const V<T>&,const V<T>&);
-
+		 const V<T,A>&,const V<T,A>&,const V<T,A>&);
 
   template<typename T> int addComp(const std::string&,const T&);
   int addComp(const std::string&,const char*);
 
   // One container
-  template<template<typename T> class V,typename T> 
-  int addComp(const std::string&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addComp(const std::string&,const V<T,A>&);
 
   // Two container
-  template<template<typename T> class V,typename T> 
-  int addComp(const std::string&,const V<T>&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addComp(const std::string&,const V<T,A>&,const V<T,A>&);
 
   // Two container + file
-  template<template<typename T> class V,typename T> 
-  int addComp(const std::string&,const std::string&,const V<T>&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addComp(const std::string&,const std::string&,const V<T,A>&,const V<T,A>&);
 
 
-  template<template<typename T> class V,typename T> 
-  int addComp(const std::string&,const V<T>&,const V<T>&,const V<T>&);
+  template<template<typename T,typename A> class V,typename T,typename A> 
+  int addComp(const std::string&,const V<T,A>&,const V<T,A>&,const V<T,A>&);
 
   // Three Containers + file
-  template<template<typename T> class V,typename T> 
+  template<template<typename T,typename A> class V,typename T,typename A> 
   int addComp(const std::string&,const std::string&,
-	      const V<T>&,const V<T>&,const V<T>&);
+	      const V<T,A>&,const V<T,A>&,const V<T,A>&);
 
   // Four Containers
-  template<template<typename T> class V,typename T> 
+  template<template<typename T,typename A> class V,typename T,typename A> 
   int addComp(const std::string&,
-	      const V<T>&,const V<T>&,const V<T>&,const V<T>&);
+	      const V<T,A>&,const V<T,A>&,const V<T,A>&,const V<T,A>&);
 
   // Attributes
   void addAttribute(const std::string&,const char*);
@@ -136,11 +134,12 @@ class XMLcollect
   int loadXML(const std::string&,const std::string&);
   int loadXML(std::istream&,const std::string&,
 	      const std::vector<std::string>&);
-};
 
+
+};
 
 }   // NAMESPACE XML
 
-}   // NAMESPACE Mantid
+}  // NAMESPACE Mantid
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef Mantid_XML_XMLgrid_h
-#define Mantid_XML_XMLgrid_h
+#ifndef XMLgrid_h
+#define XMLgrid_h
 
 namespace Mantid
 {
@@ -15,41 +15,42 @@ namespace XML
     \brief The object is to hold a set of containers
    */
 
-template<template<typename T> class V,typename T> 
+template<template<typename T,typename A> class V,typename T,typename A> 
 class XMLgrid : public XMLobject
 {
  private:
 
   int size;                   ///< Current size
   int empty;                  ///< Null value
-  std::vector< V<T> > Grid;   ///< X values
+  std::vector< V<T,A> > Grid;   ///< X values
   int contLine;
 
  public:
 
   XMLgrid(XMLobject*);
   XMLgrid(XMLobject*,const std::string&);
-  XMLgrid(const XMLgrid<V,T>&);
-  XMLgrid<V,T>* clone() const;
-  XMLgrid<V,T>& operator=(const XMLgrid<V,T>&);
+  XMLgrid(const XMLgrid<V,T,A>&);
+  XMLgrid<V,T,A>* clone() const;
+  XMLgrid<V,T,A>& operator=(const XMLgrid<V,T,A>&);
   ~XMLgrid();
 
   void setEmpty() { empty=0; } 
   int isEmpty() const { return empty; }
   int getSize() const { return (!empty) ? size : 0; }   
-  void setContLine(const int A) { contLine=A; }
+  void setContLine(const int IFlag) { contLine=IFlag; }
 
-  void setComp(const int,const V<T>&);    ///< Assumes copy setting
+  void setComp(const int,const V<T,A>&);    ///< Assumes copy setting
   virtual void writeXML(std::ostream&) const;    
   virtual int readObject(std::istream&);
 
-  V<T>& getGVec(const int);
-  const V<T>& getGVec(const int) const;
+  V<T,A>& getGVec(const int);
+  const V<T,A>& getGVec(const int) const;
   
 };
 
 }  // NAMESPACE XML
 
-}  // NAMESPACE Mantid
+
+} // NAMESPACE Mantid
 
 #endif

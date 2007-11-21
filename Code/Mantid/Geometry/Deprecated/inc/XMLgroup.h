@@ -27,7 +27,7 @@ class XMLgroup : public XMLobject
     
  private:
   
-  static Kernel::Logger& PLog;  ///< The official logger  
+  static Kernel::Logger& PLog;        ///< The official logger  
 
   std::vector<XMLobject*> Grp;          ///< Orderd list of Objects
   holdType Index;                       ///< Map for searching for an object

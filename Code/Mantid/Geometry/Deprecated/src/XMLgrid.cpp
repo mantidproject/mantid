@@ -31,18 +31,18 @@ namespace XML
 //                   XMLgrid
 // --------------------------------------------------------
 
-
-template<template<typename T> class V, typename T>
-XMLgrid<V,T>::XMLgrid(XMLobject* B,const std::string& K) :
+template<template<typename T,typename A> class V,typename T,typename A> 
+XMLgrid<V,T,A>::XMLgrid(XMLobject* B,const std::string& K) :
   XMLobject(B,K),size(0),empty(1),contLine(10)
   /*!
     Constructor with junk key (value is NOT set)
+    \param B :: XMLobject to used as parent
     \param K :: key
   */
 {}
 
-template<template<typename T> class V, typename T>
-XMLgrid<V,T>::XMLgrid(const XMLgrid<V,T>& A) :
+template<template<typename T,typename Alloc> class V,typename T,typename Alloc> 
+XMLgrid<V,T,Alloc>::XMLgrid(const XMLgrid<V,T,Alloc>& A) :
   XMLobject(A),size(A.size),empty(A.empty),Grid(A.Grid),
   contLine(A.contLine)
   /*!
@@ -51,9 +51,9 @@ XMLgrid<V,T>::XMLgrid(const XMLgrid<V,T>& A) :
   */
 {}
 
-template<template<typename T> class V, typename T>
-XMLgrid<V,T>&
-XMLgrid<V,T>::operator=(const XMLgrid<V,T>& A) 
+template<template<typename T,typename A> class V,typename T,typename Alloc> 
+XMLgrid<V,T,Alloc>&
+XMLgrid<V,T,Alloc>::operator=(const XMLgrid<V,T,Alloc>& A) 
   /*!
     Standard assignment operator
     \param A :: Object to copy
@@ -72,28 +72,27 @@ XMLgrid<V,T>::operator=(const XMLgrid<V,T>& A)
 }
 
 
-template<template<typename T> class V, typename T>
-XMLgrid<V,T>*
-XMLgrid<V,T>::clone() const
+template<template<typename T,typename A> class V,typename T,typename A> 
+XMLgrid<V,T,A>*
+XMLgrid<V,T,A>::clone() const
   /*!
     The clone function
     \return new copy of this
   */
 {
-  return new XMLgrid<V,T>(*this);
+  return new XMLgrid<V,T,A>(*this);
 }
 
-
-template<template<typename T> class V, typename T>
-XMLgrid<V,T>::~XMLgrid()
+template<template<typename T,typename A> class V,typename T,typename A> 
+XMLgrid<V,T,A>::~XMLgrid()
   /*!
     Standard destructor
   */
 {}
 
-template<template<typename T> class V, typename T>
+template<template<typename T,typename A> class V,typename T,typename A> 
 void
-XMLgrid<V,T>::setComp(const int Index,const V<T>& VO)
+XMLgrid<V,T,A>::setComp(const int Index,const V<T,A>& VO)
   /*!
     Set Component in Grid.
     \param Index :: Index number to add
@@ -113,9 +112,9 @@ XMLgrid<V,T>::setComp(const int Index,const V<T>& VO)
   return;
 }
 
-template<template<typename T> class V, typename T>
-V<T>&
-XMLgrid<V,T>::getGVec(const int Index)
+template<template<typename T,typename A> class V,typename T,typename A> 
+V<T,A>&
+XMLgrid<V,T,A>::getGVec(const int Index)
   /*!
     Set Component in Grid.
     \param Index :: Index number to add
@@ -127,9 +126,9 @@ XMLgrid<V,T>::getGVec(const int Index)
   return Grid[Index];
 }
 
-template<template<typename T> class V, typename T>
-const V<T>&
-XMLgrid<V,T>::getGVec(const int Index) const
+template<template<typename T,typename A> class V,typename T,typename A> 
+const V<T,A>&
+XMLgrid<V,T,A>::getGVec(const int Index) const
   /*!
     Set Component in Grid.
     \param Index :: Index number to add
@@ -141,9 +140,9 @@ XMLgrid<V,T>::getGVec(const int Index) const
   return Grid[Index];
 }
 
-template<template<typename T> class V, typename T>
+template<template<typename T,typename A> class V,typename T,typename A> 
 int
-XMLgrid<V,T>::readObject(std::istream& FX)
+XMLgrid<V,T,A>::readObject(std::istream& FX)
   /*!
     Generic read from a string. Assumes that size has
     been set.
@@ -184,9 +183,9 @@ XMLgrid<V,T>::readObject(std::istream& FX)
   return 0;
 }
 
-template<template<typename T> class V, typename T>
+template<template<typename T,typename A> class V,typename T,typename A> 
 void
-XMLgrid<V,T>::writeXML(std::ostream& OX) const
+XMLgrid<V,T,A>::writeXML(std::ostream& OX) const
   /*!
     Write out the object
     \param OX :: output stream
@@ -201,11 +200,11 @@ XMLgrid<V,T>::writeXML(std::ostream& OX) const
       return;
     }
   
-  typename std::vector< V<T> >::const_iterator gc;
-  std::vector< typename V<T>::const_iterator > IterVec;  // Vector of iterators
-  std::vector< typename  V<T>::const_iterator > IterEnd;  // Vector of iterators
-  typename std::vector< typename V<T>::const_iterator >::iterator ivc;  // Vector of iterators
-  typename std::vector< typename V<T>::const_iterator >::iterator evc;  // Vector of iterators
+  typename std::vector< V<T,A> >::const_iterator gc;
+  std::vector< typename V<T,A>::const_iterator > IterVec;  // Vector of iterators
+  std::vector< typename  V<T,A>::const_iterator > IterEnd;  // Vector of iterators
+  typename std::vector< typename V<T,A>::const_iterator >::iterator ivc;  // Vector of iterators
+  typename std::vector< typename V<T,A>::const_iterator >::iterator evc;  // Vector of iterators
   int finished=Grid.size();       // Number of components that must be changed
   for(gc=Grid.begin();gc!=Grid.end();gc++)
     {
@@ -265,10 +264,10 @@ XMLgrid<V,T>::writeXML(std::ostream& OX) const
 
 /// \cond TEMPLATE
 
-template class XML::XMLgrid<std::vector,std::string>;
-template class XML::XMLgrid<std::vector,double>;
-template class XML::XMLgrid<std::vector,int>;
+template class XML::XMLgrid<std::vector,std::string,std::allocator<std::string> >;
+template class XML::XMLgrid<std::vector,double,std::allocator<double> >;
+template class XML::XMLgrid<std::vector,int,std::allocator<int> >;
 
 /// \endcond TEMPLATE
 
-} // NAMESPACE Mantid
+}  // NAMESPACE Mantid

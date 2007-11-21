@@ -319,7 +319,7 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-#if __GNU__
+#ifndef __WIN32__
   CQ.imag() = (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
 #else

@@ -39,5 +39,5 @@ std::string procString(const std::string&);
 
 } // NAMESPACE XML
 
-} // NAMSPACE MAntid
+} // NAMSPACE Mantid
 #endif

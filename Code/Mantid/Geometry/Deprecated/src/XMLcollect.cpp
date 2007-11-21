@@ -155,9 +155,9 @@ XMLcollect::addNumGrp(const std::string& GK)
   return index;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX)
+XMLcollect::addNumComp(const std::string& Key,const V<T,A>& ContX)
   /*!
     Adds a component with a vector of things to add 
     \param K :: Key to used 
@@ -169,7 +169,7 @@ XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX)
   cx<<Key;
   const int out = XML::getNumberIndex(WorkGrp->getMap(),cx.str());
   cx<<out;
-  XMLgrid<V,T>* XG=new XMLgrid<V,T>(WorkGrp,cx.str());
+  XMLgrid<V,T,A>* XG=new XMLgrid<V,T,A>(WorkGrp,cx.str());
   XG->setComp(0,ContX);
   WorkGrp->addManagedObj(XG);
   return out;
@@ -216,10 +216,10 @@ XMLcollect::addNumComp(const std::string& K,const std::string& V)
 
 
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
 XMLcollect::addNumComp(const std::string& Key,const std::string& Fname,
-		       const V<T>& ContX,const V<T>& ContY)
+		       const V<T,A>& ContX,const V<T,A>& ContY)
   /*!
     Adds a numbered component, ie K_Num,
     were K_Num is unique, thus allowing a group of things to be added.
@@ -238,9 +238,10 @@ XMLcollect::addNumComp(const std::string& Key,const std::string& Fname,
   return out;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX,const V<T>& ContY)
+XMLcollect::addNumComp(const std::string& Key,const V<T,A>& ContX,
+		       const V<T,A>& ContY)
   /*!
     Adds a numbered component, ie K_Num,
     were K_Num is unique, thus allowing a group of things to be added.
@@ -253,14 +254,14 @@ XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX,const V<T>& Cont
   cx<<Key;
   const int out = XML::getNumberIndex(WorkGrp->getMap(),cx.str());
   cx<<out;
-  WorkGrp->addManagedObj(new XMLvector<V,T>(WorkGrp,cx.str(),ContX,ContY));
+  WorkGrp->addManagedObj(new XMLvector<V,T,A>(WorkGrp,cx.str(),ContX,ContY));
   return out;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX,
-		       const V<T>& ContY,const V<T>& ContZ)
+XMLcollect::addNumComp(const std::string& Key,const V<T,A>& ContX,
+		       const V<T,A>& ContY,const V<T,A>& ContZ)
   /*!
     Adds a numbered component, ie K_Num,
     were K_Num is unique, thus allowing a group of things to be added.
@@ -276,15 +277,15 @@ XMLcollect::addNumComp(const std::string& Key,const V<T>& ContX,
   cx<<Key;
   const int out = XML::getNumberIndex(WorkGrp->getMap(),cx.str());
   cx<<out;
-  WorkGrp->addComp(cx.str(),XMLvector<V,T>(WorkGrp,Key,ContX,ContY,ContZ));
+  WorkGrp->addComp(cx.str(),XMLvector<V,T,A>(WorkGrp,Key,ContX,ContY,ContZ));
   return out;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
 XMLcollect::addNumComp(const std::string& Key,const std::string& Fname,
-		       const V<T>& ContX,const V<T>& ContY,
-		       const V<T>& ContZ)
+		       const V<T,A>& ContX,const V<T,A>& ContY,
+		       const V<T,A>& ContZ)
   /*!
     Adds a numbered component, ie K_Num,
     were K_Num is unique, thus allowing a group of things to be added.
@@ -307,10 +308,10 @@ XMLcollect::addNumComp(const std::string& Key,const std::string& Fname,
 // ---------------------------
 
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
 XMLcollect::addComp(const std::string& Key,const std::string& Fname,
-		    const V<T>& ContX, const V<T>& ContY)
+		    const V<T,A>& ContX, const V<T,A>& ContY)
   /*!
     Sophisticated container adder: It takes two names and creates a file
     of the data, and then puts the filename into the object. 
@@ -326,10 +327,11 @@ XMLcollect::addComp(const std::string& Key,const std::string& Fname,
   return retVal;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
 XMLcollect::addComp(const std::string& Key,const std::string& Fname,
-		    const V<T>& ContX, const V<T>& ContY,const V<T>& ContZ)
+		    const V<T,A>& ContX, const V<T,A>& ContY,
+		    const V<T,A>& ContZ)
   /*!
     Sophisticated container adder: It takes two names and creates a file
     of the data, and then puts the filename into the object. 
@@ -352,9 +354,9 @@ XMLcollect::addComp(const std::string& Key,const std::string& Fname,
 // ADDCOMP
 // ------------------------
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addComp(const std::string& Key,const V<T>& ContX)
+XMLcollect::addComp(const std::string& Key,const V<T,A>& ContX)
   /*!
     Adds a component with a vector of things to add 
     \param K :: Key to used 
@@ -362,16 +364,16 @@ XMLcollect::addComp(const std::string& Key,const V<T>& ContX)
     \retval Cnt of new object 
   */
 {
-  XMLgrid<V,T>* XG=new XMLgrid<V,T>(WorkGrp,Key);
+  XMLgrid<V,T,A>* XG=new XMLgrid<V,T,A>(WorkGrp,Key);
   XG->setComp(0,ContX);
   return WorkGrp->addManagedObj(XG);
   return 0;
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addComp(const std::string& Key,const V<T>& ContX,
-		    const V<T>& ContY)
+XMLcollect::addComp(const std::string& Key,const V<T,A>& ContX,
+		    const V<T,A>& ContY)
   /*!
     Adds a component with a vector of things to add 
     \param K :: Key to used 
@@ -380,13 +382,13 @@ XMLcollect::addComp(const std::string& Key,const V<T>& ContX,
     \retval Cnt of new object 
   */
 {
-  return WorkGrp->addManagedObj(new XMLvector<V,T>(WorkGrp,Key,ContX,ContY));
+  return WorkGrp->addManagedObj(new XMLvector<V,T,A>(WorkGrp,Key,ContX,ContY));
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addComp(const std::string& Key,const V<T>& ContX,
-		    const V<T>& ContY,const V<T>& ContZ)
+XMLcollect::addComp(const std::string& Key,const V<T,A>& ContX,
+		    const V<T,A>& ContY,const V<T,A>& ContZ)
   /*!
     Adds a component with a vector of things to add 
     \param K :: Key to used 
@@ -396,18 +398,18 @@ XMLcollect::addComp(const std::string& Key,const V<T>& ContX,
     \retval Cnt of new object 
   */
 {
-  XMLgrid<V,T>* XG=new XMLgrid<V,T>(WorkGrp,Key);
+  XMLgrid<V,T,A>* XG=new XMLgrid<V,T,A>(WorkGrp,Key);
   XG->setComp(0,ContX);
   XG->setComp(1,ContY);
   XG->setComp(2,ContZ);
   return WorkGrp->addManagedObj(XG);
 }
 
-template<template<typename T> class V,typename T>
+template<template<typename T,typename A> class V,typename T,typename A>
 int
-XMLcollect::addComp(const std::string& Key,const V<T>& ContA,
-		    const V<T>& ContB,const V<T>& ContC,
-		    const V<T>& ContD)
+XMLcollect::addComp(const std::string& Key,const V<T,A>& ContA,
+		    const V<T,A>& ContB,const V<T,A>& ContC,
+		    const V<T,A>& ContD)
   /*!
     Adds a component with a vector of things to add 
     \param K :: Key to used 
@@ -418,7 +420,7 @@ XMLcollect::addComp(const std::string& Key,const V<T>& ContA,
     \retval Cnt of new object 
   */
 {
-  XMLgrid<V,T>* XG=new XMLgrid<V,T>(WorkGrp,Key);
+  XMLgrid<V,T,A>* XG=new XMLgrid<V,T,A>(WorkGrp,Key);
   XG->setComp(0,ContA);
   XG->setComp(1,ContB);
   XG->setComp(2,ContC);
@@ -526,9 +528,10 @@ XMLcollect::addAttribute(const std::string& Comp,
     }
   else
     {
-      std::stringstream X;
-      X<<"Error getting addAttribute:"+Comp  <<" from Workgroup "<<*WorkGrp;
-      PLog.error(X.str());
+      std::ostringstream cx;
+      cx<<"Error getting XMLcollect::addAttribute:"+Comp+
+	" from Workgroup "<<*WorkGrp;
+      PLog.error(cx.str());
     }
   return;
 }
@@ -924,7 +927,7 @@ XMLcollect::writeXML(std::ostream& OX) const
   return;
 }
 
-}   // NAMESPACE XML
+};
 
 /*!
 \cond TEMPLATE
@@ -962,9 +965,9 @@ template int XML::XMLcollect::addComp(const std::string&,const Geometry::Vec3D&)
 template int XML::XMLcollect::addNumComp(const std::string&,const Geometry::Vec3D&);
 #endif
 
+}
 
 /*!
 \endcond TEMPLATE
 */
 
-} // NAMESPACE Mantid

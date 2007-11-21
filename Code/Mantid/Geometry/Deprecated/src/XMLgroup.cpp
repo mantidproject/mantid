@@ -12,7 +12,7 @@
 #include <boost/bind.hpp>
 
 #include "Logger.h"
-#include "Exception.h"
+#include "AuxException.h"
 #include "RefControl.h"
 #include "Matrix.h"
 #include "Vec3D.h"
@@ -570,9 +570,9 @@ template int XML::XMLgroup::addComp(const std::string&,const double&);
 template int XML::XMLgroup::addComp(const std::string&,const int&);
 template int XML::XMLgroup::addComp(const std::string&,const std::string&);
 template int XML::XMLgroup::addComp(const std::string&,const Geometry::Vec3D&);
-template XML::XMLgrid<std::vector,double>* 
+template XML::XMLgrid<std::vector,double,std::allocator<double> >* 
 XML::XMLgroup::getType(const int) const;
-template XML::XMLgrid<std::vector,double>* 
+template XML::XMLgrid<std::vector,double,std::allocator<double> >* 
 XML::XMLgroup::getLastType(const int) const;
 
 /// \endcond TEMPLATE

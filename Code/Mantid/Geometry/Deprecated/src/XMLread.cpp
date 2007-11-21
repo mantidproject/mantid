@@ -16,13 +16,11 @@
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "Support.h"
-// #include "SpecDataHold.h"
 #include "XMLnamespace.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
 #include "XMLread.h"
-
 
 namespace Mantid
 {
@@ -152,9 +150,10 @@ XMLread::addLine(const std::string& Line)
   return;
 }
 
-template<template<typename T> class V,typename T> 
+
+template<template<typename T,typename A> class V,typename T,typename A> 
 int
-XMLread::convertToContainer(V<T>& CT) const
+XMLread::convertToContainer(V<T,A>& CT) const
   /*!
     Given a container of type V<T>, convert all of the
     lines to single objects in the system
@@ -175,9 +174,9 @@ XMLread::convertToContainer(V<T>& CT) const
   return CT.size();
 }
 
-template<template<typename T> class V,typename T> 
+template<template<typename T,typename A> class V,typename T,typename A> 
 int
-XMLread::convertToContainer(const int dmp,V<T>& CA,V<T>& CB) const
+XMLread::convertToContainer(const int dmp,V<T,A>& CA,V<T,A>& CB) const
   /*!
     Given a container of type V<T>, convert all of the
     lines to single objects in the system
@@ -320,6 +319,7 @@ template int XMLread::convertToContainer(const int,std::vector<double>&,
 \endcond TEMPLATE
 */
   
-} // NAMESPACE XML
+}  // NAMESPACE XML
 
-} // NAMESPACE Mantid
+}  // NAMESPACE Mantid
+

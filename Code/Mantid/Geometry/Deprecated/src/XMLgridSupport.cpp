@@ -37,6 +37,8 @@ combineGrid(XML::XMLcollect& XOut,
     \param blockCount :: to write the time separately
   */
 {
+  typedef XML::XMLgrid<std::vector,double,std::allocator<double> > xGridType;
+
   int notValidCnt(0);     // index count of items
   int gcnt(0);            // grid object cnt
 
@@ -47,10 +49,9 @@ combineGrid(XML::XMLcollect& XOut,
     (oPtr) ? dynamic_cast<XML::XMLgroup*>(oPtr->getParent()) : 0; 
 
   // Get XMLgrid object
-  XML::XMLgrid<std::vector,double>* gPtr=
-    dynamic_cast<XML::XMLgrid<std::vector,double>*>(oPtr);
-  XML::XMLgrid<std::vector,double>* gStore(0);   // Item before adding
-  std::vector<XML::XMLgrid<std::vector,double>*> gArray;
+  xGridType* gPtr=dynamic_cast<xGridType*>(oPtr);
+  xGridType* gStore(0);   // Item before adding
+  std::vector<xGridType*> gArray;
 
   int sNum(0);        
   while(oPtr)     // While findind an object
@@ -66,8 +67,7 @@ combineGrid(XML::XMLcollect& XOut,
 		  sNum=gcnt;
 		  gArray.push_back(gStore);
 		}
-	      gStore=new XML::XMLgrid<std::vector,double> 
-		(XOut.getCurrent(),"GridCluster");
+	      gStore=new xGridType(XOut.getCurrent(),"GridCluster");
 	      for(int i=0;i<gPtr->getSize();i++)
 		gStore->setComp(i,gPtr->getGVec(i));
 	    }
@@ -85,7 +85,7 @@ combineGrid(XML::XMLcollect& XOut,
 	  notValidCnt++;
 	}
       oPtr=XOut.findObj(BName,notValidCnt);
-      gPtr=dynamic_cast<XML::XMLgrid<std::vector,double>*>(oPtr);
+      gPtr=dynamic_cast<xGridType*>(oPtr);
     }
 
 
@@ -96,7 +96,7 @@ combineGrid(XML::XMLcollect& XOut,
       gArray.push_back(gStore);
     }
 
-  std::vector<XML::XMLgrid<std::vector,double>*>::iterator vc;
+  std::vector<xGridType*>::iterator vc;
   if (groupPtr)
     {
       for(vc=gArray.begin();vc!=gArray.end();vc++)
@@ -125,7 +125,7 @@ combineDeepGrid(XML::XMLcollect& XOut,
     \param blockCount :: to write the time separately
   */
 {
-  typedef XML::XMLgrid<std::vector,double> GTYPE;
+  typedef XML::XMLgrid<std::vector,double,std::allocator<double> > xGridType;
   int objectCnt(0);          // Object count
   int gcnt(0);            // grid object cnt
 
@@ -141,10 +141,10 @@ combineDeepGrid(XML::XMLcollect& XOut,
   int individualGrpCnt(0);
 
   // Get XMLgrid object
-  GTYPE* gPtr=oPtr->getType<GTYPE>(individualGrpCnt);
+  xGridType* gPtr=oPtr->getType<xGridType>(individualGrpCnt);
 
-  GTYPE* gStore(0);   // Item before adding
-  std::vector<GTYPE*> gArray;
+  xGridType* gStore(0);   // Item before adding
+  std::vector<xGridType*> gArray;
 
   int sNum(0);        
   while(gPtr)     // While finding an object
@@ -158,7 +158,7 @@ combineDeepGrid(XML::XMLcollect& XOut,
 	      sNum=gcnt;
 	      gArray.push_back(gStore);
 	    }
-	  gStore=new GTYPE(XOut.getCurrent(),"GridCluster");
+	  gStore=new xGridType(XOut.getCurrent(),"GridCluster");
 	  for(int i=0;i<gPtr->getSize();i++)
 	    gStore->setComp(i,gPtr->getGVec(i));
 	}
@@ -170,14 +170,14 @@ combineDeepGrid(XML::XMLcollect& XOut,
 	}
       XOut.deleteObj(gPtr);
       gcnt++;
-      gPtr=oPtr->getType<GTYPE>();
+      gPtr=oPtr->getType<xGridType>();
       if (!gPtr)  // New individual group needed
         {   
 	  objectCnt++;
 	  XML::XMLgroup* oPtr=dynamic_cast<XML::XMLgroup*>
 	    (XOut.findObj(BName,objectCnt));
 	  gPtr=(oPtr) ? 
-	    oPtr->getType<GTYPE>(individualGrpCnt) : 0;
+	    oPtr->getType<xGridType>(individualGrpCnt) : 0;
 	}
     }
   // Add last componenet if valid
@@ -188,12 +188,13 @@ combineDeepGrid(XML::XMLcollect& XOut,
       gArray.push_back(gStore);
     }
   // Now add back grid objects into stream 
-  std::vector<GTYPE*>::iterator vc;
+  std::vector<xGridType*>::iterator vc;
   for(vc=gArray.begin();vc!=gArray.end();vc++)
     groupPtr->addManagedObj(*vc);
   return;
 }  
 
 
-}  // Namespace XML
-}  // Namespace Mantid
+}  // NAMESPACE XML
+
+}  // NAMESPACE Mantid
