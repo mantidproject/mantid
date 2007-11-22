@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "../inc/SimpleIntegration.h"
-#include "../../DataObjects/inc/Workspace2D.h"
-#include "../../DataObjects/inc/Workspace1D.h"
+#include "SimpleIntegration.h"
+#include "Workspace2D.h"
+#include "Workspace1D.h"
 
 #include <sstream>
 #include <numeric>

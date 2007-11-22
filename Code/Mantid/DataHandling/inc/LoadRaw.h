@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DataHandlingCommand.h"
-#include "../../Kernel/inc/Logger.h"
+#include "Logger.h"
 
 namespace Mantid
 {

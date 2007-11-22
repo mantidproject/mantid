@@ -1,5 +1,5 @@
-#include "../inc/Histogram1D.h"
-#include "../../Kernel/inc/Exception.h"
+#include "Histogram1D.h"
+#include "Exception.h"
 
 #include <iostream> 
 

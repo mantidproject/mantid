@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../DataObjects/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
+				AdditionalIncludeDirectories="inc;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"

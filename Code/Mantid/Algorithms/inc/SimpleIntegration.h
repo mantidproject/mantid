@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "../../Kernel/inc/Algorithm.h"
-#include "../../Kernel/inc/Logger.h"
+#include "../../API/inc/Algorithm.h"
+#include "Logger.h"
 
 namespace Mantid
 {

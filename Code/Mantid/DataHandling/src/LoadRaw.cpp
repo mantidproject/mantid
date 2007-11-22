@@ -35,8 +35,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "../inc/LoadRaw.h"
-#include "../../DataObjects/inc/Workspace2D.h"
+#include "LoadRaw.h"
+#include "Workspace2D.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

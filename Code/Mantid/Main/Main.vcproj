@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc"
+				AdditionalIncludeDirectories="../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc"
 				PreprocessorDefinitions="_DEBUG"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -54,7 +54,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Kernel.lib Algorithms.lib Geometry.lib DataHandling.lib DataObjects.lib"
+				AdditionalDependencies="API.lib Kernel.lib Algorithms.lib Geometry.lib DataHandling.lib DataObjects.lib"
 				AdditionalLibraryDirectories="..\Debug"
 				GenerateDebugInformation="true"
 			/>

@@ -1,4 +1,4 @@
-#include "../inc/Workspace1D.h"
+#include "Workspace1D.h"
 
 DECLARE_WORKSPACE(Workspace1D)
 

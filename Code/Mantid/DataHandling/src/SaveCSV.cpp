@@ -26,9 +26,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "../inc/SaveCSV.h"
-#include "../../DataObjects/inc/Workspace1D.h"
-#include "../../DataObjects/inc/Workspace2D.h"
+#include "SaveCSV.h"
+#include "Workspace1D.h"
+#include "Workspace2D.h"
 #include "Exception.h" 
 
 #include <fstream>  // used to get ofstream

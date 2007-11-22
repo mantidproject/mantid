@@ -1,5 +1,5 @@
-#include "../inc/Workspace2D.h"
-#include "../../Kernel/inc/Exception.h"
+#include "Workspace2D.h"
+#include "Exception.h"
 
 DECLARE_WORKSPACE(Workspace2D)
 
