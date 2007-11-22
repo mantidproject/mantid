@@ -85,8 +85,8 @@ class Matrix
   std::vector<T> Diagonal() const;                  ///< Returns a vector of the diagonal
   Matrix<T> fDiagonal(const std::vector<T>&) const;    ///< Forward multiply  D*this
   Matrix<T> bDiagonal(const std::vector<T>&) const;    ///< Backward multiply this*D
-  std::vector<T> Row(const int) const;              
-  std::vector<T> Column(const int) const;              
+//  std::vector<T> Row(const int) const;              
+//  std::vector<T> Column(const int) const;              
 
   void setMem(const int,const int);
   std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }

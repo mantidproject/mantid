@@ -29,7 +29,7 @@ class XMLcomp : public XMLobject
 
  public:
 
-  XMLcomp(XMLobject*);
+  XMLcomp(Mantid::XML::XMLobject*);
   XMLcomp(XMLobject*,const std::string&);
   XMLcomp(XMLobject*,const std::string&,const T&);
   XMLcomp(const XMLcomp<T>&);

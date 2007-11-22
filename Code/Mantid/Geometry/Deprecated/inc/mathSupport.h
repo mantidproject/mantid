@@ -26,27 +26,27 @@ polInterp(const TX&,const int,const std::vector<TX>&,
 /// Calcluate a polynominal fit to a segment of data
 template<typename TX,typename TY>
 TY polFit(const TX&,const int,
-  	  typename std::vector<TX>::const_iterator,
-  	  typename std::vector<TY>::const_iterator);
+		  typename std::vector<TX,std::allocator< TX > >::const_iterator,
+		  typename std::vector<TY,std::allocator< TY > >::const_iterator);
 
 /// Determine closes point to aim in a vector
 template<typename T> 
-typename std::vector<T>::const_iterator
-iteratorPos(const std::vector<T>&,const T&);
+typename std::vector<T,std::allocator<T> >::const_iterator
+iteratorPos(const std::vector<T,std::allocator<T> >&,const T&);
 
 /// Integrate on irregular grid using quadratic
 template<typename T>
-T intQuadratic(const typename std::vector<T>::const_iterator&,
-	       const typename std::vector<T>::const_iterator&);
+T intQuadratic(const typename std::vector<T,std::allocator<T> >::const_iterator&,
+			   const typename std::vector<T,std::allocator<T> >::const_iterator&);
 
 /// Integrate on irregular grid using quadratic
 template<typename T>
-T intQuadratic(const typename std::vector<T>::const_iterator&,
-	       const typename std::vector<T>::const_iterator&);
+T intQuadratic(const typename std::vector<T,std::allocator<T> >::const_iterator&,
+			   const typename std::vector<T,std::allocator<T> >::const_iterator&);
 
 template<typename T>
-T derivQuadratic(const typename std::vector<T>::const_iterator&,
-		 const typename std::vector<T>::const_iterator&);
+T derivQuadratic(const typename std::vector<T,std::allocator<T> >::const_iterator&,
+				 const typename std::vector<T,std::allocator<T> >::const_iterator&);
 
 template<typename T>
 double norm(const std::vector<T>&);       ///< Calculate the norm of a vector (\f$ ||V|| \f$)

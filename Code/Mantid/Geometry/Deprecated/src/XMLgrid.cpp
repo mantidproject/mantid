@@ -32,6 +32,16 @@ namespace XML
 // --------------------------------------------------------
 
 template<template<typename T,typename A> class V,typename T,typename A> 
+XMLgrid<V,T,A>::XMLgrid(XMLobject* B) :
+  XMLobject(B),size(0),empty(1),contLine(10)
+  /*!
+    Constructor with junk key (value is NOT set)
+    \param B :: XMLobject to used as parent
+    \param K :: key
+  */
+{}
+
+template<template<typename T,typename A> class V,typename T,typename A> 
 XMLgrid<V,T,A>::XMLgrid(XMLobject* B,const std::string& K) :
   XMLobject(B,K),size(0),empty(1),contLine(10)
   /*!

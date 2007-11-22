@@ -319,7 +319,7 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-#ifndef __WIN32__
+#ifndef _WIN32
   CQ.imag() = (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
 #else
@@ -483,8 +483,8 @@ polInterp(const Xtype& Aim,const int Order,
 template<typename Xtype,typename Ytype>
 Ytype
 polFit(const Xtype& Aim,const int Order,
-       typename std::vector<Xtype>::const_iterator X,
-       typename std::vector<Ytype>::const_iterator Y)
+	   typename std::vector<Xtype,std::allocator<Xtype> >::const_iterator X,
+	   typename std::vector<Ytype,std::allocator<Ytype> >::const_iterator Y)
   /*!
     Function to carry out interpolation
     \param Aim :: aim point
@@ -570,8 +570,8 @@ intQuadratic(const typename std::vector<T>::const_iterator& Xpts,
 
 template<typename T>
 T
-derivQuadratic(const typename std::vector<T>::const_iterator& Xpts,
-	       const typename std::vector<T>::const_iterator& Ypts) 
+derivQuadratic(const typename std::vector<T,std::allocator<T> >::const_iterator& Xpts,
+			   const typename std::vector<T,std::allocator<T> >::const_iterator& Ypts) 
   /*!
     This function carries out a quadratic polynominal differentuation
     for the three points Xpts,Ypts. It assumes that Xpts are random.
@@ -701,17 +701,19 @@ int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 
 
-
-template std::complex<double> 
+/*
+template 
+std::complex<double> 
 polFit(const double&,const int,
-       std::vector<double>::const_iterator,
-       std::vector<std::complex<double> >::const_iterator);
+	   std::vector<double,std::allocator<double> >::const_iterator,
+	   std::vector<std::complex<double>,std::allocator<std::complex<double> > >::const_iterator);
+*/
 
 template 
 double 
 polFit(const double&,const int,
-       std::vector<double>::const_iterator,
-       std::vector<double>::const_iterator);
+	   std::vector<double,std::allocator<double> >::const_iterator,
+	   std::vector<double,std::allocator<double> >::const_iterator);
 
 template 
 std::complex<double> 

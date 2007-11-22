@@ -1396,7 +1396,7 @@ CompGrp::displayAddress() const
 
 /// \Cond TEMPLATE
 
-template class DTriple<Mantid::Geometry::Rule*,int,Mantid::Geometry::Rule*>;
+// template class DTriple<Mantid::Geometry::Rule*,int,Mantid::Geometry::Rule*>;
 
 /// \Endcond TEMPLATE
 

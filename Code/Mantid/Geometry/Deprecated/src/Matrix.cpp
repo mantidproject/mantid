@@ -827,8 +827,8 @@ Matrix<T>::normVert()
     {
       T sum=0;
       for(int j=0;j<ny;j++)
-	sum+=V[i][j]*V[i][j];
-      sum=static_cast<T>(sqrt(sum));
+	    sum+=V[i][j]*V[i][j];
+	  sum=std::sqrt(static_cast<double>(sum));
       for(int j=0;j<ny;j++)
 	V[i][j]/=sum;
     }

@@ -429,8 +429,6 @@ template int StrFullCut(std::string&,const boost::regex&,
 template int StrFullCut(std::string&,const boost::regex&,int&,const int);
 template int StrFullCut(std::string&,const boost::regex&,double&,const int);
 
-template int StrFullCut(std::string&,const boost::regex& Re,
-			std::vector<std::string>&);
 
 // --------------------------------------------------------
 template int StrFullSplit(const std::string&,const boost::regex&,
@@ -444,13 +442,10 @@ template int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<int>&);
 template int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<double>&);
-template int StrSingleSplit(const std::string&,const boost::regex&,
-			  std::vector<std::string>&);
 // --------------------------------------------------------
 
 template int StrComp(const std::string&,const boost::regex&,double&,const int);
 template int StrComp(const std::string&,const boost::regex&,int&,const int);
-template int StrComp(const std::string&,const boost::regex&,std::string&,const int);
 // ------------------------------------------------------------------
 template int findComp(std::istream&,const boost::regex&,int&);
 

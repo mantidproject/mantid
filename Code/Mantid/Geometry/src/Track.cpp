@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include "Logger.h"
+#include "Exception.h"
 #include "AuxException.h"
 #include "Matrix.h"
 #include "Vec3D.h"
@@ -226,67 +227,69 @@ Track::addTUnit(const int ID,const Geometry::Vec3D& Apt,
       Link.push_back(TUnit(Apt,Bpt,D,ID));
       return 0;
     }
-  std::vector<TUnit>::iterator xV=
-    lower_bound(Link.begin(),Link.end(),D);
 
-  Link.insert(xV,TUnit(Apt,Bpt,D,ID));
-  return distance(Link.begin(),xV);
+//  std::vector<TUnit>::iterator xV=
+//	  lower_bound(Link.begin(),Link.end(),D,std::less<TUnit>());
 
+ // Link.insert(xV,TUnit(Apt,Bpt,D,ID));
+ // return distance(Link.begin(),xV);
+   throw Kernel::Exception::NotImplementedError("Track::addUnit");
+   return 0;
 }
 
-void
-Track::buildLink()
-{
-  if (surfPoints.empty())
-    return;
-
-  // First forst surfPoints
-  sort(surfPoints.begin(),surfPoints.end());
-  
-  PType::const_iterator ac=surfPoints.begin();
-  PType::const_iterator bc=ac;
-  bc++;
-  Geometry::Vec3D workPt=iPt;            // last good point
-  // First point is not necessarily in an object
-  // Process first point:
-  if (ac->Direction==1)
-    {
-      addTUnit(0,iPt,ac->PtA);  // from the void
-      workPt=ac->PtA;
-      ac++;
-      bc++;
-    }
-
-  while(ac!=surfPoints.end() || bc!=surfPoints.end())
-    {
-      if (ac->Direction==-1 && bc->Direction==1)
-        {
-	  // Touching point
-	  if (fabs(ac->Dist-bc->Dist)>surfaceTolerance)
-	    {
-	      // track leave ac into bc.
-	      addTUnit(ac->ObjID,workPt,bc->PtA);
-	    }
-	  // Points with intermediate void
-	  else
-	    {
-	      addTUnit(ac->ObjID,workPt,ac->PtA);
-	      addTUnit(0,ac->PtA,bc->PtA);
-	    }
-	  workPt=bc->PtA;
-	  ac++;
-	  ac++;
-	  bc++;  // can I do this past the end ? 
-	  bc++;
-	}
-      else
-        {
-	  std::cerr<<"Error with track points "<<std::endl;
-	}
-    }	
-  surfPoints.clear();        // While vector 
-  return;
-}
+//void
+//Track::buildLink()
+//{
+//  if (surfPoints.empty())
+//    return;
+//
+//  // First forst surfPoints
+//  sort(surfPoints.begin(),surfPoints.end());
+//  
+//  PType::const_iterator ac=surfPoints.begin();
+//  PType::const_iterator bc=ac;
+//  bc++;
+//  Geometry::Vec3D workPt=iPt;            // last good point
+//  // First point is not necessarily in an object
+//  // Process first point:
+//  if (ac->Direction==1)
+//    {
+//      addTUnit(0,iPt,ac->PtA);  // from the void
+//      workPt=ac->PtA;
+//      ac++;
+//      bc++;
+//    }
+//
+//  while(ac!=surfPoints.end() || bc!=surfPoints.end())
+//    {
+//      if (ac->Direction==-1 && bc->Direction==1)
+//        {
+//	  // Touching point
+//	  if (fabs(ac->Dist-bc->Dist)>surfaceTolerance)
+//	    {
+//	      // track leave ac into bc.
+//	      addTUnit(ac->ObjID,workPt,bc->PtA);
+//	    }
+//	  // Points with intermediate void
+//	  else
+//	    {
+//	      addTUnit(ac->ObjID,workPt,ac->PtA);
+//	      addTUnit(0,ac->PtA,bc->PtA);
+//	    }
+//	  workPt=bc->PtA;
+//	  ac++;
+//	  ac++;
+//	  bc++;  // can I do this past the end ? 
+//	  bc++;
+//	}
+//      else
+//        {
+//	  std::cerr<<"Error with track points "<<std::endl;
+//	}
+//    }	
+//  surfPoints.clear();        // While vector 
+//  return;
+//}
 
 
 } // NAMESPACE Geometry

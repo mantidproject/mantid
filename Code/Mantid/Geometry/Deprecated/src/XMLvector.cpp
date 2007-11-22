@@ -33,11 +33,14 @@ namespace XML
 //                   XMLvector
 // --------------------------------------------------------
 
-
-// --------------------------------------------------------
-//                   XMLvector
-// --------------------------------------------------------
-
+template<template<typename T,typename A> class V, typename T,typename A>
+XMLvector<V,T,A>::XMLvector(XMLobject* B) :
+  XMLobject(B),empty(1)
+  /*!
+    Constructor with junk key (value is NOT set)
+    \param K :: key
+  */
+{}
 
 template<template<typename T,typename A> class V, typename T,typename A>
 XMLvector<V,T,A>::XMLvector(XMLobject* B,const std::string& K) :

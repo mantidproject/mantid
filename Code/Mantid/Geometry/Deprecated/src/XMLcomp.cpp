@@ -32,6 +32,14 @@ namespace XML
 //                   XMLcomp
 // --------------------------------------------------------
 
+template<typename T>
+XMLcomp<T>::XMLcomp(XMLobject* B) :
+  XMLobject(B),empty(1)
+  /*!
+    Constructor with junk key (value is NOT set)
+    \param K :: key
+  */
+{}
 
 template<typename T>
 XMLcomp<T>::XMLcomp(XMLobject* B,const std::string& K) :
@@ -99,6 +107,18 @@ XMLcomp<T>::~XMLcomp()
 { }
 
 template<typename T>
+void
+XMLcomp<T>::setComp(const T& A) 
+  /*!
+    Set the component value
+    \param A :: Component to copy
+  */
+{
+   Value=A;
+   return;
+}
+
+template<typename T>
 int
 XMLcomp<T>::readObject(std::istream& FX)
   /*!
@@ -130,7 +150,7 @@ XMLcomp<Geometry::Vec3D>::readObject(std::istream& FX)
 {
   std::string Lines;
   std::string closeKey;
-  if (XML::splitComp(FX,closeKey,Lines) |
+  if (XML::splitComp(FX,closeKey,Lines) ||
       this->Key!=closeKey)
     return -1;
   double a,b,c;
@@ -332,7 +352,7 @@ XMLcomp<tm*>::writeXML(std::ostream& OX) const
 template class XML::XMLcomp<double>;
 template class XML::XMLcomp<std::string>;
 template class XML::XMLcomp<int>;
-template class XML::XMLcomp<Geometry::Vec3D>;
+template class XML::XMLcomp<Mantid::Geometry::Vec3D>;
 
 //template class XML::XMLcomp<std::vector<double> >;
 // template class XML::XMLcomp<std::vector<int> >;

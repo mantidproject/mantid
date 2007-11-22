@@ -927,13 +927,12 @@ XMLcollect::writeXML(std::ostream& OX) const
   return;
 }
 
-};
+}   // NAMESPACE Geometry 
 
 /*!
 \cond TEMPLATE
 */
 
-template void XML::XMLcollect::addAttribute(const std::string&,const std::string&);
 template void XML::XMLcollect::addAttribute(const std::string&,const double&);
 template void XML::XMLcollect::addAttribute(const std::string&,const int&);
 
@@ -942,7 +941,6 @@ template void XML::XMLcollect::addAttribute(const std::string&,const std::string
 template int XML::XMLcollect::addComp(const std::string&,const XML::nullObj&);
 template int XML::XMLcollect::addComp(const std::string&,const double&);
 template int XML::XMLcollect::addComp(const std::string&,const int&);
-template int XML::XMLcollect::addComp(const std::string&,const std::string&);
 template int XML::XMLcollect::addComp(const std::string&,const std::vector<double>&);
 template int XML::XMLcollect::addComp(const std::string&,const std::vector<int>&);
 template int XML::XMLcollect::addComp(const std::string&,const std::vector<std::string>&);
@@ -956,18 +954,17 @@ template int XML::XMLcollect::addComp(const std::string&,const std::vector<doubl
 template int XML::XMLcollect::addNumComp(const std::string&,const XML::nullObj&);
 template int XML::XMLcollect::addNumComp(const std::string&,const double&);
 template int XML::XMLcollect::addNumComp(const std::string&,const int&);
-template int XML::XMLcollect::addNumComp(const std::string&,const std::string&);
 template int XML::XMLcollect::addNumComp(const std::string&,const std::string&,
 				      const std::vector<double>&,const std::vector<double>&);
 
-#ifdef Vec3D_h
+#ifdef Geometry_Vec3D_h
 template int XML::XMLcollect::addComp(const std::string&,const Geometry::Vec3D&);
 template int XML::XMLcollect::addNumComp(const std::string&,const Geometry::Vec3D&);
 #endif
 
-}
 
 /*!
 \endcond TEMPLATE
 */
 
+} // NAMESPACE Mantid

@@ -36,7 +36,7 @@ class XMLvector : public XMLobject
   void setEmpty() { empty=0; } 
   int isEmpty() const { return empty; }
 
-  void setComp(const V<T,A>&,const V<T,A>&);    ///< Assumes copy setting
+  void setComp(const V<T,A>& yVec,const V<T,A>& xVec) { X=xVec; Y=yVec; }
   virtual void writeXML(std::ostream&) const;    
   virtual int readObject(std::istream&);
   V<T,A>& getX() { return X; }

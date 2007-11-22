@@ -1,6 +1,5 @@
-#ifndef Vec3D_h
-#define Vec3D_h
-
+#ifndef Geometry_Vec3D_h
+#define Geometry_Vec3D_h
 
 namespace Mantid
 {

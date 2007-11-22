@@ -313,12 +313,13 @@ XMLobject::getValue(const T& DefValue) const
 
 
 /// \cond TEMPLATE
-template 
-const double& XML::XMLobject::getValue(const double&) const;
+template const double& XML::XMLobject::getValue(const double&) const;
+template const int& XML::XMLobject::getValue(const int&) const;
+template const Geometry::Vec3D& XML::XMLobject::getValue(const Geometry::Vec3D&) const;
 
 template void XML::XMLobject::addAttribute(const std::string&,const double&);
 template void XML::XMLobject::addAttribute(const std::string&,const int&);
-template void XML::XMLobject::addAttribute(const std::string&,const std::string&);
+template void XML::XMLobject::addAttribute(const std::string&,const Geometry::Vec3D&);
 
 /// \endcond TEMPLATE
 

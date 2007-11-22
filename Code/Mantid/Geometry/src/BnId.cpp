@@ -142,7 +142,8 @@ BnId::operator>(const BnId& A) const
     \returns !(this<A)
   */
 {
-  return A>*this;
+  return (&A!=this) ? 
+	  (A>*this) : 0;
 }
 
 int
