@@ -8,7 +8,7 @@ from socket import gethostname
 
 #get libraries and the library directories
 libDirList = ['../', '.']
-libList = ['python25']
+libList = ['python' + sys.version[0:3]]
 cflags = []
 dirList = []
 cppPaths = []
@@ -34,12 +34,8 @@ while(len(dirpath)):
 if os.name == 'nt':
 	# assume this is Windows
 	libDirList.append('../../Third_Party/lib/win32/')
-	libDirList.append('C:/python25/libs')
 	libDir = '../../Third_Party/lib/win32/'
-	cflags = ['-Wall']
-	#cflags = ['-W3','/EHsc', '/MDd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
-	
-	cppPaths.append('../../Third_Party/include/')
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):
@@ -88,9 +84,9 @@ for fname in dirList:
 		
 
 # set header include paths
-env = Environment(tools=["mingw"])
-env.Append( CPPPATH=cppPaths )
+env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
+env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
+
