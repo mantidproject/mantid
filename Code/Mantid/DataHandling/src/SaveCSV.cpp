@@ -58,6 +58,7 @@ namespace DataHandling
    */
   StatusCode SaveCSV::init()
   {	
+    declareProperty("Filename","");
     return StatusCode::SUCCESS;
   }
   
@@ -74,43 +75,38 @@ namespace DataHandling
     // Seperator and LineSeperator properties if they are provided by the user.
 
     // Retrieve the filename from the properties
-
-    StatusCode status = getProperty("Filename", m_filename);
-
-
-    // Check that this property has been set and retrieved successfully
-
-    if ( status.isFailure() )
-    {     
+    try {
+      m_filename = getPropertyValue("Filename");
+    } catch (Exception::NotFoundError e) {
       g_log.error("Filename property has not been set.");
-      return status;
+      return StatusCode::FAILURE;      
     }
     
-    
+    /// @todo move the defaults into a declare property line
     // Check if the user has specified the optional Seperator property 
-    
-    status = getProperty("Seperator", m_seperator);
-
-
-    // If Seperator not specified then use default Seperator
-
-    if ( status.isFailure() )
-    {     
+//    
+//    status = getProperty("Seperator", m_seperator);
+//
+//
+//    // If Seperator not specified then use default Seperator
+//
+//    if ( status.isFailure() )
+//    {     
       m_seperator = ",";
-    }    
-        
-
-    // Check if the user has specified the optional LineSeperator property 
-    
-    status = getProperty("LineSeperator", m_lineSeperator);
-
-
-    // If LineSeperator not specified then use default LineSeperator
-
-    if ( status.isFailure() )
-    {     
+//    }    
+//        
+//
+//    // Check if the user has specified the optional LineSeperator property 
+//    
+//    status = getProperty("LineSeperator", m_lineSeperator);
+//
+//
+//    // If LineSeperator not specified then use default LineSeperator
+//
+//    if ( status.isFailure() )
+//    {     
       m_lineSeperator = "\n";
-    } 
+//    } 
 
 
     // prepare to save to file

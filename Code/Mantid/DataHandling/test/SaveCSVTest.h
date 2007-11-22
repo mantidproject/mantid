@@ -29,12 +29,6 @@ public:
   
   SaveCSVTest()
   {
-    // specify name of file to save 1D-workspace to
-    
-    outputFile = "testOfSaveCSV.csv";
-    algToBeTested.setProperty("Filename", outputFile);
-    
-
     // create dummy 1D-workspace
     
     std::vector<double> lVecX; for(double d=0.0; d<0.95; d=d+0.1) lVecX.push_back(d);
@@ -51,21 +45,24 @@ public:
 
     AnalysisDataService *data = AnalysisDataService::Instance();
     data->add("testSpace", localWorkspace);
-    
-    algToBeTested.setProperty("InputWorkspace", "testSpace"); 
   }
   
   
   void testInit()
   {
-    std::string result;
-    StatusCode status = algToBeTested.getProperty("Filename", result);
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( ! result.compare(outputFile));
-
-    status = algToBeTested.initialize();
+    StatusCode status = algToBeTested.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( algToBeTested.isInitialized() );
+
+    algToBeTested.setProperty("InputWorkspace", "testSpace");     
+
+    // specify name of file to save 1D-workspace to
+    outputFile = "testOfSaveCSV.csv";
+    algToBeTested.setProperty("Filename", outputFile);
+    
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(outputFile));
   }
   
   

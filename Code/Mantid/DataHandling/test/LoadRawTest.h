@@ -14,26 +14,10 @@ using Mantid::DataObjects::Workspace2D;
 
 class LoadRawTest : public CxxTest::TestSuite
 {
-public: 
-  
-  LoadRawTest()
-  {
-    // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
-    loader.setProperty("Filename", inputFile);
-
-    outputSpace = "outer";
-    loader.setProperty("OutputWorkspace", outputSpace);
-  }
-  
+public:
   void testInit()
   {
-    std::string result;
-    StatusCode status = loader.getProperty("Filename", result);
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( ! result.compare(inputFile));
-
-    status = loader.initialize();
+    StatusCode status = loader.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( loader.isInitialized() );
   }
@@ -41,6 +25,17 @@ public:
   void testExec()
   {
     if ( !loader.isInitialized() ) loader.initialize();
+
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Data/HET15869.RAW";
+    loader.setProperty("Filename", inputFile);
+
+    outputSpace = "outer";
+    loader.setProperty("OutputWorkspace", outputSpace);    
+    
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
     
     StatusCode status = loader.execute();
     TS_ASSERT( ! status.isFailure() );

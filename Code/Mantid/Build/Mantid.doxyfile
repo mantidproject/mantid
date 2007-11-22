@@ -464,6 +464,8 @@ WARN_LOGFILE           =
 
 INPUT                  = ../Kernel/inc \
                          ../Kernel/src \
+                         ../API/inc \
+                         ../API/src \
                          ../DataObjects/inc \
                          ../DataObjects/src \
                          ../DataHandling/inc \

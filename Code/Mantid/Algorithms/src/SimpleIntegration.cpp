@@ -30,6 +30,11 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
  */
 StatusCode SimpleIntegration::init()
 {
+  declareProperty("StartX",0);
+  declareProperty("EndX",0);
+  declareProperty("StartY",0);
+  declareProperty("EndY",0);
+  
   return StatusCode::SUCCESS;
 }
 
@@ -42,38 +47,39 @@ StatusCode SimpleIntegration::exec()
   // Try and retrieve the optional properties
   // Since a property can only be a string at present, need to convert to int
   // No type checking - this code MUST be temporary
-  std::string strInput;
-  StatusCode status = getProperty("StartX", strInput);
-  if (status.isFailure() ) {
-    m_MinX = 0;
-  } else {
+  /// @todo Remove the need for this conversion
+  try {
+    std::string strInput = getPropertyValue("StartX");
     std::istringstream iss (strInput,std::istringstream::in);
     iss >> m_MinX;
+  } catch (Exception::NotFoundError e) {
+    m_MinX = 0;
   }
-  status = getProperty("EndX", strInput);
-  if (status.isFailure() ) {
-    m_MaxX = 0;
-  } else {
+
+  try {
+    std::string strInput = getPropertyValue("EndX");
     std::istringstream iss (strInput,std::istringstream::in);
     iss >> m_MaxX;
+  } catch (Exception::NotFoundError e) {
+    m_MaxX = 0;
   }
-  status = getProperty("StartY", strInput);
-  if (status.isFailure() ) {
-    m_MinY = 0;
-  } else {
+
+  try {
+    std::string strInput = getPropertyValue("StartY");
     std::istringstream iss (strInput,std::istringstream::in);
     iss >> m_MinY;
+  } catch (Exception::NotFoundError e) {
+    m_MinY = 0;
   }
-  status = getProperty("EndY", strInput);
-  if (status.isFailure() ) {
-    m_MaxY = 0;
-  } else {
+  
+  try {
+    std::string strInput = getPropertyValue("EndY");
     std::istringstream iss (strInput,std::istringstream::in);
     iss >> m_MaxY;
+  } catch (Exception::NotFoundError e) {
+    m_MaxY = 0;
   }
-  
-  
-  
+    
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra

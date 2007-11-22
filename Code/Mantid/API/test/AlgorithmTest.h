@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "../inc/Algorithm.h"
+#include "Property.h"
 
 using namespace Mantid::Kernel; 
 
@@ -12,7 +13,11 @@ class ToyAlgorithm : public Algorithm
 public:
   ToyAlgorithm() : Algorithm() {}
   virtual ~ToyAlgorithm() {}
-  StatusCode init() { return StatusCode::SUCCESS; }
+  StatusCode init()
+  { declareProperty("prop1","value");
+    declareProperty("prop2",1);
+    return StatusCode::SUCCESS; 
+  }
   StatusCode exec() { return StatusCode::SUCCESS; }
   StatusCode final() { return StatusCode::SUCCESS; }
 };
@@ -23,38 +28,51 @@ class AlgorithmTest : public CxxTest::TestSuite
 {
 public: 
   
-	void testAlgorithm()
-	{
-	  std::string theName = alg.name();
-	  TS_ASSERT( ! theName.compare("unknown") );
-	  std::string theVersion = alg.version();
-	  TS_ASSERT( ! theVersion.compare("unknown") );
-	 TS_ASSERT( ! alg.isInitialized() );
-	  TS_ASSERT( ! alg.isExecuted() );
-	  TS_ASSERT( ! alg.isFinalized() );
-	}
+  void testAlgorithm()
+  {
+    std::string theName = alg.name();
+    TS_ASSERT( ! theName.compare("unknown") );
+    std::string theVersion = alg.version();
+    TS_ASSERT( ! theVersion.compare("unknown") );
+    TS_ASSERT( ! alg.isInitialized() );
+    TS_ASSERT( ! alg.isExecuted() );
+    TS_ASSERT( ! alg.isFinalized() );
+  }
 
-	void testName()
-	{
-	  std::string theName = alg.name();
-	  TS_ASSERT( ! theName.compare("unknown") );
-	}
+  void testName()
+  {
+    std::string theName = alg.name();
+    TS_ASSERT( ! theName.compare("unknown") );
+  }
 
-	void testVersion()
-	{
-	  std::string theVersion = alg.version();
-	  TS_ASSERT( ! theVersion.compare("unknown") );
-	}
+  void testVersion()
+  {
+    std::string theVersion = alg.version();
+    TS_ASSERT( ! theVersion.compare("unknown") );
+  }
 
-	void testInitialize()
-	{
+  void testInitialize()
+  {
     StatusCode status = alg.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg.isInitialized() );
-	}
-	
-	void testFinalize()
-	{
+  }
+
+  void testExecute()
+  {
+    ToyAlgorithm myAlg;
+    StatusCode status = myAlg.execute();
+    TS_ASSERT( status.isFailure() );
+    TS_ASSERT( ! myAlg.isExecuted() );
+    status = myAlg.initialize();
+    TS_ASSERT( ! status.isFailure() );
+    status = myAlg.execute();
+    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT( myAlg.isExecuted() );
+  }
+
+  void testFinalize()
+  {
     ToyAlgorithm myAlg;
     StatusCode status = myAlg.finalize();
     TS_ASSERT( status.isFailure() );
@@ -63,51 +81,59 @@ public:
     status = myAlg.finalize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( myAlg.isFinalized() );
-	}
+  }
 
 //	void testCreateSubAlgorithm()
 //	{
 //	  // Method not implemented yet in Algorithm.cpp (need algorithm factory)
 //	}
 
-	void testSubAlgorithm()
-	{
-           std::vector<Algorithm*>& testVec = alg.subAlgorithms();
-           // Check that the newly created vector is empty
-           TS_ASSERT( testVec.empty() );
-	}
+  void testSubAlgorithm()
+  {
+    std::vector<Algorithm*>& testVec = alg.subAlgorithms();
+    // Check that the newly created vector is empty
+    TS_ASSERT( testVec.empty() );
+  }
 	
-	void testSetProprerty()
-	{
-    StatusCode status = alg.setProperty("prop1");
-    TS_ASSERT( ! status.isFailure() );
-    status = alg.setProperty("prop2","val");
-    TS_ASSERT( ! status.isFailure() );    
-	}
-	
-	void testGetProperty()
-	{
-    StatusCode status = alg.setProperty("prop2","yes");
+  void testSetProprerty()
+  {
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("prop1","val") )
+    TS_ASSERT_THROWS( alg.setProperty("prop3","1"), Exception::NotFoundError )
+  }
+
+  void testExistsProperty()
+  {
+    TS_ASSERT( alg.existsProperty("prop1") )
+    TS_ASSERT( ! alg.existsProperty("notThere") )
+  }
+  
+  void testGetPropertyValue()
+  {
     std::string value;
-    status = alg.getProperty("ghjkgh",value);
-    TS_ASSERT( status.isFailure() );
-    status = alg.getProperty("prop2",value);
-    TS_ASSERT( ! status.isFailure() );
-    TS_ASSERT( ! value.compare("yes") );
+    TS_ASSERT_THROWS_NOTHING( value = alg.getPropertyValue("prop2") )
+    TS_ASSERT( ! value.compare("1") )
+    TS_ASSERT_THROWS(alg.getProperty("ghjkgh"), Exception::NotFoundError )    
+  }
+  
+  void testGetProperty()
+  {
+    Property *p;
+    TS_ASSERT_THROWS_NOTHING( p = alg.getProperty("prop2") )
+    TS_ASSERT( ! p->name().compare("prop2") )
+    TS_ASSERT( ! p->value().compare("1") )
+    TS_ASSERT( typeid( int) == *p->type_info() )
     
+    TS_ASSERT_THROWS( alg.getProperty("wrong"), Exception::NotFoundError )
 	}
-	void testExecute()
-	  {
-		ToyAlgorithm myAlg;
-		StatusCode status = myAlg.execute();
-		TS_ASSERT( status.isFailure() );
-		TS_ASSERT( ! myAlg.isExecuted() );
-		status = myAlg.initialize();
-		TS_ASSERT( ! status.isFailure() );
-		status = myAlg.execute();
-		TS_ASSERT( ! status.isFailure() );
-		TS_ASSERT( myAlg.isExecuted() );
-	   }	
+
+  void testGetProperties()
+  {
+    std::vector<Property*> vec = alg.getProperties();
+    TS_ASSERT( ! vec.empty() )
+    TS_ASSERT( vec.size() == 4 )
+    TS_ASSERT( ! vec[0]->name().compare("InputWorkspace") )
+  }
+    
 private:
   ToyAlgorithm alg;
 	

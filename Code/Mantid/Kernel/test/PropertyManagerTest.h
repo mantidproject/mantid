@@ -30,7 +30,7 @@ public:
 		PropertyManager mgr;
 		Property *p = new PropertyWithValue<double>("myProp", 9.99);
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty(p) )
-		TS_ASSERT( mgr.checkProperty(p) )
+		TS_ASSERT( mgr.existsProperty(p->name()) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
 		
 		TS_ASSERT_THROWS( mgr.declareProperty(p), Exception::ExistsError )
@@ -77,13 +77,13 @@ public:
 		TS_ASSERT_THROWS( manager.setProperty("fhfjsdf","0"), Exception::NotFoundError )
 	}
 
-	void testCheckProperty()
+	void testExistsProperty()
 	{
 	  Property *p = new PropertyWithValue<int>("sjfudh",0);
-	  TS_ASSERT( ! manager.checkProperty(p) )
+	  TS_ASSERT( ! manager.existsProperty(p->name()) )
 		Property *pp = new PropertyWithValue<double>("APROP",9.99);
     // Note that although the name of the property is the same, the type is different - yet it passes
-		TS_ASSERT( manager.checkProperty(pp) )
+		TS_ASSERT( manager.existsProperty(pp->name()) )
 	}
 
 	void testGetPropertyValue()

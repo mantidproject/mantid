@@ -1,3 +1,6 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "PropertyManager.h"
 #include "PropertyWithValue.h"
 #include "Exception.h"
@@ -25,10 +28,11 @@ PropertyManager::~PropertyManager()
 
 /** Add a property to the list of managed properties
  *  @param p The property object to add
+ *  @throw ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( Property *p )
 {
-  if ( ! checkProperty( p ) )
+  if ( ! existsProperty( p->name() ) )
   {
     m_properties.push_back(p);
   }
@@ -42,10 +46,11 @@ void PropertyManager::declareProperty( Property *p )
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
+ *  @throw ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, int value, const std::string &doc )
 {
-  if ( ! checkProperty( name ) )
+  if ( ! existsProperty( name ) )
   {
     Property *p = new PropertyWithValue<int>(name, value);
     p->setDocumentation(doc);
@@ -61,10 +66,11 @@ void PropertyManager::declareProperty( const std::string &name, int value, const
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
+ *  @throw ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, double value, const std::string &doc )
 {
-  if ( ! checkProperty( name ) )
+  if ( ! existsProperty( name ) )
   {
     Property *p = new PropertyWithValue<double>(name, value);
     p->setDocumentation(doc);
@@ -80,10 +86,11 @@ void PropertyManager::declareProperty( const std::string &name, double value, co
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
+ *  @throw ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, std::string value, const std::string &doc )
 {
-  if ( ! checkProperty( name ) )
+  if ( ! existsProperty( name ) )
   {
     Property *p = new PropertyWithValue<std::string>(name, value);
     p->setDocumentation(doc);
@@ -107,22 +114,11 @@ void PropertyManager::setProperty( const std::string &name, const std::string &v
   if ( !success ) throw std::invalid_argument("Invalid value for this property");
 }
 
-/** Check whether a given property is already in the list of managed properties.
- *  Note that the check is performed purely on the name (not on, for example, the type)
- *  and is case insensitive.
- *  @param p The property to check
+/** Checks whether the named property is already in the list of managed property.
+ *  @param name The name of the property (case insensitive)
  *  @return True if the property is already stored
  */
-bool PropertyManager::checkProperty( Property *p ) const
-{
-  return checkProperty( p->name() );
-}
-
-/** Checks whether the named property is already in the list of managed property.
- *  @param p The name of the property (case insensitive)
- *  @return True is the property is already stored
- */
-bool PropertyManager::checkProperty( const std::string& name ) const
+bool PropertyManager::existsProperty( const std::string& name ) const
 {
   try {
     getProperty(name);

@@ -29,6 +29,9 @@ AnalysisDataService* AnalysisDataService::Instance()
 	 */
 StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
 {
+  // Don't permit an empty name for the workspace
+  if (name.empty()) return StatusCode::FAILURE;
+  
   // At the moment, you can't overwrite a workspace (i.e. pass in a name
   // that's already in the map with a pointer to a different workspace).
   // Also, there's nothing to stop the same workspace from being added

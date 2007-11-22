@@ -10,13 +10,13 @@ Regarding the IProperty interface methods....
 										 have left out this one as well.
 										 
     setProperty (const std::string &n, const std::string &v) - Kept, but return type changed to void
-    getProperty (Property *p) const  ->  renamed checkProperty
+    getProperty (Property *p) const  ->  renamed existsProperty( std::string name ), returns bool
 	getProperty (const std::string &name) const  - Kept
 	getProperty (const std::string &n, std::string &v)  ->  renamed getPropertyValue and string value is the return type
 	std::vector< Property * >& getProperties () const  - Kept
 
 	
-There's no concept of 'mandatoryness' in there yet.
+There's no concept of a mandatory (or not) parameter in there yet.
 
 The Gaudi class has 'remote properties' - I don't.
 

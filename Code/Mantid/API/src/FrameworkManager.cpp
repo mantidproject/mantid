@@ -98,10 +98,11 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     {
       alg->setProperty(property[0],property[1]);
     }
-    else if ( property.size() == 1)
-    {
-      alg->setProperty(property[0]);
-    }
+//    else if ( property.size() == 1)
+//    {
+//      // This is for a property with no value. Not clear that we will want such a thing.
+//      alg->setProperty("",property[0]);
+//    }
     // Throw if there's a problem with the string
     else
     {

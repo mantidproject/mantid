@@ -41,11 +41,6 @@ public:
     AnalysisDataService *data = AnalysisDataService::Instance();
     data->add("testSpace", space);
     
-    // Set the properties
-    alg.setProperty("InputWorkspace","testSpace");
-    outputSpace = "outer";
-    alg.setProperty("OutputWorkspace",outputSpace);
-
   }
   
   ~SimpleIntegrationTest()
@@ -55,13 +50,28 @@ public:
   
   void testInit()
   {
+    StatusCode status = alg.initialize();
+    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT( alg.isInitialized() );
+    
+    // Set the properties
+    alg.setProperty("InputWorkspace","testSpace");
+    outputSpace = "outer";
+    alg.setProperty("OutputWorkspace",outputSpace);
+
     alg.setProperty("StartX","1");
     alg.setProperty("EndX","4");
     alg.setProperty("StartY","2");
     alg.setProperty("EndY","4");
-    StatusCode status = alg.initialize();
+    
+    status = alg2.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg.isInitialized() );
+    
+    // Set the properties
+    alg2.setProperty("InputWorkspace","testSpace");
+    alg2.setProperty("OutputWorkspace","out2");
+
   }
   
   void testExec()
@@ -86,6 +96,26 @@ public:
     TS_ASSERT_EQUALS( y[0], 36);
     TS_ASSERT_EQUALS( y[1], 51);
     TS_ASSERT_EQUALS( e[0], 6);
+
+    if ( !alg2.isInitialized() ) alg2.initialize();
+    status = alg2.execute();
+    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT( alg2.isExecuted() );
+    
+    // Get back the saved workspace
+    status = data->retrieve("out2", output);
+    TS_ASSERT( ! status.isFailure() );
+    
+    output1D = dynamic_cast<Workspace1D*>(output);
+    y = output1D->getY();
+    e = output1D->getE();
+    TS_ASSERT_EQUALS( y.size(), 5 );
+    TS_ASSERT_EQUALS( e.size(), 5 );
+    
+    TS_ASSERT_EQUALS( y[0], 10 );
+    TS_ASSERT_EQUALS( y[4], 110 );
+    TS_ASSERT_DELTA ( e[2], 7.746, 0.001 );
+
   }
   
   void testFinal()
@@ -99,7 +129,8 @@ public:
   }
   
 private:
-  SimpleIntegration alg;
+  SimpleIntegration alg;   // Test with range limits
+  SimpleIntegration alg2;  // Test without limits
   std::string outputSpace;
 };
 

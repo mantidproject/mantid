@@ -8,10 +8,10 @@
 #include "IAlgorithm.h"
 #include "AlgorithmManager.h"
 #include "WorkspaceFactory.h"
+#include "PropertyManager.h"
 #include "Logger.h"
 
 #include <vector>
-//#include <ext/hash_map>
 #include <map>
 
 #ifndef PACKAGE_VERSION
@@ -96,13 +96,11 @@ class Workspace;
      std::vector<Algorithm*>& subAlgorithms()  { return m_subAlgms; }
 
      // IProperty methods
-//	  virtual StatusCode setProperty( const Property& p );
-	  virtual StatusCode setProperty( const std::string& );
-	  virtual StatusCode setProperty( const std::string& n, const std::string& v );
-//	  virtual StatusCode getProperty(Property* p) const;
-//	  virtual const Property& getProperty( const std::string& name) const;
-	  virtual StatusCode getProperty( const std::string& n, std::string& v ) const;
-//	  virtual const std::vector<Property*>& getProperties( ) const;  
+     virtual void setProperty( const std::string &name, const std::string &value );
+     virtual bool existsProperty( const std::string& name ) const;
+     virtual std::string getPropertyValue( const std::string &name ) const;
+     virtual Property* getProperty( std::string name ) const;
+     virtual const std::vector< Property* >& getProperties() const;
 	  
   protected:
 	  
@@ -118,6 +116,20 @@ class Workspace;
 	  void setExecuted( bool state );
 	  void setFinalized();
 	  
+	  /** Register a property with the property manager.
+	   *  Delegated to the PropertyManager method
+	   *  @param name The name of the property
+	   *  @param value The initial value to assign to the property
+	   *  @param doc The (optional documentation string)
+	   */
+    template <typename T>
+    void declareProperty( const std::string &name, T value, const std::string &doc="" )
+    {
+      m_propertyMgr.declareProperty(name,value,doc);
+    }
+    
+    void declareProperty( Property *p );
+    
 	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
 	  Workspace* m_inputWorkspace;
 	  /// Workspace containing the output of the algorithm. Created by the concrete algorithm.
@@ -148,11 +160,8 @@ class Workspace;
 	   */
 	  std::string m_outputWorkspaceName;
 
-	  /// Temporary way of storing properties for algorithms, in the current absence of a Property class.
-	  // N.B. hash_map is not in the standard stl, hence the wierd namespace.
-//	  __gnu_cxx::hash_map< std::string, std::string > m_properties;
-	  std::map<std::string, std::string > m_properties;
-
+	  /// Manages the algorithm's properties
+	  PropertyManager m_propertyMgr;
   };
   
 } // namespace Kernel

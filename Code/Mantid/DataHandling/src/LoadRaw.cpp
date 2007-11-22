@@ -1,37 +1,3 @@
-/* @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
-
-    Loads an file in ISIS RAW format and stores it in a 2D workspace 
-    (Workspace2D class). LoadRaw is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init(), exec() & final() methods.
-    
-    Required Properties:
-       Filename - the name of and path to the input RAW file
-       OutputWorkspace - the name of the workspace in which to store the imported data
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 26/09/2007
-    
-    Copyright &copy; 2007 ???RAL???
-
-    This file is part of Mantid.
-
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
-*/
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -51,12 +17,13 @@ extern "C" void getdat_(const char* fname, const int& spec_no, const int& nspec,
     int* idata, int& length, int& errcode, unsigned len_fname);
 extern "C" void close_data_file__();
 
-DECLARE_NAMESPACED_ALGORITHM(Mantid::DataHandling, LoadRaw)
-
 namespace Mantid
 {
 namespace DataHandling
 {
+
+  // Register the algorithm into the algorithm factory
+  DECLARE_ALGORITHM(LoadRaw)
 
   using namespace Kernel;
   using DataObjects::Workspace2D;
@@ -66,17 +33,17 @@ namespace DataHandling
   /// Empty default constructor
   LoadRaw::LoadRaw() { }
 
-
-  /** Initialisation method. Does nothing at present.
+  /** Initialisation method.
    * 
    *  @return A StatusCode object indicating whether the operation was successful
    */
   StatusCode LoadRaw::init()
   {
+    declareProperty("Filename",".");
+    
     return StatusCode::SUCCESS;
   }
   
-
   /** Executes the algorithm. Reading in the file and creating and populating
    *  the output workspace
    * 
@@ -85,12 +52,11 @@ namespace DataHandling
   StatusCode LoadRaw::exec()
   {
     // Retrieve the filename from the properties
-    StatusCode status = getProperty("Filename", m_filename);
-    // Check that property has been set and retrieved successfully
-    if ( status.isFailure() )
-    {     
-      g_log.information("Filename property has not been set.");
-      return status;
+    try {
+      m_filename = getPropertyValue("Filename");
+    } catch (Exception::NotFoundError e) {
+      g_log.error("Filename property has not been set.");
+      return StatusCode::FAILURE;      
     }
     
     int found = 0;  
@@ -163,7 +129,6 @@ namespace DataHandling
     return StatusCode::SUCCESS;
   }
 
-
   /** Personal wrapper for sqrt to allow msvs to compile.
    *
    *  @param in Some number
@@ -173,7 +138,6 @@ namespace DataHandling
 	{
 		return sqrt(in);
 	}
-
 
   /** Finalisation method. Does nothing at present.
    *

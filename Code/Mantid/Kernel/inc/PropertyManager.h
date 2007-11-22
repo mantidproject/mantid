@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IProperty.h"
-#include <vector>
 
 namespace Mantid
 {
@@ -46,7 +45,7 @@ class Property;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PropertyManager //: public IProperty
+class DLLExport PropertyManager : public IProperty
 {
 public:
 	PropertyManager();
@@ -60,14 +59,12 @@ public:
   
   // IProperty methods
   void setProperty( const std::string &name, const std::string &value );
-  bool checkProperty( Property *p ) const;
+  bool existsProperty( const std::string& name ) const;
   std::string getPropertyValue( const std::string &name ) const;
   Property* getProperty( std::string name ) const;
   const std::vector< Property* >& getProperties() const;
 	
 private:
-  bool checkProperty( const std::string& name) const;
-  
   /// The properties under management
   std::vector<Property*> m_properties;
 };

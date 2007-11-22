@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "INamedInterface.h"
+#include <vector>
 
 namespace Mantid
 {
@@ -12,6 +13,11 @@ namespace Kernel
 {
 // Declaration of the interface ID ( interface id, major version, minor version)
 // static const InterfaceID IID_IProperty("IProperty", 2 , 0); 
+
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class Property;
 
 /** @class IProperty IProperty.h Kernel/IProperty.h
 
@@ -48,47 +54,39 @@ namespace Kernel
     /// Retrieve interface ID
 //    static const InterfaceID& interfaceID() { return IID_IProperty; }
 
-    /// Set the property by property
-// RJT: No Property class yet
-//    virtual StatusCode setProperty( const Property& p // Reference to the input property
-//                                  ) = 0;
-    
-    /** Set a property which has no value
+    /** Set a property's value
      * 
-     *  @param s A string containing the property
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
+     *  @param name The property's name
+     *  @param value The property's value
      */
-    virtual StatusCode setProperty( const std::string& s ) = 0;
+    virtual void setProperty( const std::string& name, const std::string& value ) = 0;
     
-    /** Set a property and its value
+    /** Checks whether the named property already exists.
      * 
-     *  @param n The property's name
-     *  @param v The property's value
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
+     *  @param name The name of the property
+     *  @return True if the property exists
      */
-    virtual StatusCode setProperty( const std::string& n, const std::string& v ) = 0;
+    virtual bool existsProperty( const std::string& name ) const = 0;
     
-    /// Get the property by property
-//    virtual StatusCode getProperty( Property* p       // Pointer to property to be set
-//                                  ) const = 0;
-    /// Get the property by name
-//    virtual const Property& getProperty( const std::string& name  // Property name
-//                                  ) const = 0;
-    /// Get the property by std::string
-    
-    /** Get the value of a named property
+    /** Get the value of a property as a string
      * 
-     *  @param n The name of the property
-     *  @param v Returns a reference to the value
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
+     *  @param name The name of the property
+     *  @return The value of the named property
      */
-    virtual StatusCode getProperty( const std::string& n, std::string& v ) const = 0;
-    
-    /// Get list of properties
-//    virtual const std::vector<Property*>& getProperties( ) const = 0;
+    virtual std::string getPropertyValue( const std::string &name ) const = 0;
+
+    /** Get a property by name
+     * 
+     *  @param name The name of the property
+     *  @return A pointer to the named property
+     */
+    virtual Property* getProperty( std::string name ) const = 0;
+        
+    /** Get the list of properties
+     * 
+     *  @return A vector holding pointers to the list of properties
+     */
+    virtual const std::vector< Property* >& getProperties( ) const = 0;
         
   };
 

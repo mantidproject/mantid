@@ -20,7 +20,8 @@ namespace Kernel
     m_version("unknown"),
     m_isInitialized(false),
     m_isExecuted(false),
-    m_isFinalized(false)
+    m_isFinalized(false),
+    m_propertyMgr()
   {
   }
   
@@ -65,6 +66,10 @@ namespace Kernel
     // has already been initialized.
     if ( m_isInitialized ) return StatusCode::SUCCESS;
         
+    // Declare the Input/OutputWorkspace properties - common to all algorithms
+    declareProperty("InputWorkspace","");
+    declareProperty("OutputWorkspace","");
+    
     // Invoke initialize() method of the derived class inside a try/catch clause
     try 
     {
@@ -123,21 +128,17 @@ namespace Kernel
     m_outputWorkspaceName = "";
     AnalysisDataService* ADS = AnalysisDataService::Instance();
     
-    StatusCode status = getProperty("InputWorkspace", inputWorkspaceName);
-    if ( status.isFailure() )
-    {
-      g_log.information("Algorthm:: Input workspace property not set ");
-    }
-    else
-    {
-      status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
+    try {
+      inputWorkspaceName = getPropertyValue("InputWorkspace");
+      StatusCode status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
       if (status.isFailure() )
       {
-        g_log.error("Input workspace doesn't exist");
-		    return status;
+        g_log.information("Input workspace doesn't exist");
       }
+    } catch (Exception::NotFoundError e) {
+      g_log.information("Input workspace property not set ");     
     }
-    
+        
     // Invoke exec() method of derived class and catch all uncaught exceptions
     try
     {
@@ -148,12 +149,15 @@ namespace Kernel
       if ( m_outputWorkspace )
       {
         // Output Workspace:
-        status = getProperty("OutputWorkspace", m_outputWorkspaceName);
-        if ( status.isFailure() ) g_log.information("Output workspace property not set");
-        status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
-        if ( status.isFailure() ) g_log.error("Algorithm: Unable to register output workspace");
+        try {
+          m_outputWorkspaceName = getPropertyValue("OutputWorkspace");
+          status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
+          if ( status.isFailure() ) g_log.error("Algorithm: Unable to register output workspace");
+        } catch (Exception::NotFoundError e) {
+          g_log.information("Output workspace property not set");
+        }
       }
-   
+        
       setExecuted(true);
       
       // NOTE THAT THERE IS NO EXECUTION OF SUB-ALGORITHMS HERE.
@@ -286,43 +290,31 @@ namespace Kernel
   }
   
   // IProperty implementation
-  
-  // Empty for now - requires Property manager
-  //  StatusCode Algorithm::setProperty(const Property& p) {
-  //          return m_propertyMgr->setProperty(p);
-  //  }
-  StatusCode Algorithm::setProperty(const std::string& s) 
+  // Delegate to the property manager
+  void Algorithm::setProperty( const std::string &name, const std::string &value )
   {
-    if (s.empty()) return StatusCode::FAILURE;
-    m_properties[s] = "";
-    return StatusCode::SUCCESS;
+    m_propertyMgr.setProperty(name, value);
   }
   
-  StatusCode Algorithm::setProperty(const std::string& n, const std::string& v) 
-  { 
-    if (n.empty()) return StatusCode::FAILURE;
-    m_properties[n] = v;
-    return StatusCode::SUCCESS;
-  }
-//  StatusCode Algorithm::getProperty(Property* p) const {
-//          return m_propertyMgr->getProperty(p);
-//  }
-//  const Property& Algorithm::getProperty( const std::string& name) const{
-//          return m_propertyMgr->getProperty(name);
-//  }
-  StatusCode Algorithm::getProperty(const std::string& n, std::string& v ) const 
+  bool Algorithm::existsProperty( const std::string& name ) const
   {
-    // Check if key is in map & if not return with failure
-    if (m_properties.find(n) == m_properties.end()) return StatusCode::FAILURE;
-
-    // Retrieve the value corresponding to the key
-    v = m_properties.find(n)->second;
-    return StatusCode::SUCCESS;    
+    return m_propertyMgr.existsProperty(name);
   }
-//  const std::vector<Property*>& Algorithm::getProperties( ) const {
-//          return m_propertyMgr->getProperties();
-//  }
-
+  
+  std::string Algorithm::getPropertyValue( const std::string &name ) const
+  {
+    return m_propertyMgr.getPropertyValue(name);
+  }
+  
+  Property* Algorithm::getProperty( std::string name ) const
+  {
+    return m_propertyMgr.getProperty(name);
+  }
+  
+  const std::vector< Property* >& Algorithm::getProperties() const
+  {
+    return m_propertyMgr.getProperties();
+  }
   
   //----------------------------------------------------------------------
   // Protected Member Functions
@@ -348,5 +340,14 @@ namespace Kernel
     m_isFinalized = true;
   }
 
+  /** Register a property with the property manager.
+   *  Delegated to the PropertyManager method
+   *  @param p A pointer to the property instance to register
+   */
+  void Algorithm::declareProperty( Property *p )
+  {
+    m_propertyMgr.declareProperty(p);
+  }
+  
 } // namespace Kernel
 } // namespace Mantid
