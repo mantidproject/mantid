@@ -4,9 +4,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "../inc/LoadRaw.h"
-#include "../../Kernel/inc/WorkspaceFactory.h"
+#include "../../API/inc/WorkspaceFactory.h"
 #include "../../DataObjects/inc/Workspace2D.h"
-#include "../../Kernel/inc/AnalysisDataService.h"
+#include "../../API/inc/AnalysisDataService.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
