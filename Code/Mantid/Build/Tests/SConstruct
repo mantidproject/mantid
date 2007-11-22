@@ -15,12 +15,12 @@ cppPaths=[]
 #get include paths for our code
 cppPaths = []
 
-dirpath=os.listdir("../")
+dirpath=os.listdir("../../")
 while(len(dirpath)):
 	try:
 		item=dirpath.pop(0)
-		for file in os.listdir("../"+item):
-			fullPath="../"+item+"/"+file
+		for file in os.listdir("../../"+item):
+			fullPath="../../"+item+"/"+file
 			if (file=="inc"):
 					cppPaths.append(fullPath)
 	except:
