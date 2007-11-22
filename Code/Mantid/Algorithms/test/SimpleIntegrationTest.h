@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "../inc/SimpleIntegration.h"
-#include "../../Kernel/inc/AnalysisDataService.h"
-#include "../../Kernel/inc/WorkspaceFactory.h"
+#include "../../API/inc/AnalysisDataService.h"
+#include "../../API/inc/WorkspaceFactory.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 #include "../../DataObjects/inc/Workspace1D.h"
 
