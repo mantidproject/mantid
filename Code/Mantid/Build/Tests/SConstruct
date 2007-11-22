@@ -12,6 +12,20 @@ libList = ['Mantid', 'Get', 'g2c', 'python' + sys.version[0:3]]
 cflags = []
 cppPaths=[]
 
+#get include paths for our code
+cppPaths = []
+
+dirpath=os.listdir("../")
+while(len(dirpath)):
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir("../"+item):
+			fullPath="../"+item+"/"+file
+			if (file=="inc"):
+					cppPaths.append(fullPath)
+	except:
+		pass
+
 if os.name == 'nt':
 	# assume this is Windows
 	libDirList.append('../../../Third_Party/lib/win32/')
