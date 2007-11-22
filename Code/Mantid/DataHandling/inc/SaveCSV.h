@@ -80,7 +80,7 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class SaveCSV : public DataHandlingCommand
+  class DLLExport SaveCSV : public DataHandlingCommand
   {
   public:
     /// Default constructor

@@ -46,7 +46,7 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class LoadRaw : public DataHandlingCommand
+  class DLLExport LoadRaw : public DataHandlingCommand
   {
   public:
     /// Default constructor

@@ -1,6 +1,7 @@
 #include "PropertyManager.h"
 #include "PropertyWithValue.h"
 #include "Exception.h"
+#include <algorithm>
 
 namespace Mantid
 {

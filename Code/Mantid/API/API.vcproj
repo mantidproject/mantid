@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Main"
-	ProjectGUID="{8214A04F-8650-49FC-8547-FD2716855980}"
-	RootNamespace="Main"
+	Name="API"
+	ProjectGUID="{AD0CD585-694E-4367-B7D0-2F16C4EF59F8}"
+	RootNamespace="API"
 	>
 	<Platforms>
 		<Platform
@@ -18,7 +18,8 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -38,8 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc"
-				PreprocessorDefinitions="_DEBUG"
+				AdditionalIncludeDirectories="inc;../kernel/inc;../../Third_Party/include"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -54,8 +54,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Kernel.lib Algorithms.lib Geometry.lib DataHandling.lib DataObjects.lib"
-				AdditionalLibraryDirectories="..\Debug"
+				AdditionalDependencies="kernel.lib"
+				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -153,7 +153,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Main.cpp"
+				RelativePath=".\src\Algorithm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlgorithmFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlgorithmManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AnalysisDataService.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FrameworkManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Workspace.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WorkspaceFactory.cpp"
 				>
 			</File>
 		</Filter>
@@ -162,6 +186,42 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\inc\Algorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\AlgorithmFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\AlgorithmManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\AnalysisDataService.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\DeclareUserAlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\FrameworkManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\IAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\Workspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\WorkspaceFactory.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

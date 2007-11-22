@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../DataObjects/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -57,6 +57,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib kernel.lib DataObjects.lib"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
+				GenerateDebugInformation="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -153,7 +154,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\LoadRaw.cpp"
+				RelativePath=".\src\LoadInstrument.cpp"
 				>
 			</File>
 			<File
@@ -168,6 +169,10 @@
 			>
 			<File
 				RelativePath=".\inc\DataHandlingCommand.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\LoadInstrument.h"
 				>
 			</File>
 			<File

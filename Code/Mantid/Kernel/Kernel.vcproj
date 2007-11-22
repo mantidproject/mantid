@@ -154,22 +154,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\Algorithm.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlgorithmFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AlgorithmManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\AnalysisDataService.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ConfigService.cpp"
 				>
 			</File>
@@ -179,10 +163,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Exception.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
 			<File
@@ -198,19 +178,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PropertyManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PropertyWithValue.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Support.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Workspace.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\WorkspaceFactory.cpp"
 				>
 			</File>
 		</Filter>
@@ -220,27 +196,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\Algorithm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\AlgorithmFactory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\AlgorithmManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\AnalysisDataService.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\ConfigService.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\DeclareUserAlg.h"
 				>
 			</File>
 			<File
@@ -253,14 +209,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\Exception.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\FrameworkManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\IAlgorithm.h"
 				>
 			</File>
 			<File
@@ -292,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\PropertyManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\PropertyWithValue.h"
 				>
 			</File>
@@ -305,14 +257,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\System.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\Workspace.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\WorkspaceFactory.h"
 				>
 			</File>
 		</Filter>

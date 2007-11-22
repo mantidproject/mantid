@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>
 #include <map>
-#include "Algorithm.h"
 
 namespace Mantid
 {
