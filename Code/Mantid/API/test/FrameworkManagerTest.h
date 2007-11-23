@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/FrameworkManager.h"
-#include "../inc/Algorithm.h"
+#include "FrameworkManager.h"
+#include "Algorithm.h"
 #include <stdexcept>
 
 using namespace Mantid::Kernel;

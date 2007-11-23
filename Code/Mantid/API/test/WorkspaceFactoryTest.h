@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/Workspace.h"
-#include "../inc/WorkspaceFactory.h"
+#include "Workspace.h"
+#include "WorkspaceFactory.h"
 
 using namespace Mantid::Kernel;
 
