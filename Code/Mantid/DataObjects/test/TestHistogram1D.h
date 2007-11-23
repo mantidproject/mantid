@@ -1,10 +1,12 @@
 #ifndef TESTHISTOGRAM1D_
 #define TESTHISTOGRAM1D_
-#include "../inc/Histogram1D.h" 
-#include <cxxtest/TestSuite.h>
+
 #include <vector> 
 #include <algorithm> 
 #include <boost/shared_ptr.hpp>
+#include <cxxtest/TestSuite.h>
+
+#include "MantidDataObjects/Histogram1D.h" 
 
 using Mantid::DataObjects::Histogram1D;
 

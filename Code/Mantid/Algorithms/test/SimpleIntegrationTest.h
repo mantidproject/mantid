@@ -6,8 +6,8 @@
 #include "SimpleIntegration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "../../DataObjects/inc/Workspace2D.h"
-#include "../../DataObjects/inc/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace1D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;

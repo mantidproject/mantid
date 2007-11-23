@@ -6,7 +6,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceFactory.h"
-#include "Workspace1D.h"
+#include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "SaveCSV.h"
 

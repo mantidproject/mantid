@@ -1,4 +1,4 @@
-#include "Histogram1D.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/Exception.h"
 
 #include <iostream> 

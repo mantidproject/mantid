@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "SimpleIntegration.h"
-#include "Workspace2D.h"
-#include "Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace1D.h"
 
 #include <sstream>
 #include <numeric>

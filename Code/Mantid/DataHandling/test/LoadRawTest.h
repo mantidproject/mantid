@@ -5,7 +5,7 @@
 
 #include "LoadRaw.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "../../DataObjects/inc/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::Kernel;

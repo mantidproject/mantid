@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
-#include "Histogram1D.h"
+#include "MantidDataObjects/Histogram1D.h"
 
 /** @class Workspace1D Workspace1D.h
  	

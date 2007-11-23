@@ -1,4 +1,4 @@
-#include "Workspace2D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 
 DECLARE_WORKSPACE(Workspace2D)

@@ -1,4 +1,4 @@
-#include "Workspace1D.h"
+#include "MantidDataObjects/Workspace1D.h"
 
 DECLARE_WORKSPACE(Workspace1D)
 

@@ -27,8 +27,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "SaveCSV.h"
-#include "Workspace1D.h"
-#include "Workspace2D.h"
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h" 
 
 #include <fstream>  // used to get ofstream
