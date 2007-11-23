@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <stdexcept>
-#include "System.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {

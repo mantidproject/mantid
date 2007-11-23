@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
-#include "StatusCode.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/StatusCode.h"
 
 namespace Mantid
 {

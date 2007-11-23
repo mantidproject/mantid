@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "INamedInterface.h"
+#include "MantidKernel/INamedInterface.h"
 #include <vector>
 
 namespace Mantid

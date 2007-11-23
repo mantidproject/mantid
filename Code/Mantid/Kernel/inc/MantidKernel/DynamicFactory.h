@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
-#include "Instantiator.h"
-#include "Logger.h"
-#include "Exception.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Instantiator.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Exception.h"
 #include <map>
 
 namespace Mantid

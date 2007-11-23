@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "IInterface.h"
+#include "MantidKernel/IInterface.h"
 #include <string>
 
 namespace Mantid
