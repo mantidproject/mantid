@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/SimpleIntegration.h"
-#include "../../API/inc/AnalysisDataService.h"
-#include "../../API/inc/WorkspaceFactory.h"
+#include "SimpleIntegration.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "../../DataObjects/inc/Workspace2D.h"
 #include "../../DataObjects/inc/Workspace1D.h"
 

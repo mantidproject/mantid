@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACE2D_H_
 #define MANTID_DATAOBJECTS_WORKSPACE2D_H_
 
-#include "Workspace.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 #include "Histogram1D.h"
 

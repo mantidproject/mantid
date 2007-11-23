@@ -1,15 +1,14 @@
 #ifndef SAVECSVTEST_H_
 #define SAVECSVTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include <fstream>
-
-#include "../inc/SaveCSV.h"
-#include "WorkspaceFactory.h"
-#include "Workspace1D.h"
-#include "AnalysisDataService.h"
-
 #include "boost/filesystem.hpp"  // used to delete file from disk
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAPI/WorkspaceFactory.h"
+#include "Workspace1D.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "SaveCSV.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;

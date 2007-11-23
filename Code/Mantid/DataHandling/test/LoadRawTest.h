@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/LoadRaw.h"
-#include "../../API/inc/WorkspaceFactory.h"
+#include "LoadRaw.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "../../DataObjects/inc/Workspace2D.h"
-#include "../../API/inc/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;

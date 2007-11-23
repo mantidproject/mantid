@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/MantidKernel/StatusCode.h"
+#include "MantidKernel/StatusCode.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Exception.h"
 
