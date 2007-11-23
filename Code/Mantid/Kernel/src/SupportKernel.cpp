@@ -5,8 +5,8 @@
 #include <cmath>
 #include <vector>
 
-#include "Support.h"
-#include "SupportTempCode.h"
+#include "MantidKernel/Support.h"
+#include "MantidKernel/SupportTempCode.h"
 
 namespace Mantid
 {

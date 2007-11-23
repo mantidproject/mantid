@@ -25,7 +25,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "DynamicFactory.h"
+#include "MantidKernel/DynamicFactory.h"
 #include "IAlgorithm.h"
 #include <vector>
 

@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "DllOpen.h"
-#include "LibraryManager.h"
+#include "MantidKernel/DllOpen.h"
+#include "MantidKernel/LibraryManager.h"
 
 namespace Mantid
 {

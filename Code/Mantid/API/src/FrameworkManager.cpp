@@ -5,9 +5,9 @@
 #include "AlgorithmManager.h"
 #include "WorkspaceFactory.h"
 #include "AnalysisDataService.h"
-#include "ConfigService.h"
+#include "MantidKernel/ConfigService.h"
 #include "IAlgorithm.h"
-#include "Exception.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/tokenizer.hpp>
 #include <string>

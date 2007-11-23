@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "DynamicFactory.h"
-#include "Logger.h"
+#include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

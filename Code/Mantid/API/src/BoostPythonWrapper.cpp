@@ -7,7 +7,7 @@
 #include "Algorithm.h"
 #include "FrameworkManager.h"
 #include "Workspace.h"
-#include "LibraryManager.h"
+#include "MantidKernel/LibraryManager.h"
 #include "FrameworkManager.h"
 
 // Using =======================================================================

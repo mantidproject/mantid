@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "WorkspaceFactory.h"
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include <string>
 #include <ostream> 
 

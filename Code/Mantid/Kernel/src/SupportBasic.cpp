@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 
-#include "Support.h"
+#include "MantidKernel/Support.h"
 
 namespace Mantid
 {

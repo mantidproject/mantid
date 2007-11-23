@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "Exception.h"
+#include "MantidKernel/Exception.h"
 
 
 namespace Mantid

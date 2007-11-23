@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_WORKSPACE1D_H_
 
 #include "Workspace.h"
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "Histogram1D.h"
 
 /** @class Workspace1D Workspace1D.h

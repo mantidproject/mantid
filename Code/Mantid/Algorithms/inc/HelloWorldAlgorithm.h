@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "Algorithm.h"
-#include "StatusCode.h"
+#include "MantidKernel/StatusCode.h"
 
 namespace Mantid
 {

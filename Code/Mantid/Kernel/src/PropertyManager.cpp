@@ -1,9 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "PropertyManager.h"
-#include "PropertyWithValue.h"
-#include "Exception.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/Exception.h"
 #include <algorithm>
 
 namespace Mantid

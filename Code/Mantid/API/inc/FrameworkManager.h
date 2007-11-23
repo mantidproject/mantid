@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
+#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

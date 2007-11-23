@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "ConfigService.h"
-#include "Support.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Support.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"

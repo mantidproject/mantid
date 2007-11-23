@@ -1,4 +1,4 @@
-#include "Property.h"
+#include "MantidKernel/Property.h"
 
 namespace Mantid
 {

@@ -3,9 +3,9 @@
 #include <vector>
 
 #include "IAlgorithm.h"
-#include "StatusCode.h"
+#include "MantidKernel/StatusCode.h"
 #include "AlgorithmManager.h"
-#include "Exception.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {

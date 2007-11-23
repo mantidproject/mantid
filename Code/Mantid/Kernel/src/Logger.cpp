@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
 #include <iostream>

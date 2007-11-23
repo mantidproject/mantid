@@ -1,5 +1,5 @@
 #include "Histogram1D.h"
-#include "Exception.h"
+#include "MantidKernel/Exception.h"
 
 #include <iostream> 
 

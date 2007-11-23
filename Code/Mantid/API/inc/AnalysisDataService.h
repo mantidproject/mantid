@@ -4,10 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
-#include "StatusCode.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/StatusCode.h"
 #include "Workspace.h"
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 
 #include <string>
 #include <map>

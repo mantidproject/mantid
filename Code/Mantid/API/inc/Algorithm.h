@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
+#include "MantidKernel/System.h"
 #include "IAlgorithm.h"
 #include "AlgorithmManager.h"
 #include "WorkspaceFactory.h"
-#include "PropertyManager.h"
-#include "Logger.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/Logger.h"
 
 #include <vector>
 #include <map>

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "Algorithm.h"
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

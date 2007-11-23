@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "DynamicFactory.h"
+#include "MantidKernel/DynamicFactory.h"
 
 namespace Mantid
 {
