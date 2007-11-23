@@ -7,94 +7,105 @@ import sys
 from socket import gethostname
 
 #get libraries and the library directories
-libDirList = ['../', '.']
+# NOTE : ../ and . are STUPID :
+# That is because -Wl,-rpath= . IS YOUR CURRENT WORKING DIRECTORY AT RUNTIME
+# Therefore when you build some thing and put a hardlink into the creation point
+# of a library it needs to be fully pathed. PLEASE do not change it back again.
+print 'Current path == ',os.getcwd()
+cwdpath=os.getcwd()
+uppath=os.path.abspath('../')
+
+libDirList = [uppath,cwdpath ]
 libList = ['python' + sys.version[0:3].replace('.','')]
 cflags = []
 dirList = []
 cppPaths = []
 
-dirpath=os.listdir("../")
+## Get Paths for various builds 
+dirpath=os.listdir(uppath)
 while(len(dirpath)):
-	try:
-		item=dirpath.pop(0)
-		for file in os.listdir("../"+item):
-			fullPath="../"+item+"/"+file
-			if (item!='Geometry'):
-				if (file=="inc"):
-					cppPaths.append(fullPath)
-				elif (file=="src"):
-					dirList.append(item)
-					print "PATH == ",item
-				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-				and (not file.endswith('test'))):
-					dirpath.append(fullPath[3:])	
-	except:
-		pass
+  try:
+    item=dirpath.pop(0)
+    for file in os.listdir("../"+item):
+      fullPath="../"+item+"/"+file
+      if (file=="inc"):
+	cppPaths.append(fullPath)
+      elif (file=="src"):
+	dirList.append(item)
+	print "SRC PATH == ",item
+      elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+	    and (not file.endswith('test'))):
+	dirpath.append(fullPath[3:])
+  except:
+    pass
 
 if os.name == 'nt':
-	# assume this is Windows
-	libDirList.append('../../Third_Party/lib/win32/')
-	libDirList.append('c:/python25/libs')
+  # assume this is Windows
+  libDirList.append('../../Third_Party/lib/win32/')
+  libDirList.append('c:/python25/libs')
+  
+  cppPaths.append('../../Third_Party/include')
+  cppPaths.append('c:/python25/include')
+  
+  libDir = '../../Third_Party/lib/win32/'
+  cflags = ['-W3','/EHsc', '/MDd', '/Zi', '/TP', '/wd4275', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES']
+  
+  for file in os.listdir(libDir):
+    if file.endswith('.dll'):
+      libList.append(file.replace('.dll',''))
 	
-	cppPaths.append('../../Third_Party/include')
-	cppPaths.append('c:/python25/include')
-	
-	libDir = '../../Third_Party/lib/win32/'
-	cflags = ['-W3','/EHsc', '/MDd', '/Zi', '/TP', '/wd4275', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES']
-	
-	for file in os.listdir(libDir):
-		if file.endswith('.dll'):
-			libList.append(file.replace('.dll',''))
-	
-else:
-	#so this must be posix
-	boost_path = ''
-	poco_path = ''
+else:       ## so this must be posix
 
-	#Get paths
-	f=open('Scons_Linux.conf', 'r')
+  boost_path = ''        ## Set from the Scons_Linux.conf File"
+  poco_path = ''         ## 
+  #Get paths
+  f=open('Scons_Linux.conf', 'r')
+  
+  for ln in f:
+    if ln.startswith('BOOST_ROOT'):
+      boost_path=ln[11:].strip('\n')
+      if (boost_path[-1]!='/'):              ## ADD / if required
+        boost_path+='/'
+      print 'Boost root = ' + boost_path
+    elif ln.startswith('POCO_ROOT'):
+      poco_path=ln[10:].strip('\n')
+      if (poco_path[-1]!='/'):
+        poco_path+='/'
+      print 'Poco root = ' + poco_path
 	
-	for ln in f:
-		if ln.startswith('BOOST_ROOT'):
-			boost_path=ln[11:].strip('\n')
-			print 'Boost root = ' + boost_path
-		elif ln.startswith('POCO_ROOT'):
-			poco_path=ln[10:].strip('\n')
-			print 'Poco root = ' + poco_path
+  f.close()
 	
-	f.close()
-	
-	cflags = ['-Wall', '-fPIC']
-	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	cppPaths.append(poco_path + 'Foundation/include')
-	cppPaths.append(poco_path + 'Util/include')
-
+  cflags = ['-Wall', '-fPIC']
+  cppPaths.append('/usr/include/python' + sys.version[0:3])
+  cppPaths.append(poco_path + 'Foundation/include')
+  cppPaths.append(poco_path + 'Util/include')
+  
 #GET LIST OF CPPS
 codeFolder = '/src'
 listCpps = []
 pathToRoot = '../'
 
 for fname in dirList:
-	print "dir:",fname 
-	if os.path.isdir(pathToRoot + fname):
-		if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
-			#does folder contain /src?
-			if os.path.exists(pathToRoot + fname + codeFolder):
-				files = os.listdir(pathToRoot + fname + codeFolder)
-				for file in files:
-					if file.endswith('.cpp'):
-						listCpps.append(pathToRoot + fname + codeFolder + '/' +  file)
-			
-			
-		
-
+  print "dir:",fname 
+  if os.path.isdir(pathToRoot + fname):
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
+      #does folder contain /src?
+      if os.path.exists(pathToRoot + fname + codeFolder):
+	files = os.listdir(pathToRoot + fname + codeFolder)
+	for file in files:
+	  if (file.endswith('.cpp') or file.endswith('.c') or file.endswith('.f')):
+	    listCpps.append(pathToRoot + fname + codeFolder + '/' +  file)
+	    
+	    
 # set header include paths
-env = Environment(CPPPATH=cppPaths)
+env = Environment(CPPPATH=cppPaths,FORTRAN='gfortran')
 env.Append( CCFLAGS = cflags)
+env.Append( FORTRANFLAGS = '-fsecond-underscore')             ## THIS DOESN'T WORK SEE BUG Report 21 November 2007 follow up
+                                                              ## From bug report [Tue Jan 30 13:21:05 MST 2007].
 
 #BUILD CODE
 if os.name == 'nt':
-	env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
+  env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
 else:
-	env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
+  env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ] )
 
