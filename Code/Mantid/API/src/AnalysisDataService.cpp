@@ -96,7 +96,12 @@ AnalysisDataService::AnalysisDataService(const AnalysisDataService&)
  *  out by Instance
  */
 AnalysisDataService::~AnalysisDataService()
-{ }
+{ 
+  for (WorkspaceMap::iterator it = m_spaces.begin(); it != m_spaces.end(); ++it )
+  {
+    delete it->second;
+  }
+}
 
 // Initialise the instance pointer to zero
 AnalysisDataService* AnalysisDataService::m_instance = 0;

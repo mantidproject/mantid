@@ -69,6 +69,11 @@ public:
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
 	}
 
+	void testSetProperties()
+	{
+	  TS_ASSERT_THROWS( manager.setProperties(""), Exception::NotImplementedError )
+	}
+	
 	void testSetProperty()
 	{
 		manager.setProperty("APROP","10");
@@ -102,7 +107,6 @@ public:
 		TS_ASSERT( typeid(int) == *p->type_info() )
 		
 		TS_ASSERT_THROWS( manager.getProperty("werhui"), Exception::NotFoundError )
-
 	}
 
 	void testGetProperties()

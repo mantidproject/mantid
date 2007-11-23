@@ -66,7 +66,7 @@ class Property;
      *  @param name The name of the property
      *  @return True if the property exists
      */
-    virtual bool existsProperty( const std::string& name ) const = 0;
+    virtual bool existsProperty( const std::string &name ) const = 0;
     
     /** Get the value of a property as a string
      * 
@@ -80,13 +80,13 @@ class Property;
      *  @param name The name of the property
      *  @return A pointer to the named property
      */
-    virtual Property* getProperty( std::string name ) const = 0;
+    virtual Property* getProperty( const std::string &name ) const = 0;
         
     /** Get the list of properties
      * 
      *  @return A vector holding pointers to the list of properties
      */
-    virtual const std::vector< Property* >& getProperties( ) const = 0;
+    virtual std::vector< Property* > getProperties( ) const = 0;
         
   };
 

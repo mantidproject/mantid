@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IProperty.h"
+#include <map>
 
 namespace Mantid
 {
@@ -56,17 +57,24 @@ public:
 	void declareProperty( const std::string &name, int value, const std::string &doc="" );
   void declareProperty( const std::string &name, double value, const std::string &doc="" );
   void declareProperty( const std::string &name, std::string value, const std::string &doc="" );
+
+  // Sets all the declared properties from 
+  void setProperties( const std::string &values );
   
   // IProperty methods
   void setProperty( const std::string &name, const std::string &value );
-  bool existsProperty( const std::string& name ) const;
+  bool existsProperty( const std::string &name ) const;
   std::string getPropertyValue( const std::string &name ) const;
-  Property* getProperty( std::string name ) const;
-  const std::vector< Property* >& getProperties() const;
+  Property* getProperty( const std::string &name ) const;
+  std::vector< Property* > getProperties() const;
 	
 private:
+  /// typedef for the map holding the properties
+  typedef std::map<std::string, Property*> PropertyMap;
   /// The properties under management
-  std::vector<Property*> m_properties;
+  PropertyMap m_properties;
+  /// Stores the order that the properties were declared in
+  std::vector<std::string> m_orderedNames;
 };
 
 } // namespace Kernel

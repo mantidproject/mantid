@@ -306,12 +306,12 @@ namespace Kernel
     return m_propertyMgr.getPropertyValue(name);
   }
   
-  Property* Algorithm::getProperty( std::string name ) const
+  Property* Algorithm::getProperty( const std::string &name ) const
   {
     return m_propertyMgr.getProperty(name);
   }
   
-  const std::vector< Property* >& Algorithm::getProperties() const
+  std::vector< Property* > Algorithm::getProperties() const
   {
     return m_propertyMgr.getProperties();
   }

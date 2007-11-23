@@ -98,10 +98,10 @@ class Workspace;
 
      // IProperty methods
      virtual void setProperty( const std::string &name, const std::string &value );
-     virtual bool existsProperty( const std::string& name ) const;
+     virtual bool existsProperty( const std::string &name ) const;
      virtual std::string getPropertyValue( const std::string &name ) const;
-     virtual Property* getProperty( std::string name ) const;
-     virtual const std::vector< Property* >& getProperties() const;
+     virtual Property* getProperty( const std::string &name ) const;
+     virtual std::vector< Property* > getProperties() const;
 	  
   protected:
 	  

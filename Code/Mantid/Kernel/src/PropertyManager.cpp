@@ -20,21 +20,23 @@ PropertyManager::PropertyManager() :
 /// Virtual destructor
 PropertyManager::~PropertyManager()
 {
-  for ( std::vector<Property*>::const_iterator it = m_properties.begin() ; it != m_properties.end() ; ++it )
+  for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
   {
-    delete (*it);
+    delete it->second;
   }
 }
 
 /** Add a property to the list of managed properties
  *  @param p The property object to add
- *  @throw ExistsError if a property with the given name already exists
+ *  @throw Exception::ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( Property *p )
 {
-  if ( ! existsProperty( p->name() ) )
+  std::string key = p->name();
+  std::transform(key.begin(), key.end(), key.begin(), toupper);
+  if ( m_properties.insert(PropertyMap::value_type(key, p)).second)
   {
-    m_properties.push_back(p);
+    m_orderedNames.push_back(key);    
   }
   else
   {
@@ -46,15 +48,18 @@ void PropertyManager::declareProperty( Property *p )
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
- *  @throw ExistsError if a property with the given name already exists
+ *  @throw Exception::ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, int value, const std::string &doc )
 {
-  if ( ! existsProperty( name ) )
+  std::string key = name;
+  std::transform(key.begin(), key.end(), key.begin(), toupper);
+  if ( ! existsProperty( key ) )
   {
     Property *p = new PropertyWithValue<int>(name, value);
     p->setDocumentation(doc);
-    m_properties.push_back(p);
+    m_properties.insert(PropertyMap::value_type(key, p));
+    m_orderedNames.push_back(key);
   }
   else
   {
@@ -66,15 +71,18 @@ void PropertyManager::declareProperty( const std::string &name, int value, const
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
- *  @throw ExistsError if a property with the given name already exists
+ *  @throw Exception::ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, double value, const std::string &doc )
 {
-  if ( ! existsProperty( name ) )
+  std::string key = name;
+  std::transform(key.begin(), key.end(), key.begin(), toupper);
+  if ( ! existsProperty( key ) )
   {
     Property *p = new PropertyWithValue<double>(name, value);
     p->setDocumentation(doc);
-    m_properties.push_back(p);
+    m_properties.insert(PropertyMap::value_type(key, p));
+    m_orderedNames.push_back(key);
   }
   else
   {
@@ -86,26 +94,39 @@ void PropertyManager::declareProperty( const std::string &name, double value, co
  *  @param name The name to assign to the property
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
- *  @throw ExistsError if a property with the given name already exists
+ *  @throw Exception::ExistsError if a property with the given name already exists
  */
 void PropertyManager::declareProperty( const std::string &name, std::string value, const std::string &doc )
 {
-  if ( ! existsProperty( name ) )
+  std::string key = name;
+  std::transform(key.begin(), key.end(), key.begin(), toupper);
+  if ( ! existsProperty( key ) )
   {
     Property *p = new PropertyWithValue<std::string>(name, value);
     p->setDocumentation(doc);
-    m_properties.push_back(p);
+    m_properties.insert(PropertyMap::value_type(key, p));
+    m_orderedNames.push_back(key);
   }
   else
   {
     throw Exception::ExistsError("Property with given name already exists", name );
-} 
+  }
+}
+
+/** Set the ordered list of properties by one string of values.
+ *  @param values The list of property values
+ *  @throws Exception::NotImplementedError because it isn't, yet
+ */
+// Care will certainly be required in the calling of this function or it could all go horribly wrong!
+void PropertyManager::setProperties( const std::string &values )
+{
+  throw Exception::NotImplementedError("Coming to an iteration near you soon...");
 }
 
 /** Set the value of a property by string
  *  @param name The name of the property (case insensitive)
  *  @param value The value to assign to the property
- *  @throw NotFoundError if the named property is unknown
+ *  @throw Exception::NotFoundError if the named property is unknown
  */
 void PropertyManager::setProperty( const std::string &name, const std::string &value )
 {
@@ -120,10 +141,15 @@ void PropertyManager::setProperty( const std::string &name, const std::string &v
  */
 bool PropertyManager::existsProperty( const std::string& name ) const
 {
-  try {
-    getProperty(name);
+  std::string ucName = name;
+  std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
+  PropertyMap::const_iterator it = m_properties.find(ucName);
+  if (it != m_properties.end())
+  {
     return true;
-  } catch (Exception::NotFoundError e) {
+  }
+  else
+  {
     return false;
   }
 }
@@ -131,7 +157,7 @@ bool PropertyManager::existsProperty( const std::string& name ) const
 /** Get the value of a property as a string
  *  @param name The name of the property (case insensitive)
  *  @return The value of the named property
- *  @throw NotFoundError if the named property is unknown
+ *  @throw Exception::NotFoundError if the named property is unknown
  */
 std::string PropertyManager::getPropertyValue( const std::string &name ) const
 {
@@ -142,30 +168,32 @@ std::string PropertyManager::getPropertyValue( const std::string &name ) const
 /** Get a property by name
  *  @param name The name of the property (case insensitive)
  *  @return A pointer to the named property
- *  @throw NotFoundError if the named property is unknown
+ *  @throw Exception::NotFoundError if the named property is unknown
  */
-Property* PropertyManager::getProperty( std::string name ) const
+Property* PropertyManager::getProperty( const std::string &name ) const
 {
-  /// TODO Re-work to be more efficient
-  for ( std::vector<Property*>::const_iterator it = m_properties.begin() ; it != m_properties.end() ; ++it )
+  std::string ucName = name;
+  std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
+  PropertyMap::const_iterator it = m_properties.find(ucName);
+  if (it != m_properties.end())
   {
-    std::string n = (*it)->name();
-    std::transform(n.begin(), n.end(), n.begin(), toupper);
-    std::transform(name.begin(), name.end(), name.begin(), toupper);
-    if ( ! name.compare(n) )
-    {
-      return *it;
-    }
+    return it->second;
   }
-  throw Exception::NotFoundError("Unable to retrieve property", name);
+  throw Exception::NotFoundError("Unknown property", name);
 }
 
-/** Get the list of managed properties
+/** Get the list of managed properties.
+ *  The properties will be stored in the order that they were declared.
  *  @return A vector holding pointers to the list of properties
  */
-const std::vector< Property* >& PropertyManager::getProperties() const
+std::vector< Property* > PropertyManager::getProperties() const
 {
-  return m_properties;
+  std::vector< Property* > p;
+  for (std::vector<std::string>::const_iterator it = m_orderedNames.begin(); it != m_orderedNames.end(); ++it)
+  {
+    p.push_back( getProperty(*it) );
+  }
+  return p;
 }
 
 } // namespace Kernel
