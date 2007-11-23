@@ -16,7 +16,7 @@ namespace Mantid
     @author S. Ansell
     @date February 2006
     
-    Copyright & copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -35,7 +35,7 @@ namespace Mantid
     
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-v*/
+*/
 namespace StrFunc
 {
 /// determine if a character group exists in a string
