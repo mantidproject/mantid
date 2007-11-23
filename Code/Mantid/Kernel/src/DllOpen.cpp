@@ -40,7 +40,7 @@
 #if _WIN32
 
 #include "windows.h"
-#include "../inc/DllOpen.h"
+#include "DllOpen.h"
 
 namespace Mantid
 {
@@ -66,7 +66,7 @@ void DllOpen::CloseDll(void* lib)
 #else
 
 #include "/usr/include/dlfcn.h"
-#include "../inc/DllOpen.h"
+#include "DllOpen.h"
 
 namespace Mantid
 {

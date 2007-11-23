@@ -11,7 +11,7 @@ libDirList = ['../', '.']
 libList = ['python' + sys.version[0:3]]
 cflags = []
 
-cppPaths = [os.path.abspath('./inc')]
+cppPaths = [os.path.abspath('./inc'), os.path.abspath('./inc/MantidKernel')]
 
 
 if os.name == 'nt':
