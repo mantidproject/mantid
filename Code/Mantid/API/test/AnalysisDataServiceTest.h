@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::Kernel;
 

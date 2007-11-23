@@ -4,11 +4,11 @@
 #include <boost/cstdint.hpp>
 
 // Includes ====================================================================
-#include "Algorithm.h"
-#include "FrameworkManager.h"
-#include "Workspace.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/LibraryManager.h"
-#include "FrameworkManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 // Using =======================================================================
 using namespace boost::python;

@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/System.h"
-#include "IAlgorithm.h"
-#include "AlgorithmManager.h"
-#include "WorkspaceFactory.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Logger.h"
 

@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "FrameworkManager.h"
-#include "AlgorithmManager.h"
-#include "WorkspaceFactory.h"
-#include "AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
-#include "IAlgorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/tokenizer.hpp>

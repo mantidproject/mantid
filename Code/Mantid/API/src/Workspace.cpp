@@ -1,4 +1,4 @@
-#include "Workspace.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {

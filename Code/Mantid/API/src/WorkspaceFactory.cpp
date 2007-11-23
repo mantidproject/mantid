@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {

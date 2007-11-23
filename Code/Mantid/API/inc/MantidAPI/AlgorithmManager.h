@@ -26,7 +26,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DynamicFactory.h"
-#include "IAlgorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include <vector>
 
 namespace Mantid

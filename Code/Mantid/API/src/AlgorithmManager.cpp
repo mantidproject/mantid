@@ -2,9 +2,9 @@
 #include <iostream>
 #include <vector>
 
-#include "IAlgorithm.h"
-#include "MantidKernel/StatusCode.h"
-#include "AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/MantidKernel/StatusCode.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid

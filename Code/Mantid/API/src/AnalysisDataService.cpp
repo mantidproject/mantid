@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
 {

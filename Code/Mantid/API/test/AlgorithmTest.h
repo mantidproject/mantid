@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "Algorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
 
 using namespace Mantid::Kernel; 

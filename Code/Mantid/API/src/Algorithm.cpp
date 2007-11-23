@@ -1,8 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Algorithm.h"
-#include "AnalysisDataService.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
 {
