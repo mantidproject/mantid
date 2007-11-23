@@ -26,16 +26,17 @@ dirpath=os.listdir(uppath)
 while(len(dirpath)):
   try:
     item=dirpath.pop(0)
-    for file in os.listdir("../"+item):
-      fullPath="../"+item+"/"+file
-      if (file=="inc"):
-	cppPaths.append(fullPath)
-      elif (file=="src"):
-	dirList.append(item)
-	print "SRC PATH == ",item
-      elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-	    and (not file.endswith('test'))):
-	dirpath.append(fullPath[3:])
+    if item != 'Geometry':
+	for file in os.listdir("../"+item):
+		fullPath="../"+item+"/"+file
+		if (file=="inc"):
+			cppPaths.append(fullPath)
+		elif (file=="src"):
+			dirList.append(item)
+			print "SRC PATH == ",item
+		elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+		and (not file.endswith('test'))):
+			dirpath.append(fullPath[3:])
   except:
     pass
 
@@ -88,7 +89,7 @@ pathToRoot = '../'
 for fname in dirList:
   print "dir:",fname 
   if os.path.isdir(pathToRoot + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
       #does folder contain /src?
       if os.path.exists(pathToRoot + fname + codeFolder):
 	files = os.listdir(pathToRoot + fname + codeFolder)
