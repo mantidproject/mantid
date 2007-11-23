@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/DynamicFactory.h"
+#include "MantidKernel/DynamicFactory.h"
 
 using namespace Mantid::Kernel;
 

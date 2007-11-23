@@ -4,7 +4,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/Support.h"
+#include "MantidKernel/Support.h"
 #include <string>
 
 using namespace Mantid::StrFunc;

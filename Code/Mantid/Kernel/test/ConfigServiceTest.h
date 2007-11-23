@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/ConfigService.h"
-#include "../inc/Logger.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
 #include <string>
 #include <iostream>
 

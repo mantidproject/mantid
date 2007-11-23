@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/PropertyManager.h"
-#include "../inc/PropertyWithValue.h"
+#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <iostream>
 
 using namespace Mantid::Kernel;

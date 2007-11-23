@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "../inc/Property.h"
+#include "MantidKernel/Property.h"
 
 using namespace Mantid::Kernel;
 
