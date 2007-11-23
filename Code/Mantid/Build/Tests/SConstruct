@@ -34,9 +34,9 @@ while(len(dirpath)):
   try:
     item=dirpath.pop(0)
     for file in os.listdir("../../"+item):
-      fullPath="../../"+item+"/"+file
-      if (file=="inc"):
-        cppPaths.append(fullPath)
+	fullPath="../../"+item+"/"+file
+	if (file=="inc"):
+		cppPaths.append(fullPath)
   except:
     pass
 
@@ -54,8 +54,8 @@ else:
   boost_path = ''
   poco_path = ''
   boost_append=''
-  fortran_type='gfortran'
-  third_party='../../../Third_Party/lib/linux32'
+  fortran_type=''
+  third_party=''
 
   #Get paths
   f=open('../Scons_Linux.conf', 'r')
@@ -70,6 +70,7 @@ else:
   print "POCO_ROOT: ",poco_path
   print "BOOST_ROOT: ",boost_path
   print "BOOST_APPEND: ",boost_append
+  print third_party
   
   f.close()
 
