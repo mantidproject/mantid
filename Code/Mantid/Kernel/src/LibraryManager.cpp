@@ -1,3 +1,6 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include <iostream>
 
 #include "MantidKernel/DllOpen.h"
@@ -7,10 +10,11 @@ namespace Mantid
 {
 namespace Kernel
 {
-	
+	/// Constructor
 	LibraryManager::LibraryManager() : module(0)
 	{}
 
+	/// Destructor
 	LibraryManager::~LibraryManager()
 	{
 		//Close lib
@@ -21,6 +25,10 @@ namespace Kernel
 		}
 	}
 
+	/** Opens a DLL
+	 *  @param libName The name of the file to open (not including the lib/so/dll)
+	 *  @return True if DLL is opened or already open
+	 */
 	bool LibraryManager::OpenLibrary(const std::string& libName)
 	{
 		if (!module)

@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-/** Holds support functions for strings.
+/* Holds support functions for strings.
 
     @author S. Ansell
     @date February 2006
@@ -38,53 +38,53 @@ namespace Mantid
 */
 namespace StrFunc
 {
-/// determine if a character group exists in a string
+// determine if a character group exists in a string
 DLLExport int confirmStr(const std::string& S,const std::string& fullPhrase);
-/// Get a word from a string
+// Get a word from a string
 DLLExport int extractWord(std::string& Line,const std::string& Word,const int cnt = 4);
 
-/// strip all spaces
+// strip all spaces
 DLLExport std::string removeSpace(const std::string& CLine);
-/// strip pre/post spaces
+// strip pre/post spaces
 DLLExport std::string fullBlock(const std::string& A);
-/// strip trailling comments
+// strip trailling comments
 DLLExport void stripComment(std::string& A);
-/// Determines if a string is only spaces
+// Determines if a string is only spaces
 DLLExport int isEmpty(const std::string& A);
-/// Get a line and strip comments 
+// Get a line and strip comments 
 DLLExport std::string getLine(std::istream& fh,const int spc = 256);
-/// get a part of a long line
+// get a part of a long line
 DLLExport int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int spc = 256);
 
 template<typename T> int convPartNum(const std::string& A,T& out);
 
-/// Convert a string into a number
+// Convert a string into a number
 template<typename T> int convert(const std::string& A,T& out);
-/// Convert a char* into a number
+// Convert a char* into a number
 template<typename T> int convert(const char* A,T& out);
 
 
 template<typename T> 
 int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<T>& Out);
 
-/// Convert and cut a string
+// Convert and cut a string
 template<typename T> int sectPartNum(std::string& A,T& out);
 
-/// Convert and cut a string
+// Convert and cut a string
 template<typename T> int section(std::string& A,T& out);
-/// Convert and cut a char* 
+// Convert and cut a char* 
 template<typename T> int section(char* cA,T& out);
 
-/// Convert and cut a string for MCNPX
+// Convert and cut a string for MCNPX
 template<typename T> int sectionMCNPX(std::string& A,T& out);
 
-/// Write file in standard MCNPX input form 
+// Write file in standard MCNPX input form 
 void writeMCNPX(const std::string& Line,std::ostream& OX);
 
-/// Split tring into spc deliminated components
+// Split tring into spc deliminated components
 std::vector<std::string> StrParts(std::string Ln);
 
-/// Write a set of containers to a file
+// Write a set of containers to a file
 template<template<typename T> class V,typename T> 
 int writeFile(const std::string& Fname,const T step,const V<T>& Y);
 template<template<typename T> class V,typename T> 
@@ -93,7 +93,7 @@ template<template<typename T> class V,typename T>
 int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y,const V<T>& Err);
 
 
-/// Convert a VAX number to x86 little eindien
+// Convert a VAX number to x86 little eindien
 float getVAXnum(const float A);
 
 }   // NAMESPACE StrFunc
