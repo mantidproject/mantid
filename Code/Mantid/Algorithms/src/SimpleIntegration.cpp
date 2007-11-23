@@ -4,6 +4,7 @@
 #include "SimpleIntegration.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <sstream>
 #include <numeric>
@@ -45,41 +46,23 @@ StatusCode SimpleIntegration::init()
 StatusCode SimpleIntegration::exec()
 {
   // Try and retrieve the optional properties
-  // Since a property can only be a string at present, need to convert to int
-  // No type checking - this code MUST be temporary
-  /// @todo Remove the need for this conversion
-  try {
-    std::string strInput = getPropertyValue("StartX");
-    std::istringstream iss (strInput,std::istringstream::in);
-    iss >> m_MinX;
-  } catch (Exception::NotFoundError e) {
-    m_MinX = 0;
-  }
-
-  try {
-    std::string strInput = getPropertyValue("EndX");
-    std::istringstream iss (strInput,std::istringstream::in);
-    iss >> m_MaxX;
-  } catch (Exception::NotFoundError e) {
-    m_MaxX = 0;
-  }
-
-  try {
-    std::string strInput = getPropertyValue("StartY");
-    std::istringstream iss (strInput,std::istringstream::in);
-    iss >> m_MinY;
-  } catch (Exception::NotFoundError e) {
-    m_MinY = 0;
-  }
+  Property *p = getProperty("StartX");
+  PropertyWithValue<int> *pv = static_cast< PropertyWithValue<int>* >(p);
+  m_MinX = *pv;
   
-  try {
-    std::string strInput = getPropertyValue("EndY");
-    std::istringstream iss (strInput,std::istringstream::in);
-    iss >> m_MaxY;
-  } catch (Exception::NotFoundError e) {
-    m_MaxY = 0;
-  }
-    
+  p = getProperty("EndX");
+  pv = static_cast< PropertyWithValue<int>* >(p);
+  m_MaxX = *pv;
+  
+  p = getProperty("StartY");
+  pv = static_cast< PropertyWithValue<int>* >(p);
+  m_MinY = *pv;
+  
+  p = getProperty("EndY");
+  pv = static_cast< PropertyWithValue<int>* >(p);
+  m_MaxY = *pv;
+  
+  
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
