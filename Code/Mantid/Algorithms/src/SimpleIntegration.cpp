@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "SimpleIntegration.h"
+#include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidKernel/PropertyWithValue.h"

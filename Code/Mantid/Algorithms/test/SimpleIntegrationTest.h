@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "SimpleIntegration.h"
+#include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"

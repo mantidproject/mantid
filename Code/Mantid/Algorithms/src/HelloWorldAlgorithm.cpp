@@ -1,4 +1,4 @@
-#include "HelloWorldAlgorithm.h"
+#include "MantidAlgorithms/HelloWorldAlgorithm.h"
 
 
 
