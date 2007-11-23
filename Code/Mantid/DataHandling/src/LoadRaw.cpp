@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "LoadRaw.h"
+#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <cmath>

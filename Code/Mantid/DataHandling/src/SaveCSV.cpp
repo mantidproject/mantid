@@ -26,7 +26,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "SaveCSV.h"
+#include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h" 

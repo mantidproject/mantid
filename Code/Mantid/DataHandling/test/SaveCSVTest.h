@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "SaveCSV.h"
+#include "MantidDataHandling/SaveCSV.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
