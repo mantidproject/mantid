@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
 #include "MantidKernel/System.h"
 #include "IAlgorithm.h"
 #include "AlgorithmManager.h"
