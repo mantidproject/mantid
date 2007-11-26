@@ -7,6 +7,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Exception.h"
 
+using namespace Mantid::Kernel;
+
 namespace Mantid
 {
 namespace API

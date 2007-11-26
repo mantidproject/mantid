@@ -14,7 +14,7 @@ Kernel::Logger& WorkspaceFactory::g_log = Kernel::Logger::get("WorkspaceFactory"
 WorkspaceFactory* WorkspaceFactory::m_instance = 0;
 
 /// Private constructor for singleton class
-WorkspaceFactory::WorkspaceFactory() : DynamicFactory<Workspace>()
+WorkspaceFactory::WorkspaceFactory() : Mantid::Kernel::DynamicFactory<Workspace>()
 { }
 
 /** Private destructor
