@@ -12,9 +12,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"

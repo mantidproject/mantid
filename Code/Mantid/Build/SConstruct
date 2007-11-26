@@ -24,21 +24,20 @@ cppPaths = []
 ## Get Paths for various builds 
 dirpath=os.listdir(uppath)
 while(len(dirpath)):
-  try:
-    item=dirpath.pop(0)
-    if item != 'Geometry':
-	for file in os.listdir("../"+item):
-		fullPath="../"+item+"/"+file
-		if (file=="inc"):
-			cppPaths.append(fullPath)
-		elif (file=="src"):
-			dirList.append(item)
-			print "SRC PATH == ",item
-		elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-		and (not file.endswith('test'))):
-			dirpath.append(fullPath[3:])
-  except:
-    pass
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir("../"+item):
+			fullPath="../"+item+"/"+file
+			if (file=="inc"):
+				cppPaths.append(fullPath)
+			elif (file=="src"):
+				dirList.append(item)
+				print "SRC PATH == ",item
+			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+			and (not file.endswith('test'))):
+				dirpath.append(fullPath[3:])
+	except:
+		pass
 
 if os.name == 'nt':
   # assume this is Windows

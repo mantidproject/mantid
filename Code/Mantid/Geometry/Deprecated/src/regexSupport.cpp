@@ -9,7 +9,7 @@
 #include <functional>
 #include <boost/regex.hpp>
 
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "regexSupport.h"
 
 namespace Mantid

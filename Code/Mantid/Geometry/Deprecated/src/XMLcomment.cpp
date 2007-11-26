@@ -10,12 +10,12 @@
 #include <iterator>
 #include <boost/shared_ptr.hpp>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "RefControl.h"
 #include "Matrix.h"
 #include "Vec3D.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 // #include "SpecDataHold.h"
 #include "XMLnamespace.h"
 #include "XMLattribute.h"

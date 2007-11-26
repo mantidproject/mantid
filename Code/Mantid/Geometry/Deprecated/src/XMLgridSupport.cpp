@@ -11,7 +11,7 @@
 #include <functional>
 #include <boost/shared_ptr.hpp>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"

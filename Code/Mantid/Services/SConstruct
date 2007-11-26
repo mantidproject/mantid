@@ -1,0 +1,110 @@
+#For MantidServices
+
+import os
+import platform
+import sys
+
+from socket import gethostname
+
+def procHeaderPath(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+    if out[-1]!='/':
+      out+='/'
+  return out
+
+def procHeader(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+  return out
+
+#get libraries and the library directories
+print 'Current path == ',os.getcwd()
+cwdpath=os.getcwd()
+uppath=os.path.abspath('../')
+
+libDirList = [uppath,cwdpath ]
+libList = ['python' + sys.version[0:3].replace('.','')]
+cflags = []
+dirList = []
+
+cppPaths = []
+
+if os.name == 'nt':
+	# assume this is Windows
+	libDirList.append('../../Third_Party/lib/win32/')
+	libDir = '../../Third_Party/lib/win32/'
+	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+	
+	for file in os.listdir(libDir):
+		if file.endswith('.dll'):
+			libList.append(file.replace('.dll',''))
+	
+else:
+	#so this must be posix
+	boost_path = ''
+	poco_path = ''
+	boost_append=''
+	fortran_type=''
+	third_party=''
+
+	#Get paths
+	f=open('../Build/Scons_Linux.conf', 'r')
+	
+	for ln in f:
+		boost_path=procHeaderPath(ln,'BOOST_ROOT',boost_path)
+		poco_path=procHeaderPath(ln,'POCO_ROOT',poco_path)
+		boost_append=procHeader(ln,'BOOST_APPEND',boost_append)
+		fortran_type=procHeader(ln,'FORTRAN',fortran_type)
+		third_party=os.path.abspath(procHeader(ln,'THIRD',third_party))
+
+	print "POCO_ROOT: ",poco_path
+	print "BOOST_ROOT: ",boost_path
+	print "BOOST_APPEND: ",boost_append
+	print "THIRD_PARTY: ",third_party
+
+	f.close()
+
+	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
+	cppPaths.append(poco_path +'Foundation/include/')
+	cppPaths.append(poco_path +'Util/include/')
+	cppPaths.append(boost_path)
+	
+	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
+	dirpath=os.listdir(uppath)
+	while(len(dirpath)):
+		try:
+			item=dirpath.pop(0)
+			for file in os.listdir("../"+item):
+				fullPath="../"+item+"/"+file
+				if (file=="inc"):
+					cppPaths.append(fullPath)
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])
+		except:
+			pass
+	
+
+#GET LIST OF CPPS
+codeFolder = os.path.abspath('./src')
+listCpps = []
+pathToRoot = '../'
+
+if os.path.exists(codeFolder):
+	files = os.listdir(codeFolder)
+	for file in files:
+		if file.endswith('.cpp'):
+			print file
+			listCpps.append(codeFolder + '/' +  file)
+
+# set header include paths
+env = Environment(CPPPATH=cppPaths)
+env.Append( CCFLAGS = cflags)
+
+#BUILD CODE
+env.SharedLibrary('lib/MantidDataObjects', listCpps, LIBS=[ ], LIBPATH=[ ])
