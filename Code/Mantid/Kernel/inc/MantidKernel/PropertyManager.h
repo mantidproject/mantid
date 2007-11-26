@@ -74,7 +74,7 @@ private:
   /// The properties under management
   PropertyMap m_properties;
   /// Stores the order that the properties were declared in
-  std::vector<std::string> m_orderedNames;
+  std::vector<Property*> m_orderedProperties;
 };
 
 } // namespace Kernel

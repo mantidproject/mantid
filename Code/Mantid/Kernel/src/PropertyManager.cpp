@@ -36,7 +36,7 @@ void PropertyManager::declareProperty( Property *p )
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( m_properties.insert(PropertyMap::value_type(key, p)).second)
   {
-    m_orderedNames.push_back(key);    
+    m_orderedProperties.push_back(p);
   }
   else
   {
@@ -59,7 +59,7 @@ void PropertyManager::declareProperty( const std::string &name, int value, const
     Property *p = new PropertyWithValue<int>(name, value);
     p->setDocumentation(doc);
     m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedNames.push_back(key);
+    m_orderedProperties.push_back(p);
   }
   else
   {
@@ -82,7 +82,7 @@ void PropertyManager::declareProperty( const std::string &name, double value, co
     Property *p = new PropertyWithValue<double>(name, value);
     p->setDocumentation(doc);
     m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedNames.push_back(key);
+    m_orderedProperties.push_back(p);
   }
   else
   {
@@ -105,7 +105,7 @@ void PropertyManager::declareProperty( const std::string &name, std::string valu
     Property *p = new PropertyWithValue<std::string>(name, value);
     p->setDocumentation(doc);
     m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedNames.push_back(key);
+    m_orderedProperties.push_back(p);
   }
   else
   {
@@ -188,12 +188,7 @@ Property* PropertyManager::getProperty( const std::string &name ) const
  */
 std::vector< Property* > PropertyManager::getProperties() const
 {
-  std::vector< Property* > p;
-  for (std::vector<std::string>::const_iterator it = m_orderedNames.begin(); it != m_orderedNames.end(); ++it)
-  {
-    p.push_back( getProperty(*it) );
-  }
-  return p;
+  return m_orderedProperties;
 }
 
 } // namespace Kernel
