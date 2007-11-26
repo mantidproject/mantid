@@ -13,7 +13,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "MapSupport.h"
 #include "BnId.h"
 #include "Acomp.h"

@@ -31,9 +31,8 @@ while(len(dirpath)):
 			if (file=="inc"):
 				cppPaths.append(fullPath)
 			elif (file=="src"):
-				if item != 'Geometry':
-					dirList.append(item)
-					print "SRC PATH == ",item
+				dirList.append(item)
+				print "SRC PATH == ",item
 			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
 			and (not file.endswith('test'))):
 				dirpath.append(fullPath[3:])
@@ -91,7 +90,7 @@ pathToRoot = '../'
 for fname in dirList:
   print "dir:",fname 
   if os.path.isdir(pathToRoot + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
       #does folder contain /src?
       if os.path.exists(pathToRoot + fname + codeFolder):
 	files = os.listdir(pathToRoot + fname + codeFolder)
@@ -111,4 +110,5 @@ if os.name == 'nt':
   env.SharedLibrary('Mantid', listCpps, LIBS=libList, LIBPATH=libDirList, RPATH=libDirList)
 else:
   env.SharedLibrary('Mantid', listCpps, LIBS=[ ], LIBPATH=[ ] )
+
 
