@@ -32,7 +32,7 @@ libList = ['python' + sys.version[0:3].replace('.','')]
 cflags = []
 dirList = []
 
-cppPaths = [os.path.abspath('./inc'), os.path.abspath('./inc/MantidKernel')]
+cppPaths = []
 
 
 if os.name == 'nt':
@@ -69,37 +69,26 @@ else:
 	print "THIRD_PARTY: ",third_party
 
 	f.close()
-	
-	libDirList.append(third_party)
-	libDirList.append(boost_path)
-	libDirList.append(poco_path + 'lib/Linux/i686/')
-	libDirList.append(os.path.abspath('../'))
 
 	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
 	cppPaths.append(poco_path +'Foundation/include/')
 	cppPaths.append(poco_path +'Util/include/')
 	cppPaths.append(boost_path)
-
-	libList = ['Mantid', 'python' + sys.version[0:3]]
-
-
-	libList.append('PocoUtil')
-	libList.append('PocoFoundation')
-	libList.append('PocoXML')
-	libList.append('boost_python'+boost_append)
-	libList.append('boost_filesystem'+boost_append)
-	libList.append('boost_regex'+boost_append)
-
-	if (fortran_type=='gfortran'):
-		libList.append('gfortran')
-		libList.append('gfortranbegin')
-	else:
-		libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
-		libDirList.append('/usr/lib/gcc/i686-pc-linux-gnu/3.4.6/')
-		libList.append('Get')
-		libList.append('g2c')
-
-	print libDirList
+	
+	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
+	dirpath=os.listdir(uppath)
+	while(len(dirpath)):
+		try:
+			item=dirpath.pop(0)
+			for file in os.listdir("../"+item):
+				fullPath="../"+item+"/"+file
+				if (file=="inc"):
+					cppPaths.append(fullPath)
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])
+		except:
+			pass
 
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
@@ -118,4 +107,4 @@ env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=[ ], LIBPATH=[ ], RPATH=libDirList)
+env.SharedLibrary('lib/MantidKernel', listCpps, LIBS=[ ], LIBPATH=[ ])

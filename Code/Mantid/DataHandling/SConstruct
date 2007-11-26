@@ -1,4 +1,4 @@
-#For MantidAlgorithms
+#For MantidDataHandling
 
 import os
 import platform
@@ -107,4 +107,4 @@ env = Environment(CPPPATH=cppPaths)
 env.Append( CCFLAGS = cflags)
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidAlgorithms', listCpps, LIBS=[ ], LIBPATH=[ ])
+env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=[ ], LIBPATH=[ ])
