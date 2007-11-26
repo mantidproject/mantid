@@ -11,15 +11,15 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
-#include "Logger.h"
-#include "Exception.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Exception.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"

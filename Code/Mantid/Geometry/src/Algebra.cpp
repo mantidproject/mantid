@@ -11,7 +11,7 @@
 #include <functional>
 #include <iterator>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "Support.h"
 #include "MapSupport.h"

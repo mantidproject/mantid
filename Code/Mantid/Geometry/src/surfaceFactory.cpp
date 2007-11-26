@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -20,7 +20,7 @@
 #include "IndexIterator.h"
 #include "Matrix.h"
 #include "Vec3D.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "BaseVisit.h"
 #include "Surface.h"
 #include "Plane.h"

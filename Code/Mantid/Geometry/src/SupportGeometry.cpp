@@ -8,8 +8,8 @@
 #include "AuxException.h"
 #include "Matrix.h"
 #include "Vec3D.h"
-#include "Support.h"
-#include "SupportTempCode.h"
+#include "MantidKernel/Support.h"
+#include "MantidKernel/SupportTempCode.h"
 
 namespace Mantid
 {

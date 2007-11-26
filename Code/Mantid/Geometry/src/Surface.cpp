@@ -13,7 +13,7 @@
 #include <boost/regex.hpp>
 
 #include "AuxException.h"
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"

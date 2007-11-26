@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "BnId.h"
 
 namespace Mantid

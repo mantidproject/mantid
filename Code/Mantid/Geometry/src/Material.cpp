@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -19,7 +19,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "RefCon.h"
 #include "Material.h"
 

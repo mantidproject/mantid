@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"

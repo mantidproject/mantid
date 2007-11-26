@@ -6,8 +6,8 @@
 #include <string>
 #include <algorithm>
 
-#include "Logger.h"
-#include "Exception.h"
+#include "MantidKernel\Logger.h"
+#include "MantidKernel\Exception.h"
 #include "AuxException.h"
 #include "Matrix.h"
 #include "Vec3D.h"

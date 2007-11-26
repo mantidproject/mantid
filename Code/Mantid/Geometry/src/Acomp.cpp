@@ -12,7 +12,7 @@
 #include <iterator>
 #include <boost/regex.hpp>
 
-#include "Logger.h"
+#include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -20,7 +20,7 @@
 #include "XMLread.h"
 #include "XMLcollect.h"
 #include "IndexIterator.h"
-#include "Support.h"
+#include "MantidKernel/Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "RotCounter.h"
