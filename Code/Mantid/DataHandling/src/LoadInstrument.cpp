@@ -123,6 +123,7 @@ namespace DataHandling
 		samplepos->setParent(&instrument);
 		samplepos->setPos(Geometry::V3D(0.0,10.0,0.0));
 		bank->setName("Detectors");
+		bank->setPos(Geometry::V3D(0.0,10.0,0.0));
 		instrument.add(bank);
 		instrument.add(source);
 		instrument.add(samplepos);
