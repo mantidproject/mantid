@@ -14,14 +14,12 @@ namespace Algorithms
 class HelloWorldAlgorithm : public API::Algorithm
 {
 public:
-  HelloWorldAlgorithm() : Mantid::Kernel::Algorithm() {}
+  HelloWorldAlgorithm() : API::Algorithm() {}
   virtual ~HelloWorldAlgorithm() {}
   Mantid::Kernel::StatusCode init() { return Mantid::Kernel::StatusCode::SUCCESS; }
-  Mantid::Kernel::StatusCode exec() { std::cout << "Hello, World!\n"; return Mantid::Kernel::StatusCode::SUCCESS; }
+  Mantid::Kernel::StatusCode exec() { std::cout << "\nHello, World!\n"; return Mantid::Kernel::StatusCode::SUCCESS; }
   Mantid::Kernel::StatusCode final() { return Mantid::Kernel::StatusCode::SUCCESS; }
 };
-
-DECLARE_ALGORITHM(HelloWorldAlgorithm)
 
 } // namespace Algorithm
 } // namespace Mantid
