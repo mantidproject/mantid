@@ -31,15 +31,16 @@ cppPaths = []
 
 dirpath=os.listdir("../../")
 while(len(dirpath)):
-  try:
-    item=dirpath.pop(0)
-    for file in os.listdir("../../"+item):
-	fullPath="../../"+item+"/"+file
-	if (file=="inc"):
-		cppPaths.append(fullPath)
-  except:
-    pass
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir("../../"+item):
+			fullPath="../../"+item+"/"+file
+			if (file=="inc"):
+				cppPaths.append(fullPath)
+	except:
+		pass
 
+cppPaths.append('../../Geometry/Deprecated/inc')
 
 libList = ['Mantid']
 
@@ -70,7 +71,7 @@ else:
   print "POCO_ROOT: ",poco_path
   print "BOOST_ROOT: ",boost_path
   print "BOOST_APPEND: ",boost_append
-  print third_party
+  print "THIRD_PARTY: ",third_party
   
   f.close()
 
@@ -103,7 +104,6 @@ else:
     libList.append('Get')
     libList.append('g2c')
 
-
   print libDirList
 
 
@@ -118,7 +118,7 @@ dirList = os.listdir(path)
 
 for fname in dirList:
   if os.path.isdir(path + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build'  and fname != 'Geometry':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
       #does folder contain /test?
       if os.path.exists(path + fname + testfolder):
         files = os.listdir(path + fname + testfolder)
