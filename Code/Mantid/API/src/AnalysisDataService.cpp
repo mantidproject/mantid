@@ -43,6 +43,44 @@ StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
   return StatusCode::FAILURE;
 }
 
+/** Add or replaces a pointer to a named workspace to the data service store.
+	 *  Upon addition, the data service assumes ownership of the workspace.
+	 *	if an existing workspace is already there it is replaced.
+	 *	if the two workspaces are not pointers to the same workspace then the one that is replaced is deleted.
+	 * 
+	 *  @param name The user-given name for the workspace
+	 *  @param space A pointer to the workspace
+	 *  @return A StatusCode object indicating whether the operation was successful
+	 */
+StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
+{
+  //find if the workspace already exists
+  WorkspaceMap::const_iterator it = m_spaces.find(name);
+  if (m_spaces.end() != it)
+  {
+	//Yes it does
+    Workspace *existingSpace = it->second;
+	//replace it.
+	m_spaces[name] = space;
+
+	if(existingSpace != space)
+	{
+		// Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
+		delete existingSpace;
+	}
+
+    return StatusCode::SUCCESS;
+  }
+  else
+  {
+	//no it doesn't we need to add it.
+	return add(name,space);
+  }
+
+
+  return StatusCode::FAILURE;
+}
+
 /** Remove a workspace from the data service store.
  *  Upon removal, the workspace itself will be deleted.
  * 

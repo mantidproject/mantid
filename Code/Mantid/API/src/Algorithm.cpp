@@ -151,7 +151,7 @@ namespace Kernel
         // Output Workspace:
         try {
           m_outputWorkspaceName = getPropertyValue("OutputWorkspace");
-          status = ADS->add(m_outputWorkspaceName, m_outputWorkspace);
+          status = ADS->addOrReplace(m_outputWorkspaceName, m_outputWorkspace);
           if ( status.isFailure() ) g_log.error("Algorithm: Unable to register output workspace");
         } catch (Exception::NotFoundError e) {
           g_log.information("Output workspace property not set");

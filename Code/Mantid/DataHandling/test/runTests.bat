@@ -21,9 +21,9 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\..\kernel\inc" /I "..\..\DataObjects\inc" /I "..\..\Geometry\inc" /I "..\..\API\inc" /I "..\inc" /EHsc /MDd /W3 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib api.lib algorithms.lib dataobjects.lib geometry.lib runner.obj 
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib algorithms.lib dataobjects.lib datahandling.lib geometry.lib API.lib runner.obj
   
 echo "Running the tests..."
 runner.exe

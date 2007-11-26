@@ -28,6 +28,18 @@ public:
     TS_ASSERT( status.isFailure() );
 	}
 
+	void testAddOrReplace()
+	{
+    AnalysisDataService *theService = AnalysisDataService::Instance();
+    Workspace *space = 0;
+    StatusCode status = theService->add("MySpaceAddOrReplace",space);
+    TS_ASSERT( ! status.isFailure() );
+	status = theService->add("MySpaceAddOrReplace",space);
+    TS_ASSERT( status.isFailure() );
+	status = theService->addOrReplace("MySpaceAddOrReplace",space);
+    TS_ASSERT( ! status.isFailure() );
+	}
+
 	void testRemove()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();

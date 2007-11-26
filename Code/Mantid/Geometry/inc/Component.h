@@ -3,7 +3,7 @@
 #include <string>
 #include "V3D.h"
 #include "Quat.h"
-#include "System.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {

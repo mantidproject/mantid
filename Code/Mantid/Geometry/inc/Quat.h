@@ -2,7 +2,7 @@
 #define MANTID_QUAT_H_
 
 #include <iostream> 
-#include "System.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {

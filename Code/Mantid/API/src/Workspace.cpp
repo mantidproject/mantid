@@ -66,5 +66,11 @@ const std::string& Workspace::getComment() const
     return _comment;
 }
 
+
+Instrument& Workspace::getInstrument() 
+{
+	return _instrument;
+}
+
 } // namespace Kernel
 } // Namespace Mantid

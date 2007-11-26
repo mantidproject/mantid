@@ -1,12 +1,13 @@
-#ifndef MANTID_KERNEL_WORKSPACE_H_
-#define MANTID_KERNEL_WORKSPACE_H_
+#ifndef MANTID_KERNEL_INSTRUMENT_H_
+#define MANTID_KERNEL_INSTRUMENT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "CompAssembly.h"
+#include "ObjComponent.h"
+#include "Detector.h"
 #include <string>
 #include <ostream> 
 
@@ -14,15 +15,12 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @class Workspace Workspace.h
+/** @class Instrument Instrument.h
  	
- 	  Base Workspace Abstract Class
- 		Not static method create() since this base 
- 		object will not be registered with the factory.
-		Requirement: get some kind of support for memmory 
-		footprint of the data object.
+ 	  Base Instrument Class, very basic at the moment
+ 		
  			    	
-    @author Laurent C Chapon, ISIS, RAL
+    @author Nick Draper, ISIS, RAL
     @date 26/09/2007
  	    
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
@@ -45,44 +43,32 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace
+	class DLLExport Instrument : public Geometry::CompAssembly
 {
 public:
-  /// Return the workspace typeID 
-	virtual const std::string id() const = 0;
-
-	void setTitle(const std::string&);
-	void setComment(const std::string&);
-
-	const std::string& getComment() const;
-	const std::string& getTitle() const;
-
-	Instrument& getInstrument() ;
-
-	/// Get the footprint in memory.
-	virtual long int getMemorySize() const {return 0;}
+	virtual std::string type() const {return "Instrument";}
 	
-	virtual ~Workspace();
-	
-protected:
-	Workspace();
-	Workspace(const Workspace&);
-	Workspace& operator=(const Workspace&);
+	Instrument();
+	Instrument(const std::string& name);
+	virtual ~Instrument() {}
+	Instrument(const Instrument&);
+
+	Geometry::ObjComponent* getSource();
+	Geometry::ObjComponent* getSamplePos();
+	Geometry::CompAssembly* getDetectors();
+	Geometry::Detector* getDetector(const int &detector_id);
 
 private:
-
-	/// The title of the workspace
-	std::string _title;
-	/// A user-provided comment that is attached to the workspace
-	std::string _comment;
-
-	//the instrument used for this experiment
-	Instrument _instrument;
-  
 	/// Static reference to the logger class
 	static Logger& g_log;
+
+	Geometry::Component* getChild(const std::string& name);
+
+	/// a chache of the detectors assembly
+	Geometry::CompAssembly* _detectorsCacheValue;
+	
 };
 
 } // namespace Kernel
 } //Namespace Mantid
-#endif /*MANTID_KERNEL_WORKSPACE_H_*/
+#endif /*MANTID_KERNEL_INSTRUMENT_H_*/

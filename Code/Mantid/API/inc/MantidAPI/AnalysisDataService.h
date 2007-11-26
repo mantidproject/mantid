@@ -56,6 +56,7 @@ public:
   static AnalysisDataService* Instance();
   
 	StatusCode add( const std::string& name, Workspace * space );
+	StatusCode addOrReplace(const std::string& name, Workspace* space);
 	StatusCode remove(const std::string& name );
 	StatusCode retrieve(const std::string& name, Workspace *& space );	
 	

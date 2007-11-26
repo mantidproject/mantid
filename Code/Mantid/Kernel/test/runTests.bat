@@ -21,7 +21,7 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /EHsc /MDd /W3 /nologo /c /ZI /TP 
+cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /I "..\inc" /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" kernel.lib runner.obj
   

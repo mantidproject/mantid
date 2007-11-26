@@ -186,7 +186,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Support.cpp"
+				RelativePath=".\src\SupportBasic.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SupportKernel.cpp"
 				>
 			</File>
 		</Filter>
@@ -196,67 +200,75 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\ConfigService.h"
+				RelativePath=".\inc\MantidKernel\ConfigService.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DllOpen.h"
+				RelativePath=".\inc\MantidKernel\DllOpen.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DynamicFactory.h"
+				RelativePath=".\inc\MantidKernel\DynamicFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Exception.h"
+				RelativePath=".\inc\MantidKernel\Exception.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IInterface.h"
+				RelativePath=".\inc\MantidKernel\IInterface.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\INamedInterface.h"
+				RelativePath=".\inc\MantidKernel\INamedInterface.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Instantiator.h"
+				RelativePath=".\inc\MantidKernel\Instantiator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IProperty.h"
+				RelativePath=".\inc\MantidKernel\IProperty.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LibraryManager.h"
+				RelativePath=".\inc\MantidKernel\LibraryManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Logger.h"
+				RelativePath=".\inc\MantidKernel\Logger.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Property.h"
+				RelativePath=".\inc\MantidKernel\Property.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\PropertyManager.h"
+				RelativePath=".\inc\MantidKernel\PropertyManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\PropertyWithValue.h"
+				RelativePath=".\inc\MantidKernel\PropertyWithValue.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\StatusCode.h"
+				RelativePath=".\inc\MantidKernel\StatusCode.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Support.h"
+				RelativePath=".\inc\MantidKernel\Support.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\System.h"
+				RelativePath=".\inc\MantidKernel\SupportBasic.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\SupportTempCode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\System.h"
 				>
 			</File>
 		</Filter>

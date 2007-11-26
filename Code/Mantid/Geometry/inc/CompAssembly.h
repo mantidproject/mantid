@@ -2,7 +2,7 @@
 #define COMPONENT_ASSEMBLY_
 #include <string> 
 #include <vector>
-#include "System.h"
+#include "MantidKernel/System.h"
 #include "Component.h"
 
 namespace Mantid

@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib kernel.lib DataObjects.lib"
+				AdditionalDependencies="kernel.lib DataObjects.lib"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
@@ -154,6 +154,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\LoadInstrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveCSV.cpp"
 				>
 			</File>
@@ -164,15 +168,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\DataHandlingCommand.h"
+				RelativePath=".\inc\MantidDataHandling\DataHandlingCommand.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LoadRaw.h"
+				RelativePath=".\inc\MantidDataHandling\LoadInstrument.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\SaveCSV.h"
+				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveCSV.h"
 				>
 			</File>
 		</Filter>

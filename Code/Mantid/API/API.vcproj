@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Instrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>
@@ -187,39 +191,43 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\Algorithm.h"
+				RelativePath=".\inc\MantidAPI\Algorithm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AlgorithmFactory.h"
+				RelativePath=".\inc\MantidAPI\AlgorithmFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AlgorithmManager.h"
+				RelativePath=".\inc\MantidAPI\AlgorithmManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\AnalysisDataService.h"
+				RelativePath=".\inc\MantidAPI\AnalysisDataService.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DeclareUserAlg.h"
+				RelativePath=".\inc\MantidAPI\DeclareUserAlg.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\FrameworkManager.h"
+				RelativePath=".\inc\MantidAPI\FrameworkManager.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IAlgorithm.h"
+				RelativePath=".\inc\MantidAPI\IAlgorithm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Workspace.h"
+				RelativePath=".\inc\MantidAPI\Instrument.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\WorkspaceFactory.h"
+				RelativePath=".\inc\MantidAPI\Workspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceFactory.h"
 				>
 			</File>
 		</Filter>

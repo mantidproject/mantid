@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../kernel/inc;../API/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../API/inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib kernel.lib"
+				AdditionalDependencies="kernel.lib"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
@@ -172,15 +172,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\Histogram1D.h"
+				RelativePath=".\inc\MantidDataObjects\Histogram1D.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Workspace1D.h"
+				RelativePath=".\inc\MantidDataObjects\Workspace1D.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Workspace2D.h"
+				RelativePath=".\inc\MantidDataObjects\Workspace2D.h"
 				>
 			</File>
 		</Filter>

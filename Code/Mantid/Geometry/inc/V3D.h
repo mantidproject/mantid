@@ -1,7 +1,7 @@
 #ifndef MANTID_V3D_H_
 #define MANTID_V3D_H_
 
-#include "System.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {

@@ -1,6 +1,6 @@
 #ifndef OBJCOMPONENT_H_
 #define OBJCOMPONENT_H_
-#include "System.h"
+#include "MantidKernel/System.h"
 #include "Component.h"
 
 namespace Mantid

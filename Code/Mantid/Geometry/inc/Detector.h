@@ -1,6 +1,6 @@
 #ifndef DETECTOR_H_
 #define DETECTOR_H_
-#include "System.h"
+#include "MantidKernel/System.h"
 #include "ObjComponent.h"
 #include <string>
 namespace Mantid
