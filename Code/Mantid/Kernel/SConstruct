@@ -6,10 +6,31 @@ import sys
 
 from socket import gethostname
 
+def procHeaderPath(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+    if out[-1]!='/':
+      out+='/'
+  return out
+
+def procHeader(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+  return out
+
 #get libraries and the library directories
-libDirList = ['../', '.']
-libList = ['python' + sys.version[0:3]]
+print 'Current path == ',os.getcwd()
+cwdpath=os.getcwd()
+uppath=os.path.abspath('../')
+
+libDirList = [uppath,cwdpath ]
+libList = ['python' + sys.version[0:3].replace('.','')]
 cflags = []
+dirList = []
 
 cppPaths = [os.path.abspath('./inc'), os.path.abspath('./inc/MantidKernel')]
 
@@ -28,30 +49,63 @@ else:
 	#so this must be posix
 	boost_path = ''
 	poco_path = ''
+	boost_append=''
+	fortran_type=''
+	third_party=''
 
 	#Get paths
 	f=open('../Build/Scons_Linux.conf', 'r')
 	
 	for ln in f:
-		if ln.startswith('BOOST_ROOT'):
-			boost_path=ln[11:]
-			print boost_path
-		elif ln.startswith('POCO_ROOT'):
-			poco_path=ln[10:]
-			print poco_path		
+		boost_path=procHeaderPath(ln,'BOOST_ROOT',boost_path)
+		poco_path=procHeaderPath(ln,'POCO_ROOT',poco_path)
+		boost_append=procHeader(ln,'BOOST_APPEND',boost_append)
+		fortran_type=procHeader(ln,'FORTRAN',fortran_type)
+		third_party=os.path.abspath(procHeader(ln,'THIRD',third_party))
+
+	print "POCO_ROOT: ",poco_path
+	print "BOOST_ROOT: ",boost_path
+	print "BOOST_APPEND: ",boost_append
+	print "THIRD_PARTY: ",third_party
+
 	f.close()
 	
-	cflags = ['-Wall', '-fPIC']
-	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	cppPaths.append(poco_path +'Foundation/include')
-	cppPaths.append(poco_path +'Util/include')
+	libDirList.append(third_party)
+	libDirList.append(boost_path)
+	libDirList.append(poco_path + 'lib/Linux/i686/')
+	libDirList.append(os.path.abspath('../'))
+
+	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
+	cppPaths.append(poco_path +'Foundation/include/')
+	cppPaths.append(poco_path +'Util/include/')
+	cppPaths.append(boost_path)
+
+	libList = ['Mantid', 'python' + sys.version[0:3]]
+
+
+	libList.append('PocoUtil')
+	libList.append('PocoFoundation')
+	libList.append('PocoXML')
+	libList.append('boost_python'+boost_append)
+	libList.append('boost_filesystem'+boost_append)
+	libList.append('boost_regex'+boost_append)
+
+	if (fortran_type=='gfortran'):
+		libList.append('gfortran')
+		libList.append('gfortranbegin')
+	else:
+		libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+		libDirList.append('/usr/lib/gcc/i686-pc-linux-gnu/3.4.6/')
+		libList.append('Get')
+		libList.append('g2c')
+
+	print libDirList
 
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
 listCpps = []
 pathToRoot = '../'
 
-print codeFolder
 if os.path.exists(codeFolder):
 	files = os.listdir(codeFolder)
 	for file in files:
