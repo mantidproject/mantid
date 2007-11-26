@@ -10,6 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveCSV.h"
 
+using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;

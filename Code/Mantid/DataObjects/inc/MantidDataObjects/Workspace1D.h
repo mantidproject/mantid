@@ -37,7 +37,7 @@ namespace Mantid
 namespace DataObjects
 {
 
-class DLLExport Workspace1D: public Kernel::Workspace
+class DLLExport Workspace1D: public API::Workspace
 {
 public:
 	const std::string id() const {return "Workspace1D";}

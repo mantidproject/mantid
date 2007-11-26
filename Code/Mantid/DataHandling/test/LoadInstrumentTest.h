@@ -15,6 +15,7 @@
 #include "Component.h"
 #include <vector>
 
+using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using Mantid::DataObjects::Workspace2D;

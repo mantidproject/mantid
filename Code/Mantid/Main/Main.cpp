@@ -13,6 +13,7 @@
 
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 int
 main()
 {

@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 /** @class AnalysisDataService AnalysisDataService.h Kernel/AnalysisDataService.h
 
@@ -55,10 +55,10 @@ public:
   // Returns the single instance of the service
   static AnalysisDataService* Instance();
   
-	StatusCode add( const std::string& name, Workspace * space );
-	StatusCode addOrReplace(const std::string& name, Workspace* space);
-	StatusCode remove(const std::string& name );
-	StatusCode retrieve(const std::string& name, Workspace *& space );	
+	Kernel::StatusCode add( const std::string& name, Workspace * space );
+	Kernel::StatusCode addOrReplace(const std::string& name, Workspace* space);
+	Kernel::StatusCode remove(const std::string& name );
+	Kernel::StatusCode retrieve(const std::string& name, Workspace *& space );	
 	
 private:
   
@@ -68,7 +68,7 @@ private:
   ~AnalysisDataService();
 
   ///static reference to the logger class
-  // static Logger& g_log;
+  static Kernel::Logger& g_log;
   
   /// Pointer to the single instance
   static AnalysisDataService* m_instance;
@@ -79,7 +79,7 @@ private:
   WorkspaceMap m_spaces;
 };
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_ANALYSISDATASERVICE_H_*/

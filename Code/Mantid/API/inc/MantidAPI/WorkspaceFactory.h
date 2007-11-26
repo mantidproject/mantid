@@ -9,7 +9,7 @@
 #define DECLARE_WORKSPACE(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_ws_##classname( \
-       ((Mantid::Kernel::WorkspaceFactory::Instance()->subscribe<Mantid::DataObjects::classname>(#classname)) \
+       ((Mantid::API::WorkspaceFactory::Instance()->subscribe<Mantid::DataObjects::classname>(#classname)) \
        , 0)); \
   }
 
@@ -20,7 +20,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
 //----------------------------------------------------------------------
@@ -59,7 +59,7 @@ class Workspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport WorkspaceFactory : public DynamicFactory<Workspace>
+class DLLExport WorkspaceFactory : public Kernel::DynamicFactory<Workspace>
 {
 public:
   
@@ -73,7 +73,7 @@ private:
   virtual ~WorkspaceFactory();
     
   /// Static reference to the logger class
-  static Logger& g_log;
+  static Kernel::Logger& g_log;
 
   /// Pointer to the factory instance
   static WorkspaceFactory* m_instance;

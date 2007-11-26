@@ -11,7 +11,7 @@ namespace Mantid
 namespace Algorithms
 {
 	
-class HelloWorldAlgorithm : public Mantid::Kernel::Algorithm
+class HelloWorldAlgorithm : public API::Algorithm
 {
 public:
   HelloWorldAlgorithm() : Mantid::Kernel::Algorithm() {}

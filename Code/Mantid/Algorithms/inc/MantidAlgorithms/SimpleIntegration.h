@@ -53,11 +53,11 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SimpleIntegration : public Mantid::Kernel::Algorithm
+class DLLExport SimpleIntegration : public API::Algorithm
 {
 public:
   /// Default constructor
-	SimpleIntegration() : Mantid::Kernel::Algorithm() {};
+	SimpleIntegration() : API::Algorithm() {};
 	/// Destructor
 	virtual ~SimpleIntegration() {};
 	

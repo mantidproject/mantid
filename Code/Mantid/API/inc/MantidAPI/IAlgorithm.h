@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 // Declaration of the interface ID ( interface id, major version, minor version)
 // RJT: Have not yet imported the code for this (in IInterface.h in Gaudi)
@@ -45,7 +45,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport IAlgorithm : virtual public IProperty 
+  class DLLExport IAlgorithm : virtual public Kernel::IProperty 
   {
   public:
     // Retrieve interface ID
@@ -64,20 +64,20 @@ namespace Kernel
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    virtual StatusCode initialize() = 0;
+    virtual Kernel::StatusCode initialize() = 0;
 
     /** System execution. This method invokes the exec() method of a concrete algorithm.
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    virtual StatusCode execute() = 0;
+    virtual Kernel::StatusCode execute() = 0;
 
     /** System finalization. This method invokes the final() method of a concrete
      *  algorithm and the final() methods of all of that algorithm's sub algorithms.
      * 
      *  @return A StatusCode object indicating whether the operation was successful
      */
-    virtual StatusCode finalize() = 0;
+    virtual Kernel::StatusCode finalize() = 0;
 
     /// Check whether the algorithm is initialized properly
     virtual bool isInitialized() const = 0; 
@@ -87,7 +87,7 @@ namespace Kernel
     virtual bool isExecuted() const = 0;
   };
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_IALGORITHM_H_*/

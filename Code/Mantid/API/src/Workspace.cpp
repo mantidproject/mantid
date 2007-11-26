@@ -2,10 +2,10 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
-Logger& Workspace::g_log = Logger::get("Workspace");
+Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
 Workspace::Workspace()
@@ -72,5 +72,5 @@ Instrument& Workspace::getInstrument()
 	return _instrument;
 }
 
-} // namespace Kernel
+} // namespace API
 } // Namespace Mantid

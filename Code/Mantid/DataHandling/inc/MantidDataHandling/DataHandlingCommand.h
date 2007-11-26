@@ -37,7 +37,7 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class DataHandlingCommand : virtual public Kernel::Algorithm
+  class DataHandlingCommand : virtual public API::Algorithm
   {
   public:
     

@@ -9,9 +9,9 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
-	Logger& AlgorithmManager::g_log = Logger::get("AlgorithmManager");
+	Kernel::Logger& AlgorithmManager::g_log = Kernel::Logger::get("AlgorithmManager");
 	AlgorithmManager* AlgorithmManager::m_instance = 0;
 	
   /// Private Constructor for singleton class
@@ -50,7 +50,7 @@ namespace Kernel
 	IAlgorithm* AlgorithmManager::create(const std::string& algName)
 	{
 	   regAlg.push_back(DynamicFactory<IAlgorithm>::create(algName));      // Throws on fail:
-	   StatusCode status = regAlg.back()->initialize();
+	   Kernel::StatusCode status = regAlg.back()->initialize();
 	   if (status.isFailure())
 	   {
 	     throw std::runtime_error("AlgorithmManager:: Unable to initialise algorithm " + algName); 
@@ -77,7 +77,7 @@ namespace Kernel
 	  for(vc=regAlg.begin();vc!=regAlg.end();vc++)
 	  {
 	    // no test for zero since impossible 
-	    StatusCode status = (*vc)->finalize();
+	    Kernel::StatusCode status = (*vc)->finalize();
 	    errOut+= status.isFailure();
 	    delete (*vc);
 		}
@@ -88,5 +88,5 @@ namespace Kernel
 	}
 	
 	
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid

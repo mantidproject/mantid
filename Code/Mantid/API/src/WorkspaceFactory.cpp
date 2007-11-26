@@ -5,10 +5,10 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
-Logger& WorkspaceFactory::g_log = Logger::get("WorkspaceFactory");
+Kernel::Logger& WorkspaceFactory::g_log = Kernel::Logger::get("WorkspaceFactory");
 
 // Initialise the instance pointer to zero
 WorkspaceFactory* WorkspaceFactory::m_instance = 0;
@@ -34,5 +34,5 @@ WorkspaceFactory* WorkspaceFactory::Instance()
 	return m_instance;
 }
 
-} // namespace Kernel
+} // namespace API
 } // Namespace Mantid

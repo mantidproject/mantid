@@ -13,6 +13,14 @@ namespace Mantid
 {
 namespace Kernel
 {
+class ConfigService;
+}
+}
+
+namespace Mantid
+{
+namespace API
+{
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -22,7 +30,6 @@ class Workspace;
 class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
-class ConfigService;
 
 /** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
 
@@ -79,7 +86,7 @@ public:
 private:
   
   /// Static reference to the logger class
-  static Logger& g_log;
+  static Kernel::Logger& g_log;
   
   /// Pointer to the Algorithm Factory instance
   AlgorithmManager *algManager;
@@ -88,7 +95,7 @@ private:
   /// Pointer to the Analysis Data Service
   AnalysisDataService *data;
   /// Pointer to the Configuration Service
-  ConfigService *config;
+  Kernel::ConfigService *config;
   
 };
 

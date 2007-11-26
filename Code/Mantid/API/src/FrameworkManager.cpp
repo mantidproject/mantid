@@ -16,10 +16,10 @@ using namespace std;
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
-Logger& FrameworkManager::g_log = Logger::get("FrameworkManager");
+	Kernel::Logger& FrameworkManager::g_log = Kernel::Logger::get("FrameworkManager");
 
 //----------------------------------------------------------------------
 // Public member functions
@@ -40,7 +40,7 @@ void FrameworkManager::initialize()
 {
   // Required services are: the config service, the algorithm manager
   //     the analysis data service, the workspace factory
-  config = ConfigService::Instance();
+  config = Kernel::ConfigService::Instance();
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
@@ -130,7 +130,7 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
   
   // Now execute the algorithm
-  StatusCode status = alg->execute();
+  Kernel::StatusCode status = alg->execute();
   if (status.isFailure())
   {
     throw runtime_error("Unable to successfully execute algorithm " + algName);
@@ -149,13 +149,13 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
 Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
 {
   Workspace *space;
-  StatusCode status = data->retrieve(wsName, space);
+  Kernel::StatusCode status = data->retrieve(wsName, space);
   if (status.isFailure())
   {
-	  throw Exception::NotFoundError("Unable to retrieve workspace",wsName);
+	  throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
   return space;
 }
 
-} // namespace Kernel
+} // namespace API
 } // Namespace Mantid

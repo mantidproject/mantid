@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {

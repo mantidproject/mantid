@@ -16,17 +16,17 @@ using namespace boost::python;
 // Declarations ================================================================
 namespace  {
 
-struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
+struct Mantid_Kernel_Algorithm_Wrapper: Mantid::API::Algorithm
 {
     Mantid_Kernel_Algorithm_Wrapper(PyObject* py_self_):
-        Mantid::Kernel::Algorithm(), py_self(py_self_) {}
+        Mantid::API::Algorithm(), py_self(py_self_) {}
 
     const std::string& name() const {
         return call_method< const std::string& >(py_self, "name");
     }
 
     const std::string& default_name() const {
-        return Mantid::Kernel::Algorithm::name();
+        return Mantid::API::Algorithm::name();
     }
 
     const std::string& version() const {
@@ -34,7 +34,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     const std::string& default_version() const {
-        return Mantid::Kernel::Algorithm::version();
+        return Mantid::API::Algorithm::version();
     }
 
     Mantid::Kernel::StatusCode initialize() {
@@ -42,7 +42,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     Mantid::Kernel::StatusCode default_initialize() {
-        return Mantid::Kernel::Algorithm::initialize();
+        return Mantid::API::Algorithm::initialize();
     }
 
     Mantid::Kernel::StatusCode execute() {
@@ -50,7 +50,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     Mantid::Kernel::StatusCode default_execute() {
-        return Mantid::Kernel::Algorithm::execute();
+        return Mantid::API::Algorithm::execute();
     }
 
     Mantid::Kernel::StatusCode finalize() {
@@ -58,7 +58,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     Mantid::Kernel::StatusCode default_finalize() {
-        return Mantid::Kernel::Algorithm::finalize();
+        return Mantid::API::Algorithm::finalize();
     }
 
     bool isInitialized() const {
@@ -66,7 +66,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     bool default_isInitialized() const {
-        return Mantid::Kernel::Algorithm::isInitialized();
+        return Mantid::API::Algorithm::isInitialized();
     }
 
     bool isExecuted() const {
@@ -74,7 +74,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     bool default_isExecuted() const {
-        return Mantid::Kernel::Algorithm::isExecuted();
+        return Mantid::API::Algorithm::isExecuted();
     }
 
     bool isFinalized() const {
@@ -82,7 +82,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     bool default_isFinalized() const {
-        return Mantid::Kernel::Algorithm::isFinalized();
+        return Mantid::API::Algorithm::isFinalized();
     }
 
     void setProperty(const std::string& p0, const std::string& p1) {
@@ -90,7 +90,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     void default_setProperty(const std::string& p0, const std::string& p1) {
-        Mantid::Kernel::Algorithm::setProperty(p0, p1);
+        Mantid::API::Algorithm::setProperty(p0, p1);
     }
 
    /* Mantid::Kernel::StatusCode getProperty(const std::string& p0, std::string& p1) const {
@@ -98,7 +98,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     }
 
     Mantid::Kernel::StatusCode default_getProperty(const std::string& p0, std::string& p1) const {
-        return Mantid::Kernel::Algorithm::getProperty(p0, p1);
+        return Mantid::API::Algorithm::getProperty(p0, p1);
     }*/
 
     Mantid::Kernel::StatusCode init() {
@@ -116,7 +116,7 @@ struct Mantid_Kernel_Algorithm_Wrapper: Mantid::Kernel::Algorithm
     PyObject* py_self;
 };
 
-struct Mantid_Kernel_Workspace_Wrapper: Mantid::Kernel::Workspace
+struct Mantid_Kernel_Workspace_Wrapper: Mantid::API::Workspace
 {
     const std::string id() const {
         return call_method< const std::string >(py_self, "id");
@@ -127,7 +127,7 @@ struct Mantid_Kernel_Workspace_Wrapper: Mantid::Kernel::Workspace
     }
 
     long int default_getMemorySize() const {
-        return Mantid::Kernel::Workspace::getMemorySize();
+        return Mantid::API::Workspace::getMemorySize();
     }
 
     PyObject* py_self;
@@ -144,45 +144,45 @@ BOOST_PYTHON_MODULE(MantidKernel)
 BOOST_PYTHON_MODULE(libMantidKernel)
 {
 #endif	
-  /*  class_< Mantid::Kernel::Algorithm, boost::noncopyable, Mantid_Kernel_Algorithm_Wrapper >("Algorithm", init<  >())
-        .def("name", (const std::string& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::name, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
-        .def("version", (const std::string& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::version, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
-        .def("initialize", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::initialize, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_initialize)
-        .def("execute", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::execute, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_execute)
-        .def("finalize", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::finalize, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_finalize)
-        .def("isInitialized", (bool (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::isInitialized, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isInitialized)
-        .def("isExecuted", (bool (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::isExecuted, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isExecuted)
-        .def("isFinalized", (bool (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::isFinalized, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isFinalized)
-        .def("setProperty", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)(const std::string&) )&Mantid::Kernel::Algorithm::setProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&))&Mantid_Kernel_Algorithm_Wrapper::default_setProperty)
-        .def("setProperty", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)(const std::string&, const std::string&) )&Mantid::Kernel::Algorithm::setProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, const std::string&))&Mantid_Kernel_Algorithm_Wrapper::default_setProperty)
-        .def("getProperty", (Mantid::Kernel::StatusCode (Mantid::Kernel::Algorithm::*)(const std::string&, std::string&) const)&Mantid::Kernel::Algorithm::getProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, std::string&) const)&Mantid_Kernel_Algorithm_Wrapper::default_getProperty)
-//        .def("createSubAlgorithm", &Mantid::Kernel::Algorithm::createSubAlgorithm)
-//        .def("subAlgorithms", (const std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() const)&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
-//        .def("subAlgorithms", (std::vector<Mantid::Kernel::Algorithm*,std::allocator<Mantid::Kernel::Algorithm*> >& (Mantid::Kernel::Algorithm::*)() )&Mantid::Kernel::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
+  /*  class_< Mantid::API::Algorithm, boost::noncopyable, Mantid_Kernel_Algorithm_Wrapper >("Algorithm", init<  >())
+        .def("name", (const std::string& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::name, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
+        .def("version", (const std::string& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::version, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
+        .def("initialize", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::initialize, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_initialize)
+        .def("execute", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::execute, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_execute)
+        .def("finalize", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::finalize, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)())&Mantid_Kernel_Algorithm_Wrapper::default_finalize)
+        .def("isInitialized", (bool (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::isInitialized, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isInitialized)
+        .def("isExecuted", (bool (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::isExecuted, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isExecuted)
+        .def("isFinalized", (bool (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::isFinalized, (bool (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_isFinalized)
+        .def("setProperty", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)(const std::string&) )&Mantid::API::Algorithm::setProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&))&Mantid_Kernel_Algorithm_Wrapper::default_setProperty)
+        .def("setProperty", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)(const std::string&, const std::string&) )&Mantid::API::Algorithm::setProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, const std::string&))&Mantid_Kernel_Algorithm_Wrapper::default_setProperty)
+        .def("getProperty", (Mantid::Kernel::StatusCode (Mantid::API::Algorithm::*)(const std::string&, std::string&) const)&Mantid::API::Algorithm::getProperty, (Mantid::Kernel::StatusCode (Mantid_Kernel_Algorithm_Wrapper::*)(const std::string&, std::string&) const)&Mantid_Kernel_Algorithm_Wrapper::default_getProperty)
+//        .def("createSubAlgorithm", &Mantid::API::Algorithm::createSubAlgorithm)
+//        .def("subAlgorithms", (const std::vector<Mantid::API::Algorithm*,std::allocator<Mantid::API::Algorithm*> >& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
+//        .def("subAlgorithms", (std::vector<Mantid::API::Algorithm*,std::allocator<Mantid::API::Algorithm*> >& (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
     ;*/
 
-    class_< Mantid::Kernel::FrameworkManager >("FrameworkManager", init<  >())
-        .def(init< const Mantid::Kernel::FrameworkManager& >())
-        .def("initialize", &Mantid::Kernel::FrameworkManager::initialize)
-        .def("clear", &Mantid::Kernel::FrameworkManager::clear)
-        .def("createAlgorithm", (Mantid::Kernel::IAlgorithm* (Mantid::Kernel::FrameworkManager::*)(const std::string&) )&Mantid::Kernel::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >())
-        .def("createAlgorithm", (Mantid::Kernel::IAlgorithm* (Mantid::Kernel::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::Kernel::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >())
-        .def("exec", &Mantid::Kernel::FrameworkManager::exec, return_value_policy< manage_new_object >())
-        .def("getWorkspace", &Mantid::Kernel::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
+    class_< Mantid::API::FrameworkManager >("FrameworkManager", init<  >())
+        .def(init< const Mantid::API::FrameworkManager& >())
+        .def("initialize", &Mantid::API::FrameworkManager::initialize)
+        .def("clear", &Mantid::API::FrameworkManager::clear)
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::API::FrameworkManager::*)(const std::string&) )&Mantid::API::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >())
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::API::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::API::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >())
+        .def("exec", &Mantid::API::FrameworkManager::exec, return_value_policy< manage_new_object >())
+        .def("getWorkspace", &Mantid::API::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
     ;
 
-    class_< Mantid::Kernel::Workspace, boost::noncopyable, Mantid_Kernel_Workspace_Wrapper >("Workspace", no_init)
-        .def("id", pure_virtual(&Mantid::Kernel::Workspace::id))
-        .def("getMemorySize", &Mantid::Kernel::Workspace::getMemorySize, &Mantid_Kernel_Workspace_Wrapper::default_getMemorySize)
-        .def("setTitle", &Mantid::Kernel::Workspace::setTitle)
-        .def("setComment", &Mantid::Kernel::Workspace::setComment)
-        .def("getComment", &Mantid::Kernel::Workspace::getComment, return_value_policy< copy_const_reference >())
-        .def("getTitle", &Mantid::Kernel::Workspace::getTitle, return_value_policy< copy_const_reference >())
+    class_< Mantid::API::Workspace, boost::noncopyable, Mantid_Kernel_Workspace_Wrapper >("Workspace", no_init)
+        .def("id", pure_virtual(&Mantid::API::Workspace::id))
+        .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_Kernel_Workspace_Wrapper::default_getMemorySize)
+        .def("setTitle", &Mantid::API::Workspace::setTitle)
+        .def("setComment", &Mantid::API::Workspace::setComment)
+        .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
+        .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
     ;
     
-    class_< Mantid::Kernel::LibraryManager >("LibraryManager", init<  >())
-        .def(init< const Mantid::Kernel::LibraryManager& >())
-        .def("OpenLibrary", &Mantid::Kernel::LibraryManager::OpenLibrary)
+    class_< Mantid::API::LibraryManager >("LibraryManager", init<  >())
+        .def(init< const Mantid::API::LibraryManager& >())
+        .def("OpenLibrary", &Mantid::API::LibraryManager::OpenLibrary)
     ;
 
 }

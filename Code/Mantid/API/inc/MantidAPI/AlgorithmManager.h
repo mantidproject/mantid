@@ -9,14 +9,14 @@
 #define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::Kernel::AlgorithmManager::Instance()->subscribe<ns::classname>(#classname)) \
+       ((Mantid::API::AlgorithmManager::Instance()->subscribe<ns::classname>(#classname)) \
        , 0)); \
   }
 
 #define DECLARE_ALGORITHM(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::Kernel::AlgorithmManager::Instance()->subscribe<classname>(#classname)) \
+       ((Mantid::API::AlgorithmManager::Instance()->subscribe<classname>(#classname)) \
        , 0)); \
   }
 
@@ -31,7 +31,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 /** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
 
@@ -62,7 +62,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlgorithmManager  : public DynamicFactory<IAlgorithm>
+class DLLExport AlgorithmManager  : public Kernel::DynamicFactory<IAlgorithm>
 {
 public:
 
@@ -90,14 +90,14 @@ private:
 
 
   /// Static reference to the logger class
-	static Logger& g_log;
+	static Kernel::Logger& g_log;
  
 	int no_of_alg;                       ///< counter of registered algorithms
 	std::vector<IAlgorithm*> regAlg;     ///<  pointers to registered algorithms [policy???]
 	static AlgorithmManager* m_instance; ///< Pointer to the Algorithm Manager instance
 };
 
-} // namespace Kernel
+} // namespace API
 }  //Namespace Mantid
 
 #endif /* MANTID_KERNEL_ALGORITHMMANAGER_H_ */

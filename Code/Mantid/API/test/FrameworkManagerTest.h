@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 class ToyAlgorithm2 : public Algorithm
 {

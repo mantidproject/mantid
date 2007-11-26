@@ -13,7 +13,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 /** @class Instrument Instrument.h
  	
@@ -60,7 +60,7 @@ public:
 
 private:
 	/// Static reference to the logger class
-	static Logger& g_log;
+	static Kernel::Logger& g_log;
 
 	Geometry::Component* getChild(const std::string& name);
 
@@ -69,6 +69,6 @@ private:
 	
 };
 
-} // namespace Kernel
+} // namespace API
 } //Namespace Mantid
 #endif /*MANTID_KERNEL_INSTRUMENT_H_*/

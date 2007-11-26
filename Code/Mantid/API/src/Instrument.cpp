@@ -4,10 +4,10 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
-Logger& Instrument::g_log = Logger::get("Instrument");
+Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
 Instrument::Instrument() : Geometry::CompAssembly(),_detectorsCacheValue(0)
@@ -85,7 +85,7 @@ Geometry::Detector* Instrument::getDetector(const int &detector_id)
 		
 	if (!retVal)
 	{
-		throw Exception::NotFoundError("Instrument: Detector is not found.","");
+		throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
 	}
 	
 	return retVal;
@@ -115,11 +115,11 @@ Geometry::Component* Instrument::getChild(const std::string& name)
 
 	if (!retVal)
 	{
-		throw Exception::NotFoundError("Instrument: Child "+ name + " is not found.",name);
+		throw Kernel::Exception::NotFoundError("Instrument: Child "+ name + " is not found.",name);
 	}
 	
 	return retVal;
 }
 	
-} // namespace Kernel
+} // namespace API
 } // Namespace Mantid

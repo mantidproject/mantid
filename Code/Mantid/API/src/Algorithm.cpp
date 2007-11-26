@@ -6,11 +6,11 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
   // Get a reference to the logger
-  Logger& Algorithm::g_log = Logger::get("Algorithm");
+  Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
   /// Constructor
   Algorithm::Algorithm() :
@@ -60,11 +60,11 @@ namespace Kernel
    * 
    *  @return A StatusCode object indicating whether the operation was successful
    */
-  StatusCode Algorithm::initialize() 
+  Kernel::StatusCode Algorithm::initialize() 
   {
     // Bypass the initialization if the algorithm
     // has already been initialized.
-    if ( m_isInitialized ) return StatusCode::SUCCESS;
+    if ( m_isInitialized ) return Kernel::StatusCode::SUCCESS;
         
     // Declare the Input/OutputWorkspace properties - common to all algorithms
     declareProperty("InputWorkspace","");
@@ -74,8 +74,8 @@ namespace Kernel
     try 
     {
       // Invoke the initialize() method of the derived class
-      StatusCode status = init();
-      if( status.isFailure() ) return StatusCode::FAILURE;
+      Kernel::StatusCode status = init();
+      if( status.isFailure() ) return Kernel::StatusCode::FAILURE;
   
       // Now initialize any sub-algorithms
       std::vector<Algorithm*>::iterator it;
@@ -91,7 +91,7 @@ namespace Kernel
       
       // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
       setInitialized();
-      return StatusCode::SUCCESS;
+      return Kernel::StatusCode::SUCCESS;
     }
     // Unpleasant catch-all! Along with this, Gaudi version catches GaudiException & std::exception
     // but doesn't really do anything except (print fatal) messages.
@@ -104,7 +104,7 @@ namespace Kernel
     }
     
     // Only gets to here if an exception is encountered
-    return StatusCode::FAILURE;
+    return Kernel::StatusCode::FAILURE;
   }
   
   /** The actions to be performed by the algorithm on a dataset. This method is
@@ -115,10 +115,10 @@ namespace Kernel
     * 
     *  @return A StatusCode object indicating whether the operation was successful
     */
-  StatusCode Algorithm::execute() 
+  Kernel::StatusCode Algorithm::execute() 
   {
     // Return a failure if the algorithm hasn't been initialized
-    if ( !isInitialized() ) return StatusCode::FAILURE;
+    if ( !isInitialized() ) return Kernel::StatusCode::FAILURE;
 
     // Set the input and output workspaces
     std::string inputWorkspaceName;
@@ -130,12 +130,12 @@ namespace Kernel
     
     try {
       inputWorkspaceName = getPropertyValue("InputWorkspace");
-      StatusCode status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
+      Kernel::StatusCode status = ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
       if (status.isFailure() )
       {
         g_log.information("Input workspace doesn't exist");
       }
-    } catch (Exception::NotFoundError e) {
+    } catch (Kernel::Exception::NotFoundError e) {
       g_log.information("Input workspace property not set ");     
     }
         
@@ -143,7 +143,7 @@ namespace Kernel
     try
     {
       // Call the concrete algorithm's exec method
-      StatusCode status = exec();
+      Kernel::StatusCode status = exec();
       
       // Register the output workspace with the analysis data service
       if ( m_outputWorkspace )
@@ -153,7 +153,7 @@ namespace Kernel
           m_outputWorkspaceName = getPropertyValue("OutputWorkspace");
           status = ADS->addOrReplace(m_outputWorkspaceName, m_outputWorkspace);
           if ( status.isFailure() ) g_log.error("Algorithm: Unable to register output workspace");
-        } catch (Exception::NotFoundError e) {
+        } catch (Kernel::Exception::NotFoundError e) {
           g_log.information("Output workspace property not set");
         }
       }
@@ -182,7 +182,7 @@ namespace Kernel
     // having an event loop, and thus we shouldn't want it. This is the only place it's used.
     
     // Only gets to here if an exception is encountered
-    return StatusCode::FAILURE;
+    return Kernel::StatusCode::FAILURE;
   }
   
   /** System finalization. This method invokes the finalize() method of a 
@@ -191,16 +191,16 @@ namespace Kernel
    *
    *  @return A StatusCode object indicating whether the operation was successful
    */ 
-  StatusCode Algorithm::finalize() 
+  Kernel::StatusCode Algorithm::finalize() 
   {
     // Bypass the finalization if the algorithm hasn't been initialized or
     // has already been finalized.
-    if ( !isInitialized() || isFinalized() ) return StatusCode::FAILURE;
+    if ( !isInitialized() || isFinalized() ) return Kernel::StatusCode::FAILURE;
   
     // Invoke final() method of the derived class inside a try/catch clause
     try
     {
-      StatusCode status(StatusCode::SUCCESS,true);
+      Kernel::StatusCode status(Kernel::StatusCode::SUCCESS,true);
 
       // Finalize first any sub-algoithms (it can be done more than once)
       // Gaudi at some point had a bug if this wasn't done first.
@@ -217,7 +217,7 @@ namespace Kernel
       }		
   
       // Invoke the final() method of the derived class
-      StatusCode Fstatus= final();
+      Kernel::StatusCode Fstatus= final();
       if( Fstatus.isFailure() ) status=Fstatus;
   
       // Release all sub-algorithms (uses IInterface release method in Gaudi instead of direct delete)
@@ -248,7 +248,7 @@ namespace Kernel
     }
     
     // Only gets to here if an exception is encountered
-    return StatusCode::FAILURE;
+    return Kernel::StatusCode::FAILURE;
   }
   
   /// Has the Algorithm already been initialized
@@ -282,11 +282,11 @@ namespace Kernel
    * 
    *  @return        Success since nothing ever happens.
    */
-  StatusCode Algorithm::createSubAlgorithm( const std::string& type, const std::string& name, 
+  Kernel::StatusCode Algorithm::createSubAlgorithm( const std::string& type, const std::string& name, 
                                  Algorithm*& pSubAlg )
   {
     /// @todo This method needs implementing now that we have an algorithm factory
-    return StatusCode::SUCCESS;   
+    return Kernel::StatusCode::SUCCESS;   
   }
   
   // IProperty implementation
@@ -306,12 +306,12 @@ namespace Kernel
     return m_propertyMgr.getPropertyValue(name);
   }
   
-  Property* Algorithm::getProperty( const std::string &name ) const
+  Kernel::Property* Algorithm::getProperty( const std::string &name ) const
   {
     return m_propertyMgr.getProperty(name);
   }
   
-  std::vector< Property* > Algorithm::getProperties() const
+  std::vector< Kernel::Property* > Algorithm::getProperties() const
   {
     return m_propertyMgr.getProperties();
   }
@@ -344,10 +344,10 @@ namespace Kernel
    *  Delegated to the PropertyManager method
    *  @param p A pointer to the property instance to register
    */
-  void Algorithm::declareProperty( Property *p )
+  void Algorithm::declareProperty( Kernel::Property *p )
   {
     m_propertyMgr.declareProperty(p);
   }
   
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid

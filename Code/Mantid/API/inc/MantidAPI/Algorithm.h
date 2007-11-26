@@ -21,7 +21,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
 //----------------------------------------------------------------------
@@ -81,14 +81,14 @@ class Workspace;
 
      // IAlgorithm methods	  
      virtual const std::string& version() const;
-     StatusCode initialize();
-     StatusCode execute();
-     StatusCode finalize();	  
+     Kernel::StatusCode initialize();
+     Kernel::StatusCode execute();
+     Kernel::StatusCode finalize();	  
      virtual bool isInitialized() const;    // Protected in Gaudi version
      virtual bool isExecuted() const;
      virtual bool isFinalized() const;
     
-     StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
+     Kernel::StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
                                     Algorithm*& pSubAlg );
 	  
      /// List of sub-algorithms (const version). Returns a pointer to a vector of (sub) Algorithms
@@ -100,18 +100,18 @@ class Workspace;
      virtual void setProperty( const std::string &name, const std::string &value );
      virtual bool existsProperty( const std::string &name ) const;
      virtual std::string getPropertyValue( const std::string &name ) const;
-     virtual Property* getProperty( const std::string &name ) const;
-     virtual std::vector< Property* > getProperties() const;
+     virtual Kernel::Property* getProperty( const std::string &name ) const;
+     virtual std::vector< Kernel::Property* > getProperties() const;
 	  
   protected:
 	  
 	  // Equivalents of Gaudi's initialize, execute & finalize methods
 	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual StatusCode init () = 0;
+	  virtual Kernel::StatusCode init () = 0;
 	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual StatusCode exec () = 0;
+	  virtual Kernel::StatusCode exec () = 0;
 	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual StatusCode final() = 0;
+	  virtual Kernel::StatusCode final() = 0;
 	  
 	  void setInitialized();
 	  void setExecuted( bool state );
@@ -129,7 +129,7 @@ class Workspace;
       m_propertyMgr.declareProperty(name,value,doc);
     }
     
-    void declareProperty( Property *p );
+    void declareProperty( Kernel::Property *p );
     
 	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
 	  Workspace* m_inputWorkspace;
@@ -149,7 +149,7 @@ class Workspace;
 	  std::vector<Algorithm *> m_subAlgms;  ///< Sub algorithms
 
 	  /// Static refenence to the logger class
-	  static Logger& g_log;
+	  static Kernel::Logger& g_log;
 	  	  
 	  bool  m_isInitialized;    ///< Algorithm has been initialized flag
 	  bool  m_isExecuted;       ///< Algorithm is executed flag
@@ -162,10 +162,10 @@ class Workspace;
 	  std::string m_outputWorkspaceName;
 
 	  /// Manages the algorithm's properties
-	  PropertyManager m_propertyMgr;
+	  Kernel::PropertyManager m_propertyMgr;
   };
   
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_ALGORITHM_H_*/

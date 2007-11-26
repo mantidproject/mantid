@@ -2,9 +2,9 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
-	Logger& AlgorithmFactory::g_log = Logger::get("AlgorithmFactory");
+	Kernel::Logger& AlgorithmFactory::g_log = Kernel::Logger::get("AlgorithmFactory");
 
 	// Initialise the instance pointer to zero
 	AlgorithmFactory* AlgorithmFactory::m_instance = 0;
@@ -24,5 +24,5 @@ namespace Kernel
 	  return m_instance;
 	}
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid

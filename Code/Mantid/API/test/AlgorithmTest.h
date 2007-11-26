@@ -7,6 +7,7 @@
 #include "MantidKernel/Property.h"
 
 using namespace Mantid::Kernel; 
+using namespace Mantid::API;
 
 class ToyAlgorithm : public Algorithm
 {

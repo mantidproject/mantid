@@ -6,7 +6,8 @@
 #include "MantidAPI/Algorithm.h"
 #include <stdexcept>
 
-using namespace Mantid::Kernel;
+using Mantid::Kernel::StatusCode;
+using namespace Mantid::API;
 
 class algmantest : public Algorithm
 {
@@ -32,8 +33,6 @@ class algmantestSecond : public Algorithm
 
  DECLARE_ALGORITHM(algmantest)
  DECLARE_ALGORITHM(algmantestSecond)
-
-using namespace Mantid::Kernel;
 
 class AlgorithmManagerTest : public CxxTest::TestSuite
 {

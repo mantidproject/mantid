@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
 //----------------------------------------------------------------------
@@ -46,7 +46,7 @@ class IAlgorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class DLLExport AlgorithmFactory : public DynamicFactory<IAlgorithm>
+  class DLLExport AlgorithmFactory : public Kernel::DynamicFactory<IAlgorithm>
   {
   public:
     
@@ -74,13 +74,13 @@ class IAlgorithm;
 	AlgorithmFactory& operator = (const AlgorithmFactory&);
 
 	///static reference to the logger class
-	static Logger& g_log;
+	static Kernel::Logger& g_log;
 
     /// Pointer to the factory instance
     static AlgorithmFactory* m_instance;
   };
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_ALGORITHMFACTORY_H_*/

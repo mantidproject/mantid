@@ -6,6 +6,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite
 {

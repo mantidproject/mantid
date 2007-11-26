@@ -12,7 +12,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 /** @class Workspace Workspace.h
  	
@@ -80,9 +80,9 @@ private:
 	Instrument _instrument;
   
 	/// Static reference to the logger class
-	static Logger& g_log;
+	static Kernel::Logger& g_log;
 };
 
-} // namespace Kernel
+} // namespace API
 } //Namespace Mantid
 #endif /*MANTID_KERNEL_WORKSPACE_H_*/

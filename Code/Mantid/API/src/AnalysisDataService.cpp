@@ -5,9 +5,9 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
-// Logger& AnalysisDataService::g_log = Logger::get("AnalysisDataService");
+	Kernel::Logger& AnalysisDataService::g_log = Kernel::Logger::get("AnalysisDataService");
 
 /** Static method which retrieves the single instance of the Analysis data service
   * 
@@ -27,10 +27,10 @@ AnalysisDataService* AnalysisDataService::Instance()
 	 *  @param space A pointer to the workspace
 	 *  @return A StatusCode object indicating whether the operation was successful
 	 */
-StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
+Kernel::StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
 {
   // Don't permit an empty name for the workspace
-  if (name.empty()) return StatusCode::FAILURE;
+  if (name.empty()) return Kernel::StatusCode::FAILURE;
   
   // At the moment, you can't overwrite a workspace (i.e. pass in a name
   // that's already in the map with a pointer to a different workspace).
@@ -38,9 +38,9 @@ StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
   // more than once with different names.
   if (m_spaces.insert(WorkspaceMap::value_type(name, space)).second)
   {
-    return StatusCode::SUCCESS;
+    return Kernel::StatusCode::SUCCESS;
   }
-  return StatusCode::FAILURE;
+  return Kernel::StatusCode::FAILURE;
 }
 
 /** Add or replaces a pointer to a named workspace to the data service store.
@@ -52,7 +52,7 @@ StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
 	 *  @param space A pointer to the workspace
 	 *  @return A StatusCode object indicating whether the operation was successful
 	 */
-StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
+Kernel::StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
 {
   //find if the workspace already exists
   WorkspaceMap::const_iterator it = m_spaces.find(name);
@@ -69,7 +69,7 @@ StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace*
 		delete existingSpace;
 	}
 
-    return StatusCode::SUCCESS;
+    return Kernel::StatusCode::SUCCESS;
   }
   else
   {
@@ -78,7 +78,7 @@ StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace*
   }
 
 
-  return StatusCode::FAILURE;
+  return Kernel::StatusCode::FAILURE;
 }
 
 /** Remove a workspace from the data service store.
@@ -87,15 +87,15 @@ StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace*
  *  @param name The user-given name for the workspace
  *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode AnalysisDataService::remove(const std::string& name)
+Kernel::StatusCode AnalysisDataService::remove(const std::string& name)
 {  
   // Get a iterator to the workspace and naem
   WorkspaceMap::iterator it = m_spaces.find(name);
-  if (it==m_spaces.end()) return StatusCode::FAILURE;	  
+  if (it==m_spaces.end()) return Kernel::StatusCode::FAILURE;	  
   // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
   delete it->second;
   m_spaces.erase(it);
-  return StatusCode::SUCCESS;
+  return Kernel::StatusCode::SUCCESS;
 }
 
 /** Retrieve a pointer to a workspace by name.
@@ -104,15 +104,15 @@ StatusCode AnalysisDataService::remove(const std::string& name)
  *  @param space Returns a pointer to the requested workspace
  *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
+Kernel::StatusCode AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
 {
   WorkspaceMap::const_iterator it = m_spaces.find(name);
   if (m_spaces.end() != it)
   {
     space = it->second;
-    return StatusCode::SUCCESS;
+    return Kernel::StatusCode::SUCCESS;
   }
-  return StatusCode::FAILURE;
+  return Kernel::StatusCode::FAILURE;
 }
 
 //----------------------------------------------------------------------

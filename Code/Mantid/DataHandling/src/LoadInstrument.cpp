@@ -88,7 +88,7 @@ namespace DataHandling
 	// Get a pointer to the workspace factory (later will be shared)
 	if (inputWorkspaceName != outputWorkspaceName)
 	{
-		WorkspaceFactory *factory = WorkspaceFactory::Instance();
+		API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
 		m_outputWorkspace = factory->create("Workspace2D");
 	}
 	else
@@ -98,7 +98,7 @@ namespace DataHandling
 	Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
 	///Geometry components
-	Kernel::Instrument& instrument = localWorkspace->getInstrument();
+	API::Instrument& instrument = localWorkspace->getInstrument();
 	Geometry::ObjComponent  *source = new Geometry::ObjComponent;
 	Geometry::ObjComponent *samplepos = new Geometry::ObjComponent;
 	Geometry::Detector tube;
