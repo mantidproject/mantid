@@ -26,16 +26,17 @@ dirpath=os.listdir(uppath)
 while(len(dirpath)):
 	try:
 		item=dirpath.pop(0)
-		for file in os.listdir("../"+item):
-			fullPath="../"+item+"/"+file
-			if (file=="inc"):
-				cppPaths.append(fullPath)
-			elif (file=="src"):
-				dirList.append(item)
-				print "SRC PATH == ",item
-			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-			and (not file.endswith('test'))):
-				dirpath.append(fullPath[3:])
+		if not item.startswith('Geometry'):
+			for file in os.listdir("../"+item):
+				fullPath="../"+item+"/"+file
+				if (file=="inc"):
+					cppPaths.append(fullPath)
+				elif (file=="src"):
+					dirList.append(item)
+					print "SRC PATH == ",item
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])
 	except:
 		pass
 		
@@ -55,7 +56,7 @@ if os.name == 'nt':
   for file in os.listdir(libDir):
     if file.endswith('.dll'):
       libList.append(file.replace('.dll',''))
-	
+
 else:       ## so this must be posix
 
   boost_path = ''        ## Set from the Scons_Linux.conf File"
@@ -74,9 +75,9 @@ else:       ## so this must be posix
       if (poco_path[-1]!='/'):
         poco_path+='/'
       print 'Poco root = ' + poco_path
-	
+
   f.close()
-	
+
   cflags = ['-Wall', '-fPIC']
   cppPaths.append('/usr/include/python' + sys.version[0:3])
   cppPaths.append(poco_path + 'Foundation/include')
@@ -90,14 +91,23 @@ pathToRoot = '../'
 for fname in dirList:
   print "dir:",fname 
   if os.path.isdir(pathToRoot + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
       #does folder contain /src?
       if os.path.exists(pathToRoot + fname + codeFolder):
 	files = os.listdir(pathToRoot + fname + codeFolder)
 	for file in files:
 	  if (file.endswith('.cpp') or file.endswith('.c') or file.endswith('.f')):
 	    listCpps.append(pathToRoot + fname + codeFolder + '/' +  file)
-	    
+
+listCpps.append(os.path.abspath('../Geometry/src/CompAssembly.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Component.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Detector.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/ObjComponent.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Quat.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/V3D.cpp'))
+
+cppPaths.append(os.path.abspath('../Geometry/inc/'))
+
 	    
 # set header include paths
 env = Environment(CPPPATH=cppPaths,FORTRAN='gfortran')
