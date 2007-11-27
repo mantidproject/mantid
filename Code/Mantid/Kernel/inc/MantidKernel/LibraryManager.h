@@ -8,6 +8,8 @@
 #include <string>
 #include <map>
 
+#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
 namespace Kernel
@@ -56,8 +58,11 @@ public:
 	//void DestroyAlgorithm(const std::string&, Algorithm*);
 
 private:
-  /// An untyped pointer to the loaded library
+	/// An untyped pointer to the loaded library
 	void* module;
+
+	/// Static reference to the logger class
+	static Mantid::Kernel::Logger& log;
 };
 
 } // namespace Kernel

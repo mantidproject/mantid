@@ -1,6 +1,7 @@
 #ifndef MANTID_LIBRARYMANAGERTEST_H_
 #define MANTID_LIBRARYMANAGERTEST_H_
 
+#include <iostream>
 #include <cxxtest/TestSuite.h>
 
 //#include "MantidKernel/StatusCode.h"
@@ -30,16 +31,25 @@ public:
   
   void testLoadedAlgorithm()
   {
-	Mantid::API::FrameworkManager manager;
-	manager.initialize();
+	try
+	{
+		Mantid::API::FrameworkManager manager;
+		manager.initialize();
 	  
-	Mantid::API::IAlgorithm* alg= manager.createAlgorithm("TestAlgorithm");
+		Mantid::API::IAlgorithm* alg= manager.createAlgorithm("TestAlgorithm");
 	  
-	StatusCode result = alg->execute();
+		StatusCode result = alg->execute();
 	  
-	TS_ASSERT( !result.isFailure() );
+		TS_ASSERT( !result.isFailure() );
 	
-	delete alg;
+		delete alg;
+		
+	}
+	catch (...)
+	{
+		//Probably failed because testOpenLibrary failed!
+		TS_ASSERT( false );
+	}
   }
   
 };

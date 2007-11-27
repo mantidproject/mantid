@@ -10,6 +10,9 @@ namespace Mantid
 {
 namespace Kernel
 {
+	// Get a reference to the logger
+	Logger& LibraryManager::log = Logger::get("LibraryManager");
+		
 	/// Constructor
 	LibraryManager::LibraryManager() : module(0)
 	{}
@@ -37,7 +40,7 @@ namespace Kernel
 			module = DllOpen::OpenDll(libName);
 			if (!module) 
 			{
-				std::cout << "Could not open library!\n";
+				log.error("Could not open library: " + libName);
 				return false;
 			}
 		}
