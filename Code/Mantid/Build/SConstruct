@@ -79,6 +79,7 @@ else:       ## so this must be posix
   f.close()
 
   cflags = ['-Wall', '-fPIC']
+  cppPaths.append(boost_path)
   cppPaths.append('/usr/include/python' + sys.version[0:3])
   cppPaths.append(poco_path + 'Foundation/include')
   cppPaths.append(poco_path + 'Util/include')
