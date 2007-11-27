@@ -8,6 +8,8 @@
 #include <string>
 #include <exception>
 #include <map>
+#include <ostream>
+#include <streambuf>
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -16,6 +18,7 @@
 namespace Poco
 {
 	class Logger;
+	class LogStream;
 }
 /// @endcond
 
@@ -29,6 +32,11 @@ namespace Kernel
     various channels. The static methods on the class are responsible for the creation
     of Logger objects on request. This class currently uses the Logging functionality
     provided through the POCO (portable components) library.
+
+	Usage example:
+	    Logger ls(someLogger);
+	    ls.error("Some informational message");
+	    ls.error() << "Some error message" << std::endl;
     
     @author Nicholas Draper, Tessella Support Services plc
     @date 12/10/2007
@@ -53,14 +61,13 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport Logger
+	class DLLExport Logger 
 	{
 	public:	
 		/// An emuration of the priority levels of a log message.
 		enum Priority
 		{
-			PRIO_FATAL = 1,		    /// A fatal error. The application will most likely terminate. This is the highest priority.
-			PRIO_CRITICAL = 2,    /// A critical error. The application might not be able to continue running successfully.
+			PRIO_FATAL = 1,		  /// A fatal error. The application will most likely terminate. This is the highest priority.
 			PRIO_ERROR = 3,       /// An error. An operation did not complete successfully, but the application as a whole is not affected.
 			PRIO_WARNING = 4,     /// A warning. An operation completed with an unexpected result.
 			PRIO_INFORMATION = 6, /// An informational message, usually denoting the successful completion of an operation.
@@ -68,11 +75,17 @@ namespace Kernel
 		};
 
 		void fatal(const std::string& msg);
-		void critical(const std::string& msg);
 		void error(const std::string& msg);
 		void warning(const std::string& msg);
 		void information(const std::string& msg);
 		void debug(const std::string& msg);
+
+		std::ostream& fatal();
+		std::ostream& critical();
+		std::ostream& error();
+		std::ostream& warning();
+		std::ostream& information();
+		std::ostream& debug();
 
 		/// Logs the given message at debug level, followed by the data in buffer.
 		void dump(const std::string& msg, const void* buffer, std::size_t length);
@@ -92,14 +105,17 @@ namespace Kernel
 		/// Protected constructor called by static get method
 		Logger(const std::string& name);
 		
+		
 	private:
 		Logger();
 
 		/// Overload of = operator
 		Logger& operator= (const Logger&);
 
-		/// Internal handle to third party logging object
+		/// Internal handle to third party logging objects
 		Poco::Logger& _log;
+		///This pointer is owned by this class, initialized in the constructor and deleted in the destructor
+		Poco::LogStream* _logStream;
 		
 		/// Name of this logging object
 		std::string _name;

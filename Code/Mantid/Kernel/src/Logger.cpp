@@ -1,16 +1,24 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Logger.h>
+#include <Poco/LogStream.h>
 #include <Poco/Message.h>
 #include <iostream>
+#include <sstream>
 
 namespace Mantid
 {
 namespace Kernel
 {
-  /// No argument constructor
-  Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
+	/// No argument constructor
+	Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
 	{  
 		_name = name;
+		_logStream = new Poco::LogStream(_log);
+	}
+
+	Logger::~Logger()
+	{
+		delete (_logStream);
 	}
 
   /** If the Logger's log level is at least PRIO_FATAL, creates a Message with 
@@ -31,24 +39,6 @@ namespace Kernel
 		}
 	}
 		
-  /** If the Logger's log level is at least PRIO_CRITICAL, creates a Message with priority
-   *  PRIO_CRITICAL and the given message text and sends it to the attached channel.
-   * 
-   *  @param msg The message to log.
-   */
-	void Logger::critical(const std::string& msg)
-	{
-		try
-		{
-			_log.critical(msg);
-		} 
-		catch (std::exception& e)
-		{
-			//failures in logging are not allowed to throw exceptions out of the logging class
-			std::cerr << e.what();
-		}
-	}
-
   /** If the Logger's log level is at least PRIO_ERROR, creates a Message with priority
    *  PRIO_ERROR and the given message text and sends it to the attached channel.
    * 
@@ -167,6 +157,67 @@ namespace Kernel
 		return retVal;
 	}
 
+  /** This class implements an ostream interface to the Logger for fatal messages.
+	*
+	* The stream's buffer appends all characters written to it
+	* to a string. As soon as a CR or LF (std::endl) is written,
+	* the string is sent to the Logger.
+	* @returns an std::ostream reference.
+	*/
+	std::ostream& Logger::fatal()
+	{
+		return _logStream->fatal();
+	}
+
+	/** This class implements an ostream interface to the Logger for error messages.
+	*
+	* The stream's buffer appends all characters written to it
+	* to a string. As soon as a CR or LF (std::endl) is written,
+	* the string is sent to the Logger.
+	* @returns an std::ostream reference.
+	*/
+	std::ostream& Logger::error()
+	{
+		return _logStream->error();
+	}
+
+	/** This class implements an ostream interface to the Logger for warning messages.
+	*
+	* The stream's buffer appends all characters written to it
+	* to a string. As soon as a CR or LF (std::endl) is written,
+	* the string is sent to the Logger.
+	* @returns an std::ostream reference.
+	*/
+	std::ostream& Logger::warning()
+	{
+		return _logStream->warning();
+	}
+
+	/** This class implements an ostream interface to the Logger for information messages.
+	*
+	* The stream's buffer appends all characters written to it
+	* to a string. As soon as a CR or LF (std::endl) is written,
+	* the string is sent to the Logger.
+	* @returns an std::ostream reference.
+	*/
+	std::ostream& Logger::information()
+	{
+		return _logStream->information();
+	}
+
+	/** This class implements an ostream interface to the Logger for debug messages.
+	*
+	* The stream's buffer appends all characters written to it
+	* to a string. As soon as a CR or LF (std::endl) is written,
+	* the string is sent to the Logger.
+	* @returns an std::ostream reference.
+	*/
+	std::ostream& Logger::debug()
+	{
+		return _logStream->debug();
+	}
+
+
   /// Shuts down the logging framework and releases all Loggers.  
 	void Logger::shutdown()
 	{
@@ -191,6 +242,7 @@ namespace Kernel
 		Logger* pLogger = new Logger(name);
 		return *pLogger;
 	}
+
 
 } // namespace Kernel
 } // Namespace Mantid
