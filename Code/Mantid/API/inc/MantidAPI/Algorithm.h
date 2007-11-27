@@ -91,9 +91,9 @@ class Workspace;
      Kernel::StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
                                     Algorithm*& pSubAlg );
 	  
-     /// List of sub-algorithms (const version). Returns a pointer to a vector of (sub) Algorithms
+     /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
      const std::vector<Algorithm*>& subAlgorithms() const { return m_subAlgms; }
-     /// List of sub-algorithms. Returns a pointer to a vector of (sub) Algorithms
+     /// List of sub-algorithms. Returns a reference to a vector of (sub) Algorithms
      std::vector<Algorithm*>& subAlgorithms()  { return m_subAlgms; }
 
      // IProperty methods
@@ -101,7 +101,7 @@ class Workspace;
      virtual bool existsProperty( const std::string &name ) const;
      virtual std::string getPropertyValue( const std::string &name ) const;
      virtual Kernel::Property* getProperty( const std::string &name ) const;
-     virtual std::vector< Kernel::Property* > getProperties() const;
+     virtual const std::vector< Kernel::Property* >& getProperties() const;
 	  
   protected:
 	  

@@ -21,6 +21,7 @@ class Property;
     Property manager helper class.
     This class is used by algorithms and services for helping to manage their own set of properties.
     It implements the IProperty interface.
+    N.B. ONCE YOU HAVE DECLARAED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS (I.E. DON'T DELETE IT!)
 
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
@@ -66,7 +67,7 @@ public:
   bool existsProperty( const std::string &name ) const;
   std::string getPropertyValue( const std::string &name ) const;
   Property* getProperty( const std::string &name ) const;
-  std::vector< Property* > getProperties() const;
+  const std::vector< Property* >& getProperties() const;
 	
 private:
   /// typedef for the map holding the properties

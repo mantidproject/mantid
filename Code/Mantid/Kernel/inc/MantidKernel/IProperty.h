@@ -86,7 +86,7 @@ class Property;
      * 
      *  @return A vector holding pointers to the list of properties
      */
-    virtual std::vector< Property* > getProperties( ) const = 0;
+    virtual const std::vector< Property* >& getProperties( ) const = 0;
         
   };
 

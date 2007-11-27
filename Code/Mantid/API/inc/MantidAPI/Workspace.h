@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Instrument.h"
+#include "MantidAPI/Sample.h"
 #include "MantidKernel/Logger.h"
 #include <string>
 #include <ostream> 
@@ -58,6 +59,7 @@ public:
 	const std::string& getTitle() const;
 
 	Instrument& getInstrument() ;
+	Sample& getSample();
 
 	/// Get the footprint in memory.
 	virtual long int getMemorySize() const {return 0;}
@@ -76,8 +78,10 @@ private:
 	/// A user-provided comment that is attached to the workspace
 	std::string _comment;
 
-	//the instrument used for this experiment
+	/// The instrument used for this experiment
 	Instrument _instrument;
+	/// The information on the sample environment
+	Sample _sample;
   
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

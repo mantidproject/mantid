@@ -17,7 +17,7 @@ public:
   /** Constructor
    *  @param name The name to assign to the property
    */
-	TimeSeriesProperty( const std::string &name ) :
+	explicit TimeSeriesProperty( const std::string &name ) :
 	  Property( name, typeid( std::map<std::string, TYPE> ) ),
 	  m_propertySeries()
 	{

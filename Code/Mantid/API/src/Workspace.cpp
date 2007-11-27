@@ -72,5 +72,10 @@ Instrument& Workspace::getInstrument()
 	return _instrument;
 }
 
+Sample& Workspace::getSample()
+{
+  return _sample;
+}
+
 } // namespace API
 } // Namespace Mantid

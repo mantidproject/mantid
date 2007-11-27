@@ -186,7 +186,7 @@ Property* PropertyManager::getProperty( const std::string &name ) const
  *  The properties will be stored in the order that they were declared.
  *  @return A vector holding pointers to the list of properties
  */
-std::vector< Property* > PropertyManager::getProperties() const
+const std::vector< Property* >& PropertyManager::getProperties() const
 {
   return m_orderedProperties;
 }

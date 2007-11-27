@@ -311,7 +311,7 @@ namespace API
     return m_propertyMgr.getProperty(name);
   }
   
-  std::vector< Kernel::Property* > Algorithm::getProperties() const
+  const std::vector< Kernel::Property* >& Algorithm::getProperties() const
   {
     return m_propertyMgr.getProperties();
   }

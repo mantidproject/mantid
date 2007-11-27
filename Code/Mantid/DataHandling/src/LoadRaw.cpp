@@ -94,7 +94,7 @@ namespace DataHandling
 
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
-	API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
+    API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
     m_outputWorkspace = factory->create("Workspace2D");
     Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
