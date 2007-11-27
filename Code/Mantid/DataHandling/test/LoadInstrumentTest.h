@@ -84,7 +84,7 @@ public:
 	TS_ASSERT_EQUALS( ptrDet1000->getID(), 1000);
 	TS_ASSERT_EQUALS( ptrDet1000->getName(), "PSD");
 	TS_ASSERT_DELTA( ptrDet1000->getPos().X(), 3.86,0.01);
-	TS_ASSERT_DELTA( ptrDet1000->getPos().Y(), 1.12,0.01);
+	TS_ASSERT_DELTA( ptrDet1000->getPos().Y(), 11.12,0.01);
 	TS_ASSERT_DELTA( ptrDet1000->getPos().Z(), 0.43,0.01);
 	TS_ASSERT_EQUALS( ptrDet1000->type(), "DetectorComponent");
   }
