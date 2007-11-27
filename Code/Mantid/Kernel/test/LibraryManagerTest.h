@@ -30,10 +30,10 @@ public:
   
   void testLoadedAlgorithm()
   {
-	FrameworkManager manager;
+	Mantid::API::FrameworkManager manager;
 	manager.initialize();
 	  
-	IAlgorithm* alg= manager.createAlgorithm("TestAlgorithm");
+	Mantid::API::IAlgorithm* alg= manager.createAlgorithm("TestAlgorithm");
 	  
 	StatusCode result = alg->execute();
 	  
