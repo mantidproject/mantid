@@ -95,12 +95,12 @@ codeFolder = os.path.abspath('./src')
 listCpps = []
 pathToRoot = '../'
 
-listCpps.append(os.path.abspath('../Geometry/src/CompAssembly.cpp'))
-listCpps.append(os.path.abspath('../Geometry/src/Component.cpp'))
-listCpps.append(os.path.abspath('../Geometry/src/Detector.cpp'))
-listCpps.append(os.path.abspath('../Geometry/src/ObjComponent.cpp'))
-listCpps.append(os.path.abspath('../Geometry/src/Quat.cpp'))
-listCpps.append(os.path.abspath('../Geometry/src/V3D.cpp'))
+listCpps.append(os.path.abspath('src/CompAssembly.cpp'))
+listCpps.append(os.path.abspath('src/Component.cpp'))
+listCpps.append(os.path.abspath('src/Detector.cpp'))
+listCpps.append(os.path.abspath('src/ObjComponent.cpp'))
+listCpps.append(os.path.abspath('src/Quat.cpp'))
+listCpps.append(os.path.abspath('src/V3D.cpp'))
 
 # set header include paths
 env = Environment(CPPPATH=cppPaths)

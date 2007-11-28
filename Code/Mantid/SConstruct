@@ -110,16 +110,8 @@ subProjs.append('API/SConscript')
 subProjs.append('DataHandling/SConscript')
 subProjs.append('DataObjects/SConscript')
 subProjs.append('Kernel/SConscript')
+subProjs.append('Geometry/SConscript')
 #subProjs.append('Services/SConstruct')
 
 #Call the SConscripts
 SConscript(subProjs)
-
-#Copy all the libs to the necessary locations
-shutil.copy('Algorithms/lib/libMantidAlgorithms.so', 'Bin/Plugins/')
-
-shutil.copy('API/lib/libMantidAPI.so', 'Bin/')
-shutil.copy('DataHandling/lib/libMantidDataHandling.so', 'Bin/')
-shutil.copy('DataObjects/lib/libMantidDataObjects.so', 'Bin/')
-shutil.copy('Kernel/lib/libMantidKernel.so', 'Bin/')
-#shutil.copy('Services/lib/libMantidServices.so', 'Bin/')

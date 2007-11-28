@@ -71,7 +71,7 @@ void* DllOpen::OpenDll(const std::string& libName)
 
 void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
 {
-	std::string str = filePath + "lib" + libName + ".so";
+	std::string str = filePath + "/lib" + libName + ".so";
 	
 	void* handle = dlopen(str.c_str(), RTLD_NOW);
 	

@@ -6,12 +6,12 @@ import os
 codeFolder = os.path.abspath('./src')
 listCpps = []
 
-if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			print file
-			listCpps.append(codeFolder + '/' +  file)
+listCpps.append(os.path.abspath('src/CompAssembly.cpp'))
+listCpps.append(os.path.abspath('src/Component.cpp'))
+listCpps.append(os.path.abspath('src/Detector.cpp'))
+listCpps.append(os.path.abspath('src/ObjComponent.cpp'))
+listCpps.append(os.path.abspath('src/Quat.cpp'))
+listCpps.append(os.path.abspath('src/V3D.cpp'))
 
 #Import environment
 Import('cppPaths')
