@@ -3,7 +3,7 @@
 
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Instrument.h"
-#include "MantidAlgorithms/SimpleIntegration.h"
+#include "MantidDataHandling/LoadLog.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -23,24 +23,22 @@ main()
 	manager.initialize();
 	try
 	{
-		IAlgorithm *loader = manager.createAlgorithm("LoadInstrument");
-		std::string inputFile("../../../Test/Instrument/HET_Definition.txt");
+		IAlgorithm *loader = manager.createAlgorithm("LoadLog");
+		std::string inputFile("../../../Test/Data/HRP37129_ICPevent.txt");
 		loader->setProperty("Filename",inputFile);
-		loader->setProperty("OutputWorkspace","WSInstrument");
+		//loader->setProperty("OutputWorkspace","WSInstrument");
 		loader->execute();
 
-		Workspace *ws = manager.getWorkspace("WSInstrument");
-		Instrument& i = ws->getInstrument();
-		i.printSelf(std::cout);
-		std::cout << std::endl;
-		Mantid::Geometry::Component* source = i[0];
-		Mantid::Geometry::Component* samplepos = i[1];
-		i.printChildren(std::cout);
-		std::cout <<std::endl;
-
-		i.getDetector(1000)->printSelf(std::cout);
-		std::cout <<i.getDetector(1000)->getID()<<std::endl;
-
+    /*
+    IAlgorithm *saveCSV = manager.createAlgorithm("SaveCSV");
+    saveCSV->setProperty("Filename", "saveCSV2.txt");
+    saveCSV->setProperty("InputWorkspace", "inFile");
+    saveCSV->setProperty("Seperator", "*");
+    saveCSV->setProperty("LineSeperator", "\n");
+    saveCSV->initialize();
+    saveCSV->execute();
+    saveCSV->finalize();		
+*/
 	}
 	catch (Exception::NotFoundError &ex)
 	{

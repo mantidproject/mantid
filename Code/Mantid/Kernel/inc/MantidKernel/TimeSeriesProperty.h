@@ -4,6 +4,7 @@
 #include "Property.h"
 #include "Exception.h"
 #include <map>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 namespace Mantid
 {
@@ -14,11 +15,14 @@ template <typename TYPE>
 class TimeSeriesProperty : public Property
 {
 public:
+  /// The date-and-time will be stored as the boost ptime type
+  typedef boost::posix_time::ptime dateAndTime;
+
   /** Constructor
    *  @param name The name to assign to the property
    */
 	explicit TimeSeriesProperty( const std::string &name ) :
-	  Property( name, typeid( std::map<std::string, TYPE> ) ),
+	  Property( name, typeid( std::map<dateAndTime, TYPE> ) ),
 	  m_propertySeries()
 	{
 	}
@@ -41,11 +45,25 @@ public:
 	// Add a value to the map
 	bool addValue( std::string &time, TYPE &value )
 	{
-	  return m_propertySeries.insert(std::map<std::string, TYPE>::value_type(time, value)).second;
+    return m_propertySeries.insert( std::map<dateAndTime, TYPE>::value_type( 
+      dateAndTime(boost::posix_time::from_iso_string(time.c_str())), value) ).second;
 	}
+
+  /// for testing that values stored ok - while debugging
+  void printMapToScreen() 
+  { 
+    std::map<dateAndTime, TYPE>::iterator p = m_propertySeries.begin();
+
+    while ( p != m_propertySeries.end() )
+    {
+      std::cout << p->first << "  " << p->second << std::endl;
+      p++;
+    }
+
+  }
 	
 private:
-  std::map<std::string, TYPE> m_propertySeries;
+  std::map<dateAndTime, TYPE> m_propertySeries;
   
   /// Private default constructor
   TimeSeriesProperty();
