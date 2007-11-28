@@ -95,12 +95,12 @@ codeFolder = os.path.abspath('./src')
 listCpps = []
 pathToRoot = '../'
 
-if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			print file
-			listCpps.append(codeFolder + '/' +  file)
+listCpps.append(os.path.abspath('../Geometry/src/CompAssembly.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Component.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Detector.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/ObjComponent.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/Quat.cpp'))
+listCpps.append(os.path.abspath('../Geometry/src/V3D.cpp'))
 
 # set header include paths
 env = Environment(CPPPATH=cppPaths)

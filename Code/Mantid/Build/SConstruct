@@ -26,7 +26,7 @@ dirpath=os.listdir(uppath)
 while(len(dirpath)):
 	try:
 		item=dirpath.pop(0)
-		if not item.startswith('Geometry'):
+		if not item.startswith('Geometry') and not item.startswith('Main'):
 			for file in os.listdir("../"+item):
 				fullPath="../"+item+"/"+file
 				if (file=="inc"):

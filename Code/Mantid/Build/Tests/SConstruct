@@ -73,7 +73,7 @@ else:
   f.close()
 
   if (len(third_party)):
-    libDirList.append(os.path.abspath(third_party))
+    libDirList.append(os.path.abspath('../' + third_party))
   libDirList.append(os.path.abspath('../'))
   libDirList.append(boost_path)
   libDirList.append(poco_path + 'lib/Linux/i686/')

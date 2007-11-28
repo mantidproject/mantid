@@ -1,0 +1,24 @@
+#For MantidGeometry
+
+import os
+
+#GET LIST OF CPPS
+codeFolder = os.path.abspath('./src')
+listCpps = []
+
+if os.path.exists(codeFolder):
+	files = os.listdir(codeFolder)
+	for file in files:
+		if file.endswith('.cpp'):
+			print file
+			listCpps.append(codeFolder + '/' +  file)
+
+#Import environment
+Import('cppPaths')
+Import('cflags')
+
+env = Environment(CPPPATH=cppPaths)
+env.Append( CCFLAGS = cflags)
+
+#BUILD CODE
+env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=[ ], LIBPATH=[ ])

@@ -1,10 +1,13 @@
-#For MantidAlgorithms
+#For Framework
 
 import os
 import platform
 import sys
+import shutil
 
 from socket import gethostname
+
+#Set up the include paths etc
 
 def procHeaderPath(ln,keyname,out):
   ## Strips the header components if in existance and returns:
@@ -21,7 +24,7 @@ def procHeader(ln,keyname,out):
   if ln.startswith(keyname):
     out=ln[len(keyname)+1:].strip('\n')
   return out
-
+  
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
@@ -33,6 +36,7 @@ cflags = []
 dirList = []
 
 cppPaths = []
+
 
 if os.name == 'nt':
 	# assume this is Windows
@@ -53,7 +57,7 @@ else:
 	third_party=''
 
 	#Get paths
-	f=open('../Build/Scons_Linux.conf', 'r')
+	f=open('Build/Scons_Linux.conf', 'r')
 	
 	for ln in f:
 		boost_path=procHeaderPath(ln,'BOOST_ROOT',boost_path)
@@ -82,31 +86,40 @@ else:
 			for file in os.listdir("../"+item):
 				fullPath="../"+item+"/"+file
 				if (file=="inc"):
-					cppPaths.append(fullPath)
+					cppPaths.append(os.path.abspath(fullPath))
 				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
 				and (not file.endswith('test'))):
 					dirpath.append(fullPath[3:])
 		except:
 			pass
-	
 
-#GET LIST OF CPPS
-codeFolder = os.path.abspath('./src')
-listCpps = []
-pathToRoot = '../'
+#Export for SConscripts
 
-if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			print file
-			listCpps.append(codeFolder + '/' +  file)
+print cppPaths
 
-# set header include paths
-env = Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = cflags)
+#env = Environment(CPPPATH=cppPaths)
+#env.Append( CCFLAGS = cflags)
+Export('cppPaths')
+Export('cflags')
 
-print listCpps
+#Real work begins here
+subProjs = []
 
-#BUILD CODE
-env.SharedLibrary('lib/MantidAlgorithms', listCpps, LIBS=[ ], LIBPATH=[ ])
+subProjs.append('Algorithms/SConscript')
+subProjs.append('API/SConscript')
+subProjs.append('DataHandling/SConscript')
+subProjs.append('DataObjects/SConscript')
+subProjs.append('Kernel/SConscript')
+#subProjs.append('Services/SConstruct')
+
+#Call the SConscripts
+SConscript(subProjs)
+
+#Copy all the libs to the necessary locations
+shutil.copy('Algorithms/lib/libMantidAlgorithms.so', 'Bin/Plugins/')
+
+shutil.copy('API/lib/libMantidAPI.so', 'Bin/')
+shutil.copy('DataHandling/lib/libMantidDataHandling.so', 'Bin/')
+shutil.copy('DataObjects/lib/libMantidDataObjects.so', 'Bin/')
+shutil.copy('Kernel/lib/libMantidKernel.so', 'Bin/')
+#shutil.copy('Services/lib/libMantidServices.so', 'Bin/')
