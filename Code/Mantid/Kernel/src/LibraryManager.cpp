@@ -10,9 +10,6 @@ namespace Mantid
 {
 namespace Kernel
 {
-	// Get a reference to the logger
-	Logger& LibraryManager::log = Logger::get("LibraryManager");
-		
 	/// Constructor
 	LibraryManager::LibraryManager() : module(0)
 	{}
@@ -40,7 +37,26 @@ namespace Kernel
 			module = DllOpen::OpenDll(libName);
 			if (!module) 
 			{
-				log.error("Could not open library: " + libName);
+				return false;
+			}
+		}
+	
+		return true;
+	}
+	
+	/** Opens a DLL
+	 *  @param libName The name of the file to open (not including the lib/so/dll)
+	 *  @param filePath The filepath to the directory where the library lives
+	 *  @return True if DLL is opened or already open
+	 */
+	bool LibraryManager::OpenLibrary(const std::string& libName, const std::string& filePath)
+	{
+		if (!module)
+		{		
+			//Load dynamically loaded library
+			module = DllOpen::OpenDll(libName, filePath);
+			if (!module) 
+			{
 				return false;
 			}
 		}

@@ -24,6 +24,9 @@ namespace Mantid
 namespace Kernel
 {
 
+// Get a reference to the logger
+Logger& DllOpen::log = Logger::get("DllOpen");
+
 void* DllOpen::OpenDll(const std::string& libName)
 {
 	std::string str = libName + ".dll";
@@ -49,11 +52,34 @@ namespace Mantid
 {
 namespace Kernel
 {
+	
+// Get a reference to the logger
+Logger& DllOpen::log = Logger::get("DllOpen");
 
 void* DllOpen::OpenDll(const std::string& libName)
 {
 	std::string str = "lib" + libName + ".so";
-	return dlopen(str.c_str(), RTLD_NOW);
+	
+	void* handle = dlopen(str.c_str(), RTLD_NOW);
+	
+	if (!handle) {
+		log.error("Could not open library " + libName + ": " + dlerror());
+	}
+	
+	return handle;
+}
+
+void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
+{
+	std::string str = filePath + "lib" + libName + ".so";
+	
+	void* handle = dlopen(str.c_str(), RTLD_NOW);
+	
+	if (!handle) {
+		log.error("Could not open library " + libName + ": " + dlerror());
+	}
+	
+	return handle;
 }
 
 void* DllOpen::GetFunction(void* lib, const std::string& funcName)

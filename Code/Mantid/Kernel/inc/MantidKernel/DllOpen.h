@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include <string>
 
+#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
 namespace Kernel
@@ -43,6 +45,9 @@ public:
 	/// Static method for opening the shared library
 	static void* OpenDll(const std::string&);
 
+	/// Static method for opening the shared library
+	static void* OpenDll(const std::string&, const std::string&);
+
 	/// Static method for retrieving a function pointer
 	static void* GetFunction(void*, const std::string&);
 
@@ -56,6 +61,9 @@ private:
 	DllOpen(const DllOpen &a) {};
 	///Destructor private as not needed	
 	~DllOpen() {};
+	
+	/// Static reference to the logger class
+	static Mantid::Kernel::Logger& log;
 	
 };
 

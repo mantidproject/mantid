@@ -8,8 +8,6 @@
 #include <string>
 #include <map>
 
-#include "MantidKernel/Logger.h"
-
 namespace Mantid
 {
 namespace Kernel
@@ -54,6 +52,8 @@ public:
 	//Returns true if DLL is opened or already open
 	bool OpenLibrary(const std::string&);
 
+	bool OpenLibrary(const std::string&, const std::string&);
+
 	//Algorithm* CreateAlgorithm(const std::string&);
 	//void DestroyAlgorithm(const std::string&, Algorithm*);
 
@@ -61,8 +61,6 @@ private:
 	/// An untyped pointer to the loaded library
 	void* module;
 
-	/// Static reference to the logger class
-	static Mantid::Kernel::Logger& log;
 };
 
 } // namespace Kernel
