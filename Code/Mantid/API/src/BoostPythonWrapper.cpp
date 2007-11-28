@@ -182,8 +182,9 @@ BOOST_PYTHON_MODULE(libMantidKernel)
     
     class_< Mantid::Kernel::LibraryManager >("LibraryManager", init<  >())
         .def(init< const Mantid::Kernel::LibraryManager& >())
-        .def("OpenLibrary", &Mantid::Kernel::LibraryManager::OpenLibrary)
-    ;
+	.def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
+        .def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&, const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
+   ;
 
 }
 
