@@ -5,7 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>  // used to get ifstream
-#include <strstream>
+#include <sstream>
 
 namespace Mantid
 {
@@ -80,7 +80,7 @@ namespace DataHandling
         return StatusCode::FAILURE;
       }
 
-      std::istrstream ins(aLine.c_str());
+      std::stringstream ins(aLine);
       
       ins >> dateAndTime;
 
@@ -128,7 +128,7 @@ namespace DataHandling
         return StatusCode::FAILURE;
       }
 
-      std::istrstream ins(aLine.c_str());
+      std::istringstream ins(aLine);
       
       ins >> dateAndTime;
 

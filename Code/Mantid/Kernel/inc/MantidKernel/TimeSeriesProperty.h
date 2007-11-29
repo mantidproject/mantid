@@ -45,14 +45,15 @@ public:
 	// Add a value to the map
 	bool addValue( std::string &time, TYPE &value )
 	{
-    return m_propertySeries.insert( std::map<dateAndTime, TYPE>::value_type( 
+    return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
+
       dateAndTime(boost::posix_time::from_iso_string(time.c_str())), value) ).second;
 	}
 
   /// for testing that values stored ok - while debugging
   void printMapToScreen() 
   { 
-    std::map<dateAndTime, TYPE>::iterator p = m_propertySeries.begin();
+    typename std::map<dateAndTime, TYPE>::iterator p = m_propertySeries.begin();
 
     while ( p != m_propertySeries.end() )
     {
