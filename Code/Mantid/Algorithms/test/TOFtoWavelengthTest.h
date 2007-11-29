@@ -109,7 +109,7 @@ public:
     e = output2D->getE(382);
     TS_ASSERT_EQUALS( x[7], 0 );
     TS_ASSERT_EQUALS( y[1], 0 );
-    TS_ASSERT_DELTA( e[10], 0.0, 0.00001 );
+    TS_ASSERT_EQUALS( e[9], 0 );
     // Check that the data has truly been copied (i.e. isn't a reference to the same
     //    vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
