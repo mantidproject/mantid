@@ -4,8 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Property.h"
-#include "Exception.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/IValidator.h"
+#include "MantidKernel/NullValidator.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid
@@ -52,16 +54,30 @@ public:
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property
    */
-	PropertyWithValue( const std::string &name, TYPE value ) :
+	PropertyWithValue( const std::string &name, TYPE value) :
 	  Property( name, typeid( TYPE ) ),
-	  m_value( value )
+	  m_value( value ),
+	  m_validator( new NullValidator<TYPE> )
+	{
+	}
+
+  /** Constructor
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param validator The validator to use for this property (this class will take ownership of the validator)
+   */
+	PropertyWithValue( const std::string &name, TYPE value, IValidator<TYPE> *validator) :
+	  Property( name, typeid( TYPE ) ),
+	  m_value( value ),
+	  m_validator( validator )
 	{
 	}
 	
 	/// Copy constructor
 	PropertyWithValue( const PropertyWithValue& right ) :
 	  Property( right ),
-	  m_value( right.m_value )
+	  m_value( right.m_value ),
+	  m_validator( right.m_validator )
 	{  
 	}
 	
@@ -132,13 +148,23 @@ public:
 	 *  Means you can use an expression like: int i = myProperty;
 	 */
 	operator const TYPE& () const
-  {
-    return m_value;
-  }
+	{
+		return m_value;
+	}
+
+	/** Checks if the value is valid for this property.
+	 * @returns true if the valus is valid, otherwise false.
+	 */
+	virtual const bool isValid() const
+	{
+	  return m_validator->isValid(m_value);
+	}
 	
 private:
   /// The value of the property
   TYPE m_value;
+  /// Visitor validator class
+  IValidator<TYPE> *m_validator;
   
   /// Private default constructor
   PropertyWithValue();

@@ -177,6 +177,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Sample.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>

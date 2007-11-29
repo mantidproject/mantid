@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <string>
+#include "System.h"
 
 #include "MantidKernel/Logger.h"
 

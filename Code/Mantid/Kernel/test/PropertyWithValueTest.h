@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 
 using namespace Mantid::Kernel;
 
@@ -187,6 +189,61 @@ public:
     TS_ASSERT( ! ppp->value().compare("newValue") )
     TS_ASSERT_EQUALS( s.operator()(), "newValue" )
 	}
+
+	void testMandatoryValidator()
+	{
+		PropertyWithValue<std::string> p("test", "", new MandatoryValidator());
+		TS_ASSERT_EQUALS(p.isValid(),false);
+		p.setValue("I'm here");
+		TS_ASSERT_EQUALS(p.isValid(),true);
+		p.setValue("");
+		TS_ASSERT_EQUALS(p.isValid(),false);
+	}
+
+	void testIntBoundedValidator()
+	{
+		PropertyWithValue<int> p("test", 11, new BoundedValidator<int>(1,10));
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("0");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("1");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("10");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("11");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+	}
+
+	void testDoubleBoundedValidator()
+	{
+		PropertyWithValue<double> p("test", 11.0, new BoundedValidator<double>(1.0,10.0));
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("0.9");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("1");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("10");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("10.1");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+	}
+	
+	void testStringBoundedValidator()
+	{
+
+		PropertyWithValue<std::string> p("test", "", new BoundedValidator<std::string>("B","T"));
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("AZ");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+		p.setValue("B");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("T");
+		TS_ASSERT_EQUALS(p.isValid(), true);
+		p.setValue("TA");
+		TS_ASSERT_EQUALS(p.isValid(), false);
+	}
+
+	
 
 private:
 	PropertyWithValue<int> *iProp;

@@ -200,6 +200,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\inc\MantidKernel\BoundedValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\ConfigService.h"
 				>
 			</File>
@@ -232,11 +236,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\IValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\LibraryManager.h"
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\ListValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\Logger.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\MandatoryValidator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\NullValidator.h"
 				>
 			</File>
 			<File

@@ -3,8 +3,10 @@
 
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Instrument.h"
-#include "MantidDataHandling/LoadLog.h"
+#include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
@@ -23,22 +25,16 @@ main()
 	manager.initialize();
 	try
 	{
-		IAlgorithm *loader = manager.createAlgorithm("LoadLog");
-		std::string inputFile("../../../Test/Data/HRP37129_ICPevent.txt");
-		loader->setProperty("Filename",inputFile);
-		//loader->setProperty("OutputWorkspace","WSInstrument");
-		loader->execute();
 
-    /*
-    IAlgorithm *saveCSV = manager.createAlgorithm("SaveCSV");
-    saveCSV->setProperty("Filename", "saveCSV2.txt");
-    saveCSV->setProperty("InputWorkspace", "inFile");
-    saveCSV->setProperty("Seperator", "*");
-    saveCSV->setProperty("LineSeperator", "\n");
-    saveCSV->initialize();
-    saveCSV->execute();
-    saveCSV->finalize();		
-*/
+		PropertyWithValue<int> pInt("test", 11, new BoundedValidator<int>(1,10));
+		bool retValInt = pInt.isValid();
+
+		PropertyWithValue<std::string> p("test", "", new BoundedValidator<std::string>("B","T"));
+		bool retVal = p.isValid();
+		p.setValue("I'm here");
+		retVal = p.isValid();
+		p.setValue("");
+		retVal = p.isValid();
 	}
 	catch (Exception::NotFoundError &ex)
 	{

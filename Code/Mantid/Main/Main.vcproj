@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc"
+				AdditionalIncludeDirectories="../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_DEBUG"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
