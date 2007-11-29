@@ -73,10 +73,12 @@ else:
 
 	f.close()
 
-	cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
+	cppPaths.append('/usr/include/python' + sys.version[0:3])
 	cppPaths.append(poco_path +'Foundation/include/')
 	cppPaths.append(poco_path +'Util/include/')
 	cppPaths.append(boost_path)
+
+	print "CPPPATHS: ",cppPaths
 	
 	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
 	dirpath=os.listdir(uppath)
