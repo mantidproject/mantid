@@ -23,7 +23,7 @@ echo
 
 echo "Compiling the test executable..."
 g++ -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
-	                         -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+	                         -I ../../DataHandling/inc -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
 	                         -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lpython2.3
 echo
 

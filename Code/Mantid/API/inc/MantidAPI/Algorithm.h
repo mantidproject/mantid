@@ -89,7 +89,7 @@ class Workspace;
      virtual bool isFinalized() const;
     
      Kernel::StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
-                                    Algorithm*& pSubAlg );
+                                            Algorithm*& pSubAlg );
 	  
      /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
      const std::vector<Algorithm*>& subAlgorithms() const { return m_subAlgms; }
@@ -105,24 +105,24 @@ class Workspace;
 	  
   protected:
 	  
-	  // Equivalents of Gaudi's initialize, execute & finalize methods
-	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual Kernel::StatusCode init () = 0;
-	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual Kernel::StatusCode exec () = 0;
-	  /// Virtual method - must be overridden by concrete algorithm
-	  virtual Kernel::StatusCode final() = 0;
+    // Equivalents of Gaudi's initialize, execute & finalize methods
+    /// Virtual method - must be overridden by concrete algorithm
+    virtual Kernel::StatusCode init () = 0;
+    /// Virtual method - must be overridden by concrete algorithm
+    virtual Kernel::StatusCode exec () = 0;
+    /// Virtual method - must be overridden by concrete algorithm
+    virtual Kernel::StatusCode final() = 0;
 	  
-	  void setInitialized();
-	  void setExecuted( bool state );
-	  void setFinalized();
-	  
-	  /** Register a property with the property manager.
-	   *  Delegated to the PropertyManager method
-	   *  @param name The name of the property
-	   *  @param value The initial value to assign to the property
-	   *  @param doc The (optional documentation string)
-	   */
+    void setInitialized();
+    void setExecuted( bool state );
+    void setFinalized();
+
+    /** Register a property with the property manager.
+     *  Delegated to the PropertyManager method
+     *  @param name The name of the property
+     *  @param value The initial value to assign to the property
+     *  @param doc The (optional) documentation string
+     */
     template <typename T>
     void declareProperty( const std::string &name, T value, const std::string &doc="" )
     {
@@ -131,38 +131,38 @@ class Workspace;
     
     void declareProperty( Kernel::Property *p );
     
-	  /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
-	  Workspace* m_inputWorkspace;
-	  /// Workspace containing the output of the algorithm. Created by the concrete algorithm.
-	  Workspace* m_outputWorkspace;
-	  
+    /// Workspace containing input data. Its name should be set via a property called "InputWorkspace"
+    Workspace* m_inputWorkspace;
+    /// Workspace containing the output of the algorithm. Created by the concrete algorithm.
+    Workspace* m_outputWorkspace;
+
   private:
 
-	  /// Private Copy constructor: NO COPY ALLOWED
-	  Algorithm( const Algorithm& a );                 
+    /// Private Copy constructor: NO COPY ALLOWED
+    Algorithm( const Algorithm& a );                 
 
-	  /// Private asignment operator: NO ASSIGNMENT ALLOWED
-	  Algorithm& operator=( const Algorithm& rhs );
+    /// Private asignment operator: NO ASSIGNMENT ALLOWED
+    Algorithm& operator=( const Algorithm& rhs );
 
-	  std::string m_name;                   ///< Algorithm's name for identification
-	  std::string m_version;                ///< Algorithm's version
-	  std::vector<Algorithm *> m_subAlgms;  ///< Sub algorithms
+    std::string m_name;                   ///< Algorithm's name for identification
+    std::string m_version;                ///< Algorithm's version
+    std::vector<Algorithm *> m_subAlgms;  ///< Sub algorithms
 
-	  /// Static refenence to the logger class
-	  static Kernel::Logger& g_log;
-	  	  
-	  bool  m_isInitialized;    ///< Algorithm has been initialized flag
-	  bool  m_isExecuted;       ///< Algorithm is executed flag
-	  bool  m_isFinalized;      ///< Algorithm has been finalized flag
+    /// Static refenence to the logger class
+    static Kernel::Logger& g_log;
+	  
+    bool  m_isInitialized;    ///< Algorithm has been initialized flag
+    bool  m_isExecuted;       ///< Algorithm is executed flag
+    bool  m_isFinalized;      ///< Algorithm has been finalized flag
 
-	  /** Name of workspace in which result should be placed. 
-	   *  Its name should be set via a property called "OutputWorkspace".
-	   *  Only the concrete algorithm can actually create the output workspace.
-	   */
-	  std::string m_outputWorkspaceName;
+    /** Name of workspace in which result should be placed. 
+     *  Its name should be set via a property called "OutputWorkspace".
+     *  Only the concrete algorithm can actually create the output workspace.
+     */
+    std::string m_outputWorkspaceName;
 
-	  /// Manages the algorithm's properties
-	  Kernel::PropertyManager m_propertyMgr;
+    /// Manages the algorithm's properties
+    Kernel::PropertyManager m_propertyMgr;
   };
   
 } // namespace API
