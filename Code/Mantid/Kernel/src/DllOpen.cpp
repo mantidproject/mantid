@@ -33,6 +33,13 @@ void* DllOpen::OpenDll(const std::string& libName)
 	return LoadLibrary(str.c_str());
 }
 
+void* DllOpen::OpenDll(const std::string& libName, const std::string& filePath)
+{
+	std::string str = filePath + "/" + libName + ".dll";
+	
+	return LoadLibrary(str.c_str());
+}
+
 void* DllOpen::GetFunction(void* lib, const std::string& funcName)
 {
 	return GetProcAddress((HINSTANCE)lib, funcName.c_str());
