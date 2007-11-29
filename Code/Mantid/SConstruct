@@ -31,18 +31,19 @@ cwdpath=os.getcwd()
 uppath=os.path.abspath('../')
 
 libDirList = [uppath,cwdpath ]
-libList = ['python' + sys.version[0:3].replace('.','')]
+libList = []
 cflags = []
 dirList = []
 
 cppPaths = []
-
 
 if os.name == 'nt':
 	# assume this is Windows
 	libDirList.append('../../Third_Party/lib/win32/')
 	libDir = '../../Third_Party/lib/win32/'
 	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+	
+	libList.append('python' + sys.version[0:3].replace('.',''))
 	
 	for file in os.listdir(libDir):
 		if file.endswith('.dll'):

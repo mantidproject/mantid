@@ -54,6 +54,7 @@ else:
   boost_append=''
   fortran_type=''
   third_party=''
+  python_lib=''
 
   #Get paths
   f=open('../Scons_Linux.conf', 'r')
@@ -64,11 +65,13 @@ else:
     boost_append=procHeader(ln,'BOOST_APPEND',boost_append)
     fortran_type=procHeader(ln,'FORTRAN',fortran_type)
     third_party=procHeader(ln,'THIRD',third_party)
+    python_lib=procHeader(ln,'PYTHON_LIB',python_lib)
     
   print "POCO_ROOT: ",poco_path
   print "BOOST_ROOT: ",boost_path
   print "BOOST_APPEND: ",boost_append
   print "THIRD_PARTY: ",third_party
+  print "PYTHON_LIB: ",python_lib
   
   f.close()
 
@@ -77,6 +80,7 @@ else:
   libDirList.append(os.path.abspath('../'))
   libDirList.append(boost_path)
   libDirList.append(poco_path + 'lib/Linux/i686/')
+  libDirList.append(python_lib)
 
   cppPaths.append('/usr/include/python' + sys.version[0:sys.version.find(' ')])
   cppPaths.append(poco_path +'Foundation/include/Poco/')
