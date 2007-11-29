@@ -41,7 +41,9 @@ namespace Kernel
   class DLLExport IValidator 
   {
   public:
-    
+    ///virtual Destructor
+	virtual ~IValidator() {}
+
     /** Checks the value based on the validators rules
      * 
      *  @param value The value to test
