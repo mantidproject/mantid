@@ -76,9 +76,12 @@ public:
 	 */
 	bool addValue( const std::string &time, const TYPE value )
 	{
-    return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
-
-      dateAndTime(boost::posix_time::from_iso_string(time.c_str())), value) ).second;
+	  try {
+      return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
+               dateAndTime(boost::posix_time::from_iso_string(time.c_str())), value) ).second;
+	  } catch ( boost::bad_lexical_cast e ) {
+	    return false;
+	  }
 	}
 
   /// for testing that values stored ok - while debugging

@@ -55,6 +55,7 @@ public:
 		TS_ASSERT( iProp->addValue("20071130T161700",1) )
     TS_ASSERT( iProp->addValue("20071130T161710",1) )
     TS_ASSERT( ! iProp->addValue("20071130T161710",2) )
+    TS_ASSERT( ! iProp->addValue("NotaTime",3) )
     
     TS_ASSERT( dProp->addValue("20071130T161700",9.99) )
     TS_ASSERT( dProp->addValue("20071130T161710",5.55) )
