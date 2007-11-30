@@ -15,11 +15,11 @@ uppath=os.path.abspath('../')
 env = Environment()
 #printn 'Configuting for ',env['PLATFORM']
 #
-# do not re-reun checking on a "scons -c"
-if not env.GetOption('clean'):
+boost_append=''
+if not env.GetOption('clean'): # do not re-reun checking on a "scons -c"
     conf = Configure(env)
-#    if conf.CheckLib('boost_filesystem-gcc41') :
-#	boost_append = '-gcc41'
+    if conf.CheckLib('boost_filesystem-gcc41', '_ZN5boost10filesystem6nativeERKSs') :
+	boost_append = '-gcc41'
     env = conf.Finish()
 
 libDirList = [uppath,cwdpath ]
@@ -45,7 +45,7 @@ else:
 	#so this must be posix
 	boost_path = ''
 	poco_path = ''
-	boost_append=''
+#	boost_append=''
 	fortran_type=''
 	third_party=''
 
@@ -55,7 +55,7 @@ else:
 	for ln in f:
 		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
-		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
+#		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
 		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 
@@ -80,9 +80,6 @@ else:
 #  	libList.append('MantidKernel')
 #  	libList.append('MantidDataHandling')
 #  	libList.append('MantidGeometry')
-	boost_append = ''
-	if os.path.isfile(boost_path+'libboost_filesystem-gcc41.so') :
-	    boost_append = '-gcc41'
 
   	libList.append('PocoUtil')
   	libList.append('PocoFoundation')
