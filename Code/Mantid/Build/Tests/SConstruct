@@ -21,7 +21,7 @@ def procHeader(ln,keyname,out):
   return out
 
 from socket import gethostname
-  
+
 cflags = []
 cppPaths=[]
 libDirList = []
@@ -30,14 +30,14 @@ libDirList = []
 
 dirpath=os.listdir("../../")
 while(len(dirpath)):
-	try:
-		item=dirpath.pop(0)
-		for file in os.listdir("../../"+item):
-			fullPath="../../"+item+"/"+file
-			if (file=="inc"):
-				cppPaths.append(os.path.abspath(fullPath))
-	except:
-		pass
+  try:
+    item=dirpath.pop(0)
+    for file in os.listdir("../../"+item):
+      fullPath="../../"+item+"/"+file
+      if (file=="inc"):
+        cppPaths.append(os.path.abspath(fullPath))
+  except:
+    pass
 
 libList = ['Mantid']
 
@@ -66,13 +66,13 @@ else:
     fortran_type=procHeader(ln,'FORTRAN',fortran_type)
     third_party=procHeader(ln,'THIRD',third_party)
     python_lib=procHeader(ln,'PYTHON_LIB',python_lib)
-    
+
   print "POCO_ROOT: ",poco_path
   print "BOOST_ROOT: ",boost_path
   print "BOOST_APPEND: ",boost_append
   print "THIRD_PARTY: ",third_party
   print "PYTHON_LIB: ",python_lib
-  
+
   f.close()
 
   if (len(third_party)):
@@ -119,7 +119,7 @@ dirList = os.listdir(path)
 
 for fname in dirList:
   if os.path.isdir(path + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
       #does folder contain /test?
       if os.path.exists(path + fname + testfolder):
         files = os.listdir(path + fname + testfolder)
@@ -131,13 +131,23 @@ f=open('../TestsToRun', 'w')
 f.writelines(testsToRun)
 f.close()
 
-#BUILD
-env=Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = cflags)
 
 f=open('../TestsToRun', 'r')
 
 print cppPaths
+
+if (fortran_type!='g77'):
+  cflags.append('-D__GFORTRAN__')                         ## Get correct information to the cpp extern "C"
+else:
+  libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+  libDirList.append('/usr/lib/gcc/i686-pc-linux-gnu/3.4.6/')
+  libList.append('g2c')
+
+#BUILD
+env=Environment(CPPPATH=cppPaths)
+env.Append( CCFLAGS = cflags)
+## env.Append( FORTRANFLAGS = '-fsecond-underscore')       ## THIS DOESN'T WORK SEE BUG Report 21 November 2007 follow u
+
 
 for test in f:
   doth = '../' + test.strip() 
@@ -145,8 +155,6 @@ for test in f:
   dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
   os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
   env.Program(dotcpp, LIBS=libList, LIBPATH=libDirList)
-
-
 
 
 

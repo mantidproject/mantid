@@ -6,6 +6,25 @@ import sys
 
 from socket import gethostname
 
+
+def procHeaderPath(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+    if out[-1]!='/':
+      out+='/'
+  return out
+
+def procHeader(ln,keyname,out):
+  ## Strips the header components if in existance and returns:
+  ## Yes this is ugly repetition in a loop.
+  if ln.startswith(keyname):
+    out=ln[len(keyname)+1:].strip('\n')
+  return out
+
+
+
 #get libraries and the library directories
 # NOTE : ../ and . are STUPID :
 # That is because -Wl,-rpath= . IS YOUR CURRENT WORKING DIRECTORY AT RUNTIME
@@ -24,22 +43,21 @@ cppPaths = []
 ## Get Paths for various builds 
 dirpath=os.listdir(uppath)
 while(len(dirpath)):
-	try:
-		item=dirpath.pop(0)
-		if not item.startswith('Geometry') and not item.startswith('Main'):
-			for file in os.listdir("../"+item):
-				fullPath="../"+item+"/"+file
-				if (file=="inc"):
-					cppPaths.append(fullPath)
-				elif (file=="src"):
-					dirList.append(item)
-					print "SRC PATH == ",item
-				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-				and (not file.endswith('test'))):
-					dirpath.append(fullPath[3:])
-	except:
-		pass
-		
+  try:
+    item=dirpath.pop(0)
+    if not item.startswith('Geometry') and not item.startswith('Main'):
+      for file in os.listdir("../"+item):
+	fullPath="../"+item+"/"+file
+	if (file=="inc"):
+	  cppPaths.append(fullPath)
+	elif (file=="src"):
+	  dirList.append(item)
+	  print "SRC PATH == ",item
+	elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+	and (not file.endswith('test'))):
+	  dirpath.append(fullPath[3:])
+  except:
+    pass
 
 
 if os.name == 'nt':
@@ -59,30 +77,35 @@ if os.name == 'nt':
 
 else:       ## so this must be posix
 
-  boost_path = ''        ## Set from the Scons_Linux.conf File"
-  poco_path = ''         ## 
+  boost_path = ''
+  poco_path = ''
+  boost_append=''
+  fortran_type=''
+  third_party=''
+  prebuild=''
   #Get paths
   f=open('Scons_Linux.conf', 'r')
   
   for ln in f:
-    if ln.startswith('BOOST_ROOT'):
-      boost_path=ln[11:].strip('\n')
-      if (boost_path[-1]!='/'):              ## ADD / if required
-        boost_path+='/'
-      print 'Boost root = ' + boost_path
-    elif ln.startswith('POCO_ROOT'):
-      poco_path=ln[10:].strip('\n')
-      if (poco_path[-1]!='/'):
-        poco_path+='/'
-      print 'Poco root = ' + poco_path
-
+    boost_path=procHeaderPath(ln,'BOOST_ROOT',boost_path)
+    poco_path=procHeaderPath(ln,'POCO_ROOT',poco_path)
+    boost_append=procHeader(ln,'BOOST_APPEND',boost_append)
+    fortran_type=procHeader(ln,'FORTRAN',fortran_type)
+    third_party=procHeader(ln,'THIRD',third_party)
+    prebuild=procHeader(ln,'PREBUILD',prebuild)
   f.close()
+
+  print "POCO_ROOT: ",poco_path
+  print "BOOST_ROOT: ",boost_path
+  print "BOOST_APPEND: ",boost_append
+  print "FORTRAN: ",boost_append
+  print "THIRD_PARTY: ",third_party
+
 
   cflags = ['-Wall', '-fPIC']
   cppPaths.append(boost_path)
   cppPaths.append('/usr/include/python' + sys.version[0:3])
   cppPaths.append(poco_path + 'Foundation/include')
-  cppPaths.append(poco_path + 'Util/include')
   
 #GET LIST OF CPPS
 codeFolder = '/src'
@@ -92,7 +115,7 @@ pathToRoot = '../'
 for fname in dirList:
   print "dir:",fname 
   if os.path.isdir(pathToRoot + fname):
-    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
+    if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
       #does folder contain /src?
       if os.path.exists(pathToRoot + fname + codeFolder):
 	files = os.listdir(pathToRoot + fname + codeFolder)
@@ -110,11 +133,24 @@ listCpps.append(os.path.abspath('../Geometry/src/V3D.cpp'))
 cppPaths.append(os.path.abspath('../Geometry/inc/'))
 
 	    
+
+
+if (fortran_type!='g77'):
+  cflags.append('-D__GFORTRAN__')                         ## Get correct information to the cpp extern "C"
+
+else:
+  libDirList.append('/usr/lib/gcc/i386-redhat-linux/3.4.6/')
+  libDirList.append('/usr/lib/gcc/i686-pc-linux-gnu/3.4.6/')
+  libList.append('g2c')
+
+if (prebuild!=''):
+  libList.append(prebuild)
+
+                                                         
 # set header include paths
 env = Environment(CPPPATH=cppPaths,FORTRAN='gfortran')
 env.Append( CCFLAGS = cflags)
-env.Append( FORTRANFLAGS = '-fsecond-underscore')             ## THIS DOESN'T WORK SEE BUG Report 21 November 2007 follow up
-                                                              ## From bug report [Tue Jan 30 13:21:05 MST 2007].
+##  env.Append( FORTRANFLAGS = '-fsecond-underscore')       ## THIS DOESN'T WORK SEE BUG Report 21 November 2007 follow u
 
 #BUILD CODE
 if os.name == 'nt':
