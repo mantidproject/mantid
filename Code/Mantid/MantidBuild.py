@@ -26,6 +26,6 @@ def getCPPFiles(codeFolder) :
 	files = os.listdir(codeFolder)
 	for file in files:
 		if file.endswith('.cpp'):
-			print file
 			listCpps.append(codeFolder + '/' +  file)
+#			print file
     return listCpps
