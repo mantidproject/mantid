@@ -1,24 +1,17 @@
 #For MantidDataObjects
 
 import os
+import MantidBuild
 
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
-listCpps = []
-
-if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			print file
-			listCpps.append(codeFolder + '/' +  file)
+listCpps = MantidBuild.getCPPFiles(codeFolder)
 
 #Import environment
-Import('cppPaths')
-Import('cflags')
-
-env = Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = cflags)
+Import('env')
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidDataObjects', listCpps, LIBS=[ ], LIBPATH=[ ])
+shared = env.SharedLibrary('lib/MantidDataObjects', listCpps, LIBS=[ ], LIBPATH=[ ])
+static = env.StaticLibrary('lib/MantidDataObjectsStatic', listCpps, LIBS=[ ], LIBPATH=[ ])
+retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidDataObjects' ] }
+Return('retval')

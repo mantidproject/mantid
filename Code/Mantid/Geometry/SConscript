@@ -1,11 +1,15 @@
 #For MantidGeometry
 
 import os
+import MantidBuild
 
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
-listCpps = []
 
+listCpps = MantidBuild.getCPPFiles(codeFolder)
+
+# at the moment not all of geometry works
+listCpps = []
 listCpps.append(os.path.abspath('src/CompAssembly.cpp'))
 listCpps.append(os.path.abspath('src/Component.cpp'))
 listCpps.append(os.path.abspath('src/Detector.cpp'))
@@ -14,11 +18,10 @@ listCpps.append(os.path.abspath('src/Quat.cpp'))
 listCpps.append(os.path.abspath('src/V3D.cpp'))
 
 #Import environment
-Import('cppPaths')
-Import('cflags')
-
-env = Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = cflags)
+Import('env')
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=[ ], LIBPATH=[ ])
+shared = env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=[ ], LIBPATH=[ ])
+static = env.StaticLibrary('lib/MantidGeometryStatic', listCpps, LIBS=[ ], LIBPATH=[ ])
+retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidGeometry' ] }
+Return('retval')

@@ -1,34 +1,27 @@
 #For Framework
-
 import os
 import platform
 import sys
 import shutil
-
 from socket import gethostname
 
-#Set up the include paths etc
-
-def procHeaderPath(ln,keyname,out):
-  ## Strips the header components if in existance and returns:
-  ## Yes this is ugly repetition in a loop.
-  if ln.startswith(keyname):
-    out=ln[len(keyname)+1:].strip('\n')
-    if out[-1]!='/':
-      out+='/'
-  return out
-
-def procHeader(ln,keyname,out):
-  ## Strips the header components if in existance and returns:
-  ## Yes this is ugly repetition in a loop.
-  if ln.startswith(keyname):
-    out=ln[len(keyname)+1:].strip('\n')
-  return out
+import MantidBuild
   
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
 uppath=os.path.abspath('../')
+
+env = Environment()
+#printn 'Configuting for ',env['PLATFORM']
+#
+# do not re-reun checking on a "scons -c"
+if not env.GetOption('clean'):
+    conf = Configure(env)
+#    if not conf.CheckLib('m'):
+#        print 'Cannot find libm.a'
+#        Exit(1)
+    env = conf.Finish()
 
 libDirList = [uppath,cwdpath ]
 libList = []
@@ -61,11 +54,11 @@ else:
 	f=open('Build/Scons_Linux.conf', 'r')
 	
 	for ln in f:
-		boost_path=procHeaderPath(ln,'BOOST_ROOT',boost_path)
-		poco_path=procHeaderPath(ln,'POCO_ROOT',poco_path)
-		boost_append=procHeader(ln,'BOOST_APPEND',boost_append)
-		fortran_type=procHeader(ln,'FORTRAN',fortran_type)
-		third_party=os.path.abspath(procHeader(ln,'THIRD',third_party))
+		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
+		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
+		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
+		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
+		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 
 	print "POCO_ROOT: ",poco_path
 	print "BOOST_ROOT: ",boost_path
@@ -80,6 +73,24 @@ else:
 	cppPaths.append(boost_path)
 
 	print "CPPPATHS: ",cppPaths
+
+  	libList = ['python' + sys.version[0:3]]
+
+#  	libList.append('MantidDataObjects')
+#  	libList.append('MantidAPI')
+#  	libList.append('MantidKernel')
+#  	libList.append('MantidDataHandling')
+#  	libList.append('MantidGeometry')
+
+  	libList.append('PocoUtil')
+  	libList.append('PocoFoundation')
+  	libList.append('PocoXML')
+  	libList.append('boost_python'+boost_append)
+  	libList.append('boost_filesystem'+boost_append)
+  	libList.append('boost_regex'+boost_append)
+
+	libDirList.append(poco_path+'/lib')
+
 	
 	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
 	dirpath=os.listdir(uppath)
@@ -98,23 +109,44 @@ else:
 
 #Export for SConscripts
 
-print cppPaths
+env.Append(CCFLAGS=cflags)
+env.Append(CPPPATH=cppPaths)
+env.Replace(MYLIBLIST=libList)
+env.Replace(MYLIBDIRLIST=libDirList)
 
-#env = Environment(CPPPATH=cppPaths)
-#env.Append( CCFLAGS = cflags)
-Export('cppPaths')
-Export('cflags')
+Export('env')
 
 #Real work begins here
 subProjs = []
 
-subProjs.append('Algorithms/SConscript')
-subProjs.append('API/SConscript')
-subProjs.append('DataHandling/SConscript')
-subProjs.append('DataObjects/SConscript')
-subProjs.append('Kernel/SConscript')
-subProjs.append('Geometry/SConscript')
-#subProjs.append('Services/SConstruct')
+subProjs.append('Kernel')
+subProjs.append('Geometry')
+subProjs.append('DataObjects')
+subProjs.append('DataHandling')
+subProjs.append('Algorithms')
+subProjs.append('API')
+#subProjs.append('Services/SConscript')
 
-#Call the SConscripts
-SConscript(subProjs)
+# we want to link libraries in the reverse order we build them
+shared_libraries = []
+static_libraries = []
+lib_list = []
+for subproj in subProjs:
+    ret = SConscript(subproj+'/SConscript')
+    shared_libraries.insert(0,ret['shared'])
+    static_libraries.insert(0,ret['static'])
+    lib_list.insert(0,ret['libs'])
+
+env.Replace(SHARED_LIST=shared_libraries)
+env.Replace(STATIC_LIST=static_libraries)
+env.Prepend(MYLIBLIST=lib_list)
+
+# main program
+ret = SConscript('Bin/SConscript')
+
+# tests
+cxxtestgen = env.WhereIs('cxxtestgen.pl')
+if cxxtestgen != None :
+    ret = SConscript('Build/Tests/SConscript')
+else :
+    print 'CXXTESTGEN is not installed - tests will not be built'

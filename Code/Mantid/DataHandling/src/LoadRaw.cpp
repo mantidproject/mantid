@@ -7,15 +7,7 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
-// Declaration of the FORTRAN functions used to access the RAW file
-extern "C" void open_file__(const char* fname, int* found, unsigned fname_len);
-extern "C" void getpari_(const char* fname, const char* item, int* val, 
-    int* len_in, int* len_out, int* errcode, unsigned len_fname, unsigned len_item);
-extern "C" void getparr_(const char* fname, const char* item, float* val, 
-    int* len_in, int* len_out, int* errcode, unsigned len_fname, unsigned len_item);
-extern "C" void getdat_(const char* fname, const int& spec_no, const int& nspec, 
-    int* idata, int& length, int& errcode, unsigned len_fname);
-extern "C" void close_data_file__();
+#include "LoadRaw/isisraw.h"
 
 namespace Mantid
 {
@@ -60,6 +52,9 @@ namespace DataHandling
     }
     
     int found = 0;  
+    ISISRAW iraw;
+    iraw.readFromFile(m_filename.c_str());
+#if 0
     // Call the FORTRAN function to open the RAW file
     open_file__( m_filename.c_str(), &found, strlen( m_filename.c_str() ) );
     if ( ! found )
@@ -126,18 +121,10 @@ namespace DataHandling
     // Clean up
     delete[] timeChannels;
     delete[] spectrum;
+#endif
     return StatusCode::SUCCESS;
   }
 
-  /** Personal wrapper for sqrt to allow msvs to compile.
-   *
-   *  @param in Some number
-   *  @return The square-root of input parameter
-   */
-	double LoadRaw::dblSqrt(double in)
-	{
-		return sqrt(in);
-	}
 
   /** Finalisation method. Does nothing at present.
    *

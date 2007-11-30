@@ -27,6 +27,8 @@ public:
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
+    return;
+
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setProperty("Filename", inputFile);

@@ -1,24 +1,19 @@
 #For MantidDataHandling
 
 import os
+import MantidBuild
 
-#GET LIST OF CPPS
+#GET LIST OF CPPS files
 codeFolder = os.path.abspath('./src')
-listCpps = []
-
-if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			print file
-			listCpps.append(codeFolder + '/' +  file)
+listCpps = MantidBuild.getCPPFiles(codeFolder) 
+listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/LoadRaw'))
 
 #Import environment
-Import('cppPaths')
-Import('cflags')
-
-env = Environment(CPPPATH=cppPaths)
-env.Append( CCFLAGS = cflags)
+Import('env')
 
 #BUILD CODE
-env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=[ ], LIBPATH=[ ])
+shared = env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=[ ], LIBPATH=[ ])
+static = env.StaticLibrary('lib/MantidDataHandlingStatic', listCpps, LIBS=[ ], LIBPATH=[ ])
+
+retval = { 'shared': shared, 'static': static, 'libs': ['MantidDataHandling'] }
+Return('retval')

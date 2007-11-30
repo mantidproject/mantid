@@ -1,0 +1,24 @@
+#For test main
+
+import os
+import platform
+import sys
+import shutil
+from socket import gethostname
+
+import MantidBuild
+
+Import('env')
+shared_list = env['SHARED_LIST']
+static_list = env['STATIC_LIST']
+libList = env['MYLIBLIST']
+libDirList = env['MYLIBDIRLIST']
+myenv = env.Clone()
+myenv.Append(LIBS=libList)
+myenv.Append(LIBPATH=libDirList)
+
+myenv.Install('Plugins', shared_list)
+myenv.Append(LIBPATH='./Plugins')
+
+myenv.Program('main_static', ['main.cpp']+static_list)
+myenv.Program('main', ['main.cpp'])
