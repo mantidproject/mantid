@@ -60,6 +60,8 @@ else:
 		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 
+        if os.path.isdir(poco_path + '/Linux/i686') :
+	    poco_path = poco_path + '/Linux/i686'
 	print "POCO_ROOT: ",poco_path
 	print "BOOST_ROOT: ",boost_path
 	print "BOOST_APPEND: ",boost_append
