@@ -1,8 +1,4 @@
-/* @class SaveCSV SaveCSV.h DataHandling/SaveCSV.h
-
-    @author Anders J. Markvardsen, ISIS, RAL
-    @date 15/10/2007
-    
+/*    
     Copyright &copy; 2007 ???RAL???
 
     This file is part of Mantid.
@@ -35,6 +31,12 @@
 #include <iomanip>  // setw() used below
 
 DECLARE_NAMESPACED_ALGORITHM(Mantid::DataHandling, SaveCSV)
+
+/* @class SaveCSV 
+
+    @author Anders J. Markvardsen, ISIS, RAL
+    @date 15/10/2007
+*/
 
 namespace Mantid
 {
@@ -138,9 +140,9 @@ namespace DataHandling
 
       // Get info from 1D workspace
 
-      const std::vector<double>& xValue = localworkspace->getX();
-      const std::vector<double>& yValue = localworkspace->getY();
-      const std::vector<double>& eValue = localworkspace->getE();
+      const std::vector<double>& xValue = localworkspace->dataX();
+      const std::vector<double>& yValue = localworkspace->dataY();
+      const std::vector<double>& eValue = localworkspace->dataE();
   
     
       // write to file
