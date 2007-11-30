@@ -10,7 +10,34 @@ namespace Mantid
 {
 namespace Kernel
 {
+/** @class TimeSeriesProperty TimeSeriesProperty.h Kernel/TimeSeriesProperty.h
 
+    A specialised Property class for holding a series of time-value pairs.
+    Required by the LoadLog class.
+    
+    @author Russell Taylor, Tessella Support Services plc
+    @date 26/11/2007
+    
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 template <typename TYPE>
 class TimeSeriesProperty : public Property
 {
@@ -42,8 +69,12 @@ public:
 	  throw Exception::NotImplementedError("Not yet");
 	}
 	
-	// Add a value to the map
-	bool addValue( std::string &time, TYPE &value )
+	/** Add a value to the map
+	 *  @param time The time as a string
+	 *  @param value The associated value
+	 *  @return True if insertion successful (i.e. identical time not already in map
+	 */
+	bool addValue( const std::string &time, const TYPE value )
 	{
     return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
 
@@ -64,6 +95,7 @@ public:
   }
 	
 private:
+  /// Holds the time series data
   std::map<dateAndTime, TYPE> m_propertySeries;
   
   /// Private default constructor
