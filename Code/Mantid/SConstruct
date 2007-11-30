@@ -18,9 +18,8 @@ env = Environment()
 # do not re-reun checking on a "scons -c"
 if not env.GetOption('clean'):
     conf = Configure(env)
-#    if not conf.CheckLib('m'):
-#        print 'Cannot find libm.a'
-#        Exit(1)
+#    if conf.CheckLib('boost_filesystem-gcc41') :
+#	boost_append = '-gcc41'
     env = conf.Finish()
 
 libDirList = [uppath,cwdpath ]
@@ -81,6 +80,9 @@ else:
 #  	libList.append('MantidKernel')
 #  	libList.append('MantidDataHandling')
 #  	libList.append('MantidGeometry')
+	boost_append = ''
+	if os.path.isfile(boost_path+'libboost_filesystem-gcc41.so') :
+	    boost_append = '-gcc41'
 
   	libList.append('PocoUtil')
   	libList.append('PocoFoundation')
