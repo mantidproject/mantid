@@ -60,8 +60,6 @@ else:
 		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 
-        if os.path.isdir(poco_path + '/Linux/i686') :
-	    poco_path = poco_path + '/Linux/i686'
 	print "POCO_ROOT: ",poco_path
 	print "BOOST_ROOT: ",boost_path
 	print "BOOST_APPEND: ",boost_append
@@ -91,9 +89,11 @@ else:
   	libList.append('boost_filesystem'+boost_append)
   	libList.append('boost_regex'+boost_append)
 
-	libDirList.append(poco_path+'/lib')
+        if os.path.isdir(poco_path + '/lib/Linux/i686') :
+	    libDirList.append(poco_path+'/lib/Linux/i686')
+	else :
+	    libDirList.append(poco_path+'/lib')
 
-	
 	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
 	dirpath=os.listdir(uppath)
 	while(len(dirpath)):
