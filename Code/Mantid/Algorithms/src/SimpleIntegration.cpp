@@ -61,9 +61,14 @@ StatusCode SimpleIntegration::exec()
   p = getProperty("EndY");
   pv = static_cast< PropertyWithValue<int>* >(p);
   m_MaxY = *pv;
-  
-  
+   
   const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
+  if (!localworkspace)
+  {
+    g_log.error("Input workspace is of incorrect type");
+    return StatusCode::FAILURE;
+  }
+
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
   if ( (0 > m_MinY) || (m_MinY > numberOfYBins))
@@ -125,7 +130,7 @@ StatusCode SimpleIntegration::exec()
   // Create the 1D workspace for the output
   API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
   m_outputWorkspace = factory->create("Workspace1D");
-  Workspace1D *localWorkspace = dynamic_cast<Workspace1D*>(m_outputWorkspace);
+  Workspace1D *localWorkspace = static_cast<Workspace1D*>(m_outputWorkspace);
 
   // Populate the 1D workspace
   localWorkspace->setX(detectorNumber);
