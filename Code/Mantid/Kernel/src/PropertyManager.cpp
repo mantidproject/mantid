@@ -29,10 +29,14 @@ PropertyManager::~PropertyManager()
 /** Add a property to the list of managed properties
  *  @param p The property object to add
  *  @throw Exception::ExistsError if a property with the given name already exists
+ *  @throw std::invalid_argument  if the property declared has an empty name.
  */
 void PropertyManager::declareProperty( Property *p )
 {
+  // Get the name of the property and don't permit empty names
   std::string key = p->name();
+  if (key.empty()) throw std::invalid_argument("An empty property name is not permitted");
+  
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( m_properties.insert(PropertyMap::value_type(key, p)).second)
   {
@@ -49,9 +53,12 @@ void PropertyManager::declareProperty( Property *p )
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
  *  @throw Exception::ExistsError if a property with the given name already exists
+ *  @throw std::invalid_argument  if the name argument is empty
  */
 void PropertyManager::declareProperty( const std::string &name, int value, const std::string &doc )
 {
+  // Unnamed properties are not permitted
+  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
   std::string key = name;
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( ! existsProperty( key ) )
@@ -72,9 +79,12 @@ void PropertyManager::declareProperty( const std::string &name, int value, const
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
  *  @throw Exception::ExistsError if a property with the given name already exists
+ *  @throw std::invalid_argument  if the name argument is empty
  */
 void PropertyManager::declareProperty( const std::string &name, double value, const std::string &doc )
 {
+  // Unnamed properties are not permitted
+  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
   std::string key = name;
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( ! existsProperty( key ) )
@@ -95,9 +105,12 @@ void PropertyManager::declareProperty( const std::string &name, double value, co
  *  @param value The initial value to assign to the property
  *  @param doc The (optional) documentation string
  *  @throw Exception::ExistsError if a property with the given name already exists
+ *  @throw std::invalid_argument  if the name argument is empty
  */
 void PropertyManager::declareProperty( const std::string &name, std::string value, const std::string &doc )
 {
+  // Unnamed properties are not permitted
+  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
   std::string key = name;
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( ! existsProperty( key ) )

@@ -34,6 +34,7 @@ public:
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
 		
 		TS_ASSERT_THROWS( mgr.declareProperty(p), Exception::ExistsError )
+		TS_ASSERT_THROWS( mgr.declareProperty(new PropertyWithValue<int>("",0)), std::invalid_argument )
 	}
 
 	void testdeclareProperty_int()
@@ -45,6 +46,7 @@ public:
 		TS_ASSERT( ! p->documentation().compare("hello") )
 		
 		TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
+		TS_ASSERT_THROWS( mgr.declareProperty("", 5), std::invalid_argument )
 	}
 
 	void testdeclareProperty_double()
@@ -55,7 +57,8 @@ public:
     Property *p = mgr.getProperty("myProp");
     TS_ASSERT( ! p->documentation().compare("hello") )
     
-    TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
+    TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5.5), Exception::ExistsError )
+    TS_ASSERT_THROWS( mgr.declareProperty("", 5.5), std::invalid_argument )
 	}
 
 	void testdeclareProperty_string()
@@ -66,7 +69,8 @@ public:
     Property *p = mgr.getProperty("myProp");
     TS_ASSERT( ! p->documentation().compare("hello") )
     
-    TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
+    TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", "aValue"), Exception::ExistsError )
+    TS_ASSERT_THROWS( mgr.declareProperty("", "aValue"), std::invalid_argument )
 	}
 
 	void testSetProperties()
