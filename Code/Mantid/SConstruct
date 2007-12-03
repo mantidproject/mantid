@@ -12,7 +12,7 @@ print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
 uppath=os.path.abspath('../')
 
-env = Environment()
+env = Environment(ENV=os.environ)
 #printn 'Configuting for ',env['PLATFORM']
 #
 boost_append=''
