@@ -26,7 +26,7 @@ public:
   
   void testOpenLibrary()
   {
-	TS_ASSERT(mgr->OpenLibrary("TestAlgorithms"));
+	TS_ASSERT(mgr->OpenLibrary("MantidAlgorithms"));
   }
   
   void testLoadedAlgorithm()
@@ -36,7 +36,7 @@ public:
 		Mantid::API::FrameworkManager manager;
 		manager.initialize();
 	  
-		Mantid::API::IAlgorithm* alg= manager.createAlgorithm("TestAlgorithm");
+		Mantid::API::IAlgorithm* alg= manager.createAlgorithm("HelloWorldAlgorithm");
 	  
 		StatusCode result = alg->execute();
 	  
