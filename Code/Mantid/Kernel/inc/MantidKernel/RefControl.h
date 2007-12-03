@@ -24,16 +24,21 @@ namespace Mantid
 template<typename DataType>
 class RefControl
 {
+ public:
+
+  typedef boost::shared_ptr<DataType> ptr_type;   ///< typedef for the storage
+  typedef DataType value_type;                    ///< typedef for the data type
+
  private:
 
-  typedef boost::shared_ptr<DataType> PtrObj;   ///< typedef for a point to data
-  PtrObj Data;                                  ///< Real object Ptr
+  ptr_type Data;                                  ///< Real object Ptr
 
  public:
 
   RefControl();
   RefControl(const RefControl<DataType>&);      
   RefControl<DataType>& operator=(const RefControl<DataType>&);
+  RefControl<DataType>& operator=(const ptr_type&);
   ~RefControl();
 
   const DataType& operator*() const { return *Data; }  ///< Pointer dereference access
@@ -79,6 +84,24 @@ RefControl<DataType>::operator=(const RefControl<DataType>& A)
 }
 
 template<typename DataType>
+RefControl<DataType>&
+RefControl<DataType>::operator=(const ptr_type& A) 
+  /*!
+    Assignment operator : double references the data object
+    maybe drops the old reference.
+    \param A :: object to copy
+    \return *this
+  */
+{
+  if (this->Data != A)
+    {
+      Data=A;
+    }
+  return *this;
+}
+
+
+template<typename DataType>
 RefControl<DataType>::~RefControl()
   /*!
     Destructor : No work is required since Data is
@@ -100,9 +123,9 @@ RefControl<DataType>::access()
   if (Data.unique())
     return *Data;
 
-  PtrObj oldData=Data; 
+  ptr_type oldData=Data; 
   Data.reset();
-  Data=PtrObj(new DataType(*oldData));
+  Data=ptr_type(new DataType(*oldData));
   return *Data;
 }
 
