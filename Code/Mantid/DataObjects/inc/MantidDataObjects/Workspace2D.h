@@ -1,4 +1,4 @@
-/*
+/**
   Copyright 2007
   
   This file is part of Mantid.
@@ -26,28 +26,32 @@
 #include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Histogram1D.h"
 
-/** @class Workspace2D
-    
-    Concrete workspace implementation. Data is a vector of Histogram1D.
-    Since Histogram1D have share ownership of X, Y or E arrays, 
-    duplication is avoided for workspaces for example with identical time bins.     	
-    @author Laurent C Chapon, ISIS, RAL
-    @date 26/09/2007
-    
-*/ 	
 namespace Mantid
 {
 namespace DataObjects
 {
-
+/** \class Workspace2D
+    
+    Concrete workspace implementation. Data is a vector of Histogram1D.
+    Since Histogram1D have share ownership of X, Y or E arrays, 
+    duplication is avoided for workspaces for example with identical time bins.     	
+    
+    \author Laurent C Chapon, ISIS, RAL
+    \date 26/09/2007
+    
+*/ 	
 class DLLExport Workspace2D : public API::Workspace
 {
  private:
-
+  /// A vector that holds the 1D shistograms 
   std::vector<Histogram1D> data;
 
 public:
 
+  /**
+	Gets the name of the workspace type
+	\return Standard string name
+*/
   virtual const std::string id() const {return "Workspace2D";}
 
   Workspace2D();
@@ -55,21 +59,23 @@ public:
   Workspace2D& operator=(const Workspace2D&);
   virtual ~Workspace2D();
 
-  void setHistogramNumber(const int);
+  void setHistogramNumber(int const);
 
-  void setX(const int, const std::vector<double>&);
-  void setData(const int, const std::vector<double>&);
-  void setData(const int, const std::vector<double>&, const std::vector<double>&);
-  void setX(const int, const Histogram1D::RCtype&);
-  void setX(const int,const Histogram1D::RCtype::ptr_type&);
-  void setData(const int, const Histogram1D::RCtype&);
-  void setData(const int, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
+  void setX(int const, const std::vector<double>&);
+  void setData(int const, const std::vector<double>&);
+  void setData(int const, const std::vector<double>&, const std::vector<double>&);
+  void setX(int const, const Histogram1D::RCtype&);
+  void setX(int const,const Histogram1D::RCtype::ptr_type&);
+  void setData(int const, const Histogram1D::RCtype&);
+  void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
+  
+  /// Returns the histogram number
   const int getHistogramNumber() const;
 
   //Get methods return the histogram number 
-  const std::vector<double>& getX(const int) const;
-  const std::vector<double>& getY(const int) const;
-  const std::vector<double>& getE(const int) const;
+  const std::vector<double>& getX(int const) const;
+  const std::vector<double>& getY(int const) const;
+  const std::vector<double>& getE(int const) const;
 
   long int getMemorySize() const;
 

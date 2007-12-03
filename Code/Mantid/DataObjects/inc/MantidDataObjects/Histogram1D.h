@@ -29,10 +29,12 @@ namespace Mantid
 namespace DataObjects
 {
 /*!
- 
-    @class Histogram1D Histogram1D.h
-    @author Laurent C Chapon, ISIS, RAL
-    @date 26/09/2007
+	1D histogram implementation.
+
+	
+    \class Histogram1D Histogram1D.h
+    \author Laurent C Chapon, ISIS, RAL
+    \date 26/09/2007
 */
 
 class Histogram1D
@@ -47,7 +49,7 @@ public:
 
   RCtype refX;   ///< RefCounted X
   RCtype refY;   ///< RefCounted Y
-  RCtype refE;
+  RCtype refE;   ///< RefCounted E
 
 public:
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
@@ -57,40 +59,57 @@ public:
   Histogram1D& operator=(const Histogram1D&);
   virtual ~Histogram1D();
 
-
+  /// Sets the x data.
   void setX(const std::vector<double>& X) {  refX.access()=X; }
+  /// Sets the data.
   void setData(const std::vector<double>& Y) {  refY.access()=Y; };
+    /// Sets the data and errors
   void setData(const std::vector<double>& Y,const std::vector<double> E) 
     {  refY.access()=Y; refE.access()=E; }
 
+      /// Sets the x data.
   void setX(const RCtype& X) { refX=X; }
+    /// Sets the data.
   void setData(const RCtype& Y) { refY=Y; }
+    /// Sets the data.
   void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
 
+/// Sets the x data
   void setX(const RCtype::ptr_type& X) { refX=X; }
+    /// Sets the data.
   void setData(const RCtype::ptr_type& Y) { refY=Y; }
+    /// Sets the data and errors
   void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
 
   // Get the array data
+  /// Returns the x data const
   const std::vector<double>& dataX() const { return *refX; }  
+  /// Returns the y data const
   const std::vector<double>& dataY() const { return *refY; }
+  /// Returns the error data const
   const std::vector<double>& dataE() const { return *refE; }
 
+  ///Returns the x data
   std::vector<double>& dataX() { return refX.access(); }
+  ///Returns the y data
   std::vector<double>& dataY() { return refY.access(); }
+  ///Returns the error data
   std::vector<double>& dataE() { return refE.access(); }
 
-  //  Zero the Array
+  ///Clear the x data
   std::vector<double>& emptyX() { refX.access().clear(); return refX.access(); }
+    ///Clear the y data
   std::vector<double>& emptyY() { refY.access().clear(); return refY.access(); }
+    ///Clear the error data
   std::vector<double>& emptyE() { refE.access().clear(); return refE.access(); }
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
   int nybin() const { return refY->size(); }   ///< Return the number of data bin (Y or YE)
 
 
-  // Return flag if data has associated errors
+  /// Checks for errors
   bool isError() const { return refE->empty(); }
+  /// Gets the memory size of the histogram
   long int getMemorySize() const { return (refX->size()+refY->size()+refE->size())*sizeof(double); }
 
 };

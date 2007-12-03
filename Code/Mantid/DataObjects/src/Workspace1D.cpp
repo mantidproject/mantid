@@ -7,23 +7,23 @@ namespace Mantid
 namespace DataObjects
 {
 
+/// Constructor
 Workspace1D::Workspace1D() : API::Workspace(), 
 			     Histogram1D()
-  /// Constructor
 { }
 
+  /// Copy Constructor
 Workspace1D::Workspace1D(const Workspace1D& A) :
   API::Workspace(A),Histogram1D(A)
-  /// copy Constructor
 { }
 
-Workspace1D& 
-Workspace1D::operator=(const Workspace1D& A)
-  /*!
+/*!
     Assignment operator
     \param A :: Workspace  to copy
     \return *this
    */
+Workspace1D& 
+Workspace1D::operator=(const Workspace1D& A)
 {
   if (this!=&A)
     {
@@ -33,8 +33,8 @@ Workspace1D::operator=(const Workspace1D& A)
   return *this;
 }
 
+/// Destructor
 Workspace1D::~Workspace1D()
-  /// Destructor
 {}
 
 } // namespace DataObjects

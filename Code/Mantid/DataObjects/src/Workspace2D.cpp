@@ -7,16 +7,16 @@ namespace Mantid
 {
 namespace DataObjects
 {
-  
+/// Constructor
 Workspace2D::Workspace2D()
-  /// Constructor
 { }
 
+/// Copy constructor
 Workspace2D::Workspace2D(const Workspace2D& A) :
     data(A.data)
-  /// Copy constructor
 { }
 
+/// Assignment operator
 Workspace2D& 
 Workspace2D::operator=(const Workspace2D& A)
 {
@@ -27,34 +27,40 @@ Workspace2D::operator=(const Workspace2D& A)
   return *this;
 }
 
+ ///Destructor
 Workspace2D::~Workspace2D()
 {}
 
-void 
-Workspace2D::setHistogramNumber(const int nhist)
-  /*!
+/**
     Set the histogram count.
     \todo FIX this can't be right since we have not dimensioned the internal arrays
+    \param nhist The number of histograms
   */
+void 
+Workspace2D::setHistogramNumber(const int nhist)
 {
   if (nhist<0) 
     throw std::invalid_argument("Workspace2D::setHistogramNumber, invalid histograms number <0");
   data.resize(nhist);
 }
 
+/**
+  Get the amount of memory used by the 2D workspace
+  \todo to be changed
+*/
 long int 
 Workspace2D::getMemorySize() const 
-{ //to be changed
+{
   return 0;
 }
 
-void 
-Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
-  /*!
+/**
     Set the x values
     \param histnumber :: Index to the histogram
     \param Vec :: Vec to set [Should be typedef]
    */
+void 
+Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::setX, histogram number out of range");
@@ -63,13 +69,13 @@ Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
   return;
 }
 
-void 
-Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
-  /*!
+  /**
     Set the x values
     \param histnumber :: Index to the histogram
-    \param Vec :: Shared ptr base obect
+    \param Vec :: Shared ptr base object
    */
+void 
+Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::setX, histogram number out of range");
@@ -78,6 +84,26 @@ Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec
   return;
 }
 
+ /**
+    Set the x values
+    \param histnumber :: Index to the histogram
+    \param PA :: Reference counted histogram
+   */
+void 
+Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
+{
+  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::setX, histogram number out of range");
+
+  data[histnumber].setX(PA);
+  return;
+}
+
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param Vec A vector containing the data	
+*/
 void 
 Workspace2D::setData(const int histnumber, const std::vector<double>& Vec)
 {
@@ -87,6 +113,12 @@ Workspace2D::setData(const int histnumber, const std::vector<double>& Vec)
   data[histnumber].dataY()=Vec;
 }
 
+/**
+    Sets the data in the workspace (including errors)
+	\param histnumber The histogram to be set
+	\param Vec A vector containing the data	
+	\param VecErr A vector containing the corresponding errors
+*/
 void 
 Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
 		     const std::vector<double>& VecErr)
@@ -99,16 +131,11 @@ Workspace2D::setData(const int histnumber, const std::vector<double>& Vec,
   return;
 }
 
-void 
-Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
-{
-  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::setX, histogram number out of range");
-
-  data[histnumber].setX(PA);
-  return;
-}
-
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param PY A reference counted data range	
+*/
 void 
 Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
 {
@@ -118,6 +145,12 @@ Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
     data[histnumber].setData(PY);
 }
 
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param PY A reference counted data range	
+	\param PE A reference containing the corresponding errors
+*/
 void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
 			  const Histogram1D::RCtype& PE)
 {
@@ -128,12 +161,20 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
   return;
 }
 
+/** Gets the number of histograms
+	\return Integer
+*/
 const int 
 Workspace2D::getHistogramNumber() const
 {
   return static_cast<const int>(data.size());
 }
 
+/**
+	Get the x data of a specified histogram
+	\param histnumber The number of the histogram
+	\return A vector of doubles containing the x data
+*/
 const std::vector<double>& 
 Workspace2D::getX(int histnumber) const
 {
@@ -143,6 +184,11 @@ Workspace2D::getX(int histnumber) const
   return data[histnumber].dataX();
 }
 
+/**
+	Get the y data of a specified histogram
+	\param histnumber The number of the histogram
+	\return A vector of doubles containing the y data
+*/
 const std::vector<double>& 
 Workspace2D::getY(int histnumber) const
 {
@@ -152,6 +198,11 @@ Workspace2D::getY(int histnumber) const
   return data[histnumber].dataY();
 }
 
+/**
+	Get the error data for a specified histogram
+	\param histnumber The number of the histogram
+	\return A vector of doubles containing the error data
+*/
 const std::vector<double>& 
 Workspace2D::getE(int histnumber) const
 {
