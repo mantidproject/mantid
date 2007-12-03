@@ -89,8 +89,8 @@ public:
     TS_ASSERT( ! status.isFailure() );
     
     Workspace1D *output1D = dynamic_cast<Workspace1D*>(output);
-    std::vector<double> y = output1D->getY();
-    std::vector<double> e = output1D->getE();
+    std::vector<double> y = output1D->dataY();
+    std::vector<double> e = output1D->dataE();
     TS_ASSERT_EQUALS( y.size(), 2 );
     TS_ASSERT_EQUALS( e.size(), 2 );
     
@@ -108,8 +108,8 @@ public:
     TS_ASSERT( ! status.isFailure() );
     
     output1D = dynamic_cast<Workspace1D*>(output);
-    y = output1D->getY();
-    e = output1D->getE();
+    y = output1D->dataY();
+    e = output1D->dataE();
     TS_ASSERT_EQUALS( y.size(), 5 );
     TS_ASSERT_EQUALS( e.size(), 5 );
     
