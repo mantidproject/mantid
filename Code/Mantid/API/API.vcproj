@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\Sample.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\Workspace.h"
 				>
 			</File>

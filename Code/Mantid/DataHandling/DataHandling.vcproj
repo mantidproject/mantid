@@ -154,11 +154,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\LoadRaw\byte_rel_comp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw\isisraw.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw\item_struct.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadInstrument.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveCSV.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw\vms_convert.cpp"
 				>
 			</File>
 		</Filter>
@@ -168,11 +192,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\DataHandlingCommand.h"
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadRaw\isisraw.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw\item_struct.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadInstrument.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadLog.h"
 				>
 			</File>
 			<File
@@ -181,6 +221,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveCSV.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw\vms_convert.h"
 				>
 			</File>
 		</Filter>

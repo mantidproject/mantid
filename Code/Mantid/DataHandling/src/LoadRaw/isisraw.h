@@ -4,6 +4,11 @@
 struct ISISCRPT_STRUCT;
 
 #include "item_struct.h"
+#ifdef _WIN32
+typedef unsigned uint32_t;
+#include <time.h>
+#endif /* _WIN32 */
+
 
 struct HDR_STRUCT 
 {
