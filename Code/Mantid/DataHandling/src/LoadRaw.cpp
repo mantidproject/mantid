@@ -51,15 +51,9 @@ namespace DataHandling
       return StatusCode::FAILURE;      
     }
     
-    int found = 0;  
     ISISRAW iraw;
-    iraw.readFromFile(m_filename.c_str());
-#if 0
-    // Call the FORTRAN function to open the RAW file
-    open_file__( m_filename.c_str(), &found, strlen( m_filename.c_str() ) );
-    if ( ! found )
+    if (iraw.readFromFile(m_filename.c_str()) != 0)
     {
-      // Unable to open file
       g_log.error("Unable to open file " + m_filename);
       return StatusCode::FAILURE;
     }
@@ -67,22 +61,14 @@ namespace DataHandling
     // Read the number of time channels from the RAW file (calling FORTRAN)
     int channelsPerSpectrum, lengthIn, lengthOut, errorCode;
     lengthIn = lengthOut = 1;
-    getpari_(m_filename.c_str(), "NTC1", &channelsPerSpectrum, &lengthIn, &lengthOut,
-       &errorCode, strlen( m_filename.c_str() ), strlen("NTC1"));
-    if (errorCode) return StatusCode::FAILURE;
+    channelsPerSpectrum = iraw.t_ntc1;
 
     // Read in the number of spectra in the RAW file (calling FORTRAN)
-    int numberOfSpectra;
-    getpari_(m_filename.c_str(), "NSP1", &numberOfSpectra, &lengthIn, &lengthOut,
-       &errorCode, strlen( m_filename.c_str() ), strlen("NSP1"));
-    if (errorCode) return StatusCode::FAILURE;
+    int numberOfSpectra = iraw.t_nsp1;
     
     // Read in the time bin boundaries (calling FORTRAN)
     lengthIn = channelsPerSpectrum + 1;    
     float* timeChannels = new float[lengthIn];
-    getparr_(m_filename.c_str(), "TIM1", timeChannels, &lengthIn, &lengthOut,
-                  &errorCode, strlen( m_filename.c_str() ), strlen("TIM1"));
-    if (errorCode) return StatusCode::FAILURE;
     // Put the read in array into a vector (inside a shared pointer)
     boost::shared_ptr<std::vector<double> > timeChannelsVec
                      (new std::vector<double>(timeChannels, timeChannels + lengthIn));
@@ -101,7 +87,8 @@ namespace DataHandling
     for (int i = 1; i <= numberOfSpectra; i++)
     {
       // Read in a spectrum via the FORTRAN routine
-      getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
+      memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));
+//      getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
@@ -109,19 +96,15 @@ namespace DataHandling
       std::vector<double> e(lengthIn-1);
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-      localWorkspace->setX(i-1, timeChannelsVec);
+//      localWorkspace->setX(i-1, timeChannelsVec);
       localWorkspace->setData(i-1, v, e);
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
     
-    // Close the input data file
-    close_data_file__();
-    
     // Clean up
     delete[] timeChannels;
     delete[] spectrum;
-#endif
     return StatusCode::SUCCESS;
   }
 
@@ -130,9 +113,14 @@ namespace DataHandling
    *
    *  @return A StatusCode object indicating whether the operation was successful
    */
-	StatusCode LoadRaw::final()
+  StatusCode LoadRaw::final()
   {
     return StatusCode::SUCCESS;
+  }
+
+  double LoadRaw::dblSqrt(double in)
+  {
+	return sqrt(in);
   }
   
 } // namespace DataHandling
