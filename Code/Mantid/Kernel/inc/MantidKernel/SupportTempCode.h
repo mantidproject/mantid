@@ -192,11 +192,11 @@ int convert(const char* A,T& out)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T,typename A> class V,typename T,typename A>
+template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
 {
-  V<T> Ex;   // Empty vector
-  V<T> X;    // Empty vector
+  V<T,A> Ex;   // Empty vector
+  V<T,A> X;    // Empty vector
   for(unsigned int i=0;i<Y.size();i++)
     X.push_back(i*step);
 
@@ -210,10 +210,10 @@ int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T,typename A> class V,typename T,typename A>
+template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
 {
-  V<T> Ex;   // Empty vector/list
+  V<T,A> Ex;   // Empty vector/list
   return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
 }
 
@@ -228,7 +228,7 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T,typename A> class V,typename T,typename A>
+template<template<typename T,typename A> class V,typename T,typename A> 
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err)
 {
   const int Npts(X.size()>Y.size() ? Y.size() : X.size());
@@ -243,9 +243,9 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   FX<<"# "<<Npts<<" "<<Epts<<std::endl;
   FX.precision(10);
   FX.setf(std::ios::scientific,std::ios::floatfield);
-  typename V<T>::const_iterator xPt=X.begin();
-  typename V<T>::const_iterator yPt=Y.begin();
-  typename V<T>::const_iterator ePt=(Epts ? Err.begin() : Y.begin());
+  typename V<T,A>::const_iterator xPt=X.begin();
+  typename V<T,A>::const_iterator yPt=Y.begin();
+  typename V<T,A>::const_iterator ePt=(Epts ? Err.begin() : Y.begin());
   
   // Double loop to include/exclude a short error stack
   int eCount=0;
