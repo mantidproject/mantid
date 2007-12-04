@@ -109,6 +109,8 @@ else:
 			pass
 
 #Export for SConscripts
+#
+cflags.append(['-O0','-g'])
 
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
@@ -141,12 +143,13 @@ for subproj in subProjs:
 env.Replace(SHARED_LIST=shared_libraries)
 env.Replace(STATIC_LIST=static_libraries)
 env.Prepend(MYLIBLIST=lib_list)
+env.Append(LINKFLAGS=['-g'])
 
 # main program
 ret = SConscript('Bin/SConscript')
 
 # tests
-cxxtestgen = env.WhereIs('cxxtestgen.pl')
+cxxtestgen = env.WhereIs('cxxtestgen.py')
 if cxxtestgen != None :
     ret = SConscript('Build/Tests/SConscript')
 else :
