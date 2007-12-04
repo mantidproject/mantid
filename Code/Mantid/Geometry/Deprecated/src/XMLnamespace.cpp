@@ -16,7 +16,7 @@
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
 #include "regexSupport.h"
-#include "RefControl.h"
+#include "MantidKernel/RefControl.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 //#include "SpecDataHold.h"

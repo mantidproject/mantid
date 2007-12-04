@@ -13,7 +13,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "RefControl.h"
+#include "MantidKernel/RefControl.h"
 #include "Matrix.h"
 #include "XMLnamespace.h"
 #include "XMLattribute.h"
