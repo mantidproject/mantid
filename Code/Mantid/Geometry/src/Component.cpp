@@ -1,6 +1,6 @@
 #include "Component.h"
 #include "Quat.h"
-#include "MantidKernel\Exception.h"
+//#include "MantidKernel\Exception.h"
 
 namespace Mantid
 {
@@ -173,7 +173,7 @@ void Component::rotate(const Quat& r)
  */
 void Component::rotate(double angle, const V3D& axis) 
 {
-  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been impletmented");
+  //throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been impletmented");
 }
 
 /** Gets the position relative to the parent
