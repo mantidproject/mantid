@@ -192,8 +192,8 @@ int convert(const char* A,T& out)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T> class V,typename T> 
-int writeFile(const std::string& Fname,const T step, const V<T>& Y)
+template<template<typename T,typename A> class V,typename T,typename A>
+int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
 {
   V<T> Ex;   // Empty vector
   V<T> X;    // Empty vector
@@ -210,8 +210,8 @@ int writeFile(const std::string& Fname,const T step, const V<T>& Y)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T> class V,typename T> 
-int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y)
+template<template<typename T,typename A> class V,typename T,typename A>
+int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
 {
   V<T> Ex;   // Empty vector/list
   return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
@@ -228,7 +228,7 @@ int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y)
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T,typename A> class V,typename T,typename A> 
+template<template<typename T,typename A> class V,typename T,typename A>
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err)
 {
   const int Npts(X.size()>Y.size() ? Y.size() : X.size());
