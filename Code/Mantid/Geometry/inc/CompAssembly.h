@@ -18,8 +18,8 @@ namespace Geometry
       CompAssembly allows Component to be positioned
       in a hierarchical structure in the form of a tree.
       CompAssembly inherit from component.
-      @ignore 
-      Copyright 2007 RAL
+
+		  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
       This file is part of Mantid.
 
@@ -43,6 +43,7 @@ class DLLExport CompAssembly : public Component
 {
 	
 public:
+  ///String description of the type of component
   virtual std::string type() const {return "CompAssembly";}
 	//! Empty constructor
 	CompAssembly();

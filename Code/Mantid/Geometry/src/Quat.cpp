@@ -10,23 +10,24 @@ namespace Mantid
 namespace Geometry
 {
 
-// Use boost float comparison 	
+/// Use boost float comparison 	
 boost::test_tools::close_at_tolerance<double> quat_tol(boost::test_tools::percent_tolerance(1e-6));
 
 
-Quat::Quat():w(1),a(0),b(0),c(0)
 /*! Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
  */
+Quat::Quat():w(1),a(0),b(0),c(0)
 {
 }
-Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(_w),a(_a),b(_b),c(_c)
+
 //! Constructor with values
+Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(_w),a(_a),b(_b),c(_c)
 {
 }
- 
+
+//! Copy constructor 
 Quat::Quat(const Quat& _q)
-//! Copy constructor
 {
 	w=_q.w;
 	a=_q.a;
@@ -34,7 +35,6 @@ Quat::Quat(const Quat& _q)
 	c=_q.c;
 }
  
-Quat::Quat(const double _deg,const V3D& _axis)
 /*! Constructor from an angle and axis.
  * \param _deg :: angle of rotation
  * \param _axis :: axis to rotate about
@@ -42,9 +42,15 @@ Quat::Quat(const double _deg,const V3D& _axis)
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
  * */
+Quat::Quat(const double _deg,const V3D& _axis)
 {
 	setAngleAxis(_deg,_axis);
 }
+
+/** Assignment Operator
+ * @param q the Quat to copy
+ * @returns a pointer to this
+ */
 Quat& Quat::operator=(const Quat& q)
 {
 	w=q.w;
@@ -53,6 +59,13 @@ Quat& Quat::operator=(const Quat& q)
 	c=q.c;
 	return *this;
 }
+
+/** Sets the quat values from four doubles
+ * @param ww the value for w
+ * @param aa the value for a
+ * @param bb the value for b
+ * @param cc the value for c
+ */
 void Quat::set(const double ww, const double aa, const double bb, const double cc)
 {
 	w=ww;
@@ -61,7 +74,7 @@ void Quat::set(const double ww, const double aa, const double bb, const double c
 	c=cc;
 	return;
 }
-void Quat::setAngleAxis(const double _deg, const V3D& _axis)
+
 /*! Constructor from an angle and axis.
  * \param _deg :: angle of rotation
  * \param _axis :: axis to rotate about
@@ -69,6 +82,7 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
  * */
+void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 {
 	double deg2rad=M_PI/180.0;
 	w=cos(0.5*_deg*deg2rad);
@@ -80,61 +94,74 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	c=s*temp[2];	
 	return;
 }
+
+/** Sets the quat values from four doubles
+ * @param ww the value for w
+ * @param aa the value for a
+ * @param bb the value for b
+ * @param cc the value for c
+ */
 void Quat::operator()(const double ww, const double aa, const double bb, const double cc)
 {
 	this->set(ww,aa,bb,cc);
 }
+
+/** Sets the quat values from an angle and a vector
+ * @param angle the numbers of degrees
+ * @param axis the axis of rotation
+ */
 void Quat::operator()(const double angle, const V3D& axis)
 {
 	this->setAngleAxis(angle,axis);
 } 
-Quat::~Quat()
+
 //! Destructor
+Quat::~Quat()
 {}
 
-void Quat::init() 
+
 /*! Re-initialise a quaternion to identity.
  */
+void Quat::init() 
 {
 	w=1.0;
 	a=b=c=0.0;
 	return;
 }
 
-Quat Quat::operator+(const Quat& _q) const
 /*! Quaternion addition operator
  * \param _q :: the quaternion to add
  * \return *this+_q
  */
+Quat Quat::operator+(const Quat& _q) const
 {
 	return Quat(w+_q.w,a+_q.a,b+_q.b,c+_q.c);
 }
  
-Quat& Quat::operator+=(const Quat& _q)
 /*! Quaternion self-addition operator
  * \param _q :: the quaternion to add
  * \return *this+=_q
  */
+Quat& Quat::operator+=(const Quat& _q)
 {
 	w+=_q.w;a+=_q.a;b+=_q.b;c+=_q.c;
 	return *this;
 }
  
-Quat Quat::operator-(const Quat& _q) const
 /*! Quaternion subtraction operator
  * \param _q :: the quaternion to add
  * \return *this-_q
  */
-
+Quat Quat::operator-(const Quat& _q) const
 {
 	return Quat(w-_q.w,a-_q.a,b-_q.b,c-_q.c);
 }
  
-Quat& Quat::operator-=(const Quat& _q)
 /*! Quaternion self-substraction operator
  * \param _q :: the quaternion to add
  * \return *this-=_q
  */
+Quat& Quat::operator-=(const Quat& _q)
 {
 	w-=_q.w;
 	a-=_q.a;
@@ -143,7 +170,6 @@ Quat& Quat::operator-=(const Quat& _q)
 	return *this;
 }
  
-Quat Quat::operator*(const Quat& _q) const
 /*! Quaternion multiplication operator
  * \param _q :: the quaternion to multiply
  * \return *this*_q
@@ -152,6 +178,7 @@ Quat Quat::operator*(const Quat& _q) const
  *  in the same way multiplication of rotation matrices 
  *  isn't.
  */
+Quat Quat::operator*(const Quat& _q) const
 {
 	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
@@ -161,11 +188,11 @@ Quat Quat::operator*(const Quat& _q) const
 	return Quat(w1,a1,b1,c1);
 }
  
-Quat& Quat::operator*=(const Quat& _q) 
 /*! Quaternion self-multiplication operator
  * \param _q :: the quaternion to multiply
  * \return *this*=_q
  */
+Quat& Quat::operator*=(const Quat& _q) 
 {
 	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
@@ -176,33 +203,33 @@ Quat& Quat::operator*=(const Quat& _q)
 	return (*this);
 }
  
-bool Quat::operator==(const Quat& q) const 
 /*! Quaternion equal operator
  * \param _q :: the quaternion to compare
  * 
  * Compare two quaternions at 1e-6%tolerance.
  * Use boost close_at_tolerance method
  */
+bool Quat::operator==(const Quat& q) const 
 {
 	return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
 } 
  
-bool Quat::operator!=(const Quat& _q) const
-{
 /*! Quaternion non-equal operator
  * \param _q :: the quaternion to compare
  * 
  * Compare two quaternions at 1e-6%tolerance.
  *  Use boost close_at_tolerance method
  */
+bool Quat::operator!=(const Quat& _q) const
+{
 	return (!operator==(_q));
 } 
  
-void Quat::normalize()
 /*! Quaternion normalization
  * 
  * Divide all elements by the quaternion norm
  */
+void Quat::normalize()
 {
 	double overnorm=1.0/len2();
 	w*=overnorm;
@@ -212,12 +239,12 @@ void Quat::normalize()
 	return;
 }
  
-void Quat::conjugate()
 /*! Quaternion complex conjugate
  * 
  *  Reverse the sign of the 3 imaginary components of the 
  *  quaternion
  */
+void Quat::conjugate()
 {
 	a*=-1.0;
 	b*=-1.0;
@@ -225,32 +252,32 @@ void Quat::conjugate()
 	return;
 }
  
-double Quat::len() const
 /*! Quaternion length
  *  
  */
+double Quat::len() const
 {
 	return sqrt(len2());
 }
 
-double Quat::len2() const
 /*! Quaternion norm (length squared) 
  *    
  */
+double Quat::len2() const
 {
 	return (w*w+a*a+b*b+c*c);
 }
  
-void Quat::inverse()  
 /*! Inverse a quaternion
  *  
  */
+void Quat::inverse()  
 {
 	conjugate();
 	normalize();
 	return;
 }
-void Quat::rotate(V3D& v) const
+
 /*! 	Rotate a vector. 
  *  \param v :: the vector to be rotated
  *  
@@ -259,6 +286,7 @@ void Quat::rotate(V3D& v) const
  *   is represented by q.v.q-1 where q-1 is the inverse of 
  *   v. 
  */
+void Quat::rotate(V3D& v) const
  {
  	Quat qinvert(*this);
  	qinvert.inverse();
@@ -269,9 +297,13 @@ void Quat::rotate(V3D& v) const
  	v[1]=pos[2];
  	v[2]=pos[3];
  }
-void Quat::GLMatrix(double mat[16])  
-/*! 
+
+/*! Convert quaternion rotation to an OpenGL matrix [4x4] matrix 
+ * stored as an linear array of 16 double
+ * The function glRotated must be called
+ * param mat The output matrix
  */
+void Quat::GLMatrix(double mat[16])  
 {
 	double aa      = a * a;
 	double ab      = a * b;
@@ -296,6 +328,11 @@ void Quat::GLMatrix(double mat[16])
 	return;
 }
   
+/** Bracket operator overload
+ * returns the internal representation values based on an index
+ * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c
+ * @returns a double of the value requested
+ */
 const double& Quat::operator[](const int Index) const
 {
 	switch (Index)
@@ -309,6 +346,11 @@ const double& Quat::operator[](const int Index) const
 	}
 }
 
+/** Bracket operator overload
+ * returns the internal representation values based on an index
+ * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c
+ * @returns a double of the value requested
+ */
 double& Quat::operator[](const int Index) 
 {
 	switch (Index)
@@ -322,6 +364,9 @@ double& Quat::operator[](const int Index)
 	}
 }
 
+/** Prints a string representation of itself
+ * @param os the stream to output to
+ */
 void Quat::printSelf(std::ostream& os) const
 {
 	os << "[" << w << "," << a << "," << b << "," << c << "]";
@@ -329,6 +374,11 @@ void Quat::printSelf(std::ostream& os) const
 
 }
 
+/** Prints a string representation
+ * @param os the stream to output to
+ * @param q the quat to output
+ * @returns the stream
+ */
 std::ostream& operator<<(std::ostream& os,const Quat& q)
 {
 	q.printSelf(os);

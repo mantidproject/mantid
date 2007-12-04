@@ -38,9 +38,9 @@ namespace Kernel
   {
   public:
     enum {
-      FAILURE,
-      SUCCESS,
-      RECOVERABLE
+      FAILURE,        ///<The operation failed
+      SUCCESS,        ///<The operation succeeded
+      RECOVERABLE     ///<The operation failed but is recoverable
     };
 
     // Gaudi has a default constructor which sets the status to success.

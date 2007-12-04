@@ -158,18 +158,34 @@ void Component::translate(const V3D& v)
 	pos+=v;
 	return;
 }
+
+/*! Rotate the component relative to the parent component
+ *  @param r :: translation vector
+ */
 void Component::rotate(const Quat& r)
 {
 	rot=r*rot;
 }
-void Component::rotate(double, const V3D& axis) 
+/*! Rotate the component by an angle in degrees with respect to an axis.
+ * @param angle the number of degrees to rotate
+ * @axis The Vector to rotate around
+ */
+void Component::rotate(double angle, const V3D& axis) 
 {
-	
+  throw Kernel::Exception::NotImplementedError();
 }
+
+/** Gets the position relative to the parent
+ * @returns A vector of the relative position
+ */
 V3D Component::getRelativePos() const 
 {
 	return pos;
 }
+
+/** Gets the absolute position of the component
+ * @returns A vector of the absolute position
+ */
 V3D Component::getPos() const
 {
 	
@@ -183,14 +199,27 @@ V3D Component::getPos() const
 		return temp;
 	}
 }
+
+/** Gets the rotation relative to the parent
+ * @returns A quaternion of the relative rotation
+ */
 const Quat& Component::getRelativeRot() const
 {
 	return rot;
 }
+
+/** Gets the distence between two components
+ * @param comp The Component to measure against
+ * @returns The distance
+ */
 double Component::getDistance(const Component& comp) const
 {
 	return pos.distance(comp.pos);
 }
+
+/** Prints a text representation of itself
+ * @param os The ouput stream to write to
+ */
 void Component::printSelf(std::ostream& os) const
 {
 	os << "Name : " << name << std::endl;
@@ -203,6 +232,12 @@ void Component::printSelf(std::ostream& os) const
 	os << "Position : " << getPos() << std::endl;
 	os << "Orientation :" << rot << std::endl;
 }
+
+/** Prints a text representation
+ * @param os The ouput stream to write to
+ * @param comp The component to output
+ * @returns The ouput stream
+ */
 std::ostream& operator<<(std::ostream& os, const Component& comp)
 {
 	comp.printSelf(os);

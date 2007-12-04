@@ -93,7 +93,7 @@ int CompAssembly::addCopy(Component* comp)
 
 /*! AddCopy method
  * @param comp :: component to add 
- * @param m    :: name of the copied component. 
+ * @param n    :: name of the copied component. 
  * @return number of components in the assembly
  * 
  *  Add a copy of a component in the assembly. 
@@ -121,6 +121,7 @@ int CompAssembly::nelements() const
 }
 
 /*! Get a pointer to the ith component in the assembly
+ * @param i The index of the component you want
  * @return group[i] 
  * 
  *  Throws if i is not in range
@@ -149,6 +150,12 @@ void CompAssembly::printChildren(std::ostream& os) const
 	}
 }
 
+/*! Print information about all the elements in the tree to a stream
+ *  Loops through all components in the tree 
+ *  and call printSelf(os). 
+ *
+ * @param os :: output stream 
+ */
 void CompAssembly::printTree(std::ostream& os) const
 {
 	std::vector<Component*>::const_iterator it;

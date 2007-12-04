@@ -3,7 +3,6 @@
 #include <cmath> 
 #include <vector>
 
-// THIS IS VERY ERROR PRONE :: USE "V3D.h" and -I flag.
 #include "V3D.h"
 
 namespace Mantid
@@ -11,6 +10,7 @@ namespace Mantid
 namespace Geometry
 {
 
+  /// The default precision 1e-7
 const double precision(1e-7);   
 
 /// Constructor [Null]
@@ -26,6 +26,12 @@ V3D::V3D(const double xx, const double yy, const double zz) :
 V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
 {}
 
+  /*!
+    Sets the vector position based on spherical coordinates
+    \param R :: The R value
+    \param theta :: The theta value
+    \param phi :: The phi value
+  */
 void V3D::spherical(double R, double theta, double phi)
 {
 	double deg2rad=M_PI/180.0;
