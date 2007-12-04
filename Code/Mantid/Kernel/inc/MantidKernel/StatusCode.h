@@ -47,7 +47,10 @@ namespace Kernel
     // I am going to require that that status is explicitly given in the constructor.
 //    StatusCode();
     
-    /// Constructor.
+    /** Constructor.
+     * @param code the value of the statuscode
+     * @param checked If the status code has been checked
+     */
     StatusCode( unsigned long code, bool checked = false ) :
          d_code(code),m_checked(checked), m_severity(0) {}
     
@@ -55,7 +58,7 @@ namespace Kernel
      *  N.B. This is a specific type of failure where there aren't any more
      *  appropriate staus codes. To test for any failure use :
      *  if ( !StatusCode.isSuccess() ) ...
-     *  @return True if the status is set to failure
+     *  @returns True if the status is set to failure
      */
     bool isFailure() const
     {

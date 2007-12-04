@@ -18,9 +18,11 @@ class ObjComp
   Quat Orientation;              ///< Orientation / Rotation 
 
  public:
-
-  virtual isValid(const Vec3D&) =0; ///<Returns if the point is within the object component
-
+  ///Returns if the point is within the object component
+  virtual int isValid(const Vec3D&) const
+  {
+    Vec3D PtTrans(Pt-Centre);
+  }
 };
 
 
