@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Exception.h"
 #include <algorithm>
 
@@ -35,7 +34,11 @@ void PropertyManager::declareProperty( Property *p )
 {
   // Get the name of the property and don't permit empty names
   std::string key = p->name();
-  if (key.empty()) throw std::invalid_argument("An empty property name is not permitted");
+  if (key.empty()) 
+  {
+//    delete p;
+    throw std::invalid_argument("An empty property name is not permitted");
+  }
   
   std::transform(key.begin(), key.end(), key.begin(), toupper);
   if ( m_properties.insert(PropertyMap::value_type(key, p)).second)
@@ -44,86 +47,24 @@ void PropertyManager::declareProperty( Property *p )
   }
   else
   {
+//    delete p;
     throw Exception::ExistsError("Property with given name already exists", p->name() );
   }
 }
 
-/** Add an integer property to the list of managed properties
- *  @param name The name to assign to the property
- *  @param value The initial value to assign to the property
- *  @param doc The (optional) documentation string
- *  @throw Exception::ExistsError if a property with the given name already exists
- *  @throw std::invalid_argument  if the name argument is empty
+/** Specialised version of declareProperty template method to prevent the creation of a
+ *  PropertyWithValue of type const char* if an argument in quotes is passed (it will be
+ *  converted to a string)
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param doc The (optional) documentation string
+   *  @throw Exception::ExistsError if a property with the given name already exists
+   *  @throw std::invalid_argument  if the name argument is empty
  */
-void PropertyManager::declareProperty( const std::string &name, int value, const std::string &doc )
+void PropertyManager::declareProperty( const std::string &name, const char* value, const std::string &doc )
 {
-  // Unnamed properties are not permitted
-  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
-  std::string key = name;
-  std::transform(key.begin(), key.end(), key.begin(), toupper);
-  if ( ! existsProperty( key ) )
-  {
-    Property *p = new PropertyWithValue<int>(name, value);
-    p->setDocumentation(doc);
-    m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedProperties.push_back(p);
-  }
-  else
-  {
-    throw Exception::ExistsError("Property with given name already exists", name );
-  }
-}
-
-/** Add a double property to the list of managed properties
- *  @param name The name to assign to the property
- *  @param value The initial value to assign to the property
- *  @param doc The (optional) documentation string
- *  @throw Exception::ExistsError if a property with the given name already exists
- *  @throw std::invalid_argument  if the name argument is empty
- */
-void PropertyManager::declareProperty( const std::string &name, double value, const std::string &doc )
-{
-  // Unnamed properties are not permitted
-  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
-  std::string key = name;
-  std::transform(key.begin(), key.end(), key.begin(), toupper);
-  if ( ! existsProperty( key ) )
-  {
-    Property *p = new PropertyWithValue<double>(name, value);
-    p->setDocumentation(doc);
-    m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedProperties.push_back(p);
-  }
-  else
-  {
-    throw Exception::ExistsError("Property with given name already exists", name );
-  }
-}
-
-/** Add a string property to the list of managed properties
- *  @param name The name to assign to the property
- *  @param value The initial value to assign to the property
- *  @param doc The (optional) documentation string
- *  @throw Exception::ExistsError if a property with the given name already exists
- *  @throw std::invalid_argument  if the name argument is empty
- */
-void PropertyManager::declareProperty( const std::string &name, std::string value, const std::string &doc )
-{
-  // Unnamed properties are not permitted
-  if (name.empty()) throw std::invalid_argument("An empty property name is not permitted");
-  std::string key = name;
-  std::transform(key.begin(), key.end(), key.begin(), toupper);
-  if ( ! existsProperty( key ) )
-  {
-    Property *p = new PropertyWithValue<std::string>(name, value);
-    p->setDocumentation(doc);
-    m_properties.insert(PropertyMap::value_type(key, p));
-    m_orderedProperties.push_back(p);
-  }
-  else
-  {
-    throw Exception::ExistsError("Property with given name already exists", name );
-  }
+  // Simply call templated method, converting character array to a string
+  declareProperty(name, std::string(value), doc);
 }
 
 /** Set the ordered list of properties by one string of values.

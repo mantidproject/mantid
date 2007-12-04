@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <map>
 
 namespace Mantid
@@ -14,7 +15,7 @@ namespace Kernel
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class Property;
+//class Property;
 
 /** @class PropertyManager PropertyManager.h Kernel/PropertyManager.h
 
@@ -53,12 +54,27 @@ public:
 	PropertyManager();
 	virtual ~PropertyManager();
 	
-	// Overloaded functions to declare properties (i.e. store them)
+	// Function to declare properties (i.e. store them)
 	void declareProperty( Property *p );
-	void declareProperty( const std::string &name, int value, const std::string &doc="" );
-  void declareProperty( const std::string &name, double value, const std::string &doc="" );
-  void declareProperty( const std::string &name, std::string value, const std::string &doc="" );
 
+	/** Add a property of the template type to the list of managed properties
+	 *  @param name The name to assign to the property
+	 *  @param value The initial value to assign to the property
+	 *  @param doc The (optional) documentation string
+	 *  @throw Exception::ExistsError if a property with the given name already exists
+	 *  @throw std::invalid_argument  if the name argument is empty
+	 */
+	template <typename T>
+	void declareProperty( const std::string &name, T value, const std::string &doc="" )
+	{
+	  Property *p = new PropertyWithValue<T>(name, value);
+    p->setDocumentation(doc);
+    declareProperty(p);
+	}
+	
+	// Specialised version of above function
+	void declareProperty( const std::string &name, const char* value, const std::string &doc="" );
+	
   // Sets all the declared properties from 
   void setProperties( const std::string &values );
   
