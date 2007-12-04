@@ -43,7 +43,7 @@ class BnId
  public:
   
   BnId();
-  BnId(const int,unsigned int);
+  BnId(const int A,unsigned int X);
   BnId(const BnId&);
   BnId& operator=(const BnId&);
   ~BnId();
@@ -51,7 +51,7 @@ class BnId
   int operator==(const BnId&) const;
   int operator<(const BnId&) const;  
   int operator>(const BnId&) const;  
-  int operator[](const int) const;   
+  int operator[](const int A) const;   
   int operator++(int);
   int operator++();         
   int operator--(int);      

@@ -40,7 +40,10 @@ namespace Geometry
 {
 
 Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
+
+/// @cond
 const double LTolerance(1e-6);
+/// @endcond
 
 Line::Line() : Origin(),Direct()
   /*!

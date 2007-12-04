@@ -35,44 +35,44 @@ class DataSpace
 
  public:
 
-  DataSpace();
-  DataSpace(const DataSpace&);
-  DataSpace& operator=(const DataSpace&);
-  ~DataSpace();
+  DataSpace();                                 ///< Constructor
+  DataSpace(const DataSpace&);                 ///< Copy constructor
+  DataSpace& operator=(const DataSpace&);      ///< Copy assignment operator
+  ~DataSpace();                                ///< Destructor
 
-  DataSpace operator+(const DataSpace&) const;
-  DataSpace& operator+=(const DataSpace&);
-  DataSpace& operator+=(const double);         
+  DataSpace operator+(const DataSpace&) const;   ///< Addition operator
+  DataSpace& operator+=(const DataSpace&);       ///< += operator
+  DataSpace& operator+=(const double);           ///< += operator
 
-  DataSpace operator-(const DataSpace&) const;
-  DataSpace& operator-=(const DataSpace&);
-  DataSpace& operator-=(const double);         
+  DataSpace operator-(const DataSpace&) const;   ///< Subtraction operator
+  DataSpace& operator-=(const DataSpace&);       ///< -= operator
+  DataSpace& operator-=(const double);           ///< -= operator
 
-  DataSpace& operator*=(const DataSpace&);
-  DataSpace& operator*=(const double);
+  DataSpace& operator*=(const DataSpace&);       ///< *= operator
+  DataSpace& operator*=(const double);           ///< *= operator
 
-  DataSpace& operator/=(const DataSpace&);
-  DataSpace& operator/=(const double);
+  DataSpace& operator/=(const DataSpace&);       ///< /= operator
+  DataSpace& operator/=(const double);           ///< /= operator
 
-  DataSpace operator*(const DataSpace&) const;
+  DataSpace operator*(const DataSpace&) const;   ///< * operator
 
-  double& operator[](const int A) { return Y[A]; } 
-  const double operator[](const int A) const { return Y[A]; } 
-  double XPt(const int A) const { return X[A]; } 
-  double YPt(const int A) const { return Y[A]; } 
-  double ErrPt(const int A) const { return Err[A]; } 
+  double& operator[](const int A) { return Y[A]; }            ///< Returns the indexed data point
+  const double operator[](const int A) const { return Y[A]; } ///< Returns the indexed data point (const version)
+  double XPt(const int A) const { return X[A]; }              ///< Returns the indexed X data point
+  double YPt(const int A) const { return Y[A]; }              ///< Returns the indexed data point
+  double ErrPt(const int A) const { return Err[A]; }          ///< Returns the indexed error point
   
-  std::vector<double>& XValues() { return X; }
-  std::vector<double>& YValues() { return Y; }
-  std::vector<double>& ErrValues() { return Err; }
+  std::vector<double>& XValues() { return X; }       ///< Returns the vector of X values
+  std::vector<double>& YValues() { return Y; }       ///< Returns the vector of Y values
+  std::vector<double>& ErrValues() { return Err; }   ///< Returns the vector of error values
 
-  const std::vector<double>& XValues() const { return X; }
-  const std::vector<double>& YValues() const { return Y; }
-  const std::vector<double>& ErrValues() const { return Err; }
+  const std::vector<double>& XValues() const { return X; }     ///< Returns the vector of X values (const version)
+  const std::vector<double>& YValues() const { return Y; }     ///< Returns the vector of Y values (const version)
+  const std::vector<double>& ErrValues() const { return Err; } ///< Returns the vector of error values (const version)
 
 
-  DataSpace& rebin(const double,const double,const double);
-  void setLevel(const int,const double,const double=0.0,const double =-1.0);
+  DataSpace& rebin(const double,const double,const double);    ///< Rebin the data
+  void setLevel(const int,const double,const double=0.0,const double =-1.0);   ///< Set the level
   int removeZeroX();                    ///< remove X <= 0.0
   void zero();                           ///< zero Y value
 
@@ -82,13 +82,13 @@ class DataSpace
   double calcFitBasic(const DataSpace&,
 		      std::vector<double>&) const;  ///< Simple Chi^2 calc
 
-  int size() const { return Npts; }
-  void setTitle(const std::string& A) { Title=A;} 
-  std::string getTitle() const { return Title; }
+  int size() const { return Npts; }                ///< Returns the number of points in the dataset
+  void setTitle(const std::string& A) { Title=A;}  ///< Set the title of the dataset
+  std::string getTitle() const { return Title; }   ///< Get the title of the dataset
 
-  int readFour(const std::string&);
-  int write(const std::string&,const int =0) const;
-  int write(std::ostream&) const;
+  int readFour(const std::string&);                 ///< Read 4-vector?
+  int write(const std::string&,const int =0) const; ///< Write out
+  int write(std::ostream&) const;                   ///< Write out to a stream
   
   void convAngleToQ(const double);      ///< convert an angle to Q
   void calcTrans(const DataSpace&,const double);   ///< full transform 

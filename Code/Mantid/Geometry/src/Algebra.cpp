@@ -58,6 +58,7 @@ Algebra::operator=(const Algebra& A)
   return *this;
 }
 
+/// Destructor
 Algebra::~Algebra()
 { }
 

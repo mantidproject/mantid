@@ -1579,7 +1579,7 @@ Acomp::setString(const std::string& Line)
   /*!
     Sort out stuff like abc'+efg
     given a inner bracket expand that etc.
-    \param Ln :: string of for abc'.
+    \param Line :: string of for abc'.
   */
 {
   Acomp CM;            /// Complementary object

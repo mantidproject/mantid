@@ -36,8 +36,8 @@ class Line
   Geometry::Vec3D Origin;   ///< Orign point (on plane)
   Geometry::Vec3D Direct;   ///< Direction of outer surface (Unit Vector) 
   
-  int lambdaPair(const int,const std::pair<std::complex<double>,
-		 std::complex<double> >&,std::vector<Geometry::Vec3D>&) const;
+  int lambdaPair(const int ix,const std::pair<std::complex<double>,
+		 std::complex<double> >& SQ,std::vector<Geometry::Vec3D>& PntOut) const;
 
  public: 
 
@@ -49,7 +49,7 @@ class Line
   
   virtual ~Line();
 
-  Geometry::Vec3D getPoint(const double) const;   ///< gets the point O+lam*N
+  Geometry::Vec3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
   Geometry::Vec3D getOrigin() const { return Origin; }   ///< returns the origin
   Geometry::Vec3D getDirect() const { return Direct; }   ///< returns the direction
   double distance(const Geometry::Vec3D&) const;  ///< distance from line
@@ -66,7 +66,7 @@ class Line
   int intersect(std::vector<Geometry::Vec3D>&,const Plane&) const;
   int intersect(std::vector<Geometry::Vec3D>&,const Sphere&) const;
 
-  int intersect(std::vector<Geometry::Vec3D>&,const Line*) const;
+  int intersect(std::vector<Geometry::Vec3D>&,const Line*) const;  ///< Not implemented
   //  int intersect(std::vector<Geometry::Vec3D>&,const Circle*) const;
   
 };

@@ -34,7 +34,10 @@ namespace Geometry
 {
 
 Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
+
+/// @cond
 const double CTolerance(1e-6);
+/// @endcond
 
 Cone::Cone() : Surface(),
   Centre(), Normal(1,0,0), alpha(0.0), cangle(1.0)

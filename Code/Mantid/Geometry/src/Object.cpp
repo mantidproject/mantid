@@ -40,7 +40,10 @@ namespace Geometry
 {
 
 Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
+
+/// @cond
 const double OTolerance(1e-6);
+/// @endcond
 
 Object::Object() :
   ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0)

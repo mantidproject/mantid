@@ -25,7 +25,7 @@ class Algebra
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  std::map<int,std::string> SurfMap;
+  std::map<int,std::string> SurfMap;     ///< Internal surface map
   Acomp F;       ///< Factor
   
  public:

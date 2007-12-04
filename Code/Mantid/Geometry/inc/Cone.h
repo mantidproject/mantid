@@ -46,7 +46,7 @@ class Cone : public Surface
   int operator==(const Cone&) const;
   ~Cone();
   
-  int setCone(const std::string&);
+  int setCone(const std::string&);   ///< Not implemented
   int side(const Geometry::Vec3D&) const;
   int onSurface(const Geometry::Vec3D&) const;
 
@@ -61,14 +61,14 @@ class Cone : public Surface
   int setSurface(const std::string&);
   void setCentre(const Geometry::Vec3D&);              
   void setNorm(const Geometry::Vec3D&);       
-  void setAngle(const double);  
-  void setTanAngle(const double);
+  void setAngle(const double A);  
+  void setTanAngle(const double A);
   void setBaseEqn();
 
   void write(std::ostream&) const;
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int=0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int singleFlag=0);
 
 };
 

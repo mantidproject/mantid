@@ -1,6 +1,7 @@
 #ifndef Element_h
 #define Element_h
 
+/// Stores isotope data
 struct Abundance
 {
   int Z;                               ///< Z of the element
@@ -8,12 +9,12 @@ struct Abundance
   std::vector<double> Frac;            ///< Fractional weight
 
   Abundance();
-  explicit Abundance(const int);
-  Abundance(const Abundance&);
-  Abundance& operator=(const Abundance&);
-  ~Abundance();
+  explicit Abundance(const int);          ///< Constructor
+  Abundance(const Abundance&);            ///< Copy Constructor
+  Abundance& operator=(const Abundance&); ///< Copy assignment operator
+  ~Abundance();                           ///< Destructor
 
-  void addIso(const int,const double);
+  void addIso(const int,const double);    ///< Add an isotope
   
 };
 

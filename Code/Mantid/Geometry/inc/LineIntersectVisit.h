@@ -24,9 +24,9 @@ class LineIntersectVisit : public BaseVisit
 
   static Kernel::Logger& PLog;           ///< The official logger
     
-    Line ATrack;
-    std::vector<Geometry::Vec3D> PtOut;
-    std::vector<double> DOut;
+    Line ATrack;                         ///< The line
+    std::vector<Geometry::Vec3D> PtOut;  ///< The intersection point
+    std::vector<double> DOut;            ///< The distance
     
     void procTrack();
 
@@ -45,13 +45,16 @@ class LineIntersectVisit : public BaseVisit
     void Accept(const General&);
     
     // Accessor
+    /// Get the distance
     const std::vector<double>& getDistance() const 
       { return DOut; }
+    /// Get the intersection points
     const std::vector<Geometry::Vec3D>& getPoints() const 
       { return PtOut; }
+    /// Get the number of intersection points
     int getNPoints() const { return PtOut.size(); }
 
-    // Re-set the line
+    /// Re-set the line
     void setLine(const Geometry::Vec3D&,const Geometry::Vec3D&);
 
   };

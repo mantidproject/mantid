@@ -21,6 +21,10 @@ namespace Geometry
 
 Kernel::Logger& BnId::PLog(Kernel::Logger::get("BnId"));
 
+/*! Output as a stream
+ *  \param of Reference to the output stream
+ *  \param A  The object to output
+ */
 std::ostream&
 operator<<(std::ostream& of,const BnId& A) 
 {

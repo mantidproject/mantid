@@ -34,7 +34,10 @@ namespace Geometry
 {
  
 Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
+
+/// @cond
 const double STolerance(1e-6);
+/// @endcond
 
 Sphere::Sphere() : Surface(),
   Centre(0,0,0),Radius(0.0)

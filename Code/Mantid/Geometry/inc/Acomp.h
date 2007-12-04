@@ -41,7 +41,7 @@ class Acomp
   void deleteComp();            ///< delete all of the Comp list
   void addComp(const Acomp&);      ///< add a Component intellegently
   //  void addCompPtr(Acomp*);      ///< add a Component intellegently
-  void addUnitItem(const int);      ///< add an Unit intellgently
+  void addUnitItem(const int Item);      ///< add an Unit intellgently
   void processIntersection(const std::string&);
   void processUnion(const std::string&);
   int joinDepth();                                           ///< Search table to uplift objects
@@ -64,7 +64,7 @@ class Acomp
 
  public:
 
-  Acomp(const int =0);   
+  Acomp(const int Tx=0);   
   Acomp(const Acomp&);
   Acomp& operator=(const Acomp&); 
   int operator==(const Acomp&) const; 
@@ -76,8 +76,8 @@ class Acomp
   Acomp& operator*=(const Acomp&);
   ~Acomp();
 
-  const Acomp* itemC(const int) const;  ///< returns a pointer to Comp (or zero)
-  int itemN(const int) const;           ///< returns an integer to Units (or zero)
+  const Acomp* itemC(const int Index) const;  ///< returns a pointer to Comp (or zero)
+  int itemN(const int Index) const;           ///< returns an integer to Units (or zero)
 
   std::pair<int,int> size() const; ///< get the size of the units and the Acomp sub-comp
   int isSimple() const;            ///< true if only Units
@@ -99,9 +99,9 @@ class Acomp
   void complement();                                  ///< Take complement of component
   std::pair<Acomp,Acomp> algDiv(const Acomp&);        ///< Carry out Algebric division
   void setString(const std::string&);                 ///< Processes a line of type abc'+efg
-  void writeFull(std::ostream&,const int =0) const;   ///< Full write out to determine state
+  void writeFull(std::ostream& OXF,const int Indent=0) const;   ///< Full write out to determine state
   std::string display() const;                        ///< Pretty print statment
-  std::string displayDepth(const int =0) const;       ///< Really pretty print statment of tree
+  std::string displayDepth(const int dval=0) const;       ///< Really pretty print statment of tree
 };
 
 std::ostream& operator<<(std::ostream&,const Acomp&); 

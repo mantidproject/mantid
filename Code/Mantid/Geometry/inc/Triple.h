@@ -30,8 +30,8 @@ class Triple
   Triple<T>& operator=(const Triple<T>&);
   ~Triple();
 
-  T operator[](const int) const;
-  T& operator[](const int);
+  T operator[](const int A) const;
+  T& operator[](const int A);
   int operator<(const Triple<T>&) const;
   int operator>(const Triple<T>&) const;
   int operator==(const Triple<T>&) const;

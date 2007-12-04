@@ -40,7 +40,7 @@ class General : public Surface
   void setBaseEqn();
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int=0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,const int singleFlag=0);
 
 };
 

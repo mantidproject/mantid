@@ -34,7 +34,9 @@ namespace Geometry
 
 Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
 
+/// @cond
 const double GTolerance(1e-6);
+/// @endcond
 
 General::General() : Surface()
   /*!

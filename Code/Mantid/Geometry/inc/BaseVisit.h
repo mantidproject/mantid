@@ -26,14 +26,15 @@ class BaseVisit
 {
 public:
 
+  /// Destructor
   virtual ~BaseVisit() {}
 
-  virtual void Accept(const Surface&) =0;
-  virtual void Accept(const Plane&) =0;
-  virtual void Accept(const Sphere&) =0;
-  virtual void Accept(const Cone&) =0;
-  virtual void Accept(const Cylinder&) =0;
-  virtual void Accept(const General&) =0;
+  virtual void Accept(const Surface&) =0;  ///< Accept a surface
+  virtual void Accept(const Plane&) =0;    ///< Accept a plane
+  virtual void Accept(const Sphere&) =0;   ///< Accept a sphere
+  virtual void Accept(const Cone&) =0;     ///< Accept a cone
+  virtual void Accept(const Cylinder&) =0; ///< Accept a cylinder
+  virtual void Accept(const General&) =0;  ///< Accept a general surface
 
 };
 

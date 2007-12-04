@@ -36,7 +36,9 @@ namespace Geometry
 
 Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
 
+/// @cond
 const double CTolerance(1e-6);
+/// @endcond
 
 Cylinder::Cylinder() : Surface(),
    Centre(),Normal(1,0,0),Nvec(0),Radius(0.0)

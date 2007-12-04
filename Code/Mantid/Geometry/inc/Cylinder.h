@@ -46,7 +46,7 @@ class Cylinder : public Surface
   Cylinder& operator=(const Cylinder&);
   ~Cylinder();
 
-  // Visit acceptor
+  /// Visit acceptor
   virtual void acceptVisitor(BaseVisit& A) const
     {  A.Accept(*this); }
   
@@ -70,8 +70,8 @@ class Cylinder : public Surface
   void print() const;
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int=0);
-  void writeXML(const std::string&);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,const int singleFlag=0);
+  void writeXML(const std::string&);   ///< Not implemented
 
 };
 
