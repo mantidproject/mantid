@@ -104,8 +104,8 @@ public:
   std::vector<double>& emptyE() { refE.access().clear(); return refE.access(); }
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
-  int nybin() const { return refY->size(); }   ///< Return the number of data bin (Y or YE)
-
+  int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
+  int size() const { return refY->size(); }          ///< get pseudo size
 
   /// Checks for errors
   bool isError() const { return refE->empty(); }
