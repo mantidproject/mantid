@@ -218,15 +218,18 @@ int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y)
 }
 
 /*!
-  Write out the three container into a file of type dc 9
+  Write out the three container into a file with
+  column free-formated data in the form :
+   - X  Y Err
+   If Err does not exist (or is short) 0.0 is substituted.
   \param X :: X column
   \param Y :: Y column
   \param Err :: Err column
   \param Fname :: Name of the file
   \returns 0 on success and -ve on failure
 */
-template<template<typename T> class V,typename T> 
-int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y,const V<T>& Err)
+template<template<typename T,typename A> class V,typename T,typename A> 
+int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err)
 {
   const int Npts(X.size()>Y.size() ? Y.size() : X.size());
   const int Epts(Npts>static_cast<int>(Err.size()) ? Err.size() : Npts);
