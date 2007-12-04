@@ -37,6 +37,7 @@ namespace Kernel
   class DLLExport StatusCode 
   {
   public:
+    ///Enum Values for status Code
     enum {
       FAILURE,        ///<The operation failed
       SUCCESS,        ///<The operation succeeded
