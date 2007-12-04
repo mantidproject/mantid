@@ -46,36 +46,36 @@ namespace Geometry
       ~V3D();
 
       // Arithemetic operators overloaded
-      V3D operator+(const V3D&) const;
-      V3D& operator+=(const V3D&);
+      V3D operator+(const V3D& v) const;
+      V3D& operator+=(const V3D& v);
 
-      V3D operator-(const V3D&) const;
-      V3D& operator-=(const V3D&);
+      V3D operator-(const V3D& v) const;
+      V3D& operator-=(const V3D& v);
       // Inner product
-      V3D operator*(const V3D&) const;
-      V3D& operator*=(const V3D&);
+      V3D operator*(const V3D& v) const;
+      V3D& operator*=(const V3D& v);
       // Inner division
-      V3D operator/(const V3D&) const;
-      V3D& operator/=(const V3D&);
+      V3D operator/(const V3D& v) const;
+      V3D& operator/=(const V3D& v);
       // Scale 
-      V3D operator*(const double) const;
-      V3D& operator*=(const double);		
-      V3D operator/(const double) const;
-      V3D& operator/=(const double);		
+      V3D operator*(const double D) const;
+      V3D& operator*=(const double D);		
+      V3D operator/(const double D) const;
+      V3D& operator/=(const double D);		
       // Simple Comparison
       bool operator==(const V3D&) const;
       bool operator<(const V3D&) const;
       // Access
       // Setting x, y and z values
-      void operator()(const double, const double, const double);
-      void spherical(double, double, double);
+      void operator()(const double xx, const double yy, const double zz);
+      void spherical(double R, double theta, double phi);
       
       const double& X() const { return x; } ///< Get x
       const double& Y() const { return y; } ///< Get y
       const double& Z() const { return z; } ///< Get z
       
-      const double& operator[](const int) const;
-      double& operator[](const int);
+      const double& operator[](const int Index) const;
+      double& operator[](const int Index);
 
       /// Make a normalized vector (return norm value)
       double normalize();

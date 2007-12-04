@@ -43,7 +43,7 @@ void V3D::spherical(double R, double theta, double phi)
 
   /**
     Assignment operator
-    \param v :: V3D to copy 
+    \param A :: V3D to copy 
     \return *this
   */
 V3D& 
@@ -367,7 +367,7 @@ V3D::scalar_prod(const V3D& V) const
 
   /**
     Calculates the cross product
-    \param V The second vector to include in the calculation
+    \param v The second vector to include in the calculation
     \return The cross product of the two vectors
   */
 V3D 
@@ -382,7 +382,7 @@ V3D::cross_prod(const V3D& v) const
 
   /**
     Calculates the distance between two vectors
-    \param V The second vector to include in the calculation
+    \param v The second vector to include in the calculation
     \return The distance between the two vectors
   */
 double 
