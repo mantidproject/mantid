@@ -1,6 +1,19 @@
 #include <string>
 #include "TripleRef.h"
 
+namespace Mantid
+{
+
+/*!
+  \namespace Iterator
+  \author S. Ansell
+  \version 0.1
+  \date December 2007
+  \brief Holds items to allow iteration on data types
+*/
+
+namespace Iterator
+
 template<typename T>
 TripleRef<T>::TripleRef(const TripleRef<T>& A) :
   first(A.first),second(A.second),third(A.third)
@@ -185,3 +198,5 @@ TripleRef<T>::operator[](const int A)
 template class Triple<double&>;
 
 /// \endcond TEMPLATE
+
+}  // NAMESPACE Mantid

@@ -1,6 +1,20 @@
 #ifndef TripleRef_h
 #define TripleRef_h
 
+namespace Mantid
+{
+
+/*!
+  \namespace Iterator
+  \author S. Ansell
+  \version 0.1
+  \date December 2007
+  \brief Holds items to allow iteration on data types
+*/
+  
+namespace Iterator
+{
+
 /*!
   \class TripleRef
   \brief TripleRef of three identical types
@@ -28,7 +42,6 @@ class TripleRef
 
   const T operator[](const int) const;
   T operator[](const int);
-  T operator[](const int);
   int operator<(const TripleRef<T>&) const;
   int operator>(const TripleRef<T>&) const;
   int operator==(const TripleRef<T>&) const;
@@ -36,5 +49,8 @@ class TripleRef
 
 };
 
+}  // NAMESPACE Iterator
+
+}  // NAMESPACE Mantid
 
 #endif
