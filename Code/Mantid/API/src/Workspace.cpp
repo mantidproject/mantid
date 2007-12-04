@@ -66,12 +66,19 @@ const std::string& Workspace::getComment() const
     return _comment;
 }
 
-
+/** Get the Instrument associated with this workspace
+ * 
+ *  @return The instrument class
+ */
 Instrument& Workspace::getInstrument() 
 {
 	return _instrument;
 }
 
+/** Get the sample associated with this workspace
+ * 
+ *  @return The sample class
+ */
 Sample& Workspace::getSample()
 {
   return _sample;

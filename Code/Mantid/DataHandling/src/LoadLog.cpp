@@ -177,7 +177,7 @@ namespace DataHandling
 
 
   /** Takes as input a string and try to determine what type it is.
-   *
+   *  @param s The input string
    *  @return A enum kind which tells what type the string is
    */
   LoadLog::kind LoadLog::classify(const std::string& s)

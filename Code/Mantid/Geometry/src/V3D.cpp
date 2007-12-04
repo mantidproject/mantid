@@ -13,18 +13,19 @@ namespace Geometry
 
 const double precision(1e-7);   
 
+/// Constructor [Null]
 V3D::V3D():x(0),y(0),z(0)
-  /// Constructor [Null]
 {}
 
+/// Value constructor
 V3D::V3D(const double xx, const double yy, const double zz) :
-  x(xx),y(yy),z(zz)
-  /// Value constructor
+  x(xx),y(yy),z(zz) 
 {}
 
+/// Copy constructor
 V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
-  /// Copy constructor
 {}
+
 void V3D::spherical(double R, double theta, double phi)
 {
 	double deg2rad=M_PI/180.0;
@@ -33,13 +34,14 @@ void V3D::spherical(double R, double theta, double phi)
 	x=R*ct*cos(phi*deg2rad);
 	y=R*ct*sin(phi*deg2rad);
 }
-V3D& 
-V3D::operator=(const V3D& A)
+
   /*!
     Assignment operator
     \param v :: V3D to copy 
     \return *this
   */
+V3D& 
+V3D::operator=(const V3D& A)
 {
   if (this!=&A)
     {
@@ -50,12 +52,13 @@ V3D::operator=(const V3D& A)
   return *this;
 }
 
+/*!
+  Constructor from a pointer.
+  requires that the point is assigned after this has
+  been allocated since vPtr[x] may throw.
+*/
 V3D::V3D(const double* vPtr)  
-  /*!
-    Constructor from a pointer.
-    requires that the point is assigned after this has
-    been allocated since vPtr[x] may throw.
-  */
+
 {
   if (vPtr)
     {
@@ -65,69 +68,69 @@ V3D::V3D(const double* vPtr)
     }
 }
 
-V3D::~V3D()
   /// Destructor
+V3D::~V3D()
 {}
 
-V3D 
-V3D::operator+(const V3D& v) const
   /*
     Addtion operator
      \param v :: Vector to add
      \return *this+v;
   */
+V3D 
+V3D::operator+(const V3D& v) const
 {
   V3D out(*this);
   out+=v;
   return out;
 }
 
-V3D 
-V3D::operator-(const V3D& v) const
   /*
     Subtraction operator
     \param v :: Vector to sub.
     \return *this-v;
   */
+V3D 
+V3D::operator-(const V3D& v) const
 {
   V3D out(*this);
   out-=v;
   return out;
 }
 
-V3D 
-V3D::operator*(const V3D& v) const
   /*
     Inner product
     \param v :: Vector to sub.
     \return *this * v;
   */
+V3D 
+V3D::operator*(const V3D& v) const
 {
   V3D out(*this);
   out*=v;
   return out;
 }
 
-V3D 
-V3D::operator/(const V3D& v) const
   /*
     Inner division
     \param v :: Vector to divide
     \return *this * v;
   */
+V3D 
+V3D::operator/(const V3D& v) const
 {
   V3D out(*this);
   out/=v;
   return out;
 }
 
-V3D& 
-V3D::operator+=(const V3D& v) 
   /*
     Self-Addition operator
     \param v :: Vector to add.
     \return *this+=v;
   */
+V3D& 
+V3D::operator+=(const V3D& v) 
 {
   x+=v.x;
   y+=v.y;
@@ -135,13 +138,13 @@ V3D::operator+=(const V3D& v)
   return *this;
 }
 
-V3D& 
-V3D::operator-=(const V3D& v) 
   /*
     Self-Subtraction operator
     \param v :: Vector to sub.
     \return *this-v;
   */
+V3D& 
+V3D::operator-=(const V3D& v) 
 {
   x-=v.x;
   y-=v.y;
@@ -149,13 +152,13 @@ V3D::operator-=(const V3D& v)
   return *this;
 }
 
-V3D& 
-V3D::operator*=(const V3D& v) 
   /*
     Self-Inner product
     \param v :: Vector to multiply
     \return *this*=v;
   */
+V3D& 
+V3D::operator*=(const V3D& v) 
 {
   x*=v.x;
   y*=v.y;
@@ -163,13 +166,13 @@ V3D::operator*=(const V3D& v)
   return *this;
 }
 
-V3D& 
-V3D::operator/=(const V3D& v) 
   /*
     Self-Inner division
     \param v :: Vector to divide
     \return *this*=v;
   */
+V3D& 
+V3D::operator/=(const V3D& v) 
 {
   x/=v.x;
   y/=v.y;
@@ -177,39 +180,39 @@ V3D::operator/=(const V3D& v)
   return *this;
 }
 
-V3D 
-V3D::operator*(const double D) const
   /*!
     Scalar product
     \param D :: value to scale
     \return this * D
    */
+V3D 
+V3D::operator*(const double D) const
 {
   V3D out(*this);
   out*=D;
   return out;
 }
 
-V3D 
-V3D::operator/(const double D) const
   /*!
     Scalar divsion
     \param D :: value to scale
     \return this / D
   */
+V3D 
+V3D::operator/(const double D) const
 {
   V3D out(*this);
   out/=D;
   return out;
 }
 
-V3D& 
-V3D::operator*=(const double D)
   /*!
     Scalar product
     \param D :: value to scale
     \return this *= D
   */
+V3D& 
+V3D::operator*=(const double D)
 {
   x*=D;
   y*=D;
@@ -217,14 +220,14 @@ V3D::operator*=(const double D)
   return *this;
 }
 
-V3D& 
-V3D::operator/=(const double D) 
   /*!
     Scalar division
     \param D :: value to scale
     \return this /= D
     \todo ADD PRECISION
   */
+V3D& 
+V3D::operator/=(const double D) 
 {
   if (D!=0.0)
     {
@@ -235,12 +238,12 @@ V3D::operator/=(const double D)
   return *this;
 }
 
-bool 
-V3D::operator==(const V3D& v) const
   /*!
     Equals operator with tolerance factor
     \param v :: V3D for comparison
   */
+bool 
+V3D::operator==(const V3D& v) const
 {
   return (fabs(x-v.x)>precision ||
 	  fabs(y-v.y)>precision ||
@@ -248,11 +251,11 @@ V3D::operator==(const V3D& v) const
     false : true;
 }
 
+  /*!
+    \todo ADD PRCESSION
+   */
 bool 
 V3D::operator<(const V3D& V) const
-  /*!
-    \tood ADD PRCESSION
-   */
 {
   if (x!=V.x)
     return x<V.x;
@@ -261,6 +264,12 @@ V3D::operator<(const V3D& V) const
   return z<V.z;
 }
 
+  /*!
+    Sets the vector position from a triplet of doubles x,y,z
+    \param xx The X coordinate
+    \param yy The Y coordinate
+    \param zz The Z coordinate
+  */
 void 
 V3D::operator()(const double xx, const double yy, const double zz)
 {
@@ -270,6 +279,11 @@ V3D::operator()(const double xx, const double yy, const double zz)
   return;
 }
 
+  /*!
+    Returns the axis value based in the index provided
+    \param Index 0=x, 1=y, 2=z
+    \returns a double value of the requested axis
+  */
 const double&
 V3D::operator[](const int Index) const
 {
@@ -283,6 +297,11 @@ V3D::operator[](const int Index) const
     }
 }
 
+  /*!
+    Returns the axis value based in the index provided
+    \param Index 0=x, 1=y, 2=z
+    \returns a double value of the requested axis
+  */
 double&
 V3D::operator[](const int Index)
 {
@@ -296,41 +315,55 @@ V3D::operator[](const int Index)
     }
 }
 
-double 
-V3D::norm() const
   /*!
     Vector length
     \return vec.length()
   */
+double 
+V3D::norm() const
 {
   return sqrt(x*x+y*y+z*z);
 }
 
+  /*!
+    Vector length without the sqrt
+    \return vec.length()
+  */
 double 
 V3D::norm2() const
 {
 	return (x*x+y*y+z*z);
 }
 
-double
-V3D::normalize()
   /*!
     Normalises the vector and 
     then returns the scalar value of the vector
     \return Norm
   */
+double
+V3D::normalize()
 {
   const double ND(norm());
   this->operator/=(ND);
   return ND;
 }
 
+  /*!
+    Calculates the scalar product
+    \param V The second vector to include in the calculation
+    \return The scalar product of the two vectors
+  */
 double 
 V3D::scalar_prod(const V3D& V) const
 {
   return (x*V.x+y*V.y+z*V.z);
 }
 
+  /*!
+    Calculates the cross product
+    \param V The second vector to include in the calculation
+    \return The cross product of the two vectors
+  */
 V3D 
 V3D::cross_prod(const V3D& v) const
 {
@@ -341,6 +374,11 @@ V3D::cross_prod(const V3D& v) const
   return out;
 }
 
+  /*!
+    Calculates the distance between two vectors
+    \param V The second vector to include in the calculation
+    \return The distance between the two vectors
+  */
 double 
 V3D::distance(const V3D& v) const
 {
@@ -349,6 +387,10 @@ V3D::distance(const V3D& v) const
   return dif.norm();
 }
 
+  /*!
+    Prints a text representation of itself
+    \param os the Stream to output to
+  */
 void 
 V3D::printSelf(std::ostream& os) const
 {
@@ -356,6 +398,12 @@ V3D::printSelf(std::ostream& os) const
   return;
 }
 
+  /*!
+    Prints a text representation of itself
+    \param os the Stream to output to
+    \param v the vector to output
+    \returns the output stream
+    */
 std::ostream& 
 operator<<(std::ostream& os, const V3D& v)
 {

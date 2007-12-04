@@ -18,7 +18,6 @@ namespace API
 /** @class Instrument Instrument.h
  	
  	  Base Instrument Class, very basic at the moment
- 		
  			    	
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007
@@ -46,10 +45,12 @@ namespace API
 	class DLLExport Instrument : public Geometry::CompAssembly
 {
 public:
+  ///String description of the type of component
 	virtual std::string type() const {return "Instrument";}
 	
 	Instrument();
 	Instrument(const std::string& name);
+  ///Virtual destructor
 	virtual ~Instrument() {}
 	Instrument(const Instrument&);
 

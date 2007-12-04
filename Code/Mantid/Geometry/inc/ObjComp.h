@@ -19,7 +19,7 @@ class ObjComp
 
  public:
 
-  virtual isValid(const Vec3D&) =0;
+  virtual isValid(const Vec3D&) =0; ///<Returns if the point is within the object component
 
 };
 

@@ -33,9 +33,9 @@ class DLLExport Quat
 		    Rotation of an angle theta around a normalized axis (u,v,w) can be simply
 		    written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
 		    This class support all arithmetic operations for quaternions
-		    @ignore 
-		    Copyright � 2007 ???RAL???
 
+		    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+   	
 		    This file is part of Mantid.
 
 		    Mantid is free software; you can redistribute it and/or modify
