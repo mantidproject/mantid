@@ -1096,12 +1096,12 @@ BoolValue::setLeaf(Rule* aR,const int)
 }
 
 void
-BoolValue::setLeaves(Rule* aR,Rule*)
+BoolValue::setLeaves(Rule* aR,Rule* oR)
   /*!
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type SurfPoint
     \param aR :: new rule
-    \param :: Null other rule
+    \param oR :: Null other rule
   */
 {
   std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
@@ -1118,10 +1118,10 @@ BoolValue::findLeaf(const Rule* A) const
 }
 
 int
-BoolValue::isValid(const Geometry::Vec3D&) const
+BoolValue::isValid(const Geometry::Vec3D& pt) const
   /*! 
     Determines if a point  is valid.  
-    \param  :: Point to test
+    \param pt :: Point to test
     \returns status
   */
 {
@@ -1129,10 +1129,10 @@ BoolValue::isValid(const Geometry::Vec3D&) const
 }
 
 int
-BoolValue::isValid(const std::map<int,int>&) const
+BoolValue::isValid(const std::map<int,int>& map) const
   /*! 
     Determines if a point  is valid.  
-    \param  :: map of surface number and true values
+    \param map :: map of surface number and true values
     \returns :: status
   */
 {
@@ -1270,7 +1270,7 @@ CompGrp::setLeaf(Rule* nR,const int side)
     \param side :: side to use 
   */
 {
-  A=aR;
+  A=nR;
   if (A)
     A->setParent(this);
   return;
@@ -1371,6 +1371,7 @@ CompGrp::display() const
   return cx.str();
 }
 
+
 std::string
 CompGrp::displayAddress() const
   /*!
@@ -1391,7 +1392,6 @@ CompGrp::displayAddress() const
 
 
 }  // NAMESPACE Geometry
-
 
 
 /// \Cond TEMPLATE
