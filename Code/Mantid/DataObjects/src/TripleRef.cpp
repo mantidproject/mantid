@@ -1,4 +1,5 @@
 #include <string>
+#include <stdexcept>
 #include "MantidDataObjects/TripleRef.h"
 
 namespace Mantid
@@ -131,7 +132,7 @@ TripleRef<T>::operator[](const int A)
     case 2:
       return third;
     default:
-      throw "Range Error";
+      throw std::range_error("TripleRef::operator[]");
     }
   // Never gets here
   return first;
@@ -156,7 +157,7 @@ TripleRef<T>::operator[](const int A)  const
     case 2:
       return third;
     default:
-      throw "Range Error";
+      throw std::range_error("TripleRef::operator[]");
     }
   // Never gets here
   return first;
