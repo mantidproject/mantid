@@ -1,18 +1,11 @@
 #include <string>
-#include "TripleRef.h"
+#include "MantidDataObjects/TripleRef.h"
 
 namespace Mantid
 {
 
-/*!
-  \namespace Iterator
-  \author S. Ansell
-  \version 0.1
-  \date December 2007
-  \brief Holds items to allow iteration on data types
-*/
-
 namespace Iterator
+{
 
 template<typename T>
 TripleRef<T>::TripleRef(const TripleRef<T>& A) :
@@ -144,33 +137,10 @@ TripleRef<T>::operator[](const int A)
   return first;
 }
 
-template<typename T>
-const T
-TripleRef<T>::operator[](const int A) const
-  /*!
-    Accessor Value Function
-    \param A :: Index to item to get 0-2
-    \return Item[A]
-  */
-{
-  switch (A)
-    {
-    case 0:
-      return first;
-    case 1:
-      return second;
-    case 2:
-      return third;
-    default:
-      throw "Range Error";
-    }
-  // Never gets here
-  return first;
-}
 
 template<typename T>
-T
-TripleRef<T>::operator[](const int A) 
+const T
+TripleRef<T>::operator[](const int A)  const
   /*!
     Accessor Value Function
     \param A :: Index to item to get 0-2
@@ -195,8 +165,10 @@ TripleRef<T>::operator[](const int A)
 
 /// \cond TEMPLATE
 
-template class Triple<double&>;
+template class TripleRef<double&>;
 
 /// \endcond TEMPLATE
+
+} // NAMESPACE Iterator
 
 }  // NAMESPACE Mantid
