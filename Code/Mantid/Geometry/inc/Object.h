@@ -31,7 +31,7 @@ class Object
 
   Rule* TopRule;     ///< Top rule [ Geometric scope of object]
   
-  int procPair(std::string&,std::map<int,Rule*>&,int&) const;
+  int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::Vec3D&,const Geometry::Vec3D&) const;
 
@@ -51,11 +51,11 @@ class Object
 
   void setName(const int nx) { ObjName=nx; }           ///< Set Name 
   void setTemp(const double A) { Tmp=A; }              ///< Set temperature [Kelvin]
-  int setObject(const int,const std::string&);        
-  int procString(const std::string&);                 
+  int setObject(const int ON,const std::string& Ln);        
+  int procString(const std::string& Line);                 
   void setDensity(const double D) { density=D; }       ///< Set Density [Atom/A^3]
 
-  int complementaryObject(const int,std::string&);     ///< Process a complementary object
+  int complementaryObject(const int Cnum,std::string& Ln);     ///< Process a complementary object
   int hasComplement() const;                         
   
   int getName() const  { return ObjName; }             ///< Get Name
@@ -64,10 +64,10 @@ class Object
   double getDensity() const { return density; }        ///< Get Density [Atom/A^3]
 
   int populate(const std::map<int,Surface*>&);
-  int createSurfaceList(const int =0);               ///< create Surface list
-  int addSurfString(const std::string&);   
-  int removeSurface(const int);                    
-  int substituteSurf(const int,const int,Surface*);  
+  int createSurfaceList(const int outFlag=0);               ///< create Surface list
+  int addSurfString(const std::string&);     ///< Not implemented
+  int removeSurface(const int SurfN);                    
+  int substituteSurf(const int SurfN,const int NsurfN,Surface* SPtr);  
   void makeComplement();
   void convertComplement(const std::map<int,Object>&);
 
@@ -77,11 +77,13 @@ class Object
   int isValid(const Geometry::Vec3D&) const;    ///< Check if a point is valid
   int isValid(const std::map<int,int>&) const;  ///< Check if a set of surfaces are valid.
   int isOnSide(const Geometry::Vec3D&) const;
-  int calcValidType(const Geometry::Vec3D&,const Geometry::Vec3D&) const;
+  int calcValidType(const Geometry::Vec3D& Pt,const Geometry::Vec3D& uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
+  /// Get the list of surfaces (const version)
   const std::vector<const Surface*>& getSurfacePtr() const 
     { return SurList; } 
+  /// Get the list of surfaces
   std::vector<const Surface*>& getSurfacePtr()
     { return SurList; } 
 
@@ -96,8 +98,8 @@ class Object
 
   // XML:
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-		const int =0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
+		const int singleFlag=0);
 
 };
 

@@ -37,7 +37,9 @@ namespace Geometry
 
 Kernel::Logger& Surface::PLog = Kernel::Logger::get("Surface"); 
 
+/// @cond
 const double STolerance(1e-6);
+/// @endcond
 
 Surface::Surface() : 
   Name(-1),BaseEqn(10)

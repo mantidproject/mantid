@@ -11,7 +11,7 @@
 
 namespace RefCon
 {
-  const double c2(8.987551787e16);            //< Speed of light^2 [m^2sec^4]
+  const double c2(8.987551787e16);            ///< Speed of light^2 [m^2sec^4]
   const double e2(2.567010233e-38);           ///< electron charge^2  
   const double me(9.109534e-31);              ///< Mass of electron (kg)
   const double hc_e(12.39852066);             ///< convertion in keV to angstrom (wavelength)

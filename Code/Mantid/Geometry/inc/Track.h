@@ -23,12 +23,14 @@ struct TUnit
   int ObjID;           ///< ObjectID 
 
 
-  TUnit(const Geometry::Vec3D&,const Geometry::Vec3D&,
-	const double,const int);
+  TUnit(const Geometry::Vec3D& A,const Geometry::Vec3D& B,
+	const double D,const int ID);
 
+  /// Less than operator
   int operator<(const TUnit& A) const
     { return Dist<A.Dist; }
 
+  /// Less than operator
   int operator<(const double& A) const
     { return Dist<A; }
 };
@@ -45,7 +47,7 @@ struct TPartial
   Vec3D PtA;           ///< Point
   double Dist;         ///< Total distance from track begin
 
-  TPartial(const int,const int,const Geometry::Vec3D&,const double);
+  TPartial(const int ID,const int flag,const Geometry::Vec3D& PVec,const double D);
 
   int operator<(const TPartial& A) const;
 
@@ -78,25 +80,25 @@ class Track
 
  public:
 
-  Track(const Geometry::Vec3D&,const Geometry::Vec3D&,
-	const int =0);
+  Track(const Geometry::Vec3D& StartPt,const Geometry::Vec3D& UV,
+	const int initObj=0);
   Track(const Track&);
   Track& operator=(const Track&);
   ~Track();
 
-  void addPoint(const int,const int,const Geometry::Vec3D&);
-  int addTUnit(const int,const Geometry::Vec3D&,const Geometry::Vec3D&);
+  void addPoint(const int ID,const int Direct,const Geometry::Vec3D& Pt);
+  int addTUnit(const int ID,const Geometry::Vec3D& Apt,const Geometry::Vec3D& Bpt);
   
   void removeCoJoins();
-  void buildLink();
+  void buildLink();   ///< Not implemented
 
   // get/set
   void setFirst(const Geometry::Vec3D&,const Geometry::Vec3D&);
-  const Geometry::Vec3D& getInit() const { return iPt; }
-  const Geometry::Vec3D& getUVec() const { return uVec; }
+  const Geometry::Vec3D& getInit() const { return iPt; }         ///< Get the start point
+  const Geometry::Vec3D& getUVec() const { return uVec; }        ///< Get the direction
 
-  LType::const_iterator begin() const { return Link.begin(); }
-  LType::const_iterator end() const { return Link.end(); }
+  LType::const_iterator begin() const { return Link.begin(); }   ///< Iterator pointing to start of collection
+  LType::const_iterator end() const { return Link.end(); }       ///< Iterator pointing one-past-the-end of collection
     
   // tests
   int nonComplete() const;

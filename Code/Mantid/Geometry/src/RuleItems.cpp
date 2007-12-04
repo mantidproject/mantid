@@ -925,12 +925,12 @@ CompObj::setLeaf(Rule* aR,const int)
 }
 
 void
-CompObj::setLeaves(Rule* aR,Rule*)
+CompObj::setLeaves(Rule* aR,Rule* oR)
   /*!
     Replaces a leaf with a rule.
     This REQUIRES that aR is of type CompObj
     \param aR :: new rule
-    \param int :: Null other rule
+    \param oR :: Null other rule
   */
 {
   CompObj* newX = dynamic_cast<CompObj*>(aR);
@@ -940,12 +940,12 @@ CompObj::setLeaves(Rule* aR,Rule*)
 }
 
 Rule*
-CompObj::findKey(const int)
+CompObj::findKey(const int i)
   /*!
     This is a complementary object and we dont
     search into CompObjs. If that is needed
     then the CompObj should be removed first
-    \param :: Null index key
+    \param i :: Null index key
     \return 0
   */
 {
@@ -1210,7 +1210,7 @@ CompGrp::CompGrp(const CompGrp& Cother) :
   Rule(Cother),A(0)
   /*!
     Standard copy constructor
-    \param Cohter :: CompGrp to copy
+    \param Cother :: CompGrp to copy
    */
 {
   if (Cother.A)
@@ -1262,7 +1262,7 @@ CompGrp::clone() const
 }
 
 void
-CompGrp::setLeaf(Rule* aR,const int)
+CompGrp::setLeaf(Rule* nR,const int side)
   /*!
     Replaces a leaf with a rule.
     No deletion is carried out
@@ -1277,12 +1277,12 @@ CompGrp::setLeaf(Rule* aR,const int)
 }
 
 void
-CompGrp::setLeaves(Rule* aR,Rule*)
+CompGrp::setLeaves(Rule* aR,Rule* oR)
   /*!
     Replaces a leaf with a rule.
     No deletion is carried out but sets the parents.
     \param aR :: new rule
-    \param Rule* :: Null other rule
+    \param oR :: Null other rule
   */
 {
   A=aR;
@@ -1292,12 +1292,12 @@ CompGrp::setLeaves(Rule* aR,Rule*)
 }
 
 Rule*
-CompGrp::findKey(const int)
+CompGrp::findKey(const int i)
   /*!
     This is a complementary object and we dont
     search into CompGrps. If that is needed
     then the CompGrp should be removed first
-    \param :: Null index key
+    \param i :: Null index key
     \return 0
   */
 {
@@ -1308,7 +1308,7 @@ int
 CompGrp::findLeaf(const Rule* R) const
   /*!
     Check to see if this is a copy of a given Rule
-    \param A :: Rule Ptr to find
+    \param R :: Rule Ptr to find
     \retval 0 on success -ve on failuire
   */
 {

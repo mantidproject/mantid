@@ -23,9 +23,9 @@ namespace Geometry
 class Surface 
 {
  private:
-  
+
+  /// Static reference to the logger class
   static Kernel::Logger& PLog;
-  
 
   int Name;        ///< Surface number (MCNPX identifier)
   
@@ -48,6 +48,7 @@ class Surface
   /// Effective typeid
   virtual std::string className() const { return "Surface"; }
 
+  /// Visit acceptor
   virtual void acceptVisitor(BaseVisit& A) const
     {  A.Accept(*this); }
 
@@ -71,6 +72,7 @@ class Surface
   virtual void displace(const Geometry::Vec3D&);
   virtual void rotate(const Geometry::Matrix<double>&);
 
+  /// Set a surface
   virtual int setSurface(const std::string&) =0;
 
   void writeHeader(std::ostream&) const;
@@ -80,8 +82,8 @@ class Surface
   void printGeneral() const;
 
   virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-			const int=0);
+  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
+			const int singleFlag=0);
   virtual void writeXML(const std::string&) const;
 
 };

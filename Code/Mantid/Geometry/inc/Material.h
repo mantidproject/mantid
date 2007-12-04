@@ -33,34 +33,39 @@ class Material
  public:
   
   Material();
-  Material(const std::string&,const double,
-	   const double,const double,const double);
-  Material(const double,const double,const double,const double);
+  Material(const std::string& N,const double D,
+	   const double S,const double I,const double A);
+  Material(const double D,const double S,const double I,const double A);
   Material(const Material&);
   virtual Material* clone() const;
   Material& operator=(const Material&);
   virtual ~Material();
   
+  /// Set the name
   void setName(const std::string& N) { Name=N; }
-  void setDensity(const double);
-  void setScat(const double,const double,const double);
+  void setDensity(const double D);
+  void setScat(const double S,const double I,const double A);
 
-
+  /// Get the number density
   double getAtomDensity() const { return density; }
 
+  /// Set the name
   const std::string& getName() const { return Name; }
+  /// Get the total cross section
   double getScat() const { return scoh+sinc; }
+  /// Get the scattering cross section
   double getCoh() const { return scoh; }
+  /// Get the incoherent cross section
   double getInc() const { return sinc; }
-  double getScatFrac(const double) const;
-  double getAtten(const double) const; 
-  double getAttenAbs(const double) const; 
+  double getScatFrac(const double Wave) const;
+  double getAtten(const double Wave) const; 
+  double getAttenAbs(const double Wave) const; 
 
-  double calcAtten(const double,const double) const;
+  double calcAtten(const double Wave,const double Length) const;
   
   virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-		const int =0);
+  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
+		const int singleFlag=0);
 
 };
 

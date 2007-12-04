@@ -40,36 +40,37 @@ class SamGeometry
   MATMAP MatMap;                    ///< Int : Materials [Un managed pointers]
 
   // Optimization stuff here:
-  void createTable();
+  void createTable();      ///< Create the table
+  /// Build a track
   Geometry::Track buildTrack(const Geometry::Vec3D&,
 			     const Geometry::Vec3D&) const;
 
  public:
 
-  SamGeometry();
-  SamGeometry(const SamGeometry&);
-  SamGeometry& operator=(const SamGeometry&);
-  ~SamGeometry();
+  SamGeometry();                               ///< Constructor
+  SamGeometry(const SamGeometry&);             ///< Copy constructor
+  SamGeometry& operator=(const SamGeometry&);  ///< Copy assignment operator
+  ~SamGeometry();                              ///< Destructor
 
-  void addObject(const Object&);
-  void setMaterial(const int,const Material*);
+  void addObject(const Object&);                ///< Add an object
+  void setMaterial(const int,const Material*);  ///< Set the material
 
-  ISTORE::iterator begin() { return Items.begin(); }
-  ISTORE::iterator end() { return Items.end(); }
+  ISTORE::iterator begin() { return Items.begin(); }  ///< Iterator pointing to the first item.
+  ISTORE::iterator end() { return Items.end(); }      ///< Iterator pointing one-past-the-end
 
-  const Object& getObject(const int) const;
-  Object& getObject(const int);
+  const Object& getObject(const int) const;     ///< Get an object by index (const version)
+  Object& getObject(const int);                 ///< Get an object by index
 
-  int findCell(const Geometry::Vec3D&) const;  
-  int findCell(const Geometry::Vec3D&,const int) const;
+  int findCell(const Geometry::Vec3D&) const;            ///< Find a cell
+  int findCell(const Geometry::Vec3D&,const int) const;  ///< Find a cell
 
-  // Transport stuff
+  /// Transport stuff
   double outAtten(const double,const int,const Geometry::Vec3D&,
 		  const Geometry::Vec3D&) const;
 
 
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int);
+  void procXML(XML::XMLcollect&) const;      ///< Writes the XML schema
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int);   ///< Read in XML
 
 };
 

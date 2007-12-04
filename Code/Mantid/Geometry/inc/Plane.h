@@ -44,7 +44,7 @@ class Plane : public Surface
   ~Plane();
   
   int setPlane(const Geometry::Vec3D&,const Geometry::Vec3D&);
-  int setPlane(const std::string&);
+  int setPlane(const std::string&);    ///< Not implemented
   int side(const Geometry::Vec3D&) const;
   int onSurface(const Geometry::Vec3D&) const;
   // stuff for finding intersections etc.

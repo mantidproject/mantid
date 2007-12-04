@@ -28,7 +28,7 @@ class Rule
 
   Rule* Parent;                    ///< Parent object (for tree)
 
-  static int addToKey(std::vector<int>&,const int =-1);     
+  static int addToKey(std::vector<int>& AV,const int passN=-1);     
 
   int getBaseKeys(std::vector<int>&) const;  ///< Fills the vector with the surfaces 
 
@@ -38,7 +38,7 @@ class Rule
   static int makeFullDNF(Rule*&);  ///< Make Rule into a full DNF format
   static int makeCNF(Rule*&);      ///< Make Rule into a CNF format
   static int removeComplementary(Rule*&);       ///< NOT WORKING
-  static int removeItem(Rule*&,const int);
+  static int removeItem(Rule*& TRule,const int SurfN);
 
   Rule();
   Rule(Rule*);
@@ -71,10 +71,10 @@ class Rule
   /// Abstract: Can the rule be simplified 
   virtual int simplify() =0;
 
-  virtual int isComplementary() const { return 0; }
+  virtual int isComplementary() const { return 0; }   ///< Always returns false (0)
 
   int Eliminate();            ///< elimination not written
-  int substituteSurf(const int,const int,Surface*);  
+  int substituteSurf(const int SurfN,const int newSurfN,Surface* SPtr);  
 
   /// Abstract Display
   virtual std::string display() const=0;
@@ -116,9 +116,9 @@ class Intersection : public Rule
   ~Intersection();
   Rule* leaf(const int ipt=0) const { return ipt ? B : A; }   ///< selects leaf component
   void setLeaves(Rule*,Rule*);           ///< set leaves
-  void setLeaf(Rule*,const int =0);    ///< set one leaf.
+  void setLeaf(Rule* nR,const int side=0);    ///< set one leaf.
   int findLeaf(const Rule*) const;
-  Rule* findKey(const int);
+  Rule* findKey(const int KeyN);
   int isComplementary() const;
 
   int type() const { return 1; }   //effective name
@@ -166,9 +166,9 @@ class Union : public Rule
 
   Rule* leaf(const int ipt=0) const { return ipt ? B : A; }      ///< Select a leaf component
   void setLeaves(Rule*,Rule*);           ///< set leaves
-  void setLeaf(Rule*,const int =0);     
+  void setLeaf(Rule* nR,const int side=0);     
   int findLeaf(const Rule*) const;
-  Rule* findKey(const int);
+  Rule* findKey(const int KeyN);
 
   int isComplementary() const;
   int type() const { return -1; }   ///< effective name
@@ -216,11 +216,11 @@ class SurfPoint : public Rule
   void setLeaves(Rule*,Rule*);
   void setLeaf(Rule*,const int =0);
   int findLeaf(const Rule*) const;
-  Rule* findKey(const int);
+  Rule* findKey(const int KeyNum);
 
   int type() const { return 0; }   ///< Effective name
 
-  void setKeyN(const int);             ///< set keyNumber
+  void setKeyN(const int Ky);             ///< set keyNumber
   void setKey(Surface*);
   int isValid(const Geometry::Vec3D&) const;
   int isValid(const std::map<int,int>&) const;    
@@ -266,12 +266,12 @@ class CompObj : public Rule
   void setLeaves(Rule*,Rule*);
   void setLeaf(Rule*,const int =0);
   int findLeaf(const Rule*) const;
-  Rule* findKey(const int);
+  Rule* findKey(const int i);
 
   int type() const { return 0; }   ///< Is it a branched object
-  int isComplementary() const { return 1; }
+  int isComplementary() const { return 1; }  ///< Always returns true (1)
 
-  void setObjN(const int);             ///< set object Number
+  void setObjN(const int Ky);             ///< set object Number
   void setObj(Object*);               ///< Set a Object state
   int isValid(const Geometry::Vec3D&) const;
   int isValid(const std::map<int,int>&) const;    
@@ -303,7 +303,7 @@ class CompGrp : public Rule
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  Rule* A;
+  Rule* A;    ///< The rule
   
  public:
   
@@ -316,12 +316,12 @@ class CompGrp : public Rule
 
   Rule* leaf(const int) const { return A; }   ///< selects leaf component
   void setLeaves(Rule*,Rule*);
-  void setLeaf(Rule*,const int =0);
+  void setLeaf(Rule* nR,const int side=0);
   int findLeaf(const Rule*) const;
-  Rule* findKey(const int);
+  Rule* findKey(const int i);
 
   int type() const { return 0; }   ///< Is it a branched object
-  int isComplementary() const { return 1; }
+  int isComplementary() const { return 1; }   ///< Always returns true (1)
 
   int isValid(const Geometry::Vec3D&) const;
   int isValid(const std::map<int,int>&) const;    
