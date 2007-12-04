@@ -68,6 +68,7 @@ public:
 	void printChildren(std::ostream&) const;
 	void printTree(std::ostream&) const;
 private:
+  ///the group of child components
 	std::vector<Component*> group;
 };
 

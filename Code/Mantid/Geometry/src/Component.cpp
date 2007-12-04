@@ -169,7 +169,7 @@ void Component::rotate(const Quat& r)
 }
 /*! Rotate the component by an angle in degrees with respect to an axis.
  * @param angle the number of degrees to rotate
- * @axis The Vector to rotate around
+ * @param axis The Vector to rotate around
  */
 void Component::rotate(double angle, const V3D& axis) 
 {

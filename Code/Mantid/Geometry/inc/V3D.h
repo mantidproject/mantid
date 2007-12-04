@@ -69,15 +69,15 @@ namespace Geometry
       // Setting x, y and z values
       void operator()(const double, const double, const double);
       void spherical(double, double, double);
-      // Get x
-      const double& X() const { return x; }
-      const double& Y() const { return y; } 
-      const double& Z() const { return z; }
+      
+      const double& X() const { return x; } ///< Get x
+      const double& Y() const { return y; } ///< Get y
+      const double& Z() const { return z; } ///< Get z
       
       const double& operator[](const int) const;
       double& operator[](const int);
 
-      // Make a normalized vector (return norm value)
+      /// Make a normalized vector (return norm value)
       double normalize();
       double norm() const;    
       double norm2() const; 

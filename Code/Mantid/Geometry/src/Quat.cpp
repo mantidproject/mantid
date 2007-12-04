@@ -36,11 +36,11 @@ Quat::Quat(const Quat& _q)
 }
  
 /*! Constructor from an angle and axis.
- * \param _deg :: angle of rotation
- * \param _axis :: axis to rotate about
- * 
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
+ *
+ * \param _deg :: angle of rotation
+ * \param _axis :: axis to rotate about
  * */
 Quat::Quat(const double _deg,const V3D& _axis)
 {
@@ -204,7 +204,7 @@ Quat& Quat::operator*=(const Quat& _q)
 }
  
 /*! Quaternion equal operator
- * \param _q :: the quaternion to compare
+ * \param q :: the quaternion to compare
  * 
  * Compare two quaternions at 1e-6%tolerance.
  * Use boost close_at_tolerance method

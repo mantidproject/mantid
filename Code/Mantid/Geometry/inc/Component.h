@@ -50,6 +50,7 @@ namespace Geometry
 class DLLExport Component
 {
 public:
+  /// Returns a string representation of the component type
 	virtual std::string type() const {return "LogicalComponent";}
 	//! Create Empty Component at Origin, with no orientation and null parent
 	Component();
@@ -65,6 +66,7 @@ public:
 	//Component& operator=(const Component&);
 	//! Return a clone to the current object
 	virtual Component* clone() const;
+  /// Destructor
 	virtual ~Component();
 	//! Assign a parent component. Previous parent link is lost
 	void setParent(Component*);
@@ -105,7 +107,7 @@ private:
 	V3D pos;
 	//! Orientation 
 	Quat rot;
-	Component* parent;   // Parent component in the tree
+	Component* parent;   ///< Parent component in the tree
 };
 
 std::ostream& operator<<(std::ostream&, const Component&);

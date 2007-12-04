@@ -50,8 +50,9 @@ class ObjObjItem : public ObjComp
   Object* Comp;  ///< Pointer to the object component
 
  public:
-
+  ///constructor
   ObjComp();
+  ///Destructor
   ~ObjComp();
 
   
@@ -63,11 +64,11 @@ class ObjObjItem : public ObjComp
 }  // NAMESPACE 
 #endif
 
-int
-ObjComp::isValid(const Vec3D& Pt) const
  /*!
    Is the point in the object
   */
+int
+ObjComp::isValid(const Vec3D& Pt) const
 {
 
   Vec3D PtTrans(Pt-Centre);

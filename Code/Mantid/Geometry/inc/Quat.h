@@ -58,16 +58,16 @@ class DLLExport Quat
 		Quat(const double, const double, const double, const double); 
 		Quat(const Quat&);
 		//! Set quaternion form an angle in degrees and an axis
-		Quat(const double, const V3D&);
+		Quat(const double _deg, const V3D& _axis);
 		//Quat(const M33&);
 		~Quat();
 		Quat& operator=(const Quat&);
-		void operator()(const double, const double, const double, const double);
-		void operator()(const double, const V3D&);
+		void operator()(const double ww, const double aa, const double bb, const double cc);
+		void operator()(const double angle, const V3D&);
 		//! Set quaternion from a 3x3 matrix
 		//void operator()(const M33&);
-		void set(const double, const double, const double, const double);
-		void setAngleAxis(const double, const V3D&);
+		void set(const double ww, const double aa, const double bb, const double cc);
+		void setAngleAxis(const double _deg, const V3D& _axis);
 		//void setRotMatrix(const M33&);
 		//! Norm of a quaternion
 		double len() const;
@@ -100,11 +100,16 @@ class DLLExport Quat
 		double& operator[](int);
 		void printSelf(std::ostream&) const;
 	private:
-    /// Internal values
-		double w, a, b, c;
+    /// Internal value
+		double w;
+    /// Internal value
+    double a;
+    /// Internal value
+    double b;
+    /// Internal value
+    double c;
 };
 	
-		//! Overload operator <<. This calls Quat::printself()
  std::ostream& operator<<(std::ostream&, const Quat&);
 
 } // Namespace Mantid
