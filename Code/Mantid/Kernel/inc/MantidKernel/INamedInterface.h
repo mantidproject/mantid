@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/IInterface.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/StatusCode.h"
 #include <string>
 
 namespace Mantid
@@ -43,7 +44,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport INamedInterface : virtual public IInterface {
+  class DLLExport INamedInterface {
   public:
     /// Retrieve the interface ID
     // static const InterfaceID& interfaceID() { return IID_INamedInterface; }	

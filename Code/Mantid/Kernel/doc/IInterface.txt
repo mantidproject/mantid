@@ -24,3 +24,8 @@ smart pointers. Here's a paragraph from the GAUDI user guide:
 	interface."
 
 See Section 16.3 of GAUDI user guide for more information on interfaces in Gaudi.
+
+RJT, 3/12/07
+============
+
+Removed from Mantid.
