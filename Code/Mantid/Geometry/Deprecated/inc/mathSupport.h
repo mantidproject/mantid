@@ -60,8 +60,8 @@ double quad(const double,const double,const double,const double);
 
 /// Solve a Quadratic equation
 template<typename InputIter>
-int solveQuadratic(const InputIter,
-       std::pair<std::complex<double>,std::complex<double> >&);
+int solveQuadratic(InputIter,
+	     std::pair<std::complex<double>,std::complex<double> >&);
 
 /// Solve a Cubic equation
 template<typename InputIter>

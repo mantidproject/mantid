@@ -679,7 +679,7 @@ mathFunc::Swap(T& A,T& B)
   return;
 }
 
-/// \cond TEMPLATE 
+/// \cond TEMPLATE  
 
 template
 int solveQuadratic(const double*,
