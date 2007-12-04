@@ -41,9 +41,9 @@ TPartial::TPartial(const int ID,const int flag,
   ObjID(ID),Direction(flag),PtA(PVec),Dist(D)
   /*!
     Constuctor
-    \param B :: Vec3D point to end track
+    \param PVec :: Vec3D point to end track
     \param ID :: ID number
-    \param Pt :: Point of intersection
+    \param flag :: Indicated the direction
     \param D :: Total distance from start of track
    */
 {}

@@ -23,18 +23,18 @@ class Flux
   
  public:
   
-  Flux();
-  Flux(const Flux&);
-  Flux& operator=(const Flux&);
-  ~Flux();
+  Flux();                        ///< Constructor
+  Flux(const Flux&);             ///< Copy Constructor
+  Flux& operator=(const Flux&);  ///< Copy assignment operator
+  ~Flux();                       ///< Destructor
 
-  void zeroSize(const int);
-  void addEvent(const int,const double);
-  void addCnt() { nCnt++; }
+  void zeroSize(const int);                ///< Zero the vector?
+  void addEvent(const int,const double);   ///< Add an event
+  void addCnt() { nCnt++; }                ///< Increment the number of events
 
-  int getCnt() const { return nCnt; }         
-  std::vector<double>& getEvents() { return I; }
-  const std::vector<double>& getEvents() const 
+  int getCnt() const { return nCnt; }              ///< Get the number of events
+  std::vector<double>& getEvents() { return I; }   ///< Get the vector of events
+  const std::vector<double>& getEvents() const     ///< Get the vector of events (const version)
     { return I; }
 
 };

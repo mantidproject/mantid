@@ -66,13 +66,3 @@ class ObjObjItem : public ObjComp
 }  // NAMESPACE 
 #endif
 
- /*!
-   Is the point in the object
-  */
-int
-ObjComp::isValid(const Vec3D& Pt) const
-{
-
-  Vec3D PtTrans(Pt-Centre);
-  
-}

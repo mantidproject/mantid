@@ -45,7 +45,7 @@ Material::Material(const std::string& N,const double D,const double S,
   sinc(I),sabs(A)
   /*!
     Constructor for values
-    \param Name :: Material name
+    \param N :: Material name
     \param D :: density [atom/angtrom^3]
     \param S :: scattering cross section [barns]
     \param I :: incoherrent scattering cross section [barns]
@@ -127,7 +127,7 @@ Material::setScat(const double S,const double I,const double A)
   /*!
     Set the scattering factors
     \param S :: Coherrent-Scattering cross section
-    \param S :: Inc-Scattering cross section
+    \param I :: Inc-Scattering cross section
     \param A :: Absorption cross section
   */
 {

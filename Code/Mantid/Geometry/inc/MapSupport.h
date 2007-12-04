@@ -158,6 +158,7 @@ namespace MapSupport
     {
       public:
 
+      /// Operator()
       std::pair<BodyPart,KeyPart> 
       operator()(const std::pair<KeyPart,BodyPart>& A) const
 	{

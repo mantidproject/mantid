@@ -301,7 +301,7 @@ Object::procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const
     the vector, updates string
     \param Ln :: String to porcess
     \param Rlist :: Map of rules (added to)
-    \param CompUnit :: Last computed unit
+    \param compUnit :: Last computed unit
     \retval 0 :: No rule to find
     \retval 1 :: A rule has been combined
   */
@@ -474,6 +474,7 @@ Object::createSurfaceList(const int outFlag)
   /*! 
     Uses the topRule* to create a surface list
     by iterating throught the tree
+    \param outFlag Sends output to standard error if true
     \return 1 (should be number of surfaces)
   */
 { 
@@ -700,7 +701,7 @@ Object::procString(const std::string& Line)
     Processes the cell string. This is an internal function
     to process a string with 
     - String type has #( and ( )
-    \param Ln :: String value
+    \param Line :: String value
     \returns 1 on success
   */
 {
@@ -825,7 +826,7 @@ Object::calcValidType(const Geometry::Vec3D& Pt,
     \param Pt :: Point to calculate from.
     \param uVec :: Unit vector of the track
     \retval 0 :: Not valid / double valid
-    \retal 1 :: Entry point
+    \retval 1 :: Entry point
     \retval -1 :: Exit Point 
    */
 {
