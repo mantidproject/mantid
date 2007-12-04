@@ -82,7 +82,7 @@ template<typename T> int sectionMCNPX(std::string& A,T& out);
 DLLExport void writeMCNPX(const std::string& Line,std::ostream& OX);
 
 /// Split tring into spc deliminated components
-std::vector<std::string> StrParts(std::string Ln);
+DLLExport std::vector<std::string> StrParts(std::string Ln);
 
 /// Write a set of containers to a file
 template<template<typename T,typename A> class V,typename T,typename A>
