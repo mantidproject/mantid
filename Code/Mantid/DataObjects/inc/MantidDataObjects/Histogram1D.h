@@ -1,4 +1,23 @@
-/*
+#ifndef MANTID_DATAOBJECTS_HISTOGRAM1D_H_
+#define MANTID_DATAOBJECTS_HISTOGRAM1D_H_
+
+#include <boost/shared_ptr.hpp>
+#include <vector>
+#include "MantidKernel/RefControl.h"
+
+namespace Mantid
+{
+namespace DataObjects
+{
+/*!
+	1D histogram implementation.
+
+    \class Histogram1D Histogram1D.h
+    \author Laurent C Chapon, ISIS, RAL
+    \date 26/09/2007  
+    
+  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+
   This file is part of Mantid.
  	
   Mantid is free software; you can redistribute it and/or modify
@@ -15,26 +34,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-*/
 
-#ifndef MANTID_DATAOBJECTS_HISTOGRAM1D_H_
-#define MANTID_DATAOBJECTS_HISTOGRAM1D_H_
-
-#include <boost/shared_ptr.hpp>
-#include <vector>
-#include "MantidKernel/RefControl.h"
-
-namespace Mantid
-{
-namespace DataObjects
-{
-/*!
-	1D histogram implementation.
-
-	
-    \class Histogram1D Histogram1D.h
-    \author Laurent C Chapon, ISIS, RAL
-    \date 26/09/2007
 */
 
 class Histogram1D

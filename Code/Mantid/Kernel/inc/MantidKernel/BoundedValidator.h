@@ -41,14 +41,18 @@ namespace Kernel
   class DLLExport BoundedValidator : public IValidator<TYPE>
   {
   public:
-      /// Constructors
+  /// No-arg Constructor
 	BoundedValidator()
 	  : m_hasLowerBound( false ), 
 		m_hasUpperBound( false ), 
 		m_lowerBound( TYPE() ),
 		m_upperBound( TYPE() ) { }
 
-	BoundedValidator(const TYPE lowerBound, const TYPE upperBound)
+	/** Constructor
+   * @param lowerBound The lower bounding value
+   * @param upperBound The upper bounding value
+   */
+  BoundedValidator(const TYPE lowerBound, const TYPE upperBound)
 	  : m_hasLowerBound( true ), 
 		m_hasUpperBound( true ), 
 		m_lowerBound( lowerBound ),
@@ -100,11 +104,15 @@ namespace Kernel
 	}
 
 private:
-	/// Data and Function Members for This Class Implementation.
-	/// Data members
+	// Data and Function Members for This Class Implementation.
+	
+  /// Has a lower bound set true/false
 	bool  m_hasLowerBound;
+  /// Has a upper bound set true/false
 	bool  m_hasUpperBound;
+  /// the lower bound
 	TYPE     m_lowerBound;
+  ///the upper bound
 	TYPE     m_upperBound;
 };
 

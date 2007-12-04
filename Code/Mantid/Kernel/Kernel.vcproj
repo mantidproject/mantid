@@ -244,10 +244,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\ListValidator.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidKernel\Logger.h"
 				>
 			</File>
@@ -272,6 +268,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\RefControl.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\StatusCode.h"
 				>
 			</File>
@@ -289,6 +289,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\System.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\TimeSeriesProperty.h"
 				>
 			</File>
 		</Filter>

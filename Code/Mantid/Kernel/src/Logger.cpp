@@ -16,6 +16,7 @@ namespace Kernel
 		_logStream = new Poco::LogStream(_log);
 	}
 
+  ///destructor
 	Logger::~Logger()
 	{
 		delete (_logStream);

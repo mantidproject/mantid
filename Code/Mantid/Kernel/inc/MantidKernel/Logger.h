@@ -81,7 +81,6 @@ namespace Kernel
 		void debug(const std::string& msg);
 
 		std::ostream& fatal();
-		std::ostream& critical();
 		std::ostream& error();
 		std::ostream& warning();
 		std::ostream& information();

@@ -100,6 +100,7 @@ class DLLExport Quat
 		double& operator[](int);
 		void printSelf(std::ostream&) const;
 	private:
+    /// Internal values
 		double w, a, b, c;
 };
 	

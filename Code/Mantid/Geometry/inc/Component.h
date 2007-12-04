@@ -26,7 +26,7 @@ namespace Geometry
       component. The orientation is stored as a quaternion.
       Each component has a defined bounding box which at the moment 
       is cuboid.
-      @ignore 
+
       Copyright 2007 RAL
 
       This file is part of Mantid.
