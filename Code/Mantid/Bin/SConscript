@@ -19,6 +19,3 @@ myenv.Append(LIBPATH=libDirList)
 
 myenv.Install('Plugins', shared_list)
 myenv.Append(LIBPATH='./Plugins')
-
-myenv.Program('main_static', ['main.cpp']+static_list)
-myenv.Program('main', ['main.cpp'])
