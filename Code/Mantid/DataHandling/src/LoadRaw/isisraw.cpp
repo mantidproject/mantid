@@ -6,6 +6,7 @@
 #define SUCCESS 0
 #define FAILURE 1
 
+/// stuff
 ISISRAW::ISISRAW() : m_crpt(NULL), m_ntc1(0), m_nsp1(0), m_nper(0)
 {
 	int i, j;
@@ -117,6 +118,7 @@ ISISRAW::ISISRAW() : m_crpt(NULL), m_ntc1(0), m_nsp1(0), m_nper(0)
 	addItems();
 }
 
+/// stuff
 int ISISRAW::addItems()
 {
 	static const int hdr_size = sizeof(hdr) / sizeof(char);
@@ -129,6 +131,7 @@ int ISISRAW::addItems()
 }
 
 // create one bound to a CRPT
+/// stuff
 ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt), m_ntc1(0), m_nsp1(0), m_nper(0)
 {
 	e_nse = 0;
@@ -144,6 +147,7 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt), m_ntc1(0), m_nsp1(0), m_
 }
 
 // update from bound CRPT
+/// stuff
 int ISISRAW::updateFromCRPT()
 {
 	if (m_crpt == NULL)
@@ -395,6 +399,7 @@ int ISISRAW::updateFromCRPT()
 }
 
 
+/// stuff
 int ISISRAW::ioRAW(FILE* file, bool from_file)
 	{
 		int ndata, len_log, i;
@@ -531,24 +536,28 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 		return 0;
 	}
 
+/// stuff
 	int ISISRAW::ioRAW(FILE* file, HDR_STRUCT* s, int len, bool from_file) 
 		{
 			ioRAW(file, (char*)s, sizeof(HDR_STRUCT) * len, from_file);
 			return 0;
 		}
 
+/// stuff
 	int ISISRAW::ioRAW(FILE* file, ADD_STRUCT* s, int len, bool from_file)
 		{
 			ioRAW(file, (int*)s, (sizeof(ADD_STRUCT) * len / sizeof(int)), from_file);
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, USER_STRUCT* s, int len, bool from_file) 
 		{
 			ioRAW(file, (char*)s, sizeof(USER_STRUCT) * len, from_file);
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, RPB_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -564,6 +573,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 		}
 
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, IVPB_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -585,6 +595,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, SPB_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -598,6 +609,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, SE_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -613,12 +625,14 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 	
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, DAEP_STRUCT* s, int len, bool from_file) 
 		{
 			ioRAW(file, (int*)s, sizeof(DAEP_STRUCT) * len / sizeof(int), from_file);
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, DHDR_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -631,6 +645,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, DDES_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -641,6 +656,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, LOG_STRUCT* s, int len, bool from_file) 
 		{
 			int i;
@@ -652,6 +668,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, LOG_LINE* s, int len, bool from_file) 
 		{
 			char padding[5];
@@ -667,6 +684,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, char* s, int len, bool from_file) 
 		{
 			size_t n;
@@ -685,6 +703,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, int* s, int len, bool from_file) 
 		{
 			size_t n;
@@ -703,6 +722,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, uint32_t* s, int len, bool from_file) 
 		{
 			size_t n;
@@ -721,6 +741,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, float* s, int len, bool from_file) 
 		{
 			size_t n;
@@ -743,6 +764,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, char** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -767,6 +789,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, int** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -791,6 +814,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, uint32_t** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -816,6 +840,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 		}
 
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, float** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -840,6 +865,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 		
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, SE_STRUCT** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -864,6 +890,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, DDES_STRUCT** s, int len, bool from_file) 
 		{
 			if (from_file)
@@ -888,6 +915,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 		int ISISRAW::ioRAW(FILE* file, LOG_LINE** s, int len, bool from_file)
 		{
 			if (from_file)
@@ -912,6 +940,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 			return 0;
 		}
 
+/// stuff
 	int ISISRAW::size_check()
 	{
 		static int size_check_array[] = { 
@@ -935,6 +964,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 		}
 		return 0;
 	}
+/// stuff
 int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 {
 /* 
@@ -960,6 +990,7 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 }
 
 
+/// stuff
 int ISISRAW::readFromFile(const char* filename)
 {
 #ifdef _WIN32
@@ -984,6 +1015,7 @@ int ISISRAW::readFromFile(const char* filename)
 }
 
 
+/// stuff
 int ISISRAW::writeToFile(const char* filename)
 {
 	unsigned char zero_pad[512];
@@ -1021,6 +1053,7 @@ int ISISRAW::writeToFile(const char* filename)
 	}
 }
 
+/// stuff
 int ISISRAW::printInfo(std::ostream& os)
 {
 	int i;
@@ -1045,6 +1078,7 @@ int ISISRAW::printInfo(std::ostream& os)
 	return 0;
 }
 
+/// stuff
 ISISRAW::~ISISRAW()
 {
     delete[] dat1;
