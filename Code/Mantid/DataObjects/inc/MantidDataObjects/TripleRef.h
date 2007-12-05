@@ -35,12 +35,12 @@ class TripleRef
   T second;      ///< Second item
   T third;       ///< Third item
 
-  TripleRef(const T A,const T B,const T C);
+  TripleRef(T A,T B,T C);
   TripleRef(const TripleRef<T>&);
   TripleRef<T>& operator=(const TripleRef<T>&);
   ~TripleRef();
 
-  const T operator[](int const) const;
+  T operator[](int const) const;
   T operator[](int const);
   int operator<(const TripleRef<T>&) const;
   int operator>(const TripleRef<T>&) const;

@@ -35,7 +35,7 @@ class triple_iterator : public std::iterator<std::random_access_iterator_tag,Tri
   
   const TripleRef<double&>& operator*() const { return *CPoint; }   ///< Base Accessor
   const TripleRef<double&>* operator->() const { return CPoint; }   ///< Base Pointer accessor
-  const TripleRef<double&>& operator[](int) const; 
+  //const TripleRef<double&>& operator[](int) const; 
 
   triple_iterator<WorkSpace>& operator++();
   triple_iterator<WorkSpace> operator++(int);

@@ -18,7 +18,7 @@ TripleRef<T>::TripleRef(const TripleRef<T>& A) :
 {}
 
 template<typename T>
-TripleRef<T>::TripleRef(const T A,const T B,const T C) :
+TripleRef<T>::TripleRef(T A,T B,T C) :
   first(A),second(B),third(C)
   /*!
     Constructor from a 3 value input 
@@ -140,7 +140,7 @@ TripleRef<T>::operator[](const int A)
 
 
 template<typename T>
-const T
+T
 TripleRef<T>::operator[](const int A)  const
   /*!
     Accessor Value Function

@@ -941,8 +941,16 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
  * get time in VMS format 01-JAN-1970 00:00:00
  */
 	int i, n;
-	struct tm *tmstruct;
+	struct tm *tmstruct = NULL;
+#ifdef _WIN32
+  errno_t err = localtime_s( tmstruct, &time_value ); 
+  if (err)
+  {
+      return FAILURE;
+  }
+#else //_WIN32
 	tmstruct = localtime((time_t*)&time_value);
+#endif //_WIN32
 	n = strftime(timbuf, len, "%d-%b-%Y %H:%M:%S", tmstruct);
 	for(i=0; i<n; i++)
 	{
@@ -954,7 +962,15 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 
 int ISISRAW::readFromFile(const char* filename)
 {
+#ifdef _WIN32
+  FILE* input_file=NULL;
+  if(fopen_s( &input_file, filename, "rb" ) !=0 )
+  {
+      return -1;
+  }
+#else //_WIN32
 	FILE* input_file = fopen(filename,"rb");
+#endif //_WIN32
 	if (input_file != NULL)
 	{
 		ioRAW(input_file, true);
@@ -975,7 +991,15 @@ int ISISRAW::writeToFile(const char* filename)
 	long pos;
 	memset(zero_pad, 0, sizeof(zero_pad));
 	remove(filename);
+#ifdef _WIN32
+  FILE* output_file=NULL;
+  if(fopen_s( &output_file, filename, "w+bc" ) !=0 )
+  {
+      return -1;
+  }
+#else //_WIN32
 	FILE* output_file = fopen(filename,"w+bc");
+#endif //_WIN32
 	if (output_file != NULL)
 	{
 		ioRAW(output_file, false);
