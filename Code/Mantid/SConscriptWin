@@ -60,13 +60,17 @@ while(len(dirpath)):
 #Set compiler flags
 cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
 
-libDirList.append(os.path.abspath('Algorithms/lib/'))
-libDirList.append(os.path.abspath('Kernel/lib/'))
-libDirList.append(os.path.abspath('Geometry/lib/'))
-libDirList.append(os.path.abspath('API/lib/'))
-libDirList.append(os.path.abspath('DataObjects/lib/'))
-libDirList.append(os.path.abspath('DataHandling/lib/'))
-libDirList.append(os.path.abspath('Services/lib/'))
+#get lib pathes
+dirpath=os.listdir(cwdpath)
+while(len(dirpath)):
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir(item):
+			fullPath=item+"/"+file
+			if (file=="lib"):
+				libDirList.append(os.path.abspath(fullPath))
+	except:
+		pass
 
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
