@@ -110,7 +110,7 @@ while(len(dirpath)):
 		for file in os.listdir("../"+item):
 			fullPath="../"+item+"/"+file
 			if (file=="inc"):
-				cppPaths.append(os.path.abspath(fullPath))
+				cppPaths.insert(0,os.path.abspath(fullPath))
 			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
 			and (not file.endswith('test'))):
 				dirpath.append(fullPath[3:])
