@@ -84,11 +84,13 @@ void writeMCNPX(const std::string& Line,std::ostream& OX);
 // Split tring into spc deliminated components
 std::vector<std::string> StrParts(std::string Ln);
 
-// Write a set of containers to a file
+/// Write a set of containers to a file
 template<template<typename T> class V,typename T> 
 int writeFile(const std::string& Fname,const T step,const V<T>& Y);
+/// Write a set of containers to a file
 template<template<typename T> class V,typename T> 
 int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y);
+/// Write a set of containers to a file
 template<template<typename T> class V,typename T> 
 int writeFile(const std::string& Fname,const V<T>& X,const V<T>& Y,const V<T>& Err);
 

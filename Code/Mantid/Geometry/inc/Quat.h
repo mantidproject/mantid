@@ -12,9 +12,7 @@ namespace Geometry
 class V3D; 
 class M33;
 
-class DLLExport Quat
-{
-	/** @class Quat Quat.h Geometry/Quat.h
+/** @class Quat Quat.h Geometry/Quat.h
 			@brief Class for quaternions 
 		    @version 1.0
 		    @author Laurent C Chapon, ISIS RAL
@@ -26,10 +24,10 @@ class DLLExport Quat
 		    often implemented for computer graphics applications.
 		    Quaternion can be written q=W+ai+bj+ck where 
 		    w is the scalar part, and a, b, c the 3 imaginary parts.
-		    Quaternion multiplication is non-commutative.
-		    i*j=-j*i=k
-		    j*k=-k*j=i
-		    k*i=-i*k=j
+		    Quaternion multiplication is non-commutative.<br/>
+		    i*j=-j*i=k<br/>
+		    j*k=-k*j=i<br/>
+		    k*i=-i*k=j<br/>
 		    Rotation of an angle theta around a normalized axis (u,v,w) can be simply
 		    written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
 		    This class support all arithmetic operations for quaternions
@@ -53,6 +51,9 @@ class DLLExport Quat
 		    
 		    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 		*/
+class DLLExport Quat
+{
+	
 	public:
 		Quat();       
 		Quat(const double, const double, const double, const double); 
