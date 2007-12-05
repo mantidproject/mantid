@@ -25,9 +25,9 @@ class M33;
 		    Quaternion can be written q=W+ai+bj+ck where 
 		    w is the scalar part, and a, b, c the 3 imaginary parts.
 		    Quaternion multiplication is non-commutative.<br/>
-		    i*j=-j*i=k<br/>
-		    j*k=-k*j=i<br/>
-		    k*i=-i*k=j<br/>
+		    i*j=-j*i=k<br>
+		    j*k=-k*j=i<br>
+		    k*i=-i*k=j<br>
 		    Rotation of an angle theta around a normalized axis (u,v,w) can be simply
 		    written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
 		    This class support all arithmetic operations for quaternions
