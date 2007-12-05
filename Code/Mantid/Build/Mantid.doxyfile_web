@@ -61,7 +61,7 @@ OUTPUT_LANGUAGE = English
 # whereas setting the tag to NO uses a Unix-style encoding (the default for 
 # all platforms other than Windows).
 
-USE_WINDOWS_ENCODING = YES
+USE_WINDOWS_ENCODING = NO
 
 # If the BRIEF_MEMBER_DESC tag is set to YES (the default) Doxygen will 
 # include brief member descriptions after the members that are listed in 
@@ -115,7 +115,7 @@ FULL_PATH_NAMES = YES
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH = /isis/mantid_temp
+STRIP_FROM_PATH = /isis/mantid_temp/Code/Mantid
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
@@ -459,7 +459,23 @@ WARN_LOGFILE =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT = ../Kernel/inc/MantidKernel ../Kernel/src ../API/inc/MantidAPI ../API/src ../DataObjects/inc/MantidDataObjects ../DataObjects/src ../DataHandling/inc/MantidDataHandling ../DataHandling/src ../Algorithms/inc/MantidAlgorithms ../Algorithms/src ../Services/inc ../Services/src ../Geometry/inc ../Geometry/src
+INPUT                  = ../Kernel/inc/MantidKernel \
+                         ../Kernel/src \
+                         ../API/inc/MantidAPI \
+                         ../API/src \
+                         ../DataObjects/inc/MantidDataObjects \
+                         ../DataObjects/src \
+                         ../DataHandling/inc/MantidDataHandling \
+                         ../DataHandling/src \
+                         ../Algorithms/inc/MantidAlgorithms \
+                         ../Algorithms/src \
+                         ../Services/inc \
+                         ../Services/src \
+                         ../Geometry/inc \
+                         ../Geometry/src \
+			 ../Geometry/Deprecated
+
+RECURSIVE              = YES
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
