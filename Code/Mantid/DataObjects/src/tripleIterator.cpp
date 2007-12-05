@@ -85,7 +85,7 @@ triple_iterator<WorkSpace>::operator+(int N) const
 */
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
-triple_iterator<WorkSpace>::operator-(int N) const
+triple_iterator<WorkSpace>::operator-(difference_type N) const
 {
   triple_iterator<WorkSpace> Out(*this);
   Out-=N;
@@ -99,7 +99,7 @@ triple_iterator<WorkSpace>::operator-(int N) const
 */
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
-triple_iterator<WorkSpace>::operator+=(int N)
+triple_iterator<WorkSpace>::operator+=(difference_type N)
 {
   index+=N;
   validateIndex();
@@ -113,7 +113,7 @@ triple_iterator<WorkSpace>::operator+=(int N)
 */
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
-triple_iterator<WorkSpace>::operator-=(int N)
+triple_iterator<WorkSpace>::operator-=(difference_type N)
 {
   index-=N;
   validateIndex();

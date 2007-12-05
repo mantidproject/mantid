@@ -18,7 +18,6 @@ namespace Iterator
   Class maintians a type first/second/third triple
   similar to std::pair except all are identical
 
-  \class TripleRef
   \author S. Ansell
   \date April 2005
   \version 1.0 

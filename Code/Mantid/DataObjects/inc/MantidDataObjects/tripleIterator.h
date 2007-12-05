@@ -38,11 +38,13 @@ class triple_iterator : public std::iterator<std::random_access_iterator_tag,Tri
 					     TripleRef<double&>*,TripleRef<double&>& >
 {
  private:
-  
+  ///internal workspace pointer
   WorkSpace* W;
+  /// pointer to a TripleRef of doubles
   TripleRef<double&>* CPoint;
+  /// internal index of location within the workspace
   int index;
-
+ 
   void validateIndex(); 
 
  public:
