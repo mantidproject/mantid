@@ -67,7 +67,6 @@ class IndexError : public ExBase
 
   IndexError(const int,const int,const std::string&);
   IndexError(const IndexError& A);
-  IndexError& operator=(const IndexError& A);
   ~IndexError() throw() {}
 
   /// Overloaded reporting method
@@ -95,7 +94,6 @@ class FileError : public ExBase
 
   FileError(const int,const std::string&,const std::string&);
   FileError(const FileError& A);
-  FileError& operator=(const FileError& A);
   ~FileError() throw() {}
 
   /// Overloaded reporting method
@@ -126,7 +124,6 @@ class InContainerError : public ExBase
 
 
   InContainerError(const InContainerError& A);
-  InContainerError& operator=(const InContainerError& A);
   ~InContainerError() throw() {}
 
   /// Overloaded reporting method
@@ -159,7 +156,6 @@ class RangeError : public ExBase
 
   RangeError(const T&,const T&,const T&,const std::string&);
   RangeError(const RangeError& A);
-  RangeError& operator=(const RangeError& A);
   ~RangeError() throw() {} 
 
   /// Overloaded reporting method
@@ -189,7 +185,6 @@ class ArrayError : public ExBase
 
   ArrayError(const int*,const int*,const std::string&);
   ArrayError(const ArrayError<ndim>& A);
-  ArrayError<ndim>& operator=(const ArrayError<ndim>& A);
   ~ArrayError() throw() {} 
 
   /// Overloaded reporting method
@@ -222,7 +217,6 @@ class MisMatch : public ExBase
 
 
   MisMatch(const MisMatch<T>& A);
-  MisMatch<T>& operator=(const MisMatch<T>& A);
   ~MisMatch() throw() {}
 
   /// Overloaded reporting method
@@ -316,7 +310,6 @@ class CommandError : public ExBase
 
   CommandError(const std::string&,const std::string&);
   CommandError(const CommandError& A);
-  CommandError& operator=(const CommandError& A);
   ~CommandError() throw() {} 
 
   /// Overloaded reporting method

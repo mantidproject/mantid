@@ -711,7 +711,7 @@ polFit(const double&,const int,
 
 template 
 double 
-polFit(const double&,const int,
+polFit<double, double>(const double&,const int,
 	   std::vector<double,std::allocator<double> >::const_iterator,
 	   std::vector<double,std::allocator<double> >::const_iterator);
 
@@ -732,12 +732,12 @@ polInterp(const double&,const int,const std::vector<double>&,
 
 template 
 double
-intQuadratic(const std::vector<double>::const_iterator&,
+intQuadratic<double>(const std::vector<double>::const_iterator&,
 	     const std::vector<double>::const_iterator&);
 
 template 
 double
-derivQuadratic(const std::vector<double>::const_iterator&,
+derivQuadratic<double>(const std::vector<double>::const_iterator&,
 	       const std::vector<double>::const_iterator&);
 
 
@@ -758,7 +758,7 @@ template void mathFunc::Order(int&,int&);
 template void mathFunc::Order(double&,double&);
 template void mathFunc::Swap(double&,double&);
 
-template int mathFunc::binSearch(const std::vector<double>::const_iterator&,
+template int mathFunc::binSearch<double>(const std::vector<double>::const_iterator&,
 				 const std::vector<double>::const_iterator&,
 				 const double&);
 
