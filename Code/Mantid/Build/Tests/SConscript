@@ -13,7 +13,7 @@ libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
 myenv = env.Clone()
 myenv.Append(LIBS=libList)
-myenv.Append(LIBPATH=libDirList+['../../Bin/Plugins'])
+myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
 
 #GET LIST OF TESTS
 path = '../../'

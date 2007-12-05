@@ -6,7 +6,7 @@ g=open('TestsScript.sh', 'w')
 
 g.write('#!/bin/sh\n')
 g.write('LOGFILE=../../../logs/testResults.log\n')
-g.write('export LD_LIBRARY_PATH=../../Bin/Plugins:$LD_LIBRARY_PATH\n')
+g.write('export LD_LIBRARY_PATH=../../Bin/Shared:$LD_LIBRARY_PATH\n')
 
 for test in f:
 	name = test.split('/')

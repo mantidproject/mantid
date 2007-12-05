@@ -22,12 +22,7 @@ listCpps.append(MantidBuild.getCPPFiles(codeFolder))
 Import('env')
 
 #BUILD CODE
-if os.name == 'nt':
-	shared = env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-	static = env.StaticLibrary('lib/MantidGeometryStatic', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-else:
-	shared = env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=[ ], LIBPATH=[ ])
-	static = env.StaticLibrary('lib/MantidGeometryStatic', listCpps, LIBS=[ ], LIBPATH=[ ])
-	
+shared = env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+static = env.StaticLibrary('libstatic/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
 retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidGeometry' ] }
 Return('retval')

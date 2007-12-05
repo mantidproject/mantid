@@ -12,12 +12,7 @@ listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/LoadRaw'))
 Import('env')
 
 #BUILD CODE
-if os.name == 'nt':
-	shared = env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-	static = env.StaticLibrary('lib/MantidDataHandlingStatic', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-else:
-	shared = env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=[ ], LIBPATH=[ ])
-	static = env.StaticLibrary('lib/MantidDataHandlingStatic', listCpps, LIBS=[ ], LIBPATH=[ ])
-
+shared = env.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+static = env.StaticLibrary('libstatic/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
 retval = { 'shared': shared, 'static': static, 'libs': ['MantidDataHandling'] }
 Return('retval')

@@ -26,37 +26,53 @@ libDirList = [uppath,cwdpath ]
 libList = []
 cflags = []
 dirList = []
-
 cppPaths = []
 
-if os.name == 'nt':
-	SConscript('SConscriptWin')
-	
-else:
-	#so this must be posix
-	boost_path = ''
-	poco_path = ''
-	#	boost_append=''
-	fortran_type=''
-	third_party=''
+boost_path = ''
+poco_path = ''
+fortran_type=''
+third_party=''
 
-	#Get paths
+#Get paths
+if os.name == 'nt':
+	print "* COMMENCING WINDOWS BUILD *"
+	boost_path = 'C:/Program Files/boost/boost_1_34_1/'
+	third_party = os.path.abspath('../Third_Party/')
+	python_path = 'C:/Python25/'
+	libDirList.append(third_party + '/lib/win32/')
+	libDir = third_party + '/lib/win32/'
+
+	for file in os.listdir(libDir):
+        	if file.endswith('.dll'):
+                	libList.append(file.replace('.dll',''))
+
+#python and boost
+	libDirList.append(python_path + '/libs/')
+	libDirList.append(boost_path + '/lib/')
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/']
+
+else:
+	print "* COMMENCING LINUX BUILD *"
 	f=open('Build/Scons_Linux.conf', 'r')
-	
 	for ln in f:
 		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
 	#		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
 		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
-
-	print "POCO_ROOT: ",poco_path
-	print "BOOST_ROOT: ",boost_path
-	print "BOOST_APPEND: ",boost_append
-	print "THIRD_PARTY: ",third_party
-
 	f.close()
+	python_path = '/usr/local/python2.5'
 
+print "POCO_ROOT: ",poco_path
+print "BOOST_ROOT: ",boost_path
+print "BOOST_APPEND: ",boost_append
+print "THIRD_PARTY: ",third_party
+print "PYTHON_ROOT: ",python_path
+
+if os.name == 'nt':
+	cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+
+else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
 	cppPaths.append(poco_path +'Foundation/include/')
 	cppPaths.append(poco_path +'Util/include/')
@@ -83,68 +99,71 @@ else:
 	    libDirList.append(poco_path+'/lib/Linux/i686')
 	else :
 	    libDirList.append(poco_path+'/lib')
-
-	#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
-	dirpath=os.listdir(uppath)
-	while(len(dirpath)):
-		try:
-			item=dirpath.pop(0)
-			for file in os.listdir("../"+item):
-				fullPath="../"+item+"/"+file
-				if (file=="inc"):
-					cppPaths.append(os.path.abspath(fullPath))
-				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-				and (not file.endswith('test'))):
-					dirpath.append(fullPath[3:])
-		except:
-			pass
-
-	#Export for SConscripts
-	env.Append(CCFLAGS=cflags)
-	env.Append(CPPPATH=cppPaths)
-	env.Replace(MYLIBLIST=libList)
-	env.Replace(MYLIBDIRLIST=libDirList)
-
 	cflags.append(['-O0','-g'])
-
-	Export('env')
-
-	#Real work begins here
-	subProjs = []
-
-	subProjs.append('Kernel')
-	subProjs.append('Geometry')
-	subProjs.append('DataObjects')
-	subProjs.append('DataHandling')
-	subProjs.append('Algorithms')
-	subProjs.append('API')
-	#subProjs.append('Services/SConscript')
-
-	# we want to link libraries in the reverse order we build them
-	shared_libraries = []
-	static_libraries = []
-	lib_list = []
-	for subproj in subProjs:
-		ret = SConscript(subproj+'/SConscript')
-		shared_libraries.insert(0,ret['shared'])
-		static_libraries.insert(0,ret['static'])
-		lib_list.insert(0,ret['libs'])
-
-	env.Replace(SHARED_LIST=shared_libraries)
-	env.Replace(STATIC_LIST=static_libraries)
-	env.Prepend(MYLIBLIST=lib_list)
-
-	# main program
-	ret = SConscript('Bin/SConscript')
 	env.Append(LINKFLAGS=['-g'])
 
-	# main program
-	ret = SConscript('Bin/SConscript')
+#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
+dirpath=os.listdir(uppath)
+while(len(dirpath)):
+	try:
+		item=dirpath.pop(0)
+		for file in os.listdir("../"+item):
+			fullPath="../"+item+"/"+file
+			if (file=="inc"):
+				cppPaths.append(os.path.abspath(fullPath))
+			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+			and (not file.endswith('test'))):
+				dirpath.append(fullPath[3:])
+	except:
+		pass
 
-	# tests
-	cxxtestgen = env.WhereIs('cxxtestgen.py')
-	if cxxtestgen != None :
-		ret = SConscript('Build/Tests/SConscript')
-	else :
-		print 'CXXTESTGEN is not installed - tests will not be built'
+libDirList.append(os.path.abspath('./Bin/Shared'))
+#Export for SConscripts
+env.Append(CCFLAGS=cflags)
+env.Append(CPPPATH=cppPaths)
+env.Replace(MYLIBLIST=libList)
+env.Replace(MYLIBDIRLIST=libDirList)
+
+Export('env')
+
+#Real work begins here
+subProjs = []
+
+#This order matters slightly! Kernel-geometry-api in that order
+subProjs.append('Kernel')
+subProjs.append('Geometry')
+subProjs.append('API')
+subProjs.append('DataObjects')
+subProjs.append('Algorithms')
+subProjs.append('DataHandling')
+#subProjs.append('Services/SConscript')
+
+print libDirList
+
+# we want to link libraries in the reverse order we build them
+shared_libraries = []
+static_libraries = []
+lib_list = []
+orig_libs = env['MYLIBLIST']
+for subproj in subProjs:
+	ret = SConscript(subproj+'/SConscript')
+	env.Install('Bin/Shared', ret['shared'])
+	env.Install('Bin/Static', ret['static'])
+	shared_libraries.insert(0,ret['shared'])
+	static_libraries.insert(0,ret['static'])
+	lib_list.insert(0,ret['libs'])
+	env.Replace(MYLIBLIST=orig_libs+lib_list)
+
+env.Replace(SHARED_LIST=shared_libraries)
+env.Replace(STATIC_LIST=static_libraries)
+
+# main program
+ret = SConscript('Bin/SConscript')
+
+# tests
+cxxtestgen = env.WhereIs('cxxtestgen.py')
+if cxxtestgen != None :
+	ret = SConscript('Build/Tests/SConscript')
+else :
+	print 'CXXTESTGEN is not installed - tests will not be built'
 
