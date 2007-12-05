@@ -24,7 +24,7 @@ class M33;
 		    often implemented for computer graphics applications.
 		    Quaternion can be written q=W+ai+bj+ck where 
 		    w is the scalar part, and a, b, c the 3 imaginary parts.
-		    Quaternion multiplication is non-commutative.<br/>
+		    Quaternion multiplication is non-commutative.<br>
 		    i*j=-j*i=k<br>
 		    j*k=-k*j=i<br>
 		    k*i=-i*k=j<br>
