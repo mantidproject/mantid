@@ -31,7 +31,9 @@ libDir = third_party + '/lib/win32/'
 
 for file in os.listdir(libDir):
 	if file.endswith('.dll'):
-		libList.append(file.replace('.dll',''))
+		tmp = file.replace('.dll','')
+		if libList.count(tmp) == 0:
+			libList.append(tmp)
 
 #python and boost
 libDirList.append(python_path + '/libs/')
@@ -49,8 +51,6 @@ while(len(dirpath)):
 			fullPath="../"+item+"/"+file
 			if (file=="inc"):
 				cppPaths.append(os.path.abspath(fullPath))
-			elif (file=="lib"):
-				libDirList.append(os.path.abspath(fullPath))
 			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
 			and (not file.endswith('test'))):
 				dirpath.append(fullPath[3:])
@@ -59,6 +59,14 @@ while(len(dirpath)):
 		
 #Set compiler flags
 cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+
+libDirList.append(os.path.abspath('Algorithms/lib/'))
+libDirList.append(os.path.abspath('Kernel/lib/'))
+libDirList.append(os.path.abspath('Geometry/lib/'))
+libDirList.append(os.path.abspath('API/lib/'))
+libDirList.append(os.path.abspath('DataObjects/lib/'))
+libDirList.append(os.path.abspath('DataHandling/lib/'))
+libDirList.append(os.path.abspath('Services/lib/'))
 
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
@@ -84,17 +92,19 @@ print libDirList
 
 shared_libraries = []
 static_libraries = []
-lib_list = []
+
 for subproj in subProjs:
 	ret = SConscript(subproj+'/SConscript')
 	shared_libraries.insert(0,ret['shared'])
 	static_libraries.insert(0,ret['static'])
-	lib_list.insert(0,ret['libs'][0]+'.lib')
-	env.Prepend(MYLIBLIST=lib_list)
+	tmp = ret['libs'][0]+'.lib'
+	if libList.count(tmp) == 0:
+		libList.insert(0,tmp)
+		env.Replace(MYLIBLIST=libList)
 
 env.Replace(SHARED_LIST=shared_libraries)
 env.Replace(STATIC_LIST=static_libraries)
-env.Prepend(MYLIBLIST=lib_list)
+#env.Prepend(MYLIBLIST=lib_list)
 
 # main program
 ret = SConscript('Bin/SConscript')
