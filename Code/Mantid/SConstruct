@@ -30,22 +30,13 @@ dirList = []
 cppPaths = []
 
 if os.name == 'nt':
-	# assume this is Windows
-	libDirList.append('../../Third_Party/lib/win32/')
-	libDir = '../../Third_Party/lib/win32/'
-	cflags = ['-W3','/EHsc', '/MTd', '/ZI', '/TP', '/DWIN32', '/D_DEBUG', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
-	
-	libList.append('python' + sys.version[0:3].replace('.',''))
-	
-	for file in os.listdir(libDir):
-		if file.endswith('.dll'):
-			libList.append(file.replace('.dll',''))
+	SConscript('SConscriptWin')
 	
 else:
 	#so this must be posix
 	boost_path = ''
 	poco_path = ''
-#	boost_append=''
+	#	boost_append=''
 	fortran_type=''
 	third_party=''
 
@@ -55,7 +46,7 @@ else:
 	for ln in f:
 		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
-#		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
+	#		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
 		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 
@@ -75,11 +66,11 @@ else:
 
   	libList = ['python' + sys.version[0:3]]
 
-#  	libList.append('MantidDataObjects')
-#  	libList.append('MantidAPI')
-#  	libList.append('MantidKernel')
-#  	libList.append('MantidDataHandling')
-#  	libList.append('MantidGeometry')
+	#  	libList.append('MantidDataObjects')
+	#  	libList.append('MantidAPI')
+	#  	libList.append('MantidKernel')
+	#  	libList.append('MantidDataHandling')
+	#  	libList.append('MantidGeometry')
 
   	libList.append('PocoUtil')
   	libList.append('PocoFoundation')
@@ -108,49 +99,52 @@ else:
 		except:
 			pass
 
-#Export for SConscripts
-#
-cflags.append(['-O0','-g'])
+	#Export for SConscripts
+	env.Append(CCFLAGS=cflags)
+	env.Append(CPPPATH=cppPaths)
+	env.Replace(MYLIBLIST=libList)
+	env.Replace(MYLIBDIRLIST=libDirList)
 
-env.Append(CCFLAGS=cflags)
-env.Append(CPPPATH=cppPaths)
-env.Replace(MYLIBLIST=libList)
-env.Replace(MYLIBDIRLIST=libDirList)
+	cflags.append(['-O0','-g'])
 
-Export('env')
+	Export('env')
 
-#Real work begins here
-subProjs = []
+	#Real work begins here
+	subProjs = []
 
-subProjs.append('Kernel')
-subProjs.append('Geometry')
-subProjs.append('DataObjects')
-subProjs.append('DataHandling')
-subProjs.append('Algorithms')
-subProjs.append('API')
-#subProjs.append('Services/SConscript')
+	subProjs.append('Kernel')
+	subProjs.append('Geometry')
+	subProjs.append('DataObjects')
+	subProjs.append('DataHandling')
+	subProjs.append('Algorithms')
+	subProjs.append('API')
+	#subProjs.append('Services/SConscript')
 
-# we want to link libraries in the reverse order we build them
-shared_libraries = []
-static_libraries = []
-lib_list = []
-for subproj in subProjs:
-    ret = SConscript(subproj+'/SConscript')
-    shared_libraries.insert(0,ret['shared'])
-    static_libraries.insert(0,ret['static'])
-    lib_list.insert(0,ret['libs'])
+	# we want to link libraries in the reverse order we build them
+	shared_libraries = []
+	static_libraries = []
+	lib_list = []
+	for subproj in subProjs:
+		ret = SConscript(subproj+'/SConscript')
+		shared_libraries.insert(0,ret['shared'])
+		static_libraries.insert(0,ret['static'])
+		lib_list.insert(0,ret['libs'])
 
-env.Replace(SHARED_LIST=shared_libraries)
-env.Replace(STATIC_LIST=static_libraries)
-env.Prepend(MYLIBLIST=lib_list)
-env.Append(LINKFLAGS=['-g'])
+	env.Replace(SHARED_LIST=shared_libraries)
+	env.Replace(STATIC_LIST=static_libraries)
+	env.Prepend(MYLIBLIST=lib_list)
 
-# main program
-ret = SConscript('Bin/SConscript')
+	# main program
+	ret = SConscript('Bin/SConscript')
+	env.Append(LINKFLAGS=['-g'])
 
-# tests
-cxxtestgen = env.WhereIs('cxxtestgen.py')
-if cxxtestgen != None :
-    ret = SConscript('Build/Tests/SConscript')
-else :
-    print 'CXXTESTGEN is not installed - tests will not be built'
+	# main program
+	ret = SConscript('Bin/SConscript')
+
+	# tests
+	cxxtestgen = env.WhereIs('cxxtestgen.py')
+	if cxxtestgen != None :
+		ret = SConscript('Build/Tests/SConscript')
+	else :
+		print 'CXXTESTGEN is not installed - tests will not be built'
+
