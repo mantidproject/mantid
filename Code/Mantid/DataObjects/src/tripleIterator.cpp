@@ -17,43 +17,42 @@ namespace Mantid
 
 namespace Iterator
 {
-
+/*!
+  Null constructor
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>::triple_iterator() :
   W(0),CPoint(0),index(0)
-  /*!
-    Null constructor
-  */
 {}
 
+/*!
+  Workspace based constructor
+  \param A :: Workspace to take pointer
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>::triple_iterator(WorkSpace& WA) :
   W(&WA),CPoint(0),index(0)
-  /*!
-    Workspace based constructor
-    \param A :: Workspace to take pointer
-  */
 {
   validateIndex();
 }
 
+/*!
+  Copy constructor
+  \param A :: triple_iterator to copy
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>::triple_iterator(const triple_iterator<WorkSpace>& A) :
   W(A.W),CPoint(0),index(A.index)
-  /*!
-    Copy constructor
-    \param A :: triple_iterator to copy
-  */
 {
   validateIndex();
 }
 
+/*!
+  Validate the index
+*/
 template<typename WorkSpace>
 void
 triple_iterator<WorkSpace>::validateIndex()
-  /*!
-    Validate the index
-  */
 {
   if (index<0 || !W)
     index=0;
@@ -65,123 +64,121 @@ triple_iterator<WorkSpace>::validateIndex()
   return;
 }
 
-
+/*!
+  Addition to index 
+  \param N :: Number to add
+  \return Iterator advanced by N
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
 triple_iterator<WorkSpace>::operator+(int N) const
-  /*!
-    Addition to index 
-    \param N :: Number to add
-    \return Iterator advanced by N
-  */
 {
   triple_iterator<WorkSpace> Out(*this);
   Out+=N;
   return Out;
 }
 
+/*!
+  Negation to index
+  \param N :: Number to subtract
+  \return Iterator decreased by N
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
 triple_iterator<WorkSpace>::operator-(int N) const
-  /*!
-    Negation to index
-    \param N :: Number to subtrct
-    \return Iterator decreased by N
-  */
 {
   triple_iterator<WorkSpace> Out(*this);
   Out-=N;
   return Out;
 }
 
-
+/*!
+  Addition to self by N
+  \param N :: Number to add to index
+  \return *this
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
 triple_iterator<WorkSpace>::operator+=(int N)
-  /*!
-    Addition to self by N
-    \param N :: Number to add to index
-    \return *this
-  */
 {
   index+=N;
   validateIndex();
   return *this;
 }
 
+/*!
+  Negation to self by N
+  \param N :: Number to subtract
+  \return *this
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
 triple_iterator<WorkSpace>::operator-=(int N)
-  /*!
-    Negation to self by N
-    \param N :: Number to subtract
-    \return *this
-  */
 {
   index-=N;
   validateIndex();
   return *this;
 }
 
+/*!
+  Increment iterator (pre)
+  \return Iterator
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
 triple_iterator<WorkSpace>::operator++()
-  /*!
-    Increment iterator (pre)
-    \return Iterator
-  */
 {
   index++;
   validateIndex();
   return *this;
 }
 
+/*!
+  Decrement iterator (pre)
+  \return Iterator 
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>&
 triple_iterator<WorkSpace>::operator--()
-  /*!
-    Decrement iterator (pre)
-    \return Iterator 
-  */
 {
   index--;
   validateIndex();
   return *this;
 }
 
+/*!
+  Increment iterator (post)
+  \return Iterator before increment
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
 triple_iterator<WorkSpace>::operator++(int) 
-  /*!
-    Increment iterator (post)
-    \return Iterator before increment
-  */
 {
   triple_iterator<WorkSpace> Out(*this);
   this->operator++();
   return Out;
 }
 
+/*!
+  Negation iterator (post)
+  \return Iterator before decrement
+*/
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
 triple_iterator<WorkSpace>::operator--(int) 
-  /*!
-    Negation iterator (post)
-    \return Iterator before decrement
-  */
 {
   triple_iterator<WorkSpace> Out(*this);
   this->operator--();
   return Out;
 }
 
+/*!
+  Difference iterator
+  \return differen
+*/
 template<typename WorkSpace>
 typename triple_iterator<WorkSpace>::difference_type
 triple_iterator<WorkSpace>::operator-(const triple_iterator<WorkSpace>& A) const
-  /*!
-    Difference iterator
-    \return differen
-  */
 {
   if (!W && !A.W)
     return 0;

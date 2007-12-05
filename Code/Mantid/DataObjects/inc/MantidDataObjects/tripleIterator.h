@@ -6,7 +6,33 @@ namespace Mantid
 
 namespace Iterator
 {
+/*!
+  triple_iterator iterates over a workspace providing values as TripleRefs
 
+  \class TripleRef
+  \author S. Ansell
+  \date November 2007
+  \version 1.0 
+    
+  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+
+  This file is part of Mantid.
+ 	
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your option) any later version.
+  
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+*/
 template<typename WorkSpace>
 class triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double&>,int,
 					     TripleRef<double&>*,TripleRef<double&>& >
@@ -35,8 +61,7 @@ class triple_iterator : public std::iterator<std::random_access_iterator_tag,Tri
   
   const TripleRef<double&>& operator*() const { return *CPoint; }   ///< Base Accessor
   const TripleRef<double&>* operator->() const { return CPoint; }   ///< Base Pointer accessor
-  //const TripleRef<double&>& operator[](int) const; 
-
+  
   triple_iterator<WorkSpace>& operator++();
   triple_iterator<WorkSpace> operator++(int);
   triple_iterator<WorkSpace>& operator--();
