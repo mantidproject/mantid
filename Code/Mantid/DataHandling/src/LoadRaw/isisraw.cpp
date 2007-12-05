@@ -1021,3 +1021,29 @@ int ISISRAW::printInfo(std::ostream& os)
 	return 0;
 }
 
+ISISRAW::~ISISRAW()
+{
+    delete[] dat1;
+    delete[] ut;
+    delete[] mdet;
+    delete[] monp;
+    delete[] spec;
+    delete[] delt;
+    delete[] len2;
+    delete[] code;
+    delete[] tthe;
+    delete[] e_seblock;
+    delete[] crat;
+    delete[] modn;
+    delete[] mpos;
+    delete[] timr;
+    delete[] udet;
+    delete[] t_tcb1;
+    delete[] u_dat;
+    delete[] ddes;
+    for(int i=0; i<logsect.nlines; i++)
+    {
+	delete[] logsect.lines[i].data;
+    }
+    delete[] logsect.lines;
+}

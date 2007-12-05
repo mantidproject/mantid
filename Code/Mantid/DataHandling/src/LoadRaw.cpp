@@ -51,7 +51,7 @@ namespace DataHandling
       return StatusCode::FAILURE;      
     }
     
-    ISISRAW iraw;
+    ISISRAW iraw(NULL);
     if (iraw.readFromFile(m_filename.c_str()) != 0)
     {
       g_log.error("Unable to open file " + m_filename);
