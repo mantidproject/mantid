@@ -47,6 +47,9 @@ for test in f:
   temp= test.split('/')
   dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
   os.popen('cxxtestgen.pl --error-printer -o ' + dotcpp + ' ' + doth)
-  myenv.Program([dotcpp])
+  if os.name == 'nt':
+	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+  else:
+	myenv.Program([dotcpp])
 
 f.close()
