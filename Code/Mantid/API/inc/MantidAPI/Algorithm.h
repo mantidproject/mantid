@@ -121,6 +121,7 @@ class Workspace;
      *  Delegated to the PropertyManager method
      *  @param name The name of the property
      *  @param value The initial value to assign to the property
+     *  @param validator Pointer to the (optional) validator.
      *  @param doc The (optional) documentation string
      */
     template <typename T>

@@ -120,6 +120,16 @@ namespace API
     // Return a failure if the algorithm hasn't been initialized
     if ( !isInitialized() ) return Kernel::StatusCode::FAILURE;
 
+    // Check all properties for validity
+    const std::vector< Property* > &props = getProperties();
+    for (unsigned int i = 0; i < props.size(); ++i) {
+      if ( ! props[i]->isValid() )
+      {
+        g_log.error() << "Property " << props[i]->name() << "is not set to a valid value." << std::endl;
+        return Kernel::StatusCode::FAILURE;
+      }
+    }
+    
     // Set the input and output workspaces
     std::string inputWorkspaceName;
    
@@ -341,7 +351,7 @@ namespace API
   }
 
   /** Register a property with the property manager.
-   *  Delegated to the PropertyManager method
+   *  Delegated to the PropertyManager method.
    *  @param p A pointer to the property instance to register
    */
   void Algorithm::declareProperty( Kernel::Property *p )
@@ -349,6 +359,14 @@ namespace API
     m_propertyMgr.declareProperty(p);
   }
   
+  /** Specialised version of declareProperty template method. Deals with case when the value argument
+   *  is passed as a quote-enclosed string.
+   *  Delegated to the PropertyManager method.
+   *  @param name The name of the property
+   *  @param value The initial value to assign to the property
+   *  @param validator Pointer to the (optional) validator.
+   *  @param doc The (optional) documentation string
+   */
   void Algorithm::declareProperty( const std::string &name, const char* value, 
                                    Kernel::IValidator<std::string> *validator, const std::string &doc )
   {

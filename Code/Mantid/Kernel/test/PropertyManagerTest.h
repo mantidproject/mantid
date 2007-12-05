@@ -97,6 +97,11 @@ public:
 		delete pp;
 	}
 
+	void testIsValidProperty()
+	{
+	  
+	}
+	
 	void testGetPropertyValue()
 	{
 		TS_ASSERT( ! manager.getPropertyValue("APROP").compare("1") )
