@@ -8,6 +8,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid
@@ -53,20 +55,9 @@ public:
   /** Constructor
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property
-   */
-	PropertyWithValue( const std::string &name, TYPE value) :
-	  Property( name, typeid( TYPE ) ),
-	  m_value( value ),
-	  m_validator( new NullValidator<TYPE> )
-	{
-	}
-
-  /** Constructor
-   *  @param name The name to assign to the property
-   *  @param value The initial value to assign to the property
    *  @param validator The validator to use for this property (this class will take ownership of the validator)
    */
-	PropertyWithValue( const std::string &name, TYPE value, IValidator<TYPE> *validator) :
+	PropertyWithValue( const std::string &name, TYPE value, IValidator<TYPE> *validator = new NullValidator<TYPE> ) :
 	  Property( name, typeid( TYPE ) ),
 	  m_value( value ),
 	  m_validator( validator )

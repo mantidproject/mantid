@@ -40,10 +40,9 @@ public:
 	void testdeclareProperty_int()
 	{
 		PropertyManager mgr;
-		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 1, "hello") )
+		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 1) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("1") )
-		Property *p = mgr.getProperty("myProp");
-		TS_ASSERT( ! p->documentation().compare("hello") )
+		TS_ASSERT( mgr.isValidProperty("myProP") )
 		
 		TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty("", 5), std::invalid_argument )
@@ -52,10 +51,10 @@ public:
 	void testdeclareProperty_double()
 	{
     PropertyManager mgr;
-    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, "hello") )
+    BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
-    Property *p = mgr.getProperty("myProp");
-    TS_ASSERT( ! p->documentation().compare("hello") )
+    TS_ASSERT( ! mgr.isValidProperty("MyProp") )
     
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5.5), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", 5.5), std::invalid_argument )
@@ -64,8 +63,9 @@ public:
 	void testdeclareProperty_string()
 	{
     PropertyManager mgr;
-    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", "hello") )
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator, "hello") )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
+    TS_ASSERT( mgr.isValidProperty("MYprop") )
     Property *p = mgr.getProperty("myProp");
     TS_ASSERT( ! p->documentation().compare("hello") )
     
@@ -93,6 +93,8 @@ public:
 		Property *pp = new PropertyWithValue<double>("APROP",9.99);
     // Note that although the name of the property is the same, the type is different - yet it passes
 		TS_ASSERT( manager.existsProperty(pp->name()) )
+		delete p;
+		delete pp;
 	}
 
 	void testGetPropertyValue()

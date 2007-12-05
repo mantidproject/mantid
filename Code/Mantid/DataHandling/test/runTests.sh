@@ -23,10 +23,10 @@ echo
 
 echo "Compiling the test executable..."
 # -lboost_filesystem added for the SaveCSVTest test
-g++ -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc  \
+g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc  \
                              -L../../Debug -L../../Build -L../../../Third_Party/lib/linux64 \
-                             -lMantid -lboost_filesystem -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet \
-                             -lboost_python -lpython2.3 
+                             -lMantid -lboost_filesystem -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet \
+                             -lboost_python -lboost_regex -lpython2.3
 echo
 
 

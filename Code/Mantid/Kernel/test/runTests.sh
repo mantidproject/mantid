@@ -22,7 +22,9 @@ fi
 echo
 
 echo "Compiling the test executable..."
-g++ -o runner.exe runner.cpp -I ../inc -I ../../API/inc -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 -lMantid -lGet -lg2c -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lpython2.3
+g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../API/inc \
+            -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+            -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lpython2.3 -lboost_regex
 echo
 
 echo "Running the tests..."

@@ -22,7 +22,7 @@ namespace Kernel
     Property manager helper class.
     This class is used by algorithms and services for helping to manage their own set of properties.
     It implements the IProperty interface.
-    N.B. ONCE YOU HAVE DECLARAED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS (I.E. DON'T DELETE IT!)
+    N.B. ONCE YOU HAVE DECLARED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS (I.E. DON'T DELETE IT!)
 
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
@@ -60,20 +60,23 @@ public:
 	/** Add a property of the template type to the list of managed properties
 	 *  @param name The name to assign to the property
 	 *  @param value The initial value to assign to the property
+	 *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
 	 *  @param doc The (optional) documentation string
 	 *  @throw Exception::ExistsError if a property with the given name already exists
 	 *  @throw std::invalid_argument  if the name argument is empty
 	 */
 	template <typename T>
-	void declareProperty( const std::string &name, T value, const std::string &doc="" )
+	void declareProperty( const std::string &name, T value, 
+	                      IValidator<T> *validator = new NullValidator<T>, const std::string &doc="" )
 	{
-	  Property *p = new PropertyWithValue<T>(name, value);
+	  Property *p = new PropertyWithValue<T>(name, value, validator);
     p->setDocumentation(doc);
     declareProperty(p);
 	}
 	
 	// Specialised version of above function
-	void declareProperty( const std::string &name, const char* value, const std::string &doc="" );
+	void declareProperty( const std::string &name, const char* value,
+	                      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="" );
 	
   // Sets all the declared properties from 
   void setProperties( const std::string &values );
@@ -81,6 +84,7 @@ public:
   // IProperty methods
   void setProperty( const std::string &name, const std::string &value );
   bool existsProperty( const std::string &name ) const;
+  bool isValidProperty( const std::string &name ) const;
   std::string getPropertyValue( const std::string &name ) const;
   Property* getProperty( const std::string &name ) const;
   const std::vector< Property* >& getProperties() const;

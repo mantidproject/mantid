@@ -54,17 +54,19 @@ void PropertyManager::declareProperty( Property *p )
 
 /** Specialised version of declareProperty template method to prevent the creation of a
  *  PropertyWithValue of type const char* if an argument in quotes is passed (it will be
- *  converted to a string)
+ *  converted to a string). The validator, if provided, needs to be a string validator.
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property
+   *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
    *  @param doc The (optional) documentation string
    *  @throw Exception::ExistsError if a property with the given name already exists
    *  @throw std::invalid_argument  if the name argument is empty
  */
-void PropertyManager::declareProperty( const std::string &name, const char* value, const std::string &doc )
+void PropertyManager::declareProperty( const std::string &name, const char* value,
+                                       IValidator<std::string> *validator, const std::string &doc )
 {
   // Simply call templated method, converting character array to a string
-  declareProperty(name, std::string(value), doc);
+  declareProperty(name, std::string(value), validator, doc);
 }
 
 /** Set the ordered list of properties by one string of values.
@@ -95,17 +97,33 @@ void PropertyManager::setProperty( const std::string &name, const std::string &v
  */
 bool PropertyManager::existsProperty( const std::string& name ) const
 {
-  std::string ucName = name;
-  std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
-  PropertyMap::const_iterator it = m_properties.find(ucName);
-  if (it != m_properties.end())
+  try 
   {
+    getProperty(name);
     return true;
   }
-  else
+  catch (Exception::NotFoundError e)
   {
     return false;
   }
+}
+
+/** Validates the named property
+ *  @param name The name of the property (case insensitive)
+ *  @return True if the property exists AND has a valid value
+ */
+bool PropertyManager::isValidProperty( const std::string &name ) const
+{
+  Property *p;
+  try 
+  {
+    p = getProperty(name);
+  } 
+  catch (Exception::NotFoundError e)
+  {
+    return false;
+  }
+  return p->isValid();
 }
 
 /** Get the value of a property as a string

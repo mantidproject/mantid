@@ -124,10 +124,15 @@ class Workspace;
      *  @param doc The (optional) documentation string
      */
     template <typename T>
-    void declareProperty( const std::string &name, T value, const std::string &doc="" )
+    void declareProperty( const std::string &name, T value, Kernel::IValidator<T> *validator = new Kernel::NullValidator<T>, const std::string &doc="" )
     {
-      m_propertyMgr.declareProperty(name,value,doc);
+      m_propertyMgr.declareProperty(name,value,validator,doc);
     }
+    
+    // Specialised version of above function
+    void declareProperty( const std::string &name, const char* value,
+                          Kernel::IValidator<std::string> *validator = new Kernel::NullValidator<std::string>,
+                          const std::string &doc="" );
     
     void declareProperty( Kernel::Property *p );
     

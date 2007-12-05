@@ -349,5 +349,11 @@ namespace API
     m_propertyMgr.declareProperty(p);
   }
   
+  void Algorithm::declareProperty( const std::string &name, const char* value, 
+                                   Kernel::IValidator<std::string> *validator, const std::string &doc )
+  {
+    m_propertyMgr.declareProperty(name,value,validator,doc);
+  }
+  
 } // namespace API
 } // namespace Mantid
