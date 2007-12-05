@@ -9,7 +9,7 @@ namespace Iterator
 /*!
   triple_iterator iterates over a workspace providing values as TripleRefs
 
-  \class TripleRef
+  \class triple_iterator
   \author S. Ansell
   \date November 2007
   \version 1.0 

@@ -27,7 +27,7 @@ triple_iterator<WorkSpace>::triple_iterator() :
 
 /*!
   Workspace based constructor
-  \param A :: Workspace to take pointer
+  \param WA :: Workspace to take pointer
 */
 template<typename WorkSpace>
 triple_iterator<WorkSpace>::triple_iterator(WorkSpace& WA) :
@@ -71,7 +71,7 @@ triple_iterator<WorkSpace>::validateIndex()
 */
 template<typename WorkSpace>
 triple_iterator<WorkSpace>
-triple_iterator<WorkSpace>::operator+(int N) const
+triple_iterator<WorkSpace>::operator+(difference_type N) const
 {
   triple_iterator<WorkSpace> Out(*this);
   Out+=N;
