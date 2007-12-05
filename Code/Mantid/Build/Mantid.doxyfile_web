@@ -472,7 +472,8 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../Services/inc \
                          ../Services/src \
                          ../Geometry/inc \
-                         ../Geometry/src
+                         ../Geometry/src \
+			 ../Geometry/Deprecated
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
