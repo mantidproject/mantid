@@ -14,17 +14,17 @@ static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
 
-main_obj = env.Object('main.cpp')
+main_obj = env.Object('Main.cpp')
 
 myenv_dynamic = env.Clone()
 myenv_dynamic.Append(LIBS=libList)
 myenv_dynamic.Append(LIBPATH=libDirList)
-myenv_dynamic.Append(LIBPATH='./Shared')
+myenv_dynamic.Append(LIBPATH='#Bin/Shared')
 myenv_dynamic.Program('main',main_obj)
 
 myenv_static = env.Clone()
 myenv_static.Append(LIBS=libList)
 myenv_static.Append(LIBPATH=libDirList)
-myenv_static.Append(LIBPATH='./Static')
+myenv_static.Append(LIBPATH='#Bin/Static')
 #myenv_static.Append(LINKFLAGS=['-static'])
 myenv_static.Program('main_static', main_obj)

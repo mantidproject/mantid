@@ -158,7 +158,7 @@ env.Replace(SHARED_LIST=shared_libraries)
 env.Replace(STATIC_LIST=static_libraries)
 
 # main program
-ret = SConscript('Bin/SConscript')
+ret = SConscript('Main/SConscript')
 
 # tests
 cxxtestgen = env.WhereIs('cxxtestgen.py')
