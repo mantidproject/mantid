@@ -5,6 +5,7 @@
 
 // Includes ====================================================================
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/LibraryManager.h"
@@ -15,6 +16,42 @@ using namespace boost::python;
 
 // Declarations ================================================================
 namespace  {
+	
+struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
+{
+    Mantid_API_IAlgorithm_Wrapper(PyObject* py_self_, const Mantid::API::IAlgorithm& p0):
+       Mantid::API::IAlgorithm(p0), py_self(py_self_) {}
+
+    Mantid_API_IAlgorithm_Wrapper(PyObject* py_self_):
+        Mantid::API::IAlgorithm(), py_self(py_self_) {}
+
+    Mantid::Kernel::StatusCode initialize() {
+        return call_method< Mantid::Kernel::StatusCode >(py_self, "initialize");
+    }
+
+    Mantid::Kernel::StatusCode execute() {
+        return call_method< Mantid::Kernel::StatusCode >(py_self, "execute");
+    }
+
+    Mantid::Kernel::StatusCode finalize() {
+        return call_method< Mantid::Kernel::StatusCode >(py_self, "finalize");
+    }
+
+    bool isInitialized() const {
+        return call_method< bool >(py_self, "isInitialized");
+    }
+
+    bool isFinalized() const {
+        return call_method< bool >(py_self, "isFinalized");
+    }
+
+    bool isExecuted() const {
+        return call_method< bool >(py_self, "isExecuted");
+    }
+
+    PyObject* py_self;
+};
+
 
 struct Mantid_Kernel_Algorithm_Wrapper: Mantid::API::Algorithm
 {
@@ -144,6 +181,17 @@ BOOST_PYTHON_MODULE(MantidAPI)
 BOOST_PYTHON_MODULE(libMantidAPI)
 {
 #endif	
+	
+	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
+        .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
+        .def("execute", pure_virtual(&Mantid::API::IAlgorithm::execute))
+        .def("finalize", pure_virtual(&Mantid::API::IAlgorithm::finalize))
+        .def("isInitialized", pure_virtual(&Mantid::API::IAlgorithm::isInitialized))
+        .def("isFinalized", pure_virtual(&Mantid::API::IAlgorithm::isFinalized))
+        .def("isExecuted", pure_virtual(&Mantid::API::IAlgorithm::isExecuted))
+    ;
+	
+	
   /*  class_< Mantid::API::Algorithm, boost::noncopyable, Mantid_Kernel_Algorithm_Wrapper >("Algorithm", init<  >())
         .def("name", (const std::string& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::name, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
         .def("version", (const std::string& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::version, (const std::string& (Mantid_Kernel_Algorithm_Wrapper::*)() const)&Mantid_Kernel_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
@@ -185,6 +233,17 @@ BOOST_PYTHON_MODULE(libMantidAPI)
 	.def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
         .def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&, const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
    ;
+   
+   scope* Mantid_Kernel_StatusCode_scope = new scope(
+    class_< Mantid::Kernel::StatusCode >("StatusCode", no_init)
+        .def(init< const Mantid::Kernel::StatusCode& >())
+    );
+
+    scope().attr("FAILURE") = (int)Mantid::Kernel::StatusCode::FAILURE;
+    scope().attr("SUCCESS") = (int)Mantid::Kernel::StatusCode::SUCCESS;
+    scope().attr("RECOVERABLE") = (int)Mantid::Kernel::StatusCode::RECOVERABLE;
+
+    delete Mantid_Kernel_StatusCode_scope;
 
 }
 
