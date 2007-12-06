@@ -27,6 +27,11 @@ public:
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
+    StatusCode status = loader.execute();
+    // Should fail because mandatory parameter has not been set
+    TS_ASSERT( status.isFailure() );   
+    
+    // Now set it...  
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setProperty("Filename", inputFile);
@@ -38,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
     
-    StatusCode status = loader.execute();
+    status = loader.execute();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( loader.isExecuted() );    
     

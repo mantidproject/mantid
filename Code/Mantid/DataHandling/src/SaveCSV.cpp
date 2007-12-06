@@ -60,12 +60,14 @@ namespace DataHandling
    */
   StatusCode SaveCSV::init()
   {	
-    declareProperty("Filename","");
+    declareProperty("Filename","",new Kernel::MandatoryValidator);
+    declareProperty("Separator",",");
+    declareProperty("LineSeparator","\n");
     return StatusCode::SUCCESS;
   }
   
   
-  /** Executes the algorithm. Retrieve the Filename, Seperator and LineSeperator
+  /** Executes the algorithm. Retrieve the Filename, separator and Lineseparator
    *  properties and save workspace to Filename. 
    * 
    *  @return A StatusCode object indicating whether the operation was successful
@@ -74,43 +76,16 @@ namespace DataHandling
   StatusCode SaveCSV::exec()
   {
     // Gets the name of the file to save the workspace to; and the
-    // Seperator and LineSeperator properties if they are provided by the user.
+    // separator and Lineseparator properties if they are provided by the user.
 
     // Retrieve the filename from the properties
-    try {
-      m_filename = getPropertyValue("Filename");
-    } catch (Exception::NotFoundError e) {
-      g_log.error("Filename property has not been set.");
-      return StatusCode::FAILURE;      
-    }
+    m_filename = getPropertyValue("Filename");
     
-    /// @todo move the defaults into a declare property line
-    // Check if the user has specified the optional Seperator property 
-//    
-//    status = getProperty("Seperator", m_seperator);
-//
-//
-//    // If Seperator not specified then use default Seperator
-//
-//    if ( status.isFailure() )
-//    {     
-      m_seperator = ",";
-//    }    
-//        
-//
-//    // Check if the user has specified the optional LineSeperator property 
-//    
-//    status = getProperty("LineSeperator", m_lineSeperator);
-//
-//
-//    // If LineSeperator not specified then use default LineSeperator
-//
-//    if ( status.isFailure() )
-//    {     
-      m_lineSeperator = "\n";
-//    } 
+    // Get the values of the optional parameters 
+    m_separator = getPropertyValue("Separator");
+    m_lineSeparator = getPropertyValue("LineSeparator");
 
-
+    
     // prepare to save to file
     
     std::ofstream outCSV_File(m_filename.c_str());
@@ -149,8 +124,8 @@ namespace DataHandling
     
       for (int i = 0; i < (int)xValue.size(); i++)
       {
-        outCSV_File << std::setw(15) << xValue[i] << m_seperator << std::setw(15) << yValue[i] 
-          << m_seperator << std::setw(15) << eValue[i] << m_lineSeperator;
+        outCSV_File << std::setw(15) << xValue[i] << m_separator << std::setw(15) << yValue[i] 
+          << m_separator << std::setw(15) << eValue[i] << m_lineSeparator;
       }    
 	  }
     else if ( workspaceID == "Workspace2D" )
@@ -173,10 +148,10 @@ namespace DataHandling
 			
         for (int j = 0; j < (int)xValue.size(); j++)
 			  {
-			    outCSV_File << std::setw(15) << xValue[j] << m_seperator;
+			    outCSV_File << std::setw(15) << xValue[j] << m_separator;
 			  }
 	
-	      outCSV_File << m_lineSeperator;	
+	      outCSV_File << m_lineSeparator;	
 	    }
 
 
@@ -195,10 +170,10 @@ namespace DataHandling
 			
             for (int j = 0; j < (int)xValue.size(); j++)
 			      {
-			        outCSV_File << std::setw(15) << xValue[j] << m_seperator;
+			        outCSV_File << std::setw(15) << xValue[j] << m_separator;
 			      }
 	
-	          outCSV_File << m_lineSeperator;
+	          outCSV_File << m_lineSeparator;
 				  }
 				}
 				
@@ -211,10 +186,10 @@ namespace DataHandling
 				
 				for (int j = 0; j < (int)yValue.size(); j++)
         {
-          outCSV_File << std::setw(15) << yValue[j] << m_seperator;
+          outCSV_File << std::setw(15) << yValue[j] << m_separator;
         }  
 				
-				outCSV_File << m_lineSeperator;
+				outCSV_File << m_lineSeparator;
 		  }
 			
 			
@@ -230,10 +205,10 @@ namespace DataHandling
 				
 				for (int j = 0; j < (int)eValue.size(); j++)
         {
-          outCSV_File << std::setw(15) << eValue[j] << m_seperator;
+          outCSV_File << std::setw(15) << eValue[j] << m_separator;
         }  
 				
-				outCSV_File << m_lineSeperator;
+				outCSV_File << m_lineSeparator;
 		  }			
 
 		
@@ -243,7 +218,7 @@ namespace DataHandling
 		{
 		  outCSV_File.close();  // and should probably delete file from disk as well
 			
-			throw Exception::NotImplementedError("SaveCVS currently only works for 1D and 2D workspaces.");
+			throw Exception::NotImplementedError("SaveCSV currently only works for 1D and 2D workspaces.");
 		}
 		
 		

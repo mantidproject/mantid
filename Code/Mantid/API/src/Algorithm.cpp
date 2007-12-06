@@ -122,13 +122,15 @@ namespace API
 
     // Check all properties for validity
     const std::vector< Property* > &props = getProperties();
+    bool allValid = true;
     for (unsigned int i = 0; i < props.size(); ++i) {
       if ( ! props[i]->isValid() )
       {
-        g_log.error() << "Property " << props[i]->name() << "is not set to a valid value." << std::endl;
-        return Kernel::StatusCode::FAILURE;
+        g_log.error() << "Property \"" << props[i]->name() << "\" is not set to a valid value." << std::endl;
+        allValid = false;
       }
     }
+    if ( ! allValid ) return Kernel::StatusCode::FAILURE;
     
     // Set the input and output workspaces
     std::string inputWorkspaceName;

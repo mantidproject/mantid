@@ -99,6 +99,14 @@ public:
     TS_ASSERT_EQUALS( e[0], 6);
 
     if ( !alg2.isInitialized() ) alg2.initialize();
+    
+    // Check setting of invalid property value causes failure
+    alg2.setProperty("StartY","-1");
+    status = alg2.execute();
+    TS_ASSERT( status.isFailure() )
+    // Set back to default value
+    alg2.setProperty("StartY","0");
+    
     status = alg2.execute();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( alg2.isExecuted() );

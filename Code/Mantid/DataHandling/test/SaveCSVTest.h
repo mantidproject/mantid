@@ -53,16 +53,6 @@ public:
     StatusCode status = algToBeTested.initialize();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( algToBeTested.isInitialized() );
-
-    algToBeTested.setProperty("InputWorkspace", "testSpace");     
-
-    // specify name of file to save 1D-workspace to
-    outputFile = "testOfSaveCSV.csv";
-    algToBeTested.setProperty("Filename", outputFile);
-    
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(outputFile));
   }
   
   
@@ -70,8 +60,22 @@ public:
   {
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
+    algToBeTested.setProperty("InputWorkspace", "testSpace");     
     
     StatusCode status = algToBeTested.execute();
+    // Should fail because mandatory parameter has not been set
+    TS_ASSERT( status.isFailure() );   
+    
+    // Now set it...
+    // specify name of file to save 1D-workspace to
+    outputFile = "testOfSaveCSV.csv";
+    algToBeTested.setProperty("Filename", outputFile);
+    
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(outputFile)); 
+    
+    status = algToBeTested.execute();
     TS_ASSERT( ! status.isFailure() );
     TS_ASSERT( algToBeTested.isExecuted() );    
    
@@ -87,14 +91,14 @@ public:
     std::ifstream in(outputFile.c_str());
     
     double d1, d2, d3;
-    std::string seperator;
+    std::string separator;
     std::string number_plus_comma;
     
-    in >> d1 >> seperator >> d2 >> seperator >> d3 >> number_plus_comma;
+    in >> d1 >> separator >> d2 >> separator >> d3 >> number_plus_comma;
     
     in.close();
     
-    TS_ASSERT( ! seperator.compare(",") );
+    TS_ASSERT( ! separator.compare(",") );
     TS_ASSERT( ! number_plus_comma.compare("0.1,") );
     
     

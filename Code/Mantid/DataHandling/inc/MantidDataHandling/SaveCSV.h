@@ -25,8 +25,8 @@ namespace DataHandling
 
     Optional Properties:
        <UL>
-       <LI> Seperator - defaults to "," </LI>
-       <LI> LineSeperator - defaults to "\n" </LI>
+       <LI> Separator - defaults to "," </LI>
+       <LI> LineSeparator - defaults to "\n" </LI>
        </UL>
 			 
 		The format of the saved ascii CSV file for a 1D worksspace consists of three
@@ -104,10 +104,10 @@ namespace DataHandling
     std::string m_filename;
     
     /// The seperator for the CSV file
-    std::string m_seperator;
+    std::string m_separator;
     
     /// The line seperator for the CSV file
-    std::string m_lineSeperator;   
+    std::string m_lineSeparator;   
 
     ///static reference to the logger class
     static Kernel::Logger& g_log;

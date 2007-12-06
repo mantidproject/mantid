@@ -37,7 +37,7 @@ namespace DataHandling
 	*/
 	StatusCode LoadInstrument::init()
 	{
-		declareProperty("Filename","");
+		declareProperty("Filename","",new MandatoryValidator);
 
 		return StatusCode::SUCCESS;
 	}
@@ -51,15 +51,7 @@ namespace DataHandling
 	{
 		
 	// Retrieve the filename from the properties
-	try
-	{
-		m_filename = getPropertyValue("Filename");
-	}
-	catch (Kernel::Exception::NotFoundError& ex)
-	{
-	  g_log.error("Filename property has not been set.");
-	  return StatusCode::FAILURE;
-	}
+	m_filename = getPropertyValue("Filename");
 	
 	std::string inputWorkspaceName;
 	std::string outputWorkspaceName;

@@ -31,7 +31,7 @@ namespace DataHandling
    */
   StatusCode LoadRaw::init()
   {
-    declareProperty("Filename",".");
+    declareProperty("Filename","",new MandatoryValidator);
     
     return StatusCode::SUCCESS;
   }
@@ -44,12 +44,7 @@ namespace DataHandling
   StatusCode LoadRaw::exec()
   {
     // Retrieve the filename from the properties
-    try {
-      m_filename = getPropertyValue("Filename");
-    } catch (Exception::NotFoundError e) {
-      g_log.error("Filename property has not been set.");
-      return StatusCode::FAILURE;      
-    }
+    m_filename = getPropertyValue("Filename");
     
     ISISRAW iraw(NULL);
     if (iraw.readFromFile(m_filename.c_str()) != 0)
@@ -59,7 +54,7 @@ namespace DataHandling
     }
     
     // Read the number of time channels from the RAW file (calling FORTRAN)
-    int channelsPerSpectrum, lengthIn, lengthOut, errorCode;
+    int channelsPerSpectrum, lengthIn, lengthOut;
     lengthIn = lengthOut = 1;
     channelsPerSpectrum = iraw.t_ntc1;
 

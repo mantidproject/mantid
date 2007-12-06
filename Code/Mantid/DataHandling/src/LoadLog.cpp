@@ -49,20 +49,9 @@ namespace DataHandling
   StatusCode LoadLog::exec()
   {
     // Retrieve the filename from the properties
-
-    try 
-    {
-      m_filename = getPropertyValue("Filename");
-    } 
-    catch (Exception::NotFoundError e) 
-    {
-      g_log.error("Filename property has not been set.");
-      return StatusCode::FAILURE;      
-    }
-
+    m_filename = getPropertyValue("Filename");
 
 	  // Retrieve the ws names from the properties
-
 	  std::string inputWorkspaceName;
 	  std::string outputWorkspaceName;
 	  try

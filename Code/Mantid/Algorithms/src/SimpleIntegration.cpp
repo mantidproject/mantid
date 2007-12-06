@@ -31,10 +31,12 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
  */
 StatusCode SimpleIntegration::init()
 {
-  declareProperty("StartX",0);
-  declareProperty("EndX",0);
-  declareProperty("StartY",0);
-  declareProperty("EndY",0);
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(0);
+  declareProperty("StartX",0, mustBePositive);
+  declareProperty("EndX",0, mustBePositive);
+  declareProperty("StartY",0, mustBePositive);
+  declareProperty("EndY",0, mustBePositive);
   
   return StatusCode::SUCCESS;
 }
@@ -77,7 +79,6 @@ StatusCode SimpleIntegration::exec()
     m_MinY = 0;
   }
 
-  
   if ( !m_MaxY ) m_MaxY = numberOfYBins;
   if ( m_MaxY > numberOfYBins || m_MaxY < m_MinY ) 
   {
