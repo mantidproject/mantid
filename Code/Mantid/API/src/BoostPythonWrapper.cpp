@@ -138,10 +138,10 @@ struct Mantid_Kernel_Workspace_Wrapper: Mantid::API::Workspace
 
 // Module ======================================================================
 #if _WIN32
-BOOST_PYTHON_MODULE(MantidKernel)
+BOOST_PYTHON_MODULE(MantidAPI)
 {
 #else
-BOOST_PYTHON_MODULE(libMantidKernel)
+BOOST_PYTHON_MODULE(libMantidAPI)
 {
 #endif	
   /*  class_< Mantid::API::Algorithm, boost::noncopyable, Mantid_Kernel_Algorithm_Wrapper >("Algorithm", init<  >())
