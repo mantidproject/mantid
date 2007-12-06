@@ -72,7 +72,8 @@ namespace DataHandling
     /// Overwrites Algorithm method. Does nothing at present
     Kernel::StatusCode final();
     
-    /// The name and path of the input file
+    /// The name and path of an input file. This may be the filename of a
+    /// raw datafile or the name of a specific log file. 
     std::string m_filename;
     
     /// type returned by classify
@@ -81,7 +82,13 @@ namespace DataHandling
     /// Takes as input a string and try to determine what type it is
     kind classify(const std::string& s);
 
-    ///static reference to the logger class
+    std::string stringToLower(std::string strToConvert);
+
+    bool isLogFile(const std::string& filenamePart);
+    /// Read a single log file into a Sample object
+ //   void addToSample(API::Sample& sample, std::string &filename);
+
+    /// static reference to the logger class
     static Kernel::Logger& g_log;
   };
 

@@ -14,7 +14,7 @@ namespace DataHandling
 /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
     Loads instrument data from a file and adds it to a workspace. 
-	The current implmentation uses a simple data structure that will be replaced later.
+	The current implementation uses a simple data structure that will be replaced later.
 	LoadInstrument is intended to be used as a child algorithm of 
 	other Loadxxx algorithms, rather than being used directly.
 	LoadInstrument is an algorithm and as such inherits
