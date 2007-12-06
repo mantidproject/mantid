@@ -8,6 +8,8 @@
 
 #include "MantidKernel/RefControl.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TripleRef.h"
 #include "MantidDataObjects/tripleIterator.h"
 
@@ -192,7 +194,9 @@ triple_iterator<WorkSpace>::operator-(const triple_iterator<WorkSpace>& A) const
 ///\cond TEMPLATE
 
 
-template class triple_iterator<DataObjects::Histogram1D>;
+template DLLExport class triple_iterator<DataObjects::Histogram1D>;
+template DLLExport class triple_iterator<DataObjects::Workspace1D>;
+//template DLLExport class triple_iterator<DataObjects::Workspace2D>;
 
 ///\endcond TEMPLATE
 

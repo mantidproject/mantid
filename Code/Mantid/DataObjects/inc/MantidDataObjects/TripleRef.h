@@ -1,6 +1,8 @@
 #ifndef TripleRef_h
 #define TripleRef_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
 
@@ -42,7 +44,7 @@ namespace Iterator
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 template<typename T>
-class TripleRef
+class DLLExport TripleRef
 {
   public:
   

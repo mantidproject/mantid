@@ -212,5 +212,18 @@ Workspace2D::getE(int histnumber) const
   return data[histnumber].dataE();
 }
 
+/// get pseudo size
+int Workspace2D::size() const 
+{ 
+  int retVal = data.size();
+  //if not empty
+  if (retVal > 0)
+  {
+    //get the first entry multiply by its size
+    retVal *= data[0].size();
+  }
+  return retVal; 
+} 
+
 } // namespace DataObjects
 } //NamespaceMantid

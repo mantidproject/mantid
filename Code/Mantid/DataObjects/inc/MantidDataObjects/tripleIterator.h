@@ -1,5 +1,7 @@
 #ifndef triple_iterator_h
 #define triple_iterator_h
+#include "MantidKernel/System.h"
+
 
 namespace Mantid
 {
@@ -34,7 +36,7 @@ namespace Iterator
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 template<typename WorkSpace>
-class triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double&>,int,
+class DLLExport triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double&>,int,
 					     TripleRef<double&>*,TripleRef<double&>& >
 {
  private:

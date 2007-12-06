@@ -69,6 +69,9 @@ public:
   /// Returns the histogram number
   const int getHistogramNumber() const;
 
+  int size() const;         
+
+
   //Get methods return the histogram number 
   const std::vector<double>& getX(int const) const;
   const std::vector<double>& getY(int const) const;

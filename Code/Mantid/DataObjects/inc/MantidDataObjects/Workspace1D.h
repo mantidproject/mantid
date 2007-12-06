@@ -47,12 +47,12 @@ public:
   virtual const std::string id() const {return "Workspace1D";}
 
   Workspace1D();
+  virtual ~Workspace1D();
 
 protected:
 
   Workspace1D(const Workspace1D&);
   Workspace1D& operator=(const Workspace1D&);
-  virtual ~Workspace1D();
 
 };
 

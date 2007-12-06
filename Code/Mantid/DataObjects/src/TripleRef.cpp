@@ -159,7 +159,7 @@ T TripleRef<T>::operator[](const int A)  const
 
 /// \cond TEMPLATE
 
-template class TripleRef<double&>;
+template DLLExport class TripleRef<double&>;
 
 /// \endcond TEMPLATE
 

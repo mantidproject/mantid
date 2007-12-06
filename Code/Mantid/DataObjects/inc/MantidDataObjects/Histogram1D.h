@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include "MantidKernel/System.h"
 #include "MantidKernel/RefControl.h"
 
 namespace Mantid
@@ -37,7 +38,7 @@ namespace DataObjects
 
 */
 
-class Histogram1D
+class DLLExport Histogram1D
 {
 public:
 
