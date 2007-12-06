@@ -82,11 +82,11 @@ namespace DataHandling
     /// Takes as input a string and try to determine what type it is
     kind classify(const std::string& s);
 
+    /// convert string to lower case
     std::string stringToLower(std::string strToConvert);
 
+    /// looks whether filename has the .txt extension and contain a '_'
     bool isLogFile(const std::string& filenamePart);
-    /// Read a single log file into a Sample object
- //   void addToSample(API::Sample& sample, std::string &filename);
 
     /// static reference to the logger class
     static Kernel::Logger& g_log;

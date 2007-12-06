@@ -335,7 +335,8 @@ namespace DataHandling
       return LoadLog::number;
   }
 
-  //change each element of the string to lower case
+
+  /// change each element of the string to lower case
   std::string LoadLog::stringToLower(std::string strToConvert)
   {
    for(unsigned int i=0;i<strToConvert.length();i++)
@@ -346,6 +347,7 @@ namespace DataHandling
   }
 
 
+  /// looks whether filename has the .txt extension and contain a '_'
   bool LoadLog::isLogFile(const std::string& filenamePart)
   {
     if ( stringToLower(filenamePart).find(".txt") != std::string::npos && filenamePart.find("_") != std::string::npos )
@@ -354,19 +356,6 @@ namespace DataHandling
       return false;
   }
 
-
-  /** Read a single log file into a Sample object. The main purpose of this function
-   *  is to make the code in exec() more readable. 
-   *
-   *  @param sample    sample to read log file into
-   *  @param filename  name of log file 
-   *
-   *  @return A enum kind which tells what type the string is
-   */
- // void addToSample(API::Sample& sample, const std::string &filename)
- // {
-
-  //}
 
 } // namespace DataHandling
 } // namespace Mantid
