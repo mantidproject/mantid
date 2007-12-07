@@ -13,13 +13,18 @@ namespace DataHandling
 {
 /** @class LoadLog LoadLog.h DataHandling/LoadLog.h
 
-    Loads an ISIS log file. Assumes this log file originates from a 
+    Load ISIS log file(s). Assumes that a log file originates from a 
     PC (not VMS) environment, i.e. the log file to be loaded is assumed
     to have the extension .txt. Its filename is assumed to starts with the raw data 
-    file identifier and the .txt itself is assumed to contain two columns, where 
-    the first column consists of data-time strings of the form ISO 8601 
-    and the second column consists either of numbers (integers or floating)
-    or strings that may contain spaces (e.g. "CHANGE RUNTABLE").
+    file identifier followed by the character '_', and the .txt itself is assumed to 
+    contain two columns, where the first column consists of data-time strings of the 
+    form ISO 8601 and the second column consists either of numbers or strings that may 
+    contain spaces (e.g. "CHANGE RUNTABLE").
+
+    The algoritm requires an input filename. If this filename is the name of a
+    raw datafile the algorithm will attempt to read in all the log files associated
+    with that log file. Otherwise it will assume the filename specified is the 
+    filename of a specific log file. 
     
     LoadLog is an algorithm and as such inherits from the Algorithm class, 
     via DataHandlingCommand, and overrides the init(), exec() & final() methods.
@@ -27,6 +32,7 @@ namespace DataHandling
     Required Properties:
        <UL>
        <LI> Filename - The full name of and path of the input ISIS log file </LI>
+       <LI> OutputWorkspace - A name specified for the output storage space </LI>
        </UL>
 
     @author Anders Markvardsen, ISIS, RAL
@@ -85,7 +91,7 @@ namespace DataHandling
     /// convert string to lower case
     std::string stringToLower(std::string strToConvert);
 
-    /// looks whether filename has the .txt extension and contain a '_'
+    /// look at whether filename has the .txt extension and contain a '_'
     bool isLogFile(const std::string& filenamePart);
 
     /// static reference to the logger class

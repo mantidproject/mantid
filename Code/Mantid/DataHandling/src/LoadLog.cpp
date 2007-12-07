@@ -10,7 +10,6 @@
 
 #include <fstream>  // used to get ifstream
 #include <sstream>
-//#include <ctype.h>
 
 namespace Mantid
 {
@@ -30,6 +29,7 @@ namespace DataHandling
   /// Empty default constructor
   LoadLog::LoadLog() { }
 
+
   /** Initialisation method.
    * 
    *  @return A StatusCode object indicating whether the operation was successful
@@ -41,17 +41,20 @@ namespace DataHandling
     return StatusCode::SUCCESS;
   }
   
-  /** Executes the algorithm. Reading in the ISIS log file, for now, directly into 
-   *  a TimeSeriesProperties object
+
+  /** Executes the algorithm. Reading in ISIS log file(s)
    * 
    *  @return A StatusCode object indicating whether the operation was successful
    */
   StatusCode LoadLog::exec()
   {
     // Retrieve the filename from the properties
+
     m_filename = getPropertyValue("Filename");
 
+
 	  // Retrieve the ws names from the properties
+
 	  std::string inputWorkspaceName;
 	  std::string outputWorkspaceName;
 	  try
@@ -89,11 +92,13 @@ namespace DataHandling
 
 	  Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
 
+
+    // the log file(s) will be loaded into the Sample container of the workspace
+
     API::Sample& sample = localWorkspace->getSample();
 
 
-    // figure out if m_filename is the filename of a raw datafile or the filename
-    // of a log file. 
+    // do some initial checks on the input m_filename
 
     fs::path l_path( m_filename );
 
@@ -108,7 +113,11 @@ namespace DataHandling
       g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory."); 
 	    return StatusCode::FAILURE;
     }
-    
+
+
+    // If m_filename is the filename of a raw datafile then search for potential log files
+    // in the directory of this raw datafile. Otherwise check if m_filename is a potential
+    // log file. Add the filename of these potential log files to: potentialLogFiles.
 
     std::vector<std::string> potentialLogFiles;
 
@@ -149,10 +158,11 @@ namespace DataHandling
       }
     }
 
+
+    // Attempt to load the content of each potential log file into the Sample object
  
     for (unsigned int i = 0; i < potentialLogFiles.size(); i++)
     {
-
       // open log file
     
       std::ifstream inLogFile(potentialLogFiles[i].c_str());
@@ -172,11 +182,8 @@ namespace DataHandling
 
       kind l_kind;
 
-
-
       while ( std::getline(inLogFile, aLine, '\n') ) 
       {
-
         if ( aLine.size() < 19 )
         {
           // A date-time string in a log file is 19 characters
@@ -191,7 +198,7 @@ namespace DataHandling
         ins >> dateAndTime;
 
 
-        // read in what follows the date-time string and figure out
+        // read in what follows the date-time string in the log file and figure out
         // what type it is
 
         std::string whatType;
@@ -214,19 +221,9 @@ namespace DataHandling
 
       inLogFile.seekg(0, std::ios::beg);
 
-/*
-      Property *l_Property;
 
-      if ( l_kind == LoadLog::number )
-        l_Property = new TimeSeriesProperty<std::string>(m_filename);
-      else
-        l_Property = new TimeSeriesProperty<double>(m_filename);
-*/
-//      TimeSeriesProperty<std::string> *l_PropertyString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_Property);
-//      TimeSeriesProperty<double> *l_PropertyDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_PropertyDouble);
+      // Read log file into Property which is then stored in Sample object
 
-
-      
       TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(m_filename);
       TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(m_filename);
 
@@ -256,6 +253,9 @@ namespace DataHandling
         dateAndTime.erase(7,1);
         dateAndTime.erase(4,1);
 
+
+        // Store log file line in Property
+
         if ( l_kind == LoadLog::number )
         {
           double readNumber;
@@ -272,18 +272,16 @@ namespace DataHandling
       } // end while
 
 
+      // store Property in Sample object
+
       if ( l_kind == LoadLog::number )
       {
-        l_PropertyDouble->printMapToScreen();
-        // Property *l_PropertyDouble2 = dynamic_cast<Property*>(l_PropertyDouble);
-        //sample.addLogData(l_PropertyDouble);
+        sample.addLogData(l_PropertyDouble);
       }
       else
       {
-        l_PropertyString->printMapToScreen();
-        //sample.addLogData(l_PropertyString);
+        sample.addLogData(l_PropertyString);
       }
-//      sample.addLogData(l_Property);
 
 
       inLogFile.close();
