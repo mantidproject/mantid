@@ -81,9 +81,9 @@ class Workspace;
 
      // IAlgorithm methods	  
      virtual const std::string& version() const;
-     Kernel::StatusCode initialize();
-     Kernel::StatusCode execute();
-     Kernel::StatusCode finalize();	  
+     void initialize();
+     void execute();
+     void finalize();	  
      virtual bool isInitialized() const;    // Protected in Gaudi version
      virtual bool isExecuted() const;
      virtual bool isFinalized() const;
@@ -107,11 +107,11 @@ class Workspace;
 	  
     // Equivalents of Gaudi's initialize, execute & finalize methods
     /// Virtual method - must be overridden by concrete algorithm
-    virtual Kernel::StatusCode init () = 0;
+    virtual void init () = 0;
     /// Virtual method - must be overridden by concrete algorithm
-    virtual Kernel::StatusCode exec () = 0;
+    virtual void exec () = 0;
     /// Virtual method - must be overridden by concrete algorithm
-    virtual Kernel::StatusCode final() = 0;
+    virtual void final() = 0;
 	  
     void setInitialized();
     void setExecuted( bool state );

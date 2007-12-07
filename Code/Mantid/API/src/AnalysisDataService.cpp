@@ -25,12 +25,16 @@ AnalysisDataService* AnalysisDataService::Instance()
 	 * 
 	 *  @param name The user-given name for the workspace
 	 *  @param space A pointer to the workspace
-	 *  @return A StatusCode object indicating whether the operation was successful
+	 *  @throw runtime_error Thrown if problems adding workspace
 	 */
-Kernel::StatusCode AnalysisDataService::add(const std::string& name, Workspace* space)
+void AnalysisDataService::add(const std::string& name, Workspace* space)
 {
   // Don't permit an empty name for the workspace
-  if (name.empty()) return Kernel::StatusCode::FAILURE;
+  if (name.empty())
+  {
+	  g_log.error("Workspace does not have a name");
+	  throw std::runtime_error("Workspace does not have a name");
+  }
   
   // At the moment, you can't overwrite a workspace (i.e. pass in a name
   // that's already in the map with a pointer to a different workspace).
@@ -38,9 +42,10 @@ Kernel::StatusCode AnalysisDataService::add(const std::string& name, Workspace* 
   // more than once with different names.
   if (m_spaces.insert(WorkspaceMap::value_type(name, space)).second)
   {
-    return Kernel::StatusCode::SUCCESS;
+	  return;
   }
-  return Kernel::StatusCode::FAILURE;
+	g_log.error("Unable to insert workspace" + name);
+	throw std::runtime_error("Unable to insert workspace");
 }
 
 /** Add or replaces a pointer to a named workspace to the data service store.
@@ -50,69 +55,81 @@ Kernel::StatusCode AnalysisDataService::add(const std::string& name, Workspace* 
 	 * 
 	 *  @param name The user-given name for the workspace
 	 *  @param space A pointer to the workspace
-	 *  @return A StatusCode object indicating whether the operation was successful
+     *  @throw runtime_error Thrown if unable to add or replace workspace
 	 */
-Kernel::StatusCode AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
+void AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
 {
-  //find if the workspace already exists
-  WorkspaceMap::const_iterator it = m_spaces.find(name);
-  if (m_spaces.end() != it)
-  {
-	//Yes it does
-    Workspace *existingSpace = it->second;
-	//replace it.
-	m_spaces[name] = space;
-
-	if(existingSpace != space)
+	//find if the workspace already exists
+	WorkspaceMap::const_iterator it = m_spaces.find(name);
+	if (m_spaces.end() != it)
 	{
-		// Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
-		delete existingSpace;
+		//Yes it does
+		Workspace *existingSpace = it->second;
+		//replace it.
+		m_spaces[name] = space;
+
+		if(existingSpace != space)
+		{
+			// Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
+			delete existingSpace;
+		}
+		return;
 	}
-
-    return Kernel::StatusCode::SUCCESS;
-  }
-  else
-  {
-	//no it doesn't we need to add it.
-	return add(name,space);
-  }
-
-
-  return Kernel::StatusCode::FAILURE;
+	else
+	{
+		//no it doesn't we need to add it.	
+		try
+		{
+			add(name,space);
+		}
+		catch(std::runtime_error& ex)
+		{
+			g_log.error("ADS: error adding workspace");
+			throw;
+		}
+		return;
+	}
+	// code should NEVER get here
+	throw std::runtime_error("ADS: UNKNOWN error");	
 }
 
 /** Remove a workspace from the data service store.
  *  Upon removal, the workspace itself will be deleted.
  * 
- *  @param name The user-given name for the workspace
- *  @return A StatusCode object indicating whether the operation was successful
+ *  @param name The user-given name for the workspace 
+ *  @throw runtime_error Thrown if workspace cannot be found
  */
-Kernel::StatusCode AnalysisDataService::remove(const std::string& name)
+void AnalysisDataService::remove(const std::string& name)
 {  
-  // Get a iterator to the workspace and naem
+  // Get a iterator to the workspace and name
   WorkspaceMap::iterator it = m_spaces.find(name);
-  if (it==m_spaces.end()) return Kernel::StatusCode::FAILURE;	  
+  if (it==m_spaces.end())
+  {
+	  g_log.error("ADS: Workspace " + name + " cannot be found");
+	  throw std::runtime_error("ADS: Workspace cannot be found");
+  }
   // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
   delete it->second;
   m_spaces.erase(it);
-  return Kernel::StatusCode::SUCCESS;
+  return;
 }
 
 /** Retrieve a pointer to a workspace by name.
  * 
  *  @param name The name of the desired workspace
  *  @param space Returns a pointer to the requested workspace
- *  @return A StatusCode object indicating whether the operation was successful
+ *  @throw runtim_error Thrown if workspace cannot be found
  */
-Kernel::StatusCode AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
+void AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
 {
   WorkspaceMap::const_iterator it = m_spaces.find(name);
   if (m_spaces.end() != it)
   {
     space = it->second;
-    return Kernel::StatusCode::SUCCESS;
+	return;
   }
-  return Kernel::StatusCode::FAILURE;
+  g_log.error("ADS:Workspace " + name + " not found");
+  throw std::runtime_error("Workspace not found");
 }
 
 //----------------------------------------------------------------------

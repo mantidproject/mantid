@@ -61,23 +61,20 @@ namespace API
      *  for any bookkeeping of initialization required by the framework itself.
      *  It will in turn invoke the init() method of the derived algorithm,
      *  and of any sub-algorithms which it creates.
-     * 
-     *  @return A StatusCode object indicating whether the operation was successful
-     */
-    virtual Kernel::StatusCode initialize() = 0;
+     * 	 
+	 */
+    virtual void initialize() = 0;
 
     /** System execution. This method invokes the exec() method of a concrete algorithm.
      * 
-     *  @return A StatusCode object indicating whether the operation was successful
      */
-    virtual Kernel::StatusCode execute() = 0;
+    virtual void execute() = 0;
 
     /** System finalization. This method invokes the final() method of a concrete
      *  algorithm and the final() methods of all of that algorithm's sub algorithms.
      * 
-     *  @return A StatusCode object indicating whether the operation was successful
      */
-    virtual Kernel::StatusCode finalize() = 0;
+    virtual void finalize() = 0; 
 
     /// Check whether the algorithm is initialized properly
     virtual bool isInitialized() const = 0; 

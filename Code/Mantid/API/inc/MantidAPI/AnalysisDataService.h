@@ -55,10 +55,10 @@ public:
   // Returns the single instance of the service
   static AnalysisDataService* Instance();
   
-	Kernel::StatusCode add( const std::string& name, Workspace * space );
-	Kernel::StatusCode addOrReplace(const std::string& name, Workspace* space);
-	Kernel::StatusCode remove(const std::string& name );
-	Kernel::StatusCode retrieve(const std::string& name, Workspace *& space );	
+	void add( const std::string& name, Workspace * space );
+	void addOrReplace(const std::string& name, Workspace* space);
+	void remove(const std::string& name );
+	void retrieve(const std::string& name, Workspace *& space );	
 	
 private:
   

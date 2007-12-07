@@ -52,10 +52,11 @@ namespace API
 	IAlgorithm* AlgorithmManager::create(const std::string& algName)
 	{
 	   regAlg.push_back(DynamicFactory<IAlgorithm>::create(algName));      // Throws on fail:
-	   Kernel::StatusCode status = regAlg.back()->initialize();
-	   if (status.isFailure())
+	   //Kernel::StatusCode status = 
+		   regAlg.back()->initialize();
+	   //if (status.isFailure())
 	   {
-	     throw std::runtime_error("AlgorithmManager:: Unable to initialise algorithm " + algName); 
+	   //  throw std::runtime_error("AlgorithmManager:: Unable to initialise algorithm " + algName); 
 	   }
 	   no_of_alg++;		
 	   return regAlg.back();
@@ -76,16 +77,24 @@ namespace API
 	{
 	  int errOut(0);
 	  std::vector<IAlgorithm*>::iterator vc;
+	  try
+	  {
 	  for(vc=regAlg.begin();vc!=regAlg.end();vc++)
 	  {
 	    // no test for zero since impossible 
-	    Kernel::StatusCode status = (*vc)->finalize();
-	    errOut+= status.isFailure();
+	    //Kernel::StatusCode status = 
+			(*vc)->finalize();
+	    //errOut+= status.isFailure();
 	    delete (*vc);
-		}
+	  }
 	  regAlg.clear();
 	  no_of_alg=0;
-	  if (errOut) throw std::runtime_error("AlgorithmManager:: Unable to finalise algorithm " ); 
+	  }
+	  catch(std::runtime_error& ex)
+	  {
+		  g_log.error()<<"AlgorithmManager:: Unable to finalise all algorithms"<<ex.what();
+		  throw std::runtime_error("AlgorithmManager:: Unable to finalise all algorithms "); 
+	  }
 	  return;
 	}
 	

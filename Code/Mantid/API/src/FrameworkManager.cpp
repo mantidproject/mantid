@@ -130,10 +130,11 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
   
   // Now execute the algorithm
-  Kernel::StatusCode status = alg->execute();
-  if (status.isFailure())
+  //Kernel::StatusCode status = 
+	  alg->execute();
+  //if (status.isFailure())
   {
-    throw runtime_error("Unable to successfully execute algorithm " + algName);
+ //   throw runtime_error("Unable to successfully execute algorithm " + algName);
   }  
   
   return alg;
@@ -149,8 +150,11 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
 Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
 {
   Workspace *space;
-  Kernel::StatusCode status = data->retrieve(wsName, space);
-  if (status.isFailure())
+  try
+  {
+  data->retrieve(wsName, space);
+  }
+  catch (std::runtime_error& ex)
   {
 	  throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
