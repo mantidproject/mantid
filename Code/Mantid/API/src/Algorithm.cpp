@@ -192,15 +192,15 @@ namespace Mantid
 						m_outputWorkspaceName = getPropertyValue("OutputWorkspace");
 						ADS->addOrReplace(m_outputWorkspaceName, m_outputWorkspace);
 					}
+					catch (Kernel::Exception::NotFoundError& e) 
+					{
+						g_log.information("Output workspace property not set");
+					}
 					//this is put in for when retrieve is a void
 					catch (std::runtime_error& ex)
 					{
 						g_log.error()<<"Algorithm: Unable to register output workspace: "<<m_outputWorkspaceName<<std::endl;
 						throw;
-					}
-					catch (Kernel::Exception::NotFoundError e) 
-					{
-						g_log.information("Output workspace property not set");
 					}
 				}
 
