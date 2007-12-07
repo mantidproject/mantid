@@ -181,7 +181,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\tripleIterator.cpp"
+				RelativePath=".\src\TripleIterator.cpp"
 				>
 			</File>
 			<File
@@ -239,7 +239,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\tripleIterator.h"
+				RelativePath=".\inc\MantidAPI\TripleIterator.h"
 				>
 			</File>
 			<File

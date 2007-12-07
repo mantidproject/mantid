@@ -1,5 +1,5 @@
 #include "MantidDataObjects/Workspace1D.h"
-#include "MantidAPI/tripleRef.h"
+#include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/TripleIteratorCode.h"
 
