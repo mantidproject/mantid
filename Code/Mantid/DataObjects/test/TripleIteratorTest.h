@@ -7,7 +7,7 @@
 
 #include "MantidDataObjects/Workspace1D.h" 
 #include "MantidAPI/TripleRef.h" 
-#include "MantidAPI/tripleIterator.h" 
+#include "MantidAPI/TripleIterator.h" 
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

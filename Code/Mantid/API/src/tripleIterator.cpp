@@ -4,7 +4,7 @@
 #include "MantidKernel/RefControl.h"
 
 #include "MantidAPI/TripleRef.h"
-#include "MantidAPI/tripleIterator.h"
+#include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/tripleIteratorCode.h"
 #include "MantidAPI/Workspace.h"
 
