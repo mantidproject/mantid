@@ -167,7 +167,7 @@ triple_iterator<WorkSpace>::operator--(int)
 
 /*!
   Difference iterator
-  \return differen
+  \return difference (as a non-inclusive count)
 */
 template<typename WorkSpace>
 typename triple_iterator<WorkSpace>::difference_type
@@ -175,10 +175,10 @@ triple_iterator<WorkSpace>::operator-(const triple_iterator<WorkSpace>& A) const
 {
   if (!W && !A.W)
     return 0;
-  if (!W)
-    return A.index-A.W->size();
-  if (!A.W)
-    return W->size()-index;
+  if (!W)                      /// This effectively an end
+    return A.W->size()-A.index;
+  if (!A.W)                    /// A effectively an end
+    return index-W->size();
   return A.index-index;
 }
 

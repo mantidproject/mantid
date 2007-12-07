@@ -65,6 +65,9 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
   
   const TripleRef<double&>& operator*() const { return *CPoint; }   ///< Base Accessor
   const TripleRef<double&>* operator->() const { return CPoint; }   ///< Base Pointer accessor
+
+  TripleRef<double&>& operator*() { return *CPoint; }   ///< Base Accessor
+  TripleRef<double&>* operator->() { return CPoint; }   ///< Base Pointer accessor
   
   triple_iterator<WorkSpace>& operator++();
   triple_iterator<WorkSpace> operator++(int);

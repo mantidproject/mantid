@@ -40,9 +40,8 @@ Workspace1D::operator=(const Workspace1D& A)
 Workspace1D::~Workspace1D()
 {}
 
-
-
 } // namespace DataObjects
+
 } //NamespaceMantid
 
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace1D>;

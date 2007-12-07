@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 #include <stdexcept>
 #include "MantidAPI/TripleRef.h"
@@ -7,6 +8,7 @@ namespace Mantid
 
 namespace API
 {
+
 /*!
   Standard Copy Constructor
   \param A :: TripleRef Item to copy

@@ -3,6 +3,7 @@
 
 #include <algorithm> 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/Workspace1D.h" 
@@ -11,6 +12,20 @@
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+
+template<typename T>
+class FibSeries
+{
+ private:
+  T x1;  /// Initial value 1;
+  T x2;  /// Initial value 2;
+  
+  public:
+  
+  FibSeries() : x1(1),x2(1) {}
+  T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
+};
+
 
 class tripleIteratorTest : public CxxTest::TestSuite
 {
@@ -35,6 +50,20 @@ class tripleIteratorTest : public CxxTest::TestSuite
       return retVal;
     }
 
+  W1D Create1DWorkspaceFib(int size)
+    {
+      std::vector<double> x1,y1,e1;
+      x1.resize(size);
+      std::fill(x1.begin(),x1.end(),rand());	
+      y1.resize(size);
+      std::generate(y1.begin(),y1.end(),FibSeries<double>());
+      e1.resize(size);
+      W1D retVal = W1D(new Workspace1D);
+      retVal->setX(x1);
+      retVal->setData(y1,e1);
+      return retVal;
+    }
+
   void testIteratorWorkspace1DLength()
     {
       int size = 100;
@@ -44,7 +73,7 @@ class tripleIteratorTest : public CxxTest::TestSuite
       for(triple_iterator<Workspace1D> ti(*workspace); ti != ti.end(); ++ti)
 	{
 	  TS_ASSERT_THROWS_NOTHING
-	    (
+	  (
 	     TripleRef<double&> tr = *ti;
 	     double d1 = tr[0];
 	     double d2 = tr[1];
@@ -77,6 +106,34 @@ class tripleIteratorTest : public CxxTest::TestSuite
       TS_ASSERT_EQUALS(ti,ti.end());
     }
 
+  void testIteratorCopy()
+    {
+      int size = 10;
+      W1D workA = Create1DWorkspaceFib(size);
+      W1D workB = Create1DWorkspace(size);
+
+      triple_iterator<Workspace1D> IA(*workA);
+      triple_iterator<Workspace1D> IB(*workB);
+
+      copy(IA.begin(),IA.end(),IB.begin());
+
+
+      const std::vector<double>& x1 = workA->dataX();
+      const std::vector<double>& y1 = workA->dataY();
+      const std::vector<double>& e1 = workA->dataE();
+
+      const std::vector<double>& x2 = workB->dataX();
+      const std::vector<double>& y2 = workB->dataY();
+      const std::vector<double>& e2 = workB->dataE();
+
+      for (int i = 0; i < size; i++) 
+	{
+	  TS_ASSERT_EQUALS(x1[i],x2[i]);
+	  TS_ASSERT_EQUALS(y1[i],y2[i]);
+	  TS_ASSERT_EQUALS(e1[i],e2[i]);
+	}
+      return;
+    }
 
 };
 #endif /*TRIPLEITERATORTEST_*/
