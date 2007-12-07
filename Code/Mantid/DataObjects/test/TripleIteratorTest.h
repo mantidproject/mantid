@@ -14,11 +14,14 @@ using namespace Mantid::API;
 
 class tripleIteratorTest : public CxxTest::TestSuite
 {
-private: 
+ private: 
+
   typedef boost::shared_ptr<std::vector<double> > parray;
   typedef boost::shared_ptr<Workspace1D> W1D;
+
  public:
-    W1D Create1DWorkspace(int size)
+
+  W1D Create1DWorkspace(int size)
     {
       std::vector<double> x1,y1,e1;
       x1.resize(size);
@@ -32,46 +35,48 @@ private:
       return retVal;
     }
 
-		void testIteratorWorkspace1DLength()
-	  {
+  void testIteratorWorkspace1DLength()
+    {
       int size = 100;
-	    W1D workspace = Create1DWorkspace(size);
-
+      W1D workspace = Create1DWorkspace(size);
+      
       int count = 0;
       for(triple_iterator<Workspace1D> ti(*workspace); ti != ti.end(); ++ti)
-      {
-        TS_ASSERT_THROWS_NOTHING
-        (
-          TripleRef<double&> tr = *ti;
-          double d1 = tr[0];
-          double d2 = tr[1];
-          double d3 = tr[2];
-        )
-        count++;
-      }
+	{
+	  TS_ASSERT_THROWS_NOTHING
+	    (
+	     TripleRef<double&> tr = *ti;
+	     double d1 = tr[0];
+	     double d2 = tr[1];
+	     double d3 = tr[2];
+	     )
+	    count++;
+	}
       TS_ASSERT_EQUALS(count,size);
     }
 
-    void testIteratorWorkspace1DOrder()
+  void testIteratorWorkspace1DOrder()
     {
       int size = 200;
-	    W1D workspace = Create1DWorkspace(size);
+      W1D workspace = Create1DWorkspace(size);
 
       std::vector<double> x1 = workspace->dataX();
       std::vector<double> y1 = workspace->dataY();
       std::vector<double> e1 = workspace->dataE();
 
       triple_iterator<Workspace1D> ti(*workspace);
-      for (int i = 0; i < size; i++)
-      {
-        //move the iterator on one
-        TripleRef<double&> tr = *ti;
-        TS_ASSERT_EQUALS(tr[0],x1[i]);
-        TS_ASSERT_EQUALS(tr[1],y1[i]);
-        TS_ASSERT_EQUALS(tr[2],e1[i]);
-        ++ti;
-      }
+      for (int i = 0; i < size; i++) 
+	{
+	  //move the iterator on one
+	  TripleRef<double&> tr = *ti;
+	  TS_ASSERT_EQUALS(tr[0],x1[i]);
+	  TS_ASSERT_EQUALS(tr[1],y1[i]);
+	  TS_ASSERT_EQUALS(tr[2],e1[i]);
+	  ++ti;
+	}
       TS_ASSERT_EQUALS(ti,ti.end());
-	  }
+    }
+
+
 };
 #endif /*TRIPLEITERATORTEST_*/
