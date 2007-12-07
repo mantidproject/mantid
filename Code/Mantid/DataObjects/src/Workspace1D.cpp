@@ -1,7 +1,7 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/tripleRef.h"
 #include "MantidAPI/TripleIterator.h"
-#include "MantidAPI/tripleIteratorCode.h"
+#include "MantidAPI/TripleIteratorCode.h"
 
 DECLARE_WORKSPACE(Workspace1D)
 

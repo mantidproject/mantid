@@ -5,7 +5,7 @@
 
 #include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"
-#include "MantidAPI/tripleIteratorCode.h"
+#include "MantidAPI/TripleIteratorCode.h"
 #include "MantidAPI/Workspace.h"
 
 namespace Mantid 
