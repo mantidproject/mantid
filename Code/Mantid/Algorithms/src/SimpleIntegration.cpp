@@ -27,9 +27,8 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
 
 /** Initialisation method. Does nothing at present.
  * 
- *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode SimpleIntegration::init()
+void SimpleIntegration::init()
 {
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -37,15 +36,13 @@ StatusCode SimpleIntegration::init()
   declareProperty("EndX",0, mustBePositive);
   declareProperty("StartY",0, mustBePositive);
   declareProperty("EndY",0, mustBePositive);
-  
-  return StatusCode::SUCCESS;
-}
+  }
 
 /** Executes the algorithm
  * 
- *  @return A StatusCode object indicating whether the operation was successful
+ *  @throw runtime_error Thrown if algorithm cannot execute
  */
-StatusCode SimpleIntegration::exec()
+void SimpleIntegration::exec()
 {
   // Try and retrieve the optional properties
   Property *p = getProperty("StartX");
@@ -68,7 +65,7 @@ StatusCode SimpleIntegration::exec()
   if (!localworkspace)
   {
     g_log.error("Input workspace is of incorrect type");
-    return StatusCode::FAILURE;
+	throw std::runtime_error("Input workspace is of incorrect type");
   }
 
   const int numberOfYBins = localworkspace->getHistogramNumber();
@@ -78,7 +75,6 @@ StatusCode SimpleIntegration::exec()
     g_log.information("StartY out of range! Set to 0.");
     m_MinY = 0;
   }
-
   if ( !m_MaxY ) m_MaxY = numberOfYBins;
   if ( m_MaxY > numberOfYBins || m_MaxY < m_MinY ) 
   {
@@ -136,19 +132,15 @@ StatusCode SimpleIntegration::exec()
   // Populate the 1D workspace
   localWorkspace->setX(detectorNumber);
   localWorkspace->setData(sums, errors);
-
-
-
-  return StatusCode::SUCCESS;
+  
+  return;  
 }
 
 /** Finalisation method. Does nothing at present.
  *
- *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode SimpleIntegration::final()
+void SimpleIntegration::final()
 {
-  return StatusCode::SUCCESS;
 }
 
 // Register the class into the algorithm factory

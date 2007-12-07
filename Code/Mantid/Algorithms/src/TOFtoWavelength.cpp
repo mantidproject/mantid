@@ -33,26 +33,24 @@ TOFtoWavelength::~TOFtoWavelength()
 
 /** Initialisation method. Does nothing at present.
  * 
- *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode TOFtoWavelength::init()
+void TOFtoWavelength::init()
 {
   // No extra properties besides the base class ones
-  return StatusCode::SUCCESS;
 }
 
 /** Executes the algorithm
  * 
- *  @return A StatusCode object indicating whether the operation was successful
+ *  @throw runtime_error Thrown if algorithm cannot execute
  */
-StatusCode TOFtoWavelength::exec()
+void TOFtoWavelength::exec()
 {
   // Cast the input workspace to a Workspace2D
   Workspace2D *inputWS = dynamic_cast<Workspace2D*>(m_inputWorkspace);
   if (!inputWS)
   {
     g_log.error("Input workspace is of incorrect type");
-    return StatusCode::FAILURE;
+	throw std::runtime_error("Input workspace is of incorrect type");
   }
   
   // Get the number of histograms in the input 2D workspace
@@ -78,7 +76,7 @@ StatusCode TOFtoWavelength::exec()
     g_log.debug() << "Source-sample distance: " << deltaSourceSample << std::endl;
   } catch (Exception::NotFoundError e) {
     g_log.error("Unable to calculate source-sample distance");
-    return StatusCode::FAILURE;
+	throw std::runtime_error("Unable to calculate source-sample distance");
   }
   
   // Loop over the histograms (detector spectra)
@@ -118,17 +116,14 @@ StatusCode TOFtoWavelength::exec()
     localWorkspace->setX(i, XBins);
     localWorkspace->setData(i, YData, errors);
   }
-  
-  return StatusCode::SUCCESS;
+  return;
 }
 
 /** Finalisation method. Does nothing at present.
  *
- *  @return A StatusCode object indicating whether the operation was successful
  */
-StatusCode TOFtoWavelength::final()
-{
-  return StatusCode::SUCCESS;
+void TOFtoWavelength::final()
+{  
 }
 
 } // namespace Algorithm

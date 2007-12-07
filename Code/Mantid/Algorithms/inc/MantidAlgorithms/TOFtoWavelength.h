@@ -56,9 +56,9 @@ public:
 
 private:
   // Overridden Algorithm methods  
-  Kernel::StatusCode init();
-  Kernel::StatusCode exec();
-  Kernel::StatusCode final();
+  void init();
+  void exec();
+  void final();
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

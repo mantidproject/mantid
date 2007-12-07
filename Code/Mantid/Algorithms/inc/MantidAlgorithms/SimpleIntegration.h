@@ -63,9 +63,9 @@ public:
 	
 private:
   // Overridden Algorithm methods
-  Mantid::Kernel::StatusCode init();
-  Mantid::Kernel::StatusCode exec();
-  Mantid::Kernel::StatusCode final();
+  void init();
+  void exec();
+  void final();
   
   /// The X bin to start the integration from
   int m_MinX;
