@@ -177,7 +177,6 @@ public:
     triple_iterator<Workspace1D> IB(*workB);
 
     std::copy(IA.begin(),IA.end(),IB.begin());
-
     const std::vector<double>& x1 = workA->dataX();
     const std::vector<double>& y1 = workA->dataY();
     const std::vector<double>& e1 = workA->dataE();
