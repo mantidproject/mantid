@@ -59,13 +59,13 @@ namespace DataHandling
   private:
 
     /// Overwrites Algorithm method.
-    Kernel::StatusCode init();
+    void init();
     
     /// Overwrites Algorithm method
-    Kernel::StatusCode exec();
+    void exec();
     
     /// Overwrites Algorithm method. Does nothing at present
-    Kernel::StatusCode final();
+    void final();
     
     /// The name and path of the input file
     std::string m_filename;

@@ -92,13 +92,13 @@ namespace DataHandling
   private:
 
     /// Overwrites Algorithm method. Does nothing at present
-    Kernel::StatusCode init();
+    void init();
     
     /// Overwrites Algorithm method
-    Kernel::StatusCode exec();
+    void exec();
     
     /// Overwrites Algorithm method. Does nothing at present
-    Kernel::StatusCode final();
+    void final();
     
     /// The name of the file used for storing the workspace
     std::string m_filename;
