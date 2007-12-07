@@ -32,22 +32,19 @@ namespace DataHandling
 
 
 	/** Initialisation method. Does nothing at present.
-	* 
-	*  @return A StatusCode object indicating whether the operation was successful
+	* 	
 	*/
-	StatusCode LoadInstrument::init()
+	void LoadInstrument::init()
 	{
 		declareProperty("Filename","",new MandatoryValidator);
-
-		return StatusCode::SUCCESS;
 	}
 
 	/** Executes the algorithm. Reading in the file and creating and populating
 	*  the output workspace
 	* 
-	*  @return A StatusCode object indicating whether the operation was successful
+	*  @throw runtime_error Thrown if algorithm cannot execute
 	*/
-	StatusCode LoadInstrument::exec()
+	void LoadInstrument::exec()
 	{
 		
 	// Retrieve the filename from the properties
@@ -72,7 +69,7 @@ namespace DataHandling
 	catch (Kernel::Exception::NotFoundError& ex)
 	{
 	  g_log.error("OutputWorkspace has not been set.");
-	  return StatusCode::FAILURE;
+	  throw std::runtime_error("OutputWorkspace has not been set");
 	}
 
 	
@@ -156,16 +153,14 @@ namespace DataHandling
 		throw Kernel::Exception::FileError("Error opening instrument file",m_filename);
 	}
 		
-	return StatusCode::SUCCESS;
+//	return StatusCode::SUCCESS;
 	}
 
 	/** Finalisation method. Does nothing at present.
 	*
-	*  @return A StatusCode object indicating whether the operation was successful
 	*/
-	StatusCode LoadInstrument::final()
+	void LoadInstrument::final()
 	{
-	return StatusCode::SUCCESS;
 	}
 
 } // namespace DataHandling

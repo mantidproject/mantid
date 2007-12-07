@@ -31,27 +31,23 @@ namespace DataHandling
 
 
   /** Initialisation method.
-   * 
-   *  @return A StatusCode object indicating whether the operation was successful
-   */
-  StatusCode LoadLog::init()
+   *    */
+  void LoadLog::init()
   {
     declareProperty("Filename",".");
-    
-    return StatusCode::SUCCESS;
   }
   
 
   /** Executes the algorithm. Reading in ISIS log file(s)
    * 
-   *  @return A StatusCode object indicating whether the operation was successful
+   *  @throw Mantid::Kernel::Exception::FileError  Thrown if errors with file opening and existence
+   *  @throw std::runtime_error Thrown with Workspace problems
    */
-  StatusCode LoadLog::exec()
+  void LoadLog::exec()
   {
     // Retrieve the filename from the properties
 
     m_filename = getPropertyValue("Filename");
-
 
 	  // Retrieve the ws names from the properties
 
@@ -72,8 +68,8 @@ namespace DataHandling
 	  }
 	  catch (Kernel::Exception::NotFoundError& ex)
 	  {
-	    g_log.error("OutputWorkspace has not been set.");
-	    return StatusCode::FAILURE;
+	    g_log.error()<<"OutputWorkspace has not been set."<<ex.what();
+      throw std::runtime_error("OutputWorkspace has not been set");           
 	  }
 
 
@@ -105,13 +101,13 @@ namespace DataHandling
     if ( !fs::exists( l_path ) )
     {
       g_log.error("In LoadLog: " + m_filename + " does not exist."); 
-	    return StatusCode::FAILURE;
+  	  throw Exception::FileError("File does not exist:" , m_filename);	  
     }
 
     if ( fs::is_directory( l_path ) )
     {
       g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory."); 
-	    return StatusCode::FAILURE;
+  	  throw Exception::FileError("Filename is a directory:" , m_filename);	  
     }
 
 
@@ -171,7 +167,7 @@ namespace DataHandling
       {
         // Unable to open file
         g_log.error("Unable to open file " + potentialLogFiles[i]);
-        return StatusCode::FAILURE;
+    	  throw Exception::FileError("Unable to open file:" , potentialLogFiles[i]);	  
       }
   
 
@@ -190,8 +186,8 @@ namespace DataHandling
           // hence if the first line is not that length sometime
           // is not right!
           g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file.");
-          return StatusCode::FAILURE;
-        }
+          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
+          }
 
         std::stringstream ins(aLine);
       
@@ -210,7 +206,7 @@ namespace DataHandling
         if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
         {
           g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file. Can't recognise TYPE");
-          return StatusCode::FAILURE;
+          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
         }
 
         break;
@@ -232,14 +228,13 @@ namespace DataHandling
 
       while ( std::getline(inLogFile, aLine, '\n') ) 
       {
-
         if ( aLine.size() < 19 )
         {
           // A date-time string in a log file is 19 characters
           // hence if the first line is not that length sometime
           // is not right!
           g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file.");
-          return StatusCode::FAILURE;
+          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
         }
 
         std::istringstream ins(aLine);
@@ -252,7 +247,6 @@ namespace DataHandling
         dateAndTime.erase(13,1);
         dateAndTime.erase(7,1);
         dateAndTime.erase(4,1);
-
 
         // Store log file line in Property
 
@@ -282,22 +276,18 @@ namespace DataHandling
       {
         sample.addLogData(l_PropertyString);
       }
-
-
       inLogFile.close();
     } // end for
- 
-    return StatusCode::SUCCESS;
+// operation was a success and ended normally
+    return;
   }
 
 
   /** Finalisation method. Does nothing at present.
-   *
-   *  @return A StatusCode object indicating whether the operation was successful
+   *   
    */
-	StatusCode LoadLog::final()
+	void LoadLog::final()
   {
-    return StatusCode::SUCCESS;
   }
 
 

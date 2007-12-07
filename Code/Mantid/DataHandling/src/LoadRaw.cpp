@@ -27,21 +27,18 @@ namespace DataHandling
 
   /** Initialisation method.
    * 
-   *  @return A StatusCode object indicating whether the operation was successful
    */
-  StatusCode LoadRaw::init()
+  void LoadRaw::init()
   {
     declareProperty("Filename","",new MandatoryValidator);
-    
-    return StatusCode::SUCCESS;
   }
   
   /** Executes the algorithm. Reading in the file and creating and populating
    *  the output workspace
    * 
-   *  @return A StatusCode object indicating whether the operation was successful
+   *  @throw runtime_error Thrown if algorithm cannot execute
    */
-  StatusCode LoadRaw::exec()
+  void LoadRaw::exec()
   {
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
@@ -50,7 +47,7 @@ namespace DataHandling
     if (iraw.readFromFile(m_filename.c_str()) != 0)
     {
       g_log.error("Unable to open file " + m_filename);
-      return StatusCode::FAILURE;
+	  throw Exception::FileError("Unable to open File:" , m_filename);	  
     }
     
     // Read the number of time channels from the RAW file (calling FORTRAN)
@@ -100,17 +97,15 @@ namespace DataHandling
     // Clean up
     delete[] timeChannels;
     delete[] spectrum;
-    return StatusCode::SUCCESS;
+	return;
   }
 
 
   /** Finalisation method. Does nothing at present.
-   *
-   *  @return A StatusCode object indicating whether the operation was successful
+   *  
    */
-  StatusCode LoadRaw::final()
-  {
-    return StatusCode::SUCCESS;
+  void LoadRaw::final()
+  {    
   }
 
   double LoadRaw::dblSqrt(double in)
