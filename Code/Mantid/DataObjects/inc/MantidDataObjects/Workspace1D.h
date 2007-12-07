@@ -49,6 +49,31 @@ public:
   Workspace1D();
   virtual ~Workspace1D();
 
+  //section required for iteration
+  virtual int size() const;
+  //set blocksize to a very large number as 1D workspace has only one block
+  virtual int blocksize() const { return 1000000000; }
+  //inheritance redirections
+  virtual std::vector<double>& dataX(int const index) { return Histogram1D::dataX(); }
+  ///Returns the y data
+  virtual std::vector<double>& dataY(int const index) { return Histogram1D::dataY(); }
+  ///Returns the error data
+  virtual std::vector<double>& dataE(int const index) { return Histogram1D::dataE(); }
+
+
+  //inheritance redirections
+  virtual std::vector<double>& dataX() { return Histogram1D::dataX(); }
+  ///Returns the y data
+  virtual std::vector<double>& dataY() { return Histogram1D::dataY(); }
+  ///Returns the error data
+  virtual std::vector<double>& dataE() { return Histogram1D::dataE(); }
+  virtual const std::vector<double>& dataX() const { return Histogram1D::dataX(); }  
+  /// Returns the y data const
+  virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
+  /// Returns the error data const
+  virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
+
+
 protected:
 
   Workspace1D(const Workspace1D&);

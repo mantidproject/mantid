@@ -62,14 +62,22 @@ public:
   void setData(int const, const std::vector<double>&);
   void setData(int const, const std::vector<double>&, const std::vector<double>&);
   void setX(int const, const Histogram1D::RCtype&);
-  void setX(int const,const Histogram1D::RCtype::ptr_type&);
+  void setX(int const, const Histogram1D::RCtype::ptr_type&);
   void setData(int const, const Histogram1D::RCtype&);
   void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
+  void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
   
   /// Returns the histogram number
   const int getHistogramNumber() const;
 
-  int size() const;         
+  //section required for iteration
+  virtual int size() const;       
+  virtual int blocksize() const;
+  virtual std::vector<double>& dataX(int const index);
+  ///Returns the y data
+  virtual std::vector<double>& dataY(int const index);
+  ///Returns the error data
+  virtual std::vector<double>& dataE(int const index);
 
 
   //Get methods return the histogram number 

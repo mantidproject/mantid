@@ -52,8 +52,21 @@ triple_iterator<WorkSpace>::validateIndex()
   else if (index>W->size())
     index=W->size();
   delete CPoint;
-  CPoint=(W && index!=W->size()) ? 
-    new TripleRef<double&>(W->dataX()[index],W->dataY()[index],W->dataE()[index]) : 0;
+  if (!W)
+    {
+      CPoint=0;
+      return;
+    }
+
+  //work out the datalock to get
+  const int dataBlockIndex(index/W->blocksize());
+  const int itemIndex(index % W->blocksize());
+
+  CPoint=(index!=W->size()) ? 
+    new TripleRef<double&>( W->dataX(dataBlockIndex)[itemIndex],
+                            W->dataY(dataBlockIndex)[itemIndex],
+                            W->dataE(dataBlockIndex)[itemIndex]
+                           ) : 0;
   return;
 }
 

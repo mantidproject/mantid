@@ -78,7 +78,21 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
   triple_iterator<WorkSpace> operator+(difference_type) const;
   triple_iterator<WorkSpace> operator-(difference_type) const;
   difference_type operator-(const triple_iterator<WorkSpace>&) const;
-
+  
+  bool 
+    operator<(const triple_iterator<WorkSpace>& A)  const
+    /*!
+    lessthan operator
+    \param A :: Iterator to compare
+    \return  status
+    */
+  { 
+    if (!W)
+      return 0;
+    if (!A.W)
+      return 1;
+    return (index<A.index); 
+  }
 
   bool 
   operator==(const triple_iterator<WorkSpace>& A)  const
@@ -108,7 +122,7 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
     {  return (!(operator==(A))); }
 
 
-  triple_iterator<WorkSpace> begin() const
+  triple_iterator<WorkSpace> begin_const() const
   /*!
     Begin iterator (Effective copy+set zero)
     \return beginning iterator
@@ -118,6 +132,17 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
       Out.index=0;
       Out.validateIndex();
       return Out;
+    }
+ 
+  triple_iterator<WorkSpace>& begin()
+  /*!
+    Begin iterator (Set zero)
+    \return beginning iterator
+   */
+    {
+      index=0;
+      validateIndex();
+      return *this;
     }
 
   triple_iterator<WorkSpace>& end() const 

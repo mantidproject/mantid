@@ -40,6 +40,15 @@ Workspace1D::operator=(const Workspace1D& A)
 Workspace1D::~Workspace1D()
 {}
 
+/** Returns the size of the workspace
+ * \returns The number of items the workspace contains
+ */
+int Workspace1D::size() const
+{
+  return Histogram1D::size();
+}
+
+
 } // namespace DataObjects
 
 } //NamespaceMantid

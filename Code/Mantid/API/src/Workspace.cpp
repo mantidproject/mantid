@@ -1,4 +1,7 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/TripleRef.h"
+#include "MantidAPI/TripleIterator.h"
+#include "MantidAPI/TripleIteratorCode.h"
 
 namespace Mantid
 {
@@ -86,3 +89,5 @@ Sample& Workspace::getSample()
 
 } // namespace API
 } // Namespace Mantid
+
+template DLLExport class Mantid::API::triple_iterator<Mantid::API::Workspace>;

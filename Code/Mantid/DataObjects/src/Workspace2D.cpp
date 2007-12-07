@@ -1,5 +1,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/TripleRef.h"
+#include "MantidAPI/TripleIterator.h"
+#include "MantidAPI/TripleIteratorCode.h"
 
 DECLARE_WORKSPACE(Workspace2D)
 
@@ -161,6 +164,24 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
   return;
 }
 
+
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param PY A reference counted data range	
+	\param PE A reference containing the corresponding errors
+*/
+void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
+			  const Histogram1D::RCtype::ptr_type& PE)
+{
+  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::setX, histogram number out of range");
+
+  data[histnumber].setData(PY,PE);
+  return;
+}
+
+
 /** Gets the number of histograms
 	\return Integer
 */
@@ -225,5 +246,44 @@ int Workspace2D::size() const
   return retVal; 
 } 
 
+///get the size of each vector
+int Workspace2D::blocksize() const
+{
+  int retVal = 1000000000;
+  //if not empty
+  if (data.size() > 0)
+  {
+    //set the reteurn value to the length of the first vector
+    retVal = data[0].size();
+  }
+  return retVal; 
+}
+
+std::vector<double>& Workspace2D::dataX(int const index)
+{
+  if (index<0 || index>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::dataX, histogram number out of range");
+
+  return data[index].dataX();
+}
+///Returns the y data
+std::vector<double>& Workspace2D::dataY(int const index)
+{
+  if (index<0 || index>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::dataY, histogram number out of range");
+
+  return data[index].dataY();
+}
+///Returns the error data
+std::vector<double>& Workspace2D::dataE(int const index)
+{
+  if (index<0 || index>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::dataE, histogram number out of range");
+
+  return data[index].dataE();
+}
+
 } // namespace DataObjects
 } //NamespaceMantid
+
+template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace2D>;

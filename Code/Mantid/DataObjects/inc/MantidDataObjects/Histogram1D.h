@@ -75,27 +75,27 @@ public:
     /// Sets the data.
   void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
 
-/// Sets the x data
+  /// Sets the x data
   void setX(const RCtype::ptr_type& X) { refX=X; }
-    /// Sets the data.
+  /// Sets the data.
   void setData(const RCtype::ptr_type& Y) { refY=Y; }
-    /// Sets the data and errors
+  /// Sets the data and errors
   void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
 
   // Get the array data
   /// Returns the x data const
-  const std::vector<double>& dataX() const { return *refX; }  
+  virtual const std::vector<double>& dataX() const { return *refX; }  
   /// Returns the y data const
-  const std::vector<double>& dataY() const { return *refY; }
+  virtual const std::vector<double>& dataY() const { return *refY; }
   /// Returns the error data const
-  const std::vector<double>& dataE() const { return *refE; }
+  virtual const std::vector<double>& dataE() const { return *refE; }
 
   ///Returns the x data
-  std::vector<double>& dataX() { return refX.access(); }
+  virtual std::vector<double>& dataX() { return refX.access(); }
   ///Returns the y data
-  std::vector<double>& dataY() { return refY.access(); }
+  virtual std::vector<double>& dataY() { return refY.access(); }
   ///Returns the error data
-  std::vector<double>& dataE() { return refE.access(); }
+  virtual std::vector<double>& dataE() { return refE.access(); }
 
   ///Clear the x data
   std::vector<double>& emptyX() { refX.access().clear(); return refX.access(); }
@@ -106,7 +106,7 @@ public:
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
   int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
-  int size() const { return refY->size(); }          ///< get pseudo size
+  virtual int size() const { return refY->size(); }          ///< get pseudo size
 
   /// Checks for errors
   bool isError() const { return refE->empty(); }

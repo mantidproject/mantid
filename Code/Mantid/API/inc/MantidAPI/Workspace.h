@@ -60,7 +60,17 @@ public:
 
 	Instrument& getInstrument() ;
 	Sample& getSample();  
- 
+
+        
+   //section required for iteration
+  virtual int size() const = 0;
+  virtual int blocksize() const  = 0;
+  virtual std::vector<double>& dataX(int const index) =0;
+  ///Returns the y data
+  virtual std::vector<double>& dataY(int const index)  =0;
+  ///Returns the error data
+  virtual std::vector<double>& dataE(int const index)  =0;
+
 	/// Get the footprint in memory.
 	virtual long int getMemorySize() const {return 0;}
 	
