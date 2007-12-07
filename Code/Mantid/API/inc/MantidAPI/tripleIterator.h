@@ -1,12 +1,12 @@
-#ifndef triple_iterator_h
-#define triple_iterator_h
+#ifndef MANTIDAPI_TRIPLE_ITERATOR_H
+#define MANTIDAPI_TRIPLE_ITERATOR_H
 #include "MantidKernel/System.h"
 
 
 namespace Mantid
 {
 
-namespace Iterator
+namespace API
 {
 /*!
   triple_iterator iterates over a workspace providing values as TripleRefs
@@ -129,8 +129,8 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
 
 };
 
-}  // NAMESPACE Iterator
+}  // NAMESPACE API
 
 }  // NAMESPACE Mantid
 
-#endif
+#endif //MANTIDAPI_TRIPLE_ITERATOR_H

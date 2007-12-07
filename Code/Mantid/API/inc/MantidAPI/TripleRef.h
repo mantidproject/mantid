@@ -1,19 +1,12 @@
-#ifndef TripleRef_h
-#define TripleRef_h
+#ifndef MANTIDAPI_TRIPLEREF_H
+#define MANTIDAPI_TRIPLEREF_H
 
 #include "MantidKernel/System.h"
 
 namespace Mantid
 {
 
-/*!
-  \namespace Iterator
-  \author S. Ansell
-  \version 0.1
-  \date December 2007
-  \brief Holds items to allow iteration on data types
-*/
-namespace Iterator
+namespace API
 {
 /*!
   TripleRef of three identical types.
@@ -66,8 +59,8 @@ class DLLExport TripleRef
 
 };
 
-}  // NAMESPACE Iterator
+}  // NAMESPACE API
 
 }  // NAMESPACE Mantid
 
-#endif
+#endif //MANTIDAPI_TRIPLEREF_H

@@ -1,4 +1,7 @@
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/tripleRef.h"
+#include "MantidAPI/tripleIterator.h"
+#include "MantidAPI/tripleIteratorCode.h"
 
 DECLARE_WORKSPACE(Workspace1D)
 
@@ -36,6 +39,9 @@ Workspace1D::operator=(const Workspace1D& A)
 /// Destructor
 Workspace1D::~Workspace1D()
 {}
+
+
+template DLLExport class Mantid::API::triple_iterator<DataObjects::Workspace1D>;
 
 } // namespace DataObjects
 } //NamespaceMantid

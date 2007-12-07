@@ -181,6 +181,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\tripleIterator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TripleRef.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>
@@ -228,6 +236,18 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\Sample.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\tripleIterator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\TripleIteratorCode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\TripleRef.h"
 				>
 			</File>
 			<File

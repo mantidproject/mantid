@@ -59,8 +59,8 @@ public:
 	const std::string& getTitle() const;
 
 	Instrument& getInstrument() ;
-	Sample& getSample();
-
+	Sample& getSample();  
+ 
 	/// Get the footprint in memory.
 	virtual long int getMemorySize() const {return 0;}
 	

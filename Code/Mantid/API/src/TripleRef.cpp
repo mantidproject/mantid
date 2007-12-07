@@ -1,11 +1,11 @@
 #include <string>
 #include <stdexcept>
-#include "MantidDataObjects/TripleRef.h"
+#include "MantidAPI/TripleRef.h"
 
 namespace Mantid
 {
 
-namespace Iterator
+namespace API
 {
 /*!
   Standard Copy Constructor
@@ -163,6 +163,6 @@ template DLLExport class TripleRef<double&>;
 
 /// \endcond TEMPLATE
 
-} // NAMESPACE Iterator
+} // NAMESPACE API
 
 }  // NAMESPACE Mantid

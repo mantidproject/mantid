@@ -6,11 +6,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/TripleRef.h" 
-#include "MantidDataObjects/tripleIterator.h" 
+#include "MantidAPI/TripleRef.h" 
+#include "MantidAPI/tripleIterator.h" 
 
 using namespace Mantid::DataObjects;
-using namespace Mantid::Iterator;
+using namespace Mantid::API;
 
 class tripleIteratorTest : public CxxTest::TestSuite
 {

@@ -158,14 +158,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\tripleIterator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TripleRef.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Workspace1D.cpp"
 				>
 			</File>
@@ -181,14 +173,6 @@
 			>
 			<File
 				RelativePath=".\inc\MantidDataObjects\Histogram1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataObjects\tripleIterator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataObjects\TripleRef.h"
 				>
 			</File>
 			<File
