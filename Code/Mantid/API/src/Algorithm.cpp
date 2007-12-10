@@ -167,7 +167,7 @@ namespace Mantid
 			catch(std::runtime_error& ex)
 			{
 				g_log.error()<<"Unable to successfully retrieve workspace" <<ex.what();
-				throw;
+//			error is caught and nothing is done
 			}  
 
 			// Invoke exec() method of derived class and catch all uncaught exceptions

@@ -118,7 +118,7 @@ void AnalysisDataService::remove(const std::string& name)
  * 
  *  @param name The name of the desired workspace
  *  @param space Returns a pointer to the requested workspace
- *  @throw runtim_error Thrown if workspace cannot be found
+ *  @throw runtime_error Thrown if workspace cannot be found
  */
 void AnalysisDataService::retrieve(const std::string& name, Workspace *& space)  
 {
@@ -129,7 +129,7 @@ void AnalysisDataService::retrieve(const std::string& name, Workspace *& space)
 	return;
   }
   g_log.error("ADS:Workspace " + name + " not found");
-  throw std::runtime_error("Workspace not found");
+  throw std::runtime_error("ADS:Workspace not found");
 }
 
 //----------------------------------------------------------------------
