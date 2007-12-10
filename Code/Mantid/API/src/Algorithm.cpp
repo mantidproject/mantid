@@ -192,11 +192,7 @@ namespace Mantid
 						m_outputWorkspaceName = getPropertyValue("OutputWorkspace");
 						ADS->addOrReplace(m_outputWorkspaceName, m_outputWorkspace);
 					}
-					catch (Kernel::Exception::NotFoundError& e) 
-					{
-						g_log.information("Output workspace property not set");
-					}
-					//this is put in for when retrieve is a void
+
 					catch (Kernel::Exception::NotFoundError e) 
 					{
 						g_log.information("Output workspace property not set");
