@@ -25,16 +25,16 @@ struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
     Mantid_API_IAlgorithm_Wrapper(PyObject* py_self_):
         Mantid::API::IAlgorithm(), py_self(py_self_) {}
 
-    Mantid::Kernel::StatusCode initialize() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "initialize");
+    void initialize() {
+        return call_method< void >(py_self, "initialize");
     }
 
-    Mantid::Kernel::StatusCode execute() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "execute");
+    void execute() {
+        return call_method< void >(py_self, "execute");
     }
 
-    Mantid::Kernel::StatusCode finalize() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "finalize");
+    void finalize() {
+        return call_method< void >(py_self, "finalize");
     }
 
     bool isInitialized() const {
@@ -154,17 +154,18 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         return Mantid::API::Algorithm::getProperties();
     }
 
-    Mantid::Kernel::StatusCode init() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "init");
+    void init() {
+        call_method< void >(py_self, "init");
     }
 
-    Mantid::Kernel::StatusCode exec() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "exec");
+    void exec() {
+        call_method< void >(py_self, "exec");
     }
 
-    Mantid::Kernel::StatusCode final() {
-        return call_method< Mantid::Kernel::StatusCode >(py_self, "final");
+    void final() {
+        call_method< void >(py_self, "final");
     }
+
 
     PyObject* py_self;
 };
@@ -217,7 +218,7 @@ BOOST_PYTHON_MODULE(libMantidAPI)
    ;
    
   class_< Mantid::API::Algorithm, boost::noncopyable, Mantid_API_Algorithm_Wrapper >("Algorithm", init<  >())
-        .def("name", &Mantid::API::Algorithm::name, &Mantid_API_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
+	.def("name", &Mantid::API::Algorithm::name, &Mantid_API_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
         .def("version", &Mantid::API::Algorithm::version, &Mantid_API_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
         .def("isInitialized", &Mantid::API::Algorithm::isInitialized, &Mantid_API_Algorithm_Wrapper::default_isInitialized)
         .def("isExecuted", &Mantid::API::Algorithm::isExecuted, &Mantid_API_Algorithm_Wrapper::default_isExecuted)

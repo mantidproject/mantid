@@ -45,11 +45,11 @@ public:
   ///virtual destructor
   virtual ~HelloWorldAlgorithm() {}
   ///Initialisation code
-  Mantid::Kernel::StatusCode init() { return Mantid::Kernel::StatusCode::SUCCESS; }
+  void init() {  }
   ///Execution code
-  Mantid::Kernel::StatusCode exec() { std::cout << "\nHello, World!\n"; return Mantid::Kernel::StatusCode::SUCCESS; }
+  void exec() { std::cout << "\nHello, World!\n"; }
   ///Finalisation code
-  Mantid::Kernel::StatusCode final() { return Mantid::Kernel::StatusCode::SUCCESS; }
+  void final() {  }
 };
 
 } // namespace Algorithm
