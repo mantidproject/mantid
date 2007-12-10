@@ -197,9 +197,13 @@ namespace Mantid
 						g_log.information("Output workspace property not set");
 					}
 					//this is put in for when retrieve is a void
-					catch (std::runtime_error& ex)
+					catch (Kernel::Exception::NotFoundError e) 
 					{
-						g_log.error()<<"Algorithm: Unable to register output workspace: "<<m_outputWorkspaceName<<std::endl;
+						g_log.information("Output workspace property not set");
+					}	
+          catch (std::runtime_error& ex)
+					{
+						g_log.error()<<"Algorithm: Unable to register output workspace or workspace: "<<m_outputWorkspaceName<<ex.what();
 						throw;
 					}
 				}
