@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidKernel/StatusCode.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 

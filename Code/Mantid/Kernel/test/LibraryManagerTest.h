@@ -38,9 +38,7 @@ public:
 	  
 		Mantid::API::IAlgorithm* alg= manager.createAlgorithm("HelloWorldAlgorithm");
 	  
-		StatusCode result = alg->execute();
-	  
-		TS_ASSERT( !result.isFailure() );
+		TS_ASSERT_THROWS_NOTHING(alg->execute());			
 	
 		delete alg;
 		
