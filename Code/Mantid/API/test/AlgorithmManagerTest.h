@@ -6,7 +6,6 @@
 #include "MantidAPI/Algorithm.h"
 #include <stdexcept>
 
-using Mantid::Kernel::StatusCode;
 using namespace Mantid::API;
 
 class algmantest : public Algorithm
@@ -15,9 +14,9 @@ class algmantest : public Algorithm
   
 	algmantest() : Algorithm() {}
 	virtual ~algmantest() {}
-	StatusCode init() { return StatusCode::SUCCESS; }
-	StatusCode exec() { return StatusCode::SUCCESS; }
-	StatusCode final() { return StatusCode::SUCCESS; }		
+	void init() { }
+	void exec() {  }
+	void final() { }		
 };
 
 class algmantestSecond : public Algorithm
@@ -26,9 +25,9 @@ class algmantestSecond : public Algorithm
   
 	algmantestSecond() : Algorithm() {}
 	virtual ~algmantestSecond() {}
-	StatusCode init() { return StatusCode::SUCCESS; }
-	StatusCode exec() { return StatusCode::SUCCESS; }
-	StatusCode final() { return StatusCode::SUCCESS; }		
+	void init() { }
+	void exec() { }
+	void final() { }		
 };
 
  DECLARE_ALGORITHM(algmantest)

@@ -12,7 +12,6 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using Mantid::Kernel::StatusCode;
 using Mantid::DataObjects::Workspace2D;
 
 class TOFtoWavelengthTest : public CxxTest::TestSuite
@@ -66,8 +65,7 @@ public:
   
   void testInit()
   {
-    StatusCode status = alg.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());    
     TS_ASSERT( alg.isInitialized() );    
     
     // Set the properties
@@ -79,17 +77,15 @@ public:
   void testExec()
   {
     if ( !alg.isInitialized() ) alg.initialize();
-    StatusCode status = alg.execute();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    status = data->retrieve(outputSpace, output);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));
     Workspace *input;
-    status = data->retrieve(inputSpace, input);
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(inputSpace, input));
     
     Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
     Workspace2D *input2D = dynamic_cast<Workspace2D*>(input);
@@ -134,8 +130,7 @@ public:
     if ( !alg.isInitialized() ) alg.initialize();
     
     // The final() method doesn't do anything at the moment, but test anyway
-    StatusCode status = alg.finalize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(alg.finalize());
     TS_ASSERT( alg.isFinalized() );
   }
   

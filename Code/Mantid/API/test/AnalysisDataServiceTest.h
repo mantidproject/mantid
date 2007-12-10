@@ -22,23 +22,22 @@ public:
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace *space = 0;
-    StatusCode status = theService->add("MySpace",space);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( theService->add("MySpace",space));
     Workspace *space2 = 0;
-    status = theService->add("MySpace",space2);
-    TS_ASSERT( status.isFailure() );
+    TS_ASSERT_THROWS( theService->add("MySpace",space2),std::runtime_error);
+    //clean up the ADS for other tests
+    theService->remove("MySpace");
 	}
 
 	void testAddOrReplace()
 	{
     AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace *space = 0;
-    StatusCode status = theService->add("MySpaceAddOrReplace",space);
-    TS_ASSERT( ! status.isFailure() );
-	status = theService->add("MySpaceAddOrReplace",space);
-    TS_ASSERT( status.isFailure() );
-	status = theService->addOrReplace("MySpaceAddOrReplace",space);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(theService->add("MySpaceAddOrReplace",space));
+	 TS_ASSERT_THROWS(theService->add("MySpaceAddOrReplace",space),std::runtime_error);
+	 TS_ASSERT_THROWS_NOTHING(theService->addOrReplace("MySpaceAddOrReplace",space));
+    //clean up the ADS for other tests
+    theService->remove("MySpaceAddOrReplace");
 	}
 
 	void testRemove()
@@ -46,13 +45,10 @@ public:
     AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace *space = 0;
     theService->add("MySpace",space);
-    StatusCode status = theService->remove("MySpace");
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(theService->remove("MySpace"));
     Workspace *work = 0;
-    status = theService->retrieve("MySpace", work);
-    TS_ASSERT( status.isFailure() );
-    status = theService->remove("ttttt");
-    TS_ASSERT( status.isFailure() );
+    TS_ASSERT_THROWS(theService->retrieve("MySpace", work),std::runtime_error);    
+    TS_ASSERT_THROWS(theService->remove("ttttt"),std::runtime_error);
 	}
 
 	void testRetrieve()
@@ -61,10 +57,10 @@ public:
     Workspace *work = 0;
     theService->add("MySpace", work);
     Workspace *workBack = 0;
-    StatusCode status = theService->retrieve("MySpace", workBack);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(theService->retrieve("MySpace", workBack));
     TS_ASSERT_EQUALS(work, workBack);
-
+    //clean up the ADS for other tests
+    theService->remove("MySpace");
 	}
 
 };

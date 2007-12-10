@@ -29,13 +29,11 @@ public:
 	//initialise framework manager to allow logging
 	FrameworkManager manager;
 	manager.initialize();
-
   }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
-    StatusCode status = loader.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());    
     TS_ASSERT( loader.isInitialized() );
   }
   
@@ -57,17 +55,16 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( ! result.compare(outputSpace));
 
-	StatusCode status = StatusCode::FAILURE;
-	TS_ASSERT_THROWS_NOTHING( status = loader.execute());
-    TS_ASSERT( ! status.isFailure() );
+
+	TS_ASSERT_THROWS_NOTHING(loader.execute());    
 
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    status = data->retrieve(outputSpace, output);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));
+    
 	
 	Instrument& i = output->getInstrument();
 	Mantid::Geometry::Component* source = i.getSource();
@@ -94,8 +91,7 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
     
     // The final() method doesn't do anything at the moment, but test anyway
-    StatusCode status = loader.finalize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(loader.finalize());    
     TS_ASSERT( loader.isFinalized() );
   }
 
@@ -130,13 +126,11 @@ public:
 
 	//put this workspace in the data service
     AnalysisDataService *data = AnalysisDataService::Instance();
-	StatusCode status = data->add(wsName, ws2D);
-    TS_ASSERT( ! status.isFailure() );
+	  TS_ASSERT_THROWS_NOTHING(data->add(wsName, ws2D));    
 
     // Get back the saved workspace
     Workspace *output;
-    status = data->retrieve(wsName, output);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(wsName, output));    
     Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
     TS_ASSERT_EQUALS( output2D->getHistogramNumber(), histogramNumber);
 
@@ -144,18 +138,16 @@ public:
     std::string instFile = "../../../../Test/Instrument/HET_Definition.txt";
 	//now load the instrument data into the same workspace
 	LoadInstrument loadInst;
-	status = loadInst.initialize();
+	TS_ASSERT_THROWS_NOTHING(loadInst.initialize());
 	loadInst.setProperty("Filename", instFile);
 	loadInst.setProperty("InputWorkspace", wsName);
 	loadInst.setProperty("OutputWorkspace", wsName);
-    status = loadInst.execute();
-	TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(loadInst.execute());	
     TS_ASSERT( loadInst.isExecuted() ); 
 
 	// Get back the saved workspace
     Workspace *outputInst;
-    status = data->retrieve(wsName, outputInst);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(wsName, outputInst));    
     Workspace2D *output2DInst = dynamic_cast<Workspace2D*>(outputInst);
     // Should be 2584 
     TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), 2584);

@@ -241,7 +241,11 @@ namespace Mantid
 		{
 			// Bypass the finalization if the algorithm hasn't been initialized or
 			// has already been finalized.
-			if ( !isInitialized() || isFinalized() ) return; //Kernel::StatusCode::FAILURE;
+			if ( !isInitialized() || isFinalized() ) 
+      {
+        g_log.error("algorithm hasn't been initialized or has already been finalized:");
+        throw std::runtime_error("algorithm hasn't been initialized or has already been finalized");        
+      }
 
 			// Invoke final() method of the derived class inside a try/catch clause
 			try
@@ -304,7 +308,7 @@ namespace Mantid
 				throw;
 			}
 			// Only gets to here if algorithm finished normally
-			return; //Kernel::StatusCode::FAILURE;
+			return; 
 		}
 
 		/// Has the Algorithm already been initialized

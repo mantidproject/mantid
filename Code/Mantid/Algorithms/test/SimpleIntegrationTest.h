@@ -51,8 +51,7 @@ public:
   
   void testInit()
   {
-    StatusCode status = alg.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());    
     TS_ASSERT( alg.isInitialized() );
     
     // Set the properties
@@ -65,8 +64,7 @@ public:
     alg.setProperty("StartY","2");
     alg.setProperty("EndY","4");
     
-    status = alg2.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( alg2.initialize());    
     TS_ASSERT( alg.isInitialized() );
     
     // Set the properties
@@ -78,15 +76,13 @@ public:
   void testExec()
   {
     if ( !alg.isInitialized() ) alg.initialize();
-    StatusCode status = alg.execute();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
     
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    status = data->retrieve(outputSpace, output);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));
     
     Workspace1D *output1D = dynamic_cast<Workspace1D*>(output);
     std::vector<double> y = output1D->dataY();
@@ -102,18 +98,15 @@ public:
     
     // Check setting of invalid property value causes failure
     alg2.setProperty("StartY","-1");
-    status = alg2.execute();
-    TS_ASSERT( status.isFailure() )
+    TS_ASSERT_THROWS( alg2.execute(),std::runtime_error);
     // Set back to default value
     alg2.setProperty("StartY","0");
     
-    status = alg2.execute();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( alg2.execute());
     TS_ASSERT( alg2.isExecuted() );
     
     // Get back the saved workspace
-    status = data->retrieve("out2", output);
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(data->retrieve("out2", output));
     
     output1D = dynamic_cast<Workspace1D*>(output);
     y = output1D->dataY();
@@ -132,8 +125,7 @@ public:
     if ( !alg.isInitialized() ) alg.initialize();
     
     // The final() method doesn't do anything at the moment, but test anyway
-    StatusCode status = alg.finalize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( alg.finalize());
     TS_ASSERT( alg.isFinalized() );
   }
   

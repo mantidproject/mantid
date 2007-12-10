@@ -15,14 +15,13 @@ class ToyAlgorithm2 : public Algorithm
 public:
   ToyAlgorithm2() {}
   virtual ~ToyAlgorithm2() {}
-  StatusCode init()
+  void init()
   { declareProperty("Prop","");
     declareProperty("P2","");
-    declareProperty("Filename","");
-    return StatusCode::SUCCESS; 
+    declareProperty("Filename","");    
   }
-  StatusCode exec() { return StatusCode::SUCCESS; }
-  StatusCode final() { return StatusCode::SUCCESS; }
+  void exec() { }
+  void final() { }
 };
 
 DECLARE_ALGORITHM(ToyAlgorithm2)

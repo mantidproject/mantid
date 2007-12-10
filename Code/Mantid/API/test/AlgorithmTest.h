@@ -14,13 +14,12 @@ class ToyAlgorithm : public Algorithm
 public:
   ToyAlgorithm() : Algorithm() {}
   virtual ~ToyAlgorithm() {}
-  StatusCode init()
+  void init()
   { declareProperty("prop1","value");
-    declareProperty("prop2",1);
-    return StatusCode::SUCCESS; 
+    declareProperty("prop2",1);   
   }
-  StatusCode exec() { return StatusCode::SUCCESS; }
-  StatusCode final() { return StatusCode::SUCCESS; }
+  void exec() {}
+  void final() {}
 };
 
 DECLARE_ALGORITHM(ToyAlgorithm)
@@ -54,33 +53,27 @@ public:
 
   void testInitialize()
   {
-    StatusCode status = alg.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
   }
 
   void testExecute()
   {
     ToyAlgorithm myAlg;
-    StatusCode status = myAlg.execute();
-    TS_ASSERT( status.isFailure() );
+    TS_ASSERT_THROWS(myAlg.execute(),std::runtime_error);
     TS_ASSERT( ! myAlg.isExecuted() );
-    status = myAlg.initialize();
-    TS_ASSERT( ! status.isFailure() );
-    status = myAlg.execute();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING( myAlg.initialize());
+    TS_ASSERT_THROWS_NOTHING(myAlg.execute() );
     TS_ASSERT( myAlg.isExecuted() );
   }
 
   void testFinalize()
   {
     ToyAlgorithm myAlg;
-    StatusCode status = myAlg.finalize();
-    TS_ASSERT( status.isFailure() );
+    TS_ASSERT_THROWS(myAlg.finalize(),std::runtime_error);;
     // Need to initialize otherwise the finalize method immediately returns
     myAlg.initialize();
-    status = myAlg.finalize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(myAlg.finalize());
     TS_ASSERT( myAlg.isFinalized() );
   }
 
@@ -133,11 +126,9 @@ public:
     TS_ASSERT( ! vec.empty() )
     TS_ASSERT( vec.size() == 4 )
     TS_ASSERT( ! vec[0]->name().compare("InputWorkspace") )
-  }
-    
+  }    
 private:
-  ToyAlgorithm alg;
-	
+  ToyAlgorithm alg;	
 };
 
  

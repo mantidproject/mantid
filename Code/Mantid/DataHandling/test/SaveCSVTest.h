@@ -50,8 +50,7 @@ public:
   
   void testInit()
   {
-    StatusCode status = algToBeTested.initialize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT( algToBeTested.isInitialized() );
   }
   
@@ -62,9 +61,9 @@ public:
   
     algToBeTested.setProperty("InputWorkspace", "testSpace");     
     
-    StatusCode status = algToBeTested.execute();
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT( status.isFailure() );   
+    TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
+        
     
     // Now set it...
     // specify name of file to save 1D-workspace to
@@ -75,8 +74,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(outputFile)); 
     
-    status = algToBeTested.execute();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );    
    
     
@@ -113,8 +111,7 @@ public:
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
     
     // The final() method doesn't do anything at the moment, but test anyway
-    StatusCode status = algToBeTested.finalize();
-    TS_ASSERT( ! status.isFailure() );
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.finalize());
     TS_ASSERT( algToBeTested.isFinalized() );
   }
   
