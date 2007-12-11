@@ -62,9 +62,12 @@ public:
 	Sample& getSample();  
 
         
-   //section required for iteration
+  //section required for iteration
+  ///Returns the number of single indexable items in the workspace
   virtual int size() const = 0;
+  ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const  = 0;
+  ///Returns the x data
   virtual std::vector<double>& dataX(int const index) =0;
   ///Returns the y data
   virtual std::vector<double>& dataY(int const index)  =0;

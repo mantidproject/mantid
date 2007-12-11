@@ -50,10 +50,13 @@ public:
   virtual ~Workspace1D();
 
   //section required for iteration
+  ///Returns the number of single indexable items in the workspace
   virtual int size() const;
   //set blocksize to a very large number as 1D workspace has only one block
+  ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const { return 1000000000; }
   //inheritance redirections
+  ///Returns the x data
   virtual std::vector<double>& dataX(int const index) { return Histogram1D::dataX(); }
   ///Returns the y data
   virtual std::vector<double>& dataY(int const index) { return Histogram1D::dataY(); }

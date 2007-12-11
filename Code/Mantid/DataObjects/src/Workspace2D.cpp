@@ -286,4 +286,7 @@ std::vector<double>& Workspace2D::dataE(int const index)
 } // namespace DataObjects
 } //NamespaceMantid
 
+
+///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace2D>;
+///\endcond TEMPLATE

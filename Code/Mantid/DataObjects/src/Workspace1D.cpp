@@ -53,4 +53,6 @@ int Workspace1D::size() const
 
 } //NamespaceMantid
 
+///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace1D>;
+///\endcond TEMPLATE
