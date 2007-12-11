@@ -19,7 +19,7 @@ namespace Mantid
 namespace API
 {
 
-	Kernel::Logger& FrameworkManager::g_log = Kernel::Logger::get("FrameworkManager");
+  Kernel::Logger& FrameworkManager::g_log = Kernel::Logger::get("FrameworkManager");
 
 //----------------------------------------------------------------------
 // Public member functions
@@ -52,7 +52,7 @@ void FrameworkManager::initialize()
  */
 void FrameworkManager::clear()
 {
-    algManager->clear();
+  algManager->clear();
 }
 
 /** Creates an instance of an algorithm
@@ -106,7 +106,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     // Throw if there's a problem with the string
     else
     {
-		  throw std::invalid_argument("Misformed properties string");
+      throw std::invalid_argument("Misformed properties string");
     }
   }  
   return alg;
@@ -130,12 +130,7 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
   
   // Now execute the algorithm
-  //Kernel::StatusCode status = 
-	  alg->execute();
-  //if (status.isFailure())
-  {
- //   throw runtime_error("Unable to successfully execute algorithm " + algName);
-  }  
+  alg->execute();
   
   return alg;
 }
@@ -152,11 +147,11 @@ Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
   Workspace *space;
   try
   {
-  data->retrieve(wsName, space);
+    space = data->retrieve(wsName);
   }
-  catch (std::runtime_error& ex)
+  catch (Kernel::Exception::NotFoundError& ex)
   {
-	  throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
+    throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
   return space;
 }

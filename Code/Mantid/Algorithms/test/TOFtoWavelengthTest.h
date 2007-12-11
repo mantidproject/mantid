@@ -83,9 +83,9 @@ public:
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
     Workspace *input;
-    TS_ASSERT_THROWS_NOTHING(data->retrieve(inputSpace, input));
+    TS_ASSERT_THROWS_NOTHING(input = data->retrieve(inputSpace));
     
     Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
     Workspace2D *input2D = dynamic_cast<Workspace2D*>(input);

@@ -54,10 +54,10 @@ public:
   // Returns the single instance of the service
   static AnalysisDataService* Instance();
   
-	void add( const std::string& name, Workspace * space );
-	void addOrReplace(const std::string& name, Workspace* space);
-	void remove(const std::string& name );
-	void retrieve(const std::string& name, Workspace *& space );	
+  void add( const std::string& name, Workspace* space );
+  void addOrReplace( const std::string& name, Workspace* space);
+  void remove( const std::string& name );
+  Workspace* retrieve( const std::string& name );	
 	
 private:
   

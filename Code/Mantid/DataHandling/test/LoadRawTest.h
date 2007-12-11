@@ -47,7 +47,7 @@ public:
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));    
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));    
     Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);

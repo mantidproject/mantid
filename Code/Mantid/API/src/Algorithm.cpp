@@ -158,7 +158,7 @@ namespace Mantid
 			try 
 			{
 				inputWorkspaceName = getPropertyValue("InputWorkspace");
-				ADS->retrieve(inputWorkspaceName, m_inputWorkspace);
+				m_inputWorkspace = ADS->retrieve(inputWorkspaceName);
 			} 
 			catch (Kernel::Exception::NotFoundError e) 
 			{

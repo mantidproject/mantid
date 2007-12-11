@@ -82,7 +82,7 @@ public:
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    TS_ASSERT_THROWS_NOTHING(data->retrieve(outputSpace, output));
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
     
     Workspace1D *output1D = dynamic_cast<Workspace1D*>(output);
     std::vector<double> y = output1D->dataY();
@@ -106,7 +106,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
     
     // Get back the saved workspace
-    TS_ASSERT_THROWS_NOTHING(data->retrieve("out2", output));
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve("out2"));
     
     output1D = dynamic_cast<Workspace1D*>(output);
     y = output1D->dataY();
