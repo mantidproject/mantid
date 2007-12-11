@@ -2,6 +2,7 @@
 #define WORKSPACEFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <vector>
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -16,6 +17,16 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
 	{
 	public:
 		const std::string id() const {return "WorkspaceTest";}
+    //section required to support iteration
+    virtual int size() const {return 0;}
+      virtual int blocksize() const  {return 1000000;}
+    virtual std::vector<double>& dataX(int const index) {return data;}
+    ///Returns the y data
+    virtual std::vector<double>& dataY(int const index) {return data;}
+    ///Returns the error data
+    virtual std::vector<double>& dataE(int const index) {return data;}
+  private:
+    std::vector<double> data;
 	};
 public: 
 
