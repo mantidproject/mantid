@@ -132,17 +132,7 @@ namespace Mantid
 			}
 
 			// Check all properties for validity
-			const std::vector< Property* > &props = getProperties();
-			bool allValid = true;
-			for (unsigned int i = 0; i < props.size(); ++i) 
-			{
-				if ( ! props[i]->isValid() )
-				{
-					g_log.error() << "Property " << props[i]->name() << "is not set to a valid value." << std::endl;
-					allValid=false;								
-				}
-			}
-			if(!allValid)
+			if( ! validateProperties() )
 			{
 				throw std::runtime_error("Some invalid Properties found");
 			}
@@ -423,5 +413,27 @@ namespace Mantid
 			m_propertyMgr.declareProperty(name,value,validator,doc);
 		}
 
+    //----------------------------------------------------------------------
+    // Private Member Functions
+    //----------------------------------------------------------------------
+
+		/** Check all properties for validity
+		 *  @return True if all the declared properties have valid values
+		 */
+		bool Algorithm::validateProperties()
+		{
+      const std::vector< Property* > &props = getProperties();
+      bool allValid = true;
+      for (unsigned int i = 0; i < props.size(); ++i) 
+      {
+        if ( ! props[i]->isValid() )
+        {
+          g_log.error() << "Property " << props[i]->name() << "is not set to a valid value." << std::endl;
+          allValid=false;               
+        }
+      }
+      return allValid;
+		}
+		
 	} // namespace API
 } // namespace Mantid

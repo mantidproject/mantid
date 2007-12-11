@@ -116,7 +116,7 @@ void AnalysisDataService::remove(const std::string& name)
 /** Retrieve a pointer to a workspace by name.
  * 
  *  @param name The name of the desired workspace
- *  @param space Returns a pointer to the requested workspace
+ *  @return A pointer to the requested workspace
  *  @throw runtime_error Thrown if workspace cannot be found
  */
 Workspace* AnalysisDataService::retrieve(const std::string& name)  

@@ -150,6 +150,9 @@ class Workspace;
     /// Private asignment operator: NO ASSIGNMENT ALLOWED
     Algorithm& operator=( const Algorithm& rhs );
 
+    /// Check all properties for validity
+    bool validateProperties();
+    
     std::string m_name;                   ///< Algorithm's name for identification
     std::string m_version;                ///< Algorithm's version
     std::vector<Algorithm *> m_subAlgms;  ///< Sub algorithms
@@ -169,6 +172,7 @@ class Workspace;
 
     /// Manages the algorithm's properties
     Kernel::PropertyManager m_propertyMgr;
+    
   };
   
 } // namespace API
