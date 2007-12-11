@@ -12,11 +12,9 @@
 
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "MantidKernel/RefControl.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "MantidKernel/Support.h"
-// #include "SpecDataHold.h"
 #include "XMLnamespace.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"

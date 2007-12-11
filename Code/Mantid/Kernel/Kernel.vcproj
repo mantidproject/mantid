@@ -268,7 +268,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\RefControl.h"
+				RelativePath=".\inc\MantidKernel\cow_ptr.h"
 				>
 			</File>
 			<File

@@ -1,7 +1,6 @@
 #include <iterator>
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/RefControl.h"
 
 #include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"

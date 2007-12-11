@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidKernel/RefControl.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
@@ -44,7 +44,7 @@ public:
 
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
 
-  typedef RefControl<std::vector<double> > RCtype;    
+  typedef Kernel::cow_ptr<std::vector<double> > RCtype;    
   
  private:
 
