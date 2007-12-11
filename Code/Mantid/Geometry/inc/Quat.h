@@ -13,44 +13,44 @@ class V3D;
 class M33;
 
 /** @class Quat Quat.h Geometry/Quat.h
-			@brief Class for quaternions 
-		    @version 1.0
-		    @author Laurent C Chapon, ISIS RAL
-		    @date 10/10/2007
-		    
-		    Templated class for quaternions. 
-		    Quaternions are the 3D generalization of complex numbers
-		    Quaternions are used for roations in 3D spaces and  
-		    often implemented for computer graphics applications.
-		    Quaternion can be written q=W+ai+bj+ck where 
-		    w is the scalar part, and a, b, c the 3 imaginary parts.
-		    Quaternion multiplication is non-commutative.<br>
-		    i*j=-j*i=k<br>
-		    j*k=-k*j=i<br>
-		    k*i=-i*k=j<br>
-		    Rotation of an angle theta around a normalized axis (u,v,w) can be simply
-		    written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
-		    This class support all arithmetic operations for quaternions
+  @brief Class for quaternions 
+  @version 1.0
+  @author Laurent C Chapon, ISIS RAL
+  @date 10/10/2007
 
-		    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
-   	
-		    This file is part of Mantid.
+  Templated class for quaternions. 
+  Quaternions are the 3D generalization of complex numbers
+  Quaternions are used for roations in 3D spaces and  
+  often implemented for computer graphics applications.
+  Quaternion can be written q=W+ai+bj+ck where 
+  w is the scalar part, and a, b, c the 3 imaginary parts.
+  Quaternion multiplication is non-commutative.<br>
+  i*j=-j*i=k<br>
+  j*k=-k*j=i<br>
+  k*i=-i*k=j<br>
+  Rotation of an angle theta around a normalized axis (u,v,w) can be simply
+  written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
+  This class support all arithmetic operations for quaternions
 
-		    Mantid is free software; you can redistribute it and/or modify
-		    it under the terms of the GNU General Public License as published by
-		    the Free Software Foundation; either version 3 of the License, or
-		    (at your ption) any later version.
+  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
-		    Mantid is distributed in the hope that it will be useful,
-		    but WITHOUT ANY WARRANTY; without even the implied warranty of
-		    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-		    GNU General Public License for more details.
+  This file is part of Mantid.
 
-		    You should have received a copy of the GNU General Public License
-		    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-		    
-		    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-		*/
+  Mantid is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 3 of the License, or
+  (at your ption) any later version.
+
+  Mantid is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+*/
 class DLLExport Quat
 {
 	

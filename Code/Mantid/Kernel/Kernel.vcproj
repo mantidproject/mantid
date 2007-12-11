@@ -56,6 +56,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="PocoFoundationd.lib  PocoUtild.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
@@ -193,6 +194,10 @@
 				RelativePath=".\src\SupportKernel.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\TimeSeriesProperty.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -208,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\cow_ptr.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\DllOpen.h"
 				>
 			</File>
@@ -217,10 +226,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\Exception.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidKernel\IInterface.h"
 				>
 			</File>
 			<File
@@ -265,10 +270,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\PropertyWithValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidKernel\cow_ptr.h"
 				>
 			</File>
 			<File

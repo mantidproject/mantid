@@ -55,7 +55,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel.lib DataObjects.lib Geometry.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>

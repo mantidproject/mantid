@@ -54,7 +54,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="API.lib Kernel.lib Algorithms.lib Geometry.lib DataHandling.lib DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Algorithms.lib $(SolutionName)Geometry.lib $(SolutionName)DataHandling.lib $(SolutionName)DataObjects.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\Debug"
 				GenerateDebugInformation="true"
 			/>
@@ -152,6 +153,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\Main.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

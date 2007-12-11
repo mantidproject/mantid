@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -54,8 +54,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="kernel.lib"
-				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
+				AdditionalDependencies="$(SolutionName)kernel.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
+				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32;c:\Python25\libs"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -166,6 +167,10 @@
 			</File>
 			<File
 				RelativePath=".\src\AnalysisDataService.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\BoostPythonWrapper.cpp"
 				>
 			</File>
 			<File
