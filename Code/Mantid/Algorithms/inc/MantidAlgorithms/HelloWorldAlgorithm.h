@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/StatusCode.h"
 
 namespace Mantid
 {

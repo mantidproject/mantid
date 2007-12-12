@@ -93,5 +93,4 @@ Sample& Workspace::getSample()
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::Workspace>;
-
 ///\endcond TEMPLATE
