@@ -79,6 +79,9 @@ public:
     return *this;
   }
   
+  // Unhide the base class assignment operator
+  using PropertyWithValue<TYPE*>::operator=;
+  
   /// Virtual destructor
   virtual ~WorkspaceProperty()
   {
@@ -92,10 +95,17 @@ public:
     return m_workspaceName;
   }
 
-  /// Overrides PropertyWithValue method. Not to be used.
+  /** Set the name of the workspace
+   *  @param value The new name for the workspace
+   */
   virtual bool setValue( const std::string& value )
   {
-    // Not allowed!
+    if ( ! value.empty() )
+    {
+      m_workspaceName = value;
+      return true;
+    }
+    // Setting an empty workspace name is not allowed
     return false;
   }
   
@@ -113,21 +123,23 @@ public:
       try {
         API::Workspace *ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
         // Check retrieved workspace is the type that it should be and assign to the property value
-        TYPE* workspace = PropertyWithValue<TYPE*>::operator=( dynamic_cast<TYPE*>(ws) );
+        TYPE* workspace = this->operator=( dynamic_cast<TYPE*>(ws) );
         if ( !workspace ) return false;
       } catch (Exception::NotFoundError e) {
         return false;
       }
     }
+    // Would be nice if we could do the creation of the output workspace here
     
     return true;
   }
 
   /// If this is an output workspace, store it into the AnalysisDataService
-  void store()
+  virtual void store()
   {
     if ( m_direction )
     {
+      // Note use of addOrReplace rather than add
       API::AnalysisDataService::Instance()->addOrReplace(m_workspaceName, this->operator()() );
     }
   }
@@ -135,12 +147,12 @@ public:
   /// Reset the pointer to the workspace
   void clear()
   {
-    PropertyWithValue<TYPE*>::operator=( NULL );
+    this->operator=( NULL );
   }
   
 private:
   /// The name of the workspace (as used by the AnalysisDataService)
-  const std::string m_workspaceName;
+  std::string m_workspaceName;
   /// Whether the workspace is used as input, output or both to an algorithm
   const unsigned int m_direction;
 };

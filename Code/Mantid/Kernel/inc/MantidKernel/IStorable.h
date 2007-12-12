@@ -1,6 +1,10 @@
 #ifndef ISTORABLE_H_
 #define ISTORABLE_H_
 
+namespace Mantid
+{
+namespace Kernel
+{
 /** @class IStorable IStorable.h Kernel/IStorable.h
 
     An interface that is implemented by WorkspaceProperty.
@@ -39,5 +43,8 @@ public:
   /// Virtual destructor
   virtual ~IStorable() {}
 };
+
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /*ISTORABLE_H_*/

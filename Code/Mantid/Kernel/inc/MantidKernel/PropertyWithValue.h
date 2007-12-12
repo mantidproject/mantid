@@ -174,7 +174,7 @@ public:
   /** Checks if the value is valid for this property.
    *  @returns true if the value is valid, otherwise false.
    */
-  virtual const bool isValid() const
+  virtual const bool isValid()
   {
     return m_validator->isValid(m_value);
   }
