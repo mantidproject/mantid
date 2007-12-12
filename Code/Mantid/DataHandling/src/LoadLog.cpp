@@ -86,12 +86,10 @@ namespace DataHandling
 		  m_outputWorkspace = m_inputWorkspace;
 	  }
 
-	  Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
-
 
     // the log file(s) will be loaded into the Sample container of the workspace
 
-    API::Sample& sample = localWorkspace->getSample();
+    API::Sample& sample = m_outputWorkspace->getSample();
 
 
     // do some initial checks on the input m_filename
@@ -178,16 +176,17 @@ namespace DataHandling
 
       kind l_kind;
 
+      bool l_JumpToNextLogFile = false;
+
       while ( std::getline(inLogFile, aLine, '\n') ) 
       {
-        if ( aLine.size() < 19 )
+        if ( !isDateTimeString(aLine) )
         {
-          // A date-time string in a log file is 19 characters
-          // hence if the first line is not that length sometime
-          // is not right!
-          g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file.");
-          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
-          }
+          g_log.warning("File" + potentialLogFiles[i] + " is not a standard ISIS log file. Expected to be a two column file.");
+          l_JumpToNextLogFile = true;
+          inLogFile.close();
+          break;
+        }
 
         std::stringstream ins(aLine);
       
@@ -206,12 +205,16 @@ namespace DataHandling
         if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
         {
           g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file. Can't recognise TYPE");
-          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
+          throw Exception::FileError("ISIS log file contain unrecognised second column entries:", potentialLogFiles[i]);
         }
 
         break;
       } // end while
 
+      if ( l_JumpToNextLogFile ) 
+      {
+        continue;  // jump to next log file
+      }
 
       // reset random access to beginning
 
@@ -220,21 +223,22 @@ namespace DataHandling
 
       // Read log file into Property which is then stored in Sample object
 
-      TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(m_filename);
-      TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(m_filename);
+      TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(potentialLogFiles[i]);
+      TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(potentialLogFiles[i]);
 
 
       // read in the log file
 
+      l_JumpToNextLogFile = false; 
+
       while ( std::getline(inLogFile, aLine, '\n') ) 
       {
-        if ( aLine.size() < 19 )
+        if ( !isDateTimeString(aLine) )
         {
-          // A date-time string in a log file is 19 characters
-          // hence if the first line is not that length sometime
-          // is not right!
-          g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file.");
-          throw Exception::FileError("Invalid ISIS log file:", potentialLogFiles[i]);
+          g_log.warning("File" + potentialLogFiles[i] + " is not a standard ISIS log file. Expected to be two a column file.");
+          l_JumpToNextLogFile = true;
+          inLogFile.close();
+          break; // break out of while look
         }
 
         std::istringstream ins(aLine);
@@ -265,6 +269,11 @@ namespace DataHandling
 
       } // end while
 
+      if ( l_JumpToNextLogFile ) 
+      {
+        continue;  // jump to next log file
+      }
+
 
       // store Property in Sample object
 
@@ -276,9 +285,12 @@ namespace DataHandling
       {
         sample.addLogData(l_PropertyString);
       }
+
       inLogFile.close();
     } // end for
-// operation was a success and ended normally
+
+
+    // operation was a success and ended normally
     return;
   }
 
@@ -331,6 +343,18 @@ namespace DataHandling
       return true;
     else
       return false;
+  }
+
+
+  /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
+  bool LoadLog::isDateTimeString(const std::string& str)
+  { 
+    if ( str.size() >= 19 )
+      if ( str.compare(4,1,"-") == 0 && str.compare(7,1,"-") == 0 && str.compare(13,1,":") == 0 
+           && str.compare(16,1,":") == 0 && str.compare(10,1,"T") == 0 )
+        return true;
+     
+    return false;
   }
 
 

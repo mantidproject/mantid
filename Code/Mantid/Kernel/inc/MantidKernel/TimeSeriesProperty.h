@@ -5,6 +5,7 @@
 #include "Exception.h"
 #include <map>
 #include "boost/date_time/posix_time/posix_time.hpp"
+//#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -17,7 +18,9 @@ namespace Kernel
     
     @author Russell Taylor, Tessella Support Services plc
     @date 26/11/2007
-    
+    @author Anders Markvardsen, ISIS, RAL
+    @date 12/12/2007
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -57,13 +60,34 @@ public:
 	/// Virtual destructor
 	virtual ~TimeSeriesProperty() {}
 	
-	// Property method
-	std::string value() const
-	{
-	  throw Exception::NotImplementedError("Not yet");
+	/* Overwrite Property method
+   *
+   * @return time series property as a string
+   */
+	std::string value() const	
+  {
+    std::stringstream ins;
+
+    try {
+      typename std::map<dateAndTime, TYPE>::const_iterator p = m_propertySeries.begin();
+
+      while ( p != m_propertySeries.end() )
+      {
+        ins << p->first << "  " << p->second << std::endl;
+        p++;
+	    }
+
+      return ins.str();
+    }
+    catch ( boost::bad_lexical_cast e ) 
+    {
+     // g_log.error() << "Casting error in TimeSeriesProperty." << e.what();
+      return std::string(""); 
+	  }
 	}
 	
-	// Property method
+
+	// Overwrite Property method
 	bool setValue( const std::string& value )
 	{
 	  throw Exception::NotImplementedError("Not yet");
@@ -84,18 +108,6 @@ public:
 	  }
 	}
 
-  /// for testing that values stored ok - while debugging
-  void printMapToScreen() 
-  { 
-    typename std::map<dateAndTime, TYPE>::iterator p = m_propertySeries.begin();
-
-    while ( p != m_propertySeries.end() )
-    {
-      std::cout << p->first << "  " << p->second << std::endl;
-      p++;
-    }
-
-  }
 	
 private:
   /// Holds the time series data
@@ -103,6 +115,9 @@ private:
   
   /// Private default constructor
   TimeSeriesProperty();
+
+  /// static reference to the logger class
+  //static Kernel::Logger& g_log;
 };
 
 } // namespace Kernel

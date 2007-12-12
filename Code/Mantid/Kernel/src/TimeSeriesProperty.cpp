@@ -5,6 +5,8 @@ namespace Mantid
 namespace Kernel
 {
 
+  //Logger& TimeSeriesProperty::g_log = Logger::get("TimeSeriesProperty");
+
 /// @cond
 
 template DLLExport class TimeSeriesProperty<double>;
