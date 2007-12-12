@@ -236,16 +236,5 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         //.def("subAlgorithms", (std::vector<Mantid::API::Algorithm*,std::allocator<Mantid::API::Algorithm*> >& (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
     ;
    
-   scope* Mantid_Kernel_StatusCode_scope = new scope(
-    class_< Mantid::Kernel::StatusCode >("StatusCode", no_init)
-        .def(init< const Mantid::Kernel::StatusCode& >())
-    );
-
-    scope().attr("FAILURE") = (int)Mantid::Kernel::StatusCode::FAILURE;
-    scope().attr("SUCCESS") = (int)Mantid::Kernel::StatusCode::SUCCESS;
-    scope().attr("RECOVERABLE") = (int)Mantid::Kernel::StatusCode::RECOVERABLE;
-
-    delete Mantid_Kernel_StatusCode_scope;
-
 }
 

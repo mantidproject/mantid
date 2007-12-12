@@ -240,8 +240,6 @@ namespace Mantid
 			// Invoke final() method of the derived class inside a try/catch clause
 			try
 			{
-				//Kernel::StatusCode status(Kernel::StatusCode::SUCCESS,true);
-
 				// Finalize first any sub-algorithms (it can be done more than once)
 				// Gaudi at some point had a bug if this wasn't done first.
 				try
@@ -329,14 +327,13 @@ namespace Mantid
 		*  @param type    The concrete algorithm class of the sub algorithm
 		*  @param name    The name to be given to the sub algorithm
 		*  @param pSubAlg Set to point to the newly created algorithm object
-		* 
-		*  @return        Success since nothing ever happens.
+		* 		
 		*/
-		Kernel::StatusCode Algorithm::createSubAlgorithm( const std::string& type, const std::string& name, 
+		void Algorithm::createSubAlgorithm( const std::string& type, const std::string& name, 
 			Algorithm*& pSubAlg )
 		{
 			/// @todo This method needs implementing now that we have an algorithm factory
-			return Kernel::StatusCode::SUCCESS;   
+			   
 		}
 
 		// IProperty implementation

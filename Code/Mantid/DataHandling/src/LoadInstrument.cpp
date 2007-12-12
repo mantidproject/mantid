@@ -152,8 +152,8 @@ namespace DataHandling
 		g_log.error("Error opening file" + m_filename);
 		throw Kernel::Exception::FileError("Error opening instrument file",m_filename);
 	}
-		
-//	return StatusCode::SUCCESS;
+  //returns here if finished normally		
+	return;
 	}
 
 	/** Finalisation method. Does nothing at present.

@@ -88,7 +88,7 @@ class Workspace;
      virtual bool isExecuted() const;
      virtual bool isFinalized() const;
     
-     Kernel::StatusCode createSubAlgorithm( const std::string& type, const std::string& name, 
+     void createSubAlgorithm( const std::string& type, const std::string& name, 
                                             Algorithm*& pSubAlg );
 	  
      /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
