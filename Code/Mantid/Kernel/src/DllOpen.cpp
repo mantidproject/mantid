@@ -114,7 +114,7 @@ void* DllOpen::OpenDllImpl(const std::string& filePath)
 {
 	void* handle = dlopen(filePath.c_str(), RTLD_NOW);
 	if (!handle) {
-		log.error("Could not open library " + libName + ": " + dlerror());
+		log.error("Could not open library " + filePath + ": " + dlerror());
 	}
 	return handle;
 }
