@@ -42,7 +42,6 @@ public:
 		PropertyManager mgr;
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 1) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("1") )
-		TS_ASSERT( mgr.isValidProperty("myProP") )
 		
 		TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty("", 5), std::invalid_argument )
@@ -54,7 +53,6 @@ public:
     BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
-    TS_ASSERT( ! mgr.isValidProperty("MyProp") )
     
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5.5), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", 5.5), std::invalid_argument )
@@ -65,7 +63,6 @@ public:
     PropertyManager mgr;
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator, "hello") )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
-    TS_ASSERT( mgr.isValidProperty("MYprop") )
     Property *p = mgr.getProperty("myProp");
     TS_ASSERT( ! p->documentation().compare("hello") )
     
@@ -97,9 +94,13 @@ public:
 		delete pp;
 	}
 
-	void testIsValidProperty()
+	void testValidateProperties()
 	{
+	  TS_ASSERT( manager.validateProperties() )
 	  
+	  PropertyManager mgr;
+	  mgr.declareProperty("someProp","", new MandatoryValidator);
+	  TS_ASSERT( ! mgr.validateProperties() )
 	}
 	
 	void testGetPropertyValue()

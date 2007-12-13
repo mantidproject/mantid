@@ -373,23 +373,13 @@ void Algorithm::declareProperty(const std::string &name, const char* value,
 // Private Member Functions
 //----------------------------------------------------------------------
 
-/** Check all properties for validity
+/** Check all properties for validity.
+ *  Delegated to the PropertyManager method
  *  @return True if all the declared properties have valid values
  */
 bool Algorithm::validateProperties() const
 {
-  const std::vector< Property*> &props = getProperties();
-  bool allValid = true;
-  for (unsigned int i = 0; i < props.size(); ++i)
-  {
-    if ( !props[i]->isValid() )
-    {
-      g_log.error() << "Property \"" << props[i]->name()
-          << "\" is not set to a valid value." << std::endl;
-      allValid=false;
-    }
-  }
-  return allValid;
+  return m_propertyMgr.validateProperties();
 }
 
 /** Stores any output workspaces into the AnalysisDataService

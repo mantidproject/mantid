@@ -10,6 +10,9 @@ namespace Mantid
 namespace Kernel
 {
 
+// Get a reference to the logger
+Logger& PropertyManager::g_log = Logger::get("PropertyManager");
+
 /// Default constructor
 PropertyManager::PropertyManager() :
   m_properties()
@@ -108,22 +111,21 @@ bool PropertyManager::existsProperty( const std::string& name ) const
   }
 }
 
-/** Validates the named property
- *  @param name The name of the property (case insensitive)
- *  @return True if the property exists AND has a valid value
+/** Validates all the properties in the collection
+ *  @return True if all properties have a valid value
  */
-bool PropertyManager::isValidProperty( const std::string &name ) const
+bool PropertyManager::validateProperties() const
 {
-  Property *p;
-  try 
+  bool allValid = true;
+  for ( PropertyMap::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it )
   {
-    p = getProperty(name);
-  } 
-  catch (Exception::NotFoundError e)
-  {
-    return false;
+    if ( ! (it->second->isValid()) )
+    {
+      g_log.error() << "Property \"" << it->first << "\" is not set to a valid value." << std::endl;
+      allValid=false;
+    }
   }
-  return p->isValid();
+  return allValid; 
 }
 
 /** Get the value of a property as a string

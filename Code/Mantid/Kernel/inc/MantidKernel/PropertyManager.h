@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IProperty.h"
+#include "Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include <map>
 
@@ -84,7 +85,7 @@ public:
   // IProperty methods
   void setProperty( const std::string &name, const std::string &value );
   bool existsProperty( const std::string &name ) const;
-  bool isValidProperty( const std::string &name ) const;
+  bool validateProperties() const;
   std::string getPropertyValue( const std::string &name ) const;
   Property* getProperty( const std::string &name ) const;
   const std::vector< Property* >& getProperties() const;
@@ -96,6 +97,9 @@ private:
   PropertyMap m_properties;
   /// Stores the order that the properties were declared in
   std::vector<Property*> m_orderedProperties;
+  
+  /// Static refenence to the logger class
+  static Logger& g_log;
 };
 
 } // namespace Kernel
