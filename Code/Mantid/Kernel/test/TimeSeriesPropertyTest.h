@@ -35,14 +35,7 @@ public:
     TS_ASSERT( typeid( std::map<boost::posix_time::ptime, std::string> ) == *sProp->type_info()  )
     TS_ASSERT( sProp->isDefault() )
 	}
-
-	void testValue()
-	{
-		TS_ASSERT_THROWS( iProp->value(), Exception::NotImplementedError )
-    TS_ASSERT_THROWS( dProp->value(), Exception::NotImplementedError )
-    TS_ASSERT_THROWS( sProp->value(), Exception::NotImplementedError )
-	}
-
+  
 	void testSetValue()
 	{
     TS_ASSERT_THROWS( iProp->setValue("1"), Exception::NotImplementedError )
@@ -65,6 +58,16 @@ public:
     TS_ASSERT( sProp->addValue("20071130T161710","test2") )
     TS_ASSERT( ! sProp->addValue("20071130T161710","test3") )
  	}
+
+	void testValue()
+	{
+    const std::string dString = dProp->value();
+    TS_ASSERT_EQUALS( dString.substr(0,26), "2007-Nov-30 16:17:00  9.99" );
+    const std::string iString = iProp->value();
+    TS_ASSERT_EQUALS( iString.substr(0,23), "2007-Nov-30 16:17:00  1" );
+    const std::string sString = sProp->value();
+    TS_ASSERT_EQUALS( sString.substr(0,26), "2007-Nov-30 16:17:00  test" );
+	}
 
 	void testCasting()
 	{
