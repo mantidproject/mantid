@@ -97,9 +97,8 @@ namespace Kernel
         }
         else
         {
-          std::string& fileName = itr->path().leaf();
           //if they are libraries
-          std::string libName = DllOpen::ConvertToLibName(fileName);
+          std::string libName = DllOpen::ConvertToLibName(itr->path().leaf());
           if (libName != "")
           {
             //load them
