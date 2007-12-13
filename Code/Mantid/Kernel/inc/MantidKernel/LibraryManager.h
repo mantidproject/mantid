@@ -12,6 +12,7 @@ namespace Mantid
 {
 namespace Kernel
 {
+
 // the types of the class factories
 //typedef Algorithm* create_alg();
 //typedef void destroy_alg(Algorithm*);
@@ -49,18 +50,20 @@ public:
 	LibraryManager();
 	virtual ~LibraryManager();
 	
+	//opens all suitable libraries on a given path
+	int OpenAllLibraries(const std::string&, bool isRecursive=false);
+
 	//Returns true if DLL is opened or already open
 	bool OpenLibrary(const std::string&);
 
 	bool OpenLibrary(const std::string&, const std::string&);
 
-	//Algorithm* CreateAlgorithm(const std::string&);
-	//void DestroyAlgorithm(const std::string&, Algorithm*);
-
 private:
 	/// An untyped pointer to the loaded library
 	void* module;
 
+  /// static reference to the logger class
+  static Logger& g_log;
 };
 
 } // namespace Kernel

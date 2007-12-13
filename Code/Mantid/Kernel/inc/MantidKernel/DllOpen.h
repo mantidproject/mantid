@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <string>
-#include "System.h"
+#include "MantidKernel/System.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -40,7 +40,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DllOpen
+class DLLExport DllOpen
 {
 public:
 	/// Static method for opening the shared library
@@ -55,6 +55,9 @@ public:
 	/// Static method for closing the shared library
 	static void CloseDll(void*);
 
+  /// Static method for converting a filename to a libName (without lib___.so or ___.dll)
+  static const std::string ConvertToLibName(const std::string&);
+
 private:
 	/// Constructor private as not needed
 	DllOpen() {};
@@ -62,10 +65,24 @@ private:
 	DllOpen(const DllOpen &a) {};
 	///Destructor private as not needed	
 	~DllOpen() {};
-	
+
+  //private functions specific to implementation
+  /// Implementation specifc static method for opening a shared library
+	static void* OpenDllImpl(const std::string&);
+
+	/// Implementation specifc static method for retrieving a function pointer
+	static void* GetFunctionImpl(void*, const std::string&);
+
+	/// Implementation specifc static method for closing a shared library
+	static void CloseDllImpl(void*);
+
 	/// Static reference to the logger class
 	static Mantid::Kernel::Logger& log;
 	
+  ///lib prefix
+  static const std::string LIB_PREFIX;
+  ///lib postfix
+  static const std::string LIB_POSTFIX;
 };
 
 } // namespace Kernel
