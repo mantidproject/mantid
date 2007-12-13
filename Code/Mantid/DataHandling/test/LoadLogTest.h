@@ -47,13 +47,18 @@ public:
     loader.setProperty("Filename", inputFile);
 
     outputSpace = "LoadLogTest-singleLogFile";
-    loader.setProperty("OutputWorkspace", outputSpace);
+    loader.setProperty("Workspace", outputSpace);
+    // Create an empty workspace and put it in the AnalysisDataService
+    WorkspaceFactory *factory = WorkspaceFactory::Instance();
+    Workspace *ws = factory->create("Workspace2D");
+    AnalysisDataService *data = AnalysisDataService::Instance();
+    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(outputSpace));
 
 
@@ -62,7 +67,6 @@ public:
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
     
@@ -90,13 +94,18 @@ public:
     loaderRawFile.setProperty("Filename", inputFile);
 
     outputSpace = "LoadLogTest-rawdatafile";
-    loaderRawFile.setProperty("OutputWorkspace", outputSpace);
+    loaderRawFile.setProperty("Workspace", outputSpace);
+    // Create an empty workspace and put it in the AnalysisDataService
+    WorkspaceFactory *factory = WorkspaceFactory::Instance();
+    Workspace *ws = factory->create("Workspace1D");
+    AnalysisDataService *data = AnalysisDataService::Instance();
+    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(outputSpace));
 
 
@@ -105,7 +114,6 @@ public:
     TS_ASSERT( loaderRawFile.isExecuted() );    
     
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
    

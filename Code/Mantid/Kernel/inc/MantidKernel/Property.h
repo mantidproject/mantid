@@ -51,7 +51,7 @@ public:
 	const std::string& documentation() const;
 	const std::type_info* type_info() const;
 	const std::string type() const;
-	virtual const bool isValid();
+	virtual const bool isValid() const;
 	const bool isDefault() const;
 	
 	// Setter

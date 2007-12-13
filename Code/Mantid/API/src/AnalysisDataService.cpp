@@ -83,7 +83,7 @@ void AnalysisDataService::addOrReplace(const std::string& name, Workspace* space
     }
     catch(std::runtime_error& ex)
     {
-      g_log.error("Error adding workspace");
+      g_log.error("Error adding workspace" + name);
       throw;
     }
     return;

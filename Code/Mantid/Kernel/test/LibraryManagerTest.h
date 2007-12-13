@@ -4,7 +4,6 @@
 #include <iostream>
 #include <cxxtest/TestSuite.h>
 
-//#include "MantidKernel/StatusCode.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/LibraryManager.h"

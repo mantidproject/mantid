@@ -41,19 +41,49 @@ public:
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTest";
+    WorkspaceFactory *factory = WorkspaceFactory::Instance();
+    Workspace *ws = factory->create("Workspace2D");
+    Workspace2D *ws2D = dynamic_cast<Workspace2D*>(ws);
+    int histogramNumber = 2584;
+    int timechannels = 100;
+    ws2D->setHistogramNumber(histogramNumber);
+    //loop to create data
+    for (int i = 0; i < 2584; i++)
+    {
+      std::vector<double> timeChannelsVec(timechannels);
+      std::vector<double> v(timechannels);
+      // Create and fill another vector for the errors
+      std::vector<double> e(timechannels);    
+    //timechannels
+      for (int j = 0; j < timechannels; j++)
+      {
+        timeChannelsVec[j] = j*100;
+        v[j] = (i+j)%256;   
+        e[j] = (i+j)%78;
+      }
+      // Populate the workspace.
+      ws2D->setX(i, timeChannelsVec);
+      ws2D->setData(i, v, e);
+    }
+
+    //put this workspace in the data service
+    AnalysisDataService *data = AnalysisDataService::Instance();
+    TS_ASSERT_THROWS_NOTHING(data->add(wsName, ws2D));    
+
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Instrument/HET_Definition.txt";
     loader.setProperty("Filename", inputFile);
 
-    outputSpace = "LoadInstrumentTest-outer";
-    loader.setProperty("OutputWorkspace", outputSpace);
-
+    loader.setProperty("Workspace", wsName);
+    
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
-    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("OutputWorkspace") )
-    TS_ASSERT( ! result.compare(outputSpace));
+    TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
 
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());    
@@ -61,9 +91,8 @@ public:
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace *output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(wsName));
     
     Instrument& i = output->getInstrument();
     Mantid::Geometry::Component* source = i.getSource();
@@ -83,6 +112,12 @@ public:
     TS_ASSERT_DELTA( ptrDet1000->getPos().Y(), 11.12,0.01);
     TS_ASSERT_DELTA( ptrDet1000->getPos().Z(), 0.43,0.01);
     TS_ASSERT_EQUALS( ptrDet1000->type(), "DetectorComponent");
+
+    // Test input data is unchanged
+    Workspace2D *output2DInst = dynamic_cast<Workspace2D*>(output);
+    // Should be 2584 
+    TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), histogramNumber);
+
   }
   
   void testFinal()
@@ -93,73 +128,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.finalize());    
     TS_ASSERT( loader.isFinalized() );
   }
-
-  void testWithExistingData ()
-  {
-    //create a workspace with some sample data
-    std::string wsName = "LoadInstrument-testWithExistingData";
-    WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    Workspace *ws = factory->create("Workspace2D");
-    Workspace2D *ws2D = dynamic_cast<Workspace2D*>(ws);
-    int histogramNumber = 2584;
-    int timechannels = 100;
-    ws2D->setHistogramNumber(histogramNumber);
-    //loop to create data
-    for (int i = 0; i < 2584; i++)
-    {
-      std::vector<double> timeChannelsVec(timechannels);
-      std::vector<double> v(timechannels);
-      // Create and fill another vector for the errors
-      std::vector<double> e(timechannels);	  
-	  //timechannels
-      for (int j = 0; j < timechannels; j++)
-      {
-        timeChannelsVec[j] = j*100;
-        v[j] = (i+j)%256;		
-        e[j] = (i+j)%78;
-      }
-      // Populate the workspace.
-      ws2D->setX(i, timeChannelsVec);
-      ws2D->setData(i, v, e);
-    }
-
-    //put this workspace in the data service
-    AnalysisDataService *data = AnalysisDataService::Instance();
-	  TS_ASSERT_THROWS_NOTHING(data->add(wsName, ws2D));    
-
-    // Get back the saved workspace
-    Workspace *output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(wsName));    
-    Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
-    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), histogramNumber);
-
-    // Path to test input file assumes Test directory checked out from SVN
-    std::string instFile = "../../../../Test/Instrument/HET_Definition.txt";
-    //now load the instrument data into the same workspace
-    LoadInstrument loadInst;
-    TS_ASSERT_THROWS_NOTHING(loadInst.initialize());
-    loadInst.setProperty("Filename", instFile);
-    loadInst.setProperty("InputWorkspace", wsName);
-    loadInst.setProperty("OutputWorkspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loadInst.execute());	
-    TS_ASSERT( loadInst.isExecuted() ); 
-
-    // Get back the saved workspace
-    Workspace *outputInst;
-    TS_ASSERT_THROWS_NOTHING(outputInst = data->retrieve(wsName));    
-    Workspace2D *output2DInst = dynamic_cast<Workspace2D*>(outputInst);
-    // Should be 2584 
-    TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), 2584);
-
-    Instrument& i = output2DInst->getInstrument();
-    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),2184);
-  }
   
 private:
   LoadInstrument loader;
   std::string inputFile;
-  std::string outputSpace;
-  std::string inputSpace;
+  std::string wsName;
   
 };
   

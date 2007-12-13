@@ -1,10 +1,10 @@
-#include "MantidKernel/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 
 /// @cond
@@ -15,5 +15,5 @@ template DLLExport class WorkspaceProperty<DataObjects::Workspace2D>;
 
 /// @endcond
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid

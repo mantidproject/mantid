@@ -124,8 +124,8 @@ public:
   {
     std::vector<Property*> vec = alg.getProperties();
     TS_ASSERT( ! vec.empty() )
-    TS_ASSERT( vec.size() == 4 )
-    TS_ASSERT( ! vec[0]->name().compare("InputWorkspace") )
+    TS_ASSERT( vec.size() == 2 )
+    TS_ASSERT( ! vec[0]->name().compare("prop1") )
   }    
 private:
   ToyAlgorithm alg;	

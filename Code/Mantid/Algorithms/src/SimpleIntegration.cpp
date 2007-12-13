@@ -5,22 +5,24 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <sstream>
 #include <numeric>
 #include <math.h>
-
-// Register the class into the algorithm factory
-//DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms, SimpleIntegration)
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
-using namespace Mantid::Kernel;
-using Mantid::DataObjects::Workspace1D;
-using Mantid::DataObjects::Workspace2D;
+// Register the class into the algorithm factory
+DECLARE_ALGORITHM(SimpleIntegration)
+
+using namespace Kernel;
+using API::WorkspaceProperty;
+using DataObjects::Workspace1D;
+using DataObjects::Workspace2D;
 
 // Get a reference to the logger
 Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
@@ -30,13 +32,16 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
  */
 void SimpleIntegration::init()
 {
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace1D>("OutputWorkspace","",Direction::Output));
+  
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartX",0, mustBePositive);
   declareProperty("EndX",0, mustBePositive);
   declareProperty("StartY",0, mustBePositive);
   declareProperty("EndY",0, mustBePositive);
-  }
+}
 
 /** Executes the algorithm
  * 
@@ -61,12 +66,10 @@ void SimpleIntegration::exec()
   pv = static_cast< PropertyWithValue<int>* >(p);
   m_MaxY = *pv;
    
-  const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(m_inputWorkspace);
-  if (!localworkspace)
-  {
-    g_log.error("Input workspace is of incorrect type");
-	throw std::runtime_error("Input workspace is of incorrect type");
-  }
+  // Get the input workspace
+  p = getProperty("InputWorkspace");
+  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
+  const Workspace2D *localworkspace = *wp;
 
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
@@ -126,25 +129,24 @@ void SimpleIntegration::exec()
   
   // Create the 1D workspace for the output
   API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-  m_outputWorkspace = factory->create("Workspace1D");
-  Workspace1D *localWorkspace = static_cast<Workspace1D*>(m_outputWorkspace);
+  Workspace1D *localWorkspace = static_cast<Workspace1D*>(factory->create("Workspace1D"));
 
   // Populate the 1D workspace
   localWorkspace->setX(detectorNumber);
   localWorkspace->setData(sums, errors);
   
+  // Assign it to the output workspace property
+  p = getProperty("OutputWorkspace");
+  WorkspaceProperty<Workspace1D> *out = dynamic_cast< WorkspaceProperty<Workspace1D>* >(p);
+  *out = localWorkspace;
+  
   return;  
 }
 
-/** Finalisation method. Does nothing at present.
- *
- */
+/// Finalisation method. Does nothing at present.
 void SimpleIntegration::final()
 {
 }
-
-// Register the class into the algorithm factory
-DECLARE_ALGORITHM(SimpleIntegration)
 
 } // namespace Algorithm
 } // namespace Mantid

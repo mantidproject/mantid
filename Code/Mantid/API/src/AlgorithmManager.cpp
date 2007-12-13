@@ -77,7 +77,6 @@ namespace Mantid
     /// Finalizes and deletes all registered algorithms
     void AlgorithmManager::clear()
     {
-      int errOut(0);
       std::vector<IAlgorithm*>::iterator vc;
       try
       {

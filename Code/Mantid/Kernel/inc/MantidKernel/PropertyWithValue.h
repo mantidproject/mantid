@@ -174,14 +174,16 @@ public:
   /** Checks if the value is valid for this property.
    *  @returns true if the value is valid, otherwise false.
    */
-  virtual const bool isValid()
+  virtual const bool isValid() const
   {
     return m_validator->isValid(m_value);
   }
 
-private:
+protected:
   /// The value of the property
-  TYPE m_value;
+  mutable TYPE m_value;  // mutable so that it can be set in WorkspaceProperty::isValid() method
+  
+private:
   /// Visitor validator class
   IValidator<TYPE> *m_validator;
   

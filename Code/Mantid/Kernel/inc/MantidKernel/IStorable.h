@@ -37,7 +37,7 @@ class IStorable
 {
 public:
   /// Store a workspace into the AnalysisDataService
-  virtual void store() = 0;
+  virtual bool store() = 0;
   /// Clear the stored pointer
   virtual void clear() = 0;
   /// Virtual destructor

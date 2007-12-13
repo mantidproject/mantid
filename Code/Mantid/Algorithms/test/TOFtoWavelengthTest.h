@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::API;
@@ -20,8 +19,6 @@ public:
   
   TOFtoWavelengthTest()
   {
-//    Mantid::Kernel::ConfigService::Instance();
-    
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     
     // Set up a small workspace for testing
@@ -56,8 +53,7 @@ public:
     // Path to test input file assumes Test directory checked out from SVN
     std::string inputFile = "../../../../Test/Instrument/HET_Definition.txt";
     loader.setProperty("Filename", inputFile);
-    loader.setProperty("InputWorkspace", inputSpace);
-    loader.setProperty("OutputWorkspace", inputSpace);
+    loader.setProperty("Workspace", inputSpace);
     loader.execute();
     loader.finalize();
     

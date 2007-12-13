@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -18,6 +19,7 @@ namespace DataHandling
   DECLARE_ALGORITHM(LoadRaw)
 
   using namespace Kernel;
+  using API::WorkspaceProperty;
   using DataObjects::Workspace2D;
 
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");
@@ -31,6 +33,7 @@ namespace DataHandling
   void LoadRaw::init()
   {
     declareProperty("Filename","",new MandatoryValidator);
+    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
   }
   
   /** Executes the algorithm. Reading in the file and creating and populating
@@ -68,8 +71,7 @@ namespace DataHandling
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
     API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-    m_outputWorkspace = factory->create("Workspace2D");
-    Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(m_outputWorkspace);
+    Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(factory->create("Workspace2D"));
 
     // Set number of histograms in 2D workspace
     localWorkspace->setHistogramNumber(numberOfSpectra);
@@ -93,6 +95,11 @@ namespace DataHandling
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
+    
+    // Assign the result to the output workspace property
+    Property *p = getProperty("OutputWorkspace");
+    WorkspaceProperty<Workspace2D> *out = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
+    *out = localWorkspace;
     
     // Clean up
     delete[] timeChannels;

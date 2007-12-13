@@ -5,17 +5,19 @@
 #include "MantidAlgorithms/PhysicalConstants.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Instrument.h"
-
-// Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms, TOFtoWavelength)
+#include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
+// Register the class into the algorithm factory
+DECLARE_ALGORITHM(TOFtoWavelength)
+
 using namespace Kernel;
 using API::WorkspaceFactory;
+using API::WorkspaceProperty;
 using DataObjects::Workspace2D;
 
 // Get a reference to the logger
@@ -36,7 +38,8 @@ TOFtoWavelength::~TOFtoWavelength()
  */
 void TOFtoWavelength::init()
 {
-  // No extra properties besides the base class ones
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));  
 }
 
 /** Executes the algorithm
@@ -45,22 +48,18 @@ void TOFtoWavelength::init()
  */
 void TOFtoWavelength::exec()
 {
-  // Cast the input workspace to a Workspace2D
-  Workspace2D *inputWS = dynamic_cast<Workspace2D*>(m_inputWorkspace);
-  if (!inputWS)
-  {
-    g_log.error("Input workspace is of incorrect type");
-	throw std::runtime_error("Input workspace is of incorrect type");
-  }
-  
+  // Get the input workspace
+  Property *p = getProperty("InputWorkspace");
+  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
+  Workspace2D *inputWS = *wp;
+
   // Get the number of histograms in the input 2D workspace
   const int numberOfSpectra = inputWS->getHistogramNumber();
   
   // Create the 2D workspace for the output
   // Get a pointer to the workspace factory (later will be shared)
   WorkspaceFactory *factory = WorkspaceFactory::Instance();
-  m_outputWorkspace = factory->create("Workspace2D");
-  Workspace2D *localWorkspace = static_cast<Workspace2D*>(m_outputWorkspace);
+  Workspace2D *localWorkspace = static_cast<Workspace2D*>(factory->create("Workspace2D"));
 
   // Set number of histograms in 2D workspace
   localWorkspace->setHistogramNumber(numberOfSpectra);
@@ -116,6 +115,12 @@ void TOFtoWavelength::exec()
     localWorkspace->setX(i, XBins);
     localWorkspace->setData(i, YData, errors);
   }
+  
+  // Assign the result to the output workspace property
+  p = getProperty("OutputWorkspace");
+  WorkspaceProperty<Workspace2D> *out = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
+  *out = localWorkspace;
+  
   return;
 }
 

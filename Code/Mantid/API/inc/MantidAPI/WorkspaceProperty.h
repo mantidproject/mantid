@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-namespace Kernel
+namespace API
 {
 /** @class WorkspaceProperty WorkspaceProperty.h Kernel/WorkspaceProperty.h
 
@@ -43,7 +43,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class WorkspaceProperty : public PropertyWithValue<TYPE*>, public IStorable
+class WorkspaceProperty : public Kernel::PropertyWithValue<TYPE*>, public Kernel::IStorable
 {
 public:  
   /** Constructor.
@@ -54,7 +54,7 @@ public:
    *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
    */
   WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction ) :
-    PropertyWithValue<TYPE*>( name, NULL ),
+    Kernel::PropertyWithValue<TYPE*>( name, NULL ),
     m_workspaceName( wsName ),
     m_direction( direction )
   {
@@ -65,7 +65,7 @@ public:
 
   /// Copy constructor
   WorkspaceProperty( const WorkspaceProperty& right ) :
-    PropertyWithValue<TYPE*>( right ),
+    Kernel::PropertyWithValue<TYPE*>( right ),
     m_workspaceName( right.m_workspaceName ),
     m_direction( right.m_direction )
   {
@@ -75,12 +75,12 @@ public:
   WorkspaceProperty& operator=( const WorkspaceProperty& right )
   {
     if ( &right == this ) return *this;
-    PropertyWithValue<TYPE*>::operator=( right );
+    Kernel::PropertyWithValue<TYPE*>::operator=( right );
     return *this;
   }
   
   // Unhide the base class assignment operator
-  using PropertyWithValue<TYPE*>::operator=;
+  using Kernel::PropertyWithValue<TYPE*>::operator=;
   
   /// Virtual destructor
   virtual ~WorkspaceProperty()
@@ -112,7 +112,7 @@ public:
   /** Checks whether the property is valid
    *  @returns True if the property is valid, otherwise false.
    */
-  virtual const bool isValid()
+  virtual const bool isValid() const
   {
     // Assume that any declared WorkspaceProperty must have a name set (i.e. is not an optional property)
     if ( m_workspaceName.empty() ) return false;
@@ -122,10 +122,10 @@ public:
     {
       try {
         API::Workspace *ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
-        // Check retrieved workspace is the type that it should be and assign to the property value
-        TYPE* workspace = this->operator=( dynamic_cast<TYPE*>(ws) );
-        if ( !workspace ) return false;
-      } catch (Exception::NotFoundError e) {
+        // Check retrieved workspace is the type that it should be
+        Kernel::PropertyWithValue<TYPE*>::m_value = dynamic_cast<TYPE*>(ws);
+        if ( ! Kernel::PropertyWithValue<TYPE*>::m_value ) return false;
+      } catch (Kernel::Exception::NotFoundError& e) {
         return false;
       }
     }
@@ -134,13 +134,22 @@ public:
     return true;
   }
 
-  /// If this is an output workspace, store it into the AnalysisDataService
-  virtual void store()
+  /** If this is an output workspace, store it into the AnalysisDataService
+   *  @return True if the workspace is an output workspace and has been stored
+   *  @throw std::runtime_error if unable to store the workspace successfully
+   */
+  virtual bool store()
   {
     if ( m_direction )
     {
       // Note use of addOrReplace rather than add
       API::AnalysisDataService::Instance()->addOrReplace(m_workspaceName, this->operator()() );
+      return true;
+    }
+    else
+    {
+      // Come here if an input workspace
+      return false;
     }
   }
   
@@ -157,6 +166,14 @@ private:
   const unsigned int m_direction;
 };
 
+} // namespace API
+} // namespace Mantid
+
+
+namespace Mantid
+{
+namespace Kernel
+{
 /// Describes the direction (within an algorithm) of a WorkspaceProperty
 struct Direction
 {

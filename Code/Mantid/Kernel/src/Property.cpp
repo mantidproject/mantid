@@ -74,7 +74,7 @@ const std::string Property::type() const
  *  Note: always returns true unless overridden
  *  @return True if the property's value is a valid one
  */
-const bool Property::isValid()
+const bool Property::isValid() const
 {
   // Always true at present
   return true;
