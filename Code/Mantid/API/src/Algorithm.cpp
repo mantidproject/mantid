@@ -21,7 +21,8 @@ namespace Mantid
 			m_isInitialized(false),
 			m_isExecuted(false),
 			m_isFinalized(false),
-			m_propertyMgr()
+			m_propertyMgr(),
+      m_isChildAlgorithm(false)
 		{
 		}
 
@@ -171,7 +172,10 @@ namespace Mantid
 				catch(std::runtime_error& ex)
 				{
 					g_log.error()<< "Error in Execution of algorithm "<< m_name<<std::endl;
-					throw;
+
+          // only rethrow exception if algorithm is a child-algorithm
+          if (m_isChildAlgorithm)
+			  		throw;
 				}
 				// Register the output workspace with the analysis data service
 				if ( m_outputWorkspace )

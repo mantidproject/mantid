@@ -142,6 +142,9 @@ class Workspace;
     /// Workspace containing the output of the algorithm. Created by the concrete algorithm.
     Workspace* m_outputWorkspace;
 
+    /// To specify whether algorithm is a child. Default to false
+    bool  m_isChildAlgorithm; 
+
   private:
 
     /// Private Copy constructor: NO COPY ALLOWED
