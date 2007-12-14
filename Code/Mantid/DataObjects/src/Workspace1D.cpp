@@ -2,6 +2,7 @@
 #include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/TripleIteratorCode.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 DECLARE_WORKSPACE(Workspace1D)
 
@@ -55,4 +56,6 @@ int Workspace1D::size() const
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace1D>;
+
+template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace1D>;
 ///\endcond TEMPLATE

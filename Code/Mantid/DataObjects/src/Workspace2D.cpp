@@ -3,6 +3,7 @@
 #include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/TripleIteratorCode.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 DECLARE_WORKSPACE(Workspace2D)
 
@@ -289,4 +290,6 @@ std::vector<double>& Workspace2D::dataE(int const index)
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace2D>;
+
+template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 ///\endcond TEMPLATE

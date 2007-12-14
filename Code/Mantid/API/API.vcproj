@@ -201,6 +201,10 @@
 				RelativePath=".\src\WorkspaceFactory.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WorkspaceProperty.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -261,6 +265,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceProperty.h"
 				>
 			</File>
 		</Filter>

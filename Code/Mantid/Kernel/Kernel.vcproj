@@ -241,6 +241,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\IStorable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\IValidator.h"
 				>
 			</File>
@@ -270,10 +274,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\PropertyWithValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidKernel\StatusCode.h"
 				>
 			</File>
 			<File
