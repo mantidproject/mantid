@@ -5,9 +5,11 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/Minus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/LibraryManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
@@ -65,6 +67,11 @@ class FibSeries
 int main()
 {
 #if defined _DEBUG
+
+  FrameworkManager fm;
+    fm.initialize();
+  LibraryManager lm;
+  lm.OpenAllLibraries("C:\\Mantid\\Code\\Mantid\\Debug\\plugins");
 	//NOTE:  Any code in here is temporory for debugging purposes only, nothing is safe!
     int sizex = 1500,sizey=2584;
     // Register the workspace in the data service
@@ -76,7 +83,7 @@ int main()
 //    ADS->add("test_in11", work_in1);
 //    ADS->add("test_in12", work_in2);
 
-    plus plus_alg;
+    Plus plus_alg;
 /*
     plus_alg.initialize();
     plus_alg.setProperty("InputWorkspace_1","test_in11");

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_PLUS_H_
-#define MANTID_ALGORITHM_PLUS_H_
+#ifndef MANTID_ALGORITHM_MINUS_H_
+#define MANTID_ALGORITHM_MINUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,11 +16,10 @@ namespace Mantid
 {
 namespace Algorithms
 {
+  /** @class Minus Minus.h Algorithms/Minus.h
 
-  /** @class Plus Plus.h Algorithms/Plus.h
 
-
-	Plus performs the difference of two input workspaces.
+	Minus performs the difference of two input workspaces.
     It inherits from the Algorithm class, and overrides
     the init(), exec() & final() methods.
     
@@ -28,11 +27,11 @@ namespace Algorithms
        <UL>
        <LI> InputWorkspace1 - The name of the workspace </LI>
        <LI> InputWorkspace2 - The name of the workspace </LI>
-       <LI> OutputWorkspace - The name of the workspace in which to store the added data </LI>
+       <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
        </UL>
 
-    @author Dickon Champion, RAL
-    @date 12/12/2007
+    @author Nick Draper
+    @date 14/12/2007
     
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
@@ -54,13 +53,13 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-class DLLExport Plus : public API::Algorithm
+class DLLExport Minus : public API::Algorithm
 {
 public:
   /// Default constructor
-	Plus() : API::Algorithm() {};
+	Minus() : API::Algorithm() {};
 	/// Destructor
-	virtual ~Plus() {};
+	virtual ~Minus() {};
 	
 private:
   // Overridden Algorithm methods
@@ -70,7 +69,7 @@ private:
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
 
-  class Plus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
+  class Minus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
   {
    public:
     API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&) const;
@@ -81,4 +80,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_PLUS_H_*/
+#endif /*MANTID_ALGORITHM_MINUS_H_*/

@@ -156,6 +156,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\BinaryOpHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Minus.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Plus.cpp"
 				>
 			</File>
@@ -174,6 +182,18 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\BinaryOpHelper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Minus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MinusTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\PhysicalConstants.h"
 				>
 			</File>
@@ -187,6 +207,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\TOFtoWavelength.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspaceCreationHelper.h"
 				>
 			</File>
 		</Filter>

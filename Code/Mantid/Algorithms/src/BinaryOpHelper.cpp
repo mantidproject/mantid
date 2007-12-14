@@ -1,0 +1,89 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAlgorithms/BinaryOpHelper.h"
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceFactory.h" 
+#include "MantidKernel/Exception.h" 
+
+using namespace Mantid::DataObjects;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+namespace Mantid
+{
+  namespace Algorithms
+  {
+    // Get a reference to the logger
+    Logger& BinaryOpHelper::g_log = Logger::get("binaryOpHelper");
+
+    /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
+    * In order to be size compatible then the larger workspace 
+    * must divide be the size of the smaller workspace leaving no remainder
+    * @param ws1 the first workspace to compare
+    * @param ws2 the second workspace to compare
+    * @retval true The two workspaces are size compatible
+    * @retval false The two workspaces are NOT size compatible
+    */
+    const bool BinaryOpHelper::checkSizeCompatability(const Workspace* ws1,const Workspace* ws2) const
+    {
+      //get the largest workspace
+      const Workspace* wsLarger;
+      const Workspace* wsSmaller;
+      if (ws1->size() > ws2->size())
+      {
+        wsLarger = ws1;
+        wsSmaller = ws2;
+      }
+      else
+      {
+        wsLarger = ws2;
+        wsSmaller = ws1;
+      }
+      //in order to be size compatible then the larger workspace 
+      //must divide be the size of the smaller workspace leaving no remainder
+      if (wsSmaller->size() ==0) return false;
+      return ((wsLarger->size() % wsSmaller->size()) == 0);
+    }
+
+    /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces
+    * @param ws1 the first workspace to compare
+    * @param ws2 the second workspace to compare
+    * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
+    */
+    API::Workspace* BinaryOpHelper::createOutputWorkspace(const API::Workspace* ws1, const API::Workspace* ws2) const
+    {
+      //get the largest workspace
+      const Workspace* wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
+      //create a new workspace
+      Workspace* retVal = WorkspaceFactory::Instance()->create(wsLarger->id());
+      //this needs to be set to the size of the larger workspace and 0 filled
+      Workspace1D* ws1D = dynamic_cast<Workspace1D*>(retVal);
+      if (ws1D != 0)
+      {    
+        //do ws1d things
+        std::vector<double> x(wsLarger->size(),0),sig(wsLarger->size(),0),err(wsLarger->size(),0);
+        ws1D->setData(sig,err);
+        ws1D->setX(x);
+      }
+      else
+      {
+        Workspace2D* ws2D = dynamic_cast<Workspace2D*>(retVal);   
+        if (ws2D != 0)
+        {
+          //do ws2d things
+          std::vector<double> x(wsLarger->blocksize(),0),y(wsLarger->blocksize(),0),e(wsLarger->blocksize(),0);
+          int len=wsLarger->size()/wsLarger->blocksize();
+          ws2D->setHistogramNumber(len);
+          for (int i = 0; i < len; i++)
+          {
+            ws2D->setX(i,x);
+            ws2D->setData(i,y,e);
+          }
+        }
+      }
+      return retVal;
+    }
+  }
+}

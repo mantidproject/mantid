@@ -1,9 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
 #include <cmath>
-#include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/Minus.h"
 #include "MantidAlgorithms/BinaryOpHelper.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -11,7 +10,7 @@
 #include "MantidAPI/TripleIterator.h" 
 
 // Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Plus)
+DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Minus)
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,13 +20,13 @@ namespace Mantid
   namespace Algorithms
   {
     // Get a reference to the logger
-    Logger& Plus::g_log = Logger::get("Plus");
+    Logger& Minus::g_log = Logger::get("Minus");
 
     /** Initialisation method. 
     * Defines input and output workspaces
     * 
     */
-    void Plus::init()
+    void Minus::init()
     {
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
@@ -38,7 +37,7 @@ namespace Mantid
     * 
     *  @throw runtime_error Thrown if algorithm cannot execute
     */
-    void Plus::exec()
+    void Minus::exec()
     {
       // get input workspace, dynamic cast not needed
       Property* p1 = getProperty("InputWorkspace_1");
@@ -61,7 +60,7 @@ namespace Mantid
       triple_iterator<Workspace> ti_out(*out_work);
       triple_iterator<Workspace> ti_in1(*in_work1);
       triple_iterator<Workspace> ti_in2(*in_work2);
-      std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
+      std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Minus_fn());
 
       // Assign it to the output workspace property
       Property* p3 = getProperty("OutputWorkspace");
@@ -74,7 +73,7 @@ namespace Mantid
     /** Finalisation method. Does nothing at present.
     *
     */
-    void Plus::final()
+    void Minus::final()
     {
     }
 
@@ -84,9 +83,9 @@ namespace Mantid
     * @returns A triple ref of the result with Gausian errors
     */
     TripleRef<double&>
-      Plus::Plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) const 
+      Minus::Minus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) const 
     {           
-      double ret_sig(a[1]+b[1]);
+      double ret_sig(a[1]-b[1]);
       //gaussian errors for the moment
       double ret_err(sqrt((a[2]*a[2])+(b[2]*b[2])));     
       return TripleRef<double&>(a[0],ret_sig,ret_err);      
