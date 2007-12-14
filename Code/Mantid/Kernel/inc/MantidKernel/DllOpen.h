@@ -83,6 +83,8 @@ private:
   static const std::string LIB_PREFIX;
   ///lib postfix
   static const std::string LIB_POSTFIX;
+  ///path seperator 
+  static const std::string PATH_SEPERATOR;
 };
 
 } // namespace Kernel
