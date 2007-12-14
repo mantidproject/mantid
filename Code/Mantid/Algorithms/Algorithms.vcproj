@@ -160,7 +160,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Divide.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Minus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Multiply.cpp"
 				>
 			</File>
 			<File
@@ -186,11 +194,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\Divide.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Minus.h"
 				>
 			</File>
 			<File
-				RelativePath=".\test\MinusTest.h"
+				RelativePath=".\inc\MantidAlgorithms\Multiply.h"
 				>
 			</File>
 			<File
@@ -207,10 +219,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\TOFtoWavelength.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\WorkspaceCreationHelper.h"
 				>
 			</File>
 		</Filter>
