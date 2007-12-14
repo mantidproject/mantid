@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAlgorithms/SimpleIntegration.h"
-#include "MantidAlgorithms/plus.h"
+#include "MantidAlgorithms/Plus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/BoundedValidator.h"
