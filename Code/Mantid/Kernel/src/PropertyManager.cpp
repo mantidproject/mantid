@@ -15,7 +15,8 @@ Logger& PropertyManager::g_log = Logger::get("PropertyManager");
 
 /// Default constructor
 PropertyManager::PropertyManager() :
-  m_properties()
+  m_properties(),
+  m_orderedProperties()
 {
 }
 
@@ -89,7 +90,7 @@ void PropertyManager::setProperties( const std::string &values )
  */
 void PropertyManager::setProperty( const std::string &name, const std::string &value )
 {
-  Property *p = getProperty(name);   // throws NotFoundError if property not in vector
+  Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
   bool success = p->setValue(value);
   if ( !success ) throw std::invalid_argument("Invalid value for this property");
 }
@@ -102,7 +103,7 @@ bool PropertyManager::existsProperty( const std::string& name ) const
 {
   try 
   {
-    getProperty(name);
+    getPointerToProperty(name);
     return true;
   }
   catch (Exception::NotFoundError e)
@@ -135,7 +136,7 @@ bool PropertyManager::validateProperties() const
  */
 std::string PropertyManager::getPropertyValue( const std::string &name ) const
 {
-  Property *p = getProperty(name);   // throws NotFoundError if property not in vector
+  Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
   return p->value();
 }
 
@@ -144,7 +145,7 @@ std::string PropertyManager::getPropertyValue( const std::string &name ) const
  *  @return A pointer to the named property
  *  @throw Exception::NotFoundError if the named property is unknown
  */
-Property* PropertyManager::getProperty( const std::string &name ) const
+Property* PropertyManager::getPointerToProperty( const std::string &name ) const
 {
   std::string ucName = name;
   std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
@@ -163,6 +164,31 @@ Property* PropertyManager::getProperty( const std::string &name ) const
 const std::vector< Property* >& PropertyManager::getProperties() const
 {
   return m_orderedProperties;
+}
+
+/// @cond
+template <>
+std::string PropertyManager::getValue<std::string>(const std::string &name) const
+{
+  Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
+  return p->value();
+}
+
+template <>
+Property* PropertyManager::getValue(const std::string &name) const
+{
+  std::cout << "Pointer specialisation called" << std::endl;
+  return getPointerToProperty(name);
+}
+/// @endcond
+
+/** Get the value of a property
+ *  @param name The name of the property
+ *  @return The value of the property. Will be cast to the desired type (if a supported type).
+ */
+PropertyManager::TypedValue PropertyManager::getProperty( const std::string &name ) const
+{
+  return TypedValue(*this, name);
 }
 
 } // namespace Kernel

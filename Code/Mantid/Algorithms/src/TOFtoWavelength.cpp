@@ -49,9 +49,9 @@ void TOFtoWavelength::init()
 void TOFtoWavelength::exec()
 {
   // Get the input workspace
-  Property *p = getProperty("InputWorkspace");
-  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
-  Workspace2D *inputWS = *wp;
+//  Property *p = getProperty("InputWorkspace");
+//  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
+  Workspace2D *inputWS = getProperty("InputWorkspace");
 
   // Get the number of histograms in the input 2D workspace
   const int numberOfSpectra = inputWS->getHistogramNumber();
@@ -117,7 +117,7 @@ void TOFtoWavelength::exec()
   }
   
   // Assign the result to the output workspace property
-  p = getProperty("OutputWorkspace");
+  Property *p = getProperty("OutputWorkspace");
   WorkspaceProperty<Workspace2D> *out = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
   *out = localWorkspace;
   

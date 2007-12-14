@@ -98,10 +98,8 @@ void SaveCSV::exec()
   }
 
   // Get the input workspace
-  Property *p = getProperty("InputWorkspace");
-  WorkspaceProperty<Workspace> *wp = dynamic_cast< WorkspaceProperty<Workspace>* >(p);
-  Workspace *inputWorkspace = *wp;
-
+  Workspace *inputWorkspace = getProperty("InputWorkspace");
+  
   // get workspace ID string. Used to differentiate between
   // workspace1D and workspace2D in the if statement below
 

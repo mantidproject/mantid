@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
-#include "MantidKernel/IProperty.h"
+#include "MantidKernel/INamedInterface.h"
 
 namespace Mantid
 {
@@ -17,72 +16,80 @@ namespace API
 
 /** @class IAlgorithm IAlgorithm.h Kernel/IAlgorithm.h
 
-    IAlgorithm is the interface implemented by the Algorithm base class.
-    Concrete algorithms, derived from the Algorithm base class are controlled 
-    via this interface.
+ IAlgorithm is the interface implemented by the Algorithm base class.
+ Concrete algorithms, derived from the Algorithm base class are controlled 
+ via this interface.
 
-    @author Russell Taylor, Tessella Support Services plc
-    @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
-    @date 11/09/2007
-    
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ @author Russell Taylor, Tessella Support Services plc
+ @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
+ @date 11/09/2007
+ 
+ Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
-    This file is part of Mantid.
+ This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-  class DLLExport IAlgorithm : virtual public Kernel::IProperty 
-  {
-  public:
-    // Retrieve interface ID
-    //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
+ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
+class DLLExport IAlgorithm : virtual public Kernel::INamedInterface
+{
+public:
+  // Retrieve interface ID
+  //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
 
-    /// The version of the algorithm
-    virtual const std::string& version() const = 0;
-    
-    /// Virtual destructor (always needed for abstract classes)
-    virtual ~IAlgorithm() {};	  
-      
-    /** Initialization method invoked by the framework. This method is responsible
-     *  for any bookkeeping of initialization required by the framework itself.
-     *  It will in turn invoke the init() method of the derived algorithm,
-     *  and of any sub-algorithms which it creates.
-     * 	 
-	 */
-    virtual void initialize() = 0;
+  /// The version of the algorithm
+  virtual const std::string& version() const = 0;
 
-    /** System execution. This method invokes the exec() method of a concrete algorithm.
-     * 
-     */
-    virtual void execute() = 0;
+  /// Virtual destructor (always needed for abstract classes)
+  virtual ~IAlgorithm() {}
 
-    /** System finalization. This method invokes the final() method of a concrete
-     *  algorithm and the final() methods of all of that algorithm's sub algorithms.
-     * 
-     */
-    virtual void finalize() = 0; 
+  /** Initialization method invoked by the framework. This method is responsible
+   *  for any bookkeeping of initialization required by the framework itself.
+   *  It will in turn invoke the init() method of the derived algorithm,
+   *  and of any sub-algorithms which it creates.
+   */
+  virtual void initialize() = 0;
 
-    /// Check whether the algorithm is initialized properly
-    virtual bool isInitialized() const = 0; 
-    /// Check whether the algorithm is finalized properly 
-    virtual bool isFinalized() const = 0; 
-    /// Check whether the algorithm has already been executed
-    virtual bool isExecuted() const = 0;
-  };
+  /// System execution. This method invokes the exec() method of a concrete algorithm.
+  virtual void execute() = 0;
+
+  /** System finalization. This method invokes the final() method of a concrete
+   *  algorithm and the final() methods of all of that algorithm's sub algorithms.
+   */
+  virtual void finalize() = 0;
+
+  /// Check whether the algorithm is initialized properly
+  virtual bool isInitialized() const = 0;
+  /// Check whether the algorithm is finalized properly 
+  virtual bool isFinalized() const = 0;
+  /// Check whether the algorithm has already been executed
+  virtual bool isExecuted() const = 0;
+
+  /** Set a property of an algorithm
+   *  @param name The name of the property to set
+   *  @param value The value to assign to the property
+   */
+  virtual void setProperty(const std::string& name, const std::string& value) = 0;
+  
+  /** Get the value of a property as a string
+   *  @param name The name of the property
+   *  @return The value of the property
+   */
+  virtual std::string getPropertyValue( const std::string &name ) const = 0;
+};
 
 } // namespace API
 } // namespace Mantid

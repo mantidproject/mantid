@@ -23,12 +23,6 @@ namespace Mantid
 {
 namespace API
 {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class Workspace;
-
 /** @class Algorithm Algorithm.h Kernel/Algorithm.h
 
  Base class from which all concrete algorithm classes should be derived. 
@@ -45,7 +39,7 @@ class Workspace;
  member variables as properties. All other functionality, 
  i.e. the use of services and the creation of sub-algorithms,
  may be used only in initialise() and afterwards (see the 
- Gaudi user guide).    
+ Gaudi user guide).
 
  @author Russell Taylor, Tessella Support Services plc
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
@@ -71,7 +65,7 @@ class Workspace;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Algorithm : virtual public IAlgorithm
+class DLLExport Algorithm : public IAlgorithm, virtual protected Kernel::PropertyManager
 {
 public:
   Algorithm();
@@ -103,10 +97,10 @@ public:
 
   // IProperty methods
   virtual void setProperty(const std::string &name, const std::string &value);
-  virtual bool existsProperty(const std::string &name) const;
+//  virtual bool existsProperty(const std::string &name) const;
   virtual std::string getPropertyValue(const std::string &name) const;
-  virtual Kernel::Property* getProperty(const std::string &name) const;
-  virtual const std::vector< Kernel::Property*>& getProperties() const;
+//  virtual Kernel::Property* getProperty(const std::string &name) const;
+//  virtual const std::vector< Kernel::Property*>& getProperties() const;
 
 protected:
 
@@ -129,21 +123,21 @@ protected:
    *  @param validator Pointer to the (optional) validator.
    *  @param doc The (optional) documentation string
    */
-  template <typename T> void declareProperty(const std::string &name, T value,
-      Kernel::IValidator<T> *validator = new Kernel::NullValidator<T>,
-      const std::string &doc="")
-  {
-    m_propertyMgr.declareProperty(name, value, validator, doc);
-  }
+//  template <typename T> void declareProperty(const std::string &name, T value,
+//      Kernel::IValidator<T> *validator = new Kernel::NullValidator<T>,
+//      const std::string &doc="")
+//  {
+//    m_propertyMgr.declareProperty(name, value, validator, doc);
+//  }
 
   // Specialised version of above function
-  void declareProperty(
-          const std::string &name,
-          const char* value,
-          Kernel::IValidator<std::string> *validator = new Kernel::NullValidator<std::string>,
-          const std::string &doc="");
-
-  void declareProperty(Kernel::Property *p);
+//  void declareProperty(
+//          const std::string &name,
+//          const char* value,
+//          Kernel::IValidator<std::string> *validator = new Kernel::NullValidator<std::string>,
+//          const std::string &doc="");
+//
+//  void declareProperty(Kernel::Property *p);
 
   /// To specify whether algorithm is a child. Default to false
   bool m_isChildAlgorithm;
@@ -157,7 +151,7 @@ private:
   Algorithm& operator=(const Algorithm& rhs);
 
   /// Check all properties for validity
-  bool validateProperties() const;
+//  bool validateProperties() const;
 
   /// Put any output workspaces into the AnalysisDataService
   void store();
@@ -174,7 +168,7 @@ private:
   bool m_isFinalized; ///< Algorithm has been finalized flag
 
   /// Manages the algorithm's properties
-  Kernel::PropertyManager m_propertyMgr;
+//  Kernel::PropertyManager m_propertyMgr;
 
 };
 

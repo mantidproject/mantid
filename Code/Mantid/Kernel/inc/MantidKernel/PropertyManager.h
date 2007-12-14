@@ -4,20 +4,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "IProperty.h"
 #include "Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include <vector>
 #include <map>
+#include <iostream>
 
 namespace Mantid
 {
 namespace Kernel
 {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-//class Property;
-
 /** @class PropertyManager PropertyManager.h Kernel/PropertyManager.h
 
     Property manager helper class.
@@ -49,14 +45,14 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PropertyManager : public IProperty
+class DLLExport PropertyManager
 {
 public:
 	PropertyManager();
 	virtual ~PropertyManager();
 	
 	// Function to declare properties (i.e. store them)
-	void declareProperty( Property *p );
+	virtual void declareProperty( Property *p );
 
 	/** Add a property of the template type to the list of managed properties
 	 *  @param name The name to assign to the property
@@ -76,21 +72,26 @@ public:
 	}
 	
 	// Specialised version of above function
-	void declareProperty( const std::string &name, const char* value,
+	virtual void declareProperty( const std::string &name, const char* value,
 	                      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="" );
 	
   // Sets all the declared properties from 
-  void setProperties( const std::string &values );
+	virtual void setProperties( const std::string &values );
   
   // IProperty methods
-  void setProperty( const std::string &name, const std::string &value );
-  bool existsProperty( const std::string &name ) const;
-  bool validateProperties() const;
-  std::string getPropertyValue( const std::string &name ) const;
-  Property* getProperty( const std::string &name ) const;
-  const std::vector< Property* >& getProperties() const;
+	virtual void setProperty( const std::string &name, const std::string &value );
+	virtual bool existsProperty( const std::string &name ) const;
+  virtual bool validateProperties() const;
+  virtual std::string getPropertyValue( const std::string &name ) const;
+//  Property* getProperty( const std::string &name ) const;
+  virtual const std::vector< Property* >& getProperties() const;
 	
 private:
+  /// Private copy constructor.
+  PropertyManager(const PropertyManager&);
+  /// Private copy assignment operator.
+  PropertyManager& operator=(const PropertyManager&);
+  
   /// typedef for the map holding the properties
   typedef std::map<std::string, Property*> PropertyMap;
   /// The properties under management
@@ -98,8 +99,49 @@ private:
   /// Stores the order that the properties were declared in
   std::vector<Property*> m_orderedProperties;
   
-  /// Static refenence to the logger class
+  /// Static reference to the logger class
   static Logger& g_log;
+
+  Property* getPointerToProperty( const std::string &name ) const;
+  
+  /** Templated method to get the value of a property
+   *  @param name The name of the property (case insensitive)
+   *  @return The value of the property
+   */
+  template<typename T>
+  T getValue(const std::string &name) const
+  {
+    PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
+    if (prop)
+    {
+      return *prop;
+    }
+    else
+    {
+      throw std::runtime_error("Attempt to assign property of incorrect type");
+    }
+  }
+  
+  /// Utility class that enables the getProperty method to be templated on return type
+  struct TypedValue
+  {
+    /// Reference to the holding PropertyManager
+    const PropertyManager& p;
+    /// The name of the property desired
+    const std::string name;
+    
+    /// Constructor
+    TypedValue(const PropertyManager& p, const std::string &name) : p(p), name(name) {}
+    
+    /// Templated casting operator so that a TypedValue can be cast to what is actually wanted
+    template<typename T>
+    operator T() { return p.getValue<T>(name); }
+  };
+  
+public:
+  /// Get the value of a property
+  virtual TypedValue getProperty( const std::string &name ) const;  
+
 };
 
 } // namespace Kernel

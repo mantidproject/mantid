@@ -15,13 +15,15 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 /// Constructor
 Algorithm::Algorithm() :
+  PropertyManager(),
   m_isChildAlgorithm(false),
   m_name("unknown"),
   m_version("unknown"),
+  m_subAlgms(),
   m_isInitialized(false),
   m_isExecuted(false),
-  m_isFinalized(false),
-  m_propertyMgr()
+  m_isFinalized(false) //,
+//  m_propertyMgr()
 {
 }
 
@@ -129,7 +131,7 @@ void Algorithm::execute()
   }
 
   // Check all properties for validity
-  if ( !this->validateProperties() )
+  if ( !validateProperties() )
   {
     throw std::runtime_error("Some invalid Properties found");
   }
@@ -299,28 +301,28 @@ void Algorithm::createSubAlgorithm(const std::string& type,
 // Delegate to the property manager
 void Algorithm::setProperty(const std::string &name, const std::string &value)
 {
-  m_propertyMgr.setProperty(name, value);
+  PropertyManager::setProperty(name, value);
 }
-
-bool Algorithm::existsProperty(const std::string& name) const
-{
-  return m_propertyMgr.existsProperty(name);
-}
-
+//
+//bool Algorithm::existsProperty(const std::string& name) const
+//{
+//  return m_propertyMgr.existsProperty(name);
+//}
+//
 std::string Algorithm::getPropertyValue(const std::string &name) const
 {
-  return m_propertyMgr.getPropertyValue(name);
+  return PropertyManager::getPropertyValue(name);
 }
-
-Kernel::Property* Algorithm::getProperty(const std::string &name) const
-{
-  return m_propertyMgr.getProperty(name);
-}
-
-const std::vector< Kernel::Property*>& Algorithm::getProperties() const
-{
-  return m_propertyMgr.getProperties();
-}
+//
+//Kernel::Property* Algorithm::getProperty(const std::string &name) const
+//{
+//  return m_propertyMgr.getProperty(name);
+//}
+//
+//const std::vector< Kernel::Property*>& Algorithm::getProperties() const
+//{
+//  return m_propertyMgr.getProperties();
+//}
 
 //----------------------------------------------------------------------
 // Protected Member Functions
@@ -350,10 +352,10 @@ void Algorithm::setFinalized()
  *  Delegated to the PropertyManager method.
  *  @param p A pointer to the property instance to register
  */
-void Algorithm::declareProperty(Kernel::Property *p)
-{
-  m_propertyMgr.declareProperty(p);
-}
+//void Algorithm::declareProperty(Kernel::Property *p)
+//{
+//  m_propertyMgr.declareProperty(p);
+//}
 
 /** Specialised version of declareProperty template method. Deals with case when the value argument
  *  is passed as a quote-enclosed string.
@@ -363,11 +365,11 @@ void Algorithm::declareProperty(Kernel::Property *p)
  *  @param validator Pointer to the (optional) validator.
  *  @param doc The (optional) documentation string
  */
-void Algorithm::declareProperty(const std::string &name, const char* value,
-    Kernel::IValidator<std::string> *validator, const std::string &doc)
-{
-  m_propertyMgr.declareProperty(name, value, validator, doc);
-}
+//void Algorithm::declareProperty(const std::string &name, const char* value,
+//    Kernel::IValidator<std::string> *validator, const std::string &doc)
+//{
+//  m_propertyMgr.declareProperty(name, value, validator, doc);
+//}
 
 //----------------------------------------------------------------------
 // Private Member Functions
@@ -377,10 +379,10 @@ void Algorithm::declareProperty(const std::string &name, const char* value,
  *  Delegated to the PropertyManager method
  *  @return True if all the declared properties have valid values
  */
-bool Algorithm::validateProperties() const
-{
-  return m_propertyMgr.validateProperties();
-}
+//bool Algorithm::validateProperties() const
+//{
+//  return m_propertyMgr.validateProperties();
+//}
 
 /** Stores any output workspaces into the AnalysisDataService
  *  @throw std::runtime_error If unable to successfully store an output workspace

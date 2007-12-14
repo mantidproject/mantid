@@ -50,27 +50,15 @@ void SimpleIntegration::init()
 void SimpleIntegration::exec()
 {
   // Try and retrieve the optional properties
-  Property *p = getProperty("StartX");
-  PropertyWithValue<int> *pv = static_cast< PropertyWithValue<int>* >(p);
-  m_MinX = *pv;
+  m_MinX = getProperty("StartX");
+  m_MaxX = getProperty("EndX");
+  m_MinY = getProperty("StartY");
+  m_MaxY = getProperty("EndY");
   
-  p = getProperty("EndX");
-  pv = static_cast< PropertyWithValue<int>* >(p);
-  m_MaxX = *pv;
-  
-  p = getProperty("StartY");
-  pv = static_cast< PropertyWithValue<int>* >(p);
-  m_MinY = *pv;
-  
-  p = getProperty("EndY");
-  pv = static_cast< PropertyWithValue<int>* >(p);
-  m_MaxY = *pv;
-   
   // Get the input workspace
-  p = getProperty("InputWorkspace");
-  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
-  const Workspace2D *localworkspace = *wp;
-
+  // can't be const return any more (should look into that...)
+  Workspace2D *localworkspace = getProperty("InputWorkspace");
+  
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
   if ( (0 > m_MinY) || (m_MinY > numberOfYBins))
@@ -136,7 +124,7 @@ void SimpleIntegration::exec()
   localWorkspace->setData(sums, errors);
   
   // Assign it to the output workspace property
-  p = getProperty("OutputWorkspace");
+  Property *p = getProperty("OutputWorkspace");
   WorkspaceProperty<Workspace1D> *out = dynamic_cast< WorkspaceProperty<Workspace1D>* >(p);
   *out = localWorkspace;
   

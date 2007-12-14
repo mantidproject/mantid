@@ -47,10 +47,8 @@ void LoadInstrument::exec()
   m_filename = getPropertyValue("Filename");
 
   // Get the input workspace
-  Property *p = getProperty("Workspace");
-  WorkspaceProperty<Workspace> *wp = dynamic_cast< WorkspaceProperty<Workspace>*>(p);
-  Workspace *localWorkspace = *wp;
-
+  Workspace *localWorkspace = getProperty("Workspace");
+  
   ///Geometry components
   API::Instrument& instrument = localWorkspace->getInstrument();
   Geometry::ObjComponent *source = new Geometry::ObjComponent;

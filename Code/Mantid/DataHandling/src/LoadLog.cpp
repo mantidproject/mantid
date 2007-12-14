@@ -48,49 +48,10 @@ void LoadLog::init()
 void LoadLog::exec()
 {
   // Retrieve the filename from the properties
-
   m_filename = getPropertyValue("Filename");
 
-  // Retrieve the ws names from the properties
-
-//  std::string inputWorkspaceName;
-//  std::string outputWorkspaceName;
-//  try
-//  {
-//    inputWorkspaceName = getPropertyValue("InputWorkspace");
-//  }
-//  catch (Kernel::Exception::NotFoundError& ex)
-//  {
-//    g_log.debug("InputWorkspace has not been set.");
-//  }
-//
-//  try
-//  {
-//    outputWorkspaceName = getPropertyValue("OutputWorkspace");
-//  }
-//  catch (Kernel::Exception::NotFoundError& ex)
-//  {
-//    g_log.error()<<"OutputWorkspace has not been set."<<ex.what();
-//    throw std::runtime_error("OutputWorkspace has not been set");
-//  }
-//
-//  // Create the 2D workspace for the output
-//  // Get a pointer to the workspace factory (later will be shared)
-//
-//  if (inputWorkspaceName != outputWorkspaceName)
-//  {
-//    API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-//    m_outputWorkspace = factory->create("Workspace2D");
-//  }
-//  else
-//  {
-//    m_outputWorkspace = m_inputWorkspace;
-//  }
-
   // Get the input workspace
-  Property *p = getProperty("Workspace");
-  WorkspaceProperty<Workspace> *wp = dynamic_cast< WorkspaceProperty<Workspace>*>(p);
-  Workspace *localWorkspace = *wp;  
+  Workspace *localWorkspace = getProperty("Workspace");
   
   // the log file(s) will be loaded into the Sample container of the workspace
 

@@ -4,8 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include <iostream>
 
 using namespace Mantid::Kernel;
 
@@ -47,7 +45,7 @@ public:
 		TS_ASSERT_THROWS( mgr.declareProperty("", 5), std::invalid_argument )
 	}
 
-	void testdeclareProperty_double()
+	void testdeclareProperty_double() 
 	{
     PropertyManager mgr;
     BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
@@ -63,7 +61,8 @@ public:
     PropertyManager mgr;
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator, "hello") )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
-    Property *p = mgr.getProperty("myProp");
+    Property *p;
+    TS_ASSERT_THROWS_NOTHING( p = mgr.getProperty("myProp") )
     TS_ASSERT( ! p->documentation().compare("hello") )
     
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", "aValue"), Exception::ExistsError )
@@ -118,7 +117,7 @@ public:
 		TS_ASSERT( ! p->documentation().compare("") )
 		TS_ASSERT( typeid(int) == *p->type_info() )
 		
-		TS_ASSERT_THROWS( manager.getProperty("werhui"), Exception::NotFoundError )
+		TS_ASSERT_THROWS( p = manager.getProperty("werhui"), Exception::NotFoundError )
 	}
 
 	void testGetProperties()

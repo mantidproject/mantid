@@ -1,4 +1,5 @@
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TripleRef.h"
 #include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/TripleIteratorCode.h"
@@ -93,4 +94,6 @@ Sample& Workspace::getSample()
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::Workspace>;
+
+template DLLExport class Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
 ///\endcond TEMPLATE

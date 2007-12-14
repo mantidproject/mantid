@@ -20,6 +20,15 @@ public:
   }
   void exec() {}
   void final() {}
+  
+  bool existsProperty( const std::string &name ) const
+  {
+    PropertyManager::existsProperty(name);
+  }
+  const std::vector< Property* >& getProperties() const
+  {
+    PropertyManager::getProperties();
+  }
 };
 
 DECLARE_ALGORITHM(ToyAlgorithm)
@@ -89,7 +98,7 @@ public:
     TS_ASSERT( testVec.empty() );
   }
 	
-  void testSetProprerty()
+  void testSetProperty()
   {
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("prop1","val") )
     TS_ASSERT_THROWS( alg.setProperty("prop3","1"), Exception::NotFoundError )
@@ -106,20 +115,9 @@ public:
     std::string value;
     TS_ASSERT_THROWS_NOTHING( value = alg.getPropertyValue("prop2") )
     TS_ASSERT( ! value.compare("1") )
-    TS_ASSERT_THROWS(alg.getProperty("ghjkgh"), Exception::NotFoundError )    
+    TS_ASSERT_THROWS(alg.getPropertyValue("ghjkgh"), Exception::NotFoundError )    
   }
   
-  void testGetProperty()
-  {
-    Property *p;
-    TS_ASSERT_THROWS_NOTHING( p = alg.getProperty("prop2") )
-    TS_ASSERT( ! p->name().compare("prop2") )
-    TS_ASSERT( ! p->value().compare("1") )
-    TS_ASSERT( typeid( int) == *p->type_info() )
-    
-    TS_ASSERT_THROWS( alg.getProperty("wrong"), Exception::NotFoundError )
-	}
-
   void testGetProperties()
   {
     std::vector<Property*> vec = alg.getProperties();
