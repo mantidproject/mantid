@@ -39,7 +39,11 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));    
     }
 
-   Workspace* plus::createOutputWorkspace(Workspace* m_inputWorkspace)
+    /** Creates an output workspace to fill with the calculated data
+    * @param m_inputWorkspace The input workspace to use as a template
+    * @returns An new workspace with the same dimensions as the input workspace, all values set to 0.
+    */
+    Workspace* plus::createOutputWorkspace(Workspace* m_inputWorkspace)
     {
       Workspace1D* d1_out = dynamic_cast<Workspace1D*>(m_inputWorkspace);
       if (d1_out != 0)
@@ -82,13 +86,14 @@ namespace Mantid
       Workspace* in_work1 = *wp1;
       Workspace* in_work2 = *wp2;
 
-      //      Workspace* in_wksp = getExtraInputWorkspace();
       Workspace* out_work = createOutputWorkspace(in_work1);
 
       triple_iterator<Workspace> ti_out(*out_work);
       triple_iterator<Workspace> ti_in1(*in_work1);
       triple_iterator<Workspace> ti_in2(*in_work2);
-      transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),plus_fn());
+      std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),plus_fn());
+
+      std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),plus_fn());
 
       // Assign it to the output workspace property
       Property* p3 = getProperty("OutputWorkspace");
@@ -105,6 +110,11 @@ namespace Mantid
     {
     }
 
+    /* Performs the addition with Gausian errors within the transform function
+    * @param a The triple ref of the first workspace data item
+    * @param b The triple ref of the second workspace data item
+    * @returns A triple ref of the result with Gausian errors
+    */
     TripleRef<double&>
       plus::plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) const 
     {           

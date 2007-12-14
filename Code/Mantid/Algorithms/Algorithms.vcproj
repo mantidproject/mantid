@@ -43,6 +43,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -178,6 +179,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\plus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\PlusTest.h"
 				>
 			</File>
 			<File

@@ -66,10 +66,9 @@ private:
   void init();
   void exec();
   void final();
-    /// Static reference to the logger class
+  /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
   
- // API::Workspace* getExtraInputWorkspace();
   API::Workspace* createOutputWorkspace(API::Workspace*);
 
   class plus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
