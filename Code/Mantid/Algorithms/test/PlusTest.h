@@ -2,6 +2,7 @@
 #define PLUSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAPI/AnalysisDataService.h"
