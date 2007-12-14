@@ -72,7 +72,7 @@ private:
  // API::Workspace* getExtraInputWorkspace();
   API::Workspace* createOutputWorkspace(API::Workspace*);
 
-  class plus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&>>
+  class plus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
   {
    public:
     API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&) const;
