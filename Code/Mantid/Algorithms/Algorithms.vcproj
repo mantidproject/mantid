@@ -156,7 +156,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\plus.cpp"
+				RelativePath=".\src\Plus.cpp"
 				>
 			</File>
 			<File
@@ -178,11 +178,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\plus.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\PlusTest.h"
+				RelativePath=".\inc\MantidAlgorithms\Plus.h"
 				>
 			</File>
 			<File

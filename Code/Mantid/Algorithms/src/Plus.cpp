@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 
 #include <cmath>
-#include "MantidAlgorithms/plus.h"
+#include "MantidAlgorithms/Plus.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PropertyWithValue.h"
