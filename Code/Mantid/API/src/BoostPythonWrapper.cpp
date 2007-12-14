@@ -138,9 +138,9 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         return Mantid::API::Algorithm::getPropertyValue(p0);
     }
 
-    Mantid::API::Property* getProperty(const std::string& p0) const {
-        return call_method< Mantid::API::Property* >(py_self, "getProperty", p0);
-    }
+//    Mantid::API::Property* getProperty(const std::string& p0) const {
+//        return call_method< Mantid::API::Property* >(py_self, "getProperty", p0);
+//    }
 
     Mantid::API::Property* default_getProperty(const std::string& p0) const {
         return Mantid::API::Algorithm::getProperty(p0);
@@ -224,10 +224,10 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         .def("isExecuted", &Mantid::API::Algorithm::isExecuted, &Mantid_API_Algorithm_Wrapper::default_isExecuted)
         .def("isFinalized", &Mantid::API::Algorithm::isFinalized, &Mantid_API_Algorithm_Wrapper::default_isFinalized)
         .def("setProperty", &Mantid::API::Algorithm::setProperty, &Mantid_API_Algorithm_Wrapper::default_setProperty)
-        .def("existsProperty", &Mantid::API::Algorithm::existsProperty, &Mantid_API_Algorithm_Wrapper::default_existsProperty)
+//        .def("existsProperty", &Mantid::API::Algorithm::existsProperty, &Mantid_API_Algorithm_Wrapper::default_existsProperty)
         .def("getPropertyValue", &Mantid::API::Algorithm::getPropertyValue, &Mantid_API_Algorithm_Wrapper::default_getPropertyValue)
-        .def("getProperty", &Mantid::API::Algorithm::getProperty, &Mantid_API_Algorithm_Wrapper::default_getProperty, return_value_policy< manage_new_object >())
-        .def("getProperties", &Mantid::API::Algorithm::getProperties, &Mantid_API_Algorithm_Wrapper::default_getProperties, return_value_policy< copy_const_reference >())
+//        .def("getProperty", &Mantid::API::Algorithm::getProperty, &Mantid_API_Algorithm_Wrapper::default_getProperty, return_value_policy< manage_new_object >())
+//        .def("getProperties", &Mantid::API::Algorithm::getProperties, &Mantid_API_Algorithm_Wrapper::default_getProperties, return_value_policy< copy_const_reference >())
         .def("initialize", &Mantid::API::Algorithm::initialize)
         .def("execute", &Mantid::API::Algorithm::execute)
         .def("finalize", &Mantid::API::Algorithm::finalize)

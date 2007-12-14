@@ -177,7 +177,6 @@ std::string PropertyManager::getValue<std::string>(const std::string &name) cons
 template <>
 Property* PropertyManager::getValue(const std::string &name) const
 {
-  std::cout << "Pointer specialisation called" << std::endl;
   return getPointerToProperty(name);
 }
 /// @endcond

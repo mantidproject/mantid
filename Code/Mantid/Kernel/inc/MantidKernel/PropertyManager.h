@@ -8,7 +8,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include <vector>
 #include <map>
-#include <iostream>
 
 namespace Mantid
 {
