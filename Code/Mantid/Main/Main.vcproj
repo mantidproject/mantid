@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_DEBUG"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"

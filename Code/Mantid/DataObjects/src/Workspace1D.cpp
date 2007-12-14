@@ -49,6 +49,18 @@ int Workspace1D::size() const
   return Histogram1D::size();
 }
 
+///get the size of each vector
+int Workspace1D::blocksize() const
+{
+  int retVal = 1000000000;
+  //if not empty
+  if (size() > 0)
+  {
+    //set the reteurn value to the length of the first vector
+    retVal = size();
+  }
+  return retVal; 
+}
 
 } // namespace DataObjects
 

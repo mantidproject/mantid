@@ -54,7 +54,7 @@ public:
   virtual int size() const;
   //set blocksize to a very large number as 1D workspace has only one block
   ///Returns the size of each block of data returned by the dataX accessors
-  virtual int blocksize() const { return 1000000000; }
+  virtual int blocksize() const;
   //inheritance redirections
   ///Returns the x data
   virtual std::vector<double>& dataX(int const index) { return Histogram1D::dataX(); }
