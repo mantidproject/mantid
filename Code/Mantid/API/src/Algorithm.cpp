@@ -151,7 +151,7 @@ namespace Mantid
         }
 
         // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
-        if (isChild()) {this->store();}
+        if (!isChild()) {this->store();}
 
         setExecuted(true);
 
