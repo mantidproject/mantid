@@ -79,7 +79,9 @@ namespace Mantid
         */
         API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
       private:
+        ///Temporary cache of calculated signal value
         double ret_sig;
+        ///Temporary cache of calculated error value
         double ret_err;
       };
 
