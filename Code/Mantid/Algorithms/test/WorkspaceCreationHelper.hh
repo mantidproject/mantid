@@ -3,7 +3,6 @@
 
 #include <cmath>
 
-#include "MantidAlgorithms/Plus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -11,7 +10,7 @@
 
 using namespace Mantid::DataObjects;
 
-class WorkspaceCreationHelper : public CxxTest::TestSuite
+class WorkspaceCreationHelper
 {
 public:
 

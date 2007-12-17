@@ -83,14 +83,14 @@ namespace Mantid
     * @returns A triple ref of the result with Gausian errors
     */
     TripleRef<double&>
-      Multiply::Multiply_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) const 
+      Multiply::Multiply_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) 
     {           
-      double ret_sig(a[1]/b[1]);
+      ret_sig=a[1]/b[1];
       //gaussian errors for the moment
       // (Sa/a)2 + (Sb/b)2 = (Sc/c)2 
       //  So after taking proportions, squaring, summing, 
       //  and taking the square root, you get a proportional error to the product c. Multiply that proportional error by c to get the actual standard deviation Sc. 
-      double ret_err(ret_sig*sqrt((a[2]/a[1])*(a[2]/a[1])) + ((b[2]/b[1])*(b[2]/b[1])));     
+      ret_err=ret_sig*sqrt((a[2]/a[1])*(a[2]/a[1])) + ((b[2]/b[1])*(b[2]/b[1]));     
 
       return TripleRef<double&>(a[0],ret_sig,ret_err);      
     }

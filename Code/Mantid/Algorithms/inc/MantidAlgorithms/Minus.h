@@ -14,25 +14,25 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-  /** @class Minus Minus.h Algorithms/Minus.h
+  namespace Algorithms
+  {
+    /** @class Minus Minus.h Algorithms/Minus.h
 
 
-	Minus performs the difference of two input workspaces.
+    Minus performs the difference of two input workspaces.
     It inherits from the Algorithm class, and overrides
     the init(), exec() & final() methods.
-    
+
     Required Properties:
-       <UL>
-       <LI> InputWorkspace1 - The name of the workspace </LI>
-       <LI> InputWorkspace2 - The name of the workspace </LI>
-       <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
-       </UL>
+    <UL>
+    <LI> InputWorkspace1 - The name of the workspace </LI>
+    <LI> InputWorkspace2 - The name of the workspace </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
+    </UL>
 
     @author Nick Draper
     @date 14/12/2007
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -51,38 +51,41 @@ namespace Algorithms
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
-*/
-
-class DLLExport Minus : public API::Algorithm
-{
-public:
-  /// Default constructor
-	Minus() : API::Algorithm() {};
-	/// Destructor
-	virtual ~Minus() {};
-	
-private:
-  // Overridden Algorithm methods
-  void init();
-  void exec();
-  void final();
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
-
-  class Minus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
-  {
-   public:
-    /* Performs the substraction with Gausian errors within the transform function
-    * @param a The triple ref of the first workspace data item
-    * @param b The triple ref of the second workspace data item
-    * @returns A triple ref of the result with Gausian errors
     */
-    API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&) const;
-  };
 
-};
+    class DLLExport Minus : public API::Algorithm
+    {
+    public:
+      /// Default constructor
+      Minus() : API::Algorithm() {};
+      /// Destructor
+      virtual ~Minus() {};
 
-} // namespace Algorithm
+    private:
+      // Overridden Algorithm methods
+      void init();
+      void exec();
+      void final();
+      /// Static reference to the logger class
+      static Mantid::Kernel::Logger& g_log;
+
+      class Minus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
+      {
+      public:
+        /* Performs the substraction with Gausian errors within the transform function
+        * @param a The triple ref of the first workspace data item
+        * @param b The triple ref of the second workspace data item
+        * @returns A triple ref of the result with Gausian errors
+        */
+        API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
+      private:
+        double ret_sig;
+        double ret_err;
+      };
+
+    };
+
+  } // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MINUS_H_*/

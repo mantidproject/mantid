@@ -14,25 +14,25 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-  /** @class Multiply Multiply.h Algorithms/Multiply.h
+  namespace Algorithms
+  {
+    /** @class Multiply Multiply.h Algorithms/Multiply.h
 
 
-	Multiply performs the product of two input workspaces.
+    Multiply performs the product of two input workspaces.
     It inherits from the Algorithm class, and overrides
     the init(), exec() & final() methods.
-    
+
     Required Properties:
-       <UL>
-       <LI> InputWorkspace1 - The name of the workspace </LI>
-       <LI> InputWorkspace2 - The name of the workspace </LI>
-       <LI> OutputWorkspace - The name of the workspace in which to store the product data </LI>
-       </UL>
+    <UL>
+    <LI> InputWorkspace1 - The name of the workspace </LI>
+    <LI> InputWorkspace2 - The name of the workspace </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the product data </LI>
+    </UL>
 
     @author Nick Draper
     @date 14/12/2007
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -51,38 +51,42 @@ namespace Algorithms
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
-*/
-
-class DLLExport Multiply : public API::Algorithm
-{
-public:
-  /// Default constructor
-	Multiply() : API::Algorithm() {};
-	/// Destructor
-	virtual ~Multiply() {};
-	
-private:
-  // Overridden Algorithm methods
-  void init();
-  void exec();
-  void final();
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
-
-  class Multiply_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
-  {
-   public:
-    /* Performs the Multiplication with Gausian errors within the transform function
-    * @param a The triple ref of the first workspace data item
-    * @param b The triple ref of the second workspace data item
-    * @returns A triple ref of the result with Gausian errors
     */
-    API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&) const;
-  };
 
-};
+    class DLLExport Multiply : public API::Algorithm
+    {
+    public:
+      /// Default constructor
+      Multiply() : API::Algorithm() {};
+      /// Destructor
+      virtual ~Multiply() {};
 
-} // namespace Algorithm
+    private:
+      // Overridden Algorithm methods
+      void init();
+      void exec();
+      void final();
+      /// Static reference to the logger class
+      static Mantid::Kernel::Logger& g_log;
+
+      class Multiply_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
+      {
+      public:
+        /* Performs the Multiplication with Gausian errors within the transform function
+        * @param a The triple ref of the first workspace data item
+        * @param b The triple ref of the second workspace data item
+        * @returns A triple ref of the result with Gausian errors
+        */
+        API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
+
+      private:
+        double ret_sig;
+        double ret_err;
+      };
+
+    };
+
+  } // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_MULTIPLY_H_*/
