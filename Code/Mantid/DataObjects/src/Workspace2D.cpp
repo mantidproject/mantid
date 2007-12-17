@@ -297,7 +297,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-template<>
+template<> DLLExport
 Mantid::DataObjects::Workspace2D* PropertyManager::getValue<Mantid::DataObjects::Workspace2D*>(const std::string &name) const
 {
   PropertyWithValue<Mantid::DataObjects::Workspace2D*> *prop = 

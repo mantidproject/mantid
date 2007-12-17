@@ -167,7 +167,7 @@ const std::vector< Property* >& PropertyManager::getProperties() const
 }
 
 /// @cond
-template<>
+template<> DLLExport
 int PropertyManager::getValue<int>(const std::string &name) const
 {
   PropertyWithValue<int> *prop = dynamic_cast<PropertyWithValue<int>*>(getPointerToProperty(name));
@@ -181,7 +181,7 @@ int PropertyManager::getValue<int>(const std::string &name) const
   }
 }
 
-template<>
+template<> DLLExport
 double PropertyManager::getValue<double>(const std::string &name) const
 {
   PropertyWithValue<double> *prop = dynamic_cast<PropertyWithValue<double>*>(getPointerToProperty(name));
@@ -195,14 +195,14 @@ double PropertyManager::getValue<double>(const std::string &name) const
   }
 }
 
-template <>
+template <> DLLExport
 std::string PropertyManager::getValue<std::string>(const std::string &name) const
 {
   Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
   return p->value();
 }
 
-template <>
+template <> DLLExport
 Property* PropertyManager::getValue(const std::string &name) const
 {
   return getPointerToProperty(name);

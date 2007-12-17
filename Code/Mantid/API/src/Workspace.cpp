@@ -101,7 +101,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-template<>
+template<> DLLExport
 Mantid::API::Workspace* PropertyManager::getValue<Mantid::API::Workspace*>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace*> *prop = 

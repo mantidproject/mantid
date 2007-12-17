@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -170,10 +170,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\BoostPythonWrapper.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -199,10 +195,6 @@
 			</File>
 			<File
 				RelativePath=".\src\WorkspaceFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\WorkspaceProperty.cpp"
 				>
 			</File>
 		</Filter>
