@@ -96,4 +96,26 @@ Sample& Workspace::getSample()
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::Workspace>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
+
+namespace Mantid
+{
+namespace Kernel
+{
+template<>
+Mantid::API::Workspace* PropertyManager::getValue<Mantid::API::Workspace*>(const std::string &name) const
+{
+  PropertyWithValue<Mantid::API::Workspace*> *prop = 
+                    dynamic_cast<PropertyWithValue<Mantid::API::Workspace*>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+} // namespace Kernel
+} // namespace Mantid
+
 ///\endcond TEMPLATE

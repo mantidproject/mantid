@@ -108,18 +108,7 @@ private:
    *  @return The value of the property
    */
   template<typename T>
-  T getValue(const std::string &name) const
-  {
-    PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
-    if (prop)
-    {
-      return *prop;
-    }
-    else
-    {
-      throw std::runtime_error("Attempt to assign property of incorrect type");
-    }
-  }
+  T getValue(const std::string &name) const;
   
   /// Utility class that enables the getProperty method to be templated on return type
   struct TypedValue

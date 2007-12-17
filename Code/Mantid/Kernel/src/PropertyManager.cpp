@@ -167,6 +167,34 @@ const std::vector< Property* >& PropertyManager::getProperties() const
 }
 
 /// @cond
+template<>
+int PropertyManager::getValue<int>(const std::string &name) const
+{
+  PropertyWithValue<int> *prop = dynamic_cast<PropertyWithValue<int>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
+template<>
+double PropertyManager::getValue<double>(const std::string &name) const
+{
+  PropertyWithValue<double> *prop = dynamic_cast<PropertyWithValue<double>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
 template <>
 std::string PropertyManager::getValue<std::string>(const std::string &name) const
 {

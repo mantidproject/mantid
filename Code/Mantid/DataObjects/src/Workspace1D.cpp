@@ -70,4 +70,26 @@ int Workspace1D::blocksize() const
 template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace1D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace1D>;
+
+namespace Mantid
+{
+namespace Kernel
+{
+template<>
+Mantid::DataObjects::Workspace1D* PropertyManager::getValue<Mantid::DataObjects::Workspace1D*>(const std::string &name) const
+{
+  PropertyWithValue<Mantid::DataObjects::Workspace1D*> *prop = 
+          dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace1D*>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+} // namespace Kernel
+} // namespace Mantid
+
 ///\endcond TEMPLATE
