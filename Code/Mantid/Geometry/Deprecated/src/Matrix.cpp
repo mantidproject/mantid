@@ -10,6 +10,8 @@
 #include "AuxException.h"
 #include "mathSupport.h"
 #include "Matrix.h"
+#include "Vec3D.h"
+
 
 namespace Mantid
 {

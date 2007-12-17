@@ -13,6 +13,8 @@ namespace Mantid
 
 */
 
+class Vec3D;
+
 namespace Geometry
 {
 
@@ -64,6 +66,7 @@ class Matrix
 
   Matrix<T> operator*(const Matrix<T>&) const;    ///< Basic matrix multiply 
   std::vector<T> operator*(const std::vector<T>&) const; ///< Multiply M*Vec 
+  Vec3D operator*(const Vec3D&) const; ///< Multiply M*Vec 
   Matrix<T> operator*(const T&) const;              ///< Multiply by constant 
 
   Matrix<T>& operator*=(const Matrix<T>&);            ///< Basic matrix multipy
