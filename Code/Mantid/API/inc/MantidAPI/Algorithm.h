@@ -82,7 +82,11 @@ public:
   virtual bool isExecuted() const;
   virtual bool isFinalized() const;
 
-  void createSubAlgorithm(const std::string& type, const std::string& name, Algorithm*& pSubAlg);
+  /// To query whether algorithm is a child. Default to false
+  bool isChild() const;
+  void setChild(const bool isChild);
+
+  Algorithm* createSubAlgorithm(const std::string& name);
 
   /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
   const std::vector<Algorithm*>& subAlgorithms() const
@@ -139,9 +143,7 @@ protected:
 //
 //  void declareProperty(Kernel::Property *p);
 
-  /// To specify whether algorithm is a child. Default to false
-  bool m_isChildAlgorithm;
-
+  
 private:
 
   /// Private Copy constructor: NO COPY ALLOWED
@@ -166,6 +168,7 @@ private:
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
   bool m_isFinalized; ///< Algorithm has been finalized flag
+  bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
   /// Manages the algorithm's properties
 //  Kernel::PropertyManager m_propertyMgr;

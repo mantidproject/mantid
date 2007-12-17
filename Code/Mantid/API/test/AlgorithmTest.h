@@ -23,11 +23,11 @@ public:
   
   bool existsProperty( const std::string &name ) const
   {
-    PropertyManager::existsProperty(name);
+    return PropertyManager::existsProperty(name);
   }
   const std::vector< Property* >& getProperties() const
   {
-    PropertyManager::getProperties();
+    return PropertyManager::getProperties();
   }
 };
 
@@ -58,6 +58,15 @@ public:
   {
     std::string theVersion = alg.version();
     TS_ASSERT( ! theVersion.compare("unknown") );
+  }
+
+  void testIsChild()
+  {
+    TS_ASSERT_EQUALS(false, alg.isChild());
+    alg.setChild(true);
+    TS_ASSERT_EQUALS(true, alg.isChild());
+    alg.setChild(false);
+    TS_ASSERT_EQUALS(false, alg.isChild());
   }
 
   void testInitialize()
