@@ -27,8 +27,6 @@
 #include "BaseVisit.h"
 #include "Surface.h"
 
-
-
 namespace Mantid
 {
 
@@ -195,13 +193,13 @@ Surface::distanceTrue(const Geometry::Vec3D& Pt) const
   Geometry::Matrix<double> Rt(3,3);
   if (!A.Diagonalise(R,D))
     {
-      std::cerr<<"Problem with matrix :: distance now guessed at"<<std::endl;
+      PLog.warning("Problem with matrix diagonalisation :: distance now guessed at");
       return distance(Pt);
     }
   Rt=R;
   Rt.Transpose();
-  Geometry::Vec3D alpha=Pt*Rt;
-  Geometry::Vec3D beta=B*Rt;
+//  Geometry::Vec3D alpha=Rt*Pt;
+//  Geometry::Vec3D beta=Rt*B;
     
   // 
 

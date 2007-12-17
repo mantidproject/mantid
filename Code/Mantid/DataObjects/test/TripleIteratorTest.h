@@ -194,5 +194,28 @@ public:
     }
   }
 
+  void testIteratorSort()
+    {
+      int size = 10;
+      W1D workA = Create1DWorkspaceFib(size);
+      triple_iterator<Workspace1D> IA(*workA);
+
+      // Note: this used boost lambda since I am being lazy.
+      //      sort(IA.begin(),IA.end(), (boost::bind(&TripleRef<double>::first,_1)() >
+      // 				 boost::bind(&TripleRef<double>::first,_2)() );
+
+      const std::vector<double>& x1 = workA->dataX();
+      const std::vector<double>& y1 = workA->dataY();
+      const std::vector<double>& e1 = workA->dataE();
+
+
+      for (int i = 0; i < size; i++) 
+	{
+	  std::cerr<<x1[i]<<std::endl;
+	}
+      return;
+    }
+ 
+
 };
 #endif /*TRIPLEITERATORTEST_*/
