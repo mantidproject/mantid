@@ -73,7 +73,7 @@ namespace Mantid
     {
     }
 
-    /* Performs the addition with Gausian errors within the transform function
+    /** Performs the addition with Gausian errors within the transform function
     * @param a The triple ref of the first workspace data item
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gausian errors

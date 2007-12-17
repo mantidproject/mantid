@@ -73,11 +73,6 @@ namespace Mantid
       class Plus_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
       {
       public:
-        /* Performs the addition with Gausian errors within the transform function
-        * @param a The triple ref of the first workspace data item
-        * @param b The triple ref of the second workspace data item
-        * @returns A triple ref of the result with Gausian errors
-        */
         API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
       private:
         ///Temporary cache of calculated signal value
