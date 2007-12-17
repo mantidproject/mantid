@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <limits>
 #include "MantidAlgorithms/BinaryOpHelper.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -54,6 +55,8 @@ namespace Mantid
     */
     API::Workspace* BinaryOpHelper::createOutputWorkspace(const API::Workspace* ws1, const API::Workspace* ws2) const
     {
+      const double initialValue=  std::numeric_limits<double>::epsilon();
+          
       //get the largest workspace
       const Workspace* wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
       //create a new workspace
@@ -63,7 +66,7 @@ namespace Mantid
       if (ws1D != 0)
       {    
         //do ws1d things
-        std::vector<double> x(wsLarger->size(),0),sig(wsLarger->size(),0),err(wsLarger->size(),0);
+        std::vector<double> x(wsLarger->size(),initialValue),sig(wsLarger->size(),initialValue),err(wsLarger->size(),initialValue);
         ws1D->setData(sig,err);
         ws1D->setX(x);
       }
@@ -73,9 +76,10 @@ namespace Mantid
         if (ws2D != 0)
         {
           //do ws2d things
-          std::vector<double> x(wsLarger->blocksize(),0),y(wsLarger->blocksize(),0),e(wsLarger->blocksize(),0);
+          std::vector<double> x(wsLarger->blocksize(),initialValue),y(wsLarger->blocksize(),initialValue),e(wsLarger->blocksize(),initialValue);
           int len=wsLarger->size()/wsLarger->blocksize();
           ws2D->setHistogramNumber(len);
+
           for (int i = 0; i < len; i++)
           {
             ws2D->setX(i,x);

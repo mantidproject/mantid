@@ -78,7 +78,10 @@ private:
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gausian errors
     */
-    API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&) const;
+    API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
+   private:
+    double ret_sig;
+    double ret_err;
   };
 
 };

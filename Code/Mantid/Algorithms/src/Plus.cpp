@@ -79,11 +79,11 @@ namespace Mantid
     * @returns A triple ref of the result with Gausian errors
     */
     TripleRef<double&>
-      Plus::Plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) const 
+      Plus::Plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) 
     {           
-      double ret_sig(a[1]+b[1]);
+      ret_sig=a[1]+b[1];
       //gaussian errors for the moment
-      double ret_err(sqrt((a[2]*a[2])+(b[2]*b[2])));     
+      ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
       return TripleRef<double&>(a[0],ret_sig,ret_err);      
     }
   }

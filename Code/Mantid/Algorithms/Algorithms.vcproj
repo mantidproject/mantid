@@ -164,6 +164,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HelloWorldAlgorithm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Minus.cpp"
 				>
 			</File>
@@ -195,6 +199,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\Divide.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\HelloWorldAlgorithm.h"
 				>
 			</File>
 			<File

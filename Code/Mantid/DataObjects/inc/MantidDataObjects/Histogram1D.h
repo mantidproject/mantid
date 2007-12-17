@@ -65,7 +65,7 @@ public:
   /// Sets the data.
   void setData(const std::vector<double>& Y) {  refY.access()=Y; };
     /// Sets the data and errors
-  void setData(const std::vector<double>& Y,const std::vector<double> E) 
+  void setData(const std::vector<double>& Y,const std::vector<double>& E) 
     {  refY.access()=Y; refE.access()=E; }
 
       /// Sets the x data.
