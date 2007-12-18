@@ -93,7 +93,7 @@ protected:
    * 
    */
   template <typename T>
-  void setProperty(const std::string &name, const T &value)
+  void setProperty(const std::string &name, const T value)
   {
     PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>*>(getPointerToProperty(name));
     if (prop)
@@ -102,8 +102,14 @@ protected:
     }
     else
     {
-      throw std::runtime_error("Attempt to assign to property of incorrect type");
+      throw std::invalid_argument("Attempt to assign to property of incorrect type");
     }
+  }
+  
+  /// Specialised version of setProperty template method
+  void setProperty(const std::string &name, const char* value)
+  {
+    this->setPropertyValue(name, std::string(value));
   }
   
 private:

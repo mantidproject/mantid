@@ -13,6 +13,7 @@ public:
   PropertyManagerHelper() : PropertyManager() {}
   
   using PropertyManager::declareProperty;
+  using PropertyManager::setProperty;
 };
 
 class PropertyManagerTest : public CxxTest::TestSuite
@@ -22,6 +23,8 @@ public:
   {
     Property *p = new PropertyWithValue<int>("aProp",1);
     manager.declareProperty(p);
+    manager.declareProperty("anotherProp",1.11);
+    manager.declareProperty("yetAnotherProp","itsValue");
   }
   
 	void testConstructor()
@@ -90,6 +93,15 @@ public:
 		TS_ASSERT_THROWS( manager.setPropertyValue("fhfjsdf","0"), Exception::NotFoundError )
 	}
 
+	void testSetProperty()
+	{
+	  TS_ASSERT_THROWS_NOTHING( manager.setProperty("AProp",5) )
+	  TS_ASSERT_THROWS( manager.setProperty("wefhui",5), Exception::NotFoundError )
+	  TS_ASSERT_THROWS( manager.setProperty("APROP",5.55), std::invalid_argument )
+	  TS_ASSERT_THROWS( manager.setProperty("APROP","value"), std::invalid_argument )
+    TS_ASSERT_THROWS_NOTHING( manager.setProperty("AProp",1) )
+	}
+	
 	void testExistsProperty()
 	{
 	  Property *p = new PropertyWithValue<int>("sjfudh",0);
@@ -126,12 +138,30 @@ public:
 		TS_ASSERT( typeid(int) == *p->type_info() )
 		
 		TS_ASSERT_THROWS( p = manager.getProperty("werhui"), Exception::NotFoundError )
+		
+		int i;
+		TS_ASSERT_THROWS_NOTHING( i = manager.getProperty("aprop") )
+		TS_ASSERT_EQUALS( i, 1 );
+		TS_ASSERT_THROWS( double dd = manager.getProperty("aprop"), std::runtime_error )
+		std::string s = manager.getProperty("aprop");
+		TS_ASSERT( ! s.compare("1") )
+		double d;
+    TS_ASSERT_THROWS_NOTHING( d = manager.getProperty("anotherProp") )
+    TS_ASSERT_EQUALS( d, 1.11 );
+    TS_ASSERT_THROWS( int ii = manager.getProperty("anotherprop"), std::runtime_error )
+		std::string ss = manager.getProperty("anotherprop");
+    TS_ASSERT( ! ss.compare("1.11") )
+    
+    // This works, but CANNOT at present declare the string on a separate line and then assign
+    //               (as I did for the int & double above)
+    std::string sss = manager.getProperty("yetanotherprop");
+    TS_ASSERT( ! sss.compare("itsValue") )
 	}
 
 	void testGetProperties()
 	{
 	  std::vector<Property*> props = manager.getProperties();
-	  TS_ASSERT( props.size() == 1 )
+	  TS_ASSERT( props.size() == 3 )
 	  Property *p = props[0];
     TS_ASSERT( ! p->name().compare("aProp") )
     TS_ASSERT( ! p->value().compare("1") )

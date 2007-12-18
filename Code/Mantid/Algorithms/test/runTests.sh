@@ -24,7 +24,8 @@ echo
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
 	                         -I ../../DataHandling/inc -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-	                         -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lboost_regex -lboost_filesystem -lpython2.3
+	                         -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lboost_regex \
+	                         -lboost_filesystem -lpython2.3 -lgsl
 echo
 
 echo "Running the tests..."

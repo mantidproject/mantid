@@ -206,6 +206,13 @@ Property* PropertyManager::getValue<Property*>(const std::string &name) const
 {
   return getPointerToProperty(name);
 }
+
+// If a string is given in the argument, we can be more flexible
+template <>
+void PropertyManager::setProperty<std::string>(const std::string &name, const std::string value)
+{
+  this->setPropertyValue(name, value);
+}
 /// @endcond
 
 /** Get the value of a property
