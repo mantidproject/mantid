@@ -76,13 +76,10 @@ public:
 	
   // Sets all the declared properties from 
 	virtual void setProperties( const std::string &values );
-  
-  // IProperty methods
-	virtual void setProperty( const std::string &name, const std::string &value );
+ 	virtual void setProperty( const std::string &name, const std::string &value );
 	virtual bool existsProperty( const std::string &name ) const;
   virtual bool validateProperties() const;
   virtual std::string getPropertyValue( const std::string &name ) const;
-//  Property* getProperty( const std::string &name ) const;
   virtual const std::vector< Property* >& getProperties() const;
 	
 private:
@@ -106,6 +103,8 @@ private:
   /** Templated method to get the value of a property
    *  @param name The name of the property (case insensitive)
    *  @return The value of the property
+   *  @throw std::runtime_error If an attempt is made to assign a property to a different type
+   *  @throw Exception::NotFoundError If the property requested does not exist
    */
   template<typename T>
   T getValue(const std::string &name) const;
@@ -113,23 +112,23 @@ private:
   /// Utility class that enables the getProperty method to be templated on return type
   struct TypedValue
   {
-    /// Reference to the holding PropertyManager
-    const PropertyManager& p;
+    /// Reference to the containing PropertyManager
+    const PropertyManager& pm;
     /// The name of the property desired
-    const std::string name;
+    const std::string prop;
     
     /// Constructor
-    TypedValue(const PropertyManager& p, const std::string &name) : p(p), name(name) {}
+    TypedValue(const PropertyManager& p, const std::string &name) : pm(p), prop(name) {}
     
-    /// Templated casting operator so that a TypedValue can be cast to what is actually wanted
+    /// Templated cast operator so that a TypedValue can be cast to what is actually wanted
     template<typename T>
-    operator T() { return p.getValue<T>(name); }
+    operator T() { return pm.getValue<T>(prop); }
   };
   
 public:
   /// Get the value of a property
   virtual TypedValue getProperty( const std::string &name ) const;  
-
+  
 };
 
 } // namespace Kernel

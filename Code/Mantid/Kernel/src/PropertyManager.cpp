@@ -198,12 +198,11 @@ double PropertyManager::getValue<double>(const std::string &name) const
 template <> DLLExport
 std::string PropertyManager::getValue<std::string>(const std::string &name) const
 {
-  Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
-  return p->value();
+  return getPropertyValue(name);
 }
 
 template <> DLLExport
-Property* PropertyManager::getValue(const std::string &name) const
+Property* PropertyManager::getValue<Property*>(const std::string &name) const
 {
   return getPointerToProperty(name);
 }
@@ -212,6 +211,8 @@ Property* PropertyManager::getValue(const std::string &name) const
 /** Get the value of a property
  *  @param name The name of the property
  *  @return The value of the property. Will be cast to the desired type (if a supported type).
+ *  @throw std::runtime_error If an attempt is made to assign a property to a different type
+ *  @throw Exception::NotFoundError If the property requested does not exist
  */
 PropertyManager::TypedValue PropertyManager::getProperty( const std::string &name ) const
 {

@@ -40,13 +40,8 @@ namespace Mantid
     void Multiply::exec()
     {
       // get input workspace, dynamic cast not needed
-      Property* p1 = getProperty("InputWorkspace_1");
-      Property* p2 = getProperty("InputWorkspace_2");
-
-      WorkspaceProperty<Workspace> *wp1 = dynamic_cast< WorkspaceProperty<Workspace>* >(p1);
-      WorkspaceProperty<Workspace> *wp2 = dynamic_cast< WorkspaceProperty<Workspace>* >(p2);  
-      Workspace* in_work1 = *wp1;
-      Workspace* in_work2 = *wp2;
+      Workspace* in_work1 = getProperty("InputWorkspace_1");
+      Workspace* in_work2 = getProperty("InputWorkspace_1");
 
       //create a BinaryOpHelper
       BinaryOpHelper boHelper;

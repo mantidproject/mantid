@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
 #include "MantidKernel/System.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -82,6 +81,9 @@ public:
   virtual bool isExecuted() const;
   virtual bool isFinalized() const;
 
+  virtual void setProperty(const std::string &name, const std::string &value);
+  virtual std::string getPropertyValue(const std::string &name) const;
+
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
   void setChild(const bool isChild);
@@ -99,13 +101,6 @@ public:
     return m_subAlgms;
   }
 
-  // IProperty methods
-  virtual void setProperty(const std::string &name, const std::string &value);
-//  virtual bool existsProperty(const std::string &name) const;
-  virtual std::string getPropertyValue(const std::string &name) const;
-//  virtual Kernel::Property* getProperty(const std::string &name) const;
-//  virtual const std::vector< Kernel::Property*>& getProperties() const;
-
 protected:
 
   // Equivalents of Gaudi's initialize, execute & finalize methods
@@ -120,40 +115,13 @@ protected:
   void setExecuted(bool state);
   void setFinalized();
 
-  /** Register a property with the property manager.
-   *  Delegated to the PropertyManager method
-   *  @param name The name of the property
-   *  @param value The initial value to assign to the property
-   *  @param validator Pointer to the (optional) validator.
-   *  @param doc The (optional) documentation string
-   */
-//  template <typename T> void declareProperty(const std::string &name, T value,
-//      Kernel::IValidator<T> *validator = new Kernel::NullValidator<T>,
-//      const std::string &doc="")
-//  {
-//    m_propertyMgr.declareProperty(name, value, validator, doc);
-//  }
-
-  // Specialised version of above function
-//  void declareProperty(
-//          const std::string &name,
-//          const char* value,
-//          Kernel::IValidator<std::string> *validator = new Kernel::NullValidator<std::string>,
-//          const std::string &doc="");
-//
-//  void declareProperty(Kernel::Property *p);
-
   
 private:
 
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm& a);
-
-  /// Private asignment operator: NO ASSIGNMENT ALLOWED
+  /// Private assignment operator: NO ASSIGNMENT ALLOWED
   Algorithm& operator=(const Algorithm& rhs);
-
-  /// Check all properties for validity
-//  bool validateProperties() const;
 
   /// Put any output workspaces into the AnalysisDataService
   void store();
@@ -168,11 +136,8 @@ private:
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
   bool m_isFinalized; ///< Algorithm has been finalized flag
+
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
-
-  /// Manages the algorithm's properties
-//  Kernel::PropertyManager m_propertyMgr;
-
 };
 
 } // namespace API
