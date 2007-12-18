@@ -41,7 +41,7 @@ namespace Mantid
     {
       // get input workspace, dynamic cast not needed
       Workspace* in_work1 = getProperty("InputWorkspace_1");
-      Workspace* in_work2 = getProperty("InputWorkspace_1");
+      Workspace* in_work2 = getProperty("InputWorkspace_2");
 
       //create a BinaryOpHelper
       BinaryOpHelper boHelper;

@@ -42,7 +42,7 @@ namespace Mantid
     {
       // get input workspace, dynamic cast not needed
       Workspace* in_work1 = getProperty("InputWorkspace_1");
-      Workspace* in_work2 = getProperty("InputWorkspace_1");
+      Workspace* in_work2 = getProperty("InputWorkspace_2");
 
       //create a BinaryOpHelper
       BinaryOpHelper boHelper;
@@ -73,16 +73,16 @@ namespace Mantid
     {
     }
 
-    /** Performs the addition with Gausian errors within the transform function
+    /** Performs the addition with Gaussian errors within the transform function
     * @param a The triple ref of the first workspace data item
     * @param b The triple ref of the second workspace data item
-    * @returns A triple ref of the result with Gausian errors
+    * @returns A triple ref of the result with Gaussian errors
     */
     TripleRef<double&>
       Plus::Plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) 
     {           
       ret_sig=a[1]+b[1];
-      //gaussian errors for the moment
+      //Gaussian errors for the moment
       ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
       return TripleRef<double&>(a[0],ret_sig,ret_err);      
     }
