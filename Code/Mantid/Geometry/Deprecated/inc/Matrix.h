@@ -13,10 +13,10 @@ namespace Mantid
 
 */
 
-class Vec3D;
 
 namespace Geometry
 {
+class Vec3D;
 
 /*!
   \class Matrix

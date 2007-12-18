@@ -7,6 +7,8 @@
 #include <complex>
 #include <vector>
 
+#include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
 #include "AuxException.h"
 #include "mathSupport.h"
 #include "Matrix.h"
@@ -186,6 +188,14 @@ Matrix<T>::operator-(const Matrix<T>& A)
 {
   Matrix<T> X(*this);
   return X-=A;
+}
+  
+template<typename T>
+Vec3D 
+Matrix<T>::operator*(const Vec3D& A) const
+{
+  throw Kernel::Exception::NotImplementedError("Operator Mantrix * Vec3D is not implmented");
+  return A;
 }
 
 template<typename T>

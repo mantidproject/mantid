@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include;C:\gsl-1.10-windows-sources\gsl\win32\include"
 				PreprocessorDefinitions="_USE_MATH_DEFINES"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -55,9 +55,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl_d.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
-				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32 "
+				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32 ;C:\gsl-1.10-windows-sources\gsl\win32\lib"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PolyBase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Quat.cpp"
 				>
 			</File>
@@ -341,11 +345,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -397,11 +401,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\Deprecated\inc\IndexIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -429,11 +433,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\Deprecated\inc\Matrix.h"
 				>
 			</File>
 			<File
@@ -453,6 +457,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\PolyBase.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Quat.h"
 				>
 			</File>
@@ -465,11 +473,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\Deprecated\inc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
@@ -517,15 +525,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLattribute.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLattribute.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcollect.h"
+				RelativePath=".\auxinc\XMLattribute.h"
 				>
 			</File>
 			<File
@@ -533,7 +537,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomment.h"
+				RelativePath=".\auxinc\XMLcollect.h"
 				>
 			</File>
 			<File
@@ -541,11 +545,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcomp.h"
+				RelativePath=".\auxinc\XMLcomment.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLcomp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLcomp.h"
 				>
 			</File>
 			<File
@@ -557,11 +565,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
+				RelativePath=".\auxinc\XMLgridSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgridSupport.h"
+				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
 				>
 			</File>
 			<File
@@ -573,15 +581,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLindex.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\XMLindex.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLindex.h"
 				>
 			</File>
 			<File
@@ -589,11 +593,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLobject.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLobject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLobject.h"
 				>
 			</File>
 			<File
@@ -605,11 +613,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File
@@ -617,11 +625,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLvector.h"
+				RelativePath=".\Deprecated\inc\XMLvector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLvector.h"
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 		</Filter>
