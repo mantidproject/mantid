@@ -237,10 +237,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\IProperty.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidKernel\IStorable.h"
 				>
 			</File>
