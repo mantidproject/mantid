@@ -74,9 +74,9 @@ public:
 
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Instrument/HET_Definition.txt";
-    loader.setProperty("Filename", inputFile);
+    loader.setPropertyValue("Filename", inputFile);
 
-    loader.setProperty("Workspace", wsName);
+    loader.setPropertyValue("Workspace", wsName);
     
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )

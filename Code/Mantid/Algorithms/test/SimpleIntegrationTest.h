@@ -55,21 +55,21 @@ public:
     TS_ASSERT( alg.isInitialized() );
     
     // Set the properties
-    alg.setProperty("InputWorkspace","testSpace");
+    alg.setPropertyValue("InputWorkspace","testSpace");
     outputSpace = "outer";
-    alg.setProperty("OutputWorkspace",outputSpace);
+    alg.setPropertyValue("OutputWorkspace",outputSpace);
 
-    alg.setProperty("StartX","1");
-    alg.setProperty("EndX","4");
-    alg.setProperty("StartY","2");
-    alg.setProperty("EndY","4");
+    alg.setPropertyValue("StartX","1");
+    alg.setPropertyValue("EndX","4");
+    alg.setPropertyValue("StartY","2");
+    alg.setPropertyValue("EndY","4");
     
     TS_ASSERT_THROWS_NOTHING( alg2.initialize());    
     TS_ASSERT( alg.isInitialized() );
     
     // Set the properties
-    alg2.setProperty("InputWorkspace","testSpace");
-    alg2.setProperty("OutputWorkspace","out2");
+    alg2.setPropertyValue("InputWorkspace","testSpace");
+    alg2.setPropertyValue("OutputWorkspace","out2");
 
   }
   
@@ -97,10 +97,10 @@ public:
     if ( !alg2.isInitialized() ) alg2.initialize();
     
     // Check setting of invalid property value causes failure
-    alg2.setProperty("StartY","-1");
+    alg2.setPropertyValue("StartY","-1");
     TS_ASSERT_THROWS( alg2.execute(),std::runtime_error);
     // Set back to default value
-    alg2.setProperty("StartY","0");
+    alg2.setPropertyValue("StartY","0");
     
     TS_ASSERT_THROWS_NOTHING( alg2.execute());
     TS_ASSERT( alg2.isExecuted() );

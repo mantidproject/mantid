@@ -44,10 +44,10 @@ public:
 
 	  // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HRP37129_ICPevent.txt";
-    loader.setProperty("Filename", inputFile);
+    loader.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadLogTest-singleLogFile";
-    loader.setProperty("Workspace", outputSpace);
+    loader.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     Workspace *ws = factory->create("Workspace2D");
@@ -91,10 +91,10 @@ public:
 
 	  // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HRP37125.RAW";
-    loaderRawFile.setProperty("Filename", inputFile);
+    loaderRawFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadLogTest-rawdatafile";
-    loaderRawFile.setProperty("Workspace", outputSpace);
+    loaderRawFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     Workspace *ws = factory->create("Workspace1D");

@@ -88,7 +88,7 @@ void PropertyManager::setProperties( const std::string &values )
  *  @param value The value to assign to the property
  *  @throw Exception::NotFoundError if the named property is unknown
  */
-void PropertyManager::setProperty( const std::string &name, const std::string &value )
+void PropertyManager::setPropertyValue( const std::string &name, const std::string &value )
 {
   Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
   bool success = p->setValue(value);

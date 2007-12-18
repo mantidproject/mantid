@@ -117,9 +117,7 @@ void TOFtoWavelength::exec()
   }
   
   // Assign the result to the output workspace property
-  Property *p = getProperty("OutputWorkspace");
-  WorkspaceProperty<Workspace2D> *out = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
-  *out = localWorkspace;
+  setProperty("OutputWorkspace",localWorkspace);
   
   return;
 }

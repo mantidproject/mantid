@@ -50,18 +50,18 @@ namespace DataHandling
     if (iraw.readFromFile(m_filename.c_str()) != 0)
     {
       g_log.error("Unable to open file " + m_filename);
-	  throw Exception::FileError("Unable to open File:" , m_filename);	  
+      throw Exception::FileError("Unable to open File:" , m_filename);	  
     }
     
-    // Read the number of time channels from the RAW file (calling FORTRAN)
+    // Read the number of time channels from the RAW file 
     int channelsPerSpectrum, lengthIn, lengthOut;
     lengthIn = lengthOut = 1;
     channelsPerSpectrum = iraw.t_ntc1;
 
-    // Read in the number of spectra in the RAW file (calling FORTRAN)
+    // Read in the number of spectra in the RAW file
     int numberOfSpectra = iraw.t_nsp1;
     
-    // Read in the time bin boundaries (calling FORTRAN)
+    // Read in the time bin boundaries 
     lengthIn = channelsPerSpectrum + 1;    
     float* timeChannels = new float[lengthIn];
     // Put the read in array into a vector (inside a shared pointer)
@@ -80,9 +80,8 @@ namespace DataHandling
     // Loop over the spectra. Zeroth spectrum is garbage, so loop runs from 1 to NSP1
     for (int i = 1; i <= numberOfSpectra; i++)
     {
-      // Read in a spectrum via the FORTRAN routine
+      // Read in a spectrum
       memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));
-//      getdat_(m_filename.c_str(), i, 1, spectrum, lengthIn, errorCode, strlen( m_filename.c_str() ));
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
       std::vector<double> v(spectrum + 1, spectrum + lengthIn);
@@ -90,16 +89,13 @@ namespace DataHandling
       std::vector<double> e(lengthIn-1);
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-//      localWorkspace->setX(i-1, timeChannelsVec);
       localWorkspace->setData(i-1, v, e);
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
     
     // Assign the result to the output workspace property
-    Property *p = getProperty("OutputWorkspace");
-    WorkspaceProperty<Workspace2D> *out = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
-    *out = localWorkspace;
+    setProperty("OutputWorkspace",localWorkspace);
     
     // Clean up
     delete[] timeChannels;
@@ -117,7 +113,7 @@ namespace DataHandling
 
   double LoadRaw::dblSqrt(double in)
   {
-	return sqrt(in);
+    return sqrt(in);
   }
   
 } // namespace DataHandling

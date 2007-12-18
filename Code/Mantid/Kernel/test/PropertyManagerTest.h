@@ -7,6 +7,14 @@
 
 using namespace Mantid::Kernel;
 
+class PropertyManagerHelper : public PropertyManager
+{
+public:
+  PropertyManagerHelper() : PropertyManager() {}
+  
+  using PropertyManager::declareProperty;
+};
+
 class PropertyManagerTest : public CxxTest::TestSuite
 {
 public:
@@ -18,14 +26,14 @@ public:
   
 	void testConstructor()
 	{
-	  PropertyManager mgr;
+	  PropertyManagerHelper mgr;
 	  std::vector<Property*> props = mgr.getProperties();
 	  TS_ASSERT( props.empty() )
 	}
 
 	void testdeclareProperty_pointer()
 	{
-		PropertyManager mgr;
+		PropertyManagerHelper mgr;
 		Property *p = new PropertyWithValue<double>("myProp", 9.99);
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty(p) )
 		TS_ASSERT( mgr.existsProperty(p->name()) )
@@ -37,7 +45,7 @@ public:
 
 	void testdeclareProperty_int()
 	{
-		PropertyManager mgr;
+		PropertyManagerHelper mgr;
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 1) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("1") )
 		
@@ -47,7 +55,7 @@ public:
 
 	void testdeclareProperty_double() 
 	{
-    PropertyManager mgr;
+    PropertyManagerHelper mgr;
     BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
@@ -58,7 +66,7 @@ public:
 
 	void testdeclareProperty_string()
 	{
-    PropertyManager mgr;
+    PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator, "hello") )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
     Property *p;
@@ -74,12 +82,12 @@ public:
 	  TS_ASSERT_THROWS( manager.setProperties(""), Exception::NotImplementedError )
 	}
 	
-	void testSetProperty()
+	void testSetPropertyValue()
 	{
-		manager.setProperty("APROP","10");
+		manager.setPropertyValue("APROP","10");
 		TS_ASSERT( ! manager.getPropertyValue("aProp").compare("10") )
-    manager.setProperty("aProp","1");
-		TS_ASSERT_THROWS( manager.setProperty("fhfjsdf","0"), Exception::NotFoundError )
+    manager.setPropertyValue("aProp","1");
+		TS_ASSERT_THROWS( manager.setPropertyValue("fhfjsdf","0"), Exception::NotFoundError )
 	}
 
 	void testExistsProperty()
@@ -97,7 +105,7 @@ public:
 	{
 	  TS_ASSERT( manager.validateProperties() )
 	  
-	  PropertyManager mgr;
+	  PropertyManagerHelper mgr;
 	  mgr.declareProperty("someProp","", new MandatoryValidator);
 	  TS_ASSERT( ! mgr.validateProperties() )
 	}
@@ -130,7 +138,7 @@ public:
 	}
 
 private:
-  PropertyManager manager;
+  PropertyManagerHelper manager;
 	
 };
 

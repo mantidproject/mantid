@@ -81,7 +81,7 @@ public:
   virtual bool isExecuted() const;
   virtual bool isFinalized() const;
 
-  virtual void setProperty(const std::string &name, const std::string &value);
+  virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
 
   /// To query whether algorithm is a child. Default to false

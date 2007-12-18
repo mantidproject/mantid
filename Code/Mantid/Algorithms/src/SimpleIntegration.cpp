@@ -124,9 +124,7 @@ void SimpleIntegration::exec()
   localWorkspace->setData(sums, errors);
   
   // Assign it to the output workspace property
-  Property *p = getProperty("OutputWorkspace");
-  WorkspaceProperty<Workspace1D> *out = dynamic_cast< WorkspaceProperty<Workspace1D>* >(p);
-  *out = localWorkspace;
+  setProperty("OutputWorkspace",localWorkspace);
   
   return;  
 }

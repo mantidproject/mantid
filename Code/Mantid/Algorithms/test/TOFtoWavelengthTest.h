@@ -52,8 +52,8 @@ public:
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
     std::string inputFile = "../../../../Test/Instrument/HET_Definition.txt";
-    loader.setProperty("Filename", inputFile);
-    loader.setProperty("Workspace", inputSpace);
+    loader.setPropertyValue("Filename", inputFile);
+    loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
     loader.finalize();
     
@@ -65,9 +65,9 @@ public:
     TS_ASSERT( alg.isInitialized() );    
     
     // Set the properties
-    alg.setProperty("InputWorkspace",inputSpace);
+    alg.setPropertyValue("InputWorkspace",inputSpace);
     outputSpace = "outWorkspace";
-    alg.setProperty("OutputWorkspace",outputSpace);
+    alg.setPropertyValue("OutputWorkspace",outputSpace);
   }
   
   void testExec()

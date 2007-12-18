@@ -96,7 +96,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
     // Call the appropriate setProperty method on the algorithm
     if ( property.size() == 2)
     {
-      alg->setProperty(property[0],property[1]);
+      alg->setPropertyValue(property[0],property[1]);
     }
 //    else if ( property.size() == 1)
 //    {

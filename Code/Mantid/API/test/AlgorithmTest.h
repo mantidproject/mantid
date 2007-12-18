@@ -107,10 +107,10 @@ public:
     TS_ASSERT( testVec.empty() );
   }
 	
-  void testSetProperty()
+  void testSetPropertyValue()
   {
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("prop1","val") )
-    TS_ASSERT_THROWS( alg.setProperty("prop3","1"), Exception::NotFoundError )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("prop1","val") )
+    TS_ASSERT_THROWS( alg.setPropertyValue("prop3","1"), Exception::NotFoundError )
   }
 
   void testExistsProperty()

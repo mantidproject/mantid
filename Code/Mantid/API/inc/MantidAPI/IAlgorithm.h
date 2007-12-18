@@ -78,11 +78,11 @@ public:
   /// Check whether the algorithm has already been executed
   virtual bool isExecuted() const = 0;
 
-  /** Set a property of an algorithm
+  /** Set the value of an algorithm property by string
    *  @param name The name of the property to set
    *  @param value The value to assign to the property
    */
-  virtual void setProperty(const std::string& name, const std::string& value) = 0;
+  virtual void setPropertyValue(const std::string& name, const std::string& value) = 0;
   
   /** Get the value of a property as a string
    *  @param name The name of the property

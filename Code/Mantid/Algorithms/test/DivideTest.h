@@ -26,9 +26,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-    alg.setProperty("InputWorkspace_1","test_in21");
-    alg.setProperty("InputWorkspace_2","test_in22");    
-    alg.setProperty("OutputWorkspace","test_out2");
+    alg.setPropertyValue("InputWorkspace_1","test_in21");
+    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("OutputWorkspace","test_out2");
     );
 
   }
@@ -46,9 +46,9 @@ public:
     Divide alg;
 
     alg.initialize();
-    alg.setProperty("InputWorkspace_1","test_in11");
-    alg.setProperty("InputWorkspace_2","test_in12");    
-    alg.setProperty("OutputWorkspace","test_out1");
+    alg.setPropertyValue("InputWorkspace_1","test_in11");
+    alg.setPropertyValue("InputWorkspace_2","test_in12");    
+    alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
     Workspace* work_out1;
@@ -75,9 +75,9 @@ public:
     ADS->add("test_in21", work_in1);
     ADS->add("test_in22", work_in2);
     alg.initialize();
-    alg.setProperty("InputWorkspace_1","test_in21");
-    alg.setProperty("InputWorkspace_2","test_in22");    
-    alg.setProperty("OutputWorkspace","test_out2");
+    alg.setPropertyValue("InputWorkspace_1","test_in21");
+    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("OutputWorkspace","test_out2");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace* work_out1;

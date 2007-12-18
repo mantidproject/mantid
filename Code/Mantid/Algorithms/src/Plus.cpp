@@ -59,9 +59,7 @@ namespace Mantid
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
 
       // Assign it to the output workspace property
-      Property* p3 = getProperty("OutputWorkspace");
-      WorkspaceProperty<Workspace> *out = dynamic_cast< WorkspaceProperty<Workspace>* >(p3);
-      *out = out_work;
+      setProperty("OutputWorkspace",out_work);
 
       return;
     }

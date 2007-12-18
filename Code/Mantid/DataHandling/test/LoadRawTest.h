@@ -32,10 +32,10 @@ public:
     // Now set it...  
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HET15869.RAW";
-    loader.setProperty("Filename", inputFile);
+    loader.setPropertyValue("Filename", inputFile);
 
     outputSpace = "outer";
-    loader.setProperty("OutputWorkspace", outputSpace);    
+    loader.setPropertyValue("OutputWorkspace", outputSpace);    
     
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )

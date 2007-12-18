@@ -118,8 +118,8 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         call_method< void >(py_self, "setProperty", p0, p1);
     }
 
-    void default_setProperty(const std::string& p0, const std::string& p1) {
-        Mantid::API::Algorithm::setProperty(p0, p1);
+    void default_setPropertyValue(const std::string& p0, const std::string& p1) {
+        Mantid::API::Algorithm::setPropertyValue(p0, p1);
     }
 
     bool existsProperty(const std::string& p0) const {
@@ -223,7 +223,7 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         .def("isInitialized", &Mantid::API::Algorithm::isInitialized, &Mantid_API_Algorithm_Wrapper::default_isInitialized)
         .def("isExecuted", &Mantid::API::Algorithm::isExecuted, &Mantid_API_Algorithm_Wrapper::default_isExecuted)
         .def("isFinalized", &Mantid::API::Algorithm::isFinalized, &Mantid_API_Algorithm_Wrapper::default_isFinalized)
-        .def("setProperty", &Mantid::API::Algorithm::setProperty, &Mantid_API_Algorithm_Wrapper::default_setProperty)
+        .def("setPropertyValue", &Mantid::API::Algorithm::setPropertyValue, &Mantid_API_Algorithm_Wrapper::default_setPropertyValue)
 //        .def("existsProperty", &Mantid::API::Algorithm::existsProperty, &Mantid_API_Algorithm_Wrapper::default_existsProperty)
         .def("getPropertyValue", &Mantid::API::Algorithm::getPropertyValue, &Mantid_API_Algorithm_Wrapper::default_getPropertyValue)
 //        .def("getProperty", &Mantid::API::Algorithm::getProperty, &Mantid_API_Algorithm_Wrapper::default_getProperty, return_value_policy< manage_new_object >())

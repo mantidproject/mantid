@@ -297,9 +297,9 @@ Algorithm* Algorithm::createSubAlgorithm(const std::string& name)
 }
 
 // IAlgorithm property methods. Pull in PropertyManager implementation.
-void Algorithm::setProperty(const std::string &name, const std::string &value)
+void Algorithm::setPropertyValue(const std::string &name, const std::string &value)
 {
-  PropertyManager::setProperty(name, value);
+  PropertyManager::setPropertyValue(name, value);
 }
 
 std::string Algorithm::getPropertyValue(const std::string &name) const
