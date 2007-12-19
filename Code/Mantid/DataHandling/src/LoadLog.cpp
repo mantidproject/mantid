@@ -42,22 +42,14 @@ void LoadLog::init()
 
 /** Executes the algorithm. Reading in ISIS log file(s)
  * 
- *  @throw Mantid::Kernel::Exception::FileError  Thrown if errors with file opening and existence
+ *  @throw Mantid::Kernel::Exception::FileError  Thrown if file is not recognised to be a raw datafile or log file
  *  @throw std::runtime_error Thrown with Workspace problems
  */
 void LoadLog::exec()
 {
-  // Retrieve the filename from the properties
+  // Retrieve the filename from the properties and perform some initial checks on the filename
+
   m_filename = getPropertyValue("Filename");
-
-  // Get the input workspace
-  Workspace *localWorkspace = getProperty("Workspace");
-  
-  // the log file(s) will be loaded into the Sample container of the workspace
-
-  API::Sample& sample = localWorkspace->getSample();
-
-  // do some initial checks on the input m_filename
 
   fs::path l_path( m_filename );
 
@@ -73,15 +65,24 @@ void LoadLog::exec()
     throw Exception::FileError("Filename is a directory:" , m_filename);
   }
 
+
+  // Get the input workspace and retrieve sample from workspace.
+  // the log file(s) will be loaded into the Sample container of the workspace 
+
+  Workspace *localWorkspace = getProperty("Workspace");
+  API::Sample& sample = localWorkspace->getSample();
+
+
   // If m_filename is the filename of a raw datafile then search for potential log files
   // in the directory of this raw datafile. Otherwise check if m_filename is a potential
   // log file. Add the filename of these potential log files to: potentialLogFiles.
 
   std::vector<std::string> potentialLogFiles;
 
-  // strip out filename part
+  
+  // start the process or populating potential log files into the container: potentialLogFiles
 
-  std::string l_filenamePart = l_path.leaf();
+  std::string l_filenamePart = l_path.leaf();  // get filename part only
 
   if ( isLogFile(l_filenamePart) )
   {
@@ -89,7 +90,8 @@ void LoadLog::exec()
 
     potentialLogFiles.push_back(m_filename);
   }
-  else if ( stringToLower(l_filenamePart).find(".raw") != std::string::npos && l_filenamePart.size() >= 12 )
+  else if ( ( stringToLower(l_filenamePart).find(".raw") != std::string::npos ||
+              stringToLower(l_filenamePart).find(".s") != std::string::npos ) && l_filenamePart.size() >= 12 )
   {
     // then we will assume that m_filename is an ISIS raw file
 
@@ -115,6 +117,12 @@ void LoadLog::exec()
       }
     }
   }
+  else
+  {
+    g_log.error("In LoadLog: " + m_filename + " found to be neither a raw datafile nor a log file.");
+    throw Exception::FileError("Filename found to be neither a raw datafile nor a log file." , m_filename);    
+  }
+
 
   // Attempt to load the content of each potential log file into the Sample object
 
@@ -131,6 +139,7 @@ void LoadLog::exec()
       throw Exception::FileError("Unable to open file:" , potentialLogFiles[i]);
     }
 
+
     // figure out if second column is a number or a string
 
     std::string aLine;
@@ -138,16 +147,13 @@ void LoadLog::exec()
 
     kind l_kind;
 
-    bool l_JumpToNextLogFile = false;
-
-    while ( std::getline(inLogFile, aLine, '\n') )
+    if( std::getline(inLogFile, aLine, '\n') )
     {
       if ( !isDateTimeString(aLine) )
       {
         g_log.warning("File" + potentialLogFiles[i] + " is not a standard ISIS log file. Expected to be a two column file.");
-        l_JumpToNextLogFile = true;
         inLogFile.close();
-        break;
+        continue;
       }
 
       std::stringstream ins(aLine);
@@ -166,20 +172,15 @@ void LoadLog::exec()
       if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
       {
         g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file. Can't recognise TYPE");
-        throw Exception::FileError("ISIS log file contain unrecognised second column entries:", potentialLogFiles[i]);
+        throw Exception::FileError("ISIS log file contains unrecognised second column entries:", potentialLogFiles[i]);
       }
+    } 
 
-      break;
-    } // end while
-
-    if ( l_JumpToNextLogFile )
-    {
-      continue; // jump to next log file
-    }
 
     // reset random access to beginning
 
     inLogFile.seekg(0, std::ios::beg);
+
 
     // Read log file into Property which is then stored in Sample object
 
@@ -188,7 +189,7 @@ void LoadLog::exec()
 
     // read in the log file
 
-    l_JumpToNextLogFile = false;
+    bool l_JumpToNextLogFile = false;
 
     while ( std::getline(inLogFile, aLine, '\n') )
     {

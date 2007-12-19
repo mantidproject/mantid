@@ -148,6 +148,54 @@ public:
   }
   
 
+  // Same idea as testExecWithRawDataFile() but testing on a raw file with the extension .s#
+  // where # is some integer ranging from 01,02,...,99 I believe
+  void testExecWithRawDatafile_s_type()
+  {
+    //if ( !loader.isInitialized() ) loader.initialize();
+
+    LoadLog loaderRawFile;
+    loaderRawFile.initialize();
+
+	  // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Data/HRP37129.S02";
+    loaderRawFile.setPropertyValue("Filename", inputFile);
+
+    outputSpace = "LoadLogTest-rawdatafile_so_type";
+    loaderRawFile.setPropertyValue("Workspace", outputSpace);
+    // Create an empty workspace and put it in the AnalysisDataService
+    WorkspaceFactory *factory = WorkspaceFactory::Instance();
+    Workspace *ws = factory->create("Workspace1D");
+    AnalysisDataService *data = AnalysisDataService::Instance();
+    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
+
+	  std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(outputSpace));
+
+
+	  TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());    
+
+    TS_ASSERT( loaderRawFile.isExecuted() );    
+    
+    // Get back the saved workspace
+    Workspace *output;
+    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+   
+	  Sample& sample = output->getSample(); 
+
+    // obtain the expected log files which should be in the same directory as the raw datafile
+
+    Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37129_ICPevent.txt") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
+    std::string timeSeriesString = l_timeSeriesString->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+  }
+
+
   void testFinal()
   {
     if ( !loader.isInitialized() ) loader.initialize();
