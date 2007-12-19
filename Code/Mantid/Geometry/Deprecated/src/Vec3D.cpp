@@ -33,7 +33,7 @@ std::istream&
 Geometry::operator>>(std::istream& IX,Geometry::Vec3D& A)
   /*!
     Calls Vec3D method write to output class
-    \param of :: Output stream
+    \param IX :: Input stream
     \param A :: Vec3D to write
     \return Current state of stream
   */
@@ -601,7 +601,7 @@ Vec3D::read(std::istream& IX)
   /*!
     Read data from a stream.
     \todo Check Error handling 
-    \param OX :: Output stream
+    \param IX :: Input stream
   */
 {
   IX>>x>>y>>z;

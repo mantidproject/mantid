@@ -1,7 +1,11 @@
 #ifndef MANTIDGEOMETRY_V3D_H_
 #define MANTIDGEOMETRY_V3D_H_
 
+#include <cmath>
+#include <complex>
+#include <vector>
 #include "MantidKernel/System.h"
+#include "Matrix.h"
 
 namespace Mantid
 {
@@ -77,8 +81,11 @@ namespace Geometry
       const double& operator[](const int Index) const;
       double& operator[](const int Index);
 
+      //      void rotate(const V3D&,const V3D&,const double);
+      void rotate(const Matrix<double>&); 
+
       /// Make a normalized vector (return norm value)
-      double normalize();
+      double normalize();            // Vec3D::makeUnit
       double norm() const;    
       double norm2() const; 
       // Scalar product
@@ -89,6 +96,15 @@ namespace Geometry
       double distance(const V3D&) const;
       // Send to a stream
       void printSelf(std::ostream&) const;
+      void read(std::istream&);
+      
+
+      double volume() const { return fabs(x*y*z); }      ///< Calculate the volmue of a cube X*Y*Z
+
+      int reBase(const V3D&,const V3D&,const V3D&);         ///<rebase to new basis vector
+      int masterDir(const double=1e-3) const;               ///< Determine if there is a master direction
+      int nullVector(const double=1e-3) const;              ///< Determine if the point is null
+      int coLinear(const V3D&,const V3D&) const;
 
     private:
 
@@ -99,6 +115,7 @@ namespace Geometry
 	
   // Overload operator <<
   std::ostream& operator<<(std::ostream&, const V3D&);
+  std::istream& operator>>(std::istream&,V3D&);
 
 } // Namespace Geometry
 } // Namespace Mantid

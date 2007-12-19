@@ -121,7 +121,7 @@ operator<<(std::ostream&,const Geometry::Matrix<T>&);
 }
 
 
-}
+} // NAMESPACE Mantid
  
 // template<typename X>
 // std::ostream& operator<<(std::ostream&,const Geometry::Matrix<X>&);

@@ -3,6 +3,7 @@
 #include <cmath> 
 #include <vector>
 
+#include "Matrix.h"
 #include "V3D.h"
 
 namespace Mantid
@@ -11,7 +12,7 @@ namespace Geometry
 {
 
   /// The default precision 1e-7
-const double precision(1e-7);   
+const double Tolerance(1e-7);   
 
 /// Constructor [Null]
 V3D::V3D():x(0),y(0),z(0)
@@ -230,7 +231,7 @@ V3D::operator*=(const double D)
     Scalar division
     \param D :: value to scale
     \return this /= D
-    \todo ADD PRECISION
+    \todo ADD TOLERANCE
   */
 V3D& 
 V3D::operator/=(const double D) 
@@ -251,9 +252,9 @@ V3D::operator/=(const double D)
 bool 
 V3D::operator==(const V3D& v) const
 {
-  return (fabs(x-v.x)>precision ||
-	  fabs(y-v.y)>precision ||
-	  fabs(z-v.z)>precision)  ?
+  return (fabs(x-v.x)>Tolerance ||
+	  fabs(y-v.y)>Tolerance ||
+	  fabs(z-v.z)>Tolerance)  ?
     false : true;
 }
 
@@ -393,6 +394,81 @@ V3D::distance(const V3D& v) const
   return dif.norm();
 }
 
+
+
+int
+V3D::reBase(const V3D& A,const V3D&B,const V3D& C) 
+  /*! 
+     Re-express this point components of A,B,C.
+     Assuming that A,B,C are form an basis set (which
+     does not have to be othonormal.
+     \param A :: Unit vector in basis
+     \param B :: Unit vector in basis
+     \param C :: Unit vector in basis
+     \retval -1 :: The points do not form a basis set.
+     \retval 0  :: Vec3D has successfully been re-expressed.
+  */
+{
+  Matrix<double> T(3,3);
+  for(int i=0;i<3;i++)
+    {
+      T[i][0]=A[i];
+      T[i][1]=B[i];
+      T[i][2]=C[i];
+    }
+  const double det=T.Invert();
+  if (fabs(det)<1e-13)       // failed
+    return -1;
+  rotate(T);
+  return 0;
+}
+
+void
+V3D::rotate(const Geometry::Matrix<double>& A)
+  /*!
+    Rotate a point by a matrix 
+    \param A :: Rotation matrix (needs to be >3x3) 
+  */
+{
+  Matrix<double> Pv(3,1);
+  Pv[0][0]=x;
+  Pv[1][0]=y;
+  Pv[2][0]=z;
+  Matrix<double> Po=A*Pv;
+  x=Po[0][0];
+  y=Po[1][0];
+  z=Po[2][0];
+  return;
+}
+
+/*!
+  Determines if this,B,C are collinear (returns 1 if true)
+  \param Bv :: Vector to test
+  \param Cv :: Vector to test
+  \returns 0 is no colinear and 1 if they are (within Ptolerance)
+*/
+int
+V3D::coLinear(const V3D& Bv,const V3D& Cv) const
+{
+  const V3D& Av=*this;
+  const V3D Tmp((Bv-Av).cross_prod(Cv-Av));
+  return (Tmp.norm()>Tolerance) ? 0 : 1;
+}
+
+
+
+/*!
+  Read data from a stream.
+  \todo Check Error handling 
+  \param IX :: Input Stream
+*/
+void
+V3D::read(std::istream& IX)
+{
+  IX>>x>>y>>z;
+  return;
+}
+
   /**
     Prints a text representation of itself
     \param os the Stream to output to
@@ -415,6 +491,19 @@ operator<<(std::ostream& os, const V3D& v)
 {
   v.printSelf(os);
   return os;
+}
+
+std::istream& 
+operator>>(std::istream& IX,V3D& A)
+  /*!
+    Calls Vec3D method write to output class
+    \param IX :: Input Stream
+    \param A :: Vec3D to write
+    \return Current state of stream
+  */
+{
+  A.read(IX);
+  return IX;
 }
 
 } // Namespace Geometry
