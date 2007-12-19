@@ -3,16 +3,19 @@
 import os
 import platform
 import sys
+import re
 import shutil
 from socket import gethostname
 
 import MantidBuild
+
 
 Import('env')
 shared_list = env['SHARED_LIST']
 static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
+
 
 main_obj = env.Object('Main.cpp')
 
@@ -21,6 +24,7 @@ myenv_dynamic.Append(LIBS=libList)
 myenv_dynamic.Append(LIBPATH=libDirList)
 myenv_dynamic.Append(LIBPATH='#Bin/Shared')
 myenv_dynamic.Program('main',main_obj)
+
 
 myenv_static = env.Clone()
 myenv_static.Append(LIBS=libList)

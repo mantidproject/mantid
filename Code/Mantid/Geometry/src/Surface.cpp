@@ -265,7 +265,7 @@ Surface::distanceTrue(const Geometry::Vec3D& Pt) const
   // Solve main equation:
   gsl_poly_complex_workspace* WS= gsl_poly_complex_workspace_alloc(7);
   double Z[12];
-  gsl_poly_complex_solve (T, 7, WS, Z);
+  int status=gsl_poly_complex_solve (T, 7, WS, Z);
   gsl_poly_complex_workspace_free (WS);
 
   double Out(1e38);
