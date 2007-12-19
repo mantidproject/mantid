@@ -69,8 +69,6 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
   
 }
 
-
-
 template<typename T>
 Matrix<T>::Matrix(const Matrix<T>& A)
   : nx(0),ny(0),V(0)
@@ -535,6 +533,34 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
     for(int j=0;j<static_cast<int>(Dvec.size());j++)
       X.V[i][j]=Dvec[j]*V[i][j];
   return X;
+}
+
+template<typename T>
+Matrix<T>
+Matrix<T>::Tprime() const
+  /*! 
+    Transpose the matrix : 
+    Has transpose for a square matrix case.
+    \return M^T
+  */
+{
+  if (!nx*ny)
+    return *this;
+
+  if (nx==ny)   // inplace transpose
+    {
+      Matrix<T> MT(*this);
+      MT.Transpose();
+      return MT;
+    }
+
+  // irregular matrix
+  Matrix<T> MT(ny,nx);
+  for(int i=0;i<nx;i++)
+    for(int j=0;j<ny;j++)
+      MT.V[j][i]=V[i][j];
+
+  return MT;
 }
 
 template<typename T>

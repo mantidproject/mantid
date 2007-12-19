@@ -103,6 +103,7 @@ class Matrix
   void averSymmetric();                 ///< make Matrix symmetric
   int Diagonalise(Matrix<T>&,Matrix<T>&) const;  ///< (only Symmetric matrix)
   void sortEigen(Matrix<T>&);                    ///< Sort eigenvectors
+  Matrix<T> Tprime() const;                      ///< Transpose the matrix
   Matrix<T>& Transpose();                        ///< Transpose the matrix
 
   T factor();                       ///< Calculate the factor

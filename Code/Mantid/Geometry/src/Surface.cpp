@@ -22,9 +22,11 @@
 #include "XMLcollect.h" 
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
+#include "mathSupport.h"
 #include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"
+#include "PolyBase.h"
 #include "BaseVisit.h"
 #include "Surface.h"
 
@@ -185,108 +187,113 @@ Surface::distanceTrue(const Geometry::Vec3D& Pt) const
   // Job 1 :: Create matrix and vector representation
   Geometry::Matrix<double> A(3,3);
   Geometry::Vec3D B;
-  double C;
-  matrixForm(A,B,C);
+  double cc;
+  matrixForm(A,B,cc);
   
   //Job 2 :: calculate the diagonal matrix
   Geometry::Matrix<double> D(3,3);
   Geometry::Matrix<double> R(3,3);
   if (!A.Diagonalise(R,D))
     {
-      std::cerr<<"Problem with matrix :: distance now guessed at"<<std::endl;
+      PLog.warning()<<"Problem with matrix :: distance now approximated."<<std::endl;
       return distance(Pt);
     }
-  Geometry::Matrix<double> Rt(R);
-  Rt.Transpose();
-  Geometry::Vec3D alpha=Rt*Pt;
-  Geometry::Vec3D beta=Rt*B;
+
+  Geometry::Vec3D alpha=R.Tprime()*Pt;
+  Geometry::Vec3D beta=R.Tprime()*B;
     
   // Calculate fundermental equation:
-  double T[7];
-  const double aa(alpha[0]);   const double aa2(aa*aa);
-  const double ab(alpha[1]);   const double ab2(aa*aa);
-  const double ac(alpha[2]);   const double ac2(aa*aa);
+  const double aa(alpha[0]);  const double aa2(aa*aa);
+  const double ab(alpha[1]);  const double ab2(ab*ab);
+  const double ac(alpha[2]);  const double ac2(ac*ac);
 
-  const double ba(beta[0]);   const double ba2(ba*ba);
-  const double bb(beta[1]);   const double bb2(bb*bb);
-  const double bc(beta[2]);   const double bc2(bc*bc);
+  const double ba(beta[0]);  const double ba2(ba*ba);
+  const double bb(beta[1]);  const double bb2(bb*bb);
+  const double bc(beta[2]);  const double bc2(bc*bc);
 
-  const double da(D[0][0]);   const double da2(da*da);
-  const double db(D[1][3]);   const double db2(db*db);
-  const double dc(D[2][2]);   const double dc2(dc*dc);
-
-
-  T[0]=C+ aa*ba + ab*bb + ac*bc + aa2*da + ab2*db +  ac2*dc;
-
-  T[1]= -ba2-bb2-bc2 + 4*ab*bb*da + 4*ac*bc*da + 4*aa*ba*db + 4*ac*bc*db + 
-            4*aa2*da*db + 4*ab2*da*db + 4*aa*ba*dc +  4*ab*bb*dc + 4*aa*da*dc + 
-            4*ac*da*dc + 4*ab*db*dc + 4*ac*db*dc;
-  T[2]=  -ba2*da - 4*bb2*da - 4*bc2*da + 4*ab*bb*da2 + 
-            4*ac*bc*da2 - 4*ba2*db - bb2*db - 4*bc*db + 
-            16*ac*bc*da*db + 4*ab2*da2*db + 4*aa*ba*db2 + 
-            4*ac*bc*db2 + 4*aa2*da*db2 - 4*ba2*dc - 
-            4*bb2*dc - bc2*dc + 16*ab*bb*da*dc + 
-            4*ac2*da2*dc + 16*aa*ba*db*dc + 
-            16*aa2*da*db*dc + 16*ab2*da*db*dc + 
-            16*ac2*da*db*dc + 4*ac2*db2*dc + 4*aa*ba*dc2 + 
-            4*ab*bb*dc2 + 4*aa2*da*dc2 + 
-            4*ab2*db*dc2;
-
-  T[3]=   -4*bb2*da2 - 4*bc2*da2 - 4*ba2*da*db - 4*bb2*da*db - 
-            16*bc2*da*db + 16*ac*bc*da2*db - 4*ba2*db2 - 
-            4*bc2*db2 + 16*ac*bc*da*db2 - 4*ba2*da*dc - 
-            16*bb2*da*dc - 4*bc2*da*dc + 16*ab*bb*da2*dc - 
-            16*ba2*db*dc - 4*bb2*db*dc - 4*bc2*db*dc + 
-            16*ab2*da2*db*dc + 16*ac2*da2*db*dc + 
-            16*aa*ba*db2*dc + 16*aa2*da*db2*dc + 
-            16*ac2*da*db2*dc - 4*ba2*dc2 - 4*bb2*dc2 + 
-            16*ab*bb*da*dc2 + 16*aa*ba*db*dc2 + 
-            16*aa2*da*db*dc2 + 
-            16*ab2*da*db*dc2;
+  const double da(D[0][0]);  const double da2(da*da);
+  const double db(D[1][1]);  const double db2(db*db);
+  const double dc(D[2][2]);  const double dc2(dc*dc);
   
-  T[4]=   -4*bb2*da2*db - 16*bc2*da2*db - 4*ba2*da*db2 - 
-            16*bc2*da*db2 + 16*ac*bc*da2*db2 - 
-            16*bb2*da2*dc - 4*bc2*da2*dc - 
-            16*ba2*da*db*dc - 16*bb2*da*db*dc - 
-            16*bc2*da*db*dc - 16*ba2*db2*dc - 
-            4*bc2*db2*dc + 16*ac2*da2*db2*dc - 
-            4*ba2*da*dc2 - 16*bb2*da*dc2 + 
-            16*ab*bb*da2*dc2 - 16*ba2*db*dc2 - 
-            4*bb2*db*dc2 + 16*ab2*da2*db*dc2 + 
-            16*aa*ba*db2*dc2 +  16*aa2*da*db2*dc2;
-  
-  T[5]=-16*(bc2*da2*db2 + bb2*da2*db*dc + bc2*da2*db*dc + 
-            ba2*da*db2*dc + bc2*da*db2*dc +
-            bb2*da2*dc2 + ba2*da*db*dc2 + 
-            bb2*da*db*dc2 + ba2*db2*dc2);
-  
-  T[6]= -16*(bc2*da2*db2*dc + bb2*da2*db*dc2 +ba2*da*db2*dc2);
+  mathLevel::PolyBase T(6);
 
-  // Solve main equation:
-  gsl_poly_complex_workspace* WS= gsl_poly_complex_workspace_alloc(7);
-  double Z[12];
-  int status=gsl_poly_complex_solve (T, 7, WS, Z);
-  gsl_poly_complex_workspace_free (WS);
+  T[0]=aa*ba+ab*bb+ac*bc+cc+aa2*da+ab2*db+ac2*dc;
 
-  double Out(1e38);
-  int index(-1);
-  for(int i=0;i<12;i+=2)
+  T[1]= -ba2-bb2-bc2 + 4*ab*bb*da + 4*ac*bc*da + 4*cc*da + 4*aa*ba*db + 
+	 4*ac*bc*db + 4*cc*db + 4*aa2*da*db + 4*ab2*da*db + 
+	 4*aa*ba*dc + 4*ab*bb*dc + 4*cc*dc + 4*aa2*da*dc + 
+	 4*ac2*da*dc + 4*ab2*db*dc +  4*ac2*db*dc;
+	 
+  T[2]= -ba2*da -4*bb2*da -4*bc2*da + 4*ab*bb*da2 + 4*ac*bc*da2 + 4*cc*da2  
+    - 4*ba2*db - bb2*db - 4*bc2*db + 16*ac*bc*da*db + 
+    16*cc*da*db + 4*ab2*da2*db + 4*aa*ba*db2 + 
+    4*ac*bc*db2 + 4*cc*db2 + 4*aa2*da*db2 - 
+    4*ba2*dc - 4*bb2*dc - bc2*dc + 16*ab*bb*da*dc + 
+    16*cc*da*dc + 4*ac2*da2*dc + 16*aa*ba*db*dc + 
+    16*cc*db*dc + 16*aa2*da*db*dc + 16*ab2*da*db*dc + 
+    16*ac2*da*db*dc + 4*ac2*db2*dc + 4*aa*ba*dc2 + 
+    4*ab*bb*dc2 + 4*cc*dc2 + 4*aa2*da*dc2 + 
+    4*ab2*db*dc2;
+
+  T[3]= -4*bb2*da2 - 4*bc2*da2 - 4*ba2*da*db - 4*bb2*da*db - 
+         16*bc2*da*db + 16*ac*bc*da2*db + 16*cc*da2*db - 
+          4*ba2*db2 - 4*bc2*db2 + 16*ac*bc*da*db2 + 
+          16*cc*da*db2 - 4*ba2*da*dc - 16*bb2*da*dc - 
+          4*bc2*da*dc + 16*ab*bb*da2*dc + 16*cc*da2*dc - 
+          16*ba2*db*dc - 4*bb2*db*dc - 4*bc2*db*dc + 
+          64*cc*da*db*dc + 16*ab2*da2*db*dc + 
+          16*ac2*da2*db*dc + 16*aa*ba*db2*dc + 
+          16*cc*db2*dc + 16*aa2*da*db2*dc + 
+          16*ac2*da*db2*dc - 4*ba2*dc2 - 4*bb2*dc2 + 
+          16*ab*bb*da*dc2 + 16*cc*da*dc2 + 16*aa*ba*db*dc2 + 
+          16*cc*db*dc2 + 16*aa2*da*db*dc2 + 
+          16*ab2*da*db*dc2;
+
+  T[4]=-4*bb2*da2*db - 16*bc2*da2*db - 4*ba2*da*db2 - 16*bc2*da*db2 + 
+         16*ac*bc*da2*db2 + 16*cc*da2*db2 - 16*bb2*da2*dc - 4*bc2*da2*dc - 
+          16*ba2*da*db*dc - 16*bb2*da*db*dc - 16*bc2*da*db*dc + 64*cc*da2*db*dc - 
+          16*ba2*db2*dc - 4*bc2*db2*dc + 64*cc*da*db2*dc + 16*ac2*da2*db2*dc - 
+          4*ba2*da*dc2 - 16*bb2*da*dc2 + 16*ab*bb*da2*dc2 + 16*cc*da2*dc2 - 
+          16*ba2*db*dc2 - 4*bb2*db*dc2 + 64*cc*da*db*dc2 + 16*ab2*da2*db*dc2 + 
+          16*aa*ba*db2*dc2 + 16*cc*db2*dc2 + 16*aa2*da*db2*dc2;
+
+
+  T[5]= -16*bc2*da2*db2 - 16*bb2*da2*db*dc - 16*bc2*da2*db*dc - 
+          16*ba2*da*db2*dc - 16*bc2*da*db2*dc + 
+          64*cc*da2*db2*dc - 16*bb2*da2*dc2 - 
+          16*ba2*da*db*dc2 - 16*bb2*da*db*dc2 + 
+          64*cc*da2*db*dc2 - 16*ba2*db2*dc2 + 
+          64*cc*da*db2*dc2;
+
+  T[6]= 16*da*db*dc*(-bc2*da*db -bb2*da*dc -ba2*db*dc + 
+		     4*cc*da*db*dc);
+
+  std::vector<double> TRange=T.realRoots(1e-10);
+  if (TRange.empty())
+    return -1.0;
+
+  double Out= -1;
+  Geometry::Vec3D xvec;
+  std::vector<double>::const_iterator vc;
+  for(vc=TRange.begin();vc!=TRange.end();vc++)
     {
-      if (fabs(Z[i])<Out && fabs(Z[i+1])<STolerance)  // Non-complex
+      const double daI=1.0+2* (*vc) *da;
+      const double dbI=1.0+2* (*vc) *da;
+      const double dcI=1.0+2* (*vc) *da;
+      if ((daI*daI)>STolerance || (dbI*dbI)>STolerance 
+	  && (dcI*dcI)<STolerance)
         {
-	  index=i;
-	  Out=fabs(Z[i]);
+	  Geometry::Matrix<double> DI(3,3);
+	  DI[0][0]=1.0/daI;
+	  DI[1][1]=1.0/dbI;
+	  DI[2][2]=1.0/dcI;
+	  xvec = R*(DI*(alpha-beta* *vc));  // care here: to avoid 9*9 +9*3 in favour of 9*3+9*3 ops.
+	  const double Dist=xvec.Distance(Pt);
+	  if (Out<0 || Out>Dist)
+	    Out=Dist;
 	}
     }
-  if (index<0)
-    return -1.0;
-  
-  Matrix<double> DI(3,3);
-  DI[0][0]=1.0+2*Out*da;
-  DI[1][1]=1.0+2*Out*db;
-  DI[2][2]=1.0+2*Out*dc;
-  Vec3D xvec = (R*DI) * (alpha-beta*Out);
-  return xvec.Distance(Pt);
+  return Out;
 }
 
 double
