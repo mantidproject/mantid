@@ -105,7 +105,6 @@ public:
       double err2 = work_in2->dataE(i/work_in2->blocksize())[i%work_in1->blocksize()];
       double err3(sqrt((err1*err1) + (err2*err2)));     
       TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
-
     }
   }
 

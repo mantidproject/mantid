@@ -103,7 +103,7 @@ public:
       TS_ASSERT_DELTA(sig1 / sig2, sig3, 0.0001);
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double err2 = work_in2->dataE(i/work_in2->blocksize())[i%work_in1->blocksize()];
-      double err3(sig3 * sqrt(   ((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))  ));     
+      double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));     
       TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
     }
   }
