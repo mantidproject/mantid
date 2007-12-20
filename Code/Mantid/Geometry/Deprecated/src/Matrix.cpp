@@ -306,6 +306,19 @@ Matrix<T>::operator/=(const T& Value)
 
 template<typename T>
 int
+Matrix<T>::operator!=(const Matrix<T>& A) const
+  /*!
+    Element by Element comparison
+    \param A :: Matrix to check
+    \return 1 :: on sucees
+    \return 0 :: failoure
+  */
+{
+  return (this->operator==(A)) ? 0 : 1;
+}
+
+template<typename T>
+int
 Matrix<T>::operator==(const Matrix<T>& A) const
   /*! 
     Element by element comparison within tolerance.
@@ -722,7 +735,7 @@ Matrix<T>::Faddeev(Matrix<T>& InvOut)
   Matrix<T>& A(*this);
   Matrix<T> B(A);
   Matrix<T> Ident(nx,ny);
-
+  Ident.identityMatrix();
 
   T tVal=B.Trace();                     // Trace of the matrix
   std::vector<T> Poly;
@@ -865,8 +878,8 @@ Matrix<T>::normVert()
     {
       T sum=0;
       for(int j=0;j<ny;j++)
-	    sum+=V[i][j]*V[i][j];
-	  sum=std::sqrt(static_cast<double>(sum));
+	sum+=V[i][j]*V[i][j];
+      sum=static_cast<T>(std::sqrt(static_cast<double>(sum)));
       for(int j=0;j<ny;j++)
 	V[i][j]/=sum;
     }
@@ -892,8 +905,8 @@ template<typename T>
 void 
 Matrix<T>::lubcmp(int* rowperm,int& interchange)
   /*!
-    Find biggest pivit and move to top row. Then
-    divide by pivit.
+    Find biggest pivot and move to top row. Then
+    divide by pivot.
     \param interchange :: odd/even nterchange (+/-1)
     \param rowperm :: row permuations
   */
@@ -1007,7 +1020,7 @@ template<typename T>
 void
 Matrix<T>::averSymmetric()
   /*!
-    Simple function to take an average symmetric matrix
+    Simple function to create an average symmetric matrix
     out of the Matrix
   */
 {
@@ -1134,12 +1147,6 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 	  // Make OUTPUT -- D + A
 	  // sort Output::
 	  std::vector<int> index;
-//	  indexSort(Diag,index);
-//	  for(int ii=0;ii<nx;ii++)
-//	    {
-//	      DiagMatrix.V[ii][ii]=static_cast<T>(Diag[index[ii]]);
-//	      EigenVector
-
 	  for(int ix=0;ix<nx;ix++)
 	    DiagMatrix.V[ix][ix]=static_cast<T>(Diag[ix]);
 	  return 1;
