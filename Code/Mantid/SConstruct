@@ -100,13 +100,14 @@ else:
 	    libDirList.append(poco_path+'/lib/Linux/i686')
 	else :
 	    libDirList.append(poco_path+'/lib')
-	cflags.append(['-g'])            ## PLEASE DO NOT MIX - -O0 and -g UNLESS DEBUGGUNG OPTIMIZATION ISSUES.
-	f=os.popen('pkg-config --cflags gsl')
+	cflags.append(['-g','-Wall'])            ## PLEASE DO NOT MIX - -O0 and -g UNLESS DEBUGGUNG OPTIMIZATION ISSUES.
+	env.Append(LINKFLAGS=['-g'])
+	f=os.popen('gsl-config --cflags')
 	flags=re.sub('\n','',f.readline())
 	if (len(flags)>1):
 		cflags.append([flags])
 	f.close()
-	f=os.popen('pkg-config --libs gsl')
+	f=os.popen('gsl-config --libs')
 	flags=re.sub('\n','',f.readline())
 	lpts=re.split("\s+",flags)
 	lpts.append('-g')
