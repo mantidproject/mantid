@@ -67,8 +67,8 @@ public:
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
     AnalysisDataService* ADS = AnalysisDataService::Instance();
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
-    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
 
     Minus alg;
 
@@ -95,14 +95,16 @@ public:
   {
     for (int i = 0; i < work_out1->size(); i++)
     {
+      double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+      double sig2 = work_in2->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
+      double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       TS_ASSERT_DELTA(work_in1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()],
         work_out1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
-      TS_ASSERT_DELTA(work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()] - work_in2->dataY(i/work_in2->blocksize())[i%work_in1->blocksize()],
-        work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+      TS_ASSERT_DELTA(sig1 - sig2, sig3, 0.0001);
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double err2 = work_in2->dataE(i/work_in2->blocksize())[i%work_in1->blocksize()];
-      double err = sqrt((err1 * err1) + (err2 * err2));
-      TS_ASSERT_DELTA(err, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
+      double err3(sqrt((err1*err1) + (err2*err2)));     
+      TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
     }
   }
 

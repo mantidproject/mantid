@@ -41,7 +41,7 @@ public:
     return retVal;
   }
 
-  static Workspace2D* Create2DWorkspace(int xlen, int ylen)
+  static Workspace2D* Create2DWorkspace123(int xlen, int ylen)
   {
     std::vector<double> x1(xlen,1),y1(xlen,2),e1(xlen,3);
     Workspace2D* retVal = new Workspace2D;
@@ -54,7 +54,19 @@ public:
 
     return retVal;
   }
-  
+  static Workspace2D* Create2DWorkspace154(int xlen, int ylen)
+  {
+    std::vector<double> x1(xlen,1),y1(xlen,5),e1(xlen,4);
+    Workspace2D* retVal = new Workspace2D;
+    retVal->setHistogramNumber(ylen);
+    for (int i=0; i< ylen; i++)
+    {
+      retVal->setX(i,x1);     
+      retVal->setData(i,y1,e1);
+    }
+
+    return retVal;
+  }  
   
 };
 

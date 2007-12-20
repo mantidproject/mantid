@@ -54,7 +54,7 @@ public:
   void testcheckSizeCompatability2D1D()
   {
     // Register the workspace in the data service
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
     Workspace1D* work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
     Workspace1D* work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     Workspace1D* work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
@@ -83,13 +83,13 @@ public:
   void testcheckSizeCompatability2D2D()
   {
     // Register the workspace in the data service
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
-    Workspace2D* work_in3 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    Workspace2D* work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
-    Workspace2D* work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
-    Workspace2D* work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
-    Workspace2D* work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(20,10);
+    Workspace2D* work_in3 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    Workspace2D* work_in4 = WorkspaceCreationHelper::Create2DWorkspace123(5,5);
+    Workspace2D* work_in5 = WorkspaceCreationHelper::Create2DWorkspace123(3,3);
+    Workspace2D* work_in6 = WorkspaceCreationHelper::Create2DWorkspace123(1,100);
+    Workspace2D* work_in7 = WorkspaceCreationHelper::Create2DWorkspace123(0,0);
     BinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
@@ -139,7 +139,7 @@ public:
   void testcreateOutputWorkspace2D1D()
   {
     // Register the workspace in the data service
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(5,2);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(5,2);
     Workspace1D* work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
     Workspace1D* work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     Workspace1D* work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
@@ -168,13 +168,13 @@ public:
   void testcreateOutputWorkspace2D2D()
   {
     // Register the workspace in the data service
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
-    Workspace2D* work_in3 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    Workspace2D* work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
-    Workspace2D* work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
-    Workspace2D* work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
-    Workspace2D* work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(20,10);
+    Workspace2D* work_in3 = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    Workspace2D* work_in4 = WorkspaceCreationHelper::Create2DWorkspace123(5,5);
+    Workspace2D* work_in5 = WorkspaceCreationHelper::Create2DWorkspace123(3,3);
+    Workspace2D* work_in6 = WorkspaceCreationHelper::Create2DWorkspace123(1,100);
+    Workspace2D* work_in7 = WorkspaceCreationHelper::Create2DWorkspace123(0,0);
     BinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);

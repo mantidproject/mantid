@@ -35,7 +35,7 @@ public:
 
   void testExec1D1D()
   {
-    int sizex = 10;
+    int sizex = 5;
     // Register the workspace in the data service
     AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace1D* work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
@@ -64,11 +64,11 @@ public:
 
   void testExec2D2D()
   {
-    int sizex = 10,sizey=20;
+    int sizex = 2,sizey=4;
     // Register the workspace in the data service
     AnalysisDataService* ADS = AnalysisDataService::Instance();
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
-    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace(sizex,sizey);
+    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     Multiply alg;
 
@@ -96,18 +96,17 @@ public:
     for (int i = 0; i < work_out1->size(); i++)
     {
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      double sig2 = work_in1->dataY(i/work_in2->blocksize())[i%work_in1->blocksize()];
+      double sig2 = work_in2->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       TS_ASSERT_DELTA(work_in1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()],
         work_out1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
-      TS_ASSERT_DELTA(sig1 / sig2, sig3, 0.0001);
+      TS_ASSERT_DELTA(sig1 * sig2, sig3, 0.0001);
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double err2 = work_in2->dataE(i/work_in2->blocksize())[i%work_in1->blocksize()];
       // (Sa/a)2 + (Sb/b)2 = (Sc/c)2 
       //  So after taking proportions, squaring, summing, 
       //  and taking the square root, you get a proportional error to the product c. Multiply that proportional error by c to get the actual standard deviation Sc. 
-      double err3(sig3 * sqrt((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2)));     
-
+      double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));     
       TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
     }
   }
