@@ -16,7 +16,7 @@ namespace Mantid
     AlgorithmManager* AlgorithmManager::m_instance = 0;
 
     /// Private Constructor for singleton class
-    AlgorithmManager::AlgorithmManager() : DynamicFactory<IAlgorithm>(),
+    AlgorithmManager::AlgorithmManager() : AlgorithmFactory(),
       no_of_alg(0)
     {
     }
@@ -36,9 +36,9 @@ namespace Mantid
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
-    IAlgorithm* AlgorithmManager::createUnmanaged(const std::string& algName) const
+    Algorithm* AlgorithmManager::createUnmanaged(const std::string& algName) const
     {
-      return DynamicFactory<IAlgorithm>::create(algName);                // Throws on fail:
+      return AlgorithmFactory::create(algName);                // Throws on fail:
     }
 
     /** Creates an instance of an algorithm
@@ -48,11 +48,11 @@ namespace Mantid
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed
     */
-    IAlgorithm* AlgorithmManager::create(const std::string& algName)
+    Algorithm* AlgorithmManager::create(const std::string& algName)
     {
       try
       {
-        regAlg.push_back(DynamicFactory<IAlgorithm>::create(algName));      // Throws on fail:	   
+        regAlg.push_back(AlgorithmFactory::create(algName));      // Throws on fail:	   
         regAlg.back()->initialize();
       }
       catch(std::runtime_error& ex)
@@ -77,7 +77,7 @@ namespace Mantid
     /// Finalizes and deletes all registered algorithms
     void AlgorithmManager::clear()
     {
-      std::vector<IAlgorithm*>::iterator vc;
+      std::vector<Algorithm*>::iterator vc;
       try
       {
         for(vc=regAlg.begin();vc!=regAlg.end();vc++)

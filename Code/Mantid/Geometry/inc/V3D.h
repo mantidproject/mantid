@@ -5,7 +5,7 @@
 #include <complex>
 #include <vector>
 #include "MantidKernel/System.h"
-#include "Matrix.h"
+#include "../Deprecated/inc/Matrix.h"
 
 namespace Mantid
 {

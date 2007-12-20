@@ -95,14 +95,7 @@ int main()
     ADS->remove("test_in11");
     ADS->remove("test_in12");
 */
-    ADS->add("test_in21", work_in3);
-    ADS->add("test_in22", work_in4);
-    plus_alg.initialize();
-    plus_alg.setProperty("InputWorkspace_1","test_in21");
-    plus_alg.setProperty("InputWorkspace_2","test_in22");    
-    plus_alg.setProperty("OutputWorkspace","test_out2");
-    plus_alg.execute();
-    Workspace* work_out2 = ADS->retrieve("test_out2");
+
 
 
 

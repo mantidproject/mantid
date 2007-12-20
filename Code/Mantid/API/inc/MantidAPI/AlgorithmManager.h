@@ -25,8 +25,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/Algorithm.h"
 #include <vector>
 
 namespace Mantid
@@ -62,7 +62,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlgorithmManager  : public Kernel::DynamicFactory<IAlgorithm>
+class DLLExport AlgorithmManager  : public AlgorithmFactory
 {
 public:
 
@@ -72,8 +72,8 @@ public:
 ~AlgorithmManager();
 	
   // Methods to create algorithm instances
-	IAlgorithm* create( const std::string& algName );
-	IAlgorithm* createUnmanaged( const std::string& algName ) const;
+	Algorithm* create( const std::string& algName );
+	Algorithm* createUnmanaged( const std::string& algName ) const;
 
 	/// Finalizes and deletes all registered algorithms
 	void clear();
@@ -93,7 +93,7 @@ private:
 	static Kernel::Logger& g_log;
  
 	int no_of_alg;                       ///< counter of registered algorithms
-	std::vector<IAlgorithm*> regAlg;     ///<  pointers to registered algorithms [policy???]
+	std::vector<Algorithm*> regAlg;     ///<  pointers to registered algorithms [policy???]
 	static AlgorithmManager* m_instance; ///< Pointer to the Algorithm Manager instance
 };
 

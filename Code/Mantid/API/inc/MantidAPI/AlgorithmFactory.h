@@ -15,7 +15,7 @@ namespace API
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class IAlgorithm;
+class Algorithm;
 
 /** @class AlgorithmFactory AlgorithmFactory.h Kernel/AlgorithmFactory.h
 
@@ -46,7 +46,7 @@ class IAlgorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class DLLExport AlgorithmFactory : public Kernel::DynamicFactory<IAlgorithm>
+  class DLLExport AlgorithmFactory : public Kernel::DynamicFactory<Algorithm>
   {
   public:
     
