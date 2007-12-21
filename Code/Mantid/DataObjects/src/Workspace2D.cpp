@@ -214,7 +214,7 @@ Workspace2D::dataX(const int index) const
 const std::vector<double>& 
 Workspace2D::dataY(const int index) const
 {
-  if (histnumber<0 || index>=static_cast<int>(data.size()))
+  if (index<0 || index>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
   return data[index].dataY();
