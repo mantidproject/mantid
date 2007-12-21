@@ -194,8 +194,8 @@ Workspace2D::getHistogramNumber() const
 
 /**
 	Get the x data of a specified histogram
-	\param histnumber The number of the histogram
-	\return A vector of doubles containing the x data
+	@param histnumber The number of the histogram
+	@return A vector of doubles containing the x data
 */
 const std::vector<double>& 
 Workspace2D::dataX(const int histnumber) const
@@ -208,8 +208,8 @@ Workspace2D::dataX(const int histnumber) const
 
 /**
 	Get the y data of a specified histogram
-	\param histnumber The number of the histogram
-	\return A vector of doubles containing the y data
+	@param histnumber The number of the histogram
+	@return A vector of doubles containing the y data
 */
 const std::vector<double>& 
 Workspace2D::dataY(const int histnumber) const
@@ -222,8 +222,8 @@ Workspace2D::dataY(const int histnumber) const
 
 /**
 	Get the error data for a specified histogram
-	\param histnumber The number of the histogram
-	\return A vector of doubles containing the error data
+	@param histnumber The number of the histogram
+	@return A vector of doubles containing the error data
 */
 const std::vector<double>& 
 Workspace2D::dataE(const int histnumber) const
@@ -259,7 +259,7 @@ int Workspace2D::blocksize() const
   }
   return retVal; 
 }
-
+///Returns the x data
 std::vector<double>& Workspace2D::dataX(int const index)
 {
   if (index<0 || index>=static_cast<int>(data.size()))
