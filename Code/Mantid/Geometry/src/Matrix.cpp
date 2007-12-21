@@ -23,8 +23,8 @@ std::ostream&
 Geometry::operator<<(std::ostream& of,const Geometry::Matrix<T>& A)
   /*!
     External Friend :: outputs point to a stream 
-    \param A :: Matrix to write out
     \param of :: output stream
+    \param A :: Matrix to write out
     \returns The output stream (of)
   */
 {
@@ -481,7 +481,10 @@ void
 Matrix<T>::rotate(const double tau,const double s,const int i,const int j,
 		  const int k,const int m)
   /*!
-    Applies a rotation to a particular point of tan(theta)=tau
+    Applies a rotation to a particular point of tan(theta)=tau.
+    Note that you need both sin(theta) and tan(theta) because of 
+    sign preservation. 
+
     \param tau :: tan(theta) 
     \param s :: sin(theta)
     \param i ::  first index (xpos) 
@@ -501,11 +504,11 @@ template<typename T>
 Matrix<T>
 Matrix<T>::fDiagonal(const std::vector<T>& Dvec) const
   /*!
-    Construct a matrix based on 
-    A * This, where A is made into a diagonal 
-    matrix.
+    Calculate the forward diagonal product.
+    Construct a matrix based on  Dvec * This, 
+    where Dvec is made into a diagonal matrix.
     \param Dvec :: diagonal matrix (just centre points)
-    \returns a matrix multiplication
+    \return D*this
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -526,10 +529,12 @@ template<typename T>
 Matrix<T>
 Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
   /*!
+    Calculate the backward diagonal product.
     Construct a matrix based on 
-    This * A, where A is made into a diagonal 
+    This * Dvec, where Dvec is made into a diagonal 
     matrix.
     \param Dvec :: diagonal matrix (just centre points)
+    \return this*D
   */
 {
   // Note:: nx,ny zeroed so setMem always works
@@ -582,6 +587,7 @@ Matrix<T>::Transpose()
   /*! 
     Transpose the matrix : 
     Has a inplace transpose for a square matrix case.
+    \return this^T
   */
 {
   if (!nx*ny)
@@ -908,7 +914,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
     Find biggest pivot and move to top row. Then
     divide by pivot.
     \param interchange :: odd/even nterchange (+/-1)
-    \param rowperm :: row permuations
+    \param rowperm :: row permuations [nx values]
   */
 {
   int imax(0),j,k;
@@ -929,7 +935,10 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
 	  big=temp;
 
       if (big == 0.0) 
-	return;
+        {
+	  delete [] vv;
+	  return;
+	}
       vv[i]=1.0/big;
     }
 
