@@ -54,11 +54,11 @@ public:
     // Check two X vectors are the same
     TS_ASSERT( (output2D->getX(99)) == (output2D->getX(1734)) );
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS( output2D->getY(673).size(), output2D->getY(2111).size() );
+    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->getY(2111).size() );
     // Check one particular value
-    TS_ASSERT_EQUALS( output2D->getY(999)[777], 9);
+    TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS( output2D->getE(999)[777], 3);
+    TS_ASSERT_EQUALS( output2D->dataE(999)[777], 3);
   }
   
   void testFinal()
