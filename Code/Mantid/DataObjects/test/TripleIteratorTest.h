@@ -87,6 +87,8 @@ public:
     W1D workspace = Create1DWorkspace(size);
 
     int count = 0;
+    // triple_iterator<Workspace1D> ti(*workspace);
+    // for(ti.begin();ti!=ti.end; ++ti)
     for(triple_iterator<Workspace1D> ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
@@ -150,7 +152,7 @@ public:
     int size = 57;
     int histogramCount = 100;
     Wbase workspace = Create2DWorkspace(histogramCount,size);
-
+    //workspace->dataX(0) // this is the first spectrum in the workspace with real data
     int count = 0;
     for(triple_iterator<Workspace> ti(*workspace); ti != ti.end(); ++ti)
     {

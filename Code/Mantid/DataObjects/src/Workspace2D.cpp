@@ -194,44 +194,44 @@ Workspace2D::getHistogramNumber() const
 
 /**
 	Get the x data of a specified histogram
-	@param histnumber The number of the histogram
+	@param index The number of the histogram
 	@return A vector of doubles containing the x data
 */
 const std::vector<double>& 
-Workspace2D::dataX(const int histnumber) const
+Workspace2D::dataX(const int index) const
 {
-  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+  if (index<0 || index>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::dataX, histogram number out of range");
 
-  return data[histnumber].dataX();
+  return data[index].dataX();
 }
 
 /**
 	Get the y data of a specified histogram
-	@param histnumber The number of the histogram
+	@param index The number of the histogram
 	@return A vector of doubles containing the y data
 */
 const std::vector<double>& 
-Workspace2D::dataY(const int histnumber) const
+Workspace2D::dataY(const int index) const
 {
-  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+  if (histnumber<0 || index>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
-  return data[histnumber].dataY();
+  return data[index].dataY();
 }
 
 /**
 	Get the error data for a specified histogram
-	@param histnumber The number of the histogram
+	@param index The number of the histogram
 	@return A vector of doubles containing the error data
 */
 const std::vector<double>& 
-Workspace2D::dataE(const int histnumber) const
+Workspace2D::dataE(const int index) const
 {
-  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+  if (index<0 || index>=static_cast<int>(data.size()))
     throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
-  return data[histnumber].dataE();
+  return data[index].dataE();
 }
 
 /// get pseudo size
