@@ -52,9 +52,9 @@ public:
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);
     // Check two X vectors are the same
-    TS_ASSERT( (output2D->getX(99)) == (output2D->getX(1734)) );
+    TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
     // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->getY(2111).size() );
+    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
     // Check that the error on that value is correct
