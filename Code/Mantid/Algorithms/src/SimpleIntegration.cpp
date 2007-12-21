@@ -81,8 +81,8 @@ void SimpleIntegration::exec()
   for (int i = m_MinY; i < m_MaxY; ++i) {
     
     // Retrieve the spectrum into a vector
-    const std::vector<double>& YValues = localworkspace->getY(i);
-    const std::vector<double>& YErrors = localworkspace->getE(i);
+    const std::vector<double>& YValues = localworkspace->dataY(i);
+    const std::vector<double>& YErrors = localworkspace->dataE(i);
 
     // First time through the loop, do some checking on StartY & EndY
     if ( i == m_MinY )

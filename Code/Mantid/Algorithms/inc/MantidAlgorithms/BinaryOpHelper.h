@@ -52,7 +52,7 @@ public:
 	~BinaryOpHelper() {};
 	
   const bool checkSizeCompatability(const API::Workspace* ws1,const API::Workspace* ws2) const;
-
+  const bool checkXarrayCompatability(const API::Workspace* ws1, const API::Workspace* ws2) const;
   API::Workspace* createOutputWorkspace(const API::Workspace* ws1, const API::Workspace* ws2) const;
 
 private:

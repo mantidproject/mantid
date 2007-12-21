@@ -48,6 +48,28 @@ namespace Mantid
       return ((wsLarger->size() % wsSmaller->size()) == 0);
     }
 
+    /** Performs a simple check to see if the X arrays of two workspaces are compatible for a binary operation
+    * The X arrays of two workspaces must be identical to allow a binary operation to be performed
+    * @param ws1 the first workspace to compare
+    * @param ws2 the second workspace to compare
+    * @retval true The two workspaces are size compatible
+    * @retval false The two workspaces are NOT size compatible
+    */
+    const bool BinaryOpHelper::checkXarrayCompatability(const Workspace* ws1,const Workspace* ws2) const
+    {
+      const std::vector<double>& w1x = ws1->dataX(1);
+      const std::vector<double>& w2x = ws2->dataX(1);
+
+      double sum;
+      sum=0.0;
+      for (int i=0; i < w1x.size(); i++) sum += fabs(w1x[i]-w2x[i]);
+      if( sum < 0.0000001)
+        return true;
+      else
+        return false;
+    }
+
+
     /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces
     * @param ws1 the first workspace to compare
     * @param ws2 the second workspace to compare

@@ -76,7 +76,13 @@ public:
 	/// Get the footprint in memory.
 	virtual long int getMemorySize() const {return 0;}	
 	virtual ~Workspace();
-	
+
+  //Get methods return the histogram number 
+  virtual const std::vector<double>& dataX(int const index) const =0;
+  virtual const std::vector<double>& dataY(int const index) const =0;
+  virtual const std::vector<double>& dataE(int const index) const =0;
+
+
 protected:
 	Workspace();
 	Workspace(const Workspace&);

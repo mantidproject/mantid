@@ -150,6 +150,13 @@ namespace Mantid
           if (m_isChildAlgorithm) throw;
         }
 
+        catch(std::logic_error& ex)
+        {
+          g_log.error()<< "Logic Error in Execution of algorithm "<< m_name<<std::endl;
+          if (m_isChildAlgorithm) throw;
+        }
+
+
         // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
         if (!isChild())
         { this->store();}

@@ -47,8 +47,16 @@ namespace Mantid
       BinaryOpHelper boHelper;
       if (!boHelper.checkSizeCompatability(in_work1,in_work2))
       {
+        g_log.error("The size of the two workspaces are not compatible for algorithm plus");
         throw std::invalid_argument("The size of the two workspaces are not compatible for algorithm plus"  );
       }
+
+      if (!boHelper.checkXarrayCompatability(in_work1,in_work2))
+      {
+        g_log.error("The x arrays of the workspaces are not identical");
+        throw std::invalid_argument("The x arrays of the workspaces are not identical");
+      }
+
 
       Workspace* out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
 

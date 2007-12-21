@@ -29,9 +29,9 @@ public:
 
   static Workspace1D* Create1DWorkspaceFib(int size)
   {
-    std::vector<double> x1,y1,e1;
-    x1.resize(size);
-    std::generate(x1.begin(),x1.end(),rand);	
+    std::vector<double> x1(size,1),y1,e1;
+ //   x1.resize(size);
+ //   std::generate(x1.begin(),x1.end(),rand);	
     y1.resize(size);
     std::generate(y1.begin(),y1.end(),FibSeries<double>());
     e1.resize(size);

@@ -82,10 +82,10 @@ void TOFtoWavelength::exec()
   for (int i = 0; i < numberOfSpectra; ++i) {
     
     // Get the x data
-    std::vector<double> XBins = inputWS->getX(i);
+    std::vector<double> XBins = inputWS->dataX(i);
     // Get the histogram bin contents and errors for copying to the output workspace (they don't change)
-    std::vector<double> YData = inputWS->getY(i);
-    std::vector<double> errors = inputWS->getE(i);
+    std::vector<double> YData = inputWS->dataY(i);
+    std::vector<double> errors = inputWS->dataE(i);
     
     // Get the sample-detector distance for this detector (assume in metres)
     double deltaSampleDetector;

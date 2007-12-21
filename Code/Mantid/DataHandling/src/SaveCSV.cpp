@@ -140,7 +140,7 @@ void SaveCSV::exec()
     // Add first x-axis line to output file
 
     {
-      const std::vector<double>& xValue = localworkspace->getX(0);
+      const std::vector<double>& xValue = localworkspace->dataX(0);
 
       outCSV_File << "A";
 
@@ -158,8 +158,8 @@ void SaveCSV::exec()
 
       if (i > 0)
       {
-        const std::vector<double>& xValue = localworkspace->getX(i);
-        const std::vector<double>& xValuePrevious = localworkspace->getX(i-1);
+        const std::vector<double>& xValue = localworkspace->dataX(i);
+        const std::vector<double>& xValuePrevious = localworkspace->dataX(i-1);
 
         if (xValue != xValuePrevious)
         {
@@ -176,7 +176,7 @@ void SaveCSV::exec()
 
       // add y-axis line for histogram (detector) i
 
-      const std::vector<double>& yValue = localworkspace->getY(i);
+      const std::vector<double>& yValue = localworkspace->dataY(i);
 
       outCSV_File << i;
 
@@ -193,7 +193,7 @@ void SaveCSV::exec()
 
     for (int i = 0; i < numberOfHist; i++)
     {
-      const std::vector<double>& eValue = localworkspace->getE(i);
+      const std::vector<double>& eValue = localworkspace->dataE(i);
 
       outCSV_File << i;
 

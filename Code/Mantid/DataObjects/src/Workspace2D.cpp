@@ -198,10 +198,10 @@ Workspace2D::getHistogramNumber() const
 	\return A vector of doubles containing the x data
 */
 const std::vector<double>& 
-Workspace2D::getX(int histnumber) const
+Workspace2D::dataX(const int histnumber) const
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::getX, histogram number out of range");
+    throw std::range_error("Workspace2D::dataX, histogram number out of range");
 
   return data[histnumber].dataX();
 }
@@ -212,10 +212,10 @@ Workspace2D::getX(int histnumber) const
 	\return A vector of doubles containing the y data
 */
 const std::vector<double>& 
-Workspace2D::getY(int histnumber) const
+Workspace2D::dataY(const int histnumber) const
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::getY, histogram number out of range");
+    throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
   return data[histnumber].dataY();
 }
@@ -226,10 +226,10 @@ Workspace2D::getY(int histnumber) const
 	\return A vector of doubles containing the error data
 */
 const std::vector<double>& 
-Workspace2D::getE(int histnumber) const
+Workspace2D::dataE(const int histnumber) const
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::getY, histogram number out of range");
+    throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
   return data[histnumber].dataE();
 }
@@ -284,8 +284,13 @@ std::vector<double>& Workspace2D::dataE(int const index)
   return data[index].dataE();
 }
 
+
 } // namespace DataObjects
 } //NamespaceMantid
+
+
+
+
 
 
 ///\cond TEMPLATE

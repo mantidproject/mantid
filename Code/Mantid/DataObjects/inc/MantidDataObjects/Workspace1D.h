@@ -75,6 +75,9 @@ public:
   virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
+  virtual const std::vector<double>& dataX(int const index) const {return dataX();}
+  virtual const std::vector<double>& dataY(int const index) const {return dataY();}
+  virtual const std::vector<double>& dataE(int const index) const {return dataE();}
 
 
 protected:
