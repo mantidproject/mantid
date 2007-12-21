@@ -65,18 +65,23 @@ public:
 
 
   //inheritance redirections
+  ///Returns non-const vector of the x data
   virtual std::vector<double>& dataX() { return Histogram1D::dataX(); }
-  ///Returns the y data
+  ///Returns non-const vector of the y data
   virtual std::vector<double>& dataY() { return Histogram1D::dataY(); }
-  ///Returns the error data
+  ///Returns non-const vector of the error data
   virtual std::vector<double>& dataE() { return Histogram1D::dataE(); }
+  /// Returns the x data const
   virtual const std::vector<double>& dataX() const { return Histogram1D::dataX(); }  
   /// Returns the y data const
   virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
+  /// Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const {return dataX();}
+  /// Returns the y data const
   virtual const std::vector<double>& dataY(int const index) const {return dataY();}
+  /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const {return dataE();}
 
 

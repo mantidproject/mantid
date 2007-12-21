@@ -81,8 +81,11 @@ public:
 
 
   //Get methods return the histogram number 
+  /// Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const;
+  /// Returns the y data const
   virtual const std::vector<double>& dataY(int const index) const;
+  /// Returns the error const 
   virtual const std::vector<double>& dataE(int const index) const;
 
   long int getMemorySize() const;
