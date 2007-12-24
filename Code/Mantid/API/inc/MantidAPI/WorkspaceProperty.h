@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IStorable.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
@@ -43,7 +44,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class WorkspaceProperty : public Kernel::PropertyWithValue<TYPE*>, public Kernel::IStorable
+class WorkspaceProperty : public Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>, public Kernel::IStorable
 {
 public:  
   /** Constructor.
@@ -54,7 +55,7 @@ public:
    *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
    */
   WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction ) :
-    Kernel::PropertyWithValue<TYPE*>( name, NULL ),
+    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>( name, boost::shared_ptr<TYPE>( ) ),
     m_workspaceName( wsName ),
     m_direction( direction )
   {
@@ -65,7 +66,7 @@ public:
 
   /// Copy constructor
   WorkspaceProperty( const WorkspaceProperty& right ) :
-    Kernel::PropertyWithValue<TYPE*>( right ),
+    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>( right ),
     m_workspaceName( right.m_workspaceName ),
     m_direction( right.m_direction )
   {
@@ -75,12 +76,12 @@ public:
   WorkspaceProperty& operator=( const WorkspaceProperty& right )
   {
     if ( &right == this ) return *this;
-    Kernel::PropertyWithValue<TYPE*>::operator=( right );
+    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=( right );
     return *this;
   }
   
   // Unhide the base class assignment operator
-  using Kernel::PropertyWithValue<TYPE*>::operator=;
+  using Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=;
   
   /// Virtual destructor
   virtual ~WorkspaceProperty()
@@ -121,11 +122,11 @@ public:
     if ( ( m_direction==0 ) || ( m_direction==2 ) )
     {
       try {
-        API::Workspace *ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
+        API::Workspace_sptr ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
         // Check retrieved workspace is the type that it should be
-        Kernel::PropertyWithValue<TYPE*>::m_value = dynamic_cast<TYPE*>(ws);
-        if ( ! Kernel::PropertyWithValue<TYPE*>::m_value ) return false;
-      } catch (Kernel::Exception::NotFoundError& e) {
+        Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
+        if ( ! Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value ) return false;
+      } catch (Kernel::Exception::NotFoundError&) {
         return false;
       }
     }
@@ -156,7 +157,7 @@ public:
   /// Reset the pointer to the workspace
   void clear()
   {
-    this->operator=( NULL );
+    this->operator=( boost::shared_ptr<TYPE>( ) );
   }
   
 private:

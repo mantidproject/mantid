@@ -1,6 +1,7 @@
 #ifndef DYNAMICFACTORYTEST_H_
 #define DYNAMICFACTORYTEST_H_
 
+#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DynamicFactory.h"
@@ -14,12 +15,13 @@ class AFactory : public DynamicFactory<int>
 
 class DynamicFactoryTest : public CxxTest::TestSuite
 {
+  typedef boost::shared_ptr<int> int_ptr;
 public:
 	void testCreate()
 	{
 	  TS_ASSERT_THROWS( factory.create("testEntry"), std::runtime_error )
 	  factory.subscribe<int>("testEntry");
-	  TS_ASSERT_THROWS_NOTHING( int *i = factory.create("testEntry") );
+	  TS_ASSERT_THROWS_NOTHING( int_ptr i = factory.create("testEntry") );
 	}
 
 	void testSubscribe()

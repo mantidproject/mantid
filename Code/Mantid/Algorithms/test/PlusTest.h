@@ -38,8 +38,8 @@ public:
     int sizex = 10;
     // Register the workspace in the data service
     AnalysisDataService* ADS = AnalysisDataService::Instance();
-    Workspace1D* work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    Workspace1D* work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
     ADS->add("test_in11", work_in1);
     ADS->add("test_in12", work_in2);
 
@@ -51,7 +51,7 @@ public:
     plus_alg.setPropertyValue("OutputWorkspace","test_out1");
     plus_alg.execute();
 
-    Workspace* work_out1;
+    Workspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
@@ -67,8 +67,8 @@ public:
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
     AnalysisDataService* ADS = AnalysisDataService::Instance();
-    Workspace2D* work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    Workspace2D* work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     Plus plus_alg;
 
@@ -80,7 +80,7 @@ public:
     plus_alg.setPropertyValue("OutputWorkspace","test_out2");
     TS_ASSERT_THROWS_NOTHING(plus_alg.execute());
     TS_ASSERT( plus_alg.isExecuted() );
-    Workspace* work_out1;
+    Workspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve("test_out2"));
 
     checkData(work_in1, work_in2, work_out1);
@@ -91,7 +91,7 @@ public:
    
   }
 
-  void checkData( Workspace* work_in1,  Workspace* work_in2, Workspace* work_out1)
+  void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)
   {
     for (int i = 0; i < work_out1->size(); i++)
     {

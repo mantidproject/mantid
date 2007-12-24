@@ -54,10 +54,10 @@ public:
   // Returns the single instance of the service
   static AnalysisDataService* Instance();
   
-  void add( const std::string& name, Workspace* space );
-  void addOrReplace( const std::string& name, Workspace* space);
+  void add( const std::string& name, Workspace_sptr space );
+  void addOrReplace( const std::string& name, Workspace_sptr space);
   void remove( const std::string& name );
-  Workspace* retrieve( const std::string& name );	
+  Workspace_sptr retrieve( const std::string& name );	
 	
 private:
   
@@ -73,7 +73,7 @@ private:
   static AnalysisDataService* m_instance;
   
   /// Typedef for the map of the managed algorithms and their names
-  typedef std::map<std::string, Workspace*> WorkspaceMap;
+  typedef std::map<std::string, Workspace_sptr> WorkspaceMap;
   /// The map holding the managed algorithms
   WorkspaceMap m_spaces;
 };

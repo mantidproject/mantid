@@ -102,7 +102,7 @@ public:
 
   void testSubAlgorithm()
   {
-    std::vector<Algorithm*>& testVec = alg.subAlgorithms();
+    std::vector<Algorithm_sptr>& testVec = alg.subAlgorithms();
     // Check that the newly created vector is empty
     TS_ASSERT( testVec.empty() );
   }

@@ -82,7 +82,7 @@ namespace Mantid
         try
         {
           // Now initialize any sub-algorithms
-          std::vector<Algorithm*>::iterator it;
+          std::vector<Algorithm_sptr>::iterator it;
           for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
           {
             (*it)->initialize();
@@ -212,7 +212,7 @@ namespace Mantid
         // Gaudi at some point had a bug if this wasn't done first.
         try
         {
-          std::vector<Algorithm *>::iterator it;
+          std::vector<Algorithm_sptr>::iterator it;
           for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
           {
             (*it)->finalize();
@@ -237,10 +237,11 @@ namespace Mantid
 
         // Release all sub-algorithms (uses IInterface release method in Gaudi instead of direct delete)
         // if it managed to finalise them
-        for (std::vector<Algorithm *>::iterator it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
-        {
-          delete (*it);
-        }
+        /// @todo shared pointers no need
+        //for (std::vector<Algorithm_sptr>::iterator it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
+        //{
+        //  delete (*it);
+        //}
         m_subAlgms.clear();
 
         // Indicate that this Algorithm has been finalized to prevent duplicate attempts
@@ -255,11 +256,11 @@ namespace Mantid
         // (1) perform the printout
         g_log.fatal("UNKNOWN Exception is caught ");
 
-        std::vector<Algorithm *>::iterator it;	    
-        for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++) 
-        {
-          delete (*it);
-        }
+        /// @todo shared pointers no need
+        //for (std::vector<Algorithm_sptr>::iterator it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
+        //{
+        //  delete (*it);
+        //}
         m_subAlgms.clear();
 
         throw;
@@ -294,13 +295,12 @@ namespace Mantid
     *  @param name    The concrete algorithm class of the sub algorithm
     *  @returns Set to point to the newly created algorithm object
     */
-    Algorithm* Algorithm::createSubAlgorithm(const std::string& name)
+    Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
     {
       AlgorithmManager* algManager = AlgorithmManager::Instance(); 
-      Algorithm* alg = algManager->createUnmanaged(name);
+      Algorithm_sptr alg = algManager->createUnmanaged(name);
       //set as a child
       alg->setChild(true);
-      alg->init();
       //hold in the internal store to allow this alg to manage it's children
       m_subAlgms.push_back(alg);
       return alg;

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <vector>
 
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
@@ -36,7 +36,7 @@ namespace Mantid
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
-    Algorithm* AlgorithmManager::createUnmanaged(const std::string& algName) const
+    Algorithm_sptr AlgorithmManager::createUnmanaged(const std::string& algName) const
     {
       return AlgorithmFactory::create(algName);                // Throws on fail:
     }
@@ -48,7 +48,7 @@ namespace Mantid
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed
     */
-    Algorithm* AlgorithmManager::create(const std::string& algName)
+    Algorithm_sptr AlgorithmManager::create(const std::string& algName)
     {
       try
       {
@@ -77,14 +77,15 @@ namespace Mantid
     /// Finalizes and deletes all registered algorithms
     void AlgorithmManager::clear()
     {
-      std::vector<Algorithm*>::iterator vc;
+      std::vector<Algorithm_sptr>::iterator vc;
       try
       {
         for(vc=regAlg.begin();vc!=regAlg.end();vc++)
         {
           // no test for zero since impossible 
           (*vc)->finalize();
-          delete (*vc);
+          //no need to delete the shared pointers
+          //delete (*vc);
         }
         regAlg.clear();
         no_of_alg=0;

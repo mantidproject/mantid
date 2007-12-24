@@ -27,7 +27,7 @@ AnalysisDataService* AnalysisDataService::Instance()
  *  @param space A pointer to the workspace
  *  @throw runtime_error Thrown if problems adding workspace
  */
-void AnalysisDataService::add(const std::string& name, Workspace* space)
+void AnalysisDataService::add(const std::string& name, Workspace_sptr space)
 {
   // Don't permit an empty name for the workspace
   if (name.empty())
@@ -56,22 +56,18 @@ void AnalysisDataService::add(const std::string& name, Workspace* space)
  *  @param space A pointer to the workspace
  *  @throw runtime_error Thrown if unable to add or replace workspace
  */
-void AnalysisDataService::addOrReplace(const std::string& name, Workspace* space)
+void AnalysisDataService::addOrReplace(const std::string& name, Workspace_sptr space)
 {
   //find if the workspace already exists
   WorkspaceMap::const_iterator it = m_spaces.find(name);
   if (m_spaces.end() != it)
   {
     //Yes it does
-    Workspace *existingSpace = it->second;
+    Workspace_sptr existingSpace = it->second;
     //replace it.
     m_spaces[name] = space;
 
-    if(existingSpace != space)
-    {
-      // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
-      delete existingSpace;
-    }
+    //no need to delete it is a shared pointer
     return;
   }
   else
@@ -107,8 +103,7 @@ void AnalysisDataService::remove(const std::string& name)
     g_log.error("Workspace " + name + " cannot be found");
     throw Kernel::Exception::NotFoundError("Workspace cannot be found",name);
   }
-  // Delete the workspace itself (care required on user's part - someone could still have a pointer to it)
-  delete it->second;
+  //no need to delete it is a shared pointer
   m_spaces.erase(it);
   return;
 }
@@ -119,7 +114,7 @@ void AnalysisDataService::remove(const std::string& name)
  *  @return A pointer to the requested workspace
  *  @throw runtime_error Thrown if workspace cannot be found
  */
-Workspace* AnalysisDataService::retrieve(const std::string& name)  
+Workspace_sptr AnalysisDataService::retrieve(const std::string& name)  
 {
   WorkspaceMap::const_iterator it = m_spaces.find(name);
   if (m_spaces.end() != it)
@@ -150,10 +145,7 @@ AnalysisDataService::AnalysisDataService(const AnalysisDataService&)
  */
 AnalysisDataService::~AnalysisDataService()
 { 
-  for (WorkspaceMap::iterator it = m_spaces.begin(); it != m_spaces.end(); ++it )
-  {
-    delete it->second;
-  }
+  //no need to delete contents as they are shared pointers
 }
 
 // Initialise the instance pointer to zero

@@ -92,6 +92,9 @@ protected:
 
 };
 
+  ///shared pointer to the workspace base class
+  typedef boost::shared_ptr<Workspace1D> Workspace1D_sptr;
+
 } // namespace DataObjects
 
 } // namespace Mantid

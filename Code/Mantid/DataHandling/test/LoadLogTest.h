@@ -19,7 +19,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using Mantid::DataObjects::Workspace2D;
+using namespace Mantid::DataObjects;
 
 class LoadLogTest : public CxxTest::TestSuite
 {
@@ -50,7 +50,7 @@ public:
     loader.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    Workspace *ws = factory->create("Workspace2D");
+    Workspace_sptr ws = factory->create("Workspace2D");
     AnalysisDataService *data = AnalysisDataService::Instance();
     TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
 
@@ -67,7 +67,7 @@ public:
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
     
 	  Sample& sample = output->getSample();
@@ -97,7 +97,7 @@ public:
     loaderRawFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    Workspace *ws = factory->create("Workspace1D");
+    Workspace_sptr ws = factory->create("Workspace1D");
     AnalysisDataService *data = AnalysisDataService::Instance();
     TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
 
@@ -114,7 +114,7 @@ public:
     TS_ASSERT( loaderRawFile.isExecuted() );    
     
     // Get back the saved workspace
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
    
 	  Sample& sample = output->getSample(); 
@@ -165,7 +165,7 @@ public:
     loaderRawFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    Workspace *ws = factory->create("Workspace1D");
+    Workspace_sptr ws = factory->create("Workspace1D");
     AnalysisDataService *data = AnalysisDataService::Instance();
     TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
 
@@ -182,7 +182,7 @@ public:
     TS_ASSERT( loaderRawFile.isExecuted() );    
     
     // Get back the saved workspace
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
    
 	  Sample& sample = output->getSample(); 

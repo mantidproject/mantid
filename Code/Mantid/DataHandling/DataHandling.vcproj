@@ -225,6 +225,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SaveCSVTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\vms_convert.h"
 				>
 			</File>

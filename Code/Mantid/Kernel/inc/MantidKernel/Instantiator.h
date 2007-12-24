@@ -1,6 +1,8 @@
 #ifndef MANTID_KERNEL_INSTANTIATOR_H_
 #define MANTID_KERNEL_INSTANTIATOR_H_
 
+#include "boost/shared_ptr.hpp"
+
 namespace Mantid 
 {
 namespace Kernel
@@ -49,7 +51,7 @@ public:
   }
   
   /// Creates an instance of a concrete subclass of Base. 
-  virtual Base* createInstance() const = 0;
+  virtual boost::shared_ptr<Base> createInstance() const = 0;
 
 private:
   /// Private copy constructor
@@ -81,9 +83,10 @@ public:
   /** Creates an instance of a concrete subclass of Base. 
    *  @return A pointer to the base type
    */
-  Base* createInstance() const
+  boost::shared_ptr<Base> createInstance() const
   {
-    return new C;
+    boost::shared_ptr<Base> ptr(new C);
+    return ptr;
   }
 };
 

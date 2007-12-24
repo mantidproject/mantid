@@ -1,6 +1,8 @@
 #ifndef Geometry_Matrix_h 
 #define Geometry_Matrix_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid 
 {
 
@@ -32,7 +34,7 @@ class Vec3D;
 */
 
 template<typename T>
-class Matrix
+class DLLExport Matrix
 {
  private:
 

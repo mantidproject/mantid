@@ -17,34 +17,38 @@ public:
   template<typename T>
   class FibSeries
   {
-   private:
+  private:
     T x1;  /// Initial value 1;
     T x2;  /// Initial value 2;
-    
-    public:
-    
+
+  public:
+
     FibSeries() : x1(1),x2(1) {}
     T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
   };
 
-  static Workspace1D* Create1DWorkspaceFib(int size)
+  static Workspace1D_sptr Create1DWorkspaceFib(int size)
   {
     std::vector<double> x1(size,1),y1,e1;
- //   x1.resize(size);
- //   std::generate(x1.begin(),x1.end(),rand);	
+    //   x1.resize(size);
+    //   std::generate(x1.begin(),x1.end(),rand);	
     y1.resize(size);
     std::generate(y1.begin(),y1.end(),FibSeries<double>());
     e1.resize(size);
-    Workspace1D* retVal = new Workspace1D;
+    Workspace1D_sptr retVal(new Workspace1D);
     retVal->setX(x1);
     retVal->setData(y1,e1);
     return retVal;
   }
+  static Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
+  {
+    return Create2DWorkspace123(xlen, ylen);
+  }
 
-  static Workspace2D* Create2DWorkspace123(int xlen, int ylen)
+  static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen)
   {
     std::vector<double> x1(xlen,1),y1(xlen,2),e1(xlen,3);
-    Workspace2D* retVal = new Workspace2D;
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->setHistogramNumber(ylen);
     for (int i=0; i< ylen; i++)
     {
@@ -54,10 +58,11 @@ public:
 
     return retVal;
   }
-  static Workspace2D* Create2DWorkspace154(int xlen, int ylen)
+
+  static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen)
   {
     std::vector<double> x1(xlen,1),y1(xlen,5),e1(xlen,4);
-    Workspace2D* retVal = new Workspace2D;
+    Workspace2D_sptr retVal(new Workspace2D);
     retVal->setHistogramNumber(ylen);
     for (int i=0; i< ylen; i++)
     {
@@ -67,7 +72,7 @@ public:
 
     return retVal;
   }  
-  
+
 };
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

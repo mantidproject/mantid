@@ -11,7 +11,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using Mantid::DataObjects::Workspace2D;
+using namespace Mantid::DataObjects;
 
 class TOFtoWavelengthTest : public CxxTest::TestSuite
 {
@@ -22,8 +22,8 @@ public:
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     
     // Set up a small workspace for testing
-    Workspace *space = factory->create("Workspace2D");
-    Workspace2D *space2D = dynamic_cast<Workspace2D*>(space);
+    Workspace_sptr space = factory->create("Workspace2D");
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     space2D->setHistogramNumber(2584);
     std::vector<double> x(11);
     for (int i = 0; i < 11; ++i) 
@@ -78,13 +78,13 @@ public:
 
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
-    Workspace *input;
+    Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = data->retrieve(inputSpace));
     
-    Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
-    Workspace2D *input2D = dynamic_cast<Workspace2D*>(input);
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Test that y & e data is unchanged
     std::vector<double> y = output2D->dataY(777);
     std::vector<double> e = output2D->dataE(777);

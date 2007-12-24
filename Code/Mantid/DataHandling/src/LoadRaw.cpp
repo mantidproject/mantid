@@ -20,7 +20,7 @@ namespace DataHandling
 
   using namespace Kernel;
   using API::WorkspaceProperty;
-  using DataObjects::Workspace2D;
+  using namespace DataObjects;
 
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
@@ -71,7 +71,7 @@ namespace DataHandling
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
     API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-    Workspace2D *localWorkspace = dynamic_cast<Workspace2D*>(factory->create("Workspace2D"));
+    Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
 
     // Set number of histograms in 2D workspace
     localWorkspace->setHistogramNumber(numberOfSpectra);

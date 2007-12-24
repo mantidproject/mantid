@@ -18,7 +18,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using Mantid::DataObjects::Workspace2D;
+using namespace Mantid::DataObjects;
 
 class LoadInstrumentTest : public CxxTest::TestSuite
 {
@@ -44,8 +44,9 @@ public:
     //create a workspace with some sample data
     wsName = "LoadInstrumentTest";
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    Workspace *ws = factory->create("Workspace2D");
-    Workspace2D *ws2D = dynamic_cast<Workspace2D*>(ws);
+    Workspace_sptr ws = factory->create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    //Workspace2D *ws2D = dynamic_cast<Workspace2D*>(ws.get());
     int histogramNumber = 2584;
     int timechannels = 100;
     ws2D->setHistogramNumber(histogramNumber);
@@ -91,7 +92,7 @@ public:
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(wsName));
     
     Instrument& i = output->getInstrument();
@@ -114,7 +115,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet1000->type(), "DetectorComponent");
 
     // Test input data is unchanged
-    Workspace2D *output2DInst = dynamic_cast<Workspace2D*>(output);
+    Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 
     TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), histogramNumber);
 

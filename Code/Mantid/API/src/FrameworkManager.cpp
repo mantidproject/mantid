@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/tokenizer.hpp>
@@ -63,8 +64,8 @@ void FrameworkManager::clear()
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  */
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
-{
-   IAlgorithm *alg = algManager->create(algName);
+{ 
+   IAlgorithm* alg = algManager->create(algName).get();
    return alg;
 }
 
@@ -147,7 +148,7 @@ Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
   Workspace *space;
   try
   {
-    space = data->retrieve(wsName);
+    space = data->retrieve(wsName).get();
   }
   catch (Kernel::Exception::NotFoundError& ex)
   {

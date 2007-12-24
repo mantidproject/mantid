@@ -51,9 +51,9 @@ public:
 	/// Destructor
 	~BinaryOpHelper() {};
 	
-  const bool checkSizeCompatability(const API::Workspace* ws1,const API::Workspace* ws2) const;
-  const bool checkXarrayCompatability(const API::Workspace* ws1, const API::Workspace* ws2) const;
-  API::Workspace* createOutputWorkspace(const API::Workspace* ws1, const API::Workspace* ws2) const;
+  const bool checkSizeCompatability(const API::Workspace_sptr ws1,const API::Workspace_sptr ws2) const;
+  const bool checkXarrayCompatability(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const;
+  API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const;
 
 private:
   /// Static reference to the logger class

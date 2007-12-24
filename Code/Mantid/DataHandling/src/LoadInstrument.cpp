@@ -20,8 +20,7 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadInstrument)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::Workspace;
+using namespace API;
 
 Logger& LoadInstrument::g_log = Logger::get("LoadInstrument");
 
@@ -47,7 +46,7 @@ void LoadInstrument::exec()
   m_filename = getPropertyValue("Filename");
 
   // Get the input workspace
-  Workspace *localWorkspace = getProperty("Workspace");
+  Workspace_sptr localWorkspace = getProperty("Workspace");
   
   ///Geometry components
   API::Instrument& instrument = localWorkspace->getInstrument();

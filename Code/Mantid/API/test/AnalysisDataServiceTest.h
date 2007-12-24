@@ -21,9 +21,9 @@ public:
   void testAdd()
   {
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *space = 0;
+    Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING( theService->add("MySpace",space));
-    Workspace *space2 = 0;
+    Workspace_sptr space2;
     TS_ASSERT_THROWS( theService->add("MySpace",space2),std::runtime_error);
     //clean up the ADS for other tests
     theService->remove("MySpace");
@@ -32,7 +32,7 @@ public:
   void testAddOrReplace()
   {
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *space = 0;
+    Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(theService->add("MySpaceAddOrReplace",space));
     TS_ASSERT_THROWS(theService->add("MySpaceAddOrReplace",space),std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(theService->addOrReplace("MySpaceAddOrReplace",space));
@@ -43,7 +43,7 @@ public:
   void testRemove()
   {
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *space = 0;
+    Workspace_sptr space;
     theService->add("MySpace",space);
     TS_ASSERT_THROWS_NOTHING(theService->remove("MySpace"));
     TS_ASSERT_THROWS(theService->retrieve("MySpace"),std::runtime_error);    
@@ -53,9 +53,9 @@ public:
   void testRetrieve()
   {
     AnalysisDataService *theService = AnalysisDataService::Instance();
-    Workspace *work = 0;
+    Workspace_sptr work;
     theService->add("MySpace", work);
-    Workspace *workBack = 0;
+    Workspace_sptr workBack;
     TS_ASSERT_THROWS_NOTHING(workBack = theService->retrieve("MySpace"));
     TS_ASSERT_EQUALS(work, workBack);
     //clean up the ADS for other tests

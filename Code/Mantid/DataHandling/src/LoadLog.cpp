@@ -23,7 +23,9 @@ DECLARE_ALGORITHM(LoadLog)
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::Workspace;
+using API::Workspace_sptr;
 using DataObjects::Workspace2D;
+using DataObjects::Workspace2D_sptr;
 
 namespace fs = boost::filesystem; // to help clarify which bits are boost in code below
 
@@ -69,7 +71,7 @@ void LoadLog::exec()
   // Get the input workspace and retrieve sample from workspace.
   // the log file(s) will be loaded into the Sample container of the workspace 
 
-  Workspace *localWorkspace = getProperty("Workspace");
+  Workspace_sptr localWorkspace = getProperty("Workspace");
   API::Sample& sample = localWorkspace->getSample();
 
 

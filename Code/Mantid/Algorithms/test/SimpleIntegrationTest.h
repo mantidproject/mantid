@@ -23,8 +23,8 @@ public:
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     
     // Set up a small workspace for testing
-    Workspace *space = factory->create("Workspace2D");
-    Workspace2D *space2D = dynamic_cast<Workspace2D*>(space);
+    Workspace_sptr space = factory->create("Workspace2D");
+    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     space2D->setHistogramNumber(5);
     double *a = new double[25];
     double *e = new double[25];
@@ -81,10 +81,10 @@ public:
     
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
     
-    Workspace1D *output1D = dynamic_cast<Workspace1D*>(output);
+    Workspace1D_sptr output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     std::vector<double> y = output1D->dataY();
     std::vector<double> e = output1D->dataE();
     TS_ASSERT_EQUALS( y.size(), 2 );
@@ -108,7 +108,7 @@ public:
     // Get back the saved workspace
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve("out2"));
     
-    output1D = dynamic_cast<Workspace1D*>(output);
+    output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     y = output1D->dataY();
     e = output1D->dataE();
     TS_ASSERT_EQUALS( y.size(), 5 );

@@ -27,11 +27,11 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOpHelper::checkSizeCompatability(const Workspace* ws1,const Workspace* ws2) const
+    const bool BinaryOpHelper::checkSizeCompatability(const Workspace_sptr ws1,const Workspace_sptr ws2) const
     {
       //get the largest workspace
-      const Workspace* wsLarger;
-      const Workspace* wsSmaller;
+      Workspace_sptr wsLarger;
+      Workspace_sptr wsSmaller;
       if (ws1->size() > ws2->size())
       {
         wsLarger = ws1;
@@ -55,7 +55,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOpHelper::checkXarrayCompatability(const Workspace* ws1,const Workspace* ws2) const
+    const bool BinaryOpHelper::checkXarrayCompatability(const Workspace_sptr ws1,const Workspace_sptr ws2) const
     {
       const std::vector<double>& w1x = ws1->dataX(1);
       const std::vector<double>& w2x = ws2->dataX(1);
@@ -75,16 +75,16 @@ namespace Mantid
     * @param ws2 the second workspace to compare
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
-    API::Workspace* BinaryOpHelper::createOutputWorkspace(const API::Workspace* ws1, const API::Workspace* ws2) const
+    API::Workspace_sptr BinaryOpHelper::createOutputWorkspace(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const
     {
       const double initialValue=  std::numeric_limits<double>::epsilon();
           
       //get the largest workspace
-      const Workspace* wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
+      const Workspace_sptr wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
       //create a new workspace
-      Workspace* retVal = WorkspaceFactory::Instance()->create(wsLarger->id());
+      Workspace_sptr retVal = (WorkspaceFactory::Instance()->create(wsLarger->id()));
       //this needs to be set to the size of the larger workspace and 0 filled
-      Workspace1D* ws1D = dynamic_cast<Workspace1D*>(retVal);
+      Workspace1D* ws1D = dynamic_cast<Workspace1D*>(retVal.get());
       if (ws1D != 0)
       {    
         //do ws1d things
@@ -94,7 +94,7 @@ namespace Mantid
       }
       else
       {
-        Workspace2D* ws2D = dynamic_cast<Workspace2D*>(retVal);   
+        Workspace2D* ws2D = dynamic_cast<Workspace2D*>(retVal.get());   
         if (ws2D != 0)
         {
           //do ws2d things

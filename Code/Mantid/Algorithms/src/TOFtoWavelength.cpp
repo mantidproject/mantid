@@ -19,6 +19,7 @@ using namespace Kernel;
 using API::WorkspaceFactory;
 using API::WorkspaceProperty;
 using DataObjects::Workspace2D;
+using DataObjects::Workspace2D_sptr;
 
 // Get a reference to the logger
 Logger& TOFtoWavelength::g_log = Logger::get("TOFtoWavelength");
@@ -51,7 +52,7 @@ void TOFtoWavelength::exec()
   // Get the input workspace
 //  Property *p = getProperty("InputWorkspace");
 //  WorkspaceProperty<Workspace2D> *wp = dynamic_cast< WorkspaceProperty<Workspace2D>* >(p);
-  Workspace2D *inputWS = getProperty("InputWorkspace");
+  Workspace2D_sptr inputWS = getProperty("InputWorkspace");
 
   // Get the number of histograms in the input 2D workspace
   const int numberOfSpectra = inputWS->getHistogramNumber();
@@ -59,7 +60,7 @@ void TOFtoWavelength::exec()
   // Create the 2D workspace for the output
   // Get a pointer to the workspace factory (later will be shared)
   WorkspaceFactory *factory = WorkspaceFactory::Instance();
-  Workspace2D *localWorkspace = static_cast<Workspace2D*>(factory->create("Workspace2D"));
+  Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
 
   // Set number of histograms in 2D workspace
   localWorkspace->setHistogramNumber(numberOfSpectra);

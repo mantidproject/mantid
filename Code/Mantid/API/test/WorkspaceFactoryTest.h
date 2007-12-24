@@ -51,9 +51,9 @@ public:
   void testReturnType()
   {
     factory->subscribe<WorkspaceTest>("work");
-    Workspace *space;
+    Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING( space = factory->create("work") );
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space) );
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space.get()) );
   }
   
   void testCast()

@@ -48,8 +48,11 @@ DECLARE_ALGORITHM(SaveCSV)
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::Workspace;
+using API::Workspace_sptr;
 using DataObjects::Workspace1D;
 using DataObjects::Workspace2D;
+using DataObjects::Workspace1D_sptr;
+using DataObjects::Workspace2D_sptr;
 
 Logger& SaveCSV::g_log = Logger::get("SaveCSV");
 
@@ -86,6 +89,9 @@ void SaveCSV::exec()
   // Get the values of the optional parameters 
   m_separator = getPropertyValue("Separator");
   m_lineSeparator = getPropertyValue("LineSeparator");
+  g_log.debug() << "Parameters: Filename='" << m_filename << "' " <<
+    "Seperator='" << m_separator << "' " <<
+    "LineSeparator='" << m_lineSeparator << "' " << std::endl;
 
   // prepare to save to file
 
@@ -98,7 +104,7 @@ void SaveCSV::exec()
   }
 
   // Get the input workspace
-  Workspace *inputWorkspace = getProperty("InputWorkspace");
+  Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
   
   // get workspace ID string. Used to differentiate between
   // workspace1D and workspace2D in the if statement below
@@ -111,7 +117,7 @@ void SaveCSV::exec()
   if (workspaceID == "Workspace1D")
   {
 
-    const Workspace1D *localworkspace = dynamic_cast<Workspace1D*>(inputWorkspace);
+    const Workspace1D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace1D>(inputWorkspace);
 
     // Get info from 1D workspace
 
@@ -131,7 +137,7 @@ void SaveCSV::exec()
   else if (workspaceID == "Workspace2D")
   {
 
-    const Workspace2D *localworkspace = dynamic_cast<Workspace2D*>(inputWorkspace);
+    const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
 

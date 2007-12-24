@@ -40,8 +40,8 @@ namespace Mantid
     void Divide::exec()
     {
       // get input workspace, dynamic cast not needed
-      Workspace* in_work1 = getProperty("InputWorkspace_1");
-      Workspace* in_work2 = getProperty("InputWorkspace_2");
+      Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
+      Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
       //create a BinaryOpHelper
       BinaryOpHelper boHelper;
@@ -56,7 +56,7 @@ namespace Mantid
         throw std::invalid_argument("The x arrays of the workspaces are not identical");
       }
 
-      Workspace* out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
+      Workspace_sptr out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
 
       triple_iterator<Workspace> ti_out(*out_work);
       triple_iterator<Workspace> ti_in1(*in_work1);

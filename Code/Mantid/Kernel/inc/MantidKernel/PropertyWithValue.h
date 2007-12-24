@@ -12,6 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/type_traits/is_pointer.hpp>
+#include <boost/shared_ptr.hpp> 
 
 namespace Mantid
 {
@@ -49,6 +50,18 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+///Partial template match method for compile time detection of shared pointers
+template <class T> 
+struct is_shared_ptr 
+  : boost::false_type {}; 
+
+///Partial template match method for compile time detection of shared pointers
+template <class T> 
+struct is_shared_ptr<boost::shared_ptr<T> > 
+  : boost::true_type {}; 
+
+
 template <typename TYPE>
 class PropertyWithValue : public Property
 {
@@ -58,7 +71,14 @@ private:
   {
     /// Required for compilation of WorkspaceProperty. Should never get called.
     template <typename T>
-    void setValue(const std::string& value, T& result, const boost::true_type&)
+    void setValue(const std::string& value, T& result, const boost::false_type&, const boost::true_type&)
+    {
+      // As this method should never get called, just throw a bad_lexical_cast
+      throw boost::bad_lexical_cast();
+    }
+    /// Required for compilation of WorkspaceProperty. Should never get called.
+    template <typename T>
+    void setValue(const std::string& value, T& result, const boost::true_type&, const boost::false_type&)
     {
       // As this method should never get called, just throw a bad_lexical_cast
       throw boost::bad_lexical_cast();
@@ -69,7 +89,7 @@ private:
      *  @param result The result of the lexical_cast
      */
     template <typename T>
-    void setValue(const std::string& value, T& result, const boost::false_type&)
+    void setValue(const std::string& value, T& result, const boost::false_type&,const boost::false_type&)
     {
       result = boost::lexical_cast<T>( value );
     }
@@ -123,7 +143,7 @@ public:
     {
       PropertyUtility helper;
       TYPE result;
-      helper.setValue(value, result, boost::is_pointer<TYPE>());
+      helper.setValue(value, result, is_shared_ptr<TYPE>(), boost::is_pointer<TYPE>());
       // Use the assignment operator defined below
       *this = result;
       return true;

@@ -92,6 +92,9 @@ public:
 
 };
 
+  ///shared pointer to the workspace base class
+  typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
+
 } // namespace DataObjects
 } // Namespace Mantid 
 #endif /*MANTID_DATAOBJECTS_WORKSPACE2D_H_*/

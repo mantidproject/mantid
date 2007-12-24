@@ -11,7 +11,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
-using Mantid::DataObjects::Workspace2D;
+using namespace Mantid::DataObjects;
 
 class LoadRawTest : public CxxTest::TestSuite
 {
@@ -46,9 +46,9 @@ public:
     
     // Get back the saved workspace
     AnalysisDataService *data = AnalysisDataService::Instance();
-    Workspace *output;
+    Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));    
-    Workspace2D *output2D = dynamic_cast<Workspace2D*>(output);
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);
     // Check two X vectors are the same

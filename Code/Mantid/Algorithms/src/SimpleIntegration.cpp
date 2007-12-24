@@ -21,7 +21,9 @@ DECLARE_ALGORITHM(SimpleIntegration)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
+using DataObjects::Workspace1D_sptr;
 using DataObjects::Workspace1D;
+using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
 // Get a reference to the logger
@@ -57,7 +59,7 @@ void SimpleIntegration::exec()
   
   // Get the input workspace
   // can't be const return any more (should look into that...)
-  Workspace2D *localworkspace = getProperty("InputWorkspace");
+  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
   
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
@@ -117,7 +119,7 @@ void SimpleIntegration::exec()
   
   // Create the 1D workspace for the output
   API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-  Workspace1D *localWorkspace = static_cast<Workspace1D*>(factory->create("Workspace1D"));
+  Workspace1D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace1D>(factory->create("Workspace1D"));
 
   // Populate the 1D workspace
   localWorkspace->setX(detectorNumber);

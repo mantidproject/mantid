@@ -8,6 +8,7 @@
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "boost/shared_ptr.hpp"
 #include <map>
 
 namespace Mantid
@@ -62,7 +63,7 @@ public:
   /// The class must have been registered with registerClass.
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className the name of the class you wish to create
-  virtual Base* create(const std::string& className) const
+  virtual boost::shared_ptr<Base> create(const std::string& className) const
   {   
     typename FactoryMap::const_iterator it = _map.find(className);
     if (it != _map.end())

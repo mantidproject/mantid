@@ -4,22 +4,43 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "boost/shared_ptr.hpp"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::DataObjects::Workspace1D;
-using Mantid::DataObjects::Workspace2D;
 
 class WorkspacePropertyTest : public CxxTest::TestSuite
-{
+{ 
+  
+  //private test class - using this removes the dependency on the DataObjects library
+	class WorkspaceTest: public Workspace
+	{
+	public:
+		const std::string id() const {return "WorkspacePropTest";}
+    //section required to support iteration
+    virtual int size() const {return 0;}
+      virtual int blocksize() const  {return 1000000;}
+    virtual std::vector<double>& dataX(int const index) {return data;}
+    ///Returns the y data
+    virtual std::vector<double>& dataY(int const index) {return data;}
+    ///Returns the error data
+    virtual std::vector<double>& dataE(int const index) {return data;}
+ 
+    virtual const std::vector<double>& dataX(int const index)const {return data;}
+    ///Returns the y data
+    virtual const std::vector<double>& dataY(int const index)const {return data;}
+    ///Returns the error data
+    virtual const std::vector<double>& dataE(int const index)const {return data;}
+  private:
+    std::vector<double> data;
+	};
+
 public:
   WorkspacePropertyTest()
   {
     wsp = new WorkspaceProperty<Workspace>("workspace1","ws1",Direction::Input);
-    wsp1D = new WorkspaceProperty<Workspace1D>("workspace2","",Direction::Output);
-    wsp2D = new WorkspaceProperty<Workspace2D>("workspace3","ws3",Direction::InOut);
+    wsp1D = new WorkspaceProperty<Workspace>("workspace2","",Direction::Output);
+    wsp2D = new WorkspaceProperty<Workspace>("workspace3","ws3",Direction::InOut);
   }
 
   ~WorkspacePropertyTest()
@@ -33,6 +54,7 @@ public:
 //	{
 //		// TODO: Implement testOperator =() function.
 //	}
+
 
 	void testValue()
 	{
@@ -59,15 +81,14 @@ public:
     TS_ASSERT( wsp1D->setValue("ws2") )
     TS_ASSERT( wsp1D->isValid() )
 
-    Workspace *ws;
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance()->create("Workspace1D") )
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->add("ws1", ws) );
+    WorkspaceFactory* factory = WorkspaceFactory::Instance();
+    factory->subscribe<WorkspaceTest>("WorkspacePropertyTest");
+
+    Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING( space = factory->create("WorkspacePropertyTest") );
+    TS_ASSERT( !wsp->isValid() )
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->add("ws1", space) );
     TS_ASSERT( wsp->isValid() )
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->add("ws3", ws) );
-    TS_ASSERT( ! wsp2D->isValid() )
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance()->create("Workspace2D") )
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->addOrReplace("ws3", ws) );
-    TS_ASSERT( wsp2D->isValid() )
 
 	}
 
@@ -83,8 +104,8 @@ public:
 
 private:
 	WorkspaceProperty<Workspace> *wsp;
-  WorkspaceProperty<Workspace1D> *wsp1D;
-  WorkspaceProperty<Workspace2D> *wsp2D;
+  WorkspaceProperty<Workspace> *wsp1D;
+  WorkspaceProperty<Workspace> *wsp2D;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/

@@ -1285,8 +1285,8 @@ Matrix<T>::str() const
   return cx.str();
 }
 
-template class Matrix<double>;
-template class Matrix<int>;
+template class DLLExport Matrix<double>;
+template class DLLExport Matrix<int>;
 
 }   // NAMESPACE Geometry
 

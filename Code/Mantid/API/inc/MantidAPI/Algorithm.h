@@ -11,6 +11,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Logger.h"
 
+#include "boost/shared_ptr.hpp"
 #include <vector>
 #include <map>
 
@@ -22,6 +23,9 @@ namespace Mantid
 {
 namespace API
 {
+  ///Typedef for a shared pointer to an Algorithm
+  typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+
 /** @class Algorithm Algorithm.h Kernel/Algorithm.h
 
  Base class from which all concrete algorithm classes should be derived. 
@@ -88,15 +92,15 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
 
-  Algorithm* createSubAlgorithm(const std::string& name);
+  Algorithm_sptr createSubAlgorithm(const std::string& name);
 
   /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
-  const std::vector<Algorithm*>& subAlgorithms() const
+  const std::vector<Algorithm_sptr>& subAlgorithms() const
   {
     return m_subAlgms;
   }
   /// List of sub-algorithms. Returns a reference to a vector of (sub) Algorithms
-  std::vector<Algorithm*>& subAlgorithms()
+  std::vector<Algorithm_sptr>& subAlgorithms()
   {
     return m_subAlgms;
   }
@@ -128,7 +132,7 @@ private:
 
   std::string m_name; ///< Algorithm's name for identification
   std::string m_version; ///< Algorithm's version
-  std::vector<Algorithm *> m_subAlgms; ///< Sub algorithms
+  std::vector<Algorithm_sptr> m_subAlgms; ///< Sub algorithms
 
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;

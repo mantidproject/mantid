@@ -26,13 +26,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Algorithm.h"
+#include "boost/shared_ptr.hpp"
 #include <vector>
 
 namespace Mantid
 {
 namespace API
 {
+//Forward declarations
+  class Algorithm;
+  ///Typedef for a shared pointer to an Algorithm
+  typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+
 /** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
 
 	  The Algorithm Manager class is responsible for controlling algorithm 
@@ -69,11 +74,11 @@ public:
   /// A static method which retrieves the single instance of the Algorithm Manager
   static AlgorithmManager* Instance();
 
-~AlgorithmManager();
+  ~AlgorithmManager();
 	
   // Methods to create algorithm instances
-	Algorithm* create( const std::string& algName );
-	Algorithm* createUnmanaged( const std::string& algName ) const;
+	Algorithm_sptr create( const std::string& algName );
+	Algorithm_sptr createUnmanaged( const std::string& algName ) const;
 
 	/// Finalizes and deletes all registered algorithms
 	void clear();
@@ -93,7 +98,7 @@ private:
 	static Kernel::Logger& g_log;
  
 	int no_of_alg;                       ///< counter of registered algorithms
-	std::vector<Algorithm*> regAlg;     ///<  pointers to registered algorithms [policy???]
+	std::vector<Algorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]
 	static AlgorithmManager* m_instance; ///< Pointer to the Algorithm Manager instance
 };
 

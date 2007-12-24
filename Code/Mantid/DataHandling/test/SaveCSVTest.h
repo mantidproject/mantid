@@ -37,14 +37,14 @@ public:
 
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     
-    Workspace *localWorkspace = factory->create("Workspace1D");
-    Workspace1D *localWorkspace1D = dynamic_cast<Workspace1D*>(localWorkspace);
+    Workspace_sptr localWorkspace = factory->create("Workspace1D");
+    Workspace1D_sptr localWorkspace1D = boost::dynamic_pointer_cast<Workspace1D>(localWorkspace);
 
     localWorkspace1D->setX(lVecX);
     localWorkspace1D->setData(lVecY, lVecE);
 
     AnalysisDataService *data = AnalysisDataService::Instance();
-    data->add("testSpace", localWorkspace);
+    data->add("SAVECSVTEST-testSpace", localWorkspace);
   }
   
   
@@ -59,7 +59,7 @@ public:
   {
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
-    algToBeTested.setPropertyValue("InputWorkspace", "testSpace");     
+    algToBeTested.setPropertyValue("InputWorkspace", "SAVECSVTEST-testSpace");     
     
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
@@ -96,7 +96,7 @@ public:
     
     in.close();
     
-    TS_ASSERT( ! separator.compare(",") );
+    TS_ASSERT_EQUALS(separator,"," );
     TS_ASSERT( ! number_plus_comma.compare("0.1,") );
     
     

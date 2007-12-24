@@ -8,6 +8,7 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/Logger.h"
+#include "boost/shared_ptr.hpp"
 #include <string>
 #include <ostream> 
 
@@ -15,6 +16,9 @@ namespace Mantid
 {
 namespace API
 {
+  ///shared pointer to the workspace base class
+  typedef boost::shared_ptr<Workspace> Workspace_sptr;
+
 /** @class Workspace Workspace.h
  	
  	  Base Workspace Abstract Class
