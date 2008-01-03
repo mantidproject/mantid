@@ -9,7 +9,6 @@
 #include "MantidKernel/Exception.h" 
 
 using namespace Mantid::DataObjects;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -27,11 +26,11 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOpHelper::checkSizeCompatability(const Workspace_sptr ws1,const Workspace_sptr ws2) const
+    const bool BinaryOpHelper::checkSizeCompatability(const API::Workspace_sptr ws1,const API::Workspace_sptr ws2) const
     {
       //get the largest workspace
-      Workspace_sptr wsLarger;
-      Workspace_sptr wsSmaller;
+      API::Workspace_sptr wsLarger;
+      API::Workspace_sptr wsSmaller;
       if (ws1->size() > ws2->size())
       {
         wsLarger = ws1;
@@ -55,7 +54,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOpHelper::checkXarrayCompatability(const Workspace_sptr ws1,const Workspace_sptr ws2) const
+    const bool BinaryOpHelper::checkXarrayCompatability(const API::Workspace_sptr ws1,const API::Workspace_sptr ws2) const
     {
       const std::vector<double>& w1x = ws1->dataX(1);
       const std::vector<double>& w2x = ws2->dataX(1);
@@ -80,9 +79,9 @@ namespace Mantid
       const double initialValue=  std::numeric_limits<double>::epsilon();
           
       //get the largest workspace
-      const Workspace_sptr wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
+      const API::Workspace_sptr wsLarger = (ws1->size() > ws2->size()) ? ws1 : ws2;
       //create a new workspace
-      Workspace_sptr retVal = (WorkspaceFactory::Instance()->create(wsLarger->id()));
+      API::Workspace_sptr retVal = (API::WorkspaceFactory::Instance()->create(wsLarger->id()));
       //this needs to be set to the size of the larger workspace and 0 filled
       Workspace1D* ws1D = dynamic_cast<Workspace1D*>(retVal.get());
       if (ws1D != 0)
