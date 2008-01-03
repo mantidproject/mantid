@@ -44,7 +44,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class WorkspaceProperty : public Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>, public Kernel::IStorable
+class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, public Kernel::IStorable
 {
 public:  
   /** Constructor.
@@ -55,7 +55,7 @@ public:
    *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
    */
   WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction ) :
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>( name, boost::shared_ptr<TYPE>( ) ),
+    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ) ),
     m_workspaceName( wsName ),
     m_direction( direction )
   {
@@ -66,7 +66,7 @@ public:
 
   /// Copy constructor
   WorkspaceProperty( const WorkspaceProperty& right ) :
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>( right ),
+    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
     m_workspaceName( right.m_workspaceName ),
     m_direction( right.m_direction )
   {
@@ -76,12 +76,12 @@ public:
   WorkspaceProperty& operator=( const WorkspaceProperty& right )
   {
     if ( &right == this ) return *this;
-    Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=( right );
+    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( right );
     return *this;
   }
   
   // Unhide the base class assignment operator
-  using Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::operator=;
+  using Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=;
   
   /// Virtual destructor
   virtual ~WorkspaceProperty()
@@ -124,8 +124,8 @@ public:
       try {
         API::Workspace_sptr ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
         // Check retrieved workspace is the type that it should be
-        Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
-        if ( ! Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value ) return false;
+        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
+        if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
       } catch (Kernel::Exception::NotFoundError&) {
         return false;
       }
