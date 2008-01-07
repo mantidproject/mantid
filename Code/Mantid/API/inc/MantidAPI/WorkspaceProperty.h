@@ -143,6 +143,8 @@ public:
   {
     if ( m_direction )
     {
+      // Check that workspace exists
+      if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
       // Note use of addOrReplace rather than add
       API::AnalysisDataService::Instance()->addOrReplace(m_workspaceName, this->operator()() );
       return true;

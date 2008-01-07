@@ -76,6 +76,7 @@ private:
       // As this method should never get called, just throw a bad_lexical_cast
       throw boost::bad_lexical_cast();
     }
+    
     /// Required for compilation of WorkspaceProperty. Should never get called.
     template <typename T>
     void setValue(const std::string& value, T& result, const boost::true_type&, const boost::false_type&)
