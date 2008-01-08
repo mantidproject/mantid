@@ -23,7 +23,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 10/12/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -121,13 +121,17 @@ public:
     // If an input workspace, check that it exists in the AnalysisDataService & can be cast to correct type
     if ( ( m_direction==0 ) || ( m_direction==2 ) )
     {
-      try {
-        API::Workspace_sptr ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
-        // Check retrieved workspace is the type that it should be
-        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
-        if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
-      } catch (Kernel::Exception::NotFoundError&) {
-        return false;
+      // If the WorkspaceProperty already points to something, don't go looking in the ADS
+      if ( ! this->operator()() )
+      {
+        try {
+          API::Workspace_sptr ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
+          // Check retrieved workspace is the type that it should be
+          Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
+          if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
+        } catch (Kernel::Exception::NotFoundError&) {
+          return false;
+        }
       }
     }
     // Would be nice if we could do the creation of the output workspace here

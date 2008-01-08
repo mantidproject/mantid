@@ -48,7 +48,7 @@ namespace API
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
  
- Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
  This file is part of Mantid.
 

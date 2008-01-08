@@ -19,13 +19,15 @@ namespace DataHandling
   DECLARE_ALGORITHM(LoadRaw)
 
   using namespace Kernel;
-  using API::WorkspaceProperty;
+  using namespace API;
   using namespace DataObjects;
 
   Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
   /// Empty default constructor
-  LoadRaw::LoadRaw() { }
+  LoadRaw::LoadRaw()
+  {
+  }
 
   /** Initialisation method.
    * 
@@ -71,10 +73,10 @@ namespace DataHandling
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
     API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-    Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
+    m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
 
     // Set number of histograms in 2D workspace
-    localWorkspace->setHistogramNumber(numberOfSpectra);
+    m_localWorkspace->setHistogramNumber(numberOfSpectra);
 
     int* spectrum = new int[lengthIn];
     // Loop over the spectra. Zeroth spectrum is garbage, so loop runs from 1 to NSP1
@@ -89,18 +91,22 @@ namespace DataHandling
       std::vector<double> e(lengthIn-1);
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-      localWorkspace->setData(i-1, v, e);
+      m_localWorkspace->setData(i-1, v, e);
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
     
     // Assign the result to the output workspace property
-    setProperty("OutputWorkspace",localWorkspace);
+    setProperty("OutputWorkspace",m_localWorkspace);
     
     // Clean up
     delete[] timeChannels;
     delete[] spectrum;
-	return;
+    
+    // Run the sub-algorithms (LoadInstrument & LoadRaw)
+    runSubAlgorithms();
+    
+    return;
   }
 
 
@@ -111,6 +117,55 @@ namespace DataHandling
   {    
   }
 
+  /// Run the sub-algorithms (LoadInstrument & LoadLog)
+  void LoadRaw::runSubAlgorithms()
+  {
+    // First deal with LoadInstruments
+    Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+    // Hardcoded filename for now...this will certainly change
+    loadInst->setPropertyValue("Filename","../../../../Test/Instrument/HET_Definition.txt");
+    // Set the workspace property to be the same one filled above
+    loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+    
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    try
+    {
+      loadInst->execute();
+    }
+    catch (std::runtime_error& err)
+    {
+      g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+    }
+    
+    if ( ! loadInst->isExecuted() )
+    {
+      g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+    }
+
+    // Now do LoadLog
+    Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
+    // Pass through the same input filename
+    loadLog->setPropertyValue("Filename",m_filename);
+    // Set the workspace property to be the same one filled above
+    loadLog->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+    
+    // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+    try
+    {
+      loadLog->execute();
+    }
+    catch (std::runtime_error& err)
+    {
+      g_log.error("Unable to successfully run LoadLog sub-algorithm");
+    }
+    
+    if ( ! loadLog->isExecuted() )
+    {
+      g_log.error("Unable to successfully run LoadLog sub-algorithm");
+    }
+    
+  }
+  
   double LoadRaw::dblSqrt(double in)
   {
     return sqrt(in);

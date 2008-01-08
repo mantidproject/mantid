@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
 #include "MantidKernel/Logger.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -27,7 +28,7 @@ namespace DataHandling
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -70,9 +71,15 @@ namespace DataHandling
     /// The name and path of the input file
     std::string m_filename;
     
+    /// Pointer to the local workspace
+    DataObjects::Workspace2D_sptr m_localWorkspace;
+    
     ///static reference to the logger class
     static Kernel::Logger& g_log;
 
+    /// Run the sub-algorithms
+    void runSubAlgorithms();
+    
     /// Personal wrapper for sqrt to allow msvs to compile
     static double dblSqrt(double in);
   };

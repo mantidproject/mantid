@@ -303,6 +303,17 @@ namespace Mantid
       alg->setChild(true);
       //hold in the internal store to allow this alg to manage it's children
       m_subAlgms.push_back(alg);
+      
+      // Initialise the sub-algorithm
+      try 
+      {
+        alg->initialize();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
+      }
+      
       return alg;
     }
 

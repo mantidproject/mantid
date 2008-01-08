@@ -31,7 +31,7 @@ namespace DataHandling
     @author Nick Draper, Tessella Support Services plc
     @date 19/11/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 

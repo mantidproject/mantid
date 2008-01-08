@@ -38,7 +38,7 @@ namespace DataHandling
     @author Anders Markvardsen, ISIS, RAL
     @date 26/09/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 

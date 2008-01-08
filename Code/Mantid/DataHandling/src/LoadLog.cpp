@@ -38,7 +38,8 @@ LoadLog::LoadLog()
 /// Initialisation method.
 void LoadLog::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace","",Direction::InOut));
+  // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
+  declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("Filename","");
 }
 
