@@ -24,7 +24,7 @@ namespace Kernel
  @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 20/11/2007
  
- Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
  This file is part of Mantid.
 
@@ -63,28 +63,6 @@ public:
   virtual std::string getPropertyValue(const std::string &name) const;
   virtual const std::vector< Property*>& getProperties() const;
 
-protected:
-  /** Add a property of the template type to the list of managed properties
-   *  @param name The name to assign to the property
-   *  @param value The initial value to assign to the property
-   *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
-   *  @param doc The (optional) documentation string
-   *  @throw Exception::ExistsError if a property with the given name already exists
-   *  @throw std::invalid_argument  if the name argument is empty
-   */
-  template <typename T>
-  void declareProperty(const std::string &name, T value,
-                       IValidator<T> *validator = new NullValidator<T>, const std::string &doc="")
-  {
-    Property *p = new PropertyWithValue<T>(name, value, validator);
-    p->setDocumentation(doc);
-    declareProperty(p);
-  }
-
-  // Specialised version of above function
-  virtual void declareProperty(const std::string &name, const char* value,
-      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="");
-
   /** Templated method to set the value of a PropertyWithValue
    *  @param name The name of the property (case insensitive)
    *  @param value The value to assign to the property
@@ -111,7 +89,29 @@ protected:
   {
     this->setPropertyValue(name, std::string(value));
   }
-  
+
+protected:
+  /** Add a property of the template type to the list of managed properties
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
+   *  @param doc The (optional) documentation string
+   *  @throw Exception::ExistsError if a property with the given name already exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
+  template <typename T>
+  void declareProperty(const std::string &name, T value,
+                       IValidator<T> *validator = new NullValidator<T>, const std::string &doc="")
+  {
+    Property *p = new PropertyWithValue<T>(name, value, validator);
+    p->setDocumentation(doc);
+    declareProperty(p);
+  }
+
+  // Specialised version of above function
+  virtual void declareProperty(const std::string &name, const char* value,
+      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="");
+
 private:
   /// Private copy constructor.
   PropertyManager(const PropertyManager&);

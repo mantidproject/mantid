@@ -88,6 +88,9 @@ public:
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
 
+  // Make PropertyManager's setProperty methods public
+  using Kernel::PropertyManager::setProperty;
+
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
   void setChild(const bool isChild);
