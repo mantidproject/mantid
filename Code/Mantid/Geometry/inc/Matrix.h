@@ -57,7 +57,9 @@ class DLLExport Matrix
   Matrix<T>& operator=(const Matrix<T>&); 
   ~Matrix();
 
-  const T* operator[](const int A) const { return V[A]; }
+  /// const Array accessor
+  const T* operator[](const int A) const { return V[A]; } 
+  /// Array accessor
   T* operator[](const int A) { return V[A]; }
 
   Matrix<T>& operator+=(const Matrix<T>&);       ///< Basic addition operator
@@ -77,7 +79,7 @@ class DLLExport Matrix
 
   int operator!=(const Matrix<T>&) const; 
   int operator==(const Matrix<T>&) const; 
-  T item(const int a,const int b) const { return V[a][b]; }   // disallows access
+  T item(const int a,const int b) const { return V[a][b]; }   ///< disallows access
 
   void print() const;
   void write(std::ostream&,const int =0) const;
@@ -95,8 +97,10 @@ class DLLExport Matrix
 //  std::vector<T> Column(const int) const;              
 
   void setMem(const int,const int);
+  /// Access matrix sizes
   std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }
-  int Ssize() const { return (nx>ny) ? ny : nx; }
+  /// Access Large matrix component
+  int Ssize() const { return (nx>ny) ? ny : nx; }   
 
   void swapRows(const int,const int);        ///< Swap rows (first V index)
   void swapCols(const int,const int);        ///< Swap cols (second V index)
@@ -121,10 +125,10 @@ template<typename T>
 std::ostream&
 operator<<(std::ostream&,const Geometry::Matrix<T>&);
 
-}
+}  // NAMESPACE Geometry
 
 
-} // NAMESPACE Mantid
+}  // NAMESPACE Mantid
  
 // template<typename X>
 // std::ostream& operator<<(std::ostream&,const Geometry::Matrix<X>&);

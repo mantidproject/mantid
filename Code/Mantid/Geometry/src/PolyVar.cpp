@@ -172,6 +172,7 @@ void
 PolyVar<VCount>::setComp(const int Index,const double& V)
   /*!
     Set a component
+    \param Index :: Component Index
     \param V :: Value
    */
 {
@@ -187,6 +188,7 @@ void
 PolyVar<VCount>::setComp(const int Index,const PolyVar<ICount>& FX)
   /*!
     Set a component
+    \param Index :: Component Index
     \param FX :: Base compoenente
    */
 {
@@ -247,7 +249,7 @@ PolyVar<VCount>::operator+=(const PolyVar<VCount>& A)
    */
 {
   const int iMax((iDegree>A.iDegree)  ? iDegree : A.iDegree);
-  PCoeff.resize(iMax);
+  PCoeff.resize(iMax+1);
 
   for(int i=0;i<=A.iDegree;i++)
     PCoeff[i]+=A.PCoeff[i];
@@ -265,7 +267,7 @@ PolyVar<VCount>::operator-=(const PolyVar<VCount>& A)
    */
 {
   const int iMax((iDegree>A.iDegree)  ? iDegree : A.iDegree);
-  PCoeff.resize(iMax);
+  PCoeff.resize(iMax+1);
 
   for(int i=0;i<=A.iDegree;i++)
     PCoeff[i]-=A.PCoeff[i];
@@ -349,8 +351,8 @@ PolyVar<VCount>
 PolyVar<VCount>::operator+(const double V) const
   /*!
     PolyVar multiplication
-    \param A :: PolyVar 
-    \return (*this+A);
+    \param V :: Value to add
+    \return (*this+V);
    */
 {
   PolyVar<VCount> kSum(*this);
@@ -362,8 +364,8 @@ PolyVar<VCount>
 PolyVar<VCount>::operator-(const double V) const
   /*!
     PolyVar substractr
-    \param A :: PolyVar substract
-    \return (*this-A);
+    \param V :: Value to add
+    \return (*this-V);
    */
 {
   PolyVar<VCount> kSum(*this);
@@ -375,7 +377,7 @@ PolyVar<VCount>
 PolyVar<VCount>::operator*(const double V) const
   /*!
     PolyVar multiplication
-    \param A :: PolyVar multiplication
+    \param V :: Value to scale poly by
     \return (*this*A);
    */
 {
@@ -388,8 +390,8 @@ PolyVar<VCount>
 PolyVar<VCount>::operator/(const double V) const
   /*!
     PolyVar division
-    \param A :: PolyVar Division
-    \return (*this/A);
+    \param V :: Value to divide
+    \return (*this/V);
    */
 {
   PolyVar<VCount> kSum(*this);
@@ -551,8 +553,9 @@ template<int VCount>
 int 
 PolyVar<VCount>::getCount(const double eps) const
   /*!
-    Determine number of 
+    Determine number of non-zero objects
     \param eps :: Value to used
+    \return number of non-zero object
   */
 {
   int cnt(0);
@@ -568,6 +571,7 @@ PolyVar<VCount>::isZero(const double eps) const
   /*!
     Determine if is zero
     \param eps :: Value to used
+    \return 1 if zero
   */
 {
   int i;
@@ -616,9 +620,9 @@ PolyVar<VCount>::write(std::ostream& OX) const
 
 /// \cond TEMPLATE
 
-template class PolyVar<1>;   // f(x,y) 
-template class PolyVar<2>;   // f(x,y,z)
-template class PolyVar<3>;   // f(x,y,z,a)
+template class PolyVar<1>;   // f(x) 
+template class PolyVar<2>;   // f(x,y)
+template class PolyVar<3>;   // f(x,y,z)
 
 template std::ostream& operator<<(std::ostream&,const PolyVar<1>&);
 template std::ostream& operator<<(std::ostream&,const PolyVar<2>&);
@@ -629,6 +633,10 @@ template void PolyVar<2>::setComp(int,const PolyVar<1>&);
 template PolyVar<2>& PolyVar<2>::operator=(const PolyVar<1>&);
 template PolyVar<3>& PolyVar<3>::operator=(const PolyVar<1>&);
 template PolyVar<3>& PolyVar<3>::operator=(const PolyVar<2>&);
+
+template PolyVar<2>::PolyVar(const PolyVar<1>&);
+template PolyVar<3>::PolyVar(const PolyVar<1>&);
+template PolyVar<3>::PolyVar(const PolyVar<2>&);
 
 
 /// \endcond TEMPLATE

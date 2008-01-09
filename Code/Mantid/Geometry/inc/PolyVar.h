@@ -28,7 +28,7 @@ class PolyVar  : public PolyFunction
 {
  private:
 
-  int iDegree;                                ///< Degree of polynomial  
+  int iDegree;                                     ///< Degree of polynomial  
   std::vector<PolyVar<VCount-1> > PCoeff;          ///< Polynominals
 
  public:

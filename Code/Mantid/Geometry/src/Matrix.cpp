@@ -18,9 +18,13 @@
 namespace Mantid
 {
 
+
+namespace Geometry
+{
+
 template<typename T>
 std::ostream& 
-Geometry::operator<<(std::ostream& of,const Geometry::Matrix<T>& A)
+operator<<(std::ostream& of,const Matrix<T>& A)
   /*!
     External Friend :: outputs point to a stream 
     \param of :: output stream
@@ -32,9 +36,6 @@ Geometry::operator<<(std::ostream& of,const Geometry::Matrix<T>& A)
   A.write(of,5);
   return of;
 }
-
-namespace Geometry
-{
 
 template<typename T>
 Matrix<T>::Matrix(const int nrow,const int ncol)
@@ -188,13 +189,6 @@ Matrix<T>::operator-(const Matrix<T>& A)
   return X-=A;
 }
   
-template<typename T>
-Vec3D 
-Matrix<T>::operator*(const Vec3D& A) const
-{
-  throw Kernel::Exception::NotImplementedError("Operator Mantrix * Vec3D is not implmented");
-  return A;
-}
 
 template<typename T>
 Matrix<T>
@@ -238,6 +232,25 @@ Matrix<T>::operator*(const std::vector<T>& Vec) const
 	Out[i]+=V[i][j]*Vec[j];
     }
   return Out;
+}
+
+template<typename T>
+Vec3D 
+Matrix<T>::operator*(const Vec3D& Vx) const
+  /*! 
+    Matrix multiplication THIS * V
+    \param Vx :: Colunm vector to multiply by
+    \throw MisMatch<int> if there is a size mismatch.
+    \return Matrix(This * A) 
+ */
+{
+  if (ny!=3)
+    throw ColErr::MisMatch<int>(ny,3,"Matrix::operator*(Vec3D)");
+  Vec3D X;
+  for(int i=0;i<nx;i++)
+    for(int kk=0;kk<ny;kk++)
+      X[i]+=V[i][kk]*Vx[kk];
+  return X;
 }
 
 template<typename T>
@@ -728,11 +741,12 @@ Matrix<T>::Faddeev(Matrix<T>& InvOut)
   /*!
     Return the polynominal for the matrix
     and the inverse. 
-    The polybnomial is such that
+    The polynomial is such that
     \f[
       det(sI-A)=s^n+a_{n-1}s^{n-1} \dots +a_0
     \f]
     \param InvOut ::: output 
+    \return Matrix self Polynomial (low->high coefficient order)
   */
 {
   if (nx!=ny)
@@ -1285,9 +1299,13 @@ Matrix<T>::str() const
   return cx.str();
 }
 
+///\cond TEMPLATE
+
 template class DLLExport Matrix<double>;
 template class DLLExport Matrix<int>;
 
+///\end cond TEMPLATE
+
 }   // NAMESPACE Geometry
 
-}   // NAMESPACE MAntid
+}   // NAMESPACE Mantid

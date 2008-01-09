@@ -238,9 +238,9 @@ PolyVar<1>::operator+=(const PolyVar<1>& A)
 PolyVar<1>& 
 PolyVar<1>::operator-=(const PolyVar<1>& A)
   /*!
-    Self addition value
-    \param A :: PolyBase to add 
-    \return *this+=A;
+    Self subtraction value
+    \param A :: PolyVar to subtract
+    \return *this-=A;
    */
 {
   iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -254,7 +254,7 @@ PolyVar<1>&
 PolyVar<1>::operator*=(const PolyVar<1>& A)
   /*!
     Self multiplication value
-    \param A :: PolyBase to add 
+    \param A :: PolyVar to add 
     \return *this*=A;
    */
 {
@@ -321,9 +321,9 @@ PolyVar<1>::operator+(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator-(const double V) const
   /*!
-    PolyVar<1> substractr
-    \param A :: PolyBase substract
-    \return (*this-A);
+    PolyVar<1> substract Values
+    \param V :: Value 
+    \return (*this-V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -333,9 +333,9 @@ PolyVar<1>::operator-(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator*(const double V) const
   /*!
-    PolyBase multiplication
-    \param A :: PolyBase multiplication
-    \return (*this*A);
+    PolyVar multiplication by value
+    \param V :: Value 
+    \return (*this*V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -345,9 +345,9 @@ PolyVar<1>::operator*(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator/(const double V) const
   /*!
-    PolyBase division
-    \param A :: PolyBase Division
-    \return (*this/A);
+    PolyVar division by value
+    \param V :: Value
+    \return (*this/V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -373,7 +373,7 @@ PolyVar<1>::operator-=(const double V)
   /*!
     PolyBase subtraction
     \param V :: Value to subtract
-    \return (*this+V);
+    \return (*this-V);
    */
 {
   PCoeff[0]-=V;  // There is always zero component
@@ -710,7 +710,9 @@ PolyVar<1>::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 int 
 PolyVar<1>::getCount(const double eps) const
   /*!
-    Determine if is zero
+    Determine number of non-zoro components
+    \param eps :: accuracy factor
+    \return Number of non-zero components
   */
 {
   int cnt(0);
@@ -724,6 +726,8 @@ int
 PolyVar<1>::isZero(const double eps) const
   /*!
     Determine if is zero
+    \param eps :: Accuracy
+    \return 1 if within eps of zero.
   */
 {
   int i;
