@@ -87,8 +87,9 @@ public:
     Workspace1D_sptr output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     std::vector<double> y = output1D->dataY();
     std::vector<double> e = output1D->dataE();
-    TS_ASSERT_EQUALS( y.size(), 2 );
-    TS_ASSERT_EQUALS( e.size(), 2 );
+    unsigned int two = 2;
+    TS_ASSERT_EQUALS( y.size(), two );
+    TS_ASSERT_EQUALS( e.size(), two );
     
     TS_ASSERT_EQUALS( y[0], 36);
     TS_ASSERT_EQUALS( y[1], 51);
@@ -111,8 +112,9 @@ public:
     output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     y = output1D->dataY();
     e = output1D->dataE();
-    TS_ASSERT_EQUALS( y.size(), 5 );
-    TS_ASSERT_EQUALS( e.size(), 5 );
+    unsigned int five = 5;
+    TS_ASSERT_EQUALS( y.size(), five );
+    TS_ASSERT_EQUALS( e.size(), five );
     
     TS_ASSERT_EQUALS( y[0], 10 );
     TS_ASSERT_EQUALS( y[4], 110 );

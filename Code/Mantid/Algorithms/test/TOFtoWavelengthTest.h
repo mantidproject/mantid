@@ -88,8 +88,9 @@ public:
     // Test that y & e data is unchanged
     std::vector<double> y = output2D->dataY(777);
     std::vector<double> e = output2D->dataE(777);
-    TS_ASSERT_EQUALS( y.size(), 10 );
-    TS_ASSERT_EQUALS( e.size(), 10 );
+    unsigned int ten = 10;
+    TS_ASSERT_EQUALS( y.size(), ten );
+    TS_ASSERT_EQUALS( e.size(), ten );
     std::vector<double> yIn = input2D->dataY(777);
     std::vector<double> eIn = input2D->dataE(777);
     TS_ASSERT_EQUALS( y[0], yIn[0] );
