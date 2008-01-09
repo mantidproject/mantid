@@ -29,12 +29,8 @@ class PolyFunction
   PolyFunction& operator=(const PolyFunction&);
   virtual ~PolyFunction();
 
-    // member access
-  void setDegree(int const);
-  int getDegree() const;
-
-  virtual PolyFunction& operator+=(const double) =0;
-  virtual PolyFunction& operator/=(const double) =0;
+  virtual PolyFunction& operator+=(double const) =0;  ///< Virtual add
+  virtual PolyFunction& operator/=(double const) =0;  ///< Virtual divide
 
   void write(std::ostream&) const;
 };

@@ -18,6 +18,7 @@ namespace Mantid
 
 namespace Geometry
 {
+
 class Vec3D;
 
 /*!
@@ -45,13 +46,13 @@ class DLLExport Matrix
   
   void deleteMem();           ///< Helper function to delete memory
   void lubcmp(int*,int&);     ///< starts inversion process 
-  void lubksb(const int*,double*);    
-  void rotate(const double,const double,const int,
-	      const int,const int,const int);
+  void lubksb(int const*,double*);    
+  void rotate(double const,double const,
+	      int const,int const,int const,int const);
 
  public:
 
-  Matrix(const int =0,const int =0);
+  Matrix(int const =0,int const  =0);
   Matrix(const std::vector<T>&,const std::vector<T>&); 
   Matrix(const Matrix<T>&);
   Matrix<T>& operator=(const Matrix<T>&); 
@@ -82,7 +83,7 @@ class DLLExport Matrix
   T item(const int a,const int b) const { return V[a][b]; }   ///< disallows access
 
   void print() const;
-  void write(std::ostream&,const int =0) const;
+  void write(std::ostream&,int const =0) const;
   std::string str() const;
 
   void zeroMatrix();      ///< Set the matrix to zero
@@ -93,17 +94,17 @@ class DLLExport Matrix
   std::vector<T> Diagonal() const;                  ///< Returns a vector of the diagonal
   Matrix<T> fDiagonal(const std::vector<T>&) const;    ///< Forward multiply  D*this
   Matrix<T> bDiagonal(const std::vector<T>&) const;    ///< Backward multiply this*D
-//  std::vector<T> Row(const int) const;              
-//  std::vector<T> Column(const int) const;              
+//  std::vector<T> Row(int const) const;              
+//  std::vector<T> Column(int const) const;              
 
-  void setMem(const int,const int);
+  void setMem(int const,int const);
   /// Access matrix sizes
   std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }
   /// Access Large matrix component
   int Ssize() const { return (nx>ny) ? ny : nx; }   
 
-  void swapRows(const int,const int);        ///< Swap rows (first V index)
-  void swapCols(const int,const int);        ///< Swap cols (second V index)
+  void swapRows(int const,int const);        ///< Swap rows (first V index)
+  void swapCols(int const,int const);        ///< Swap cols (second V index)
 
   T Invert();                           ///< LU inversion routine
   std::vector<T> Faddeev(Matrix<T>&);      ///< Polynomanal and inversion by Faddeev method.

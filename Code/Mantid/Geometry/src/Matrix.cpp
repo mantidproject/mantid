@@ -18,7 +18,6 @@
 namespace Mantid
 {
 
-
 namespace Geometry
 {
 
@@ -497,7 +496,6 @@ Matrix<T>::rotate(const double tau,const double s,const int i,const int j,
     Applies a rotation to a particular point of tan(theta)=tau.
     Note that you need both sin(theta) and tan(theta) because of 
     sign preservation. 
-
     \param tau :: tan(theta) 
     \param s :: sin(theta)
     \param i ::  first index (xpos) 
@@ -1304,7 +1302,7 @@ Matrix<T>::str() const
 template class DLLExport Matrix<double>;
 template class DLLExport Matrix<int>;
 
-///\end cond TEMPLATE
+///\endcond TEMPLATE
 
 }   // NAMESPACE Geometry
 

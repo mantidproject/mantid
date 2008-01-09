@@ -592,7 +592,7 @@ PolyBase::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
     Compress MUST have been called.
     \param AnsA :: complex roots of the equation 
     \param AnsB :: complex roots of the equation 
-    \parma AnsC :: complex roots of the equation 
+    \param AnsC :: complex roots of the equation 
     \return Number of unique solutions 
   */
 

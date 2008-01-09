@@ -9,7 +9,7 @@ namespace Geometry
 {
 
 /*!
-  \class LineIntersectionVisis
+  \class LineIntersectVisit
   \author S. Ansell
   \version 1.0
   \date September 2007 

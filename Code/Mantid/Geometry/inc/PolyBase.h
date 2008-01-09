@@ -67,7 +67,7 @@ public:
   PolyBase operator+(const PolyBase&) const;
   PolyBase operator-(const PolyBase&) const;
   PolyBase operator*(const PolyBase&) const;
-  PolyBase operator/(const PolyBase&) const;
+  //  PolyBase operator/(const PolyBase&) const;
 
   // input is degree 0 poly
   PolyBase operator+(double const) const;  // input is degree 0 poly
@@ -91,7 +91,6 @@ public:
   PolyBase GetInversion() const;
 
   void compress(double const); 
-  void compress(); 
 
   void divide(const PolyBase&,PolyBase&,PolyBase&,double const =-1.0) const;
 

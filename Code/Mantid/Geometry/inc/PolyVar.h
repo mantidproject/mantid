@@ -47,8 +47,8 @@ class PolyVar  : public PolyFunction
   int getDegree() const;
 
   template<int ICount>
-  void setComp(const int,const PolyVar<ICount>&);
-  void setComp(const int,const double&);
+  void setComp(int const,const PolyVar<ICount>&);
+  void setComp(int const,const double&);
   // get value
   double operator()(const std::vector<double>&) const;
   double operator()(const double*) const;
@@ -82,11 +82,12 @@ class PolyVar  : public PolyFunction
 
   // inversion ( invpoly[i] = poly[degree-i] for 0 <= i <= degree )
   PolyVar GetInversion() const;
-  void compress(const double =1.0);
+  void compress(double const =1.0);
 
-  int isZero(const double) const;
-  int getCount(const double) const;
-  int isDouble() const { return 0; }
+  int isZero(double const) const;
+  int getCount(double const) const;
+  int isDouble() const { return 0; }      ///< has double values [\todo must be corrected]
+
   /// Get a double valued coefficient:
   double getDouble() const { return PCoeff[0].getDouble(); }  
 
@@ -95,6 +96,14 @@ class PolyVar  : public PolyFunction
 
 template<int VCount> 
 std::ostream& operator<<(std::ostream&,const PolyVar<VCount>&);
+
+/*!
+  \class PolyVar<1>
+  \brief Specialization of PolyVar
+  \author S.Ansell 
+  \date December 2007
+  \version 1.0
+*/
 
 template<> 
 class PolyVar<1> : public PolyFunction
@@ -171,8 +180,8 @@ class PolyVar<1> : public PolyFunction
 
   int isZero(const double) const;
   int getCount(const double) const;
-  int isDouble() const { return 1; }
-  double getDouble() const { return PCoeff[0]; }
+  int isDouble() const { return 1; }              ///< Inquire if double values 
+  double getDouble() const { return PCoeff[0]; }  ///< Return double value 
 
   void write(std::ostream&) const;
 };

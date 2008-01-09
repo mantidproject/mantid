@@ -1,6 +1,8 @@
 #ifndef ObjComp_h
 #define ObjComp_h
 
+///\cond WORKING
+
 namespace Geometry
 {
 
@@ -64,5 +66,8 @@ class ObjObjItem : public ObjComp
 };
 
 }  // NAMESPACE 
+
+///\endcond WORKING
+
 #endif
 
