@@ -210,13 +210,7 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
     ;
-    
-    class_< Mantid::Kernel::LibraryManager >("LibraryManager", init<  >())
-        .def(init< const Mantid::Kernel::LibraryManager& >())
-	.def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
-        .def("OpenLibrary", (bool (Mantid::Kernel::LibraryManager::*)(const std::string&, const std::string&) )&Mantid::Kernel::LibraryManager::OpenLibrary)
-   ;
-   
+
   class_< Mantid::API::Algorithm, boost::noncopyable, Mantid_API_Algorithm_Wrapper >("Algorithm", init<  >())
 	.def("name", &Mantid::API::Algorithm::name, &Mantid_API_Algorithm_Wrapper::default_name, return_value_policy< copy_const_reference >())
         .def("version", &Mantid::API::Algorithm::version, &Mantid_API_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
