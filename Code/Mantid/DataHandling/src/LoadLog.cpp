@@ -72,7 +72,7 @@ void LoadLog::exec()
   // Get the input workspace and retrieve sample from workspace.
   // the log file(s) will be loaded into the Sample container of the workspace 
 
-  Workspace_sptr localWorkspace = getProperty("Workspace");
+  const Workspace_sptr localWorkspace = getProperty("Workspace");
   API::Sample& sample = localWorkspace->getSample();
 
 

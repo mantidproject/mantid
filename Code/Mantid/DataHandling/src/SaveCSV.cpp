@@ -104,7 +104,7 @@ void SaveCSV::exec()
   }
 
   // Get the input workspace
-  Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  const Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
   
   // get workspace ID string. Used to differentiate between
   // workspace1D and workspace2D in the if statement below

@@ -58,8 +58,7 @@ void SimpleIntegration::exec()
   m_MaxY = getProperty("EndY");
   
   // Get the input workspace
-  // can't be const return any more (should look into that...)
-  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
+  const Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
   
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra

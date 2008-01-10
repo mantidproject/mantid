@@ -17,8 +17,11 @@ namespace Kernel
 
  Property manager helper class.
  This class is used by algorithms and services for helping to manage their own set of properties.
- It implements the IProperty interface.
+ 
  N.B. ONCE YOU HAVE DECLARED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS (I.E. DON'T DELETE IT!)
+
+ Property values of any type except std::string can be extracted using getProperty().
+ For assignment of string properties it is necessary to use getPropertyValue().
 
  @author Russell Taylor, Tessella Support Services plc
  @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
@@ -67,8 +70,7 @@ public:
    *  @param name The name of the property (case insensitive)
    *  @param value The value to assign to the property
    *  @throw Exception::NotFoundError If the named property is unknown
-   *  @throw std::runtime_error If an attempt is made to assign to a property of different type
-   * 
+   *  @throw std::invalid_argument If an attempt is made to assign to a property of different type
    */
   template <typename T>
   void setProperty(const std::string &name, const T value)
@@ -139,7 +141,7 @@ private:
   template<typename T> 
   T getValue(const std::string &name) const;
 
-  /// Utility class that enables the getProperty method to be templated on return type
+  /// Utility class that enables the getProperty() method to effectively be templated on the return type
   struct TypedValue
   {
     /// Reference to the containing PropertyManager

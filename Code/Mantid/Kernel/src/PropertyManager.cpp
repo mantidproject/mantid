@@ -167,6 +167,11 @@ const std::vector< Property* >& PropertyManager::getProperties() const
 }
 
 /// @cond
+
+// getValue template specialisations (there is no generic implementation)
+// Note that other implementations can be found in Workspace.cpp & Workspace1D/2D.cpp (to satisfy
+// package dependency rules).
+
 template<> DLLExport
 int PropertyManager::getValue<int>(const std::string &name) const
 {
@@ -196,6 +201,15 @@ double PropertyManager::getValue<double>(const std::string &name) const
 }
 
 template <> DLLExport
+const char* PropertyManager::getValue<const char*>(const std::string &name) const
+{
+  return getPropertyValue(name).c_str();
+}
+
+// This template implementation has been left in because although you can't assign to an existing string
+// via the getProperty() method, you can construct a local variable by saying, 
+// e.g.: std::string s = getProperty("myProperty")
+template <> DLLExport
 std::string PropertyManager::getValue<std::string>(const std::string &name) const
 {
   return getPropertyValue(name);
@@ -215,7 +229,14 @@ void PropertyManager::setProperty<std::string>(const std::string &name, const st
 }
 /// @endcond
 
-/** Get the value of a property
+/** Get the value of a property. Allows you to assign directly to a variable of the property's type
+ *  (if a supported type).
+ *  
+ *  *** This method does NOT work for assigning to an existing std::string.
+ *      In this case you have to use getPropertyValue() instead.
+ *      Note that you can, though, construct a local string variable by writing,
+ *      e.g. std::string s = getProperty("myProperty"). ***
+ *  
  *  @param name The name of the property
  *  @return The value of the property. Will be cast to the desired type (if a supported type).
  *  @throw std::runtime_error If an attempt is made to assign a property to a different type

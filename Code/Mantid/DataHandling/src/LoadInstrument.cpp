@@ -47,7 +47,7 @@ void LoadInstrument::exec()
   m_filename = getPropertyValue("Filename");
 
   // Get the input workspace
-  Workspace_sptr localWorkspace = getProperty("Workspace");
+  const Workspace_sptr localWorkspace = getProperty("Workspace");
   
   ///Geometry components
   API::Instrument& instrument = localWorkspace->getInstrument();
