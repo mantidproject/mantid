@@ -88,8 +88,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -108,6 +110,11 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
+				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500"
+				RuntimeLibrary="2"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -120,6 +127,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
+				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
 			<Tool
 				Name="VCALinkTool"

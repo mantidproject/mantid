@@ -86,8 +86,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -106,6 +108,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
+				RuntimeLibrary="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -118,6 +123,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="$(SolutionName)kernel.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
+				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32;c:\Python25\libs"
 			/>
 			<Tool
 				Name="VCALinkTool"
