@@ -1,4 +1,4 @@
-#ifndef MANTID_KERNEL_LIBRARY_MANAGER__H_
+#ifndef MANTID_KERNEL_LIBRARY_MANAGER_H_
 #define MANTID_KERNEL_LIBRARY_MANAGER_H_
 
 //----------------------------------------------------------------------
@@ -80,4 +80,4 @@ private:
 } // namespace Kernel
 } // namespace Mantid
 
-#endif //MANTID_KERNEL_ALGORITHM_PROVIDER_H_
+#endif //MANTID_KERNEL_LIBRARY_MANAGER_H_
