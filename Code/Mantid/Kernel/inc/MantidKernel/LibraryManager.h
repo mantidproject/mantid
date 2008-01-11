@@ -7,6 +7,11 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <boost/shared_ptr.hpp>
+
+#include "MantidKernel/System.h"
+#include "MantidKernel/LibraryWrapper.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -47,23 +52,29 @@ namespace Kernel
 class DLLExport LibraryManager
 {
 public:
-	LibraryManager();
+	static LibraryManager* Instance();
+	
 	virtual ~LibraryManager();
 	
 	//opens all suitable libraries on a given path
 	int OpenAllLibraries(const std::string&, bool isRecursive=false);
 
-	//Returns true if DLL is opened or already open
-	bool OpenLibrary(const std::string&);
-
-	bool OpenLibrary(const std::string&, const std::string&);
-
 private:
-	/// An untyped pointer to the loaded library
-	void* module;
+	///Private Constructor
+	LibraryManager();
+	/// Private copy constructor - NO COPY ALLOWED
+	LibraryManager(const LibraryManager&);
+	/// Private assignment operator - NO ASSIGNMENT ALLOWED
+	LibraryManager& operator = (const LibraryManager&);
 
-  /// static reference to the logger class
-  static Logger& g_log;
+	///Storage for the LibraryWrappers.
+	std::map< const std::string,  boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
+
+	/// static reference to the logger class
+	static Logger& g_log;
+
+	/// Pointer to the instance
+	static LibraryManager* m_instance;
 };
 
 } // namespace Kernel

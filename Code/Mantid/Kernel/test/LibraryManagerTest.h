@@ -20,12 +20,12 @@ public:
 
   LibraryManagerTest()
   {
-	mgr = new LibraryManager;
+	mgr = LibraryManager::Instance();
   }
   
   void testOpenLibrary()
   {
-	TS_ASSERT(mgr->OpenLibrary("MantidAlgorithms"));
+	TS_ASSERT_LESS_THAN(0, mgr->OpenAllLibraries("../../Bin/Shared/", false));
   }
   
   void testLoadedAlgorithm()

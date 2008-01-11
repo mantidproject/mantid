@@ -3,71 +3,39 @@
 //----------------------------------------------------------------------
 #include <iostream>
 
-#include "MantidKernel/DllOpen.h"
-#include "MantidKernel/LibraryManager.h"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+
+#include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/DllOpen.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
-  namespace fs = boost::filesystem;  // to help clarify which bits are boost in code below
+	namespace fs = boost::filesystem;  // to help clarify which bits are boost in code below
 
-  Logger& LibraryManager::g_log = Logger::get("LibraryManager");
+	LibraryManager* LibraryManager::m_instance = 0;
+	
+	Logger& LibraryManager::g_log = Logger::get("LibraryManager");
+	
+	/// Get an instance of LibraryManager if it already exists, else creates a new object.
+	LibraryManager* LibraryManager::Instance()
+	{
+		if (!m_instance) m_instance=new LibraryManager;
+		return m_instance;
+	}
 
 	/// Constructor
-	LibraryManager::LibraryManager() : module(0)
+	LibraryManager::LibraryManager()
 	{}
 
 	/// Destructor
 	LibraryManager::~LibraryManager()
 	{
-		//Close lib
-		if (module)
-		{
-			DllOpen::CloseDll(module);
-			module = 0;
-		}
-	}
-
-	/** Opens a DLL
-	 *  @param libName The name of the file to open (not including the lib/so/dll)
-	 *  @return True if DLL is opened or already open
-	 */
-	bool LibraryManager::OpenLibrary(const std::string& libName)
-	{
-		if (!module)
-		{		
-			//Load dynamically loaded library
-			module = DllOpen::OpenDll(libName);
-			if (!module) 
-			{
-				return false;
-			}
-		}
-	
-		return true;
-	}
-	
-	/** Opens a DLL
-	 *  @param libName The name of the file to open (not including the lib/so/dll)
-	 *  @param filePath The filepath to the directory where the library lives
-	 *  @return True if DLL is opened or already open
-	 */
-	bool LibraryManager::OpenLibrary(const std::string& libName, const std::string& filePath)
-	{
-		if (!module)
-		{		
-			//Load dynamically loaded library
-			module = DllOpen::OpenDll(libName, filePath);
-			if (!module) 
-			{
-				return false;
-			}
-		}
-	
-		return true;
+		//Clear the map - will automatically call the deconstructor for
+		//the items in it.
+		OpenLibs.clear();
 	}
 
   /** Opens all suitable DLLs on a given path
@@ -101,8 +69,15 @@ namespace Kernel
           std::string libName = DllOpen::ConvertToLibName(itr->path().leaf());
           if (libName != "")
           {
-            //load them
-            if (OpenLibrary(libName,filePath)) ++libCount;
+		//load them
+		LibraryWrapper* tmp = new LibraryWrapper;
+	  
+            if (tmp->OpenLibrary(libName,filePath))
+	    {		
+		    ++libCount;
+		    boost::shared_ptr<LibraryWrapper> pLib(tmp);
+		    OpenLibs.insert ( std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, pLib) );
+	    }
           }
         }
       }
@@ -111,8 +86,6 @@ namespace Kernel
     {
       g_log.error("In OpenAllLibraries: " + filePath + " must be a directory."); 
     }
-
-
    
     return libCount;
   }
