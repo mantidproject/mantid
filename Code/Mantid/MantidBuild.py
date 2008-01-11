@@ -29,3 +29,11 @@ def getCPPFiles(codeFolder) :
 			listCpps.append(codeFolder + '/' +  file)
 #			print file
     return listCpps
+    
+def copyPropertiesFiles(srcFolder, destFolder) :
+    if os.path.exists(srcFolder) and os.path.exists(destFolder):
+	files = os.listdir(srcFolder)
+	for file in files:
+		if file.endswith('.properties'):
+			shutil.copy(srcFolder + '/' +  file, destFolder)
+
