@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/LibraryManager.h"
 
 namespace Mantid
 {
@@ -96,6 +97,8 @@ private:
   AnalysisDataService *data;
   /// Pointer to the Configuration Service
   Kernel::ConfigService *config;
+  /// Pointer to the Library Manager
+  Kernel::LibraryManager *libManager;
   
 };
 

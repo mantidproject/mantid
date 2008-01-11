@@ -45,6 +45,13 @@ void FrameworkManager::initialize()
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
+
+  config->loadConfig("MantidFramework.properties");
+  std::string pluginDir = config->getString("plugins.directory");
+	
+  libManager = Mantid::Kernel::LibraryManager::Instance();
+  libManager->OpenAllLibraries(pluginDir, false);
+	
   return;
 }
 

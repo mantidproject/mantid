@@ -8,7 +8,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/LibraryManager.h"
 #include "MantidAPI/FrameworkManager.h"
 
 // Using =======================================================================
