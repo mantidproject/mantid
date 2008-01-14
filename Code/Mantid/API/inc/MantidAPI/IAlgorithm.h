@@ -66,15 +66,8 @@ public:
   /// System execution. This method invokes the exec() method of a concrete algorithm.
   virtual void execute() = 0;
 
-  /** System finalization. This method invokes the final() method of a concrete
-   *  algorithm and the final() methods of all of that algorithm's sub algorithms.
-   */
-  virtual void finalize() = 0;
-
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
-  /// Check whether the algorithm is finalized properly 
-  virtual bool isFinalized() const = 0;
   /// Check whether the algorithm has already been executed
   virtual bool isExecuted() const = 0;
 

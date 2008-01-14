@@ -19,7 +19,6 @@ public:
     declareProperty("prop2",1);   
   }
   void exec() {}
-  void final() {}
   
   bool existsProperty( const std::string &name ) const
   {
@@ -45,7 +44,6 @@ public:
     TS_ASSERT( ! theVersion.compare("unknown") );
     TS_ASSERT( ! alg.isInitialized() );
     TS_ASSERT( ! alg.isExecuted() );
-    TS_ASSERT( ! alg.isFinalized() );
   }
 
   void testName()
@@ -85,15 +83,6 @@ public:
     TS_ASSERT( myAlg.isExecuted() );
   }
 
-  void testFinalize()
-  {
-    ToyAlgorithm myAlg;
-    TS_ASSERT_THROWS(myAlg.finalize(),std::runtime_error);;
-    // Need to initialize otherwise the finalize method immediately returns
-    myAlg.initialize();
-    TS_ASSERT_THROWS_NOTHING(myAlg.finalize());
-    TS_ASSERT( myAlg.isFinalized() );
-  }
 
 //	void testCreateSubAlgorithm()
 //	{

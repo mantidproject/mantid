@@ -121,12 +121,6 @@ void TOFtoWavelength::exec()
   return;
 }
 
-/** Finalisation method. Does nothing at present.
- *
- */
-void TOFtoWavelength::final()
-{  
-}
 
 } // namespace Algorithm
 } // namespace Mantid

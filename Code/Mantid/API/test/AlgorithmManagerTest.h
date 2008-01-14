@@ -16,7 +16,6 @@ public:
   virtual ~algmantest() {}
   void init() { }
   void exec() {  }
-  void final() { }		
 };
 
 class algmantestSecond : public Algorithm
@@ -27,7 +26,6 @@ public:
   virtual ~algmantestSecond() {}
   void init() { }
   void exec() { }
-  void final() { }		
 };
 
 DECLARE_ALGORITHM(algmantest)

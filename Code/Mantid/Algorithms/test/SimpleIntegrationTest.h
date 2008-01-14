@@ -122,15 +122,6 @@ public:
 
   }
   
-  void testFinal()
-  {
-    if ( !alg.isInitialized() ) alg.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING( alg.finalize());
-    TS_ASSERT( alg.isFinalized() );
-  }
-  
 private:
   SimpleIntegration alg;   // Test with range limits
   SimpleIntegration alg2;  // Test without limits

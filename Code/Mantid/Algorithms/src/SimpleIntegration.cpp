@@ -130,10 +130,5 @@ void SimpleIntegration::exec()
   return;  
 }
 
-/// Finalisation method. Does nothing at present.
-void SimpleIntegration::final()
-{
-}
-
 } // namespace Algorithm
 } // namespace Mantid

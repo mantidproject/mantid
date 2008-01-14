@@ -69,12 +69,6 @@ namespace Mantid
       return;
     }
 
-    /** Finalisation method. Does nothing at present.
-    *
-    */
-    void Minus::final()
-    {
-    }
 
     /** Performs the addition with Gausian errors within the transform function
     * @param a The triple ref of the first workspace data item

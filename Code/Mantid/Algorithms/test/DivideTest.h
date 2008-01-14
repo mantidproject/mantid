@@ -108,15 +108,7 @@ public:
     }
   }
 
-  void xtestFinal()
-  {
-    Divide alg;
-    if ( !alg.isInitialized() ) alg.initialize();
 
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING( alg.finalize());
-    TS_ASSERT( alg.isFinalized() );
-  }
 
 };
 

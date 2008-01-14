@@ -65,7 +65,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void final();
   
   /// The X bin to start the integration from
   int m_MinX;

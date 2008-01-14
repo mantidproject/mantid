@@ -58,11 +58,40 @@ namespace Mantid
       }
 
       Workspace_sptr out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
+/*
+      Workspace2D_sptr workin1=boost::dynamic_pointer_cast<Workspace2D>(in_work1);
+      Workspace2D_sptr workin2=boost::dynamic_pointer_cast<Workspace2D>(in_work2);
+      Workspace2D_sptr workout=boost::dynamic_pointer_cast<Workspace2D>(out_work);
+
+      for( int i=0;i<workin1->getHistogramNumber();i++)
+        for(int j=0; j<workin1->blocksize();j++)
+        {
+          double& e1=workin1->dataE(i)[j];
+          double& e2=workin2->dataE(i)[j];
+          workout->dataY(i)[j]=workin1->dataY(i)[j]+workin2->dataY(i)[j];
+          workout->dataX(i)[j]=workin1->dataX(i)[j];
+          workout->dataE(i)[j]=sqrt((e2*e2)+(e1*e1));
+        }
+*/    
 
       triple_iterator<Workspace> ti_out(*out_work);
       triple_iterator<Workspace> ti_in1(*in_work1);
       triple_iterator<Workspace> ti_in2(*in_work2);
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
+
+/*
+      for( ti_in1=ti_in1.begin();ti_in1!=ti_in1.end();++ti_in1)
+      {
+      (*ti_out)[0]=(*ti_in1)[0];
+      (*ti_out)[1]=0;//(*ti_in1)[1]+(*ti_in2)[1];
+      (*ti_out)[2]=0;// sqrt(  ((*ti_in1)[2]*(*ti_in1)[2]) + ((*ti_in2)[2]*(*ti_in2)[2]));
+
+//        ++ti_in2;
+        ++ti_out;
+      }
+*/
+
+
 
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",out_work);
@@ -70,12 +99,6 @@ namespace Mantid
       return;
     }
 
-    /** Finalisation method. Does nothing at present.
-    *
-    */
-    void Plus::final()
-    {
-    }
 
     /** Performs the addition with Gaussian errors within the transform function
     * @param a The triple ref of the first workspace data item

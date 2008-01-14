@@ -47,8 +47,6 @@ public:
   void init() {  }
   ///Execution code
   void exec() { std::cout << "\nHello, World!\n"; }
-  ///Finalisation code
-  void final() {  }
 };
 
 } // namespace Algorithm

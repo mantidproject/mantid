@@ -41,8 +41,7 @@ namespace API
 /** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
 
 	  The Algorithm Manager class is responsible for controlling algorithm 
-	  instances. It incorporates the algorithm factory, and initializes and
-	  finalizes algorithms.
+	  instances. It incorporates the algorithm factory and initializes algorithms.
 
 	  @author Dickon Champion, ISIS, RAL
 	  @date 30/10/2007
@@ -80,7 +79,7 @@ public:
 	Algorithm_sptr create( const std::string& algName );
 	Algorithm_sptr createUnmanaged( const std::string& algName ) const;
 
-	/// Finalizes and deletes all registered algorithms
+	/// deletes all registered algorithms
 	void clear();
 	
 	/** Gives the number of managed algorithms

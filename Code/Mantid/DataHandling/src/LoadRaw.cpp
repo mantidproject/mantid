@@ -110,13 +110,6 @@ namespace DataHandling
   }
 
 
-  /** Finalisation method. Does nothing at present.
-   *  
-   */
-  void LoadRaw::final()
-  {    
-  }
-
   /// Run the sub-algorithms (LoadInstrument & LoadLog)
   void LoadRaw::runSubAlgorithms()
   {

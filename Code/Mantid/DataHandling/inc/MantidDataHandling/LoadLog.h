@@ -27,7 +27,7 @@ namespace DataHandling
     filename of a specific log file. 
     
     LoadLog is an algorithm and as such inherits from the Algorithm class, 
-    via DataHandlingCommand, and overrides the init(), exec() & final() methods.
+    via DataHandlingCommand, and overrides the init() & exec() methods.
     
     Required Properties:
        <UL>
@@ -75,8 +75,6 @@ namespace DataHandling
     /// Overwrites Algorithm method
     void exec();
     
-    /// Overwrites Algorithm method. Does nothing at present
-    void final();
     
     /// The name and path of an input file. This may be the filename of a
     /// raw datafile or the name of a specific log file. 

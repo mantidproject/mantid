@@ -30,7 +30,7 @@ namespace API
 
  Base class from which all concrete algorithm classes should be derived. 
  In order for a concrete algorithm class to do anything
- useful the methods init(), exec() and final() should be overridden.
+ useful the methods init() & exec()  should be overridden.
  
  Further text from Gaudi file.......
  The base class provides utility methods for accessing 
@@ -80,10 +80,8 @@ public:
   virtual const std::string& version() const;
   void initialize();
   void execute();
-  void finalize();
   virtual bool isInitialized() const; // Protected in Gaudi version
   virtual bool isExecuted() const;
-  virtual bool isFinalized() const;
 
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
@@ -110,18 +108,14 @@ public:
 
 protected:
 
-  // Equivalents of Gaudi's initialize, execute & finalize methods
+  // Equivalents of Gaudi's initialize & execute  methods
   /// Virtual method - must be overridden by concrete algorithm
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
-  /// Virtual method - must be overridden by concrete algorithm
-  virtual void final() = 0;
 
   void setInitialized();
   void setExecuted(bool state);
-  void setFinalized();
-
   
 private:
 
@@ -142,7 +136,6 @@ private:
 
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
-  bool m_isFinalized; ///< Algorithm has been finalized flag
 
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 };

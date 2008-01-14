@@ -195,17 +195,6 @@ public:
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
   }
 
-
-  void testFinal()
-  {
-    if ( !loader.isInitialized() ) loader.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING(loader.finalize());    
-    TS_ASSERT( loader.isFinalized() );
-  }
-
-
   
 private:
   LoadLog loader;

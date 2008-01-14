@@ -112,12 +112,6 @@ void LoadInstrument::exec()
   return;
 }
 
-/** Finalisation method. Does nothing at present.
- *
- */
-void LoadInstrument::final()
-{
-}
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -55,7 +55,6 @@ public:
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
-    loader.finalize();
     
   }
   
@@ -122,14 +121,6 @@ public:
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
   }
   
-  void testFinal()
-  {
-    if ( !alg.isInitialized() ) alg.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING(alg.finalize());
-    TS_ASSERT( alg.isFinalized() );
-  }
   
 private:
   TOFtoWavelength alg;

@@ -21,7 +21,7 @@ namespace Mantid
 
     Minus performs the difference of two input workspaces.
     It inherits from the Algorithm class, and overrides
-    the init(), exec() & final() methods.
+    the init() & exec() methods.
 
     Required Properties:
     <UL>
@@ -65,7 +65,6 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      void final();
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 

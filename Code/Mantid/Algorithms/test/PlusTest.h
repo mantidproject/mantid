@@ -108,15 +108,6 @@ public:
     }
   }
 
-  void testFinal()
-  {
-    Plus plus_alg;
-    if ( !plus_alg.isInitialized() ) plus_alg.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING( plus_alg.finalize());
-    TS_ASSERT( plus_alg.isFinalized() );
-  }
   
 };
 

@@ -105,15 +105,7 @@ public:
     boost::filesystem::remove_all(outputFile);    
   
   }
-  
-  void testFinal()
-  {
-    if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.finalize());
-    TS_ASSERT( algToBeTested.isFinalized() );
-  }
+
   
 private:
   SaveCSV algToBeTested;

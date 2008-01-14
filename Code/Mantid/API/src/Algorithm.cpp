@@ -21,7 +21,6 @@ namespace Mantid
       m_subAlgms(),
       m_isInitialized(false), 
       m_isExecuted(false), 
-      m_isFinalized(false),
       m_isChildAlgorithm(false)
     {
     }
@@ -189,86 +188,6 @@ namespace Mantid
       return;
     }
 
-    /** System finalization. This method invokes the finalize() method of a 
-    * concrete algorithm and the finalize() methods of all of that algorithm's 
-    * sub algorithms. 
-    *
-    *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be finalised
-    */
-    void Algorithm::finalize()
-    {
-      // Bypass the finalization if the algorithm hasn't been initialized or
-      // has already been finalized.
-      if ( !isInitialized() || isFinalized() )
-      {
-        g_log.error("algorithm hasn't been initialized or has already been finalized:");
-        throw std::runtime_error("algorithm hasn't been initialized or has already been finalized");
-      }
-
-      // Invoke final() method of the derived class inside a try/catch clause
-      try
-      {
-        // Finalize first any sub-algorithms (it can be done more than once)
-        // Gaudi at some point had a bug if this wasn't done first.
-        try
-        {
-          std::vector<Algorithm_sptr>::iterator it;
-          for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
-          {
-            (*it)->finalize();
-          }
-        }
-        catch(std::runtime_error& ex)
-        {
-          g_log.error()<<"Error finalizing one or several sub-algorithms: "<<ex.what();
-          throw;
-        }
-
-        try
-        {
-          // Invoke the final() method of the derived class
-          this->final();
-        }
-        catch(std::runtime_error& ex)
-        {
-          g_log.error()<<"Error finalizing main algorithm: "<<m_name<<ex.what();
-          throw;
-        }
-
-        // Release all sub-algorithms (uses IInterface release method in Gaudi instead of direct delete)
-        // if it managed to finalise them
-        /// @todo shared pointers no need
-        //for (std::vector<Algorithm_sptr>::iterator it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
-        //{
-        //  delete (*it);
-        //}
-        m_subAlgms.clear();
-
-        // Indicate that this Algorithm has been finalized to prevent duplicate attempts
-        setFinalized( );
-
-      }
-      // Unpleasant catch-all! Along with this, Gaudi version catches GaudiException & std::exception
-      // but doesn't really do anything except (print fatal) messages.
-
-      catch (...)
-      {
-        // (1) perform the printout
-        g_log.fatal("UNKNOWN Exception is caught ");
-
-        /// @todo shared pointers no need
-        //for (std::vector<Algorithm_sptr>::iterator it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
-        //{
-        //  delete (*it);
-        //}
-        m_subAlgms.clear();
-
-        throw;
-      }
-      // Only gets to here if algorithm finished normally
-      return;
-    }
-
     /// Has the Algorithm already been initialized
     bool Algorithm::isInitialized() const
     {
@@ -281,11 +200,6 @@ namespace Mantid
       return m_isExecuted;
     }
 
-    /// Has the Algorithm already been finalized?
-    bool Algorithm::isFinalized() const
-    {
-      return m_isFinalized;
-    }
 
     /** Create a sub algorithm.  A call to this method creates a child algorithm object.
     *  Using this mechanism instead of creating daughter 
@@ -344,12 +258,6 @@ namespace Mantid
     void Algorithm::setExecuted(bool state)
     {
       m_isExecuted = state;
-    }
-
-    /// Set the Algorithm finalized state
-    void Algorithm::setFinalized()
-    {
-      m_isFinalized = true;
     }
 
     //----------------------------------------------------------------------

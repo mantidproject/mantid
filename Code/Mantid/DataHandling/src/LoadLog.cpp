@@ -256,13 +256,6 @@ void LoadLog::exec()
   return;
 }
 
-/** Finalisation method. Does nothing at present.
- *   
- */
-void LoadLog::final()
-{
-}
-
 /** Takes as input a string and try to determine what type it is.
  *  @param s The input string
  *  @param s  string to be classified

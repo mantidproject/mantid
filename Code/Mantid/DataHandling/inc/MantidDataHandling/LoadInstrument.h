@@ -19,7 +19,7 @@ namespace DataHandling
 	other Loadxxx algorithms, rather than being used directly.
 	LoadInstrument is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
-    the init(), exec() & final() methods.
+    the init() & exec()  methods.
     
     Required Properties:
        <UL>
@@ -66,10 +66,7 @@ namespace DataHandling
     
     /// Overwrites Algorithm method
     void exec();
-    
-    /// Overwrites Algorithm method. Does nothing at present
-    void final();
-    
+        
     /// The name and path of the input file
     std::string m_filename;
     

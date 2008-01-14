@@ -74,27 +74,12 @@ namespace Mantid
       return m_instance;
     }
 
-    /// Finalizes and deletes all registered algorithms
+    /// deletes all registered algorithms
     void AlgorithmManager::clear()
     {
       std::vector<Algorithm_sptr>::iterator vc;
-      try
-      {
-        for(vc=regAlg.begin();vc!=regAlg.end();vc++)
-        {
-          // no test for zero since impossible 
-          (*vc)->finalize();
-          //no need to delete the shared pointers
-          //delete (*vc);
-        }
-        regAlg.clear();
-        no_of_alg=0;
-      }
-      catch(std::runtime_error& ex)
-      {
-        g_log.error()<<"AlgorithmManager:: Unable to finalise all algorithms"<<ex.what();
-        throw std::runtime_error("AlgorithmManager:: Unable to finalise all algorithms "); 
-      }
+      regAlg.clear();
+      no_of_alg=0;
       return;
     }
 

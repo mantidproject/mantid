@@ -120,15 +120,7 @@ public:
     TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), histogramNumber);
 
   }
-  
-  void testFinal()
-  {
-    if ( !loader.isInitialized() ) loader.initialize();
-    
-    // The final() method doesn't do anything at the moment, but test anyway
-    TS_ASSERT_THROWS_NOTHING(loader.finalize());    
-    TS_ASSERT( loader.isFinalized() );
-  }
+ 
   
 private:
   LoadInstrument loader;

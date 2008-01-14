@@ -219,12 +219,6 @@ void SaveCSV::exec()
   //only gets here if everything happened normally
   return;
 }
-/** Finalisation method. Does nothing at present.
- *
- */
-void SaveCSV::final()
-{
-}
 
 } // namespace DataHandling
 } // namespace Mantid

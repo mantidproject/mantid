@@ -15,7 +15,7 @@ namespace DataHandling
 
     Saves a 1D or 2D workspace to a CSV file. SaveCSV is an algorithm and as such 
     inherits from the Algorithm class, via DataHandlingCommand, and overrides
-    the init(), exec() & final() methods.
+    the init() & exec()  methods.
     
     Required Properties:
        <UL>
@@ -96,9 +96,6 @@ namespace DataHandling
     
     /// Overwrites Algorithm method
     void exec();
-    
-    /// Overwrites Algorithm method. Does nothing at present
-    void final();
     
     /// The name of the file used for storing the workspace
     std::string m_filename;

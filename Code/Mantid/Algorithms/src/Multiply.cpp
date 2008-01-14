@@ -70,13 +70,6 @@ namespace Mantid
       return;
     }
 
-    /** Finalisation method. Does nothing at present.
-    *
-    */
-    void Multiply::final()
-    {
-    }
-
     /** Performs the addition with Gausian errors within the transform function
     * @param a The triple ref of the first workspace data item
     * @param b The triple ref of the second workspace data item
