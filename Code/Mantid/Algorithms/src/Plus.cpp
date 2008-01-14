@@ -63,6 +63,7 @@ namespace Mantid
       Workspace2D_sptr workin2=boost::dynamic_pointer_cast<Workspace2D>(in_work2);
       Workspace2D_sptr workout=boost::dynamic_pointer_cast<Workspace2D>(out_work);
 
+      // handcrafted for loop iteration 1.5 seconds on jdmc workstation (see benchmark.cpp for more details)
       for( int i=0;i<workin1->getHistogramNumber();i++)
         for(int j=0; j<workin1->blocksize();j++)
         {
@@ -79,14 +80,17 @@ namespace Mantid
       triple_iterator<Workspace> ti_in2(*in_work2);
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
 
-/*
+
+      // handcrafted iteration over iterator (ie removing transform call)
+      // same time as with transform
+      /*
       for( ti_in1=ti_in1.begin();ti_in1!=ti_in1.end();++ti_in1)
       {
       (*ti_out)[0]=(*ti_in1)[0];
-      (*ti_out)[1]=0;//(*ti_in1)[1]+(*ti_in2)[1];
-      (*ti_out)[2]=0;// sqrt(  ((*ti_in1)[2]*(*ti_in1)[2]) + ((*ti_in2)[2]*(*ti_in2)[2]));
+      (*ti_out)[1]=(*ti_in1)[1]+(*ti_in2)[1];
+      (*ti_out)[2]= sqrt(  ((*ti_in1)[2]*(*ti_in1)[2]) + ((*ti_in2)[2]*(*ti_in2)[2]));
 
-//        ++ti_in2;
+        ++ti_in2;
         ++ti_out;
       }
 */
