@@ -32,16 +32,8 @@ struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
         return call_method< void >(py_self, "execute");
     }
 
-    void finalize() {
-        return call_method< void >(py_self, "finalize");
-    }
-
     bool isInitialized() const {
         return call_method< bool >(py_self, "isInitialized");
-    }
-
-    bool isFinalized() const {
-        return call_method< bool >(py_self, "isFinalized");
     }
 
     bool isExecuted() const {
@@ -105,14 +97,6 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         return Mantid::API::Algorithm::isExecuted();
     }
 
-    bool isFinalized() const {
-        return call_method< bool >(py_self, "isFinalized");
-    }
-
-    bool default_isFinalized() const {
-        return Mantid::API::Algorithm::isFinalized();
-    }
-
     void setProperty(const std::string& p0, const std::string& p1) {
         call_method< void >(py_self, "setProperty", p0, p1);
     }
@@ -161,11 +145,6 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         call_method< void >(py_self, "exec");
     }
 
-    void final() {
-        call_method< void >(py_self, "final");
-    }
-
-
     PyObject* py_self;
 };
 
@@ -185,9 +164,7 @@ BOOST_PYTHON_MODULE(libMantidAPI)
 	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
         .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
         .def("execute", pure_virtual(&Mantid::API::IAlgorithm::execute))
-        .def("finalize", pure_virtual(&Mantid::API::IAlgorithm::finalize))
         .def("isInitialized", pure_virtual(&Mantid::API::IAlgorithm::isInitialized))
-        .def("isFinalized", pure_virtual(&Mantid::API::IAlgorithm::isFinalized))
         .def("isExecuted", pure_virtual(&Mantid::API::IAlgorithm::isExecuted))
     ;
 		
@@ -215,7 +192,6 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         .def("version", &Mantid::API::Algorithm::version, &Mantid_API_Algorithm_Wrapper::default_version, return_value_policy< copy_const_reference >())
         .def("isInitialized", &Mantid::API::Algorithm::isInitialized, &Mantid_API_Algorithm_Wrapper::default_isInitialized)
         .def("isExecuted", &Mantid::API::Algorithm::isExecuted, &Mantid_API_Algorithm_Wrapper::default_isExecuted)
-        .def("isFinalized", &Mantid::API::Algorithm::isFinalized, &Mantid_API_Algorithm_Wrapper::default_isFinalized)
         .def("setPropertyValue", &Mantid::API::Algorithm::setPropertyValue, &Mantid_API_Algorithm_Wrapper::default_setPropertyValue)
 //        .def("existsProperty", &Mantid::API::Algorithm::existsProperty, &Mantid_API_Algorithm_Wrapper::default_existsProperty)
         .def("getPropertyValue", &Mantid::API::Algorithm::getPropertyValue, &Mantid_API_Algorithm_Wrapper::default_getPropertyValue)
@@ -223,7 +199,6 @@ BOOST_PYTHON_MODULE(libMantidAPI)
 //        .def("getProperties", &Mantid::API::Algorithm::getProperties, &Mantid_API_Algorithm_Wrapper::default_getProperties, return_value_policy< copy_const_reference >())
         .def("initialize", &Mantid::API::Algorithm::initialize)
         .def("execute", &Mantid::API::Algorithm::execute)
-        .def("finalize", &Mantid::API::Algorithm::finalize)
         //.def("createSubAlgorithm", &Mantid::API::Algorithm::createSubAlgorithm)
         //.def("subAlgorithms", (const std::vector<Mantid::API::Algorithm*,std::allocator<Mantid::API::Algorithm*> >& (Mantid::API::Algorithm::*)() const)&Mantid::API::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
         //.def("subAlgorithms", (std::vector<Mantid::API::Algorithm*,std::allocator<Mantid::API::Algorithm*> >& (Mantid::API::Algorithm::*)() )&Mantid::API::Algorithm::subAlgorithms, return_value_policy< copy_const_reference >())
