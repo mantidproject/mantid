@@ -17,12 +17,12 @@ using namespace Mantid::API;
 template<typename T>
 class FibSeries
 {
- private:
+private:
   T x1;  /// Initial value 1;
   T x2;  /// Initial value 2;
-  
-  public:
-  
+
+public:
+
   FibSeries() : x1(1),x2(1) {}
   T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
 };
@@ -92,11 +92,12 @@ public:
     for(triple_iterator<Workspace1D> ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
-      (
+        (
         TripleRef<double> tr = *ti;
-        double d1 = tr[0];
-        double d2 = tr[1];
-        double d3 = tr[2];
+      double d1 = tr[0];
+      double d2 = tr[1];
+      double d3 = tr[2];
+      d1++;d2++;d3++;
       )
         count++;
     }
@@ -125,7 +126,7 @@ public:
     TS_ASSERT_EQUALS(ti,ti.end());
   }
 
-  
+
   void testIteratorWorkspace1DAsBase()
   {
     int size = 57;
@@ -135,18 +136,19 @@ public:
     for(triple_iterator<Workspace> ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
-      (
+        (
         TripleRef<double> tr = *ti;
-        double d1 = tr[0];
-        double d2 = tr[1];
-        double d3 = tr[2];
+      double d1 = tr[0];
+      double d2 = tr[1];
+      double d3 = tr[2];
+      d1++;d2++;d3++;
       )
-      count++;
+        count++;
     }
     TS_ASSERT_EQUALS(count,size);
   }
 
- 
+
   void testIteratorWorkspace2DAsBase()
   {
     int size = 57;
@@ -157,13 +159,14 @@ public:
     for(triple_iterator<Workspace> ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
-      (
+        (
         TripleRef<double> tr = *ti;
-        double d1 = tr[0];
-        double d2 = tr[1];
-        double d3 = tr[2];
+      double d1 = tr[0];
+      double d2 = tr[1];
+      double d3 = tr[2];
+      d1++;d2++;d3++;
       )
-      count++;
+        count++;
     }
     TS_ASSERT_EQUALS(count,size*histogramCount);
   }
@@ -174,7 +177,7 @@ public:
     W1D workA = Create1DWorkspaceFib(size);
     W1D workB = Create1DWorkspace(size);
 
-    
+
     triple_iterator<Workspace1D> IA(*workA);
     triple_iterator<Workspace1D> IB(*workB);
 
@@ -187,7 +190,7 @@ public:
     const std::vector<double>& y2 = workB->dataY();
     const std::vector<double>& e2 = workB->dataE();
 
-    
+
     for (int i = 0; i < size; i++) 
     {
       TS_ASSERT_EQUALS(x1[i],x2[i]);
@@ -197,27 +200,27 @@ public:
   }
 
   void testIteratorSort()
+  {
+    int size = 10;
+    W1D workA = Create1DWorkspaceFib(size);
+    triple_iterator<Workspace1D> IA(*workA);
+
+    // Note: this used boost lambda since I am being lazy.
+    //      sort(IA.begin(),IA.end(), (boost::bind(&TripleRef<double>::first,_1)() >
+    // 				 boost::bind(&TripleRef<double>::first,_2)() );
+
+    const std::vector<double>& x1 = workA->dataX();
+    const std::vector<double>& y1 = workA->dataY();
+    const std::vector<double>& e1 = workA->dataE();
+
+
+    for (int i = 0; i < size; i++) 
     {
-      int size = 10;
-      W1D workA = Create1DWorkspaceFib(size);
-      triple_iterator<Workspace1D> IA(*workA);
-
-      // Note: this used boost lambda since I am being lazy.
-      //      sort(IA.begin(),IA.end(), (boost::bind(&TripleRef<double>::first,_1)() >
-      // 				 boost::bind(&TripleRef<double>::first,_2)() );
-
-      const std::vector<double>& x1 = workA->dataX();
-      const std::vector<double>& y1 = workA->dataY();
-      const std::vector<double>& e1 = workA->dataE();
-
-
-      for (int i = 0; i < size; i++) 
-	{
-	  std::cerr<<x1[i]<<std::endl;
-	}
-      return;
+      std::cerr<<x1[i]<<std::endl;
     }
- 
+    return;
+  }
+
 
 };
 #endif /*TRIPLEITERATORTEST_*/
