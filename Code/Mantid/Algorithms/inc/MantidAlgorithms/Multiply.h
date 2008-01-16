@@ -68,12 +68,13 @@ namespace Mantid
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 
-      class Multiply_fn : public std::binary_function<API::TripleRef<double&>,API::TripleRef<double&>,API::TripleRef<double&> >
+      class Multiply_fn : public std::binary_function<API::TripleRef<double>,API::TripleRef<double>,API::TripleRef<double> >
       {
       public:
-        API::TripleRef<double&> operator()(const API::TripleRef<double&>&,const API::TripleRef<double&>&);
+        API::TripleRef<double> operator()(const API::TripleRef<double>&,const API::TripleRef<double>&);
 
       private:
+        double xvalue;
         ///Temporary cache of calculated signal value
         double ret_sig;
         ///Temporary cache of calculated error value

@@ -25,9 +25,13 @@ TripleRef<T>::TripleRef(const TripleRef<T>& A) :
   \param C :: third item
 */
 template<typename T>
-TripleRef<T>::TripleRef(T A,T B,T C) :
-  first(A),second(B),third(C)
+TripleRef<T>::TripleRef():first(0),second(0),third(0)
 {}
+
+template<typename T>
+TripleRef<T>::TripleRef(T& A,T& B,T& C):first(&A),second(&B),third(&C)
+{
+}
 
 
 /*!
@@ -40,9 +44,9 @@ TripleRef<T>& TripleRef<T>::operator=(const TripleRef<T>& A)
 {
   if (this!=&A)
     {
-      first=A.first;
-      second=A.second;
-      third=A.third;
+      *first= *A.first;
+      *second= *A.second;
+      *third= *A.third;
     }
   return *this;
 }
@@ -52,7 +56,9 @@ TripleRef<T>& TripleRef<T>::operator=(const TripleRef<T>& A)
 */
 template<typename T>
 TripleRef<T>::~TripleRef()
-{}
+{
+  //do not delete the contents of first second and third as they are managed by the collection.
+}
 
 
 /*! 
@@ -61,8 +67,8 @@ TripleRef<T>::~TripleRef()
 template<typename T>
 int TripleRef<T>::operator==(const TripleRef<T>& A) const
 {
-  return  (first!=A.first || second!=A.second || 
-	   third!=A.third) ? 0 : 1;
+  return  (*first!=*A.first || *second!=*A.second || 
+	   *third!=*A.third) ? 0 : 1;
 }
 
 /*! 
@@ -73,8 +79,8 @@ int TripleRef<T>::operator==(const TripleRef<T>& A) const
 template<typename T>
 int TripleRef<T>::operator!=(const TripleRef<T>& A) const
 {
-  return  (first==A.first && second==A.second &&
-	   third==A.third) ? 0 : 1;
+  return  (*first==*A.first && *second == *A.second &&
+	   *third== *A.third) ? 0 : 1;
 }
 
 /*! 
@@ -85,17 +91,20 @@ int TripleRef<T>::operator!=(const TripleRef<T>& A) const
 template<typename T>
 int TripleRef<T>::operator<(const TripleRef<T>& A) const
 {
-  if (first>A.first)
-    return 0;
-  if (first<A.first)
-    return 1;
-  if (second>A.second)
-    return 0;
-  if (second<A.second)
-    return 1;
-  if (third>=A.third)
-    return 0;
-  return 1;
+  if (&A!=this)
+    {
+      if (*first> *A.first)
+        return 0;
+      if (*first< *A.first)
+        return 1;
+      if (*second> *A.second)
+        return 0;
+      if (*second< *A.second)
+        return 1;
+      if (*third < *A.third)
+        return 0;
+  }
+ return 0;
 }
 
 /*! 
@@ -108,7 +117,7 @@ int TripleRef<T>::operator<(const TripleRef<T>& A) const
 template<typename T>
 int TripleRef<T>::operator>(const TripleRef<T>& A) const
 {
-  return A.operator<(*this);
+  return !(this->operator<(A));
 }
 
 /*!
@@ -117,21 +126,21 @@ int TripleRef<T>::operator>(const TripleRef<T>& A) const
   \return Reference Item[A]
 */
 template<typename T>
-T TripleRef<T>::operator[](const int A)
+T& TripleRef<T>::operator[](const int A)
 {
   switch (A)
     {
     case 0:
-      return first;
+      return *first;
     case 1:
-      return second;
+      return *second;
     case 2:
-      return third;
+      return *third;
     default:
       throw std::range_error("TripleRef::operator[]");
     }
   // Never gets here
-  return first;
+//  return *first;
 }
 
 
@@ -141,27 +150,27 @@ T TripleRef<T>::operator[](const int A)
   \return Item[A]
 */
 template<typename T>
-T TripleRef<T>::operator[](const int A)  const
+const T& TripleRef<T>::operator[](const int A)  const
 {
   switch (A)
     {
     case 0:
-      return first;
+      return *first;
     case 1:
-      return second;
+      return *second;
     case 2:
-      return third;
+      return *third;
     default:
       throw std::range_error("TripleRef::operator[]");
     }
   // Never gets here
-  return first;
+//  return *first;
 }
 
 
 /// \cond TEMPLATE
 
-template DLLExport class TripleRef<double&>;
+template class TripleRef<double>;
 
 /// \endcond TEMPLATE
 

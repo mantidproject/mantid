@@ -93,7 +93,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        TripleRef<double&> tr = *ti;
+        TripleRef<double> tr = *ti;
         double d1 = tr[0];
         double d2 = tr[1];
         double d3 = tr[2];
@@ -116,7 +116,7 @@ public:
     for (int i = 0; i < size; i++) 
     {
       //move the iterator on one
-      TripleRef<double&> tr = *ti;
+      TripleRef<double> tr = *ti;
       TS_ASSERT_EQUALS(tr[0],x1[i]);
       TS_ASSERT_EQUALS(tr[1],y1[i]);
       TS_ASSERT_EQUALS(tr[2],e1[i]);
@@ -136,7 +136,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        TripleRef<double&> tr = *ti;
+        TripleRef<double> tr = *ti;
         double d1 = tr[0];
         double d2 = tr[1];
         double d3 = tr[2];
@@ -158,7 +158,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        TripleRef<double&> tr = *ti;
+        TripleRef<double> tr = *ti;
         double d1 = tr[0];
         double d2 = tr[1];
         double d3 = tr[2];

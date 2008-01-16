@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LibraryWrapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Logger.cpp"
 				>
 			</File>
@@ -256,6 +260,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\LibraryManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\LibraryWrapper.h"
 				>
 			</File>
 			<File

@@ -41,17 +41,18 @@ class DLLExport TripleRef
 {
   public:
   
-  T first;       ///< First item
-  T second;      ///< Second item
-  T third;       ///< Third item
+  T* first;       ///< First item
+  T* second;      ///< Second item
+  T* third;       ///< Third item
 
-  TripleRef(T A,T B,T C);
+  TripleRef();
+  TripleRef(T& A,T& B,T& C);
   TripleRef(const TripleRef<T>&);
   TripleRef<T>& operator=(const TripleRef<T>&);
   ~TripleRef();
 
-  T operator[](int const) const;
-  T operator[](int const);
+  const T& operator[](int const) const;
+  T& operator[](int const);
   int operator<(const TripleRef<T>&) const;
   int operator>(const TripleRef<T>&) const;
   int operator==(const TripleRef<T>&) const;

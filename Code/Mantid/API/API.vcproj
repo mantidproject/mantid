@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\BoostPythonWrapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>

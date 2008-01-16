@@ -149,7 +149,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        TripleRef<double&> tr = *ti;
+        TripleRef<double> tr = *ti;
         TS_ASSERT_DELTA(tr[0],0,0.0001);
         TS_ASSERT_DELTA(tr[1],0,0.0001);
         TS_ASSERT_DELTA(tr[2],0,0.0001);

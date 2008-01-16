@@ -1,6 +1,8 @@
 #ifndef MANTIDAPI_TRIPLE_ITERATOR_H
 #define MANTIDAPI_TRIPLE_ITERATOR_H
+#include <vector>
 #include "MantidKernel/System.h"
+#include "MantidAPI/TripleRef.h"
 
 
 namespace Mantid
@@ -36,17 +38,31 @@ namespace API
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 template<typename WorkSpace>
-class DLLExport triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double&>,int,
-					     TripleRef<double&>*,TripleRef<double&>& >
+class DLLExport triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double>,int,
+					     TripleRef<double>*,TripleRef<double>& >
 {
  private:
   ///internal workspace pointer
   WorkSpace* W;
   /// pointer to a TripleRef of doubles
-  TripleRef<double&>* CPoint;
+  TripleRef<double> CPoint;
   /// internal index of location within the workspace
   int index;
+  ///Internal cache of the workspace size
+  int wsSize;
+  ///Internal cache of the workspace blocksize
+  int blocksize;
+
+  ///Internal cache of the current datablock index
+  int dataBlockIndex;
+  ///Internal cache of the current datablock index minimum value
+  int blockMin;
+  ///Internal cache of the current datablock index maximum value
+  int blockMax;
+  ///Internal cache of iterators for current datablock
+  std::vector<double>::iterator it_dataX, it_dataY, it_dataE;
  
+  ///Validates the inex and updates the current CPoint
   void validateIndex(); 
 
  public:
@@ -63,11 +79,11 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
   triple_iterator<WorkSpace>(WorkSpace&);
   triple_iterator<WorkSpace>(const triple_iterator<WorkSpace>&);
   
-  const TripleRef<double&>& operator*() const { return *CPoint; }   ///< Base Accessor
-  const TripleRef<double&>* operator->() const { return CPoint; }   ///< Base Pointer accessor
+  const TripleRef<double>& operator*() const { return CPoint; }   ///< Base Accessor
+  const TripleRef<double>* operator->() const { return &CPoint; }   ///< Base Pointer accessor
 
-  TripleRef<double&>& operator*() { return *CPoint; }   ///< Base Accessor
-  TripleRef<double&>* operator->() { return CPoint; }   ///< Base Pointer accessor
+  TripleRef<double>& operator*() { return CPoint; }   ///< Base Accessor
+  TripleRef<double>* operator->() { return &CPoint; }   ///< Base Pointer accessor
   
   triple_iterator<WorkSpace>& operator++();
   triple_iterator<WorkSpace> operator++(int);
@@ -101,16 +117,17 @@ class DLLExport triple_iterator : public std::iterator<std::random_access_iterat
     \param A :: Iterator to compare
     \return equality status
    */
-  { 
+  {
     if (!W)
-      {
-	if (!A.W) return 1;
-	return  (A.W->size()==A.index) ? 1 : 0;
-      }
+    {
+      if (!A.W)
+        return 1;
+      return (A.wsSize==A.index) ? 1 : 0;
+    }
     if (!A.W)
-      return  (W->size()==index) ? 1 : 0;
-    
-    return (index==A.index); 
+      return (wsSize==index) ? 1 : 0;
+
+    return (index==A.index);
   }
 
   bool operator!=(const triple_iterator<WorkSpace>& A)  const

@@ -237,28 +237,15 @@ Workspace2D::dataE(const int index) const
 /// get pseudo size
 int Workspace2D::size() const 
 { 
-  int retVal = data.size();
-  //if not empty
-  if (retVal > 0)
-  {
-    //get the first entry multiply by its size
-    retVal *= data[0].size();
-  }
-  return retVal; 
+  return data.size() * blocksize(); 
 } 
 
 ///get the size of each vector
 int Workspace2D::blocksize() const
 {
-  int retVal = 1000000000;
-  //if not empty
-  if (data.size() > 0)
-  {
-    //set the reteurn value to the length of the first vector
-    retVal = data[0].size();
-  }
-  return retVal; 
+  return (data.size() > 0) ? data[0].size() : 0;
 }
+
 ///Returns the x data
 std::vector<double>& Workspace2D::dataX(int const index)
 {

@@ -75,13 +75,14 @@ namespace Mantid
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gausian errors
     */
-    TripleRef<double&>
-      Minus::Minus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) 
-    {           
+    TripleRef<double>
+      Minus::Minus_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
+    {     
+      xvalue=a[0];
       ret_sig=a[1]-b[1];
       //gaussian errors for the moment
       ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
-      return TripleRef<double&>(a[0],ret_sig,ret_err);      
+      return TripleRef<double>(xvalue,ret_sig,ret_err);      
     }
   }
 }

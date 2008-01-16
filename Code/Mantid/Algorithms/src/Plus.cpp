@@ -58,44 +58,15 @@ namespace Mantid
       }
 
       Workspace_sptr out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
-/*
+
       Workspace2D_sptr workin1=boost::dynamic_pointer_cast<Workspace2D>(in_work1);
       Workspace2D_sptr workin2=boost::dynamic_pointer_cast<Workspace2D>(in_work2);
       Workspace2D_sptr workout=boost::dynamic_pointer_cast<Workspace2D>(out_work);
-
-      // handcrafted for loop iteration 1.5 seconds on jdmc workstation (see benchmark.cpp for more details)
-      for( int i=0;i<workin1->getHistogramNumber();i++)
-        for(int j=0; j<workin1->blocksize();j++)
-        {
-          double& e1=workin1->dataE(i)[j];
-          double& e2=workin2->dataE(i)[j];
-          workout->dataY(i)[j]=workin1->dataY(i)[j]+workin2->dataY(i)[j];
-          workout->dataX(i)[j]=workin1->dataX(i)[j];
-          workout->dataE(i)[j]=sqrt((e2*e2)+(e1*e1));
-        }
-*/    
-
+    
       triple_iterator<Workspace> ti_out(*out_work);
       triple_iterator<Workspace> ti_in1(*in_work1);
       triple_iterator<Workspace> ti_in2(*in_work2);
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
-
-
-      // handcrafted iteration over iterator (ie removing transform call)
-      // same time as with transform
-      /*
-      for( ti_in1=ti_in1.begin();ti_in1!=ti_in1.end();++ti_in1)
-      {
-      (*ti_out)[0]=(*ti_in1)[0];
-      (*ti_out)[1]=(*ti_in1)[1]+(*ti_in2)[1];
-      (*ti_out)[2]= sqrt(  ((*ti_in1)[2]*(*ti_in1)[2]) + ((*ti_in2)[2]*(*ti_in2)[2]));
-
-        ++ti_in2;
-        ++ti_out;
-      }
-*/
-
-
 
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",out_work);
@@ -109,13 +80,14 @@ namespace Mantid
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gaussian errors
     */
-    TripleRef<double&>
-      Plus::Plus_fn::operator() (const TripleRef<double&>& a,const TripleRef<double&>& b) 
+    TripleRef<double>
+      Plus::Plus_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
     {           
+      xvalue=a[0];
       ret_sig=a[1]+b[1];
       //Gaussian errors for the moment
       ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
-      return TripleRef<double&>(a[0],ret_sig,ret_err);      
+      return TripleRef<double>(xvalue,ret_sig,ret_err);      
     }
   }
 }
