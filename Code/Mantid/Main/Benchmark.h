@@ -45,7 +45,7 @@ public:
   /// No-arg Constructor
   Benchmark() { }
 
-  /// Runs a ttimed addition of two workspaces
+  /// Runs a timed addition of two workspaces
   void RunPlusTest();
 
   static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int xlen, int ylen);

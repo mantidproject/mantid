@@ -76,7 +76,6 @@ An identical fortran operation using LIBISIS takes ~0.7 seconds
 void Benchmark::RunPlusTest()
 {
 
-  //NOTE:  Any code in here is temporory for debugging purposes only, nothing is safe!
   int sizex = 2000,sizey=2584;
   // Register the workspace in the data service
   AnalysisDataService* ADS = AnalysisDataService::Instance();
