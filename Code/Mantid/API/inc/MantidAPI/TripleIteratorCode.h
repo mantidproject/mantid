@@ -13,7 +13,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator() :
-      m_workspace(0),m_CPoint(),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),m_loopCount(1)
+      m_workspace(0),m_CPoint(),m_loopCount(1),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
     {}
 
     /*!
@@ -22,8 +22,8 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
-      m_workspace(&WA),m_CPoint(),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_loopCount(1)
+      m_workspace(&WA),m_CPoint(),m_loopCount(1),m_index(0),
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
       validateIndex();
     }
@@ -35,8 +35,8 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount) :
-      m_workspace(&WA),m_CPoint(),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_loopCount(loopCount)
+      m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_index(0),
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
       //pretend that the container is long than it is by multiplying its size by the loopcount
       m_wsSize *= m_loopCount;
@@ -49,9 +49,9 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
-      m_workspace(A.m_workspace),m_CPoint(),m_index(A.m_index),m_wsSize(A.m_wsSize),
+      m_workspace(A.m_workspace),m_CPoint(),m_loopCount(A.m_loopCount),m_index(A.m_index),m_wsSize(A.m_wsSize),
       m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
-      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE),m_loopCount(A.m_loopCount)
+      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
     {
       validateIndex();
     }
