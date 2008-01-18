@@ -63,9 +63,9 @@ namespace Mantid
       Workspace2D_sptr workin2=boost::dynamic_pointer_cast<Workspace2D>(in_work2);
       Workspace2D_sptr workout=boost::dynamic_pointer_cast<Workspace2D>(out_work);
     
-      triple_iterator<Workspace> ti_out(*out_work);
-      triple_iterator<Workspace> ti_in1(*in_work1);
-      triple_iterator<Workspace> ti_in2(*in_work2);
+      Workspace::iterator ti_out(*out_work);
+      Workspace::const_iterator ti_in1(*in_work1);
+      Workspace::const_iterator ti_in2(*in_work2);
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Plus_fn());
 
       // Assign it to the output workspace property

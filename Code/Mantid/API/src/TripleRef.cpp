@@ -18,6 +18,11 @@ TripleRef<T>::TripleRef(const TripleRef<T>& A) :
   first(A.first),second(A.second),third(A.third)
 {}
 
+/// Default constructor
+template<typename T>
+TripleRef<T>::TripleRef():first(0),second(0),third(0)
+{}
+
 /*!
   Constructor from a 3 value input 
   \param A :: first item
@@ -25,14 +30,9 @@ TripleRef<T>::TripleRef(const TripleRef<T>& A) :
   \param C :: third item
 */
 template<typename T>
-TripleRef<T>::TripleRef():first(0),second(0),third(0)
-{}
-
-template<typename T>
 TripleRef<T>::TripleRef(T& A,T& B,T& C):first(&A),second(&B),third(&C)
 {
 }
-
 
 /*!
   Standard Assignment Constructor

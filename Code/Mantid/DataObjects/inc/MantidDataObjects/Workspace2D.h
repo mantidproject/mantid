@@ -18,7 +18,7 @@ namespace DataObjects
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
     
@@ -35,16 +35,21 @@ namespace DataObjects
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */ 	
 class DLLExport Workspace2D : public API::Workspace
 {
  private:
-  /// A vector that holds the 1D shistograms 
+  /// A vector that holds the 1D histograms 
   std::vector<Histogram1D> data;
 
 public:
-
+  /// Typedef for the triple_iterator to use with a Workspace2D
+  typedef API::triple_iterator<API::TripleRef<double>, Workspace2D> iterator;
+  /// Typedef for the const triple_iterator to use with a Workspace2D
+  typedef API::triple_iterator<const API::TripleRef<double>, Workspace2D> const_iterator;  
+  
   /**
 	Gets the name of the workspace type
 	\return Standard string name
@@ -92,7 +97,7 @@ public:
 
 };
 
-  ///shared pointer to the workspace base class
+  ///shared pointer to the Workspace2D class
   typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
 
 } // namespace DataObjects

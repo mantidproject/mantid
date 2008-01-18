@@ -61,7 +61,7 @@ namespace Mantid
 
       double sum;
       sum=0.0;
-      for (int i=0; i < w1x.size(); i++) sum += fabs(w1x[i]-w2x[i]);
+      for (unsigned int i=0; i < w1x.size(); i++) sum += fabs(w1x[i]-w2x[i]);
       if( sum < 0.0000001)
         return true;
       else

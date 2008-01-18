@@ -87,9 +87,7 @@ public:
     W1D workspace = Create1DWorkspace(size);
 
     int count = 0;
-    // triple_iterator<Workspace1D> ti(*workspace);
-    // for(ti.begin();ti!=ti.end; ++ti)
-    for(triple_iterator<Workspace1D> ti(*workspace); ti != ti.end(); ++ti)
+    for(Workspace1D::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
         (
@@ -113,7 +111,7 @@ public:
     std::vector<double> y1 = workspace->dataY();
     std::vector<double> e1 = workspace->dataE();
 
-    triple_iterator<Workspace1D> ti(*workspace);
+    Workspace1D::const_iterator ti(*workspace);
     for (int i = 0; i < size; i++) 
     {
       //move the iterator on one
@@ -133,7 +131,7 @@ public:
     Wbase workspace = Create1DWorkspace(size);
 
     int count = 0;
-    for(triple_iterator<Workspace> ti(*workspace); ti != ti.end(); ++ti)
+    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
         (
@@ -156,7 +154,7 @@ public:
     Wbase workspace = Create2DWorkspace(histogramCount,size);
     //workspace->dataX(0) // this is the first spectrum in the workspace with real data
     int count = 0;
-    for(triple_iterator<Workspace> ti(*workspace); ti != ti.end(); ++ti)
+    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
         (
@@ -178,8 +176,8 @@ public:
     W1D workB = Create1DWorkspace(size);
 
 
-    triple_iterator<Workspace1D> IA(*workA);
-    triple_iterator<Workspace1D> IB(*workB);
+    Workspace1D::const_iterator IA(*workA);
+    Workspace1D::iterator IB(*workB);
 
     std::copy(IA.begin(),IA.end(),IB.begin());
     const std::vector<double>& x1 = workA->dataX();
@@ -199,11 +197,12 @@ public:
     }
   }
 
-  void testIteratorSort()
+  // Disable this test until it uses cxxtest instead of cerr output
+  void xtestIteratorSort()
   {
     int size = 10;
     W1D workA = Create1DWorkspaceFib(size);
-    triple_iterator<Workspace1D> IA(*workA);
+    Workspace1D::iterator IA(*workA);
 
     // Note: this used boost lambda since I am being lazy.
     //      sort(IA.begin(),IA.end(), (boost::bind(&TripleRef<double>::first,_1)() >

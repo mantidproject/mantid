@@ -35,9 +35,11 @@ namespace API
 {
 //Forward declarations
   class Algorithm;
-  ///Typedef for a shared pointer to an Algorithm
-  typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 
+  ///@cond (Don't document here because done elsewhere
+  //Typedef for a shared pointer to an Algorithm
+  typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+  ///@endcond
 /** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
 
 	  The Algorithm Manager class is responsible for controlling algorithm 

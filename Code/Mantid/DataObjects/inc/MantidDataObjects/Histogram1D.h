@@ -10,14 +10,14 @@ namespace Mantid
 {
 namespace DataObjects
 {
-/*!
+/**
 	1D histogram implementation.
 
     \class Histogram1D Histogram1D.h
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007  
     
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
   This file is part of Mantid.
  	
@@ -34,38 +34,36 @@ namespace DataObjects
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-
+  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport Histogram1D
 {
 public:
-
+  /// The data storage type used internally in a Histogram1D
+  typedef std::vector<double> StorageType;
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
-
-  typedef Kernel::cow_ptr<std::vector<double> > RCtype;    
+  typedef Kernel::cow_ptr<StorageType > RCtype;    
   
- private:
-
+private:
   RCtype refX;   ///< RefCounted X
   RCtype refY;   ///< RefCounted Y
-  RCtype refE;   ///< RefCounted E
+  RCtype refE;   ///< RefCounted Error
+  RCtype refE2;  ///< Second error value for when Poisson errors used
 
 public:
-  /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR 
-
   Histogram1D();
   Histogram1D(const Histogram1D&);
   Histogram1D& operator=(const Histogram1D&);
   virtual ~Histogram1D();
 
   /// Sets the x data.
-  void setX(const std::vector<double>& X) {  refX.access()=X; }
+  void setX(const StorageType& X) {  refX.access()=X; }
   /// Sets the data.
-  void setData(const std::vector<double>& Y) {  refY.access()=Y; };
+  void setData(const StorageType& Y) {  refY.access()=Y; };
     /// Sets the data and errors
-  void setData(const std::vector<double>& Y,const std::vector<double>& E) 
+  void setData(const StorageType& Y,const StorageType& E) 
     {  refY.access()=Y; refE.access()=E; }
 
       /// Sets the x data.
@@ -84,25 +82,25 @@ public:
 
   // Get the array data
   /// Returns the x data const
-  virtual const std::vector<double>& dataX() const { return *refX; }  
+  virtual const StorageType& dataX() const { return *refX; }  
   /// Returns the y data const
-  virtual const std::vector<double>& dataY() const { return *refY; }
+  virtual const StorageType& dataY() const { return *refY; }
   /// Returns the error data const
-  virtual const std::vector<double>& dataE() const { return *refE; }
+  virtual const StorageType& dataE() const { return *refE; }
 
   ///Returns the x data
-  virtual std::vector<double>& dataX() { return refX.access(); }
+  virtual StorageType& dataX() { return refX.access(); }
   ///Returns the y data
-  virtual std::vector<double>& dataY() { return refY.access(); }
+  virtual StorageType& dataY() { return refY.access(); }
   ///Returns the error data
-  virtual std::vector<double>& dataE() { return refE.access(); }
+  virtual StorageType& dataE() { return refE.access(); }
 
   ///Clear the x data
-  std::vector<double>& emptyX() { refX.access().clear(); return refX.access(); }
+  StorageType& emptyX() { refX.access().clear(); return refX.access(); }
     ///Clear the y data
-  std::vector<double>& emptyY() { refY.access().clear(); return refY.access(); }
+  StorageType& emptyY() { refY.access().clear(); return refY.access(); }
     ///Clear the error data
-  std::vector<double>& emptyE() { refE.access().clear(); return refE.access(); }
+  StorageType& emptyE() { refE.access().clear(); return refE.access(); }
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
   int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)

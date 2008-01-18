@@ -145,7 +145,7 @@ public:
     int targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
     TS_ASSERT_EQUALS(ws->size(),targetsize);
     //check they arre all 0
-    for(triple_iterator<Workspace> ti(*ws); ti != ti.end(); ++ti)
+    for(Workspace::iterator ti(*ws); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
       (

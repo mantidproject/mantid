@@ -18,7 +18,8 @@ namespace API
 /** @class AnalysisDataService AnalysisDataService.h Kernel/AnalysisDataService.h
 
     The Analysis data service stores instances of the Workspace objects and 
-    anything that derives from emplate class DynamicFactory<Mantid::Kernel::IAlgorithm>them.  This is the primary data service that
+    anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.  
+    This is the primary data service that
     the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 

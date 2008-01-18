@@ -6,10 +6,12 @@
 #include "MantidDataObjects/Histogram1D.h"
 
 /** @class Workspace1D
-    \brief Concrete workspace implementation. Data is a Histogram1D      	
+
+    Concrete workspace implementation. Data is a Histogram1D      	
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007 	
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
     
@@ -26,24 +28,27 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */ 	
 namespace Mantid
 {
 namespace DataObjects
 {
 
-class DLLExport Workspace1D : public API::Workspace, 
-    public Histogram1D
+class DLLExport Workspace1D : public API::Workspace, public Histogram1D
 {
 
 public:
-
-/**
-	Gets the name of the workspace type
-	\return Standard string name
-*/
+  /// Typedef for the triple_iterator to use with a Workspace1D
+  typedef API::triple_iterator<API::TripleRef<double>, Workspace1D> iterator;
+  /// Typedef for the const triple_iterator to use with a Workspace1D
+  typedef API::triple_iterator<const API::TripleRef<double>, Workspace1D> const_iterator;  
+  
+  /**
+  	Gets the name of the workspace type
+  	\return Standard string name
+  */
   virtual const std::string id() const {return "Workspace1D";}
 
   Workspace1D();
@@ -55,6 +60,7 @@ public:
   //set blocksize to a very large number as 1D workspace has only one block
   ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const;
+
   //inheritance redirections
   ///Returns the x data
   virtual std::vector<double>& dataX(int const index) { return Histogram1D::dataX(); }
@@ -77,6 +83,7 @@ public:
   virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
+
   /// Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const {return dataX();}
   /// Returns the y data const
@@ -92,7 +99,7 @@ protected:
 
 };
 
-  ///shared pointer to the workspace base class
+  ///shared pointer to the Workspace1D class
   typedef boost::shared_ptr<Workspace1D> Workspace1D_sptr;
 
 } // namespace DataObjects

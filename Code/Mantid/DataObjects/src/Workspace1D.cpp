@@ -16,7 +16,7 @@ Workspace1D::Workspace1D() : API::Workspace(),
 			     Histogram1D()
 { }
 
-  /// Copy Constructor
+/// Copy Constructor
 Workspace1D::Workspace1D(const Workspace1D& A) :
   API::Workspace(A),Histogram1D(A)
 { }
@@ -26,8 +26,7 @@ Workspace1D::Workspace1D(const Workspace1D& A) :
     \param A :: Workspace  to copy
     \return *this
    */
-Workspace1D& 
-Workspace1D::operator=(const Workspace1D& A)
+Workspace1D& Workspace1D::operator=(const Workspace1D& A)
 {
   if (this!=&A)
     {
@@ -63,11 +62,11 @@ int Workspace1D::blocksize() const
 }
 
 } // namespace DataObjects
-
-} //NamespaceMantid
+} // namespace Mantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace1D>;
+template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>, Mantid::DataObjects::Workspace1D>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::DataObjects::Workspace1D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace1D>;
 

@@ -1,92 +1,88 @@
 #include <vector>
 #include <iterator>
 #include <boost/shared_ptr.hpp>
-#include <iostream>
 
 #include "TripleRef.h"
 
 namespace Mantid 
 {
-
   namespace API
   {
     /*!
     Null constructor
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>::triple_iterator() :
-    W(0),CPoint(),index(0),wsSize(0),blocksize(0),blockMin(-1),blockMax(-1)
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>::triple_iterator() :
+      m_workspace(0),m_CPoint(),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
     {}
 
     /*!
     Workspace based constructor
     \param WA :: Workspace to take pointer
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>::triple_iterator(WorkSpace& WA) :
-    W(&WA),CPoint(),index(0),wsSize(W->size()),blocksize(W->blocksize()),blockMin(-1),blockMax(-1)
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
+      m_workspace(&WA),m_CPoint(),m_index(0),
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
       validateIndex();
     }
-
+    
     /*!
     Copy constructor
     \param A :: triple_iterator to copy
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>::triple_iterator(const triple_iterator<WorkSpace>& A) :
-    W(A.W),CPoint(),index(A.index),wsSize(A.wsSize),blocksize(A.blocksize),
-      blockMin(A.blockMin),blockMax(A.blockMax),
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
+      m_workspace(A.m_workspace),m_CPoint(),m_index(A.m_index),m_wsSize(A.m_wsSize),
+      m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
       it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
     {
       validateIndex();
-
     }
 
     /*!
     Validate the index
     */
-    template<typename WorkSpace>
-    void
-      triple_iterator<WorkSpace>::validateIndex()
+    template<typename _Iterator, typename _Container>
+    void triple_iterator<_Iterator, _Container>::validateIndex()
     {
-      if (index<0 || !W)
-        index=0;
-      else if (index>wsSize)
-        index=wsSize;
-      if (!W)
+      if (m_index<0 || !m_workspace)
+        m_index=0;
+      else if (m_index>m_wsSize)
+        m_index=m_wsSize;
+      if (!m_workspace)
       {
         return;
       }
 
-      if (index != wsSize )
+      if (m_index != m_wsSize )
       {
-        if (index > blockMax || index < blockMin )
+        if (m_index > m_blockMax || m_index < m_blockMin )
         {
-          dataBlockIndex = index/blocksize;
-          blockMin = index - (index % blocksize);
-          blockMax = blockMin + blocksize -1;
+          m_dataBlockIndex = m_index/m_blocksize;
+          m_blockMin = m_index - (m_index % m_blocksize);
+          m_blockMax = m_blockMin + m_blocksize -1;
 
-          it_dataX = W->dataX(dataBlockIndex).begin();
-          it_dataY = W->dataY(dataBlockIndex).begin();
-          it_dataE = W->dataE(dataBlockIndex).begin();
+          it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
+          it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
+          it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
         }
-        CPoint.first  = &(it_dataX[index-blockMin]);
-        CPoint.second = &(it_dataY[index-blockMin]);
-        CPoint.third  = &(it_dataE[index-blockMin]);
+        m_CPoint.first  = &(it_dataX[m_index-m_blockMin]);
+        m_CPoint.second = &(it_dataY[m_index-m_blockMin]);
+        m_CPoint.third  = &(it_dataE[m_index-m_blockMin]);
       }
     }
-
+      
     /*!
     Addition to index 
     \param N :: Number to add
     \return Iterator advanced by N
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>
-      triple_iterator<WorkSpace>::operator+(difference_type N) const
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator+(difference_type N) const
     {
-      triple_iterator<WorkSpace> Out(*this);
+      triple_iterator<_Iterator, _Container> Out(*this);
       Out+=N;
       return Out;
     }
@@ -96,11 +92,10 @@ namespace Mantid
     \param N :: Number to subtract
     \return Iterator decreased by N
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>
-      triple_iterator<WorkSpace>::operator-(difference_type N) const
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator-(difference_type N) const
     {
-      triple_iterator<WorkSpace> Out(*this);
+      triple_iterator<_Iterator, _Container> Out(*this);
       Out-=N;
       return Out;
     }
@@ -110,11 +105,10 @@ namespace Mantid
     \param N :: Number to add to index
     \return *this
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>&
-      triple_iterator<WorkSpace>::operator+=(difference_type N)
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator+=(difference_type N)
     {
-      index+=N;
+      m_index+=N;
       validateIndex();
       return *this;
     }
@@ -124,11 +118,10 @@ namespace Mantid
     \param N :: Number to subtract
     \return *this
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>&
-      triple_iterator<WorkSpace>::operator-=(difference_type N)
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator-=(difference_type N)
     {
-      index-=N;
+      m_index-=N;
       validateIndex();
       return *this;
     }
@@ -137,11 +130,10 @@ namespace Mantid
     Increment iterator (pre)
     \return Iterator
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>&
-      triple_iterator<WorkSpace>::operator++()
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator++()
     {
-      index++;
+      ++m_index;
       validateIndex();
       return *this;
     }
@@ -150,11 +142,10 @@ namespace Mantid
     Decrement iterator (pre)
     \return Iterator 
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>&
-      triple_iterator<WorkSpace>::operator--()
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator--()
     {
-      index--;
+      --m_index;
       validateIndex();
       return *this;
     }
@@ -163,11 +154,10 @@ namespace Mantid
     Increment iterator (post)
     \return Iterator before increment
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>
-      triple_iterator<WorkSpace>::operator++(int) 
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator++(int) 
     {
-      triple_iterator<WorkSpace> Out(*this);
+      triple_iterator<_Iterator, _Container> Out(*this);
       this->operator++();
       return Out;
     }
@@ -176,11 +166,10 @@ namespace Mantid
     Negation iterator (post)
     \return Iterator before decrement
     */
-    template<typename WorkSpace>
-    triple_iterator<WorkSpace>
-      triple_iterator<WorkSpace>::operator--(int) 
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator--(int) 
     {
-      triple_iterator<WorkSpace> Out(*this);
+      triple_iterator<_Iterator, _Container> Out(*this);
       this->operator--();
       return Out;
     }
@@ -189,17 +178,16 @@ namespace Mantid
     Difference iterator
     \return difference (as a non-inclusive count)
     */
-    template<typename WorkSpace>
-    typename triple_iterator<WorkSpace>::difference_type
-      triple_iterator<WorkSpace>::operator-(const triple_iterator<WorkSpace>& A) const
+    template<typename _Iterator, typename _Container>
+    typename triple_iterator<_Iterator, _Container>::difference_type triple_iterator<_Iterator, _Container>::operator-(const triple_iterator<_Iterator, _Container>& A) const
     {
-      if (!W && !A.W)
+      if (!m_workspace && !A.m_workspace)
         return 0;
-      if (!W)                      /// This effectively an end
-        return A.W->size()-A.index;
-      if (!A.W)                    /// A effectively an end
-        return index-W->size();
-      return A.index-index;
+      if (!m_workspace)                      /// This effectively an end
+        return A.m_wsSize-A.m_index;
+      if (!A.m_workspace)                    /// A effectively an end
+        return m_index-m_wsSize;
+      return A.m_index-m_index;
     }
 
 

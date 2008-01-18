@@ -17,7 +17,7 @@ Workspace::Workspace()
 
 /// Copy constructor
 Workspace::Workspace(const Workspace& A)  :
-     _title(A._title),_comment(A._comment)
+     m_title(A.m_title),m_comment(A.m_comment)
 {}
 
 /// Assignment operator
@@ -25,8 +25,8 @@ Workspace& Workspace::operator=(const Workspace& A)
 {
   if (this!=&A)
   {
-    _comment=A._comment;
-    _title=A._title;
+    m_comment=A.m_comment;
+    m_title=A.m_title;
   }	       
   return *this;
 }
@@ -41,7 +41,7 @@ Workspace::~Workspace()
  */
 void Workspace::setTitle(const std::string& t)
 {
-     _title=t;
+     m_title=t;
 }
 /** Set the comment field of the workspace
  * 
@@ -49,7 +49,7 @@ void Workspace::setTitle(const std::string& t)
  */
 void Workspace::setComment(const std::string& c)
 {
-	_comment=c;
+	m_comment=c;
 }
 
 /** Get the workspace title
@@ -58,7 +58,7 @@ void Workspace::setComment(const std::string& c)
  */
 const std::string& Workspace::getTitle() const
 {
-	return _title;
+	return m_title;
 }
 
 /** Get the workspace comment
@@ -67,7 +67,7 @@ const std::string& Workspace::getTitle() const
  */
 const std::string& Workspace::getComment() const
 {
-    return _comment;
+    return m_comment;
 }
 
 /** Get the Instrument associated with this workspace
@@ -76,7 +76,7 @@ const std::string& Workspace::getComment() const
  */
 Instrument& Workspace::getInstrument() 
 {
-	return _instrument;
+	return m_instrument;
 }
 
 /** Get the sample associated with this workspace
@@ -85,7 +85,7 @@ Instrument& Workspace::getInstrument()
  */
 Sample& Workspace::getSample()
 {
-  return _sample;
+  return m_sample;
 }
 
 } // namespace API
@@ -93,7 +93,8 @@ Sample& Workspace::getSample()
 
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::triple_iterator<Mantid::API::Workspace>;
+template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>,Mantid::API::Workspace>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::API::Workspace>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
 

@@ -1,181 +1,185 @@
 #ifndef MANTIDAPI_TRIPLE_ITERATOR_H
 #define MANTIDAPI_TRIPLE_ITERATOR_H
+
 #include <vector>
 #include "MantidKernel/System.h"
-#include "MantidAPI/TripleRef.h"
-
+#include "TripleRef.h"
 
 namespace Mantid
 {
-
 namespace API
 {
-/*!
-  triple_iterator iterates over a workspace providing values as TripleRefs
+/**
+ triple_iterator iterates over a workspace providing values as TripleRefs
 
-  \class triple_iterator
-  \author S. Ansell
-  \date November 2007
-  \version 1.0 
-    
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+ \class triple_iterator
+ \author S. Ansell
+ \date November 2007
+ \version 1.0 
+ 
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
-  This file is part of Mantid.
- 	
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-  
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-  
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
-  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+ This file is part of Mantid.
+ 
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+ 
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template<typename WorkSpace>
-class DLLExport triple_iterator : public std::iterator<std::random_access_iterator_tag,TripleRef<double>,int,
-					     TripleRef<double>*,TripleRef<double>& >
+template<typename _Iterator, typename _Container>
+class DLLExport triple_iterator
 {
- private:
+private:
   ///internal workspace pointer
-  WorkSpace* W;
+  _Container *m_workspace;
   /// pointer to a TripleRef of doubles
-  TripleRef<double> CPoint;
+  TripleRef<double> m_CPoint;
   /// internal index of location within the workspace
-  int index;
+  int m_index;
   ///Internal cache of the workspace size
-  int wsSize;
+  int m_wsSize;
   ///Internal cache of the workspace blocksize
-  int blocksize;
+  int m_blocksize;
 
   ///Internal cache of the current datablock index
-  int dataBlockIndex;
+  int m_dataBlockIndex;
   ///Internal cache of the current datablock index minimum value
-  int blockMin;
+  int m_blockMin;
   ///Internal cache of the current datablock index maximum value
-  int blockMax;
-  ///Internal cache of iterators for current datablock
-  std::vector<double>::iterator it_dataX, it_dataY, it_dataE;
- 
-  ///Validates the inex and updates the current CPoint
-  void validateIndex(); 
+  int m_blockMax;
+  ///Internal cache of X iterator for current datablock
+  std::vector<double>::iterator it_dataX;
+  ///Internal cache of Y iterator for current datablock
+  std::vector<double>::iterator it_dataY;
+  ///Internal cache of E iterator for current datablock
+  std::vector<double>::iterator it_dataE;
 
- public:
+  ///Validates the index and updates the current m_CPoint
+  void validateIndex();
 
-/*
-  typedef TripleRef<double> value_type;
-  typedef TripleRef<double>& reference;
-  typedef TripleRef<double>* pointer;
-  typedef int difference_type;
-  typedef std::random_iterator_tag iterator_category;
-*/
-
-  triple_iterator<WorkSpace>();
-  triple_iterator<WorkSpace>(WorkSpace&);
-  triple_iterator<WorkSpace>(const triple_iterator<WorkSpace>&);
+public:
+  /// @cond
+  typedef typename std::iterator_traits<_Iterator*>::iterator_category iterator_category;
+  typedef typename std::iterator_traits<_Iterator*>::value_type        value_type;
+  typedef typename std::iterator_traits<_Iterator*>::difference_type   difference_type;
+  typedef typename std::iterator_traits<_Iterator*>::reference         reference;
+  typedef typename std::iterator_traits<_Iterator*>::pointer           pointer;
+  /// @endcond
   
-  const TripleRef<double>& operator*() const { return CPoint; }   ///< Base Accessor
-  const TripleRef<double>* operator->() const { return &CPoint; }   ///< Base Pointer accessor
+  triple_iterator();
+  triple_iterator(_Container&);
+  triple_iterator(const triple_iterator&);
 
-  TripleRef<double>& operator*() { return CPoint; }   ///< Base Accessor
-  TripleRef<double>* operator->() { return &CPoint; }   ///< Base Pointer accessor
+  reference operator*() { return m_CPoint; }   ///< Base Accessor
+  pointer operator->() { return &m_CPoint; }   ///< Base Pointer accessor
+  /// Random accessor
+  reference operator[](const difference_type& N)
+  {
+    m_index=N;
+    validateIndex();
+    return m_CPoint;
+  }
   
-  triple_iterator<WorkSpace>& operator++();
-  triple_iterator<WorkSpace> operator++(int);
-  triple_iterator<WorkSpace>& operator--();
-  triple_iterator<WorkSpace> operator--(int);
-  triple_iterator<WorkSpace>& operator+=(difference_type);
-  triple_iterator<WorkSpace>& operator-=(difference_type);
-  triple_iterator<WorkSpace> operator+(difference_type) const;
-  triple_iterator<WorkSpace> operator-(difference_type) const;
-  difference_type operator-(const triple_iterator<WorkSpace>&) const;
-  
-  bool 
-    operator<(const triple_iterator<WorkSpace>& A)  const
-    /*!
-    lessthan operator
-    \param A :: Iterator to compare
-    \return  status
-    */
-  { 
-    if (!W)
+  triple_iterator& operator++();
+  triple_iterator operator++(int);
+  triple_iterator& operator--();
+  triple_iterator operator--(int);
+  triple_iterator& operator+=(difference_type);
+  triple_iterator& operator-=(difference_type);
+  triple_iterator operator+(difference_type) const;
+  triple_iterator operator-(difference_type) const;
+  difference_type operator-(const triple_iterator&) const;
+
+  /*!
+   lessthan operator
+   \param A :: Iterator to compare
+   \return  status
+   */
+  bool operator<(const triple_iterator& A) const
+  {
+    if (!m_workspace)
       return 0;
-    if (!A.W)
+    if (!A.m_workspace)
       return 1;
-    return (index<A.index); 
+    return (m_index<A.m_index);
   }
 
-  bool 
-  operator==(const triple_iterator<WorkSpace>& A)  const
   /*!
-    Equality operator
-    \param A :: Iterator to compare
-    \return equality status
+   Equality operator
+   \param A :: Iterator to compare
+   \return equality status
+   */
+  bool operator==(const triple_iterator& A) const
+  {
+    if (!m_workspace)
+    {
+      if (!A.m_workspace)
+        return 1;
+      return (A.m_wsSize==A.m_index) ? 1 : 0;
+    }
+    if (!A.m_workspace)
+      return (m_wsSize==m_index) ? 1 : 0;
+
+    return (m_index==A.m_index);
+  }
+
+  /*!
+   InEquality operator
+   \param A :: Iterator to compare
+   \return equality status
+   */
+  bool operator!=(const triple_iterator& A) const
+  {
+    return (!(operator==(A)));
+  }
+
+  triple_iterator begin_const() const
+  /*!
+   Begin iterator (Effective copy+set zero)
+   \return beginning iterator
    */
   {
-    if (!W)
-    {
-      if (!A.W)
-        return 1;
-      return (A.wsSize==A.index) ? 1 : 0;
-    }
-    if (!A.W)
-      return (wsSize==index) ? 1 : 0;
-
-    return (index==A.index);
+    triple_iterator Out(*this);
+    Out.m_index=0;
+    Out.validateIndex();
+    return Out;
   }
 
-  bool operator!=(const triple_iterator<WorkSpace>& A)  const
   /*!
-    InEquality operator
-    \param A :: Iterator to compare
-    \return equality status
+   Begin iterator (Set zero)
+   \return beginning iterator
    */
-    {  return (!(operator==(A))); }
+  triple_iterator& begin()
+  {
+    m_index=0;
+    validateIndex();
+    return *this;
+  }
 
-
-  triple_iterator<WorkSpace> begin_const() const
   /*!
-    Begin iterator (Effective copy+set zero)
-    \return beginning iterator
+   End iterator
+   \return Null/end iterator
    */
-    { 
-      triple_iterator<WorkSpace> Out(*this);
-      Out.index=0;
-      Out.validateIndex();
-      return Out;
-    }
- 
-  triple_iterator<WorkSpace>& begin()
-  /*!
-    Begin iterator (Set zero)
-    \return beginning iterator
-   */
-    {
-      index=0;
-      validateIndex();
-      return *this;
-    }
-
-  triple_iterator<WorkSpace>& end() const 
-  /*!
-    End iterator
-    \return Null/end iterator
-  */
-    { 
-      static triple_iterator<WorkSpace> endIter;
-      return endIter; 
-    }
+  triple_iterator& end() const
+  {
+    static triple_iterator endIter;
+    return endIter;
+  }
 
 };
 
-}  // NAMESPACE API
-
-}  // NAMESPACE Mantid
+} // NAMESPACE API
+} // NAMESPACE Mantid
 
 #endif //MANTIDAPI_TRIPLE_ITERATOR_H

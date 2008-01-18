@@ -8,7 +8,7 @@ namespace Mantid
 
 namespace API
 {
-/*!
+/**
   TripleRef of three identical types.
   Class maintians a type first/second/third triple
   similar to std::pair except all are identical

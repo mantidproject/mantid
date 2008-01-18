@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TripleIterator.h"
 #include "MantidKernel/Logger.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -21,7 +22,7 @@ namespace API
 
 /** @class Workspace Workspace.h
  	
- 	  Base Workspace Abstract Class
+ 	  Base Workspace Abstract Class.
  		Not static method create() since this base 
  		object will not be registered with the factory.
 		Requirement: get some kind of support for memmory 
@@ -30,7 +31,7 @@ namespace API
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
  	    
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
  	
     This file is part of Mantid.
  	
@@ -53,6 +54,11 @@ namespace API
 class DLLExport Workspace
 {
 public:
+  /// Typedef for the triple_iterator to use with a Workspace
+  typedef triple_iterator<TripleRef<double>, Workspace> iterator;
+  /// Typedef for the const triple_iterator to use with a Workspace
+  typedef triple_iterator<const TripleRef<double>, Workspace> const_iterator;  
+  
   /// Return the workspace typeID 
 	virtual const std::string id() const = 0;
 
@@ -72,7 +78,7 @@ public:
   ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const  = 0;
   ///Returns the x data
-  virtual std::vector<double>& dataX(int const index) =0;
+  virtual std::vector<double>& dataX(int const index) = 0;
   ///Returns the y data
   virtual std::vector<double>& dataY(int const index)  =0;
   ///Returns the error data
@@ -83,12 +89,11 @@ public:
 
   //Get methods return the histogram number 
   ///Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const =0;
-    ///Returns the y data const
+  virtual const std::vector<double>& dataX(int const index) const = 0;
+  ///Returns the y data const
   virtual const std::vector<double>& dataY(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& dataE(int const index) const =0;
-
 
 protected:
 	Workspace();
@@ -98,14 +103,14 @@ protected:
 private:
 
 	/// The title of the workspace
-	std::string _title;
+	std::string m_title;
 	/// A user-provided comment that is attached to the workspace
-	std::string _comment;
+	std::string m_comment;
 
 	/// The instrument used for this experiment
-	Instrument _instrument;
+	Instrument m_instrument;
 	/// The information on the sample environment
-	Sample _sample;
+	Sample m_sample;
   
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

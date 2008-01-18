@@ -281,7 +281,8 @@ std::vector<double>& Workspace2D::dataE(int const index)
 
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::triple_iterator<Mantid::DataObjects::Workspace2D>;
+template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>, Mantid::DataObjects::Workspace2D>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::DataObjects::Workspace2D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
