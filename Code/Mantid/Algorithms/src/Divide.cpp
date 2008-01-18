@@ -59,8 +59,8 @@ namespace Mantid
       Workspace_sptr out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
 
       Workspace::iterator ti_out(*out_work);
-      Workspace::const_iterator ti_in1(*in_work1);
-      Workspace::const_iterator ti_in2(*in_work2);
+      Workspace::const_iterator ti_in1(*in_work1,boHelper.getRelativeLoopCount(in_work1,in_work2));
+      Workspace::const_iterator ti_in2(*in_work2,boHelper.getRelativeLoopCount(in_work2,in_work1));
       std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Divide_fn());
 
       // Assign it to the output workspace property

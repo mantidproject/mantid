@@ -17,7 +17,7 @@ int main()
 {
 
   FrameworkManager fm;
-  fm.initialize();
+  //fm.initialize();
 
   Benchmark b;
   b.RunPlusTest();

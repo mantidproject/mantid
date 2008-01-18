@@ -70,13 +70,16 @@ using full iterator method  : ~52 seconds
 An identical fortran operation using LIBISIS takes ~0.7 seconds
 
 */
-
-
-
 void Benchmark::RunPlusTest()
 {
+  RunPlusTest(2000,2584);
+}
 
-  int sizex = 2000,sizey=2584;
+
+void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
+{
+  int sizex = detectorCount;
+  int sizey = timeBinCount;
   // Register the workspace in the data service
   AnalysisDataService* ADS = AnalysisDataService::Instance();
 

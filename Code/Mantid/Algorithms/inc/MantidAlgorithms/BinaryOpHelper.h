@@ -53,6 +53,7 @@ public:
 	
   const bool checkSizeCompatability(const API::Workspace_sptr ws1,const API::Workspace_sptr ws2) const;
   const bool checkXarrayCompatability(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const;
+  const int getRelativeLoopCount(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const;
   API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const;
 
 private:

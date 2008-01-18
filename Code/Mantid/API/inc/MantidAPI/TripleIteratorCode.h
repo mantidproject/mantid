@@ -13,7 +13,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator() :
-      m_workspace(0),m_CPoint(),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
+      m_workspace(0),m_CPoint(),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),m_loopCount(1)
     {}
 
     /*!
@@ -23,8 +23,23 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
       m_workspace(&WA),m_CPoint(),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_loopCount(1)
     {
+      validateIndex();
+    }
+
+    /*!
+    Multiple loop workspace based constructor
+    \param WA :: Workspace to take pointer
+    \param loopCount :: The number of time this iterator should loop over the same data before stopping.
+    */
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount) :
+      m_workspace(&WA),m_CPoint(),m_index(0),
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_loopCount(loopCount)
+    {
+      //pretend that the container is long than it is by multiplying its size by the loopcount
+      m_wsSize *= m_loopCount;
       validateIndex();
     }
     
@@ -36,7 +51,7 @@ namespace Mantid
     triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
       m_workspace(A.m_workspace),m_CPoint(),m_index(A.m_index),m_wsSize(A.m_wsSize),
       m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
-      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
+      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE),m_loopCount(A.m_loopCount)
     {
       validateIndex();
     }
@@ -63,6 +78,13 @@ namespace Mantid
           m_dataBlockIndex = m_index/m_blocksize;
           m_blockMin = m_index - (m_index % m_blocksize);
           m_blockMax = m_blockMin + m_blocksize -1;
+
+          //make sure you get the right block if you are looping multiple times
+          if (m_loopCount != 1)
+          {
+            int realWsSize = m_wsSize/m_loopCount;
+            m_dataBlockIndex = (m_index % realWsSize)/m_blocksize;
+          }
 
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();

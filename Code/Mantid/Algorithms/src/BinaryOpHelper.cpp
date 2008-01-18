@@ -68,6 +68,20 @@ namespace Mantid
         return false;
     }
 
+    /** Gets the number of time an iterator over the first workspace would have to loop to perform a full iteration of the second workspace
+    * @param ws1 the first workspace to compare
+    * @param ws2 the second workspace to compare
+    * @returns Integer division of ws2.size()/ws1.size() with a minimum of 1
+    */
+    const int BinaryOpHelper::getRelativeLoopCount(const API::Workspace_sptr ws1, const API::Workspace_sptr ws2) const
+    {
+      int ws1Size = ws1->size();
+      if (ws1Size == 0) return 1;
+      int retVal = ws2->size()/ws1Size;
+      return (retVal == 0)?1:retVal;
+    }
+  
+
 
     /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces
     * @param ws1 the first workspace to compare

@@ -90,12 +90,11 @@ public:
     for(Workspace1D::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
-        (
+      (
         TripleRef<double> tr = *ti;
-      double d1 = tr[0];
-      double d2 = tr[1];
-      double d3 = tr[2];
-      d1++;d2++;d3++;
+        TS_ASSERT_EQUALS(tr[0],workspace->dataX(0)[count]);
+        TS_ASSERT_EQUALS(tr[1],workspace->dataY(0)[count]);
+        TS_ASSERT_EQUALS(tr[2],workspace->dataE(0)[count]);
       )
         count++;
     }
@@ -136,10 +135,10 @@ public:
       TS_ASSERT_THROWS_NOTHING
         (
         TripleRef<double> tr = *ti;
-      double d1 = tr[0];
-      double d2 = tr[1];
-      double d3 = tr[2];
-      d1++;d2++;d3++;
+
+        TS_ASSERT_EQUALS(tr[0],workspace->dataX(0)[count]);
+        TS_ASSERT_EQUALS(tr[1],workspace->dataY(0)[count]);
+        TS_ASSERT_EQUALS(tr[2],workspace->dataE(0)[count]);
       )
         count++;
     }
@@ -157,12 +156,13 @@ public:
     for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
-        (
+      (
         TripleRef<double> tr = *ti;
-      double d1 = tr[0];
-      double d2 = tr[1];
-      double d3 = tr[2];
-      d1++;d2++;d3++;
+        int datablock = count/size;
+        int blockindex = count%size;
+        TS_ASSERT_EQUALS(tr[0],workspace->dataX(datablock)[blockindex]);
+        TS_ASSERT_EQUALS(tr[1],workspace->dataY(datablock)[blockindex]);
+        TS_ASSERT_EQUALS(tr[2],workspace->dataE(datablock)[blockindex]);
       )
         count++;
     }
@@ -220,6 +220,73 @@ public:
     return;
   }
 
+  void testLoopIteratorWorkspace1D()
+  {
+    int size = 13;
+    const int loopCountArrayLength = 6;
+    int loopCountArray[loopCountArrayLength];
+    loopCountArray[0] = 1;
+    loopCountArray[1] = 2;
+    loopCountArray[2] = 3;
+    loopCountArray[3] = 5;
+    loopCountArray[4] = 11;
+    loopCountArray[5] = 0;
+    
+    Wbase workspace = Create1DWorkspace(size);
+
+    for (int i = 0; i < loopCountArrayLength; i++)
+    {
+      int loopCount = loopCountArray[i];
+      int count = 0;
+      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      {
+        TS_ASSERT_THROWS_NOTHING
+        (
+          TripleRef<double> tr = *ti;
+          TS_ASSERT_EQUALS(tr[0],workspace->dataX(0)[count%size]);
+          TS_ASSERT_EQUALS(tr[1],workspace->dataY(0)[count%size]);
+          TS_ASSERT_EQUALS(tr[2],workspace->dataE(0)[count%size]);
+        )
+          count++;
+      }
+      TS_ASSERT_EQUALS(count,size*loopCount);
+    }
+  }
+
+  void testLoopIteratorWorkspace2D()
+  {
+    int size = 57;
+    int histogramCount = 100;
+    Wbase workspace = Create2DWorkspace(histogramCount,size);
+
+    const int loopCountArrayLength = 4;
+    int loopCountArray[loopCountArrayLength];
+    loopCountArray[0] = 1;
+    loopCountArray[1] = 2;
+    loopCountArray[2] = 3;
+    loopCountArray[3] = 0;
+    
+    for (int i = 0; i < loopCountArrayLength; i++)
+    {
+      int loopCount = loopCountArray[i];
+      int count = 0;
+      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      {
+        TS_ASSERT_THROWS_NOTHING
+        (
+          TripleRef<double> tr = *ti;
+          int indexPosition = count%(size*histogramCount);
+          int datablock = indexPosition/size;
+          int blockindex = indexPosition%size;
+          TS_ASSERT_EQUALS(tr[0],workspace->dataX(datablock)[blockindex]);
+          TS_ASSERT_EQUALS(tr[1],workspace->dataY(datablock)[blockindex]);
+          TS_ASSERT_EQUALS(tr[2],workspace->dataE(datablock)[blockindex]);
+        )
+          count++;
+      }
+      TS_ASSERT_EQUALS(count,size*histogramCount*loopCount);
+    }
+  }
 
 };
 #endif /*TRIPLEITERATORTEST_*/

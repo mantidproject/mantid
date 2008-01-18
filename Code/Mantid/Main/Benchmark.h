@@ -47,6 +47,8 @@ public:
 
   /// Runs a timed addition of two workspaces
   void RunPlusTest();
+  /// Runs a timed addition of two workspaces
+  void RunPlusTest(int detectorCount, int timeBinCount);
 
   static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int xlen, int ylen);
 

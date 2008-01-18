@@ -139,6 +139,34 @@ public:
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in7),work_in1,work_in7);
   }
 
+  void testgetRelativeLoopCount()
+  {
+    // Register the workspace in the data service
+    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
+    Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
+    Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
+    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(4,5);
+    Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
+    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
+    Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
+    BinaryOpHelper helper;
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in2),2);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in1),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in2),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in3),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in3,work_in1),10);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in4),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in2),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in5,work_in3),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in3,work_in5),9);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in6,work_in1),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in6),10);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in6,work_in4),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in6),5);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in7,work_in4),1);
+    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in7),1);
+  }
+
 
   void checkOutputWorkspace(Workspace_sptr ws, Workspace_sptr wsIn1,Workspace_sptr wsIn2 ) const
   {
