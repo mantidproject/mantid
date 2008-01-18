@@ -5,6 +5,7 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+#include "boost/algorithm/string.hpp"
 
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/DllOpen.h"
@@ -69,15 +70,18 @@ namespace Kernel
           {
 		//load them
 		LibraryWrapper tmp;
+		
+		//use lower case library name for the map key
+		std::string libNameLower = boost::algorithm::to_lower_copy(libName);
 	  
 		//Check that a libray with this name has not already been loaded
-		if (OpenLibs.find(libName) == OpenLibs.end())
+		if (OpenLibs.find(libNameLower) == OpenLibs.end())
 		{
 			//Try to open the library
 			if (tmp.OpenLibrary(libName,filePath))
 			{		
 				//Successfully opened, so add to map
-				OpenLibs.insert ( std::map< std::string, LibraryWrapper >::value_type(libName, tmp) );
+				OpenLibs.insert ( std::map< std::string, LibraryWrapper >::value_type(libNameLower, tmp) );
 				++libCount;
 			}
 		}
