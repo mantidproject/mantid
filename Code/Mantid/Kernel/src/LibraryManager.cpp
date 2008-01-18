@@ -33,9 +33,7 @@ namespace Kernel
 	/// Destructor
 	LibraryManager::~LibraryManager()
 	{
-		//Clear the map - will automatically call the deconstructor for
-		//the items in it.
-		OpenLibs.clear();
+
 	}
 
   /** Opens all suitable DLLs on a given path
@@ -70,14 +68,19 @@ namespace Kernel
           if (libName != "")
           {
 		//load them
-		LibraryWrapper* tmp = new LibraryWrapper;
+		LibraryWrapper tmp;
 	  
-            if (tmp->OpenLibrary(libName,filePath))
-	    {		
-		    ++libCount;
-		    boost::shared_ptr<LibraryWrapper> pLib(tmp);
-		    OpenLibs.insert ( std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, pLib) );
-	    }
+		//Check that a libray with this name has not already been loaded
+		if (OpenLibs.find(libName) == OpenLibs.end())
+		{
+			//Try to open the library
+			if (tmp.OpenLibrary(libName,filePath))
+			{		
+				//Successfully opened, so add to map
+				OpenLibs.insert ( std::map< std::string, LibraryWrapper >::value_type(libName, tmp) );
+				++libCount;
+			}
+		}
           }
         }
       }

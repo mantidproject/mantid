@@ -68,7 +68,7 @@ private:
 	LibraryManager& operator = (const LibraryManager&);
 
 	///Storage for the LibraryWrappers.
-	std::map< const std::string,  boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
+	std::map< const std::string,  Mantid::Kernel::LibraryWrapper > OpenLibs;
 
 	/// static reference to the logger class
 	static Logger& g_log;
