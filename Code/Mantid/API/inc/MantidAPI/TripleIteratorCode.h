@@ -179,7 +179,7 @@ namespace Mantid
     \return difference (as a non-inclusive count)
     */
     template<typename _Iterator, typename _Container>
-    typename triple_iterator<_Iterator, _Container>::difference_type triple_iterator<_Iterator, _Container>::operator-(const triple_iterator<_Iterator, _Container>& A) const
+    typename std::iterator_traits<_Iterator*>::difference_type triple_iterator<_Iterator, _Container>::operator-(const triple_iterator<_Iterator, _Container>& A) const
     {
       if (!m_workspace && !A.m_workspace)
         return 0;
