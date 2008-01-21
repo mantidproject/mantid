@@ -11,6 +11,10 @@
 #include "PolyFunction.h"
 #include "PolyVar.h"
 
+#ifndef M_PI 
+#define M_PI 3.1415926535897932384626433832795 
+#endif
+
 namespace Mantid
 {
 
@@ -632,8 +636,13 @@ PolyVar<1>::solveQuadratic(std::complex<double>& AnsA,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-  CQ.imag()= (b>=0) ?
+  #ifndef _WIN32
+  CQ.imag() = (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
+#else
+  CQ.imag((b>=0) ? -0.5*sqrt(-cf) : 0.5*sqrt(-cf));
+#endif
+  
   AnsA = CQ;
   AnsB = c/CQ;
   return 2;
