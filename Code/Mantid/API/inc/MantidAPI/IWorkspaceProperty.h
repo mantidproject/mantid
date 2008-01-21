@@ -1,7 +1,7 @@
 #ifndef IWORKSPACEPROPERTY_H_
 #define IWORKSPACEPROPERTY_H_
 
-#include "MantidAPI\Workspace.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
