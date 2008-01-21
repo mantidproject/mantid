@@ -89,12 +89,6 @@ public:
 //	  // Method not implemented yet in Algorithm.cpp (need algorithm factory)
 //	}
 
-  void testSubAlgorithm()
-  {
-    std::vector<Algorithm_sptr>& testVec = alg.subAlgorithms();
-    // Check that the newly created vector is empty
-    TS_ASSERT( testVec.empty() );
-  }
 	
   void testSetPropertyValue()
   {
