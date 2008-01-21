@@ -18,7 +18,6 @@ namespace Mantid
     PropertyManager(),
       m_name("unknown"), 
       m_version("unknown"), 
-      m_subAlgms(),
       m_isInitialized(false), 
       m_isExecuted(false), 
       m_isChildAlgorithm(false)
@@ -30,12 +29,7 @@ namespace Mantid
     {
     }
 
-    /** The identifying name of the algorithm object. This is the name of a 
-    *  particular instantiation of an algorithm object as opposed to the name 
-    *  of the algorithm itself, e.g. "LinearTrackFit" may be the name of a 
-    *  concrete algorithm class, whereas "ApproxTrackFit" and 
-    *  "BestTrackFit" may be two instantiations of the class configured 
-    *  to find tracks with different fit criteria.
+    /** The identifying name of the algorithm object. 
     * 
     *  @return Name of Instance
     */
@@ -76,20 +70,6 @@ namespace Mantid
         catch(std::runtime_error& ex)
         {
           g_log.error()<<"Error initializing main algorithm"<<ex.what();
-          throw;
-        }
-        try
-        {
-          // Now initialize any sub-algorithms
-          std::vector<Algorithm_sptr>::iterator it;
-          for (it = m_subAlgms.begin(); it != m_subAlgms.end(); it++)
-          {
-            (*it)->initialize();
-          }
-        }
-        catch(std::runtime_error& ex)
-        {
-          g_log.error()<<"Error initializing one or several sub-algorithms"<<ex.what();
           throw;
         }
 
@@ -148,7 +128,6 @@ namespace Mantid
           g_log.error()<< "Error in Execution of algorithm "<< m_name<<std::endl;
           if (m_isChildAlgorithm) throw;
         }
-
         catch(std::logic_error& ex)
         {
           g_log.error()<< "Logic Error in Execution of algorithm "<< m_name<<std::endl;
@@ -160,13 +139,9 @@ namespace Mantid
         if (!isChild())
         { this->store();}
 
-        setExecuted(true);
-
-        // NOTE THAT THERE IS NO EXECUTION OF SUB-ALGORITHMS HERE.
-        // THIS HAS TO BE EXPLICITLY DONE BY THE PARENT ALGORITHM'S exec() METHOD.				
+        setExecuted(true);	
       }
       // Gaudi also specifically catches GaudiException & std:exception.
-
       catch (...)
       {
         // Gaudi sets the executed flag to true here despite the exception 
@@ -215,8 +190,6 @@ namespace Mantid
       Algorithm_sptr alg = algManager->createUnmanaged(name);
       //set as a child
       alg->setChild(true);
-      //hold in the internal store to allow this alg to manage it's children
-      m_subAlgms.push_back(alg);
       
       // Initialise the sub-algorithm
       try 
@@ -304,6 +277,6 @@ namespace Mantid
     {
       m_isChildAlgorithm = isChild;
     }
-
+  
   } // namespace API
 } // namespace Mantid

@@ -10,11 +10,34 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+
+class MinusOpTest : public Algorithm
+{
+public:
+
+  MinusOpTest() : Algorithm() {}
+  virtual ~MinusOpTest() {}
+  void init() 
+  {
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));   
+  }
+  void exec() 
+  {
+    Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
+    Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
+
+    Workspace_sptr out_work = in_work1 - in_work2;
+    setProperty("OutputWorkspace",out_work);
+  }
+};
 
 class MinusTest : public CxxTest::TestSuite
 {
@@ -122,6 +145,39 @@ public:
     ADS->remove(wsNameOut);
    
   }
+  
+  void testExec2D2DbyOperatorOverload()
+  {
+    int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+    AnalysisDataService* ADS = AnalysisDataService::Instance();
+    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    Workspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+    MinusOpTest alg;
+
+    std::string wsNameIn1 = "testExec2D2DbyOperatorOverload_in21";
+    std::string wsNameIn2 = "testExec2D2DbyOperatorOverload_in22";
+    std::string wsNameOut = "testExec2D2DbyOperatorOverload_out";
+    ADS->add(wsNameIn1, work_in1);
+    ADS->add(wsNameIn2, work_in2);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace_1",wsNameIn1);
+    alg.setPropertyValue("InputWorkspace_2",wsNameIn2);    
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    Workspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve(wsNameOut));
+
+    checkData(work_in1, work_in2, work_out1);
+
+    ADS->remove(wsNameIn1);
+    ADS->remove(wsNameIn2);
+    ADS->remove(wsNameOut);
+  }
+
+private:
 
   void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)
   {

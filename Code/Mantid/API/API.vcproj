@@ -209,6 +209,10 @@
 				RelativePath=".\src\WorkspaceFactory.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WorkspaceOpOverloads.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -248,6 +252,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IWorkspaceProperty.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\Sample.h"
 				>
 			</File>
@@ -269,6 +277,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceOpOverloads.h"
 				>
 			</File>
 			<File

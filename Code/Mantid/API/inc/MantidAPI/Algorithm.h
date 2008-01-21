@@ -8,6 +8,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Logger.h"
 
@@ -89,22 +90,14 @@ public:
   // Make PropertyManager's setProperty methods public
   using Kernel::PropertyManager::setProperty;
 
+  virtual const std::vector< Property*>& getProperties() const
+  {
+    return Kernel::PropertyManager::getProperties();
+  }
+
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
   void setChild(const bool isChild);
-
-  Algorithm_sptr createSubAlgorithm(const std::string& name);
-
-  /// List of sub-algorithms (const version). Returns a reference to a vector of (sub) Algorithms
-  const std::vector<Algorithm_sptr>& subAlgorithms() const
-  {
-    return m_subAlgms;
-  }
-  /// List of sub-algorithms. Returns a reference to a vector of (sub) Algorithms
-  std::vector<Algorithm_sptr>& subAlgorithms()
-  {
-    return m_subAlgms;
-  }
 
 protected:
 
@@ -114,9 +107,12 @@ protected:
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
 
+  //creates a sub algorithm for use in this algorithm
+  Algorithm_sptr createSubAlgorithm(const std::string& name);
+
   void setInitialized();
   void setExecuted(bool state);
-  
+
 private:
 
   /// Private Copy constructor: NO COPY ALLOWED
@@ -129,7 +125,6 @@ private:
 
   std::string m_name; ///< Algorithm's name for identification
   std::string m_version; ///< Algorithm's version
-  std::vector<Algorithm_sptr> m_subAlgms; ///< Sub algorithms
 
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;
@@ -138,6 +133,7 @@ private:
   bool m_isExecuted; ///< Algorithm is executed flag
 
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
+
 };
 
 } // namespace API
