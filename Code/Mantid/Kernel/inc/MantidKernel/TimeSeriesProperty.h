@@ -94,7 +94,7 @@ public:
 	}
 	
 	/** Add a value to the map
-	 *  @param time The time as a string
+	 *  @param time The time as a string in the format: YYYYMMDDTHHmmss
 	 *  @param value The associated value
 	 *  @return True if insertion successful (i.e. identical time not already in map
 	 */
