@@ -1,11 +1,11 @@
-#ifndef BINARYOPHELPERTEST_H_
-#define BINARYOPHELPERTEST_H_
+#ifndef COMMUTATIVEBINARYOPERATIONTEST_H_
+#define COMMUTATIVEBINARYOPERATIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
 #include "WorkspaceCreationHelper.hh"
-#include "MantidAlgorithms/BinaryOpHelper.h"
+#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TripleRef.h" 
@@ -18,7 +18,32 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class BinaryOpHelperTest : public CxxTest::TestSuite
+ class CommutativeBinaryOpHelper : public CommutativeBinaryOperation
+    {
+    public:
+      /// Default constructor
+      CommutativeBinaryOpHelper() : CommutativeBinaryOperation() {};
+      /// Destructor
+      virtual ~CommutativeBinaryOpHelper() {};
+      const bool checkSizeCompatability(const Workspace_sptr ws1,const Workspace_sptr ws2) const
+      {
+        return CommutativeBinaryOperation::checkSizeCompatability(ws1,ws2);
+      }
+      Workspace_sptr createOutputWorkspace(const Workspace_sptr ws1, const Workspace_sptr ws2) const
+      {
+        return CommutativeBinaryOperation::createOutputWorkspace(ws1,ws2);
+      }
+
+
+
+    private:
+      // Overridden BinaryOperation methods
+      void performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
+        Workspace::iterator it_out)
+      {}
+    };
+
+class CommutativeBinaryOperationTest : public CxxTest::TestSuite
 {
 public:
 
@@ -33,7 +58,7 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
@@ -52,7 +77,7 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
@@ -72,7 +97,7 @@ public:
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
     Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
@@ -91,7 +116,7 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
@@ -110,7 +135,7 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
@@ -130,7 +155,7 @@ public:
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
     Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
-    BinaryOpHelper helper;
+    CommutativeBinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
@@ -138,35 +163,6 @@ public:
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in6),work_in1,work_in6);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in7),work_in1,work_in7);
   }
-
-  void testgetRelativeLoopCount()
-  {
-    // Register the workspace in the data service
-    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
-    Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
-    Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
-    Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(4,5);
-    Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
-    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
-    Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
-    BinaryOpHelper helper;
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in2),2);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in1),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in2),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in3),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in3,work_in1),10);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in2,work_in4),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in2),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in5,work_in3),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in3,work_in5),9);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in6,work_in1),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in1,work_in6),10);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in6,work_in4),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in6),5);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in7,work_in4),1);
-    TS_ASSERT_EQUALS(helper.getRelativeLoopCount(work_in4,work_in7),1);
-  }
-
 
   void checkOutputWorkspace(Workspace_sptr ws, Workspace_sptr wsIn1,Workspace_sptr wsIn2 ) const
   {
@@ -187,4 +183,4 @@ public:
   
 };
 
-#endif /*BINARYOPHELPERTEST_H_*/
+#endif /*COMMUTATIVEBINARYOPERATIONTEST_H_*/

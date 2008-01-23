@@ -19,8 +19,8 @@ int main()
   FrameworkManager fm;
   //fm.initialize();
 
- // Benchmark b;
- // b.RunPlusTest();
+  Benchmark b;
+  b.RunPlusTest();
     
 #if defined _DEBUG
 	//NOTE:  Any code in here is temporory for debugging purposes only, nothing is safe!

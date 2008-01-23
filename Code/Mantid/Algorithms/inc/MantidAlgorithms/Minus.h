@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/TripleRef.h" 
+#include "MantidAlgorithms/BinaryOperation.h"
 
 #include <algorithm>
 #include <functional>
@@ -53,32 +54,25 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
 
-    class DLLExport Minus : public API::Algorithm
+    class DLLExport Minus : public BinaryOperation
     {
     public:
       /// Default constructor
-      Minus() : API::Algorithm() {};
+      Minus() : BinaryOperation() {};
       /// Destructor
       virtual ~Minus() {};
 
     private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
+      // Overridden BinaryOperation methods
+      void performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
+        API::Workspace::iterator it_out);
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 
-      class Minus_fn : public std::binary_function<API::TripleRef<double>,API::TripleRef<double>,API::TripleRef<double> >
+      class Minus_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
         API::TripleRef<double> operator()(const API::TripleRef<double>&,const API::TripleRef<double>&);
-      private:
-        ///The X value of the first TripleRef
-        double xvalue;
-        ///Temporary cache of calculated signal value
-        double ret_sig;
-        ///Temporary cache of calculated error value
-        double ret_err;
       };
 
     };

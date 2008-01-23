@@ -83,8 +83,8 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   // Register the workspace in the data service
   AnalysisDataService* ADS = AnalysisDataService::Instance();
 
-  Workspace2D_sptr work_in3 = Create2DWorkspace123(sizex,sizey);
-  Workspace2D_sptr work_in4 = Create2DWorkspace154(sizex,sizey);
+  Workspace_sptr work_in3 = Create2DWorkspace123(sizex,sizey);
+  Workspace_sptr work_in4 = Create2DWorkspace154(sizex,sizey);
 
   ADS->add("test_in11", work_in3);
   ADS->add("test_in12", work_in4);

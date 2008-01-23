@@ -166,7 +166,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\BinaryOpHelper.cpp"
+				RelativePath=".\src\BinaryOperation.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CommutativeBinaryOperation.cpp"
 				>
 			</File>
 			<File
@@ -204,7 +208,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\BinaryOpHelper.h"
+				RelativePath=".\inc\MantidAlgorithms\BinaryOperation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CommutativeBinaryOperation.h"
 				>
 			</File>
 			<File

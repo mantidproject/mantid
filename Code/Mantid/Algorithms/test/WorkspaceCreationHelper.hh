@@ -25,7 +25,22 @@ public:
 
     FibSeries() : x1(1),x2(1) {}
     T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
-  };
+  }; 
+  
+  static Workspace1D_sptr Create1DWorkspaceRand(int size)
+  {
+    std::vector<double> x1(size,1),y1,e1;
+    //   x1.resize(size);
+    //   std::generate(x1.begin(),x1.end(),rand);	
+    y1.resize(size);
+    std::generate(y1.begin(),y1.end(),rand);
+    e1.resize(size);
+    std::generate(e1.begin(),e1.end(),rand);
+    Workspace1D_sptr retVal(new Workspace1D);
+    retVal->setX(x1);
+    retVal->setData(y1,e1);
+    return retVal;
+  }
 
   static Workspace1D_sptr Create1DWorkspaceFib(int size)
   {

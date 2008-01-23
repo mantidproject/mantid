@@ -13,7 +13,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator() :
-      m_workspace(0),m_CPoint(),m_loopCount(1),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
+      m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
     {}
 
     /*!
@@ -22,7 +22,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
-      m_workspace(&WA),m_CPoint(),m_loopCount(1),m_index(0),
+      m_workspace(&WA),m_CPoint(),m_loopCount(1),m_index(0),m_loopOrientation(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
       validateIndex();
@@ -35,10 +35,26 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount) :
-      m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_index(0),
+      m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
-      //pretend that the container is long than it is by multiplying its size by the loopcount
+      //pretend that the container is longer than it is by multiplying its size by the loopcount
+      m_wsSize *= m_loopCount;
+      validateIndex();
+    }
+
+    /*!
+    Multiple loop workspace based constructor also specifying the loop orientation
+    \param WA :: Workspace to take pointer
+    \param loopCount :: The number of time this iterator should loop over the same data before stopping.
+    \param loopOrientation :: true = vertical, false = horizontal.
+    */
+    template<typename _Iterator, typename _Container>
+    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
+      m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(loopOrientation),m_index(0),
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
+    {
+      //pretend that the container is longer than it is by multiplying its size by the loopcount
       m_wsSize *= m_loopCount;
       validateIndex();
     }
@@ -49,7 +65,8 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
-      m_workspace(A.m_workspace),m_CPoint(),m_loopCount(A.m_loopCount),m_index(A.m_index),m_wsSize(A.m_wsSize),
+      m_workspace(A.m_workspace),m_CPoint(),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
+      m_index(A.m_index),m_wsSize(A.m_wsSize),
       m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
       it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
     {
@@ -82,17 +99,41 @@ namespace Mantid
           //make sure you get the right block if you are looping multiple times
           if (m_loopCount != 1)
           {
-            int realWsSize = m_wsSize/m_loopCount;
-            m_dataBlockIndex = (m_index % realWsSize)/m_blocksize;
+            if (m_loopOrientation)
+            {
+              //vertical Orientation we want to loop over each index value loopcount times.
+              m_dataBlockIndex = m_index/(m_blocksize*m_loopCount);
+              m_blockMin = m_index - (m_index % (m_blocksize*m_loopCount));
+              m_blockMax = m_blockMin + (m_blocksize*m_loopCount) -1;
+            }
+            else
+            {
+              //Horizontal Orientation we want to loop over the same datablock loopcount times.
+              int realWsSize = m_wsSize/m_loopCount;
+              m_dataBlockIndex = (m_index % realWsSize)/m_blocksize;
+            }
           }
 
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
         }
-        m_CPoint.first  = &(it_dataX[m_index-m_blockMin]);
-        m_CPoint.second = &(it_dataY[m_index-m_blockMin]);
-        m_CPoint.third  = &(it_dataE[m_index-m_blockMin]);
+        if ((m_loopCount != 1) && (m_loopOrientation))
+        {
+          //vertical Orientation we want to loop over each index value loopcount times.
+          // and never change the blockindex
+          int interatorPos = (m_index-m_blockMin)/m_loopCount;
+          m_CPoint.first  = &(it_dataX[interatorPos]);
+          m_CPoint.second = &(it_dataY[interatorPos]);
+          m_CPoint.third  = &(it_dataE[interatorPos]);
+        }
+        else
+        {
+          int interatorPos = m_index-m_blockMin;
+          m_CPoint.first  = &(it_dataX[interatorPos]);
+          m_CPoint.second = &(it_dataY[interatorPos]);
+          m_CPoint.third  = &(it_dataE[interatorPos]);
+        }
       }
     }
       

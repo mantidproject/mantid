@@ -177,6 +177,38 @@ public:
     ADS->remove(wsNameOut);
    
   }  
+
+  void testExec1DRand2DVertical()
+  {
+    int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+    AnalysisDataService* ADS = AnalysisDataService::Instance();
+    Workspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizey);
+    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+    Multiply alg;
+
+    std::string wsName1 = "test_in1D2Dv1";
+    std::string wsName2 = "test_in1D2Dv2";
+    std::string wsNameOut = "test_out1D2Dv";
+    ADS->add(wsName1, work_in1);
+    ADS->add(wsName2, work_in2);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace_1",wsName1);
+    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    Workspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve(wsNameOut));
+
+    checkData(work_in1, work_in2, work_out1,LoopOrientation::Vertical);
+
+    ADS->remove(wsName1);
+    ADS->remove(wsName2);
+    ADS->remove(wsNameOut);
+  }
+
   
   void testExec2D2DbyOperatorOverload()
   {
@@ -210,8 +242,14 @@ public:
   }
 
 private:
-
   void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)
+  {
+    //default to a horizontal loop orientation
+    checkData(work_in1,work_in2,work_out1,0);
+  }
+
+  // loopOrientation 0=Horizontal, 1=Vertical
+  void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1, int loopOrientation)
   {
     int ws2LoopCount;
     if (work_in2->size() > 0)
@@ -222,20 +260,33 @@ private:
 
     for (int i = 0; i < work_out1->size(); i++)
     {
-      checkDataItem(work_in1,work_in2,work_out1,i,i/ws2LoopCount);
+      int ws2Index = i;
+    
+      if (ws2LoopCount > 1)
+      {
+        if (loopOrientation == 0)
+        {
+          ws2Index = i%ws2LoopCount;
+        }
+        else
+        {
+          ws2Index = i/ws2LoopCount;
+        }
+      }
+      checkDataItem(work_in1,work_in2,work_out1,i,ws2Index);
     }
   }
 
   void checkDataItem (Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1, int i, int ws2Index)
   {
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      double sig2 = work_in2->dataY(ws2Index/work_in1->blocksize())[ws2Index%work_in1->blocksize()];
+      double sig2 = work_in2->dataY(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
       double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       TS_ASSERT_DELTA(work_in1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()],
         work_out1->dataX(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
       TS_ASSERT_DELTA(sig1 * sig2, sig3, 0.0001);
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      double err2 = work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in1->blocksize()]; 
+      double err2 = work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()]; 
       // (Sa/a)2 + (Sb/b)2 = (Sc/c)2 
       //  So after taking proportions, squaring, summing, 
       //  and taking the square root, you get a proportional error to the product c. Multiply that proportional error by c to get the actual standard deviation Sc. 

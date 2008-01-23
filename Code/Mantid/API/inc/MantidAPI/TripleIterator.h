@@ -47,6 +47,8 @@ private:
   TripleRef<double> m_CPoint;
   ///The number of times this iterator should loop before ending
   int m_loopCount;
+  ///The number of times this iterator should loop before ending
+  const unsigned int m_loopOrientation;
   /// internal index of location within the workspace
   int m_index;
   ///Internal cache of the workspace size
@@ -82,6 +84,7 @@ public:
   triple_iterator();
   triple_iterator(_Container&);
   triple_iterator(_Container&, int loopCount);
+  triple_iterator(_Container&, int loopCount, const unsigned int loopOrientation);
   triple_iterator(const triple_iterator&);
 
   reference operator*() { return m_CPoint; }   ///< Base Accessor
@@ -181,6 +184,18 @@ public:
   }
 
 };
+
+/// Describes the orientation of the looping when using a looping iterator
+struct LoopOrientation
+{
+  /// Enum giving the possible orientations
+  enum
+  { 
+    Horizontal=0,    ///< Iterate repeatedly over a horizontal workspace
+    Vertical=1       ///< Iterate repeatedly over a vertical workspace
+  };
+};
+
 
 } // NAMESPACE API
 } // NAMESPACE Mantid

@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/Minus.h"
-#include "MantidAlgorithms/BinaryOpHelper.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
@@ -11,10 +10,8 @@
 
 // Register the class into the algorithm factory
 DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Minus)
-using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-
 namespace Mantid
 {
   namespace Algorithms
@@ -22,51 +19,10 @@ namespace Mantid
     // Get a reference to the logger
     Logger& Minus::g_log = Logger::get("Minus");
 
-    /** Initialisation method. 
-    * Defines input and output workspaces
-    * 
-    */
-    void Minus::init()
+    void Minus::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
+        API::Workspace::iterator it_out)
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));    
-    }
-
-    /** Executes the algorithm
-    * 
-    *  @throw runtime_error Thrown if algorithm cannot execute
-    */
-    void Minus::exec()
-    {
-      // get input workspace, dynamic cast not needed
-      Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
-      Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
-
-      //create a BinaryOpHelper
-      BinaryOpHelper boHelper;
-      if (!boHelper.checkSizeCompatability(in_work1,in_work2))
-      {
-        throw std::invalid_argument("The size of the two workspaces are not compatible for algorithm plus"  );
-      }
-
-      if (!boHelper.checkXarrayCompatability(in_work1,in_work2))
-      {
-        g_log.error("The x arrays of the workspaces are not identical");
-        throw std::invalid_argument("The x arrays of the workspaces are not identical");
-      }
-
-      Workspace_sptr out_work = boHelper.createOutputWorkspace(in_work1,in_work2);
-
-      Workspace::iterator ti_out(*out_work);
-      Workspace::const_iterator ti_in1(*in_work1,boHelper.getRelativeLoopCount(in_work1,in_work2));
-      Workspace::const_iterator ti_in2(*in_work2,boHelper.getRelativeLoopCount(in_work2,in_work1));
-      std::transform(ti_in1.begin(),ti_in1.end(),ti_in2.begin(),ti_out.begin(),Minus_fn());
-
-      // Assign it to the output workspace property
-      setProperty("OutputWorkspace",out_work);
-
-      return;
+      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Minus_fn());
     }
 
 
@@ -78,11 +34,11 @@ namespace Mantid
     TripleRef<double>
       Minus::Minus_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
     {     
-      xvalue=a[0];
+      ret_x=a[0];
       ret_sig=a[1]-b[1];
       //gaussian errors for the moment
       ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
-      return TripleRef<double>(xvalue,ret_sig,ret_err);      
+      return TripleRef<double>(ret_x,ret_sig,ret_err);      
     }
   }
 }

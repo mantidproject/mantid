@@ -1,5 +1,5 @@
-#ifndef PLUSTEST_H_
-#define PLUSTEST_H_
+#ifndef CHAINEDOPERATORTEST_H_
+#define CHAINEDOPERATORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
@@ -103,4 +103,4 @@ private:
   
 };
 
-#endif /*PLUSTEST_H_*/
+#endif /*CHAINEDOPERATORTEST_H_*/

@@ -1,13 +1,12 @@
-#ifndef MANTID_ALGORITHM_PLUS_H_
-#define MANTID_ALGORITHM_PLUS_H_
+#ifndef MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_
+#define MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/TripleRef.h" 
-#include "MantidAlgorithms/CommutativeBinaryOperation.h"
 
 #include <algorithm>
 #include <functional>
@@ -17,23 +16,21 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    /** @class CommutativeBinaryOperation CommutativeBinaryOperation.h Algorithms/CommutativeBinaryOperation.h
 
-    /** @class Plus Plus.h Algorithms/Plus.h
 
-
-    Plus performs the difference of two input workspaces.
-    It inherits from the Algorithm class, and overrides
-    the init() & exec() methods.
+    CommutativeBinaryOperation supports commutative binary operations on two input workspaces.
+    It inherits from the binaryoperation class.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace1 - The name of the workspace </LI>
     <LI> InputWorkspace2 - The name of the workspace </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the added data </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
     </UL>
 
-    @author Dickon Champion, RAL
-    @date 12/12/2007
+    @author Nick Draper
+    @date 14/12/2007
 
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
@@ -55,31 +52,25 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
 
-    class DLLExport Plus : public CommutativeBinaryOperation
+    class DLLExport CommutativeBinaryOperation : public BinaryOperation
     {
     public:
       /// Default constructor
-      Plus() : CommutativeBinaryOperation() {};
+      CommutativeBinaryOperation() : BinaryOperation() {};
       /// Destructor
-      virtual ~Plus() {};
+      virtual ~CommutativeBinaryOperation() {};
+
+    protected:
+      // Overridden BinaryOperation methods
+      virtual const bool checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const;
+      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
 
     private:
-      // Overridden BinaryOperation methods
-      void performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
-        API::Workspace::iterator it_out);
-
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
-
-      class Plus_fn : public BinaryOperation::BinaryOperation_fn
-      {
-      public:
-        API::TripleRef<double> operator()(const API::TripleRef<double>&,const API::TripleRef<double>&);
-      };
-
     };
 
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_PLUS_H_*/
+#endif /*MANTID_ALGORITHM_COMMUTATIVEBINARYOPERATION_H_*/
