@@ -389,6 +389,7 @@ public:
 	int readFromFile(const char* filename);
 	int writeToFile(const char* filename);
 	int printInfo(std::ostream& os);
+	int getTimeChannels(float* rtcb1, int n);
 };
 
 

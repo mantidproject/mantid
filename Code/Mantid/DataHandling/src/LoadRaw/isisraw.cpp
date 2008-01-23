@@ -1105,3 +1105,27 @@ ISISRAW::~ISISRAW()
     }
     delete[] logsect.lines;
 }
+
+// rtcb1 is of size t_ntc1+1
+int ISISRAW::getTimeChannels(float* rtcb1, int n)
+{
+    if (n != t_ntc1+1)
+    {
+	return -1;
+    }
+    float extra;
+    if (frmt_ver_no > 1)
+    {
+	extra = 4 * daep.a_delay; // add on frame sync delay
+    }
+    else
+    {
+	extra = 0.0;		  // old files did not have this
+    }
+    int i;
+    for(i=0; i<t_ntc1+1; i++)
+    {
+	rtcb1[i] = t_tcb1[i] * t_pre1 / 32.0 + extra;
+    }
+    return 0;
+}

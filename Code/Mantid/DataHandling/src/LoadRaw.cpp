@@ -66,6 +66,7 @@ namespace DataHandling
     // Read in the time bin boundaries 
     lengthIn = channelsPerSpectrum + 1;    
     float* timeChannels = new float[lengthIn];
+    iraw.getTimeChannels(timeChannels, lengthIn);
     // Put the read in array into a vector (inside a shared pointer)
     boost::shared_ptr<std::vector<double> > timeChannelsVec
                      (new std::vector<double>(timeChannels, timeChannels + lengthIn));
