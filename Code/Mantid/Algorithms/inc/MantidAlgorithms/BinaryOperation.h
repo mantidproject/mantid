@@ -72,8 +72,8 @@ namespace Mantid
       virtual const bool checkXarrayCompatability(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
       virtual const int getRelativeLoopCount(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
       virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
-      API::Workspace::const_iterator BinaryOperation::createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
-      unsigned int BinaryOperation::getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
+      API::Workspace::const_iterator createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
+      unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
     
       
       class BinaryOperation_fn : public std::binary_function<API::TripleRef<double>,API::TripleRef<double>,API::TripleRef<double> >
