@@ -12,6 +12,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -20,12 +21,16 @@ namespace Mantid
 namespace API
 {
 
+	FrameworkManager* FrameworkManager::m_instance = 0;
   Kernel::Logger& FrameworkManager::g_log = Kernel::Logger::get("FrameworkManager");
 
-//----------------------------------------------------------------------
-// Public member functions
-//----------------------------------------------------------------------
-		
+/// Get an instance of FrameworkManager if it already exists, else creates a new object.
+	FrameworkManager* FrameworkManager::Instance()
+	{
+		if (!m_instance) m_instance=new FrameworkManager;
+		return m_instance;
+	}
+	
 /// Default constructor
 FrameworkManager::FrameworkManager()
 {
@@ -41,6 +46,7 @@ void FrameworkManager::initialize()
 {
   // Required services are: the config service, the algorithm manager
   //     the analysis data service, the workspace factory
+	
   config = Kernel::ConfigService::Instance();
   algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
@@ -48,10 +54,8 @@ void FrameworkManager::initialize()
 
   config->loadConfig("Mantid.properties");
   std::string pluginDir = config->getString("plugins.directory");
-	
   libManager = Mantid::Kernel::LibraryManager::Instance();
   libManager->OpenAllLibraries(pluginDir, false);
-	
   return;
 }
 

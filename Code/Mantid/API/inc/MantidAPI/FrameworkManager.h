@@ -62,11 +62,12 @@ class AnalysisDataService;
 class DLLExport FrameworkManager
 {
 public:
-
-  FrameworkManager();
-  virtual ~FrameworkManager();	
 	
-	/// Creates all of the required services
+  static FrameworkManager* Instance();
+
+  virtual ~FrameworkManager();	
+
+/// Creates all of the required services
   void initialize();
 
   /// Clears all memory associated with the AlgorithmManager 
@@ -85,6 +86,16 @@ public:
 	Workspace* getWorkspace(const std::string& wsName);
 	
 private:
+	
+ ///Private Constructor
+	FrameworkManager();
+	/// Private copy constructor - NO COPY ALLOWED
+	FrameworkManager(const FrameworkManager&);
+	/// Private assignment operator - NO ASSIGNMENT ALLOWED
+	FrameworkManager& operator = (const FrameworkManager&);
+  
+  /// Pointer to the instance
+  static FrameworkManager* m_instance;
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
