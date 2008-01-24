@@ -45,6 +45,8 @@ namespace Kernel
 	int LibraryManager::OpenAllLibraries(const std::string& filePath, bool isRecursive)
   {
     int libCount = 0;
+	  
+	  std::cout << "In Open all libs\n";
 
     //validate inputs
     if ( fs::exists( filePath ) )
@@ -69,7 +71,7 @@ namespace Kernel
           if (libName != "")
           {
 		//load them
-		LibraryWrapper tmp;
+		LibraryWrapper* tmp = new LibraryWrapper; 
 		
 		//use lower case library name for the map key
 		std::string libNameLower = boost::algorithm::to_lower_copy(libName);
@@ -77,11 +79,13 @@ namespace Kernel
 		//Check that a libray with this name has not already been loaded
 		if (OpenLibs.find(libNameLower) == OpenLibs.end())
 		{
+			std::cout << libName << '\n';
 			//Try to open the library
-			if (tmp.OpenLibrary(libName,filePath))
+			if (tmp->OpenLibrary(libName,filePath))
 			{		
 				//Successfully opened, so add to map
-				OpenLibs.insert ( std::map< std::string, LibraryWrapper >::value_type(libNameLower, tmp) );
+				boost::shared_ptr<LibraryWrapper> pLib(tmp); 
+	 	                OpenLibs.insert ( std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, pLib) ); 
 				++libCount;
 			}
 		}
