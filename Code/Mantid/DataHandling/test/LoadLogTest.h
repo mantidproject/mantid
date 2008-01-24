@@ -28,8 +28,8 @@ public:
   LoadLogTest()
   {	
 	  //initialise framework manager to allow logging
-	  FrameworkManager manager;
-	  manager.initialize();
+	 FrameworkManager* manager=Mantid::API::FrameworkManager::Instance();
+	manager->initialize();
   }
   void testInit()
   {
