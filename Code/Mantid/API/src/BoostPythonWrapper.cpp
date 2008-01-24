@@ -168,8 +168,7 @@ BOOST_PYTHON_MODULE(libMantidAPI)
         .def("isExecuted", pure_virtual(&Mantid::API::IAlgorithm::isExecuted))
     ;
 		
-    class_< Mantid::API::FrameworkManager >("FrameworkManager", init<  >())
-        .def(init< const Mantid::API::FrameworkManager& >())
+    class_< Mantid::API::FrameworkManager, boost::noncopyable >("FrameworkManager", no_init)
         .def("initialize", &Mantid::API::FrameworkManager::initialize)
         .def("clear", &Mantid::API::FrameworkManager::clear)
         .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::API::FrameworkManager::*)(const std::string&) )&Mantid::API::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >())
