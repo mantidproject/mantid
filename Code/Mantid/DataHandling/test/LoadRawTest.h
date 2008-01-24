@@ -69,6 +69,8 @@ public:
     TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataE(999)[777], 3);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
     
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly

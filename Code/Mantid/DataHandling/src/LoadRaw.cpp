@@ -93,6 +93,7 @@ namespace DataHandling
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       m_localWorkspace->setData(i-1, v, e);
+      m_localWorkspace->setX(i-1, timeChannelsVec);
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
