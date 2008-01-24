@@ -32,10 +32,10 @@ public:
   {
 	try
 	{
-		Mantid::API::FrameworkManager manager;
-		manager.initialize();
+		Mantid::API::FrameworkManager* manager = Mantid::API::FrameworkManager::Instance();
+		manager->initialize();
 	  
-		Mantid::API::IAlgorithm* alg= manager.createAlgorithm("HelloWorldAlgorithm");
+		Mantid::API::IAlgorithm* alg= manager->createAlgorithm("HelloWorldAlgorithm");
 	  
 		TS_ASSERT_THROWS_NOTHING(alg->execute());			
 	
