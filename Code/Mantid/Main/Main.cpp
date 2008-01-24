@@ -16,8 +16,8 @@ using namespace Mantid::Algorithms;
 int main()
 {
 
-  FrameworkManager fm;
-  //fm.initialize();
+  FrameworkManager* fm = FrameworkManager::Instance();
+  //fm->initialize();
 
   Benchmark b;
   b.RunPlusTest();
