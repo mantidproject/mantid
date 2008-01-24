@@ -45,8 +45,6 @@ namespace Kernel
 	int LibraryManager::OpenAllLibraries(const std::string& filePath, bool isRecursive)
   {
     int libCount = 0;
-	  
-	  std::cout << "In Open all libs\n";
 
     //validate inputs
     if ( fs::exists( filePath ) )
@@ -79,11 +77,12 @@ namespace Kernel
 		//Check that a libray with this name has not already been loaded
 		if (OpenLibs.find(libNameLower) == OpenLibs.end())
 		{
-			std::cout << libName << '\n';
+			g_log.debug("Trying to open library: " + libName + "...");
 			//Try to open the library
 			if (tmp->OpenLibrary(libName,filePath))
 			{		
 				//Successfully opened, so add to map
+				g_log.debug("Opened library: " + libName + ".");
 				boost::shared_ptr<LibraryWrapper> pLib(tmp); 
 	 	                OpenLibs.insert ( std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, pLib) ); 
 				++libCount;
