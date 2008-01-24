@@ -13,6 +13,7 @@ print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
 uppath=os.path.abspath('../')
 
+libList = []
 env = Environment(ENV=os.environ)
 #printn 'Configuting for ',env['PLATFORM']
 #
@@ -21,10 +22,11 @@ if not env.GetOption('clean'): # do not re-reun checking on a "scons -c"
     conf = Configure(env)
     if conf.CheckLib('boost_filesystem-gcc41', '_ZN5boost10filesystem6nativeERKSs') :
 	boost_append = '-gcc41'
+    if conf.CheckLib('NeXus', 'nxiopen_') :
+	libList.append('NeXus')
     env = conf.Finish()
 
 libDirList = [uppath,cwdpath ]
-libList = []
 cflags = []
 dirList = []
 cppPaths = []

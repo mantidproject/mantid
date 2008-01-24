@@ -7,6 +7,7 @@ import MantidBuild
 codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder) 
 listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/LoadRaw'))
+listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/LoadNeXus'))
 
 #Import environment
 Import('env')
