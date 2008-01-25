@@ -179,6 +179,11 @@ namespace Mantid
       return errorHelper; 
     }
 
+    template<typename T>
+    const int& TripleRef<T>::Detector() const
+    {
+      return detector; 
+    }
 
     /// \cond TEMPLATE
 

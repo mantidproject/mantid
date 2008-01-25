@@ -16,7 +16,8 @@ namespace API
 
 /** @class GaussianErrorHelper GaussianErrorHelper.h Kernel/GaussianErrorHelper.h
 
-    A helper class for calculating the error values using Gaussian errors
+    A helper class for calculating the error values using Gaussian errors.
+    WARNING:  This class is NOT thread safe.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 24/01/2008
@@ -63,9 +64,15 @@ private:
 	// Private constructor & destructor for singleton class
 	GaussianErrorHelper();
 	static GaussianErrorHelper* m_instance; ///< Pointer to the GaussianErrorHelper instance
-	
   /// Static reference to the logger class
 	static Kernel::Logger& g_log;
+
+  //internal X value cache to prevent scope issures when returning a tripleref
+  mutable double xVal;
+  //internal Y value cache to prevent scope issures when returning a tripleref
+  mutable double yVal;
+  //internal E value cache to prevent scope issures when returning a tripleref
+  mutable double err;
 };
 
 } // namespace Kernel
