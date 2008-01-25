@@ -66,7 +66,7 @@ int Workspace1D::blocksize() const
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>, Mantid::DataObjects::Workspace1D>;
-template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::DataObjects::Workspace1D>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>, const Mantid::DataObjects::Workspace1D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace1D>;
 

@@ -1,6 +1,9 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACE2D_H_
 #define MANTID_DATAOBJECTS_WORKSPACE2D_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Histogram1D.h"
@@ -48,7 +51,7 @@ public:
   /// Typedef for the triple_iterator to use with a Workspace2D
   typedef API::triple_iterator<API::TripleRef<double>, Workspace2D> iterator;
   /// Typedef for the const triple_iterator to use with a Workspace2D
-  typedef API::triple_iterator<const API::TripleRef<double>, Workspace2D> const_iterator;  
+  typedef API::triple_iterator<const API::TripleRef<double>, const Workspace2D> const_iterator;  
   
   /**
 	Gets the name of the workspace type
@@ -61,19 +64,19 @@ public:
   Workspace2D& operator=(const Workspace2D&);
   virtual ~Workspace2D();
 
-  void setHistogramNumber(int const);
+  virtual void setHistogramNumber(int const);
 
-  void setX(int const, const std::vector<double>&);
-  void setData(int const, const std::vector<double>&);
-  void setData(int const, const std::vector<double>&, const std::vector<double>&);
-  void setX(int const, const Histogram1D::RCtype&);
-  void setX(int const, const Histogram1D::RCtype::ptr_type&);
-  void setData(int const, const Histogram1D::RCtype&);
-  void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
+  virtual void setX(int const, const std::vector<double>&);
+  virtual void setData(int const, const std::vector<double>&);
+  virtual void setData(int const, const std::vector<double>&, const std::vector<double>&);
+  virtual void setX(int const, const Histogram1D::RCtype&);
+  virtual void setX(int const, const Histogram1D::RCtype::ptr_type&);
+  virtual void setData(int const, const Histogram1D::RCtype&);
+  virtual void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
+  virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
   
   /// Returns the histogram number
-  const int getHistogramNumber() const;
+  virtual const int getHistogramNumber() const;
 
   //section required for iteration
   virtual int size() const;       
@@ -93,7 +96,7 @@ public:
   /// Returns the error const 
   virtual const std::vector<double>& dataE(int const index) const;
 
-  long int getMemorySize() const;
+  virtual long int getMemorySize() const;
 
 };
 

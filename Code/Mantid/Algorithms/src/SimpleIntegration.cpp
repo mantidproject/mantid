@@ -56,9 +56,9 @@ void SimpleIntegration::exec()
   m_MaxX = getProperty("EndX");
   m_MinY = getProperty("StartY");
   m_MaxY = getProperty("EndY");
-  
+
   // Get the input workspace
-  const Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
   
   const int numberOfYBins = localworkspace->getHistogramNumber();
   // Check 'StartX' is in range 0-numberOfSpectra
@@ -118,14 +118,14 @@ void SimpleIntegration::exec()
   
   // Create the 1D workspace for the output
   API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-  Workspace1D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace1D>(factory->create("Workspace1D"));
+  Workspace1D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace1D>(factory->create("Workspace1D"));
 
   // Populate the 1D workspace
-  localWorkspace->setX(detectorNumber);
-  localWorkspace->setData(sums, errors);
+  outputWorkspace->setX(detectorNumber);
+  outputWorkspace->setData(sums, errors);
   
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace",localWorkspace);
+  setProperty("OutputWorkspace",outputWorkspace);
   
   return;  
 }

@@ -22,7 +22,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
-      m_workspace(&WA),m_CPoint(),m_loopCount(1),m_index(0),m_loopOrientation(0),
+      m_workspace(&WA),m_CPoint(),m_loopCount(1),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
     {
       validateIndex();
@@ -118,22 +118,21 @@ namespace Mantid
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
         }
+        int iteratorPos;
         if ((m_loopCount != 1) && (m_loopOrientation))
         {
           //vertical Orientation we want to loop over each index value loopcount times.
           // and never change the blockindex
-          int interatorPos = (m_index-m_blockMin)/m_loopCount;
-          m_CPoint.first  = &(it_dataX[interatorPos]);
-          m_CPoint.second = &(it_dataY[interatorPos]);
-          m_CPoint.third  = &(it_dataE[interatorPos]);
+          iteratorPos = (m_index-m_blockMin)/m_loopCount;
         }
         else
         {
-          int interatorPos = m_index-m_blockMin;
-          m_CPoint.first  = &(it_dataX[interatorPos]);
-          m_CPoint.second = &(it_dataY[interatorPos]);
-          m_CPoint.third  = &(it_dataE[interatorPos]);
+          iteratorPos = m_index-m_blockMin;
         }
+        // const_cast is needed for the const_iterator (does nothing otherwise)
+        m_CPoint.first  = const_cast<double*>(&(it_dataX[iteratorPos]));
+        m_CPoint.second = const_cast<double*>(&(it_dataY[iteratorPos]));
+        m_CPoint.third  = const_cast<double*>(&(it_dataE[iteratorPos]));
       }
     }
       

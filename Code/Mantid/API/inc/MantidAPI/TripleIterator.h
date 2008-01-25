@@ -42,9 +42,10 @@ class DLLExport triple_iterator
 {
 private:
   ///internal workspace pointer
-  _Container *m_workspace;
+  _Container * const m_workspace;
   /// pointer to a TripleRef of doubles
   TripleRef<double> m_CPoint;
+//  _Iterator m_CPoint;
   ///The number of times this iterator should loop before ending
   int m_loopCount;
   ///The number of times this iterator should loop before ending
@@ -62,12 +63,34 @@ private:
   int m_blockMin;
   ///Internal cache of the current datablock index maximum value
   int m_blockMax;
+  
+  /// @cond
+  template<typename T>
+  struct internal_iterator_type {};
+  
+  template<typename T>
+  struct internal_iterator_type<T*>
+  {
+    typedef std::vector<double>::iterator iterator_type;
+  };
+  
+  template<typename T>
+  struct internal_iterator_type<const T*>
+  {
+    typedef std::vector<double>::const_iterator iterator_type;    
+  };
+  /// @endcond
+  
+  /// Makes the underlying std::vector<double> iterator be const or not according to whether
+  /// the triple_iterator is (or not).
+  typedef typename internal_iterator_type<_Iterator*>::iterator_type iterator_type;
+  
   ///Internal cache of X iterator for current datablock
-  std::vector<double>::iterator it_dataX;
+  iterator_type it_dataX;
   ///Internal cache of Y iterator for current datablock
-  std::vector<double>::iterator it_dataY;
+  iterator_type it_dataY;
   ///Internal cache of E iterator for current datablock
-  std::vector<double>::iterator it_dataE;
+  iterator_type it_dataE;
 
   ///Validates the index and updates the current m_CPoint
   void validateIndex();

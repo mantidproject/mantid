@@ -43,7 +43,7 @@ public:
   /// Typedef for the triple_iterator to use with a Workspace1D
   typedef API::triple_iterator<API::TripleRef<double>, Workspace1D> iterator;
   /// Typedef for the const triple_iterator to use with a Workspace1D
-  typedef API::triple_iterator<const API::TripleRef<double>, Workspace1D> const_iterator;  
+  typedef API::triple_iterator<const API::TripleRef<double>, const Workspace1D> const_iterator;  
   
   /**
   	Gets the name of the workspace type

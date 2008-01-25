@@ -37,7 +37,6 @@ namespace DataObjects
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class DLLExport Histogram1D
 {
 public:
@@ -62,23 +61,31 @@ public:
   void setX(const StorageType& X) {  refX.access()=X; }
   /// Sets the data.
   void setData(const StorageType& Y) {  refY.access()=Y; };
-    /// Sets the data and errors
-  void setData(const StorageType& Y,const StorageType& E) 
+  /// Sets the data and single-value errors
+  void setData(const StorageType& Y, const StorageType& E) 
     {  refY.access()=Y; refE.access()=E; }
+  /// Sets the data and errors
+  void setData(const StorageType& Y, const StorageType& E, const StorageType& E2) 
+    {  refY.access()=Y; refE.access()=E; refE2.access(); }
 
-      /// Sets the x data.
+  /// Sets the x data.
   void setX(const RCtype& X) { refX=X; }
-    /// Sets the data.
+  /// Sets the data.
   void setData(const RCtype& Y) { refY=Y; }
-    /// Sets the data.
+  /// Sets the data and single-value errors
   void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
-
+  /// Sets the data and errors
+  void setData(const RCtype& Y, const RCtype& E, const RCtype& E2) { refY=Y; refE=E; refE2=E2; }  
+  
   /// Sets the x data
   void setX(const RCtype::ptr_type& X) { refX=X; }
   /// Sets the data.
   void setData(const RCtype::ptr_type& Y) { refY=Y; }
-  /// Sets the data and errors
+  /// Sets the data and single-value errors
   void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
+  /// Sets the data and errors
+  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E, const RCtype::ptr_type& E2) 
+    { refY=Y; refE=E; refE2=E2; }
 
   // Get the array data
   /// Returns the x data const
@@ -87,6 +94,8 @@ public:
   virtual const StorageType& dataY() const { return *refY; }
   /// Returns the error data const
   virtual const StorageType& dataE() const { return *refE; }
+  /// Returns the second error value data const
+  virtual const StorageType& dataE2() const { return *refE2; }
 
   ///Returns the x data
   virtual StorageType& dataX() { return refX.access(); }
@@ -94,13 +103,17 @@ public:
   virtual StorageType& dataY() { return refY.access(); }
   ///Returns the error data
   virtual StorageType& dataE() { return refE.access(); }
+  ///Returns the second error value data
+  virtual StorageType& dataE2() { return refE2.access(); }
 
   ///Clear the x data
   StorageType& emptyX() { refX.access().clear(); return refX.access(); }
-    ///Clear the y data
+  ///Clear the y data
   StorageType& emptyY() { refY.access().clear(); return refY.access(); }
-    ///Clear the error data
+  ///Clear the error data
   StorageType& emptyE() { refE.access().clear(); return refE.access(); }
+  ///Clear the second error value data
+  StorageType& emptyE2() { refE2.access().clear(); return refE2.access(); }
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
   int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
@@ -109,11 +122,11 @@ public:
   /// Checks for errors
   bool isError() const { return refE->empty(); }
   /// Gets the memory size of the histogram
-  long int getMemorySize() const { return (refX->size()+refY->size()+refE->size())*sizeof(double); }
+  long int getMemorySize() const 
+    { return (refX->size()+refY->size()+refE->size()+refE2->size())*sizeof(double); }
 
 };
 
 } // namespace DataObjects
-
 }  //Namespace Mantid
 #endif /*MANTID_DATAOBJECTS_HISTOGRAM1D_H_*/

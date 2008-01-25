@@ -94,7 +94,7 @@ Sample& Workspace::getSample()
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>,Mantid::API::Workspace>;
-template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::API::Workspace>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>, const Mantid::API::Workspace>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
 

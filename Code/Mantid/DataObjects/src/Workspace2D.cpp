@@ -282,7 +282,7 @@ std::vector<double>& Workspace2D::dataE(int const index)
 
 ///\cond TEMPLATE
 template DLLExport class Mantid::API::triple_iterator<Mantid::API::TripleRef<double>, Mantid::DataObjects::Workspace2D>;
-template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>,Mantid::DataObjects::Workspace2D>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::TripleRef<double>, const Mantid::DataObjects::Workspace2D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 
@@ -290,11 +290,25 @@ namespace Mantid
 {
 namespace Kernel
 {
+//template<> DLLExport
+//Mantid::DataObjects::Workspace2D* PropertyManager::getValue<Mantid::DataObjects::Workspace2D*>(const std::string &name) const
+//{
+//  PropertyWithValue<Mantid::DataObjects::Workspace2D*> *prop = 
+//          dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D*>*>(getPointerToProperty(name));
+//  if (prop)
+//  {
+//    return *prop;
+//  }
+//  else
+//  {
+//    throw std::runtime_error("Attempt to assign property of incorrect type");
+//  }
+//}
 template<> DLLExport
-Mantid::DataObjects::Workspace2D* PropertyManager::getValue<Mantid::DataObjects::Workspace2D*>(const std::string &name) const
+Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
 {
-  PropertyWithValue<Mantid::DataObjects::Workspace2D*> *prop = 
-          dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D*>*>(getPointerToProperty(name));
+  PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop = 
+                    dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
   if (prop)
   {
     return *prop;
@@ -305,10 +319,10 @@ Mantid::DataObjects::Workspace2D* PropertyManager::getValue<Mantid::DataObjects:
   }
 }
 template<> DLLExport
-Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
+boost::shared_ptr<const Mantid::DataObjects::Workspace2D> PropertyManager::getValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >(const std::string &name) const
 {
-  PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop = 
-                    dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
+  PropertyWithValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >* prop = 
+                   dynamic_cast<PropertyWithValue<boost::shared_ptr<const Mantid::DataObjects::Workspace2D> >*>(getPointerToProperty(name));
   if (prop)
   {
     return *prop;
