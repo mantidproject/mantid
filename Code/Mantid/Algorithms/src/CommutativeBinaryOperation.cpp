@@ -54,13 +54,13 @@ namespace Mantid
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
     API::Workspace_sptr CommutativeBinaryOperation::createOutputWorkspace(const API::Workspace_sptr rhs, const API::Workspace_sptr lhs) const
-    {
-      const double initialValue=  std::numeric_limits<double>::epsilon();
-          
+    {     
       //get the largest workspace
       const API::Workspace_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
+      //get the smallest workspace
+      const API::Workspace_sptr wsSmaller = (lhs->size() > rhs->size()) ? rhs : lhs;
 
-      return BinaryOperation::createOutputWorkspace(wsLarger,rhs);
+      return BinaryOperation::createOutputWorkspace(wsLarger,wsSmaller);
     }
 
   }
