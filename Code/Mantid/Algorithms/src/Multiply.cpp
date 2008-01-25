@@ -20,6 +20,11 @@ namespace Mantid
     // Get a reference to the logger
     Logger& Multiply::g_log = Logger::get("Multiply");
 
+    /** Performs the multiply operation using Iterators and the std::tranform function.
+    * @param it_in1 The const iterator to the lhs data item
+    * @param it_in2 The const iterator to the rhs data item
+    * @param it_out The output iterator to the new workspace
+    */
     void Multiply::performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
         Workspace::iterator it_out)
     {

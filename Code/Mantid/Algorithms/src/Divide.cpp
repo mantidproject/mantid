@@ -20,7 +20,12 @@ namespace Mantid
     // Get a reference to the logger
     Logger& Divide::g_log = Logger::get("Divide");
 
-   void Divide::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
+    /** Performs the divide operation using Iterators and the std::tranform function.
+    * @param it_in1 The const iterator to the lhs data item
+    * @param it_in2 The const iterator to the rhs data item
+    * @param it_out The output iterator to the new workspace
+    */
+    void Divide::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
         API::Workspace::iterator it_out)
     {
       std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Divide_fn());

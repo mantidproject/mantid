@@ -20,19 +20,14 @@ namespace Mantid
 
 
     CommutativeBinaryOperation supports commutative binary operations on two input workspaces.
-    It inherits from the binaryoperation class.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace1 - The name of the workspace </LI>
-    <LI> InputWorkspace2 - The name of the workspace </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
-    </UL>
+    In Commutative operations it does not matter if the order of the two input workspaces is reversed.
+    e.g. a+b is the same as b+a, and a*b is the same as b*a.
+    It inherits from the BinaryOperation class.
 
     @author Nick Draper
-    @date 14/12/2007
+    @date 23/01/2008
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -62,7 +57,10 @@ namespace Mantid
 
     protected:
       // Overridden BinaryOperation methods
+      /// Checks the overall size compatability of two workspaces
       virtual const bool checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const;
+
+      /// Creates a suitable output workspace for two input workspaces
       virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
 
     private:

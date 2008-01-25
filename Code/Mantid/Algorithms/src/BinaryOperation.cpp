@@ -50,8 +50,6 @@ namespace Mantid
       Workspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
       Workspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
       
-
-
       Workspace_sptr out_work = createOutputWorkspace(in_work1,in_work2);
       Workspace::iterator ti_out(*out_work);
 
@@ -158,9 +156,14 @@ namespace Mantid
       return retVal;
     }
 
+    /** Creates a const iterator taking into account loop
+    * @param wsMain The workspace theat the iterator will be created for
+    * @param wsComparison The workspace to be used for axes comparisons
+    * @returns a const iterator to wsMain, with loop count and orientation set appropriately
+    */
     Workspace::const_iterator BinaryOperation::createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const
     {
-     //get loop count for WS2
+     //get loop count
       unsigned int loopDirection = LoopOrientation::Vertical;
       int loopCount = getRelativeLoopCount(wsMain,wsComparison);
       if (loopCount > 1)
@@ -179,6 +182,13 @@ namespace Mantid
       return it;
     }
 
+    /** Determines the required loop direction for a looping iterator
+    * @param wsMain The workspace theat the iterator will be created for
+    * @param wsComparison The workspace to be used for axes comparisons
+    * @returns An value describing the orientation of the 1D workspace to be looped
+    * @retval 0 Horizontal - The number and contents of the X axis bins match
+    * @retval 1 Vertical - The number of detector elements match
+    */
     unsigned int BinaryOperation::getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const
     {
       unsigned int retVal = LoopOrientation::Horizontal;

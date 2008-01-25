@@ -21,6 +21,11 @@ namespace Mantid
     // Get a reference to the logger
     Logger& Plus::g_log = Logger::get("Plus");
 
+    /** Performs the plus operation using Iterators and the std::tranform function.
+    * @param it_in1 The const iterator to the lhs data item
+    * @param it_in2 The const iterator to the rhs data item
+    * @param it_out The output iterator to the new workspace
+    */
     void Plus::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
         API::Workspace::iterator it_out)
     {

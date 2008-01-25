@@ -64,23 +64,42 @@ namespace Mantid
     protected:
       // Overridden Algorithm methods
       void init();
-      void exec();    
+      void exec();  
+
+      /** Abstract method to perform the binary operation in the inheriting class.
+      * @param it_in1 The const iterator to the lhs data item
+      * @param it_in2 The const iterator to the rhs data item
+      * @param it_out The output iterator to the new workspace
+      */
       virtual void performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
         API::Workspace::iterator it_out) =0;
 
+      /// Checks the overall size compatability of two workspaces
       virtual const bool checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const;
+      /// Checks the compatability the X arrays of two workspaces
       virtual const bool checkXarrayCompatability(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      /// Returns the number of times lhs will have to loop to match the size of rhs
       virtual const int getRelativeLoopCount(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      /// Creates a suitable output workspace for two input workspaces
       virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      /// Creates a const iterator with appropriate looping settings.
       API::Workspace::const_iterator createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
+      /// Gets the looping orientation for a looping iterator
       unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
     
       
       class BinaryOperation_fn : public std::binary_function<API::TripleRef<double>,API::TripleRef<double>,API::TripleRef<double> >
       {
       public:
+        /// Virtual destructor
         virtual ~BinaryOperation_fn() {};
-        virtual API::TripleRef<double> operator()(const API::TripleRef<double>&,const API::TripleRef<double>&) =0;
+
+        /** Abstract function that performs each element of the binary function
+        * @param a The lhs data element
+        * @param a The rhs data element
+        * @returns The result data element
+        */
+        virtual API::TripleRef<double> operator()(const API::TripleRef<double>& a,const API::TripleRef<double>& b) =0;
       protected:
         ///The X value to return
         double ret_x;
