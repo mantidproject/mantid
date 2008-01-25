@@ -73,7 +73,7 @@ print "THIRD_PARTY: ",third_party
 print "PYTHON_ROOT: ",python_path
 
 if os.name == 'nt':
-	cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500']
+	cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS']
 
 else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
