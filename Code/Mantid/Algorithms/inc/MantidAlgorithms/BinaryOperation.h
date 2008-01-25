@@ -101,12 +101,7 @@ namespace Mantid
         */
         virtual API::TripleRef<double> operator()(const API::TripleRef<double>& a,const API::TripleRef<double>& b) =0;
       protected:
-        ///The X value to return
-        double ret_x;
-        ///Temporary cache of calculated signal value
-        double ret_sig;
-        ///Temporary cache of calculated error value
-        double ret_err;
+
       };
 
     private:

@@ -63,6 +63,7 @@ private:
   int m_blockMin;
   ///Internal cache of the current datablock index maximum value
   int m_blockMax;
+
   
   /// @cond
   template<typename T>

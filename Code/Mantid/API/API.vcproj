@@ -186,6 +186,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GaussianErrorHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Instrument.cpp"
 				>
 			</File>
@@ -244,7 +248,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\GaussianErrorHelper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\IErrorHelper.h"
 				>
 			</File>
 			<File

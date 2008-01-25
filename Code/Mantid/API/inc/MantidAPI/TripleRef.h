@@ -8,6 +8,10 @@ namespace Mantid
 
 namespace API
 {
+
+  //forward declaration
+  class IErrorHelper;
+
 /**
   TripleRef of three identical types.
   Class maintians a type first/second/third triple
@@ -44,6 +48,12 @@ class DLLExport TripleRef
   T* first;       ///< First item
   T* second;      ///< Second item
   T* third;       ///< Third item
+
+  IErrorHelper* errorHelper;
+  int detector;
+
+  const IErrorHelper* ErrorHelper() const;
+  const int& Detector() const;
 
   TripleRef();
   TripleRef(T& A,T& B,T& C);

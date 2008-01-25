@@ -8,6 +8,8 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TripleIterator.h"
+#include "MantidAPI/IErrorHelper.h"
+#include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/Logger.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -71,6 +73,11 @@ public:
   Instrument& getInstrument();
   Sample& getSample();
 
+	/// Get the footprint in memory.
+	virtual long int getMemorySize() const {return 0;}	
+	virtual ~Workspace();
+
+        
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
   virtual int size() const = 0;
@@ -81,13 +88,19 @@ public:
   ///Returns the y data
   virtual std::vector<double>& dataY(int const index) =0;
   ///Returns the error data
-  virtual std::vector<double>& dataE(int const index) =0;
-  /// Get the footprint in memory.
-  virtual long int getMemorySize() const
+  virtual std::vector<double>& dataE(int const index)  =0;  
+  ///Returns the ErrorHelper applicable for this detector
+  virtual IErrorHelper* errorHelper(int const index) const
   {
-    return 0;
+    //this is a very temporary solution here.
+    return GaussianErrorHelper::Instance();
   }
-  virtual ~Workspace();
+  ///Returns the detector
+  virtual int detector(int const index) const
+  {
+    //this is a very temporary solution here.
+    return index;
+  }
 
   //Get methods return the histogram number 
   ///Returns the x data const

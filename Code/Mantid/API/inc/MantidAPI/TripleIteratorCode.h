@@ -13,7 +13,8 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator() :
-      m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
+      m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),
+        m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
     {}
 
     /*!
@@ -65,7 +66,7 @@ namespace Mantid
     */
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
-      m_workspace(A.m_workspace),m_CPoint(),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
+      m_workspace(A.m_workspace),m_CPoint(A.m_CPoint),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
       m_index(A.m_index),m_wsSize(A.m_wsSize),
       m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
       it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
@@ -114,6 +115,9 @@ namespace Mantid
             }
           }
 
+          //get cached block level data objects
+          m_CPoint.errorHelper = m_workspace->errorHelper(m_dataBlockIndex);
+          m_CPoint.detector = m_workspace->detector(m_dataBlockIndex);
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();

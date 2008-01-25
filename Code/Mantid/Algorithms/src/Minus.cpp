@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
 #include "MantidAPI/TripleIterator.h" 
+#include "MantidAPI/IErrorHelper.h" 
 
 // Register the class into the algorithm factory
 DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Minus)
@@ -39,11 +40,7 @@ namespace Mantid
     TripleRef<double>
       Minus::Minus_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
     {     
-      ret_x=a[0];
-      ret_sig=a[1]-b[1];
-      //gaussian errors for the moment
-      ret_err=sqrt((a[2]*a[2])+(b[2]*b[2]));     
-      return TripleRef<double>(ret_x,ret_sig,ret_err);      
+      return a.ErrorHelper()->minus(a,b);           
     }
   }
 }

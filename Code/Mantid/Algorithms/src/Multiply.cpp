@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
 #include "MantidAPI/TripleIterator.h" 
+#include "MantidAPI/IErrorHelper.h" 
 
 // Register the class into the algorithm factory
 DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Multiply)
@@ -39,15 +40,7 @@ namespace Mantid
     TripleRef<double>
       Multiply::Multiply_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
     {           
-      ret_x=a[0];
-      ret_sig=a[1]*b[1];
-      //gaussian errors for the moment
-      // (Sa/a)2 + (Sb/b)2 = (Sc/c)2 
-      //  So after taking proportions, squaring, summing, 
-      //  and taking the square root, you get a proportional error to the product c. Multiply that proportional error by c to get the actual standard deviation Sc. 
-      ret_err=ret_sig*sqrt(pow((a[2]/a[1]),2) + pow((b[2]/b[1]),2));    
-
-      return TripleRef<double>(ret_x,ret_sig,ret_err);      
+      return a.ErrorHelper()->multiply(a,b);           
     }
   }
 }
