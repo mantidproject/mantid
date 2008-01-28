@@ -45,7 +45,7 @@ private:
   _Container * const m_workspace;
   /// pointer to a TripleRef of doubles
   TripleRef<double> m_CPoint;
-//  _Iterator m_CPoint;
+
   ///The number of times this iterator should loop before ending
   int m_loopCount;
   ///The number of times this iterator should loop before ending
@@ -63,6 +63,8 @@ private:
   int m_blockMin;
   ///Internal cache of the current datablock index maximum value
   int m_blockMax;
+  ///Internal cache of the current datablock index maximum value
+  bool m_IsE2Present;
 
   
   /// @cond
@@ -92,6 +94,8 @@ private:
   iterator_type it_dataY;
   ///Internal cache of E iterator for current datablock
   iterator_type it_dataE;
+  ///Internal cache of E iterator for current datablock
+  iterator_type it_dataE2;
 
   ///Validates the index and updates the current m_CPoint
   void validateIndex();

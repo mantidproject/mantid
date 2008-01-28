@@ -48,6 +48,7 @@ class DLLExport TripleRef
   T* first;       ///< First item
   T* second;      ///< Second item
   T* third;       ///< Third item
+  T* fourth;       ///< fourth item
 
   IErrorHelper* errorHelper;
   int detector;
@@ -57,6 +58,7 @@ class DLLExport TripleRef
 
   TripleRef();
   TripleRef(T& A,T& B,T& C);
+  TripleRef(T& A,T& B,T& C,T& D);
   TripleRef(const TripleRef<T>&);
   TripleRef<T>& operator=(const TripleRef<T>&);
   ~TripleRef();

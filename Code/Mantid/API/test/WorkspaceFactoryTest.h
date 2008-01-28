@@ -25,12 +25,16 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual std::vector<double>& dataY(int const index) {return data;}
     ///Returns the error data
     virtual std::vector<double>& dataE(int const index) {return data;}
+    ///Returns the error data
+    virtual std::vector<double>& dataE2(int const index) {return data;}
  
     virtual const std::vector<double>& dataX(int const index)const {return data;}
     ///Returns the y data
     virtual const std::vector<double>& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const std::vector<double>& dataE(int const index)const {return data;}
+    ///Returns the error data
+    virtual const std::vector<double>& dataE2(int const index)const {return data;}
 
   private:
     std::vector<double> data;

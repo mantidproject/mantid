@@ -14,7 +14,7 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator() :
       m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),
-        m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1)
+        m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),m_IsE2Present(false)
     {}
 
     /*!
@@ -24,7 +24,7 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
       m_workspace(&WA),m_CPoint(),m_loopCount(1),m_loopOrientation(0),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_IsE2Present(m_workspace->dataE2(0).size() > 0)
     {
       validateIndex();
     }
@@ -37,7 +37,7 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(0),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_IsE2Present(m_workspace->dataE2(0).size() > 0)
     {
       //pretend that the container is longer than it is by multiplying its size by the loopcount
       m_wsSize *= m_loopCount;
@@ -53,7 +53,7 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(loopOrientation),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),m_IsE2Present(m_workspace->dataE2(0).size() > 0)
     {
       //pretend that the container is longer than it is by multiplying its size by the loopcount
       m_wsSize *= m_loopCount;
@@ -68,8 +68,8 @@ namespace Mantid
     triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
       m_workspace(A.m_workspace),m_CPoint(A.m_CPoint),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
       m_index(A.m_index),m_wsSize(A.m_wsSize),
-      m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
-      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
+      m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),m_IsE2Present(A.m_IsE2Present),
+      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE),it_dataE2(A.it_dataE2)
     {
       validateIndex();
     }
@@ -121,6 +121,10 @@ namespace Mantid
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
+          if(m_IsE2Present)
+          {
+            it_dataE2 = m_workspace->dataE2(m_dataBlockIndex).begin();
+          }
         }
         int iteratorPos;
         if ((m_loopCount != 1) && (m_loopOrientation))
@@ -137,6 +141,10 @@ namespace Mantid
         m_CPoint.first  = const_cast<double*>(&(it_dataX[iteratorPos]));
         m_CPoint.second = const_cast<double*>(&(it_dataY[iteratorPos]));
         m_CPoint.third  = const_cast<double*>(&(it_dataE[iteratorPos]));
+        if(m_IsE2Present)
+        {
+          m_CPoint.fourth  = const_cast<double*>(&(it_dataE2[iteratorPos]));
+        }
       }
     }
       

@@ -89,6 +89,8 @@ public:
   virtual std::vector<double>& dataY(int const index) =0;
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index)  =0;  
+  ///Returns the error data
+  virtual std::vector<double>& dataE2(int const index)  =0;  
   ///Returns the ErrorHelper applicable for this detector
   virtual IErrorHelper* errorHelper(int const index) const
   {
@@ -109,6 +111,8 @@ public:
   virtual const std::vector<double>& dataY(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& dataE(int const index) const =0;
+  ///Returns the error const
+  virtual const std::vector<double>& dataE2(int const index) const =0;
 
 protected:
   Workspace();

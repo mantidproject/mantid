@@ -142,14 +142,15 @@ namespace Mantid
         if (ws2d != 0)
         {
           //do rhsd things
-          std::vector<double> x(wsLarger->blocksize(),initialValue),y(wsLarger->blocksize(),initialValue),e(wsLarger->blocksize(),initialValue);
+          std::vector<double> x(wsLarger->blocksize(),initialValue),y(wsLarger->blocksize(),initialValue),
+            e(wsLarger->blocksize(),initialValue), e2(wsLarger->dataE2(0).size());
           int len=wsLarger->size()/wsLarger->blocksize();
           ws2d->setHistogramNumber(len);
 
           for (int i = 0; i < len; i++)
           {
             ws2d->setX(i,x);
-            ws2d->setData(i,y,e);
+            ws2d->setData(i,y,e,e2);
           }
         }
       }

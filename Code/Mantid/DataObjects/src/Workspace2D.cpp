@@ -128,10 +128,30 @@ Workspace2D::setData(const int histnumber, const std::vector<double>& Vec,
 		     const std::vector<double>& VecErr)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::setDAta, histogram number out of range");
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
 
   data[histnumber].dataY()=Vec;
   data[histnumber].dataE()=VecErr;
+  return;
+}
+
+/**
+    Sets the data in the workspace (including errors)
+	\param histnumber The histogram to be set
+	\param Vec A vector containing the data	
+	\param VecErr A vector containing the corresponding errors
+	\param VecErr2 A vector containing the corresponding second error value
+*/
+void 
+Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
+		     const std::vector<double>& VecErr, const std::vector<double>& VecErr2)
+{
+  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
+
+  data[histnumber].dataY()=Vec;
+  data[histnumber].dataE()=VecErr;
+  data[histnumber].dataE2()=VecErr2;
   return;
 }
 
@@ -144,7 +164,7 @@ void
 Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::setX, histogram number out of range");
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
 
     data[histnumber].setData(PY);
 }
@@ -159,12 +179,28 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
 			  const Histogram1D::RCtype& PE)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::setX, histogram number out of range");
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
 
   data[histnumber].setData(PY,PE);
   return;
 }
 
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param PY A reference counted data range	
+	\param PE A reference containing the corresponding errors
+	\param PE2 A reference containing the corresponding error second value
+*/
+void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
+			  const Histogram1D::RCtype& PE,const Histogram1D::RCtype& PE2)
+{
+  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
+
+  data[histnumber].setData(PY,PE,PE2);
+  return;
+}
 
 /**
     Sets the data in the workspace
@@ -176,11 +212,28 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_t
 			  const Histogram1D::RCtype::ptr_type& PE)
 {
   if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::setX, histogram number out of range");
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
 
   data[histnumber].setData(PY,PE);
   return;
 }
+/**
+    Sets the data in the workspace
+	\param histnumber The histogram to be set
+	\param PY A reference counted data range	
+	\param PE A reference containing the corresponding errors
+*/
+void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
+			  const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
+{
+  if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::setData, histogram number out of range");
+
+  data[histnumber].setData(PY,PE,PE2);
+  return;
+}
+
+
 
 
 /** Gets the number of histograms
@@ -229,9 +282,23 @@ const std::vector<double>&
 Workspace2D::dataE(const int index) const
 {
   if (index<0 || index>=static_cast<int>(data.size()))
-    throw std::range_error("Workspace2D::dataY, histogram number out of range");
+    throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
   return data[index].dataE();
+}
+
+/**
+	Get the error data for a specified histogram
+	@param index The number of the histogram
+	@return A vector of doubles containing the error data
+*/
+const std::vector<double>& 
+Workspace2D::dataE2(const int index) const
+{
+  if (index<0 || index>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::dataE2, histogram number out of range");
+
+  return data[index].dataE2();
 }
 
 /// get pseudo size
@@ -269,6 +336,14 @@ std::vector<double>& Workspace2D::dataE(int const index)
     throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
   return data[index].dataE();
+}
+///Returns the error data
+std::vector<double>& Workspace2D::dataE2(int const index)
+{
+  if (index<0 || index>=static_cast<int>(data.size()))
+    throw std::range_error("Workspace2D::dataE2, histogram number out of range");
+
+  return data[index].dataE2();
 }
 
 

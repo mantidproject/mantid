@@ -16,13 +16,13 @@ namespace Mantid
     */
     template<typename T>
     TripleRef<T>::TripleRef(const TripleRef<T>& A) :
-    first(A.first),second(A.second),third(A.third),
+    first(A.first),second(A.second),third(A.third),fourth(A.fourth),
       errorHelper(A.errorHelper),detector(A.detector)
     {}
 
     /// Default constructor
     template<typename T>
-    TripleRef<T>::TripleRef():first(0),second(0),third(0),
+    TripleRef<T>::TripleRef():first(0),second(0),third(0),fourth(0),
       errorHelper(0),detector(0)
     {}
 
@@ -33,7 +33,20 @@ namespace Mantid
     \param C :: third item
     */
     template<typename T>
-    TripleRef<T>::TripleRef(T& A,T& B,T& C):first(&A),second(&B),third(&C),
+    TripleRef<T>::TripleRef(T& A,T& B,T& C):first(&A),second(&B),third(&C),fourth(0),
+      errorHelper(0),detector(0)
+    {
+    }
+
+        /*!
+    Constructor from a 4 value input 
+    \param A :: first item
+    \param B :: second item
+    \param C :: third item
+    \param D :: fourth item
+    */
+    template<typename T>
+    TripleRef<T>::TripleRef(T& A,T& B,T& C,T& D):first(&A),second(&B),third(&C),fourth(&D),
       errorHelper(0),detector(0)
     {
     }
@@ -51,6 +64,10 @@ namespace Mantid
         *first= *A.first;
         *second= *A.second;
         *third= *A.third;
+        if (A.fourth)
+        {
+          *fourth= *A.fourth;
+        }
         *errorHelper = *A.errorHelper;
         detector = A.detector;
       }
@@ -74,7 +91,7 @@ namespace Mantid
     int TripleRef<T>::operator==(const TripleRef<T>& A) const
     {
       return  (*first!=*A.first || *second!=*A.second || 
-        *third!=*A.third) ? 0 : 1;
+        *third!=*A.third || *fourth!=*A.fourth) ? 0 : 1;
     }
 
     /*! 
@@ -86,7 +103,7 @@ namespace Mantid
     int TripleRef<T>::operator!=(const TripleRef<T>& A) const
     {
       return  (*first==*A.first && *second == *A.second &&
-        *third== *A.third) ? 0 : 1;
+        *third== *A.third  && *fourth!=*A.fourth) ? 0 : 1;
     }
 
     /*! 
@@ -107,7 +124,11 @@ namespace Mantid
           return 0;
         if (*second< *A.second)
           return 1;
-        if (*third < *A.third)
+        if (*third > *A.third)
+          return 0;
+        if (*second< *A.second)
+          return 1;
+        if (*fourth < *A.fourth)
           return 0;
       }
       return 0;
@@ -142,6 +163,8 @@ namespace Mantid
         return *second;
       case 2:
         return *third;
+      case 3:
+        return *fourth;
       default:
         throw std::range_error("TripleRef::operator[]");
       }
@@ -166,6 +189,8 @@ namespace Mantid
         return *second;
       case 2:
         return *third;
+      case 3:
+        return *fourth;
       default:
         throw std::range_error("TripleRef::operator[]");
       }
