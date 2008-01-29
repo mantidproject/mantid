@@ -5,8 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAlgorithms/Plus.h"
-#include "MantidAlgorithms/Multiply.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace1D.h" 

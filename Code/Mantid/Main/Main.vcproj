@@ -54,7 +54,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Algorithms.lib $(SolutionName)Geometry.lib $(SolutionName)DataHandling.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Debug"
 				GenerateDebugInformation="true"
@@ -122,9 +122,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Algorithms.lib $(SolutionName)Geometry.lib $(SolutionName)DataHandling.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\Release"
+				AdditionalLibraryDirectories="..\Release;..\..\Third_Party\lib\win32"
 			/>
 			<Tool
 				Name="VCALinkTool"

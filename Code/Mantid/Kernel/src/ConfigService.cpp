@@ -17,6 +17,9 @@ namespace Kernel
 	// Initialise the instance pointer to zero
 	ConfigService* ConfigService::m_instance=0;
 
+  // Get a reference to the logger
+  Logger& ConfigService::g_log = Logger::get("ConfigService");
+
   /** A static method which retrieves the single instance of the ConfigService
    *
    * @returns A pointer to the instance
@@ -102,11 +105,21 @@ namespace Kernel
    *  returns the value as a string.
    *
    *  @param keyName The case sensitive name of the property that you need the value of.
-   *  @returns The string value of the property
+   *  @returns The string value of the property, or an empty string if the key cannot be found
    */
 	std::string ConfigService::getString(const std::string& keyName)
 	{
-		return m_pConf->getString(keyName);
+    std::string retVal;
+    try
+    {
+      retVal = m_pConf->getString(keyName);
+    }
+    catch(Poco::NotFoundException& ex)
+    {
+      g_log.warning()<<"Unable to find " << keyName << " in the properties file";
+      retVal = "";
+    }
+		return retVal;
 	}
 
   /** Searches for a string within the currently loaded configuaration values and 

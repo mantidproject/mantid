@@ -9,7 +9,6 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
 
 
 
@@ -17,7 +16,7 @@ int main()
 {
 
   FrameworkManager* fm = FrameworkManager::Instance();
-  //fm->initialize();
+  fm->initialize();
 
   Benchmark b;
   b.RunPlusTest();

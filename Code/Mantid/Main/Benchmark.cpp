@@ -2,12 +2,11 @@
 #include <iomanip>
 #include <ctime>
 #include "Benchmark.h"
+#include "MantidAPI\IAlgorithm.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
-using namespace Mantid::Algorithms;
-
 
 Workspace1D_sptr Benchmark::Create1DWorkspaceFib(int size)
 {
@@ -89,15 +88,16 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   ADS->add("test_in11", work_in3);
   ADS->add("test_in12", work_in4);
 
-  Plus plus_alg;
+  
+  IAlgorithm* alg = FrameworkManager::Instance()->createAlgorithm("Plus");
 
-  plus_alg.initialize();
-  plus_alg.setPropertyValue("InputWorkspace_1","test_in11");
-  plus_alg.setPropertyValue("InputWorkspace_2","test_in12");    
-  plus_alg.setPropertyValue("OutputWorkspace","test_out1");
+  //alg.initialize();
+  alg->setPropertyValue("InputWorkspace_1","test_in11");
+  alg->setPropertyValue("InputWorkspace_2","test_in12");    
+  alg->setPropertyValue("OutputWorkspace","test_out1");
 
   clock_t start = clock();
-  plus_alg.execute();
+  alg->execute();
   clock_t end = clock();
 
   Workspace_sptr work_out1 = ADS->retrieve("test_out1");

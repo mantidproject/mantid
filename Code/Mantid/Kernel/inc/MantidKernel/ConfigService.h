@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -150,6 +151,9 @@ namespace Kernel
 
 		/// Pointer to the factory instance
 		static ConfigService* m_instance;
+
+    /// static reference to the logger class
+	  static Logger& g_log;
 
 	};
 
