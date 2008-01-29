@@ -170,7 +170,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AlgorithmHistory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AlgorithmManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AlgorithmParameter.cpp"
 				>
 			</File>
 			<File
@@ -179,6 +187,10 @@
 			</File>
 			<File
 				RelativePath=".\src\BoostPythonWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\EnvironmentHistory.cpp"
 				>
 			</File>
 			<File
@@ -214,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\WorkspaceHistory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\WorkspaceOpOverloads.cpp"
 				>
 			</File>
@@ -232,7 +248,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\AlgorithmHistory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\AlgorithmManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\AlgorithmParameter.h"
 				>
 			</File>
 			<File
@@ -241,6 +265,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\DeclareUserAlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\EnvironmentHistory.h"
 				>
 			</File>
 			<File
@@ -289,6 +317,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceHistory.h"
 				>
 			</File>
 			<File

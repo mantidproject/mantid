@@ -173,6 +173,11 @@ public:
     return this->operator()();
   }
   
+  const unsigned int direction()const
+  {
+    return m_direction;
+  }
+
 private:
   /// The name of the workspace (as used by the AnalysisDataService)
   std::string m_workspaceName;
@@ -196,7 +201,8 @@ struct Direction
   { 
     Input,    ///< An input workspace
     Output,   ///< An output workspace
-    InOut     ///< Both an input & output workspace
+    InOut,     ///< Both an input & output workspace
+    None 
   };
 };
 

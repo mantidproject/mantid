@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/TripleIterator.h"
@@ -114,6 +115,10 @@ public:
   ///Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const =0;
 
+  WorkspaceHistory& getWorkspaceHistory() { return m_history; }
+  const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
+
+
 protected:
   Workspace();
   Workspace(const Workspace&);
@@ -130,8 +135,11 @@ private:
   /// The information on the sample environment
   Sample m_sample;
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  /// The history of the workspace, algorithm and environment
+  WorkspaceHistory m_history;
+  
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 } // namespace API

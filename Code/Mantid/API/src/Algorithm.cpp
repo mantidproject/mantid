@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/IStorable.h"
 
 namespace Mantid
@@ -102,6 +103,7 @@ namespace Mantid
     */
     void Algorithm::execute()
     {
+      dateAndTime start,end,duration;
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
@@ -120,8 +122,10 @@ namespace Mantid
       {
         try
         {
+          start = boost::posix_time::microsec_clock::local_time();
           // Call the concrete algorithm's exec method
           this->exec();
+          end = boost::posix_time::microsec_clock::local_time();
         }
         catch(std::runtime_error& ex)
         {
@@ -134,13 +138,15 @@ namespace Mantid
           if (m_isChildAlgorithm) throw;
         }
 
-
         // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
         if (!isChild())
-        { this->store();}
-
+        { 
+          fillHistory(start,end - start);
+          this->store();
+        }
         setExecuted(true);	
       }
+
       // Gaudi also specifically catches GaudiException & std:exception.
       catch (...)
       {
@@ -190,7 +196,7 @@ namespace Mantid
       Algorithm_sptr alg = algManager->createUnmanaged(name);
       //set as a child
       alg->setChild(true);
-      
+
       // Initialise the sub-algorithm
       try 
       {
@@ -200,7 +206,7 @@ namespace Mantid
       {
         g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
       }
-      
+
       return alg;
     }
 
@@ -237,6 +243,187 @@ namespace Mantid
     // Private Member Functions
     //----------------------------------------------------------------------
 
+    /** Fills History, Algorithm History and Algorithm Parameters
+    */
+    void Algorithm::fillHistory(dateAndTime start,timeDuration duration)
+    {     
+      //std::vector<AlgorithmParameter>* algParameters = new std::vector<AlgorithmParameter>;
+      //references didn't work as not initialised
+      std::vector<WorkspaceHistory>  inW_History,outW_History,inoutW_History,OUT_inoutW_History;
+      Workspace_sptr out_work, in_work, inout_work;
+      std::vector<AlgorithmParameter> algParameters;
+      bool iflag(false) ,ioflag(false),oflag(false);
+
+      const std::vector<Property*>& algProperties = getProperties();
+
+      for (unsigned int i = 0; i < algProperties.size(); ++i)
+      {
+        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(algProperties[i]);
+        if (wsProp)
+        {
+          const unsigned int i = wsProp->direction();
+          if( (i == Mantid::Kernel::Direction::InOut) )            
+          {
+            ioflag=true;
+            inout_work = wsProp->getWorkspace();
+            inoutW_History.push_back( inout_work->getWorkspaceHistory());
+          }
+
+          else if( (i == Mantid::Kernel::Direction::Input) )            
+          {
+            iflag=true;
+            in_work = wsProp->getWorkspace();
+            inW_History.push_back( in_work->getWorkspaceHistory());
+          }
+          else if( (i == Mantid::Kernel::Direction::Output) )            
+          {
+            oflag=true;
+            out_work = wsProp->getWorkspace();
+            outW_History.push_back(out_work->getWorkspaceHistory());
+          }
+        }
+      }
+/*
+fill each output with each input history
+fill each inout with each OTHER inout history
+fill each inout with each input history
+*/
+
+      if(iflag)
+      {
+        //loop over input workspaces to fill output workspace history with constituent input histories
+        for (int j=0; j<inW_History.size();j++)
+        { 
+          std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
+          if(  in_algH.size() != 0)
+          {
+            //loop over number of output workspaces
+            for (int i=0; i<outW_History.size();i++)
+            {
+              // copy each algorithmhistory from each input workspace into the out history
+              for(int k=0; k<in_algH.size();k++)
+              {
+                std::vector<AlgorithmHistory>& out_algH = outW_History[i].getAlgorithms();
+                out_algH.push_back(in_algH[k]);
+              }
+            }
+          }
+        }
+      }
+
+      if(ioflag)
+      {
+        //loop over inout workspaces to fill output workspace history with constituent inout histories
+        for (int j=0; j<inoutW_History.size();j++)
+        { 
+          std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
+          if(  inout_algH.size() != 0)
+          {
+            //loop over number of output workspaces
+            for (int i=0; i<outW_History.size();i++)
+            {
+              // copy each algorithmhistory from each inout workspace into the out history
+              for(int k=0; k<inout_algH.size();k++)
+              {
+                std::vector<AlgorithmHistory>& out_algH = outW_History[i].getAlgorithms();
+                out_algH.push_back(inout_algH[k]);
+              }
+            }
+          }
+        }
+      }
+
+
+      if(ioflag)
+      {
+        //loop over inout workspaces to fill inout workspace history other inout histories
+        for (int j=0; j<inoutW_History.size();j++)
+        { 
+          std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
+          if(  inout_algH.size() != 0)
+          {
+            for (int i=0; i<inoutW_History.size();i++)
+            {
+              // don't want to copy the history of an inout workspace into itself
+              if(i!=j)
+              {          
+                // copy each algorithmhistory from each inout workspace into each inout history (except for the same one)
+                for(int k=0; k<inout_algH.size();k++)
+                {
+                  std::vector<AlgorithmHistory>& out_algH = inoutW_History[i].getAlgorithms();
+                  out_algH.push_back(inout_algH[k]);
+                }
+              }
+            }
+          }
+        }
+      }
+      if(iflag && ioflag)
+      {
+        //loop over input workspaces to fill inout workspace history with constituent input histories
+        for (int j=0; j<inW_History.size();j++)
+        { 
+          std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
+          if(  in_algH.size() != 0)
+          {
+            //loop over number of output workspaces
+            for (int i=0; i<inoutW_History.size();i++)
+            {
+              // copy each algorithmhistory from each input workspace into the out history
+              for(int k=0; k<in_algH.size();k++)
+              {
+                std::vector<AlgorithmHistory>& out_algH = inoutW_History[i].getAlgorithms();
+                out_algH.push_back(in_algH[k]);
+              }
+            }
+          }
+        }
+      }
+
+
+      // 
+
+      int no_of_props = algProperties.size();
+      for (int i=0; i < no_of_props; i++)
+      {
+        IWorkspaceProperty* wsProp = dynamic_cast<IWorkspaceProperty*>(algProperties[i]);
+        // could not do dynamic cast on const AP so do a cast on alProperties instead
+        const Property* AP=algProperties[i];
+        if (AP && wsProp)
+        {
+          algParameters.push_back(AlgorithmParameter(AP->name(),
+            AP->value(),AP->type(),AP->isDefault(),wsProp->direction()));
+        }
+        else if(AP && !wsProp)
+        {
+          algParameters.push_back(AlgorithmParameter(AP->name(),
+            AP->value(),AP->type(),AP->isDefault(),Mantid::Kernel::Direction::None));
+        }
+      }
+
+      if(oflag)
+      { 
+        // get the reference  to output workspace without it going out of scope, and it's not a copy
+        std::vector<AlgorithmHistory>& OalgHistory = (outW_History.front()).getAlgorithms();
+        //increment output workspace history with new algorithm properties
+        OalgHistory.push_back(AlgorithmHistory(m_name,m_version,start,duration,algParameters));
+        WorkspaceHistory& Ohist = out_work->getWorkspaceHistory();
+        std::vector<AlgorithmHistory>& Oalg = Ohist.getAlgorithms();
+        Oalg=OalgHistory;
+      }
+
+      if(ioflag)
+      {
+        // get the reference  to input workspace without it going out of scope, and it's not a copy
+        std::vector<AlgorithmHistory>& IOalgHistory = (inoutW_History.front()).getAlgorithms();
+        //increment output workspace history with new algorithm properties
+        IOalgHistory.push_back(AlgorithmHistory(m_name,m_version,start,duration,algParameters));
+        WorkspaceHistory& IOhist = inout_work->getWorkspaceHistory();
+        std::vector<AlgorithmHistory>& IOalg = IOhist.getAlgorithms();
+        IOalg=IOalgHistory;
+      }
+    }
+
     /** Stores any output workspaces into the AnalysisDataService
     *  @throw std::runtime_error If unable to successfully store an output workspace
     */
@@ -251,7 +438,12 @@ namespace Mantid
           try
           {
             // Store the workspace. Will only be 1 output workspace so stop looping if true
-            if ( wsProp->store() ) break;
+            // fill history has been designed to create history for potentially multiple inout
+            // and multiple out workspaces
+            
+            //if ( 
+              wsProp->store();
+            //) break;
           }
           catch (std::runtime_error& e)
           {
@@ -277,6 +469,6 @@ namespace Mantid
     {
       m_isChildAlgorithm = isChild;
     }
-  
+
   } // namespace API
 } // namespace Mantid

@@ -8,6 +8,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Logger.h"
@@ -24,6 +25,8 @@ namespace Mantid
 {
 namespace API
 {
+  typedef AlgorithmHistory::dateAndTime dateAndTime;
+  typedef AlgorithmHistory::timeDuration timeDuration;
   ///Typedef for a shared pointer to an Algorithm
   typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 
@@ -122,6 +125,7 @@ private:
 
   /// Put any output workspaces into the AnalysisDataService
   void store();
+  void fillHistory(dateAndTime, timeDuration);
 
   std::string m_name; ///< Algorithm's name for identification
   std::string m_version; ///< Algorithm's version
