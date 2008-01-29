@@ -83,7 +83,7 @@ public:
 
   
   /// Returns the histogram number
-  virtual const int getHistogramNumber() const;
+  const int getHistogramNumber() const;
 
   //section required for iteration
   virtual int size() const;       
