@@ -208,12 +208,6 @@ void LoadLog::exec()
 
       ins >> dateAndTime;
 
-      // strim down the date-time string to format YYYYMMDDTHHmmss
-
-      dateAndTime.erase(16,1);
-      dateAndTime.erase(13,1);
-      dateAndTime.erase(7,1);
-      dateAndTime.erase(4,1);
 
       // Store log file line in Property
 

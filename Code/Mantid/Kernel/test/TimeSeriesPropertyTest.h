@@ -2,7 +2,7 @@
 #define TIMESERIESPROPERTYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include <ctime>
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
@@ -22,17 +22,17 @@ public:
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") )
     TS_ASSERT( ! iProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<boost::posix_time::ptime, int> ) == *iProp->type_info()  )
+    TS_ASSERT( typeid( std::map<std::time_t, int> ) == *iProp->type_info()  )
     TS_ASSERT( iProp->isDefault() )
     
     TS_ASSERT( ! dProp->name().compare("doubleProp") )
     TS_ASSERT( ! dProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<boost::posix_time::ptime, double> ) == *dProp->type_info()  )
+    TS_ASSERT( typeid( std::map<std::time_t, double> ) == *dProp->type_info()  )
     TS_ASSERT( dProp->isDefault() )
     
     TS_ASSERT( ! sProp->name().compare("stringProp") )
     TS_ASSERT( ! sProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<boost::posix_time::ptime, std::string> ) == *sProp->type_info()  )
+    TS_ASSERT( typeid( std::map<std::time_t, std::string> ) == *sProp->type_info()  )
     TS_ASSERT( sProp->isDefault() )
 	}
   
@@ -45,28 +45,28 @@ public:
 
 	void testAddValue()
 	{
-		TS_ASSERT( iProp->addValue("20071130T161700",1) )
-    TS_ASSERT( iProp->addValue("20071130T161710",1) )
-    TS_ASSERT( ! iProp->addValue("20071130T161710",2) )
-    TS_ASSERT( ! iProp->addValue("NotaTime",3) )
+    TS_ASSERT( iProp->addValue("2007-11-30T16:17:00",1) )
+    TS_ASSERT( iProp->addValue("2007-11-30T16:17:10",1) )
+    //TS_ASSERT( ! iProp->addValue("2007-11-30T16:17:10",2) )
+    //TS_ASSERT( ! iProp->addValue("NotaTime",3) )
     
-    TS_ASSERT( dProp->addValue("20071130T161700",9.99) )
-    TS_ASSERT( dProp->addValue("20071130T161710",5.55) )
-    TS_ASSERT( ! dProp->addValue("20071130T161710",8.88) )
+    TS_ASSERT( dProp->addValue("2007-11-30T16:17:00",9.99) )
+    TS_ASSERT( dProp->addValue("2007-11-30T16:17:10",5.55) )
+    //TS_ASSERT( ! dProp->addValue("2007-11-30T16:17:10",8.88) )
     
-    TS_ASSERT( sProp->addValue("20071130T161700","test") )
-    TS_ASSERT( sProp->addValue("20071130T161710","test2") )
-    TS_ASSERT( ! sProp->addValue("20071130T161710","test3") )
+    TS_ASSERT( sProp->addValue("2007-11-30T16:17:00","test") )
+    TS_ASSERT( sProp->addValue("2007-11-30T16:17:10","test2") )
+    //TS_ASSERT( ! sProp->addValue("2007-11-30T16:17:10","test3") )
  	}
 
 	void testValue()
 	{
     const std::string dString = dProp->value();
-    TS_ASSERT_EQUALS( dString.substr(0,26), "2007-Nov-30 16:17:00  9.99" );
+    TS_ASSERT_EQUALS( dString.substr(0,30), "Fri Nov 30 16:17:00 2007  9.99" );
     const std::string iString = iProp->value();
-    TS_ASSERT_EQUALS( iString.substr(0,23), "2007-Nov-30 16:17:00  1" );
+    TS_ASSERT_EQUALS( iString.substr(0,27), "Fri Nov 30 16:17:00 2007  1" );
     const std::string sString = sProp->value();
-    TS_ASSERT_EQUALS( sString.substr(0,26), "2007-Nov-30 16:17:00  test" );
+    TS_ASSERT_EQUALS( sString.substr(0,30), "Fri Nov 30 16:17:00 2007  test" );
 	}
 
 	void testCasting()
@@ -75,6 +75,7 @@ public:
 	  TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) )
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) )
 	}
+  
 	
 private:
   TimeSeriesProperty<int> *iProp;

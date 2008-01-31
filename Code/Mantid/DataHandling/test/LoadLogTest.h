@@ -78,7 +78,7 @@ public:
     std::string timeSeriesString = l_timeSeries->value();
 
     // test that log file read in ok
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,30), "Fri Nov 16 13:25:48 2007   END" );
   }
 
 
@@ -124,27 +124,27 @@ public:
     Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_ICPevent.txt") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,28), "2007-Nov-13 15:19:13   BEGIN" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,32), "Tue Nov 13 15:19:13 2007   BEGIN" );
 
     l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_cphs_6.txt") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "Tue Nov 13 15:16:20 2007  0" );
 
     l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_PROP3.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "Tue Nov 13 15:16:20 2007  0" );
 
     l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_SE_He_Level.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2007-Nov-13 15:17:08  -1" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,28), "Tue Nov 13 15:17:08 2007  -1" );
 
     l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_TEMP1.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "Tue Nov 13 15:16:20 2007  0" );
   }
   
 
@@ -192,7 +192,7 @@ public:
     Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37129_ICPevent.txt") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,30), "Fri Nov 16 13:25:48 2007   END" );
   }
 
   

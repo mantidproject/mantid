@@ -3,8 +3,10 @@
 
 #include "Property.h"
 #include "Exception.h"
+#include <iostream>
 #include <map>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <ctime>
+#include <sstream>
 //#include "MantidKernel/Logger.h"
 
 namespace Mantid
@@ -45,8 +47,8 @@ template <typename TYPE>
 class TimeSeriesProperty : public Property
 {
 public:
-  /// The date-and-time will be stored as the boost ptime type
-  typedef boost::posix_time::ptime dateAndTime;
+  /// The date-and-time is currently stored as a time_t
+  typedef std::time_t dateAndTime;
 
   /** Constructor
    *  @param name The name to assign to the property
@@ -68,22 +70,20 @@ public:
   {
     std::stringstream ins;
 
-    try {
-      typename std::map<dateAndTime, TYPE>::const_iterator p = m_propertySeries.begin();
+    typename std::map<dateAndTime, TYPE>::const_iterator p = m_propertySeries.begin();
 
-      while ( p != m_propertySeries.end() )
-      {
-        ins << p->first << "  " << p->second << std::endl;
-        p++;
-	    }
-
-      return ins.str();
-    }
-    catch ( boost::bad_lexical_cast e ) 
+    while ( p != m_propertySeries.end() )
     {
-     // g_log.error() << "Casting error in TimeSeriesProperty." << e.what();
-      return std::string(""); 
-	  }
+      // asctime has the annoying feature of appending a '\n'
+      // hence the reason of first reading in the data-time into str
+      // before printing out this string minus the '\n'
+
+      std::string str(asctime(localtime(&(p->first))));
+      ins << str.substr(0,str.size()-1) << "  " << p->second << std::endl;
+      p++;
+    }
+
+    return ins.str();
 	}
 	
 
@@ -94,27 +94,44 @@ public:
 	}
 	
 	/** Add a value to the map
-	 *  @param time The time as a string in the format: YYYYMMDDTHHmmss
+	 *  @param time The time as a string in the format: (ISO 8601) yyyy-mm-ddThh:mm:ss
 	 *  @param value The associated value
 	 *  @return True if insertion successful (i.e. identical time not already in map
 	 */
 	bool addValue( const std::string &time, const TYPE value )
 	{
-	  try {
-      return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
-               dateAndTime(boost::posix_time::from_iso_string(time.c_str())), value) ).second;
-	  } catch ( boost::bad_lexical_cast e ) {
-	    return false;
-	  }
+    return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
+               createTime_t_FromString(time), value) ).second;
 	}
 
 	
 private:
-  /// Holds the time series data
+  /// Holds the time series data 
   std::map<dateAndTime, TYPE> m_propertySeries;
   
   /// Private default constructor
   TimeSeriesProperty();
+
+  /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
+  std::time_t createTime_t_FromString(const std::string &str)
+  {
+    struct std::tm * time_since_1990;
+ 
+    // create tm struct
+
+    time_t rawtime;
+    time( &rawtime );
+    time_since_1990 = localtime( &rawtime );
+
+    time_since_1990->tm_year = atoi(str.substr(0,4).c_str()) - 1900;
+    time_since_1990->tm_mon = atoi(str.substr(5,2).c_str()) - 1;
+    time_since_1990->tm_mday = atoi(str.substr(8,2).c_str());
+    time_since_1990->tm_hour = atoi(str.substr(11,2).c_str());
+    time_since_1990->tm_min = atoi(str.substr(14,2).c_str());
+    time_since_1990->tm_sec = atoi(str.substr(17,2).c_str());
+
+    return mktime(time_since_1990);
+  }
 
   /// static reference to the logger class
   //static Kernel::Logger& g_log;
