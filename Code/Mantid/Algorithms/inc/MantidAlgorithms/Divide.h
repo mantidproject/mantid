@@ -61,6 +61,8 @@ namespace Mantid
       Divide() : BinaryOperation() {};
       /// Destructor
       virtual ~Divide() {};
+    virtual const std::string name() const { return "Divide";};///< Algorithm's name for identification
+    virtual const std::string version() const { return "1";};///< Algorithm's name for identification
 
     private:
       // Overridden BinaryOperation methods

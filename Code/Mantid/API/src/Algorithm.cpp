@@ -17,8 +17,6 @@ namespace Mantid
     /// Constructor
     Algorithm::Algorithm() :
     PropertyManager(),
-      m_name("unknown"), 
-      m_version("unknown"), 
       m_isInitialized(false), 
       m_isExecuted(false), 
       m_isChildAlgorithm(false)
@@ -30,23 +28,6 @@ namespace Mantid
     {
     }
 
-    /** The identifying name of the algorithm object. 
-    * 
-    *  @return Name of Instance
-    */
-    const std::string& Algorithm::name() const
-    {
-      return m_name;
-    }
-
-    /** The version of the algorithm
-    * 
-    *  @return Version string
-    */
-    const std::string& Algorithm::version() const
-    {
-      return m_version;
-    }
 
     /** Initialization method invoked by the framework. This method is responsible
     *  for any bookkeeping of initialization required by the framework itself.
@@ -107,8 +88,8 @@ namespace Mantid
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
-        g_log.error("Algorithm is not initialized:" + m_name);
-        throw std::runtime_error("Algorithm is not initialised:" + m_name);
+        g_log.error("Algorithm is not initialized:" + this->name());
+        throw std::runtime_error("Algorithm is not initialised:" + this->name());
       }
 
       // Check all properties for validity
@@ -129,12 +110,12 @@ namespace Mantid
         }
         catch(std::runtime_error& ex)
         {
-          g_log.error()<< "Error in Execution of algorithm "<< m_name<<std::endl;
+          g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
           if (m_isChildAlgorithm) throw;
         }
         catch(std::logic_error& ex)
         {
-          g_log.error()<< "Logic Error in Execution of algorithm "<< m_name<<std::endl;
+          g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
           if (m_isChildAlgorithm) throw;
         }
 
@@ -406,7 +387,7 @@ fill each inout with each input history
         // get the reference  to output workspace without it going out of scope, and it's not a copy
         std::vector<AlgorithmHistory>& OalgHistory = (outW_History.front()).getAlgorithms();
         //increment output workspace history with new algorithm properties
-        OalgHistory.push_back(AlgorithmHistory(m_name,m_version,start,duration,algParameters));
+        OalgHistory.push_back(AlgorithmHistory(this->name(),this->version(),start,duration,algParameters));
         WorkspaceHistory& Ohist = out_work->getWorkspaceHistory();
         std::vector<AlgorithmHistory>& Oalg = Ohist.getAlgorithms();
         Oalg=OalgHistory;
@@ -417,7 +398,7 @@ fill each inout with each input history
         // get the reference  to input workspace without it going out of scope, and it's not a copy
         std::vector<AlgorithmHistory>& IOalgHistory = (inoutW_History.front()).getAlgorithms();
         //increment output workspace history with new algorithm properties
-        IOalgHistory.push_back(AlgorithmHistory(m_name,m_version,start,duration,algParameters));
+        IOalgHistory.push_back(AlgorithmHistory(this->name(),this->version(),start,duration,algParameters));
         WorkspaceHistory& IOhist = inout_work->getWorkspaceHistory();
         std::vector<AlgorithmHistory>& IOalg = IOhist.getAlgorithms();
         IOalg=IOalgHistory;

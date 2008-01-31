@@ -59,8 +59,10 @@ public:
   /// Default constructor
 	SimpleIntegration() : API::Algorithm() {};
 	/// Destructor
-	virtual ~SimpleIntegration() {};
-	
+  virtual ~SimpleIntegration() {};
+  virtual const std::string name() const { return "SimpleIntegration";};///< Algorithm's name for identification
+  virtual const std::string version() const { return "1";};///< Algorithm's name for identification
+
 private:
   // Overridden Algorithm methods
   void init();

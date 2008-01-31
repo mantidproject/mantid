@@ -50,9 +50,6 @@ public:
   // Retrieve interface ID
   //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
 
-  /// The version of the algorithm
-  virtual const std::string& version() const = 0;
-
   /// Virtual destructor (always needed for abstract classes)
   virtual ~IAlgorithm() {}
 

@@ -58,7 +58,9 @@ namespace DataHandling
 
     /// Destructor
     ~LoadInstrument() {}
-    
+    virtual const std::string name() const { return "LoadInstrument";};///< Algorithm's name for identification
+    virtual const std::string version() const { return "1";};///< Algorithm's name for identification
+   
   private:
 
     /// Overwrites Algorithm method. Does nothing at present

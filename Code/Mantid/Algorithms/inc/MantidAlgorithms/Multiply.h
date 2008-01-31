@@ -61,6 +61,8 @@ namespace Mantid
       Multiply() : CommutativeBinaryOperation() {};
       /// Destructor
       virtual ~Multiply() {};
+      virtual const std::string name() const { return "Multiply";};///< Algorithm's name for identification
+      virtual const std::string version() const { return "1";};///< Algorithm's name for identification
 
     private:
       // Overridden BinaryOperation methods

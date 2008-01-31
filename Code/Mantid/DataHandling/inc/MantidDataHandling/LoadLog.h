@@ -66,6 +66,8 @@ namespace DataHandling
 
     /// Destructor
     ~LoadLog() {}
+    virtual const std::string name() const { return "LoadLog";};///< Algorithm's name for identification
+    virtual const std::string version() const { return "1";};///< Algorithm's name for identification
     
   private:
 

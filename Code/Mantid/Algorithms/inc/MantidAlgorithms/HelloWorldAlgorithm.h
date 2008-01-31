@@ -43,6 +43,9 @@ public:
   HelloWorldAlgorithm() : API::Algorithm() {}
   ///virtual destructor
   virtual ~HelloWorldAlgorithm() {}
+  virtual const std::string name() const { return "HelloWorldAlgorithm";};///< Algorithm's name for identification
+  virtual const std::string version() const { return "1";};///< Algorithm's name for identification
+
   ///Initialisation code
   void init() {  }
   ///Execution code

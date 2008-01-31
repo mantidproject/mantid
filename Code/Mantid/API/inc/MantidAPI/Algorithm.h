@@ -78,10 +78,10 @@ public:
   Algorithm();
   virtual ~Algorithm();
 
-  virtual const std::string& name() const;
+  virtual const std::string name() const=0;
 
   // IAlgorithm methods	  
-  virtual const std::string& version() const;
+  virtual const std::string version() const=0;
   void initialize();
   void execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
@@ -126,9 +126,6 @@ private:
   /// Put any output workspaces into the AnalysisDataService
   void store();
   void fillHistory(dateAndTime, timeDuration);
-
-  std::string m_name; ///< Algorithm's name for identification
-  std::string m_version; ///< Algorithm's version
 
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;

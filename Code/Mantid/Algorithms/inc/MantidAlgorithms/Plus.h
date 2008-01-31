@@ -62,6 +62,8 @@ namespace Mantid
       Plus() : CommutativeBinaryOperation() {};
       /// Destructor
       virtual ~Plus() {};
+      virtual const std::string name() const { return "Plus";};///< Algorithm's name for identification
+      virtual const std::string version() const { return "1";};///< Algorithm's name for identification
 
     private:
       // Overridden BinaryOperation methods
