@@ -2,7 +2,7 @@
 #include <iomanip>
 #include <ctime>
 #include "Benchmark.h"
-#include "MantidAPI\IAlgorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
