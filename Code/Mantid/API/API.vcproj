@@ -186,10 +186,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\BoostPythonWrapper.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\EnvironmentHistory.cpp"
 				>
 			</File>

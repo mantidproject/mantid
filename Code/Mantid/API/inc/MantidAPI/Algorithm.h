@@ -78,10 +78,10 @@ public:
   Algorithm();
   virtual ~Algorithm();
 
-  virtual const std::string name() const=0;
+  virtual const std::string name() {return "UNKNOWN";}
 
   // IAlgorithm methods	  
-  virtual const std::string version() const=0;
+  virtual const std::string version() {return "UNKNOWN";}
   void initialize();
   void execute();
   virtual bool isInitialized() const; // Protected in Gaudi version

@@ -15,6 +15,8 @@ class ToyAlgorithm2 : public Algorithm
 public:
   ToyAlgorithm2() {}
   virtual ~ToyAlgorithm2() {}
+  virtual const std::string name() const { return "ToyAlgorithm2";};///< Algorithm's name for identification
+  virtual const std::string version() const { return "1";};///< Algorithm's version for identification
   void init()
   { declareProperty("Prop","");
     declareProperty("P2","");
