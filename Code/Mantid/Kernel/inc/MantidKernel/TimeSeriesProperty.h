@@ -74,12 +74,9 @@ public:
 
     while ( p != m_propertySeries.end() )
     {
-      // asctime has the annoying feature of appending a '\n'
-      // hence the reason of first reading in the data-time into str
-      // before printing out this string minus the '\n'
-
-      std::string str(asctime(localtime(&(p->first))));
-      ins << str.substr(0,str.size()-1) << "  " << p->second << std::endl;
+      char buffer [25];
+      strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&(p->first)));
+      ins << buffer << "  " << p->second << std::endl;
       p++;
     }
 
@@ -115,22 +112,22 @@ private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
   std::time_t createTime_t_FromString(const std::string &str)
   {
-    struct std::tm * time_since_1990;
+    struct std::tm * time_since_1900;
  
     // create tm struct
 
     time_t rawtime;
     time( &rawtime );
-    time_since_1990 = localtime( &rawtime );
+    time_since_1900 = localtime( &rawtime );
 
-    time_since_1990->tm_year = atoi(str.substr(0,4).c_str()) - 1900;
-    time_since_1990->tm_mon = atoi(str.substr(5,2).c_str()) - 1;
-    time_since_1990->tm_mday = atoi(str.substr(8,2).c_str());
-    time_since_1990->tm_hour = atoi(str.substr(11,2).c_str());
-    time_since_1990->tm_min = atoi(str.substr(14,2).c_str());
-    time_since_1990->tm_sec = atoi(str.substr(17,2).c_str());
+    time_since_1900->tm_year = atoi(str.substr(0,4).c_str()) - 1900;
+    time_since_1900->tm_mon = atoi(str.substr(5,2).c_str()) - 1;
+    time_since_1900->tm_mday = atoi(str.substr(8,2).c_str());
+    time_since_1900->tm_hour = atoi(str.substr(11,2).c_str());
+    time_since_1900->tm_min = atoi(str.substr(14,2).c_str());
+    time_since_1900->tm_sec = atoi(str.substr(17,2).c_str());
 
-    return mktime(time_since_1990);
+    return mktime(time_since_1900);
   }
 
   /// static reference to the logger class

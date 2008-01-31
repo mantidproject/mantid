@@ -86,7 +86,10 @@ public:
   void TestMissingProperty()
   {
 	  //Mantid.noses is not defined in the properties script 
-	  TS_ASSERT_THROWS_ANYTHING( std::string legCountString = configSvc->getString("mantid.noses"));
+	  std::string noseCountString = configSvc->getString("mantid.noses");
+    //this should return an empty string
+
+	  TS_ASSERT_EQUALS(noseCountString, "");
   }
   
  

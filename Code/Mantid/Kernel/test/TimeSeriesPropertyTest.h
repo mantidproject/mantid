@@ -62,11 +62,11 @@ public:
 	void testValue()
 	{
     const std::string dString = dProp->value();
-    TS_ASSERT_EQUALS( dString.substr(0,30), "Fri Nov 30 16:17:00 2007  9.99" );
+    TS_ASSERT_EQUALS( dString.substr(0,27), "2007-Nov-30 16:17:00  9.99\n" );
     const std::string iString = iProp->value();
-    TS_ASSERT_EQUALS( iString.substr(0,27), "Fri Nov 30 16:17:00 2007  1" );
+    TS_ASSERT_EQUALS( iString.substr(0,24), "2007-Nov-30 16:17:00  1\n" );
     const std::string sString = sProp->value();
-    TS_ASSERT_EQUALS( sString.substr(0,30), "Fri Nov 30 16:17:00 2007  test" );
+    TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
 	}
 
 	void testCasting()
