@@ -15,12 +15,12 @@ namespace API
     const std::vector<AlgorithmParameter>& parameters):
     m_name(name),
     m_version(version),
-    m_executionDuration(duration),
     m_executionDate(start),
+    m_executionDuration(duration),
     m_parameters(parameters)
 {  
-
-  }
+}
+  
 /// Default Constructor
 AlgorithmHistory::AlgorithmHistory()
 // strings have their own default constructor
@@ -39,9 +39,10 @@ AlgorithmHistory::~AlgorithmHistory()
 
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A)
 :
-m_name(A.m_name),m_version(A.m_version),m_executionDuration(A.m_executionDuration),
-m_executionDate(A.m_executionDate),m_parameters(A.m_parameters)
-{}
+m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
+m_executionDuration(A.m_executionDuration),m_parameters(A.m_parameters)
+{
+}
 
 AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
   {

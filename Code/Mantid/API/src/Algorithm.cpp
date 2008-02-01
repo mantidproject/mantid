@@ -273,16 +273,16 @@ fill each inout with each input history
       if(iflag)
       {
         //loop over input workspaces to fill output workspace history with constituent input histories
-        for (int j=0; j<inW_History.size();j++)
+        for (unsigned int j=0; j<inW_History.size();j++)
         { 
           std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
           if(  in_algH.size() != 0)
           {
             //loop over number of output workspaces
-            for (int i=0; i<outW_History.size();i++)
+            for (unsigned int i=0; i<outW_History.size();i++)
             {
               // copy each algorithmhistory from each input workspace into the out history
-              for(int k=0; k<in_algH.size();k++)
+              for(unsigned int k=0; k<in_algH.size();k++)
               {
                 std::vector<AlgorithmHistory>& out_algH = outW_History[i].getAlgorithms();
                 out_algH.push_back(in_algH[k]);
@@ -295,16 +295,16 @@ fill each inout with each input history
       if(ioflag)
       {
         //loop over inout workspaces to fill output workspace history with constituent inout histories
-        for (int j=0; j<inoutW_History.size();j++)
+        for (unsigned int j=0; j<inoutW_History.size();j++)
         { 
           std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
           if(  inout_algH.size() != 0)
           {
             //loop over number of output workspaces
-            for (int i=0; i<outW_History.size();i++)
+            for (unsigned int i=0; i<outW_History.size();i++)
             {
               // copy each algorithmhistory from each inout workspace into the out history
-              for(int k=0; k<inout_algH.size();k++)
+              for(unsigned int k=0; k<inout_algH.size();k++)
               {
                 std::vector<AlgorithmHistory>& out_algH = outW_History[i].getAlgorithms();
                 out_algH.push_back(inout_algH[k]);
@@ -318,18 +318,18 @@ fill each inout with each input history
       if(ioflag)
       {
         //loop over inout workspaces to fill inout workspace history other inout histories
-        for (int j=0; j<inoutW_History.size();j++)
+        for (unsigned int j=0; j<inoutW_History.size();j++)
         { 
           std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
           if(  inout_algH.size() != 0)
           {
-            for (int i=0; i<inoutW_History.size();i++)
+            for (unsigned int i=0; i<inoutW_History.size();i++)
             {
               // don't want to copy the history of an inout workspace into itself
               if(i!=j)
               {          
                 // copy each algorithmhistory from each inout workspace into each inout history (except for the same one)
-                for(int k=0; k<inout_algH.size();k++)
+                for(unsigned int k=0; k<inout_algH.size();k++)
                 {
                   std::vector<AlgorithmHistory>& out_algH = inoutW_History[i].getAlgorithms();
                   out_algH.push_back(inout_algH[k]);
@@ -342,16 +342,16 @@ fill each inout with each input history
       if(iflag && ioflag)
       {
         //loop over input workspaces to fill inout workspace history with constituent input histories
-        for (int j=0; j<inW_History.size();j++)
+        for (unsigned int j=0; j<inW_History.size();j++)
         { 
           std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
           if(  in_algH.size() != 0)
           {
             //loop over number of output workspaces
-            for (int i=0; i<inoutW_History.size();i++)
+            for (unsigned int i=0; i<inoutW_History.size();i++)
             {
               // copy each algorithmhistory from each input workspace into the out history
-              for(int k=0; k<in_algH.size();k++)
+              for(unsigned int k=0; k<in_algH.size();k++)
               {
                 std::vector<AlgorithmHistory>& out_algH = inoutW_History[i].getAlgorithms();
                 out_algH.push_back(in_algH[k]);
