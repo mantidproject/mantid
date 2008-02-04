@@ -40,10 +40,10 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class ManagedDataBlock2D
+class DLLExport ManagedDataBlock2D
 {
-  friend std::fstream& operator<<(std::fstream&, ManagedDataBlock2D&);
-  friend std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
+  friend DLLExport std::fstream& operator<<(std::fstream&, ManagedDataBlock2D&);
+  friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:
 	ManagedDataBlock2D(const unsigned int &minIndex, const unsigned int &noVectors, const unsigned int &XLength, const unsigned int &YLength);
