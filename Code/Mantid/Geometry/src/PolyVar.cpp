@@ -620,7 +620,6 @@ PolyVar<VCount>::write(std::ostream& OX) const
 
 /// \cond TEMPLATE
 
-template class PolyVar<1>;   // f(x) 
 template class PolyVar<2>;   // f(x,y)
 template class PolyVar<3>;   // f(x,y,z)
 
