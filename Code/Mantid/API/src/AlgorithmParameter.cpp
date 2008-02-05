@@ -38,7 +38,10 @@ AlgorithmParameter::AlgorithmParameter(const AlgorithmParameter& A)
     m_type(A.m_type),m_isDefault(A.m_isDefault),m_direction(A.m_direction)
 {}
 
-
+/*!
+  Standard Assignment operator
+  \param A :: AlgorithmParameter Item to assign to 'this'
+*/
 AlgorithmParameter& AlgorithmParameter::operator=(const AlgorithmParameter& A)
 {
   if (this!=&A)

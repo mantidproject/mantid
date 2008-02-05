@@ -115,7 +115,9 @@ public:
   ///Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const =0;
 
+  ///Returns a reference to the WorkspaceHistory
   WorkspaceHistory& getWorkspaceHistory() { return m_history; }
+  ///Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
 
 

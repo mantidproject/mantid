@@ -5,23 +5,21 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmParameter.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include <ctime>
 #include <vector>
 
 namespace Mantid
 {
-namespace API
-{
+  namespace API
+  {
 
-/** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
+    /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
     This class stores information about the Command History used by algorithms on a workspace.
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -38,39 +36,35 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport AlgorithmHistory
-{
-public:
-    /// The date-and-time will be stored as the boost ptime type
-  typedef boost::posix_time::ptime dateAndTime;
-  typedef boost::posix_time::time_duration timeDuration;
-  AlgorithmHistory();
-  AlgorithmHistory(const std::string&, const std::string&, 
-    const dateAndTime&, const timeDuration&,
-    const std::vector<AlgorithmParameter>&);
-	virtual ~AlgorithmHistory();
-  AlgorithmHistory& operator=(const AlgorithmHistory&);
-  AlgorithmHistory(const AlgorithmHistory&);
-  void addparam(std::string, std::string, std::string, bool, unsigned int);
-  void setduration(timeDuration);
-private:
-  /// The name of the Algorithm
-  std::string m_name;
-  /// The version of the algorithm
-  std::string m_version;
-  /// The execution date of the algorithm
-  dateAndTime m_executionDate;
-    /// The execution duration of the algorithm
-  timeDuration m_executionDuration;
-  std::vector<AlgorithmParameter> m_parameters;
-
-};
-
-} // namespace API
+    */
+    class DLLExport AlgorithmHistory
+    {
+    public:
+      /// The date-and-time will be stored as the ctime time_t type
+      typedef time_t dateAndTime;
+      AlgorithmHistory();
+      AlgorithmHistory(const std::string&, const std::string&, 
+        const dateAndTime&, const double&,
+        const std::vector<AlgorithmParameter>&);
+      virtual ~AlgorithmHistory();
+      AlgorithmHistory& operator=(const AlgorithmHistory&);
+      AlgorithmHistory(const AlgorithmHistory&);
+    private:
+      /// The name of the Algorithm
+      std::string m_name;
+      /// The version of the algorithm
+      std::string m_version;
+      /// The execution date of the algorithm
+      dateAndTime m_executionDate;
+      /// The execution duration of the algorithm
+      double m_executionDuration;
+      /// The AlgorithmParameter's defined for each the algorithm
+      std::vector<AlgorithmParameter> m_parameters;
+    };
+  } // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_ALGORITHMHISTORY_H_*/

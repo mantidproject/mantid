@@ -84,7 +84,9 @@ namespace Mantid
     */
     void Algorithm::execute()
     {
-      dateAndTime start,end,duration;
+      clock_t start,end;
+      time_t start_time;
+      double duration;
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
@@ -103,10 +105,11 @@ namespace Mantid
       {
         try
         {
-          start = boost::posix_time::microsec_clock::local_time();
+          time(&start_time);
+          start = clock();
           // Call the concrete algorithm's exec method
           this->exec();
-          end = boost::posix_time::microsec_clock::local_time();
+          end = clock();
         }
         catch(std::runtime_error& ex)
         {
@@ -122,7 +125,7 @@ namespace Mantid
         // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
         if (!isChild())
         { 
-          fillHistory(start,end - start);
+          fillHistory(start,double(end - start)/CLOCKS_PER_SEC);
           this->store();
         }
         setExecuted(true);	
@@ -226,7 +229,7 @@ namespace Mantid
 
     /** Fills History, Algorithm History and Algorithm Parameters
     */
-    void Algorithm::fillHistory(dateAndTime start,timeDuration duration)
+    void Algorithm::fillHistory(dateAndTime start,double duration)
     {     
       //std::vector<AlgorithmParameter>* algParameters = new std::vector<AlgorithmParameter>;
       //references didn't work as not initialised

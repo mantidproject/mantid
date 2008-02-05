@@ -26,7 +26,6 @@ namespace Mantid
 namespace API
 {
   typedef AlgorithmHistory::dateAndTime dateAndTime;
-  typedef AlgorithmHistory::timeDuration timeDuration;
   ///Typedef for a shared pointer to an Algorithm
   typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 
@@ -78,10 +77,10 @@ public:
   Algorithm();
   virtual ~Algorithm();
 
-  virtual const std::string name() {return "UNKNOWN";}
+  virtual const std::string name() const {return "UNKNOWN";}
 
   // IAlgorithm methods	  
-  virtual const std::string version() {return "UNKNOWN";}
+  virtual const std::string version() const {return "UNKNOWN";}
   void initialize();
   void execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
@@ -125,7 +124,7 @@ private:
 
   /// Put any output workspaces into the AnalysisDataService
   void store();
-  void fillHistory(dateAndTime, timeDuration);
+  void fillHistory(dateAndTime, double);
 
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;

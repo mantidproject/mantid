@@ -57,6 +57,7 @@ private:
   std::string m_type;
   /// flag defining if the parameter is a default or a user-defined parameter
   bool m_isDefault;
+  /// direction of parameter
   unsigned int m_direction;
 };
 
