@@ -44,7 +44,8 @@ if os.name == 'nt':
 
 	for file in os.listdir(libDir):
         	if file.endswith('.dll'):
-                	libList.append(file.replace('.dll',''))
+			if (file.find('boost')==-1):
+	                	libList.append(file.replace('.dll',''))
 
 #python and boost
 	libDirList.append(python_path + '/libs/')
