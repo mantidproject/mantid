@@ -165,9 +165,12 @@ env.Replace(STATIC_LIST=static_libraries)
 ret = SConscript('Main/SConscript')
 
 # tests
-cxxtestgen = env.WhereIs('cxxtestgen.py')
-if cxxtestgen != None :
+if os.name == 'nt':
 	ret = SConscript('Build/Tests/SConscript')
-else :
-	print 'CXXTESTGEN is not installed - tests will not be built'
+else:
+	cxxtestgen = env.WhereIs('cxxtestgen.py')
+	if cxxtestgen != None :
+		ret = SConscript('Build/Tests/SConscript')
+	else :
+		print 'CXXTESTGEN is not installed - tests will not be built'
 
