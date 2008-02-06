@@ -8,17 +8,17 @@
 #include <string>
 namespace Mantid
 {
-namespace API
-{
+  namespace API
+  {
 
 
-/** @class AlgorithmParameter AlgorithmParameter.h API/MAntidAPI/AlgorithmParameter.h
+    /** @class AlgorithmParameter AlgorithmParameter.h API/MAntidAPI/AlgorithmParameter.h
 
     This class stores information about the parameters used by an algorithm.
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -35,33 +35,42 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport AlgorithmParameter
-{
-public:
-  AlgorithmParameter();
-  AlgorithmParameter(const std::string& , const std::string&, const std::string& , const bool& , const unsigned int&);
-  AlgorithmParameter(const AlgorithmParameter&);
-  AlgorithmParameter& operator=(const AlgorithmParameter&);
-	virtual ~AlgorithmParameter();
+    */
+    class DLLExport AlgorithmParameter
+    {
+    public:
+      AlgorithmParameter();
+      AlgorithmParameter(const std::string& , const std::string&, const std::string& , const bool& , const unsigned int&);
+      AlgorithmParameter(const AlgorithmParameter&);
+      AlgorithmParameter& operator=(const AlgorithmParameter&);
+      virtual ~AlgorithmParameter();
+      /// get name of algorithm parameter const
+      const std::string& name()const {return m_name;};
+      /// get value of algorithm parameter const
+      const std::string& value()const {return m_value;};
+      /// get type of algorithm parameter const
+      const std::string& type()const {return m_type;};
+      /// get isdefault flag of algorithm parameter const
+      const bool& isDefault()const {return m_isDefault;};
+      /// get direction flag of algorithm parameter const
+      const unsigned int& direction()const {return m_direction;};
+    private:
+      /// The name of the parameter
+      std::string m_name;
+      /// The value of the parameter
+      std::string m_value;
+      /// The type of the parameter
+      std::string m_type;
+      /// flag defining if the parameter is a default or a user-defined parameter
+      bool m_isDefault;
+      /// direction of parameter
+      unsigned int m_direction;
+    };
 
-private:
-  /// The name of the parameter
-  std::string m_name;
-  /// The value of the parameter
-  std::string m_value;
-  /// The type of the parameter
-  std::string m_type;
-  /// flag defining if the parameter is a default or a user-defined parameter
-  bool m_isDefault;
-  /// direction of parameter
-  unsigned int m_direction;
-};
-
-} // namespace API
+  } // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_ALGORITHMPARAMETER_H_*/

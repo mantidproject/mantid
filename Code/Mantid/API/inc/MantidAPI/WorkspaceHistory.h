@@ -53,9 +53,9 @@ public:
   WorkspaceHistory(const WorkspaceHistory&);
   WorkspaceHistory& operator=(const WorkspaceHistory& );
   ///Returns a reference to the algorithmHistory
-  std::vector<AlgorithmHistory>& getAlgorithms() { return m_algorithms; }
+  std::vector<AlgorithmHistory>& getAlgorithms() { return m_algorithms; };
   ///Returns a reference to the algorithmHistory const
-  const std::vector<AlgorithmHistory>& getAlgorithms() const { return m_algorithms; }
+  const std::vector<AlgorithmHistory>& getAlgorithms() const { return m_algorithms; };
 
 private:
   /// The environment of the workspace

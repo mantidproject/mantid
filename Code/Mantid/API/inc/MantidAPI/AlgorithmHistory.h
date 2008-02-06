@@ -52,6 +52,13 @@ namespace Mantid
       virtual ~AlgorithmHistory();
       AlgorithmHistory& operator=(const AlgorithmHistory&);
       AlgorithmHistory(const AlgorithmHistory&);
+      // get functions
+      /// get name of algorithm in history const
+      const std::string& name()const {return m_name;};
+      /// get version number of algorithm in history const
+      const std::string& version()const {return m_version;};
+      /// get parameter list of algorithm in history const
+      const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;};
     private:
       /// The name of the Algorithm
       std::string m_name;
