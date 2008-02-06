@@ -28,6 +28,9 @@ namespace API
 //----------------------------------------------------------------------
 class Workspace;
 
+///shared pointer to the workspace base class
+typedef boost::shared_ptr<Workspace> Workspace_sptr;
+
 /** @class WorkspaceFactory WorkspaceFactory.h Kernel/WorkspaceFactory.h
 
     The WorkspaceFactory class is in charge of the creation of all types
@@ -65,6 +68,13 @@ public:
   
   // Returns the single instance of the factory
   static WorkspaceFactory* Instance();
+  
+  // Unhide the inherited create method
+  using Kernel::DynamicFactory<Workspace>::create;
+  
+  Workspace_sptr create(const Workspace_sptr& parent) const;
+  Workspace_sptr create(const std::string& className, const int& NVectors, 
+                                   const int& XLength, const int& YLength) const;
   
 private:
   

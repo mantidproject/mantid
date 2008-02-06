@@ -9,7 +9,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/Workspace2D.h" 
+#include "MantidDataObjects/ManagedWorkspace2D.h" 
 
 /** @class Benchmark Benchmark.h Kernel/Benchmark.h
 

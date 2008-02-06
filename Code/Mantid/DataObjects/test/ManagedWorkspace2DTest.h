@@ -64,7 +64,7 @@ public:
     }
 
     // Test all is as it should be with the temporary file
-    fstream file("testInit.tmp", ios::in | ios::binary);
+    fstream file("WS2D3testInit.tmp", ios::in | ios::binary);
     TS_ASSERT(file);
 
     unsigned int numberOfVectors;

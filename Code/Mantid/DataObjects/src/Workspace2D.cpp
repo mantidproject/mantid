@@ -217,11 +217,13 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_t
   data[histnumber].setData(PY,PE);
   return;
 }
+
 /**
     Sets the data in the workspace
 	\param histnumber The histogram to be set
 	\param PY A reference counted data range	
 	\param PE A reference containing the corresponding errors
+  \param PE2 A reference containing the corresponding error second value	
 */
 void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
 			  const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)

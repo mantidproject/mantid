@@ -67,6 +67,7 @@ void FrameworkManager::initialize()
 void FrameworkManager::clear()
 {
   algManager->clear();
+  data->clear();
 }
 
 /** Creates an instance of an algorithm

@@ -126,7 +126,7 @@ namespace Mantid
       //get the largest workspace
       const API::Workspace_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
       //create a new workspace
-      API::Workspace_sptr retVal = (API::WorkspaceFactory::Instance()->create(wsLarger->id()));
+      API::Workspace_sptr retVal = API::WorkspaceFactory::Instance()->create(wsLarger);
       //this needs to be set to the size of the larger workspace and 0 filled
       Workspace1D* ws1d = dynamic_cast<Workspace1D*>(retVal.get());
       if (ws1d != 0)

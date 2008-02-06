@@ -111,6 +111,7 @@ public:
 	
   /// Returns the histogram number
   virtual const int getHistogramNumber() const;
+  virtual void setHistogramNumber(int const) {}  // Does nothing
 
   virtual void setX(const int histnumber, const std::vector<double>&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype&);
@@ -146,9 +147,7 @@ private:
   ManagedWorkspace2D(const ManagedWorkspace2D&);
   /// Private copy assignment operator
   ManagedWorkspace2D& operator=(const ManagedWorkspace2D&);
-  
-  virtual void setHistogramNumber(int const) {}  // will not be allowed  
-  
+    
   ManagedDataBlock2D* getDataBlock(const int index) const;
   
   /// The number of vectors in the workspace
@@ -168,6 +167,9 @@ private:
   /// The stream handle to the temporary file used to store the data
   mutable std::fstream m_datafile;
 
+  /// Static instance count. Used to ensure temporary filenames are distinct.
+  static int g_uniqueID;
+  
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };

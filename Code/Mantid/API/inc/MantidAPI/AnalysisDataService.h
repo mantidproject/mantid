@@ -58,6 +58,7 @@ public:
   void add( const std::string& name, Workspace_sptr space );
   void addOrReplace( const std::string& name, Workspace_sptr space);
   void remove( const std::string& name );
+  void clear();
   Workspace_sptr retrieve( const std::string& name );	
 	
 private:

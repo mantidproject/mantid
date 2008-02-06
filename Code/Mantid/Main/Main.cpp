@@ -26,5 +26,6 @@ int main()
 
 
 #endif
+  fm->clear();
 	exit(0);
 }

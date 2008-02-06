@@ -108,6 +108,13 @@ void AnalysisDataService::remove(const std::string& name)
   return;
 }
 
+/// Clears all workspaces from the data service store
+void AnalysisDataService::clear()
+{
+  m_spaces.clear();
+  return;
+}
+
 /** Retrieve a pointer to a workspace by name.
  * 
  *  @param name The name of the desired workspace

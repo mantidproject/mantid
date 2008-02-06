@@ -64,6 +64,9 @@ public:
   Workspace2D& operator=(const Workspace2D&);
   virtual ~Workspace2D();
 
+  /// For now, does nothing
+  virtual void init(const unsigned int&,const unsigned int&,const unsigned int&) {}
+  
   virtual void setHistogramNumber(int const);
 
   virtual void setX(int const, const std::vector<double>&);
@@ -83,7 +86,7 @@ public:
 
   
   /// Returns the histogram number
-  const int getHistogramNumber() const;
+  virtual const int getHistogramNumber() const;
 
   //section required for iteration
   virtual int size() const;       

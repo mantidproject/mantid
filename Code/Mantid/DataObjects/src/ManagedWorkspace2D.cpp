@@ -11,18 +11,23 @@ namespace Mantid
 namespace DataObjects
 {
 
+// Initialise the instance count
+int ManagedWorkspace2D::g_uniqueID = 1;
+
 // Get a reference to the logger
 Kernel::Logger& ManagedWorkspace2D::g_log = Kernel::Logger::get("ManagedWorkspace2D");
 
 /// Constructor
 ManagedWorkspace2D::ManagedWorkspace2D() :
   Workspace2D(), m_bufferedData(100, *this)
-{}
+{
+}
 
 /** Sets the size of the workspace and sets up the temporary file
  *  @param NVectors The number of vectors/histograms/detectors in the workspace
  *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
  *  @param YLength The number of data/error points in each vector (must all be the same)
+ *  @throw std::runtime_error if unable to open a temporary file
  */
 void ManagedWorkspace2D::init(const unsigned int &NVectors, const unsigned int &XLength, const unsigned int &YLength)
 {
@@ -30,22 +35,52 @@ void ManagedWorkspace2D::init(const unsigned int &NVectors, const unsigned int &
   m_XLength = XLength;
   m_YLength = YLength;
   
-  // should also get path to put file in out of properties
-  m_filename = this->getTitle() + ".tmp";
+  Kernel::ConfigService* configSvc = Kernel::ConfigService::Instance();
+  // Look for the (optional) path from the configuration file
+  std::string path = configSvc->getString("ManagedWorkspace.FilePath");
+  if ( !path.empty() )
+  {
+    if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
+    {
+      path.push_back('/');
+    }
+  }
+ 
+  std::stringstream filestem;
+  filestem << "WS2D" << ManagedWorkspace2D::g_uniqueID;
+  m_filename = filestem.str() + this->getTitle() + ".tmp";
+  // Increment the instance count
+  ++ManagedWorkspace2D::g_uniqueID;
+  std::string fileToOpen = path + m_filename;
+
   // Create the temporary file
-  m_datafile.open(m_filename.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+  m_datafile.open(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+
   if ( ! m_datafile )
   {
-    g_log.error("Unable to open temporary data file.");
-    // This would be a big problem - probably need to throw
+    m_datafile.clear();
+    // Try to open in current working directory instead
+    m_datafile.open(m_filename.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+    
+    // Throw an exception if it still doesn't work
+    if ( ! m_datafile )
+    {
+      g_log.error("Unable to open temporary data file");
+      throw std::runtime_error("ManagedWorkspace2D: Unable to open temporary data file");
+    }
   }
-  // Set exception flags for fstream so that any problems will throw
+  else
+  {
+    m_filename = fileToOpen;
+  }
+
+  // Set exception flags for fstream so that any problems from now on will throw
   m_datafile.exceptions( std::fstream::eofbit | std::fstream::failbit | std::fstream::badbit );
   
   // CALCULATE BLOCKSIZE
   // Get memory size of a block from config file
   int blockMemory;
-  if ( ! Kernel::ConfigService::Instance()->getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
+  if ( ! configSvc->getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
       || blockMemory <= 0 )
   {
     // default to 1MB if property not found
@@ -60,23 +95,25 @@ void ManagedWorkspace2D::init(const unsigned int &NVectors, const unsigned int &
 
   // Fill the temporary file
   // Header of datafile is number of detectors (i.e. Histogram1D's) in the workspace & detectors per block
-  m_datafile.write((char *) &m_noVectors, sizeof(unsigned int));
-  m_datafile.write((char *) &m_vectorsPerBlock, sizeof(unsigned int));
-  // Fill main body of file with zeroes
-  const std::vector<double> xzeroes(m_XLength, 0.0);
-  const std::vector<double> yzeroes(m_YLength, 0.0);
-  for (unsigned int i = 0; i < m_vectorsPerBlock*numberOfBlocks; ++i) 
-  {
-    m_datafile.write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
-    m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-    m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-    m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+  try {
+    m_datafile.write((char *) &m_noVectors, sizeof(unsigned int));
+    m_datafile.write((char *) &m_vectorsPerBlock, sizeof(unsigned int));
+    // Fill main body of file with zeroes
+    const std::vector<double> xzeroes(m_XLength, 0.0);
+    const std::vector<double> yzeroes(m_YLength, 0.0);
+    for (unsigned int i = 0; i < m_vectorsPerBlock*numberOfBlocks; ++i) 
+    {
+      m_datafile.write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
+      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+    }
   }
-  // Check we didn't run out of diskspace or something
-  if ( m_datafile.fail() )
+  // Thrown if we run out of diskspace or something
+  catch (std::ios_base::failure ex)
   {
-    g_log.error("Unable to write temporary file");
-    // probably throw
+    g_log.error() << "Unable to write temporary file for workspace " << this->getTitle();
+    throw;
   }
   // Wondering if I could have file grow only if necessary, or if this would actually be slower
 }
@@ -383,8 +420,16 @@ ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
   
   // If not found, need to load block into memory and mru list
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
-  int seekPoint = ( 2 * sizeof(unsigned int) ) + ( startIndex * (m_XLength + ( 3*m_YLength )) * sizeof(double) );
-  m_datafile.seekg(seekPoint, std::ios::beg);
+  long seekPoint = ( 2 * sizeof(unsigned int) ) + ( startIndex * (m_XLength + ( 3*m_YLength )) * sizeof(double) );
+  if (seekPoint > 2147483647)
+  {
+    m_datafile.seekg(2147483647, std::ios::beg);
+    m_datafile.seekg((seekPoint-2147483647), std::ios::cur);
+  }
+  else
+  {
+    m_datafile.seekg(seekPoint, std::ios::beg);
+  }
   m_datafile >> *newBlock;
   m_bufferedData.insert(newBlock);
   return newBlock;
@@ -422,8 +467,16 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
     ManagedDataBlock2D *toWrite = il.back();
     if ( toWrite->hasChanges() )
     {
-      int seekPoint = ( 2 * sizeof(unsigned int) ) + toWrite->minIndex() * (outer.m_XLength + ( 3*outer.m_YLength )) * sizeof(double);
-      outer.m_datafile.seekp(seekPoint, std::ios::beg);
+      long seekPoint = ( 2 * sizeof(unsigned int) ) + toWrite->minIndex() * (outer.m_XLength + ( 3*outer.m_YLength )) * sizeof(double);
+      if (seekPoint > 2147483647)
+      {
+        outer.m_datafile.seekp(2147483647, std::ios::beg);
+        outer.m_datafile.seekp((seekPoint-2147483647), std::ios::cur);
+      }
+      else
+      {
+        outer.m_datafile.seekp(seekPoint, std::ios::beg);
+      }
       outer.m_datafile << *toWrite;
     }
     il.pop_back();
