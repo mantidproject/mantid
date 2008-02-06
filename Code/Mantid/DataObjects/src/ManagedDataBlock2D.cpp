@@ -19,10 +19,14 @@ Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBloc
  *  @param XLength  The number of elements in the X data
  *  @param YLength  The number of elements in the Y/E/E2 data
  */
-ManagedDataBlock2D::ManagedDataBlock2D(const unsigned int &minIndex, const unsigned int &NVectors, 
-    const unsigned int &XLength, const unsigned int &YLength) :
+ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors, 
+    const int &XLength, const int &YLength) :
   m_data(NVectors), m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_hasChanges(false)
 {
+  if (minIndex < 0 || NVectors < 0 || XLength < 0 || YLength < 0)
+  {
+    throw std::out_of_range("All arguments to ManagedDataBlock constructor must be positive");
+  }
 }
 
 /// Virtual destructor
@@ -31,7 +35,7 @@ ManagedDataBlock2D::~ManagedDataBlock2D()
 }
 
 /// The minimum index of the workspace data that this data block contains
-unsigned int ManagedDataBlock2D::minIndex() const
+int ManagedDataBlock2D::minIndex() const
 {
   return m_minIndex;
 }
@@ -52,7 +56,7 @@ bool ManagedDataBlock2D::hasChanges() const
  */
 void ManagedDataBlock2D::setX(const int index, const std::vector<double>& vec)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
@@ -68,7 +72,7 @@ void ManagedDataBlock2D::setX(const int index, const std::vector<double>& vec)
  */
 void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype::ptr_type& vec)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
@@ -84,7 +88,7 @@ void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype::ptr_ty
  */
 void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype& PA)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
@@ -100,7 +104,7 @@ void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype& PA)
  */
 void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -118,7 +122,7 @@ void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec
 void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec,
     const std::vector<double>& vecErr)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -138,7 +142,7 @@ void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec
 void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec,
     const std::vector<double>& vecErr, const std::vector<double>& vecErr2)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -156,7 +160,7 @@ void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec
  */
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -174,7 +178,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY)
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
     const Histogram1D::RCtype& PE)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -193,7 +197,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
     const Histogram1D::RCtype& PE, const Histogram1D::RCtype& PE2)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -211,7 +215,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr_type& PY,
     const Histogram1D::RCtype::ptr_type& PE)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -230,7 +234,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr_type& PY,
     const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
@@ -246,7 +250,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr
 */
 std::vector<double>& ManagedDataBlock2D::dataX(const int index)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
 
@@ -261,7 +265,7 @@ std::vector<double>& ManagedDataBlock2D::dataX(const int index)
 */
 std::vector<double>& ManagedDataBlock2D::dataY(const int index)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
 
@@ -276,7 +280,7 @@ std::vector<double>& ManagedDataBlock2D::dataY(const int index)
 */
 std::vector<double>& ManagedDataBlock2D::dataE(const int index)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
 
@@ -291,7 +295,7 @@ std::vector<double>& ManagedDataBlock2D::dataE(const int index)
 */
 std::vector<double>& ManagedDataBlock2D::dataE2(const int index)
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE2, histogram number out of range");
 
@@ -306,7 +310,7 @@ std::vector<double>& ManagedDataBlock2D::dataE2(const int index)
 */
 const std::vector<double>& ManagedDataBlock2D::dataX(const int index) const
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
 
@@ -320,7 +324,7 @@ const std::vector<double>& ManagedDataBlock2D::dataX(const int index) const
 */
 const std::vector<double>& ManagedDataBlock2D::dataY(const int index) const
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
 
@@ -334,7 +338,7 @@ const std::vector<double>& ManagedDataBlock2D::dataY(const int index) const
 */
 const std::vector<double>& ManagedDataBlock2D::dataE(const int index) const
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
 
@@ -348,7 +352,7 @@ const std::vector<double>& ManagedDataBlock2D::dataE(const int index) const
 */
 const std::vector<double>& ManagedDataBlock2D::dataE2(const int index) const
 {
-  if ( ( index < static_cast<int>(m_minIndex) ) 
+  if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE2, histogram number out of range");
 
@@ -365,25 +369,25 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
   {
     // If anyone's gone and changed the size of the vectors then get them back to the
     // correct size, removing elements or adding zeroes as appropriate.
-    if (it->dataX().size() != data.m_XLength)
+    if (it->dataX().size() != static_cast<unsigned int>(data.m_XLength))
     {
       it->dataX().resize(data.m_XLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "X vector resized to " << data.m_XLength << " elements.";
     }
     fs.write((char *) &*it->dataX().begin(), data.m_XLength * sizeof(double));
-    if (it->dataY().size() != data.m_YLength)
+    if (it->dataY().size() != static_cast<unsigned int>(data.m_YLength))
     {
       it->dataY().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "Y vector resized to " << data.m_YLength << " elements.";
     }
     fs.write((char *) &*it->dataY().begin(), data.m_YLength * sizeof(double));
-    if (it->dataE().size() != data.m_YLength)
+    if (it->dataE().size() != static_cast<unsigned int>(data.m_YLength))
     {
       it->dataE().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
     fs.write((char *) &*it->dataE().begin(), data.m_YLength * sizeof(double));
-    if (it->dataE2().size() != data.m_YLength)
+    if (it->dataE2().size() != static_cast<unsigned int>(data.m_YLength))
     {
       it->dataE2().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "E2 vector resized to " << data.m_YLength << " elements.";

@@ -86,7 +86,8 @@ public:
 
   
   /// Returns the histogram number
-  virtual const int getHistogramNumber() const;
+  // @TODO VS can't handle this being virtual for some reason - need to figure out a solution
+   const int getHistogramNumber() const;
 
   //section required for iteration
   virtual int size() const;       

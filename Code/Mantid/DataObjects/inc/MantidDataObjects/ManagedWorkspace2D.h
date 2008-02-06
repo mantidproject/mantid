@@ -73,7 +73,7 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
       ManagedDataBlock2D*,
       indexed_by<
         sequenced<>,
-        hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,unsigned int,minIndex)>
+        hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
 //        ordered_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
       >
     > item_list;
@@ -87,24 +87,31 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
     
   public:
     /// Import the multi index container iterator
-    typedef item_list::const_iterator const_iterator;
-    /// An iterator pointing to the beginning of the list
+    typedef item_list::nth_index<1>::type::const_iterator const_iterator;
+    /// An iterator pointing to the beginning of the list sorted by minIndex
     const_iterator begin() const
     {
-      return il.begin();
+      return il.get<1>().begin();
     }
-    /// An iterator pointing one past the end of the list
+    /// An iterator pointing one past the end of the list sorted by minIndex
     const_iterator end() const
     {
-      return il.end();
-    } 
+      return il.get<1>().end();
+    }
+    /** Find an element of the list from the key of the minIndex
+     *  @param minIndex The minIndex value to search the list for
+     */
+    const_iterator find(unsigned int minIndex) const
+    {
+      return il.get<1>().find(minIndex);
+    }
   };
 
   friend class mru_list;
   
 public:
 	ManagedWorkspace2D();
-	virtual void init(const unsigned int &NVectors, const unsigned int &XLength, const unsigned int &YLength);
+	virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 	virtual ~ManagedWorkspace2D();
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
@@ -151,13 +158,13 @@ private:
   ManagedDataBlock2D* getDataBlock(const int index) const;
   
   /// The number of vectors in the workspace
-  unsigned int m_noVectors;
+  int m_noVectors;
   /// The number of vectors in each data block
-  unsigned int m_vectorsPerBlock;
+  int m_vectorsPerBlock;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
-  unsigned int m_XLength;
+  int m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
-  unsigned int m_YLength;
+  int m_YLength;
 
   /// The most-recently-used list of buffered data blocks
   mutable mru_list m_bufferedData;

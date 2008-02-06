@@ -29,8 +29,13 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
  *  @param YLength The number of data/error points in each vector (must all be the same)
  *  @throw std::runtime_error if unable to open a temporary file
  */
-void ManagedWorkspace2D::init(const unsigned int &NVectors, const unsigned int &XLength, const unsigned int &YLength)
+void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
 {
+  if (NVectors < 0 || XLength < 0 || YLength < 0)
+  {
+    throw std::out_of_range("All arguments to init must be positive");
+  }
+  
   m_noVectors = NVectors;
   m_XLength = XLength;
   m_YLength = YLength;
@@ -90,18 +95,18 @@ void ManagedWorkspace2D::init(const unsigned int &NVectors, const unsigned int &
   m_vectorsPerBlock = blockMemory / ( ( m_XLength + ( 3*m_YLength ) ) * sizeof(double) );
   // Should this ever come out to be zero, then actually set it to 1
   if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
-  unsigned int numberOfBlocks = m_noVectors / m_vectorsPerBlock;
+  int numberOfBlocks = m_noVectors / m_vectorsPerBlock;
   if ( m_noVectors%m_vectorsPerBlock != 0 ) ++numberOfBlocks;
 
   // Fill the temporary file
   // Header of datafile is number of detectors (i.e. Histogram1D's) in the workspace & detectors per block
   try {
-    m_datafile.write((char *) &m_noVectors, sizeof(unsigned int));
-    m_datafile.write((char *) &m_vectorsPerBlock, sizeof(unsigned int));
+    m_datafile.write((char *) &m_noVectors, sizeof(int));
+    m_datafile.write((char *) &m_vectorsPerBlock, sizeof(int));
     // Fill main body of file with zeroes
     const std::vector<double> xzeroes(m_XLength, 0.0);
     const std::vector<double> yzeroes(m_YLength, 0.0);
-    for (unsigned int i = 0; i < m_vectorsPerBlock*numberOfBlocks; ++i) 
+    for (int i = 0; i < m_vectorsPerBlock*numberOfBlocks; ++i) 
     {
       m_datafile.write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
       m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
@@ -132,13 +137,13 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
 /// Returns the number of histograms
 const int ManagedWorkspace2D::getHistogramNumber() const
 {
-  return static_cast<const int>(m_noVectors);
+  return m_noVectors;
 }
 
 /// Get pseudo size
 int ManagedWorkspace2D::size() const 
 { 
-  return static_cast<int>(m_noVectors) * blocksize(); 
+  return m_noVectors * blocksize(); 
 } 
 
 /// Get the size of each vector
@@ -153,7 +158,7 @@ int ManagedWorkspace2D::blocksize() const
  */
 void ManagedWorkspace2D::setX(const int histnumber, const std::vector<double>& Vec)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
   
   getDataBlock(histnumber)->setX(histnumber, Vec);
@@ -166,7 +171,7 @@ void ManagedWorkspace2D::setX(const int histnumber, const std::vector<double>& V
  */
 void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
 
   getDataBlock(histnumber)->setX(histnumber, PA);
@@ -179,7 +184,7 @@ void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& P
  */
 void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
   
   getDataBlock(histnumber)->setX(histnumber, Vec);
@@ -192,7 +197,7 @@ void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::p
  */
 void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setDAta, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, Vec);
@@ -207,7 +212,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>
 void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
                                  const std::vector<double>& VecErr)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, Vec, VecErr);
@@ -223,7 +228,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>
 void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
                                  const std::vector<double>& VecErr, const std::vector<double>& VecErr2)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, Vec, VecErr, VecErr2);
@@ -236,7 +241,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>
  */
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY);
@@ -251,7 +256,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
         const Histogram1D::RCtype& PE)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE);
@@ -267,7 +272,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
         const Histogram1D::RCtype& PE,const Histogram1D::RCtype& PE2)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE, PE2);
@@ -282,7 +287,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
         const Histogram1D::RCtype::ptr_type& PE)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE);
@@ -298,7 +303,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
         const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
 {
-  if ( histnumber<0 || histnumber>=static_cast<int>(m_noVectors) )
+  if ( histnumber<0 || histnumber>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE, PE2);
@@ -311,7 +316,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
  */
 std::vector<double>& ManagedWorkspace2D::dataX(const int index)
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
 
   return getDataBlock(index)->dataX(index);
@@ -323,7 +328,7 @@ std::vector<double>& ManagedWorkspace2D::dataX(const int index)
  */
 std::vector<double>& ManagedWorkspace2D::dataY(const int index)
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
 
   return getDataBlock(index)->dataY(index);
@@ -335,7 +340,7 @@ std::vector<double>& ManagedWorkspace2D::dataY(const int index)
  */
 std::vector<double>& ManagedWorkspace2D::dataE(const int index)
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
 
   return getDataBlock(index)->dataE(index);
@@ -347,7 +352,7 @@ std::vector<double>& ManagedWorkspace2D::dataE(const int index)
  */
 std::vector<double>& ManagedWorkspace2D::dataE2(const int index)
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE2, histogram number out of range");
 
   return getDataBlock(index)->dataE2(index);
@@ -359,7 +364,7 @@ std::vector<double>& ManagedWorkspace2D::dataE2(const int index)
  */
 const std::vector<double>& ManagedWorkspace2D::dataX(const int index) const
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
@@ -371,7 +376,7 @@ const std::vector<double>& ManagedWorkspace2D::dataX(const int index) const
  */
 const std::vector<double>& ManagedWorkspace2D::dataY(const int index) const
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
@@ -383,7 +388,7 @@ const std::vector<double>& ManagedWorkspace2D::dataY(const int index) const
  */
 const std::vector<double>& ManagedWorkspace2D::dataE(const int index) const
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
@@ -395,7 +400,7 @@ const std::vector<double>& ManagedWorkspace2D::dataE(const int index) const
  */
 const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
 {
-  if ( index<0 || index>=static_cast<int>(m_noVectors) )
+  if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE2, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE2(index);
@@ -408,19 +413,17 @@ const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
 // not really a const method, but need to make it that so const data getters can call it
 ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
 {
-  unsigned int startIndex = index - ( index%m_vectorsPerBlock );
-  /// @TODO Work out how to make 'find' work (for now, iterate through the collection)
-  for (mru_list::const_iterator it = m_bufferedData.begin(); it != m_bufferedData.end(); ++it)
+  int startIndex = index - ( index%m_vectorsPerBlock );
+  // Look to see if the data block is already buffered
+  mru_list::const_iterator it = m_bufferedData.find(startIndex);
+  if ( it != m_bufferedData.end() )
   {
-    if ((*it)->minIndex() == startIndex)
-    {
-      return *it;
-    }
+    return *it;
   }
-  
+    
   // If not found, need to load block into memory and mru list
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
-  long seekPoint = ( 2 * sizeof(unsigned int) ) + ( startIndex * (m_XLength + ( 3*m_YLength )) * sizeof(double) );
+  long seekPoint = ( 2 * sizeof(int) ) + ( startIndex * (m_XLength + ( 3*m_YLength )) * sizeof(double) );
   if (seekPoint > 2147483647)
   {
     m_datafile.seekg(2147483647, std::ios::beg);
@@ -467,7 +470,7 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
     ManagedDataBlock2D *toWrite = il.back();
     if ( toWrite->hasChanges() )
     {
-      long seekPoint = ( 2 * sizeof(unsigned int) ) + toWrite->minIndex() * (outer.m_XLength + ( 3*outer.m_YLength )) * sizeof(double);
+      long seekPoint = ( 2 * sizeof(int) ) + toWrite->minIndex() * (outer.m_XLength + ( 3*outer.m_YLength )) * sizeof(double);
       if (seekPoint > 2147483647)
       {
         outer.m_datafile.seekp(2147483647, std::ios::beg);

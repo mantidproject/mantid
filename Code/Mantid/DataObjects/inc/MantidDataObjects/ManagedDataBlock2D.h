@@ -46,10 +46,10 @@ class DLLExport ManagedDataBlock2D
   friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:
-	ManagedDataBlock2D(const unsigned int &minIndex, const unsigned int &noVectors, const unsigned int &XLength, const unsigned int &YLength);
+	ManagedDataBlock2D(const int &minIndex, const int &noVectors, const int &XLength, const int &YLength);
 	virtual ~ManagedDataBlock2D();
 	
-	unsigned int minIndex() const;
+	int minIndex() const;
 	bool hasChanges() const;
 
 	// Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
@@ -84,11 +84,11 @@ private:
   /// The data 'chunk'
   std::vector<Histogram1D> m_data;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
-  const unsigned int m_XLength;
+  const int m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
-  const unsigned int m_YLength;
+  const int m_YLength;
   /// The index of the workspace that this datablock starts from.
-  const unsigned int m_minIndex;
+  const int m_minIndex;
   /// A 'dirty' flag. Set if any of the elements of m_data are accessed through non-const accessors.
   bool m_hasChanges;
   

@@ -24,11 +24,11 @@ Workspace1D_sptr Benchmark::Create1DWorkspaceFib(int size)
 Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 {
   std::vector<double> x1(xlen,1),y1(xlen,2),e1(xlen,3),e2(xlen,3);
-  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-  retVal->setTitle("ws123");
-  retVal->init(ylen,xlen,xlen);
-//  Workspace2D_sptr retVal(new Workspace2D);
-//    retVal->setHistogramNumber(ylen);
+//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
+//  retVal->setTitle("ws123");
+//  retVal->init(ylen,xlen,xlen);
+  Workspace2D_sptr retVal(new Workspace2D);
+    retVal->setHistogramNumber(ylen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     
@@ -41,11 +41,11 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 Workspace2D_sptr Benchmark::Create2DWorkspace154(int xlen, int ylen)
 {
   std::vector<double> x1(xlen,1),y1(xlen,5),e1(xlen,4),e2(xlen,4);
-  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-  retVal->setTitle("ws154");
-  retVal->init(ylen,xlen,xlen);
-//  Workspace2D_sptr retVal(new Workspace2D);
-//    retVal->setHistogramNumber(ylen);
+//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
+//  retVal->setTitle("ws154");
+//  retVal->init(ylen,xlen,xlen);
+  Workspace2D_sptr retVal(new Workspace2D);
+    retVal->setHistogramNumber(ylen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     
