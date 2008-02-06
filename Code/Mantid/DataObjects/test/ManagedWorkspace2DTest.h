@@ -67,15 +67,15 @@ public:
     fstream file("WS2D3testInit.tmp", ios::in | ios::binary);
     TS_ASSERT(file);
 
-    unsigned int numberOfVectors;
-    file.read((char *) &numberOfVectors, sizeof(unsigned int));
+    int numberOfVectors;
+    file.read((char *) &numberOfVectors, sizeof(int));
     TS_ASSERT_EQUALS( numberOfVectors, 5 )
-    unsigned int vectorsPerBlock;
-    file.read((char *) &vectorsPerBlock, sizeof(unsigned int));
-    unsigned int expected = 4000 / ( (5+15) * sizeof(double) );
+    int vectorsPerBlock;
+    file.read((char *) &vectorsPerBlock, sizeof(int));
+    int expected = 4000 / ( (5+15) * sizeof(double) );
     TS_ASSERT_EQUALS( vectorsPerBlock, expected )
 
-    unsigned int numberOfBlocks = numberOfVectors / vectorsPerBlock;
+    int numberOfBlocks = numberOfVectors / vectorsPerBlock;
     if ( numberOfVectors%vectorsPerBlock != 0 ) ++numberOfBlocks;    
     
     double temp;

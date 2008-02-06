@@ -23,7 +23,7 @@ public:
   {
     //initialise framework manager to allow logging
     FrameworkManager* manager=Mantid::API::FrameworkManager::Instance();
-	manager->initialize();
+    manager->initialize();
   }
   
   void testInit()

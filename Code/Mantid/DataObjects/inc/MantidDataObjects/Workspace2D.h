@@ -65,7 +65,7 @@ public:
   virtual ~Workspace2D();
 
   /// For now, does nothing
-  virtual void init(const unsigned int&,const unsigned int&,const unsigned int&) {}
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
   
   virtual void setHistogramNumber(int const);
 

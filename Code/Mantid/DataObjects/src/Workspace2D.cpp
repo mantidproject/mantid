@@ -35,6 +35,17 @@ Workspace2D::operator=(const Workspace2D& A)
 Workspace2D::~Workspace2D()
 {}
 
+/** Sets the size of the workspace
+ *  @param NVectors The number of vectors/histograms/detectors in the workspace
+ *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
+ *  @param YLength The number of data/error points in each vector (must all be the same)
+ */
+void Workspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
+{
+  setHistogramNumber(NVectors);
+  // Doesn't set the size of the X/Y/E vectors at present. May want to later.
+}
+
 /**
     Set the histogram count.
     \todo FIX this can't be right since we have not dimensioned the internal arrays

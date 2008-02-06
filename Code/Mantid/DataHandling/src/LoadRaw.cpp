@@ -74,10 +74,8 @@ namespace DataHandling
     // Create the 2D workspace for the output
     // Get a pointer to the workspace factory (later will be shared)
     API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-    m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
-
-    // Set number of histograms in 2D workspace
-    m_localWorkspace->setHistogramNumber(numberOfSpectra);
+    m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>
+                               (factory->create("Workspace2D",numberOfSpectra,lengthIn,lengthIn-1));
 
     int* spectrum = new int[lengthIn];
     // Loop over the spectra. Zeroth spectrum is garbage, so loop runs from 1 to NSP1

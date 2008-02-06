@@ -23,9 +23,8 @@ public:
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     
     // Set up a small workspace for testing
-    Workspace_sptr space = factory->create("Workspace2D");
+    Workspace_sptr space = factory->create("Workspace2D",5,25,25);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    space2D->setHistogramNumber(5);
     double *a = new double[25];
     double *e = new double[25];
     for (int i = 0; i < 25; ++i)

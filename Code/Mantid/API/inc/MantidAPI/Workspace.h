@@ -66,7 +66,7 @@ public:
   virtual const std::string id() const = 0;
 
   /// Initialises the workspace. Mainly sets the size. Only implemented for 2D workspaces at present.
-  virtual void init(const unsigned int&,const unsigned int&,const unsigned int&) {};
+  virtual void init(const int&,const int&,const int&) {};
   
   void setTitle(const std::string&);
   void setComment(const std::string&);
