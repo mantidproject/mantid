@@ -173,6 +173,7 @@ public:
     return this->operator()();
   }
   
+  /// returnd the direction of the property
   const unsigned int direction()const
   {
     return m_direction;

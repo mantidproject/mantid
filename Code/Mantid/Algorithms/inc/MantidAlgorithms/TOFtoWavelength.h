@@ -8,9 +8,9 @@
 
 namespace Mantid
 {
-namespace Algorithms
-{
-/** @class TOFtoWavelength TOFtoWavelength.h Algorithms/TOFtoWavelength.h
+  namespace Algorithms
+  {
+    /** @class TOFtoWavelength TOFtoWavelength.h Algorithms/TOFtoWavelength.h
 
     Converts all of the TOF axes in a 2D workspace to wavelength values.
     The algorithm is: h / wavelength = m_n * (d1+d2)/tof
@@ -22,10 +22,10 @@ namespace Algorithms
     <LI> InputWorkspace - The name of the workspace to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     </UL>
-    
+
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2007
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -45,27 +45,29 @@ namespace Algorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport TOFtoWavelength : public API::Algorithm
-{
-public:
-  /// Default constructor
-	TOFtoWavelength();
-	/// Destructor
-	virtual ~TOFtoWavelength();
-  virtual const std::string name() const { return "TOFtoWavelength";};///< Algorithm's name for identification
-  virtual const std::string version() const { return "1";};///< Algorithm's name for identification
+    */
+    class DLLExport TOFtoWavelength : public API::Algorithm
+    {
+    public:
+      /// Default constructor
+      TOFtoWavelength();
+      /// Destructor
+      virtual ~TOFtoWavelength();
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "TOFtoWavelength";};
+      /// Algorithm's version for identification overriding a virtual method
+      virtual const std::string version() const { return "1";};
 
-private:
-  // Overridden Algorithm methods  
-  void init();
-  void exec();
-  
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
-  };
+    private:
+      // Overridden Algorithm methods  
+      void init();
+      void exec();
 
-} // namespace Algorithm
+      /// Static reference to the logger class
+      static Kernel::Logger& g_log;
+    };
+
+  } // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_TOFTOWAVELENGTH_H_*/

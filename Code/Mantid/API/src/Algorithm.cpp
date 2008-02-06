@@ -110,6 +110,14 @@ namespace Mantid
           // Call the concrete algorithm's exec method
           this->exec();
           end = clock();
+          // need it to throw before trying to run fillhistory() on an algorithm which has failed
+          // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
+          if (!isChild())
+          { 
+            fillHistory(start,double(end - start)/CLOCKS_PER_SEC);
+            this->store();
+          }
+
         }
         catch(std::runtime_error& ex)
         {
@@ -122,12 +130,6 @@ namespace Mantid
           if (m_isChildAlgorithm) throw;
         }
 
-        // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
-        if (!isChild())
-        { 
-          fillHistory(start,double(end - start)/CLOCKS_PER_SEC);
-          this->store();
-        }
         setExecuted(true);	
       }
 
@@ -228,6 +230,8 @@ namespace Mantid
     //----------------------------------------------------------------------
 
     /** Fills History, Algorithm History and Algorithm Parameters
+    *  @param start a date and time defnining the start time of the algorithm
+    *  @param duration a double defining the length of duration of the algorithm
     */
     void Algorithm::fillHistory(dateAndTime start,double duration)
     {     

@@ -10,24 +10,24 @@
 
 namespace Mantid
 {
-namespace DataHandling
-{
-/** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
+  namespace DataHandling
+  {
+    /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
 
     Loads an file in ISIS RAW format and stores it in a 2D workspace 
     (Workspace2D class). LoadRaw is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
-    
+
     Required Properties:
-       <UL>
-       <LI> Filename - The name of and path to the input RAW file </LI>
-       <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
-       </UL>
+    <UL>
+    <LI> Filename - The name of and path to the input RAW file </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -47,43 +47,45 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-  class DLLExport LoadRaw : public DataHandlingCommand
-  {
-  public:
-    /// Default constructor
-    LoadRaw();
+    */
+    class DLLExport LoadRaw : public DataHandlingCommand
+    {
+    public:
+      /// Default constructor
+      LoadRaw();
 
-    /// Destructor
-    ~LoadRaw() {}
-    virtual const std::string name() const { return "LoadRaw";};///< Algorithm's name for identification
-    virtual const std::string version() const { return "1";};///< Algorithm's name for identification
-    
-  private:
+      /// Destructor
+      ~LoadRaw() {}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "LoadRaw";};
+      /// Algorithm's version for identification overriding a virtual method
+      virtual const std::string version() const { return "1";};
 
-    /// Overwrites Algorithm method.
-    void init();
-    
-    /// Overwrites Algorithm method
-    void exec();
-       
-    /// The name and path of the input file
-    std::string m_filename;
-    
-    /// Pointer to the local workspace
-    DataObjects::Workspace2D_sptr m_localWorkspace;
-    
-    ///static reference to the logger class
-    static Kernel::Logger& g_log;
+    private:
 
-    /// Run the sub-algorithms
-    void runSubAlgorithms();
-    
-    /// Personal wrapper for sqrt to allow msvs to compile
-    static double dblSqrt(double in);
-  };
+      /// Overwrites Algorithm method.
+      void init();
 
-} // namespace DataHandling
+      /// Overwrites Algorithm method
+      void exec();
+
+      /// The name and path of the input file
+      std::string m_filename;
+
+      /// Pointer to the local workspace
+      DataObjects::Workspace2D_sptr m_localWorkspace;
+
+      ///static reference to the logger class
+      static Kernel::Logger& g_log;
+
+      /// Run the sub-algorithms
+      void runSubAlgorithms();
+
+      /// Personal wrapper for sqrt to allow msvs to compile
+      static double dblSqrt(double in);
+    };
+
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADRAW_H_*/

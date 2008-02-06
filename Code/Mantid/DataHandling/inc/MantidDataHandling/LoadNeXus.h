@@ -10,24 +10,24 @@
 
 namespace Mantid
 {
-namespace DataHandling
-{
-/** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h
+  namespace DataHandling
+  {
+    /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h
 
     Loads a file in NeXus format and stores it in a 2D workspace 
     (Workspace2D class). LoadNeXus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
-    
+
     Required Properties:
-       <UL>
-       <LI> Filename - The name of and path to the input RAW file </LI>
-       <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
-       </UL>
+    <UL>
+    <LI> Filename - The name of and path to the input RAW file </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    </UL>
 
     @author Freddie Akeroyd, STFC ISIS Facility, GB
     @date 24/01/2008
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -47,38 +47,40 @@ namespace DataHandling
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-  class DLLExport LoadNeXus : public DataHandlingCommand
-  {
-  public:
-    /// Default constructor
-    LoadNeXus();
+    */
+    class DLLExport LoadNeXus : public DataHandlingCommand
+    {
+    public:
+      /// Default constructor
+      LoadNeXus();
 
-    /// Destructor
-    ~LoadNeXus() {}
-    virtual const std::string name() const { return "LoadNexus";};///< Algorithm's name for identification
-    virtual const std::string version() const { return "1";};///< Algorithm's name for identification
-    
-  private:
+      /// Destructor
+      ~LoadNeXus() {}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "LoadNexus";};
+      /// Algorithm's version for identification overriding a virtual method
+      virtual const std::string version() const { return "1";};
 
-    /// Overwrites Algorithm method.
-    void init();
-    
-    /// Overwrites Algorithm method
-    void exec();
-       
-    /// The name and path of the input file
-    std::string m_filename;
-    
-    /// Pointer to the local workspace
-    DataObjects::Workspace2D_sptr m_localWorkspace;
-    
-    ///static reference to the logger class
-    static Kernel::Logger& g_log;
+    private:
 
-  };
+      /// Overwrites Algorithm method.
+      void init();
 
-} // namespace DataHandling
+      /// Overwrites Algorithm method
+      void exec();
+
+      /// The name and path of the input file
+      std::string m_filename;
+
+      /// Pointer to the local workspace
+      DataObjects::Workspace2D_sptr m_localWorkspace;
+
+      ///static reference to the logger class
+      static Kernel::Logger& g_log;
+
+    };
+
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADNEXUS_H_*/

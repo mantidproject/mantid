@@ -43,8 +43,10 @@ public:
   HelloWorldAlgorithm() : API::Algorithm() {}
   ///virtual destructor
   virtual ~HelloWorldAlgorithm() {}
-  virtual const std::string name() const { return "HelloWorldAlgorithm";};///< Algorithm's name for identification
-  virtual const std::string version() const { return "1";};///< Algorithm's name for identification
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "HelloWorldAlgorithm";};
+      /// Algorithm's version for identification overriding a virtual method
+      virtual const std::string version() const { return "1";};
 
   ///Initialisation code
   void init() {  }

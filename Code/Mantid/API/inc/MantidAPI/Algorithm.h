@@ -76,10 +76,11 @@ class DLLExport Algorithm : public IAlgorithm, virtual protected Kernel::Propert
 public:
   Algorithm();
   virtual ~Algorithm();
-
+  /// function to return a name of the algorithm, must be overridden in all algorithms
   virtual const std::string name() const {return "UNKNOWN";}
 
   // IAlgorithm methods	  
+/// function to return the version of the algorithm, must be overridden in all algorithms
   virtual const std::string version() const {return "UNKNOWN";}
   void initialize();
   void execute();
