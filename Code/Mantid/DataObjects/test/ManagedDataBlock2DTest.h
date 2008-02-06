@@ -169,7 +169,7 @@ private:
       TS_ASSERT_THROWS( dataToTest.dataX(2), std::range_error )
       TS_ASSERT_EQUALS( x.size(), 4 )
       TS_ASSERT_EQUALS( xx.size(), 4 )
-      for (int i = 0; i < x.size(); ++i)
+      for (unsigned int i = 0; i < x.size(); ++i)
       {
         TS_ASSERT_EQUALS( x[i], i )
         TS_ASSERT_EQUALS( xx[i], i+4 )
@@ -183,7 +183,7 @@ private:
       TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataX(2), std::range_error )
       TS_ASSERT_EQUALS( xc.size(), 4 )
       TS_ASSERT_EQUALS( xxc.size(), 4 )
-      for (int i = 0; i < xc.size(); ++i)
+      for (unsigned int i = 0; i < xc.size(); ++i)
       {
         TS_ASSERT_EQUALS( xc[i], i )
         TS_ASSERT_EQUALS( xxc[i], i+4 )
@@ -200,7 +200,7 @@ private:
       TS_ASSERT_THROWS( dataToTest.dataY(2), std::range_error )
       TS_ASSERT_EQUALS( y.size(), 3 )
       TS_ASSERT_EQUALS( yy.size(), 3 )
-      for (int i = 0; i < y.size(); ++i)
+      for (unsigned int i = 0; i < y.size(); ++i)
       {
         TS_ASSERT_EQUALS( y[i], i*10 )
         TS_ASSERT_EQUALS( yy[i], i*100 )
@@ -214,7 +214,7 @@ private:
       TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataY(2), std::range_error )
       TS_ASSERT_EQUALS( yc.size(), 3 )
       TS_ASSERT_EQUALS( yyc.size(), 3 )
-      for (int i = 0; i < yc.size(); ++i)
+      for (unsigned int i = 0; i < yc.size(); ++i)
       {
         TS_ASSERT_EQUALS( yc[i], i*10 )
         TS_ASSERT_EQUALS( yyc[i], i*100 )
@@ -231,7 +231,7 @@ private:
       TS_ASSERT_THROWS( dataToTest.dataE(2), std::range_error )
       TS_ASSERT_EQUALS( e.size(), 3 )
       TS_ASSERT_EQUALS( ee.size(), 3 )
-      for (int i = 0; i < e.size(); ++i)
+      for (unsigned int i = 0; i < e.size(); ++i)
       {
         TS_ASSERT_EQUALS( e[i], sqrt(i*10.0) )
         TS_ASSERT_EQUALS( ee[i], sqrt(i*100.0) )
@@ -245,7 +245,7 @@ private:
       TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataE(2), std::range_error )
       TS_ASSERT_EQUALS( ec.size(), 3 )
       TS_ASSERT_EQUALS( eec.size(), 3 )
-      for (int i = 0; i < ec.size(); ++i)
+      for (unsigned int i = 0; i < ec.size(); ++i)
       {
         TS_ASSERT_EQUALS( ec[i], sqrt(i*10.0) )
         TS_ASSERT_EQUALS( eec[i], sqrt(i*100.0) )
