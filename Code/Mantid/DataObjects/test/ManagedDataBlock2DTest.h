@@ -141,7 +141,7 @@ public:
     const std::vector<double>& eec = temp.dataE2(1);
     TS_ASSERT_EQUALS( ec.size(), 3 )
     TS_ASSERT_EQUALS( eec.size(), 3 )
-    for (int i = 0; i < ec.size(); ++i)
+    for (unsigned int i = 0; i < ec.size(); ++i)
     {
       TS_ASSERT_EQUALS( ec[i], 0.0 )
       TS_ASSERT_EQUALS( eec[i], 0.0 )
