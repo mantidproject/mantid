@@ -972,7 +972,7 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
  */
 	int i, n;
 	struct tm *tmstruct = NULL;
-#ifdef _WIN32
+#ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s( tmstruct, &time_value ); 
   if (err)
   {
@@ -993,7 +993,7 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 /// stuff
 int ISISRAW::readFromFile(const char* filename)
 {
-#ifdef _WIN32
+#ifdef MS_VISUAL_STUDIO
   FILE* input_file=NULL;
   if(fopen_s( &input_file, filename, "rb" ) !=0 )
   {
@@ -1023,7 +1023,7 @@ int ISISRAW::writeToFile(const char* filename)
 	long pos;
 	memset(zero_pad, 0, sizeof(zero_pad));
 	remove(filename);
-#ifdef _WIN32
+#ifdef MS_VISUAL_STUDIO
   FILE* output_file=NULL;
   if(fopen_s( &output_file, filename, "w+bc" ) !=0 )
   {

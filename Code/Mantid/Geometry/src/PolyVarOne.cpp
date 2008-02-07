@@ -636,7 +636,7 @@ PolyVar<1>::solveQuadratic(std::complex<double>& AnsA,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-  #ifndef _WIN32
+  #ifndef MS_VISUAL_STUDIO
   CQ.imag() = (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
 #else

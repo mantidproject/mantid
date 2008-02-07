@@ -16,14 +16,13 @@ Shared library name is of the form lib*.so.
 */
 
 #if _WIN32
-#include "windows.h"
-#include "MantidKernel/DllOpen.h"
-#include <strsafe.h>
-
+#include <windows.h>
+//#include <strsafe.h>
 #else
-#include "/usr/include/dlfcn.h"
+#include <dlfcn.h>
+#endif /* _WIN32 */
+
 #include "MantidKernel/DllOpen.h"
-#endif
 
 namespace Mantid
 {
@@ -115,14 +114,14 @@ namespace Mantid
           0, NULL );
 
         // Display the error message and exit the process
+		size_t n = lstrlen((LPCTSTR)lpMsgBuf) + 40;
 
-        lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, 
-          (lstrlen((LPCTSTR)lpMsgBuf)+40)*sizeof(TCHAR)); 
-        StringCchPrintf((LPTSTR)lpDisplayBuf, 
-          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
-          TEXT("failed with error %d: %s"), 
-          dw, lpMsgBuf); 
-
+        lpDisplayBuf = (LPVOID)LocalAlloc(LMEM_ZEROINIT, n*sizeof(TCHAR)); 
+//        StringCchPrintf((LPTSTR)lpDisplayBuf, 
+//          LocalSize(lpDisplayBuf) / sizeof(TCHAR),
+//          TEXT("failed with error %d: %s"), 
+//          dw, lpMsgBuf); 
+		_snprintf((char*)lpDisplayBuf, n, "failed with error %d: %s", dw, lpMsgBuf); 
         log.error()<<"Could not open library " << filePath << ": " << lpDisplayBuf << std::endl;
 
 
@@ -136,7 +135,7 @@ namespace Mantid
 
     void* DllOpen::GetFunctionImpl(void* lib, const std::string& funcName)
     {
-      return GetProcAddress((HINSTANCE)lib, funcName.c_str());
+      return (void*)GetProcAddress((HINSTANCE)lib, funcName.c_str());
     }
 
     void DllOpen::CloseDllImpl(void* lib)
@@ -167,7 +166,7 @@ namespace Mantid
       dlclose(lib);
     }
 
-#endif
+#endif /* _WIN32 */
 
   } // namespace Kernel
 } // namespace Mantid

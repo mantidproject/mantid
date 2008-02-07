@@ -8,20 +8,31 @@ from socket import gethostname
 
 import MantidBuild
   
+opts = Options('scons_options.py')
+opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
+opts.Add('msvc','Set to 1 to use Microsoft Visual Studio Compiler on Windows', 1)
+
+base_env = Environment(ENV=os.environ, options = opts)
+mingw_env = Environment(ENV=os.environ, options = opts, tools = [ 'mingw' ])
+Help(opts.GenerateHelpText(base_env))
+mingw = ARGUMENTS.get('mingw', 0)
+msvc = ARGUMENTS.get('msvc', 1)
+if int(msvc) :
+	env = base_env
+if int(mingw) :
+	env = mingw_env
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
 uppath=os.path.abspath('../')
 
 libList = []
-env = Environment(ENV=os.environ)
-
 boost_append=''
 if not env.GetOption('clean'): # do not re-rerun checking on a "scons -c"
-    conf = Configure(env)
-    if conf.CheckLib('boost_filesystem-gcc41', '_ZN5boost10filesystem6nativeERKSs') :
-	boost_append = '-gcc41'
-    env = conf.Finish()
+	conf = Configure(env)
+	if conf.CheckLib('boost_filesystem-gcc41', '_ZN5boost10filesystem6nativeERKSs') :
+		boost_append = '-gcc41'
+	env = conf.Finish()
 
 libDirList = [uppath,cwdpath ]
 cflags = []
@@ -34,22 +45,35 @@ fortran_type=''
 third_party=''
 
 #Get paths
-if os.name == 'nt':
+if os.name == 'nt': 
 	print "* COMMENCING WINDOWS BUILD *"
-	boost_path = 'C:/Program Files/boost/boost_1_34_1/'
 	third_party = os.path.abspath('../Third_Party/')
+#	boost_path = 'C:/Program Files/boost/boost_1_34_1/boost'
+	boost_path = third_party + '/include/'
+	
 	python_path = 'C:/Python25/'
-	libDirList.append(third_party + '/lib/win32/')
-	libDir = third_party + '/lib/win32/'
 
-	for file in os.listdir(libDir):
-        	if file.endswith('.dll'):
-			if not file.startswith('boost'):
-	                	libList.append(file.replace('.dll',''))
-
-#python and boost
+	libList.append('PocoUtil')
+	libList.append('PocoFoundation')
+	libList.append('PocoXML')
 	libDirList.append(python_path + '/libs/')
-	libDirList.append(boost_path + '/lib/')
+	if int(mingw) :
+		libDirList.append(third_party + '/lib/win32-MinGW/')
+		libList.append('boost_python-mgw34-mt-1_34_1')
+		libList.append('boost_filesystem-mgw34-mt-1_34_1')
+		libList.append('boost_regex-mgw34-mt-1_34_1')
+		libList.append('libpython25')
+		libList.append('NeXus')
+	else :
+		libDirList.append(third_party + '/lib/win32/')
+#		libList.append('boost_python-vc80-mt-1_34_1')
+#		libList.append('boost_filesystem-vc80-mt-1_34_1')
+#		libList.append('boost_regex-vc80-mt-1_34_1')
+		libList.append('python25')
+		libList.append('libNeXus-0')
+
+	libList.append('gsl')
+
 	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/']
 
 else:
@@ -71,7 +95,11 @@ print "THIRD_PARTY: ",third_party
 print "PYTHON_ROOT: ",python_path
 
 if os.name == 'nt':
-	cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/wd4275']
+	if int(mingw) :
+		cflags = ['-g', '-O2', '-DPOCO_DLL']
+		env.Append(LINKFLAGS=['-g','-Wl,--export-all-symbols'])
+	else :
+		cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/wd4275']
 
 else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
@@ -81,19 +109,19 @@ else:
 
 	print "CPPPATHS: ",cppPaths
 
-  	libList.append('python' + sys.version[0:3])
-  	libList.append('PocoUtil')
-  	libList.append('PocoFoundation')
-  	libList.append('PocoXML')
-  	libList.append('boost_python'+boost_append)
-  	libList.append('boost_filesystem'+boost_append)
-  	libList.append('boost_regex'+boost_append)
+	libList.append('python' + sys.version[0:3])
+	libList.append('PocoUtil')
+	libList.append('PocoFoundation')
+	libList.append('PocoXML')
+	libList.append('boost_python'+boost_append)
+	libList.append('boost_filesystem'+boost_append)
+	libList.append('boost_regex'+boost_append)
 	libList.append('NeXus')
 
-        if os.path.isdir(poco_path + '/lib/Linux/i686') :
-	    libDirList.append(poco_path+'/lib/Linux/i686')
+	if os.path.isdir(poco_path + '/lib/Linux/i686') :
+		libDirList.append(poco_path+'/lib/Linux/i686')
 	else :
-	    libDirList.append(poco_path+'/lib')
+		libDirList.append(poco_path+'/lib')
 	cflags.append(['-g','-Wall'])            ## PLEASE DO NOT MIX - -O0 and -g UNLESS DEBUGGUNG OPTIMIZATION ISSUES.
 	env.Append(LINKFLAGS=['-g'])
 	f=os.popen('gsl-config --cflags')
@@ -129,6 +157,7 @@ env.Append(CPPPATH=cppPaths)
 env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
 
+
 Export('env')
 
 #Real work begins here
@@ -142,7 +171,7 @@ subProjs.append('DataObjects')
 subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 #subProjs.append('PythonAPI')
-#subProjs.append('Services/SConscript')
+#subProjs.append('Services')
 
 # we want to link libraries in the reverse order we build them
 shared_libraries = []
