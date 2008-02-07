@@ -165,13 +165,18 @@ env.Replace(SHARED_LIST=shared_libraries)
 ret = SConscript('Main/SConscript')
 env.Install('Bin/Shared', ret['shared'])
 
-# tests
-if os.name == 'nt':
-	ret = SConscript('Build/Tests/SConscript')
-else:
-	cxxtestgen = env.WhereIs('cxxtestgen.py')
-	if cxxtestgen != None :
+skiptest=ARGUMENTS.get('skiptest',0)
+if not int(skiptest):
+	print 'Building Tests.  Specify -Q "skiptest=1" to skip the tests'
+	# tests
+	if os.name == 'nt':
 		ret = SConscript('Build/Tests/SConscript')
-	else :
-		print 'CXXTESTGEN is not installed - tests will not be built'
+	else:
+		cxxtestgen = env.WhereIs('cxxtestgen.py')
+		if cxxtestgen != None :
+			ret = SConscript('Build/Tests/SConscript')
+		else :
+			print 'CXXTESTGEN is not installed - tests will not be built'
+else:
+	print "Not Building Tests."
 
