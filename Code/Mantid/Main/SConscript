@@ -12,7 +12,7 @@ import MantidBuild
 
 Import('env')
 shared_list = env['SHARED_LIST']
-static_list = env['STATIC_LIST']
+#static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
 
@@ -25,7 +25,7 @@ myenv_dynamic = env.Clone()
 myenv_dynamic.Append(LIBS=libList)
 myenv_dynamic.Append(LIBPATH=libDirList)
 myenv_dynamic.Append(LIBPATH='#Bin/Shared')
-myenv_dynamic.Program('main',listCpps)
+shared = myenv_dynamic.Program('main',listCpps)
 
 #myenv_static = env.Clone()
 #myenv_static.Append(LIBS=libList)
@@ -33,3 +33,6 @@ myenv_dynamic.Program('main',listCpps)
 #myenv_static.Append(LIBPATH='#Bin/Static')
 #myenv_static.Append(LINKFLAGS=['-static'])
 #myenv_static.Program('main_static', listCpps)
+
+retval = { 'shared': shared }
+Return('retval')

@@ -12,6 +12,6 @@ Import('env')
 
 #BUILD CODE
 shared = env.SharedLibrary('lib/MantidDataObjects', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-static = env.StaticLibrary('libstatic/MantidDataObjects', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidDataObjects' ] }
+#static = env.StaticLibrary('libstatic/MantidDataObjects', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+retval = { 'shared': shared, 'static': shared, 'libs': [ 'MantidDataObjects' ] }
 Return('retval')

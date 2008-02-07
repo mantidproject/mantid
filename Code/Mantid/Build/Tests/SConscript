@@ -8,7 +8,7 @@ import MantidBuild
 
 Import('env')
 shared_list = env['SHARED_LIST']
-static_list = env['STATIC_LIST']
+#static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
 myenv = env.Clone()

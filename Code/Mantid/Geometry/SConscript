@@ -23,6 +23,6 @@ Import('env')
 
 #BUILD CODE
 shared = env.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-static = env.StaticLibrary('libstatic/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
-retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidGeometry' ] }
+#static = env.StaticLibrary('libstatic/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+retval = { 'shared': shared, 'static': shared, 'libs': [ 'MantidGeometry' ] }
 Return('retval')
