@@ -160,6 +160,8 @@ public:
       // Come here if an input workspace
       return false;
     }
+    //always clear the internal pointer after storing
+    clear();
   }
   
   /// Reset the pointer to the workspace
