@@ -16,7 +16,7 @@ if (os.name =='nt'):
 else:
      SENDER = 'Linux' + SENDER
 
-#Set up email content
+#Set up email content 
 buildSuccess = False
 testsBuildSuccess = False
 sconsResult = ''
