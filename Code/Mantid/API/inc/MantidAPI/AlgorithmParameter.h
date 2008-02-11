@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include <string>
-#include <ios>
+#include <iostream>
 namespace Mantid
 {
   namespace API
@@ -82,4 +82,4 @@ namespace Mantid
   } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_DATAOBJECTS_ALGORITHMPARAMETER_H_*/
+#endif /*MANTID_API_ALGORITHMPARAMETER_H_*/
