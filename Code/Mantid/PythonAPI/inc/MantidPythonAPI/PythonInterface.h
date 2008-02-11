@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include "MantidKernel/system.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -18,7 +19,7 @@ namespace API
 namespace PythonAPI
 {
 
-class PythonInterface
+class DLLExport PythonInterface
 {
 private:
 	Mantid::API::FrameworkManager* fwMgr;

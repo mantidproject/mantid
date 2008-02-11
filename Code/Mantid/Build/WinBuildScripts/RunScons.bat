@@ -2,8 +2,8 @@ del ..\logs\scons.log
 del ..\logs\sconsErr.log
 del ..\logs\svn.log
 del ..\logs\doxy.log
-svn log -v -rBASE:HEAD > ..\logs\svn.log
 svn up
+svn log -v -rBASE > ..\logs\svn.log
 svn up ../Third_Party
 svn up ../../Test
 doxygen Build\Mantid.doxyfile 2> ..\logs\doxy.log

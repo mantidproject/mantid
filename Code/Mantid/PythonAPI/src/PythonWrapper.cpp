@@ -20,8 +20,8 @@ typedef std::vector< double > double_vec;
 BOOST_PYTHON_MODULE(MantidPythonAPI)
 #else
 BOOST_PYTHON_MODULE(libMantidPythonAPI)
-{
 #endif
+{
 	
 	//Vectors
 	class_< string_vec >( "StringVec" )

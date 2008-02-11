@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -56,7 +56,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(SolutionName)kernel.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
-				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32;c:\Python25\libs"
+				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
