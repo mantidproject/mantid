@@ -99,7 +99,7 @@ if os.name == 'nt':
 		cflags = ['-g', '-O2', '-DPOCO_DLL']
 		env.Append(LINKFLAGS=['-g','-Wl,--export-all-symbols'])
 	else :
-		cflags = ['-W3','/EHsc', '/MD', '/ZI', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/wd4275']
+		cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/wd4275']
 
 else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
