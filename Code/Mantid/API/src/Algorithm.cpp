@@ -114,7 +114,7 @@ namespace Mantid
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild())
           { 
-            fillHistory(start,double(end - start)/CLOCKS_PER_SEC);
+            fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC);
             this->store();
           }
 

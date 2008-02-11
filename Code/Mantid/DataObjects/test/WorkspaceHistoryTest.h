@@ -210,7 +210,7 @@ public:
     TS_ASSERT_EQUALS(C_AP[2].value(),"C");
     TS_ASSERT_EQUALS(C_AP[2].isDefault(),true);
     TS_ASSERT_EQUALS(C_AP[2].direction(),2);
-
+    TS_ASSERT_THROWS_NOTHING(std::cout<<std::endl << C_WH <<std::endl;)
   }
 };
 

@@ -59,6 +59,9 @@ namespace Mantid
       const std::string& version()const {return m_version;};
       /// get parameter list of algorithm in history const
       const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;};
+      /// print contents of object
+      void printSelf(std::ostream&,const int = 0)const;
+
     private:
       /// The name of the Algorithm
       std::string m_name;
@@ -71,6 +74,9 @@ namespace Mantid
       /// The AlgorithmParameter's defined for each the algorithm
       std::vector<AlgorithmParameter> m_parameters;
     };
+
+    DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
+
   } // namespace API
 } // namespace Mantid
 

@@ -11,10 +11,10 @@
 
 namespace Mantid
 {
-namespace API
-{
+  namespace API
+  {
 
-/** @class WorkspaceHistory WorkspaceHistory.h API/MAntidAPI/WorkspaceHistory.h
+    /** @class WorkspaceHistory WorkspaceHistory.h API/MAntidAPI/WorkspaceHistory.h
 
     This class stores information about the Workspace History used by algorithms
     on a workspace and the environment history
@@ -22,7 +22,7 @@ namespace API
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -39,33 +39,35 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport WorkspaceHistory
-{
-public:
+    */
+    class DLLExport WorkspaceHistory
+    {
+    public:
 
-  WorkspaceHistory();
-  WorkspaceHistory(const EnvironmentHistory&, const std::vector<AlgorithmHistory>&);
-	virtual ~WorkspaceHistory();
-  WorkspaceHistory(const WorkspaceHistory&);
-  WorkspaceHistory& operator=(const WorkspaceHistory& );
-  ///Returns a reference to the algorithmHistory
-  std::vector<AlgorithmHistory>& getAlgorithms() { return m_algorithms; };
-  ///Returns a reference to the algorithmHistory const
-  const std::vector<AlgorithmHistory>& getAlgorithms() const { return m_algorithms; };
+      WorkspaceHistory();
+      WorkspaceHistory(const EnvironmentHistory&, const std::vector<AlgorithmHistory>&);
+      virtual ~WorkspaceHistory();
+      WorkspaceHistory(const WorkspaceHistory&);
+      WorkspaceHistory& operator=(const WorkspaceHistory& );
+      ///Returns a reference to the algorithmHistory
+      std::vector<AlgorithmHistory>& getAlgorithms() { return m_algorithms; };
+      ///Returns a reference to the algorithmHistory const
+      const std::vector<AlgorithmHistory>& getAlgorithms() const { return m_algorithms; };
+      ///
+      void printSelf(std::ostream&, const int = 0) const;
+    private:
+      /// The environment of the workspace
+      EnvironmentHistory m_environment;
+      /// The algorithms which have been called on the workspace
+      std::vector<AlgorithmHistory> m_algorithms;
 
-private:
-  /// The environment of the workspace
-  EnvironmentHistory m_environment;
-  /// The algorithms which have been called on the workspace
-  std::vector<AlgorithmHistory> m_algorithms;
+    };
+    DLLExport std::ostream& operator<<(std::ostream&, const WorkspaceHistory&);
 
-};
-
-} // namespace API
+  } // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_WORKSPACEHISTORY_H_*/

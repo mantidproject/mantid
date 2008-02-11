@@ -8,17 +8,17 @@
 #include <string>
 namespace Mantid
 {
-namespace API
-{
+  namespace API
+  {
 
 
-/** @class EnvironmentHistory EnvironmentHistory.h API/MAntidAPI/AlgorithmParameter.h
+    /** @class EnvironmentHistory EnvironmentHistory.h API/MAntidAPI/AlgorithmParameter.h
 
     This class stores information about the Environment of the computer used by the framework.
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -35,31 +35,34 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-class DLLExport EnvironmentHistory
-{
-public:
-  EnvironmentHistory();
-  EnvironmentHistory(std::string, std::string, std::string, std::string);
-  EnvironmentHistory(const EnvironmentHistory&);
-  EnvironmentHistory& operator=(const EnvironmentHistory& );
-	virtual ~EnvironmentHistory();
+    */
+    class DLLExport EnvironmentHistory
+    {
+    public:
+      EnvironmentHistory();
+      EnvironmentHistory(std::string, std::string, std::string, std::string);
+      EnvironmentHistory(const EnvironmentHistory&);
+      EnvironmentHistory& operator=(const EnvironmentHistory& );
+      virtual ~EnvironmentHistory();
+      /// print contents of object
+      void printSelf(std::ostream&, const int = 0)const;
 
-private:
-  /// The version of the framework
-  std::string m_version;
-  /// The nema of the operating system
-  std::string m_osName;
-  /// The version of the operating system
-  std::string m_osVersion;
-  /// The name of the user running the framwork
-  std::string m_userName;
-};
+    private:
+      /// The version of the framework
+      std::string m_version;
+      /// The nema of the operating system
+      std::string m_osName;
+      /// The version of the operating system
+      std::string m_osVersion;
+      /// The name of the user running the framwork
+      std::string m_userName;
+    };
+    DLLExport std::ostream& operator<<(std::ostream&, const EnvironmentHistory&);
 
-} // namespace API
+  } // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_ENVIRONMENTHISTORY_H_*/
