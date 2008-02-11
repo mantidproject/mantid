@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "MantidKernel/system.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
