@@ -86,7 +86,6 @@ namespace Mantid
     {
       clock_t start,end;
       time_t start_time;
-      double duration;
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {

@@ -69,20 +69,12 @@ namespace Mantid
       os << std::string(indent,' ') << "Direction :" << getdirectiontext() << std::endl;
     }
     const std::string AlgorithmParameter::getdirectiontext()const
-    {
- 
+    { 
       if(m_direction == Mantid::Kernel::Direction::Input) return "Input";
       if(m_direction == Mantid::Kernel::Direction::Output) return "Output";
       if(m_direction == Mantid::Kernel::Direction::InOut) return "Inout";
       if(m_direction == Mantid::Kernel::Direction::None) return "None";
-
-/*
-      if(m_direction == 0) return "Input";
-      if(m_direction == 1) return "Output";
-      if(m_direction == 2) return "Inout";
-      if(m_direction == 3) return "None";
- */ 
-      //   throw;
+      throw std::invalid_argument("Unknown Mantid::Kernel::Direction defined");
     }
 
     /** Prints a text representation
