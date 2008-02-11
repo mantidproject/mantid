@@ -168,6 +168,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ManagedDataBlock2D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ManagedWorkspace2D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace1D.cpp"
 				>
 			</File>
@@ -183,6 +191,14 @@
 			>
 			<File
 				RelativePath=".\inc\MantidDataObjects\Histogram1D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\ManagedDataBlock2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\ManagedWorkspace2D.h"
 				>
 			</File>
 			<File

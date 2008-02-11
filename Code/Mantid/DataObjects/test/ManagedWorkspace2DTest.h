@@ -106,6 +106,9 @@ public:
   {
     TS_ASSERT_EQUALS( smallWorkspace.getHistogramNumber(), 2 )
     TS_ASSERT_EQUALS( bigWorkspace.getHistogramNumber(), 1250 )
+    
+    Workspace2D &ws = dynamic_cast<Workspace2D&>(smallWorkspace);
+    TS_ASSERT_EQUALS( ws.getHistogramNumber(), 2);
   }
 
   void testSetX()

@@ -86,8 +86,7 @@ public:
 
   
   /// Returns the histogram number
-  // @TODO VS can't handle this being virtual for some reason - need to figure out a solution
-   const int getHistogramNumber() const;
+  const int getHistogramNumber() const;
 
   //section required for iteration
   virtual int size() const;       
@@ -113,6 +112,8 @@ public:
 
   virtual long int getMemorySize() const;
 
+private:
+  virtual const int getHistogramNumberHelper() const;
 };
 
   ///shared pointer to the Workspace2D class

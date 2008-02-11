@@ -255,7 +255,7 @@ void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_t
 const int 
 Workspace2D::getHistogramNumber() const
 {
-  return static_cast<const int>(data.size());
+  return getHistogramNumberHelper();
 }
 
 /**
@@ -359,6 +359,14 @@ std::vector<double>& Workspace2D::dataE2(int const index)
   return data[index].dataE2();
 }
 
+/** Returns the number of histograms.
+    For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
+	being virtual so it now just calls this private (and virtual) method which does the work.
+*/
+const int Workspace2D::getHistogramNumberHelper() const
+{
+  return static_cast<const int>(data.size());
+}
 
 } // namespace DataObjects
 } //NamespaceMantid

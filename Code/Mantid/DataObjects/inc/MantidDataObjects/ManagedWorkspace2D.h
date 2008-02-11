@@ -116,8 +116,6 @@ public:
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 	
-  /// Returns the histogram number
-  virtual const int getHistogramNumber() const;
   virtual void setHistogramNumber(int const) {}  // Does nothing
 
   virtual void setX(const int histnumber, const std::vector<double>&);
@@ -155,6 +153,8 @@ private:
   /// Private copy assignment operator
   ManagedWorkspace2D& operator=(const ManagedWorkspace2D&);
     
+  virtual const int getHistogramNumberHelper() const;
+
   ManagedDataBlock2D* getDataBlock(const int index) const;
   
   /// The number of vectors in the workspace

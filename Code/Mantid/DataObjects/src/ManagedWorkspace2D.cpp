@@ -134,12 +134,6 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
   remove(m_filename.c_str());
 }
 
-/// Returns the number of histograms
-const int ManagedWorkspace2D::getHistogramNumber() const
-{
-  return m_noVectors;
-}
-
 /// Get pseudo size
 int ManagedWorkspace2D::size() const 
 { 
@@ -404,6 +398,15 @@ const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
     throw std::range_error("ManagedWorkspace2D::dataE2, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE2(index);
+}
+
+/** Returns the number of histograms.
+    For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
+	being virtual so it now just calls this private (and virtual) method which does the work.
+*/
+const int ManagedWorkspace2D::getHistogramNumberHelper() const
+{
+  return m_noVectors;
 }
 
 /** Get a pointer to the data block containing the data corresponding to a given index
