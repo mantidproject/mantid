@@ -170,7 +170,7 @@ subProjs.append('API')
 subProjs.append('DataObjects')
 subProjs.append('Algorithms')
 subProjs.append('DataHandling')
-#subProjs.append('PythonAPI')
+subProjs.append('PythonAPI')
 #subProjs.append('Services')
 
 # we want to link libraries in the reverse order we build them

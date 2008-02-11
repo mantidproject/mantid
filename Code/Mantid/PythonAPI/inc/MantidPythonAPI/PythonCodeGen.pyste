@@ -1,0 +1,2 @@
+Class("Mantid::PythonAPI::PythonInterface", "PythonInterface.h")
+

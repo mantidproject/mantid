@@ -1,0 +1,17 @@
+#For MantidPythonAPI
+
+import os
+import MantidBuild
+
+#GET LIST OF CPPS
+codeFolder = os.path.abspath('./src')
+listCpps = MantidBuild.getCPPFiles(codeFolder)
+
+#Import environment
+Import('env')
+
+#BUILD CODE
+shared = env.SharedLibrary('lib/MantidPythonAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+static = env.StaticLibrary('libstatic/MantidPythonAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'])
+retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidPythonAPI' ] }
+Return('retval')
