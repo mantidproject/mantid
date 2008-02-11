@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include <string>
+#include <ios>
 namespace Mantid
 {
   namespace API
