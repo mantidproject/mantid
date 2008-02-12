@@ -628,6 +628,8 @@ template Geometry::Vec3D&
 Geometry::Vec3D::operator*=(const Geometry::Matrix<double>&);
 template Geometry::Vec3D 
 Geometry::Vec3D::operator*(const Geometry::Matrix<double>&) const;
+template void 
+Geometry::Vec3D::rotate(const Matrix<double>&); 
 
 /// \endcond TEMPLATE
 
