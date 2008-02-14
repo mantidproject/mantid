@@ -11,12 +11,14 @@ import MantidBuild
 opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
 opts.Add('msvc','Set to 1 to use Microsoft Visual Studio Compiler on Windows', 1)
+opts.Add('debug','Set to 1 to build debug', 0)
 
 base_env = Environment(ENV=os.environ, options = opts)
 mingw_env = Environment(ENV=os.environ, options = opts, tools = [ 'mingw' ])
 Help(opts.GenerateHelpText(base_env))
 mingw = ARGUMENTS.get('mingw', 0)
 msvc = ARGUMENTS.get('msvc', 1)
+debug = ARGUMENTS.get('debug', 0)
 if int(msvc) :
 	env = base_env
 if int(mingw) :
@@ -122,7 +124,10 @@ else:
 		libDirList.append(poco_path+'/lib/Linux/i686')
 	else :
 		libDirList.append(poco_path+'/lib')
-	cflags.append(['-g','-Wall'])            ## PLEASE DO NOT MIX - -O0 and -g UNLESS DEBUGGUNG OPTIMIZATION ISSUES.
+	if int(debug) :
+	    cflags.append(['-g','-O0','-Wall'])
+	else :
+	    cflags.append(['-g','-O3','-Wall'])
 	env.Append(LINKFLAGS=['-g'])
 	f=os.popen('gsl-config --cflags')
 	flags=re.sub('\n','',f.readline())

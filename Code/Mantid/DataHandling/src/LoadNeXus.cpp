@@ -6,7 +6,7 @@
 #include "MantidDataHandling/LoadNeXus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "LoadNeXus/NeXusUtils.h"
+#include "NeXusUtils/NeXusUtils.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
