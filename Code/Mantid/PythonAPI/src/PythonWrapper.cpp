@@ -36,12 +36,14 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	class_< Mantid::PythonAPI::PythonInterface >("PythonInterface", init<  >())
         .def(init< const Mantid::PythonAPI::PythonInterface& >())
         .def("InitialiseFrameworkManager", &Mantid::PythonAPI::PythonInterface::InitialiseFrameworkManager)
-	.def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm)
+        .def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm)
         .def("ExecuteAlgorithm", &Mantid::PythonAPI::PythonInterface::ExecuteAlgorithm)
-	.def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)
-	.def("GetXData", &Mantid::PythonAPI::PythonInterface::GetXData)
-	.def("GetYData", &Mantid::PythonAPI::PythonInterface::GetYData)
-        ;
+        .def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)
+        .def("GetXData", &Mantid::PythonAPI::PythonInterface::GetXData)
+        .def("GetYData", &Mantid::PythonAPI::PythonInterface::GetYData)
+	.def("GetAddressXData", &Mantid::PythonAPI::PythonInterface::GetAddressXData)
+        .def("GetAddressYData", &Mantid::PythonAPI::PythonInterface::GetAddressYData)
+	;
 
 }
 

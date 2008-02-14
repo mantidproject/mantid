@@ -1,2 +1,4 @@
-Class("Mantid::PythonAPI::PythonInterface", "PythonInterface.h")
+PI = Class("Mantid::PythonAPI::PythonInterface", "PythonInterface.h")
+set_policy(PI.GetXData, return_value_policy(manage_new_object))
+set_policy(PI.GetYData, return_value_policy(manage_new_object))
 

@@ -39,6 +39,10 @@ public:
 	std::vector<double> GetXData(const std::string&, int const );
 	std::vector<double> GetYData(const std::string&, int const );
 
+	unsigned long GetAddressXData(const std::string&, int const );
+	unsigned long GetAddressYData(const std::string&, int const );
+	
+
 };
 
 }

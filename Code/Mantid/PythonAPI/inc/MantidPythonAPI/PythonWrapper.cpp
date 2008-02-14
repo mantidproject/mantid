@@ -18,7 +18,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm)
         .def("ExecuteAlgorithm", &Mantid::PythonAPI::PythonInterface::ExecuteAlgorithm)
         .def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)
-        .def("GetXData", &Mantid::PythonAPI::PythonInterface::GetXData)
+        .def("PlotIsisData", &Mantid::PythonAPI::PythonInterface::PlotIsisData)
+        .def("GetXData", &Mantid::PythonAPI::PythonInterface::GetXData, return_value_policy< manage_new_object >())
+        .def("GetYData", &Mantid::PythonAPI::PythonInterface::GetYData, return_value_policy< manage_new_object >())
     ;
 
 }
