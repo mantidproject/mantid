@@ -2,6 +2,9 @@
 #include <sstream>
 #include <napi.h>
 #include <stdlib.h>
+#ifdef _WIN32
+#include <io.h> /* for F_OK */
+#endif /* _WIN32 */
 #include "NeXusUtils.h"
 
 // quick and dirty illustation of NeXus writing of a workspace
