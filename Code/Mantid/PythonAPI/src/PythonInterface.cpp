@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "boost/algorithm/string.hpp"
 #include "boost/pointer_cast.hpp"
 
@@ -40,14 +42,7 @@ bool PythonInterface::CreateAlgorithm(const std::string& algName)
 {
 	if (fwMgr)
 	{
-		std::string algNameLower = boost::algorithm::to_lower_copy(algName);
-		
-		if (algs.find(algNameLower) == algs.end())
-		{
-			IAlgorithm* temp = fwMgr->createAlgorithm(algName);
-			boost::shared_ptr<IAlgorithm> pAlg(temp); 
-			algs.insert( std::pair< std::string, boost::shared_ptr<IAlgorithm> >(algNameLower, pAlg) ); 
-		}
+		 fwMgr->createAlgorithm(algName);
 		
 		return true;
 	}
@@ -55,20 +50,23 @@ bool PythonInterface::CreateAlgorithm(const std::string& algName)
 	return false;
 }
 
-bool PythonInterface::ExecuteAlgorithm(const std::string& algName)
+bool PythonInterface::ExecuteAlgorithm(const std::string& algName, const std::string& properties)
 {
 	if (fwMgr)
 	{
-		std::string algNameLower = boost::algorithm::to_lower_copy(algName);
+		fwMgr->exec(algName, properties);
 		
-		algMap::iterator val = algs.find(algNameLower) ;
+		return true;
+	}
+	
+	return false;
+}
+
+bool PythonInterface::LoadNexusFile(const std::string& fileName, const std::string& workspaceName)
+{
+	if (fwMgr)
+	{
 		
-		if (val != algs.end())
-		{
-			val->second->execute();
-			
-			return true;
-		}
 	}
 	
 	return false;
@@ -76,14 +74,11 @@ bool PythonInterface::ExecuteAlgorithm(const std::string& algName)
 
 int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::string& workspaceName)
 {
-	//Load the data into a workspace
-	Mantid::DataHandling::LoadRaw loader;
-	loader.initialize();
+	fwMgr->createAlgorithm("LoadRaw");
 	
-	loader.setPropertyValue("Filename", fileName);
-	loader.setPropertyValue("OutputWorkspace",  workspaceName);
+	std::string properties = "Filename:" + fileName + ",OutputWorkspace:" + workspaceName;
 	
-	loader.execute();
+	fwMgr->exec("LoadRaw", properties);
 	
 	//Retrieve workspace
 	AnalysisDataService *ads = AnalysisDataService::Instance();
@@ -91,6 +86,8 @@ int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::str
 	Workspace_sptr output = ads->retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	
+	std::cout << output2D->getHistogramNumber() << std::endl;
 	
 	//Return the number of histograms
 	return output2D->getHistogramNumber();

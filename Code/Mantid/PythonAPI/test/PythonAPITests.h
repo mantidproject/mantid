@@ -40,12 +40,12 @@ public:
   
   void xtestExecuteAlgorithm()
   {
-	TS_ASSERT(inter->ExecuteAlgorithm("HelloWorldAlgorithm"));
+	TS_ASSERT(inter->ExecuteAlgorithm("HelloWorldAlgorithm", ""));
   }
   
   void xtestExecuteAlgorithmNotFound()
   {
-	TS_ASSERT(!inter->ExecuteAlgorithm("Rubbish!"));
+	TS_ASSERT_THROWS_ANYTHING(inter->ExecuteAlgorithm("Rubbish!", ""));
   }
   
   void testLoadIsisRaw()
