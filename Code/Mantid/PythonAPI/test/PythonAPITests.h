@@ -28,22 +28,22 @@ public:
 	TS_ASSERT_THROWS_NOTHING(inter->InitialiseFrameworkManager());
   }
   
-  void testCreateAlgorithm()
+  void xtestCreateAlgorithm()
   {
 	TS_ASSERT(inter->CreateAlgorithm("HelloWorldAlgorithm"));
   }
   
-  void testCreateAlgorithmNotFoundThrows()
+  void xtestCreateAlgorithmNotFoundThrows()
   {
 	TS_ASSERT_THROWS_ANYTHING(inter->CreateAlgorithm("Rubbish!"));
   }
   
-  void testExecuteAlgorithm()
+  void xtestExecuteAlgorithm()
   {
 	TS_ASSERT(inter->ExecuteAlgorithm("HelloWorldAlgorithm"));
   }
   
-  void testExecuteAlgorithmNotFound()
+  void xtestExecuteAlgorithmNotFound()
   {
 	TS_ASSERT(!inter->ExecuteAlgorithm("Rubbish!"));
   }
