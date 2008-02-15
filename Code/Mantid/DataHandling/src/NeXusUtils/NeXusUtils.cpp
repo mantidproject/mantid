@@ -3,7 +3,10 @@
 #include <napi.h>
 #include <stdlib.h>
 #ifdef _WIN32
-#include <io.h> /* for F_OK */
+#include <io.h>
+#ifndef F_OK
+#define F_OK 0	/* MinGW has this defined, Visual Studio doesn't */
+#endif
 #endif /* _WIN32 */
 #include "NeXusUtils.h"
 
