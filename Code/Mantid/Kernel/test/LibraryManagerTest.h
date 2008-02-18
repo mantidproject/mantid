@@ -35,12 +35,9 @@ public:
 		Mantid::API::FrameworkManager* manager = Mantid::API::FrameworkManager::Instance();
 		manager->initialize();
 	  
-		Mantid::API::IAlgorithm* alg= manager->createAlgorithm("HelloWorldAlgorithm");
+		manager->createAlgorithm("HelloWorldAlgorithm");
 	  
-		TS_ASSERT_THROWS_NOTHING(alg->execute());			
-	
-		delete alg;
-		
+		TS_ASSERT_THROWS_NOTHING(manager->exec("HelloWorldAlgorithm", ""));				
 	}
 	catch (...)
 	{

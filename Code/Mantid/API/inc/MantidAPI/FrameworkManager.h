@@ -28,7 +28,6 @@ namespace API
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
-class AlgorithmManager;
 class WorkspaceFactory;
 class AnalysisDataService;
 
@@ -99,9 +98,7 @@ private:
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
-  
-  /// Pointer to the Algorithm Factory instance
-  AlgorithmManager *algManager;
+ 
   /// Pointer to the Workspace Factory instance
   WorkspaceFactory *workFactory;
   /// Pointer to the Analysis Data Service

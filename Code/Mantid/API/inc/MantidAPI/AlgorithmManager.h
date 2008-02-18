@@ -9,14 +9,14 @@
 #define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::API::AlgorithmManager::Instance()->subscribe<ns::classname>(#classname)) \
+       ((Mantid::API::AlgorithmManager::Instance().subscribe<ns::classname>(#classname)) \
        , 0)); \
   }
 
 #define DECLARE_ALGORITHM(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::API::AlgorithmManager::Instance()->subscribe<classname>(#classname)) \
+       ((Mantid::API::AlgorithmManager::Instance().subscribe<classname>(#classname)) \
        , 0)); \
   }
 
@@ -28,6 +28,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
@@ -40,9 +41,9 @@ namespace API
   //Typedef for a shared pointer to an Algorithm
   typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
   ///@endcond
-/** @class AlgorithmManager AlgorithmManager.h Kernel/AlgorithmManager.h
+/** @class AlgorithmManagerImpl AlgorithmManager.h Kernel/AlgorithmManager.h
 
-	  The Algorithm Manager class is responsible for controlling algorithm 
+	  The AlgorithmManagerImpl class is responsible for controlling algorithm 
 	  instances. It incorporates the algorithm factory and initializes algorithms.
 
 	  @author Dickon Champion, ISIS, RAL
@@ -68,16 +69,13 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlgorithmManager  : public AlgorithmFactory
+
+
+class DLLExport AlgorithmManagerImpl  : public AlgorithmFactory
 {
 public:
 
-  /// A static method which retrieves the single instance of the Algorithm Manager
-  static AlgorithmManager* Instance();
-
-  ~AlgorithmManager();
-	
-  // Methods to create algorithm instances
+	// Methods to create algorithm instances
 	Algorithm_sptr create( const std::string& algName );
 	Algorithm_sptr createUnmanaged( const std::string& algName ) const;
 
@@ -90,9 +88,13 @@ public:
   int size() const { return regAlg.size(); }
 
 private:
+	friend class Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
-	// Private constructor & destructor for singleton class
-	AlgorithmManager();
+	//Class cannot be instantiated by normal means
+	AlgorithmManagerImpl();
+	~AlgorithmManagerImpl();
+	AlgorithmManagerImpl(const AlgorithmManagerImpl&);
+	AlgorithmManagerImpl& operator = (const AlgorithmManagerImpl&);
 
 
   /// Static reference to the logger class
@@ -100,8 +102,10 @@ private:
  
 	int no_of_alg;                       ///< counter of registered algorithms
 	std::vector<Algorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]
-	static AlgorithmManager* m_instance; ///< Pointer to the Algorithm Manager instance
 };
+
+///The singleton definition of AlgorithmManagerImpl
+typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
 
 } // namespace API
 }  //Namespace Mantid

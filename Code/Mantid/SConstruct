@@ -124,10 +124,12 @@ else:
 		libDirList.append(poco_path+'/lib/Linux/i686')
 	else :
 		libDirList.append(poco_path+'/lib')
+
 	if int(debug) :
 	    cflags.append(['-g','-O0','-Wall'])
 	else :
 	    cflags.append(['-g','-O3','-Wall'])
+
 	env.Append(LINKFLAGS=['-g'])
 	f=os.popen('gsl-config --cflags')
 	flags=re.sub('\n','',f.readline())

@@ -177,8 +177,7 @@ namespace Mantid
     */
     Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
     {
-      AlgorithmManager* algManager = AlgorithmManager::Instance(); 
-      Algorithm_sptr alg = algManager->createUnmanaged(name);
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
       //set as a child
       alg->setChild(true);
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/AlgorithmFactory.h"
+#include <iostream>
 
 namespace Mantid
 {
@@ -11,11 +12,12 @@ namespace API
 
 	AlgorithmFactory::AlgorithmFactory()
 	{
+		
 	}
 
 	AlgorithmFactory::~AlgorithmFactory()
 	{
-	  delete m_instance;
+	 
 	}
 
 	AlgorithmFactory* AlgorithmFactory::Instance()

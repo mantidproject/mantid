@@ -18,6 +18,10 @@ int main()
   FrameworkManager* fm = FrameworkManager::Instance();
   fm->initialize();
 
+  fm->createAlgorithm("HelloWorldAlgorithm");
+	fm->exec("HelloWorldAlgorithm", "");
+
+	
   Benchmark b;
   b.RunPlusTest();
     

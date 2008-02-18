@@ -48,7 +48,6 @@ void FrameworkManager::initialize()
   //     the analysis data service, the workspace factory
 	
   config = Kernel::ConfigService::Instance();
-  algManager = AlgorithmManager::Instance();
   workFactory = WorkspaceFactory::Instance();
   data = AnalysisDataService::Instance();
 
@@ -66,7 +65,7 @@ void FrameworkManager::initialize()
  */
 void FrameworkManager::clear()
 {
-  algManager->clear();
+  AlgorithmManager::Instance().clear();
   data->clear();
 }
 
@@ -79,7 +78,7 @@ void FrameworkManager::clear()
  */
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 { 
-   IAlgorithm* alg = algManager->create(algName).get();
+   IAlgorithm* alg = AlgorithmManager::Instance().create(algName).get();
    return alg;
 }
 
@@ -96,7 +95,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
 IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
 {
   // Use the previous method to create the algorithm
-  IAlgorithm *alg = createAlgorithm(algName);
+  IAlgorithm *alg = AlgorithmManager::Instance().create(algName).get();//createAlgorithm(algName);
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	

@@ -18,10 +18,6 @@ namespace Mantid
 namespace Kernel
 {
 
-// the types of the class factories
-//typedef Algorithm* create_alg();
-//typedef void destroy_alg(Algorithm*);
-
 /** @class LibraryManager LibraryManager.h Kernel/LibraryManager.h
 
     Class for opening shared libraries.
@@ -58,6 +54,8 @@ public:
 	
 	//opens all suitable libraries on a given path
 	int OpenAllLibraries(const std::string&, bool isRecursive=false);
+
+	int Test() { return 123; }
 
 private:
 	///Private Constructor

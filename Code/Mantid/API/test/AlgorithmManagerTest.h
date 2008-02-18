@@ -1,5 +1,5 @@
-#ifndef ALGORITHMMANAGERTEST_H_
-#define ALGORITHMMANAGERTEST_H_
+#ifndef AlgorithmManagerTest_H_
+#define AlgorithmManagerTest_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -8,28 +8,28 @@
 
 using namespace Mantid::API;
 
-class algmantest : public Algorithm
+class AlgTest : public Algorithm
 {
 public:
 
-  algmantest() : Algorithm() {}
-  virtual ~algmantest() {}
+  AlgTest() : Algorithm() {}
+  virtual ~AlgTest() {}
   void init() { }
   void exec() {  }
 };
 
-class algmantestSecond : public Algorithm
+class AlgTestSecond : public Algorithm
 {
 public:
 
-  algmantestSecond() : Algorithm() {}
-  virtual ~algmantestSecond() {}
+  AlgTestSecond() : Algorithm() {}
+  virtual ~AlgTestSecond() {}
   void init() { }
   void exec() { }
 };
 
-DECLARE_ALGORITHM(algmantest)
-DECLARE_ALGORITHM(algmantestSecond)
+DECLARE_ALGORITHM(AlgTest)
+DECLARE_ALGORITHM(AlgTestSecond)
 
 class AlgorithmManagerTest : public CxxTest::TestSuite
 {
@@ -37,61 +37,56 @@ public:
 
   AlgorithmManagerTest() 
   {
-    manager = AlgorithmManager::Instance();
+
   }
 
   void testInstance()
   {
     // Not really much to test
-    AlgorithmManager *tester = AlgorithmManager::Instance();
-    TS_ASSERT_EQUALS( manager, tester);
-    TS_ASSERT_THROWS_NOTHING( manager->create("algmantest") )
-    TS_ASSERT_THROWS( manager->create("aaaaaa"), std::runtime_error )
+    //AlgorithmManager *tester = AlgorithmManager::Instance();
+    //TS_ASSERT_EQUALS( manager, tester);
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
+    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
   }
 
   void testClear()
   {
-    manager->clear();
-    manager->subscribe<algmantest>("AlgorithmManager::myAlgclear");
-    manager->subscribe<algmantestSecond>("AlgorithmManager::myAlgBclear");
-    TS_ASSERT_THROWS_NOTHING( manager->create("AlgorithmManager::myAlgBclear") );
-    TS_ASSERT_THROWS_NOTHING( manager->create("AlgorithmManager::myAlgBclear") );
-    TS_ASSERT_EQUALS(manager->size(),2);
-    manager->clear();
-    TS_ASSERT_EQUALS(manager->size(),0);
+    AlgorithmManager::Instance().clear();
+    AlgorithmManager::Instance().subscribe<AlgTest>("AlgorithmManager::myAlgclear");
+    AlgorithmManager::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgBclear");
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
+    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);
+    AlgorithmManager::Instance().clear();
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
   }
 
   void testReturnType()
   {
-    manager->clear();
-    manager->subscribe<algmantest>("AlgorithmManager::myAlg");
-    manager->subscribe<algmantestSecond>("AlgorithmManager::myAlgB");
+    AlgorithmManager::Instance().clear();
+    AlgorithmManager::Instance().subscribe<AlgTest>("AlgorithmManager::myAlg");
+    AlgorithmManager::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgB");
     Algorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING( alg = manager->create("AlgorithmManager::myAlg") );
-    TS_ASSERT_DIFFERS(dynamic_cast<algmantest*>(alg.get()),static_cast<algmantest*>(0));
-    TS_ASSERT_THROWS_NOTHING( alg = manager->create("AlgorithmManager::myAlgB") );
-    TS_ASSERT_DIFFERS(dynamic_cast<algmantestSecond*>(alg.get()),static_cast<algmantestSecond*>(0));
+    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgorithmManager::myAlg") );
+    TS_ASSERT_DIFFERS(dynamic_cast<AlgTest*>(alg.get()),static_cast<AlgTest*>(0));
+    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgorithmManager::myAlgB") );
+    TS_ASSERT_DIFFERS(dynamic_cast<AlgTestSecond*>(alg.get()),static_cast<AlgTestSecond*>(0));
     TS_ASSERT_DIFFERS(dynamic_cast<Algorithm*>(alg.get()),static_cast<Algorithm*>(0));
-    TS_ASSERT_EQUALS(manager->size(),2);   // To check that crea is called on local objects
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);   // To check that crea is called on local objects
   }
 
   void testManagedType()
   {
-    manager->clear();
+    AlgorithmManager::Instance().clear();
     Algorithm_sptr Aptr, Bptr;
-    Aptr=manager->create("algmantest");
-    Bptr=manager->createUnmanaged("algmantest");
+    Aptr=AlgorithmManager::Instance().create("AlgorithmManagerTest");
+    Bptr=AlgorithmManager::Instance().createUnmanaged("AlgorithmManagerTest");
     TS_ASSERT_DIFFERS(Aptr,Bptr);
-    TS_ASSERT_EQUALS(manager->size(),1);
+    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),1);
     TS_ASSERT_DIFFERS(Aptr.get(),static_cast<Algorithm*>(0));
     TS_ASSERT_DIFFERS(Bptr.get(),static_cast<Algorithm*>(0));
   }
 
-
-private:
-
-  AlgorithmManager *manager;
-
 };
 
-#endif /* ALGORITHMMANAGERTEST_H_*/
+#endif /* AlgorithmManagerTest_H_*/

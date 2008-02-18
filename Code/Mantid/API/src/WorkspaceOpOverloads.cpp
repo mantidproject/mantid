@@ -57,8 +57,7 @@ namespace Mantid
     */
     Workspace_sptr executeBinaryOperation(const std::string algorithmName, const Workspace_sptr lhs, const Workspace_sptr rhs)
     {
-      AlgorithmManager* algManager = AlgorithmManager::Instance();
-      Algorithm_sptr alg = algManager->createUnmanaged(algorithmName);
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
       alg->setChild(true);
       alg->initialize();    
       
