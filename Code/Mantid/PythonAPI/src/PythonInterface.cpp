@@ -21,7 +21,7 @@ namespace PythonAPI
 {	
 	
 	
-PythonInterface::PythonInterface()
+PythonInterface::PythonInterface() : fwMgr(0)
 {
 }
 
@@ -31,44 +31,26 @@ PythonInterface::~PythonInterface()
 
 void PythonInterface::InitialiseFrameworkManager()
 {
-	if (!fwMgr)
-	{
 		fwMgr = FrameworkManager::Instance();
 		fwMgr->initialize();
-	}
 }
 
 bool PythonInterface::CreateAlgorithm(const std::string& algName)
 {
-	if (fwMgr)
-	{
 		 fwMgr->createAlgorithm(algName);
 		
 		return true;
-	}
-	
-	return false;
 }
 
 bool PythonInterface::ExecuteAlgorithm(const std::string& algName, const std::string& properties)
 {
-	if (fwMgr)
-	{
 		fwMgr->exec(algName, properties);
 		
 		return true;
-	}
-	
-	return false;
 }
 
 bool PythonInterface::LoadNexusFile(const std::string& fileName, const std::string& workspaceName)
 {
-	if (fwMgr)
-	{
-		
-	}
-	
 	return false;
 }
 
