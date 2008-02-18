@@ -79,8 +79,8 @@ public:
   {
     AlgorithmManager::Instance().clear();
     Algorithm_sptr Aptr, Bptr;
-    Aptr=AlgorithmManager::Instance().create("AlgorithmManagerTest");
-    Bptr=AlgorithmManager::Instance().createUnmanaged("AlgorithmManagerTest");
+    Aptr=AlgorithmManager::Instance().create("AlgTest");
+    Bptr=AlgorithmManager::Instance().createUnmanaged("AlgTest");
     TS_ASSERT_DIFFERS(Aptr,Bptr);
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),1);
     TS_ASSERT_DIFFERS(Aptr.get(),static_cast<Algorithm*>(0));
