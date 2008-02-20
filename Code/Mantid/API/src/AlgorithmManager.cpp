@@ -15,10 +15,8 @@ namespace Mantid
     Kernel::Logger& AlgorithmManagerImpl::g_log = Kernel::Logger::get("AlgorithmManager");
 
     /// Private Constructor for singleton class
-    AlgorithmManagerImpl::AlgorithmManagerImpl() : AlgorithmFactory(),
-      no_of_alg(0)
+    AlgorithmManagerImpl::AlgorithmManagerImpl(): no_of_alg(0)
     {
-	   
     }
 
     /** Private destructor
@@ -27,7 +25,6 @@ namespace Mantid
     */
     AlgorithmManagerImpl::~AlgorithmManagerImpl()
     {
-	
     }
 
     /** Creates an instance of an algorithm, but does not own that instance
@@ -38,7 +35,7 @@ namespace Mantid
     */
     Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName) const
     {
-      return AlgorithmFactory::create(algName);                // Throws on fail:
+      return AlgorithmFactory::Instance()->create(algName);                // Throws on fail:
     }
 
     /** Creates an instance of an algorithm
@@ -52,7 +49,7 @@ namespace Mantid
     {
       try
       {
-        regAlg.push_back(AlgorithmFactory::create(algName));      // Throws on fail:	   
+        regAlg.push_back(AlgorithmFactory::Instance()->create(algName));      // Throws on fail:	   
         regAlg.back()->initialize();
       }
       catch(std::runtime_error& ex)

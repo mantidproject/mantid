@@ -12,12 +12,10 @@ namespace API
 
 	AlgorithmFactory::AlgorithmFactory()
 	{
-		
 	}
 
 	AlgorithmFactory::~AlgorithmFactory()
 	{
-	 
 	}
 
 	AlgorithmFactory* AlgorithmFactory::Instance()
