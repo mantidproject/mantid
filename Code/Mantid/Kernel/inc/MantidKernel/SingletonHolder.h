@@ -31,7 +31,13 @@ namespace Kernel
 {
 
 template <typename T>
-class SingletonHolder
+class 
+#ifdef SINGLETON_EXPORT
+DLLExport	
+#else
+DLLImport
+#endif /* SINGLETON_EXPORT */
+SingletonHolder
 {
 public:
 	static T& Instance();
@@ -52,11 +58,7 @@ struct CreateUsingNew
 	static void Destroy(T* p){delete p;}
 };
 
-template <typename T>
-T* SingletonHolder<T>::pInstance = 0;
-
-template <typename T>
-bool SingletonHolder<T>::destroyed = false;
+#ifdef SINGLETON_EXPORT
 
 template <typename T>
 inline T& SingletonHolder<T>::Instance()
@@ -69,8 +71,6 @@ inline T& SingletonHolder<T>::Instance()
 	return *pInstance;
 }
 
-
-
 template <typename T>
 void SingletonHolder<T>::DestroySingleton()
 {
@@ -79,6 +79,14 @@ void SingletonHolder<T>::DestroySingleton()
 	pInstance = 0;
 	destroyed = true;
 };
+
+template <typename T>
+T* SingletonHolder<T>::pInstance = 0;
+
+template <typename T>
+bool SingletonHolder<T>::destroyed = false;
+
+#endif /* SINGLETON_EXPORT */
 
 }
 }

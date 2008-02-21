@@ -35,8 +35,11 @@
 #ifdef _WIN32
   #pragma warning( disable: 4251 )
   #define DLLExport __declspec( dllexport )
+  #define DLLImport __declspec( dllimport )
 #else
   #define DLLExport
+  #define DLLImport
+#define 
 #endif
 
 namespace Mantid 
