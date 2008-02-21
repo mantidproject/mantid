@@ -75,7 +75,13 @@ namespace Exception
 {
 
 /// Records the filename and the description of failure.
-class DLLExport FileError : public std::runtime_error
+class
+#ifdef IN_MANTID_KERNEL
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_KERNEL */
+FileError : public std::runtime_error
 {
  private:
   /// The name of the file relating to the error
@@ -95,7 +101,13 @@ class DLLExport FileError : public std::runtime_error
 };
 
 /// Marks code as not implemented yet.
-class DLLExport NotImplementedError : public std::logic_error
+class
+#ifdef IN_MANTID_KERNEL
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_KERNEL */
+NotImplementedError : public std::logic_error
 { 
  public:
   NotImplementedError(const std::string&);
@@ -109,7 +121,13 @@ class DLLExport NotImplementedError : public std::logic_error
 };
 
 /// Exception for when an item is not found in a collection.
-class DLLExport NotFoundError : public std::runtime_error
+class
+#ifdef IN_MANTID_KERNEL
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_KERNEL */
+NotFoundError : public std::runtime_error
 {
  private:
   /// The name of the search object
@@ -129,7 +147,13 @@ class DLLExport NotFoundError : public std::runtime_error
 };
 
 /// Exception for when an item is already in a collection.
-class DLLExport ExistsError : public std::runtime_error
+class
+#ifdef IN_MANTID_KERNEL
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_KERNEL */
+ExistsError : public std::runtime_error
 {
  private:
   /// The name of the search object

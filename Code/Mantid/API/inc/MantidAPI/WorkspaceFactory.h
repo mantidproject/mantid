@@ -62,7 +62,13 @@ typedef boost::shared_ptr<Workspace> Workspace_sptr;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport WorkspaceFactory : public Kernel::DynamicFactory<Workspace>
+class
+#if IN_MANTID_API
+DLLExport 
+#else
+DLLImport
+#endif /* IN_MANTID_API */
+WorkspaceFactory : public Kernel::DynamicFactory<Workspace>
 {
 public:
   

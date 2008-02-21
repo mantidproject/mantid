@@ -48,7 +48,13 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AnalysisDataService
+class
+#ifdef IN_MANTID_API
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_API */
+AnalysisDataService
 {
 public:
    

@@ -11,6 +11,8 @@ import MantidBuild
 
 
 Import('env')
+myenv = env.Clone()
+myenv.Append(CPPDEFINES=[('IN_MANTID_MAIN',1)])
 shared_list = env['SHARED_LIST']
 #static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
@@ -21,18 +23,18 @@ libDirList = env['MYLIBDIRLIST']
 codeFolder = os.path.abspath('.')
 listCpps = MantidBuild.getCPPFiles(codeFolder)
 
-myenv_dynamic = env.Clone()
+myenv_dynamic = myenv.Clone()
 myenv_dynamic.Append(LIBS=libList)
 myenv_dynamic.Append(LIBPATH=libDirList)
 myenv_dynamic.Append(LIBPATH='#Bin/Shared')
-shared = myenv_dynamic.Program('main',listCpps)
+shared = myenv_dynamic.Program('main',listCpps, PDB='main.pdb')
 
-#myenv_static = env.Clone()
+#myenv_static = myenv.Clone()
 #myenv_static.Append(LIBS=libList)
 #myenv_static.Append(LIBPATH=libDirList)
 #myenv_static.Append(LIBPATH='#Bin/Static')
 #myenv_static.Append(LINKFLAGS=['-static'])
-#myenv_static.Program('main_static', listCpps)
+#myenv_static.Program('main_static', listCpps, PDB='main_static.pdb')
 
 retval = { 'shared': shared }
 Return('retval')

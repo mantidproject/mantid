@@ -70,8 +70,13 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-
-class DLLExport AlgorithmManagerImpl 
+class
+#if IN_MANTID_API
+DLLExport
+#else
+DLLImport
+#endif
+AlgorithmManagerImpl 
 {
 public:
 
@@ -88,7 +93,7 @@ public:
   int size() const { return regAlg.size(); }
 
 private:
-	friend class Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
+	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
 	//Class cannot be instantiated by normal means
 	AlgorithmManagerImpl();
@@ -106,7 +111,6 @@ private:
 
 ///The singleton definition of AlgorithmManagerImpl
 typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
-
 } // namespace API
 }  //Namespace Mantid
 

@@ -46,7 +46,13 @@ class Algorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-  class DLLExport AlgorithmFactory : public Kernel::DynamicFactory<Algorithm>
+class 
+#if IN_MANTID_API
+DLLExport 
+#else
+DLLImport
+#endif /* IN_MANTID_API */
+AlgorithmFactory : public Kernel::DynamicFactory<Algorithm>
   {
   public:
     
