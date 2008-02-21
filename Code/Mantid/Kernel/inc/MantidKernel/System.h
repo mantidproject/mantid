@@ -39,7 +39,6 @@
 #else
   #define DLLExport
   #define DLLImport
-#define 
 #endif
 
 namespace Mantid 

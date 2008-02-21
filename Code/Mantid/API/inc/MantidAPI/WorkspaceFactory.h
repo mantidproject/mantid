@@ -63,7 +63,7 @@ typedef boost::shared_ptr<Workspace> Workspace_sptr;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class
-#if IN_MANTID_API
+#ifdef IN_MANTID_API
 DLLExport 
 #else
 DLLImport

@@ -71,11 +71,11 @@ namespace API
 */
 
 class
-#if IN_MANTID_API
+#ifdef IN_MANTID_API
 DLLExport
 #else
 DLLImport
-#endif
+#endif /* IN_MANTID_API */
 AlgorithmManagerImpl 
 {
 public:

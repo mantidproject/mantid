@@ -59,11 +59,11 @@ class AnalysisDataService;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class
-#if IN_MANTID_API
+#ifdef IN_MANTID_API
 DLLExport 
 #else
 DLLImport
-#endif
+#endif /* IN_MANTID_API */
 FrameworkManager
 {
 public:

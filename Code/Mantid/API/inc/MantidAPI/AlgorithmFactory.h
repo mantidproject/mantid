@@ -47,7 +47,7 @@ class Algorithm;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 class 
-#if IN_MANTID_API
+#ifdef IN_MANTID_API
 DLLExport 
 #else
 DLLImport
