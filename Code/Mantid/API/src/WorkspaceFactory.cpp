@@ -64,7 +64,7 @@ Workspace_sptr WorkspaceFactory::create(const std::string& className, const int&
   
   // Now decide what kind of 2D workspace to create according to the size
   int triggerSize;
-  if ( ! Kernel::ConfigService::Instance()->getValue("ManagedWorkspace.MinSize", triggerSize) )
+  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", triggerSize) )
   {
     // Default to 20M elements if missing
     triggerSize = 25000000;

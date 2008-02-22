@@ -15,8 +15,7 @@ public:
 
   ConfigServiceTest()
   {
-	  configSvc = ConfigService::Instance();
-	  configSvc->loadConfig("MantidTest.properties");
+	  ConfigService::Instance().loadConfig("MantidTest.properties");
   }
 
   void testLogging()
@@ -52,22 +51,22 @@ public:
   {
 	  //we cannot test the return values here as they will differ based on the environment.
 	  //therfore we will just check they return a non empty string.
-	  std::string osName = configSvc->getOSName();
+	  std::string osName = ConfigService::Instance().getOSName();
 	  TS_ASSERT_LESS_THAN(0, osName.length()); //check that the string is not empty
-	  std::string osArch = configSvc->getOSArchitecture();
+	  std::string osArch = ConfigService::Instance().getOSArchitecture();
 	  TS_ASSERT_LESS_THAN(0, osArch.length()); //check that the string is not empty
-	  std::string osCompName = configSvc->getComputerName();
+	  std::string osCompName = ConfigService::Instance().getComputerName();
 	  TS_ASSERT_LESS_THAN(0, osCompName.length()); //check that the string is not empty
-	  TS_ASSERT_LESS_THAN(0, configSvc->getOSVersion().length()); //check that the string is not empty
-	  TS_ASSERT_LESS_THAN(0, configSvc->getCurrentDir().length()); //check that the string is not empty
-	  TS_ASSERT_LESS_THAN(0, configSvc->getHomeDir().length()); //check that the string is not empty
-	  TS_ASSERT_LESS_THAN(0, configSvc->getTempDir().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getOSVersion().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getCurrentDir().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getHomeDir().length()); //check that the string is not empty
+	  TS_ASSERT_LESS_THAN(0, ConfigService::Instance().getTempDir().length()); //check that the string is not empty
   }
 
   void TestCustomProperty()
   {
 	  //Mantid.legs is defined in the properties script as 6
-	  std::string legCountString = configSvc->getString("mantid.legs");
+	  std::string legCountString = ConfigService::Instance().getString("mantid.legs");
 	  TS_ASSERT_EQUALS(legCountString, "6");
   }
 
@@ -75,9 +74,9 @@ public:
   {
 	  //Mantid.legs is defined in the properties script as 6
 	  int value;
-	  int retVal = configSvc->getValue("mantid.legs",value);
+	  int retVal = ConfigService::Instance().getValue("mantid.legs",value);
 	  double dblValue;
-	  retVal = configSvc->getValue("mantid.legs",dblValue);
+	  retVal = ConfigService::Instance().getValue("mantid.legs",dblValue);
 
 	  TS_ASSERT_EQUALS(value, 6);
 	  TS_ASSERT_EQUALS(dblValue, 6.0);
@@ -86,7 +85,7 @@ public:
   void TestMissingProperty()
   {
 	  //Mantid.noses is not defined in the properties script 
-	  std::string noseCountString = configSvc->getString("mantid.noses");
+	  std::string noseCountString = ConfigService::Instance().getString("mantid.noses");
     //this should return an empty string
 
 	  TS_ASSERT_EQUALS(noseCountString, "");

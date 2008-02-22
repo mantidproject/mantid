@@ -12,14 +12,6 @@
 
 namespace Mantid
 {
-namespace Kernel
-{
-class ConfigService;
-}
-}
-
-namespace Mantid
-{
 namespace API
 {
 
@@ -106,8 +98,6 @@ private:
  
   /// Pointer to the Workspace Factory instance
   WorkspaceFactory *workFactory;
-  /// Pointer to the Configuration Service
-  Kernel::ConfigService *config;
   
 };
 

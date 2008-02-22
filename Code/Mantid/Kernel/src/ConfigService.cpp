@@ -14,39 +14,28 @@ namespace Mantid
 {
 namespace Kernel
 {
-	// Initialise the instance pointer to zero
-	ConfigService* ConfigService::m_instance=0;
-
   // Get a reference to the logger
-  Logger& ConfigService::g_log = Logger::get("ConfigService");
+  Logger& ConfigServiceImpl::g_log = Logger::get("ConfigService");
 
-  /** A static method which retrieves the single instance of the ConfigService
-   *
-   * @returns A pointer to the instance
-   */
-	ConfigService* ConfigService::Instance()
-	{
-		if (!m_instance) m_instance = new ConfigService;
-		return m_instance;
-	}
-
-	/// Private constructor for singleton class
-	ConfigService::ConfigService()
+  /// Private constructor for singleton class
+	ConfigServiceImpl::ConfigServiceImpl()
 	{
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
 		m_pConf = 0;
 		//attempt to load the default properties filename
 		loadConfig("Mantid.properties");
+		g_log.debug() << "ConfigService created." << std::endl;
 	}
 
   /** Private Destructor
    *  Prevents client from calling 'delete' on the pointer handed out by Instance
    */
-	ConfigService::~ConfigService()
+	ConfigServiceImpl::~ConfigServiceImpl()
 	{
 		delete m_pSysConfig;
 		delete m_pConf;                // potential double delete???
+		g_log.debug() << "ConfigService destroyed." << std::endl;
 	}
 
 
@@ -55,7 +44,7 @@ namespace Kernel
    *
    *  @param filename The filename and optionally path of the file to load
    */
-	void ConfigService::loadConfig(const std::string& filename)
+	void ConfigServiceImpl::loadConfig(const std::string& filename)
 	{
 		delete m_pConf;
 
@@ -92,7 +81,7 @@ namespace Kernel
 			//configure the logging framework
 			Poco::Util::LoggingConfigurator configurator;
 			
-			//BUG? This line crashes the FrameworkManagerTest and ConfigServiceTest
+			//BUG? This line crashes the FrameworkManagerTest and ConfigServiceImplTest
 			configurator.configure(m_pConf);
 		}
 		catch (std::exception& e)
@@ -107,7 +96,7 @@ namespace Kernel
    *  @param keyName The case sensitive name of the property that you need the value of.
    *  @returns The string value of the property, or an empty string if the key cannot be found
    */
-	std::string ConfigService::getString(const std::string& keyName)
+	std::string ConfigServiceImpl::getString(const std::string& keyName)
 	{
     std::string retVal;
     try
@@ -130,7 +119,7 @@ namespace Kernel
    *  @returns A success flag - 0 on failure, 1 on success
    */
 	template<typename T>
-	int ConfigService::getValue(const std::string& keyName, T& out)
+	int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
 	{
 		std::string strValue = getString(keyName);
 		int result = StrFunc::convert(strValue,out);
@@ -143,7 +132,7 @@ namespace Kernel
    *  @param keyName The name of the environment variable that you need the value of.
    *  @returns The string value of the property
    */
-	std::string ConfigService::getEnvironment(const std::string& keyName)	
+	std::string ConfigServiceImpl::getEnvironment(const std::string& keyName)	
 	{
 		return m_pSysConfig->getString("system.env." + keyName);
 	}
@@ -152,7 +141,7 @@ namespace Kernel
    *
    *  @returns The name pf the OS version
    */
-	std::string ConfigService::getOSName()
+	std::string ConfigServiceImpl::getOSName()
 	{
 		return m_pSysConfig->getString("system.osName");
 	}
@@ -161,7 +150,7 @@ namespace Kernel
    *
    *  @returns The  name of the computer
    */
-	std::string ConfigService::getOSArchitecture()
+	std::string ConfigServiceImpl::getOSArchitecture()
 	{
 		return m_pSysConfig->getString("system.osArchitecture");
 	}
@@ -170,7 +159,7 @@ namespace Kernel
    *
    * @returns The operating system architecture
    */
-	std::string ConfigService::getComputerName()
+	std::string ConfigServiceImpl::getComputerName()
 	{
 		return m_pSysConfig->getString("system.nodeName");
 	}
@@ -179,7 +168,7 @@ namespace Kernel
    *
    * @returns The operating system version
    */
-	std::string ConfigService::getOSVersion()
+	std::string ConfigServiceImpl::getOSVersion()
 	{
 		return m_pSysConfig->getString("system.osVersion");
 	}
@@ -188,7 +177,7 @@ namespace Kernel
    *
    * @returns The absolute path of the current directory containing the dll
    */
-	std::string ConfigService::getCurrentDir()
+	std::string ConfigServiceImpl::getCurrentDir()
 	{
 		return m_pSysConfig->getString("system.currentDir");
 	}
@@ -197,7 +186,7 @@ namespace Kernel
    *
    * @returns The absolute path of the home directory 
    */
-	std::string ConfigService::getHomeDir()
+	std::string ConfigServiceImpl::getHomeDir()
 	{
 		return m_pSysConfig->getString("system.homeDir");
 	}
@@ -206,7 +195,7 @@ namespace Kernel
    *
    * @returns The absolute path of the temp directory 
    */
-	std::string ConfigService::getTempDir()
+	std::string ConfigServiceImpl::getTempDir()
 	{
 		return m_pSysConfig->getString("system.tempDir");
 	}
@@ -215,9 +204,9 @@ namespace Kernel
 	
 /// \cond TEMPLATE 
 
-	template DLLExport int ConfigService::getValue(const std::string&,double&);
-	template DLLExport int ConfigService::getValue(const std::string&,std::string&);
-	template DLLExport int ConfigService::getValue(const std::string&,int&);
+	template DLLExport int ConfigServiceImpl::getValue(const std::string&,double&);
+	template DLLExport int ConfigServiceImpl::getValue(const std::string&,std::string&);
+	template DLLExport int ConfigServiceImpl::getValue(const std::string&,int&);
 
 /// \endcond TEMPLATE
 

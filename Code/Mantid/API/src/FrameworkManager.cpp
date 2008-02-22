@@ -43,14 +43,10 @@ FrameworkManager::~FrameworkManager()
 
 /// Creates all of the required services
 void FrameworkManager::initialize()
-{
-  // Required services are: the config service, the algorithm manager
-  //     the analysis data service, the workspace factory
-	
-  config = Kernel::ConfigService::Instance();
+{ 
   workFactory = WorkspaceFactory::Instance();
 
-  std::string pluginDir = config->getString("plugins.directory");
+  std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);

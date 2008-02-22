@@ -9,6 +9,14 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include "MantidKernel/SingletonHolder.h"
+
+#ifdef IN_MANTID_KERNEL
+#define EXPORT_OPT_MANTID_KERNEL DLLExport 
+#else
+#define EXPORT_OPT_MANTID_KERNEL DLLImport
+#endif /* IN_MANTID_API */
+
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -58,7 +66,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport ConfigService
+	class EXPORT_OPT_MANTID_KERNEL ConfigServiceImpl
 	{
 	  /** Inner templated class to wrap the poco library objects that have protected 
 	   *  desctructors and expose them as public.
@@ -111,9 +119,6 @@ namespace Kernel
 	  // Back to the ConfigService class itself...
 	  
 	public:	
-	  // Returns the single instance of the service
-		static ConfigService* Instance();
-
 		// Loads a config file
 		void loadConfig(const std::string& filename);
 		
@@ -137,25 +142,28 @@ namespace Kernel
 		std::string getTempDir();
 
 	private:
+		friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
+	
 	  // Private constructors and destructor for singleton class
-		ConfigService();
+		ConfigServiceImpl();
 		/// Private copy constructor. Prevents singleton being copied.
-		ConfigService(const ConfigService&) {}
+		ConfigServiceImpl(const ConfigServiceImpl&) {}
 	    
-    virtual ~ConfigService();
+		virtual ~ConfigServiceImpl();
 
     /// the POCO file config object
 		WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
 		/// the POCO system Config Object
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
-		/// Pointer to the factory instance
-		static ConfigService* m_instance;
-
     /// static reference to the logger class
 	  static Logger& g_log;
 
 	};
+	
+	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+	template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+	typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 } // namespace Kernel
 } // namespace Mantid

@@ -40,9 +40,8 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   m_XLength = XLength;
   m_YLength = YLength;
   
-  Kernel::ConfigService* configSvc = Kernel::ConfigService::Instance();
   // Look for the (optional) path from the configuration file
-  std::string path = configSvc->getString("ManagedWorkspace.FilePath");
+  std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
   if ( !path.empty() )
   {
     if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
@@ -85,7 +84,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   // CALCULATE BLOCKSIZE
   // Get memory size of a block from config file
   int blockMemory;
-  if ( ! configSvc->getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
+  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
       || blockMemory <= 0 )
   {
     // default to 1MB if property not found
