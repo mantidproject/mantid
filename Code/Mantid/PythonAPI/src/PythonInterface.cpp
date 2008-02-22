@@ -61,11 +61,8 @@ int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::str
 	std::string properties = "Filename:" + fileName + ",OutputWorkspace:" + workspaceName;
 	
 	fwMgr->exec("LoadRaw", properties);
-	
-	//Retrieve workspace
-	AnalysisDataService *ads = AnalysisDataService::Instance();
-	
-	Workspace_sptr output = ads->retrieve(workspaceName);
+		
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
@@ -78,9 +75,7 @@ int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::str
 std::vector<double> PythonInterface::GetXData(const std::string& workspaceName, int const index)
 {
 	//Retrieve workspace
-	AnalysisDataService *ads = AnalysisDataService::Instance();
-	
-	Workspace_sptr output = ads->retrieve(workspaceName);
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
@@ -90,9 +85,7 @@ std::vector<double> PythonInterface::GetXData(const std::string& workspaceName, 
 std::vector<double> PythonInterface::GetYData(const std::string& workspaceName, int const index)
 {
 	//Retrieve workspace
-	AnalysisDataService *ads = AnalysisDataService::Instance();
-	
-	Workspace_sptr output = ads->retrieve(workspaceName);
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
@@ -102,9 +95,7 @@ std::vector<double> PythonInterface::GetYData(const std::string& workspaceName, 
 unsigned long PythonInterface::GetAddressXData(const std::string& workspaceName, int const index)
 {
 	//Retrieve workspace
-	AnalysisDataService *ads = AnalysisDataService::Instance();
-	
-	Workspace_sptr output = ads->retrieve(workspaceName);
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
@@ -114,9 +105,7 @@ unsigned long PythonInterface::GetAddressXData(const std::string& workspaceName,
 unsigned long PythonInterface::GetAddressYData(const std::string& workspaceName, int const index)
 {
 	//Retrieve workspace
-	AnalysisDataService *ads = AnalysisDataService::Instance();
-	
-	Workspace_sptr output = ads->retrieve(workspaceName);
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	

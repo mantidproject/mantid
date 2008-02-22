@@ -127,7 +127,7 @@ public:
       if ( ! this->operator()() )
       {
         try {
-          API::Workspace_sptr ws = API::AnalysisDataService::Instance()->retrieve(m_workspaceName);
+          API::Workspace_sptr ws = API::AnalysisDataService::Instance().retrieve(m_workspaceName);
           // Check retrieved workspace is the type that it should be
           Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
           if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
@@ -152,7 +152,7 @@ public:
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
       // Note use of addOrReplace rather than add
-      API::AnalysisDataService::Instance()->addOrReplace(m_workspaceName, this->operator()() );
+      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()() );
       return true;
     }
     else

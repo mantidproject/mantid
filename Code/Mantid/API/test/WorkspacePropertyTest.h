@@ -119,15 +119,15 @@ public:
     // The other two need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING( space = factory->create("WorkspacePropertyTest") );
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->add("ws1", space) );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
     TS_ASSERT( wsp1->isValid() )
     
     // Put workspace of wrong type and check validation fails
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->add("ws3", space) );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
     TS_ASSERT( ! wsp3->isValid() )
     // Now put correct type in and check it passes
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance()->create("WorkspacePropertyTest2") )
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance()->addOrReplace("ws3", space) );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
     TS_ASSERT( wsp3->isValid() )
   }
 
@@ -145,7 +145,7 @@ public:
     TS_ASSERT( wsp2->store() )
     // Check it really has been stored in the ADS
     Workspace_sptr storedspace;
-    TS_ASSERT_THROWS_NOTHING( storedspace = AnalysisDataService::Instance()->retrieve("ws2") )
+    TS_ASSERT_THROWS_NOTHING( storedspace = AnalysisDataService::Instance().retrieve("ws2") )
     TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
     
     // This one should pass

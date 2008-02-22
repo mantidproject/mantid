@@ -4,12 +4,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <string>
+#include <map>
+
 #include "MantidKernel/System.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
-
-#include <string>
-#include <map>
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {
@@ -48,19 +50,10 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class
-#ifdef IN_MANTID_API
-DLLExport
-#else
-DLLImport
-#endif /* IN_MANTID_API */
-AnalysisDataService
+class EXPORT_OPT_MANTID_API AnalysisDataServiceImpl
 {
 public:
-   
-  // Returns the single instance of the service
-  static AnalysisDataService* Instance();
-  
+ 
   void add( const std::string& name, Workspace_sptr space );
   void addOrReplace( const std::string& name, Workspace_sptr space);
   void remove( const std::string& name );
@@ -68,23 +61,26 @@ public:
   Workspace_sptr retrieve( const std::string& name );	
 	
 private:
+	friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
   
   // Private constructors and destructor for singleton class
-  AnalysisDataService();
-  AnalysisDataService(const AnalysisDataService&);
-  ~AnalysisDataService();
+  AnalysisDataServiceImpl();
+  AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
+  AnalysisDataServiceImpl& operator = (const AnalysisDataServiceImpl&);
+  ~AnalysisDataServiceImpl();
 
   ///static reference to the logger class
   static Kernel::Logger& g_log;
-  
-  /// Pointer to the single instance
-  static AnalysisDataService* m_instance;
   
   /// Typedef for the map of the managed algorithms and their names
   typedef std::map<std::string, Workspace_sptr> WorkspaceMap;
   /// The map holding the managed algorithms
   WorkspaceMap m_spaces;
 };
+
+	///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
+	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
+	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
 
 } // namespace API
 } // namespace Mantid

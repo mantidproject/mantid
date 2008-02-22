@@ -104,7 +104,6 @@ public:
 
   void testExecute()
   {
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
 
     fill2d myAlg1,myAlg2, myAlg3;
     add2d  manip;
@@ -113,7 +112,7 @@ public:
     myAlg1.setPropertyValue("OutWS","A");
     myAlg1.execute();
 
-    Workspace_sptr A = ADS->retrieve("A");
+    Workspace_sptr A = AnalysisDataService::Instance().retrieve("A");
     TS_ASSERT_THROWS_NOTHING(WorkspaceHistory& A_WH = A->getWorkspaceHistory());
     WorkspaceHistory& A_WH = A->getWorkspaceHistory();
     TS_ASSERT_THROWS_NOTHING(const std::vector<AlgorithmHistory>& A_AH = A_WH.getAlgorithms());
@@ -146,7 +145,7 @@ public:
     myAlg2.setProperty("error",4.0);
     myAlg2.execute();
 
-    Workspace_sptr B = ADS->retrieve("B");
+    Workspace_sptr B = AnalysisDataService::Instance().retrieve("B");
     TS_ASSERT_THROWS_NOTHING(WorkspaceHistory& B_WH = B->getWorkspaceHistory());
     WorkspaceHistory& B_WH = B->getWorkspaceHistory();
     TS_ASSERT_THROWS_NOTHING(const std::vector<AlgorithmHistory>& B_AH = B_WH.getAlgorithms());
@@ -186,7 +185,7 @@ public:
     manip.setPropertyValue("InWS_2","B");
     manip.setPropertyValue("InoutWS","C");    
     manip.execute();
-    Workspace_sptr C = ADS->retrieve("C");
+    Workspace_sptr C = AnalysisDataService::Instance().retrieve("C");
     TS_ASSERT_THROWS_NOTHING(WorkspaceHistory& C_WH = C->getWorkspaceHistory());
     WorkspaceHistory& C_WH = C->getWorkspaceHistory();
     TS_ASSERT_THROWS_NOTHING(std::vector<AlgorithmHistory>& C_AH = C_WH.getAlgorithms());

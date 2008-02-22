@@ -11,55 +11,45 @@ using namespace Mantid::API;
 class AnalysisDataServiceTest : public CxxTest::TestSuite
 {
 public:
-  void testInstance()
-  {
-    AnalysisDataService *theService = AnalysisDataService::Instance();
-    AnalysisDataService *theService2 = AnalysisDataService::Instance();
-    TS_ASSERT_EQUALS( theService, theService2);
-  }
 
   void testAdd()
   {
-    AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING( theService->add("MySpace",space));
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("MySpace",space));
     Workspace_sptr space2;
-    TS_ASSERT_THROWS( theService->add("MySpace",space2),std::runtime_error);
+    TS_ASSERT_THROWS( AnalysisDataService::Instance().add("MySpace",space2),std::runtime_error);
     //clean up the ADS for other tests
-    theService->remove("MySpace");
+    AnalysisDataService::Instance().remove("MySpace");
   }
 
   void testAddOrReplace()
   {
-    AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING(theService->add("MySpaceAddOrReplace",space));
-    TS_ASSERT_THROWS(theService->add("MySpaceAddOrReplace",space),std::runtime_error);
-    TS_ASSERT_THROWS_NOTHING(theService->addOrReplace("MySpaceAddOrReplace",space));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("MySpaceAddOrReplace",space));
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().add("MySpaceAddOrReplace",space),std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("MySpaceAddOrReplace",space));
     //clean up the ADS for other tests
-    theService->remove("MySpaceAddOrReplace");
+    AnalysisDataService::Instance().remove("MySpaceAddOrReplace");
   }
 
   void testRemove()
   {
-    AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace_sptr space;
-    theService->add("MySpace",space);
-    TS_ASSERT_THROWS_NOTHING(theService->remove("MySpace"));
-    TS_ASSERT_THROWS(theService->retrieve("MySpace"),std::runtime_error);    
-    TS_ASSERT_THROWS(theService->remove("ttttt"),std::runtime_error);
+    AnalysisDataService::Instance().add("MySpace",space);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("MySpace"));
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("MySpace"),std::runtime_error);    
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().remove("ttttt"),std::runtime_error);
   }
 
   void testRetrieve()
   {
-    AnalysisDataService *theService = AnalysisDataService::Instance();
     Workspace_sptr work;
-    theService->add("MySpace", work);
+    AnalysisDataService::Instance().add("MySpace", work);
     Workspace_sptr workBack;
-    TS_ASSERT_THROWS_NOTHING(workBack = theService->retrieve("MySpace"));
+    TS_ASSERT_THROWS_NOTHING(workBack = AnalysisDataService::Instance().retrieve("MySpace"));
     TS_ASSERT_EQUALS(work, workBack);
     //clean up the ADS for other tests
-    theService->remove("MySpace");
+    AnalysisDataService::Instance().remove("MySpace");
   }
 
 };

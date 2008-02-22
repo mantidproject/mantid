@@ -7,18 +7,7 @@ namespace Mantid
 {
 namespace API
 {
-  Kernel::Logger& AnalysisDataService::g_log = Kernel::Logger::get("AnalysisDataService");
-
-/** Static method which retrieves the single instance of the Analysis data service
-  * 
-  *  @returns A pointer to the service instance
-  */
-AnalysisDataService* AnalysisDataService::Instance()
-{
-  // Create the instance if not already created
-  if (!m_instance) m_instance = new AnalysisDataService;
-  return m_instance;
-}
+  Kernel::Logger& AnalysisDataServiceImpl::g_log = Kernel::Logger::get("AnalysisDataService");
 
 /** Add a pointer to a named workspace to the data service store.
  *  Upon addition, the data service assumes ownership of the workspace.
@@ -27,7 +16,7 @@ AnalysisDataService* AnalysisDataService::Instance()
  *  @param space A pointer to the workspace
  *  @throw runtime_error Thrown if problems adding workspace
  */
-void AnalysisDataService::add(const std::string& name, Workspace_sptr space)
+void AnalysisDataServiceImpl::add(const std::string& name, Workspace_sptr space)
 {
   // Don't permit an empty name for the workspace
   if (name.empty())
@@ -56,7 +45,7 @@ void AnalysisDataService::add(const std::string& name, Workspace_sptr space)
  *  @param space A pointer to the workspace
  *  @throw runtime_error Thrown if unable to add or replace workspace
  */
-void AnalysisDataService::addOrReplace(const std::string& name, Workspace_sptr space)
+void AnalysisDataServiceImpl::addOrReplace(const std::string& name, Workspace_sptr space)
 {
   //find if the workspace already exists
   WorkspaceMap::const_iterator it = m_spaces.find(name);
@@ -94,7 +83,7 @@ void AnalysisDataService::addOrReplace(const std::string& name, Workspace_sptr s
  *  @param name The user-given name for the workspace 
  *  @throw runtime_error Thrown if workspace cannot be found
  */
-void AnalysisDataService::remove(const std::string& name)
+void AnalysisDataServiceImpl::remove(const std::string& name)
 {  
   // Get a iterator to the workspace and name
   WorkspaceMap::iterator it = m_spaces.find(name);
@@ -109,7 +98,7 @@ void AnalysisDataService::remove(const std::string& name)
 }
 
 /// Clears all workspaces from the data service store
-void AnalysisDataService::clear()
+void AnalysisDataServiceImpl::clear()
 {
   m_spaces.clear();
   return;
@@ -121,7 +110,7 @@ void AnalysisDataService::clear()
  *  @return A pointer to the requested workspace
  *  @throw runtime_error Thrown if workspace cannot be found
  */
-Workspace_sptr AnalysisDataService::retrieve(const std::string& name)  
+Workspace_sptr AnalysisDataServiceImpl::retrieve(const std::string& name)  
 {
   WorkspaceMap::const_iterator it = m_spaces.find(name);
   if (m_spaces.end() != it)
@@ -137,26 +126,27 @@ Workspace_sptr AnalysisDataService::retrieve(const std::string& name)
 //----------------------------------------------------------------------
 
 /// Private constructor for singleton class
-AnalysisDataService::AnalysisDataService() 
-{ }
+AnalysisDataServiceImpl::AnalysisDataServiceImpl() 
+{ 
+	g_log.debug() << "Analysis Data Service created." << std::endl;
+}
 
 /** Private copy constructor
  *  Prevents singleton being copied
  */
-AnalysisDataService::AnalysisDataService(const AnalysisDataService&)
-{ }
+AnalysisDataServiceImpl::AnalysisDataServiceImpl(const AnalysisDataServiceImpl&)
+{ 
+}
 
 /** Private destructor
  *  Prevents client from calling 'delete' on the pointer handed 
  *  out by Instance
  */
-AnalysisDataService::~AnalysisDataService()
+AnalysisDataServiceImpl::~AnalysisDataServiceImpl()
 { 
-  //no need to delete contents as they are shared pointers
+	g_log.debug() << "Analysis Data Service destroyed." << std::endl;
 }
 
-// Initialise the instance pointer to zero
-AnalysisDataService* AnalysisDataService::m_instance = 0;
 
 } // namespace Kernel
 } // namespace Mantid

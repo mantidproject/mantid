@@ -42,9 +42,8 @@ public:
     }
     
     // Register the workspace in the data service
-    AnalysisDataService *data = AnalysisDataService::Instance();
     inputSpace = "testWorkspace";
-    data->add(inputSpace, space);
+    AnalysisDataService::Instance().add(inputSpace, space);
 
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
@@ -75,11 +74,10 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(input = data->retrieve(inputSpace));
+    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
     
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);

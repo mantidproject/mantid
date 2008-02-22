@@ -55,9 +55,8 @@ public:
     TS_ASSERT( loader.isExecuted() );    
     
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));    
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);

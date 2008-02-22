@@ -34,8 +34,7 @@ public:
     localWorkspace1D->setX(lVecX);
     localWorkspace1D->setData(lVecY, lVecE);
 
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    data->add("SAVENEXUSTEST-testSpace", localWorkspace);
+    AnalysisDataService::Instance().add("SAVENEXUSTEST-testSpace", localWorkspace);
   }
   
   

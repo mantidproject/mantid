@@ -86,14 +86,12 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
 {
   int sizex = detectorCount;
   int sizey = timeBinCount;
-  // Register the workspace in the data service
-  AnalysisDataService* ADS = AnalysisDataService::Instance();
 
   Workspace_sptr work_in3 = Create2DWorkspace123(sizex,sizey);
   Workspace_sptr work_in4 = Create2DWorkspace154(sizex,sizey);
 
-  ADS->add("test_in11", work_in3);
-  ADS->add("test_in12", work_in4);
+  AnalysisDataService::Instance().add("test_in11", work_in3);
+  AnalysisDataService::Instance().add("test_in12", work_in4);
 
   
   IAlgorithm* alg = FrameworkManager::Instance()->createAlgorithm("Plus", "");
@@ -105,12 +103,12 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   clock_t start = clock();
   alg->execute();
   clock_t end = clock();
-  Workspace_sptr work_out1 = ADS->retrieve("test_out1");
+  Workspace_sptr work_out1 = AnalysisDataService::Instance().retrieve("test_out1");
 
 
   std::cout << double(end - start)/CLOCKS_PER_SEC << std::endl;
   //    ADS->remove("test_out1");
-  ADS->remove("test_in11");
-  ADS->remove("test_in12");
+  AnalysisDataService::Instance().remove("test_in11");
+  AnalysisDataService::Instance().remove("test_in12");
 
 }

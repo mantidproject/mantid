@@ -68,8 +68,7 @@ public:
     }
 
     //put this workspace in the data service
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    TS_ASSERT_THROWS_NOTHING(data->add(wsName, ws2D));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
 
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Instrument/HET_Definition.txt";
@@ -91,7 +90,7 @@ public:
     
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(wsName));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
     
     Instrument& i = output->getInstrument();
     Mantid::Geometry::Component* source = i.getSource();

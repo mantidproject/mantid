@@ -60,11 +60,10 @@ public:
   {
     int sizex = 10;
     // Register the workspace in the data service
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
     Workspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    ADS->add("test_in11", work_in1);
-    ADS->add("test_in12", work_in2);
+    AnalysisDataService::Instance().add("test_in11", work_in1);
+    AnalysisDataService::Instance().add("test_in12", work_in2);
 
     Divide alg;
 
@@ -75,13 +74,13 @@ public:
     alg.execute();
 
     Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve("test_out1"));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve("test_out1"));
 
     checkData(work_in1, work_in2, work_out1);
 
-    ADS->remove("test_out1");
-    ADS->remove("test_in11");
-    ADS->remove("test_in12");
+    AnalysisDataService::Instance().remove("test_out1");
+    AnalysisDataService::Instance().remove("test_in11");
+    AnalysisDataService::Instance().remove("test_in12");
 
   }
 
@@ -89,14 +88,13 @@ public:
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
     Workspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     Divide alg;
 
-    ADS->add("test_in21", work_in1);
-    ADS->add("test_in22", work_in2);
+    AnalysisDataService::Instance().add("test_in21", work_in1);
+    AnalysisDataService::Instance().add("test_in22", work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1","test_in21");
     alg.setPropertyValue("InputWorkspace_2","test_in22");    
@@ -104,13 +102,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve("test_out2"));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve("test_out2"));
 
     checkData(work_in1, work_in2, work_out1);
 
-    ADS->remove("test_in21");
-    ADS->remove("test_in22");
-    ADS->remove("test_out2");
+    AnalysisDataService::Instance().remove("test_in21");
+    AnalysisDataService::Instance().remove("test_in22");
+    AnalysisDataService::Instance().remove("test_out2");
 
   }
   
@@ -118,7 +116,6 @@ public:
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
     Workspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
 
@@ -127,8 +124,8 @@ public:
     std::string wsName1 = "test_in1D2D21";
     std::string wsName2 = "test_in1D2D22";
     std::string wsNameOut = "test_out1D2D";
-    ADS->add(wsName1, work_in1);
-    ADS->add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsName1);
     alg.setPropertyValue("InputWorkspace_2",wsName2);    
@@ -136,20 +133,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve(wsNameOut));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve(wsNameOut));
 
     checkData(work_in1, work_in2, work_out1);
 
-    ADS->remove(wsName1);
-    ADS->remove(wsName2);
-    ADS->remove(wsNameOut);
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);
   }
 
   void testExec1DRand2DVertical()
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizey);
     Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
@@ -158,8 +154,8 @@ public:
     std::string wsName1 = "test_in1D2Dv1";
     std::string wsName2 = "test_in1D2Dv2";
     std::string wsNameOut = "test_out1D2Dv";
-    ADS->add(wsName1, work_in1);
-    ADS->add(wsName2, work_in2);
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsName1);
     alg.setPropertyValue("InputWorkspace_2",wsName2);    
@@ -167,20 +163,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve(wsNameOut));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve(wsNameOut));
 
     checkData(work_in1, work_in2, work_out1,LoopOrientation::Vertical);
 
-    ADS->remove(wsName1);
-    ADS->remove(wsName2);
-    ADS->remove(wsNameOut);
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);
   }
 
   void testExec2D2DbyOperatorOverload()
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    AnalysisDataService* ADS = AnalysisDataService::Instance();
     Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
     Workspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
@@ -189,8 +184,8 @@ public:
     std::string wsNameIn1 = "testExec2D2DbyOperatorOverload_in21";
     std::string wsNameIn2 = "testExec2D2DbyOperatorOverload_in22";
     std::string wsNameOut = "testExec2D2DbyOperatorOverload_out";
-    ADS->add(wsNameIn1, work_in1);
-    ADS->add(wsNameIn2, work_in2);
+    AnalysisDataService::Instance().add(wsNameIn1, work_in1);
+    AnalysisDataService::Instance().add(wsNameIn2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsNameIn1);
     alg.setPropertyValue("InputWorkspace_2",wsNameIn2);    
@@ -198,13 +193,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = ADS->retrieve(wsNameOut));
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve(wsNameOut));
 
     checkData(work_in1, work_in2, work_out1);
 
-    ADS->remove(wsNameIn1);
-    ADS->remove(wsNameIn2);
-    ADS->remove(wsNameOut);
+    AnalysisDataService::Instance().remove(wsNameIn1);
+    AnalysisDataService::Instance().remove(wsNameIn2);
+    AnalysisDataService::Instance().remove(wsNameOut);
   }
 
 private:

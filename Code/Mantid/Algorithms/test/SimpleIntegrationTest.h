@@ -38,8 +38,7 @@ public:
     }
       
     // Register the workspace in the data service
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    data->add("testSpace", space);
+	AnalysisDataService::Instance().add("testSpace", space);
     
   }
   
@@ -79,9 +78,8 @@ public:
     TS_ASSERT( alg.isExecuted() );
     
     // Get back the saved workspace
-    AnalysisDataService *data = AnalysisDataService::Instance();
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     
     Workspace1D_sptr output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     std::vector<double> y = output1D->dataY();
@@ -106,7 +104,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
     
     // Get back the saved workspace
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve("out2"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
     
     output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
     y = output1D->dataY();

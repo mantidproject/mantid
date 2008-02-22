@@ -49,7 +49,6 @@ void FrameworkManager::initialize()
 	
   config = Kernel::ConfigService::Instance();
   workFactory = WorkspaceFactory::Instance();
-  data = AnalysisDataService::Instance();
 
   std::string pluginDir = config->getString("plugins.directory");
   if (pluginDir.length() > 0)
@@ -65,7 +64,7 @@ void FrameworkManager::initialize()
 void FrameworkManager::clear()
 {
   AlgorithmManager::Instance().clear();
-  data->clear();
+  AnalysisDataService::Instance().clear();
 }
 
 /** Creates an instance of an algorithm
@@ -160,7 +159,7 @@ Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
   Workspace *space;
   try
   {
-    space = data->retrieve(wsName).get();
+    space = AnalysisDataService::Instance().retrieve(wsName).get();
   }
   catch (Kernel::Exception::NotFoundError& ex)
   {

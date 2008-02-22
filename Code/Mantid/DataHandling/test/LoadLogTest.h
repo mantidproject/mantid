@@ -51,8 +51,8 @@ public:
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     Workspace_sptr ws = factory->create("Workspace2D");
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
+
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
@@ -68,7 +68,7 @@ public:
     
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     
 	  Sample& sample = output->getSample();
 
@@ -98,8 +98,8 @@ public:
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     Workspace_sptr ws = factory->create("Workspace1D");
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
+
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
@@ -115,7 +115,7 @@ public:
     
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
    
 	  Sample& sample = output->getSample(); 
 
@@ -166,8 +166,8 @@ public:
     // Create an empty workspace and put it in the AnalysisDataService
     WorkspaceFactory *factory = WorkspaceFactory::Instance();
     Workspace_sptr ws = factory->create("Workspace1D");
-    AnalysisDataService *data = AnalysisDataService::Instance();
-    TS_ASSERT_THROWS_NOTHING(data->add(outputSpace, ws));    
+
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
@@ -183,7 +183,7 @@ public:
     
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = data->retrieve(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
    
 	  Sample& sample = output->getSample(); 
 
