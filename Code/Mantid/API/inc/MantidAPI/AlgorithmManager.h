@@ -104,7 +104,10 @@ private:
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
 template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
+#endif /* _WIN32 */
 typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
 
 } // namespace API
