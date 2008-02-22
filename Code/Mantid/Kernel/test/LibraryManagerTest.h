@@ -13,19 +13,16 @@ using namespace Mantid::Kernel;
 class LibraryManagerTest : public CxxTest::TestSuite
 {
 
-private:
-	LibraryManager* mgr;	
-
 public: 
 
   LibraryManagerTest()
   {
-	mgr = LibraryManager::Instance();
+
   }
   
   void testOpenLibrary()
   {
-	TS_ASSERT_LESS_THAN(0, mgr->OpenAllLibraries("../../Bin/Shared/", false));
+	TS_ASSERT_LESS_THAN(0, LibraryManager::Instance().OpenAllLibraries("../../Bin/Shared/", false));
   }
   
   void testLoadedAlgorithm()

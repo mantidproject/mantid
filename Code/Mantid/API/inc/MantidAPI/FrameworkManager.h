@@ -111,8 +111,6 @@ private:
   AnalysisDataService *data;
   /// Pointer to the Configuration Service
   Kernel::ConfigService *config;
-  /// Pointer to the Library Manager
-  Kernel::LibraryManager *libManager;
   
 };
 

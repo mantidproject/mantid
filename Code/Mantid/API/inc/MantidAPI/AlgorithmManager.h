@@ -70,13 +70,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class
-#ifdef IN_MANTID_API
-DLLExport
-#else
-DLLImport
-#endif /* IN_MANTID_API */
-AlgorithmManagerImpl 
+class EXPORT_OPT_MANTID_API AlgorithmManagerImpl 
 {
 public:
 

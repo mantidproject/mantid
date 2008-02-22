@@ -15,26 +15,19 @@ namespace Mantid
 namespace Kernel
 {
 	namespace fs = boost::filesystem;  // to help clarify which bits are boost in code below
-
-	LibraryManager* LibraryManager::m_instance = 0;
 	
-	Logger& LibraryManager::g_log = Logger::get("LibraryManager");
-	
-	/// Get an instance of LibraryManager if it already exists, else creates a new object.
-	LibraryManager* LibraryManager::Instance()
-	{
-		if (!m_instance) m_instance=new LibraryManager;
-		return m_instance;
-	}
+	Logger& LibraryManagerImpl::g_log = Logger::get("LibraryManager");
 
 	/// Constructor
-	LibraryManager::LibraryManager()
-	{}
+	LibraryManagerImpl::LibraryManagerImpl()
+	{
+		g_log.debug() << "LibraryManager created." << std::endl;
+	}
 
 	/// Destructor
-	LibraryManager::~LibraryManager()
+	LibraryManagerImpl::~LibraryManagerImpl()
 	{
-
+		g_log.debug() << "LibraryManager destroyed." << std::endl;
 	}
 
   /** Opens all suitable DLLs on a given path
@@ -42,7 +35,7 @@ namespace Kernel
 	 *  @param isRecursive whether to search subdirectories
 	 *  @return The number of libraries opened
 	 */
-	int LibraryManager::OpenAllLibraries(const std::string& filePath, bool isRecursive)
+	int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath, bool isRecursive)
   {
     int libCount = 0;
 

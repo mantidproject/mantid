@@ -8,6 +8,12 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 
+#ifdef IN_MANTID_API
+#define EXPORT_OPT_MANTID_API DLLExport 
+#else
+#define EXPORT_OPT_MANTID_API DLLImport
+#endif /* IN_MANTID_API */
+
 namespace Mantid
 {
 namespace API
@@ -47,12 +53,6 @@ class Algorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-#ifdef IN_MANTID_API
-#define EXPORT_OPT_MANTID_API DLLExport 
-#else
-#define EXPORT_OPT_MANTID_API DLLImport
-#endif /* IN_MANTID_API */
-
 class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
   {
   public:
@@ -68,8 +68,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
     virtual ~AlgorithmFactoryImpl();
 
   private:
-  
-  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
+	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 	  
 	/// Private copy constructor - NO COPY ALLOWED
 	AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);

@@ -12,6 +12,13 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SingletonHolder.h"
+
+#ifdef IN_MANTID_KERNEL
+#define EXPORT_OPT_MANTID_KERNEL DLLExport 
+#else
+#define EXPORT_OPT_MANTID_KERNEL DLLImport
+#endif /* IN_MANTID_API */
 
 namespace Mantid
 {
@@ -45,41 +52,36 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class
-#ifdef IN_MANTID_KERNEL
-DLLExport
-#else
-DLLImport
-#endif /* IN_MANTID_KERNEL */
-LibraryManager
+class EXPORT_OPT_MANTID_KERNEL LibraryManagerImpl
 {
 public:
-	static LibraryManager* Instance();
-	
-	virtual ~LibraryManager();
-	
 	//opens all suitable libraries on a given path
 	int OpenAllLibraries(const std::string&, bool isRecursive=false);
 
 	int Test() { return 123; }
 
 private:
+	friend struct Mantid::Kernel::CreateUsingNew<LibraryManagerImpl>;
+
 	///Private Constructor
-	LibraryManager();
+	LibraryManagerImpl();
 	/// Private copy constructor - NO COPY ALLOWED
-	LibraryManager(const LibraryManager&);
+	LibraryManagerImpl(const LibraryManagerImpl&);
 	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	LibraryManager& operator = (const LibraryManager&);
+	LibraryManagerImpl& operator = (const LibraryManagerImpl&);
+	///Private Destructor
+	virtual ~LibraryManagerImpl();
 
 	///Storage for the LibraryWrappers.
 	std::map< const std::string,  boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
 
 	/// static reference to the logger class
 	static Logger& g_log;
-
-	/// Pointer to the instance
-	static LibraryManager* m_instance;
 };
+
+///Forward declaration of a specialisation of SingletonHolder for LibraryManagerImpl (needed for dllexport/dllimport) and a typedef for it.
+template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
+typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
 
 } // namespace Kernel
 } // namespace Mantid

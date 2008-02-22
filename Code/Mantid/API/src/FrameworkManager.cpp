@@ -54,8 +54,7 @@ void FrameworkManager::initialize()
   std::string pluginDir = config->getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
-    libManager = Mantid::Kernel::LibraryManager::Instance();
-    libManager->OpenAllLibraries(pluginDir, false);
+    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
   return;
 }
