@@ -52,8 +52,8 @@ public:
   void testClear()
   {
     AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance()->subscribe<AlgTest>("AlgorithmManager::myAlgclear");
-    AlgorithmFactory::Instance()->subscribe<AlgTestSecond>("AlgorithmManager::myAlgBclear");
+    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::myAlgclear");
+    AlgorithmFactory::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgBclear");
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
     TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);
@@ -64,8 +64,8 @@ public:
   void testReturnType()
   {
     AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance()->subscribe<AlgTest>("AlgorithmManager::myAlg");
-    AlgorithmFactory::Instance()->subscribe<AlgTestSecond>("AlgorithmManager::myAlgB");
+    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::myAlg");
+    AlgorithmFactory::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgB");
     Algorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgorithmManager::myAlg") );
     TS_ASSERT_DIFFERS(dynamic_cast<AlgTest*>(alg.get()),static_cast<AlgTest*>(0));

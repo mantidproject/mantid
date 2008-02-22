@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
@@ -46,46 +47,44 @@ class Algorithm;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class 
 #ifdef IN_MANTID_API
-DLLExport 
+#define EXPORT_OPT_MANTID_API DLLExport 
 #else
-DLLImport
+#define EXPORT_OPT_MANTID_API DLLImport
 #endif /* IN_MANTID_API */
-AlgorithmFactory : public Kernel::DynamicFactory<Algorithm>
+
+class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
   {
   public:
-    
-    /** A static method which retrieves the single instance of the Algorithm Factory
-     * 
-     *  @returns A pointer to the factory instance
-     */
-   static AlgorithmFactory* Instance();
-    
+ 
   protected:    
     /// Protected Constructor for singleton class
-    AlgorithmFactory();	
+    AlgorithmFactoryImpl();	
   
     /** Protected destructor
      *  Prevents client from calling 'delete' on the pointer handed 
      *  out by Instance
      */
-    virtual ~AlgorithmFactory();
+    virtual ~AlgorithmFactoryImpl();
 
   private:
+  
+  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 	  
 	/// Private copy constructor - NO COPY ALLOWED
-	AlgorithmFactory(const AlgorithmFactory&);
+	AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);
 	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	AlgorithmFactory& operator = (const AlgorithmFactory&);
+	AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
 
 	///static reference to the logger class
 	static Kernel::Logger& g_log;
 
-    /// Pointer to the factory instance
-    static AlgorithmFactory* m_instance;
   };
-
+  
+	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
+	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
+	
 } // namespace API
 } // namespace Mantid
 

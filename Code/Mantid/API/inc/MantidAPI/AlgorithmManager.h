@@ -9,14 +9,14 @@
 #define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::API::AlgorithmFactory::Instance()->subscribe<ns::classname>(#classname)) \
+       ((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>(#classname)) \
        , 0)); \
   }
 
 #define DECLARE_ALGORITHM(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-       ((Mantid::API::AlgorithmFactory::Instance()->subscribe<classname>(#classname)) \
+       ((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
   }
 
@@ -109,8 +109,10 @@ private:
 	std::vector<Algorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]
 };
 
-///The singleton definition of AlgorithmManagerImpl
+///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.
+template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;
 typedef Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl> AlgorithmManager;
+
 } // namespace API
 }  //Namespace Mantid
 
