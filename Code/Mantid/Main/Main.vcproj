@@ -39,7 +39,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -109,6 +109,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				PreprocessorDefinitions="IN_MANTID_MAIN=1"
 				RuntimeLibrary="2"
 			/>
 			<Tool

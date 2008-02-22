@@ -39,6 +39,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
+				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -109,6 +110,7 @@
 				Optimization="3"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
+				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1"
 				RuntimeLibrary="2"
 			/>
 			<Tool
