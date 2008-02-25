@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include <limits>
 
 DECLARE_WORKSPACE(ManagedWorkspace2D)
 
@@ -19,7 +20,7 @@ Kernel::Logger& ManagedWorkspace2D::g_log = Kernel::Logger::get("ManagedWorkspac
 
 /// Constructor
 ManagedWorkspace2D::ManagedWorkspace2D() :
-  Workspace2D(), m_bufferedData(100, *this)
+  Workspace2D(), m_bufferedData(100, *this),m_indexWrittenTo(-1)
 {
 }
 
@@ -31,14 +32,42 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
  */
 void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
 {
-  if (NVectors < 0 || XLength < 0 || YLength < 0)
+  if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
   {
-    throw std::out_of_range("All arguments to init must be positive");
+    g_log.error("All arguments to init must be positive and non-zero");
+    throw std::out_of_range("All arguments to init must be positive and non-zero");
   }
   
   m_noVectors = NVectors;
   m_XLength = XLength;
   m_YLength = YLength;
+  
+  m_vectorSize = ( m_XLength + ( 3*m_YLength ) ) * sizeof(double);
+  
+  // CALCULATE BLOCKSIZE
+  // Get memory size of a block from config file
+  int blockMemory;
+  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
+      || blockMemory <= 0 )
+  {
+    // default to 1MB if property not found
+    blockMemory = 1024*1024;
+  }
+
+  m_vectorsPerBlock = blockMemory / m_vectorSize;
+  // Should this ever come out to be zero, then actually set it to 1
+  if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
+
+  // Calculate the number of blocks that will go into a file
+  m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * m_vectorSize);
+  if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile;
+
+  // Now work out the number of files needed
+  int totalBlocks = m_noVectors / m_vectorsPerBlock;
+  if (m_noVectors%m_vectorsPerBlock != 0) ++totalBlocks;
+  int numberOfFiles = totalBlocks / m_blocksPerFile;
+  if (totalBlocks%m_blocksPerFile != 0) ++numberOfFiles;
+  m_datafile.resize(numberOfFiles);
   
   // Look for the (optional) path from the configuration file
   std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
@@ -55,19 +84,23 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   m_filename = filestem.str() + this->getTitle() + ".tmp";
   // Increment the instance count
   ++ManagedWorkspace2D::g_uniqueID;
-  std::string fileToOpen = path + m_filename;
+  std::string fullPath = path + m_filename;
+  
+  {
+  std::string fileToOpen = fullPath + "0";
 
   // Create the temporary file
-  m_datafile.open(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
-
-  if ( ! m_datafile )
+  m_datafile[0] = new std::fstream(fileToOpen.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+    
+  if ( ! *m_datafile[0] )
   {
-    m_datafile.clear();
+    m_datafile[0]->clear();
     // Try to open in current working directory instead
-    m_datafile.open(m_filename.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
+    std::string file = m_filename + "0";
+    m_datafile[0]->open(file.c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);
     
     // Throw an exception if it still doesn't work
-    if ( ! m_datafile )
+    if ( ! *m_datafile[0] )
     {
       g_log.error("Unable to open temporary data file");
       throw std::runtime_error("ManagedWorkspace2D: Unable to open temporary data file");
@@ -75,62 +108,43 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   }
   else
   {
-    m_filename = fileToOpen;
+    m_filename = fullPath;
   }
-
-  // Set exception flags for fstream so that any problems from now on will throw
-  m_datafile.exceptions( std::fstream::eofbit | std::fstream::failbit | std::fstream::badbit );
+  } // block to restrict scope of fileToOpen
   
-  // CALCULATE BLOCKSIZE
-  // Get memory size of a block from config file
-  int blockMemory;
-  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize", blockMemory) 
-      || blockMemory <= 0 )
+  // Set exception flags for fstream so that any problems from now on will throw
+  m_datafile[0]->exceptions( std::fstream::eofbit | std::fstream::failbit | std::fstream::badbit );
+  
+  // Open the other temporary files (if any)
+  for (unsigned int i = 1; i < m_datafile.size(); ++i) 
   {
-    // default to 1MB if property not found
-    blockMemory = 1024*1024;
-  }
-
-  m_vectorsPerBlock = blockMemory / ( ( m_XLength + ( 3*m_YLength ) ) * sizeof(double) );
-  // Should this ever come out to be zero, then actually set it to 1
-  if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
-  int numberOfBlocks = m_noVectors / m_vectorsPerBlock;
-  if ( m_noVectors%m_vectorsPerBlock != 0 ) ++numberOfBlocks;
-
-  // Fill the temporary file
-  // Header of datafile is number of detectors (i.e. Histogram1D's) in the workspace & detectors per block
-  try {
-    m_datafile.write((char *) &m_noVectors, sizeof(int));
-    m_datafile.write((char *) &m_vectorsPerBlock, sizeof(int));
-    // Fill main body of file with zeroes
-    const std::vector<double> xzeroes(m_XLength, 0.0);
-    const std::vector<double> yzeroes(m_YLength, 0.0);
-    for (int i = 0; i < m_vectorsPerBlock*numberOfBlocks; ++i) 
+    std::stringstream fileToOpen;
+    fileToOpen << m_filename << i;
+    m_datafile[i] = new std::fstream(fileToOpen.str().c_str(), std::ios::in | std::ios::out | std::ios::binary | std::ios::trunc);    
+    if ( ! *m_datafile[i] )
     {
-      m_datafile.write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
-      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-      m_datafile.write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      g_log.error("Unable to open temporary data file");
+      throw std::runtime_error("ManagedWorkspace2D: Unable to open temporary data file");
     }
+    m_datafile[i]->exceptions( std::fstream::eofbit | std::fstream::failbit | std::fstream::badbit );
   }
-  // Thrown if we run out of diskspace or something
-  catch (std::ios_base::failure ex)
-  {
-    g_log.error() << "Unable to write temporary file for workspace " << this->getTitle();
-    throw;
-  }
-  // Wondering if I could have file grow only if necessary, or if this would actually be slower
+  
 }
 
 /// Destructor. Clears the buffer and deletes the temporary file.
 ManagedWorkspace2D::~ManagedWorkspace2D()
 {
-//  std::cout << "Destructor called for " << getTitle() << std::endl;
   // delete all ManagedDataBlock2D's
   m_bufferedData.clear();
-  // delete the temporary file
-  m_datafile.close();
-  remove(m_filename.c_str());
+  // delete the temporary file and fstream objects
+  for (unsigned int i = 0; i < m_datafile.size(); ++i)
+  {
+    m_datafile[i]->close();
+    delete m_datafile[i];
+    std::stringstream fileToRemove;
+    fileToRemove << m_filename << i;
+    remove(fileToRemove.str().c_str());
+  }
 }
 
 /// Get pseudo size
@@ -401,7 +415,7 @@ const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
 
 /** Returns the number of histograms.
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
-	being virtual so it now just calls this private (and virtual) method which does the work.
+	  being virtual so it now just calls this private (and virtual) method which does the work.
 */
 const int ManagedWorkspace2D::getHistogramNumberHelper() const
 {
@@ -412,7 +426,7 @@ const int ManagedWorkspace2D::getHistogramNumberHelper() const
  *  @param index The index to search for
  *  @return A pointer to the data block containing the index requested
  */
-// not really a const method, but need to make it that so const data getters can call it
+// not really a const method, but need to pretend it is so that const data getters can call it
 ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
 {
   int startIndex = index - ( index%m_vectorsPerBlock );
@@ -425,17 +439,22 @@ ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
     
   // If not found, need to load block into memory and mru list
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
-  long seekPoint = ( 2 * sizeof(int) ) + ( startIndex * (m_XLength + ( 3*m_YLength )) * sizeof(double) );
-  if (seekPoint > 2147483647)
+  // Check whether datablock has previously been saved. If so, read it in.
+  if (startIndex <= m_indexWrittenTo)
   {
-    m_datafile.seekg(2147483647, std::ios::beg);
-    m_datafile.seekg((seekPoint-2147483647), std::ios::cur);
+    long long seekPoint = startIndex * m_vectorSize;
+
+    int fileIndex = 0;
+    while (seekPoint > std::numeric_limits<int>::max())
+    {
+      seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+      ++fileIndex;
+    }
+    
+    m_datafile[fileIndex]->seekg(seekPoint, std::ios::beg);
+    *m_datafile[fileIndex] >> *newBlock;
   }
-  else
-  {
-    m_datafile.seekg(seekPoint, std::ios::beg);
-  }
-  m_datafile >> *newBlock;
+  
   m_bufferedData.insert(newBlock);
   return newBlock;
 }
@@ -472,17 +491,43 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
     ManagedDataBlock2D *toWrite = il.back();
     if ( toWrite->hasChanges() )
     {
-      long seekPoint = ( 2 * sizeof(int) ) + toWrite->minIndex() * (outer.m_XLength + ( 3*outer.m_YLength )) * sizeof(double);
-      if (seekPoint > 2147483647)
+      int fileIndex = 0;
+      if ( toWrite->minIndex() > outer.m_indexWrittenTo+outer.m_vectorsPerBlock && outer.m_indexWrittenTo >= 0 )
       {
-        outer.m_datafile.seekp(2147483647, std::ios::beg);
-        outer.m_datafile.seekp((seekPoint-2147483647), std::ios::cur);
+        fileIndex = outer.m_indexWrittenTo / (outer.m_vectorsPerBlock * outer.m_blocksPerFile);
+        
+        outer.m_datafile[fileIndex]->seekp(0, std::ios::end);
+        const std::vector<double> xzeroes(outer.m_XLength);
+        const std::vector<double> yzeroes(outer.m_YLength);
+        for (int i = 0; i < (toWrite->minIndex() - outer.m_indexWrittenTo); ++i) 
+        {
+          if ( (outer.m_indexWrittenTo + i) / (outer.m_blocksPerFile * outer.m_vectorsPerBlock) )
+          {
+            ++fileIndex;
+            outer.m_datafile[fileIndex]->seekp(0, std::ios::beg);
+          }
+          
+          outer.m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), outer.m_XLength * sizeof(double));
+          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
+          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
+          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
+        }
       }
       else
       {
-        outer.m_datafile.seekp(seekPoint, std::ios::beg);
+        long long seekPoint = toWrite->minIndex() * outer.m_vectorSize;
+
+        while (seekPoint > std::numeric_limits<int>::max())
+        {
+          seekPoint -= outer.m_vectorSize * outer.m_vectorsPerBlock * outer.m_blocksPerFile;
+          ++fileIndex;
+        }
+
+          outer.m_datafile[fileIndex]->seekp(seekPoint, std::ios::beg);
       }
-      outer.m_datafile << *toWrite;
+
+      *outer.m_datafile[fileIndex] << *toWrite;
+      outer.m_indexWrittenTo = std::max(outer.m_indexWrittenTo, toWrite->minIndex());
     }
     il.pop_back();
     delete toWrite;

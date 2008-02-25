@@ -42,14 +42,14 @@ public:
     ManagedDataBlock2D aBlock(0,2,2,2);
     TS_ASSERT_EQUALS( aBlock.minIndex(), 0 )
     TS_ASSERT( ! aBlock.hasChanges() )
-    TS_ASSERT( aBlock.dataX(0).empty() )
-    TS_ASSERT( aBlock.dataY(0).empty() )
-    TS_ASSERT( aBlock.dataE(0).empty() )
-    TS_ASSERT( aBlock.dataE2(0).empty() )
-    TS_ASSERT( aBlock.dataX(1).empty() )
-    TS_ASSERT( aBlock.dataY(1).empty() )
-    TS_ASSERT( aBlock.dataE(1).empty() )
-    TS_ASSERT( aBlock.dataE2(0).empty() )
+    TS_ASSERT_EQUALS( aBlock.dataX(0).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataY(0).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataE(0).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataE2(0).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataX(1).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataY(1).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataE(1).size(), 2 )
+    TS_ASSERT_EQUALS( aBlock.dataE2(1).size(), 2 )
   }
     
   void testSetX()
@@ -109,16 +109,12 @@ public:
     std::vector<double> ee;
     TS_ASSERT_THROWS_NOTHING( ee = data.dataE2(1) )
     TS_ASSERT_THROWS( data.dataE2(2), std::range_error )
-    TS_ASSERT( e.empty() )
-    TS_ASSERT( ee.empty() )
     
     // test const version
     TS_ASSERT_THROWS( const std::vector<double> v = data.dataE2(-1), std::range_error )
     const std::vector<double> ec = data.dataE2(0);
     const std::vector<double> eec = data.dataE2(1);
     TS_ASSERT_THROWS( const std::vector<double> v = data.dataE2(2), std::range_error )
-    TS_ASSERT( ec.empty() )
-    TS_ASSERT( eec.empty() )
   }
   
   void testStreamOperators()

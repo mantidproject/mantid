@@ -10,7 +10,6 @@
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
-//#include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 
 using namespace boost::multi_index;
@@ -74,7 +73,6 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
       indexed_by<
         sequenced<>,
         hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
-//        ordered_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
       >
     > item_list;
     
@@ -159,12 +157,16 @@ private:
   
   /// The number of vectors in the workspace
   int m_noVectors;
-  /// The number of vectors in each data block
-  int m_vectorsPerBlock;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
   int m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
   int m_YLength;
+  /// The size in bytes of each vector
+  long long m_vectorSize;
+  /// The number of vectors in each data block
+  int m_vectorsPerBlock;
+  /// The number of blocks per temporary file
+  int m_blocksPerFile;
 
   /// The most-recently-used list of buffered data blocks
   mutable mru_list m_bufferedData;
@@ -172,7 +174,9 @@ private:
   /// The name of the temporary file
   std::string m_filename;
   /// The stream handle to the temporary file used to store the data
-  mutable std::fstream m_datafile;
+  mutable std::vector<std::fstream*> m_datafile;
+  /// Index written up to in temporary file
+  int m_indexWrittenTo;
 
   /// Static instance count. Used to ensure temporary filenames are distinct.
   static int g_uniqueID;

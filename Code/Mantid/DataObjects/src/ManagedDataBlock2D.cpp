@@ -27,6 +27,15 @@ ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors,
   {
     throw std::out_of_range("All arguments to ManagedDataBlock constructor must be positive");
   }
+
+  // Set all the internal vectors to the right size
+  for (std::vector<Histogram1D>::iterator it = m_data.begin(); it != m_data.end(); ++it)
+  {
+    it->dataX().resize(m_XLength);
+    it->dataY().resize(m_YLength);
+    it->dataE().resize(m_YLength);
+    it->dataE2().resize(m_YLength);
+  }
 }
 
 /// Virtual destructor

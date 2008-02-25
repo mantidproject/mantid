@@ -9,7 +9,7 @@ using namespace Mantid::API;
 
 
 
-class AlgorithmParameterTest : public CxxTest::TestSuite
+class EnvironmentHistoryTest : public CxxTest::TestSuite
 {
 public:
 

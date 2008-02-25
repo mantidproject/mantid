@@ -67,7 +67,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
   int triggerSize;
   if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", triggerSize) )
   {
-    // Default to 20M elements if missing
+    // Default to 25M elements if missing
     triggerSize = 25000000;
   }
   int wsSize = NVectors * YLength;

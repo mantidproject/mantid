@@ -64,27 +64,10 @@ public:
     }
 
     // Test all is as it should be with the temporary file
-    fstream file("WS2D3testInit.tmp", ios::in | ios::binary);
+    fstream file("WS2D3testInit.tmp0", ios::in | ios::binary);
     TS_ASSERT(file);
-
-    int numberOfVectors;
-    file.read((char *) &numberOfVectors, sizeof(int));
-    TS_ASSERT_EQUALS( numberOfVectors, 5 )
-    int vectorsPerBlock;
-    file.read((char *) &vectorsPerBlock, sizeof(int));
-    int expected = 4000 / ( (5+15) * sizeof(double) );
-    TS_ASSERT_EQUALS( vectorsPerBlock, expected )
-
-    int numberOfBlocks = numberOfVectors / vectorsPerBlock;
-    if ( numberOfVectors%vectorsPerBlock != 0 ) ++numberOfBlocks;    
     
     double temp;
-    for (int i = 0; i < 20*numberOfBlocks*vectorsPerBlock; ++i)
-    {
-      file.read((char *) &temp, sizeof(double));
-      TS_ASSERT_DELTA( temp, 0.0, 0.0001 )
-      TS_ASSERT( ! file.fail() )
-    }
     file.read((char *) &temp, sizeof(double));
     TS_ASSERT( file.fail() )
     file.close();
@@ -318,7 +301,7 @@ public:
 
   void testDestructor()
   {
-    fstream deletedFile("testInit.tmp");
+    fstream deletedFile("WS2D3testInit.tmp");
     TS_ASSERT( ! deletedFile );
   }
 
