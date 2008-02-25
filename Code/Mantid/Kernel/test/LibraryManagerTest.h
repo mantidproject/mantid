@@ -29,12 +29,11 @@ public:
   {
 	try
 	{
-		Mantid::API::FrameworkManager* manager = Mantid::API::FrameworkManager::Instance();
-		manager->initialize();
+		Mantid::API::FrameworkManager::Instance().initialize();
 	  
-		manager->createAlgorithm("HelloWorldAlgorithm");
+		Mantid::API::FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
 	  
-		TS_ASSERT_THROWS_NOTHING(manager->exec("HelloWorldAlgorithm", ""));				
+		TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec("HelloWorldAlgorithm", ""));				
 	}
 	catch (...)
 	{

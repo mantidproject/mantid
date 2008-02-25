@@ -22,8 +22,7 @@ public:
   LoadRawTest()
   {
     //initialise framework manager to allow logging
-    FrameworkManager* manager=Mantid::API::FrameworkManager::Instance();
-    manager->initialize();
+	Mantid::API::FrameworkManager::Instance().initialize();
   }
   
   void testInit()

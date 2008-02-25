@@ -21,7 +21,7 @@ namespace PythonAPI
 {	
 	
 	
-PythonInterface::PythonInterface() : fwMgr(0)
+PythonInterface::PythonInterface()
 {
 }
 
@@ -31,20 +31,19 @@ PythonInterface::~PythonInterface()
 
 void PythonInterface::InitialiseFrameworkManager()
 {
-		fwMgr = FrameworkManager::Instance();
-		fwMgr->initialize();
+	FrameworkManager::Instance().initialize();
 }
 
 bool PythonInterface::CreateAlgorithm(const std::string& algName)
 {
-		 fwMgr->createAlgorithm(algName);
+		FrameworkManager::Instance().createAlgorithm(algName);
 		
 		return true;
 }
 
 bool PythonInterface::ExecuteAlgorithm(const std::string& algName, const std::string& properties)
 {
-		fwMgr->exec(algName, properties);
+		FrameworkManager::Instance().exec(algName, properties);
 		
 		return true;
 }
@@ -56,11 +55,11 @@ bool PythonInterface::LoadNexusFile(const std::string& fileName, const std::stri
 
 int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::string& workspaceName)
 {
-	fwMgr->createAlgorithm("LoadRaw");
+	FrameworkManager::Instance().createAlgorithm("LoadRaw");
 	
 	std::string properties = "Filename:" + fileName + ",OutputWorkspace:" + workspaceName;
 	
-	fwMgr->exec("LoadRaw", properties);
+	FrameworkManager::Instance().exec("LoadRaw", properties);
 		
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 

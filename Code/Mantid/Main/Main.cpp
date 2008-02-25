@@ -15,11 +15,10 @@ using namespace Mantid::API;
 int main()
 {
 
-  FrameworkManager* fm = FrameworkManager::Instance();
-  fm->initialize();
+  FrameworkManager::Instance().initialize();
 
-  fm->createAlgorithm("HelloWorldAlgorithm");
-	fm->exec("HelloWorldAlgorithm", "");
+  FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
+	FrameworkManager::Instance().exec("HelloWorldAlgorithm", "");
 
 	
   Benchmark b;
@@ -30,6 +29,6 @@ int main()
 
 
 #endif
-  fm->clear();
+  FrameworkManager::Instance().clear();
 	exit(0);
 }

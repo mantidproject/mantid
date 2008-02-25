@@ -13,7 +13,6 @@ namespace Mantid
 
 namespace API
 {
-	class FrameworkManager;
 	class IAlgorithm;
 }
 
@@ -22,9 +21,6 @@ namespace PythonAPI
 
 class DLLExport PythonInterface
 {
-private:
-	Mantid::API::FrameworkManager* fwMgr;
-
 public:
 	PythonInterface();
 	~PythonInterface();

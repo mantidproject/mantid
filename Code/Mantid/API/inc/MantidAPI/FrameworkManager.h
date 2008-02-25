@@ -9,6 +9,8 @@
 #include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
@@ -48,20 +50,9 @@ class Workspace;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class
-#ifdef IN_MANTID_API
-DLLExport 
-#else
-DLLImport
-#endif /* IN_MANTID_API */
-FrameworkManager
+class EXPORT_OPT_MANTID_API FrameworkManagerImpl
 {
 public:
-	
-  static FrameworkManager* Instance();
-
-  virtual ~FrameworkManager();	
-
 /// Creates all of the required services
   void initialize();
 
@@ -81,21 +72,27 @@ public:
 	Workspace* getWorkspace(const std::string& wsName);
 	
 private:
+	friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
 	
- ///Private Constructor
-	FrameworkManager();
+	///Private Constructor
+	FrameworkManagerImpl();
+	virtual ~FrameworkManagerImpl();	
 	/// Private copy constructor - NO COPY ALLOWED
-	FrameworkManager(const FrameworkManager&);
+	FrameworkManagerImpl(const FrameworkManagerImpl&);
 	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	FrameworkManager& operator = (const FrameworkManager&);
-  
-  /// Pointer to the instance
-  static FrameworkManager* m_instance;
+	FrameworkManagerImpl& operator = (const FrameworkManagerImpl&);
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
   
 };
+
+	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FrameworkManagerImpl>;
+#endif /* _WIN32 */
+	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FrameworkManagerImpl> FrameworkManager;
 
 } // namespace Kernel
 } // namespace Mantid

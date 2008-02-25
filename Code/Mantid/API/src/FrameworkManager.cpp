@@ -20,29 +20,22 @@ namespace Mantid
 {
 namespace API
 {
-
-	FrameworkManager* FrameworkManager::m_instance = 0;
-  Kernel::Logger& FrameworkManager::g_log = Kernel::Logger::get("FrameworkManager");
-
-/// Get an instance of FrameworkManager if it already exists, else creates a new object.
-	FrameworkManager* FrameworkManager::Instance()
-	{
-		if (!m_instance) m_instance=new FrameworkManager;
-		return m_instance;
-	}
+  Kernel::Logger& FrameworkManagerImpl::g_log = Kernel::Logger::get("FrameworkManager");
 	
 /// Default constructor
-FrameworkManager::FrameworkManager()
+FrameworkManagerImpl::FrameworkManagerImpl()
 {
+	g_log.debug() << "FrameworkManager created." << std::endl;
 }
 
 /// Destructor
-FrameworkManager::~FrameworkManager()
+FrameworkManagerImpl::~FrameworkManagerImpl()
 {
+	g_log.debug() << "FrameworkManager destroyed." << std::endl;
 }
 
 /// Creates all of the required services
-void FrameworkManager::initialize()
+void FrameworkManagerImpl::initialize()
 { 
   std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
   if (pluginDir.length() > 0)
@@ -55,7 +48,7 @@ void FrameworkManager::initialize()
 /** At the moment clears all memory associated with AlgorithmManager.
  *  May do more in the future
  */
-void FrameworkManager::clear()
+void FrameworkManagerImpl::clear()
 {
   AlgorithmManager::Instance().clear();
   AnalysisDataService::Instance().clear();
@@ -68,7 +61,7 @@ void FrameworkManager::clear()
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  */
-IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
+IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName)
 { 
    IAlgorithm* alg = AlgorithmManager::Instance().create(algName).get();
    return alg;
@@ -84,7 +77,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  *  @throw std::invalid_argument Thrown if properties string is ill-formed
  */ 
-IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
+IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
 {
   // Use the previous method to create the algorithm
   IAlgorithm *alg = AlgorithmManager::Instance().create(algName).get();//createAlgorithm(algName);
@@ -130,7 +123,7 @@ IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const 
  *  @throw std::invalid_argument Thrown if properties string is ill-formed
  *  @throw runtime_error Thrown if algorithm cannot be executed
  */ 
-IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string& propertiesArray)
+IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::string& propertiesArray)
 {
   // Make use of the previous method for algorithm creation and property setting
   IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
@@ -148,7 +141,7 @@ IAlgorithm* FrameworkManager::exec(const std::string& algName, const std::string
  * 
  *  @throw NotFoundError If workspace is not registered with analysis data service
  */
-Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
+Workspace* FrameworkManagerImpl::getWorkspace(const std::string& wsName)
 {
   Workspace *space;
   try
