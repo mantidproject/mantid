@@ -9,16 +9,10 @@
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-
-#ifdef IN_MANTID_KERNEL
-#define EXPORT_OPT_MANTID_KERNEL DLLExport 
-#else
-#define EXPORT_OPT_MANTID_KERNEL DLLImport
-#endif /* IN_MANTID_KERNEL */
+#include "MantidKernel/DllExport.h"
+#include "MantidKernel/LibraryWrapper.h"
 
 namespace Mantid
 {

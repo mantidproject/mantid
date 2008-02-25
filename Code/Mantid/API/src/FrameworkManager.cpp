@@ -1,6 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <boost/tokenizer.hpp>
+#include <string>
+#include <iostream>
+
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -9,10 +13,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Exception.h"
-
-#include <boost/tokenizer.hpp>
-#include <string>
-#include <iostream>
+#include "MantidKernel/LibraryManager.h"
 
 using namespace std;
 

@@ -7,11 +7,10 @@
 #include <string>
 #include <map>
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {

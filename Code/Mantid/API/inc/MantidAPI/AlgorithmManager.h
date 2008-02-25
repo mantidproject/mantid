@@ -25,10 +25,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmFactory.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
+#include "MantidAPI/DllExport.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 namespace Mantid
 {

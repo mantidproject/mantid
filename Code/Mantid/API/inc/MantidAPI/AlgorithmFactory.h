@@ -1,18 +1,13 @@
-#ifndef MANTID_KERNEL_ALGORITHMFACTORY_H_
-#define MANTID_KERNEL_ALGORITHMFACTORY_H_
+#ifndef MANTID_API_ALGORITHMFACTORY_H_
+#define MANTID_API_ALGORITHMFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-
-#ifdef IN_MANTID_API
-#define EXPORT_OPT_MANTID_API DLLExport 
-#else
-#define EXPORT_OPT_MANTID_API DLLImport
-#endif /* IN_MANTID_API */
 
 namespace Mantid
 {
@@ -90,4 +85,4 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_ALGORITHMFACTORY_H_*/
+#endif /*MANTID_API_ALGORITHMFACTORY_H_*/

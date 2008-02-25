@@ -4,10 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Logger.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include <vector>
 #include <map>
+
+#include "Logger.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid
 {

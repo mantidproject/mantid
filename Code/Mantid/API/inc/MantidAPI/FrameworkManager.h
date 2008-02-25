@@ -4,12 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
+#include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/LibraryManager.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid

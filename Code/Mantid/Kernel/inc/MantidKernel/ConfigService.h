@@ -4,19 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 #include <iostream>
 #include <iomanip>
 #include <string>
+
+#include "MantidKernel/DllExport.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
-
-#ifdef IN_MANTID_KERNEL
-#define EXPORT_OPT_MANTID_KERNEL DLLExport 
-#else
-#define EXPORT_OPT_MANTID_KERNEL DLLImport
-#endif /* IN_MANTID_API */
-
 
 //----------------------------------------------------------------------
 // Forward declaration
