@@ -18,11 +18,9 @@ class TOFtoWavelengthTest : public CxxTest::TestSuite
 public:
   
   TOFtoWavelengthTest()
-  {
-    WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    
+  {   
     // Set up a small workspace for testing
-    Workspace_sptr space = factory->create("Workspace2D",2584,11,10);
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2584,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(11);
     for (int i = 0; i < 11; ++i) 

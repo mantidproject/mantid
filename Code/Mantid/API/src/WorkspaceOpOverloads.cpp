@@ -96,7 +96,7 @@ namespace Mantid
 
       //Hoeerndous code inclusion to satisfy compilers that all code paths return a value
       // in reality the above code should either throw or return successfully.
-      Workspace_sptr retVal = WorkspaceFactory::Instance()->create("Workspace2D");
+      Workspace_sptr retVal = WorkspaceFactory::Instance().create("Workspace2D");
       return retVal;
     }
   }

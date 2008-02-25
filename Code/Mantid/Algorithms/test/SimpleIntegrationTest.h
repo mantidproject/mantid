@@ -19,11 +19,9 @@ class SimpleIntegrationTest : public CxxTest::TestSuite
 public:
   
   SimpleIntegrationTest()
-  { 
-    WorkspaceFactory *factory = WorkspaceFactory::Instance();
-    
+  {    
     // Set up a small workspace for testing
-    Workspace_sptr space = factory->create("Workspace2D",5,25,25);
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,25,25);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     double *a = new double[25];
     double *e = new double[25];

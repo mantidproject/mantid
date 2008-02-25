@@ -10,21 +10,22 @@ namespace Mantid
 namespace API
 {
 
-Kernel::Logger& WorkspaceFactory::g_log = Kernel::Logger::get("WorkspaceFactory");
-
-// Initialise the instance pointer to zero
-WorkspaceFactory* WorkspaceFactory::m_instance = 0;
+Kernel::Logger& WorkspaceFactoryImpl::g_log = Kernel::Logger::get("WorkspaceFactory");
 
 /// Private constructor for singleton class
-WorkspaceFactory::WorkspaceFactory() : Mantid::Kernel::DynamicFactory<Workspace>()
-{ }
+WorkspaceFactoryImpl::WorkspaceFactoryImpl() : Mantid::Kernel::DynamicFactory<Workspace>()
+{
+	g_log.debug() << "WorkspaceFactory created." << std::endl;
+}
 
 /** Private destructor
  *  Prevents client from calling 'delete' on the pointer handed 
  *  out by Instance
  */
-WorkspaceFactory::~WorkspaceFactory()
-{ }
+WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
+{
+	g_log.debug() << "WorkspaceFactory destroyed." << std::endl;
+}
 
 /** Create a new instance of the same type of workspace as that given as argument.
  *  Also initialises the workspace to be the same size as the parent (only if a 2D).
@@ -32,7 +33,7 @@ WorkspaceFactory::~WorkspaceFactory()
  *  @return A shared pointer to the newly created instance
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactory::create(const Workspace_sptr& parent) const
+Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
 {
   Workspace_sptr ws = this->create(parent->id());
   // Find out the size of the parent
@@ -56,7 +57,7 @@ Workspace_sptr WorkspaceFactory::create(const Workspace_sptr& parent) const
  *  @return A shared pointer to the newly created instance
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactory::create(const std::string& className, const int& NVectors, 
+Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors, 
                                                    const int& XLength, const int& YLength) const
 {
   // If not asking for a 2D workspace, just call vanilla create and return
@@ -82,16 +83,6 @@ Workspace_sptr WorkspaceFactory::create(const std::string& className, const int&
   }
   ws->init(NVectors,XLength,YLength);
   return ws;
-}
-
-/** A static method which retrieves the single instance of the Algorithm Factory
- * 
- *  @returns A pointer to the factory instance
- */
-WorkspaceFactory* WorkspaceFactory::Instance()
-{
-	if (!m_instance) m_instance=new WorkspaceFactory;
-	return m_instance;
 }
 
 } // namespace API

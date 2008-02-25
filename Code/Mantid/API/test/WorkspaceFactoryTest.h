@@ -43,30 +43,18 @@ public:
 
   WorkspaceFactoryTest()
   {
-    factory = WorkspaceFactory::Instance();
-  }
-  
-  void testInstance()
-  {
-    WorkspaceFactory *tester = WorkspaceFactory::Instance();
-    TS_ASSERT_EQUALS( factory, tester);
+
   }
   
   void testReturnType()
   {
-    factory->subscribe<WorkspaceTest>("work");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTest>("work");
     Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING( space = factory->create("work") );
+    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("work") );
     TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space.get()) );
   }
   
-  void testCast()
-  {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<DynamicFactory<Workspace>*>(factory) );
-  }
-  
 private:
-  WorkspaceFactory *factory;
   
 };
 

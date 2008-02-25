@@ -18,7 +18,7 @@
 #define EXPORT_OPT_MANTID_KERNEL DLLExport 
 #else
 #define EXPORT_OPT_MANTID_KERNEL DLLImport
-#endif /* IN_MANTID_API */
+#endif /* IN_MANTID_KERNEL */
 
 namespace Mantid
 {

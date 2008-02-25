@@ -50,8 +50,7 @@ namespace DataHandling
     m_filename = getPropertyValue("Filename");
     
     // Get a pointer to the workspace factory (later will be shared)
-    API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-    m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create("Workspace2D"));
+    m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D"));
 
     // Assign the result to the output workspace property
     setProperty("OutputWorkspace",m_localWorkspace);

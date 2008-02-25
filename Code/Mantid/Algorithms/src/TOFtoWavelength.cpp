@@ -57,8 +57,7 @@ void TOFtoWavelength::exec()
   
   // Create the 2D workspace for the output
   // Get a pointer to the workspace factory (later will be shared)
-  WorkspaceFactory *factory = WorkspaceFactory::Instance();
-  Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(factory->create(inputWS));
+  Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(inputWS));
 
   // Get a reference to the instrument contained in the workspace
   API::Instrument &instrument = inputWS->getInstrument();

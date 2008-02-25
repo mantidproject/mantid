@@ -44,8 +44,6 @@ FrameworkManager::~FrameworkManager()
 /// Creates all of the required services
 void FrameworkManager::initialize()
 { 
-  workFactory = WorkspaceFactory::Instance();
-
   std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
   if (pluginDir.length() > 0)
   {

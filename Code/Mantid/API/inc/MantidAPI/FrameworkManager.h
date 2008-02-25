@@ -20,7 +20,6 @@ namespace API
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Workspace;
-class WorkspaceFactory;
 
 /** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
 
@@ -95,9 +94,6 @@ private:
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
- 
-  /// Pointer to the Workspace Factory instance
-  WorkspaceFactory *workFactory;
   
 };
 

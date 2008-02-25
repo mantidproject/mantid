@@ -112,13 +112,12 @@ public:
     TS_ASSERT( wsp2->setValue("ws2") )
     TS_ASSERT( wsp2->isValid() )
 
-    WorkspaceFactory* factory = WorkspaceFactory::Instance();
-    factory->subscribe<WorkspaceTest>("WorkspacePropertyTest");
-    factory->subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
+    WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
 
     // The other two need the input workspace to exist in the ADS
-    Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING( space = factory->create("WorkspacePropertyTest") );
+	Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest") );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
     TS_ASSERT( wsp1->isValid() )
     
@@ -126,7 +125,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
     TS_ASSERT( ! wsp3->isValid() )
     // Now put correct type in and check it passes
-    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance()->create("WorkspacePropertyTest2") )
+    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2") )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
     TS_ASSERT( wsp3->isValid() )
   }
@@ -139,9 +138,9 @@ public:
     // Since no workspace has been assigned to this output property, it should throw
     TS_ASSERT_THROWS( wsp2->store(), std::runtime_error )
     // So now create and assign the workspace and test again
-    Workspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance()->create("WorkspacePropertyTest") );
-    *wsp2 = space;
+	Workspace_sptr space;
+    TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest") );
+	*wsp2 = space;
     TS_ASSERT( wsp2->store() )
     // Check it really has been stored in the ADS
     Workspace_sptr storedspace;
@@ -149,7 +148,7 @@ public:
     TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
     
     // This one should pass
-    TS_ASSERT( wsp3->store() )
+    TS_ASSERT(wsp3->store() )
   }
 
   void testClear()

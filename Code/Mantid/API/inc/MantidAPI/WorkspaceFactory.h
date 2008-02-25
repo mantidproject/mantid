@@ -9,7 +9,7 @@
 #define DECLARE_WORKSPACE(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_ws_##classname( \
-       ((Mantid::API::WorkspaceFactory::Instance()->subscribe<Mantid::DataObjects::classname>(#classname)) \
+       ((Mantid::API::WorkspaceFactory::Instance().subscribe<Mantid::DataObjects::classname>(#classname)) \
        , 0)); \
   }
 
@@ -17,6 +17,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {
@@ -62,19 +64,10 @@ typedef boost::shared_ptr<Workspace> Workspace_sptr;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class
-#ifdef IN_MANTID_API
-DLLExport 
-#else
-DLLImport
-#endif /* IN_MANTID_API */
-WorkspaceFactory : public Kernel::DynamicFactory<Workspace>
+class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
 {
 public:
-  
-  // Returns the single instance of the factory
-  static WorkspaceFactory* Instance();
-  
+ 
   // Unhide the inherited create method
   using Kernel::DynamicFactory<Workspace>::create;
   
@@ -83,17 +76,22 @@ public:
                                    const int& XLength, const int& YLength) const;
   
 private:
+	friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
   
   // Private constructor and destructor for singleton class
-  WorkspaceFactory();
-  virtual ~WorkspaceFactory();
+  WorkspaceFactoryImpl();
+  virtual ~WorkspaceFactoryImpl();
     
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
-
-  /// Pointer to the factory instance
-  static WorkspaceFactory* m_instance;
 };
+
+///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
+#endif /* _WIN32 */
+	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
 } // namespace Kernel
 } // namespace Mantid

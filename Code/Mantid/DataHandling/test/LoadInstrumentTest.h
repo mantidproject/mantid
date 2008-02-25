@@ -43,10 +43,9 @@ public:
 
     //create a workspace with some sample data
     wsName = "LoadInstrumentTest";
-    WorkspaceFactory *factory = WorkspaceFactory::Instance();
     int histogramNumber = 2584;
     int timechannels = 100;
-    Workspace_sptr ws = factory->create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
     //loop to create data
     for (int i = 0; i < histogramNumber; i++)

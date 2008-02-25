@@ -117,8 +117,7 @@ void SimpleIntegration::exec()
   }
   
   // Create the 1D workspace for the output
-  API::WorkspaceFactory *factory = API::WorkspaceFactory::Instance();
-  Workspace1D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace1D>(factory->create("Workspace1D"));
+  Workspace1D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace1D>(API::WorkspaceFactory::Instance().create("Workspace1D"));
 
   // Populate the 1D workspace
   outputWorkspace->setX(detectorNumber);
