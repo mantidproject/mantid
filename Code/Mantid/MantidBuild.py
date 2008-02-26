@@ -35,11 +35,5 @@ def getSharedObjects(listCpps, env) :
     for f in listCpps :
         listSharedObjects.append(os.path.splitext(f)[0]+env['SHOBJSUFFIX'])
     return listSharedObjects
-    
-def copyPropertiesFiles(srcFolder, destFolder) :
-    if os.path.exists(srcFolder) and os.path.exists(destFolder):
-	files = os.listdir(srcFolder)
-	for file in files:
-		if file.endswith('.properties'):
-			shutil.copy(srcFolder + '/' +  file, destFolder)
+
 

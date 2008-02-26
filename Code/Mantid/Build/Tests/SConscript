@@ -31,8 +31,6 @@ for fname in dirList:
     if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build' and fname != 'Geometry':
       #does folder contain /test?
       if os.path.exists(path + fname + testfolder):
-        #Copy any property files across to the test directory
-        MantidBuild.copyPropertiesFiles(path + fname + testfolder, '.')
         files = os.listdir(path + fname + testfolder)
         for file in files:
           if file.endswith('.h'):
