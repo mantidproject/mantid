@@ -4,6 +4,7 @@ import platform
 import sys
 import shutil
 import re
+import string
 from socket import gethostname
 
 import MantidBuild
@@ -168,7 +169,7 @@ env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
 
 
-#Export('env')
+Export('env')
 
 #Real work begins here
 subProjs = []
@@ -189,31 +190,40 @@ static_libraries = []
 shared_objects = []
 lib_list = []
 orig_libs = env['MYLIBLIST']
+
+
 for subproj in subProjs:
-	ret = SConscript([subproj+'/SConscript'], exports='env')
+	ret = SConscript([subproj+'/SConscript'])
 	env.Install('Bin/Shared', ret['shared'])
 	#env.Install('Bin/Static', ret['static'])
 	shared_libraries.insert(0,ret['shared'])
 	static_libraries.insert(0,ret['static'])
-	shared_objects.insert(0,ret['sharedobjs'])
+	shared_objects = shared_objects + ret['sharedobjs']
 	lib_list.insert(0,ret['libs'])
 	env.Replace(MYLIBLIST=lib_list + orig_libs)
 
 env.Replace(SHARED_LIST=shared_libraries)
 #env.Replace(STATIC_LIST=static_libraries)
 
+#
+# Correct bug in windows scons - OBJSUFFIX is not substituted for some reason
+#
+for i in range(len(shared_objects)) :
+    shared_objects[i] = string.replace(shared_objects[i], '$OBJSUFFIX', env['OBJSUFFIX'])
+
+#
 # one big shared library
-big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=libDirList,PDB='Bin/Shared/Mantid.pdb')
-#env.Install('Bin/Shared', big_shared)
+#
 if int(bigshared) :
+    big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
     
 #User Algs
-ret = SConscript('UserAlgorithms/SConscript')
+ret = SConscript(['UserAlgorithms/SConscript'])
 env.Install('Bin/Plugins', ret['shared'])
     
 # main program
-ret = SConscript(['Main/SConscript'], exports='env')
+ret = SConscript(['Main/SConscript'])
 env.Install('Bin/Shared', ret['shared'])
 
 skiptest=ARGUMENTS.get('skiptest',0)
@@ -221,11 +231,11 @@ if not int(skiptest):
 	print 'Building Tests.  Specify -Q "skiptest=1" to skip the tests'
 	# tests
 	if os.name == 'nt':
-		ret = SConscript(['Build/Tests/SConscript'], exports='env')
+		ret = SConscript(['Build/Tests/SConscript'])
 	else:
 		cxxtestgen = env.WhereIs('cxxtestgen.py')
 		if cxxtestgen != None :
-			ret = SConscript(['Build/Tests/SConscript'], exports='env')
+			ret = SConscript(['Build/Tests/SConscript'])
 		else :
 			print 'CXXTESTGEN is not installed - tests will not be built'
 else:
