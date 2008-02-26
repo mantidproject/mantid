@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SimpleRebin.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TOFtoWavelength.cpp"
 				>
 			</File>
@@ -241,6 +245,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\SimpleIntegration.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SimpleRebin.h"
 				>
 			</File>
 			<File
