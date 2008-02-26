@@ -203,8 +203,8 @@ env.Replace(SHARED_LIST=shared_libraries)
 #env.Replace(STATIC_LIST=static_libraries)
 
 # one big shared library
-big_shared = env.SharedLibrary('Mantid', shared_objects, LIBS=libList, LIBPATH=libDirList,PDB='Mantid.pdb')
-env.Install('Bin/Shared', big_shared)
+big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=libDirList,PDB='Bin/Shared/Mantid.pdb')
+#env.Install('Bin/Shared', big_shared)
 if int(bigshared) :
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
 # main program
