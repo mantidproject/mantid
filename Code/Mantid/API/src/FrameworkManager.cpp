@@ -34,7 +34,7 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
 	std::cout << "FrmMgr destroyed!" << std::endl;
-	g_log.debug() << "FrameworkManager destroyed." << std::endl;
+//	g_log.debug() << "FrameworkManager destroyed." << std::endl;
 }
 
 /// Creates all of the required services

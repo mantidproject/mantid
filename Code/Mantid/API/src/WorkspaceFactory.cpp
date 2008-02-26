@@ -24,7 +24,7 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl() : Mantid::Kernel::DynamicFactory<Wo
  */
 WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
 {
-	g_log.debug() << "WorkspaceFactory destroyed." << std::endl;
+//	g_log.debug() << "WorkspaceFactory destroyed." << std::endl;
 }
 
 /** Create a new instance of the same type of workspace as that given as argument.

@@ -14,7 +14,7 @@ namespace API
 
 	AlgorithmFactoryImpl::~AlgorithmFactoryImpl()
 	{
-		g_log.debug() << "Algorithm Factory destroyed." << std::endl;
+//		g_log.debug() << "Algorithm Factory destroyed." << std::endl;
 	}
 
 } // namespace API
