@@ -241,7 +241,7 @@ namespace Mantid
         if ( xsteps[j] >= 0.0)        
           xs = xsteps[j];        
         else 
-          xs = xcurr * abs(xsteps[j]);
+          xs = xcurr * fabs(xsteps[j]);
         /* continue stepping unless we get to almost where we want to */
         if ( (xcurr + xs) < (xbounds[i] - (xs * 1.E-6)) )
         {
