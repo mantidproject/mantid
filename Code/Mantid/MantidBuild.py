@@ -29,6 +29,12 @@ def getCPPFiles(codeFolder) :
 			listCpps.append(codeFolder + '/' +  file)
 #			print file
     return listCpps
+
+def getSharedObjects(listCpps, env) :
+    listSharedObjects = []
+    for f in listCpps :
+        listSharedObjects.append(os.path.splitext(f)[0]+env['SHOBJSUFFIX'])
+    return listSharedObjects
     
 def copyPropertiesFiles(srcFolder, destFolder) :
     if os.path.exists(srcFolder) and os.path.exists(destFolder):

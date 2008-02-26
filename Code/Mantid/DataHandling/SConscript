@@ -6,16 +6,17 @@ import MantidBuild
 #GET LIST OF CPPS files
 codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder) 
-listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/LoadRaw'))
-listCpps.append(MantidBuild.getCPPFiles(codeFolder + '/NeXusUtils'))
+listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder + '/LoadRaw')
+listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder + '/NeXusUtils')
 
 #Import environment
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_DATA_HANDLING',1)])
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidDataHandling.pdb')
-#static = myenv.StaticLibrary('libstatic/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'],PDB='libstatic/MantidDataHandling.pdb')
-retval = { 'shared': shared, 'static': shared, 'libs': ['MantidDataHandling'] }
+static = myenv.StaticLibrary('libstatic/MantidDataHandling', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'],PDB='libstatic/MantidDataHandling.pdb')
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': ['MantidDataHandling'] }
 Return('retval')

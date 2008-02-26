@@ -19,6 +19,7 @@ Help(opts.GenerateHelpText(base_env))
 mingw = ARGUMENTS.get('mingw', 0)
 msvc = ARGUMENTS.get('msvc', 1)
 debug = ARGUMENTS.get('debug', 0)
+bigshared = ARGUMENTS.get('bigshared', 0)
 if int(msvc) :
 	env = base_env
 if int(mingw) :
@@ -185,6 +186,7 @@ subProjs.append('PythonAPI')
 # we want to link libraries in the reverse order we build them
 shared_libraries = []
 static_libraries = []
+shared_objects = []
 lib_list = []
 orig_libs = env['MYLIBLIST']
 for subproj in subProjs:
@@ -192,13 +194,19 @@ for subproj in subProjs:
 	env.Install('Bin/Shared', ret['shared'])
 	#env.Install('Bin/Static', ret['static'])
 	shared_libraries.insert(0,ret['shared'])
-	#static_libraries.insert(0,ret['static'])
+	static_libraries.insert(0,ret['static'])
+	shared_objects.insert(0,ret['sharedobjs'])
 	lib_list.insert(0,ret['libs'])
 	env.Replace(MYLIBLIST=lib_list + orig_libs)
 
 env.Replace(SHARED_LIST=shared_libraries)
 #env.Replace(STATIC_LIST=static_libraries)
 
+# one big shared library
+big_shared = env.SharedLibrary('Mantid', shared_objects, LIBS=libList, LIBPATH=libDirList,PDB='Mantid.pdb')
+env.Install('Bin/Shared', big_shared)
+if int(bigshared) :
+    env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
 # main program
 ret = SConscript(['Main/SConscript'], exports='env')
 env.Install('Bin/Shared', ret['shared'])

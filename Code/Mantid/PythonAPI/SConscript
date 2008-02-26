@@ -11,9 +11,10 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_PYTHON_API',1)])
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidPythonAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidPythonAPI.pdb')
 static = myenv.StaticLibrary('libstatic/MantidPythonAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidPythonAPI.pdb')
-retval = { 'shared': shared, 'static': static, 'libs': [ 'MantidPythonAPI' ] }
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidPythonAPI' ] }
 Return('retval')

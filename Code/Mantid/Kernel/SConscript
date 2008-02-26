@@ -12,8 +12,10 @@ Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_KERNEL',1)])
 
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
+
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidKernel', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidKernel.pdb')
-#static = myenv.StaticLibrary('libstatic/MantidKernel', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidKernel.pdb')
-retval = { 'shared': shared, 'static': shared, 'libs': [ 'MantidKernel' ] }
+static = myenv.StaticLibrary('libstatic/MantidKernel', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidKernel.pdb')
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidKernel' ] }
 Return('retval')

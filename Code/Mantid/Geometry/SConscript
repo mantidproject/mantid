@@ -7,7 +7,7 @@ import MantidBuild
 codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder)
 codeFolder = os.path.abspath('./Deprecated/src')
-listCpps.append(MantidBuild.getCPPFiles(codeFolder))
+listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder)
 
 # at the moment not all of geometry works
 # listCpps = []
@@ -22,9 +22,10 @@ listCpps.append(MantidBuild.getCPPFiles(codeFolder))
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_GEOMETRY',1)])
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidGeometry.pdb')
-#static = myenv.StaticLibrary('libstatic/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidGeometry.pdb')
-retval = { 'shared': shared, 'static': shared, 'libs': [ 'MantidGeometry' ] }
+static = myenv.StaticLibrary('libstatic/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidGeometry.pdb')
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidGeometry' ] }
 Return('retval')
