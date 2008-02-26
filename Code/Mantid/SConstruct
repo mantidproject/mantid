@@ -207,6 +207,11 @@ big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList
 #env.Install('Bin/Shared', big_shared)
 if int(bigshared) :
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
+    
+#User Algs
+ret = SConscript('UserAlgorithms/SConscript')
+env.Install('Bin/Plugins', ret['shared'])
+    
 # main program
 ret = SConscript(['Main/SConscript'], exports='env')
 env.Install('Bin/Shared', ret['shared'])

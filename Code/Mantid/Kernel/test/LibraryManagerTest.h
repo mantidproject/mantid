@@ -22,15 +22,13 @@ public:
   
   void testOpenLibrary()
   {
-	TS_ASSERT_LESS_THAN(0, LibraryManager::Instance().OpenAllLibraries("../../Bin/Shared/", false));
+	TS_ASSERT_LESS_THAN(0, LibraryManager::Instance().OpenAllLibraries("../../Bin/Plugins/", false));
   }
   
   void testLoadedAlgorithm()
   {
 	try
-	{
-		Mantid::API::FrameworkManager::Instance().initialize();
-	  
+	{  
 		Mantid::API::FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
 	  
 		TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec("HelloWorldAlgorithm", ""));				

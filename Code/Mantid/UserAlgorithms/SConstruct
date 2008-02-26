@@ -1,0 +1,6 @@
+env = Environment()
+incs = ['/home/mjc23/mantid/Code/Mantid/API/inc', '/home/mjc23/mantid/Code/Mantid/Kernel/inc', '/home/mjc23/mantid/Code/Mantid/Geometry/inc']
+
+env.Append(CPPPATH=incs)
+env.SharedLibrary('UsersAlgorithms', 'HelloWorldAlgorithm.cpp')
+
