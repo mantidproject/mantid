@@ -7,10 +7,7 @@ namespace API
 {
 	Kernel::Logger& AlgorithmFactoryImpl::g_log = Kernel::Logger::get("AlgorithmFactory");
 
-	// Initialise the instance pointer to zero
-	//AlgorithmFactory* AlgorithmFactory::m_instance = 0;
-
-	AlgorithmFactoryImpl::AlgorithmFactoryImpl()
+	AlgorithmFactoryImpl::AlgorithmFactoryImpl() : Kernel::DynamicFactory<Algorithm>()
 	{
 		g_log.debug() << "Algorithm Factory created." << std::endl;
 	}

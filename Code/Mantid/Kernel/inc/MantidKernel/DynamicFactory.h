@@ -69,7 +69,7 @@ public:
     if (it != _map.end())
       return it->second->createInstance();
     else
-      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.", className);
+      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n", className);
   }
   
   /// Registers the instantiator for the given class with the DynamicFactory.
@@ -99,7 +99,7 @@ public:
     else
     {
       delete pAbstractFactory;
-      throw std::runtime_error(className + "is already registered.");
+      throw std::runtime_error(className + "is already registered.\n");
     }
   }
   
@@ -116,7 +116,7 @@ public:
       _map.erase(it);
     }
     else 
-      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.",className);
+      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n",className);
   }
   
   /// Returns true if the given class is currently registered.

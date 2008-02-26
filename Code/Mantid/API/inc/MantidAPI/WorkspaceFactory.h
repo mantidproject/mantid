@@ -78,12 +78,17 @@ public:
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
   
-  // Private constructor and destructor for singleton class
-  WorkspaceFactoryImpl();
-  virtual ~WorkspaceFactoryImpl();
-    
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+	/// Private Constructor for singleton class
+	WorkspaceFactoryImpl();	
+	/// Private copy constructor - NO COPY ALLOWED
+	WorkspaceFactoryImpl(const WorkspaceFactoryImpl&);
+	/// Private assignment operator - NO ASSIGNMENT ALLOWED
+	WorkspaceFactoryImpl& operator = (const WorkspaceFactoryImpl&);
+	///Private Destructor
+	virtual ~WorkspaceFactoryImpl();
+	
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

@@ -56,7 +56,7 @@ namespace Mantid
       }
       catch(std::runtime_error& ex)
       {
-        g_log.error()<<"AlgorithmManager:: Unable to create algorithm "<< algName <<ex.what();  
+        g_log.error()<<"AlgorithmManager:: Unable to create algorithm "<< algName <<ex.what() << std::endl;  
         throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName); 
       }
       no_of_alg++;		

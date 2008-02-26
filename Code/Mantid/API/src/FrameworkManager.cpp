@@ -26,12 +26,14 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl()
 {
+	std::cout << "FrmMgr created!" << std::endl;
 	g_log.debug() << "FrameworkManager created." << std::endl;
 }
 
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
+	std::cout << "FrmMgr destroyed!" << std::endl;
 	g_log.debug() << "FrameworkManager destroyed." << std::endl;
 }
 

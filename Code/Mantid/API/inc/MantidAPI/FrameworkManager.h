@@ -74,6 +74,7 @@ private:
 	
 	///Private Constructor
 	FrameworkManagerImpl();
+	///Private Destructor
 	virtual ~FrameworkManagerImpl();	
 	/// Private copy constructor - NO COPY ALLOWED
 	FrameworkManagerImpl(const FrameworkManagerImpl&);

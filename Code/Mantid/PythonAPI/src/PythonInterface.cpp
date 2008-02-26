@@ -36,30 +36,25 @@ void PythonInterface::InitialiseFrameworkManager()
 
 bool PythonInterface::CreateAlgorithm(const std::string& algName)
 {
-		FrameworkManager::Instance().createAlgorithm(algName);
+	FrameworkManager::Instance().createAlgorithm(algName);
 		
-		return true;
+	return true;
 }
 
 bool PythonInterface::ExecuteAlgorithm(const std::string& algName, const std::string& properties)
 {
-		FrameworkManager::Instance().exec(algName, properties);
+	FrameworkManager::Instance().exec(algName, properties);
 		
-		return true;
-}
-
-bool PythonInterface::LoadNexusFile(const std::string& fileName, const std::string& workspaceName)
-{
-	return false;
+	return true;
 }
 
 int PythonInterface::LoadIsisRawFile(const std::string& fileName, const std::string& workspaceName)
 {
-	FrameworkManager::Instance().createAlgorithm("LoadRaw");
+	CreateAlgorithm("LoadRaw");
 	
 	std::string properties = "Filename:" + fileName + ",OutputWorkspace:" + workspaceName;
 	
-	FrameworkManager::Instance().exec("LoadRaw", properties);
+	ExecuteAlgorithm("LoadRaw", properties);
 		
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D = 
@@ -89,6 +84,26 @@ std::vector<double> PythonInterface::GetYData(const std::string& workspaceName, 
 		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
 	return output2D->dataY(index);	
+}
+
+std::vector<double> PythonInterface::GetEData(const std::string& workspaceName, int const index)
+{
+	//Retrieve workspace
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
+	Mantid::DataObjects::Workspace2D_sptr output2D = 
+		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	
+	return output2D->dataE(index);	
+}
+
+std::vector<double> PythonInterface::GetE2Data(const std::string& workspaceName, int const index)
+{
+	//Retrieve workspace
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
+	Mantid::DataObjects::Workspace2D_sptr output2D = 
+		boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	
+	return output2D->dataE2(index);	
 }
 
 unsigned long PythonInterface::GetAddressXData(const std::string& workspaceName, int const index)

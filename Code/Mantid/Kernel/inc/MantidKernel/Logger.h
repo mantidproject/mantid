@@ -106,6 +106,7 @@ namespace Kernel
 		
 		
 	private:
+		
 		Logger();
 
 		/// Overload of = operator

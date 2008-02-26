@@ -50,28 +50,38 @@ public:
   
   void testLoadIsisRaw()
   {
-	  int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace");
+	  int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
 	  
 	  TS_ASSERT_EQUALS(hists, 2584);
   }
   
   void testGetXdata()
   {
-	  int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace");
+	  //int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
 	  
-	  std::vector<double> data = inter->GetXData("TestWorkspace", 0);
+	  std::vector<double> data = inter->GetXData("TestWorkspace1", 0);
 	  
 	  TS_ASSERT(!data.empty());	  
   }
   
   void testGetYdata()
   {
-	  int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace");
+	  //int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
 	  
-	  std::vector<double> data = inter->GetYData("TestWorkspace", 0);
+	  std::vector<double> data = inter->GetYData("TestWorkspace1", 0);
 	  
 	  TS_ASSERT(!data.empty());	  
   }
+  
+   void testGetEdata()
+  {
+	  //int hists = inter->LoadIsisRawFile("../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
+	  
+	  std::vector<double> data = inter->GetEData("TestWorkspace1", 0);
+	  
+	  TS_ASSERT(!data.empty());	  
+  }
+
   
 };
 

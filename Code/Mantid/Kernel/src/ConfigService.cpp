@@ -105,7 +105,7 @@ namespace Kernel
     }
     catch(Poco::NotFoundException& ex)
     {
-      g_log.warning()<<"Unable to find " << keyName << " in the properties file";
+      g_log.warning()<<"Unable to find " << keyName << " in the properties file" << std::endl;
       retVal = "";
     }
 		return retVal;

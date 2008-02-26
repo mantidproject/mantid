@@ -51,24 +51,18 @@ class Algorithm;
 class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
   {
   public:
- 
-  protected:    
-    /// Protected Constructor for singleton class
-    AlgorithmFactoryImpl();	
-  
-    /** Protected destructor
-     *  Prevents client from calling 'delete' on the pointer handed 
-     *  out by Instance
-     */
-    virtual ~AlgorithmFactoryImpl();
 
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
-	  
+	
+	/// Private Constructor for singleton class
+	AlgorithmFactoryImpl();	
 	/// Private copy constructor - NO COPY ALLOWED
 	AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);
 	/// Private assignment operator - NO ASSIGNMENT ALLOWED
 	AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
+	///Private Destructor
+	virtual ~AlgorithmFactoryImpl();
 
 	///static reference to the logger class
 	static Kernel::Logger& g_log;
