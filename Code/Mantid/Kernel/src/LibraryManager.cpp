@@ -27,7 +27,7 @@ namespace Kernel
 	/// Destructor
 	LibraryManagerImpl::~LibraryManagerImpl()
 	{
-		g_log.debug() << "LibraryManager destroyed." << std::endl;
+//		g_log.debug() << "LibraryManager destroyed." << std::endl;
 	}
 
   /** Opens all suitable DLLs on a given path

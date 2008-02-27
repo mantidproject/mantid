@@ -24,6 +24,9 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <stdexcept>
+#include <typeinfo>
+#include <iostream>
 
 namespace Mantid
 {
@@ -55,8 +58,15 @@ struct CreateUsingNew
 template <typename T>
 inline T& SingletonHolder<T>::Instance()
 {
+	if (destroyed)
+	{
+	    std::string s("Attempt to use destroyed singleton ");
+	    s += typeid(T).name();
+	    throw std::runtime_error(s.c_str());
+	}
 	if (!pInstance)
 	{
+//		std::cerr << "creating singleton " << typeid(T).name() << std::endl;
 		pInstance = CreateUsingNew<T>::Create();
 		atexit(&DestroySingleton);
 	}
@@ -67,6 +77,7 @@ template <typename T>
 void SingletonHolder<T>::DestroySingleton()
 {
 	assert(!destroyed);
+//	std::cerr << "destroying singleton " << typeid(T).name() << std::endl;
 	CreateUsingNew<T>::Destroy(pInstance);
 	pInstance = 0;
 	destroyed = true;
