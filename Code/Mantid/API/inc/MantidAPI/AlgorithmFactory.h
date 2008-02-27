@@ -65,7 +65,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	virtual ~AlgorithmFactoryImpl();
 
 	///static reference to the logger class
-	static Kernel::Logger& g_log;
+	Kernel::Logger& g_log;
 
   };
   

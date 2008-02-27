@@ -82,7 +82,7 @@ private:
 	FrameworkManagerImpl& operator = (const FrameworkManagerImpl&);
   
   /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  Kernel::Logger& g_log;
   
 };
 

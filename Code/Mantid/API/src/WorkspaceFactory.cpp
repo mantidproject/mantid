@@ -10,13 +10,11 @@ namespace Mantid
   namespace API
   {
 
-    Kernel::Logger& WorkspaceFactoryImpl::g_log = Kernel::Logger::get("WorkspaceFactory");
-
-    /// Private constructor for singleton class
-    WorkspaceFactoryImpl::WorkspaceFactoryImpl() : Mantid::Kernel::DynamicFactory<Workspace>()
-    {
-      g_log.debug() << "WorkspaceFactory created." << std::endl;
-    }
+/// Private constructor for singleton class
+WorkspaceFactoryImpl::WorkspaceFactoryImpl() : Mantid::Kernel::DynamicFactory<Workspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
+{
+	g_log.debug() << "WorkspaceFactory created." << std::endl;
+}
 
     /** Private destructor
     *  Prevents client from calling 'delete' on the pointer handed 

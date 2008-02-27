@@ -69,7 +69,7 @@ private:
   ~AnalysisDataServiceImpl();
 
   ///static reference to the logger class
-  static Kernel::Logger& g_log;
+  Kernel::Logger& g_log;
   
   /// Typedef for the map of the managed algorithms and their names
   typedef std::map<std::string, Workspace_sptr> WorkspaceMap;

@@ -88,7 +88,7 @@ private:
 	virtual ~WorkspaceFactoryImpl();
 	
 	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+	Kernel::Logger& g_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

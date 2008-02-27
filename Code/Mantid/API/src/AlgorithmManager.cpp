@@ -12,10 +12,9 @@ namespace Mantid
 {
   namespace API
   {
-    Kernel::Logger& AlgorithmManagerImpl::g_log = Kernel::Logger::get("AlgorithmManager");
 
     /// Private Constructor for singleton class
-    AlgorithmManagerImpl::AlgorithmManagerImpl(): no_of_alg(0)
+    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")), no_of_alg(0)
     {
 		g_log.debug() << "Algorithm Manager created." << std::endl;
     }

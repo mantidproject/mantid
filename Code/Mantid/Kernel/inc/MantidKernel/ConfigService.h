@@ -141,7 +141,7 @@ namespace Kernel
 	  // Private constructors and destructor for singleton class
 		ConfigServiceImpl();
 		/// Private copy constructor. Prevents singleton being copied.
-		ConfigServiceImpl(const ConfigServiceImpl&) {}
+		ConfigServiceImpl(const ConfigServiceImpl&);
 	    
 		virtual ~ConfigServiceImpl();
 
@@ -151,7 +151,7 @@ namespace Kernel
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
     /// static reference to the logger class
-	  static Logger& g_log;
+	  Logger& g_log;
 
 	};
 	

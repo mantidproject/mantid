@@ -6,9 +6,8 @@ namespace Mantid
 {
 namespace API
 {
-	Kernel::Logger& AlgorithmFactoryImpl::g_log = Kernel::Logger::get("AlgorithmFactory");
 
-	AlgorithmFactoryImpl::AlgorithmFactoryImpl() : Kernel::DynamicFactory<Algorithm>()
+	AlgorithmFactoryImpl::AlgorithmFactoryImpl() : Kernel::DynamicFactory<Algorithm>(), g_log(Kernel::Logger::get("AlgorithmFactory"))
 	{
 	// we need to make sure the library manager has been loaded before we 
 	// are constructed so that it is destroyed after us and thus does

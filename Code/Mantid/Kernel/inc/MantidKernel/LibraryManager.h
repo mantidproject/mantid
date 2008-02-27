@@ -70,7 +70,7 @@ private:
 	std::map< const std::string,  boost::shared_ptr<Mantid::Kernel::LibraryWrapper> > OpenLibs;
 
 	/// static reference to the logger class
-	static Logger& g_log;
+	Logger& g_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for LibraryManagerImpl (needed for dllexport/dllimport) and a typedef for it.

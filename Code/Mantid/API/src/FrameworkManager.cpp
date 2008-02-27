@@ -21,10 +21,9 @@ namespace Mantid
 {
 namespace API
 {
-  Kernel::Logger& FrameworkManagerImpl::g_log = Kernel::Logger::get("FrameworkManager");
 	
 /// Default constructor
-FrameworkManagerImpl::FrameworkManagerImpl()
+FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
 	std::cout << "FrmMgr created!" << std::endl;
 	g_log.debug() << "FrameworkManager created." << std::endl;

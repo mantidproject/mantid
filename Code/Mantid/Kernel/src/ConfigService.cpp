@@ -14,11 +14,9 @@ namespace Mantid
 {
 namespace Kernel
 {
-  // Get a reference to the logger
-  Logger& ConfigServiceImpl::g_log = Logger::get("ConfigService");
 
   /// Private constructor for singleton class
-	ConfigServiceImpl::ConfigServiceImpl()
+	ConfigServiceImpl::ConfigServiceImpl() : g_log(Logger::get("ConfigService"))
 	{
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -26,6 +24,11 @@ namespace Kernel
 		//attempt to load the default properties filename
 		loadConfig("Mantid.properties");
 		g_log.debug() << "ConfigService created." << std::endl;
+	}
+
+  /// Private copy constructor for singleton class
+	ConfigServiceImpl::ConfigServiceImpl(const ConfigServiceImpl&) : g_log(Logger::get("ConfigService"))
+	{
 	}
 
   /** Private Destructor

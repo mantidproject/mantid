@@ -215,7 +215,7 @@ for i in range(len(shared_objects)) :
 # one big shared library
 #
 if int(bigshared) :
-    big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
+    big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
     
 #User Algs

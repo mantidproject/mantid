@@ -16,10 +16,9 @@ namespace Kernel
 {
 	namespace fs = boost::filesystem;  // to help clarify which bits are boost in code below
 	
-	Logger& LibraryManagerImpl::g_log = Logger::get("LibraryManager");
 
 	/// Constructor
-	LibraryManagerImpl::LibraryManagerImpl()
+	LibraryManagerImpl::LibraryManagerImpl() : g_log(Logger::get("LibraryManager"))
 	{
 		g_log.debug() << "LibraryManager created." << std::endl;
 	}

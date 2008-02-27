@@ -99,7 +99,7 @@ private:
 
 
   /// Static reference to the logger class
-	static Kernel::Logger& g_log;
+	Kernel::Logger& g_log;
  
 	int no_of_alg;                       ///< counter of registered algorithms
 	std::vector<Algorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]

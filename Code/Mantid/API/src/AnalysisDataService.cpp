@@ -7,7 +7,6 @@ namespace Mantid
 {
 namespace API
 {
-  Kernel::Logger& AnalysisDataServiceImpl::g_log = Kernel::Logger::get("AnalysisDataService");
 
 /** Add a pointer to a named workspace to the data service store.
  *  Upon addition, the data service assumes ownership of the workspace.
@@ -126,7 +125,8 @@ Workspace_sptr AnalysisDataServiceImpl::retrieve(const std::string& name)
 //----------------------------------------------------------------------
 
 /// Private constructor for singleton class
-AnalysisDataServiceImpl::AnalysisDataServiceImpl() 
+AnalysisDataServiceImpl::AnalysisDataServiceImpl() :
+  g_log(Kernel::Logger::get("AnalysisDataService"))
 { 
 	g_log.debug() << "Analysis Data Service created." << std::endl;
 }
@@ -134,7 +134,8 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl()
 /** Private copy constructor
  *  Prevents singleton being copied
  */
-AnalysisDataServiceImpl::AnalysisDataServiceImpl(const AnalysisDataServiceImpl&)
+AnalysisDataServiceImpl::AnalysisDataServiceImpl(const AnalysisDataServiceImpl&) :
+  g_log(Kernel::Logger::get("AnalysisDataService"))
 { 
 }
 
