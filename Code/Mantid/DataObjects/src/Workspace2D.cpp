@@ -35,7 +35,7 @@ Workspace2D::operator=(const Workspace2D& A)
 Workspace2D::~Workspace2D()
 {}
 
-/** Sets the size of the workspace
+ /** Sets the size of the workspace and initializes arrays to zero
  *  @param NVectors The number of vectors/histograms/detectors in the workspace
  *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
  *  @param YLength The number of data/error points in each vector (must all be the same)
@@ -43,7 +43,17 @@ Workspace2D::~Workspace2D()
 void Workspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
 {
   setHistogramNumber(NVectors);
-  // Doesn't set the size of the X/Y/E vectors at present. May want to later.
+
+  Histogram1D::RCtype t1,t2;
+  t1.access().resize(XLength); //this call initializes array to zero 
+  t2.access().resize(YLength);
+  for (int i=0;i<NVectors;i++)
+  {
+    this->setX(i,t1);
+    // Y,E,E2 arrays populated
+    this->setData(i,t2,t2,t2);
+  }
+
 }
 
 /**

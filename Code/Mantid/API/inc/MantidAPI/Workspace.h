@@ -65,8 +65,8 @@ public:
   /// Return the workspace typeID 
   virtual const std::string id() const = 0;
 
-  /// Initialises the workspace. Mainly sets the size. Only implemented for 2D workspaces at present.
-  virtual void init(const int&,const int&,const int&) {};
+  /// Initialises the workspace. sets the size and lengths in the arrays, must be overloaded
+  virtual void init(const int&,const int&,const int&) = 0;
   
   void setTitle(const std::string&);
   void setComment(const std::string&);
@@ -94,7 +94,8 @@ public:
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index)  =0;  
   ///Returns the error data
-  virtual std::vector<double>& dataE2(int const index)  =0;  
+  virtual std::vector<double>& dataE2(int const index)  =0;
+
   ///Returns the ErrorHelper applicable for this detector
   virtual IErrorHelper* errorHelper(int const index) const
   {
@@ -117,6 +118,20 @@ public:
   virtual const std::vector<double>& dataE(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const =0;
+
+  ///sets the x data const
+//  virtual void setX(int const index, const std::vector<double> ) const = 0;
+  /// sets the y data const 
+//  virtual void setY(int const index, const std::vector<double>) const =0;
+  /// sets the error data const
+//  virtual void setE(int const index, const std::vector<double>) const =0;  
+  ///sets the error data const
+//  virtual void setE2(int const index, const std::vector<double>) const =0;
+
+
+
+
+
 
   ///Returns a reference to the WorkspaceHistory
   WorkspaceHistory& getWorkspaceHistory() { return m_history; }

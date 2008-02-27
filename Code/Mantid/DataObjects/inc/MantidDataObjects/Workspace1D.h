@@ -53,6 +53,8 @@ public:
 
   Workspace1D();
   virtual ~Workspace1D();
+  // allocates space in a new workspace
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
@@ -98,7 +100,6 @@ public:
   virtual const std::vector<double>& dataE(int const index) const {return dataE();}
   /// Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const {return dataE2();}
-
 
 protected:
 

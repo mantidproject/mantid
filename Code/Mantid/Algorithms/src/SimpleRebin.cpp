@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Workspace.h"
 
 #include <sstream>
 #include <numeric>
@@ -21,8 +22,10 @@ namespace Mantid
 
     using namespace Kernel;
     using API::WorkspaceProperty;
-    using DataObjects::Workspace1D_sptr;
-    using DataObjects::Workspace1D;
+    using API::Workspace_sptr;
+    using API::Workspace;
+    //    using DataObjects::Workspace1D_sptr;
+    //    using DataObjects::Workspace1D;
 
     // Get a reference to the logger
     Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
@@ -32,8 +35,8 @@ namespace Mantid
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace1D>("InputWorkspace","",Direction::Input));  
-      declareProperty(new WorkspaceProperty<Workspace1D>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
       //      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       //      mustBePositive->setLower(0);
@@ -44,22 +47,22 @@ namespace Mantid
 
     }
 
-    /** Executes the algorithm
+    /** Executes the rebin algorithm
     * 
     *  @throw runtime_error Thrown if 
     */
     void SimpleRebin::exec()
     {
-      // retrieve the optional properties
+      // retrieve the properties
       double xlo = getProperty("xlo");
       double delta = getProperty("delta");
       double xhi = getProperty("xhi");
       int dist = getProperty("dist");
 
       // Get the input workspace
-      Workspace1D_sptr localworkspace = getProperty("InputWorkspace");
+      Workspace_sptr inputW = getProperty("InputWorkspace");
 
-      // Create vectors to hold result
+      // Create vectors to hold input parameters
       std::vector<double> xbounds;
       std::vector<double> xsteps;
 
@@ -68,30 +71,33 @@ namespace Mantid
       xbounds.push_back(xhi);
       xsteps.push_back(delta);
 
-      // Retrieve the spectrum into a vector
-      const std::vector<double>& XValues = localworkspace->dataX();
-      const std::vector<double>& YValues = localworkspace->dataY();
-      const std::vector<double>& YErrors = localworkspace->dataE();
-
-
+      // workspace independent determination of length
+      int histnumber = inputW->size()/inputW->blocksize();
       std::vector<double> XValues_new;
-
-
-      // Create the 1D workspace for the output
-      Workspace1D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace1D>(API::WorkspaceFactory::Instance().create("Workspace1D"));
-
+      // create new output X axis
       int ntcnew = newAxis(xbounds,xsteps,XValues_new);
-      // or we could get reference to output workspace...
-      std::vector<double> YValues_new(ntcnew - 1,0.0);
-      std::vector<double> YErrors_new(ntcnew -1 ,0.0);
+      // make output Workspace the same type is the input, but with new length of signal array
+      API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW->id(),histnumber,ntcnew,ntcnew-1);
 
-      rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, dist);
-      // Populate the 1D workspace
-      outputWorkspace->setX(XValues_new);
-      outputWorkspace->setData(YValues_new,YErrors_new);
+      for (int hist=0; hist <  histnumber;hist++)
+      {
+        // get const references to input Workspace arrays (no copying)
+        const std::vector<double>& XValues = inputW->dataX(hist);
+        const std::vector<double>& YValues = inputW->dataY(hist);
+        const std::vector<double>& YErrors = inputW->dataE(hist);
+ 
+        //get references to output workspace data (no copying)
+        std::vector<double>& YValues_new=outputW->dataY(hist);
+        std::vector<double>& YErrors_new=outputW->dataE(hist);
+
+        // output data arrays are implicitly filled by function
+        rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, dist);
+        // Populate the output workspace X values
+        outputW->dataX(hist)=XValues_new;
+      }
 
       // Assign it to the output workspace property
-      setProperty("OutputWorkspace",outputWorkspace);
+      setProperty("OutputWorkspace",outputW);
 
       return;  
     }
@@ -119,21 +125,18 @@ namespace Mantid
       int size_ynew=ynew.size();
       int size_x=xold.size();
 
-
       // put in g_log stuff later about histogram data
       if(size_yold != size_x-1)
       {
         g_log.error("SimpleRebin: rebinning not possible on point data ");
         throw std::invalid_argument("SimpleRebin: rebinning not possible on point data");
       }
-
       while((inew < size_ynew) && (iold < size_yold))
       {
         xo_low = xold[iold];
         xo_high = xold[iold+1];
         xn_low = xnew[inew];
         xn_high = xnew[inew+1];
-
         if ( xn_high <= xo_low )
         {
           inew++;		/* old and new bins do not overlap */
@@ -144,7 +147,6 @@ namespace Mantid
         }
         else
         {
-
           //        delta is the overlap of the bins on the x axis
           delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
           width = xo_high - xo_low;
@@ -225,7 +227,7 @@ namespace Mantid
       int i(1), j(0), inew(1);
       int isteps=xsteps.size();
       int ibounds=xbounds.size();
- 
+
       if(ibounds != isteps+1)
       {
         g_log.error("SimpleRebin: length  of xbounds/xsteps arrays incompatible ");
