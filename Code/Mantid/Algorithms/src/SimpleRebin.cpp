@@ -171,8 +171,9 @@ namespace Mantid
             // yold/eold data is not distribution
             // do implicit division of yold by width in summing.... avoiding the need for temporary yold array
             // this method is ~7% faster and uses less memory
-            ynew[inew] += yold[iold]*delta/width;
-            enew[inew] += eold[iold]*eold[iold]*delta;
+            ynew[inew] += yold[iold]*delta/width; //yold=yold/width
+            // eold=eold/width, so divide by width**2 compared with distribution calculation
+            enew[inew] += eold[iold]*eold[iold]*delta/width; 
           }
           if ( xn_high > xo_high )
           {
@@ -206,6 +207,12 @@ namespace Mantid
             }
           }
         }
+      }
+      else
+      {
+        //non distribution , just square root final error value
+        for(i=0; i<size_ynew; i++)
+          enew[i]=(double)sqrt((double)enew[i]);
       }
       return; //without problems
     }
