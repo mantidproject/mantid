@@ -103,21 +103,6 @@ namespace Mantid
 namespace Kernel
 {
 template<> DLLExport
-Mantid::API::Workspace* PropertyManager::getValue<Mantid::API::Workspace*>(const std::string &name) const
-{
-  PropertyWithValue<Mantid::API::Workspace*> *prop = 
-                    dynamic_cast<PropertyWithValue<Mantid::API::Workspace*>*>(getPointerToProperty(name));
-  if (prop)
-  {
-    return *prop;
-  }
-  else
-  {
-    throw std::runtime_error("Attempt to assign property of incorrect type");
-  }
-  
-}
-template<> DLLExport
 Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace_sptr>* prop = 

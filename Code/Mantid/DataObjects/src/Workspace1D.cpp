@@ -91,22 +91,8 @@ template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Wor
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    template<> DLLExport
-      Mantid::DataObjects::Workspace1D* PropertyManager::getValue<Mantid::DataObjects::Workspace1D*>(const std::string &name) const
-    {
-      PropertyWithValue<Mantid::DataObjects::Workspace1D*> *prop = 
-        dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace1D*>*>(getPointerToProperty(name));
-      if (prop)
-      {
-        return *prop;
-      }
-      else
-      {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
-      }
-    }
+namespace Kernel
+{
     template<> DLLExport
       Mantid::DataObjects::Workspace1D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace1D_sptr>(const std::string &name) const
     {
@@ -122,7 +108,7 @@ namespace Mantid
       }
     }
 
-  } // namespace Kernel
+} // namespace Kernel
 } // namespace Mantid
 
 ///\endcond TEMPLATE
