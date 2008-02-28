@@ -40,6 +40,7 @@ typedef void (*atexit_func_t)();
 extern EXPORT_OPT_MANTID_KERNEL void CleanupSingletons();
 extern EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func);
 
+/// class to manage an instance of an object as a singleton
 template <typename T>
 class SingletonHolder
 {
@@ -48,20 +49,27 @@ public:
 
 private:
 	static void DestroySingleton();
+    /// default constructor marked private so only access is via the Instance() method
 	SingletonHolder();
 
 	static T* pInstance;
 	static bool destroyed;
 };
 
+/// Implementation of the SingletonHolder create policy using the new and delete operators
 template <typename T> 
 struct CreateUsingNew
 {
+    /// create an object using the new operator
+	/// @returns New instance
 	static T* Create(){return new T;}
-
+   /// delete an object instantiated using Create
+   /// @param p pointer to instance to destroy
 	static void Destroy(T* p){delete p;}
 };
 
+/// Return a reference to the Singleton instance, creating it if it does not already exist
+/// Creation is done using the CreateUsingNew policy at the moment
 template <typename T>
 inline T& SingletonHolder<T>::Instance()
 {
@@ -81,6 +89,7 @@ inline T& SingletonHolder<T>::Instance()
 	return *pInstance;
 }
 
+/// Destroy the singleton
 template <typename T>
 void SingletonHolder<T>::DestroySingleton()
 {
@@ -91,9 +100,11 @@ void SingletonHolder<T>::DestroySingleton()
 	destroyed = true;
 };
 
+/// global variable holding pointer to singleton instance
 template <typename T>
 T* SingletonHolder<T>::pInstance = 0;
 
+/// variable to allow trapping of attempts to destroy a singleton more than once
 template <typename T>
 bool SingletonHolder<T>::destroyed = false;
 
