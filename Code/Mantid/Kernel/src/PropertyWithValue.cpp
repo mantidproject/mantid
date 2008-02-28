@@ -11,6 +11,10 @@ template DLLExport class PropertyWithValue<int>;
 template DLLExport class PropertyWithValue<double>;
 template DLLExport class PropertyWithValue<std::string>;
 
+template DLLExport class PropertyWithValue<std::vector<int> >;
+template DLLExport class PropertyWithValue<std::vector<double> >;
+template DLLExport class PropertyWithValue<std::vector<std::string> >;
+
 /// @endcond
 
 } // namespace Kernel

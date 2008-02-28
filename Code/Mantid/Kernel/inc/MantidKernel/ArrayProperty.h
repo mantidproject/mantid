@@ -1,0 +1,85 @@
+#ifndef MANTID_KERNEL_ARRAYPROPERTY_H_
+#define MANTID_KERNEL_ARRAYPROPERTY_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "PropertyWithValue.h"
+
+namespace Mantid
+{
+namespace Kernel
+{
+/** Support for a property that holds an array of values.
+    Implemented as a PropertyWithValue that holds a vector of the desired type.
+    This class is really a convenience class to aid in the declaration of the
+    property - there's no problem directly using a PropertyWithValue of vector type.
+
+    @author Russell Taylor, Tessella Support Services plc
+    @date 27/02/2008
+    
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+template <typename T>
+class ArrayProperty : public PropertyWithValue< std::vector<T> >
+{
+public:
+  /** Constructor
+   *  @param name The name to assign to the property
+   *  @param vec  The initial vector of values to assign to the property. 
+   *              Default constructed vector if not provided.
+   */
+	ArrayProperty( const std::string &name, std::vector<T> vec = std::vector<T>() ) : 
+	  PropertyWithValue< std::vector<T> >( name, vec, new NullValidator<std::vector<T> >)
+	{  
+	}
+
+	/// Virtual destructor
+	virtual ~ArrayProperty()
+	{
+	}
+	
+	/** Returns the values stored in the ArrayProperty
+	 *  @return The stored values as a comma-separated list
+	 */
+	std::string value() const
+	{
+	  // Implemented this method for documentation reasons. Just calls base class method.
+	  return PropertyWithValue< std::vector<T> >::value();
+	}
+	
+  /** Sets the values stored in the ArrayProperty from a string representation
+   *  @param value The values to assign to the property, given as a comma-separated list
+   *  @return True if the assignment was successful
+   */
+	bool setValue( const std::string& value )
+	{
+    // Implemented this method for documentation reasons. Just calls base class method.
+	  return PropertyWithValue< std::vector<T> >::setValue(value);
+	}
+	
+	// May want to add specialisation the the class later, e.g. setting just one element of the vector
+};
+
+} // namespace Kernel
+} // namespace Mantid
+
+#endif /*MANTID_KERNEL_ARRAYPROPERTY_H_*/

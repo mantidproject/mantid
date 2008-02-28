@@ -6,13 +6,15 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/type_traits/is_pointer.hpp>
-#include <boost/shared_ptr.hpp> 
+#include <boost/shared_ptr.hpp>
+#include <boost/tokenizer.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -50,49 +52,94 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
-///Partial template match method for compile time detection of shared pointers
-template <class T> 
-struct is_shared_ptr 
-  : boost::false_type {}; 
-
-///Partial template match method for compile time detection of shared pointers
-template <class T> 
-struct is_shared_ptr<boost::shared_ptr<T> > 
-  : boost::true_type {}; 
-
-
 template <typename TYPE>
 class PropertyWithValue : public Property
 {
 private:
-  /// Private helper class for the PropertyWithValue::setValue method
+
+  /** Private helper class for the PropertyWithValue::setValue & value methods.
+      Avoids construction of lexical_cast for types with which it isn't compatible.
+   */
+  template <class T>
   struct PropertyUtility
   {
-    /// Required for compilation of WorkspaceProperty. Should never get called.
-    template <typename T>
-    void setValue(const std::string& value, T& result, const boost::false_type&, const boost::true_type&)
+    /** Performs the lexical_cast for the PropertyWithValue::value method
+     *  @param value The value of the property to be converted to a string
+     */
+    std::string value(const T& value) const
     {
-      // As this method should never get called, just throw a bad_lexical_cast
-      throw boost::bad_lexical_cast();
-    }
-    
-    /// Required for compilation of WorkspaceProperty. Should never get called.
-    template <typename T>
-    void setValue(const std::string& value, T& result, const boost::true_type&, const boost::false_type&)
-    {
-      // As this method should never get called, just throw a bad_lexical_cast
-      throw boost::bad_lexical_cast();
+      return boost::lexical_cast<std::string>( value );
     }
     
     /** Performs the lexical_cast for the PropertyWithValue::setValue method
      *  @param value The value to assign to the property
      *  @param result The result of the lexical_cast
      */
-    template <typename T>
-    void setValue(const std::string& value, T& result, const boost::false_type&,const boost::false_type&)
+    void setValue(const std::string& value, T& result)
     {
       result = boost::lexical_cast<T>( value );
+    }
+  };
+
+  /// Specialisation for WorkspaceProperty.
+  template <class T>
+  struct PropertyUtility<boost::shared_ptr<T> >
+  {
+    /// Should never get called. Just throws.
+    std::string value(const boost::shared_ptr<T>& value) const
+    {
+      throw boost::bad_lexical_cast();
+    }
+
+    /// Should never get called. Just throws.
+    void setValue(const std::string& value, boost::shared_ptr<T>& result)
+    {
+      throw boost::bad_lexical_cast();
+    }
+  };
+
+  /// Specialisation for a property of type std::vector (as in an ArrayProperty)
+  template <class T>
+  struct PropertyUtility<std::vector<T> >
+  {
+    /// Converts the vector of values to a comma-separated string representation
+    std::string value(const std::vector<T>& value) const
+    {
+      std::stringstream s;
+      for (unsigned int i = 0; i < value.size(); ++i)
+      {
+        s << value[i];
+        if (i != (value.size()-1) ) s << ',';
+      }
+      return s.str();
+    }
+
+    /// Takes a comma-separated string of values and stores them as the vector of values
+    void setValue(const std::string& value, std::vector<T>& result)
+    {
+      // Split up comma-separated properties
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+      
+      boost::char_separator<char> sep(",");
+      tokenizer values(value, sep);
+      std::vector<T> vec;
+      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
+      {
+        try
+        {
+          vec.push_back( boost::lexical_cast<T>( *it ) );
+        }
+        catch (boost::bad_lexical_cast e)
+        {
+          g_log.error("Attempt to set value with mis-formed string for this property type");
+          throw;
+        }
+      }
+      if (vec.size() != result.size())
+      {
+        g_log.information("New property value has different number of elements");
+      }
+      result = vec;
     }
   };
   
@@ -130,8 +177,8 @@ public:
    */
   virtual std::string value() const
   {
-    // Could potentially throw a bad_lexical_cast, but that shouldn't happen with the types we're supporting
-    return boost::lexical_cast<std::string>( m_value );
+    PropertyUtility<TYPE> helper;
+    return helper.value(m_value);
   }
 	
   /** Set the value of the property from a string representation
@@ -142,9 +189,9 @@ public:
   {
     try
     {
-      PropertyUtility helper;
-      TYPE result;
-      helper.setValue(value, result, is_shared_ptr<TYPE>(), boost::is_pointer<TYPE>());
+      PropertyUtility<TYPE> helper;
+      TYPE result = m_value;
+      helper.setValue(value, result);
       // Use the assignment operator defined below
       *this = result;
       return true;
@@ -207,11 +254,16 @@ protected:
 private:
   /// Visitor validator class
   IValidator<TYPE> *m_validator;
+
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
   
   /// Private default constructor
   PropertyWithValue();
 };
 
+template <typename TYPE>
+Kernel::Logger& PropertyWithValue<TYPE>::g_log = Kernel::Logger::get("PropertyWithValue");
 
 } // namespace Kernel
 } // namespace Mantid

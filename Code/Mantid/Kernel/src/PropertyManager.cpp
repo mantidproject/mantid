@@ -200,6 +200,48 @@ double PropertyManager::getValue<double>(const std::string &name) const
   }
 }
 
+template<> DLLExport
+std::vector<int> PropertyManager::getValue<std::vector<int> >(const std::string &name) const
+{
+  PropertyWithValue<std::vector<int> > *prop = dynamic_cast<PropertyWithValue<std::vector<int> >*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
+template<> DLLExport
+std::vector<double> PropertyManager::getValue<std::vector<double> >(const std::string &name) const
+{
+  PropertyWithValue<std::vector<double> > *prop = dynamic_cast<PropertyWithValue<std::vector<double> >*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
+template<> DLLExport
+std::vector<std::string> PropertyManager::getValue<std::vector<std::string> >(const std::string &name) const
+{
+  PropertyWithValue<std::vector<std::string> > *prop = dynamic_cast<PropertyWithValue<std::vector<std::string> >*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
 template <> DLLExport
 const char* PropertyManager::getValue<const char*>(const std::string &name) const
 {
