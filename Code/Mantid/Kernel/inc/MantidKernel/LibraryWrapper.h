@@ -1,9 +1,6 @@
 #ifndef MANTID_KERNEL_LIBRARY_WRAPPER_H_
 #define MANTID_KERNEL_LIBRARY_WRAPPER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include <string>
 
 #include "MantidKernel/System.h"
@@ -15,31 +12,31 @@ namespace Kernel
 
 /** @class LibraryWrapper LibraryWrapper.h Kernel/LibraryWrapperr.h
 
-    Class for wrapping a shared library.
-    
-    @author Matt Clarke
-    @date 10/01/2008
-    
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+ Class for wrapping a shared library.
+ 
+ @author ISIS, STFC
+ @date 10/01/2008
+ 
+ Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
 
-    This file is part of Mantid.
+ This file is part of Mantid.
 
-    Mantid is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
 
-    Mantid is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-    Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
 class DLLExport LibraryWrapper
 {
 public:
@@ -53,8 +50,8 @@ public:
 
 private:
 	/** An untyped pointer to the loaded library.
-	* This is created and deleted by this class.
-	**/
+	 * This is created and deleted by this class.
+	 **/
 	void* module;
 };
 

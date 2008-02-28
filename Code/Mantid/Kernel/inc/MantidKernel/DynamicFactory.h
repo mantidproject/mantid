@@ -55,7 +55,7 @@ public:
   {
     for (typename FactoryMap::iterator it = _map.begin(); it != _map.end(); ++it)
     {
-      delete it->second;
+	delete it->second;
     }
   }
   
