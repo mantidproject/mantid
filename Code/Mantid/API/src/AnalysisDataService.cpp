@@ -145,7 +145,8 @@ AnalysisDataServiceImpl::AnalysisDataServiceImpl(const AnalysisDataServiceImpl&)
  */
 AnalysisDataServiceImpl::~AnalysisDataServiceImpl()
 { 
-	g_log.debug() << "Analysis Data Service destroyed." << std::endl;
+	std::cerr << "Analysis Data Service destroyed." << std::endl;
+//	g_log.debug() << "Analysis Data Service destroyed." << std::endl;
 }
 
 

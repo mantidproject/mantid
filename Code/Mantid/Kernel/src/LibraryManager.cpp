@@ -20,12 +20,14 @@ namespace Kernel
 	/// Constructor
 	LibraryManagerImpl::LibraryManagerImpl() : g_log(Logger::get("LibraryManager"))
 	{
+		std::cerr << "LibraryManager created." << std::endl;
 		g_log.debug() << "LibraryManager created." << std::endl;
 	}
 
 	/// Destructor
 	LibraryManagerImpl::~LibraryManagerImpl()
 	{
+		std::cerr << "LibraryManager destroyed." << std::endl;
 //		g_log.debug() << "LibraryManager destroyed." << std::endl;
 	}
 

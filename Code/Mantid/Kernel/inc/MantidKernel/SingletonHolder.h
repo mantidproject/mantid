@@ -33,6 +33,11 @@ namespace Mantid
 namespace Kernel
 {
 
+/// prototype for function passed to atexit()
+typedef void (*atexit_func_t)(void);
+extern void CleanupSingletons(void);
+extern void AddSingleton(atexit_func_t func);
+
 template <typename T>
 class SingletonHolder
 {
@@ -68,7 +73,8 @@ inline T& SingletonHolder<T>::Instance()
 	{
 //		std::cerr << "creating singleton " << typeid(T).name() << std::endl;
 		pInstance = CreateUsingNew<T>::Create();
-		atexit(&DestroySingleton);
+		AddSingleton(&DestroySingleton);
+		atexit(&CleanupSingletons);
 	}
 	return *pInstance;
 }
