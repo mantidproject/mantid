@@ -35,6 +35,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual const std::vector<double>& dataE(int const index)const {return data;}
     ///Returns the error data
     virtual const std::vector<double>& dataE2(int const index)const {return data;}
+    virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
   private:
     std::vector<double> data;
