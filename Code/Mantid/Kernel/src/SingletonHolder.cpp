@@ -13,7 +13,7 @@ static std::list<atexit_func_t>* cleanup_list = NULL;
 /// all our singletons
 /// This function may be registed more than once, so needs to
 /// clear the list once it has called all the functions
-void CleanupSingletons(void)
+EXPORT_OPT_MANTID_KERNEL void CleanupSingletons()
 {
     if (cleanup_list == NULL)
     {
@@ -29,7 +29,7 @@ void CleanupSingletons(void)
 }
 
 /// Add s singleton cleanup function to our atexit list
-void AddSingleton(atexit_func_t func)
+EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func)
 {
     if (cleanup_list == NULL)
     {
