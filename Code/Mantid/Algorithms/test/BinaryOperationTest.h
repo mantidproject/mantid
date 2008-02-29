@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TripleRef.h" 
 #include "MantidAPI/TripleIterator.h" 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
