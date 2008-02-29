@@ -8,7 +8,6 @@
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/TripleRef.h" 
 #include "MantidAPI/TripleIterator.h" 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
@@ -173,10 +172,10 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        TripleRef<double> tr = *ti;
-        TS_ASSERT_DELTA(tr[0],0,0.0001);
-        TS_ASSERT_DELTA(tr[1],0,0.0001);
-        TS_ASSERT_DELTA(tr[2],0,0.0001);
+        PointDataRef tr = *ti;
+        TS_ASSERT_DELTA(tr.X(),0,0.0001);
+        TS_ASSERT_DELTA(tr.Y(),0,0.0001);
+        TS_ASSERT_DELTA(tr.E(),0,0.0001);
       )
     }
   }
