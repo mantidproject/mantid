@@ -28,7 +28,7 @@ LibraryWrapper::~LibraryWrapper()
  */
 bool LibraryWrapper::OpenLibrary(const std::string& libName)
 {
-	if (module != 0)
+	if (!module)
 	{
 		//Load dynamically loaded library
 		module = DllOpen::OpenDll(libName);
@@ -50,7 +50,7 @@ bool LibraryWrapper::OpenLibrary(const std::string& libName)
 bool LibraryWrapper::OpenLibrary(const std::string& libName,
 		const std::string& filePath)
 {
-	if (module != 0)
+	if (!module)
 	{
 		//Load dynamically loaded library
 		module = DllOpen::OpenDll(libName, filePath);

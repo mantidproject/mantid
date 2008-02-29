@@ -53,7 +53,7 @@ public:
 	int OpenAllLibraries(const std::string&, bool isRecursive=false);
 
 	int Test()
-	{	return 123;}
+	{ return 123;}
 
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<LibraryManagerImpl>;

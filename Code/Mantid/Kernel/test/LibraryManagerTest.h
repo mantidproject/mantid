@@ -14,7 +14,6 @@ class LibraryManagerTest : public CxxTest::TestSuite
 {
 
 public:
-
 	LibraryManagerTest()
 	{
 		Mantid::API::FrameworkManager::Instance();
@@ -29,7 +28,7 @@ public:
 	{
 		try
 		{
-			//Mantid::API::FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
+			Mantid::API::FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
 
 			TS_ASSERT_THROWS_NOTHING(Mantid::API::FrameworkManager::Instance().exec("HelloWorldAlgorithm", ""));
 		}
