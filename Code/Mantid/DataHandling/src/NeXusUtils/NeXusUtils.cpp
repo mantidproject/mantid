@@ -32,7 +32,7 @@ void writeEntry1D(const std::string& filename, const std::string& entryname, con
 {
     NXhandle h;
     NXaccess mode;
-    if (_access(filename.c_str(), F_OK) == 0)
+    if (access(filename.c_str(), F_OK) == 0)
     {
         mode = NXACC_RDWR;
     }
