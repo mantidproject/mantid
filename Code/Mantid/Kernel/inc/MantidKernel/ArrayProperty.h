@@ -39,7 +39,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename T>
-class ArrayProperty : public PropertyWithValue< std::vector<T> >
+class DLLExport ArrayProperty : public PropertyWithValue< std::vector<T> >
 {
 public:
   /** Constructor
@@ -52,10 +52,33 @@ public:
 	{  
 	}
 
+	/** Constructor from which you can set the property's values through a string
+	 *  @param name   The name to assign to the property
+	 *  @param values A comma-separated string containing the values to store in the property
+	 *  @throws std::invalid_argument if the string passed is not compatible with the array type
+	 */
+	ArrayProperty( const std::string &name, const std::string& values ) :
+	  PropertyWithValue< std::vector<T> >( name, std::vector<T>(), new NullValidator<std::vector<T> >)
+	{
+	  if ( ! setValue( values ) )
+	  {
+	    throw std::invalid_argument("Invalid values string passed to constructor.");
+	  }
+	}
+	
+	/// Copy constructor
+	ArrayProperty( const ArrayProperty& right ) :
+	  PropertyWithValue< std::vector<T> >( right )
+	{  
+	}
+	
 	/// Virtual destructor
 	virtual ~ArrayProperty()
 	{
 	}
+	
+  // Unhide the base class assignment operator
+  using PropertyWithValue< std::vector<T> >::operator=;
 	
 	/** Returns the values stored in the ArrayProperty
 	 *  @return The stored values as a comma-separated list
