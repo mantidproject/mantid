@@ -25,6 +25,8 @@ cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\.." /I "..\inc"  /I "../.
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib runner.obj
   
+echo "Copying in properties files..."
+copy /Y ..\..\Build\Tests\*properties
 echo "Running the tests..."
 runner.exe
 

@@ -2,7 +2,7 @@
 #include <iterator>
 #include <boost/shared_ptr.hpp>
 
-#include "TripleRef.h"
+#include "PointDataRef.h"
 
 namespace Mantid 
 {
@@ -117,7 +117,7 @@ namespace Mantid
 
           //get cached block level data objects
           m_CPoint.errorHelper = m_workspace->errorHelper(m_dataBlockIndex);
-          m_CPoint.detector = m_workspace->detector(m_dataBlockIndex);
+          m_CPoint.spectraNo = m_workspace->spectraNo(m_dataBlockIndex);
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
@@ -138,12 +138,12 @@ namespace Mantid
           iteratorPos = m_index-m_blockMin;
         }
         // const_cast is needed for the const_iterator (does nothing otherwise)
-        m_CPoint.first  = const_cast<double*>(&(it_dataX[iteratorPos]));
-        m_CPoint.second = const_cast<double*>(&(it_dataY[iteratorPos]));
-        m_CPoint.third  = const_cast<double*>(&(it_dataE[iteratorPos]));
+        m_CPoint.xPointer  = const_cast<double*>(&(it_dataX[iteratorPos]));
+        m_CPoint.yPointer = const_cast<double*>(&(it_dataY[iteratorPos]));
+        m_CPoint.ePointer  = const_cast<double*>(&(it_dataE[iteratorPos]));
         if(m_IsE2Present)
         {
-          m_CPoint.fourth  = const_cast<double*>(&(it_dataE2[iteratorPos]));
+          m_CPoint.e2Pointer  = const_cast<double*>(&(it_dataE2[iteratorPos]));
         }
       }
     }

@@ -6,7 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/TripleRef.h" 
+#include "MantidAPI/PointDataRef.h" 
+#include "MantidAPI/HistDataValue.h" 
 
 #include <algorithm>
 #include <functional>
@@ -88,19 +89,24 @@ namespace Mantid
       unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
     
       
-      class BinaryOperation_fn : public std::binary_function<API::TripleRef<double>,API::TripleRef<double>,API::TripleRef<double> >
+      class BinaryOperation_fn : public std::binary_function<API::PointDataRef,API::PointDataRef,API::PointDataRef >
       {
       public:
         /// Virtual destructor
-        virtual ~BinaryOperation_fn() {};
+        virtual ~BinaryOperation_fn() 
+        { }
 
         /** Abstract function that performs each element of the binary function
         * @param a The lhs data element
         * @param a The rhs data element
         * @returns The result data element
         */
-        virtual API::TripleRef<double> operator()(const API::TripleRef<double>& a,const API::TripleRef<double>& b) =0;
+        virtual API::HistDataValue& operator()(const API::IPointData& a,const API::IPointData& b) =0;
       protected:
+        /**Temporary cache of the Histogram Result.
+        This save creating a new object for each iteration and removes lifetime issues.
+        */
+        API::HistDataValue result;
 
       };
 

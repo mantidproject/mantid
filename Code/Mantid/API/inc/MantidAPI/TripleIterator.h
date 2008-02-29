@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "MantidKernel/System.h"
-#include "TripleRef.h"
+#include "PointDataRef.h"
 
 namespace Mantid
 {
@@ -44,7 +44,7 @@ private:
   ///internal workspace pointer
   _Container * const m_workspace;
   /// pointer to a TripleRef of doubles
-  TripleRef<double> m_CPoint;
+  PointDataRef m_CPoint;
 
   ///The number of times this iterator should loop before ending
   int m_loopCount;

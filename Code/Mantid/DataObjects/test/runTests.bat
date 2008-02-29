@@ -24,7 +24,9 @@ echo "Compiling the test executable..."
 cl runner.cpp /I "..\..\..\Third_Party\include" /I "..\..\kernel\inc" /I "..\..\DataObjects\inc" /I "..\..\Geometry\inc" /I "..\..\API\inc" /I "..\inc" /EHsc /MDd /wd4275 /wd4996 /W3 /nologo /c /ZI /TP 
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantidapi.lib Mantiddataobjects.lib Mantidgeometry.lib runner.obj 
-  
+    
+echo "Copying in properties files..."
+copy /Y ..\..\Build\Tests\*properties
 echo "Running the tests..."
 runner.exe
 

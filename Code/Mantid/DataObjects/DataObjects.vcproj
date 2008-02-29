@@ -194,11 +194,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\Histogram1DTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataObjects\ManagedDataBlock2D.h"
 				>
 			</File>
 			<File
+				RelativePath=".\test\ManagedDataBlock2DTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataObjects\ManagedWorkspace2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ManagedWorkspace2DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TripleIteratorTest.h"
 				>
 			</File>
 			<File
@@ -207,6 +223,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\Workspace2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspaceHistoryTest.h"
 				>
 			</File>
 		</Filter>

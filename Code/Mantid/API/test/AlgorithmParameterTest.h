@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/AlgorithmParameter.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include <ostream>
+#include <sstream>
 
 using namespace Mantid::API;
 
@@ -16,9 +16,19 @@ public:
 
   void testPopulate()
   {
+    std::string correctOutput = "Name : arg1_param\n";
+    correctOutput = correctOutput + "Value: 20\n";
+    correctOutput = correctOutput + "Type: argument\n";
+    correctOutput = correctOutput + "isDefault: 1\n";
+    correctOutput = correctOutput + "Direction :Input\n";
+
     // Not really much to test 
     AlgorithmParameter AP("arg1_param","20","argument",true,Mantid::Kernel::Direction::Input);
-    TS_ASSERT_THROWS_NOTHING(std::cout<<std::endl << AP <<std::endl;)
+
+    //dump output to sting
+    std::ostringstream output;
+    TS_ASSERT_THROWS_NOTHING(output << AP);
+    TS_ASSERT_EQUALS(output.str(),correctOutput);
   }
 
 

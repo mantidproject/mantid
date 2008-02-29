@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/TripleRef.h" 
+#include "MantidAPI/PointDataRef.h" 
 
 #include <algorithm>
 #include <functional>

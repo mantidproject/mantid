@@ -200,7 +200,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HistDataRef.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\HistDataValue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Instrument.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PointDataValue.cpp"
 				>
 			</File>
 			<File
@@ -209,10 +221,6 @@
 			</File>
 			<File
 				RelativePath=".\src\TripleIterator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TripleRef.cpp"
 				>
 			</File>
 			<File
@@ -250,7 +258,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\AlgorithmHistoryTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\AlgorithmManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\AlgorithmManagerTest.h"
 				>
 			</File>
 			<File
@@ -258,7 +274,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\AlgorithmParameterTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\AlgorithmTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\AnalysisDataService.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\AnalysisDataServiceTest.h"
 				>
 			</File>
 			<File
@@ -266,7 +294,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\DllExport.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\EnvironmentHistory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\EnvironmentHistoryTest.h"
 				>
 			</File>
 			<File
@@ -274,7 +310,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FrameworkManagerTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\GaussianErrorHelper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\GaussianErrorHelperTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\HistDataRef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\HistDataValue.h"
 				>
 			</File>
 			<File
@@ -282,7 +334,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IDataItem.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IErrorHelper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\IHistData.h"
 				>
 			</File>
 			<File
@@ -290,11 +350,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IPointData.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IWorkspaceProperty.h"
 				>
 			</File>
 			<File
+				RelativePath=".\src\PointDataRef.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\PointDataRef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\PointDataValue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\Sample.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SampleTest.h"
 				>
 			</File>
 			<File
@@ -306,15 +386,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\TripleRef.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\Workspace.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspaceFactoryTest.h"
 				>
 			</File>
 			<File
@@ -327,6 +407,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceProperty.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspacePropertyTest.h"
 				>
 			</File>
 		</Filter>

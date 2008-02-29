@@ -178,10 +178,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HelloWorldAlgorithm.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Minus.cpp"
 				>
 			</File>
@@ -216,7 +212,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\BinaryOperationTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ChainedOperatorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CommutativeBinaryOperation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CommutativeBinaryOperationTest.h"
 				>
 			</File>
 			<File
@@ -224,7 +232,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\HelloWorldAlgorithm.h"
+				RelativePath=".\test\DivideTest.h"
 				>
 			</File>
 			<File
@@ -232,7 +240,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\MinusTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Multiply.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MultiplyTest.h"
 				>
 			</File>
 			<File
@@ -244,7 +260,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\PlusTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\SimpleIntegration.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SimpleIntegrationTest.h"
 				>
 			</File>
 			<File
@@ -255,6 +279,10 @@
 				RelativePath=".\inc\MantidAlgorithms\TOFtoWavelength.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\TOFtoWavelengthTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -262,6 +290,10 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath=".\test\WorkspaceCreationHelper.hh"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

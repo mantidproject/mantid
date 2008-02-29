@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/TripleRef.h" 
+#include "MantidAPI/PointDataRef.h" 
 #include "MantidAlgorithms/BinaryOperation.h"
 
 #include <algorithm>
@@ -76,7 +76,7 @@ namespace Mantid
       class Minus_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
-        API::TripleRef<double> operator()(const API::TripleRef<double>&,const API::TripleRef<double>&);
+        API::HistDataValue& operator()(const API::IPointData&,const API::IPointData&);
       };
 
     };

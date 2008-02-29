@@ -49,9 +49,9 @@ class DLLExport Workspace2D : public API::Workspace
 
 public:
   /// Typedef for the triple_iterator to use with a Workspace2D
-  typedef API::triple_iterator<API::TripleRef<double>, Workspace2D> iterator;
+  typedef API::triple_iterator<API::PointDataRef, Workspace2D> iterator;
   /// Typedef for the const triple_iterator to use with a Workspace2D
-  typedef API::triple_iterator<const API::TripleRef<double>, const Workspace2D> const_iterator;  
+  typedef API::triple_iterator<const API::PointDataRef, const Workspace2D> const_iterator;  
   
   /**
 	Gets the name of the workspace type

@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include "MantidAPI/GaussianErrorHelper.h"
-#include "MantidAPI/TripleRef.h"
+#include "MantidAPI/PointDataRef.h"
+#include "MantidAPI/PointDataValue.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,58 +31,55 @@ public:
     GaussianErrorHelper *tester = GaussianErrorHelper::Instance();
     TS_ASSERT_EQUALS( eh, tester);
     TS_ASSERT_THROWS_NOTHING( IErrorHelper *tester = GaussianErrorHelper::Instance(); )
+    //set lhs and rhs values
+    lhs.xPointer=&values[0];
+    lhs.yPointer=&values[1];
+    lhs.ePointer=&values[2];
+    rhs.xPointer=&values[3];
+    rhs.yPointer=&values[4];
+    rhs.ePointer=&values[5];
   }
 
   void testPlus()
   {
-    TripleRef<double> lhs(values[0],values[1],values[2]);
-    TripleRef<double> rhs(values[3],values[4],values[5]);
-    TripleRef<double> result = eh->plus(lhs,rhs);
-    TS_ASSERT_DELTA(result[0],1.0,0.0001);
-    TS_ASSERT_DELTA(result[1],values[1]+values[4],0.0001);
-    TS_ASSERT_DELTA(result[2],sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
+    eh->plus(lhs,rhs,result);
+    TS_ASSERT_DELTA(result.Y(),values[1]+values[4],0.0001);
+    TS_ASSERT_DELTA(result.E(),sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.Detector(), lhs.Detector());
+    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
   void testMinus()
   {
-    TripleRef<double> lhs(values[0],values[1],values[2]);
-    TripleRef<double> rhs(values[3],values[4],values[5]);
-    TripleRef<double> result = eh->minus(lhs,rhs);
-    TS_ASSERT_DELTA(result[0],values[0],0.0001);
-    TS_ASSERT_DELTA(result[1],values[1]-values[4],0.0001);
-    TS_ASSERT_DELTA(result[2],sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
+    eh->minus(lhs,rhs,result);
+    TS_ASSERT_DELTA(result.Y(),values[1]-values[4],0.0001);
+    TS_ASSERT_DELTA(result.E(),sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.Detector(), lhs.Detector());
+    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
-  
+
   void testMultiply()
   {
-    TripleRef<double> lhs(values[0],values[1],values[2]);
-    TripleRef<double> rhs(values[3],values[4],values[5]);
-    TripleRef<double> result = eh->multiply(lhs,rhs);
-    TS_ASSERT_DELTA(result[0],values[0],0.0001);
-    TS_ASSERT_DELTA(result[1],values[1]*values[4],0.0001);
-    TS_ASSERT_DELTA(result[2],values[1]*values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
+    eh->multiply(lhs,rhs,result);
+    TS_ASSERT_DELTA(result.Y(),values[1]*values[4],0.0001);
+    TS_ASSERT_DELTA(result.E(),values[1]*values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.Detector(), lhs.Detector());
+    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
-    
+
   void testDivision()
   {
-    TripleRef<double> lhs(values[0],values[1],values[2]);
-    TripleRef<double> rhs(values[3],values[4],values[5]);
-    TripleRef<double> result = eh->divide(lhs,rhs);
-    TS_ASSERT_DELTA(result[0],values[0],0.0001);
-    TS_ASSERT_DELTA(result[1],values[1]/values[4],0.0001);
-    TS_ASSERT_DELTA(result[2],values[1]/values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
+    eh->divide(lhs,rhs,result);
+    TS_ASSERT_DELTA(result.Y(),values[1]/values[4],0.0001);
+    TS_ASSERT_DELTA(result.E(),values[1]/values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.Detector(), lhs.Detector());
+    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
 private:
   GaussianErrorHelper* eh;
+  PointDataRef lhs, rhs;
+  PointDataValue result;
   double values[6];
 };
 

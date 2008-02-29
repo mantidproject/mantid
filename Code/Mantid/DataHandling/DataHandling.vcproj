@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidDataHandling\LoadNeXus.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
 				>
 			</File>
@@ -235,6 +239,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveCSVTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveNeXus.h"
 				>
 			</File>
 			<File

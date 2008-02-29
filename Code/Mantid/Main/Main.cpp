@@ -17,15 +17,13 @@ int main()
 
   FrameworkManager::Instance().initialize();
 
-  FrameworkManager::Instance().createAlgorithm("HelloWorldAlgorithm");
-	FrameworkManager::Instance().exec("HelloWorldAlgorithm", "");
 
 	
   Benchmark b;
   b.RunPlusTest();
     
 #if defined _DEBUG
-	//NOTE:  Any code in here is temporory for debugging purposes only, nothing is safe!
+	//NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!
 
 
 #endif

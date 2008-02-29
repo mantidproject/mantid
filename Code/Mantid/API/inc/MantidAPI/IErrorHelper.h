@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/TripleRef.h"
+#include "MantidAPI/PointDataRef.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
@@ -43,35 +44,35 @@ class DLLExport IErrorHelper
 {
 public:
   ///Typedef for the value type of the ErrorHelper
-  typedef TripleRef<double> value_type;
+  typedef IDataItem value_type;
   
   /**Addition
   * @param lhs The lhs value
   * @param rhs The rhs value
-  * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+  * @param result The result with value and error caluculated
   */
-  virtual const value_type plus (const value_type& lhs,const value_type& rhs) const=0;
+  virtual const void plus (const value_type& lhs,const value_type& rhs, value_type& result) const=0;
   
   /**Subtraction
   * @param lhs The lhs value
   * @param rhs The rhs value
-  * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+  * @param result The result with value and error caluculated
   */
-  virtual const value_type minus (const value_type& lhs,const value_type& rhs) const=0;
+  virtual const void minus (const value_type& lhs,const value_type& rhs, value_type& result) const=0;
   
   /**Multiplication
   * @param lhs The lhs value
   * @param rhs The rhs value
-  * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+  * @param result The result with value and error caluculated
   */
-  virtual const value_type multiply (const value_type& lhs,const value_type& rhs) const=0;
+  virtual const void multiply (const value_type& lhs,const value_type& rhs, value_type& result) const=0;
   
   /**Division
   * @param lhs The lhs value
   * @param rhs The rhs value
-  * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+  * @param result The result with value and error caluculated
   */
-  virtual const value_type divide (const value_type& lhs,const value_type& rhs) const=0;
+  virtual const void divide (const value_type& lhs,const value_type& rhs, value_type& result) const=0;
 
   ///Virtual Destructor
   virtual ~IErrorHelper() {}

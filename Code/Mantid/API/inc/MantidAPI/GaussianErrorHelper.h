@@ -52,13 +52,13 @@ public:
   typedef IErrorHelper::value_type value_type;
 
   ///Performs Gaussian addition
-  const value_type plus (const value_type& lhs,const value_type& rhs) const;
+  const void plus (const value_type& lhs,const value_type& rhs, value_type& result) const;
   ///Performs Gaussian subtraction
-  const value_type minus (const value_type& lhs,const value_type& rhs) const;
+  const void minus (const value_type& lhs,const value_type& rhs, value_type& result) const;
   ///Performs Gaussian multiplication
-  const value_type multiply (const value_type& lhs,const value_type& rhs) const;
+  const void multiply (const value_type& lhs,const value_type& rhs, value_type& result) const;
   ///Performs Gaussian division
-  const value_type divide (const value_type& lhs,const value_type& rhs) const;
+  const void divide (const value_type& lhs,const value_type& rhs, value_type& result) const;
 
 private:
 	// Private constructor & destructor for singleton class
@@ -67,12 +67,6 @@ private:
   /// Static reference to the logger class
 	static Kernel::Logger& g_log;
 
-  //internal X value cache to prevent scope issures when returning a tripleref
-  mutable double xVal;
-  //internal Y value cache to prevent scope issures when returning a tripleref
-  mutable double yVal;
-  //internal E value cache to prevent scope issures when returning a tripleref
-  mutable double err;
 };
 
 } // namespace Kernel

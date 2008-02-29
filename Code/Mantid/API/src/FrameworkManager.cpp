@@ -31,7 +31,7 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
-	std::cerr << "FrameworkManager destroyed." << std::endl;
+//	std::cerr << "FrameworkManager destroyed." << std::endl;
 //	g_log.debug() << "FrameworkManager destroyed." << std::endl;
 }
 

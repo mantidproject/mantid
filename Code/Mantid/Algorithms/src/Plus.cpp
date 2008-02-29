@@ -38,10 +38,14 @@ namespace Mantid
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gaussian errors
     */
-    TripleRef<double>
-      Plus::Plus_fn::operator() (const TripleRef<double>& a,const TripleRef<double>& b) 
-    {            
-      return a.ErrorHelper()->plus(a,b);      
+    HistDataValue&
+      Plus::Plus_fn::operator() (const IPointData& a,const IPointData& b) 
+    {   
+      //copy the values from lhs
+      result = a;
+      //use the error helper to correct the changed values in result
+      a.ErrorHelper()->plus(a,b,result);      
+      return result;
     }
   }
 }
