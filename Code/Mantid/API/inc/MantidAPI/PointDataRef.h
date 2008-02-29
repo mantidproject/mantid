@@ -51,6 +51,7 @@ namespace API
   double& X();
   double& E();
   double& E2();
+  virtual const bool isE2() const {return (e2Pointer!=0);}
 
   const double& Y() const;
   double& Y();
@@ -61,6 +62,7 @@ namespace API
   double* e2Pointer;       ///< Pointer to the value of E2
   const IErrorHelper* errorHelper;  
   int spectraNo;
+
 
   PointDataRef* clone() const;
 

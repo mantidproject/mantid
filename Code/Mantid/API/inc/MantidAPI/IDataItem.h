@@ -49,6 +49,8 @@ class DLLExport IDataItem
   virtual double& E() =0;                               ///< Returns the E value
   virtual double& E2() =0;                              ///< Returns the E2 value
 
+  virtual const bool isE2() const {return true;}
+
   virtual ~IDataItem()
   {}
 };

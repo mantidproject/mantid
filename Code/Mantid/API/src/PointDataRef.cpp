@@ -59,7 +59,10 @@ namespace Mantid
         *xPointer= A.X();
         *yPointer= A.Y();
         *ePointer= A.E();
-        *e2Pointer= A.E2();
+        if(e2Pointer)
+        {
+          *e2Pointer= A.E2();
+        }
         errorHelper = A.ErrorHelper();
         spectraNo = A.SpectraNo();
       }

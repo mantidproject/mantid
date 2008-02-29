@@ -87,7 +87,10 @@ namespace Mantid
         xValue= A.X();
         yValue= A.Y();
         eValue= A.E();
-        e2Value= A.E2();
+        if (A.isE2())
+        {
+          e2Value= A.E2();
+        }
         errorHelper = A.ErrorHelper();
         spectraNo = A.SpectraNo();
       }
