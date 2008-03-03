@@ -17,7 +17,7 @@ namespace Kernel
 
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
-    
+ 
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -34,11 +34,11 @@ namespace Kernel
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+ 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
-template <typename T>
+ */
+template <typename T> 
 class DLLExport ArrayProperty : public PropertyWithValue< std::vector<T> >
 {
 public:
@@ -47,59 +47,59 @@ public:
    *  @param vec  The initial vector of values to assign to the property. 
    *              Default constructed vector if not provided.
    */
-	ArrayProperty( const std::string &name, std::vector<T> vec = std::vector<T>() ) : 
-	  PropertyWithValue< std::vector<T> >( name, vec, new NullValidator<std::vector<T> >)
-	{  
-	}
+  ArrayProperty(const std::string &name, std::vector<T> vec = std::vector<T>()) :
+    PropertyWithValue< std::vector<T> >(name, vec, new NullValidator<std::vector<T> >)
+  {
+  }
 
-	/** Constructor from which you can set the property's values through a string
-	 *  @param name   The name to assign to the property
-	 *  @param values A comma-separated string containing the values to store in the property
-	 *  @throws std::invalid_argument if the string passed is not compatible with the array type
-	 */
-	ArrayProperty( const std::string &name, const std::string& values ) :
-	  PropertyWithValue< std::vector<T> >( name, std::vector<T>(), new NullValidator<std::vector<T> >)
-	{
-	  if ( ! setValue( values ) )
-	  {
-	    throw std::invalid_argument("Invalid values string passed to constructor.");
-	  }
-	}
-	
-	/// Copy constructor
-	ArrayProperty( const ArrayProperty& right ) :
-	  PropertyWithValue< std::vector<T> >( right )
-	{  
-	}
-	
-	/// Virtual destructor
-	virtual ~ArrayProperty()
-	{
-	}
-	
+  /** Constructor from which you can set the property's values through a string
+   *  @param name   The name to assign to the property
+   *  @param values A comma-separated string containing the values to store in the property
+   *  @throws std::invalid_argument if the string passed is not compatible with the array type
+   */
+  ArrayProperty(const std::string &name, const std::string& values) :
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), new NullValidator<std::vector<T> >)
+  {
+    if ( ! setValue( values ) )
+    {
+      throw std::invalid_argument("Invalid values string passed to constructor.");
+    }
+  }
+
+  /// Copy constructor
+  ArrayProperty( const ArrayProperty& right ) :
+    PropertyWithValue< std::vector<T> >( right )
+  {
+  }
+
+  /// Virtual destructor
+  virtual ~ArrayProperty()
+  {
+  }
+
   // Unhide the base class assignment operator
   using PropertyWithValue< std::vector<T> >::operator=;
-	
-	/** Returns the values stored in the ArrayProperty
-	 *  @return The stored values as a comma-separated list
-	 */
-	std::string value() const
-	{
-	  // Implemented this method for documentation reasons. Just calls base class method.
-	  return PropertyWithValue< std::vector<T> >::value();
-	}
-	
+  
+  /** Returns the values stored in the ArrayProperty
+   *  @return The stored values as a comma-separated list
+   */
+  std::string value() const
+  {
+    // Implemented this method for documentation reasons. Just calls base class method.
+    return PropertyWithValue< std::vector<T> >::value();
+  }
+
   /** Sets the values stored in the ArrayProperty from a string representation
    *  @param value The values to assign to the property, given as a comma-separated list
    *  @return True if the assignment was successful
    */
-	bool setValue( const std::string& value )
-	{
+  bool setValue( const std::string& value )
+  {
     // Implemented this method for documentation reasons. Just calls base class method.
-	  return PropertyWithValue< std::vector<T> >::setValue(value);
-	}
-	
-	// May want to add specialisation the the class later, e.g. setting just one element of the vector
+    return PropertyWithValue< std::vector<T> >::setValue(value);
+  }
+
+  // May want to add specialisation the the class later, e.g. setting just one element of the vector
 };
 
 } // namespace Kernel

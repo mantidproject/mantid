@@ -30,6 +30,7 @@ echo
 
 echo "Running the tests..."
 ln ../../Build/Tests/Mantid.properties
+ln ../../Build/Tests/MantidTest.properties
 ./runner.exe
 echo
 
@@ -37,6 +38,6 @@ echo
 #   when something in the chain has failed.
 echo "Cleaning up..."
 rm -rf runner.*
-rm -f Mantid.properties
-rm -f Test.log
+rm -f Mantid*.properties
+rm -f *Test.log
 echo "Done."
