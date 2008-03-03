@@ -56,7 +56,14 @@ namespace API
   const double& Y() const;
   double& Y();
 
+  const double& X2() const; ///< Returns the X value of the end of the histogram bin
+  double& X2();             ///< Returns the X value of the end of the histogram bin
+
+  const bool isHistogram() const; ///<Returns true if the data point is hastogram data and therefore has an X2.
+
+
   double* xPointer;        ///< Pointer to the value of X
+  double* x2Pointer;        ///< Pointer to the value of X
   double* yPointer;        ///< Pointer to the value of Y
   double* ePointer;        ///< Pointer to the value of E
   double* e2Pointer;       ///< Pointer to the value of E2

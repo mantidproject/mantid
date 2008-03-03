@@ -58,7 +58,40 @@ Workspace2D_sptr Benchmark::Create2DWorkspace(int xlen, int ylen)
 {
   return Create2DWorkspace123(xlen, ylen);
 }
+Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
+{
+  std::vector<double> x1(xlen+1,1);
+  std::vector<double> y1(xlen,2),e1(xlen,3),e2(xlen,3);
+//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
+//  retVal->setTitle("ws154");
+//  retVal->init(ylen,xlen,xlen);
+  Workspace2D_sptr retVal(new Workspace2D);
+    retVal->setHistogramNumber(ylen);
+  for (int i=0; i< ylen; i++)
+  {
+    retVal->setX(i,x1);     
+    retVal->setData(i,y1,e1,e2);
+  }
 
+  return retVal;
+}  
+Workspace2D_sptr Benchmark::Create2DWorkspace154Hist(int xlen, int ylen)
+{
+  std::vector<double> x1(xlen+1,1);
+  std::vector<double> y1(xlen,5),e1(xlen,4),e2(xlen,4);
+//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
+//  retVal->setTitle("ws154");
+//  retVal->init(ylen,xlen,xlen);
+  Workspace2D_sptr retVal(new Workspace2D);
+    retVal->setHistogramNumber(ylen);
+  for (int i=0; i< ylen; i++)
+  {
+    retVal->setX(i,x1);     
+    retVal->setData(i,y1,e1,e2);
+  }
+
+  return retVal;
+}  
 
 /*
 This code runs on jdmc windows workstation (4Gb, AMD Athlon X2 Dual Core Processor 3800+ 1.99Ghz) 

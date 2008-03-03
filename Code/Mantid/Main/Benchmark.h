@@ -53,6 +53,8 @@ public:
 
   static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen);
   static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen);
+  static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154Hist(int xlen, int ylen);
+  static Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123Hist(int xlen, int ylen);
   static Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
 
 

@@ -1,9 +1,6 @@
-#include <iostream>
-#include <string>
-#include <stdexcept>
 #include "MantidAPI/PointDataRef.h"
 #include "MantidAPI/IErrorHelper.h"
-
+#include "MantidKernel/Exception.h"
 namespace Mantid
 {
 
@@ -15,13 +12,13 @@ namespace Mantid
     \param A :: PointDataRef Item to copy
     */
     PointDataRef::PointDataRef(const PointDataRef& A) : IPointData(),
-      xPointer(A.xPointer),yPointer(A.yPointer),ePointer(A.ePointer),e2Pointer(A.e2Pointer),
+      xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),e2Pointer(A.e2Pointer),
       errorHelper(A.errorHelper),spectraNo(A.spectraNo)
     {}
 
     /// Default constructor
     PointDataRef::PointDataRef(): IPointData(),
-      xPointer(0),yPointer(0),ePointer(0),e2Pointer(0),
+      xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),e2Pointer(0),
       errorHelper(0),spectraNo(0)
     {}
 
@@ -40,6 +37,10 @@ namespace Mantid
         if (A.e2Pointer)
         {
           *e2Pointer= *A.e2Pointer;
+        }        
+        if (A.x2Pointer)
+        {
+          *x2Pointer= *A.x2Pointer;
         }
         errorHelper = A.errorHelper;
         spectraNo = A.spectraNo;
@@ -62,6 +63,10 @@ namespace Mantid
         if(e2Pointer)
         {
           *e2Pointer= A.E2();
+        }        
+        if(x2Pointer)
+        {
+          *x2Pointer= A.X2();
         }
         errorHelper = A.ErrorHelper();
         spectraNo = A.SpectraNo();
@@ -217,6 +222,45 @@ namespace Mantid
     {
       return *e2Pointer; 
     }
+
+    /** Const Accessor for X2 value, this should only be used if isHistogram() == true
+    @return The X2 value
+    */
+    const double& PointDataRef::X2() const 
+    {
+      if (isHistogram())
+      {
+        return *x2Pointer; 
+      }
+      else
+      {
+        throw Kernel::Exception::NotFoundError("X2 value is not set, check isHistogram() before accessing X2","X2");
+      }
+    }
+
+    /** Accessor for X2 value, this should only be used if isHistogram() == true
+    @return The X2 value
+    */
+    double& PointDataRef::X2() 
+    {
+      if (isHistogram())
+      {
+        return *x2Pointer; 
+      }
+      else
+      {
+        throw Kernel::Exception::NotFoundError("X2 value is not set, check isHistogram() before accessing X2","X2");
+      }
+    }
+   
+    /** Returns true if the data point is hastogram data and therefore has an X2.
+    @returns true if the X2 value is present
+    */
+    const bool PointDataRef::isHistogram() const
+    {
+      return (x2Pointer!=0);
+    }
+
 
     /*! Clone method
     *  Make a copy of the PointDataRef

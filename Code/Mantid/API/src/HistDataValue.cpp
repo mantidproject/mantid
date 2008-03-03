@@ -1,8 +1,6 @@
-#include <iostream>
-#include <string>
-#include <stdexcept>
 #include "MantidAPI/HistDataValue.h"
 #include "MantidAPI/IErrorHelper.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -14,25 +12,30 @@ namespace Mantid
     Standard Copy Constructor
     \param A :: HistDataValue Item to copy
     */
-    HistDataValue::HistDataValue(const HistDataValue& A) : IHistData(),
+    HistDataValue::HistDataValue(const HistDataValue& A) : IPointData(),
       xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),e2Value(A.e2Value),
-      errorHelper(A.errorHelper),spectraNo(A.spectraNo), x2Value(A.x2Value)
+      errorHelper(A.errorHelper),spectraNo(A.spectraNo), x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
     /*!
     Standard Copy Constructor
     \param A :: HistDataValue Item to copy
     */
-    HistDataValue::HistDataValue(const IHistData& A) : IHistData(),
+    HistDataValue::HistDataValue(const IPointData& A) : IPointData(),
       xValue(A.X()),yValue(A.Y()),eValue(A.E()),e2Value(A.E2()),
       errorHelper(A.ErrorHelper()),spectraNo(A.SpectraNo()),
-      x2Value(A.X2())
-    {}
+      x2Value(0),_isHistogram(A.isHistogram())
+    {
+      if (isHistogram())
+      {
+        x2Value = A.X2();
+      }
+    }
 
     /// Default constructor
-    HistDataValue::HistDataValue(): IHistData(),
+    HistDataValue::HistDataValue(): IPointData(),
       xValue(0),yValue(0),eValue(0),e2Value(0),
-      errorHelper(0),spectraNo(0), x2Value(0)
+      errorHelper(0),spectraNo(0), x2Value(0),_isHistogram(false)
     {}
 
     /*!
@@ -51,31 +54,12 @@ namespace Mantid
         e2Value= A.e2Value;
         errorHelper = A.errorHelper;
         spectraNo = A.spectraNo;
+        _isHistogram = A._isHistogram;
       }
       return *this;
     }
 
-     /*!
-    Standard Assignment Constructor
-    \param A :: IHistData Item to copy
-    \return *this
-    */
-    HistDataValue& HistDataValue::operator=(const IHistData& A)
-    {
-      if (this!=&A)
-      {
-        xValue= A.X();
-        x2Value= A.X2();
-        yValue= A.Y();
-        eValue= A.E();
-        e2Value= A.E2();
-        errorHelper = A.ErrorHelper();
-        spectraNo = A.SpectraNo();
-      }
-      return *this;
-    }
-
-     /*!
+    /*!
     Standard Assignment Constructor
     \param A :: IPointData Item to copy
     \return *this
@@ -85,6 +69,12 @@ namespace Mantid
       if (this!=&A)
       {
         xValue= A.X();
+        _isHistogram = A.isHistogram();
+        if (_isHistogram)
+        {
+          x2Value= A.X2();
+        }
+
         yValue= A.Y();
         eValue= A.E();
         if (A.isE2())
@@ -96,7 +86,7 @@ namespace Mantid
       }
       return *this;
     }
-    
+
     /*!
     Standard Destructor
     */
@@ -168,13 +158,20 @@ namespace Mantid
     {
       return !(this->operator<(A));
     }
-    
+
     /** Const accessor for X2
     @return The value of X2
     */
     const double& HistDataValue::X2() const
     {
-      return x2Value; 
+      if (isHistogram())
+      {
+        return x2Value; 
+      }
+      else
+      {
+        throw Kernel::Exception::NotFoundError("X2 value is not set, check isHistogram() before accessing X2","X2");
+      }
     }
 
     /** Accessor for X2
@@ -182,7 +179,14 @@ namespace Mantid
     */
     double& HistDataValue::X2()
     {
-      return x2Value; 
+      if (isHistogram())
+      {
+        return x2Value; 
+      }
+      else
+      {
+        throw Kernel::Exception::NotFoundError("X2 value is not set, check isHistogram() before accessing X2","X2");
+      }
     }
 
     /** Const Accessor for ErrorHelper class
@@ -200,7 +204,7 @@ namespace Mantid
     {
       return spectraNo; 
     } 
-    
+
     /** Const Accessor for X value
     @return The X value
     */
@@ -263,6 +267,11 @@ namespace Mantid
     double& HistDataValue::E2()
     {
       return e2Value; 
+    }
+
+    const bool HistDataValue::isHistogram() const
+    {
+      return _isHistogram;
     }
 
 

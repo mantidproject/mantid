@@ -2,8 +2,7 @@
 #define MANTIDAPI_HISTDATAVALUE_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IHistData.h"
-#include "MantidAPI/PointDataValue.h"
+#include "MantidAPI/IPointData.h"
 
 namespace Mantid
 {
@@ -40,7 +39,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport HistDataValue : public IHistData
+    class DLLExport HistDataValue : public IPointData
     {
     public:
 
@@ -67,13 +66,14 @@ namespace Mantid
       const double& X2() const;
       double& X2();
 
+      const bool isHistogram() const; ///<Returns true if the data point is hastogram data and therefore has an X2.
+
       double x2Value;        ///< value of X2
 
       HistDataValue();
       HistDataValue(const HistDataValue&);
-      HistDataValue(const IHistData&);
+      HistDataValue(const IPointData&);
       HistDataValue& operator=(const HistDataValue&);
-      HistDataValue& operator=(const IHistData&);
       HistDataValue& operator=(const IPointData&);
       virtual ~HistDataValue();
 
@@ -81,6 +81,8 @@ namespace Mantid
       int operator>(const HistDataValue&) const;
       int operator==(const HistDataValue&) const;
       int operator!=(const HistDataValue&) const;
+    private:
+      bool _isHistogram;
     };
 
   }  // NAMESPACE API

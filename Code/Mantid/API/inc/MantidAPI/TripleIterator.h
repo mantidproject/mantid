@@ -63,9 +63,10 @@ private:
   int m_blockMin;
   ///Internal cache of the current datablock index maximum value
   int m_blockMax;
-  ///Internal cache of the current datablock index maximum value
+  ///Internal flag to indicate if the E2 value is present
   bool m_IsE2Present;
-
+  ///Internal flag to indicate if the X2 value is present
+  bool m_IsX2Present;
   
   /// @cond
   template<typename T>
@@ -99,6 +100,9 @@ private:
 
   ///Validates the index and updates the current m_CPoint
   void validateIndex();
+
+  ///Validates the index and updates the current m_CPoint
+  bool isWorkspaceHistogram();
 
 public:
   /// @cond

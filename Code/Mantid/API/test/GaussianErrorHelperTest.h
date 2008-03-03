@@ -5,7 +5,7 @@
 #include <cmath>
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidAPI/PointDataRef.h"
-#include "MantidAPI/PointDataValue.h"
+#include "MantidAPI/HistDataValue.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -79,7 +79,7 @@ public:
 private:
   GaussianErrorHelper* eh;
   PointDataRef lhs, rhs;
-  PointDataValue result;
+  HistDataValue result;
   double values[6];
 };
 

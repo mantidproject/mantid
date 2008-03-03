@@ -200,10 +200,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HistDataRef.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\HistDataValue.cpp"
 				>
 			</File>
@@ -212,7 +208,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PointDataValue.cpp"
+				RelativePath=".\src\PointDataRef.cpp"
 				>
 			</File>
 			<File
@@ -322,10 +318,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\HistDataRef.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\HistDataValue.h"
 				>
 			</File>
@@ -342,10 +334,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\IHistData.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\Instrument.h"
 				>
 			</File>
@@ -358,15 +346,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PointDataRef.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\PointDataRef.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\PointDataValue.h"
 				>
 			</File>
 			<File
