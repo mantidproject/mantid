@@ -7,11 +7,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
-#include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/Workspace2D.h" 
 
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -120,40 +117,12 @@ namespace Mantid
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
     API::Workspace_sptr BinaryOperation::createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const
-    {
-      const double initialValue=  std::numeric_limits<double>::epsilon();
-          
+    {       
       //get the largest workspace
       const API::Workspace_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
       //create a new workspace
       API::Workspace_sptr retVal = API::WorkspaceFactory::Instance().create(wsLarger);
-      //this needs to be set to the size of the larger workspace and 0 filled
-      Workspace1D* ws1d = dynamic_cast<Workspace1D*>(retVal.get());
-      if (ws1d != 0)
-      {    
-        //do ws1d things
-        std::vector<double> x(wsLarger->size(),initialValue),sig(wsLarger->size(),initialValue),err(wsLarger->size(),initialValue);
-        ws1d->setData(sig,err);
-        ws1d->setX(x);
-      }
-      else
-      {
-        Workspace2D* ws2d = dynamic_cast<Workspace2D*>(retVal.get());   
-        if (ws2d != 0)
-        {
-          //do rhsd things
-          std::vector<double> x(wsLarger->blocksize(),initialValue),y(wsLarger->blocksize(),initialValue),
-            e(wsLarger->blocksize(),initialValue), e2(wsLarger->dataE2(0).size());
-          int len=wsLarger->size()/wsLarger->blocksize();
-          ws2d->setHistogramNumber(len);
 
-          for (int i = 0; i < len; i++)
-          {
-            ws2d->setX(i,x);
-            ws2d->setData(i,y,e,e2);
-          }
-        }
-      }
       return retVal;
     }
 

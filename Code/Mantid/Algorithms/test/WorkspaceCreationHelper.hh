@@ -60,9 +60,9 @@ public:
     return Create2DWorkspace123(xlen, ylen);
   }
 
-  static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen)
+  static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0)
   {
-    std::vector<double> x1(xlen,1),y1(xlen,2),e1(xlen,3);
+    std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,2),e1(xlen,3);
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->setHistogramNumber(ylen);
     for (int i=0; i< ylen; i++)
@@ -74,9 +74,9 @@ public:
     return retVal;
   }
 
-  static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen)
+  static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0)
   {
-    std::vector<double> x1(xlen,1),y1(xlen,5),e1(xlen,4);
+    std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,5),e1(xlen,4);
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->setHistogramNumber(ylen);
     for (int i=0; i< ylen; i++)

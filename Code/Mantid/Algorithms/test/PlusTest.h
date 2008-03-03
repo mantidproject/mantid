@@ -143,6 +143,40 @@ public:
   }
 
   
+  void testExec2D2DHist()
+  {
+    int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey,true);
+    Workspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey,true);
+
+    Plus alg;
+
+    AnalysisDataService::Instance().add("test_in21", work_in1);
+    AnalysisDataService::Instance().add("test_in22", work_in2);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace_1","test_in21");
+    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("OutputWorkspace","test_out2");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    Workspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve("test_out2"));
+
+    checkData(work_in1, work_in2, work_out1);
+    TS_ASSERT_EQUALS(work_out1->dataX(0).size(),work_in1->dataX(0).size());
+    TS_ASSERT_DELTA(work_out1->dataX(0)[work_out1->dataX(0).size()-1],1, 0.00001);
+    TS_ASSERT_EQUALS(work_out1->dataY(0).size(),work_in1->dataY(0).size());
+    TS_ASSERT_EQUALS(work_out1->dataE(0).size(),work_in1->dataE(0).size());
+
+
+    AnalysisDataService::Instance().remove("test_in21");
+    AnalysisDataService::Instance().remove("test_in22");
+    AnalysisDataService::Instance().remove("test_out2");
+   
+  }
+
+  
   void testExec1D2D()
   {
     int sizex = 10,sizey=20;
