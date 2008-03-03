@@ -9,7 +9,7 @@
 #include "MantidDataObjects/Workspace1D.h" 
 #include "MantidDataObjects/Workspace2D.h" 
 #include "MantidAPI/LocatedDataRef.h" 
-#include "MantidAPI/TripleIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h" 
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

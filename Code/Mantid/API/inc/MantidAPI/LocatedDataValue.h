@@ -15,9 +15,7 @@ namespace Mantid
 
     /**
     IDataItem of an X value, two error values E and E2 together with a pointer to an ErrorHelper and a specta number.
-    Class maintians a type first/second/third triple
-    similar to std::pair except all are identical
-
+    
     \author N. Draper
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories

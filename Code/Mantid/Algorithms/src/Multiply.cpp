@@ -6,7 +6,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
-#include "MantidAPI/TripleIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h" 
 #include "MantidAPI/IErrorHelper.h" 
 
 // Register the class into the algorithm factory
@@ -33,9 +33,9 @@ namespace Mantid
     }
 
     /** Performs the addition with Gausian errors within the transform function
-    * @param a The triple ref of the first workspace data item
-    * @param b The triple ref of the second workspace data item
-    * @returns A triple ref of the result with Gausian errors
+    * @param a The LocatedData ref of the first workspace data item
+    * @param b The LocatedData ref of the second workspace data item
+    * @returns A LocatedData ref of the result with Gausian errors
     */
     LocatedDataValue&
       Multiply::Multiply_fn::operator() (const ILocatedData& a,const ILocatedData& b) 

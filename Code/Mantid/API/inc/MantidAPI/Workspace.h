@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
-#include "MantidAPI/TripleIterator.h"
+#include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/Logger.h"

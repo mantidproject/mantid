@@ -1,8 +1,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/TripleIterator.h"
-#include "MantidAPI/TripleIteratorCode.h"
+#include "MantidAPI/WorkspaceIterator.h"
+#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 DECLARE_WORKSPACE(Workspace2D)

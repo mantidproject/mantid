@@ -1,8 +1,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/TripleIterator.h"
-#include "MantidAPI/TripleIteratorCode.h"
+#include "MantidAPI/WorkspaceIterator.h"
+#include "MantidAPI/WorkspaceIteratorCode.h"
 
 namespace Mantid
 {
