@@ -4,9 +4,9 @@
 #include <iostream>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
 
@@ -16,7 +16,7 @@ class LibraryManagerTest : public CxxTest::TestSuite
 public:
 	LibraryManagerTest()
 	{
-		Mantid::API::FrameworkManager::Instance();
+		ConfigService::Instance();
 	}
 
 	void testOpenLibrary()

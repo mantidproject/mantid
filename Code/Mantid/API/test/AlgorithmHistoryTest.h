@@ -60,6 +60,7 @@ public:
     AlgorithmHistory AH("testalg","version 1",execTime,14.0,aps);
     //dump output to sting
     std::ostringstream output;
+    output.exceptions( std::ios::failbit | std::ios::badbit );
     TS_ASSERT_THROWS_NOTHING(output << AH);
     TS_ASSERT_EQUALS(output.str(),correctOutput);
 

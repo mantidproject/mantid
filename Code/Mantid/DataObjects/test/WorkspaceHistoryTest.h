@@ -209,7 +209,20 @@ public:
     TS_ASSERT_EQUALS(C_AP[2].value(),"C");
     TS_ASSERT_EQUALS(C_AP[2].isDefault(),true);
     TS_ASSERT_EQUALS(C_AP[2].direction(),2);
-    TS_ASSERT_THROWS_NOTHING(std::cout<<std::endl << C_WH <<std::endl;)
+    
+    // Test streamed output.
+    std::stringstream s;
+    s.exceptions( std::ios::failbit | std::ios::badbit );
+    TS_ASSERT_THROWS_NOTHING( s << C_WH )
+    // Check size (in bytes) of output
+    int i = s.tellp();
+    TS_ASSERT_LESS_THAN( 1800, i )
+    // Check first line
+    s.seekp(0);
+    char c[21];
+    s.getline(c,21);
+    std::string ss(c);
+    TS_ASSERT( ! ss.compare("Framework Version : ") )
   }
 };
 
