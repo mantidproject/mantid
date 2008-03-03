@@ -2,7 +2,7 @@
 #define MANTIDAPI_HISTDATAVALUE_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IPointData.h"
+#include "MantidAPI/ILocatedData.h"
 
 namespace Mantid
 {
@@ -39,7 +39,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport HistDataValue : public IPointData
+    class DLLExport LocatedDataValue : public ILocatedData
     {
     public:
 
@@ -70,17 +70,17 @@ namespace Mantid
 
       double x2Value;        ///< value of X2
 
-      HistDataValue();
-      HistDataValue(const HistDataValue&);
-      HistDataValue(const IPointData&);
-      HistDataValue& operator=(const HistDataValue&);
-      HistDataValue& operator=(const IPointData&);
-      virtual ~HistDataValue();
+      LocatedDataValue();
+      LocatedDataValue(const LocatedDataValue&);
+      LocatedDataValue(const ILocatedData&);
+      LocatedDataValue& operator=(const LocatedDataValue&);
+      LocatedDataValue& operator=(const ILocatedData&);
+      virtual ~LocatedDataValue();
 
-      int operator<(const HistDataValue&) const;
-      int operator>(const HistDataValue&) const;
-      int operator==(const HistDataValue&) const;
-      int operator!=(const HistDataValue&) const;
+      int operator<(const LocatedDataValue&) const;
+      int operator>(const LocatedDataValue&) const;
+      int operator==(const LocatedDataValue&) const;
+      int operator!=(const LocatedDataValue&) const;
     private:
       bool _isHistogram;
     };

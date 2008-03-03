@@ -8,7 +8,7 @@
 
 #include "MantidDataObjects/Workspace1D.h" 
 #include "MantidDataObjects/Workspace2D.h" 
-#include "MantidAPI/PointDataRef.h" 
+#include "MantidAPI/LocatedDataRef.h" 
 #include "MantidAPI/TripleIterator.h" 
 
 using namespace Mantid::DataObjects;
@@ -91,7 +91,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        PointDataRef tr = *ti;
+        LocatedDataRef tr = *ti;
         TS_ASSERT_EQUALS(tr.X(),workspace->dataX(0)[count]);
         TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(0)[count]);
         TS_ASSERT_EQUALS(tr.E(),workspace->dataE(0)[count]);
@@ -114,7 +114,7 @@ public:
     for (int i = 0; i < size; i++) 
     {
       //move the iterator on one
-      PointDataRef tr = *ti;
+      LocatedDataRef tr = *ti;
       TS_ASSERT_EQUALS(tr.X(),x1[i]);
       TS_ASSERT_EQUALS(tr.Y(),y1[i]);
       TS_ASSERT_EQUALS(tr.E(),e1[i]);
@@ -134,7 +134,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
         (
-        PointDataRef tr = *ti;
+        LocatedDataRef tr = *ti;
 
         TS_ASSERT_EQUALS(tr.X(),workspace->dataX(0)[count]);
         TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(0)[count]);
@@ -157,7 +157,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        PointDataRef tr = *ti;
+        LocatedDataRef tr = *ti;
         int datablock = count/size;
         int blockindex = count%size;
         TS_ASSERT_EQUALS(tr.X(),workspace->dataX(datablock)[blockindex]);
@@ -205,8 +205,8 @@ public:
     Workspace1D::iterator IA(*workA);
 
     // Note: this used boost lambda since I am being lazy.
-    //      sort(IA.begin(),IA.end(), (boost::bind(&PointDataRef::first,_1)() >
-    // 				 boost::bind(&PointDataRef::first,_2)() );
+    //      sort(IA.begin(),IA.end(), (boost::bind(&LocatedDataRef::first,_1)() >
+    // 				 boost::bind(&LocatedDataRef::first,_2)() );
 
     const std::vector<double>& x1 = workA->dataX();
     const std::vector<double>& y1 = workA->dataY();
@@ -242,7 +242,7 @@ public:
       {
         TS_ASSERT_THROWS_NOTHING
         (
-          PointDataRef tr = *ti;
+          LocatedDataRef tr = *ti;
           TS_ASSERT_EQUALS(tr.X(),workspace->dataX(0)[count%size]);
           TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(0)[count%size]);
           TS_ASSERT_EQUALS(tr.E(),workspace->dataE(0)[count%size]);
@@ -274,7 +274,7 @@ public:
       {
         TS_ASSERT_THROWS_NOTHING
         (
-          PointDataRef tr = *ti;
+          LocatedDataRef tr = *ti;
           int indexPosition = count%(size*histogramCount);
           int datablock = indexPosition/size;
           int blockindex = indexPosition%size;
@@ -310,7 +310,7 @@ public:
       {
         TS_ASSERT_THROWS_NOTHING
         (
-          PointDataRef tr = *ti;
+          LocatedDataRef tr = *ti;
           TS_ASSERT_EQUALS(tr.X(),workspace->dataX(0)[count/loopCount]);
           TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(0)[count/loopCount]);
           TS_ASSERT_EQUALS(tr.E(),workspace->dataE(0)[count/loopCount]);
@@ -343,7 +343,7 @@ public:
       {
         TS_ASSERT_THROWS_NOTHING
         (
-          //PointDataRef tr = *ti;
+          //LocatedDataRef tr = *ti;
           int datablock = count/(size*loopCount);
           int blockindex = count/loopCount;
           //TS_ASSERT_EQUALS(tr.X(),workspace->dataX(datablock)[blockindex]);

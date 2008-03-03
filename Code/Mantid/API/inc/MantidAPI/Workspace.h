@@ -58,9 +58,9 @@ class DLLExport Workspace
 {
 public:
   /// Typedef for the triple_iterator to use with a Workspace
-  typedef triple_iterator<PointDataRef, Workspace> iterator;
+  typedef triple_iterator<LocatedDataRef, Workspace> iterator;
   /// Typedef for the const triple_iterator to use with a Workspace
-  typedef triple_iterator<const PointDataRef, const Workspace> const_iterator;
+  typedef triple_iterator<const LocatedDataRef, const Workspace> const_iterator;
 
   /// Return the workspace typeID 
   virtual const std::string id() const = 0;

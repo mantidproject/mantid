@@ -14,7 +14,7 @@ namespace API
   class IErrorHelper;
 
 /**
-  Interface IPointData describes a single data item of a point data dataset.
+  Interface ILocatedData describes a single data item of a point data dataset.
 
   \author N. Draper
     
@@ -37,7 +37,7 @@ namespace API
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class DLLExport IPointData : public IDataItem
+  class DLLExport ILocatedData : public IDataItem
 {
   public:
 
@@ -49,7 +49,7 @@ namespace API
 
   virtual const bool isHistogram() const =0; ///<Returns true if the data point is hastogram data and therefore has an X2.
 
-  virtual ~IPointData()
+  virtual ~ILocatedData()
   {}
 };
 

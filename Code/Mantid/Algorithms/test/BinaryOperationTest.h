@@ -211,7 +211,7 @@ public:
     {
       TS_ASSERT_THROWS_NOTHING
       (
-        PointDataRef tr = *ti;
+        LocatedDataRef tr = *ti;
         TS_ASSERT_DELTA(tr.X(),0,0.0001);
         TS_ASSERT_DELTA(tr.Y(),0,0.0001);
         TS_ASSERT_DELTA(tr.E(),0,0.0001);

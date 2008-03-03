@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/PointDataRef.h" 
+#include "MantidAPI/LocatedDataRef.h" 
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 
 #include <algorithm>
@@ -76,7 +76,7 @@ namespace Mantid
       class Multiply_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
-        API::HistDataValue& operator()(const API::IPointData&,const API::IPointData&);
+        API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
 
       };
 

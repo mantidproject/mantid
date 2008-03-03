@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidAPI/PointDataRef.h"
+#include "MantidAPI/LocatedDataRef.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid

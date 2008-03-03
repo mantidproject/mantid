@@ -200,15 +200,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\HistDataValue.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Instrument.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PointDataRef.cpp"
+				RelativePath=".\src\LocatedDataRef.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LocatedDataValue.cpp"
 				>
 			</File>
 			<File
@@ -318,10 +318,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\HistDataValue.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\IAlgorithm.h"
 				>
 			</File>
@@ -334,11 +330,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\Instrument.h"
+				RelativePath=".\inc\MantidAPI\ILocatedData.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\IPointData.h"
+				RelativePath=".\inc\MantidAPI\Instrument.h"
 				>
 			</File>
 			<File
@@ -346,7 +342,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\PointDataRef.h"
+				RelativePath=".\inc\MantidAPI\LocatedDataRef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\LocatedDataValue.h"
 				>
 			</File>
 			<File

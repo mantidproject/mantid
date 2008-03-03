@@ -1,4 +1,4 @@
-#include "MantidAPI/HistDataValue.h"
+#include "MantidAPI/LocatedDataValue.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidKernel/Exception.h"
 
@@ -10,18 +10,18 @@ namespace Mantid
 
     /*!
     Standard Copy Constructor
-    \param A :: HistDataValue Item to copy
+    \param A :: LocatedDataValue Item to copy
     */
-    HistDataValue::HistDataValue(const HistDataValue& A) : IPointData(),
+    LocatedDataValue::LocatedDataValue(const LocatedDataValue& A) : ILocatedData(),
       xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),e2Value(A.e2Value),
       errorHelper(A.errorHelper),spectraNo(A.spectraNo), x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
     /*!
     Standard Copy Constructor
-    \param A :: HistDataValue Item to copy
+    \param A :: LocatedDataValue Item to copy
     */
-    HistDataValue::HistDataValue(const IPointData& A) : IPointData(),
+    LocatedDataValue::LocatedDataValue(const ILocatedData& A) : ILocatedData(),
       xValue(A.X()),yValue(A.Y()),eValue(A.E()),e2Value(A.E2()),
       errorHelper(A.ErrorHelper()),spectraNo(A.SpectraNo()),
       x2Value(0),_isHistogram(A.isHistogram())
@@ -33,17 +33,17 @@ namespace Mantid
     }
 
     /// Default constructor
-    HistDataValue::HistDataValue(): IPointData(),
+    LocatedDataValue::LocatedDataValue(): ILocatedData(),
       xValue(0),yValue(0),eValue(0),e2Value(0),
       errorHelper(0),spectraNo(0), x2Value(0),_isHistogram(false)
     {}
 
     /*!
     Standard Assignment Constructor
-    \param A :: HistDataValue Item to copy
+    \param A :: LocatedDataValue Item to copy
     \return *this
     */
-    HistDataValue& HistDataValue::operator=(const HistDataValue& A)
+    LocatedDataValue& LocatedDataValue::operator=(const LocatedDataValue& A)
     {
       if (this!=&A)
       {
@@ -61,10 +61,10 @@ namespace Mantid
 
     /*!
     Standard Assignment Constructor
-    \param A :: IPointData Item to copy
+    \param A :: ILocatedData Item to copy
     \return *this
     */
-    HistDataValue& HistDataValue::operator=(const IPointData& A)
+    LocatedDataValue& LocatedDataValue::operator=(const ILocatedData& A)
     {
       if (this!=&A)
       {
@@ -90,7 +90,7 @@ namespace Mantid
     /*!
     Standard Destructor
     */
-    HistDataValue::~HistDataValue()
+    LocatedDataValue::~LocatedDataValue()
     {
     }
 
@@ -99,7 +99,7 @@ namespace Mantid
     Operator== all components must be equal
     \param A :: Other object to compare
     */
-    int HistDataValue::operator==(const HistDataValue& A) const
+    int LocatedDataValue::operator==(const LocatedDataValue& A) const
     {
       return  (xValue!=A.xValue || x2Value!=A.x2Value || yValue!=A.yValue || 
         eValue!=A.eValue || e2Value!=A.e2Value) ? 0 : 1;
@@ -110,7 +110,7 @@ namespace Mantid
     \param A :: Other object to compare
     \return this!=A
     */
-    int HistDataValue::operator!=(const HistDataValue& A) const
+    int LocatedDataValue::operator!=(const LocatedDataValue& A) const
     {
       return  (xValue==A.xValue && x2Value==A.x2Value && yValue == A.yValue &&
         eValue== A.eValue  && e2Value!=A.e2Value) ? 0 : 1;
@@ -118,10 +118,10 @@ namespace Mantid
 
     /*! 
     Operator< takes xValue to last precidence.
-    \param A :: HistDataValue to compare
+    \param A :: LocatedDataValue to compare
     \return this < A
     */
-    int HistDataValue::operator<(const HistDataValue& A) const
+    int LocatedDataValue::operator<(const LocatedDataValue& A) const
     {
       if (&A!=this)
       {
@@ -151,10 +151,10 @@ namespace Mantid
     Operator> takes xValue to last precidence.
     Uses operator<  to obtain value.
     Note it does not uses 1-(A<this)
-    \param A :: HistDataValue to compare
+    \param A :: LocatedDataValue to compare
     \return this > A
     */
-    int HistDataValue::operator>(const HistDataValue& A) const
+    int LocatedDataValue::operator>(const LocatedDataValue& A) const
     {
       return !(this->operator<(A));
     }
@@ -162,7 +162,7 @@ namespace Mantid
     /** Const accessor for X2
     @return The value of X2
     */
-    const double& HistDataValue::X2() const
+    const double& LocatedDataValue::X2() const
     {
       if (isHistogram())
       {
@@ -177,7 +177,7 @@ namespace Mantid
     /** Accessor for X2
     @return The value of X2
     */
-    double& HistDataValue::X2()
+    double& LocatedDataValue::X2()
     {
       if (isHistogram())
       {
@@ -192,7 +192,7 @@ namespace Mantid
     /** Const Accessor for ErrorHelper class
     @return Pointer to the ErrorHelper class
     */
-    const IErrorHelper* HistDataValue::ErrorHelper() const
+    const IErrorHelper* LocatedDataValue::ErrorHelper() const
     {
       return errorHelper; 
     }
@@ -200,7 +200,7 @@ namespace Mantid
     /** Const Accessor for Spectra Number
     @return The Spectra Number
     */
-    int HistDataValue::SpectraNo() const
+    int LocatedDataValue::SpectraNo() const
     {
       return spectraNo; 
     } 
@@ -208,7 +208,7 @@ namespace Mantid
     /** Const Accessor for X value
     @return The X value
     */
-    const double& HistDataValue::X() const
+    const double& LocatedDataValue::X() const
     {
       return xValue; 
     }
@@ -216,7 +216,7 @@ namespace Mantid
     /** Accessor for X value
     @return The X value
     */
-    double& HistDataValue::X()
+    double& LocatedDataValue::X()
     {
       return xValue; 
     }
@@ -224,7 +224,7 @@ namespace Mantid
     /** Const Accessor for Y value
     @return The Y value
     */
-    const double& HistDataValue::Y() const
+    const double& LocatedDataValue::Y() const
     {
       return yValue; 
     }
@@ -232,7 +232,7 @@ namespace Mantid
     /** Accessor for Y value
     @return The Y value
     */
-    double& HistDataValue::Y()
+    double& LocatedDataValue::Y()
     {
       return yValue; 
     }
@@ -240,7 +240,7 @@ namespace Mantid
     /** Const Accessor for E value
     @return The E value
     */
-    const double& HistDataValue::E() const
+    const double& LocatedDataValue::E() const
     {
       return eValue; 
     }
@@ -248,7 +248,7 @@ namespace Mantid
     /** Accessor for E value
     @return The E value
     */
-    double& HistDataValue::E()
+    double& LocatedDataValue::E()
     {
       return eValue; 
     }
@@ -256,7 +256,7 @@ namespace Mantid
     /** Const Accessor for E2 value
     @return The E2 value
     */
-    const double& HistDataValue::E2() const
+    const double& LocatedDataValue::E2() const
     {
       return e2Value; 
     }
@@ -264,12 +264,12 @@ namespace Mantid
     /** Accessor for E2 value
     @return The E2 value
     */
-    double& HistDataValue::E2()
+    double& LocatedDataValue::E2()
     {
       return e2Value; 
     }
 
-    const bool HistDataValue::isHistogram() const
+    const bool LocatedDataValue::isHistogram() const
     {
       return _isHistogram;
     }

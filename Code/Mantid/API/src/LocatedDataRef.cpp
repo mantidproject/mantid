@@ -1,4 +1,4 @@
-#include "MantidAPI/PointDataRef.h"
+#include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidKernel/Exception.h"
 namespace Mantid
@@ -9,25 +9,25 @@ namespace Mantid
 
     /*!
     Standard Copy Constructor
-    \param A :: PointDataRef Item to copy
+    \param A :: LocatedDataRef Item to copy
     */
-    PointDataRef::PointDataRef(const PointDataRef& A) : IPointData(),
+    LocatedDataRef::LocatedDataRef(const LocatedDataRef& A) : ILocatedData(),
       xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),e2Pointer(A.e2Pointer),
       errorHelper(A.errorHelper),spectraNo(A.spectraNo)
     {}
 
     /// Default constructor
-    PointDataRef::PointDataRef(): IPointData(),
+    LocatedDataRef::LocatedDataRef(): ILocatedData(),
       xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),e2Pointer(0),
       errorHelper(0),spectraNo(0)
     {}
 
     /*!
     Standard Assignment Constructor
-    \param A :: PointDataRef Item to copy
+    \param A :: LocatedDataRef Item to copy
     \return *this
     */
-    PointDataRef& PointDataRef::operator=(const PointDataRef& A)
+    LocatedDataRef& LocatedDataRef::operator=(const LocatedDataRef& A)
     {
       if (this!=&A)
       {
@@ -50,10 +50,10 @@ namespace Mantid
 
     /*!
     Standard Assignment Constructor
-    \param A :: IPointData Item to copy
+    \param A :: ILocatedData Item to copy
     \return *this
     */
-    PointDataRef& PointDataRef::operator=(const IPointData& A)
+    LocatedDataRef& LocatedDataRef::operator=(const ILocatedData& A)
     {
       if (this!=&A)
       {
@@ -77,7 +77,7 @@ namespace Mantid
     /*!
     Standard Destructor
     */
-    PointDataRef::~PointDataRef()
+    LocatedDataRef::~LocatedDataRef()
     {
       //do not delete the contents as they are managed by the collection.
     }
@@ -87,7 +87,7 @@ namespace Mantid
     Operator== all components must be equal
     \param A :: Other object to compare
     */
-    int PointDataRef::operator==(const PointDataRef& A) const
+    int LocatedDataRef::operator==(const LocatedDataRef& A) const
     {
       return  (*xPointer!=*A.xPointer || *yPointer!=*A.yPointer || 
         *ePointer!=*A.ePointer || *e2Pointer!=*A.e2Pointer) ? 0 : 1;
@@ -98,7 +98,7 @@ namespace Mantid
     \param A :: Other object to compare
     \return this!=A
     */
-    int PointDataRef::operator!=(const PointDataRef& A) const
+    int LocatedDataRef::operator!=(const LocatedDataRef& A) const
     {
       return  (*xPointer==*A.xPointer && *yPointer == *A.yPointer &&
         *ePointer== *A.ePointer  && *e2Pointer!=*A.e2Pointer) ? 0 : 1;
@@ -106,10 +106,10 @@ namespace Mantid
 
     /*! 
     Operator< takes xPointer to last precidence.
-    \param A :: PointDataRef to compare
+    \param A :: LocatedDataRef to compare
     \return this < A
     */
-    int PointDataRef::operator<(const PointDataRef& A) const
+    int LocatedDataRef::operator<(const LocatedDataRef& A) const
     {
       if (&A!=this)
       {
@@ -135,10 +135,10 @@ namespace Mantid
     Operator> takes xPointer to last precidence.
     Uses operator<  to obtain value.
     Note it does not uses 1-(A<this)
-    \param A :: PointDataRef to compare
+    \param A :: LocatedDataRef to compare
     \return this > A
     */
-    int PointDataRef::operator>(const PointDataRef& A) const
+    int LocatedDataRef::operator>(const LocatedDataRef& A) const
     {
       return !(this->operator<(A));
     }
@@ -146,7 +146,7 @@ namespace Mantid
     /** Const Accessor for ErrorHelper class
     @return Pointer to the ErrorHelper class
     */
-    const IErrorHelper* PointDataRef::ErrorHelper() const
+    const IErrorHelper* LocatedDataRef::ErrorHelper() const
     {
       return errorHelper; 
     }
@@ -154,7 +154,7 @@ namespace Mantid
     /** Const Accessor for Spectra Number
     @return The Spectra Number
     */
-    int PointDataRef::SpectraNo() const
+    int LocatedDataRef::SpectraNo() const
     {
       return spectraNo; 
     } 
@@ -162,7 +162,7 @@ namespace Mantid
     /** Const Accessor for X value
     @return The X value
     */
-    const double& PointDataRef::X() const
+    const double& LocatedDataRef::X() const
     {
       return *xPointer; 
     }
@@ -170,7 +170,7 @@ namespace Mantid
     /** Accessor for X value
     @return The X value
     */
-    double& PointDataRef::X()
+    double& LocatedDataRef::X()
     {
       return *xPointer; 
     }
@@ -178,7 +178,7 @@ namespace Mantid
     /** Const Accessor for Y value
     @return The Y value
     */
-    const double& PointDataRef::Y() const
+    const double& LocatedDataRef::Y() const
     {
       return *yPointer; 
     }
@@ -186,7 +186,7 @@ namespace Mantid
     /** Accessor for Y value
     @return The Y value
     */
-    double& PointDataRef::Y()
+    double& LocatedDataRef::Y()
     {
       return *yPointer; 
     }
@@ -194,7 +194,7 @@ namespace Mantid
     /** Const Accessor for E value
     @return The E value
     */
-    const double& PointDataRef::E() const
+    const double& LocatedDataRef::E() const
     {
       return *ePointer; 
     }
@@ -202,7 +202,7 @@ namespace Mantid
     /** Accessor for E value
     @return The E value
     */
-    double& PointDataRef::E()
+    double& LocatedDataRef::E()
     {
       return *ePointer; 
     }
@@ -210,7 +210,7 @@ namespace Mantid
     /** Const Accessor for E2 value
     @return The E2 value
     */
-    const double& PointDataRef::E2() const
+    const double& LocatedDataRef::E2() const
     {
       return *e2Pointer; 
     }
@@ -218,7 +218,7 @@ namespace Mantid
     /** Accessor for E2 value
     @return The E2 value
     */
-    double& PointDataRef::E2()
+    double& LocatedDataRef::E2()
     {
       return *e2Pointer; 
     }
@@ -226,7 +226,7 @@ namespace Mantid
     /** Const Accessor for X2 value, this should only be used if isHistogram() == true
     @return The X2 value
     */
-    const double& PointDataRef::X2() const 
+    const double& LocatedDataRef::X2() const 
     {
       if (isHistogram())
       {
@@ -241,7 +241,7 @@ namespace Mantid
     /** Accessor for X2 value, this should only be used if isHistogram() == true
     @return The X2 value
     */
-    double& PointDataRef::X2() 
+    double& LocatedDataRef::X2() 
     {
       if (isHistogram())
       {
@@ -256,19 +256,19 @@ namespace Mantid
     /** Returns true if the data point is hastogram data and therefore has an X2.
     @returns true if the X2 value is present
     */
-    const bool PointDataRef::isHistogram() const
+    const bool LocatedDataRef::isHistogram() const
     {
       return (x2Pointer!=0);
     }
 
 
     /*! Clone method
-    *  Make a copy of the PointDataRef
+    *  Make a copy of the LocatedDataRef
     *  @return new(*this)
     */
-    PointDataRef* PointDataRef::clone() const
+    LocatedDataRef* LocatedDataRef::clone() const
     {
-      return new PointDataRef(*this);
+      return new LocatedDataRef(*this);
     }
   } // NAMESPACE API
 

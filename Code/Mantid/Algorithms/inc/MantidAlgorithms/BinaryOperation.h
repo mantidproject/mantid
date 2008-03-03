@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/PointDataRef.h" 
-#include "MantidAPI/HistDataValue.h" 
+#include "MantidAPI/LocatedDataRef.h" 
+#include "MantidAPI/LocatedDataValue.h" 
 
 #include <algorithm>
 #include <functional>
@@ -89,7 +89,7 @@ namespace Mantid
       unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
     
       
-      class BinaryOperation_fn : public std::binary_function<API::PointDataRef,API::PointDataRef,API::PointDataRef >
+      class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
       {
       public:
         /// Virtual destructor
@@ -101,12 +101,12 @@ namespace Mantid
         * @param a The rhs data element
         * @returns The result data element
         */
-        virtual API::HistDataValue& operator()(const API::IPointData& a,const API::IPointData& b) =0;
+        virtual API::LocatedDataValue& operator()(const API::ILocatedData& a,const API::ILocatedData& b) =0;
       protected:
         /**Temporary cache of the Histogram Result.
         This save creating a new object for each iteration and removes lifetime issues.
         */
-        API::HistDataValue result;
+        API::LocatedDataValue result;
 
       };
 

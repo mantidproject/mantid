@@ -2,7 +2,7 @@
 #define MANTIDAPI_POINTDATAREF_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IPointData.h"
+#include "MantidAPI/ILocatedData.h"
 
 namespace Mantid
 {
@@ -14,7 +14,7 @@ namespace API
   class IErrorHelper;
 
 /**
-  The PointDataRef class holds references to all of the data required to describe a single data item of a point dataset.
+  The LocatedDataRef class holds references to all of the data required to describe a single data item of a point dataset.
   All of the data items are held as pointers to data owned by classes other than itself.  
   This is done for performance reasons when iterating over workspaces.
 
@@ -39,7 +39,7 @@ namespace API
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-  class DLLExport PointDataRef : public IPointData
+  class DLLExport LocatedDataRef : public ILocatedData
 {
   public:
   const double& X() const;
@@ -71,18 +71,18 @@ namespace API
   int spectraNo;
 
 
-  PointDataRef* clone() const;
+  LocatedDataRef* clone() const;
 
-  PointDataRef();
-  PointDataRef(const PointDataRef&);
-  PointDataRef& operator=(const PointDataRef&);
-  PointDataRef& operator=(const IPointData&);
-  virtual ~PointDataRef();
+  LocatedDataRef();
+  LocatedDataRef(const LocatedDataRef&);
+  LocatedDataRef& operator=(const LocatedDataRef&);
+  LocatedDataRef& operator=(const ILocatedData&);
+  virtual ~LocatedDataRef();
 
-  int operator<(const PointDataRef&) const;
-  int operator>(const PointDataRef&) const;
-  int operator==(const PointDataRef&) const;
-  int operator!=(const PointDataRef&) const;
+  int operator<(const LocatedDataRef&) const;
+  int operator>(const LocatedDataRef&) const;
+  int operator==(const LocatedDataRef&) const;
+  int operator!=(const LocatedDataRef&) const;
 };
 
 }  // NAMESPACE API

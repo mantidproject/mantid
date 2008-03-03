@@ -1,6 +1,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/PointDataRef.h"
+#include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/TripleIterator.h"
 #include "MantidAPI/TripleIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -387,8 +387,8 @@ const int Workspace2D::getHistogramNumberHelper() const
 
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::triple_iterator<Mantid::API::PointDataRef, Mantid::DataObjects::Workspace2D>;
-template DLLExport class Mantid::API::triple_iterator<const Mantid::API::PointDataRef, const Mantid::DataObjects::Workspace2D>;
+template DLLExport class Mantid::API::triple_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::Workspace2D>;
+template DLLExport class Mantid::API::triple_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::Workspace2D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace2D>;
 

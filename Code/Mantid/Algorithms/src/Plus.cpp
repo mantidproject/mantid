@@ -38,8 +38,8 @@ namespace Mantid
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gaussian errors
     */
-    HistDataValue&
-      Plus::Plus_fn::operator() (const IPointData& a,const IPointData& b) 
+    LocatedDataValue&
+      Plus::Plus_fn::operator() (const ILocatedData& a,const ILocatedData& b) 
     {   
       //copy the values from lhs
       result = a;

@@ -39,8 +39,8 @@ namespace Mantid
     * @param b The triple ref of the second workspace data item
     * @returns A triple ref of the result with Gausian errors
     */
-    HistDataValue&
-      Divide::Divide_fn::operator() (const IPointData& a,const IPointData& b) 
+    LocatedDataValue&
+      Divide::Divide_fn::operator() (const ILocatedData& a,const ILocatedData& b) 
     {  
       //copy the values from lhs
       result = a;

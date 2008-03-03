@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include "MantidAPI/GaussianErrorHelper.h"
-#include "MantidAPI/PointDataRef.h"
-#include "MantidAPI/HistDataValue.h"
+#include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/LocatedDataValue.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -78,8 +78,8 @@ public:
 
 private:
   GaussianErrorHelper* eh;
-  PointDataRef lhs, rhs;
-  HistDataValue result;
+  LocatedDataRef lhs, rhs;
+  LocatedDataValue result;
   double values[6];
 };
 
