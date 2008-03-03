@@ -30,9 +30,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @class ConfigService ConfigService.h Kernel/ConfigService.h
-
-    The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
+/** The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
 	  The class gathers information from config files and the system variables.  
 	  This information is available to all the objects within the framework as well as being used to configure the logging framework.
 	  This class currently uses the Logging functionality provided through the POCO (portable components library).

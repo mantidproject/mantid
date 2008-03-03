@@ -16,9 +16,7 @@ namespace Mantid
 {
 namespace API
 {
-/** @class AnalysisDataService AnalysisDataService.h Kernel/AnalysisDataService.h
-
-    The Analysis data service stores instances of the Workspace objects and 
+/** The Analysis data service stores instances of the Workspace objects and 
     anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.  
     This is the primary data service that
     the users will interact with either through writing scripts or directly
@@ -65,7 +63,7 @@ private:
   // Private constructors and destructor for singleton class
   AnalysisDataServiceImpl();
   AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
-  AnalysisDataServiceImpl& operator = (const AnalysisDataServiceImpl&);
+  AnalysisDataServiceImpl& operator = (const AnalysisDataServiceImpl&); ///<Private copy assignment operator
   ~AnalysisDataServiceImpl();
 
   ///static reference to the logger class

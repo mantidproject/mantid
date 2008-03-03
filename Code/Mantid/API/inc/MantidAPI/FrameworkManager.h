@@ -21,9 +21,7 @@ namespace API
 class IAlgorithm;
 class Workspace;
 
-/** @class FrameworkManager FrameworkManager.h Kernel/FrameworkManager.h
-
-    The main public API via which users interact with the Mantid framework.
+/** The main public API via which users interact with the Mantid framework.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 05/10/2007

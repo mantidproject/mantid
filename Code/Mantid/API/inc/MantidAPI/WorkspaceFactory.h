@@ -33,9 +33,7 @@ class Workspace;
 ///shared pointer to the workspace base class
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
 
-/** @class WorkspaceFactory WorkspaceFactory.h Kernel/WorkspaceFactory.h
-
-    The WorkspaceFactory class is in charge of the creation of all types
+/** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.

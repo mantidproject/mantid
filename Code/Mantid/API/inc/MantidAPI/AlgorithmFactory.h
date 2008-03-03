@@ -19,9 +19,7 @@ namespace API
 //----------------------------------------------------------------------
 class Algorithm;
 
-/** @class AlgorithmFactory AlgorithmFactory.h Kernel/AlgorithmFactory.h
-
-    The AlgorithmFactory class is in charge of the creation of concrete
+/** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.

@@ -19,8 +19,7 @@ namespace Mantid
 namespace Kernel
 {
 
-/** @class LibraryManager LibraryManager.h Kernel/LibraryManager.h
-
+/** 
  Class for opening shared libraries.
  
  @author ISIS, STFC

@@ -94,7 +94,7 @@ public:
   /// @param pAbstractFactory A pointer to an abstractFactory for this class
   void subscribe(const std::string& className, AbstractFactory* pAbstractFactory)
   {
-	std::cout << "class: " << className << std::endl;  
+//	std::cout << "class: " << className << std::endl;  
     typename FactoryMap::iterator it = _map.find(className);
     if (!className.empty() && it == _map.end())
       _map[className] = pAbstractFactory;

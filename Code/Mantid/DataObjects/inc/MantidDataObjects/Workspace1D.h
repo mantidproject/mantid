@@ -5,9 +5,12 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
-/** @class Workspace1D
+namespace Mantid
+{
+namespace DataObjects
+{
 
-    Concrete workspace implementation. Data is a Histogram1D      	
+/** Concrete workspace implementation. Data is a Histogram1D      	
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007 	
     
@@ -31,11 +34,6 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */ 	
-namespace Mantid
-{
-namespace DataObjects
-{
-
 class DLLExport Workspace1D : public API::Workspace, public Histogram1D
 {
 
