@@ -108,6 +108,10 @@ public:
     TS_ASSERT_DELTA( ptrDet1000->getPos().Y(), 11.12,0.01);
     TS_ASSERT_DELTA( ptrDet1000->getPos().Z(), 0.43,0.01);
     TS_ASSERT_EQUALS( ptrDet1000->type(), "DetectorComponent");
+    double d = ptrDet1000->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,4.0435,0.0001);
+    double cmpDistance = ptrDet1000->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,4.0435,0.0001);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);

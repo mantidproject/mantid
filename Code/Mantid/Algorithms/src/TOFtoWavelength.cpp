@@ -70,9 +70,11 @@ void TOFtoWavelength::exec()
     g_log.debug() << "Source-sample distance: " << deltaSourceSample << std::endl;
   } catch (Exception::NotFoundError e) {
     g_log.error("Unable to calculate source-sample distance");
-	throw std::runtime_error("Unable to calculate source-sample distance");
+	  throw std::runtime_error("Unable to calculate source-sample distance");
   }
-  
+
+  const int notFailed = -99;
+  int failedDetectorIndex = notFailed;
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
     
@@ -86,7 +88,12 @@ void TOFtoWavelength::exec()
     double deltaSampleDetector;
     try {
       deltaSampleDetector = instrument.getDetector(i)->getDistance(samplePos);
-      g_log.debug() << "Sample-detector[" << i << "] distance: " << deltaSampleDetector << std::endl; 
+      //g_log.debug() << "Sample-detector[" << i << "] distance: " << deltaSampleDetector << std::endl; 
+      if (failedDetectorIndex != notFailed)
+      {
+        g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
+        failedDetectorIndex = notFailed;
+      }
       
       // Factors to get the units right
       const double TOFisinMicroseconds = 1e-6;
@@ -100,7 +107,11 @@ void TOFtoWavelength::exec()
 
     } catch (Exception::NotFoundError e) {
       // Get to here if exception thrown when calculating distance to detector
-      g_log.information() << "Unable to calculate sample-detector[" << i << "] distance. Zeroing spectrum." << std::endl;
+      //g_log.information() << "Unable to calculate sample-detector[" << i << "] distance. Zeroing spectrum." << std::endl;
+      if (failedDetectorIndex == notFailed)
+      {
+        failedDetectorIndex = i;
+      }
       XBins.assign(XBins.size(),0.0);
       YData.assign(YData.size(),0.0);
       errors.assign(errors.size(),0.0);
@@ -109,6 +120,10 @@ void TOFtoWavelength::exec()
     // Store the result into the output workspace
     localWorkspace->setX(i, XBins);
     localWorkspace->setData(i, YData, errors);
+  }
+  if (failedDetectorIndex != notFailed)
+  {
+    g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << numberOfSpectra-1 << "] distance. Zeroing spectrum." << std::endl;
   }
   
   // Assign the result to the output workspace property

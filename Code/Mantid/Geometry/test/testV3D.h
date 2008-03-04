@@ -274,6 +274,16 @@ public:
 		double d=a.distance(b);
 		TS_ASSERT_EQUALS(d,2.0*sqrt(3.0));
 	}
+
+  void testSpherical()
+  {
+    double r=3,theta=2,phi=1;
+    a(0.0,0.0,0.0);
+    b(0.0,0.0,0.0);
+    b.spherical(r,theta,phi);
+    double d=a.distance(b);
+		TS_ASSERT_DELTA(d,r,0.0001);
+  }
 	
 };
 

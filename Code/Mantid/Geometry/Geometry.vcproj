@@ -372,11 +372,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -428,11 +428,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\Deprecated\inc\IndexIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -532,6 +532,34 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\testCompAssembly.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testDetector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testMatrix.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testObjComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testQuat.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\testV3D.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Torus.h"
 				>
 			</File>
@@ -568,19 +596,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomment.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLcomment.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomp.h"
+				RelativePath=".\auxinc\XMLcomment.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\XMLcomp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLcomp.h"
 				>
 			</File>
 			<File
@@ -600,19 +628,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgroup.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLgroup.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLindex.h"
+				RelativePath=".\auxinc\XMLgroup.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLindex.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLindex.h"
 				>
 			</File>
 			<File
@@ -624,11 +652,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLobject.h"
+				RelativePath=".\Deprecated\inc\XMLobject.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLobject.h"
+				RelativePath=".\auxinc\XMLobject.h"
 				>
 			</File>
 			<File
@@ -640,11 +668,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File

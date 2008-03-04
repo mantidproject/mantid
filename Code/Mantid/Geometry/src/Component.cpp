@@ -215,7 +215,7 @@ const Quat& Component::getRelativeRot() const
  */
 double Component::getDistance(const Component& comp) const
 {
-	return pos.distance(comp.pos);
+	return getPos().distance(comp.getPos());
 }
 
 /** Prints a text representation of itself
