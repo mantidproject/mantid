@@ -17,11 +17,11 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class WorkspaceTest: public Workspace
   {
   public:
-    WorkspaceTest() : data(std::vector<double>(1)) {}
+    WorkspaceTest() : data(std::vector<double>(1,1)) {}
     virtual const std::string id() const {return "WorkspaceTest";}
     //section required to support iteration
     virtual int size() const {return 1000000;}
-    virtual int blocksize() const  {return 1000000;}
+    virtual int blocksize() const  {return 10000;}
     virtual std::vector<double>& dataX(int const index) {return data;}
     ///Returns the y data
     virtual std::vector<double>& dataY(int const index) {return data;}
@@ -52,6 +52,13 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   {
   public:
     const std::string id() const {return "Workspace2DTest";}
+    void init(const int &NVectors, const int &XLength, const int &YLength)
+    {
+      size.push_back(NVectors);
+      size.push_back(XLength);
+      size.push_back(YLength);
+    }
+    std::vector<int> size;
   };
 
   class ManagedWorkspace2DTest: public WorkspaceTest
@@ -103,6 +110,10 @@ public:
     Workspace_sptr ws2D(new Workspace2DTest);
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) )
     TS_ASSERT( ! child->id().compare("Workspace2DTest") )
+    Workspace2DTest& space = dynamic_cast<Workspace2DTest&>(*child);
+    TS_ASSERT_EQUALS( space.size[0], 100 )
+    TS_ASSERT_EQUALS( space.size[1], 1 )
+    TS_ASSERT_EQUALS( space.size[2], 10000 )
 
     Workspace_sptr mws2D(new ManagedWorkspace2DTest);
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) )
@@ -115,9 +126,14 @@ public:
   void testAccordingToSize()
   {
     Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",1,1,1) )
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",1,2,3) )
     TS_ASSERT( ! ws->id().compare("Workspace2DTest") )
+    Workspace2DTest& space = dynamic_cast<Workspace2DTest&>(*ws);
+    TS_ASSERT_EQUALS( space.size[0], 1 )
+    TS_ASSERT_EQUALS( space.size[1], 2 )
+    TS_ASSERT_EQUALS( space.size[2], 3 )
 
+    // ManagedWorkspace.MinSize should be set to 99 in MantidTest.properties file
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",10,10,10) )
     TS_ASSERT( ! ws->id().compare("ManagedWorkspace2D") )
     
@@ -127,8 +143,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",10,10,10) )
     TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
     
-    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotThere",1,1,1), std::runtime_error )
-    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotThere",10,10,10), std::runtime_error ) 
+    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error )
+    TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error ) 
   }
 };
 
