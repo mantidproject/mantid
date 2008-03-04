@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/GaussianErrorHelper.h"
 
 
 #include <sstream>
@@ -57,6 +58,7 @@ namespace Mantid
       // Get the input workspace
       Workspace_sptr inputW = getProperty("InputWorkspace");
 
+      
 
       // workspace independent determination of length
       int histnumber = inputW->size()/inputW->blocksize();
@@ -68,6 +70,14 @@ namespace Mantid
 
       for (int hist=0; hist <  histnumber;hist++)
       {
+        API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
+        if(dynamic_cast<API::GaussianErrorHelper*>(e_ptr) ==0)
+        {
+          g_log.error("Can only rebin Gaussian data");
+          throw std::invalid_argument("Invalid input Workspace");
+        }
+          
+      
         // get const references to input Workspace arrays (no copying)
         const std::vector<double>& XValues = inputW->dataX(hist);
         const std::vector<double>& YValues = inputW->dataY(hist);
