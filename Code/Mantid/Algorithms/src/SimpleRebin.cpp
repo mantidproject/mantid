@@ -7,6 +7,8 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/ArrayProperty.h"
+
 
 #include <sstream>
 #include <numeric>
@@ -24,13 +26,11 @@ namespace Mantid
     using API::WorkspaceProperty;
     using API::Workspace_sptr;
     using API::Workspace;
-    //    using DataObjects::Workspace1D_sptr;
-    //    using DataObjects::Workspace1D;
-
+ 
     // Get a reference to the logger
     Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
 
-    /** Initialisation method. Does nothing at present.
+    /** Initialisation method. Declares properties to be used in algorithm.
     * 
     */
     void SimpleRebin::init()
@@ -38,12 +38,8 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      //      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
-      //      mustBePositive->setLower(0);
-      declareProperty("xlo",0.0);
-      declareProperty("delta",0.0);
-      declareProperty("xhi",0.0);
       declareProperty("dist",1);
+      declareProperty(new ArrayProperty<double>("params"));
 
     }
 
@@ -54,28 +50,19 @@ namespace Mantid
     void SimpleRebin::exec()
     {
       // retrieve the properties
-      double xlo = getProperty("xlo");
-      double delta = getProperty("delta");
-      double xhi = getProperty("xhi");
-      int dist = getProperty("dist");
 
+      int dist = getProperty("dist");
+      std::vector<double> rb_params=getProperty("params");
+      
       // Get the input workspace
       Workspace_sptr inputW = getProperty("InputWorkspace");
 
-      // Create vectors to hold input parameters
-      std::vector<double> xbounds;
-      std::vector<double> xsteps;
-
-      // create input vector from input properties
-      xbounds.push_back(xlo);
-      xbounds.push_back(xhi);
-      xsteps.push_back(delta);
 
       // workspace independent determination of length
       int histnumber = inputW->size()/inputW->blocksize();
       std::vector<double> XValues_new;
       // create new output X axis
-      int ntcnew = newAxis(xbounds,xsteps,XValues_new);
+      int ntcnew = newAxis(rb_params,XValues_new);
       // make output Workspace the same type is the input, but with new length of signal array
       API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW->id(),histnumber,ntcnew,ntcnew-1);
 
@@ -164,6 +151,7 @@ namespace Mantid
           {
             // yold/eold data is distribution
             ynew[inew] += yold[iold]*delta;
+            // this error is calculated in the same way as opengenie
             enew[inew] += eold[iold]*eold[iold]*delta*width;
           }
           else
@@ -173,7 +161,7 @@ namespace Mantid
             // this method is ~7% faster and uses less memory
             ynew[inew] += yold[iold]*delta/width; //yold=yold/width
             // eold=eold/width, so divide by width**2 compared with distribution calculation
-            enew[inew] += eold[iold]*eold[iold]*delta/width; 
+            enew[inew] += eold[iold]*eold[iold]*delta/width;
           }
           if ( xn_high > xo_high )
           {
@@ -219,54 +207,44 @@ namespace Mantid
 
     /** Creates a new  output X array  according to specific boundary defnitions
     *
-    * @param xbounds - array defining limits of particular step size
-    * @param xsteps - contains the bin size to use within the limits deined by xbounds
-    * e.g. step xstep[0] between xbounds[0] and xbounds[1]
-    *      step xstep[1] between xbounds[1] and xbounds[2]
+    * @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
     * @param xnew - new output workspace x array
-    * @throw invalid_argument Thrown if input to function is incorrect
     **/
-    int SimpleRebin::newAxis(const std::vector<double>& xbounds,
-      const std::vector<double>& xsteps, 
+    int SimpleRebin::newAxis(const std::vector<double>& params,
       std::vector<double>& xnew)
     {
       double xcurr, xs;
-      int i(1), j(0), inew(1);
-      int isteps=xsteps.size();
-      int ibounds=xbounds.size();
+      int ibound(2), istep(1), inew(1);      
+      int ibounds=params.size(); //highest index in params array containing a bin boundary
+      int isteps=ibounds-1; // highest index in params array containing a step
 
-      if(ibounds != isteps+1)
-      {
-        g_log.error("SimpleRebin: length  of xbounds/xsteps arrays incompatible ");
-        throw std::invalid_argument("SimpleRebin: length  of xbounds/xsteps arrays incompatible");
-      }
-
-      xcurr = xbounds[0];
+      xcurr = params[0];
       xnew.push_back(xcurr);
 
-      while( (i < ibounds) && (j < isteps) )
+      while( (ibound <= ibounds) && (istep <= isteps) )
       {
         // if step is negative then it is logarithmic step
-        if ( xsteps[j] >= 0.0)        
-          xs = xsteps[j];        
+        if ( params[istep] >= 0.0)        
+          xs = params[istep];        
         else 
-          xs = xcurr * fabs(xsteps[j]);
+          xs = xcurr * fabs(params[istep]);
         /* continue stepping unless we get to almost where we want to */
-        if ( (xcurr + xs) < (xbounds[i] - (xs * 1.E-6)) )
+        if ( (xcurr + xs) < (params[ibound] - (xs * 1.E-6)) )
         {
           xcurr += xs;
         }
         else
         {
-          xcurr = xbounds[i];
-          i++;
-          j++;
+          xcurr = params[ibound];
+          ibound+=2;
+          istep+=2;
         }
         xnew.push_back(xcurr);
         inew++;
       }
       //returns length of new x array or -1 if failure
-      return( (i == ibounds) && (j == isteps) ? inew : -1 );
+      return inew;
+      //return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
     }
 
   } // namespace Algorithm

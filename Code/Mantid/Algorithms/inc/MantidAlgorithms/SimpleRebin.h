@@ -71,8 +71,7 @@ namespace Mantid
       void exec();
       void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& , 
           const std::vector<double>& , std::vector<double>&, std::vector<double>&, int);
-      int newAxis(const std::vector<double>& , const std::vector<double>& , 
-      std::vector<double>&);
+      int newAxis(const std::vector<double>& , std::vector<double>& );       
         /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
