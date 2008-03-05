@@ -222,7 +222,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadInstrumentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadLog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadLogTest.h"
 				>
 			</File>
 			<File
@@ -231,6 +239,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadRawTest.h"
 				>
 			</File>
 			<File

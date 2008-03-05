@@ -96,18 +96,16 @@ public:
   ///Returns the error data
   virtual std::vector<double>& dataE2(int const index)  =0;
 
-  ///Returns the ErrorHelper applicable for this detector
-  virtual IErrorHelper* errorHelper(int const index) const
-  {
-    //this is a very temporary solution here.
-    return GaussianErrorHelper::Instance();
-  }
-  ///Returns the detector
-  virtual int spectraNo(int const index) const
-  {
-    //this is a very temporary solution here.
-    return index;
-  }
+  ///Returns the ErrorHelper applicable for this spectra
+  virtual const IErrorHelper* errorHelper(int const index)  const=0;
+  ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) =0;
+  ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) =0;
+
+  ///Returns the spectra number
+  virtual int spectraNo(int const index) const =0;
+  virtual int& spectraNo(int const index) =0;
 
   //Get methods return the histogram number 
   ///Returns the x data const
@@ -118,20 +116,6 @@ public:
   virtual const std::vector<double>& dataE(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const =0;
-
-  ///sets the x data const
-//  virtual void setX(int const index, const std::vector<double> ) const = 0;
-  /// sets the y data const 
-//  virtual void setY(int const index, const std::vector<double>) const =0;
-  /// sets the error data const
-//  virtual void setE(int const index, const std::vector<double>) const =0;  
-  ///sets the error data const
-//  virtual void setE2(int const index, const std::vector<double>) const =0;
-
-
-
-
-
 
   ///Returns a reference to the WorkspaceHistory
   WorkspaceHistory& getWorkspaceHistory() { return m_history; }

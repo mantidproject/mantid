@@ -70,8 +70,8 @@ namespace Mantid
 
       for (int hist=0; hist <  histnumber;hist++)
       {
-        API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
-        if(dynamic_cast<API::GaussianErrorHelper*>(e_ptr) ==0)
+        const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
+        if(dynamic_cast<const API::GaussianErrorHelper*>(e_ptr) ==0)
         {
           g_log.error("Can only rebin Gaussian data");
           throw std::invalid_argument("Invalid input Workspace");
@@ -91,6 +91,9 @@ namespace Mantid
         rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, dist);
         // Populate the output workspace X values
         outputW->dataX(hist)=XValues_new;
+        //copy oer the spectrum No and ErrorHelper
+        outputW->spectraNo(hist)=inputW->spectraNo(hist);
+        outputW->setErrorHelper(hist,inputW->errorHelper(hist));
       }
 
       // Assign it to the output workspace property

@@ -214,10 +214,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\TripleIteratorTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidDataObjects\Workspace1D.h"
 				>
 			</File>

@@ -5,6 +5,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidAPI/IErrorHelper.h"
 
 namespace Mantid
 {
@@ -50,6 +51,8 @@ private:
   RCtype refY;   ///< RefCounted Y
   RCtype refE;   ///< RefCounted Error
   RCtype refE2;  ///< Second error value for when Poisson errors used
+  const API::IErrorHelper* _errorHelper; ///<pointer to the error helper class for this spectra
+  int _spectraNo; ///< The spectra no for this histogram 0 = not set
 
 public:
   Histogram1D();
@@ -124,6 +127,14 @@ public:
   /// Gets the memory size of the histogram
   long int getMemorySize() const 
     { return (refX->size()+refY->size()+refE->size()+refE2->size())*sizeof(double); }
+
+  ///Returns the ErrorHelper applicable for this detector
+  void setErrorHelper(const API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
+  void setErrorHelper(API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
+  const API::IErrorHelper* errorHelper() const { return _errorHelper; }
+  ///Returns the detector
+  const int spectraNo() const { return _spectraNo; }
+  int& spectraNo() { return _spectraNo; }
 
 };
 

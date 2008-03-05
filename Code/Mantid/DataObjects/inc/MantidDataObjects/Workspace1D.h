@@ -3,6 +3,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IErrorHelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
@@ -98,6 +99,17 @@ public:
   virtual const std::vector<double>& dataE(int const index) const {return dataE();}
   /// Returns the error const
   virtual const std::vector<double>& dataE2(int const index) const {return dataE2();}
+
+  ///Returns the ErrorHelper applicable for this detector
+  virtual const API::IErrorHelper* errorHelper(int const index) const { return Histogram1D::errorHelper(); }
+  ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
+   ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
+  ///Returns the detector
+  virtual int spectraNo(int const index) const { return Histogram1D::spectraNo(); }
+  ///Returns the detector
+  virtual int& spectraNo(int const index){ return Histogram1D::spectraNo(); }
 
 protected:
 

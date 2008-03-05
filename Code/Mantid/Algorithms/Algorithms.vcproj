@@ -276,6 +276,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SimpleRebinTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\TOFtoWavelength.h"
 				>
 			</File>

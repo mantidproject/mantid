@@ -112,6 +112,18 @@ public:
 
   virtual long int getMemorySize() const;
 
+  ///Returns the ErrorHelper applicable for this spectra
+  virtual const API::IErrorHelper* errorHelper(int const index) const;
+  ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper);
+  ///Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
+
+  ///Returns the detector
+  virtual int spectraNo(int const index) const;
+  ///Returns the detector
+  virtual int& spectraNo(int const index);
+
 private:
   virtual const int getHistogramNumberHelper() const;
 };

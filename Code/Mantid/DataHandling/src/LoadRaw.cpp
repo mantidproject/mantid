@@ -90,6 +90,8 @@ namespace DataHandling
       // Populate the workspace. Loop starts from 1, hence i-1
       m_localWorkspace->setData(i-1, v, e);
       m_localWorkspace->setX(i-1, timeChannelsVec);
+      m_localWorkspace->setErrorHelper(i-1,GaussianErrorHelper::Instance());
+      m_localWorkspace->spectraNo(i-1)= i;
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }

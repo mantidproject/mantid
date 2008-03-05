@@ -286,6 +286,7 @@ namespace Mantid
       {
         return (m_workspace->dataX(0).size() > m_workspace->dataY(0).size());
       }
+      return false;
     }
 
 
