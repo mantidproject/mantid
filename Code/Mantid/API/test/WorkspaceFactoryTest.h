@@ -6,6 +6,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
@@ -38,8 +39,20 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual const std::vector<double>& dataE2(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    
+    ///Returns the ErrorHelper applicable for this spectra
+    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) {}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) {}
+
+  ///Returns the spectra number
+    virtual int spectraNo(int const index) const{ return dummy;}
+    virtual int& spectraNo(int const index) { return dummy;}
   private:
     std::vector<double> data;
+    int dummy;
   };
 	
   class Workspace1DTest: public WorkspaceTest

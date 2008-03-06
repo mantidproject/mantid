@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/GaussianErrorHelper.h"
 #include "boost/shared_ptr.hpp"
 
 using namespace Mantid::Kernel;
@@ -36,8 +37,19 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual const std::vector<double>& dataE2(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    ///Returns the ErrorHelper applicable for this spectra
+    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) {}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) {}
+
+    ///Returns the spectra number
+    virtual int spectraNo(int const index) const{ return dummy;}
+    virtual int& spectraNo(int const index) { return dummy;}
   private:
     std::vector<double> data;
+    int dummy;
   };
 
   // Second, identical private test class - used for testing check on workspace type in isValid()
@@ -64,8 +76,19 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual const std::vector<double>& dataE2(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
+    ///Returns the ErrorHelper applicable for this spectra
+    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) {}
+    ///Sets the ErrorHelper for this spectra
+    virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) {}
+
+    ///Returns the spectra number
+    virtual int spectraNo(int const index) const{ return dummy;}
+    virtual int& spectraNo(int const index) { return dummy;}
   private:
     std::vector<double> data;
+    int dummy;
   };
 
 public:
