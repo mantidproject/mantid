@@ -7,6 +7,16 @@
 #include "MantidDataHandling/DataHandlingCommand.h"
 #include "MantidKernel/Logger.h"
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+/// @cond Exclude from doxygen documentation
+namespace Poco {
+namespace XML {
+	class Element;
+}}
+/// @endcond
+
 namespace Mantid
 {
   namespace DataHandling
@@ -30,6 +40,8 @@ namespace Mantid
 
     @author Nick Draper, Tessella Support Services plc
     @date 19/11/2007
+    @author Anders Markvardsen, ISIS, RAL
+    @date 7/3/2008
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
@@ -70,6 +82,22 @@ namespace Mantid
 
       /// Overwrites Algorithm method
       void exec();
+
+      /// Add XML element to parent assuming the element contains other component elements
+      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
+
+      /// Add XML element to parent assuming the element contains no other component elements
+      void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
+
+      /// Set location (position) of comp as specified in XML location element
+      void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
+
+      /// map which holds names of types and whether or not they are catagorised as being 
+      /// assembles, which means whether the type element contains component elements
+      std::map<std::string,bool> isTypeAssemply;
+
+      /// map which holds names of types and pointers to these type for fast retrievel in code
+      std::map<std::string,Poco::XML::Element*> getTypeElement;
 
       /// The name and path of the input file
       std::string m_filename;

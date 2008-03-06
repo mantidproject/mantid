@@ -111,6 +111,33 @@ const char* ExistsError::what() const throw()
 	return outMessage.c_str();
 }
 
+//-------------------------
+// InstrumentDefinitionError
+//-------------------------
+/** Constructor
+	@param Desc Function description
+	@param ObjectName The name of the search object
+*/
+InstrumentDefinitionError::InstrumentDefinitionError(const std::string& Desc,const std::string& ObjectName) :
+std::runtime_error(Desc),objectName(ObjectName)
+{
+	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
+}
+ 
+/// Copy constructor
+InstrumentDefinitionError::InstrumentDefinitionError(const InstrumentDefinitionError& A) :
+  std::runtime_error(A),objectName(A.objectName)
+{}
+
+/** Writes out the range and limits
+	@returns a char array of foramtted error information
+*/
+const char* InstrumentDefinitionError::what() const throw()
+{
+	return outMessage.c_str();
+}
+
+
 } // namespace Exception
 } // namespace Kernel
 } // namespace Mantid

@@ -42,6 +42,7 @@ namespace Kernel
 				<li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
 				<li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
 				<li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
+        <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
 			</ul>
 			</li>
 		</ul>
@@ -168,6 +169,27 @@ ExistsError : public std::runtime_error
   ExistsError& operator=(const ExistsError& A);
   /// Destructor
   ~ExistsError() throw() {}
+
+  const char* what() const throw();
+};
+
+/// Exception for errors associated with the instrument definition.
+/// This might e.g. occur while reading the instrument definition file. 
+class DLLExport InstrumentDefinitionError : public std::runtime_error
+{
+ private:
+  /// The name of the search object
+  const std::string objectName;
+  /// The message returned by what()
+  std::string outMessage;
+
+ public:
+  InstrumentDefinitionError(const std::string&,const std::string&);
+  InstrumentDefinitionError(const InstrumentDefinitionError& A);
+  /// Assignment operator
+  InstrumentDefinitionError& operator=(const InstrumentDefinitionError& A);
+  /// Destructor
+  ~InstrumentDefinitionError() throw() {}
 
   const char* what() const throw();
 };

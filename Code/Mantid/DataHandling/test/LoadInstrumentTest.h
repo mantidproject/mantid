@@ -69,7 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Instrument/HET_Definition.txt";
+    inputFile = "../../../../Test/Instrument/HET_cutdown_version.xml";
     loader.setPropertyValue("Filename", inputFile);
 
     loader.setPropertyValue("Workspace", wsName);
@@ -82,7 +82,8 @@ public:
     TS_ASSERT( ! result.compare(wsName));
 
 
-    TS_ASSERT_THROWS_NOTHING(loader.execute());    
+    //loader.execute();  
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     TS_ASSERT( loader.isExecuted() );    
     
@@ -93,25 +94,28 @@ public:
     Instrument& i = output->getInstrument();
     Mantid::Geometry::Component* source = i.getSource();
     TS_ASSERT_EQUALS( source->getName(), "Source");
-    TS_ASSERT_EQUALS( source->getPos(), Mantid::Geometry::V3D(0,0,0));
+    //TS_ASSERT_EQUALS( source->getPos(), Mantid::Geometry::V3D(0,0,0));
+    TS_ASSERT_DELTA( source->getPos().Y(), 10.0,0.01);
 
     Mantid::Geometry::Component* samplepos = i.getSamplePos();
     TS_ASSERT_EQUALS( samplepos->getName(), "SamplePos");
-    TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
+    //TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),2184);
+    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),3);
 
-    Mantid::Geometry::Detector *ptrDet1000 = i.getDetector(1000);
-    TS_ASSERT_EQUALS( ptrDet1000->getID(), 1000);
-    TS_ASSERT_EQUALS( ptrDet1000->getName(), "PSD");
-    TS_ASSERT_DELTA( ptrDet1000->getPos().X(), 3.86,0.01);
-    TS_ASSERT_DELTA( ptrDet1000->getPos().Y(), 11.12,0.01);
-    TS_ASSERT_DELTA( ptrDet1000->getPos().Z(), 0.43,0.01);
-    TS_ASSERT_EQUALS( ptrDet1000->type(), "DetectorComponent");
-    double d = ptrDet1000->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,4.0435,0.0001);
-    double cmpDistance = ptrDet1000->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,4.0435,0.0001);
+    Mantid::Geometry::Detector *ptrDet103 = i.getDetector(103);
+    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
+    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
+    TS_ASSERT_DELTA( ptrDet103->getPos().X(), -3.641,0.01);
+    //TS_ASSERT_DELTA( ptrDet103->getPos().Y(), -1.7032,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.253,0.01);
+    double d = ptrDet103->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,9.0642,0.0001);
+    double cmpDistance = ptrDet103->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,9.0642,0.0001);
+
+    TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);

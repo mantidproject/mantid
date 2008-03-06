@@ -82,9 +82,11 @@ public:
 
     return ins.str();
 	}
-	
 
-	// Overwrite Property method
+  /** Overwrite Property method.
+   *
+   *  @throws Exception::NotImplementedError Not yet implemented
+   */
 	bool setValue( const std::string& value )
 	{
 	  throw Exception::NotImplementedError("Not yet");
