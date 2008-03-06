@@ -67,7 +67,16 @@ void LoadInstrument::exec()
   // Set up the DOM parser and parse xml file
 
   DOMParser pParser; 
-  Document* pDoc = pParser.parse(m_filename);
+  Document* pDoc;
+  try 
+  {
+    pDoc = pParser.parse(m_filename);
+  }
+  catch(...)
+  {
+    g_log.error("Unable to XML parse file " + m_filename);
+    throw Kernel::Exception::FileError("Unable to XML parse File:" , m_filename);	      
+  }
 
 
   // Get pointer to root element and list of all elements with

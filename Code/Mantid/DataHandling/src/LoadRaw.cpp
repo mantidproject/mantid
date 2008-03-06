@@ -116,8 +116,9 @@ namespace DataHandling
     // First deal with LoadInstruments
     Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
     // Hardcoded filename for now...this will certainly change
-    loadInst->setPropertyValue("Filename","../../../../Test/Instrument/HET_Definition.txt");
+    loadInst->setPropertyValue("Filename","../../../../Test/Instrument/HET_cutdown_version.xml");
     // Set the workspace property to be the same one filled above
+
     loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
     
     // Now execute the sub-algorithm. Catch and log any error, but don't stop.
