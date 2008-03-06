@@ -43,9 +43,9 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     ///Returns the ErrorHelper applicable for this spectra
     virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
     ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) {}
+    virtual void setErrorHelper(int const index,IErrorHelper* errorHelper) {}
     ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) {}
+    virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
   ///Returns the spectra number
     virtual int spectraNo(int const index) const{ return dummy;}
