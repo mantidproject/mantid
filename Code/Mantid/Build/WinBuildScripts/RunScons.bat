@@ -7,4 +7,4 @@ svn log -v -rBASE > ..\logs\svn.log
 svn up ../Third_Party
 svn up ../../Test
 doxygen Build\Mantid.doxyfile 2> ..\logs\doxy.log
-build.bat 1> ..\logs\scons.log 2> ..\logs\sconsErr.log
+build.bat "skiptest=1" 1> ..\logs\scons.log 2> ..\logs\sconsErr.log
