@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib libnexus-0.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
@@ -184,11 +184,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadNeXus.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\src\NeXusUtils\NeXusUtils.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveCSV.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SaveNeXus.cpp"
 				>
 			</File>
 			<File
@@ -246,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\NeXusUtils\NeXusUtils.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\SaveCSV.h"
 				>
 			</File>
@@ -255,6 +271,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveNeXus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SaveNeXusTest.h"
 				>
 			</File>
 			<File
