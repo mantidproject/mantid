@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFtoWavelength.h"
-#include "MantidAlgorithms/PhysicalConstants.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/WorkspaceProperty.h"

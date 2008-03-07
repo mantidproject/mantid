@@ -55,7 +55,7 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
    *  inserted items, listing first the newer ones. Care has to be
    *  taken when a duplicate item is inserted: instead of letting it
    *  appear twice, the MRU list relocates it to the first position.
-   *  This class has been taken one of the examples given in the
+   *  This class has been taken from one of the examples given in the
    *  Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
    */
   class mru_list

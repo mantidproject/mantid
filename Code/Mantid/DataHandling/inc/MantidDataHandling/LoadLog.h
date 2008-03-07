@@ -28,11 +28,13 @@ namespace Mantid
 
     LoadLog is an algorithm and as such inherits from the Algorithm class, 
     via DataHandlingCommand, and overrides the init() & exec() methods.
+    LoadLog is intended to be used as a child algorithm of 
+    other Loadxxx algorithms, rather than being used directly.
 
     Required Properties:
     <UL>
     <LI> Filename - The full name of and path of the input ISIS log file </LI>
-    <LI> OutputWorkspace - A name specified for the output storage space </LI>
+    <LI> Workspace - The workspace to which to append the log data </LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

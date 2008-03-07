@@ -34,8 +34,7 @@ namespace Mantid
     Required Properties:
     <UL>
     <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> InputWorkspace - The name of the workspace in which to use as a basis for any data to be added, a blank 2dWorkspace will be used as a default.</LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
