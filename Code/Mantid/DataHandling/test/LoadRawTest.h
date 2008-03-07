@@ -104,10 +104,97 @@ public:
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
     
   }
+
+    void testarrayin()
+  {
+    if ( !loader2.isInitialized() ) loader2.initialize();
+    
+    // Now set it...  
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Data/HET15869.RAW";
+    loader2.setPropertyValue("Filename", inputFile);    
+    loader2.setPropertyValue("OutputWorkspace", "outWS");    
+    loader2.setPropertyValue("spectrum_list", "998,999,1000");
+    loader2.setPropertyValue("spectrum_min", "5");
+    loader2.setPropertyValue("spectrum_max", "10");
+    
+    TS_ASSERT_THROWS_NOTHING(loader2.execute());    
+    TS_ASSERT( loader2.isExecuted() );    
+    
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));    
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    
+    // Should be 6 for selected input
+    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 9);
+    
+    // Check two X vectors are the same
+    TS_ASSERT( (output2D->dataX(1)) == (output2D->dataX(5)) );
+    
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(7).size() );
+
+    // Check one particular value
+    TS_ASSERT_EQUALS( output2D->dataY(8)[777], 9);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataE(8)[777], 3);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
+    
+  }
   
-  
+   void testfail()
+  {
+    if ( !loader3.isInitialized() ) loader3.initialize();
+    
+    // Now set it...  
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Data/HET15869.RAW";
+    loader3.setPropertyValue("Filename", inputFile);    
+    loader3.setPropertyValue("OutputWorkspace", "out");    
+    loader3.setPropertyValue("spectrum_list", "0,999,1000");
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "10");
+    loader3.execute();
+    Workspace_sptr output;
+    // test that there is no workspace as it should have failed
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+ 
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "0");
+     loader3.execute();   
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "3");
+     loader3.execute();   
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "5");
+     loader3.execute();   
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "3000");
+    loader3.execute();   
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+
+    loader3.setPropertyValue("spectrum_min", "5");
+    loader3.setPropertyValue("spectrum_max", "10");
+    loader3.setPropertyValue("spectrum_list", "999,3000");
+    loader3.execute();   
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
+
+    loader3.setPropertyValue("spectrum_list", "999,2000");
+    loader3.execute();   
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out"));    
+
+
+  }
 private:
-  LoadRaw loader;
+  LoadRaw loader,loader2,loader3;
   std::string inputFile;
   std::string outputSpace;
   

@@ -8,6 +8,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+
+class ISISRAW;
+
+
 namespace Mantid
 {
   namespace DataHandling
@@ -80,6 +84,8 @@ namespace Mantid
 
       /// Run the sub-algorithms
       void runSubAlgorithms();
+
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , int& , int* );
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
