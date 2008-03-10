@@ -184,16 +184,7 @@ namespace Kernel
 	{
 		return m_pSysConfig->getString("system.currentDir");
 	}
-	  
-  /** Gets the absolute path of the home directory 
-   *
-   * @returns The absolute path of the home directory 
-   */
-	std::string ConfigServiceImpl::getHomeDir()
-	{
-		return m_pSysConfig->getString("system.homeDir");
-	}
-	
+	  	
   /** Gets the absolute path of the temp directory 
    *
    * @returns The absolute path of the temp directory 

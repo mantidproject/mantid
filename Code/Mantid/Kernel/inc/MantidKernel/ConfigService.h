@@ -130,7 +130,6 @@ namespace Kernel
 		std::string getOSArchitecture();
 		std::string getOSVersion();	
 		std::string getCurrentDir();
-		std::string getHomeDir();
 		std::string getTempDir();
 
 	private:
