@@ -187,6 +187,20 @@ int PropertyManager::getValue<int>(const std::string &name) const
 }
 
 template<> DLLExport
+bool PropertyManager::getValue<bool>(const std::string &name) const
+{
+  PropertyWithValue<bool> *prop = dynamic_cast<PropertyWithValue<bool>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
+
+template<> DLLExport
 double PropertyManager::getValue<double>(const std::string &name) const
 {
   PropertyWithValue<double> *prop = dynamic_cast<PropertyWithValue<double>*>(getPointerToProperty(name));

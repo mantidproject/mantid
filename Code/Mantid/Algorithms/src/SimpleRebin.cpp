@@ -39,7 +39,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      declareProperty("dist",1);
+      declareProperty("dist",true);
       declareProperty(new ArrayProperty<double>("params"));
 
     }
@@ -52,7 +52,7 @@ namespace Mantid
     {
       // retrieve the properties
 
-      int dist = getProperty("dist");
+      bool dist = getProperty("dist");
       std::vector<double> rb_params=getProperty("params");
       
       // Get the input workspace
@@ -116,7 +116,7 @@ namespace Mantid
     * @throw invalid_argument Thrown if input to function is incorrect
     **/
     void SimpleRebin::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, int distribution)
+      const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
 
     {
       int i,iold = 0,inew = 0;
