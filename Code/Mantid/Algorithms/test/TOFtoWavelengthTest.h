@@ -80,13 +80,13 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Test that y & e data is unchanged
-    std::vector<double> y = output2D->dataY(777);
-    std::vector<double> e = output2D->dataE(777);
+    std::vector<double> y = output2D->dataY(101);
+    std::vector<double> e = output2D->dataE(101);
     unsigned int ten = 10;
     TS_ASSERT_EQUALS( y.size(), ten );
     TS_ASSERT_EQUALS( e.size(), ten );
-    std::vector<double> yIn = input2D->dataY(777);
-    std::vector<double> eIn = input2D->dataE(777);
+    std::vector<double> yIn = input2D->dataY(101);
+    std::vector<double> eIn = input2D->dataE(101);
     TS_ASSERT_EQUALS( y[0], yIn[0] );
     TS_ASSERT_EQUALS( y[4], yIn[4] );
     TS_ASSERT_EQUALS( e[1], eIn[1] );
@@ -108,9 +108,9 @@ public:
     TS_ASSERT_EQUALS( yIn[3], 3.0);
     
     // Check that a couple of x bin boundaries have been correctly converted
-    x = output2D->dataX(500);
-    TS_ASSERT_DELTA( x[5], 1.4103, 0.001 );
-    TS_ASSERT_DELTA( x[10], 2.8206, 0.001 );
+    x = output2D->dataX(103);
+    TS_ASSERT_DELTA( x[5], 1.0375, 0.001 );
+    TS_ASSERT_DELTA( x[10], 2.0751, 0.001 );
     // Just check that an input bin boundary is unchanged
     std::vector<double> xIn = input2D->dataX(2066);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
