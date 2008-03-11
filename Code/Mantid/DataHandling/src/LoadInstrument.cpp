@@ -53,7 +53,8 @@ void LoadInstrument::init()
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  * 
- *  @throw runtime_error Thrown if algorithm cannot execute
+ *  @throw FileError Thrown if unable to parse XML file
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
 void LoadInstrument::exec()
 {
@@ -79,16 +80,14 @@ void LoadInstrument::exec()
   }
 
 
-  // Get pointer to root element and list of all elements with
-  // tag name component (this unfortunately means ALL elements
-  // with tag name component, that is, included any component element
-  // appearing anywhere in the xml document........
+  // Get pointer to root element
 
   Element* pRootElem = pDoc->documentElement();
 
   if ( !pRootElem->hasChildNodes() )
   {
-    // complain
+    g_log.error("XML file: " + m_filename + "contains no root element.");
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);	 
   }
 
 
@@ -98,7 +97,8 @@ void LoadInstrument::exec()
 
   if ( pNL_type->length() == 0 )
   {
-    // complain
+    g_log.error("XML file: " + m_filename + "contains no type elements.");
+    throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);	
   }
 
   for (int iType = 0; iType < pNL_type->length(); iType++)
@@ -122,7 +122,8 @@ void LoadInstrument::exec()
   // Get reference to Instrument and set its name
 
   API::Instrument& instrument = localWorkspace->getInstrument();
-  instrument.setName( pRootElem->getAttribute("name") );
+  if ( pRootElem->hasAttribute("name") ) 
+    instrument.setName( pRootElem->getAttribute("name") );
 
 
   // do analysis for each top level compoment element
@@ -185,8 +186,10 @@ void LoadInstrument::exec()
   return;
 }
 
-/** Assumes second argument is pointing to an assemble and append it to parent. Note
-    this method may call itself, i.e. it may act recursively.
+/** Assumes second argument is pointing to an assemble and this method appends 
+ *  it to the parent passed as the 1st arg. Note this method may call itself, 
+ *  i.e. it may act recursively.
+ *
  *  @param parent Parent to append assemble to
  *  @param pElem  Poco::XML element that points to the element in the XML doc we want to add  
  *  @return runningDetID Detector ID, which may be incremented if appendLeave is called
@@ -244,7 +247,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Element* pCo
 }
 
 
-/** Assumes second argument is pointing to a leaf, which here mean component element of a type which
+/** Assumes second argument is pointing to a leaf, which here mean component element that
  *  contains no sub-components. This component is appended to the parent (1st argument). 
  *
  *  @param parent Parent to append (none-assemble) component to

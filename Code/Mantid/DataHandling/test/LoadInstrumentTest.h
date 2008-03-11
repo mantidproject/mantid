@@ -69,7 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Instrument/HET_cutdown_version.xml";
+    inputFile = "../../../../Test/Instrument/HET_definition.xml";
     loader.setPropertyValue("Filename", inputFile);
 
     loader.setPropertyValue("Workspace", wsName);
@@ -81,12 +81,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(wsName));
 
-
     //loader.execute();  
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     TS_ASSERT( loader.isExecuted() );    
-    
+
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
@@ -102,18 +101,18 @@ public:
     //TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),3);
+    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),2184);
 
     Mantid::Geometry::Detector *ptrDet103 = i.getDetector(103);
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), -3.641,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 3.6527,0.01);
     //TS_ASSERT_DELTA( ptrDet103->getPos().Y(), -1.7032,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.253,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.2222,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,9.0642,0.0001);
+    TS_ASSERT_DELTA(d,9.0905,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,9.0642,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,9.0905,0.0001);
 
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
