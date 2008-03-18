@@ -39,10 +39,10 @@ class DLLExport Workspace1D : public API::Workspace, public Histogram1D
 {
 
 public:
-  /// Typedef for the triple_iterator to use with a Workspace1D
-  typedef API::triple_iterator<API::LocatedDataRef, Workspace1D> iterator;
-  /// Typedef for the const triple_iterator to use with a Workspace1D
-  typedef API::triple_iterator<const API::LocatedDataRef, const Workspace1D> const_iterator;  
+  /// Typedef for the workspace_iterator to use with a Workspace1D
+  typedef API::workspace_iterator<API::LocatedDataRef, Workspace1D> iterator;
+  /// Typedef for the const workspace_iterator to use with a Workspace1D
+  typedef API::workspace_iterator<const API::LocatedDataRef, const Workspace1D> const_iterator;  
   
   /**
   	Gets the name of the workspace type

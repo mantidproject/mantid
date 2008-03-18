@@ -12,7 +12,7 @@ namespace Mantid
     Null constructor
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>::triple_iterator() :
+    workspace_iterator<_Iterator, _Container>::workspace_iterator() :
       m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),
         m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),
         m_IsE2Present(false),m_IsX2Present(false)
@@ -23,7 +23,7 @@ namespace Mantid
     \param WA :: Workspace to take pointer
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA) :
+    workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA) :
       m_workspace(&WA),m_CPoint(),m_loopCount(1),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
       m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
@@ -39,7 +39,7 @@ namespace Mantid
     \param loopCount :: The number of time this iterator should loop over the same data before stopping.
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount) :
+    workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
       m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
@@ -58,7 +58,7 @@ namespace Mantid
     \param loopOrientation :: true = vertical, false = horizontal.
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>::triple_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
+    workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(loopOrientation),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
       m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
@@ -72,10 +72,10 @@ namespace Mantid
     
     /*!
     Copy constructor
-    \param A :: triple_iterator to copy
+    \param A :: workspace_iterator to copy
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>::triple_iterator(const triple_iterator<_Iterator, _Container>& A) :
+    workspace_iterator<_Iterator, _Container>::workspace_iterator(const workspace_iterator<_Iterator, _Container>& A) :
       m_workspace(A.m_workspace),m_CPoint(A.m_CPoint),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
       m_index(A.m_index),m_wsSize(A.m_wsSize),
       m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
@@ -89,7 +89,7 @@ namespace Mantid
     Validate the index
     */
     template<typename _Iterator, typename _Container>
-    void triple_iterator<_Iterator, _Container>::validateIndex()
+    void workspace_iterator<_Iterator, _Container>::validateIndex()
     {
       if (m_index<0 || !m_workspace)
         m_index=0;
@@ -169,9 +169,9 @@ namespace Mantid
     \return Iterator advanced by N
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator+(difference_type N) const
+    workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator+(difference_type N) const
     {
-      triple_iterator<_Iterator, _Container> Out(*this);
+      workspace_iterator<_Iterator, _Container> Out(*this);
       Out+=N;
       return Out;
     }
@@ -182,9 +182,9 @@ namespace Mantid
     \return Iterator decreased by N
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator-(difference_type N) const
+    workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator-(difference_type N) const
     {
-      triple_iterator<_Iterator, _Container> Out(*this);
+      workspace_iterator<_Iterator, _Container> Out(*this);
       Out-=N;
       return Out;
     }
@@ -195,7 +195,7 @@ namespace Mantid
     \return *this
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator+=(difference_type N)
+    workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator+=(difference_type N)
     {
       m_index+=N;
       validateIndex();
@@ -208,7 +208,7 @@ namespace Mantid
     \return *this
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator-=(difference_type N)
+    workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator-=(difference_type N)
     {
       m_index-=N;
       validateIndex();
@@ -220,7 +220,7 @@ namespace Mantid
     \return Iterator
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator++()
+    workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator++()
     {
       ++m_index;
       validateIndex();
@@ -232,7 +232,7 @@ namespace Mantid
     \return Iterator 
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container>& triple_iterator<_Iterator, _Container>::operator--()
+    workspace_iterator<_Iterator, _Container>& workspace_iterator<_Iterator, _Container>::operator--()
     {
       --m_index;
       validateIndex();
@@ -244,9 +244,9 @@ namespace Mantid
     \return Iterator before increment
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator++(int) 
+    workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator++(int) 
     {
-      triple_iterator<_Iterator, _Container> Out(*this);
+      workspace_iterator<_Iterator, _Container> Out(*this);
       this->operator++();
       return Out;
     }
@@ -256,9 +256,9 @@ namespace Mantid
     \return Iterator before decrement
     */
     template<typename _Iterator, typename _Container>
-    triple_iterator<_Iterator, _Container> triple_iterator<_Iterator, _Container>::operator--(int) 
+    workspace_iterator<_Iterator, _Container> workspace_iterator<_Iterator, _Container>::operator--(int) 
     {
-      triple_iterator<_Iterator, _Container> Out(*this);
+      workspace_iterator<_Iterator, _Container> Out(*this);
       this->operator--();
       return Out;
     }
@@ -268,7 +268,7 @@ namespace Mantid
     \return difference (as a non-inclusive count)
     */
     template<typename _Iterator, typename _Container>
-    typename std::iterator_traits<_Iterator*>::difference_type triple_iterator<_Iterator, _Container>::operator-(const triple_iterator<_Iterator, _Container>& A) const
+    typename std::iterator_traits<_Iterator*>::difference_type workspace_iterator<_Iterator, _Container>::operator-(const workspace_iterator<_Iterator, _Container>& A) const
     {
       if (!m_workspace && !A.m_workspace)
         return 0;
@@ -280,7 +280,7 @@ namespace Mantid
     }
 
     template<typename _Iterator, typename _Container>
-    bool triple_iterator<_Iterator, _Container>::isWorkspaceHistogram()
+    bool workspace_iterator<_Iterator, _Container>::isWorkspaceHistogram()
     {
       if (m_wsSize > 0)
       {

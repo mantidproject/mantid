@@ -216,10 +216,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\TripleIterator.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>

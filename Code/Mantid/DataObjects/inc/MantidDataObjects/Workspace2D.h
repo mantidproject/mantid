@@ -48,10 +48,10 @@ class DLLExport Workspace2D : public API::Workspace
   std::vector<Histogram1D> data;
 
 public:
-  /// Typedef for the triple_iterator to use with a Workspace2D
-  typedef API::triple_iterator<API::LocatedDataRef, Workspace2D> iterator;
-  /// Typedef for the const triple_iterator to use with a Workspace2D
-  typedef API::triple_iterator<const API::LocatedDataRef, const Workspace2D> const_iterator;  
+  /// Typedef for the workspace_iterator to use with a Workspace2D
+  typedef API::workspace_iterator<API::LocatedDataRef, Workspace2D> iterator;
+  /// Typedef for the const workspace_iterator to use with a Workspace2D
+  typedef API::workspace_iterator<const API::LocatedDataRef, const Workspace2D> const_iterator;  
   
   /**
 	Gets the name of the workspace type

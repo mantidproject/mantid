@@ -84,8 +84,8 @@ namespace Mantid
 } // namespace Mantid
 
 ///\cond TEMPLATE
-template DLLExport class Mantid::API::triple_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::Workspace1D>;
-template DLLExport class Mantid::API::triple_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::Workspace1D>;
+template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataObjects::Workspace1D>;
+template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataObjects::Workspace1D>;
 
 template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataObjects::Workspace1D>;
 

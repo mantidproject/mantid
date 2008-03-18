@@ -1,5 +1,5 @@
-#ifndef MANTIDAPI_TRIPLE_ITERATOR_H
-#define MANTIDAPI_TRIPLE_ITERATOR_H
+#ifndef MANTIDAPI_WORKSPACE_ITERATOR_H
+#define MANTIDAPI_WORKSPACE_ITERATOR_H
 
 #include <vector>
 #include "MantidKernel/System.h"
@@ -10,9 +10,9 @@ namespace Mantid
 namespace API
 {
 /**
- triple_iterator iterates over a workspace providing values as TripleRefs
+ workspace_iterator iterates over a workspace providing values as TripleRefs
 
- \class triple_iterator
+ \class workspace_iterator
  \author S. Ansell
  \date November 2007
  \version 1.0 
@@ -38,7 +38,7 @@ namespace API
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template<typename _Iterator, typename _Container>
-class DLLExport triple_iterator
+class DLLExport workspace_iterator
 {
 private:
   ///internal workspace pointer
@@ -86,7 +86,7 @@ private:
   /// @endcond
   
   /// Makes the underlying std::vector<double> iterator be const or not according to whether
-  /// the triple_iterator is (or not).
+  /// the workspace_iterator is (or not).
   typedef typename internal_iterator_type<_Iterator*>::iterator_type iterator_type;
   
   ///Internal cache of X iterator for current datablock
@@ -113,11 +113,11 @@ public:
   typedef typename std::iterator_traits<_Iterator*>::pointer           pointer;
   /// @endcond
   
-  triple_iterator();
-  triple_iterator(_Container&);
-  triple_iterator(_Container&, int loopCount);
-  triple_iterator(_Container&, int loopCount, const unsigned int loopOrientation);
-  triple_iterator(const triple_iterator&);
+  workspace_iterator();
+  workspace_iterator(_Container&);
+  workspace_iterator(_Container&, int loopCount);
+  workspace_iterator(_Container&, int loopCount, const unsigned int loopOrientation);
+  workspace_iterator(const workspace_iterator&);
 
   reference operator*() { return m_CPoint; }   ///< Base Accessor
   pointer operator->() { return &m_CPoint; }   ///< Base Pointer accessor
@@ -129,22 +129,22 @@ public:
     return m_CPoint;
   }
   
-  triple_iterator& operator++();
-  triple_iterator operator++(int);
-  triple_iterator& operator--();
-  triple_iterator operator--(int);
-  triple_iterator& operator+=(difference_type);
-  triple_iterator& operator-=(difference_type);
-  triple_iterator operator+(difference_type) const;
-  triple_iterator operator-(difference_type) const;
-  difference_type operator-(const triple_iterator&) const;
+  workspace_iterator& operator++();
+  workspace_iterator operator++(int);
+  workspace_iterator& operator--();
+  workspace_iterator operator--(int);
+  workspace_iterator& operator+=(difference_type);
+  workspace_iterator& operator-=(difference_type);
+  workspace_iterator operator+(difference_type) const;
+  workspace_iterator operator-(difference_type) const;
+  difference_type operator-(const workspace_iterator&) const;
 
   /*!
    lessthan operator
    \param A :: Iterator to compare
    \return  status
    */
-  bool operator<(const triple_iterator& A) const
+  bool operator<(const workspace_iterator& A) const
   {
     if (!m_workspace)
       return 0;
@@ -158,7 +158,7 @@ public:
    \param A :: Iterator to compare
    \return equality status
    */
-  bool operator==(const triple_iterator& A) const
+  bool operator==(const workspace_iterator& A) const
   {
     if (!m_workspace)
     {
@@ -177,18 +177,18 @@ public:
    \param A :: Iterator to compare
    \return equality status
    */
-  bool operator!=(const triple_iterator& A) const
+  bool operator!=(const workspace_iterator& A) const
   {
     return (!(operator==(A)));
   }
 
-  triple_iterator begin_const() const
+  workspace_iterator begin_const() const
   /*!
    Begin iterator (Effective copy+set zero)
    \return beginning iterator
    */
   {
-    triple_iterator Out(*this);
+    workspace_iterator Out(*this);
     Out.m_index=0;
     Out.validateIndex();
     return Out;
@@ -198,7 +198,7 @@ public:
    Begin iterator (Set zero)
    \return beginning iterator
    */
-  triple_iterator& begin()
+  workspace_iterator& begin()
   {
     m_index=0;
     validateIndex();
@@ -209,9 +209,9 @@ public:
    End iterator
    \return Null/end iterator
    */
-  triple_iterator& end() const
+  workspace_iterator& end() const
   {
-    static triple_iterator endIter;
+    static workspace_iterator endIter;
     return endIter;
   }
 
@@ -232,4 +232,4 @@ struct LoopOrientation
 } // NAMESPACE API
 } // NAMESPACE Mantid
 
-#endif //MANTIDAPI_TRIPLE_ITERATOR_H
+#endif //MANTIDAPI_WORKSPACE_ITERATOR_H

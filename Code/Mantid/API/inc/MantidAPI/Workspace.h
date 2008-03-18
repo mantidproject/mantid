@@ -57,10 +57,10 @@ typedef boost::shared_ptr<Workspace> Workspace_sptr;
 class DLLExport Workspace
 {
 public:
-  /// Typedef for the triple_iterator to use with a Workspace
-  typedef triple_iterator<LocatedDataRef, Workspace> iterator;
-  /// Typedef for the const triple_iterator to use with a Workspace
-  typedef triple_iterator<const LocatedDataRef, const Workspace> const_iterator;
+  /// Typedef for the workspace_iterator to use with a Workspace
+  typedef workspace_iterator<LocatedDataRef, Workspace> iterator;
+  /// Typedef for the const workspace_iterator to use with a Workspace
+  typedef workspace_iterator<const LocatedDataRef, const Workspace> const_iterator;
 
   /// Return the workspace typeID 
   virtual const std::string id() const = 0;
