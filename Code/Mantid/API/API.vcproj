@@ -358,14 +358,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\TripleIterator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\TripleIteratorCode.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\Workspace.h"
 				>
 			</File>
@@ -379,6 +371,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\WorkspaceHistory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceIterator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceIteratorCode.h"
 				>
 			</File>
 			<File
