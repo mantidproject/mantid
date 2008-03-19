@@ -16,6 +16,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -56,7 +57,7 @@ class Unit;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class UnitFactoryImpl : public DynamicFactory<Unit>
+class EXPORT_OPT_MANTID_KERNEL UnitFactoryImpl : public DynamicFactory<Unit>
 {
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
@@ -75,6 +76,11 @@ private:
 
 };
 
+///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
+#ifdef _WIN32
+// this breaks new namespace declaraion rules; need to find a better fix
+  template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<UnitFactoryImpl>;
+#endif /* _WIN32 */
 /// The specialisation of the SingletonHolder class that holds the UnitFactory
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
 
