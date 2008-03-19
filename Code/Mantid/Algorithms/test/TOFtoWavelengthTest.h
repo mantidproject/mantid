@@ -3,12 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/TOFtoWavelength.h"
+//#include "MantidAlgorithms/TOFtoWavelength.h"
+#include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
@@ -52,6 +55,7 @@ public:
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
     
+    space->XUnit() = UnitFactory::Instance().create("TOF");
   }
   
   void testInit()
@@ -63,6 +67,7 @@ public:
     alg.setPropertyValue("InputWorkspace",inputSpace);
     outputSpace = "outWorkspace";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
+    alg.setPropertyValue("Target","Wavelength");
   }
   
   void testExec()
@@ -118,7 +123,8 @@ public:
   
   
 private:
-  TOFtoWavelength alg;
+//  TOFtoWavelength alg;
+  ConvertUnits alg;
   std::string inputSpace;
   std::string outputSpace;
 };

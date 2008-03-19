@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/Logger.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -66,7 +67,7 @@ public:
   virtual const std::string id() const = 0;
 
   /// Initialises the workspace. sets the size and lengths in the arrays, must be overloaded
-  virtual void init(const int&,const int&,const int&) = 0;
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength) = 0;
   
   void setTitle(const std::string&);
   void setComment(const std::string&);
@@ -105,6 +106,7 @@ public:
 
   ///Returns the spectra number
   virtual int spectraNo(int const index) const =0;
+  ///Returns the spectra number (non const)
   virtual int& spectraNo(int const index) =0;
 
   //Get methods return the histogram number 
@@ -122,13 +124,23 @@ public:
   ///Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
 
-
+  /// Returns the unit object
+  const boost::shared_ptr<Kernel::Unit>& XUnit() const;
+  boost::shared_ptr<Kernel::Unit>& XUnit();
+  
+  /// Are the Y-values dimensioned?
+  const bool& isDistribution() const;
+  bool& isDistribution(bool newValue);
+  
 protected:
   Workspace();
-  Workspace(const Workspace&);
-  Workspace& operator=(const Workspace&);
 
 private:
+  /// Private copy constructor. NO COPY ALLOWED
+  Workspace(const Workspace&);
+  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
+  Workspace& operator=(const Workspace&);
+  
   /// The title of the workspace
   std::string m_title;
   /// A user-provided comment that is attached to the workspace
@@ -141,6 +153,11 @@ private:
 
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
+  
+  /// The unit of the x axis
+  boost::shared_ptr<Kernel::Unit> m_xUnit;
+  /// Flag indicating whether the Y-values are dimensioned? False by default
+  bool m_isDistribution;
   
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

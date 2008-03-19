@@ -1,5 +1,5 @@
 /*    
- Copyright &copy; 2007 ???RAL???
+ Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
  This file is part of Mantid.
 

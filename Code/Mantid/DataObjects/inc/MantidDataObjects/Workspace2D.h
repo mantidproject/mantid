@@ -43,7 +43,7 @@ namespace DataObjects
 */ 	
 class DLLExport Workspace2D : public API::Workspace
 {
- private:
+private:
   /// A vector that holds the 1D histograms 
   std::vector<Histogram1D> data;
 
@@ -60,8 +60,6 @@ public:
   virtual const std::string id() const {return "Workspace2D";}
 
   Workspace2D();
-  Workspace2D(const Workspace2D&);
-  Workspace2D& operator=(const Workspace2D&);
   virtual ~Workspace2D();
 
   /// For now, does nothing
@@ -125,7 +123,15 @@ public:
   virtual int& spectraNo(int const index);
 
 private:
+  /// Private copy constructor. NO COPY ALLOWED
+  Workspace2D(const Workspace2D&);
+  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
+  Workspace2D& operator=(const Workspace2D&);
+
   virtual const int getHistogramNumberHelper() const;
+  
+  /// Static reference to the logger class
+  static Kernel::Logger &g_log;
 };
 
   ///shared pointer to the Workspace2D class

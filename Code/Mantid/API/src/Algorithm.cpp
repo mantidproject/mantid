@@ -117,6 +117,9 @@ namespace Mantid
             this->store();
           }
 
+          // RJT, 19/3/08: Moved this up from below the catch blocks 
+          setExecuted(true);  
+
         }
         catch(std::runtime_error& ex)
         {
@@ -129,7 +132,6 @@ namespace Mantid
           if (m_isChildAlgorithm) throw;
         }
 
-        setExecuted(true);	
       }
 
       // Gaudi also specifically catches GaudiException & std:exception.

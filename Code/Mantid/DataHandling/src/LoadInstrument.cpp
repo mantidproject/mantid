@@ -101,7 +101,7 @@ void LoadInstrument::exec()
     throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);	
   }
 
-  for (int iType = 0; iType < pNL_type->length(); iType++)
+  for (unsigned int iType = 0; iType < pNL_type->length(); iType++)
   {  
     Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
     std::string typeName = pTypeElem->getAttribute("name");
@@ -130,7 +130,7 @@ void LoadInstrument::exec()
 
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
 
-  for (int i = 0; i < pNL_comp->length(); i++)
+  for (unsigned int i = 0; i < pNL_comp->length(); i++)
   {
     // we are only interest in the top level component elements hence
     // the reason for the if statement below
@@ -234,7 +234,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Element* pCo
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
   NodeList* pNL_comp_for_this_type = pType->getElementsByTagName("component");
 
-  for (int i = 0; i < pNL_comp_for_this_type->length(); i++)
+  for (unsigned int i = 0; i < pNL_comp_for_this_type->length(); i++)
   {
     Element* pElem = static_cast<Element*>(pNL_comp_for_this_type->item(i));
     std::string typeName = pElem->getAttribute("type");

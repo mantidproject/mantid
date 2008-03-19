@@ -11,30 +11,13 @@ namespace Mantid
   namespace DataObjects
   {
 
+    // Get a reference to the logger
+    Kernel::Logger& Workspace1D::g_log = Kernel::Logger::get("Workspace1D");
+
     /// Constructor
     Workspace1D::Workspace1D() : API::Workspace(), 
       Histogram1D()
     { }
-
-    /// Copy Constructor
-    Workspace1D::Workspace1D(const Workspace1D& A) :
-    API::Workspace(A),Histogram1D(A)
-    { }
-
-    /*!
-    Assignment operator
-    \param A :: Workspace  to copy
-    \return *this
-    */
-    Workspace1D& Workspace1D::operator=(const Workspace1D& A)
-    {
-      if (this!=&A)
-      {
-        API::Workspace::operator=(A);
-        Histogram1D::operator=(A);
-      }
-      return *this;
-    }
 
     /// Destructor
     Workspace1D::~Workspace1D()
@@ -46,7 +29,11 @@ namespace Mantid
     */
     void Workspace1D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
-      // Doesn't set the size of the X/Y/E vectors at present. May want to later.
+      if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
+      {
+        g_log.error("All arguments to init must be positive and non-zero");
+        throw std::out_of_range("All arguments to init must be positive and non-zero");
+      }
 
       if(NVectors > 1)
         throw std::invalid_argument("Workspace1D::init() cannot create a workspace1D with Nvectors > 1");

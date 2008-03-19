@@ -30,8 +30,10 @@ namespace API
 //----------------------------------------------------------------------
 class Workspace;
 
-///shared pointer to the workspace base class
+/// @cond (documented elsewhere)
+//shared pointer to the workspace base class
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
+/// @endcond
 
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from

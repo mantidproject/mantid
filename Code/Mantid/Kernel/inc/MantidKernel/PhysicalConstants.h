@@ -1,5 +1,5 @@
-#ifndef PHYSICALCONSTANTS_H_
-#define PHYSICALCONSTANTS_H_
+#ifndef MANTID_PHYSICALCONSTANTS_H_
+#define MANTID_PHYSICALCONSTANTS_H_
 
 namespace Mantid
 {
@@ -40,4 +40,4 @@ namespace PhysicalConstants
 } // namespace PhysicalConstants
 } // namespace Mantid
 
-#endif /*PHYSICALCONSTANTS_H_*/
+#endif /*MANTID_PHYSICALCONSTANTS_H_*/

@@ -27,7 +27,7 @@ class Algorithm;
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
     
-    Copyright &copy; 2007 ???RAL???
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 

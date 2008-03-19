@@ -152,7 +152,7 @@ namespace Mantid
         }
         if(list)
         {
-          for(int i=0; i < spec_list.size();i++)
+          for(unsigned int i=0; i < spec_list.size();i++)
           {
             loadData(timeChannelsVec,counter,spec_list[i],iraw,lengthIn,spectrum);
             counter++;

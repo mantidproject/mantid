@@ -111,11 +111,14 @@ public:
   ///Returns the detector
   virtual int& spectraNo(int const index){ return Histogram1D::spectraNo(); }
 
-protected:
-
+private:
+  /// Private copy constructor. NO COPY ALLOWED
   Workspace1D(const Workspace1D&);
+  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace1D& operator=(const Workspace1D&);
 
+  /// Static reference to the logger class
+  static Kernel::Logger &g_log;
 };
 
   ///shared pointer to the Workspace1D class

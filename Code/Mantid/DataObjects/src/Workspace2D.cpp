@@ -11,25 +11,13 @@ namespace Mantid
 {
   namespace DataObjects
   {
+  
+    // Get a reference to the logger
+    Kernel::Logger& Workspace2D::g_log = Kernel::Logger::get("Workspace2D");
+
     /// Constructor
     Workspace2D::Workspace2D()
     { }
-
-    /// Copy constructor
-    Workspace2D::Workspace2D(const Workspace2D& A) :
-    data(A.data)
-    { }
-
-    /// Assignment operator
-    Workspace2D& 
-      Workspace2D::operator=(const Workspace2D& A)
-    {
-      if (this!=&A)
-      {
-        data=A.data;
-      }
-      return *this;
-    }
 
     ///Destructor
     Workspace2D::~Workspace2D()
@@ -42,6 +30,12 @@ namespace Mantid
     */
     void Workspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
+      if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
+      {
+        g_log.error("All arguments to init must be positive and non-zero");
+        throw std::out_of_range("All arguments to init must be positive and non-zero");
+      }
+
       setHistogramNumber(NVectors);
 
       Histogram1D::RCtype t1,t2;
@@ -53,7 +47,6 @@ namespace Mantid
         // Y,E,E2 arrays populated
         this->setData(i,t2,t2,t2);
       }
-
     }
 
     /**

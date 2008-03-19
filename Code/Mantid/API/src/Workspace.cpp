@@ -12,24 +12,8 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace()
+Workspace::Workspace() : m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
 {}
-
-/// Copy constructor
-Workspace::Workspace(const Workspace& A)  :
-     m_title(A.m_title),m_comment(A.m_comment)
-{}
-
-/// Assignment operator
-Workspace& Workspace::operator=(const Workspace& A)
-{
-  if (this!=&A)
-  {
-    m_comment=A.m_comment;
-    m_title=A.m_title;
-  }	       
-  return *this;
-}
 
 /// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
 Workspace::~Workspace()
@@ -41,7 +25,7 @@ Workspace::~Workspace()
  */
 void Workspace::setTitle(const std::string& t)
 {
-     m_title=t;
+  m_title=t;
 }
 /** Set the comment field of the workspace
  * 
@@ -49,7 +33,7 @@ void Workspace::setTitle(const std::string& t)
  */
 void Workspace::setComment(const std::string& c)
 {
-	m_comment=c;
+  m_comment=c;
 }
 
 /** Get the workspace title
@@ -58,7 +42,7 @@ void Workspace::setComment(const std::string& c)
  */
 const std::string& Workspace::getTitle() const
 {
-	return m_title;
+  return m_title;
 }
 
 /** Get the workspace comment
@@ -67,7 +51,7 @@ const std::string& Workspace::getTitle() const
  */
 const std::string& Workspace::getComment() const
 {
-    return m_comment;
+  return m_comment;
 }
 
 /** Get the Instrument associated with this workspace
@@ -76,7 +60,7 @@ const std::string& Workspace::getComment() const
  */
 Instrument& Workspace::getInstrument() 
 {
-	return m_instrument;
+  return m_instrument;
 }
 
 /** Get the sample associated with this workspace
@@ -86,6 +70,35 @@ Instrument& Workspace::getInstrument()
 Sample& Workspace::getSample()
 {
   return m_sample;
+}
+
+/** The unit for the X axes in this workspace
+ *  @return A shared pointer to the unit object
+ */
+const boost::shared_ptr<Kernel::Unit>& Workspace::XUnit() const
+{
+  return m_xUnit;
+}
+
+/** The unit object for this workspace (non const version)
+ *  @return A shared pointer to the unit object
+ */
+boost::shared_ptr<Kernel::Unit>& Workspace::XUnit()
+{
+  return m_xUnit;
+}
+
+/// Are the Y-values in this workspace dimensioned?
+const bool& Workspace::isDistribution() const
+{
+  return m_isDistribution;
+}
+
+/// Set the flag for whether the Y-values are dimensioned
+bool& Workspace::isDistribution(bool newValue)
+{
+  m_isDistribution = newValue;
+  return m_isDistribution;
 }
 
 } // namespace API
