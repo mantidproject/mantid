@@ -220,6 +220,14 @@
 				RelativePath=".\src\TimeSeriesProperty.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\Unit.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnitFactory.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -295,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\PhysicalConstants.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\Property.h"
 				>
 			</File>
@@ -324,6 +336,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\TimeSeriesProperty.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\Unit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\UnitFactory.h"
 				>
 			</File>
 		</Filter>
