@@ -19,22 +19,23 @@ public:
   void init(const int&, const int&, const int&) {}
   int size() const {return 0;}
   int blocksize() const {return 0;}
-  std::vector<double>& dataX(int const index) {vec;}
-  std::vector<double>& dataY(int const index) {vec;}
-  std::vector<double>& dataE(int const index) {vec;}
-  std::vector<double>& dataE2(int const index) {vec;}
-  const std::vector<double>& dataX(int const index) const {vec;}
-  const std::vector<double>& dataY(int const index) const {vec;}
-  const std::vector<double>& dataE(int const index) const {vec;}
-  const std::vector<double>& dataE2(int const index) const {vec;}
+  std::vector<double>& dataX(int const index) {return vec;}
+  std::vector<double>& dataY(int const index) {return vec;}
+  std::vector<double>& dataE(int const index) {return vec;}
+  std::vector<double>& dataE2(int const index) {return vec;}
+  const std::vector<double>& dataX(int const index) const {return vec;}
+  const std::vector<double>& dataY(int const index) const {return vec;}
+  const std::vector<double>& dataE(int const index) const {return vec;}
+  const std::vector<double>& dataE2(int const index) const {return vec;}
   const IErrorHelper* errorHelper(int const index) const {return NULL;}
   void setErrorHelper(int const,IErrorHelper*) {}
   void setErrorHelper(int const,const IErrorHelper*) {}
-  int spectraNo(int const) const {}
-  int& spectraNo(int const) {}
+  int spectraNo(int const) const {return spec;}
+  int& spectraNo(int const) {return spec;}
   
 private:
   std::vector<double> vec;
+  int spec;
 };
 
 class WorkspaceTest : public CxxTest::TestSuite
