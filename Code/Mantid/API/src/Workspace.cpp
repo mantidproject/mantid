@@ -12,7 +12,8 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace() : m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
+Workspace::Workspace() : m_title(), m_comment(), m_instrument(), m_sample(), m_history(), 
+  m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
 {}
 
 /// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.

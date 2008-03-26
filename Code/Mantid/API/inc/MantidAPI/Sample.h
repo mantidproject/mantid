@@ -55,6 +55,11 @@ public:
 	const std::vector< Property* >& getLogData() const;
 	
 private:
+  /// Private copy constructor. NO COPY ALLOWED!
+  Sample(const Sample&);
+  /// Private copy assignment operator. NO COPY ASSIGNMENT ALLOWED!
+  Sample& operator=(const Sample&);
+  
   /// The name for the sample
   std::string m_name;
   /// Stores the information read in from the logfiles.
