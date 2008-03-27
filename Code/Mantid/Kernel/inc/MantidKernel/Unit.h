@@ -52,7 +52,7 @@ public:
   virtual const std::string label() const = 0;
   
   // Methods dealing with instance-level description
-  const std::string description() const;
+  const std::string& description() const;
   void setDescription(const std::string& value);
   
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.

@@ -23,7 +23,7 @@ namespace Kernel
 /** @class PropertyWithValue PropertyWithValue.h Kernel/PropertyWithValue.h
 
     The concrete, templated class for properties.
-    The supported types at present are int, double & std::string.
+    The supported types at present are int, double, bool & std::string.
     
     With reference to the Gaudi structure, this class can be seen as the equivalent of both the
     Gaudi class of the same name and its sub-classses.
@@ -181,7 +181,8 @@ public:
     return helper.value(m_value);
   }
 	
-  /** Set the value of the property from a string representation
+  /** Set the value of the property from a string representation.
+   *  Note that "1" & "0" must be used for bool properties rather than true/false.
    *  @param value The value to assign to the property
    *  @return True if the assignment was successful
    */

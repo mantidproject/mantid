@@ -21,13 +21,13 @@ public:
   void testworkspace1D_dist()
   {    
     Workspace1D_sptr test_in1D = Create1DWorkspace(50);
+    test_in1D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in1D", test_in1D);    
 
     SimpleRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in1D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
-    rebin.setPropertyValue("dist","1");
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     rebin.execute();
     Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
@@ -60,7 +60,6 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in1D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
-    rebin.setPropertyValue("dist","0");
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     rebin.execute();
     Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
@@ -86,13 +85,13 @@ public:
   void testworkspace2D_dist()
   {
     Workspace2D_sptr test_in2D = Create2DWorkspace(50,20);
+    test_in2D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     SimpleRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
-    rebin.setPropertyValue("dist","1");
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     rebin.execute();
     Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
@@ -126,7 +125,6 @@ public:
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
     rebin.setPropertyValue("OutputWorkspace","test_out");
-    rebin.setPropertyValue("dist","0");
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     rebin.execute();
     Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");

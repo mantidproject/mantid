@@ -37,6 +37,7 @@ void ConvertUnits::init()
 }
 
 /** Executes the algorithm
+ *  @throw std::runtime_error If the input workspace has not had its unit set
  *  @throw NotImplementedError If the input workspace contains point (not histogram) data
  *  @throw InstrumentDefinitionError If unable to calculate source-sample distance
  */
@@ -50,6 +51,13 @@ void ConvertUnits::exec()
   {
     g_log.error("Conversion of units for point data is not yet implemented");
     throw Exception::NotImplementedError("Conversion of units for point data is not yet implemented");
+  }
+  
+  // Check that the input workspace has had its unit set
+  if ( ! inputWS->XUnit() )
+  {
+    g_log.error("Input workspace has not had its unit set");
+    throw std::runtime_error("Input workspace has not had its unit set");
   }
   
   // Calculate the number of spectra in this workspace

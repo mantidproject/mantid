@@ -84,6 +84,7 @@ void PropertyManager::setProperties( const std::string &values )
 }
 
 /** Set the value of a property by string
+ *  N.B. bool properties must be set using 1/0 rather than true/false
  *  @param name The name of the property (case insensitive)
  *  @param value The value to assign to the property
  *  @throw Exception::NotFoundError if the named property is unknown

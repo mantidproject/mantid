@@ -156,7 +156,7 @@ private:
   
   /// The unit of the x axis
   boost::shared_ptr<Kernel::Unit> m_xUnit;
-  /// Flag indicating whether the Y-values are dimensioned? False by default
+  /// Flag indicating whether the Y-values are dimensioned. False by default
   bool m_isDistribution;
   
 	/// Static reference to the logger class

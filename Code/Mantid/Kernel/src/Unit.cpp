@@ -12,7 +12,7 @@ namespace Kernel
 /** Get the description attached to a unit instance
  *  @return A string containing the description
  */
-const std::string Unit::description() const
+const std::string& Unit::description() const
 {
   return m_description;
 }

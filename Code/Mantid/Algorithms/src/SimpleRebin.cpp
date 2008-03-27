@@ -39,7 +39,6 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      declareProperty("dist",true);
       declareProperty(new ArrayProperty<double>("params"));
 
     }
@@ -51,14 +50,12 @@ namespace Mantid
     void SimpleRebin::exec()
     {
       // retrieve the properties
-
-      bool dist = getProperty("dist");
       std::vector<double> rb_params=getProperty("params");
       
       // Get the input workspace
       Workspace_sptr inputW = getProperty("InputWorkspace");
 
-      
+      bool dist = inputW->isDistribution();
 
       // workspace independent determination of length
       int histnumber = inputW->size()/inputW->blocksize();
