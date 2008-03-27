@@ -218,6 +218,13 @@ double Component::getDistance(const Component& comp) const
 	return getPos().distance(comp.getPos());
 }
 
+double Component::getAzimuth(const Component& comp) const
+{
+	double R=getDistance(comp);
+	double offset=(this->getPos()-comp.getPos())[2];
+	return acos(offset/R);
+}
+
 /** Prints a text representation of itself
  * @param os The ouput stream to write to
  */
