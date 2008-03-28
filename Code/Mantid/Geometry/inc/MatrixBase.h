@@ -68,7 +68,7 @@ class MatrixBase
 
   MatrixBase<T> operator*(const MatrixBase<T>&) const;    ///< Basic matrix multiply 
   std::vector<T> operator*(const std::vector<T>&) const; ///< Multiply M*Vec 
-  Vec3D operator*(const Vec3D&) const; ///< Multiply M*Vec 
+  //Vec3D operator*(const Vec3D&) const; ///< Multiply M*Vec 
   MatrixBase<T> operator*(const T&) const;              ///< Multiply by constant 
 
   MatrixBase<T>& operator*=(const MatrixBase<T>&);            ///< Basic matrix multipy
@@ -86,7 +86,7 @@ class MatrixBase
 
   void zeroMatrix();    
   void identityMatrix();    
-  void normVert();         ///< Vertical normalisation 
+  //void normVert();         ///< Vertical normalisation 
   T Trace() const;         ///< Trace of the matrix  
 
   std::vector<T> Diagonal() const;                  ///< Returns a vector of the diagonal
@@ -103,12 +103,12 @@ class MatrixBase
   void swapRows(int const,int const);        ///< Swap rows (first V index)
   void swapCols(int const,int const);        ///< Swap cols (second V index)
 
-  T Invert();                           ///< LU inversion routine
+  //T Invert();                           ///< LU inversion routine
   /// Polynomanal and inversion by Faddeev method.
-  std::vector<T> Faddeev(MatrixBase<T>&);   
-  void averSymmetric();                          ///< make MatrixBase symmetric
-  int Diagonalise(MatrixBase<T>&,MatrixBase<T>&) const;  ///< (only Symmetric matrix)
-  void sortEigen(MatrixBase<T>&);                    ///< Sort eigenvectors
+  //std::vector<T> Faddeev(MatrixBase<T>&);   
+  //void averSymmetric();                          ///< make MatrixBase symmetric
+  //int Diagonalise(MatrixBase<T>&,MatrixBase<T>&) const;  ///< (only Symmetric matrix)
+  //void sortEigen(MatrixBase<T>&);                    ///< Sort eigenvectors
 
   MatrixBase<T>& Transpose();                        ///< Transpose the matrix
   MatrixBase<T> Tprime() const;                      ///< Transpose the matrix

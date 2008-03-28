@@ -242,6 +242,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\MatrixBase.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ObjComponent.cpp"
 				>
 			</File>
@@ -255,6 +259,18 @@
 			</File>
 			<File
 				RelativePath=".\src\PolyBase.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PolyFunction.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PolyVar.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PolyVarOne.cpp"
 				>
 			</File>
 			<File
@@ -428,11 +444,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\Deprecated\inc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -460,11 +476,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\auxinc\Matrix.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MatrixBase.h"
 				>
 			</File>
 			<File
@@ -485,6 +505,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\PolyBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\PolyFunction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\PolyVar.h"
 				>
 			</File>
 			<File
@@ -612,19 +640,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgrid.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLgrid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
+				RelativePath=".\auxinc\XMLgrid.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLgridSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
 				>
 			</File>
 			<File
@@ -644,11 +672,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -660,19 +688,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLpath.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLpath.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLpath.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
