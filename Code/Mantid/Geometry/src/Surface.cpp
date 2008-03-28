@@ -275,13 +275,14 @@ Surface::distanceTrue(const Geometry::Vec3D& Pt) const
   double Out= -1;
   Geometry::Vec3D xvec;
   std::vector<double>::const_iterator vc;
+  // For each point: solve for intersection point (xvec)
   for(vc=TRange.begin();vc!=TRange.end();vc++)
     {
       const double daI=1.0+2* (*vc) *da;
-      const double dbI=1.0+2* (*vc) *da;
-      const double dcI=1.0+2* (*vc) *da;
-      if ((daI*daI)>STolerance || (dbI*dbI)>STolerance 
-	  && (dcI*dcI)<STolerance)
+      const double dbI=1.0+2* (*vc) *db;
+      const double dcI=1.0+2* (*vc) *dc;
+      if ((daI*daI)>STolerance && (dbI*dbI)>STolerance 
+	  && (dcI*dcI)>STolerance)
         {
 	  Geometry::Matrix<double> DI(3,3);
 	  DI[0][0]=1.0/daI;
