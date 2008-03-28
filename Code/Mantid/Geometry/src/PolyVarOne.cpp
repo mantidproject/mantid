@@ -8,6 +8,7 @@
 #include <gsl/gsl_poly.h>
 
 #include "AuxException.h"
+#include "MantidKernel/Support.h"
 #include "PolyFunction.h"
 #include "PolyVar.h"
 
@@ -17,7 +18,6 @@
 
 namespace Mantid
 {
-
 namespace mathLevel
 {
 
@@ -30,7 +30,8 @@ operator<<(std::ostream& OX,const PolyVar<1>& A)
     \returns The output stream (OX)
   */
 {
-  A.write(OX);
+  if (!A.write(OX))
+    OX<<"0";
   return OX;
 }
 
@@ -113,6 +114,14 @@ PolyVar<1>::setDegree(const int iD)
   PCoeff.resize(iDegree+1);
 }
 
+void
+PolyVar<1>::zeroPoly()
+{
+  fill(PCoeff.begin(),PCoeff.end(),0.0);
+  return;
+}
+
+
 int 
 PolyVar<1>::getDegree() const 
   /*!
@@ -176,7 +185,7 @@ PolyVar<1>::operator()(const double X) const
     \return polyvalue(x)
   */
 {
-  double Result = PCoeff[iDegree];
+  double Result = PCoeff[iDegree];              
   for (int i=iDegree-1; i >= 0; i--)
     {
       Result *= X;
@@ -242,9 +251,9 @@ PolyVar<1>::operator+=(const PolyVar<1>& A)
 PolyVar<1>& 
 PolyVar<1>::operator-=(const PolyVar<1>& A)
   /*!
-    Self subtraction value
-    \param A :: PolyVar to subtract
-    \return *this-=A;
+    Self addition value
+    \param A :: PolyBase to add 
+    \return *this+=A;
    */
 {
   iDegree=(iDegree>A.iDegree) ? iDegree : A.iDegree;
@@ -258,7 +267,7 @@ PolyVar<1>&
 PolyVar<1>::operator*=(const PolyVar<1>& A)
   /*!
     Self multiplication value
-    \param A :: PolyVar to add 
+    \param A :: PolyBase to add 
     \return *this*=A;
    */
 {
@@ -325,9 +334,9 @@ PolyVar<1>::operator+(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator-(const double V) const
   /*!
-    PolyVar<1> substract Values
-    \param V :: Value 
-    \return (*this-V);
+    PolyVar<1> substractr
+    \param A :: PolyBase substract
+    \return (*this-A);
    */
 {
   PolyVar<1> kSum(*this);
@@ -337,9 +346,9 @@ PolyVar<1>::operator-(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator*(const double V) const
   /*!
-    PolyVar multiplication by value
-    \param V :: Value 
-    \return (*this*V);
+    PolyBase multiplication
+    \param A :: PolyBase multiplication
+    \return (*this*A);
    */
 {
   PolyVar<1> kSum(*this);
@@ -349,9 +358,9 @@ PolyVar<1>::operator*(const double V) const
 PolyVar<1> 
 PolyVar<1>::operator/(const double V) const
   /*!
-    PolyVar division by value
-    \param V :: Value
-    \return (*this/V);
+    PolyBase division
+    \param A :: PolyBase Division
+    \return (*this/A);
    */
 {
   PolyVar<1> kSum(*this);
@@ -377,7 +386,7 @@ PolyVar<1>::operator-=(const double V)
   /*!
     PolyBase subtraction
     \param V :: Value to subtract
-    \return (*this-V);
+    \return (*this+V);
    */
 {
   PCoeff[0]-=V;  // There is always zero component
@@ -421,7 +430,74 @@ PolyVar<1>::operator-() const
   KOut*= -1.0;
   return KOut;
 }
+
+int
+PolyVar<1>::operator==(const PolyVar<1>& A) const
+  /*!
+    Determine if two polynomials are equal
+    \param A :: Other polynomial to use
+    \return 1 :: true 0 on false
+  */
+{
+  int i;
+  for(i=0;i<=A.iDegree && i<=iDegree;i++)
+    if (fabs(PCoeff[i]-A.PCoeff[i])>this->Eaccuracy)
+      return 0;
+  if (A.iDegree>iDegree)
+    {
+      for(;i<=A.iDegree;i++)
+	if (fabs(A.PCoeff[i])>this->Eaccuracy)
+	  return 0;
+    }
+  else if (A.iDegree<iDegree)
+    {
+      for(;i<=iDegree;i++)
+	if (fabs(PCoeff[i])>this->Eaccuracy)
+	  return 0;
+    }
+  return 1;
+}
  
+int
+PolyVar<1>::operator!=(const PolyVar<1>& A) const
+  /*!
+    Determine if two polynomials are different
+    \param A :: Other polynomial to use
+    \return 1 is polynomial differ:  0 on false
+  */
+{
+  return (this->operator==(A)) ? 0 : 1;
+}
+
+int
+PolyVar<1>::operator==(const double& V) const
+  /*!
+    Determine if a polynomial and a value are equal
+    \param V :: Single value to use
+    \return 1 equal:  0 on false
+  */
+{
+  if (fabs(PCoeff[0]-V)>this->Eaccuracy)
+    return 0;
+  for(int i=1;i<=iDegree;i++)
+    if (fabs(PCoeff[i])>this->Eaccuracy)
+      return 0;
+  
+  return 1;
+}
+
+int
+PolyVar<1>::operator!=(const double& V) const
+  /*!
+    Determine if a value and polynomial are different
+    \param V :: Single value to use
+    \return 1 is polynomial differs:  0 on false
+  */
+{
+  return (this->operator==(V)) ? 0 : 1;
+}
+
+
 PolyVar<1> 
 PolyVar<1>::getDerivative() const
   /*!
@@ -636,13 +712,8 @@ PolyVar<1>::solveQuadratic(std::complex<double>& AnsA,
     }
 
   std::complex<double> CQ(-0.5*b,0);
-  #ifndef MS_VISUAL_STUDIO
-  CQ.imag() = (b>=0) ?
+  CQ.imag()= (b>=0) ?
     -0.5*sqrt(-cf) : 0.5*sqrt(-cf);
-#else
-  CQ.imag((b>=0) ? -0.5*sqrt(-cf) : 0.5*sqrt(-cf));
-#endif
-  
   AnsA = CQ;
   AnsB = c/CQ;
   return 2;
@@ -719,9 +790,7 @@ PolyVar<1>::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 int 
 PolyVar<1>::getCount(const double eps) const
   /*!
-    Determine number of non-zoro components
-    \param eps :: accuracy factor
-    \return Number of non-zero components
+    Determine if is zero
   */
 {
   int cnt(0);
@@ -735,8 +804,6 @@ int
 PolyVar<1>::isZero(const double eps) const
   /*!
     Determine if is zero
-    \param eps :: Accuracy
-    \return 1 if within eps of zero.
   */
 {
   int i;
@@ -744,36 +811,152 @@ PolyVar<1>::isZero(const double eps) const
   return (i<=iDegree) ? 0 : 1;
 }
 
-void
-PolyVar<1>::write(std::ostream& OX) const
+
+int 
+PolyVar<1>::isUnit(const double eps) const
+  /*!
+    Determine if is zero
+    \param eps :: Value to used
+    \retval 2 :: x unit set 
+    \retval 1 :: +ve unit 
+    \retval 0 :: Not unit
+    \retval -1 :: -ve unit 
+  */
+{
+  int i;
+  for(i=iDegree;i>0 && fabs(PCoeff[i])<eps;i--);
+  if (i)
+    return 0;
+  if (fabs(fabs(PCoeff[0])-1.0)>eps)
+    return 0;
+  return (PCoeff[0]>0.0) ? 1 : -1;
+}
+
+
+int 
+PolyVar<1>::isUnitary(const double eps) const
+  /*!
+    Determine if is zero
+    \param eps :: Value to used
+    \retval 2 :: x unit set 
+    \retval 1 :: +ve unit 
+    \retval 0 :: Not unit
+    \retval -1 :: -ve unit 
+  */
+{
+  int item(0);
+  int flag(0);
+  for(int i=iDegree;i>=0 && flag<2;i--)
+    {
+      if (fabs(PCoeff[i])>=eps)
+        {
+	  item=i;
+	  flag++;
+	}
+    }
+  if (flag==2 || flag==0) // all zeros are also NOT unit
+    return 0;
+  if (fabs(fabs(PCoeff[item])-1.0)>eps)
+    return 0;
+  const int sign( (PCoeff[item]>0.0) ? 1 : -1);
+  return ((item==0) ? 1 : 2) * sign;
+}
+
+
+int
+PolyVar<1>::read(const std::string& Line)
+  /*!
+    Given a line of type 
+    x^2+4.0x+3.0x 
+    convert into a function:
+    \return 0 :: success
+    \return -1 :: failure
+  */
+{
+  const char Variable('x');
+  std::string CLine=StrFunc::removeSpace(Line);
+  setDegree(PolyFunction::getMaxSize(CLine,Variable));
+  
+  std::string::size_type pos=CLine.find(Variable);
+  double cV;
+  while (pos!=std::string::npos)
+    {
+      int compStart(pos);
+      int sign(0);     // default is positive but not found
+      // get preFunction 
+       while(compStart>0)
+        {
+	  compStart--;
+	  if (CLine[compStart]=='+' || CLine[compStart]=='-')
+	    {
+	      sign=(CLine[compStart]=='+') ? 1 : -1;
+	      break;
+	    } 
+	}
+      std::string Comp;      
+      if (sign)
+	Comp=CLine.substr(compStart+1,pos-1);
+      else
+        {
+	  Comp=CLine.substr(compStart,pos-compStart);
+	  sign=1;
+	}
+      
+      // Find power
+      int pV(1);
+      CLine.erase(0,pos+1);
+      if (!CLine.empty() && CLine[0]=='^')
+        {
+	  CLine.erase(0,1);
+	  StrFunc::sectPartNum(CLine,pV);
+	}
+      
+      if (pV<0 || (!Comp.empty() && !StrFunc::convert(Comp,cV)))
+	throw ColErr::InvalidLine("PolVarOne::read",Line,0);
+
+      if (Comp.empty())
+	cV=1.0;
+      PCoeff[pV]=sign*cV;
+      // Find next value
+      pos=CLine.find(Variable);
+    }
+
+  // Process variable at end:
+  if (!CLine.empty() && StrFunc::section(CLine,cV))
+    PCoeff[0]=cV;
+
+  return 0;
+}
+
+int
+PolyVar<1>::write(std::ostream& OX,const int prePlus) const
   /*!
     Basic write command
     \param OX :: output stream
+    \return 0 :: value ==0.0
   */
 {
-  int first(1);
-  for(int i=0;i<=iDegree;i++)
+  int nowrite(0);
+  for(int i=iDegree;i>=0;i--)
     {
-      int zero(0);
       if (fabs(PCoeff[i])>this->Eaccuracy)
         {
-	  if (!first) OX<<" + ";
-	  OX<<PCoeff[i];
-	}
-      else 
-	zero=1;
-
-      if (!zero)
-        {
+	  if ((nowrite || prePlus) && PCoeff[i]>0.0)
+	    OX<<"+";
+	  else if (PCoeff[i]<0.0)
+	    OX<<"-";
+	  // Now write value:
+	  if (!i || fabs(fabs(PCoeff[i])-1.0)>this->Eaccuracy)
+	    OX<<fabs(PCoeff[i]);
 	  if (i)
 	    {
 	      OX<<"x";
 	      if (i!=1)	OX<<"^"<<i;
 	    }
-	  first=0;
+	  nowrite=1;
 	}
     }
-  return;
+  return nowrite;
 }  
 
 }  // NAMESPACE  mathLevel

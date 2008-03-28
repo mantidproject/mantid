@@ -83,7 +83,7 @@ class Track
 {
  public:
 
-  typedef std::vector<TUnit> LType;    ///< Type for the Link storage
+  typedef std::vector<TUnit> LType;       ///< Type for the Link storage
   typedef std::vector<TPartial> PType;    ///< Type for the parital
 
  private:

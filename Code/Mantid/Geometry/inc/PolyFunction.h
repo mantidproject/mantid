@@ -6,14 +6,14 @@ namespace Mantid
 
 namespace mathLevel
 {
-
   /*!
     \class PolyFunction
     \version 1.0
-    \author S. Ansell 
+    \author S. Ansell
     \date December 2007
     \brief Holds a polynominal base type
   */
+
 
 class PolyFunction
 {
@@ -23,14 +23,20 @@ class PolyFunction
 
  public:
 
+  static int getMaxSize(const std::string&,const char);
+
   PolyFunction();
   explicit PolyFunction(double const);
   PolyFunction(const PolyFunction&);
   PolyFunction& operator=(const PolyFunction&);
   virtual ~PolyFunction();
 
-  virtual PolyFunction& operator+=(double const) =0;  ///< Virtual add
-  virtual PolyFunction& operator/=(double const) =0;  ///< Virtual divide
+    // member access
+  void setDegree(int const);
+  int getDegree() const;
+
+  virtual PolyFunction& operator+=(const double) =0;
+  virtual PolyFunction& operator/=(const double) =0;
 
   void write(std::ostream&) const;
 };
@@ -39,6 +45,7 @@ std::ostream& operator<<(std::ostream&,const PolyFunction&);
 
 
 }  // NAMESPACE mathlevel
+
 
 } // NAMESPACE Mantid
 

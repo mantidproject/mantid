@@ -3,7 +3,6 @@
 
 namespace Mantid
 {
-
 namespace mathLevel
 {
 
@@ -14,13 +13,13 @@ namespace mathLevel
     \date December 2007
     \brief Holds a polynominal as a secondary type
 
-    This holds a single variable polynomial of primary positive type.
+    This holds a multi-variable polynomial of primary positive type.
     Assumes Euclidean division, hence a remainders.
     Internal solution of the polynomial is possible. Conversion to 
     other forms is not internally handled.
 
     Note that Index refers to the depth. It is only valid from 1 to N.
-    for zero use PolyBase
+    PolyVar<1> has been specialised
   */
 
 template<int VCount>
@@ -28,8 +27,8 @@ class PolyVar  : public PolyFunction
 {
  private:
 
-  int iDegree;                                     ///< Degree of polynomial  
-  std::vector<PolyVar<VCount-1> > PCoeff;          ///< Polynominals
+  int iDegree;                                ///< Degree of polynomial  
+  std::vector<PolyVar<VCount-1> > PCoeff;     ///< Polynominals [0]=const 
 
  public:
 
@@ -45,10 +44,11 @@ class PolyVar  : public PolyFunction
     // member access
   void setDegree(int const);
   int getDegree() const;
+  void zeroPoly();
 
   template<int ICount>
-  void setComp(int const,const PolyVar<ICount>&);
-  void setComp(int const,const double&);
+  void setComp(const int,const PolyVar<ICount>&);
+  void setComp(const int,double const&);
   // get value
   double operator()(const std::vector<double>&) const;
   double operator()(const double*) const;
@@ -76,6 +76,9 @@ class PolyVar  : public PolyFunction
   PolyVar<VCount>& operator*=(double const);
   PolyVar<VCount>& operator/=(double const);
 
+  int operator==(const PolyVar<VCount>&) const;
+  int operator!=(const PolyVar<VCount>&) const;
+
     // derivation
   PolyVar getDerivative() const;
   PolyVar& derivative();
@@ -85,25 +88,20 @@ class PolyVar  : public PolyFunction
   void compress(double const =1.0);
 
   int isZero(double const) const;
+  int isUnit(double const) const;
+  int isUnitary(double const) const;
   int getCount(double const) const;
-  int isDouble() const { return 0; }      ///< has double values [\todo must be corrected]
-
+  int isDouble() const { return 0; }
   /// Get a double valued coefficient:
   double getDouble() const { return PCoeff[0].getDouble(); }  
+  PolyVar<VCount-1> reduce(const PolyVar<VCount>&) const;
 
-  void write(std::ostream&) const;
+  int read(const std::string&);
+  int write(std::ostream&,const int=0) const;
 };
 
 template<int VCount> 
 std::ostream& operator<<(std::ostream&,const PolyVar<VCount>&);
-
-/*!
-  \class PolyVar<1>
-  \brief Specialization of PolyVar
-  \author S.Ansell 
-  \date December 2007
-  \version 1.0
-*/
 
 template<> 
 class PolyVar<1> : public PolyFunction
@@ -111,7 +109,7 @@ class PolyVar<1> : public PolyFunction
  private:
 
   int iDegree;                    ///< Degree of polynomial [0 == constant]
-  std::vector<double> PCoeff;    ///< Coefficients
+  std::vector<double> PCoeff;     ///< Coefficients
 
   int solveQuadratic(std::complex<double>&,std::complex<double>&) const;
   int solveCubic(std::complex<double>&,std::complex<double>&,
@@ -129,6 +127,8 @@ class PolyVar<1> : public PolyFunction
     // member access
   void setDegree(int const);
   int getDegree() const;
+  void zeroPoly();
+
   operator const std::vector<double>& () const;
   operator std::vector<double>& ();
   double operator[](int const) const;
@@ -163,6 +163,11 @@ class PolyVar<1> : public PolyFunction
   PolyVar<1>& operator*=(double const);
   PolyVar<1>& operator/=(double const);
 
+  int operator==(const PolyVar<1>&) const;
+  int operator!=(const PolyVar<1>&) const;
+  int operator==(const double&) const;
+  int operator!=(const double&) const;
+
     // derivation
   PolyVar<1> getDerivative() const;
   PolyVar<1>& derivative();
@@ -178,12 +183,15 @@ class PolyVar<1> : public PolyFunction
   std::vector<double> realRoots(double const= -1.0);
   std::vector<std::complex<double> > calcRoots(double const= -1.0);
 
-  int isZero(const double) const;
-  int getCount(const double) const;
-  int isDouble() const { return 1; }              ///< Inquire if double values 
-  double getDouble() const { return PCoeff[0]; }  ///< Return double value 
+  int isZero(double const) const;
+  int isUnit(double const) const;
+  int isUnitary(double const) const;
+  int getCount(double const) const;
+  int isDouble() const { return 1; }
+  double getDouble() const { return PCoeff[0]; }
 
-  void write(std::ostream&) const;
+  int read(const std::string&);
+  int write(std::ostream&,const int =0) const;
 };
 
 }  // NAMESPACE mathlevel

@@ -8,11 +8,11 @@
 #include <gsl/gsl_poly.h>
 
 #include "AuxException.h"
+#include "MantidKernel/Support.h"
 #include "PolyFunction.h"
 
 namespace Mantid
 {
-
 namespace mathLevel
 {
 
@@ -82,8 +82,38 @@ PolyFunction::write(std::ostream& OX) const
   return;
 }  
 
+int
+PolyFunction::getMaxSize(const std::string& CLine,const char V)
+  /*!
+    Finds the maximum power in the string
+    of the variable type
+    \param CLine :: Line to calcuate V^x componenets
+    \param V :: Variable letter.
+    \return Max Power 
+  */
+{
+  int maxPower(0);
+  std::string::size_type pos(0);
+  pos=CLine.find(V,pos);
+  const unsigned int L=CLine.length()-2;
+  while(pos!=std::string::npos)
+    {
+      if (pos!=L && CLine[pos+1]=='^') 
+        {
+	  int pV;
+	  if (StrFunc::convPartNum(CLine.substr(pos+2),pV) && pV>maxPower)
+	    maxPower=pV;
+	}
+      else if (!maxPower)      // case of +y+... etc
+	maxPower=1;
+	
+      pos=CLine.find(V,pos+1);
+    }
+  return maxPower;
+}
 
 }  // NAMESPACE  mathLevel
+
 
 }  // NAMESPACE Mantid
 
