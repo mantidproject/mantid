@@ -704,7 +704,7 @@ Acomp::assignCNF(const std::vector<int>& Index,const std::vector<BnId>& A)
   for(vc=A.begin();vc!=A.end();vc++)
     {
       Acomp Px(0);      // Intersection
-      std::cout<<"Item == "<<*vc<<std::endl;
+      //std::cout<<"Item == "<<*vc<<std::endl;
       BnId X=*vc;
       X.reverse();
       Px.addUnit(Index,X);
@@ -940,7 +940,7 @@ Acomp::makePI(std::vector<BnId>& DNFobj) const
   std::vector<BnId>::iterator uend;     // itor to remove unique
   // Need to make an initial copy.
   Work=DNFobj;
-  std::cerr<<"Work .size == "<<Work.size()<<std::endl;
+  //std::cerr<<"Work .size == "<<Work.size()<<std::endl;
   do
     {
       // Deal with tri-state objects ??
@@ -956,7 +956,7 @@ Acomp::makePI(std::vector<BnId>& DNFobj) const
       //set PI status to 1
       for_each( Work.begin(),Work.end(),
 		std::bind2nd(std::mem_fun_ref(&BnId::setPI),1) );
-      std::cerr<<"Start of Acomp::makePI"<<std::endl;
+      //std::cerr<<"Start of Acomp::makePI"<<std::endl;
 	  
       //Collect into pairs which have a difference of +/- one 
       // object
@@ -981,12 +981,12 @@ Acomp::makePI(std::vector<BnId>& DNFobj) const
 		}
 	    }
 	}	
-      std::cerr<<"End of Acomp::makePI"<<changeCount<<std::endl;
+      //std::cerr<<"End of Acomp::makePI"<<changeCount<<std::endl;
       for(vc=Work.begin();vc!=Work.end();vc++)
 	if (vc->PIstatus()==1)
 	  PIComp.push_back(*vc);
       // Now make unique:
-      std::cerr<<"Change count == "<<Tmod.size()<<std::endl;
+      //std::cerr<<"Change count == "<<Tmod.size()<<std::endl;
 
       Work=Tmod;
     } while (!Tmod.empty());
@@ -1189,8 +1189,8 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
       keyNumbers.push_back(mc->first);
     }
 
-  std::cerr<<"DNF Size == "<<Base.size()<<std::endl;
-  std::cerr<<"KeyNumb Size == "<<keyNumbers.size()<<std::endl;
+  //std::cerr<<"DNF Size == "<<Base.size()<<std::endl;
+  //std::cerr<<"KeyNumb Size == "<<keyNumbers.size()<<std::endl;
   DNFobj.clear();
   BnId State(Base.size(),0);                 //zero base
   do
@@ -1201,7 +1201,7 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
 	  DNFobj.push_back(State);
 	}
     } while(++State);
-  std::cerr<<"DNF == "<<DNFobj.size()<<std::endl;
+  //std::cerr<<"DNF == "<<DNFobj.size()<<std::endl;
   return 0;
 }
  

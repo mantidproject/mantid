@@ -147,7 +147,7 @@ Algebra::algDiv(const Algebra& D) const
   Algebra Q;
   Algebra R;
   Acomp Tf=F;
-  std::cerr<<"AlgDiv:"<<std::endl;
+  //std::cerr<<"AlgDiv:"<<std::endl;
   std::pair<Acomp,Acomp> QR=Tf.algDiv(D.F);
   if (!QR.first.isNull() && 
       !QR.second.isNull())
@@ -216,6 +216,13 @@ Algebra::write(std::ostream& Out) const
   Out<<"F == "<<F.display()<<std::endl;
   //  Out<<F.displayDepth(0)<<std::endl;
   return Out;
+}
+
+
+std::string Algebra::display() const
+{
+  return F.display();
+
 }
 
 int

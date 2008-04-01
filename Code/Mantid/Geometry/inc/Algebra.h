@@ -1,6 +1,9 @@
 #ifndef Algebra_h
 #define Algebra_h
 
+#include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
+#include "AComp.h"
 
 namespace Mantid
 {
@@ -39,7 +42,7 @@ namespace Geometry
 
 */ 
 
-class Algebra
+class DLLExport Algebra
 {
  private:
 
@@ -75,6 +78,7 @@ class Algebra
 
   // Debug Functions::
   int countLiterals() const;
+  std::string display() const;
 
 };
 

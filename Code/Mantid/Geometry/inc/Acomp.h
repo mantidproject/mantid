@@ -1,6 +1,10 @@
 #ifndef Acomp_h
 #define Acomp_h
 
+
+#include "MantidKernel/System.h"
+#include "BnId.h"
+
 namespace Mantid
 {
 
@@ -47,7 +51,7 @@ namespace Geometry
 
 */
 
-class Acomp 
+class DLLExport Acomp 
 {
  private:
 
