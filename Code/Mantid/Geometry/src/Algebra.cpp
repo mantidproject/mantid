@@ -11,13 +11,11 @@
 #include <functional>
 #include <iterator>
 
-#include "MantidKernel/Logger.h"
+#include "Algebra.h"
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
 #include "MapSupport.h"
 #include "BnId.h"
-#include "Acomp.h"
-#include "Algebra.h"
 
 namespace Mantid
 {

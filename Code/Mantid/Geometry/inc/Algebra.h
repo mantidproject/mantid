@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
-#include "AComp.h"
+#include "Acomp.h"
 
 namespace Mantid
 {
