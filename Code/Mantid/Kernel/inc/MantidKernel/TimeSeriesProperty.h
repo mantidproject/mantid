@@ -114,13 +114,13 @@ private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
   std::time_t createTime_t_FromString(const std::string &str)
   {
-    struct std::tm * time_since_1900;
+    std::tm * time_since_1900 = new std::tm;
+    time_since_1900->tm_isdst = -1;
  
     // create tm struct
 
-    time_t rawtime;
-    time( &rawtime );
-    time_since_1900 = localtime( &rawtime );
+    std::time_t rawtime;
+    std::time( &rawtime );
 
     time_since_1900->tm_year = atoi(str.substr(0,4).c_str()) - 1900;
     time_since_1900->tm_mon = atoi(str.substr(5,2).c_str()) - 1;
@@ -128,8 +128,8 @@ private:
     time_since_1900->tm_hour = atoi(str.substr(11,2).c_str());
     time_since_1900->tm_min = atoi(str.substr(14,2).c_str());
     time_since_1900->tm_sec = atoi(str.substr(17,2).c_str());
-
-    return mktime(time_since_1900);
+    
+    return std::mktime(time_since_1900);
   }
 
   /// static reference to the logger class

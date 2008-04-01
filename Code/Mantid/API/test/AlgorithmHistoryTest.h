@@ -35,22 +35,19 @@ public:
     correctOutput = correctOutput + "  Direction :Inout\n";
 
     //set the time
-    time_t rawtime;
-    struct tm * timeinfo;
-    char * weekday[] = { "Sunday", "Monday",
-                         "Tuesday", "Wednesday",
-                         "Thursday", "Friday", "Saturday"};
+    std::time_t rawtime;
+    std::tm * timeinfo = new std::tm;
+    timeinfo->tm_isdst = -1;
 
     /* The datetime must match that in the strng above */
-    time ( &rawtime );
-    timeinfo = localtime ( &rawtime );
+    std::time ( &rawtime );
     timeinfo->tm_year = 108;
     timeinfo->tm_mon = 1;
     timeinfo->tm_mday = 29;
     timeinfo->tm_hour = 9;
     timeinfo->tm_min = 54;
     timeinfo->tm_sec = 49;
-    time_t execTime = mktime ( timeinfo );
+    std::time_t execTime = mktime ( timeinfo );
 
     // Not really much to test
     std::vector<AlgorithmParameter> aps;
