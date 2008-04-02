@@ -1,6 +1,8 @@
 #ifndef Sphere_h
 #define Sphere_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
 
@@ -36,7 +38,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class Sphere : public Surface
+class DLLExport Sphere : public Surface
 {
  private:
 

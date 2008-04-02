@@ -1,6 +1,8 @@
 #ifndef XMLgroup_h
 #define XMLgroup_h
 
+#include "XMLobject.h"
+
 namespace Mantid
 {
 

@@ -1,6 +1,7 @@
 #ifndef IndexIterator_h
 #define IndexIterator_h
 
+#include <stack>
 /*!
   \class IndexIterator
   \author S. Ansell

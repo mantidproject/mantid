@@ -9,7 +9,6 @@
 
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
-#include "PolyFunction.h"
 #include "PolyVar.h"
 
 #ifndef M_PI 

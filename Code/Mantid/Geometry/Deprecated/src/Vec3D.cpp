@@ -6,9 +6,7 @@
 #include <string>
 #include <algorithm>
 
-#include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "Matrix.h"
 #include "Vec3D.h"
 
 namespace Mantid 

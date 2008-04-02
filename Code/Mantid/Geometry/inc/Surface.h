@@ -1,6 +1,11 @@
 #ifndef Geometry_Surface_h
 #define Geometry_Surface_h
 
+#include "MantidKernel/System.h"
+#include "XMLcollect.h"
+#include "IndexIterator.h"
+#include "BaseVisit.h"
+
 namespace Mantid
 {
 
@@ -38,7 +43,7 @@ namespace Geometry
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class Surface 
+class DLLExport Surface 
 {
  private:
 

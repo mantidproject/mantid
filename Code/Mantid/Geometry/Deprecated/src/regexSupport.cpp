@@ -7,9 +7,7 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-#include <boost/regex.hpp>
 
-#include "MantidKernel/Support.h"
 #include "regexSupport.h"
 
 namespace Mantid

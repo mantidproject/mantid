@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../inc/Matrix.h" 
+#include "../inc/Object.h" 
 
 using namespace Mantid;
 using namespace Geometry;
@@ -125,6 +125,9 @@ void testMakeComplement()
   return;
   
 }
+
+private:
+  Object MObj;
 
 };
 

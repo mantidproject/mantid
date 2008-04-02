@@ -3,7 +3,6 @@
 #include <cmath> 
 #include <vector>
 
-#include "Matrix.h"
 #include "V3D.h"
 
 namespace Mantid

@@ -1,6 +1,9 @@
 #ifndef mathLevel_PolyVar_h
 #define mathLevel_PolyVar_h
 
+#include "MantidKernel/System.h"
+#include "PolyFunction.h"
+
 namespace Mantid
 {
 namespace mathLevel
@@ -23,7 +26,7 @@ namespace mathLevel
   */
 
 template<int VCount>
-class PolyVar  : public PolyFunction
+class DLLExport PolyVar  : public PolyFunction
 {
  private:
 
@@ -104,7 +107,7 @@ template<int VCount>
 std::ostream& operator<<(std::ostream&,const PolyVar<VCount>&);
 
 template<> 
-class PolyVar<1> : public PolyFunction
+class DLLExport PolyVar<1> : public PolyFunction
 {
  private:
 

@@ -1,6 +1,7 @@
 #ifndef Cylinder_h
 #define Cylinder_h
 
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ namespace Geometry
 
 */
 
-class Cylinder : public Surface
+class DLLExport Cylinder : public Surface
 {
  private:
 

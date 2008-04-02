@@ -7,31 +7,23 @@
 #include <list>
 #include <deque>
 #include <map>
-#include <stack>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include <boost/regex.hpp>
 
-#include "MantidKernel/Logger.h"
+#include "Object.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
 #include "XMLread.h"
-#include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
-#include "Vec3D.h"
-#include "Track.h"
 #include "Line.h"
-#include "BaseVisit.h"
 #include "LineIntersectVisit.h"
-#include "Surface.h"
-#include "Rules.h"
-#include "Object.h"
 
 namespace Mantid
 {

@@ -1,6 +1,8 @@
 #ifndef XMLobject_h
 #define XMLobject_h
 
+#include "XMLattribute.h"
+
 namespace Mantid
 {
 

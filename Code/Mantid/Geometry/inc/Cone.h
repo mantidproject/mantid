@@ -1,6 +1,8 @@
 #ifndef Cone_h
 #define Cone_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
 
@@ -40,7 +42,7 @@ namespace Geometry
 */
 
 
-class Cone : public Surface
+class DLLExport Cone : public Surface
 {
  private:
 

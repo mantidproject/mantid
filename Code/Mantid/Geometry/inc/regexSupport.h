@@ -1,6 +1,9 @@
 #ifndef regexSupport_h
 #define regexSupport_h
 
+#include <boost/regex.hpp>
+#include "MantidKernel/Support.h"
+
 namespace Mantid 
 {
 

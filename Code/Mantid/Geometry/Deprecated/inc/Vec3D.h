@@ -1,6 +1,10 @@
 #ifndef Geometry_Vec3D_h
 #define Geometry_Vec3D_h
 
+#include "MantidKernel/System.h"
+#include "../../inc/Matrix.h"
+#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
 
@@ -18,7 +22,7 @@ namespace Geometry
   simple dot and cross products
  */
 
-class Vec3D
+class DLLExport Vec3D
 {
  protected:
   
@@ -82,8 +86,8 @@ class Vec3D
 };
 
 
-std::ostream& operator<<(std::ostream&,const Vec3D&);
-std::istream& operator>>(std::istream&,Vec3D&);
+DLLExport std::ostream& operator<<(std::ostream&,const Vec3D&);
+DLLExport std::istream& operator>>(std::istream&,Vec3D&);
 
 } // NAMESPACE Geometry
 

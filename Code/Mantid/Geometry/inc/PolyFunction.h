@@ -1,6 +1,8 @@
 #ifndef mathLevel_PolyFunction_h
 #define mathLevel_PolyFunction_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
 
@@ -15,7 +17,7 @@ namespace mathLevel
   */
 
 
-class PolyFunction
+class DLLExport PolyFunction
 {
  protected:
 

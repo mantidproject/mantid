@@ -1,6 +1,13 @@
 #ifndef Object_h
 #define Object_h
 
+#include "MantidKernel/Logger.h"
+#include "Vec3D.h"
+#include "Rules.h"
+#include "Surface.h"
+#include "Track.h"
+#include "XMLcollect.h"
+
 namespace Mantid
 {
 
