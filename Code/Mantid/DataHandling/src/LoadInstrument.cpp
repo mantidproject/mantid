@@ -121,9 +121,10 @@ void LoadInstrument::exec()
 
   // Get reference to Instrument and set its name
 
-  API::Instrument& instrument = localWorkspace->getInstrument();
+  //API::Instrument* 
+  instrument = &(localWorkspace->getInstrument());
   if ( pRootElem->hasAttribute("name") ) 
-    instrument.setName( pRootElem->getAttribute("name") );
+    instrument->setName( pRootElem->getAttribute("name") );
 
 
   // do analysis for each top level compoment element
@@ -157,7 +158,7 @@ void LoadInstrument::exec()
           detectorLastID = atoi( (pFound->getAttribute("end")).c_str() ); 
         }
 
-        appendAssembly(&instrument, pElem, runningDetID);
+        appendAssembly(instrument, pElem, runningDetID);
 
 
         // a check
@@ -176,7 +177,7 @@ void LoadInstrument::exec()
       }
       else
       {
-        appendLeaf(&instrument, pElem, runningDetID);
+        appendLeaf(instrument, pElem, runningDetID);
       }
     }
   }
@@ -289,7 +290,9 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Element* pCompEl
 
     detector.setID(runningDetID);
     runningDetID++;
-    parent->addCopy(&detector);
+    int toGetHoldOfDetectorCopy = parent->addCopy(&detector);
+    Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
+    instrument->markAsDetector(temp);
   }
   else
   {
@@ -302,6 +305,18 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Element* pCompEl
       comp->setName(pCompElem->getAttribute("name"));
     else
       comp->setName(pCompElem->getAttribute("type"));
+
+
+    // check if special Source or SamplePos Component
+
+    if ( typeName.compare("Source") == 0 )
+    {
+      instrument->markAsSource(comp);
+    }
+    if ( typeName.compare("SamplePos") == 0 )
+    {
+      instrument->markAsSamplePos(comp);
+    }
 
     // set location for this comp. Done this way because are likely to need
     // to take into account the fact that a component element may contain more

@@ -17,11 +17,13 @@ namespace API
 {
 /** @class Instrument Instrument.h
  	
- 	  Base Instrument Class, very basic at the moment
+ 	  Base Instrument Class.
  			    	
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007
- 	    
+    @author Anders Markvardsen, ISIS, RAL
+    @date 1/4/2008
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
  	
     This file is part of Mantid.
@@ -52,22 +54,45 @@ public:
 	Instrument(const std::string& name);
   ///Virtual destructor
 	virtual ~Instrument() {}
-	Instrument(const Instrument&);
 
 	Geometry::ObjComponent* getSource();
 	Geometry::ObjComponent* getSamplePos();
-	Geometry::CompAssembly* getDetectors();
 	Geometry::Detector* getDetector(const int &detector_id);
 
+  /// mark a Component which has already been added to the Instrument class
+  /// to be 'the' samplePos Component. For now it is assumed that we have
+  /// at most one of these.
+  void markAsSamplePos(Geometry::ObjComponent*);
+
+  /// mark a Component which has already been added to the Instrument class
+  /// to be 'the' source Component. For now it is assumed that we have
+  /// at most one of these.
+  void markAsSource(Geometry::ObjComponent*);
+
+  /// mark a Component which has already been added to the Instrument class
+  /// to be a Detector component, and add it to a detector cache for possible
+  /// later retrievel
+  void markAsDetector(Geometry::Detector*);
+
 private:
+  Instrument& operator=(const Instrument&);
+  Instrument(const Instrument&);
+
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 
 	Geometry::Component* getChild(const std::string& name);
 
-	/// a chache of the detectors assembly
-	Geometry::CompAssembly* _detectorsCacheValue;
-	
+  /// Map which holds detector-IDs and pointers to detector components 
+  std::map<int, Geometry::Detector*> _detectorCache;
+
+  /// Purpose to hold copy of source component. For now assumed to
+  /// be just one component
+  Geometry::ObjComponent* _sourceCache;
+
+  /// Purpose to hold copy of samplePos component. For now assumed to
+  /// be just one component
+  Geometry::ObjComponent* _samplePosCache;
 };
 
 } // namespace API

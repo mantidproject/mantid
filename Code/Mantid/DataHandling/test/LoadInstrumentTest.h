@@ -101,8 +101,6 @@ public:
     //TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),2184);
-
     Mantid::Geometry::Detector *ptrDet103 = i.getDetector(103);
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");

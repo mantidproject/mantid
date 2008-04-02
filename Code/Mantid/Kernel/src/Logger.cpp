@@ -237,7 +237,7 @@ namespace Kernel
   /** Returns a reference to the Logger with the given name.
    *  If the Logger does not yet exist, it is created, based on its parent logger.
    * 
-   *  @param name The name of the logger to use - this is usually the class namename. 
+   *  @param name The name of the logger to use - this is usually the class name. 
    */
 	Logger& Logger::get(const std::string& name)
 	{

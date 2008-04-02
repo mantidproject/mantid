@@ -10,16 +10,13 @@ namespace API
 Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
-Instrument::Instrument() : Geometry::CompAssembly(),_detectorsCacheValue(0)
+Instrument::Instrument() : Geometry::CompAssembly(),
+                          _samplePosCache(0),_sourceCache(0)
 {}
 
 /// Constructor with name
-Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),_detectorsCacheValue(0)
-{}
-
-/// Copy constructor
-Instrument::Instrument(const Instrument& A)  :
-     Geometry::CompAssembly(A)
+Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
+                          _samplePosCache(0),_sourceCache(0)
 {}
 
 /**	Gets a pointer to the source
@@ -27,10 +24,9 @@ Instrument::Instrument(const Instrument& A)  :
 */
 Geometry::ObjComponent* Instrument::getSource()
 {
-	Geometry::Component* ptrChild = getChild("Source");
-	Geometry::ObjComponent *retVal = dynamic_cast<Geometry::ObjComponent*>(ptrChild);
-	if (!retVal) throw std::bad_cast();
-	return retVal;
+  if ( !_sourceCache )
+    g_log.warning("In Instrument::getSource(). No source has been set.");
+	return _sourceCache;
 }
 
 /**	Gets a pointer to the Sample Position
@@ -38,27 +34,9 @@ Geometry::ObjComponent* Instrument::getSource()
 */
 Geometry::ObjComponent* Instrument::getSamplePos()
 {
-	Geometry::Component* ptrChild = getChild("SamplePos");
-	Geometry::ObjComponent *retVal = dynamic_cast<Geometry::ObjComponent*>(ptrChild);
-	if (!retVal) throw std::bad_cast();
-	return retVal;
-}
-
-/**	Gets a pointer to the Assembly of detectors
-* @returns a pointer to the Assembly of detectors
-*/
-Geometry::CompAssembly* Instrument::getDetectors()
-{
-	if (!_detectorsCacheValue)
-	{
-		Geometry::Component* ptrChild = getChild("Detectors");
-		_detectorsCacheValue = dynamic_cast<Geometry::CompAssembly*>(ptrChild);
-	}
-
-	Geometry::CompAssembly *retVal = _detectorsCacheValue;
-
-	if (!retVal) throw std::bad_cast();
-	return retVal;
+  if ( !_samplePosCache )
+    g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
+	return _samplePosCache;
 }
 
 /**	Gets a pointer to the requested detector
@@ -67,28 +45,16 @@ Geometry::CompAssembly* Instrument::getDetectors()
 */
 Geometry::Detector* Instrument::getDetector(const int &detector_id)
 {
-	Geometry::CompAssembly *ptrDetectors = getDetectors();
-	Geometry::Detector *retVal = 0;
-	
-	int noOfChildren = ptrDetectors->nelements();
-	for (int i = 0; i < noOfChildren; i++)
-	{
-		Geometry::Component *loopPtr = (*ptrDetectors)[i];
-		Geometry::Detector *ptrDetector = dynamic_cast<Geometry::Detector*>(loopPtr);
-	
-		if ((ptrDetector) && (ptrDetector->getID() == detector_id))
-		{
-			retVal = ptrDetector;
-			break;
-		}
-	}
-		
-	if (!retVal)
-	{
+  std::map<int, Geometry::Detector*>::iterator it;
+
+  it = _detectorCache.find(detector_id);
+  
+	if ( it == _detectorCache.end() )	
+  {
 		throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
-	}
-	
-	return retVal;
+  }
+
+	return it->second;
 }
 
 /**	Gets a pointer to the requested child component
@@ -120,6 +86,47 @@ Geometry::Component* Instrument::getChild(const std::string& name)
 	
 	return retVal;
 }
-	
+
+/** Mark a Component which has already been added to the Instrument class
+* to be 'the' samplePos Component. For now it is assumed that we have
+* at most one of these.
+*
+* @param comp Component to be marked (stored for later retrievel) as a "SamplePos" Component
+*/
+void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
+{
+  if ( !_samplePosCache )
+    _samplePosCache = comp;
+  else
+    g_log.warning("Have already added samplePos component to the _samplePosCache.");
+}
+
+/** Mark a Component which has already been added to the Instrument class
+* to be 'the' source Component. For now it is assumed that we have
+* at most one of these.
+*
+* @param comp Component to be marked (stored for later retrievel) as a "source" Component
+*/
+void Instrument::markAsSource(Geometry::ObjComponent* comp)
+{
+  if ( !_sourceCache )
+    _sourceCache = comp;
+  else
+    g_log.warning("Have already added source component to the _sourceCache.");
+}
+
+/** Mark a Component which has already been added to the Instrument class
+* to be a Detector component. Add it to a detector cache for possible
+* later retrievel
+*
+* @param det Component to be marked (stored for later retrievel) as a detector Component
+*/
+void Instrument::markAsDetector(Geometry::Detector* det)
+{
+  if ( !_detectorCache.insert( std::map<int, Geometry::Detector*>::value_type(det->getID(), det) ).second )
+    g_log.warning("Not successful in adding Detector to _detectorCache.");
+}
+
+
 } // namespace API
 } // Namespace Mantid

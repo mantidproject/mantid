@@ -120,7 +120,10 @@ int CompAssembly::nelements() const
 	return group.size();
 }
 
-/*! Get a pointer to the ith component in the assembly
+/*! Get a pointer to the ith component in the assembly. Note standard C/C++
+ *  array notation used, that is, i most be an integer i = 0,1,..., N-1, where
+ *  N is the number of component in the assembly.
+ *
  * @param i The index of the component you want
  * @return group[i] 
  * 

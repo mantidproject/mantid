@@ -103,6 +103,9 @@ namespace Mantid
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
+
+      /// For convenience added pointer to instrument here
+      API::Instrument* instrument;
     };
 
   } // namespace DataHandling

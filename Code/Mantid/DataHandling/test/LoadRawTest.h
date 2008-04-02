@@ -45,7 +45,7 @@ public:
 
     outputSpace = "outer";
     loader.setPropertyValue("OutputWorkspace", outputSpace);    
-    
+
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
@@ -70,13 +70,13 @@ public:
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
 
+
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     Instrument& i = output->getInstrument();
     Mantid::Geometry::Component* source = i.getSource();
 
-    std::cout << source->getName() << std::endl;
     TS_ASSERT_EQUALS( source->getName(), "Source");
     //TS_ASSERT_EQUALS( source->getPos(), Mantid::Geometry::V3D(0,0,0));
     TS_ASSERT_DELTA( source->getPos().Y(), 10.0,0.01);
@@ -86,14 +86,13 @@ public:
     //TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    TS_ASSERT_EQUALS(i.getDetectors()->nelements(),3);
-
     Mantid::Geometry::Detector *ptrDet103 = i.getDetector(103);
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), -3.641,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.253,0.01);
     
+
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
