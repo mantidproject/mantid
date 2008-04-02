@@ -4,12 +4,12 @@
 namespace Mantid
 {
 
-/** A namespace containing physical constants that are required by algorithms.
+/** A namespace containing physical constants that are required by algorithms and unit routines.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -31,11 +31,20 @@ namespace Mantid
 */
 namespace PhysicalConstants
 {
+  /// Pi.
+  static const double pi = 3.14159265358979323846;
+
   /// Planck constant. Taken from <http://physics.nist.gov/cuu/Constants> on 31/10/2007.
   static const double h = 6.62606896e-34;
 
   /// Mass of the neutron in kg. Taken from <http://physics.nist.gov/cuu/Constants> on 30/10/2007.
   static const double NeutronMass = 1.674927211e-27;
+  
+  /// 1 meV in Joules. Taken from <http://physics.nist.gov/cuu/Constants> on 28/03/2008.
+  static const double meV = 1.602176487e-22;
+  
+  /// 1 meV in wavenumber (cm-1). Taken from <http://physics.nist.gov/cuu/Constants> on 02/04/2008.
+  static const double meVtoWavenumber = 8.06554465;
   
 } // namespace PhysicalConstants
 } // namespace Mantid

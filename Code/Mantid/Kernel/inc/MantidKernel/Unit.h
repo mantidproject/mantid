@@ -137,6 +137,114 @@ public:
   ~Wavelength() {}
 };
 
+class DLLExport Energy : public Unit
+{
+public:
+  const int unitCode() const { return 3; }
+  const std::string caption() const { return "Energy"; }
+  const std::string label() const {return "MeV"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  Energy() : Unit() {}
+  /// Destructor
+  ~Energy() {}
+};
+
+class DLLExport dSpacing : public Unit
+{
+public:
+  const int unitCode() const { return 4; }
+  const std::string caption() const { return "d-Spacing"; }
+  const std::string label() const {return "Angstrom"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  dSpacing() : Unit() {}
+  /// Destructor
+  ~dSpacing() {}
+};
+
+class DLLExport MomentumTransfer : public Unit
+{
+public:
+  const int unitCode() const { return 5; }
+  const std::string caption() const { return "q"; }
+  const std::string label() const {return "1/Angstrom"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  MomentumTransfer() : Unit() {}
+  /// Destructor
+  ~MomentumTransfer() {}
+};
+
+class DLLExport QSquared : public Unit
+{
+public:
+  const int unitCode() const { return 6; }
+  const std::string caption() const { return "Q2"; }
+  const std::string label() const {return "Angstrom^-2"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  QSquared() : Unit() {}
+  /// Destructor
+  ~QSquared() {}
+};
+
+class DLLExport DeltaE : public Unit
+{
+public:
+  const int unitCode() const { return 7; }
+  const std::string caption() const { return "Energy transfer"; }
+  const std::string label() const {return "meV"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  DeltaE() : Unit() {}
+  /// Destructor
+  ~DeltaE() {}
+};
+
+class DLLExport DeltaE_inWavenumber : public Unit
+{
+public:
+  const int unitCode() const { return 8; }
+  const std::string caption() const { return "Energy transfer"; }
+  const std::string label() const {return "1/cm"; }
+  
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
+  
+  /// Constructor
+  DeltaE_inWavenumber() : Unit() {}
+  /// Destructor
+  ~DeltaE_inWavenumber() {}
+};
+
 } // namespace Units
 
 } // namespace Kernel
