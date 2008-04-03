@@ -2,6 +2,7 @@
 #define Sphere_h
 
 #include "MantidKernel/System.h"
+#include "Surface.h"
 
 namespace Mantid
 {

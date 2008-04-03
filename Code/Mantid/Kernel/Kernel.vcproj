@@ -239,11 +239,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ArrayPropertyTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\BoundedValidator.h"
 				>
 			</File>
 			<File
+				RelativePath=".\test\BoundedValidatorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\ConfigService.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ConfigServiceTest.h"
 				>
 			</File>
 			<File
@@ -260,6 +272,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\DynamicFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DynamicFactoryTest.h"
 				>
 			</File>
 			<File
@@ -287,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LibraryManagerTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\LibraryWrapper.h"
 				>
 			</File>
@@ -299,7 +319,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\MandatoryValidatorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\NullValidator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\NullValidatorTest.h"
 				>
 			</File>
 			<File
@@ -315,7 +343,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\PropertyManagerTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\PropertyTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\PropertyWithValue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\PropertyWithValueTest.h"
 				>
 			</File>
 			<File
@@ -331,6 +371,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SupportTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\System.h"
 				>
 			</File>
@@ -339,11 +383,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\TimeSeriesPropertyTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\Unit.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\UnitFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UnitTest.h"
 				>
 			</File>
 		</Filter>

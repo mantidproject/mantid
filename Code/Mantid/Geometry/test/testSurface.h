@@ -12,9 +12,7 @@
 #include "../inc/Surface.h"
 #include "../inc/Cone.h"
 #include "../inc/Cylinder.h"
-//#include "../inc/General.h"
 #include "../inc/Sphere.h"
-//#include "../inc/Torus.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -78,41 +76,6 @@ public:
     }
   }
 
-  void testSphereDistance()
-    /*!
-    Test the distance of a point from the cone
-    \retval -1 :: failed build a cone
-    \retval -2 :: Failed on the distance calculation
-    \retval 0 :: All passed
-    */
-  {
-    std::vector<std::string> SphStr;
-    SphStr.push_back("so 1");                // sphere origin
-    SphStr.push_back("s 1.5 -2.5 1.8 1");     // sphere 
-    Geometry::Vec3D P(3,7,4);
-    Geometry::Vec3D Q(0,0,4);
-    std::vector<std::string>::const_iterator vc;
-    Sphere A;
-
-    for(vc=SphStr.begin();vc!=SphStr.end();vc++)
-    {
-      const int retVal=A.setSurface(*vc);
-      TS_ASSERT(retVal==0);
-      // Surface distance and Sphere distance are the same:
-      if (fabs(A.distanceTrue(P)-A.distance(P))>1e-6)
-      {
-        TS_ASSERT_DELTA(A.distanceTrue(P),A.distance(P),1e-6);
-        std::cout<<"Sphere == ";
-        A.Surface::write(std::cout);
-        std::cout<<"TestPoint == "<<P<<std::endl;
-        std::cout<<"Distance == "<<A.distanceTrue(P)
-          <<" === "<<A.distance(P)<<std::endl;
-        std::cout<<"--------------"<<std::endl;
-        std::cout<<"Distance == "<<A.distanceTrue(Q)
-          <<" === "<<A.distance(Q)<<std::endl;
-      }
-    }
-  }
 private:
 
   std::string extractString(Surface& pv)
