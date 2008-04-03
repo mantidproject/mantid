@@ -572,6 +572,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\testCynlinder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\testDetector.h"
 				>
 			</File>
@@ -640,11 +644,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomment.h"
+				RelativePath=".\Deprecated\inc\XMLcomment.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcomment.h"
+				RelativePath=".\auxinc\XMLcomment.h"
 				>
 			</File>
 			<File
@@ -688,11 +692,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLnamespace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -712,11 +716,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File

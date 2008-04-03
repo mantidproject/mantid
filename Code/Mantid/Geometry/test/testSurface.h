@@ -48,34 +48,6 @@ public:
     }
   }
 
-  void testCylinderDistance()
-    /*!
-    Test the distance of a point from the cylinder
-    */
-  {
-    std::vector<std::string> CylStr;
-    CylStr.push_back("cx 1");                // Cylinder origin
-    CylStr.push_back("c/x 0.5 0.5 1.0");     // also cylinder at ?origin?
-    Geometry::Vec3D P(-1.2,0,0);
-    double results[]={ 1-sqrt(0.6*0.6+0.4*0.4),  1.0-sqrt(2*0.1*0.1) };
-
-    std::vector<std::string>::const_iterator vc;
-    Cylinder A;
-    int cnt(0);
-    for(vc=CylStr.begin();vc!=CylStr.end();vc++,cnt++)
-    { 
-      if (fabs(A.distanceTrue(P)-results[cnt])>1e-6)
-      {
-        TS_ASSERT_DELTA(A.distanceTrue(P),results[cnt],0.0001);
-        TS_ASSERT_EQUALS(A.setSurface(*vc),0);
-        std::cout<<"Cylinder == ";
-        A.write(std::cout);
-        std::cout<<"TestPoint == "<<P<<std::endl;
-        std::cout<<"Distance == "<<A.distanceTrue(P)<<std::endl;;
-      }
-    }
-  }
-
 private:
 
   std::string extractString(Surface& pv)
