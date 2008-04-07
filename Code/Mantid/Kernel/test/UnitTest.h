@@ -159,7 +159,7 @@ public:
     std::vector<double> x(1,input);
     lambda.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
-    TS_ASSERT_DELTA( x[0], result, 1.0e-14 )
+    TS_ASSERT_DELTA( x[0], result, 1.0e-10 )
   }
   
   //----------------------------------------------------------------------
