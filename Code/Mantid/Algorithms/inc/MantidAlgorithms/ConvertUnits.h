@@ -20,6 +20,12 @@ namespace Algorithms
     <LI> Target          - The units to which the workspace should be converted. </LI>
     </UL>
 
+    Optional properties required for certain units (DeltaE & DeltaE_inWavenumber):
+    <UL>
+    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)</LI>
+    <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
+    </UL>
+
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
 
@@ -59,6 +65,9 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  
+  void convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power);
+  void convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS);
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

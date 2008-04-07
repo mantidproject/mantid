@@ -14,9 +14,9 @@ namespace Mantid
 namespace Kernel
 {
 /** The base units (abstract) class. All concrete units should inherit from
-    this class and provide implementations of the unitCode(), caption(),
-    label(), toTOF() and fromTOF() methods. They also need to register into
-    the UnitFactory via the macro DECLARE_UNIT(classname).
+    this class and provide implementations of the caption(), label(), 
+    toTOF() and fromTOF() methods. They also need to declare (but NOT define)
+    the unitID() method and register into the UnitFactory via the macro DECLARE_UNIT(classname).
 
     @author Russell Taylor, Tessella Support Services plc
     @date 25/02/2008
@@ -44,12 +44,18 @@ namespace Kernel
 class DLLExport Unit
 {
 public:
-  /// The unique code identifying the unit
-  virtual const int unitCode() const = 0;
+  /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
+  /// macro and it will return the argument passed to that macro (which is the unit's key in the
+  /// factory).
+  virtual const std::string unitID() const = 0;
   /// The full name of the unit
   virtual const std::string caption() const = 0;
   /// A label for the unit to be printed on axes
   virtual const std::string label() const = 0;
+  
+  // Check whether the unit can be converted to another via a simple factor
+  bool quickConversion(const Unit& destination, double& factor, double& power) const;
+  bool quickConversion(std::string destUnitName, double& factor, double& power) const;
   
   // Methods dealing with instance-level description
   const std::string& description() const;
@@ -60,9 +66,9 @@ public:
    *  @param ydata    Not currently used (ConvertUnits passes an empty vector)
    *  @param l1       The source-sample distance (in metres)
    *  @param l2       The sample-detector distance (in metres)
-   *  @param twoTheta Not currently used
-   *  @param emode    Not currently used
-   *  @param efixed   Not currently used
+   *  @param twoTheta The scattering angle (in radians)
+   *  @param emode    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
    *  @param delta    Not currently used
    */
   virtual void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
@@ -73,9 +79,9 @@ public:
    *  @param ydata    Not currently used (ConvertUnits passes an empty vector)
    *  @param l1       The source-sample distance (in metres)
    *  @param l2       The sample-detector distance (in metres)
-   *  @param twoTheta Not currently used
-   *  @param emode    Not currently used
-   *  @param efixed   Not currently used
+   *  @param twoTheta The scattering angle (in radians)
+   *  @param emode    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
    *  @param delta    Not currently used
    */
   virtual void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
@@ -84,11 +90,24 @@ public:
   /// (Empty) Constructor
   Unit() {}
   /// Virtual destructor
-	virtual ~Unit() {}
+  virtual ~Unit() {}
 	
+protected:
+  // Add a 'quick conversion' for a unit pair
+  void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
+  
 private:
   /// The optional description that can be attached to an instance of a concrete unit
   std::string m_description;
+  
+  /// A 'quick conversion' requires the constant by which to multiply the input and the power to which to raise it
+  typedef std::pair< double, double > ConstantAndPower;
+  /// Lists, for a given starting unit, the units to which a 'quick conversion' can be made
+  typedef std::map< std::string, ConstantAndPower > UnitConversions;
+  /// The possible 'quick conversions' are held in a map with the starting unit as the key
+  typedef std::map< std::string, UnitConversions > ConversionsMap;
+  /// The table of possible 'quick conversions'
+  static ConversionsMap s_conversionFactors;
 };
 
 
@@ -104,7 +123,7 @@ namespace Units
 class DLLExport TOF : public Unit
 {
 public:
-  const int unitCode() const { return 1; }
+  const std::string unitID() const; ///< "TOF"
   const std::string caption() const { return "Time-of-flight"; }
   const std::string label() const {return "microsecond"; }
   
@@ -122,7 +141,7 @@ public:
 class DLLExport Wavelength : public Unit
 {
 public:
-  const int unitCode() const { return 2; }
+  const std::string unitID() const; ///< "Wavelength"
   const std::string caption() const { return "Wavelength"; }
   const std::string label() const {return "Angstrom"; }
   
@@ -132,7 +151,7 @@ public:
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
   
   /// Constructor
-  Wavelength() : Unit() {}
+  Wavelength();
   /// Destructor
   ~Wavelength() {}
 };
@@ -140,7 +159,7 @@ public:
 class DLLExport Energy : public Unit
 {
 public:
-  const int unitCode() const { return 3; }
+  const std::string unitID() const; ///< "Energy"
   const std::string caption() const { return "Energy"; }
   const std::string label() const {return "MeV"; }
   
@@ -150,7 +169,7 @@ public:
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
   
   /// Constructor
-  Energy() : Unit() {}
+  Energy();
   /// Destructor
   ~Energy() {}
 };
@@ -158,7 +177,7 @@ public:
 class DLLExport dSpacing : public Unit
 {
 public:
-  const int unitCode() const { return 4; }
+  const std::string unitID() const; ///< "dSpacing"
   const std::string caption() const { return "d-Spacing"; }
   const std::string label() const {return "Angstrom"; }
   
@@ -168,7 +187,7 @@ public:
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
   
   /// Constructor
-  dSpacing() : Unit() {}
+  dSpacing();
   /// Destructor
   ~dSpacing() {}
 };
@@ -176,7 +195,7 @@ public:
 class DLLExport MomentumTransfer : public Unit
 {
 public:
-  const int unitCode() const { return 5; }
+  const std::string unitID() const; ///< "MomentumTransfer"
   const std::string caption() const { return "q"; }
   const std::string label() const {return "1/Angstrom"; }
   
@@ -186,7 +205,7 @@ public:
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
   
   /// Constructor
-  MomentumTransfer() : Unit() {}
+  MomentumTransfer();
   /// Destructor
   ~MomentumTransfer() {}
 };
@@ -194,7 +213,7 @@ public:
 class DLLExport QSquared : public Unit
 {
 public:
-  const int unitCode() const { return 6; }
+  const std::string unitID() const; ///< "QSquared"
   const std::string caption() const { return "Q2"; }
   const std::string label() const {return "Angstrom^-2"; }
   
@@ -204,7 +223,7 @@ public:
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
   
   /// Constructor
-  QSquared() : Unit() {}
+  QSquared();
   /// Destructor
   ~QSquared() {}
 };
@@ -212,7 +231,7 @@ public:
 class DLLExport DeltaE : public Unit
 {
 public:
-  const int unitCode() const { return 7; }
+  const std::string unitID() const; ///< "DeltaE"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "meV"; }
   
@@ -230,7 +249,7 @@ public:
 class DLLExport DeltaE_inWavenumber : public Unit
 {
 public:
-  const int unitCode() const { return 8; }
+  const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "1/cm"; }
   

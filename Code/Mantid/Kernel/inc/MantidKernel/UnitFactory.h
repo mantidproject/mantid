@@ -1,16 +1,21 @@
 #ifndef MANTID_KERNEL_UNITFACTORYIMPL_H_
 #define MANTID_KERNEL_UNITFACTORYIMPL_H_
 
-/* Used to register classes into the factory. creates a global object in an 
+/* Used to register unit classes into the factory. creates a global object in an 
  * anonymous namespace. The object itself does nothing, but the comma operator
  * is used in the call to its constructor to effect a call to the factory's 
  * subscribe method.
+ * 
+ * The second operation that this macro performs is to provide the definition
+ * of the unitID method for the concrete unit.
  */
 #define DECLARE_UNIT(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
        ((Mantid::Kernel::UnitFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
+       \
+    const std::string Mantid::Kernel::Units::classname::unitID() const {return #classname;} \
   }
 
 //----------------------------------------------------------------------

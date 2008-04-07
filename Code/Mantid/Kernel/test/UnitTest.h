@@ -11,127 +11,164 @@ class UnitTest : public CxxTest::TestSuite
 {
   class UnitTester : public Unit
   {
-  public:
-    UnitTester() : Unit() {}
-    virtual ~UnitTester() {}
-    
-    // Empty overrides of virtual methods
-    const int unitCode() const {return 0;}
-    const std::string caption() const {return "";}
-    const std::string label() const {return "";}
-    void toTOF(std::vector<double>&,std::vector<double>&,const double&,const double&,const double&,const int&,const double&,const double&) const {}
-    void fromTOF(std::vector<double>&,std::vector<double>&,const double&,const double&,const double&,const int&,const double&,const double&) const {}
-  };
-  
 public:
-  
+    UnitTester() : Unit()
+    {
+      addConversion("a", 1.1);
+      addConversion("b", 2.2, 0.5);
+    }
+    virtual ~UnitTester() {}
+
+    // Empty overrides of virtual methods
+    const std::string unitID() const {return "aUnit";}
+    const std::string caption() const {return "";}
+    const std::string label() const{return "";}
+    void toTOF(std::vector<double>&, std::vector<double>&, const double&, const double&, const double&,const int&, const double&, const double&) const {}
+    void fromTOF(std::vector<double>&, std::vector<double>&, const double&, const double&, const double&, const int&, const double&, const double&) const {}
+  };
+
+public:
+
   //----------------------------------------------------------------------
   // Base Unit class tests
   //----------------------------------------------------------------------
-  
-	void testUnit_GetSetDescription()
-	{
-	  UnitTester t;
+
+  void testUnit_quickConversion()
+  {
+    Units::Wavelength w;
+    
+    UnitTester t;
+    double factor;
+    double power;
+    TS_ASSERT( t.quickConversion("a",factor,power) )
+    TS_ASSERT_EQUALS( factor, 1.1 )
+    TS_ASSERT_EQUALS( power, 1.0 )
+    TS_ASSERT( t.quickConversion("b",factor,power) )
+    TS_ASSERT_EQUALS( factor, 2.2 )
+    TS_ASSERT_EQUALS( power, 0.5 )
+    TS_ASSERT( ! t.quickConversion("notThere",factor,power) )
+    
+    // Test the quickConversion method that takes a Unit
+    Units::TOF tof;
+    TS_ASSERT( ! t.quickConversion(tof,factor,power) )
+  }
+
+  void testUnit_GetSetDescription()
+  {
+    UnitTester t;
     TS_ASSERT_EQUALS( t.description(), "" )
     t.setDescription("testing");
     TS_ASSERT_EQUALS( t.description(), "testing" )
-	}
+  }
 
   //----------------------------------------------------------------------
   // TOF tests
   //----------------------------------------------------------------------
 
-	void testTOF_unitCode()
-	{
-		TS_ASSERT_EQUALS( tof.unitCode(), 1 )
-	}
+  void testTOF_unitID()
+  {
+    TS_ASSERT_EQUALS( tof.unitID(), "TOF" )
+  }
 
-	void testTOF_caption()
-	{
-		TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" )
-	}
+  void testTOF_caption()
+  {
+    TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" )
+  }
 
-	void testTOF_label()
-	{
-	  TS_ASSERT_EQUALS( tof.label(), "microsecond" )
-	}
-	
-	void testTOF_cast()
-	{
-	  TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(tof) )
-	}
+  void testTOF_label()
+  {
+    TS_ASSERT_EQUALS( tof.label(), "microsecond" )
+  }
 
-	void testTOF_toTOF()
-	{
-	  std::vector<double> x(20,9.9), y(20,8.8);
-	  std::vector<double> xx = x;
+  void testTOF_cast()
+  {
+    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(tof) )
+  }
+
+  void testTOF_toTOF()
+  {
+    std::vector<double> x(20, 9.9), y(20, 8.8);
+    std::vector<double> xx = x;
     std::vector<double> yy = y;
-	  TS_ASSERT_THROWS_NOTHING( tof.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-	  // Check vectors are unchanged
-	  TS_ASSERT( xx == x )
-	  TS_ASSERT( yy == y )
-	}
+    TS_ASSERT_THROWS_NOTHING( tof.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
+    // Check vectors are unchanged
+    TS_ASSERT( xx == x )
+    TS_ASSERT( yy == y )
+  }
 
-	void testTOF_fromTOF()
-	{
-    std::vector<double> x(20,9.9), y(20,8.8);
+  void testTOF_fromTOF()
+  {
+    std::vector<double> x(20, 9.9), y(20, 8.8);
     std::vector<double> xx = x;
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( tof.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     // Check vectors are unchanged
     TS_ASSERT( xx == x )
     TS_ASSERT( yy == y )
-	}
+  }
 
   //----------------------------------------------------------------------
   // Wavelength tests
   //----------------------------------------------------------------------
 
-	void testWavelength_unitCode()
-	{
-    TS_ASSERT_EQUALS( lambda.unitCode(), 2 )
-	}
+  void testWavelength_unitID()
+  {
+    TS_ASSERT_EQUALS( lambda.unitID(), "Wavelength" )
+  }
 
-	void testWavelength_caption()
-	{
+  void testWavelength_caption()
+  {
     TS_ASSERT_EQUALS( lambda.caption(), "Wavelength" )
-	}
+  }
 
-	void testWavelength_label()
-	{
+  void testWavelength_label()
+  {
     TS_ASSERT_EQUALS( lambda.label(), "Angstrom" )
-	}
+  }
 
-	void testWavelength_cast()
+  void testWavelength_cast()
   {
     TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(lambda) )
   }
 
-	void testWavelength_toTOF()
-	{
-    std::vector<double> x(1,1.5), y(1,1.5);
+  void testWavelength_toTOF()
+  {
+    std::vector<double> x(1, 1.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( lambda.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 758.3352, 0.0001 )
     TS_ASSERT( yy == y )
-	}
+  }
 
-	void testWavelength_fromTOF()
-	{
-    std::vector<double> x(1,1000.5), y(1,1.5);
+  void testWavelength_fromTOF()
+  {
+    std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( lambda.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-    TS_ASSERT_DELTA( x[0], 1.979006, 0.000001 )    
+    TS_ASSERT_DELTA( x[0], 1.979006, 0.000001 )
     TS_ASSERT( yy == y )
-	}
+  }
 
-	//----------------------------------------------------------------------
+  void testWavelength_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    double factor, power;
+    TS_ASSERT( lambda.quickConversion(energy,factor,power) )
+    double input = 1.1;
+    double result = factor * std::pow(input,power);
+    std::vector<double> x(1,input);
+    lambda.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-14 )
+  }
+  
+  //----------------------------------------------------------------------
   // Energy tests
   //----------------------------------------------------------------------
 
-  void testEnergy_unitCode()
+  void testEnergy_unitID()
   {
-    TS_ASSERT_EQUALS( energy.unitCode(), 3 )
+    TS_ASSERT_EQUALS( energy.unitID(), "Energy" )
   }
 
   void testEnergy_caption()
@@ -151,7 +188,7 @@ public:
 
   void testEnergy_toTOF()
   {
-    std::vector<double> x(1,4.0), y(1,1.0);
+    std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( energy.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 2286.271, 0.001 )
@@ -160,20 +197,33 @@ public:
 
   void testEnergy_fromTOF()
   {
-    std::vector<double> x(1,4.0), y(1,1.0);
+    std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( energy.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 1306759.0, 1.0 )
     TS_ASSERT( yy == y )
   }
 
+  void testEnergy_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    double factor, power;
+    TS_ASSERT( energy.quickConversion(lambda,factor,power) )
+    double input = 100.1;
+    double result = factor * std::pow(input,power);
+    std::vector<double> x(1,input);
+    energy.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    lambda.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+  }
+  
   //----------------------------------------------------------------------
   // d-Spacing tests
   //----------------------------------------------------------------------
 
-  void testdSpacing_unitCode()
+  void testdSpacing_unitID()
   {
-    TS_ASSERT_EQUALS( d.unitCode(), 4 )
+    TS_ASSERT_EQUALS( d.unitID(), "dSpacing" )
   }
 
   void testdSpacing_caption()
@@ -193,7 +243,7 @@ public:
 
   void testdSpacing_toTOF()
   {
-    std::vector<double> x(1,1.0), y(1,1.0);
+    std::vector<double> x(1, 1.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( d.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 484.7537, 0.0001 )
@@ -202,20 +252,43 @@ public:
 
   void testdSpacing_fromTOF()
   {
-    std::vector<double> x(1,1001.1), y(1,1.0);
+    std::vector<double> x(1, 1001.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( d.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 2.065172, 0.000001 )
     TS_ASSERT( yy == y )
   }
 
+  void testdSpacing_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    // To MomentumTransfer
+    double factor, power;
+    TS_ASSERT( d.quickConversion(q,factor,power) )
+    double input = 1.1;
+    double result = factor * std::pow(input,power);
+    std::vector<double> x(1,input);
+    d.toTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
+    q.fromTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+    
+    // To QSquared
+    TS_ASSERT( d.quickConversion(q2,factor,power) )
+    input = 1.1;
+    result = factor * std::pow(input,power);
+    x[0] = input;
+    d.toTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
+    q2.fromTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
+  }
+
   //----------------------------------------------------------------------
   // Momentum Transfer tests
   //----------------------------------------------------------------------
 
-  void testQTransfer_unitCode()
+  void testQTransfer_unitID()
   {
-    TS_ASSERT_EQUALS( q.unitCode(), 5 )
+    TS_ASSERT_EQUALS( q.unitID(), "MomentumTransfer" )
   }
 
   void testQTransfer_caption()
@@ -235,7 +308,7 @@ public:
 
   void testQTransfer_toTOF()
   {
-    std::vector<double> x(1,1.1), y(1,1.0);
+    std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( q.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 2768.9067, 0.0001 )
@@ -244,20 +317,43 @@ public:
 
   void testQTransfer_fromTOF()
   {
-    std::vector<double> x(1,1.1), y(1,1.0);
+    std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( q.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 2768.9067, 0.0001 )
     TS_ASSERT( yy == y )
   }
 
+  void testQTransfer_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    // To QSquared
+    double factor, power;
+    TS_ASSERT( q.quickConversion(q2,factor,power) )
+    double input = 1.1;
+    double result = factor * std::pow(input,power);
+    std::vector<double> x(1,input);
+    q.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    q2.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-30 )
+    
+    // To dSpacing
+    TS_ASSERT( q.quickConversion(d,factor,power) )
+    input = 1.1;
+    result = factor * std::pow(input,power);
+    x[0] = input;
+    q.toTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
+    d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+  }
+
   //----------------------------------------------------------------------
   // Momentum Squared tests
   //----------------------------------------------------------------------
 
-  void testQ2_unitCode()
+  void testQ2_unitID()
   {
-    TS_ASSERT_EQUALS( q2.unitCode(), 6 )
+    TS_ASSERT_EQUALS( q2.unitID(), "QSquared" )
   }
 
   void testQ2_caption()
@@ -277,7 +373,7 @@ public:
 
   void testQ2_toTOF()
   {
-    std::vector<double> x(1,4.0), y(1,1.0);
+    std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( q2.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 1522.899, 0.001 )
@@ -286,20 +382,43 @@ public:
 
   void testQ2_fromTOF()
   {
-    std::vector<double> x(1,200.0), y(1,1.0);
+    std::vector<double> x(1, 200.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( q2.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
     TS_ASSERT_DELTA( x[0], 231.9220, 0.0001 )
     TS_ASSERT( yy == y )
   }
 
+  void testQ2_quickConversions()
+  {
+    // Test it gives the same answer as going 'the long way'
+    // To MomentumTransfer
+    double factor, power;
+    TS_ASSERT( q2.quickConversion(q,factor,power) )
+    double input = 1.1;
+    double result = factor * std::pow(input,power);
+    std::vector<double> x(1,input);
+    q2.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    q.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-30 )
+    
+    // To dSpacing
+    TS_ASSERT( q2.quickConversion(d,factor,power) )
+    input = 1.1;
+    result = factor * std::pow(input,power);
+    x[0] = input;
+    q2.toTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
+    d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
+    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+  }
+  
   //----------------------------------------------------------------------
   // Energy transfer tests
   //----------------------------------------------------------------------
 
-  void testDeltaE_unitCode()
+  void testDeltaE_unitID()
   {
-    TS_ASSERT_EQUALS( dE.unitCode(), 7 )
+    TS_ASSERT_EQUALS( dE.unitID(), "DeltaE" )
   }
 
   void testDeltaE_caption()
@@ -319,7 +438,7 @@ public:
 
   void testDeltaE_toTOF()
   {
-    std::vector<double> x(1,1.1), y(1,1.0);
+    std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( dE.toTOF(x,y,1.5,2.5,0.0,1,4.0,0.0) )
     TS_ASSERT_DELTA( x[0], 5071.066, 0.001 )
@@ -336,7 +455,7 @@ public:
 
   void testDeltaE_fromTOF()
   {
-    std::vector<double> x(1,2001.0), y(1,1.0);
+    std::vector<double> x(1, 2001.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( dE.fromTOF(x,y,1.5,2.5,0.0,1,4.0,0.0) )
     TS_ASSERT_DELTA( x[0], -394.5692, 0.0001 )
@@ -349,15 +468,15 @@ public:
 
     // emode = 0
     TS_ASSERT_THROWS( dE.fromTOF(x,y,1.5,2.5,0.0,0,4.0,0.0), std::invalid_argument )
-}
+  }
 
   //----------------------------------------------------------------------
   // Energy transfer tests
   //----------------------------------------------------------------------
 
-  void testDeltaEk_unitCode()
+  void testDeltaEk_unitID()
   {
-    TS_ASSERT_EQUALS( dEk.unitCode(), 8 )
+    TS_ASSERT_EQUALS( dEk.unitID(), "DeltaE_inWavenumber" )
   }
 
   void testDeltaEk_caption()
@@ -377,7 +496,7 @@ public:
 
   void testDeltaEk_toTOF()
   {
-    std::vector<double> x(1,1.1), y(1,1.0);
+    std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( dEk.toTOF(x,y,1.5,2.5,0.0,1,4.0,0.0) )
     TS_ASSERT_DELTA( x[0], 11246.74, 0.01 )
@@ -394,7 +513,7 @@ public:
 
   void testDeltaEk_fromTOF()
   {
-    std::vector<double> x(1,2001.0), y(1,1.0);
+    std::vector<double> x(1, 2001.0), y(1, 1.0);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( dEk.fromTOF(x,y,1.5,2.5,0.0,1,4.0,0.0) )
     TS_ASSERT_DELTA( x[0], -3182.416, 0.001 )
@@ -414,10 +533,10 @@ private:
   Units::Wavelength lambda;
   Units::Energy energy;
   Units::dSpacing d;
-	Units::MomentumTransfer q;
-	Units::QSquared q2;
-	Units::DeltaE dE;
-	Units::DeltaE_inWavenumber dEk;
+  Units::MomentumTransfer q;
+  Units::QSquared q2;
+  Units::DeltaE dE;
+  Units::DeltaE_inWavenumber dEk;
 };
 
 #endif /*UNITTEST_H_*/

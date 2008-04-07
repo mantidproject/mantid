@@ -34,6 +34,8 @@ void ConvertUnits::init()
   declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));  
   declareProperty("Target","",new MandatoryValidator);
+  declareProperty("Emode",0);
+  declareProperty("Efixed",0.0);
 }
 
 /** Executes the algorithm
@@ -74,8 +76,79 @@ void ConvertUnits::exec()
   outputWS->XUnit() = UnitFactory::Instance().create(getPropertyValue("Target"));
   
   // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
-  bool distribution = outputWS->isDistribution(inputWS->isDistribution());
+  const bool distribution = outputWS->isDistribution(inputWS->isDistribution());
+  const unsigned int size = inputWS->blocksize();
   
+  // Loop over the histograms (detector spectra)
+  for (int i = 0; i < numberOfSpectra; ++i) {
+    
+    // Take the bin width dependency out of the Y & E data
+    if (distribution)
+    {
+      for (unsigned int j = 0; j < size; ++j)
+      {
+        const double width = std::abs( inputWS->dataX(i)[j+1] - inputWS->dataX(i)[j] );
+        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*width;
+        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*width;
+      }
+    }
+    else
+    {
+      // Just copy over
+      outputWS->dataY(i) = inputWS->dataY(i);
+      outputWS->dataE(i) = inputWS->dataE(i); 
+      /// @todo Will also need to deal with E2
+    }
+    // Copy over the X data (no copying will happen if the two workspaces are the same)
+    outputWS->dataX(i) = inputWS->dataX(i);
+    
+  }  
+  
+  // Check whether there is a quick conversion available
+  double factor, power;
+  if ( inputWS->XUnit()->quickConversion(*outputWS->XUnit(),factor,power) )
+  // If test fails, could also check whether a quick conversion in the opposite direction has been entered
+  {
+    convertQuickly(numberOfSpectra,outputWS,factor,power);
+  }
+  else
+  {
+    convertViaTOF(numberOfSpectra,inputWS,outputWS);
+  }
+  
+  // If appropriate, put back the bin width division into Y/E.
+  if (distribution)
+  {
+    for (int i = 0; i < numberOfSpectra; ++i) {
+      // There must be good case for having a 'divideByBinWidth'/'normalise' algorithm...
+      for (unsigned int j = 0; j < size; ++j)
+      {
+        const double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
+        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]/width;
+        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]/width;
+        // Again, will also need to deal with E2
+      }
+    }
+  }
+  
+}
+
+/// Convert the workspace units according to a simple output = a * (input^b) relationship
+void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power)
+{
+  // Loop over the histograms (detector spectra)
+  for (int i = 0; i < numberOfSpectra; ++i) {
+    std::vector<double>::iterator it;
+    for (it = outputWS->dataX(i).begin(); it != outputWS->dataX(i).end(); ++it)
+    {
+      *it = factor * std::pow(*it,power);
+    }
+  }
+}
+
+/// Convert the workspace units using TOF as an intermediate step in the conversion
+void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS)
+{  
   // Get a reference to the instrument contained in the workspace
   API::Instrument &instrument = inputWS->getInstrument();
   
@@ -99,36 +172,14 @@ void ConvertUnits::exec()
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
   
-  unsigned int size = inputWS->blocksize();
-  
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
     
-    // Take the bin width dependency out of the Y & E data
-    if (distribution)
-    {
-      for (unsigned int j = 0; j < size; ++j)
-      {
-        double width = std::abs( inputWS->dataX(i)[j+1] - inputWS->dataX(i)[j] );
-        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*width;
-        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*width;
-      }
-    }
-    else
-    {
-      // Just copy over
-      outputWS->dataY(i) = inputWS->dataY(i);
-      outputWS->dataE(i) = inputWS->dataE(i); 
-      // Will also need to deal with E2
-    }
-    // Copy over the X data (no copying will happen if the two workspaces are the same)
-    outputWS->dataX(i) = inputWS->dataX(i);
-    
-    // No implementation for any of these in the geometry yet
-    const double twoTheta = 1.0;
-    const int emode = 1;
-    const double efixed = 1.0;
-    const double delta = 1.0;
+    /// @todo No implementation for any of these in the geometry yet so using properties
+    const int emode = getProperty("Emode");
+    const double efixed = getProperty("Efixed");
+    /// @todo Don't yet consider hold-off (delta)
+    const double delta = 0.0;
     
     try {
       // Get the sample-detector distance for this detector (in metres)
@@ -138,27 +189,17 @@ void ConvertUnits::exec()
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
         failedDetectorIndex = notFailed;
       }
-
+      // Get the scattering angle for this detector (in radians). Won't throw if getting l2 hasn't.
+      //     - this assumes the incident beam comes in along the z axis
+      const double twoTheta = instrument.getDetector(i)->getAzimuth(samplePos);
+      
       // Convert the input unit to time-of-flight
       inputWS->XUnit()->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
       outputWS->XUnit()->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
-      if (distribution)
-      {
-        // There must be good case for having a 'divideByBinWidth'/'normalise' algorithm...
-        for (unsigned int j = 0; j < size; ++j)
-        {
-          double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
-          outputWS->dataY(i)[j] = inputWS->dataY(i)[j]/width;
-          outputWS->dataE(i)[j] = inputWS->dataE(i)[j]/width;
-          // Will also need to deal with E2
-        }
-      }
-      
-    } catch (Exception::NotFoundError e) {
+   } catch (Exception::NotFoundError e) {
       // Get to here if exception thrown when calculating distance to detector
-      // WHAT IF THIS CONVERSION DOESN'T NEED TO KNOW L2?????
       if (failedDetectorIndex == notFailed)
       {
         failedDetectorIndex = i;
@@ -174,7 +215,7 @@ void ConvertUnits::exec()
   {
     g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << numberOfSpectra-1 << "] distance. Zeroing spectrum." << std::endl;
   }
-
+  
 }
 
 } // namespace Algorithm
