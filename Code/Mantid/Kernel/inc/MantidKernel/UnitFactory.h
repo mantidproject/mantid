@@ -14,9 +14,9 @@
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
        ((Mantid::Kernel::UnitFactory::Instance().subscribe<classname>(#classname)) \
        , 0)); \
-       \
-    const std::string Mantid::Kernel::Units::classname::unitID() const {return #classname;} \
-  }
+  } \
+  const std::string Mantid::Kernel::Units::classname::unitID() const {return #classname;}
+
 
 //----------------------------------------------------------------------
 // Includes
