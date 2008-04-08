@@ -7,7 +7,7 @@
 #include <map>
 #include <ctime>
 #include <sstream>
-//#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -44,7 +44,7 @@ namespace Kernel
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class TimeSeriesProperty : public Property
+class DLLExport TimeSeriesProperty : public Property
 {
 public:
   /// The date-and-time is currently stored as a time_t

@@ -39,7 +39,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1"
+				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -110,7 +110,7 @@
 				Optimization="3"
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1"
+				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
 			<Tool

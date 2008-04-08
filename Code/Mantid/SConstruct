@@ -104,9 +104,9 @@ if os.name == 'nt':
 		env.Append(LINKFLAGS=['-g','-Wl,--export-all-symbols'])
 	else :
 		if int(debug) :
-			cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP', '/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/wd4275', '/wd4996' ]
+			cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP', '/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275', '/wd4996' ]
 		else :
-			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/wd4275']
+			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275']
 else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
 	cppPaths.append(poco_path +'Foundation/include/')
