@@ -11,6 +11,7 @@ namespace Kernel
 {
 
 /** Is conversion by constant multiplication possible?
+ * 
  *  Look to see if conversion from the unit upon which this method is called requires 
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.
@@ -26,6 +27,7 @@ bool Unit::quickConversion(const Unit& destination, double& factor, double& powe
 }
 
 /** Is conversion by constant multiplication possible?
+ * 
  *  Look to see if conversion from the unit upon which this method is called requires 
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.

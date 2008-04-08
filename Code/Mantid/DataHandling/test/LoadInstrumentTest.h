@@ -17,6 +17,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
@@ -91,21 +92,18 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
     
     Instrument& i = output->getInstrument();
-    Mantid::Geometry::Component* source = i.getSource();
+    Component* source = i.getSource();
     TS_ASSERT_EQUALS( source->getName(), "Source");
-    //TS_ASSERT_EQUALS( source->getPos(), Mantid::Geometry::V3D(0,0,0));
     TS_ASSERT_DELTA( source->getPos().Y(), 10.0,0.01);
 
-    Mantid::Geometry::Component* samplepos = i.getSamplePos();
+    Component* samplepos = i.getSamplePos();
     TS_ASSERT_EQUALS( samplepos->getName(), "SamplePos");
-    //TS_ASSERT_EQUALS( samplepos->getPos(), Mantid::Geometry::V3D(0,10,0));
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    Mantid::Geometry::Detector *ptrDet103 = i.getDetector(103);
+    Detector *ptrDet103 = dynamic_cast<Detector*>(i.getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 3.6527,0.01);
-    //TS_ASSERT_DELTA( ptrDet103->getPos().Y(), -1.7032,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.2222,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d,9.0905,0.0001);

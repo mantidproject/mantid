@@ -192,13 +192,13 @@ void LoadInstrument::exec()
  *  i.e. it may act recursively.
  *
  *  @param parent Parent to append assemble to
- *  @param pElem  Poco::XML element that points to the element in the XML doc we want to add  
- *  @return runningDetID Detector ID, which may be incremented if appendLeave is called
+ *  @param pCompElem  Poco::XML element that points to the element in the XML doc we want to add  
+ *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
  *
  *  @throw logic_error Thrown if second argument is not a pointer to component XML element
  *  @throw NotImplementedError At present a component element is restricted to have a max of one location element
  */
-void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Element* pCompElem, int& runningDetID)
+void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pCompElem, int& runningDetID)
 {
   // for now assume that the tag name of the element is 'component'
 
@@ -252,12 +252,12 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Element* pCo
  *  contains no sub-components. This component is appended to the parent (1st argument). 
  *
  *  @param parent Parent to append (none-assemble) component to
- *  @param pElem  Poco::XML element that points to the element in the XML doc we want to add  
- *  @return runningDetID Detector ID, which may be incremented if appendLeave is called
+ *  @param pCompElem  Poco::XML element that points to the element in the XML doc we want to add  
+ *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
  *
  *  @throw NotImplementedError At present a component element is restricted to have a max of one location element
  */
-void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Element* pCompElem, int& runningDetID)
+void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pCompElem, int& runningDetID)
 {
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 

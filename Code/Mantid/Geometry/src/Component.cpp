@@ -209,15 +209,20 @@ const Quat& Component::getRelativeRot() const
 	return rot;
 }
 
-/** Gets the distence between two components
- * @param comp The Component to measure against
- * @returns The distance
+/** Gets the distance between two components
+ *  @param comp The Component to measure against
+ *  @returns The distance
  */
 double Component::getDistance(const Component& comp) const
 {
 	return getPos().distance(comp.getPos());
 }
 
+/** Returns the polar aZimuth angle between this detector and another Component.
+ *  Currently assumes that the z-axis points in the direction of the beam
+ *  @param comp The component to compute the angle to
+ *  @return The azimuth angle in radians
+ */
 double Component::getAzimuth(const Component& comp) const
 {
 	double R=getDistance(comp);

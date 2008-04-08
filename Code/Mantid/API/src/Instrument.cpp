@@ -11,12 +11,12 @@ Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
 Instrument::Instrument() : Geometry::CompAssembly(),
-                          _samplePosCache(0),_sourceCache(0)
+                           _sourceCache(0),_samplePosCache(0)
 {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
-                          _samplePosCache(0),_sourceCache(0)
+                                                  _sourceCache(0),_samplePosCache(0)
 {}
 
 /**	Gets a pointer to the source
@@ -43,9 +43,9 @@ Geometry::ObjComponent* Instrument::getSamplePos()
 * @param detector_id the requested detector Id
 * @returns a pointer to the Assembly of detectors
 */
-Geometry::Detector* Instrument::getDetector(const int &detector_id)
+Geometry::IDetector* Instrument::getDetector(const int &detector_id)
 {
-  std::map<int, Geometry::Detector*>::iterator it;
+  std::map<int, Geometry::IDetector*>::iterator it;
 
   it = _detectorCache.find(detector_id);
   

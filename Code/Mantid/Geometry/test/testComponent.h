@@ -247,7 +247,7 @@ public:
 		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);		
 		//Note: there is no GetRot function to get the absolute rotation
 		//Get the location of the component
-		V3D &beforeParentPos = comp.getPos();
+		V3D beforeParentPos = comp.getPos();
 		//assign a parent
 		Component parent("parent",V3D(0,0,0),parentRot);
 		comp.setParent(&parent);

@@ -112,9 +112,12 @@ public:
 		CompAssembly q("Child",&parent);
 		q.setPos(V3D(5,6,7));
 		q.setRot(Quat(1,1,1,1));
-		q.addCopy(&Component("Grandchild1"));
-		q.add(&Component("Grandchild2"));
-		q.addCopy(&Component("Grandchild3"));
+		Component gc1("Grandchild1");
+		q.addCopy(&gc1);
+    Component gc2("Grandchild2");
+		q.add(&gc2);
+    Component gc3("Grandchild3");
+		q.addCopy(&gc3);
 		TS_ASSERT_EQUALS(q.nelements(),3);
 		CompAssembly copy = q;
 		TS_ASSERT_EQUALS(q.getName(),copy.getName());
@@ -134,9 +137,12 @@ public:
 		CompAssembly q("Child",&parent);
 		q.setPos(V3D(5,6,7));
 		q.setRot(Quat(1,1,1,1));
-		q.addCopy(&Component("Grandchild1"));
-		q.add(&Component("Grandchild2"));
-		q.addCopy(&Component("Grandchild3"));
+    Component gc1("Grandchild1");
+    q.addCopy(&gc1);
+    Component gc2("Grandchild2");
+    q.add(&gc2);
+    Component gc3("Grandchild3");
+    q.addCopy(&gc3);
 		TS_ASSERT_EQUALS(q.nelements(),3);
 		Component* copyAsComponent = q.clone();
 		CompAssembly* copy = dynamic_cast<CompAssembly*>(copyAsComponent);
@@ -304,7 +310,7 @@ public:
 		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);		
 		//Note: there is no GetRot function to get the absolute rotation
 		//Get the location of the CompAssembly
-		V3D &beforeParentPos = comp.getPos();
+		V3D beforeParentPos = comp.getPos();
 		//assign a parent
 		Component parent("parent",V3D(0,0,0),parentRot);
 		comp.setParent(&parent);

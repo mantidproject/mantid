@@ -24,7 +24,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
  	
     This file is part of Mantid.
  	
@@ -57,7 +57,7 @@ public:
 
 	Geometry::ObjComponent* getSource();
 	Geometry::ObjComponent* getSamplePos();
-	Geometry::Detector* getDetector(const int &detector_id);
+	Geometry::IDetector* getDetector(const int &detector_id);
 
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -75,7 +75,9 @@ public:
   void markAsDetector(Geometry::Detector*);
 
 private:
+  /// Private copy assignment operator
   Instrument& operator=(const Instrument&);
+  /// Private copy constructor
   Instrument(const Instrument&);
 
 	/// Static reference to the logger class
@@ -84,7 +86,7 @@ private:
 	Geometry::Component* getChild(const std::string& name);
 
   /// Map which holds detector-IDs and pointers to detector components 
-  std::map<int, Geometry::Detector*> _detectorCache;
+  std::map<int, Geometry::IDetector*> _detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to
   /// be just one component
