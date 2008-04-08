@@ -49,13 +49,27 @@ public:
     A[1][2]=6.0;
     A[2][2]=-7.0;
 
-    Matrix<double> Iv=A;
-    double Det=Iv.Invert();
-    Matrix<double> Ident(3,3);
-    Ident.identityMatrix();
+    TS_ASSERT_DELTA(A.Invert(),105.0,1e-5);
+  }
 
-    TS_ASSERT(fabs(Det-105.0)<1e-5);
-    TS_ASSERT(Ident==A);
+  void testIdent()
+  {
+    Matrix<double> A(3,3);
+
+    A[0][0]=1.0;
+    A[1][0]=0.0;
+    A[0][1]=0.0;
+    A[0][2]=0.0;
+    A[2][0]=0.0;
+    A[1][1]=1.0;
+    A[2][1]=0.0;
+    A[1][2]=0.0;
+    A[2][2]=1.0;
+
+    Matrix<double> Ident(3,3);
+    TS_ASSERT_DIFFERS(Ident,A);
+    Ident.identityMatrix();
+    TS_ASSERT_EQUALS(Ident,A);
   }
 
   /*!

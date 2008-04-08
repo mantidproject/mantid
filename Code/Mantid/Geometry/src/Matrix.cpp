@@ -1301,7 +1301,8 @@ Matrix<T>::str() const
 
 template class DLLExport Matrix<double>;
 template class DLLExport Matrix<int>;
-
+template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<double>&);
+template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
 ///\endcond TEMPLATE
 
 }   // NAMESPACE Geometry
