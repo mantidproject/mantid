@@ -148,7 +148,7 @@ void LoadLog::exec()
     std::string aLine;
     std::string dateAndTime;
 
-    kind l_kind;
+    kind l_kind(LoadLog::empty);
 
     if( std::getline(inLogFile, aLine, '\n') )
     {

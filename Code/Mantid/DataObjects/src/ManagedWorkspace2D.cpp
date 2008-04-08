@@ -18,17 +18,21 @@ int ManagedWorkspace2D::g_uniqueID = 1;
 // Get a reference to the logger
 Kernel::Logger& ManagedWorkspace2D::g_log = Kernel::Logger::get("ManagedWorkspace2D");
 
+#ifdef _WIN32
 #pragma warning (push)
 #pragma warning( disable:4355 ) 
 //Disable warning for using this in constructor.
 //This is safe as long as the class that gets the pointer does not use any methods on it in it's constructor.
 //In this case this is an inner class that is only used internally to this class, and is safe.
+#endif //_WIN32
 /// Constructor
 ManagedWorkspace2D::ManagedWorkspace2D() :
   Workspace2D(), m_bufferedData(100, *this),m_indexWrittenTo(-1)
 {
 }
+#ifdef _WIN32
 #pragma warning (pop)
+#endif //_WIN32
 
 /** Sets the size of the workspace and sets up the temporary file
  *  @param NVectors The number of vectors/histograms/detectors in the workspace
