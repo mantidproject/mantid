@@ -17,7 +17,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -37,20 +37,22 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  template <typename TYPE>
-  class DLLExport IValidator 
-  {
-  public:
-    ///virtual Destructor
-	virtual ~IValidator() {}
+template <typename TYPE>
+class DLLExport IValidator
+{
+public:
+  ///virtual Destructor
+  virtual ~IValidator() {}
 
-    /** Checks the value based on the validators rules
-     * 
-     *  @param value The value to test
-     */
-    virtual const bool isValid( const TYPE &value ) const = 0;
-    
-  };
+  /** Checks the value based on the validators rules
+   * 
+   *  @param value The value to test
+   */
+  virtual const bool isValid(const TYPE &value) const = 0;
+
+  /// Make a copy of the present type of validator
+  virtual IValidator* clone() = 0;
+};
 
 } // namespace Kernel
 } // namespace Mantid

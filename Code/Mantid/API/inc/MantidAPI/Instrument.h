@@ -44,20 +44,20 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport Instrument : public Geometry::CompAssembly
+class DLLExport Instrument : public Geometry::CompAssembly
 {
 public:
   ///String description of the type of component
-	virtual std::string type() const {return "Instrument";}
-	
-	Instrument();
-	Instrument(const std::string& name);
-  ///Virtual destructor
-	virtual ~Instrument() {}
+  virtual std::string type() const { return "Instrument"; }
 
-	Geometry::ObjComponent* getSource();
-	Geometry::ObjComponent* getSamplePos();
-	Geometry::IDetector* getDetector(const int &detector_id);
+  Instrument();
+  Instrument(const std::string& name);
+  ///Virtual destructor
+  virtual ~Instrument() {}
+
+  Geometry::ObjComponent* getSource();
+  Geometry::ObjComponent* getSamplePos();
+  Geometry::IDetector* getDetector(const int &detector_id);
 
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -80,10 +80,10 @@ private:
   /// Private copy constructor
   Instrument(const Instrument&);
 
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 
-	Geometry::Component* getChild(const std::string& name);
+  Geometry::Component* getChild(const std::string& name);
 
   /// Map which holds detector-IDs and pointers to detector components 
   std::map<int, Geometry::IDetector*> _detectorCache;

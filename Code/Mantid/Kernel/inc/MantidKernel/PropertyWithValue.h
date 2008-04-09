@@ -32,7 +32,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -163,13 +163,14 @@ public:
   PropertyWithValue( const PropertyWithValue& right ) :
     Property( right ),
     m_value( right.m_value ),
-    m_validator( right.m_validator )
+    m_validator( right.m_validator->clone() )
   {  
   }
 	
   /// Virtual destructor
   virtual ~PropertyWithValue()
   {
+    delete m_validator;
   }
 	
   /** Get the value of the property as a string
@@ -211,6 +212,7 @@ public:
     Property::operator=( right );
     m_value = right.m_value;
     m_isDefault = false;
+    m_validator = right.m_validator->clone();
     return *this;
   }
 	

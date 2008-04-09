@@ -183,6 +183,7 @@ void LoadInstrument::exec()
   }
 
   pNL_comp->release();
+  pDoc->release();
 
   return;
 }
@@ -213,10 +214,13 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
   parent->add(ass);
 
   if ( pCompElem->hasAttribute("name") )
+  {
     ass->setName(pCompElem->getAttribute("name"));
+  }
   else
+  {
     ass->setName(pCompElem->getAttribute("type"));
-
+  }
 
   // set location for this comp. Done this way because are likely to need
   // to take into account the fact that a component element may contain more
@@ -224,11 +228,14 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
 
   NodeList* pNL_location = pCompElem->getElementsByTagName("location");
   if (pNL_location->length() == 1)
+  {
     setLocation(ass, static_cast<Element*>(pNL_location->item(0)));
+  }
   else
+  {
     throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
+  }
   pNL_location->release();
-
 
   // find all the component elements of this type element and loop over these
 
@@ -240,9 +247,13 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     Element* pElem = static_cast<Element*>(pNL_comp_for_this_type->item(i));
     std::string typeName = pElem->getAttribute("type");
     if (isTypeAssemply[typeName])
+    {
       appendAssembly(ass, pElem, runningDetID);
+    }
     else
+    {
       appendLeaf(ass, pElem, runningDetID);
+    }
   }
   pNL_comp_for_this_type->release();
 }
@@ -270,9 +281,13 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     Geometry::Detector detector;
 
     if ( pCompElem->hasAttribute("name") )
+    {
       detector.setName(pCompElem->getAttribute("name"));
+    }
     else
+    {
       detector.setName(pCompElem->getAttribute("type"));
+    }
 
     // set location for this comp. Done this way because are likely to need
     // to take into account the fact that a component element may contain more
@@ -280,14 +295,16 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
     NodeList* pNL_location = pCompElem->getElementsByTagName("location");
     if (pNL_location->length() == 1)
+    {
       setLocation(&detector, static_cast<Element*>(pNL_location->item(0)));
+    }
     else
+    {
       throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
+    }
     pNL_location->release();
 
-
     // set detector ID and increment it. Finally add the detector to the parent
-
     detector.setID(runningDetID);
     runningDetID++;
     int toGetHoldOfDetectorCopy = parent->addCopy(&detector);
@@ -302,13 +319,15 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     parent->add(comp);
 
     if ( pCompElem->hasAttribute("name") )
+    {
       comp->setName(pCompElem->getAttribute("name"));
+    }
     else
+    {
       comp->setName(pCompElem->getAttribute("type"));
-
+    }
 
     // check if special Source or SamplePos Component
-
     if ( typeName.compare("Source") == 0 )
     {
       instrument->markAsSource(comp);
@@ -324,9 +343,13 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
     NodeList* pNL_location = pCompElem->getElementsByTagName("location");
     if (pNL_location->length() == 1)
+    {
       setLocation(comp, static_cast<Element*>(pNL_location->item(0)));
+    }
     else
+    {
       throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
+    }
     pNL_location->release();
   }
 }
@@ -351,17 +374,13 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
   }
 
 
-  if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || 
-    pElem->hasAttribute("phi") )
+  if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
   {
     double R=0.0, theta=0.0, phi=0.0;
 
-    if ( pElem->hasAttribute("R") )
-      R = atof((pElem->getAttribute("R")).c_str());
-    if ( pElem->hasAttribute("theta") )
-      theta = atof((pElem->getAttribute("theta")).c_str());
-    if ( pElem->hasAttribute("phi") )
-      phi = atof((pElem->getAttribute("phi")).c_str());    
+    if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
+    if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
+    if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());    
 
     Geometry::V3D pos;
     pos.spherical(R,theta,phi);
@@ -371,12 +390,9 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
   {
     double x=0.0, y=0.0, z=0.0;
 
-    if ( pElem->hasAttribute("x") )
-      x = atof((pElem->getAttribute("x")).c_str());
-    if ( pElem->hasAttribute("y") )
-      y = atof((pElem->getAttribute("y")).c_str());
-    if ( pElem->hasAttribute("z") )
-      z = atof((pElem->getAttribute("z")).c_str());
+    if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
+    if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
+    if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
     
     comp->setPos(Geometry::V3D(x,y,z));
   }

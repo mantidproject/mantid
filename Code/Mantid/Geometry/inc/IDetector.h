@@ -50,7 +50,7 @@ public:
    */
   virtual double getDistance(const Component& comp) const = 0;
   
-  /** Returns the polar aZimuth angle between this detector and another Component.
+  /** Returns the polar azimuth angle between this detector and another Component.
    *  Currently assumes that the z-axis points in the direction of the beam
    *  @param comp The component to compute the angle to
    *  @return The azimuth angle in radians

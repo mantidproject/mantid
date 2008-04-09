@@ -40,9 +40,11 @@ void SimpleIntegration::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartX",0, mustBePositive);
-  declareProperty("EndX",0, mustBePositive);
-  declareProperty("StartY",0, mustBePositive);
-  declareProperty("EndY",0, mustBePositive);
+  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
+  // pointer to each property.
+  declareProperty("EndX",0, mustBePositive->clone());
+  declareProperty("StartY",0, mustBePositive->clone());
+  declareProperty("EndY",0, mustBePositive->clone());
 }
 
 /** Executes the algorithm

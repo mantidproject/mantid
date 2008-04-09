@@ -18,7 +18,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -38,16 +38,18 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport MandatoryValidator : public IValidator<std::string>
-  {
-  public:
-    
-    /** Checks the value based on the validators rules
-     * 
-     *  @param value The value to test
-     */
-	  const bool isValid( const std::string &value ) const { return !(value.empty());}    
-  };
+class DLLExport MandatoryValidator : public IValidator<std::string>
+{
+public:
+
+  /** Checks the value based on the validators rules
+   * 
+   *  @param value The value to test
+   */
+  const bool isValid(const std::string &value) const { return !(value.empty()); }
+  
+  IValidator<std::string>* clone() { return new MandatoryValidator(*this); }
+};
 
 } // namespace Kernel
 } // namespace Mantid

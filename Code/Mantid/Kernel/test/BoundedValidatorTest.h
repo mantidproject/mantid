@@ -10,152 +10,176 @@ class BoundedValidatorTest : public CxxTest::TestSuite
 {
 public:
 
-	void testConstructor()
-	{
-		BoundedValidator<int> bv(2,5);
-		// Test that all the base class member variables are correctly assigned to
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), 2 );
-		TS_ASSERT_EQUALS( bv.upper(), 5 );
-	}
+  void testConstructor()
+  {
+    BoundedValidator<int> bv(2, 5);
+    // Test that all the base class member variables are correctly assigned to
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), 2);
+    TS_ASSERT_EQUALS(bv.upper(), 5);
+  }
 
-	void testIntClear()
-	{
-		BoundedValidator<int> bv(2,5);
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), 2 );
-		TS_ASSERT_EQUALS( bv.upper(), 5 );
-		
-		bv.clearLower();
-		TS_ASSERT_EQUALS( bv.hasLower(), false );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), 0 );
-		TS_ASSERT_EQUALS( bv.upper(), 5 );
+  void testClone()
+  {
+    IValidator<int> *v = new BoundedValidator<int>;
+    IValidator<int> *vv = v->clone();
+    TS_ASSERT_DIFFERS( v, vv )
+    BoundedValidator<int> &bv = dynamic_cast<BoundedValidator<int>&>(*v);
+    BoundedValidator<int> *bvv;
+    TS_ASSERT( bvv = dynamic_cast<BoundedValidator<int>*>(vv) )
+    TS_ASSERT_EQUALS( bv.hasLower(), bvv->hasLower() )
+    TS_ASSERT_EQUALS( bv.hasUpper(), bvv->hasUpper() )
+    TS_ASSERT_EQUALS( bv.lower(), bvv->lower() )
+    TS_ASSERT_EQUALS( bv.upper(), bvv->upper() )
+  }
 
-		bv.clearUpper();
-		TS_ASSERT_EQUALS( bv.hasLower(), false );
-		TS_ASSERT_EQUALS( bv.hasUpper(), false );
-		TS_ASSERT_EQUALS( bv.lower(), 0 );
-		TS_ASSERT_EQUALS( bv.upper(), 0 );
-	}
+  void testCast()
+  {
+    BoundedValidator<int> *v = new BoundedValidator<int>;
+    TS_ASSERT( dynamic_cast<IValidator<int>*>(v) )
+    BoundedValidator<double> *vv = new BoundedValidator<double>;
+    TS_ASSERT( dynamic_cast<IValidator<double>*>(vv) )
+    BoundedValidator<std::string> *vvv = new BoundedValidator<std::string>;
+    TS_ASSERT( dynamic_cast<IValidator<std::string>*>(vvv) )
+  }
 
-	void testDoubleClear()
-	{
-		BoundedValidator<double> bv(2.0,5.0);
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), 2.0 );
-		TS_ASSERT_EQUALS( bv.upper(), 5.0 );
+  void testIntClear()
+  {
+    BoundedValidator<int> bv(2, 5);
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), 2);
+    TS_ASSERT_EQUALS(bv.upper(), 5);
 
-		bv.clearBounds();
-		TS_ASSERT_EQUALS( bv.hasLower(), false );
-		TS_ASSERT_EQUALS( bv.hasUpper(), false );
-		TS_ASSERT_EQUALS( bv.lower(), 0 );
-		TS_ASSERT_EQUALS( bv.upper(), 0 );
-	}
+    bv.clearLower();
+    TS_ASSERT_EQUALS(bv.hasLower(), false);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), 0);
+    TS_ASSERT_EQUALS(bv.upper(), 5);
 
-	void testSetBounds()
-	{
-		BoundedValidator<std::string> bv("A","B");
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), "A" );
-		TS_ASSERT_EQUALS( bv.upper(), "B" );
+    bv.clearUpper();
+    TS_ASSERT_EQUALS(bv.hasLower(), false);
+    TS_ASSERT_EQUALS(bv.hasUpper(), false);
+    TS_ASSERT_EQUALS(bv.lower(), 0);
+    TS_ASSERT_EQUALS(bv.upper(), 0);
+  }
 
-		bv.clearBounds();
-		TS_ASSERT_EQUALS( bv.hasLower(), false );
-		TS_ASSERT_EQUALS( bv.hasUpper(), false );
-		TS_ASSERT_EQUALS( bv.lower(), "" );
-		TS_ASSERT_EQUALS( bv.upper(), "" );
+  void testDoubleClear()
+  {
+    BoundedValidator<double> bv(2.0, 5.0);
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), 2.0);
+    TS_ASSERT_EQUALS(bv.upper(), 5.0);
 
-		bv.setBounds("C","D");
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), "C" );
-		TS_ASSERT_EQUALS( bv.upper(), "D" );
-	}
+    bv.clearBounds();
+    TS_ASSERT_EQUALS(bv.hasLower(), false);
+    TS_ASSERT_EQUALS(bv.hasUpper(), false);
+    TS_ASSERT_EQUALS(bv.lower(), 0);
+    TS_ASSERT_EQUALS(bv.upper(), 0);
+  }
 
-	void testSetValues()
-	{
-		BoundedValidator<std::string> bv("A","B");
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), "A" );
-		TS_ASSERT_EQUALS( bv.upper(), "B" );
+  void testSetBounds()
+  {
+    BoundedValidator<std::string> bv("A", "B");
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), "A");
+    TS_ASSERT_EQUALS(bv.upper(), "B");
 
-		bv.clearBounds();
-		TS_ASSERT_EQUALS( bv.hasLower(), false );
-		TS_ASSERT_EQUALS( bv.hasUpper(), false );
-		TS_ASSERT_EQUALS( bv.lower(), "" );
-		TS_ASSERT_EQUALS( bv.upper(), "" );
+    bv.clearBounds();
+    TS_ASSERT_EQUALS(bv.hasLower(), false);
+    TS_ASSERT_EQUALS(bv.hasUpper(), false);
+    TS_ASSERT_EQUALS(bv.lower(), "");
+    TS_ASSERT_EQUALS(bv.upper(), "");
 
-		bv.setLower("C");
-		bv.setUpper("D");
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), "C" );
-		TS_ASSERT_EQUALS( bv.upper(), "D" );
+    bv.setBounds("C", "D");
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), "C");
+    TS_ASSERT_EQUALS(bv.upper(), "D");
+  }
 
-		bv.setUpper("E");
-		TS_ASSERT_EQUALS( bv.hasLower(), true );
-		TS_ASSERT_EQUALS( bv.hasUpper(), true );
-		TS_ASSERT_EQUALS( bv.lower(), "C" );
-		TS_ASSERT_EQUALS( bv.upper(), "E" );
+  void testSetValues()
+  {
+    BoundedValidator<std::string> bv("A", "B");
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), "A");
+    TS_ASSERT_EQUALS(bv.upper(), "B");
 
-	}
+    bv.clearBounds();
+    TS_ASSERT_EQUALS(bv.hasLower(), false);
+    TS_ASSERT_EQUALS(bv.hasUpper(), false);
+    TS_ASSERT_EQUALS(bv.lower(), "");
+    TS_ASSERT_EQUALS(bv.upper(), "");
 
-	void testIntBoundedValidator()
-	{
-		BoundedValidator<int> p(1,10);
-		TS_ASSERT_EQUALS(p.isValid(0), false);
-		TS_ASSERT_EQUALS(p.isValid(1), true);
-		TS_ASSERT_EQUALS(p.isValid(10), true);
-		TS_ASSERT_EQUALS(p.isValid(11), false);
+    bv.setLower("C");
+    bv.setUpper("D");
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), "C");
+    TS_ASSERT_EQUALS(bv.upper(), "D");
 
-		p.clearLower();
-		TS_ASSERT_EQUALS(p.isValid(0), true);
-		TS_ASSERT_EQUALS(p.isValid(-1), true);
-		TS_ASSERT_EQUALS(p.isValid(10), true);
-		TS_ASSERT_EQUALS(p.isValid(11), false);
-		p.clearUpper();
-		TS_ASSERT_EQUALS(p.isValid(11), true);
-	}
+    bv.setUpper("E");
+    TS_ASSERT_EQUALS(bv.hasLower(), true);
+    TS_ASSERT_EQUALS(bv.hasUpper(), true);
+    TS_ASSERT_EQUALS(bv.lower(), "C");
+    TS_ASSERT_EQUALS(bv.upper(), "E");
 
-	void testDoubleBoundedValidator()
-	{
-		BoundedValidator<double> p(1.0,10.0);
-		TS_ASSERT_EQUALS(p.isValid(0.9), false);
-		TS_ASSERT_EQUALS(p.isValid(1.0), true);
-		TS_ASSERT_EQUALS(p.isValid(10.0), true);
-		TS_ASSERT_EQUALS(p.isValid(10.1), false);
+  }
 
-		p.clearLower();
-		TS_ASSERT_EQUALS(p.isValid(0.9), true);
-		TS_ASSERT_EQUALS(p.isValid(-1.0), true);
-		TS_ASSERT_EQUALS(p.isValid(10), true);
-		TS_ASSERT_EQUALS(p.isValid(10.1), false);
-		p.clearUpper();
-		TS_ASSERT_EQUALS(p.isValid(10.1), true);
-	}
-	
-	void testStringBoundedValidator()
-	{
-		BoundedValidator<std::string> p("B","T");
-		TS_ASSERT_EQUALS(p.isValid("AZ"), false);
-		TS_ASSERT_EQUALS(p.isValid("B"), true);
-		TS_ASSERT_EQUALS(p.isValid("T"), true);
-		TS_ASSERT_EQUALS(p.isValid("TA"), false);
+  void testIntBoundedValidator()
+  {
+    BoundedValidator<int> p(1, 10);
+    TS_ASSERT_EQUALS(p.isValid(0), false);
+    TS_ASSERT_EQUALS(p.isValid(1), true);
+    TS_ASSERT_EQUALS(p.isValid(10), true);
+    TS_ASSERT_EQUALS(p.isValid(11), false);
 
-		p.clearLower();
-		TS_ASSERT_EQUALS(p.isValid("AZ"), true);
-		TS_ASSERT_EQUALS(p.isValid("B"), true);
-		TS_ASSERT_EQUALS(p.isValid("T"), true);
-		TS_ASSERT_EQUALS(p.isValid("TA"), false);
-		p.clearUpper();
-		TS_ASSERT_EQUALS(p.isValid("TA"), true);
-	}
+    p.clearLower();
+    TS_ASSERT_EQUALS(p.isValid(0), true);
+    TS_ASSERT_EQUALS(p.isValid(-1), true);
+    TS_ASSERT_EQUALS(p.isValid(10), true);
+    TS_ASSERT_EQUALS(p.isValid(11), false);
+    p.clearUpper();
+    TS_ASSERT_EQUALS(p.isValid(11), true);
+  }
+
+  void testDoubleBoundedValidator()
+  {
+    BoundedValidator<double> p(1.0, 10.0);
+    TS_ASSERT_EQUALS(p.isValid(0.9), false);
+    TS_ASSERT_EQUALS(p.isValid(1.0), true);
+    TS_ASSERT_EQUALS(p.isValid(10.0), true);
+    TS_ASSERT_EQUALS(p.isValid(10.1), false);
+
+    p.clearLower();
+    TS_ASSERT_EQUALS(p.isValid(0.9), true);
+    TS_ASSERT_EQUALS(p.isValid(-1.0), true);
+    TS_ASSERT_EQUALS(p.isValid(10), true);
+    TS_ASSERT_EQUALS(p.isValid(10.1), false);
+    p.clearUpper();
+    TS_ASSERT_EQUALS(p.isValid(10.1), true);
+  }
+
+  void testStringBoundedValidator()
+  {
+    BoundedValidator<std::string> p("B", "T");
+    TS_ASSERT_EQUALS(p.isValid("AZ"), false);
+    TS_ASSERT_EQUALS(p.isValid("B"), true);
+    TS_ASSERT_EQUALS(p.isValid("T"), true);
+    TS_ASSERT_EQUALS(p.isValid("TA"), false);
+
+    p.clearLower();
+    TS_ASSERT_EQUALS(p.isValid("AZ"), true);
+    TS_ASSERT_EQUALS(p.isValid("B"), true);
+    TS_ASSERT_EQUALS(p.isValid("T"), true);
+    TS_ASSERT_EQUALS(p.isValid("TA"), false);
+    p.clearUpper();
+    TS_ASSERT_EQUALS(p.isValid("TA"), true);
+  }
 
 };
 

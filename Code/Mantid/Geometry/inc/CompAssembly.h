@@ -7,19 +7,19 @@
 
 namespace Mantid
 {
-  namespace Geometry
-  {
-    /** @class CompAssembly 
+namespace Geometry
+{
+/** @class CompAssembly 
     @brief Class for Assembly of geometric components. 
     @version A
     @author Laurent C Chapon, ISIS RAL
     @date 01/11/2007
 
-    CompAssembly allows Component to be positioned
+    CompAssembly allows Components to be positioned
     in a hierarchical structure in the form of a tree.
-    CompAssembly inherit from component.
+    CompAssembly inherits from component.
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -36,44 +36,47 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: 
-    <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-    */
-    class DLLExport CompAssembly : public Component
-    {
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport CompAssembly : public Component
+{
+public:
+  ///String description of the type of component
+  virtual std::string type() const { return "CompAssembly";}
+  //! Empty constructor
+  CompAssembly();
+  //! Constructor with a name and parent reference
+  CompAssembly(const std::string&, Component* reference=0);
+  //! Copy constructor
+  CompAssembly(const CompAssembly&);
+  virtual ~CompAssembly();
+  //! Make a clone of the present component
+  virtual Component* clone() const;
+  //! Return the number of elements in the assembly
+  int nelements() const;
+  //! Add a component to the assembly
+  int add(Component*);
+  //! Add a copy (clone) of a component 
+  int addCopy(Component*);
+  //! Add a copy (clone) of a component and rename it
+  int addCopy(Component*, const std::string&);
+  //! Get a pointer to the ith component in the assembly
+  Component* operator[](int i) const;
+  //! Print information about all children
+  void printChildren(std::ostream&) const;
+  void printTree(std::ostream&) const;
+private:
+  /// Private copy assignment operator
+  CompAssembly& operator=(const CompAssembly&);
 
-    public:
-      ///String description of the type of component
-      virtual std::string type() const {return "CompAssembly";}
-      //! Empty constructor
-      CompAssembly();
-      //! Constructor with a name and parent reference
-      CompAssembly(const std::string&, Component* reference=0);
-      //! Copy constructor
-      CompAssembly(const CompAssembly&);
-      virtual ~CompAssembly();
-      //! Make a clone of the present component
-      virtual Component* clone() const ;
-      //! Return the number of elements in the assembly
-      int nelements() const;
-      //! Add a component to the assembly
-      int add(Component*);
-      //! Add a copy (clone) of a component 
-      int addCopy(Component*);
-      //! Add a copy (clone) of a component and rename it
-      int addCopy(Component*,const std::string&);
-      //! Get a pointer to the ith component in the assembly
-      Component* operator[](int i) const;
-      //! Print information about all children
-      void printChildren(std::ostream&) const;
-      void printTree(std::ostream&) const;
-    private:
-      ///the group of child components
-      std::vector<Component*> group;
-    };
+  ///the group of child components
+  std::vector<Component*> group;
+};
 
-    DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
-  } //Namespace Geometry
+DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);
+
+} //Namespace Geometry
 } //Namespace Mantid
 
 #endif

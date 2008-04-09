@@ -2,14 +2,14 @@
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
-namespace Mantid 
+namespace Mantid
 {
 namespace Geometry
 {
-	
+
 /*! Empty constructor
  */
-CompAssembly::CompAssembly():Component()
+CompAssembly::CompAssembly() : Component()
 {
 }
 
@@ -21,30 +21,46 @@ CompAssembly::CompAssembly():Component()
  *  normal parenting apply. If the reference object is
  *  an assembly itself, then in addition to parenting
  *  this is registered as a children of reference.
- */	
-CompAssembly::CompAssembly(const std::string& n, Component* reference) : Component(n,reference)
+ */
+CompAssembly::CompAssembly(const std::string& n, Component* reference) :
+  Component(n, reference)
 {
-	if (reference)
-	{
-	CompAssembly* test=dynamic_cast<CompAssembly*>(reference);
-	if (test)
-		test->add(this);
-	}
+  if (reference)
+  {
+    CompAssembly* test=dynamic_cast<CompAssembly*>(reference);
+    if (test)
+      test->add(this);
+  }
 }
 
 /*! Copy constructor
  *  @param ass :: assembly to copy
  */
-CompAssembly::CompAssembly(const CompAssembly& ass):Component(ass)
+CompAssembly::CompAssembly(const CompAssembly& ass) :
+  Component(ass)
 {
-	group=ass.group;
+  group=ass.group;
+  // Need to do a deep copy
+  std::vector<Component*>::iterator it;
+  for (it = group.begin(); it != group.end(); ++it)
+  {
+    *it = (*it)->clone();
+    // Move copied component object's parent from old to new CompAssembly
+    (*it)->setParent(this);
+  }
 }
 
 /*! Destructor
  */
 CompAssembly::~CompAssembly()
 {
-	group.empty();
+  // Iterate over pointers in group, deleting them
+  std::vector<Component*>::iterator it;
+  for (it = group.begin(); it != group.end(); ++it)
+  {
+    delete *it;
+  }
+  group.clear();
 }
 
 /*! Clone method
@@ -53,23 +69,23 @@ CompAssembly::~CompAssembly()
  */
 Component* CompAssembly::clone() const
 {
-	return new CompAssembly(*this);
+  return new CompAssembly(*this);
 }
-	
+
 /*! Add method
  * @param comp :: component to add 
  * @return number of components in the assembly
  * 
  * This becomes the new parent of comp.
  */
-int	CompAssembly::add(Component* comp)
+int CompAssembly::add(Component* comp)
 {
-	if (comp)
-	{
-	comp->setParent(this);
-	group.push_back(comp);
-	} 
-	return group.size();
+  if (comp)
+  {
+    comp->setParent(this);
+    group.push_back(comp);
+  }
+  return group.size();
 }
 
 /*! AddCopy method
@@ -82,13 +98,13 @@ int	CompAssembly::add(Component* comp)
  */
 int CompAssembly::addCopy(Component* comp)
 {
-	if (comp)
-	{
-	Component* newcomp=comp->clone();
-	newcomp->setParent(this);
-	group.push_back(newcomp);
-	}
-	return group.size();
+  if (comp)
+  {
+    Component* newcomp=comp->clone();
+    newcomp->setParent(this);
+    group.push_back(newcomp);
+  }
+  return group.size();
 }
 
 /*! AddCopy method
@@ -102,22 +118,22 @@ int CompAssembly::addCopy(Component* comp)
  */
 int CompAssembly::addCopy(Component* comp, const std::string& n)
 {
-	if (comp)
-	{
-	Component* newcomp=comp->clone();
-	newcomp->setParent(this);
-	newcomp->setName(n);
-	group.push_back(newcomp);
-	}
-	return group.size();
+  if (comp)
+  {
+    Component* newcomp=comp->clone();
+    newcomp->setParent(this);
+    newcomp->setName(n);
+    group.push_back(newcomp);
+  }
+  return group.size();
 }
 
 /*! Return the number of components in the assembly
  * @return group.size() 
-  */
+ */
 int CompAssembly::nelements() const
 {
-	return group.size();
+  return group.size();
 }
 
 /*! Get a pointer to the ith component in the assembly. Note standard C/C++
@@ -131,9 +147,9 @@ int CompAssembly::nelements() const
  */
 Component* CompAssembly::operator[](int i) const
 {
-	if (i<0 || i> static_cast<int>(group.size()-1)) 
-		throw std::runtime_error("CompAssembly::operator[] range not valid");
-	return group[i];
+  if (i<0 || i> static_cast<int>(group.size()-1))
+  throw std::runtime_error("CompAssembly::operator[] range not valid");
+  return group[i];
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -144,13 +160,13 @@ Component* CompAssembly::operator[](int i) const
  */
 void CompAssembly::printChildren(std::ostream& os) const
 {
-	std::vector<Component*>::const_iterator it;
-	int i=0;
-	for (it=group.begin();it!=group.end();it++)
-	{
-		os << "Component " << i++ <<" : **********" <<std::endl;
-		(*it)->printSelf(os);
-	}
+  std::vector<Component*>::const_iterator it;
+  int i=0;
+  for (it=group.begin();it!=group.end();it++)
+  {
+    os << "Component " << i++ <<" : **********" <<std::endl;
+    (*it)->printSelf(os);
+  }
 }
 
 /*! Print information about all the elements in the tree to a stream
@@ -161,21 +177,21 @@ void CompAssembly::printChildren(std::ostream& os) const
  */
 void CompAssembly::printTree(std::ostream& os) const
 {
-	std::vector<Component*>::const_iterator it;
-	int i=0;
-	for (it=group.begin();it!=group.end();it++)
-	{
-		const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
-		os << "Element " << i++ << " in the assembly : ";
-		if (test)
-		{	
-			os << test->getName() << std::endl;
-			os << "Children :******** " << std::endl;
-			test->printTree(os);
-		}
-		else
-		os << (*it)->getName() << std::endl;
-	}
+  std::vector<Component*>::const_iterator it;
+  int i=0;
+  for (it=group.begin();it!=group.end();it++)
+  {
+    const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
+    os << "Element " << i++ << " in the assembly : ";
+    if (test)
+    {
+      os << test->getName() << std::endl;
+      os << "Children :******** " << std::endl;
+      test->printTree(os);
+    }
+    else
+    os << (*it)->getName() << std::endl;
+  }
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -189,11 +205,11 @@ void CompAssembly::printTree(std::ostream& os) const
  */
 std::ostream& operator<<(std::ostream& os, const CompAssembly& ass)
 {
-	ass.printSelf(os);
-	os << "************************" << std::endl;
-	os << "Number of children :" << ass.nelements() << std::endl;
-	ass.printChildren(os);
-	return os;
+  ass.printSelf(os);
+  os << "************************" << std::endl;
+  os << "Number of children :" << ass.nelements() << std::endl;
+  ass.printChildren(os);
+  return os;
 }
 
 } // Namespace Geometry

@@ -11,21 +11,35 @@ class MandatoryValidatorTest : public CxxTest::TestSuite
 {
 public:
 
-	void testConstructor()
-	{
+  void testConstructor()
+  {
     TS_ASSERT_THROWS_NOTHING(
-    MandatoryValidator nsv;
+        MandatoryValidator nsv;
     );
-	}
-	
-	void testMandatoryValidator()
-	{
-		MandatoryValidator p;
-		TS_ASSERT_EQUALS(p.isValid("AZ"), true);
-		TS_ASSERT_EQUALS(p.isValid("B"), true);
-		TS_ASSERT_EQUALS(p.isValid(""), false);
-		TS_ASSERT_EQUALS(p.isValid("ta"), true);
-	}
+  }
+
+  void testClone()
+  {
+    IValidator<std::string> *v = new MandatoryValidator;
+    IValidator<std::string> *vv = v->clone();
+    TS_ASSERT_DIFFERS( v, vv )
+    TS_ASSERT( dynamic_cast<MandatoryValidator*>(vv) )
+  }
+
+  void testCast()
+  {
+    MandatoryValidator *v = new MandatoryValidator;
+    TS_ASSERT( dynamic_cast<IValidator<std::string>*>(v) )
+  }
+
+  void testMandatoryValidator()
+  {
+    MandatoryValidator p;
+    TS_ASSERT_EQUALS(p.isValid("AZ"), true);
+    TS_ASSERT_EQUALS(p.isValid("B"), true);
+    TS_ASSERT_EQUALS(p.isValid(""), false);
+    TS_ASSERT_EQUALS(p.isValid("ta"), true);
+  }
 
 };
 
