@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <set>
 #include <map>
 #include <stack>
 #include <string>
@@ -11,11 +12,11 @@
 #include <functional>
 #include <iterator>
 
-#include "Algebra.h"
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
 #include "MapSupport.h"
-#include "BnId.h"
+#include "Algebra.h"
+
 
 namespace Mantid
 {

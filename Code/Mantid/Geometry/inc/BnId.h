@@ -1,6 +1,9 @@
 #ifndef BnId_h
 #define BnId_h 
 
+#include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
+
 namespace Mantid
 {
 
@@ -45,56 +48,67 @@ namespace Geometry
 
 class BnId
 {
-  /// Output Friend 
-  friend std::ostream& operator<<(std::ostream&,const BnId&); 
-
  private:
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  int size;            ///< number of variables
-  int PI;              ///< Prime Implicant
-  int Tnum;            ///< True number (1 in Tval)
-  int Znum;            ///< Zero number (0 in Tval)
-  std::vector<int> Tval;   ///< Truth values
+  int size;                 ///< number of variables
+  int PI;                   ///< Prime Implicant
+  int Tnum;                 ///< True number (1 in Tval)
+  int Znum;                 ///< Zero number (0 in Tval)
+  std::vector<int> Tval;    ///< Truth values
+  std::set<int> MinTerm;    ///< Minterms list
 
   void setCounters();    ///< Calculates Tnum and Znum
 
  public:
   
   BnId();
-  BnId(const int A,unsigned int X);
+  BnId(int const,unsigned int);
   BnId(const BnId&);
   BnId& operator=(const BnId&);
   ~BnId();
 
-  int operator==(const BnId&) const;
-  int operator<(const BnId&) const;  
-  int operator>(const BnId&) const;  
-  int operator[](const int A) const;   
-  int operator++(int);
-  int operator++();         
-  int operator--(int);      
-  int operator--();         
-  int equivalent(const BnId&) const;
-  void reverse();                     ///< Swap -1 to 1 and leave the zeros
+  int operator==(const BnId&) const;    ///< Equals operator for tri-state object
+  int operator<(const BnId&) const;    ///< operator> for tri-state object
+  int operator>(const BnId&) const;    ///< operator> for tri-state object
+  int operator[](int const) const;       ///< Access operator
+  int operator++(int);        ///< addition operator (returns !carry flag)
+  int operator++();           ///< addition operator (returns !carry flag)
+  int operator--(int);        ///< subtraction operator (returns !carry flag)
+  int operator--();           ///< subtraction operator (returns !carry flag)
+
+  /// Set a MinTerm
+  void setMinTerm(const int);
+  void addMinTerm(const BnId&); 
+  int hasMinTerm(const int) const;
+
+  int equivalent(const BnId&) const;     ///< Equal but - is assume to be ok
+  void reverse();                     ///< Swap -1 to 1 adn leaver the zeros
 
   int PIstatus() const { return PI; }     ///< PI accessor
   void setPI(const int A) { PI=A; }       ///< PI accessor
   int intValue() const;                   ///< Integer from binary expression
   std::pair<int,BnId> 
-    makeCombination(const BnId&) const;   ///< Combination operator
-  std::string display() const;            ///< Get output string
+    makeCombination(const BnId&) const;  
+
 
   /// Total requiring expression
   int expressCount() const { return size-Znum; } 
-  int Size() const { return size; }                      ///< returns number of variables / size          
+  /// returns number of variables / size          
+  int Size() const { return size; }   
+  /// Access true count
+  int TrueCount() const { return Tnum; }
+  
   void mapState(const std::vector<int>&,std::map<int,int>&) const;
+
+  std::string display() const;           
+  void write(std::ostream&) const;
 };
 
-std::ostream& operator<<(std::ostream&,const BnId&);
+ std::ostream& operator<<(std::ostream&,const BnId&);
 
-}   // NAMESPACE 
+}   // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
 

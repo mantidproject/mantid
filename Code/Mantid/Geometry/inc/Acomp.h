@@ -55,8 +55,10 @@ class DLLExport Acomp
 {
  private:
 
-  static Kernel::Logger& PLog;           ///< The official logger
-  
+
+ private:
+
+  static Kernel::Logger& PLog;           ///< The official logger  
   int Intersect;                ///<  Union/Intersection (0,1)
   std::vector<int> Units;       ///< Units in list
   std::vector<Acomp> Comp;      ///< Components in list
@@ -64,7 +66,7 @@ class DLLExport Acomp
   void deleteComp();            ///< delete all of the Comp list
   void addComp(const Acomp&);      ///< add a Component intellegently
   //  void addCompPtr(Acomp*);      ///< add a Component intellegently
-  void addUnitItem(const int Item);      ///< add an Unit intellgently
+  void addUnitItem(int const);      ///< add an Unit intellgently
   void processIntersection(const std::string&);
   void processUnion(const std::string&);
   int joinDepth();                                           ///< Search table to uplift objects
@@ -80,14 +82,16 @@ class DLLExport Acomp
   void assignCNF(const std::vector<int>&,const std::vector<BnId>&);   ///< Assigns the Comp with the DNF
   //  int getCNFpart(std::vector<Acomp>&) const;                   ///< get the CNF parts (as Acomp)
 
-  int makePI(std::vector<BnId>&) const;                        ///< Calculate Principle Components
-  int makeEPI(std::vector<BnId>&,std::vector<BnId>&) const;    ///< Calculate Essentual Principle Components
+  /// Calculate Principle Components
+  int makePI(std::vector<BnId>&) const;                        
+  int makeEPI(std::vector<BnId>&,std::vector<BnId>&) const;    
+  int makeEPIX(std::vector<BnId>&) const;
 
   int makeReadOnce();                   ///< Factorize into a read once function
 
  public:
 
-  Acomp(const int Tx=0);   
+  Acomp(int const =0);   
   Acomp(const Acomp&);
   Acomp& operator=(const Acomp&); 
   int operator==(const Acomp&) const; 
@@ -99,8 +103,8 @@ class DLLExport Acomp
   Acomp& operator*=(const Acomp&);
   ~Acomp();
 
-  const Acomp* itemC(const int Index) const;  ///< returns a pointer to Comp (or zero)
-  int itemN(const int Index) const;           ///< returns an integer to Units (or zero)
+  const Acomp* itemC(int const) const;  ///< returns a pointer to Comp (or zero)
+  int itemN(int const) const;           ///< returns an integer to Units (or zero)
 
   std::pair<int,int> size() const; ///< get the size of the units and the Acomp sub-comp
   int isSimple() const;            ///< true if only Units
@@ -122,14 +126,16 @@ class DLLExport Acomp
   void complement();                                  ///< Take complement of component
   std::pair<Acomp,Acomp> algDiv(const Acomp&);        ///< Carry out Algebric division
   void setString(const std::string&);                 ///< Processes a line of type abc'+efg
-  void writeFull(std::ostream& OXF,const int Indent=0) const;   ///< Full write out to determine state
+  void writeFull(std::ostream&,int const =0) const;   ///< Full write out to determine state
   std::string display() const;                        ///< Pretty print statment
-  std::string displayDepth(const int dval=0) const;       ///< Really pretty print statment of tree
+  std::string displayDepth(int const =0) const;       ///< Really pretty print statment of tree
+
+  void printImplicates(const std::vector<BnId>&,
+		       const Geometry::Matrix<int>&) const;
 };
 
 std::ostream& operator<<(std::ostream&,const Acomp&); 
-// int operator<(const Acomp&,const Acomp&);
-//int more_than(const Acomp&,const Acomp&);
+
 
 }  // NAMESPACE Geometry
 

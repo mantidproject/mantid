@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include "Matrix.h"
+#include "BnId.h"
 #include "Acomp.h"
 
 namespace Mantid

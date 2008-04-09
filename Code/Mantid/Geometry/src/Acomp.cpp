@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <set>
 #include <map>
 #include <stack>
 #include <string>
@@ -44,6 +45,7 @@ operator<<(std::ostream& OX,const Acomp& A)
     \param A :: Acomp unit to output
     \returns Output stream
   */
+   
 {
   OX<<A.display();
   return OX;
@@ -76,14 +78,15 @@ split(const int A,int& S,int& V)
 // ------------- ACOMP ---------------- 
 //
 
-Acomp::Acomp(const int Tx) :  Intersect(Tx)
+Acomp::Acomp(const int Tx) : 
+  Intersect(Tx)
   /*!
     Standard Constructor 
     \param Tx :: 1 it means intersect 0 it meanse union
   */
 {}
 
-Acomp::Acomp(const Acomp& A) :
+Acomp::Acomp(const Acomp& A) : 
  Intersect(A.Intersect),Units(A.Units)
   /*!
     Copy constructor
@@ -703,8 +706,8 @@ Acomp::assignCNF(const std::vector<int>& Index,const std::vector<BnId>& A)
   std::vector<BnId>::const_iterator vc;
   for(vc=A.begin();vc!=A.end();vc++)
     {
-      Acomp Px(0);      // Intersection
-      //std::cout<<"Item == "<<*vc<<std::endl;
+      Acomp Px(0);      // Union
+      std::cout<<"Item == "<<*vc<<std::endl;
       BnId X=*vc;
       X.reverse();
       Px.addUnit(Index,X);
@@ -934,76 +937,76 @@ Acomp::makePI(std::vector<BnId>& DNFobj) const
   // Note: need to store PI components separately
   // since we don't want to loop continuously through them
   std::vector<BnId> Work;       // Working copy
-  std::vector<BnId> PIComp;       // Store for PI componends
+  std::vector<BnId> PIComp;     // Store for PI componends
   std::vector<BnId> Tmod;       // store modified components
   int changeCount(0);           // Number change
   std::vector<BnId>::iterator uend;     // itor to remove unique
   // Need to make an initial copy.
   Work=DNFobj;
-  //std::cerr<<"Work .size == "<<Work.size()<<std::endl;
+  
+  int cnt(0);
   do
     {
+      cnt++;
       // Deal with tri-state objects ??
       sort(Work.begin(),Work.end());
       uend=unique(Work.begin(),Work.end());
       Work.erase(uend,Work.end());
-      if (DNFobj.empty())
-        {
-	  std::cerr<<"DNF EMPTY"<<std::endl;
-	  exit(1);
-	}
       Tmod.clear();                  // erase all at the start
       //set PI status to 1
       for_each( Work.begin(),Work.end(),
 		std::bind2nd(std::mem_fun_ref(&BnId::setPI),1) );
-      //std::cerr<<"Start of Acomp::makePI"<<std::endl;
-	  
+
       //Collect into pairs which have a difference of +/- one 
       // object
       // Can sort this realive to 
       std::vector<BnId>::iterator vc;
       for(vc=Work.begin();vc!=Work.end();vc++)
 	{
+	  const int GrpIndex(vc->TrueCount()+1);
 	  std::vector<BnId>::iterator oc=vc+1;
 	  for(oc=vc+1;oc!=Work.end();oc++)
 	    {
-	      std::pair<int,BnId> cVal=vc->makeCombination(*oc);
-	      if (cVal.first<0)  //Diffs >1 
+	      const int OCnt=oc->TrueCount();
+	      if (OCnt>GrpIndex)
 		break;
-
-	      if (cVal.first==1)   // was complementary
-		{
-		  Tmod.push_back(cVal.second);
-		  oc->setPI(0);         
-		  vc->setPI(0);
-		  changeCount++;       // 1 changed
-		  break;
+	      if (OCnt==GrpIndex)
+	        {
+		  std::pair<int,BnId> cVal=vc->makeCombination(*oc);
+		  if (cVal.first==1)   // was complementary
+		    {
+		      Tmod.push_back(cVal.second);
+		      oc->setPI(0);         
+		      vc->setPI(0);
+		      changeCount++;       // 1 changed
+		    }
 		}
 	    }
-	}	
-      //std::cerr<<"End of Acomp::makePI"<<changeCount<<std::endl;
+	}
+      
       for(vc=Work.begin();vc!=Work.end();vc++)
 	if (vc->PIstatus()==1)
 	  PIComp.push_back(*vc);
-      // Now make unique:
-      //std::cerr<<"Change count == "<<Tmod.size()<<std::endl;
-
       Work=Tmod;
+      
     } while (!Tmod.empty());
-
   // Copy over the unit.
+  
   return makeEPI(DNFobj,PIComp);
 }
+
 
 int
 Acomp::makeEPI(std::vector<BnId>& DNFobj,
 	       std::vector<BnId>& PIform) const
   /*!
     Creates an essentual PI list (note: this is 
-    not unique)
+    not unique).
+    Given the list form the EPI based on the Quine-McClusky method.
+
     \param DNFobj :: Object in DNF form 
     \param PIform :: List of rules in Prime Implicant form
-         It is set on exit (to the EPI)
+       It is set on exit (to the EPI)
     \returns :: 1 if successful and 0 if failed
   */
 {
@@ -1015,11 +1018,11 @@ Acomp::makeEPI(std::vector<BnId>& DNFobj,
 
   std::vector<int> EPIvalue;
   // Make zeroed matrix.
-  Geometry::Matrix<int> Grid(PIform.size(),DNFobj.size());   // Map (efficient??)
+  Geometry::Matrix<int> Grid(PIform.size(),DNFobj.size()); 
   std::vector<int> DNFactive(DNFobj.size());       // DNF that active
   std::vector<int> PIactive(PIform.size());        // PI that are active
-
   std::vector<int> DNFscore(DNFobj.size());        // Number in each channel
+  std::vector<int> PIscore(DNFobj.size());        // Number in each channel
   
   //Populate
   for(unsigned int pc=0;pc!=PIform.size();pc++)
@@ -1038,6 +1041,9 @@ Acomp::makeEPI(std::vector<BnId>& DNFobj,
 	}
       if (DNFscore[ic]==0)
 	{
+	  std::cerr<<"PIForm:"<<std::endl;
+	  copy(PIform.begin(),PIform.end(),
+	       std::ostream_iterator<BnId>(std::cerr,"\n"));
 	  std::cerr<<"Error with DNF / EPI determination at "<<ic<<std::endl;
 	  std::cerr<<" Items "<<DNFobj[ic]<<std::endl;
 	  return 0;
@@ -1045,21 +1051,15 @@ Acomp::makeEPI(std::vector<BnId>& DNFobj,
     }
   /// DEBUG PRINT 
   if (debug)
-    {
-      for(unsigned int pc=0;pc!=PIform.size();pc++)
-	{
-	  std::cerr<<PIform[pc]<<":";
-	  for(unsigned int ic=0;ic!=DNFobj.size();ic++)
-	    std::cerr<<((Grid[pc][ic]) ? " 1" : " 0");
-	  std::cerr<<std::endl;
-	}
-    }
+    printImplicates(PIform,Grid);
   /// END DEBUG
 
   std::vector<int>::iterator dx,ddx;     // DNF active iterator
   std::vector<int>::iterator px;     // PIactive iterator
 
+  // 
   // First remove singlets:
+  // 
   for(dx=DNFactive.begin();dx!=DNFactive.end();dx++)
     {
       if (*dx>=0 && DNFscore[*dx]==1)        // EPI (definately)
@@ -1078,18 +1078,14 @@ Acomp::makeEPI(std::vector<BnId>& DNFobj,
     }
   // Remove dead items from active list
   DNFactive.erase(
-		  remove_if(DNFactive.begin(),DNFactive.end(),
-			    std::bind2nd(std::less<int>(),0)),
-		  DNFactive.end());
+    remove_if(DNFactive.begin(),DNFactive.end(),
+	      std::bind2nd(std::less<int>(),0)),
+    DNFactive.end());
 
 
   /// DEBUG PRINT 
   if (debug)
     {
-      std::cerr<<"START OF TABLE "<<std::endl;
-      std::cerr<<"DNF size =="<<DNFactive.size()<<std::endl;
-      std::cerr<<"Final PIactive size == "<<PIactive.size()<<std::endl;
-      
       for(px=PIactive.begin();px!=PIactive.end();px++)
 	{
 	  std::cerr<<PIform[*px]<<":";
@@ -1189,8 +1185,6 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
       keyNumbers.push_back(mc->first);
     }
 
-  //std::cerr<<"DNF Size == "<<Base.size()<<std::endl;
-  //std::cerr<<"KeyNumb Size == "<<keyNumbers.size()<<std::endl;
   DNFobj.clear();
   BnId State(Base.size(),0);                 //zero base
   do
@@ -1201,7 +1195,6 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
 	  DNFobj.push_back(State);
 	}
     } while(++State);
-  //std::cerr<<"DNF == "<<DNFobj.size()<<std::endl;
   return 0;
 }
  
@@ -1284,7 +1277,7 @@ Acomp::getDNFpart(std::vector<Acomp>& Parts) const
 	  std::vector<BnId>::const_iterator vc;
 	  for(vc=DNFobj.begin();vc!=DNFobj.end();vc++)
 	    {
-	      Acomp Aitem(1);              // make an intersection and add components
+	      Acomp Aitem(1);     // make an intersection and add components
 	      Aitem.addUnit(keyNumbers,*vc);
 	      Parts.push_back(Aitem);
 	    }
@@ -1809,6 +1802,28 @@ Acomp::displayDepth(const int dval) const
 
     }
   return cx.str();
+}
+
+void
+Acomp::printImplicates(const std::vector<BnId>& PIform,
+		       const Geometry::Matrix<int>& Grid) const
+  /*!
+    Debug function to print out 
+    PI and Grid :
+    \param PIform :: Principle implicates
+    \param Grid :: grid form
+  */
+
+{
+  const std::pair<int,int> RX=Grid.size();
+  for(unsigned int pc=0;pc!=PIform.size();pc++)
+     {
+       std::cerr<<PIform[pc]<<":";
+       for(int ic=0;ic!=RX.second;ic++)
+	 std::cerr<<((Grid[pc][ic]) ? " 1" : " 0");
+       std::cerr<<std::endl;
+     }
+  return;
 }
 
 }  // NAMESPACE Geometry

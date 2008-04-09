@@ -17,8 +17,7 @@ class testAlgebra: public CxxTest::TestSuite
 
 public:
 
-
-void testcountLiterals()
+void testcountLiterals() 
   /*!
     Test the number of literals in a string.
     Single test includes not.
@@ -35,31 +34,30 @@ void testcountLiterals()
 //Test disabled as it takes too long
 // Causes long delay - infinite loop?
 void testDNF()
-  /*!
+  /*! 
     Test the DNF Structure 
    */
 {
   Algebra A;
-  
-  A.setFunction("(f+x)(x+y+z)");
+  // sum m(0,1,2,5, 6,7,8,9,10,14)
+  std::string Func("(a'b'c'd')+(a'b'c'd)+(a'b'cd')+(a'bc'd)+(a'bcd')+(a'bcd)+(ab'c'd')+(ab'c'd)+(ab'cd')+(abcd')");
+  A.setFunction(Func);
+  //  A.write(std::cout);
+
   A.makeDNF();
-  TS_ASSERT_EQUALS(A.display(),"x+(fxy)+(fy)+(fz)");
+  std::cout<<"A == "<<A.display()<<std::endl;
+  TS_ASSERT_EQUALS("(d'c)+(c'b')+(a'bd)",A.display());
 
-  A.setFunction("a'b'c'+d'e'");
-  TS_ASSERT_EQUALS(A.display(),"(e'd')+(c'b'a')");
-  
+  // sum m(0,1,2,5,6,7)
+  std::cout<<"New simple function"<<std::endl;
+  std::string FuncA("(a'b'c')+(a'b'c)+(a'bc')+(ab'c)+(abc')+(abc)");
+  A.setFunction(FuncA);
+  //  A.write(std::cout);
+
+  std::cout<<"DNF[a'c'+c'b'+ab] == ";
   A.makeDNF();
-  TS_ASSERT_EQUALS(A.display(),"(e'd')+(c'b'a'd)+(c'b'a'e)");
-
-//  A.setFunction("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
-
-//Test disabled as it takes too long
-// Causes long delay - infinite loop?
-  //TestFunc::bracketTest(" Please Wait:: ");
-  //A.setFunction("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
-  //A.write(std::cout);
-  //A.makeDNF();
-  //A.write(std::cout);
+  
+  TS_ASSERT_EQUALS("(c'a')+(b'c)+(ab)",A.display());
 
 }
 
