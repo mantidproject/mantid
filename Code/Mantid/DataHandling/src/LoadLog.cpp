@@ -236,10 +236,12 @@ void LoadLog::exec()
     if ( l_kind == LoadLog::number )
     {
       sample.addLogData(l_PropertyDouble);
+      delete l_PropertyString;
     }
     else
     {
       sample.addLogData(l_PropertyString);
+      delete l_PropertyDouble;
     }
 
     inLogFile.close();

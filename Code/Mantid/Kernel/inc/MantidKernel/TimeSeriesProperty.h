@@ -1,6 +1,9 @@
-#ifndef TIMESERIESPROPERTY_H_
-#define TIMESERIESPROPERTY_H_
+#ifndef MANTID_KERNEL_TIMESERIESPROPERTY_H_
+#define MANTID_KERNEL_TIMESERIESPROPERTY_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "Property.h"
 #include "Exception.h"
 #include <iostream>
@@ -23,7 +26,7 @@ namespace Kernel
     @author Anders Markvardsen, ISIS, RAL
     @date 12/12/2007
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -84,7 +87,7 @@ public:
 	}
 
   /** Overwrite Property method.
-   *
+   *  @param value The new value
    *  @throws Exception::NotImplementedError Not yet implemented
    */
 	bool setValue( const std::string& value )
@@ -114,22 +117,19 @@ private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
   std::time_t createTime_t_FromString(const std::string &str)
   {
-    std::tm * time_since_1900 = new std::tm;
-    time_since_1900->tm_isdst = -1;
+    std::tm time_since_1900;
+    time_since_1900.tm_isdst = -1;
  
     // create tm struct
 
-    std::time_t rawtime;
-    std::time( &rawtime );
-
-    time_since_1900->tm_year = atoi(str.substr(0,4).c_str()) - 1900;
-    time_since_1900->tm_mon = atoi(str.substr(5,2).c_str()) - 1;
-    time_since_1900->tm_mday = atoi(str.substr(8,2).c_str());
-    time_since_1900->tm_hour = atoi(str.substr(11,2).c_str());
-    time_since_1900->tm_min = atoi(str.substr(14,2).c_str());
-    time_since_1900->tm_sec = atoi(str.substr(17,2).c_str());
+    time_since_1900.tm_year = atoi(str.substr(0,4).c_str()) - 1900;
+    time_since_1900.tm_mon = atoi(str.substr(5,2).c_str()) - 1;
+    time_since_1900.tm_mday = atoi(str.substr(8,2).c_str());
+    time_since_1900.tm_hour = atoi(str.substr(11,2).c_str());
+    time_since_1900.tm_min = atoi(str.substr(14,2).c_str());
+    time_since_1900.tm_sec = atoi(str.substr(17,2).c_str());
     
-    return std::mktime(time_since_1900);
+    return std::mktime(&time_since_1900);
   }
 
   /// static reference to the logger class
@@ -139,4 +139,4 @@ private:
 } // namespace Kernel
 } // namespace Mantid
 
-#endif /*TIMESERIESPROPERTY_H_*/
+#endif /*MANTID_KERNEL_TIMESERIESPROPERTY_H_*/
