@@ -1,3 +1,4 @@
+import re
 import smtplib
 import os
 from shutil import move
@@ -32,6 +33,9 @@ mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
 logDir = '../logs/'
+
+testCount = 0
+failCount = 0
 
 #create archive directory
 archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
@@ -91,9 +95,13 @@ filetestsRun = logDir+'testResults.log'
 f = open(filetestsRun,'r')
 
 for line in f.readlines():
-	if line.startswith('Failed ')  != -1 and line.endswith(' tests\n'):
-		#A test failed
-		testsPass = False
+	m=reTestCount.match(line)
+        if m:
+            testCount += int(m.group(1))
+        m=reFailCount.match(line)
+        if m:
+            failCount += int(m.group(1))
+            testsPass = False
 	mssgTestsResults = mssgTestsResults + line
      
 f.close()
@@ -114,7 +122,11 @@ httpLinkToArchive = 'http://' + localServerName + archiveDir.replace('..','') + 
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
-message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
+message += 'Units Tests Passed: ' + str(testsPass) 
+message += ' (' + str(testCount)
+if failCount>0:
+    print str(failCount) + " failed of "
+message += str(testCount) + " total)\n\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'

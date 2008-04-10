@@ -173,9 +173,8 @@ if os.name != 'nt':
 	lpts.insert(0,newLibList)
 	print "LibList ",newLibList
 	print "LPTS == ",lpts
-
-
-env.Append(LINKFLAGS=lpts)
+	env.Append(LINKFLAGS=lpts)
+	
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
