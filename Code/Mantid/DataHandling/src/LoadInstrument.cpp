@@ -170,7 +170,7 @@ void LoadInstrument::exec()
         }
 
 
-        for (int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
         {
           appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
         }
@@ -191,7 +191,7 @@ void LoadInstrument::exec()
       }
       else
       {
-        for (int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
         {
           appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
         }

@@ -138,7 +138,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Instrument/GEM_definition.xml";
+    inputFile = "../../../../Test/Instrument/GEM_Definition.xml";
     loaderGEM.setPropertyValue("Filename", inputFile);
 
     loaderGEM.setPropertyValue("Workspace", wsName);
