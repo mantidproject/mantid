@@ -159,6 +159,8 @@ while(len(dirpath)):
 				dirpath.append(fullPath[3:])
 	except:
 		pass
+		
+MantidBuild.collectIncludes('.', 'includes')
 
 libDirList.append(os.path.abspath('./Bin/Shared'))
 

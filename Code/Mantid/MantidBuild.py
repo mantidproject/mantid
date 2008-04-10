@@ -40,7 +40,7 @@ def collectIncludes(start, dest):
 	try:
 		shutil.rmtree(os.path.abspath(dest))
 	except:
-		print "Could not delete old folder\n"
+		print "collectIncludes: could not delete old folder\n"
 	
 	uppath=os.path.abspath(start)
 	dirpath=os.listdir(uppath)
@@ -65,7 +65,6 @@ def collectIncludes(start, dest):
 		while (len(dirpath)):
 			item=dirpath.pop(0)
 			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
-				print os.path.abspath(path + '/' + item)
 				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
 
 
