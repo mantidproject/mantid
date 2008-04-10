@@ -44,19 +44,17 @@ namespace Geometry
 */
 
 
-class Torus : public Surface
+class DLLExport Torus : public Surface
 {
  private:
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  const double TTolerance;      ///< Tolerance to the surfaces.
-  
   Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
   Geometry::Vec3D Normal;        ///< Normal
-  double Iradius;      ///< Inner radius
-  double Dradius;      ///< Inner radius
-  double Displacement; ///< Displacement
+  double Iradius;                ///< Inner radius
+  double Dradius;                ///< Inner radius
+  double Displacement;           ///< Displacement
 
   void rotate(const Geometry::Matrix<double>&);
   void displace(const Geometry::Vec3D&);
@@ -66,8 +64,6 @@ class Torus : public Surface
   /// Public identifier
   virtual std::string className() const { return "Torus"; }
 
-  static int possibleLine(const std::string&);
-  
   Torus();
   Torus(const Torus&);
   Torus* clone() const;
@@ -78,20 +74,18 @@ class Torus : public Surface
   int setSurface(const std::string&);
   int side(const Geometry::Vec3D&) const;
   int onSurface(const Geometry::Vec3D&) const;
+  double distance(const Geometry::Vec3D&) const;   
 
   /// Return centre point
   Geometry::Vec3D getCentre() const { return Centre; }              
   /// Central normal
   Geometry::Vec3D getNormal() const { return Normal; }       
-  /// Edge Angle
-  double distance(const Geometry::Vec3D&) const;   
+  Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const;
 
-  void setBaseEqn();
   void setCentre(const Geometry::Vec3D&);              
   void setNorm(const Geometry::Vec3D&);
 
   void write(std::ostream&) const;
-
 };
 
 } // NAMESPACE

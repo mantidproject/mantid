@@ -41,7 +41,7 @@ namespace Geometry
 
 */
 
-class DLLExport Cylinder : public Surface
+class DLLExport Cylinder : public Quadratic
 {
  private:
 
@@ -61,14 +61,13 @@ class DLLExport Cylinder : public Surface
   /// Public identifer
   virtual std::string className() const { return "Cylinder"; }  
 
-  
   Cylinder();
   Cylinder(const Cylinder&);
   Cylinder* clone() const;
   Cylinder& operator=(const Cylinder&);
   ~Cylinder();
 
-  /// Visit acceptor
+  // Visit acceptor
   virtual void acceptVisitor(BaseVisit& A) const
     {  A.Accept(*this); }
   
@@ -92,8 +91,8 @@ class DLLExport Cylinder : public Surface
   void print() const;
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,const int singleFlag=0);
-  void writeXML(const std::string&);   ///< Not implemented
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
+  //  void writeXML(const std::string&);
 
 };
 

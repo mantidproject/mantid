@@ -23,6 +23,7 @@
 #include "MantidKernel/Support.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Plane.h"
 #include "Cylinder.h"
 #include "Cone.h"

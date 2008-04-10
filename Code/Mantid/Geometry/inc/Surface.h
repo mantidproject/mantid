@@ -6,6 +6,22 @@
 #include "IndexIterator.h"
 #include "BaseVisit.h"
 
+// This is the CORRECT way to do the above then ONLY 
+// Surface.cpp requires the long template build to IndexIterator
+// and only surface needs the above includes.
+namespace Mantid
+{
+namespace XML
+{
+  class XMLobject;
+  class XMLgroup;
+  class XMLcollect;
+  template<typename A,typename B> class IndexIterator;
+  template<typename XMLobject,typename XMLgroup> class IndexIterator;
+}
+
+}
+
 namespace Mantid
 {
 
@@ -46,17 +62,11 @@ namespace Geometry
 class DLLExport Surface 
 {
  private:
-
+  
   /// Static reference to the logger class
   static Kernel::Logger& PLog;
 
   int Name;        ///< Surface number (MCNPX identifier)
-  
-  double eqnValue(const Geometry::Vec3D&) const;
-
- protected:
-
-  std::vector<double> BaseEqn;       ///< Base equation (as a 10 point vector)
   
  public:
 
@@ -70,43 +80,40 @@ class DLLExport Surface
 
   /// Effective typeid
   virtual std::string className() const { return "Surface"; }
-
-  /// Visit acceptor
+  
+  /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit& A) const
     {  A.Accept(*this); }
 
   //  virtual double lineIntersect(const Geometry::Vec3D&,
   //			       const Geometry::Vec3D&) const;
 
-  void setName(const int N) { Name=N; }            ///< Set Name
+  void setName(int const N) { Name=N; }            ///< Set Name
   int getName() const { return Name; }             ///< Get Name
-  /// access BaseEquation vector
-  const std::vector<double>& copyBaseEqn() const { return BaseEqn; } 
-  void matrixForm(Geometry::Matrix<double>&,Geometry::Vec3D&,double&) const;          
-  virtual int side(const Geometry::Vec3D&) const; 
 
-  virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
+  void matrixForm(Geometry::Matrix<double>&,
+		  Geometry::Vec3D&,double&) const;          
 
-  virtual int onSurface(const Geometry::Vec3D&) const;          ///< is point valid on surface 
-  virtual double distance(const Geometry::Vec3D&) const;        ///< distance between point and surface (approx)
-  virtual double distanceTrue(const Geometry::Vec3D&) const;    ///< distance between point and surface 
-  virtual Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const;    ///< Normal at surface
+  virtual int setSurface(const std::string&) =0; 
+  virtual int side(const Geometry::Vec3D&) const;
 
-  virtual void displace(const Geometry::Vec3D&);
-  virtual void rotate(const Geometry::Matrix<double>&);
+  // is point valid on surface 
+  virtual int onSurface(const Geometry::Vec3D&) const =0;
 
-  /// Set a surface
-  virtual int setSurface(const std::string&) =0;
+  virtual double distance(const Geometry::Vec3D&) const =0; 
+  virtual Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const =0;
+
+  virtual void displace(const Geometry::Vec3D&)  =0;
+  virtual void rotate(const Geometry::Matrix<double>&) =0;
 
   void writeHeader(std::ostream&) const;
   virtual void write(std::ostream&) const;
   virtual void print() const; 
 
-  void printGeneral() const;
 
   virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-			const int singleFlag=0);
+  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
+			int const=0);
   virtual void writeXML(const std::string&) const;
 
 };

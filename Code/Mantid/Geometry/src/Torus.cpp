@@ -33,54 +33,18 @@ namespace Geometry
 
 Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
-int 
-Torus::possibleLine(const std::string& Line)
-  /*! 
-     Checks to see if the input string is a torus.
-     Valid input is: 
-     - number {transformNumber} tz cen_x cen_y cen_z A B C
-     \retval 1 :: all parts for a torus
-     \retval -1 :: extension possible
-     \retval 0 :: no a Torus object 
-  */
-{
-  // Split line
-  std::vector<std::string> Items=StrFunc::StrParts(Line);
-  if (Items.size()<3)           //Indecyferable line
-    return 0;
-
-  unsigned int ix(1);
-
-  if (tolower(Items[ix][0])!='t' &&         //Not a cone
-      tolower(Items[++ix][0])!='t')
-    return 0;                    
-
-  if (Items[ix].length()<2)        // too short
-    return 0;
-
-  if (tolower(Items[ix][1])>='x' && 
-      tolower(Items[ix][1])<='z')   // Simple  ?
-    {
-      return (Items.size()>ix+1) ? 1 : -1;     
-    }
-
-  return 0;
-}
-
-
-Torus::Torus() : Surface(),TTolerance(1e-6),
+const double TTolerance(1e-6);       ///< Tolerance to the surfaces.
+  
+Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
 		 Iradius(0),Dradius(0),Displacement(0)
   /*!
     Constructor with centre line along X axis 
     and centre on origin
   */
-{
-  setBaseEqn();
-}
-
-Torus::Torus(const Torus& A) : 
-  Surface(A),TTolerance(A.TTolerance),
+{}
+ 
+Torus::Torus(const Torus& A) : Surface(A),
   Centre(A.Centre), Normal(A.Normal), 
   Iradius(A.Iradius), Dradius(A.Dradius),
   Displacement(A.Displacement)
@@ -138,6 +102,7 @@ Torus::operator==(const Torus& A) const
 {
   if(this==&A)
     return 1;
+
   if ( (fabs(Displacement-A.Displacement)>TTolerance) ||
        (fabs(Iradius-A.Iradius)>TTolerance) ||
        (fabs(Dradius-A.Dradius)>TTolerance) )
@@ -154,70 +119,49 @@ Torus::operator==(const Torus& A) const
 int 
 Torus::setSurface(const std::string& Pstr)
   /*! 
-    processes a standard MCNPX cone string    
+    Processes a standard MCNPX cone string    
     Recall that cones can only be specified on an axis
      Valid input is: 
      - number {transformNumber} t/x cen_x cen_y cen_z a,b,c
+    \param Pstr :: String to process
     \return : 0 on success, neg of failure 
   */
 {
-  std::vector<std::string> Items=StrFunc::StrParts(Pstr);
-  if (Items.size()<8)           //Indecyferable line
-    return -1;
+  enum { errDesc=-1, errAxis=-2,
+	 errCent=-3, errNormal=-4};
 
-  int nx;
-  std::vector<std::string>::iterator ic=Items.begin();
-  if (!StrFunc::convert(*ic++,nx))            // Get name 
-    return -2;
+  std::string Line=Pstr;
 
-  setName(nx);                       // Assign the name
+  std::string item;
+  if (!StrFunc::section(Line,item) || 
+      tolower(item[0])!='t' || item.length()!=2) 
+    return errDesc;
 
-  if (tolower((*ic)[0])!='t')       // Not a torus
-    return -3;
+  // Torus on X/Y/Z axis
+  const int ptype=static_cast<int>(tolower(item[2])-'x');
+  if (ptype<0 || ptype>=3)
+    return errAxis;
 
-  if (ic->length()<2)               // Not a torus
-    return -4;
+  Geometry::Vec3D Norm;
+  Geometry::Vec3D Cent;
+  Geometry::Vec3D PtVec;
+  Norm[ptype]=1.0;
 
-  // Toruss on X/Y/Z axis
+  // Torus on X/Y/Z axis
+  Norm[ptype]=1.0;
+  if (!StrFunc::section(Line,Centre))
+    return errCent;
+  if (!StrFunc::section(Line,PtVec))
+    return errCent;
 
-  int ptype=static_cast<int>(tolower((*ic)[1])-'x');
-  double norm[3]={0.0,0.0,0.0};
-  double cent[3]={0.0,0.0,0.0};
-  if (ptype<0 || ptype>2)
-    return -4;
-
-  ic++;   // Go to next element in vector 
-  norm[ptype]=1.0;
-  for(int i=0;i<3;i++,ic++)
-     
-    if(ic==Items.end() || !StrFunc::convert(*ic,cent[i]))
-      return -5;
+  for(int i=0;i<3;i++)
+    return errCent;
   
-  Centre=Geometry::Vec3D(cent);
-  Normal=Geometry::Vec3D(norm);
-  double X[3];
-  for(int i=0;i<3;i++,ic++)
-    if(ic==Items.end() || !StrFunc::convert(*ic,X[i]))
-      return -6;
-
-  Iradius=X[1];
-  Dradius=X[2];
-  Displacement=X[0];
+  Iradius=PtVec[1];
+  Dradius=PtVec[2];
+  Displacement=PtVec[0];
   return 0;
 } 
-
-
-void
-Torus::setBaseEqn()
-  /*!
-    Sets an equation of type 
-    \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
-  */
-{
-  for(int i=0;i<10;i++)
-    BaseEqn[i]=0;
-  return;
-}
 
 void
 Torus::rotate(const Geometry::Matrix<double>& R)
@@ -228,7 +172,6 @@ Torus::rotate(const Geometry::Matrix<double>& R)
 {
   Centre.rotate(R);
   Normal.rotate(R);
-  setBaseEqn();
   return;
 }
 
@@ -241,7 +184,6 @@ Torus::displace(const Geometry::Vec3D& A)
   */
 {
     Centre+=A;
-    setBaseEqn();
     return;
 }
 
@@ -253,7 +195,6 @@ Torus::setCentre(const Geometry::Vec3D& A)
   */
 {
   Centre=A;
-  setBaseEqn();
   return;
 }
 
@@ -268,9 +209,19 @@ Torus::setNorm(const Geometry::Vec3D& A)
     {
       Normal=A;
       Normal.makeUnit();
-      setBaseEqn();
     }
   return;
+}
+
+Geometry::Vec3D
+Torus::surfaceNormal(const Geometry::Vec3D& Pt) const
+  /*!
+    Get the normal at a point
+    \param A :: New Normal direction
+    \todo Does not work
+  */
+{
+  return Normal;
 }
 
 

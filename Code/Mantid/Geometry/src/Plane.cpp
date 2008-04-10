@@ -20,12 +20,13 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "regexSupport.h"
 #include "Matrix.h"
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Plane.h"
+
 
 namespace Mantid
 {
@@ -35,40 +36,11 @@ namespace Geometry
 
 Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
-int
-Plane::possibleLine(const std::string& Line)
-  /*!
-     Checks to see if the string is sufficient
-     and appropiate to be a plane 
-     \retval 1 :: all parts for a plane
-     \retval -1 :: extension possible 
-  */
-{
-  // Split line
-  std::vector<std::string> Items=StrFunc::StrParts(Line);
-  if (Items.size()<2)           //Indecyferable lineSu
-    return 0;
+/// Numerical tolerance
+const double PTolerance(1e-6); 
 
-  unsigned int ix(1);
-
-  if (tolower(Items[ix++][0])!='p' &&         //Not a plane
-      tolower(Items[ix++][0])!='p')
-    return 0;                    
-  ix--;
-  if (Items[ix][1]>='x' && Items[ix][1]<='z')       //Simple plane ?
-    {
-      return (Items.size()>ix+1) ? 1 : -1;
-    }
-  if (Items.size()==ix+5 || Items.size()==ix+10)
-    return 1;
-  if (Items.size()<10)
-    return -1;
-  return 0;
-}
- 
-
-Plane::Plane() : Surface(),
-  PTolerance(1e-6),NormV(1.0,0.0,0.0),Dist(0)
+Plane::Plane() : Quadratic(),
+  NormV(1.0,0.0,0.0),Dist(0)
   /*!
     Constructor: sets plane in y-z plane and throught origin
   */
@@ -76,8 +48,8 @@ Plane::Plane() : Surface(),
   setBaseEqn();
 }
 
-Plane::Plane(const Plane& A) : Surface(A),
-  PTolerance(A.PTolerance),NormV(A.NormV),Dist(A.Dist)
+Plane::Plane(const Plane& A) : Quadratic(A),
+   NormV(A.NormV),Dist(A.Dist)
   /*!
     Copy Constructor
     \param A :: Plane to copy
@@ -104,7 +76,7 @@ Plane::operator=(const Plane& A)
 {
   if (&A!=this)
     {
-      this->Surface::operator=(A);
+      this->Quadratic::operator=(A);
       NormV=A.NormV;
       Dist=A.Dist;
     }
@@ -206,7 +178,7 @@ Plane::rotate(const Geometry::Matrix<double>& MA)
 {
   NormV.rotate(MA);
   NormV.makeUnit();
-  Surface::rotate(MA);
+  Quadratic::rotate(MA);
   return;
 }
 
@@ -219,7 +191,7 @@ Plane::displace(const Geometry::Vec3D& Sp)
   */
 {
   Dist+=NormV.dotProd(Sp);
-  Surface::displace(Sp);
+  Quadratic::displace(Sp);
   return;
 }
 
@@ -296,7 +268,7 @@ Plane::print() const
     the Plane info.
   */
 {
-  Surface::print();
+  Quadratic::print();
   std::cout<<"NormV == "<<NormV<<" : "<<Dist<<std::endl;
   return;
 }
@@ -397,8 +369,8 @@ Plane::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	    }
 	  if (errNum)
 	    {
+	      errCnt++;                 // Not good....
 	      PLog.warning("importXML :: Key failed "+KVal);
-	      errCnt++;
 	    }
 	  // Post processing
 	  if (!singleFlag) 

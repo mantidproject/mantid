@@ -12,18 +12,23 @@
 #include <algorithm>
 #include <boost/regex.hpp>
 
-#include "Object.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Support.h"
 #include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
 #include "XMLread.h"
 #include "IndexIterator.h"
-#include "MantidKernel/Support.h"
 #include "regexSupport.h"
 #include "Matrix.h"
+#include "BaseVisit.h"
+#include "Vec3D.h"
+#include "Surface.h"
 #include "Line.h"
 #include "LineIntersectVisit.h"
+#include "Object.h"
+
 
 namespace Mantid
 {

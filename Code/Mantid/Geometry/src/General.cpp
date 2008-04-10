@@ -24,6 +24,7 @@
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "General.h"
 
 namespace Mantid
@@ -34,20 +35,19 @@ namespace Geometry
 
 Kernel::Logger& General::PLog(Kernel::Logger::get("General"));
 
-/// @cond
-const double GTolerance(1e-6);
-/// @endcond
 
-General::General() : Surface()
+
+const double GTolerance(1e-6);  ///< Tolerance
+
+General::General() : Quadratic()
   /*!
     Standard Constructor
   */
 {
-  setBaseEqn();
 }
 
 General::General(const General& A) : 
-  Surface(A)
+  Quadratic(A)
   /*!
     Standard Copy Constructor
     \param A :: General Object to copy
@@ -74,7 +74,7 @@ General::operator=(const General& A)
 {
   if (this!=&A)
     {
-      Surface::operator=(A);
+      Quadratic::operator=(A);
     }
   return *this;
 }
@@ -91,6 +91,11 @@ General::setSurface(const std::string& Pstr)
   /*! 
     Processes a standard MCNPX general string (GQ/SQ types)
     Despite type, moves both to the general equation.
+
+    NOTE: Check the gq version with the MCNPX source code
+          since there are multiple version of xy xz yz parameter
+	  read-in which swap xz and yz. [This code uses the first]
+
     \param Pstr :: String to process (with name and transform)
     \return 0 on success, neg of failure
   */
@@ -112,20 +117,20 @@ General::setSurface(const std::string& Pstr)
   if (tolower(item[0])=='g')
     {
       for(int i=0;i<10;i++)
-	Surface::BaseEqn[i]=num[i];
+	Quadratic::BaseEqn[i]=num[i];
     }
   else
     {
-      Surface::BaseEqn[0]=num[0];
-      Surface::BaseEqn[1]=num[1];
-      Surface::BaseEqn[2]=num[2];
-      Surface::BaseEqn[3]=0.0;;
-      Surface::BaseEqn[4]=0.0;;
-      Surface::BaseEqn[5]=0.0;;
-      Surface::BaseEqn[6]=2*(num[3]-num[7]*num[0]);
-      Surface::BaseEqn[7]=2*(num[4]-num[8]*num[1]);
-      Surface::BaseEqn[8]=2*(num[5]-num[9]*num[2]);
-      Surface::BaseEqn[9]=num[0]*num[7]*num[7]+
+      Quadratic::BaseEqn[0]=num[0];
+      Quadratic::BaseEqn[1]=num[1];
+      Quadratic::BaseEqn[2]=num[2];
+      Quadratic::BaseEqn[3]=0.0;;
+      Quadratic::BaseEqn[4]=0.0;;
+      Quadratic::BaseEqn[5]=0.0;;
+      Quadratic::BaseEqn[6]=2*(num[3]-num[7]*num[0]);
+      Quadratic::BaseEqn[7]=2*(num[4]-num[8]*num[1]);
+      Quadratic::BaseEqn[8]=2*(num[5]-num[9]*num[2]);
+      Quadratic::BaseEqn[9]=num[0]*num[7]*num[7]+
 	num[1]*num[8]*num[8]+num[2]*num[9]*num[9]-
 	2.0*(num[3]*num[7]+num[4]*num[8]+num[5]*num[9])+
 	num[6];
@@ -155,6 +160,7 @@ General::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
     \param SK :: IndexIterator object
     \param singleFlag :: single pass through to determine if has key
     (only for virtual base object)
+    \return Error count
    */
 {
   int errCnt(0);
@@ -168,7 +174,7 @@ General::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	  int errNum(1);
 	  if (RPtr)
 	    {
-	      errNum=Surface::importXML(SK,1);
+	      errNum=Quadratic::importXML(SK,1);
 	    }
 	  if (errNum)
 	    {
@@ -191,7 +197,7 @@ General::procXML(XML::XMLcollect& XOut) const
    */
 {
   XOut.getCurrent()->addAttribute("type","General");
-  Surface::procXML(XOut);
+  Quadratic::procXML(XOut);
   return;
 }
 

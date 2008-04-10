@@ -42,11 +42,11 @@ namespace Geometry
 */
 
 
-class DLLExport Cone : public Surface
+class DLLExport Cone : public Quadratic
 {
  private:
 
-  static Kernel::Logger& PLog;           ///< The official logger
+  static Kernel::Logger& PLog;    ///< The official logger
   
   Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
   Geometry::Vec3D Normal;        ///< Normal
@@ -58,9 +58,6 @@ class DLLExport Cone : public Surface
 
  public:
 
-  /// Public identifier
-  virtual std::string className() const { return "Cone"; }
-  
   Cone();
   Cone(const Cone&);
   Cone* clone() const;
@@ -68,7 +65,6 @@ class DLLExport Cone : public Surface
   int operator==(const Cone&) const;
   ~Cone();
   
-  int setCone(const std::string&);   ///< Not implemented
   int side(const Geometry::Vec3D&) const;
   int onSurface(const Geometry::Vec3D&) const;
 
@@ -83,14 +79,14 @@ class DLLExport Cone : public Surface
   int setSurface(const std::string&);
   void setCentre(const Geometry::Vec3D&);              
   void setNorm(const Geometry::Vec3D&);       
-  void setAngle(const double A);  
-  void setTanAngle(const double A);
+  void setAngle(double const);  
+  void setTanAngle(double const);
   void setBaseEqn();
 
   void write(std::ostream&) const;
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int singleFlag=0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
 
 };
 

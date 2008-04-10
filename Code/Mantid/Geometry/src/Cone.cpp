@@ -25,6 +25,7 @@
 #include "Line.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Cone.h"
 
 namespace Mantid
@@ -35,11 +36,10 @@ namespace Geometry
 
 Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
 
-/// @cond
+/// Floating point tolerance
 const double CTolerance(1e-6);
-/// @endcond
 
-Cone::Cone() : Surface(),
+Cone::Cone() : Quadratic(),
   Centre(), Normal(1,0,0), alpha(0.0), cangle(1.0)
   /*!
     Constructor with centre line along X axis 
@@ -49,7 +49,7 @@ Cone::Cone() : Surface(),
   setBaseEqn();
 }
 
-Cone::Cone(const Cone& A) :Surface(A),
+Cone::Cone(const Cone& A) :Quadratic(A),
   Centre(A.Centre), Normal(A.Normal), 
   alpha(A.alpha), cangle(A.cangle)
   /*!
@@ -78,7 +78,7 @@ Cone::operator=(const Cone& A)
 {
   if(this!=&A)
     {
-      Surface::operator=(A);
+      Quadratic::operator=(A);
       Centre=A.Centre;
       Normal=A.Normal;
       alpha=A.alpha;
@@ -113,7 +113,7 @@ Cone::setSurface(const std::string& Pstr)
     return -1;
 
   // Cones on X/Y/Z axis
-  const  int itemPt((item[1]=='/' && item.length()==3) ? 2 : 1);
+  const int itemPt((item[1]=='/' && item.length()==3) ? 2 : 1);
   const int ptype=static_cast<int>(tolower(item[itemPt])-'x');
   if (ptype<0 || ptype>=3)
     return -2;
@@ -346,11 +346,11 @@ Cone::write(std::ostream& OX) const
   const int Ndir=Normal.masterDir(CTolerance);
   if (Ndir==0)
     {
-      Surface::write(OX);
+      Quadratic::write(OX);
       return;
     }
   std::ostringstream cx;
-  Surface::writeHeader(cx);
+  Quadratic::writeHeader(cx);
   
   const int Cdir=Centre.masterDir(CTolerance);
   cx.precision(Surface::Nprecision);
@@ -410,7 +410,7 @@ Cone::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 		  cangle=cos(M_PI*alpha/180.0);
 		}
 	      else
-		errNum=Surface::importXML(SK,1);
+		errNum=Quadratic::importXML(SK,1);
 	    }
 	  if (errNum)
 	    {
@@ -437,8 +437,7 @@ Cone::procXML(XML::XMLcollect& XOut) const
     \param XOut :: Output parameter
    */
 {
-  XOut.getCurrent()->addAttribute("type","Cone");
-  Surface::procXML(XOut);
+  Quadratic::procXML(XOut);
   XOut.addComp("Centre",Centre);
   XOut.addComp("Normal",Normal);
   XOut.addComp("alpha",alpha);

@@ -39,8 +39,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-
-class General : public Surface
+class General : public Quadratic
 {
  private:
 
@@ -55,11 +54,10 @@ class General : public Surface
   ~General();
   
   int setSurface(const std::string&);
-
   void setBaseEqn();
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,const int singleFlag=0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
 
 };
 

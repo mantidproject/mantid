@@ -27,6 +27,7 @@
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Plane.h"
 #include "Cylinder.h"
 #include "Cone.h"
@@ -51,7 +52,18 @@ LineIntersectVisit::LineIntersectVisit
 {}
 
 void
-LineIntersectVisit::Accept(const Surface& Surf)
+LineIntersectVisit::Accept(const Surface&)
+  /*!
+    Process an intersect track
+    \param :: Surface to use int line Interesect
+  */
+{
+  throw ColErr::ExBase(-1,"LineIntersectVisit::Accept Surface");
+  return;
+}
+
+void
+LineIntersectVisit::Accept(const Quadratic& Surf)
   /*!
     Process an intersect track
     \param Surf :: Surface to use int line Interesect

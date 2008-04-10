@@ -7,8 +7,14 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../inc/Vec3D.h"
-#include "../inc/Sphere.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "XMLcollect.h"
+#include "IndexIterator.h"
+#include "Vec3D.h"
+#include "Surface.h"
+#include "Quadratic.h"
+#include "Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -173,28 +179,28 @@ public:
     A.setSurface("so 5");// sphere at origin radius 5
 
     //just outside
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,5.1)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(-5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,-5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,-5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(-5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,-5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-5.1)),0.1,1e-5);
 
     //just inside
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,4.9)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(-4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,-4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,-4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(-4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,-4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-4.9)),0.1,1e-5);
 
     //distant
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,100)),95,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(-100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,-100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distanceTrue(Vec3D(0,0,-100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(-100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,-100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-100)),95,1e-5);
   }
 
   void testSphereDistanceComplex()
@@ -218,16 +224,16 @@ public:
       const int retVal=A.setSurface(*vc);
       TS_ASSERT(retVal==0);
       // Surface distance and Sphere distance are the same:
-      if (fabs(A.distanceTrue(P)-A.distance(P))>1e-6)
+      if (fabs(A.distance(P)-A.distance(P))>1e-6)
       {
-        TS_ASSERT_DELTA(A.distanceTrue(P),A.distance(P),1e-6);
+        TS_ASSERT_DELTA(A.distance(P),A.distance(P),1e-6);
         std::cout<<"Sphere == ";
         A.Surface::write(std::cout);
         std::cout<<"TestPoint == "<<P<<std::endl;
-        std::cout<<"Distance == "<<A.distanceTrue(P)
+        std::cout<<"Distance == "<<A.distance(P)
           <<" === "<<A.distance(P)<<std::endl;
         std::cout<<"--------------"<<std::endl;
-        std::cout<<"Distance == "<<A.distanceTrue(Q)
+        std::cout<<"Distance == "<<A.distance(Q)
           <<" === "<<A.distance(Q)<<std::endl;
       }
     }
@@ -274,7 +280,7 @@ public:
 
 private:
 
-  std::string extractString(Surface& pv)
+std::string extractString(const Surface& pv)
   {
     //dump output to sting
     std::ostringstream output;

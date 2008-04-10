@@ -173,6 +173,53 @@ ExistsError : public std::runtime_error
   const char* what() const throw();
 };
 
+/*!
+  \class AbsObjMethod 
+  \brief Exception for a call to an abstract class function
+  
+  For a method virtual abstract class exists that 
+  needs to have instance because of interation over
+  a base class pointer. e.g 
+  vector<AbsBase*> Vec;
+  for(vc=Vec.begin();vc!=Vec.end();vc++)
+     (*vc)->method();
+
+   but: X=new AbsBase() is forbidden by the compiler
+   but it always possible to obtain a pure AbsBase pointer
+   by casting and this exception is to be placed in these sorts
+   of methods in the Abstract class. 
+
+   It is a runtime error constructed a runtime reinterpret cast.
+
+   Anyone has a better way of doing this ? Please let me know!!!
+   -- Note: I believe this was tabled for Cx00 but rejected (why?)
+*/
+
+class
+#ifdef IN_MANTID_KERNEL
+DLLExport
+#else
+DLLImport
+#endif /* IN_MANTID_KERNEL */
+AbsObjMethod : public std::runtime_error
+{
+ private:
+  /// The name of the search object
+  const std::string objectName;
+  /// The message returned by what()
+  std::string outMessage;
+
+ public:
+  AbsObjMethod(const std::string&);
+  AbsObjMethod(const AbsObjMethod& A);
+  /// Assignment operator
+  AbsObjMethod& operator=(const AbsObjMethod& A);
+  /// Destructor
+  ~AbsObjMethod() throw() {}
+
+  const char* what() const throw();
+};
+
 /// Exception for errors associated with the instrument definition.
 /// This might e.g. occur while reading the instrument definition file. 
 class DLLExport InstrumentDefinitionError : public std::runtime_error

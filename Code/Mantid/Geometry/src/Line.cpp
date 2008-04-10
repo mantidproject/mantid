@@ -26,6 +26,7 @@
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Plane.h"
 #include "Cylinder.h"
 #include "Cone.h"
@@ -41,9 +42,8 @@ namespace Geometry
 
 Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 
-/// @cond
-const double LTolerance(1e-6);
-/// @endcond
+
+const double LTolerance(1e-6);  ///< Tolerance
 
 Line::Line() : Origin(),Direct()
   /*!
@@ -68,14 +68,16 @@ Line::Line(const Line& A) :
    */
 {}
 
-Line*
+/*Line*
 Line::clone() const
-  /*! 
+  /* ! 
     Virtual copy constructor (not currently used)
-  */
+  * /
+
 {
   return new Line(*this);
 }
+*/
 
 Line&
 Line::operator=(const Line& A)
@@ -213,7 +215,8 @@ Line::lambdaPair(const int ix,const std::pair<
 }
 
 int
-Line::intersect(std::vector<Geometry::Vec3D>& VecOut,const Surface& Sur) const
+Line::intersect(std::vector<Geometry::Vec3D>& VecOut,
+		const Quadratic& Sur) const
   /*!
      For the line that intersects the surfaces 
      add the point(s) to the VecOut, return number of points
@@ -248,7 +251,7 @@ Line::intersect(std::vector<Geometry::Vec3D>& VecOut,const Surface& Sur) const
 int 
 Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Plane& Pln) const
   /*! 
-     For the line that intersects the cylinder generate 
+    For the line that intersects the cylinder generate 
      add the point to the VecOut, return number of points
      added. It does not check the points for validity. 
 
@@ -349,6 +352,7 @@ Line::print() const
   std::cout<<"Line == "<<Origin<<" :: "<<Direct<<std::endl;
   return;
 }
+
 
 }   // NAMESPACE MonteCarlo
 

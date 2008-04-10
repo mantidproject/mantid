@@ -8,6 +8,7 @@ namespace Geometry
 {
 
 class Surface;
+class Quadratic;
 class Plane;
 class Cylinder;
 class Cone;

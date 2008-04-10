@@ -25,6 +25,7 @@
 #include "Vec3D.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Sphere.h"
 
 namespace Mantid
@@ -35,11 +36,9 @@ namespace Geometry
  
 Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 
-/// @cond
-const double STolerance(1e-6);
-/// @endcond
+const double STolerance(1e-6);  ///< Tolerance (should be replaced with boost::)
 
-Sphere::Sphere() : Surface(),
+Sphere::Sphere() : Quadratic(),
   Centre(0,0,0),Radius(0.0)
   /*!
     Default constructor 
@@ -50,7 +49,7 @@ Sphere::Sphere() : Surface(),
 }
   
 Sphere::Sphere(const Sphere &A) : 
-  Surface(A),Centre(A.Centre),Radius(A.Radius)
+  Quadratic(A),Centre(A.Centre),Radius(A.Radius)
   /*!
     Default Copy constructor 
     \param A :: Sphere to copy
@@ -77,7 +76,7 @@ Sphere::operator=(const Sphere &A)
 {
   if (this!=&A)
     {
-      Surface::operator=(A);
+      Quadratic::operator=(A);
       Centre=A.Centre;
       Radius=A.Radius;
     }
@@ -153,10 +152,6 @@ Sphere::side(const Geometry::Vec3D& Pt) const
   */
 {
   const Geometry::Vec3D Xv=Pt-Centre;
-  if (onSurface(Pt)==1)
-  {
-    return 0;
-  }
   return (Xv.dotProd(Xv)>Radius*Radius) ? 1 : -1;
 }
 
@@ -195,7 +190,7 @@ Sphere::displace(const Geometry::Vec3D& Pt)
   */
 {
   Centre+=Pt;
-  Surface::displace(Pt);
+  Quadratic::displace(Pt);
   return;
 }
 
@@ -207,7 +202,7 @@ Sphere::rotate(const Geometry::Matrix<double>& MA)
   */
 {
   Centre.rotate(MA);
-  Surface::rotate(MA);
+  Quadratic::rotate(MA);
   return;
 }
 
@@ -252,7 +247,7 @@ Sphere::procXML(XML::XMLcollect& XOut) const
    */
 {
   XOut.getCurrent()->addAttribute("type","Sphere");
-  Surface::procXML(XOut);
+  Quadratic::procXML(XOut);
   XOut.addComp("Centre",Centre);
   XOut.addComp("Radius",Radius);
   return;
@@ -287,7 +282,7 @@ Sphere::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	      else if (KVal=="Radius")
 		errNum=(StrFunc::convert(RPtr->getFront(),Radius)) ? 0 : 1;
 	      else
-		errNum=Surface::importXML(SK,1);
+		errNum=Quadratic::importXML(SK,1);
 	    }
 	  if (errNum)
 	    {
@@ -316,7 +311,7 @@ Sphere::write(std::ostream& OX) const
   */
 {
   std::ostringstream cx;
-  Surface::writeHeader(cx);
+  Quadratic::writeHeader(cx);
   cx.precision(Surface::Nprecision);
   if (Centre.Distance(Geometry::Vec3D(0,0,0))<STolerance)
     {
@@ -330,6 +325,6 @@ Sphere::write(std::ostream& OX) const
   return;
 }
 
-}
+}  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid

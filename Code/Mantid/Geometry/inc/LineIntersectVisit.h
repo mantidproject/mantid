@@ -57,6 +57,7 @@ class LineIntersectVisit : public BaseVisit
     virtual ~LineIntersectVisit() {};
 
     void Accept(const Surface&);
+    void Accept(const Quadratic&);
     void Accept(const Plane&);
     void Accept(const Sphere&);
     void Accept(const Cone&);

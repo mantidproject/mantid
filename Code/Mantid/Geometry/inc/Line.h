@@ -38,6 +38,7 @@ namespace Geometry
 */
 
 class Surface;
+class Quadratic;
 class Plane;
 class Cylinder;
 class Cone;
@@ -80,12 +81,12 @@ class Line
 
   int setLine(const Geometry::Vec3D&,const Geometry::Vec3D&);     ///< input Origin + direction
 
-  int intersect(std::vector<Geometry::Vec3D>&,const Surface&) const;
+  int intersect(std::vector<Geometry::Vec3D>&,const Quadratic&) const;
   int intersect(std::vector<Geometry::Vec3D>&,const Cylinder&) const;
   int intersect(std::vector<Geometry::Vec3D>&,const Plane&) const;
   int intersect(std::vector<Geometry::Vec3D>&,const Sphere&) const;
 
-  int intersect(std::vector<Geometry::Vec3D>&,const Line*) const;  ///< Not implemented
+  // int intersect(std::vector<Geometry::Vec3D>&,const Line*) const;  ///< Not implemented
   //  int intersect(std::vector<Geometry::Vec3D>&,const Circle*) const;
   
 };

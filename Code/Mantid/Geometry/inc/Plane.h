@@ -36,16 +36,14 @@ namespace Geometry
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class Plane : public Surface
+class DLLExport Plane : public Quadratic
 {
  private:
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  const double PTolerance;      ///< Tolerance to the surfaces.
-
   Geometry::Vec3D NormV;         ///< Normal vector
-  double Dist;         ///< Distance 
+  double Dist;                   ///< Distance 
 
   int planeType() const;         ///< are we alined on an axis
 
@@ -60,10 +58,10 @@ class Plane : public Surface
   Plane(const Plane&);
   Plane* clone() const;
   Plane& operator=(const Plane&);
-  ~Plane();
+  virtual ~Plane();
   
   int setPlane(const Geometry::Vec3D&,const Geometry::Vec3D&);
-  int setPlane(const std::string&);    ///< Not implemented
+  //  int setPlane(const std::string&);
   int side(const Geometry::Vec3D&) const;
   int onSurface(const Geometry::Vec3D&) const;
   // stuff for finding intersections etc.
@@ -84,12 +82,13 @@ class Plane : public Surface
   void setBaseEqn() ;                      ///< set up to be eqn based
 
   void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		const int singleFlag =0);
+  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
+		int const =0);
 
 };
 
 } // NAMESPACE MonteCarlo
+
 }  // NAMESPACE Mantid
 
 #endif

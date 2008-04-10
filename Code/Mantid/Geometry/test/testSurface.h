@@ -8,11 +8,17 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../inc/Vec3D.h"
-#include "../inc/Surface.h"
-#include "../inc/Cone.h"
-#include "../inc/Cylinder.h"
-#include "../inc/Sphere.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
+#include "XMLcollect.h"
+#include "IndexIterator.h"
+#include "Vec3D.h"
+#include "Surface.h"
+#include "Quadratic.h"
+#include "Sphere.h"
+#include "Cone.h"
+#include "Cylinder.h"
+
 
 using namespace Mantid;
 using namespace Geometry;
@@ -25,7 +31,7 @@ public:
 
   void testConeDistance()
     /*!
-    Test the distance of a point from the cone
+      Test the distance of a point from the cone
     */
   {
     std::vector<std::string> ConeStr;
@@ -39,13 +45,13 @@ public:
     Cone A;
     int cnt(0);
     for(vc=ConeStr.begin();vc!=ConeStr.end();vc++,cnt++)
-    {
-      TS_ASSERT_EQUALS(A.setSurface(*vc),0);
-      TS_ASSERT_EQUALS(extractString(A),"-1  kx 0 1\n");
-
-      const double R=A.distanceTrue(P);
-      TS_ASSERT_DELTA(R,results[cnt],1e-5);
-    }
+      {
+	TS_ASSERT_EQUALS(A.setSurface(*vc),0);
+	TS_ASSERT_EQUALS(extractString(A),"-1  kx 0 1\n");
+	
+	const double R=A.distance(P);
+	TS_ASSERT_DELTA(R,results[cnt],1e-5);
+      }
   }
 
 private:

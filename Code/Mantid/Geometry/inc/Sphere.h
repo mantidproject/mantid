@@ -39,7 +39,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class DLLExport Sphere : public Surface
+class DLLExport Sphere : public Quadratic
 {
  private:
 

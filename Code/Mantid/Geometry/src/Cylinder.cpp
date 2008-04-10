@@ -26,6 +26,7 @@
 #include "Line.h"
 #include "BaseVisit.h"
 #include "Surface.h"
+#include "Quadratic.h"
 #include "Cylinder.h"
 
 namespace Mantid
@@ -36,23 +37,22 @@ namespace Geometry
 
 Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
 
-/// @cond
-const double CTolerance(1e-6);
-/// @endcond
 
-Cylinder::Cylinder() : Surface(),
+const double CTolerance(1e-6);  ///< Tolerance
+
+Cylinder::Cylinder() : Quadratic(),
    Centre(),Normal(1,0,0),Nvec(0),Radius(0.0)
   /*!
     Standard Constructor creats a cylinder (radius 0)
     along the x axis
   */
 {
-  // Called after it has been sized by Surface
+  // Called after it has been sized by Quadratic
   Cylinder::setBaseEqn();
 }
 
 Cylinder::Cylinder(const Cylinder& A) :
-  Surface(A),Centre(A.Centre),Normal(A.Normal),
+  Quadratic(A),Centre(A.Centre),Normal(A.Normal),
   Nvec(A.Nvec),Radius(A.Radius)
   /*!
     Standard Copy Constructor
@@ -63,7 +63,7 @@ Cylinder::Cylinder(const Cylinder& A) :
 Cylinder*
 Cylinder::clone() const
   /*!
-    makes a clone (implicit virtual copy constructor) 
+    Makes a clone (implicit virtual copy constructor) 
     \return Copy(*this)
   */
 {
@@ -80,7 +80,7 @@ Cylinder::operator=(const Cylinder& A)
 {
   if (this!=&A)
     {
-      Surface::operator=(A);
+      Quadratic::operator=(A);
       Centre=A.Centre;
       Normal=A.Normal;
       Nvec=A.Nvec;
@@ -103,6 +103,7 @@ Cylinder::setSurface(const std::string& Pstr)
      Valid input is: 
      - c/x cen_y cen_z radius 
      - cx radius 
+     \param Pstr :: Input string
     \return : 0 on success, neg of failure 
   */
 {
@@ -155,6 +156,7 @@ Cylinder::side(const Geometry::Vec3D& Pt) const
   /*!
     Calculate if the point PT within the middle
     of the cylinder 
+    \param Pt :: Point to check
     \retval -1 :: within cylinder 
     \retval 1 :: outside the cylinder
     \retval 0 :: on the surface 
@@ -171,7 +173,7 @@ Cylinder::side(const Geometry::Vec3D& Pt) const
 	return 0;
       return (displace>0.0) ? 1 : -1;
     }
-  return Surface::side(Pt);
+  return Quadratic::side(Pt);
 }
 
 int 
@@ -179,10 +181,8 @@ Cylinder::onSurface(const Geometry::Vec3D& Pt) const
   /*!
     Calculate if the point PT on the cylinder 
     \param Pt :: Geometry::Vec3D to test
-
     \retval 1 :: on the surface 
     \retval 0 :: not on the surface
-
   */
 {
   if (Nvec)      // Nvec =1-3 (point to exclude == Nvec-1)
@@ -193,7 +193,7 @@ Cylinder::onSurface(const Geometry::Vec3D& Pt) const
       y*=y;
       return (fabs((x+y)-Radius*Radius)>CTolerance*CTolerance) ? 0 : 1;
     }
-  return Surface::onSurface(Pt);
+  return Quadratic::onSurface(Pt);
 }
 
 void
@@ -228,7 +228,7 @@ Cylinder::rotate(const Geometry::Matrix<double>& MA)
   Normal.rotate(MA);
   Normal.makeUnit();
   setNvec();
-  Surface::rotate(MA);
+  Quadratic::rotate(MA);
   return;
 }
 
@@ -246,7 +246,7 @@ Cylinder::displace(const Geometry::Vec3D& Pt)
     }
   else
     Centre+=Pt;
-  Surface::displace(Pt);
+  Quadratic::displace(Pt);
   return;
 }
 
@@ -266,8 +266,8 @@ void
 Cylinder::setNorm(const Geometry::Vec3D& A)
   /*! 
     Sets the centre line unit vector 
-    \param A :: Vector along the centre line 
     A does not need to be a unit vector
+    \param A :: Vector along the centre line 
   */
 {
   Normal=A;
@@ -330,7 +330,7 @@ Cylinder::write(std::ostream& OX) const
   if (Ndir==0)
     {
       // general surface
-      Surface::write(OX);
+      Quadratic::write(OX);
       return;
     }
   
@@ -388,7 +388,7 @@ Cylinder::print() const
    Debug routine to print out basic information 
  */
 {
-  Surface::print();
+  Quadratic::print();
   std::cout<<"Axis =="<<Normal<<" ";
   std::cout<<"Centre == "<<Centre<<" ";
   std::cout<<"Radius == "<<Radius<<std::endl;
@@ -406,6 +406,7 @@ Cylinder::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
     \param SK :: IndexIterator object
     \param singleFlag :: single pass through to determine if has key
     (only for virtual base object)
+    \return Error count
    */
 {
   int errCnt(0);
@@ -428,12 +429,12 @@ Cylinder::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
 	      else if (KVal=="Nvec")
 		errNum=(StrFunc::convert(RPtr->getFront(),Nvec)) ? 0 : 1;
 	      else
-		errNum=Surface::importXML(SK,1);
+		errNum=Quadratic::importXML(SK,1);
 	    }
 	  if (errNum)
 	    {
+	      errCnt++;                 // Not good....
 	      PLog.warning("importXML :: Key failed "+KVal);
-	      errCnt++;
 	    }
 	  // Post processing
 	  if (!singleFlag) 
@@ -455,8 +456,7 @@ Cylinder::procXML(XML::XMLcollect& XOut) const
     \param XOut :: Output parameter
    */
 {
-  XOut.getCurrent()->addAttribute("type",std::string("Cylinder"));
-  Surface::procXML(XOut);
+  Quadratic::procXML(XOut);
   XOut.addComp("Centre",Centre);
   XOut.addComp("Normal",Normal);
   XOut.addComp("Nvec",Nvec);

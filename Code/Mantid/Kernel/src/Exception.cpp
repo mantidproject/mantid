@@ -112,6 +112,32 @@ const char* ExistsError::what() const throw()
 }
 
 //-------------------------
+// AbsObjMethod
+//-------------------------
+/** Constructor
+	@param Desc Function description
+	@param ObjectName The name of the search object
+*/
+AbsObjMethod::AbsObjMethod(const std::string& ObjectName) :
+  std::runtime_error(""),objectName(ObjectName)
+{
+  outMessage = std::string("AbsObjMethod object: ") + objectName;
+}
+ 
+/// Copy constructor
+AbsObjMethod::AbsObjMethod(const AbsObjMethod& A) :
+  std::runtime_error(A),objectName(A.objectName)
+{}
+
+/** Writes out the range and limits
+	@returns a char array of foramtted error information
+*/
+const char* AbsObjMethod::what() const throw()
+{
+  return outMessage.c_str();
+}
+
+//-------------------------
 // InstrumentDefinitionError
 //-------------------------
 /** Constructor
