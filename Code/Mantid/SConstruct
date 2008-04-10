@@ -144,8 +144,7 @@ else:
 	flags=re.sub('\n','',f.readline())
 	lpts=re.split("\s+",flags)
 	lpts.append('-g')
-	env.Append(LINKFLAGS=lpts)
-
+	
 #GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
 dirpath=os.listdir(uppath)
 while(len(dirpath)):
@@ -162,6 +161,21 @@ while(len(dirpath)):
 		pass
 
 libDirList.append(os.path.abspath('./Bin/Shared'))
+
+if os.name != 'nt':	
+   ##
+   ## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
+   ## 
+	newLibList=[]
+	for libitem in libDirList:
+		if (os.path.isdir(libitem)):
+			newLibList.append('-Wl,-rpath,'+libitem)
+	lpts.insert(0,newLibList)
+	print "LibList ",newLibList
+	print "LPTS == ",lpts
+
+
+env.Append(LINKFLAGS=lpts)
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
@@ -240,3 +254,4 @@ if not int(skiptest):
 			print 'CXXTESTGEN is not installed - tests will not be built'
 else:
 	print "Not Building Tests."
+
