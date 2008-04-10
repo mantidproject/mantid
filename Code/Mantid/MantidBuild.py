@@ -35,5 +35,39 @@ def getSharedObjects(listCpps, env) :
     for f in listCpps :
         listSharedObjects.append(os.path.splitext(f)[0]+env['SHOBJSUFFIX'])
     return listSharedObjects
+    
+def collectIncludes(start, dest):
+	try:
+		shutil.rmtree(os.path.abspath(dest))
+	except:
+		print "Could not delete old folder\n"
+	
+	uppath=os.path.abspath(start)
+	dirpath=os.listdir(uppath)
+	incpaths = []
+	
+	while(len(dirpath)):
+		try:
+			item=dirpath.pop(0)
+			for file in os.listdir(item):
+				fullPath= item+"/"+ file
+				if (file=="inc"):
+					incpaths.insert(0,os.path.abspath(fullPath))
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])
+		except:
+			pass
+	
+	for path in incpaths:
+		dirpath=os.listdir(path)
+		
+		while (len(dirpath)):
+			item=dirpath.pop(0)
+			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
+				print os.path.abspath(path + '/' + item)
+				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
+
+
 
 
