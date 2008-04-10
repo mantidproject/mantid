@@ -66,7 +66,7 @@ class DLLExport Vec3D
   Vec3D operator-(const Vec3D&) const;
   Vec3D operator-() const;
  
-  int operator==(const Vec3D&) const;
+  bool operator==(const Vec3D&) const;
   virtual void rotate(const Vec3D&,const Vec3D&,const double);
 
   double Distance(const Vec3D&) const;    ///< Calculate scale distance

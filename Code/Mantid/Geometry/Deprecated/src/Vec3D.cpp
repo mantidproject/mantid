@@ -189,7 +189,7 @@ Vec3D::operator[](const int A) const
   return z;
 }
 
-int
+bool
 Vec3D::operator==(const Vec3D& A) const
   /*!
     Equality operator within tolerance
@@ -197,7 +197,7 @@ Vec3D::operator==(const Vec3D& A) const
     \return A==this
   */
 {
-  return (&A==this || Distance(A)<=PTolerance) ? 1 : 0;
+  return (&A==this || Distance(A)<=PTolerance) ;
 }
 
 

@@ -317,56 +317,56 @@ Matrix<T>::operator/=(const T& Value)
 }
 
 template<typename T>
-int
+bool
 Matrix<T>::operator!=(const Matrix<T>& A) const
-  /*!
-    Element by Element comparison
-    \param A :: Matrix to check
-    \return 1 :: on sucees
-    \return 0 :: failoure
-  */
+/*!
+Element by Element comparison
+\param A :: Matrix to check
+\return true :: on succees
+\return false :: failure
+*/
 {
-  return (this->operator==(A)) ? 0 : 1;
+  return (this->operator==(A));
 }
 
 template<typename T>
-int
+bool
 Matrix<T>::operator==(const Matrix<T>& A) const
-  /*! 
-    Element by element comparison within tolerance.
-    Tolerance means that the value must be > tolerance
-    and less than (diff/max)>tolerance 
+/*! 
+Element by element comparison within tolerance.
+Tolerance means that the value must be > tolerance
+and less than (diff/max)>tolerance 
 
-    Always returns 0 if the Matrix have different sizes
-    \param A :: matrix to check.
-    \return 1 on success 
-  */
+Always returns 0 if the Matrix have different sizes
+\param A :: matrix to check.
+\return true on success 
+*/
 {
   const double Tolerance(1e-8);
   if (&A!=this)       // this == A == always true
-    {
-      if(A.nx!=nx || A.ny!=ny)
-	return 0;
+  {
+    if(A.nx!=nx || A.ny!=ny)
+      return false;
 
-      double maxS(0.0);
-      double maxDiff(0.0);   // max di
-      for(int i=0;i<nx;i++)
-	for(int j=0;j<ny;j++)
-	  {
-	    const T diff=(V[i][j]-A.V[i][j]);
-	    if (fabs(diff)>maxDiff)
-	      maxDiff=fabs(diff);
-	    if (fabs(V[i][j])>maxS)
-	      maxS=fabs(V[i][j]);
-	  }
+    double maxS(0.0);
+    double maxDiff(0.0);   // max di
+    for(int i=0;i<nx;i++)
+      for(int j=0;j<ny;j++)
+      {
+        const T diff=(V[i][j]-A.V[i][j]);
+        if (fabs(diff)>maxDiff)
+          maxDiff=fabs(diff);
+        if (fabs(V[i][j])>maxS)
+          maxS=fabs(V[i][j]);
+      }
       if (maxDiff<Tolerance)
-	return 1;
+        return true;
       if (maxS>1.0 && (maxDiff/maxS)<Tolerance)
-	return 1;
-      return 0;
-    }
+        return true;
+      return false;
+  }
   //this == this is true
-  return 1;
+  return true;
 }
 
 template<typename T>

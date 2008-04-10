@@ -78,8 +78,8 @@ namespace Mantid
       Matrix<T>& operator*=(const T&);                 ///< Multiply by constant
       Matrix<T>& operator/=(const T&);                 ///< Divide by constant
 
-      int operator!=(const Matrix<T>&) const; 
-      int operator==(const Matrix<T>&) const; 
+      bool operator!=(const Matrix<T>&) const; 
+      bool operator==(const Matrix<T>&) const; 
       T item(const int a,const int b) const { return V[a][b]; }   ///< disallows access
 
       void print() const;

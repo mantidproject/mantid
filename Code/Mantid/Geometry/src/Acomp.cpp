@@ -707,7 +707,7 @@ Acomp::assignCNF(const std::vector<int>& Index,const std::vector<BnId>& A)
   for(vc=A.begin();vc!=A.end();vc++)
     {
       Acomp Px(0);      // Union
-      std::cout<<"Item == "<<*vc<<std::endl;
+      //std::cout<<"Item == "<<*vc<<std::endl;
       BnId X=*vc;
       X.reverse();
       Px.addUnit(Index,X);
