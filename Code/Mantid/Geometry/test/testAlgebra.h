@@ -54,9 +54,7 @@ void testDNF()
   A.setFunction(FuncA);
   //  A.write(std::cout);
 
-  std::cout<<"DNF[a'c'+c'b'+ab] == ";
   A.makeDNF();
-  
   TS_ASSERT_EQUALS("(c'a')+(b'c)+(ab)",A.display());
 
 }
@@ -64,23 +62,31 @@ void testDNF()
 void testCNF()
   /*!
     Test the CNF Structure 
-   */
+  */
 {
   Algebra A;
   A.setFunction("(f+x)(x+y+z)");
+  // This test sees that the function is in CNF & is 
+  // obviously minimal. Hence it skips the CNF factoring
+  // Change one of the x literals to x' and the same result
+  // will occur BUT the program must factor. 
   TS_ASSERT_EQUALS(A.display(),"(f+x)(x+y+z)");
   A.makeCNF();
-  TS_ASSERT_EQUALS(A.display(),"(z'+f+x)(y'+f+x)(x+y+z)");
+  TS_ASSERT_EQUALS(A.display(),"(f+x)(x+y+z)");
   
-  A.setFunction("aq+acp+ace");
+  // Start with a DNF form wiht common factor:
+  A.setFunction("aq+acp+ace");  
   TS_ASSERT_EQUALS(A.display(),"(ace)+(acp)+(aq)");
-  
   A.makeCNF();
-  TS_ASSERT_EQUALS(A.display(),"(q'+a)(p'+c'+a)(p'+c+q)(e'+c'+a)(e'+c+q)(a'+e+p+q)(e+p+q)");
+  // Note: there are several possibles here:
+  // This expands in DNF to a(ce+cp+cq+qe+qp+q):
+  //                     :==  ac(e+p+q)+q
+  //                     :==  ace+acp+aq
+  TS_ASSERT_EQUALS(A.display(),"a(c+q)(e+p+q)")
   
-  //Back to DNF
+  //Back to DNF (were we started)
   A.makeDNF();
-  TS_ASSERT_EQUALS(A.display(),"(acep)+(ace)+(acp)+(aq)");
+  TS_ASSERT_EQUALS(A.display(),"(ace)+(acp)+(aq)")
   return;
 }
 
@@ -114,7 +120,7 @@ void testmakeString()
 }
 
 
-void testmult()
+void testMult()
   /*!
     Test algebraic multiplication
 
@@ -154,18 +160,20 @@ void testWeakDiv()
   TS_ASSERT_EQUALS(B.display(),"a+b");
 
   std::pair<Algebra,Algebra> X=A.algDiv(B);
-  TS_ASSERT_EQUALS(X.first.display(),"c+d+(cd)");
-  TS_ASSERT_EQUALS(X.second.display(),"e'a(c'+b'+a')");
+  TS_ASSERT_EQUALS(X.first.display(),"c+d");
+  TS_ASSERT_EQUALS(X.second.display(),"e'a");
   
+  // NOW CHECK that multiplication of divisor * factor + remainder 
+  // is the same
   Algebra XY=X.first*B;
-  TS_ASSERT_EQUALS(XY.display(),"(a+b)(c+d+(cd))");
-  
   XY+=X.second;
+  TS_ASSERT_EQUALS(A,XY);
+
+  TS_ASSERT_EQUALS(XY.display(),"(e'a)+((a+b)(c+d))");
+
   XY.makeDNF();
-  TS_ASSERT_EQUALS(XY.display(),"(e'a)+(abcd)+(ac)+(ad)+(bc)+(bd)");
-  
-  //test fails - should it?  the compared algebras are similar but XY has an additional +abcd
-  //TS_ASSERT(A==XY);
+
+  TS_ASSERT_EQUALS(A,XY);
 }
 
 void testComplementary()
