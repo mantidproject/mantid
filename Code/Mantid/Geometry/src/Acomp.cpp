@@ -761,6 +761,40 @@ Acomp::makeReadOnce()
 
 
 int
+Acomp::logicalEqual(const Acomp& A) const
+  /*!
+    Test that the system that is logically the same:
+    \param A :: Logical state to test
+    \retval 0 :: false  
+    \retval 1 :: true
+  */
+{
+  std::map<int,int> litMap;       // keynumber :: number of occurances
+  getAbsLiterals(litMap);
+  
+  A.getAbsLiterals(litMap);
+  std::map<int,int> Base;       // keynumber :: number of occurances
+  std::vector<int> keyNumbers;
+
+
+  std::map<int,int>::const_iterator mc;
+  for(mc=litMap.begin();mc!=litMap.end();mc++)
+    {
+      Base[mc->first]=1;          // Insert and Set to true
+      keyNumbers.push_back(mc->first);
+    }
+
+  BnId State(Base.size(),0);                 //zero base
+  do
+    {
+      State.mapState(keyNumbers,Base);
+      if (isTrue(Base) != A.isTrue(Base))
+	  return 0;
+    } while(++State);
+  return 1;
+}
+
+int
 Acomp::isNull() const
   /*!
     \returns 1 if there are no memebers
@@ -1151,6 +1185,23 @@ Acomp::makeEPI(std::vector<BnId>& DNFobj,
   return 1;
 }
 
+std::vector<int>
+Acomp::getKeys() const
+  /*!
+    Get the key numbers in the system
+    \return Key of literals
+  */
+{
+  std::map<int,int> litMap;       // keynumber :: number of occurances
+  std::vector<int> keyNumbers;
+  getAbsLiterals(litMap);
+  std::map<int,int>::const_iterator mc;
+  for(mc=litMap.begin();mc!=litMap.end();mc++)
+    keyNumbers.push_back(mc->first);
+
+  return keyNumbers;
+}
+
 int
 Acomp::getDNFobject(std::vector<int>& keyNumbers,
 		    std::vector<BnId>& DNFobj) const
@@ -1170,17 +1221,14 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
   std::map<int,int> Base;         // keynumber :: value
   getAbsLiterals(litMap);
   
-  if (litMap.size()<1)
+  if (litMap.empty())
     return -1;
 
   keyNumbers.clear();
   std::map<int,int>::iterator mc;
-  int cnt(0);
-
 
   for(mc=litMap.begin();mc!=litMap.end();mc++)
     {
-      mc->second=cnt++;
       Base[mc->first]=1;          // Set to true
       keyNumbers.push_back(mc->first);
     }
@@ -1195,6 +1243,7 @@ Acomp::getDNFobject(std::vector<int>& keyNumbers,
 	  DNFobj.push_back(State);
 	}
     } while(++State);
+
   return 0;
 }
  

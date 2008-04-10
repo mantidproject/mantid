@@ -11,6 +11,9 @@ namespace Mantid
 namespace Geometry
 {
 
+  
+  template<typename T> class Matrix;
+
   //void split(const int,int&,int&);
 
 /*!
@@ -85,7 +88,6 @@ class DLLExport Acomp
   /// Calculate Principle Components
   int makePI(std::vector<BnId>&) const;                        
   int makeEPI(std::vector<BnId>&,std::vector<BnId>&) const;    
-  int makeEPIX(std::vector<BnId>&) const;
 
   int makeReadOnce();                   ///< Factorize into a read once function
 
@@ -119,6 +121,8 @@ class DLLExport Acomp
   void Sort();                                     ///< Sort the Units+Comp items
   void getLiterals(std::map<int,int>&) const;      ///< Get literals (+/- different)
   void getAbsLiterals(std::map<int,int>&) const;   ///< Get literals (positve)
+  std::vector<int> getKeys() const;      
+  int logicalEqual(const Acomp&) const;
 
   int makeDNFobject();                 ///< Make the object into DNF form (Sum of Products)
   int makeCNFobject();                 ///< Make the object into CNF form (Product of Sums)

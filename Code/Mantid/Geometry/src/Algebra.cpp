@@ -24,6 +24,18 @@ namespace Mantid
 namespace Geometry
 {
 
+std::ostream&
+operator<<(std::ostream& OX,const Algebra& A)
+  /*!
+    Write to standard stream
+    \param OX :: Output stream
+    \param A :: Algebra to write
+   */
+{
+  OX<<A.display();
+  return OX;
+}
+
 Kernel::Logger& Algebra::PLog(Kernel::Logger::get("Algebra"));
 
 Algebra::Algebra() :
@@ -73,6 +85,17 @@ Algebra::operator==(const Algebra& A) const
   if (this==&A)
     return 1;
   return F==A.F;
+}
+
+int
+Algebra::operator!=(const Algebra& A) const
+  /*!
+    Inequality operator
+    \param A :: object to compary
+    \returns this!=A (via ==)
+  */
+{
+  return (F==A.F) ? 0 : 1;
 }
 
 Algebra&
@@ -366,6 +389,18 @@ Algebra::countLiterals() const
   std::map<int,int> Lit;
   F.getLiterals(Lit);
   return Lit.size();
+}
+
+int
+Algebra::logicalEqual(const Algebra& A) const
+  /*!
+    Calculate if two functions are logically
+    equivilent (exhaustive search)
+    \param A :: Algrebra to testg
+    \return True/False
+   */  
+{
+  return F.logicalEqual(A.F);
 }
 
 } // NAMESPACE MonteCarlo

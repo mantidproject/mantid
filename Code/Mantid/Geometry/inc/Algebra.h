@@ -59,12 +59,17 @@ class DLLExport Algebra
   Algebra(const Algebra&);
   Algebra& operator=(const Algebra&);
   ~Algebra();
-  
+
+    /// Accessor
+  const Acomp& getComp() const { return F; }  
+
   int operator==(const Algebra&) const;
+  int operator!=(const Algebra&) const;
   Algebra& operator+=(const Algebra&);
   Algebra& operator*=(const Algebra&);
   Algebra operator+(const Algebra&) const;
   Algebra operator*(const Algebra&) const;
+  int logicalEqual(const Algebra&) const;
 
 
   void Complement();
@@ -83,6 +88,9 @@ class DLLExport Algebra
   std::string display() const;
 
 };
+
+std::ostream&
+operator<<(std::ostream&,const Algebra&);
 
 }  // NAMESPACE Geometry
 
