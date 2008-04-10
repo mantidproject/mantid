@@ -125,10 +125,10 @@ message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) 
-message += ' (' + str(testCount)
+message += ' (' 
 if failCount>0:
     print str(failCount) + " failed of "
-message += str(testCount) + " total)\n\n"
+message += str(testCount) + " tests)\n\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
