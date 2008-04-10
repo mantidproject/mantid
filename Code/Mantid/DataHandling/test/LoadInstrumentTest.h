@@ -37,7 +37,7 @@ public:
     TS_ASSERT( loader.isInitialized() );
   }
   
-  void testExec()
+  void testExecHET()
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
@@ -81,8 +81,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(wsName));
-
-    //loader.execute();  
+ 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     TS_ASSERT( loader.isExecuted() );    
@@ -93,12 +92,12 @@ public:
     
     Instrument& i = output->getInstrument();
     Component* source = i.getSource();
-    TS_ASSERT_EQUALS( source->getName(), "Source");
-    TS_ASSERT_DELTA( source->getPos().Y(), 10.0,0.01);
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
     Component* samplepos = i.getSamplePos();
-    TS_ASSERT_EQUALS( samplepos->getName(), "SamplePos");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
 
     Detector *ptrDet103 = dynamic_cast<Detector*>(i.getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
@@ -106,17 +105,78 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 3.6527,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.2222,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,9.0905,0.0001);
+    TS_ASSERT_DELTA(d,4.026,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,9.0905,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,4.026,0.0001);
 
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
+
+    // also a few tests on the last detector and a test for the one beyond the last
+    Detector *ptrDetLast = dynamic_cast<Detector*>(i.getDetector(2184));
+    TS_ASSERT_EQUALS( ptrDetLast->getID(), 2184);
+    TS_ASSERT_EQUALS( ptrDetLast->getName(), "pixel");
+    TS_ASSERT_THROWS(i.getDetector(2185), Exception::NotFoundError);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 
     TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), histogramNumber);
+  }
 
+  void testExecGEM()
+  {
+    LoadInstrument loaderGEM;
+
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize()); 
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestGEM";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
+
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Instrument/GEM_definition.xml";
+    loaderGEM.setPropertyValue("Filename", inputFile);
+
+    loaderGEM.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+ 
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
+
+    TS_ASSERT( loaderGEM.isExecuted() );    
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    
+    Instrument& i = output->getInstrument();
+    Component* source = i.getSource();
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+
+    Component* samplepos = i.getSamplePos();
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
+
+    Detector *ptrDet = dynamic_cast<Detector*>(i.getDetector(101001));
+    TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "scintillator_B1");
+    TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0,0.01);
+    TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0,0.01);
+    double d = ptrDet->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,10.0,0.0001);
+    double cmpDistance = ptrDet->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,10.0,0.0001);
+    TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
   }
  
   

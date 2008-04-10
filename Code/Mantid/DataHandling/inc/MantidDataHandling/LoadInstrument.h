@@ -23,8 +23,9 @@ namespace Mantid
   {
     /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
-    Loads instrument data from a file and adds it to a workspace. 
-    The current implementation uses a simple data structure that will be replaced later.
+    Loads instrument data from a XML instrument description file and adds it 
+    to a workspace. 
+
     LoadInstrument is intended to be used as a child algorithm of 
     other Loadxxx algorithms, rather than being used directly.
     LoadInstrument is an algorithm and as such inherits
@@ -90,6 +91,9 @@ namespace Mantid
 
       /// Set location (position) of comp as specified in XML location element
       void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
+
+      /// Get parent component element of location element
+      Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
 
       /// map which holds names of types and whether or not they are catagorised as being 
       /// assembles, which means whether the type element contains component elements

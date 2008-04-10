@@ -121,7 +121,6 @@ void LoadInstrument::exec()
 
   // Get reference to Instrument and set its name
 
-  //API::Instrument* 
   instrument = &(localWorkspace->getInstrument());
   if ( pRootElem->hasAttribute("name") ) 
     instrument->setName( pRootElem->getAttribute("name") );
@@ -145,6 +144,18 @@ void LoadInstrument::exec()
                                                 // The initialisation is to make a
                                                 // check below to be true by default
 
+      // get all location element contained in component element
+
+      NodeList* pNL_location = pElem->getElementsByTagName("location");
+      if (pNL_location->length() == 0)
+      {
+        g_log.error(std::string("All component elements must contain at least one location element") +
+          " even it is just an empty location element of the form <location />");
+        throw Kernel::Exception::InstrumentDefinitionError(
+          std::string("All component elements must contain at least one location element") +
+          " even it is just an empty location element of the form <location />", m_filename);
+      }
+
       if ( isTypeAssemply[pElem->getAttribute("type")] )
       {
         // read detertor ID start and end values if idlist specified
@@ -158,8 +169,12 @@ void LoadInstrument::exec()
           detectorLastID = atoi( (pFound->getAttribute("end")).c_str() ); 
         }
 
-        appendAssembly(instrument, pElem, runningDetID);
 
+        for (int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        {
+          appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
+        }
+        
 
         // a check
 
@@ -173,12 +188,15 @@ void LoadInstrument::exec()
             "Number of IDs listed in idlist does not match number of detectors listed in type = "
             + pElem->getAttribute("type"), m_filename);
         }
-
       }
       else
       {
-        appendLeaf(instrument, pElem, runningDetID);
+        for (int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        {
+          appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
+        }
       }
+      pNL_location->release();
     }
   }
 
@@ -188,32 +206,32 @@ void LoadInstrument::exec()
   return;
 }
 
-/** Assumes second argument is pointing to an assemble and this method appends 
- *  it to the parent passed as the 1st arg. Note this method may call itself, 
- *  i.e. it may act recursively.
+/** Assumes second argument is a XML location element and its parent is a component element
+ *  which is assigned to be an assemble. This method appends the parent component element of
+ %  the location element to the CompAssemply passed as the 1st arg. Note this method may call 
+ %  itself, i.e. it may act recursively.
  *
- *  @param parent Parent to append assemble to
- *  @param pCompElem  Poco::XML element that points to the element in the XML doc we want to add  
+ *  @param parent CompAssembly to append new component to
+ *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
  *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
- *
- *  @throw logic_error Thrown if second argument is not a pointer to component XML element
- *  @throw NotImplementedError At present a component element is restricted to have a max of one location element
  */
-void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pCompElem, int& runningDetID)
+void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, int& runningDetID)
 {
-  // for now assume that the tag name of the element is 'component'
+  // The location element is required to be a child of a component element. Get this component element
 
-  if ( (pCompElem->tagName()).compare("component") )
-  {
-    g_log.error("Second argument to function appendAssembly must be a pointer to an XML element with tag name component.");
-    throw std::logic_error( "Second argument to function appendAssembly must be a pointer to an XML element with tag name component." );
-  }
+  Element* pCompElem = getParentComponent(pLocElem);
+
 
   Geometry::CompAssembly *ass = new Geometry::CompAssembly;
   ass->setParent(parent);
   parent->add(ass);
 
-  if ( pCompElem->hasAttribute("name") )
+
+  // set name of newly added component assembly.
+
+  if ( pLocElem->hasAttribute("name") )
+    ass->setName(pLocElem->getAttribute("name"));
+  else if ( pCompElem->hasAttribute("name") )
   {
     ass->setName(pCompElem->getAttribute("name"));
   }
@@ -222,30 +240,22 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     ass->setName(pCompElem->getAttribute("type"));
   }
 
-  // set location for this comp. Done this way because are likely to need
-  // to take into account the fact that a component element may contain more
-  // than one location element
+  // set location for this newly added comp. 
 
-  NodeList* pNL_location = pCompElem->getElementsByTagName("location");
-  if (pNL_location->length() == 1)
-  {
-    setLocation(ass, static_cast<Element*>(pNL_location->item(0)));
-  }
-  else
-  {
-    throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
-  }
-  pNL_location->release();
+  setLocation(ass, pLocElem);
 
-  // find all the component elements of this type element and loop over these
+
+  // The newly added component is required to have a type. Find out what this
+  // type is and find all the location elements of this type. Finally loop over these
+  // location elements
 
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
-  NodeList* pNL_comp_for_this_type = pType->getElementsByTagName("component");
+  NodeList* pNL_loc_for_this_type = pType->getElementsByTagName("location");
 
-  for (unsigned int i = 0; i < pNL_comp_for_this_type->length(); i++)
+  for (unsigned int i = 0; i < pNL_loc_for_this_type->length(); i++)
   {
-    Element* pElem = static_cast<Element*>(pNL_comp_for_this_type->item(i));
-    std::string typeName = pElem->getAttribute("type");
+    Element* pElem = static_cast<Element*>(pNL_loc_for_this_type->item(i));
+    std::string typeName = (getParentComponent(pElem))->getAttribute("type");
     if (isTypeAssemply[typeName])
     {
       appendAssembly(ass, pElem, runningDetID);
@@ -255,32 +265,44 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
       appendLeaf(ass, pElem, runningDetID);
     }
   }
-  pNL_comp_for_this_type->release();
+  pNL_loc_for_this_type->release();
 }
 
 
-/** Assumes second argument is pointing to a leaf, which here mean component element that
- *  contains no sub-components. This component is appended to the parent (1st argument). 
+/** Assumes second argument is pointing to a leaf, which here mean location element (indirectly 
+ *  representing a component element) that contains no sub-components. This component is appended 
+ %  to the parent (1st argument). 
  *
- *  @param parent Parent to append (none-assemble) component to
- *  @param pCompElem  Poco::XML element that points to the element in the XML doc we want to add  
+ *  @param parent CompAssembly to append component to
+ *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add  
  *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
- *
- *  @throw NotImplementedError At present a component element is restricted to have a max of one location element
  */
-void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pCompElem, int& runningDetID)
+void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, int& runningDetID)
 {
+  // The location element is required to be a child of a component element. Get this component element
+
+  Element* pCompElem = getParentComponent(pLocElem);
+
+
+  // get the type element of the component element in order to determine if the type
+  // belong to the catogory: "detector", "SamplePos or "Source".
+
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 
-  std::string typeName = ""; 
+  std::string category = ""; 
   if (pType->hasAttribute("is")) 
-    typeName = pType->getAttribute("is");
+    category = pType->getAttribute("is");
 
-  if ( typeName.compare("detector") == 0 )
+
+  // do stuff a bit differently depending on which category the type belong to
+
+  if ( category.compare("detector") == 0 )
   {
     Geometry::Detector detector;
 
-    if ( pCompElem->hasAttribute("name") )
+    if ( pLocElem->hasAttribute("name") )
+      detector.setName(pLocElem->getAttribute("name"));
+    else if ( pCompElem->hasAttribute("name") )
     {
       detector.setName(pCompElem->getAttribute("name"));
     }
@@ -289,20 +311,10 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
       detector.setName(pCompElem->getAttribute("type"));
     }
 
-    // set location for this comp. Done this way because are likely to need
-    // to take into account the fact that a component element may contain more
-    // than one location element
+    // set location for this comp
 
-    NodeList* pNL_location = pCompElem->getElementsByTagName("location");
-    if (pNL_location->length() == 1)
-    {
-      setLocation(&detector, static_cast<Element*>(pNL_location->item(0)));
-    }
-    else
-    {
-      throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
-    }
-    pNL_location->release();
+    setLocation(&detector, pLocElem);
+
 
     // set detector ID and increment it. Finally add the detector to the parent
     detector.setID(runningDetID);
@@ -318,7 +330,9 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     comp->setParent(parent);
     parent->add(comp);
 
-    if ( pCompElem->hasAttribute("name") )
+    if ( pLocElem->hasAttribute("name") )
+      comp->setName(pLocElem->getAttribute("name"));
+    else if ( pCompElem->hasAttribute("name") )
     {
       comp->setName(pCompElem->getAttribute("name"));
     }
@@ -328,29 +342,18 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     }
 
     // check if special Source or SamplePos Component
-    if ( typeName.compare("Source") == 0 )
+    if ( category.compare("Source") == 0 )
     {
       instrument->markAsSource(comp);
     }
-    if ( typeName.compare("SamplePos") == 0 )
+    if ( category.compare("SamplePos") == 0 )
     {
       instrument->markAsSamplePos(comp);
     }
 
-    // set location for this comp. Done this way because are likely to need
-    // to take into account the fact that a component element may contain more
-    // than one location element
+    // set location for this comp
 
-    NodeList* pNL_location = pCompElem->getElementsByTagName("location");
-    if (pNL_location->length() == 1)
-    {
-      setLocation(comp, static_cast<Element*>(pNL_location->item(0)));
-    }
-    else
-    {
-      throw Kernel::Exception::NotImplementedError("component element restricted to contain one location element");
-    }
-    pNL_location->release();
+    setLocation(comp, pLocElem);
   }
 }
 
@@ -386,6 +389,25 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     pos.spherical(R,theta,phi);
     comp->setPos(pos);
   }
+  else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || 
+    pElem->hasAttribute("p") ) 
+  // This is alternative way a user may specify sphecical coordinates
+  // which may be preferred in the long run to the more verbose of 
+  // using R, theta and phi.
+  {
+    double R=0.0, theta=0.0, phi=0.0;
+
+    if ( pElem->hasAttribute("r") )
+      R = atof((pElem->getAttribute("r")).c_str());
+    if ( pElem->hasAttribute("t") )
+      theta = atof((pElem->getAttribute("t")).c_str());
+    if ( pElem->hasAttribute("p") )
+      phi = atof((pElem->getAttribute("p")).c_str());    
+
+    Geometry::V3D pos;
+    pos.spherical(R,theta,phi);
+    comp->setPos(pos);
+  }
   else
   {
     double x=0.0, y=0.0, z=0.0;
@@ -398,6 +420,42 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
   }
 }
 
+/** Get parent component element of location element.
+ *
+ *  @param pLocElem  Poco::XML element that points a location element in the XML doc  
+ *
+ *  @throw logic_error Thrown if argument is not a child of component element
+ */
+Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocElem)
+{
+  if ( (pLocElem->tagName()).compare("location") )
+  {
+    g_log.error("Argument to function getParentComponent must be a pointer to an XML element with tag name location.");
+    throw std::logic_error( "Argument to function getParentComponent must be a pointer to an XML element with tag name location." );
+  }
+
+  // The location element is required to be a child of a component element. Get this component element
+
+  Node* pCompNode = pLocElem->parentNode(); 
+
+  Element* pCompElem;
+  if (pCompNode->nodeType() == 1)
+  {
+    pCompElem = static_cast<Element*>(pCompNode);
+    if ( (pCompElem->tagName()).compare("component") )
+    {
+      g_log.error("Argument to function getParentComponent must be a XML element sitting inside a component element.");
+      throw std::logic_error( "Argument to function getParentComponent must be a XML element sitting inside a component element." );      
+    }
+  }
+  else
+  {
+    g_log.error("Argument to function getParentComponent must be a XML element whos parent is an element.");
+    throw std::logic_error( "Argument to function getParentComponent must be a XML element whos parent is an element." );      
+  }
+
+  return pCompElem;
+}
 
 } // namespace DataHandling
 } // namespace Mantid

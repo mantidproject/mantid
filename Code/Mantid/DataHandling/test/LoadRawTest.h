@@ -77,12 +77,12 @@ public:
     Instrument& i = output->getInstrument();
     Mantid::Geometry::Component* source = i.getSource();
 
-    TS_ASSERT_EQUALS( source->getName(), "Source");
-    TS_ASSERT_DELTA( source->getPos().Y(), 10.0,0.01);
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
     Mantid::Geometry::Component* samplepos = i.getSamplePos();
-    TS_ASSERT_EQUALS( samplepos->getName(), "SamplePos");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
 
     Mantid::Geometry::Detector *ptrDet103 = dynamic_cast<Mantid::Geometry::Detector*>(i.getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
