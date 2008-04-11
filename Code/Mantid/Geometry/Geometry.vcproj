@@ -392,6 +392,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\AlgebraTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
@@ -416,7 +420,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CompAssemblyTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Component.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ComponentTest.h"
 				>
 			</File>
 			<File
@@ -428,11 +440,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CynlinderTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\DataSpace.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\Detector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DetectorTest.h"
 				>
 			</File>
 			<File
@@ -484,15 +504,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\Matrix.h"
 				>
 			</File>
 			<File
+				RelativePath=".\auxinc\Matrix.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MatrixBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MatrixTest.h"
 				>
 			</File>
 			<File
@@ -501,6 +525,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\ObjComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ObjComponentTest.h"
 				>
 			</File>
 			<File
@@ -520,6 +548,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\PolyTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\PolyVar.h"
 				>
 			</File>
@@ -529,6 +561,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\Quat.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\QuatTest.h"
 				>
 			</File>
 			<File
@@ -564,6 +600,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SphereTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Surface.h"
 				>
 			</File>
@@ -572,47 +612,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\testAlgebra.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testCompAssembly.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testComponent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testCynlinder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testDetector.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testMatrix.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testObjComponent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testPoly.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testQuat.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testSphere.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\testSurface.h"
+				RelativePath=".\test\SurfaceTest.h"
 				>
 			</File>
 			<File
@@ -648,11 +648,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcollect.h"
+				RelativePath=".\Deprecated\inc\XMLcollect.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcollect.h"
+				RelativePath=".\auxinc\XMLcollect.h"
 				>
 			</File>
 			<File
@@ -672,11 +672,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgrid.h"
+				RelativePath=".\auxinc\XMLgrid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgrid.h"
+				RelativePath=".\Deprecated\inc\XMLgrid.h"
 				>
 			</File>
 			<File
@@ -688,15 +688,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgroup.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\XMLgroup.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLindex.h"
+				RelativePath=".\Deprecated\inc\XMLgroup.h"
 				>
 			</File>
 			<File
@@ -704,11 +700,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLindex.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLnamespace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -728,11 +728,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
@@ -755,7 +755,7 @@
 			>
 		</Filter>
 		<File
-			RelativePath=".\test\testObject.hh"
+			RelativePath=".\test\ObjectTest.hh"
 			>
 		</File>
 	</Files>
