@@ -31,7 +31,7 @@ void testcountLiterals()
   return;
 }
 
-void xtestDNF()
+void testDNF()
   /*! 
     Test the DNF Structure 
    */
@@ -142,24 +142,25 @@ void testMult()
   TS_ASSERT(C==A);
 }  
 
-
 void testWeakDiv()
   /*!
     Test weak division algorithm
   */
 {
 
-  Algebra A;
-  A.setFunction("ac+ad+bc+bd+ae'");
-  Algebra B;
-  B.setFunction("a+b");
-  std::pair<Algebra,Algebra> X=A.algDiv(B);
-  // Check multiplication:
-  Algebra XY=X.first*B;
-  XY+=X.second;      
-  TS_ASSERT_EQUALS(XY.logicalEqual(A),0)
+  Algebra F;
+  F.setFunction("ad+abc+bcd");
+  Algebra P;
+  P.setFunction("a+bc");
+  std::pair<Algebra,Algebra> X=F.algDiv(P);
+  TS_ASSERT_EQUALS(X.first.display(),"d");
+  TS_ASSERT_EQUALS(X.second.display(),"abc");
+  //Multiply back up
+  Algebra XY=X.first*P;
+  XY+=X.second; 
+  TS_ASSERT_EQUALS(XY.logicalEqual(F),1)
   XY.makeDNF();
-  TS_ASSERT(A!=XY)
+  TS_ASSERT_EQUALS(F,XY)
 }
 
 void testComplementary()

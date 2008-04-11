@@ -74,7 +74,7 @@ Algebra::~Algebra()
 { }
 
 
-int
+bool
 Algebra::operator==(const Algebra& A) const
   /*!
     Equality operator
@@ -83,11 +83,11 @@ Algebra::operator==(const Algebra& A) const
   */
 {
   if (this==&A)
-    return 1;
-  return F==A.F;
+    return true;
+  return (F==A.F);
 }
 
-int
+bool
 Algebra::operator!=(const Algebra& A) const
   /*!
     Inequality operator
@@ -95,7 +95,7 @@ Algebra::operator!=(const Algebra& A) const
     \returns this!=A (via ==)
   */
 {
-  return (F==A.F) ? 0 : 1;
+  return (F!=A.F);
 }
 
 Algebra&

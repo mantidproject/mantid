@@ -63,8 +63,8 @@ class DLLExport Algebra
     /// Accessor
   const Acomp& getComp() const { return F; }  
 
-  int operator==(const Algebra&) const;
-  int operator!=(const Algebra&) const;
+  bool operator==(const Algebra&) const;
+  bool operator!=(const Algebra&) const;
   Algebra& operator+=(const Algebra&);
   Algebra& operator*=(const Algebra&);
   Algebra operator+(const Algebra&) const;
