@@ -127,7 +127,7 @@ message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) 
 message += ' (' 
 if failCount>0:
-    print str(failCount) + " failed of "
+    message += str(failCount) + " failed out of "
 message += str(testCount) + " tests)\n\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
