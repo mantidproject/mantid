@@ -120,6 +120,7 @@ private:
 namespace Units
 {
 
+/// Time of flight in microseconds
 class DLLExport TOF : public Unit
 {
 public:
@@ -138,6 +139,7 @@ public:
   ~TOF() {}
 };
 
+/// Wavelength in Angstrom
 class DLLExport Wavelength : public Unit
 {
 public:
@@ -156,6 +158,7 @@ public:
   ~Wavelength() {}
 };
 
+/// Energy in milli-electronvolts
 class DLLExport Energy : public Unit
 {
 public:
@@ -174,6 +177,7 @@ public:
   ~Energy() {}
 };
 
+/// d-Spacing in Angstrom
 class DLLExport dSpacing : public Unit
 {
 public:
@@ -192,6 +196,7 @@ public:
   ~dSpacing() {}
 };
 
+/// Momentum Transfer in Angstrom^-1
 class DLLExport MomentumTransfer : public Unit
 {
 public:
@@ -210,6 +215,7 @@ public:
   ~MomentumTransfer() {}
 };
 
+/// Momentum transfer squared in Angstrom^-2
 class DLLExport QSquared : public Unit
 {
 public:
@@ -228,6 +234,7 @@ public:
   ~QSquared() {}
 };
 
+/// Energy in milli-electronvolts
 class DLLExport DeltaE : public Unit
 {
 public:
@@ -246,6 +253,7 @@ public:
   ~DeltaE() {}
 };
 
+/// Energy transfer in units of wavenumber (cm^-1)
 class DLLExport DeltaE_inWavenumber : public Unit
 {
 public:
