@@ -10,14 +10,12 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
-#include "Vec3D.h"
-#include "Surface.h"
-#include "Quadratic.h"
-#include "Sphere.h"
-#include "Cone.h"
-#include "Cylinder.h"
+#include "../inc/IndexIterator.h"
+#include "../inc/Vec3D.h"
+#include "../inc/Quadratic.h"
+#include "../inc/Sphere.h"
+#include "../inc/Cone.h"
+#include "../inc/Cylinder.h"
 
 
 using namespace Mantid;

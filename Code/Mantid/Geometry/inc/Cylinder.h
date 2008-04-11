@@ -2,7 +2,7 @@
 #define Cylinder_h
 
 #include "MantidKernel/System.h"
-#include "Surface.h"
+#include "Quadratic.h"
 
 namespace Mantid
 {

@@ -31,9 +31,7 @@ void testcountLiterals()
   return;
 }
 
-//Test disabled as it takes too long
-// Causes long delay - infinite loop?
-void testDNF()
+void xtestDNF()
   /*! 
     Test the DNF Structure 
    */
@@ -45,7 +43,7 @@ void testDNF()
   Func.push_back("(a'b'c')+(a'b'c)+(a'bc')+(ab'c)+(abc')+(abc)");
   Func.push_back("a'b'c'+d'e'");
   // This test takes about 20 second on an old PC. [Note: the g' : g  cyclic problem]
-  Func.push_back("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
+  //Func.push_back("ab((c'(d+e+f')g'h'i')+(gj'(k+l')(m+n)))");
 
   std::vector<std::string>::const_iterator sv;
   for(sv=Func.begin();sv!=Func.end();sv++)

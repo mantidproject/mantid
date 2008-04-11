@@ -9,12 +9,10 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
-#include "Vec3D.h"
-#include "Surface.h"
-#include "Quadratic.h"
-#include "Sphere.h"
+#include "../inc/IndexIterator.h"
+#include "../inc/Vec3D.h"
+#include "../inc/Quadratic.h"
+#include "../inc/Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;

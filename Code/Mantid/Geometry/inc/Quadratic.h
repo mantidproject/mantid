@@ -1,6 +1,9 @@
 #ifndef Geometry_Quadratic_h
 #define Geometry_Quadratic_h
 
+#include "MantidKernel/System.h"
+#include "Surface.h"
+
 namespace Mantid
 {
 
