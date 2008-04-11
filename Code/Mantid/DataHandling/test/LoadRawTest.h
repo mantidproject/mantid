@@ -87,8 +87,8 @@ public:
     Mantid::Geometry::Detector *ptrDet103 = dynamic_cast<Mantid::Geometry::Detector*>(i.getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
-    TS_ASSERT_DELTA( ptrDet103->getPos().X(), -3.641,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.253,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().X(), -0.229,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 4.0199,0.01);
     
 
     //----------------------------------------------------------------------
