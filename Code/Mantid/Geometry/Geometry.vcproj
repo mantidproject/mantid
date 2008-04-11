@@ -274,6 +274,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Quadratic.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Quat.cpp"
 				>
 			</File>
@@ -388,11 +392,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -444,11 +448,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\inc\IDetector.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -516,6 +524,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\Quadratic.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\Quat.h"
 				>
 			</File>
@@ -528,11 +540,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\Deprecated\inc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
@@ -628,19 +640,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLattribute.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLattribute.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcollect.h"
+				RelativePath=".\auxinc\XMLattribute.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\XMLcollect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLcollect.h"
 				>
 			</File>
 			<File
@@ -660,15 +672,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgrid.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\XMLgrid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgridSupport.h"
+				RelativePath=".\Deprecated\inc\XMLgrid.h"
 				>
 			</File>
 			<File
@@ -676,11 +684,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgroup.h"
+				RelativePath=".\auxinc\XMLgridSupport.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLgroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLgroup.h"
 				>
 			</File>
 			<File
@@ -692,11 +704,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -728,11 +740,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLvector.h"
+				RelativePath=".\Deprecated\inc\XMLvector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLvector.h"
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 		</Filter>
