@@ -182,16 +182,18 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
     const double delta = 0.0;
     
     try {
-      // Get the sample-detector distance for this detector (in metres)
-      const double l2 = instrument.getDetector(i)->getDistance(samplePos);
+      // The sample-detector distance for this detector (in metres)
+      double l2;
+      // The scattering angle for this detector (in radians).
+      //     - this assumes the incident beam comes in along the z axis
+      double twoTheta;
+      // Get these two values
+      instrument.detectorLocation(i,l2,twoTheta);
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
         failedDetectorIndex = notFailed;
       }
-      // Get the scattering angle for this detector (in radians). Won't throw if getting l2 hasn't.
-      //     - this assumes the incident beam comes in along the z axis
-      const double twoTheta = instrument.getDetector(i)->getAzimuth(samplePos);
       
       // Convert the input unit to time-of-flight
       inputWS->XUnit()->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);

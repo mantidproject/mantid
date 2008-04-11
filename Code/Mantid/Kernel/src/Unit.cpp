@@ -211,7 +211,7 @@ DECLARE_UNIT(dSpacing)
 
 dSpacing::dSpacing() : Unit()
 {
-  const double factor = 2.0 * PhysicalConstants::pi;
+  const double factor = 2.0 * M_PI;
   addConversion("MomentumTransfer",factor,-1.0);
   addConversion("QSquared",(factor*factor),-2.0);
 }
@@ -256,7 +256,7 @@ DECLARE_UNIT(MomentumTransfer)
 MomentumTransfer::MomentumTransfer() : Unit()
 {
   addConversion("QSquared",1.0,2.0);
-  const double factor = 2.0 * PhysicalConstants::pi;
+  const double factor = 2.0 * M_PI;
   addConversion("dSpacing",factor,-1.0);
 }
 
@@ -264,7 +264,7 @@ void MomentumTransfer::toTOF(std::vector<double>& xdata, std::vector<double>& yd
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * PhysicalConstants::pi * PhysicalConstants::NeutronMass * (l1 + l2) 
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) 
                                * sin(twoTheta/2.0) ) / PhysicalConstants::h;
   
   // Now adjustments for the scale of units used
@@ -283,7 +283,7 @@ void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& 
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * PhysicalConstants::pi * PhysicalConstants::NeutronMass * (l1 + l2)
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
       * sin(twoTheta/2.0) ) / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
@@ -306,7 +306,7 @@ DECLARE_UNIT(QSquared)
 QSquared::QSquared() : Unit()
 {
   addConversion("MomentumTransfer",1.0,0.5);
-  const double factor = 2.0 * PhysicalConstants::pi;
+  const double factor = 2.0 * M_PI;
   addConversion("dSpacing",factor,-0.5);
 }
 
@@ -314,7 +314,7 @@ void QSquared::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * PhysicalConstants::pi * PhysicalConstants::NeutronMass * (l1 + l2)
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
       * sin(twoTheta/2.0) ) / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
@@ -333,7 +333,7 @@ void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, c
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * PhysicalConstants::pi * PhysicalConstants::NeutronMass * (l1 + l2) 
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) 
                                * sin(twoTheta/2.0) ) / PhysicalConstants::h;
   
   // Now adjustments for the scale of units used

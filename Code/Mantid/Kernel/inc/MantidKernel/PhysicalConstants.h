@@ -31,9 +31,6 @@ namespace Mantid
 */
 namespace PhysicalConstants
 {
-  /// Pi.
-  static const double pi = 3.14159265358979323846;
-
   /// Planck constant. Taken from <http://physics.nist.gov/cuu/Constants> on 31/10/2007.
   static const double h = 6.62606896e-34;
 

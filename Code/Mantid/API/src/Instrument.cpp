@@ -1,4 +1,5 @@
 #include "MantidAPI/Instrument.h"
+#include "V3D.h"
 #include "MantidKernel/Exception.h"
 #include <algorithm>
 
@@ -40,9 +41,10 @@ Geometry::ObjComponent* Instrument::getSamplePos()
 }
 
 /**	Gets a pointer to the requested detector
-* @param detector_id the requested detector Id
-* @returns a pointer to the Assembly of detectors
-*/
+ *  @param detector_id the requested detector ID
+ *  @returns a pointer to the Assembly of detectors
+ *  @throw NotFoundError If the detector ID is not found
+ */
 Geometry::IDetector* Instrument::getDetector(const int &detector_id)
 {
   std::map<int, Geometry::IDetector*>::iterator it;
@@ -55,6 +57,20 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id)
   }
 
 	return it->second;
+}
+
+/** Get the L2 and TwoTheta for the given detector
+ *  @param detector_id   The detector ID
+ *  @param l2            Returns the sample-detector distance
+ *  @param twoTheta      Returns the scattering angle for the given detector
+ *  @throw NotFoundError If the detector ID is not found
+ */
+void Instrument::detectorLocation(const int &detector_id, double &l2, double &twoTheta)
+{
+  Geometry::V3D detectorPosition = getDetector(detector_id)->getPos();
+  Geometry::V3D samplePosition = getSamplePos()->getPos();
+  l2 = detectorPosition.distance(samplePosition);
+  twoTheta = detectorPosition.zenith(samplePosition);
 }
 
 /**	Gets a pointer to the requested child component

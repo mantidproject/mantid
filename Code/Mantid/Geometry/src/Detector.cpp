@@ -41,14 +41,14 @@ int Detector::getID() const
 }
 
 // IDetector methods. Just pull in Component implementation
+V3D Detector::getPos() const
+{
+  return Component::getPos();
+}
+
 double Detector::getDistance(const Component& comp) const
 {
   return Component::getDistance(comp);
-}
-
-double Detector::getAzimuth(const Component& comp) const
-{
-  return Component::getAzimuth(comp);
 }
 
 } //Namespace Geometry

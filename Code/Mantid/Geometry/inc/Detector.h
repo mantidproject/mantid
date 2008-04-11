@@ -49,8 +49,8 @@ public:
 	int getID() const;
 	
 	// IDetector methods
+	V3D getPos() const;
 	double getDistance(const Component& comp) const;
-  double getAzimuth(const Component& comp) const;
 
 private:
 	/// The detector id

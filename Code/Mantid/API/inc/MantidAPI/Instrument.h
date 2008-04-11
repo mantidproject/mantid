@@ -58,6 +58,7 @@ public:
   Geometry::ObjComponent* getSource();
   Geometry::ObjComponent* getSamplePos();
   Geometry::IDetector* getDetector(const int &detector_id);
+  void detectorLocation(const int &detector_id, double &l2, double &twoTheta);
 
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have

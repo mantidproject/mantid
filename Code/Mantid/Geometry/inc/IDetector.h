@@ -15,6 +15,7 @@ namespace Geometry
 // Forward declaration
 //----------------------------------------------------------------------
 class Component;
+class V3D;
 
 /** Interface class for detector objects.
 
@@ -44,19 +45,15 @@ class Component;
 class DLLExport IDetector
 {
 public:
+  /// Get the absolute position of this detector
+  virtual V3D getPos() const = 0;
+  
   /** Get the distance of this detector object from another Component
    *  @param comp The component to give the distance to
    *  @return The distance
    */
   virtual double getDistance(const Component& comp) const = 0;
-  
-  /** Returns the polar azimuth angle between this detector and another Component.
-   *  Currently assumes that the z-axis points in the direction of the beam
-   *  @param comp The component to compute the angle to
-   *  @return The azimuth angle in radians
-   */
-  virtual double getAzimuth(const Component& comp) const  = 0;
-  
+    
   /// (Empty) Constructor
 	IDetector() {}
 	/// Virtual destructor

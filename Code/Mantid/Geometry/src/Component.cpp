@@ -1,6 +1,5 @@
 #include "Component.h"
 #include "Quat.h"
-//#include "MantidKernel\Exception.h"
 
 namespace Mantid
 {
@@ -10,10 +9,8 @@ namespace Geometry
 /*! Empty constructor
  *  Create a component with null parent
  */
-Component::Component()
+Component::Component() : name(), pos(), rot(), parent(NULL)
 {
-	name="";
-	parent=0;
 }
 
 /*! Constructor by value
@@ -216,18 +213,6 @@ const Quat& Component::getRelativeRot() const
 double Component::getDistance(const Component& comp) const
 {
 	return getPos().distance(comp.getPos());
-}
-
-/** Returns the polar aZimuth angle between this detector and another Component.
- *  Currently assumes that the z-axis points in the direction of the beam
- *  @param comp The component to compute the angle to
- *  @return The azimuth angle in radians
- */
-double Component::getAzimuth(const Component& comp) const
-{
-	double R=getDistance(comp);
-	double offset=(this->getPos()-comp.getPos())[2];
-	return acos(offset/R);
 }
 
 /** Prints a text representation of itself

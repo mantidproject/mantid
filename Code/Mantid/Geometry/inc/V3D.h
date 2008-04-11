@@ -18,7 +18,7 @@ namespace Mantid
     @author Laurent C Chapon, ISIS, RAL
     @date 09/10/2007
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -92,8 +92,10 @@ namespace Mantid
       double scalar_prod(const V3D&) const;
       // Cross product 
       V3D cross_prod(const V3D&) const;
-      // Distance between two points defined as vectors
+      // Distance (R) between two points defined as vectors
       double distance(const V3D&) const;
+      // Zenith (theta) angle between this and another vector
+      double zenith(const V3D&) const;
       // Send to a stream
       void printSelf(std::ostream&) const;
       void read(std::istream&);

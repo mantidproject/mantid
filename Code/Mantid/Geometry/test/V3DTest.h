@@ -8,7 +8,7 @@
 
 #include "../inc/V3D.h" 
 
-class testV3D : public CxxTest::TestSuite
+class V3DTest : public CxxTest::TestSuite
 {
 private:
 
@@ -274,15 +274,34 @@ public:
 		double d=a.distance(b);
 		TS_ASSERT_EQUALS(d,2.0*sqrt(3.0));
 	}
+	
+	void testZenith()
+	{
+	  b(0.0,0.0,0.0);
+	  a(9.9,7.6,0.0);
+	  TS_ASSERT_EQUALS( a.zenith(a), 0.0 )
+	  TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 )
+	  a(-1.1,0.0,0.0);
+    TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 )
+    a(0.0,0.0,1.0);
+    TS_ASSERT_EQUALS( a.zenith(b), 0.0 )
+    a(1.0,0.0,1.0);
+    TS_ASSERT_DELTA( a.zenith(b), M_PI/4.0, 0.0001 )
+    a(1.0,0.0,-1.0);
+    TS_ASSERT_DELTA( a.zenith(b), 3.0*M_PI/4.0, 0.0001 )
+	}
 
   void testSpherical()
   {
-    double r=3,theta=2,phi=1;
+    double r=3,theta=45.0,phi=45.0;
     a(0.0,0.0,0.0);
     b(0.0,0.0,0.0);
     b.spherical(r,theta,phi);
     double d=a.distance(b);
 		TS_ASSERT_DELTA(d,r,0.0001);
+		TS_ASSERT_DELTA(b.X(), 1.5, 0.0001 )
+    TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001 )
+    TS_ASSERT_DELTA(b.Z(), 3.0/sqrt(2.0), 0.0001 )
   }
 	
 };

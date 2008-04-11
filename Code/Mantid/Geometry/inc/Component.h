@@ -99,8 +99,6 @@ namespace Mantid
       const Quat& getRelativeRot() const;
       //! Get the distance to another component
       double getDistance(const Component&) const;
-      //! Get the azimuth angle in radians 
-      double getAzimuth(const Component&) const;
       void printSelf(std::ostream&) const;
     private:
       //! Name of the component

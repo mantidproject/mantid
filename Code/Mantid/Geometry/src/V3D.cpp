@@ -29,14 +29,14 @@ V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
   /**
     Sets the vector position based on spherical coordinates
     \param R :: The R value
-    \param theta :: The theta value
-    \param phi :: The phi value
+    \param theta :: The theta value (in degrees)
+    \param phi :: The phi value (in degrees)
   */
 void V3D::spherical(double R, double theta, double phi)
 {
 	double deg2rad=M_PI/180.0;
-	z=R*sin(theta*deg2rad);
-	double ct=cos(theta*deg2rad);
+	z=R*cos(theta*deg2rad);
+	double ct=sin(theta*deg2rad);
 	x=R*ct*cos(phi*deg2rad);
 	y=R*ct*sin(phi*deg2rad);
 }
@@ -393,7 +393,23 @@ V3D::distance(const V3D& v) const
   return dif.norm();
 }
 
-
+/** Calculates the zenith angle (theta) of this vector with respect to another
+ *  \param v The other vector
+ *  \return The azimuthal angle in radians (0 < theta < pi)
+ */
+double V3D::zenith(const V3D& v) const
+{
+  double R = distance(v);
+  double zOffset = z - v.z;
+  if ( R )
+  {
+    return acos( zOffset / R );
+  }
+  else
+  {
+    return 0.0;
+  }
+}
 
 int
 V3D::reBase(const V3D& A,const V3D&B,const V3D& C) 
