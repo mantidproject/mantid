@@ -73,7 +73,7 @@ public:
   /// mark a Component which has already been added to the Instrument class
   /// to be a Detector component, and add it to a detector cache for possible
   /// later retrievel
-  void markAsDetector(Geometry::Detector*);
+  void markAsDetector(Geometry::IDetector*);
 
 private:
   /// Private copy assignment operator

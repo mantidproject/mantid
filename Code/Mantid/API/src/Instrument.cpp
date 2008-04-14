@@ -12,12 +12,12 @@ Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
 Instrument::Instrument() : Geometry::CompAssembly(),
-                           _sourceCache(0),_samplePosCache(0)
+                           _detectorCache(),_sourceCache(0),_samplePosCache(0)
 {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
-                                                  _sourceCache(0),_samplePosCache(0)
+                           _detectorCache(),_sourceCache(0),_samplePosCache(0)
 {}
 
 /**	Gets a pointer to the source
@@ -63,10 +63,11 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id)
  *  @param detector_id   The detector ID
  *  @param l2            Returns the sample-detector distance
  *  @param twoTheta      Returns the scattering angle for the given detector
- *  @throw NotFoundError If the detector ID is not found
+ *  @throw NotFoundError If the detector ID is not found or the sample has not been set
  */
 void Instrument::detectorLocation(const int &detector_id, double &l2, double &twoTheta)
 {
+  if ( !_samplePosCache ) throw Kernel::Exception::NotFoundError("Instrument: Sample position has not been set","");
   Geometry::V3D detectorPosition = getDetector(detector_id)->getPos();
   Geometry::V3D samplePosition = getSamplePos()->getPos();
   l2 = detectorPosition.distance(samplePosition);
@@ -137,9 +138,9 @@ void Instrument::markAsSource(Geometry::ObjComponent* comp)
 *
 * @param det Component to be marked (stored for later retrievel) as a detector Component
 */
-void Instrument::markAsDetector(Geometry::Detector* det)
+void Instrument::markAsDetector(Geometry::IDetector* det)
 {
-  if ( !_detectorCache.insert( std::map<int, Geometry::Detector*>::value_type(det->getID(), det) ).second )
+  if ( !_detectorCache.insert( std::map<int, Geometry::IDetector*>::value_type(det->getID(), det) ).second )
     g_log.warning("Not successful in adding Detector to _detectorCache.");
 }
 
