@@ -46,9 +46,9 @@ public:
 	virtual ~Detector();
 	virtual Component* clone() const {return new Detector(*this);}
 	void setID(int);
-	int getID() const;
 	
 	// IDetector methods
+  int getID() const;
 	V3D getPos() const;
 	double getDistance(const Component& comp) const;
 

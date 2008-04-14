@@ -45,6 +45,8 @@ class V3D;
 class DLLExport IDetector
 {
 public:
+  virtual int getID() const = 0;
+  
   /// Get the absolute position of this detector
   virtual V3D getPos() const = 0;
   
