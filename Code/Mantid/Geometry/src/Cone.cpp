@@ -313,7 +313,10 @@ Cone::side(const Geometry::Vec3D& R) const
   const Geometry::Vec3D cR = R-Centre;
   double rptAngle=cR.dotProd(Normal);
   rptAngle*=rptAngle/cR.dotProd(cR);
-  return (sqrt(rptAngle)>cangle) ? 1 : -1;  
+  const double eqn(sqrt(rptAngle));
+  if (fabs(eqn-cangle)<CTolerance)
+    return 0;
+  return (eqn>cangle) ? 1 : -1;  
 }
 
 int
@@ -325,12 +328,14 @@ Cone::onSurface(const Geometry::Vec3D& R) const
      since angle calcuation calcuates an angle.
      We need a distance for tolerance!)
      \param R :: Point to check
-     \return 1 if on surface and -1 if not no surface
+     \return 1 if on surface and 0 if not not on surface
   */
   const Geometry::Vec3D cR = R-Centre;
   double rptAngle=cR.dotProd(Normal);
   rptAngle*=rptAngle/cR.dotProd(cR);
-  return (sqrt(rptAngle)>cangle) ? 1 : -1;  
+  const double eqn(sqrt(rptAngle));
+  
+  return (fabs(eqn-cangle)>CTolerance) ? 0 : 1;  
 }
 
 void

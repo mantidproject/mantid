@@ -152,11 +152,10 @@ Sphere::side(const Geometry::Vec3D& Pt) const
   */
 {
   const Geometry::Vec3D Xv=Pt-Centre;
-  if (onSurface(Pt))
-  {
+  const double R2(Xv.dotProd(Xv));
+  if (fabs(R2-Radius*Radius)<STolerance*STolerance)
     return 0;
-  }
-  return (Xv.dotProd(Xv)>Radius*Radius) ? 1 : -1;
+  return (R2>Radius*Radius) ? 1 : -1;
 }
 
 int

@@ -38,6 +38,8 @@ def getSharedObjects(listCpps, env) :
     
 def collectIncludes(start, dest):
 	try:
+                print dest
+                print os.path.abspath(dest)
 		shutil.rmtree(os.path.abspath(dest))
 	except:
 		print "collectIncludes: could not delete old folder\n"
@@ -65,6 +67,7 @@ def collectIncludes(start, dest):
 		while (len(dirpath)):
 			item=dirpath.pop(0)
 			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
+                                print "path == ",os.path.abspath(path + '/' + item)
 				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
 
 
