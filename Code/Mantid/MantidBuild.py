@@ -37,17 +37,20 @@ def getSharedObjects(listCpps, env) :
     return listSharedObjects
     
 def collectIncludes(start, dest):
-	try:
-                print dest
-                print os.path.abspath(dest)
-		shutil.rmtree(os.path.abspath(dest))
-	except:
-		print "collectIncludes: could not delete old folder\n"
-	
+	#check that the directory exists and delete it and everthing beneath it if it does.
+	if (os.path.isdir(os.path.abspath(dest))):
+		try:
+			shutil.rmtree(os.path.abspath(dest))
+		except:
+			print "collectIncludes: could not delete old folder\n"
+		#put the base destination directory back in
+		os.mkdir(dest)
+					
 	uppath=os.path.abspath(start)
 	dirpath=os.listdir(uppath)
 	incpaths = []
 	
+	#loop over all the subdirectorires of the start looking for projects with an inc directory
 	while(len(dirpath)):
 		try:
 			item=dirpath.pop(0)
@@ -67,7 +70,7 @@ def collectIncludes(start, dest):
 		while (len(dirpath)):
 			item=dirpath.pop(0)
 			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
-                                print "path == ",os.path.abspath(path + '/' + item)
+				print "Collecting Includes: ",os.path.abspath(path + '/' + item)," -> ", dest + '/' + item
 				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
 
 
