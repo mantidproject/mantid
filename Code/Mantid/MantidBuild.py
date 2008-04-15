@@ -2,6 +2,7 @@ import os
 import platform
 import sys
 import shutil
+import re
 from socket import gethostname
 
 def procHeaderPath(ln,keyname,out):
@@ -42,7 +43,7 @@ def collectIncludes(start, dest):
 		try:
 			shutil.rmtree(os.path.abspath(dest))
 		except:
-			print "collectIncludes: could not delete old folder\n"
+			print "collectIncludes: could not delete old folder ",os.path.abspath(dest),"\n"
 		
 		
 	#put the base destination directory back in, also add it for the first time
@@ -74,8 +75,23 @@ def collectIncludes(start, dest):
 			item=dirpath.pop(0)
 			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
 				#print "Collecting Includes: ",os.path.abspath(path + '/' + item)," -> ", dest + '/' + item
-				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
+				copyTreeWithRe(os.path.abspath(path + '/' + item), dest + '/' + item,'.*\.h')
 
 
+def copyTreeWithRe(source, dest, pattern):
+	#first make this directory
+	os.mkdir(os.path.abspath(dest))
+	
+	regex = re.compile(pattern)
+	allFiles=os.listdir(source)
+	for file in allFiles:
+		if (os.path.isdir(os.path.abspath(file)) and (not file.endswith('svn'))):
+			#this is a directory - recurse
+			copyTreeWithRe(source + '/' +  file,dest + '/' +  file, pattern);
+		if pattern != "":
+			if regex.search(file):
+				shutil.copy2(source + '/' +  file,dest + '/' +  file)
+		
+	
 
 
