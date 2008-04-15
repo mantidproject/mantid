@@ -5,8 +5,11 @@ namespace Mantid
 namespace Geometry
 {
 
+// Get a reference to the logger
+Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
+
 ///Constructor
-Detector::Detector() : ObjComponent(), IDetector(), id(0)
+Detector::Detector() : ObjComponent(), IDetector(), m_id(0), m_isDead(false)
 {
 }
 
@@ -15,7 +18,7 @@ Detector::Detector() : ObjComponent(), IDetector(), id(0)
  *  @param reference The parent component
  */
 Detector::Detector(const std::string& n, Component* reference) : 
-  ObjComponent(n,reference), IDetector(), id(0)
+  ObjComponent(n,reference), IDetector(), m_id(0), m_isDead(false)
 {
 }
 
@@ -29,7 +32,7 @@ Detector::~Detector()
  */
 void Detector::setID(int det_id)
 {
-	id=det_id;
+	m_id=det_id;
 }
 
 /** Gets the detector id
@@ -37,7 +40,7 @@ void Detector::setID(int det_id)
  */
 int Detector::getID() const
 {
-	return id;
+	return m_id;
 }
 
 // IDetector methods. Just pull in Component implementation
@@ -49,6 +52,17 @@ V3D Detector::getPos() const
 double Detector::getDistance(const Component& comp) const
 {
   return Component::getDistance(comp);
+}
+
+bool Detector::isDead() const
+{
+  return m_isDead;
+}
+
+void Detector::markDead()
+{
+  if ( !m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead.";
+  m_isDead = true;
 }
 
 } //Namespace Geometry

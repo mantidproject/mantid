@@ -50,6 +50,17 @@ public:
 		Detector det;
 		TS_ASSERT_EQUALS(det.type(),"DetectorComponent");
 	}
+	
+	void testDead()
+	{
+	  Detector det;
+	  TS_ASSERT( ! det.isDead() )
+	  TS_ASSERT_THROWS_NOTHING( det.markDead() )
+    TS_ASSERT( det.isDead() )
+    // Re-flagging as dead doesn't throw, just prints a warning
+    TS_ASSERT_THROWS_NOTHING( det.markDead() )
+    TS_ASSERT( det.isDead() )	  
+	}
 };
 
 #endif

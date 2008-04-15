@@ -1,6 +1,9 @@
 #ifndef MANTID_GEOMETRY_DETECTOR_H_
 #define MANTID_GEOMETRY_DETECTOR_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "IDetector.h"
 #include "ObjComponent.h"
 #include <string>
@@ -9,6 +12,7 @@ namespace Mantid
 {
 namespace Geometry
 {
+
 /** An extension of the ObjectComponent class to add a detector id.
  
   @class Detector
@@ -51,10 +55,17 @@ public:
   int getID() const;
 	V3D getPos() const;
 	double getDistance(const Component& comp) const;
+	bool isDead() const;
+	void markDead();
 
 private:
 	/// The detector id
-	int id;
+	int m_id;
+	/// Flags if the detector is dead
+	bool m_isDead;
+	
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 } // namespace Geometry

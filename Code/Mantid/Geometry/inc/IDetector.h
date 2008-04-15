@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -45,6 +46,7 @@ class V3D;
 class DLLExport IDetector
 {
 public:
+  /// Get the detector ID
   virtual int getID() const = 0;
   
   /// Get the absolute position of this detector
@@ -55,7 +57,12 @@ public:
    *  @return The distance
    */
   virtual double getDistance(const Component& comp) const = 0;
-    
+  
+  /// Indicates whether the detector is to be regarded as dead
+  virtual bool isDead() const = 0;
+  /// Flag the detector as dead
+  virtual void markDead() = 0;
+  
   /// (Empty) Constructor
 	IDetector() {}
 	/// Virtual destructor
