@@ -43,7 +43,10 @@ def collectIncludes(start, dest):
 			shutil.rmtree(os.path.abspath(dest))
 		except:
 			print "collectIncludes: could not delete old folder\n"
-		#put the base destination directory back in
+		
+		
+	#put the base destination directory back in, also add it for the first time
+	if (not os.path.isdir(os.path.abspath(dest))):
 		os.mkdir(dest)
 					
 	uppath=os.path.abspath(start)
@@ -70,7 +73,7 @@ def collectIncludes(start, dest):
 		while (len(dirpath)):
 			item=dirpath.pop(0)
 			if (os.path.isdir(path + '/' + item) and(item[0] != '.')):
-				print "Collecting Includes: ",os.path.abspath(path + '/' + item)," -> ", dest + '/' + item
+				#print "Collecting Includes: ",os.path.abspath(path + '/' + item)," -> ", dest + '/' + item
 				shutil.copytree(os.path.abspath(path + '/' + item), dest + '/' + item)
 
 
