@@ -160,8 +160,9 @@ while(len(dirpath)):
 	except:
 		pass
 
-if os.name != 'nt':
-	MantidBuild.collectIncludes('.', 'includes')
+
+#Collect the includes into a single directory
+MantidBuild.collectIncludes('.', 'includes')
 
 libDirList.append(os.path.abspath('./Bin/Shared'))
 
@@ -183,7 +184,6 @@ env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
 env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
-
 
 Export('env')
 
@@ -244,7 +244,7 @@ env.Install('Bin/Shared', ret['shared'])
 
 skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest):
-	print 'Building Tests.  Specify -Q "skiptest=1" to skip the tests'
+	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
 	# tests
 	if os.name == 'nt':
 		ret = SConscript(['Build/Tests/SConscript'])
