@@ -44,9 +44,9 @@ public:
   ///virtual destructor
   virtual ~HelloWorldAlgorithm() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "HelloWorldAlgorithm";};
+      virtual const std::string name() { return "HelloWorldAlgorithm";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int const { return (1);};
+      virtual const int { return (1);}
 
   ///Initialisation code
   void init() {  }
