@@ -10,7 +10,7 @@ namespace Algorithms
 {
 
 // Register with the algorithm factory
-DECLARE_ALGORITHM(ConvertUnits)
+	DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,ConvertUnits)
 
 using namespace Kernel;
 using namespace API;

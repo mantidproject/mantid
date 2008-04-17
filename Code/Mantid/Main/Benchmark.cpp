@@ -127,7 +127,7 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   AnalysisDataService::Instance().add("test_in12", work_in4);
 
   
-  IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("Plus", "");
+  IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("Plus", "",1);
 
   //alg.initialize();
   alg->setPropertyValue("InputWorkspace_1","test_in11");

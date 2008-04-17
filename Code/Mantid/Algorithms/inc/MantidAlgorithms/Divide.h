@@ -62,9 +62,9 @@ namespace Mantid
       /// Destructor
       virtual ~Divide() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Divide";};
+      virtual const std::string name() const { return "Divide";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const std::string version() const { return "1";};
+      virtual const int version() const { return (1);}
 
     private:
       // Overridden BinaryOperation methods

@@ -85,6 +85,12 @@ public:
     subscribe(className, new Instantiator<C, Base>);
   }
   
+  template <class C> 
+  void subscribe(const std::string& className, const int& version)
+  {
+    subscribe(className, new Instantiator<C, Base>);
+  }
+
   /// Registers the instantiator for the given class with the DynamicFactory.
   /// The DynamicFactory takes ownership of the instantiator and deletes
   /// it when it's no longer used.
@@ -102,7 +108,7 @@ public:
     else
     {
       delete pAbstractFactory;
-      throw std::runtime_error(className + "is already registered.\n");
+      throw std::runtime_error(className + " is already registered.\n");
     }
   }
   

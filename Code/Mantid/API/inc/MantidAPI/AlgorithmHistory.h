@@ -46,7 +46,7 @@ namespace Mantid
       /// The date-and-time will be stored as the ctime time_t type
       typedef time_t dateAndTime;
       AlgorithmHistory();
-      AlgorithmHistory(const std::string&, const std::string&, 
+      AlgorithmHistory(const std::string&, const int&, 
         const dateAndTime&, const double&,
         const std::vector<AlgorithmParameter>&);
       virtual ~AlgorithmHistory();
@@ -54,11 +54,11 @@ namespace Mantid
       AlgorithmHistory(const AlgorithmHistory&);
       // get functions
       /// get name of algorithm in history const
-      const std::string& name()const {return m_name;};
+      const std::string& name()const {return m_name;}
       /// get version number of algorithm in history const
-      const std::string& version()const {return m_version;};
+      const int& version()const {return m_version;}
       /// get parameter list of algorithm in history const
-      const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;};
+      const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;}
       /// print contents of object
       void printSelf(std::ostream&,const int = 0)const;
 
@@ -66,7 +66,7 @@ namespace Mantid
       /// The name of the Algorithm
       std::string m_name;
       /// The version of the algorithm
-      std::string m_version;
+      int m_version;
       /// The execution date of the algorithm
       dateAndTime m_executionDate;
       /// The execution duration of the algorithm

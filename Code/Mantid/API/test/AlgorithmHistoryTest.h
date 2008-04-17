@@ -17,7 +17,7 @@ public:
   void testPopulate()
   {
     std::string correctOutput = "Name : testalg\n";
-    correctOutput = correctOutput + "Version: version 1\n";
+    correctOutput = correctOutput + "Version: 1\n";
     correctOutput = correctOutput + "Execution Date: 2008-Feb-29 09:54:49\n";
     correctOutput = correctOutput + "Execution Duration: 14 seconds\n";
     correctOutput = correctOutput + "Parameters:\n";
@@ -54,7 +54,7 @@ public:
     aps.push_back(AlgorithmParameter("arg1_param","20","argument",true,Mantid::Kernel::Direction::Input));
     aps.push_back(AlgorithmParameter("arg2_param","23","argument",true,Mantid::Kernel::Direction::InOut));
 
-    AlgorithmHistory AH("testalg","version 1",execTime,14.0,aps);
+    AlgorithmHistory AH("testalg",1,execTime,14.0,aps);
     //dump output to sting
     std::ostringstream output;
     output.exceptions( std::ios::failbit | std::ios::badbit );

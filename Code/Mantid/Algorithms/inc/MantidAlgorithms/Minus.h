@@ -62,9 +62,9 @@ namespace Mantid
       /// Destructor
       virtual ~Minus() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Minus";};
+      virtual const std::string name() const { return "Minus";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const std::string version() const { return "1";};
+      virtual const int version() const { return 1;}
 
     private:
       // Overridden BinaryOperation methods

@@ -36,9 +36,9 @@ namespace Mantid
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
-    Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName) const
+    Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
     {
-      return AlgorithmFactory::Instance().create(algName);                // Throws on fail:
+      return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
 
     /** Creates an instance of an algorithm
@@ -48,11 +48,11 @@ namespace Mantid
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed
     */
-    Algorithm_sptr AlgorithmManagerImpl::create(const std::string& algName)
+    Algorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version)
     {
       try
       {
-        regAlg.push_back(AlgorithmFactory::Instance().create(algName));      // Throws on fail:	   
+        regAlg.push_back(AlgorithmFactory::Instance().create(algName,version));      // Throws on fail:	   
         regAlg.back()->initialize();
       }
       catch(std::runtime_error& ex)

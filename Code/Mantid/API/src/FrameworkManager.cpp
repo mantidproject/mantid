@@ -62,9 +62,9 @@ void FrameworkManagerImpl::clear()
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  */
-IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName)
+IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, const int& version)
 { 
-   IAlgorithm* alg = AlgorithmManager::Instance().create(algName).get();
+   IAlgorithm* alg = AlgorithmManager::Instance().create(algName,version).get();
    return alg;
 }
 
@@ -78,10 +78,10 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName)
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  *  @throw std::invalid_argument Thrown if properties string is ill-formed
  */ 
-IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
+IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,const std::string& propertiesArray, const int& version)
 {
   // Use the previous method to create the algorithm
-  IAlgorithm *alg = AlgorithmManager::Instance().create(algName).get();//createAlgorithm(algName);
+  IAlgorithm *alg = AlgorithmManager::Instance().create(algName,version).get();//createAlgorithm(algName);
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	

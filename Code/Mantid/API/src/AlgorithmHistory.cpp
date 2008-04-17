@@ -10,7 +10,7 @@ namespace Mantid
   {
 
     /// Constructor
-    AlgorithmHistory::AlgorithmHistory(const std::string& name, const std::string& version, 
+    AlgorithmHistory::AlgorithmHistory(const std::string& name, const int& version, 
       const dateAndTime& start, const double& duration,
       const std::vector<AlgorithmParameter>& parameters):
     m_name(name),

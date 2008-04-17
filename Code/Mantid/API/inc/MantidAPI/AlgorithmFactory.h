@@ -49,6 +49,30 @@ class Algorithm;
 class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
   {
   public:
+	  boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
+
+	  template <class C>
+	  void subscribe(const std::string& className)
+	  {
+		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
+		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
+		  int version = tempAlg->version();
+		  delete newI;
+		  typename versionMap::iterator it = _vmap.find(className);
+		  if (!className.empty())
+		  {
+			  if( it == _vmap.end())
+				  _vmap[className] = version;	
+			  else
+			  {
+				  if(version == it->second )
+					  throw std::runtime_error("cannot register algorithm "+ className + " twice with the same version\n");
+				  if(version > it->second)
+					  _vmap[className]=version;
+			  }  
+			  DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
+		  }
+	  }
 
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
@@ -61,9 +85,14 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
 	///Private Destructor
 	virtual ~AlgorithmFactoryImpl();
-
+	std::string createName(const std::string&, const int&)const;
 	///static reference to the logger class
 	Kernel::Logger& g_log;
+  
+	/// A typedef for the map of algorithm versions
+	 typedef std::map<std::string, int> versionMap;
+	 /// The map holding the registered class names and their highest versions
+	 versionMap _vmap;
 
   };
   

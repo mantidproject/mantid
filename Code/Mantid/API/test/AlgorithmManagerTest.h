@@ -15,7 +15,36 @@ public:
   AlgTest() : Algorithm() {}
   virtual ~AlgTest() {}
   void init() { }
-  void exec() {  }
+  void exec() { }
+  virtual const std::string name() const {return "AlgTest";}:
+  virtual const int version() const {return(1);)}:
+
+};
+
+class AlgTestFail : public Algorithm
+{
+public:
+
+  AlgTestFail() : Algorithm() {}
+  virtual ~AlgTestFail() {}
+  void init() { }
+  void exec() { }
+  virtual const std::string name() const {return "AlgTest";}:
+  virtual const int version() const {return(1);)}:
+
+};
+
+class AlgTestPass : public Algorithm
+{
+public:
+
+  AlgTestPass() : Algorithm() {}
+  virtual ~AlgTestPass() {}
+  void init() { }
+  void exec() { }
+  virtual const std::string name() const {return "AlgTest";}:
+  virtual const int version() const {return(2);)}:
+
 };
 
 class AlgTestSecond : public Algorithm
@@ -26,6 +55,9 @@ public:
   virtual ~AlgTestSecond() {}
   void init() { }
   void exec() { }
+  virtual const std::string name() const {return "AlgTestSecond";}:
+  virtual const int version() const {return(1);)}:
+
 };
 
 DECLARE_ALGORITHM(AlgTest)
@@ -40,12 +72,30 @@ public:
 
   }
 
+  void testVersionFail()
+  {
+    AlgorithmManager::Instance().clear();
+    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::AlgTest");
+	TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>("AlgorithmManager::AlgTestFail",std::runtime_error);
+    AlgorithmManager::Instance().clear();
+  }
+
+ void testVersionPass()
+  {
+    AlgorithmManager::Instance().clear();
+    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::AlgTest");
+	TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>("AlgorithmManager::AlgTestPass");
+    AlgorithmManager::Instance().clear();
+  }
+
   void testInstance()
   {
     // Not really much to test
     //AlgorithmManager *tester = AlgorithmManager::Instance();
     //TS_ASSERT_EQUALS( manager, tester);
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
+    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error )
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
   }
 

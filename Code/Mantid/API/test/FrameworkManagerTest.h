@@ -16,7 +16,7 @@ public:
   ToyAlgorithm2() {}
   virtual ~ToyAlgorithm2() {}
   virtual const std::string name() const { return "ToyAlgorithm2";};///< Algorithm's name for identification
-  virtual const std::string version() const { return "1";};///< Algorithm's version for identification
+  virtual const std::string version() const { return 1;};///< Algorithm's version for identification
   void init()
   { declareProperty("Prop","");
     declareProperty("P2","");
@@ -43,6 +43,7 @@ public:
   void testcreateAlgorithm()
   {
     TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2") )
+	TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","",3), std::runtime_error )
     TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("aaaaaa"), std::runtime_error )
   }
 
