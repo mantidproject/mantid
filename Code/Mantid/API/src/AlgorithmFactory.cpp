@@ -52,7 +52,7 @@ namespace Mantid
 			}
 			try
 			{
-				return(DynamicFactory<Algorithm>::create(createName(className,local_version)));
+        return(Kernel::DynamicFactory<Algorithm>::create(createName(className,local_version)));
 			}
 			catch(Kernel::Exception::NotFoundError& ex)
 			{
@@ -68,11 +68,19 @@ namespace Mantid
 			}
 		}
 
+    /** Extract the name of an algorithm
+    * @param alg the Algrorithm to use
+    * @returns the name of the algroithm
+    */
     const std::string AlgorithmFactoryImpl::extractAlgName(const boost::shared_ptr<Algorithm> alg) const
     {
       return alg->name();
     }
 
+    /** Extract the version of an algorithm
+    * @param alg the Algrorithm to use
+    * @returns the version of the algroithm
+    */
     const int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const
     {
       return alg->version();
