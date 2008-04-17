@@ -55,8 +55,9 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	  {
 		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
 		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
-		  const int version = tempAlg->version();
-      const std::string className = tempAlg->name();
+      
+		  const int version = extractAlgVersion(tempAlg);
+      const std::string className = extractAlgName(tempAlg);
 		  delete newI;
 		  typename versionMap::iterator it = _vmap.find(className);
 		  if (!className.empty())
@@ -76,6 +77,9 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
+
+  const std::string extractAlgName(const boost::shared_ptr<Algorithm> alg) const;
+  const int extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const;
 	
 	/// Private Constructor for singleton class
 	AlgorithmFactoryImpl();	

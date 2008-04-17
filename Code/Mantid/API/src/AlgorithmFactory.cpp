@@ -68,7 +68,15 @@ namespace Mantid
 			}
 		}
 
+    const std::string AlgorithmFactoryImpl::extractAlgName(const boost::shared_ptr<Algorithm> alg) const
+    {
+      return alg->name();
+    }
 
+    const int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const
+    {
+      return alg->version();
+    }
 
 
 	} // namespace API
