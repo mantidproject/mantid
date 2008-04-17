@@ -42,11 +42,11 @@ public:
   ///no arg constructor
   HelloWorldAlgorithm() : API::Algorithm() {}
   ///virtual destructor
-  virtual ~HelloWorldAlgorithm() {};
+  virtual ~HelloWorldAlgorithm() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() { return "HelloWorldAlgorithm";}
+      virtual const std::string name() const { return "HelloWorldAlgorithm";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() { return (1);}
+      virtual const int version()const { return (1);}
 
   ///Initialisation code
   void init() {  }
