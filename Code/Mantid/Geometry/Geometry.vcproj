@@ -200,6 +200,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DetectorGroup.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\General.cpp"
 				>
 			</File>
@@ -396,11 +400,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -440,7 +444,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\CynlinderTest.h"
+				RelativePath=".\test\CylinderTest.h"
 				>
 			</File>
 			<File
@@ -449,6 +453,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\Detector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\DetectorGroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DetectorGroupTest.h"
 				>
 			</File>
 			<File
@@ -472,11 +484,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\Deprecated\inc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -640,11 +652,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLattribute.h"
+				RelativePath=".\Deprecated\inc\XMLattribute.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLattribute.h"
+				RelativePath=".\auxinc\XMLattribute.h"
 				>
 			</File>
 			<File
@@ -656,11 +668,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcomment.h"
+				RelativePath=".\auxinc\XMLcomment.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomment.h"
+				RelativePath=".\Deprecated\inc\XMLcomment.h"
 				>
 			</File>
 			<File
@@ -672,11 +684,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgrid.h"
+				RelativePath=".\Deprecated\inc\XMLgrid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgrid.h"
+				RelativePath=".\auxinc\XMLgrid.h"
 				>
 			</File>
 			<File
@@ -688,15 +700,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgroup.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLgroup.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLindex.h"
+				RelativePath=".\auxinc\XMLgroup.h"
 				>
 			</File>
 			<File
@@ -704,11 +712,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLindex.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -728,11 +740,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File
@@ -740,11 +752,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLvector.h"
+				RelativePath=".\Deprecated\inc\XMLvector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLvector.h"
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 		</Filter>
