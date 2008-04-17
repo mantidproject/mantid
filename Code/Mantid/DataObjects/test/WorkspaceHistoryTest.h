@@ -19,7 +19,7 @@ public:
   fill2d() : Algorithm() {}
   virtual ~fill2d() {}
   const std::string name() const { return "fill2d";} 
-  const std::string version() const { return "1";} 
+  const int version() const { return 1;} 
 
   void init()
   { 
@@ -52,7 +52,7 @@ public:
   add2d() : Algorithm() {}
   virtual ~add2d() {}
   const std::string name() const { return "add2d";} 
-  const std::string version() const { return "1";} 
+  const int version() const { return 1;} 
 
   void init()
   { 
@@ -119,7 +119,7 @@ public:
     const std::vector<AlgorithmHistory>& A_AH = A_WH.getAlgorithms();
     TS_ASSERT_EQUALS( A_AH.size(), 1);
     TS_ASSERT_EQUALS( "fill2d", A_AH[0].name());
-    TS_ASSERT_EQUALS( "1", A_AH[0].version());
+    TS_ASSERT_EQUALS( 1, A_AH[0].version());
     TS_ASSERT_THROWS_NOTHING(const std::vector<AlgorithmParameter>& A_AP = A_AH[0].getParameters());    
     const std::vector<AlgorithmParameter>& A_AP = A_AH[0].getParameters();
     TS_ASSERT_EQUALS(A_AP.size(), 3);
@@ -152,7 +152,7 @@ public:
     const std::vector<AlgorithmHistory>& B_AH = B_WH.getAlgorithms();
     TS_ASSERT_EQUALS( B_AH.size(), 1);
     TS_ASSERT_EQUALS( "fill2d", B_AH[0].name());
-    TS_ASSERT_EQUALS( "1", B_AH[0].version());
+    TS_ASSERT_EQUALS( 1, B_AH[0].version());
     TS_ASSERT_THROWS_NOTHING(const std::vector<AlgorithmParameter>& B_AP = B_AH[0].getParameters());
     const std::vector<AlgorithmParameter>& B_AP = B_AH[0].getParameters();
     TS_ASSERT_EQUALS(B_AP.size(), 3);
@@ -192,7 +192,7 @@ public:
     std::vector<AlgorithmHistory>& C_AH = C_WH.getAlgorithms();
     TS_ASSERT_EQUALS( C_AH.size(), 4);
     TS_ASSERT_EQUALS( "add2d", C_AH[3].name());
-    TS_ASSERT_EQUALS( "1", C_AH[3].version());
+    TS_ASSERT_EQUALS( 1, C_AH[3].version());
     TS_ASSERT_THROWS_NOTHING(const std::vector<AlgorithmParameter>& C_AP = C_AH[0].getParameters());
     const std::vector<AlgorithmParameter>& C_AP = C_AH[3].getParameters();
     TS_ASSERT_EQUALS(C_AP.size(), 3);

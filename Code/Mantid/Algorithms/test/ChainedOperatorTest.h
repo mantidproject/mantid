@@ -38,6 +38,9 @@ public:
     Workspace_sptr out_work = (in_work1 + in_work2)/(in_work1 - in_work2);
     setProperty("OutputWorkspace",out_work);
   }
+  virtual const std::string name() const {return "ComplexOpTest";}
+  virtual const int version() const {return(1);}
+
 };
 
 class ChainedOperatorTest : public CxxTest::TestSuite

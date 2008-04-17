@@ -23,6 +23,9 @@ public:
 
   DivideOpTest() : Algorithm() {}
   virtual ~DivideOpTest() {}
+  virtual const std::string name() const {return "DivideOpTest";}
+  virtual const int version() const {return(1);}
+  
   void init() 
   {
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));

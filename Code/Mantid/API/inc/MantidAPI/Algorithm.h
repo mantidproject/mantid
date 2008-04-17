@@ -1,6 +1,26 @@
 #ifndef MANTID_KERNEL_ALGORITHM_H_
 #define MANTID_KERNEL_ALGORITHM_H_
 
+/* Used to register classes into the factory. creates a global object in an 
+* anonymous namespace. The object itself does nothing, but the comma operator
+* is used in the call to its constructor to effect a call to the factory's 
+* subscribe method.
+*/
+
+#define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
+	namespace { \
+	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+	((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>()) \
+	, 0)); \
+  }
+
+#define DECLARE_ALGORITHM(classname) \
+	namespace { \
+	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+	((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()) \
+	, 0)); \
+  }
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -25,6 +45,7 @@ namespace Mantid
 {
 namespace API
 {
+
   typedef AlgorithmHistory::dateAndTime dateAndTime;
   ///Typedef for a shared pointer to an Algorithm
   typedef boost::shared_ptr<Algorithm> Algorithm_sptr;

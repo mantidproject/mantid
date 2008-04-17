@@ -17,8 +17,7 @@ namespace API
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class Algorithm;
-
+  class Algorithm;
 /** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
     the Dynamic Factory base class.
@@ -52,12 +51,12 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	  boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
 
 	  template <class C>
-	  void subscribe()
+    void subscribe()
 	  {
 		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
 		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
-		  int version = tempAlg->version();
-      std::string className = tempAlg->name();
+		  const int version = tempAlg->version();
+      const std::string className = tempAlg->name();
 		  delete newI;
 		  typename versionMap::iterator it = _vmap.find(className);
 		  if (!className.empty())
