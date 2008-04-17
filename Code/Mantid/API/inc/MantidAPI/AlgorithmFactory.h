@@ -71,7 +71,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 				  if(version > it->second)
 					  _vmap[className]=version;
 			  }  
-			  DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
+			  Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
 		  }
 	  }
 
