@@ -16,8 +16,8 @@ public:
   virtual ~AlgTest() {}
   void init() { }
   void exec() { }
-  virtual const std::string name() const {return "AlgTest";}:
-  virtual const int version() const {return(1);)}:
+  virtual const std::string name() const {return "AlgTest";}
+  virtual const int version() const {return(1);}
 
 };
 
@@ -29,8 +29,8 @@ public:
   virtual ~AlgTestFail() {}
   void init() { }
   void exec() { }
-  virtual const std::string name() const {return "AlgTest";}:
-  virtual const int version() const {return(1);)}:
+  virtual const std::string name() const {return "AlgTest";}
+  virtual const int version() const {return(1);}
 
 };
 
@@ -42,8 +42,8 @@ public:
   virtual ~AlgTestPass() {}
   void init() { }
   void exec() { }
-  virtual const std::string name() const {return "AlgTest";}:
-  virtual const int version() const {return(2);)}:
+  virtual const std::string name() const {return "AlgTest";}
+  virtual const int version() const {return(2);}
 
 };
 
@@ -55,8 +55,8 @@ public:
   virtual ~AlgTestSecond() {}
   void init() { }
   void exec() { }
-  virtual const std::string name() const {return "AlgTestSecond";}:
-  virtual const int version() const {return(1);)}:
+  virtual const std::string name() const {return "AlgTestSecond";}
+  virtual const int version() const {return(1);}
 
 };
 
@@ -69,23 +69,17 @@ public:
 
   AlgorithmManagerTest() 
   {
-
   }
 
   void testVersionFail()
   {
-    AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::AlgTest");
-	TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>("AlgorithmManager::AlgTestFail",std::runtime_error);
-    AlgorithmManager::Instance().clear();
+//    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgTest");
+	TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),std::runtime_error);
   }
 
  void testVersionPass()
   {
-    AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::AlgTest");
-	TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>("AlgorithmManager::AlgTestPass");
-    AlgorithmManager::Instance().clear();
+	TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestPass>());
   }
 
   void testInstance()
@@ -94,7 +88,6 @@ public:
     //AlgorithmManager *tester = AlgorithmManager::Instance();
     //TS_ASSERT_EQUALS( manager, tester);
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
-    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error )
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
   }
@@ -102,10 +95,10 @@ public:
   void testClear()
   {
     AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::myAlgclear");
-    AlgorithmFactory::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgBclear");
-    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
-    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgorithmManager::myAlgBclear") );
+//    AlgorithmFactory::Instance().subscribe<AlgTest>();
+//    AlgorithmFactory::Instance().subscribe<AlgTestSecond>();
+    TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
+    TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
@@ -114,12 +107,12 @@ public:
   void testReturnType()
   {
     AlgorithmManager::Instance().clear();
-    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgorithmManager::myAlg");
-    AlgorithmFactory::Instance().subscribe<AlgTestSecond>("AlgorithmManager::myAlgB");
+//    AlgorithmFactory::Instance().subscribe<AlgTest>();
+//    AlgorithmFactory::Instance().subscribe<AlgTestSecond>();
     Algorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgorithmManager::myAlg") );
+    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgTest",1) );
     TS_ASSERT_DIFFERS(dynamic_cast<AlgTest*>(alg.get()),static_cast<AlgTest*>(0));
-    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgorithmManager::myAlgB") );
+    TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgTestSecond",1) );
     TS_ASSERT_DIFFERS(dynamic_cast<AlgTestSecond*>(alg.get()),static_cast<AlgTestSecond*>(0));
     TS_ASSERT_DIFFERS(dynamic_cast<Algorithm*>(alg.get()),static_cast<Algorithm*>(0));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);   // To check that crea is called on local objects

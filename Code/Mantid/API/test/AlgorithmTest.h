@@ -15,7 +15,7 @@ public:
   ToyAlgorithm() : Algorithm() {}
   virtual ~ToyAlgorithm() {}
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
-  const std::string version() const { return 1;} ///< Algorithm's version for identification
+  const int version() const { return 1;} ///< Algorithm's version for identification
 
   void init()
   { declareProperty("prop1","value");
@@ -43,8 +43,8 @@ public:
   {
     std::string theName = alg.name();
     TS_ASSERT( ! theName.compare("ToyAlgorithm") );
-    std::string theVersion = alg.version();
-    TS_ASSERT( ! theVersion.compare(1) );
+    int theVersion = alg.version();
+    TS_ASSERT_EQUALS( theVersion,1 );
     TS_ASSERT( ! alg.isInitialized() );
     TS_ASSERT( ! alg.isExecuted() );
   }
@@ -57,8 +57,8 @@ public:
 
   void testVersion()
   {
-    std::string theVersion = alg.version();
-    TS_ASSERT( ! theVersion.compare(1) );
+    int theVersion = alg.version();
+    TS_ASSERT_EQUALS( theVersion,1 );
   }
 
   void testIsChild()

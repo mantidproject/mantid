@@ -6,30 +6,18 @@
 * is used in the call to its constructor to effect a call to the factory's 
 * subscribe method.
 */
-#define DECLARE_OLDNAMESPACED_ALGORITHM(ns, classname) \
-	namespace { \
-	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-	((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>(#classname)) \
-	, 0)); \
-  }
-#define DECLARE_OLD_ALGORITHM(classname) \
-	namespace { \
-	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-	((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>(#classname)) \
-	, 0)); \
-  }
 
 #define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
 	namespace { \
 	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-	((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>(#classname)) \
+	((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>()) \
 	, 0)); \
   }
 
 #define DECLARE_ALGORITHM(classname) \
 	namespace { \
 	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-	((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>(#classname)) \
+	((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()) \
 	, 0)); \
   }
 

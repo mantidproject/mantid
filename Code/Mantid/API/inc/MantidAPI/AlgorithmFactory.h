@@ -52,11 +52,12 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	  boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
 
 	  template <class C>
-	  void subscribe(const std::string& className)
+	  void subscribe()
 	  {
 		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
 		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
 		  int version = tempAlg->version();
+      std::string className = tempAlg->name();
 		  delete newI;
 		  typename versionMap::iterator it = _vmap.find(className);
 		  if (!className.empty())
