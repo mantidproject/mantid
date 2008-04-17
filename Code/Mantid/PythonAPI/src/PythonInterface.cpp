@@ -119,6 +119,15 @@ int PythonInterface::GetBinNumber(const std::string& workspaceName)
 }
 
 /**
+ * Returns the name of all the workspaces.
+ * \return Vector of strings.
+ **/
+std::vector<std::string> PythonInterface::GetWorkspaceNames()
+{
+	return AnalysisDataService::Instance().getWorkspaceNames();
+}
+
+/**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
  * The pointer returned to Python may become invalid if the workspace is subsequently altered;
  * for example, if the workspace was closed in Mantid, the Python pointer would be left hanging.

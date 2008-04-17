@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <map>
+#include <vector>
 
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
@@ -57,6 +58,7 @@ public:
   void clear();
   Workspace_sptr retrieve( const std::string& name );
   bool doesWorkspaceExist(const std::string& name);
+  std::vector<std::string> getWorkspaceNames();
 	
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;

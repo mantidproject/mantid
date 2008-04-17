@@ -68,6 +68,13 @@ public:
 
 		TS_ASSERT_EQUALS(bins, 1676);
 	}
+	
+	void testGetWorkspaceNames()
+	{
+		std::vector<std::string> temp = inter->GetWorkspaceNames();
+
+		TS_ASSERT(!temp.empty());
+	}
 
 	void testGetXdata()
 	{

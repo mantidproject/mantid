@@ -58,8 +58,11 @@ public:
 
 	//Load Data
 	int LoadIsisRawFile(const std::string&, const std::string&);
+
+	//Workspace information
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
+	std::vector<std::string> GetWorkspaceNames();
 
 	//Access Data
 	std::vector<double>* GetXData(const std::string&, int const );
