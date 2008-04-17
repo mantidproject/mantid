@@ -104,6 +104,21 @@ int PythonInterface::GetHistogramNumber(const std::string& workspaceName)
 }
 
 /**
+ * Returns the number of bins in a workspace.
+ * \param workspaceName :: The name under which the workspace is stored in Mantid.
+ * \return int.
+ **/
+int PythonInterface::GetBinNumber(const std::string& workspaceName)
+{
+	//Retrieve workspace
+	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
+	Mantid::DataObjects::Workspace2D_sptr output2D =
+	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	
+	return output2D->dataX(0).size();
+}
+
+/**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
  * The pointer returned to Python may become invalid if the workspace is subsequently altered;
  * for example, if the workspace was closed in Mantid, the Python pointer would be left hanging.

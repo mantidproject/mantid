@@ -54,6 +54,20 @@ public:
 
 		TS_ASSERT_EQUALS(hists, 2584);
 	}
+	
+	void testGetHistogramNumber()
+	{
+		int hists = inter->GetHistogramNumber("TestWorkspace1");
+
+		TS_ASSERT_EQUALS(hists, 2584);
+	}
+	
+	void testGetBinNumber()
+	{
+		int bins = inter->GetBinNumber("TestWorkspace1");
+
+		TS_ASSERT_EQUALS(bins, 1676);
+	}
 
 	void testGetXdata()
 	{
