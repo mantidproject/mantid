@@ -2,7 +2,7 @@
 #include <sstream>
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/LibraryManager.h"
-
+#include "MantidAPI/Algorithm.h"
 namespace Mantid
 {
 	namespace API
