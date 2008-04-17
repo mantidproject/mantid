@@ -58,6 +58,7 @@ public:
 
 	//Load Data
 	int LoadIsisRawFile(const std::string&, const std::string&);
+	int GetHistogramNumber(const std::string&);
 
 	//Access Data
 	std::vector<double>* GetXData(const std::string&, int const );

@@ -103,6 +103,17 @@ void AnalysisDataServiceImpl::clear()
   return;
 }
 
+/// Checks to see if a workspace exists without
+bool AnalysisDataServiceImpl::doesWorkspaceExist(const std::string& name)
+{
+  WorkspaceMap::const_iterator it = m_spaces.find(name);
+  if (m_spaces.end() != it)
+  {
+    return true;
+  }
+  return false;
+}
+
 /** Retrieve a pointer to a workspace by name.
  * 
  *  @param name The name of the desired workspace

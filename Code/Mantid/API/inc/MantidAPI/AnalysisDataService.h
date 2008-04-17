@@ -55,7 +55,8 @@ public:
   void addOrReplace( const std::string& name, Workspace_sptr space);
   void remove( const std::string& name );
   void clear();
-  Workspace_sptr retrieve( const std::string& name );	
+  Workspace_sptr retrieve( const std::string& name );
+  bool doesWorkspaceExist(const std::string& name);
 	
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;

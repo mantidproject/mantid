@@ -71,20 +71,35 @@ bool PythonInterface::ExecuteAlgorithm(const std::string& algName,
 int PythonInterface::LoadIsisRawFile(const std::string& fileName,
 		const std::string& workspaceName)
 {
-	CreateAlgorithm("LoadRaw");
+	//Check workspace does not exist
+	if (!AnalysisDataService::Instance().doesWorkspaceExist(workspaceName))
+	{
+		CreateAlgorithm("LoadRaw");
 
-	std::string properties = "Filename:" + fileName + ",OutputWorkspace:"
+		std::string properties = "Filename:" + fileName + ",OutputWorkspace:"
 			+ workspaceName;
 
-	ExecuteAlgorithm("LoadRaw", properties);
+		ExecuteAlgorithm("LoadRaw", properties);
 
+		//Return the number of histograms
+		return GetHistogramNumber(workspaceName);
+	}
+	
+	return -1;
+}
+
+/**
+ * Returns the number of histograms in a workspace.
+ * \param workspaceName :: The name under which the workspace is stored in Mantid.
+ * \return int.
+ **/
+int PythonInterface::GetHistogramNumber(const std::string& workspaceName)
+{
+	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 	Mantid::DataObjects::Workspace2D_sptr output2D =
-			boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
-
-	std::cout << output2D->getHistogramNumber() << std::endl;
-
-	//Return the number of histograms
+	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	
 	return output2D->getHistogramNumber();
 }
 
