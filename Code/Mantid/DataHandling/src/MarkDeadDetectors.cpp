@@ -44,7 +44,7 @@ void MarkDeadDetectors::init()
 void MarkDeadDetectors::exec()
 {
   // Get the input workspace
-  const Workspace2D_sptr m_localWorkspace = getProperty("Workspace");
+  m_localWorkspace = getProperty("Workspace");
   // Get the size of the vectors
   const int vectorSize = m_localWorkspace->blocksize();
 
@@ -90,13 +90,13 @@ void MarkDeadDetectors::exec()
 
 void MarkDeadDetectors::clearSpectrum(const int& index, const int& vectorSize)
 {
+  // Mark associated detector as dead
+  m_localWorkspace->getInstrument().getDetector(m_localWorkspace->spectraNo(index))->markDead();
+
   // Zero the workspace spectra (data and errors, not X values)
   m_localWorkspace->dataY(index).assign(vectorSize,0.0);
   m_localWorkspace->dataE(index).assign(vectorSize,0.0);
   m_localWorkspace->dataE2(index).assign(vectorSize,0.0);
-
-  // Mark associated detector as dead
-  m_localWorkspace->getInstrument().getDetector(m_localWorkspace->spectraNo(index))->markDead();
 }
 
 } // namespace DataHandling
