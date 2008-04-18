@@ -114,8 +114,9 @@ Plane::setSurface(const std::string& Pstr)
     {
       int cnt;
       for(cnt=0;cnt<9 && StrFunc::section(Line,surf[cnt]);cnt++);
-      if (cnt!=4 || cnt!=9)
-	return -3;
+
+      if (cnt!=4 && cnt!=9)
+		return -3;
       if (cnt==9)          // Vec3d type
         {
 	  Geometry::Vec3D A=Geometry::Vec3D(surf[0],surf[1],surf[2]);
