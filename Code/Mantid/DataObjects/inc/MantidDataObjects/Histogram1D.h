@@ -132,8 +132,9 @@ public:
   void setErrorHelper(const API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
   void setErrorHelper(API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
   const API::IErrorHelper* errorHelper() const { return _errorHelper; }
-  ///Returns the detector
+  /// Returns the spectrum number to which this histogram refers
   const int spectraNo() const { return _spectraNo; }
+  /// The spectrum number to which this histogram refers
   int& spectraNo() { return _spectraNo; }
 
 };

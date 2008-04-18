@@ -70,6 +70,9 @@ public:
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
 
+    // Check the unit has been set correctly
+    TS_ASSERT_EQUALS( output->XUnit()->unitID(), "TOF" )
+    TS_ASSERT( ! output-> isDistribution() )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly

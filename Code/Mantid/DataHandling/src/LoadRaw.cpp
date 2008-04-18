@@ -176,6 +176,9 @@ namespace Mantid
       delete[] timeChannels;
       delete[] spectrum;
 
+      // Set the unit on the workspace to TOF
+      m_localWorkspace->XUnit() = UnitFactory::Instance().create("TOF");
+      
       // Run the sub-algorithms (LoadInstrument & LoadRaw)
       runSubAlgorithms();
 

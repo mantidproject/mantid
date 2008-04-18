@@ -117,9 +117,8 @@ public:
   ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
 
-  ///Returns the detector
+  ///Returns the spectrum number to which a given index refers
   virtual int spectraNo(int const index) const;
-  ///Returns the detector
   virtual int& spectraNo(int const index);
 
 private:

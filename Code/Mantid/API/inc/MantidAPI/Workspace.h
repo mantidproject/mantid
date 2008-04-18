@@ -104,9 +104,9 @@ public:
   ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) =0;
 
-  ///Returns the spectra number
+  ///Returns the spectrum number to which a given index refers
   virtual int spectraNo(int const index) const =0;
-  ///Returns the spectra number (non const)
+  ///Returns the spectrum number to which a given index refers (non const)
   virtual int& spectraNo(int const index) =0;
 
   //Get methods return the histogram number 

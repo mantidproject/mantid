@@ -377,7 +377,7 @@ namespace Mantid
       return data[index].errorHelper();
     }
 
-    ///Returns the detector
+    ///Returns the spectrum number to which a given index refers
     int Workspace2D::spectraNo(int const index) const
     {
       if (index<0 || index>=static_cast<int>(data.size()))
@@ -386,7 +386,7 @@ namespace Mantid
       return data[index].spectraNo();
     }
 
-    ///Returns the detector
+    ///Returns the spectrum number to which a given index refers
     int& Workspace2D::spectraNo(int const index)
     {
       if (index<0 || index>=static_cast<int>(data.size()))

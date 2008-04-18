@@ -106,9 +106,9 @@ public:
   virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
    ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
-  ///Returns the detector
+  ///Returns the spectrum number to which this workspace refers
   virtual int spectraNo(int const index) const { return Histogram1D::spectraNo(); }
-  ///Returns the detector
+  ///Returns the spectrum number to which this workspace refers
   virtual int& spectraNo(int const index){ return Histogram1D::spectraNo(); }
 
 private:

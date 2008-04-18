@@ -64,6 +64,7 @@ public:
     TS_ASSERT_EQUALS( detg.getPos()[0], 6.0 )
     TS_ASSERT_EQUALS( detg.getPos()[1], 3.0 )
     TS_ASSERT_EQUALS( detg.getPos()[2], 2.0 )
+    delete d;
   }
 
   void testGetID()

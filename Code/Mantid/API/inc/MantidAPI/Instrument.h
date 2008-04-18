@@ -87,7 +87,7 @@ private:
   Geometry::Component* getChild(const std::string& name);
 
   /// Map which holds detector-IDs and pointers to detector components 
-  // May want to change this to an ordered map (hash map) at some point
+  // May want to change this to an unordered map (hash map) at some point
   std::map<int, Geometry::IDetector*> _detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to

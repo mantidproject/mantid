@@ -11,7 +11,7 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /** @class SimpleRebinn SimpleRebin.h MantidAlgorithms/SimpleIntegration.h
+    /** 
 
     Takes a 1D workspace as input and rebins the data according to the input rebin parameters.
 
