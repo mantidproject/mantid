@@ -188,7 +188,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
       //     - this assumes the incident beam comes in along the z axis
       double twoTheta;
       // Get these two values
-      instrument.detectorLocation(i,l2,twoTheta);
+      instrument.detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;

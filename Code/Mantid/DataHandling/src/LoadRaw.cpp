@@ -182,9 +182,19 @@ namespace Mantid
       // Run the sub-algorithms (LoadInstrument & LoadRaw)
       runSubAlgorithms();
 
+      /// @todo Need to deal with the connection between spectum number and detector
+      
       return;
     }
 
+    /** Read in a single spectrum from the raw file
+     *  @param tcbs     The vector containing the time bin boundaries
+     *  @param hist     The workspace index
+     *  @param i        The spectrum number
+     *  @param iraw     A reference to the ISISRAW object
+     *  @param lengthIn The number of elements in a spectrum
+     *  @param spectrum Pointer to the array into which the spectrum will be read
+     */
     void LoadRaw::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, int& lengthIn, int* spectrum)
     {
       // m_localWorkspace is a private class variable and does not need to be declared anywhere

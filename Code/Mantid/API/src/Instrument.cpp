@@ -1,6 +1,7 @@
 #include "MantidAPI/Instrument.h"
 #include "V3D.h"
 #include "MantidKernel/Exception.h"
+#include "DetectorGroup.h"
 #include <algorithm>
 
 namespace Mantid
@@ -40,16 +41,18 @@ Geometry::ObjComponent* Instrument::getSamplePos()
 	return _samplePosCache;
 }
 
-/**	Gets a pointer to the requested detector
- *  @param detector_id the requested detector ID
- *  @returns a pointer to the Assembly of detectors
- *  @throw NotFoundError If the detector ID is not found
+/**	Gets a pointer to the detector related to a particular spectrum
+ *  @param   spectrumNo The spectrum number 
+ *  @returns A pointer to the detector object
+ *  @throw   NotFoundError If no detector is found for the spectrum number given
  */
-Geometry::IDetector* Instrument::getDetector(const int &detector_id)
+Geometry::IDetector* Instrument::getDetector(const int &spectrumNo)
 {
+  /// @todo Sort out mapping so that spectrum number is the key, not detector ID
+  // For now, just pretend they're the same
   std::map<int, Geometry::IDetector*>::iterator it;
 
-  it = _detectorCache.find(detector_id);
+  it = _detectorCache.find(spectrumNo);
   
 	if ( it == _detectorCache.end() )	
   {
@@ -60,18 +63,40 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id)
 }
 
 /** Get the L2 and TwoTheta for the given detector
- *  @param detector_id   The detector ID
+ *  @param spectrumNo    The spectrum number 
  *  @param l2            Returns the sample-detector distance
  *  @param twoTheta      Returns the scattering angle for the given detector
- *  @throw NotFoundError If the detector ID is not found or the sample has not been set
+ *  @throw NotFoundError If no detector is found for the spectrum number given or the sample has not been set
  */
-void Instrument::detectorLocation(const int &detector_id, double &l2, double &twoTheta)
+void Instrument::detectorLocation(const int &spectrumNo, double &l2, double &twoTheta)
 {
   if ( !_samplePosCache ) throw Kernel::Exception::NotFoundError("Instrument: Sample position has not been set","");
-  Geometry::V3D detectorPosition = getDetector(detector_id)->getPos();
+  Geometry::V3D detectorPosition = getDetector(spectrumNo)->getPos();
   Geometry::V3D samplePosition = getSamplePos()->getPos();
   l2 = detectorPosition.distance(samplePosition);
   twoTheta = detectorPosition.zenith(samplePosition);
+}
+
+/** Group several detector objects in the map into a single DetectorGroup object.
+ *  The new grouped object will be be linked to the first spectrum in the argument vector
+ *  @param spectra A vector containing the spectrum numbers whose detectors should be grouped
+ *  @throw NotFoundError If any spectrum number does not have an associated detector
+ */
+void Instrument::groupDetectors(const std::vector<int> &spectra)
+{
+  Geometry::DetectorGroup *group = new Geometry::DetectorGroup;
+  
+  // Loop over the spectrum numbers
+  std::vector<int>::const_iterator it;
+  for (it = spectra.begin(); it != spectra.end(); ++it)
+  {
+    group->addDetector(getDetector(*it));
+    // Remove the detector just added from the map
+    _detectorCache.erase(*it);
+  }
+  
+  // Add a new entry in the map with the key of the first element
+  _detectorCache[spectra[0]] = group;
 }
 
 /**	Gets a pointer to the requested child component

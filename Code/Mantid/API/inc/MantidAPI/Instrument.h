@@ -57,8 +57,10 @@ public:
 
   Geometry::ObjComponent* getSource();
   Geometry::ObjComponent* getSamplePos();
-  Geometry::IDetector* getDetector(const int &detector_id);
-  void detectorLocation(const int &detector_id, double &l2, double &twoTheta);
+  Geometry::IDetector* getDetector(const int &spectrumNo);
+  void detectorLocation(const int &spectrumNo, double &l2, double &twoTheta);
+
+  void groupDetectors(const std::vector<int> &spectra);
 
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -72,7 +74,7 @@ public:
 
   /// mark a Component which has already been added to the Instrument class
   /// to be a Detector component, and add it to a detector cache for possible
-  /// later retrievel
+  /// later retrieval
   void markAsDetector(Geometry::IDetector*);
 
 private:
@@ -87,6 +89,7 @@ private:
   Geometry::Component* getChild(const std::string& name);
 
   /// Map which holds detector-IDs and pointers to detector components 
+  /// @todo Needs changing so that spectrum number is the key
   // May want to change this to an unordered map (hash map) at some point
   std::map<int, Geometry::IDetector*> _detectorCache;
 

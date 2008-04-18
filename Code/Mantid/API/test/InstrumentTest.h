@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Instrument.h"
 #include "MantidKernel/Exception.h"
+#include "DetectorGroup.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -21,11 +22,17 @@ public:
     det->setID(1);
     det->setPos(1.0,0.0,0.0);
     instrument.markAsDetector(det);
+    det2 = new Detector;
+    det2->setID(10);
+    instrument.markAsDetector(det2);
+    det3 = new Detector;
+    det3->setID(11);
+    instrument.markAsDetector(det3);
   }
   
   ~InstrumentTest()
   {
-    delete det;
+    delete det, det2, det3;
     delete instrument.getSamplePos();
   }
   
@@ -102,6 +109,22 @@ public:
 		TS_ASSERT_THROWS( i.detectorLocation(0,d,dd), Exception::NotFoundError )
 	}
 
+	void testGroupDetectors()
+	{
+	  TS_ASSERT_THROWS_NOTHING( instrument.getDetector(10) )
+    TS_ASSERT_THROWS_NOTHING( instrument.getDetector(11) )
+	  
+	  std::vector<int> s;
+	  s.push_back(10);
+	  s.push_back(11);
+	  TS_ASSERT_THROWS_NOTHING( instrument.groupDetectors(s) )
+	  IDetector *d;
+	  TS_ASSERT_THROWS_NOTHING( d = instrument.getDetector(10) )
+	  TS_ASSERT( dynamic_cast<DetectorGroup*>(d) )
+    TS_ASSERT_THROWS( instrument.getDetector(11), Exception::NotFoundError )
+    TS_ASSERT_THROWS( instrument.groupDetectors(s), Exception::NotFoundError )
+	}
+	
 	void testCasts()
 	{
 	  Instrument *i = new Instrument;
@@ -112,7 +135,7 @@ public:
 	
 private:
   Instrument instrument;
-  Detector *det;
+  Detector *det, *det2, *det3;
 };
 
 #endif /*INSTRUMENTTEST_H_*/

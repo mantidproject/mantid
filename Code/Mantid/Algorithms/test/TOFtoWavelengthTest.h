@@ -40,6 +40,8 @@ public:
     for (int j = 0; j < 2584; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, a, e);
+      // Just set the spectrum number to match the index
+      space2D->spectraNo(j) = j;
     }
     
     // Register the workspace in the data service
