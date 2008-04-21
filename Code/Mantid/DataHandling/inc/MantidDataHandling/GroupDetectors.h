@@ -43,7 +43,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class GroupDetectors : public DataHandlingCommand
+class DLLExport GroupDetectors : public DataHandlingCommand
 {
 public:
 	GroupDetectors();

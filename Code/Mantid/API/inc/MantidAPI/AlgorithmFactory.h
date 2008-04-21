@@ -78,7 +78,9 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 
+  /// Extract the name of an algorithm
   const std::string extractAlgName(const boost::shared_ptr<Algorithm> alg) const;
+  // Extract the version of an algorithm
   const int extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const;
 	
 	/// Private Constructor for singleton class

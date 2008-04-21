@@ -49,7 +49,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MarkDeadDetectors : public DataHandlingCommand
+class DLLExport MarkDeadDetectors : public DataHandlingCommand
 {
 public:
   MarkDeadDetectors();

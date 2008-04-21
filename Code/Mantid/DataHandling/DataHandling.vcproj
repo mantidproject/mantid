@@ -168,6 +168,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GroupDetectors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\isisraw.cpp"
 				>
 			</File>
@@ -189,6 +193,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\MarkDeadDetectors.cpp"
 				>
 			</File>
 			<File
@@ -219,6 +227,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\DataHandlingCommand.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\GroupDetectors.h"
 				>
 			</File>
 			<File
@@ -255,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadRawTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectors.h"
 				>
 			</File>
 			<File
