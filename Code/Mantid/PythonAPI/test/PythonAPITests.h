@@ -37,16 +37,6 @@ public:
 		TS_ASSERT_THROWS_ANYTHING(inter->CreateAlgorithm("Rubbish!"));
 	}
 
-	void testExecuteAlgorithm()
-	{
-		TS_ASSERT(inter->ExecuteAlgorithm("HelloWorldAlgorithm", ""));
-	}
-
-	void testExecuteAlgorithmNotFound()
-	{
-		TS_ASSERT_THROWS_ANYTHING(inter->ExecuteAlgorithm("Rubbish!", ""));
-	}
-
 	void testLoadIsisRaw()
 	{
 		int hists = inter->LoadIsisRawFile(

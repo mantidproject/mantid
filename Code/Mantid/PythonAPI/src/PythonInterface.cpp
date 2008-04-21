@@ -5,6 +5,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -39,28 +40,15 @@ void PythonInterface::InitialiseFrameworkManager()
 /**
  * Creates a specified algorithm.
  * \param algName :: The name of the algorithm to execute.
- * \return Boolean.
+ * \return Pointer to algorithm.
  **/
-bool PythonInterface::CreateAlgorithm(const std::string& algName)
+IAlgorithm* PythonInterface::CreateAlgorithm(const std::string& algName)
 {
-	FrameworkManager::Instance().createAlgorithm(algName);
+	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
 
-	return true;
+	return alg;
 }
 
-/**
- * Executes a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param properties :: The properties for the algorithm (as std::string).
- * \return Boolean.
- **/
-bool PythonInterface::ExecuteAlgorithm(const std::string& algName,
-		const std::string& properties)
-{
-	FrameworkManager::Instance().exec(algName, properties);
-
-	return true;
-}
 
 /**
  * Loads a standard ISIS raw file into Mantid, using the LoadRaw algorithm.
@@ -74,12 +62,11 @@ int PythonInterface::LoadIsisRawFile(const std::string& fileName,
 	//Check workspace does not exist
 	if (!AnalysisDataService::Instance().doesWorkspaceExist(workspaceName))
 	{
-		CreateAlgorithm("LoadRaw");
+		IAlgorithm* alg = CreateAlgorithm("LoadRaw");
+		alg->setPropertyValue("Filename", fileName);
+		alg->setPropertyValue("OutputWorkspace", workspaceName);
 
-		std::string properties = "Filename:" + fileName + ",OutputWorkspace:"
-			+ workspaceName;
-
-		ExecuteAlgorithm("LoadRaw", properties);
+		alg->execute();
 
 		//Return the number of histograms
 		return GetHistogramNumber(workspaceName);

@@ -53,8 +53,7 @@ public:
 	void InitialiseFrameworkManager();
 
 	//Algorithms
-	bool CreateAlgorithm(const std::string&);
-	bool ExecuteAlgorithm(const std::string&, const std::string&);
+	API::IAlgorithm* CreateAlgorithm(const std::string&);
 
 	//Load Data
 	int LoadIsisRawFile(const std::string&, const std::string&);
