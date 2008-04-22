@@ -35,6 +35,8 @@ namespace Geometry
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+  ChangeLog:
+  22.04.2008: Sri,  Missing DLLExport and Destructor was virtual it's changed to normal destructor
 */
 
 class Surface;
@@ -45,7 +47,7 @@ class Cone;
 class Sphere;
 class General;
   
-class Line 
+class DLLExport Line 
 {
   
  private:
@@ -67,7 +69,7 @@ class Line
   Line* clone() const;
   Line& operator=(const Line&);
   
-  virtual ~Line();
+  ~Line();
 
   Geometry::Vec3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
   Geometry::Vec3D getOrigin() const { return Origin; }   ///< returns the origin
