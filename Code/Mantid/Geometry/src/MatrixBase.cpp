@@ -11,9 +11,9 @@
 
 #include "AuxException.h"
 #include "mathSupport.h"
-#include "MatrixBase.h"
-#include "PolyFunction.h"
-#include "PolyVar.h"
+#include "MantidGeometry/MatrixBase.h"
+#include "MantidGeometry/PolyFunction.h"
+#include "MantidGeometry/PolyVar.h"
 
 namespace Mantid
 {

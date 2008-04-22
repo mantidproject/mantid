@@ -20,8 +20,8 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "RefCon.h"
-#include "Material.h"
+#include "MantidGeometry/RefCon.h"
+#include "MantidGeometry/Material.h"
 
 
 namespace Mantid

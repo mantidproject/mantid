@@ -1,4 +1,4 @@
-#include "CompAssembly.h" 
+#include "MantidGeometry/CompAssembly.h" 
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>

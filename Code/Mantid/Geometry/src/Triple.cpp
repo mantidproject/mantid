@@ -1,5 +1,5 @@
 #include <string>
-#include "Triple.h"
+#include "MantidGeometry/Triple.h"
 
 namespace Mantid
 {

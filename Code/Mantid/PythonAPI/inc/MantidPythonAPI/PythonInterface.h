@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {
@@ -56,7 +57,7 @@ public:
 	API::IAlgorithm* CreateAlgorithm(const std::string&);
 
 	//Load Data
-	int LoadIsisRawFile(const std::string&, const std::string&);
+	API::Workspace_sptr LoadIsisRawFile(const std::string&, const std::string&);
 
 	//Workspace information
 	int GetHistogramNumber(const std::string&);

@@ -21,13 +21,13 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "Matrix.h"
+#include "MantidGeometry/Matrix.h"
 #include "Vec3D.h"
-#include "Line.h"
-#include "BaseVisit.h"
-#include "Surface.h"
-#include "Quadratic.h"
-#include "Cylinder.h"
+#include "MantidGeometry/Line.h"
+#include "MantidGeometry/BaseVisit.h"
+#include "MantidGeometry/Surface.h"
+#include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Cylinder.h"
 
 namespace Mantid
 {

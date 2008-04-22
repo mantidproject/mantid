@@ -2,8 +2,8 @@
 #define MANTID_TESTOBJCOMPNENT__
 
 #include <cxxtest/TestSuite.h>
-#include "../inc/ObjComponent.h" 
-#include "../inc/Component.h" 
+#include "MantidGeometry/ObjComponent.h" 
+#include "MantidGeometry/Component.h" 
 
 using namespace Mantid;
 using namespace Geometry;

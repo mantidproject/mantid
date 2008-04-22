@@ -9,9 +9,9 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "AuxException.h"
-#include "Matrix.h"
+#include "MantidGeometry/Matrix.h"
 #include "Vec3D.h"
-#include "Track.h"
+#include "MantidGeometry/Track.h"
 
 
 const double surfaceTolerance(1e-5);       ///< Below this two point touch.

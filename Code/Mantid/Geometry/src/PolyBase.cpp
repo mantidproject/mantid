@@ -9,7 +9,7 @@
 #include <gsl/gsl_poly.h>
 
 #include "AuxException.h"
-#include "PolyBase.h"
+#include "MantidGeometry/PolyBase.h"
 
 namespace Mantid
 {

@@ -20,14 +20,14 @@
 #include "XMLgroup.h"
 #include "XMLread.h"
 #include "IndexIterator.h"
-#include "regexSupport.h"
-#include "Matrix.h"
-#include "BaseVisit.h"
+#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/Matrix.h"
+#include "MantidGeometry/BaseVisit.h"
 #include "Vec3D.h"
-#include "Surface.h"
-#include "Line.h"
-#include "LineIntersectVisit.h"
-#include "Object.h"
+#include "MantidGeometry/Surface.h"
+#include "MantidGeometry/Line.h"
+#include "MantidGeometry/LineIntersectVisit.h"
+#include "MantidGeometry/Object.h"
 
 
 namespace Mantid

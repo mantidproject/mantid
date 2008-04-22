@@ -2,7 +2,7 @@
 #define Geometry_Vec3D_h
 
 #include "MantidKernel/System.h"
-#include "../../inc/Matrix.h"
+#include "MantidGeometry/Matrix.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid

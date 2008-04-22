@@ -6,9 +6,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/Instrument.h"
 
-#include "Detector.h"
-#include "CompAssembly.h"
-#include "Component.h"
+#include "MantidGeometry/Detector.h"
+#include "MantidGeometry/CompAssembly.h"
+#include "MantidGeometry/Component.h"
 
 #include <fstream>
 

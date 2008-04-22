@@ -6,7 +6,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidDataHandling/LoadRaw.h"
@@ -56,7 +55,7 @@ IAlgorithm* PythonInterface::CreateAlgorithm(const std::string& algName)
  * \param workspaceName :: The name under which the workspace is to be stored in Mantid.
  * \return Number of spectra.
  **/
-int PythonInterface::LoadIsisRawFile(const std::string& fileName,
+Workspace_sptr PythonInterface::LoadIsisRawFile(const std::string& fileName,
 		const std::string& workspaceName)
 {
 	//Check workspace does not exist
@@ -68,11 +67,15 @@ int PythonInterface::LoadIsisRawFile(const std::string& fileName,
 
 		alg->execute();
 
+		Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
+
 		//Return the number of histograms
-		return GetHistogramNumber(workspaceName);
+		return output;
 	}
 	
-	return -1;
+	Workspace_sptr empty;
+	
+	return empty;
 }
 
 /**

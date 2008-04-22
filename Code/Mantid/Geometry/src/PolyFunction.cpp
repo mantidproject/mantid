@@ -9,7 +9,7 @@
 
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
-#include "PolyFunction.h"
+#include "MantidGeometry/PolyFunction.h"
 
 namespace Mantid
 {

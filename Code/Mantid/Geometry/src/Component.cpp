@@ -1,5 +1,5 @@
-#include "Component.h"
-#include "Quat.h"
+#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Quat.h"
 
 namespace Mantid
 {

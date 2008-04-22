@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "DetectorGroup.h"
+#include "MantidGeometry/DetectorGroup.h"
 
 namespace Mantid
 {

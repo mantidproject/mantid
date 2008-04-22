@@ -109,8 +109,8 @@ if os.name == 'nt':
 			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275']
 else:
 	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	cppPaths.append(poco_path +'Foundation/include/')
-	cppPaths.append(poco_path +'Util/include/')
+	cppPaths.append(poco_path + 'include')
+	cppPaths.append(poco_path +'Util')
 	cppPaths.append(boost_path)
 
 	print "CPPPATHS: ",cppPaths
@@ -124,8 +124,8 @@ else:
 	libList.append('boost_regex'+boost_append)
 	libList.append('NeXus')
 
-	if os.path.isdir(poco_path + '/lib/Linux/i686') :
-		libDirList.append(poco_path+'/lib/Linux/i686')
+	if os.path.isdir('/usr/local/poco-1.3.1/'+ '/lib/Linux/i686') :
+		libDirList.append('/usr/local/poco-1.3.1/' +'/lib/Linux/i686')
 	else :
 		libDirList.append(poco_path+'/lib')
 

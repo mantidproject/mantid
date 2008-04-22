@@ -14,8 +14,8 @@
 
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
-#include "MapSupport.h"
-#include "Algebra.h"
+#include "MantidGeometry/MapSupport.h"
+#include "MantidGeometry/Algebra.h"
 
 
 namespace Mantid

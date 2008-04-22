@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include "../inc/Vec3D.h"
-#include "../inc/Quadratic.h"
-#include "../inc/Cone.h"
+#include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Cone.h"
 
 using namespace Mantid;
 using namespace Geometry;

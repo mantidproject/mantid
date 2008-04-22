@@ -11,8 +11,8 @@
 #include "MantidKernel/System.h"
 #include "../inc/IndexIterator.h"
 #include "../inc/Vec3D.h"
-#include "../inc/Quadratic.h"
-#include "../inc/Sphere.h"
+#include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;

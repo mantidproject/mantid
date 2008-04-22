@@ -12,7 +12,7 @@
 #include <iterator>
 
 #include "MantidKernel/Logger.h"
-#include "BnId.h"
+#include "MantidGeometry/BnId.h"
 
 namespace Mantid
 {

@@ -4,11 +4,11 @@
 #include <cmath>
 #include <vector>
 #include "../inc/Vec3D.h"
-#include "../inc/Quadratic.h"
-#include "../inc/Line.h"
-#include "../inc/Cylinder.h"
-#include "../inc/Sphere.h"
-#include "../inc/Plane.h"
+#include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Line.h"
+#include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Sphere.h"
+#include "MantidGeometry/lane.h"
 
 using namespace Mantid;
 using namespace Geometry;

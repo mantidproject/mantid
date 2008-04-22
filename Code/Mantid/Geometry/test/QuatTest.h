@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <ostream>
-#include "../inc/V3D.h"
-#include "../inc/Quat.h" 
+#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quat.h" 
 
 class testQuat : public CxxTest::TestSuite
 {

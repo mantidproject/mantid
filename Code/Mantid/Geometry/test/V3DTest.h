@@ -6,7 +6,7 @@
 #include <ostream>
 #include <vector>
 
-#include "../inc/V3D.h" 
+#include "MantidGeometry/V3D.h" 
 
 class V3DTest : public CxxTest::TestSuite
 {

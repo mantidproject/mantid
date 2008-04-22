@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-#include "CompAssembly.h"
-#include "ObjComponent.h"
-#include "Detector.h"
+#include "MantidGeometry/CompAssembly.h"
+#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/Detector.h"
 #include <string>
 #include <ostream> 
 

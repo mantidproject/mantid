@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "AuxException.h"
-#include "Matrix.h"
+#include "MantidGeometry/Matrix.h"
 #include "Vec3D.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/SupportTempCode.h"

@@ -3,7 +3,7 @@
 #include <cmath> 
 #include <vector>
 
-#include "V3D.h"
+#include "MantidGeometry/V3D.h"
 
 namespace Mantid
 {

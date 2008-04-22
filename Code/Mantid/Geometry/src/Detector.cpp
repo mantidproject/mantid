@@ -1,4 +1,4 @@
-#include "Detector.h"
+#include "MantidGeometry/Detector.h"
 
 namespace Mantid
 {

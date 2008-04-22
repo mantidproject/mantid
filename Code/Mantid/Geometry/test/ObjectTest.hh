@@ -7,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 
-#include "../inc/Object.h" 
+#include "MantidGeometry/Object.h" 
 
 using namespace Mantid;
 using namespace Geometry;

@@ -22,12 +22,12 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "regexSupport.h"
-#include "Matrix.h"
+#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/Matrix.h"
 #include "RotCounter.h"
-#include "Triple.h"
-#include "BnId.h"
-#include "Acomp.h"
+#include "MantidGeometry/Triple.h"
+#include "MantidGeometry/BnId.h"
+#include "MantidGeometry/Acomp.h"
 
 namespace Mantid
 {

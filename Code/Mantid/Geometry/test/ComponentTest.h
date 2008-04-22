@@ -5,9 +5,9 @@
 #include <cmath>
 #include <iostream>
 #include <string>
-#include "../inc/Component.h"
-#include "../inc/V3D.h"
-#include "../inc/Quat.h" 
+#include "MantidGeometry/Component.h"
+#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quat.h" 
 
 using namespace Mantid::Geometry;
 

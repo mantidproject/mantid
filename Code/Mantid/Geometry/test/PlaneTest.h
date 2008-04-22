@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "../inc/Vec3D.h"
-#include "../inc/Quadratic.h"
-#include "../inc/Plane.h"
+#include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Plane.h"
 
 using namespace Mantid;
 using namespace Geometry;

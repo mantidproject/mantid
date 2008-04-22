@@ -1,4 +1,4 @@
-#include "ObjComponent.h"
+#include "MantidGeometry/ObjComponent.h"
 
 namespace Mantid
 {

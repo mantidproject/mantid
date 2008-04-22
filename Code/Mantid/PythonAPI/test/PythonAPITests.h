@@ -6,6 +6,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidPythonAPI/PythonInterface.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::PythonAPI;
 
@@ -39,10 +40,10 @@ public:
 
 	void testLoadIsisRaw()
 	{
-		int hists = inter->LoadIsisRawFile(
+		Mantid::API::Workspace_sptr ws = inter->LoadIsisRawFile(
 				"../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
 
-		TS_ASSERT_EQUALS(hists, 2584);
+		TS_ASSERT(ws.use_count() > 0);
 	}
 	
 	void testGetHistogramNumber()
@@ -89,10 +90,10 @@ public:
 	
 	void testTryDuplicatingWorkspaceName()
 	{
-		int hists = inter->LoadIsisRawFile(
+		Mantid::API::Workspace_sptr ws = inter->LoadIsisRawFile(
 				"../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
 
-		TS_ASSERT_EQUALS(hists, -1);
+		TS_ASSERT_EQUALS(ws.use_count(), 0);
 	}
 
 };

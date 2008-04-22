@@ -1,7 +1,7 @@
 #include "MantidAPI/Instrument.h"
-#include "V3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "DetectorGroup.h"
+#include "MantidGeometry/DetectorGroup.h"
 #include <algorithm>
 
 namespace Mantid

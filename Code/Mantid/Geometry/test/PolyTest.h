@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../inc/PolyVar.h" 
-#include "../inc/Matrix.h" 
+#include "MantidGeometry/PolyVar.h" 
+#include "MantidGeometry/Matrix.h" 
 
 using namespace Mantid;
 using namespace Geometry;

@@ -1,5 +1,5 @@
-#include "Quat.h" 
-#include "V3D.h"
+#include "MantidGeometry/Quat.h" 
+#include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <boost/test/floating_point_comparison.hpp>
 #include <stdexcept> 
