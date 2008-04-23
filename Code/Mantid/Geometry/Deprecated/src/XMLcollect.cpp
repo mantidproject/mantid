@@ -15,7 +15,7 @@
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "Vec3D.h"
 #include "XMLattribute.h"

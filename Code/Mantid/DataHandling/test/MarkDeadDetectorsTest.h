@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "Detector.h"
+#include "MantidGeometry/Detector.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::DataHandling;

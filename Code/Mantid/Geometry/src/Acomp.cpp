@@ -22,7 +22,7 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "RotCounter.h"
 #include "MantidGeometry/Triple.h"

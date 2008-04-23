@@ -12,7 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
-#include "Component.h"
+#include "MantidGeometry/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
 

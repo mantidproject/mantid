@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/RegexSupport.h"
 
 namespace Mantid
 {

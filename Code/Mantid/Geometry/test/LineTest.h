@@ -8,7 +8,7 @@
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/Cylinder.h"
 #include "MantidGeometry/Sphere.h"
-#include "MantidGeometry/lane.h"
+#include "MantidGeometry/Plane.h"
 
 using namespace Mantid;
 using namespace Geometry;

@@ -20,7 +20,7 @@
 #include "XMLgroup.h"
 #include "XMLread.h"
 #include "IndexIterator.h"
-#include "MantidGeometry/regexSupport.h"
+#include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "Vec3D.h"
