@@ -388,11 +388,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\Acomp.h"
+				RelativePath=".\inc\MantidGeometry\Acomp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Algebra.h"
+				RelativePath=".\inc\MantidGeometry\Algebra.h"
 				>
 			</File>
 			<File
@@ -408,19 +408,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\BaseVisit.h"
+				RelativePath=".\inc\MantidGeometry\BaseVisit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\BnId.h"
+				RelativePath=".\inc\MantidGeometry\BnId.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ChebPoly.h"
+				RelativePath=".\inc\MantidGeometry\ChebPoly.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\CompAssembly.h"
+				RelativePath=".\inc\MantidGeometry\CompAssembly.h"
 				>
 			</File>
 			<File
@@ -428,7 +428,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Component.h"
+				RelativePath=".\inc\MantidGeometry\Component.h"
 				>
 			</File>
 			<File
@@ -436,11 +436,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Cone.h"
+				RelativePath=".\inc\MantidGeometry\Cone.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Cylinder.h"
+				RelativePath=".\inc\MantidGeometry\Cylinder.h"
 				>
 			</File>
 			<File
@@ -448,15 +448,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DataSpace.h"
+				RelativePath=".\inc\MantidGeometry\DataSpace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Detector.h"
+				RelativePath=".\inc\MantidGeometry\Detector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\DetectorGroup.h"
+				RelativePath=".\inc\MantidGeometry\DetectorGroup.h"
 				>
 			</File>
 			<File
@@ -468,19 +468,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Element.h"
+				RelativePath=".\inc\MantidGeometry\Element.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Flux.h"
+				RelativePath=".\inc\MantidGeometry\Flux.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\General.h"
+				RelativePath=".\inc\MantidGeometry\General.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\IDetector.h"
+				RelativePath=".\inc\MantidGeometry\IDetector.h"
 				>
 			</File>
 			<File
@@ -492,23 +492,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Line.h"
+				RelativePath=".\inc\MantidGeometry\Line.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LineIntersectVisit.h"
+				RelativePath=".\inc\MantidGeometry\LineIntersectVisit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\LinkIterator.h"
+				RelativePath=".\inc\MantidGeometry\LinkIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MapSupport.h"
+				RelativePath=".\inc\MantidGeometry\MapSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Material.h"
+				RelativePath=".\inc\MantidGeometry\Material.h"
 				>
 			</File>
 			<File
@@ -516,15 +516,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Matrix.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MatrixBase.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\MatrixBase.h"
 				>
 			</File>
 			<File
@@ -532,11 +532,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ObjComp.h"
+				RelativePath=".\inc\MantidGeometry\ObjComp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\ObjComponent.h"
+				RelativePath=".\inc\MantidGeometry\ObjComponent.h"
 				>
 			</File>
 			<File
@@ -544,19 +544,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Object.h"
+				RelativePath=".\inc\MantidGeometry\Object.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Plane.h"
+				RelativePath=".\inc\MantidGeometry\Plane.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\PolyBase.h"
+				RelativePath=".\test\PlaneTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\PolyFunction.h"
+				RelativePath=".\inc\MantidGeometry\PolyBase.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\PolyFunction.h"
 				>
 			</File>
 			<File
@@ -564,15 +568,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\PolyVar.h"
+				RelativePath=".\inc\MantidGeometry\PolyVar.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Quadratic.h"
+				RelativePath=".\inc\MantidGeometry\Quadratic.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Quat.h"
+				RelativePath=".\inc\MantidGeometry\Quat.h"
 				>
 			</File>
 			<File
@@ -580,15 +584,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\RefCon.h"
+				RelativePath=".\inc\MantidGeometry\RefCon.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\regexSupport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Deprecated\inc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RegexSupport.h"
 				>
 			</File>
 			<File
@@ -596,19 +596,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Rules.h"
+				RelativePath=".\Deprecated\inc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\SamGeometry.h"
+				RelativePath=".\inc\MantidGeometry\Rules.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Simulation.h"
+				RelativePath=".\inc\MantidGeometry\SamGeometry.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Sphere.h"
+				RelativePath=".\inc\MantidGeometry\Simulation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Sphere.h"
 				>
 			</File>
 			<File
@@ -616,11 +620,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Surface.h"
+				RelativePath=".\inc\MantidGeometry\Surface.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\surfaceFactory.h"
+				RelativePath=".\inc\MantidGeometry\surfaceFactory.h"
 				>
 			</File>
 			<File
@@ -628,19 +632,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Torus.h"
+				RelativePath=".\inc\MantidGeometry\Torus.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Track.h"
+				RelativePath=".\inc\MantidGeometry\Track.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\Triple.h"
+				RelativePath=".\inc\MantidGeometry\Triple.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\V3D.h"
+				RelativePath=".\inc\MantidGeometry\V3D.h"
 				>
 			</File>
 			<File
@@ -652,19 +656,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLattribute.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\XMLattribute.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcollect.h"
+				RelativePath=".\Deprecated\inc\XMLattribute.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\XMLcollect.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Deprecated\inc\XMLcollect.h"
 				>
 			</File>
 			<File
@@ -676,11 +680,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLcomp.h"
+				RelativePath=".\Deprecated\inc\XMLcomp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLcomp.h"
+				RelativePath=".\auxinc\XMLcomp.h"
 				>
 			</File>
 			<File
@@ -692,11 +696,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
+				RelativePath=".\auxinc\XMLgridSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgridSupport.h"
+				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
 				>
 			</File>
 			<File
@@ -708,15 +712,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLindex.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Deprecated\inc\XMLindex.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLindex.h"
 				>
 			</File>
 			<File
@@ -724,11 +724,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLobject.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\XMLobject.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLobject.h"
 				>
 			</File>
 			<File
@@ -740,11 +744,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLread.h"
+				RelativePath=".\auxinc\XMLread.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLread.h"
+				RelativePath=".\Deprecated\inc\XMLread.h"
 				>
 			</File>
 			<File
@@ -752,11 +756,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLvector.h"
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLvector.h"
+				RelativePath=".\Deprecated\inc\XMLvector.h"
 				>
 			</File>
 		</Filter>
