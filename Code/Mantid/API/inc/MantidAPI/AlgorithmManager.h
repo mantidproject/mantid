@@ -1,15 +1,12 @@
 #ifndef MANTID_KERNEL_ALGORITHMMANAGER_H_
 #define MANTID_KERNEL_ALGORITHMMANAGER_H_
 
-
-
-
-
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "boost/shared_ptr.hpp"
 #include <vector>
+#include <string>
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -70,6 +67,8 @@ namespace Mantid
 			*  @return The number of registered algorithms
 			*/
 			int size() const { return regAlg.size(); }
+			
+			const std::vector<std::string> getNames() const;
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;

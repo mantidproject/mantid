@@ -2,9 +2,12 @@
 #define MANTID_LIBRARYMANAGERTEST_H_
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
 

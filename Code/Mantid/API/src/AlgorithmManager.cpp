@@ -40,6 +40,22 @@ namespace Mantid
     {
       return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
+    
+    /** Gets the names of all the currently available algorithms
+    *
+    *  \return A pointer to the created algorithm
+    */
+    const std::vector<std::string> AlgorithmManagerImpl::getNames() const
+    {
+	std::vector<std::string> names;
+	    
+	for (int i=0; i < regAlg.size(); ++i)
+	{
+		names.push_back(regAlg[i]->name());
+	}
+	    
+        return names;              
+    }
 
     /** Creates an instance of an algorithm
     *
