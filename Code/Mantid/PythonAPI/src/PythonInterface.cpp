@@ -53,7 +53,7 @@ IAlgorithm* PythonInterface::CreateAlgorithm(const std::string& algName)
  * Loads a standard ISIS raw file into Mantid, using the LoadRaw algorithm.
  * \param fileName :: The filepath of the raw file to be opened.
  * \param workspaceName :: The name under which the workspace is to be stored in Mantid.
- * \return Number of spectra.
+ * \return Shared pointer to the workspace.
  **/
 Workspace_sptr PythonInterface::LoadIsisRawFile(const std::string& fileName,
 		const std::string& workspaceName)
@@ -69,7 +69,26 @@ Workspace_sptr PythonInterface::LoadIsisRawFile(const std::string& fileName,
 
 		Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 
-		//Return the number of histograms
+		return output;
+	}
+	
+	Workspace_sptr empty;
+	
+	return empty;
+}
+
+/**
+ * Retrieves a workspace by name.
+ * \param workspaceName :: The name under which the workspace is stored in Mantid.
+ * \return Shared pointer to the workspace.
+ **/
+Workspace_sptr PythonInterface::RetrieveWorkspace(const std::string& workspaceName)
+{
+	//Check workspace does exist
+	if (AnalysisDataService::Instance().doesWorkspaceExist(workspaceName))
+	{
+		Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
+
 		return output;
 	}
 	

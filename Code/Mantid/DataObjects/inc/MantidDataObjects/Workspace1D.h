@@ -61,6 +61,8 @@ public:
   //set blocksize to a very large number as 1D workspace has only one block
   ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const;
+  
+  const int getHistogramNumber() const { return 1; }
 
   //inheritance redirections
   ///Returns the x data

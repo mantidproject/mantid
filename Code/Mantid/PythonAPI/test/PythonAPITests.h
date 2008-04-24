@@ -6,7 +6,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidPythonAPI/PythonInterface.h"
-#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::PythonAPI;
 
@@ -48,16 +48,15 @@ public:
 	
 	void testGetHistogramNumber()
 	{
-		int hists = inter->GetHistogramNumber("TestWorkspace1");
-
-		TS_ASSERT_EQUALS(hists, 2584);
+		Mantid::API::Workspace_sptr ws = inter->RetrieveWorkspace("TestWorkspace1");
+		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
 	}
 	
 	void testGetBinNumber()
 	{
-		int bins = inter->GetBinNumber("TestWorkspace1");
+		Mantid::API::Workspace_sptr ws = inter->RetrieveWorkspace("TestWorkspace1");
 
-		TS_ASSERT_EQUALS(bins, 1676);
+		TS_ASSERT_EQUALS(ws->blocksize(), 1675);
 	}
 	
 	void testGetWorkspaceNames()

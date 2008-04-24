@@ -15,6 +15,7 @@ public:
   virtual ~WorkspaceTester() {}
   
   // Empty overrides of virtual methods
+  virtual const int getHistogramNumber() const { return 1;}
   const std::string id() const {return "WorkspaceTester";}
   void init(const int&, const int&, const int&) {}
   int size() const {return 0;}

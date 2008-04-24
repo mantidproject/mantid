@@ -60,6 +60,7 @@ public:
 	API::Workspace_sptr LoadIsisRawFile(const std::string&, const std::string&);
 
 	//Workspace information
+	API::Workspace_sptr RetrieveWorkspace(const std::string& workspaceName);
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
 	std::vector<std::string> GetWorkspaceNames();
