@@ -49,7 +49,7 @@ namespace Mantid
     {
 	std::vector<std::string> names;
 	    
-	for (int i=0; i < regAlg.size(); ++i)
+	for (unsigned int i=0; i < regAlg.size(); ++i)
 	{
 		names.push_back(regAlg[i]->name());
 	}
