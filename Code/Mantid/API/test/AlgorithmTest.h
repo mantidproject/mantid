@@ -5,6 +5,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 using namespace Mantid::Kernel; 
 using namespace Mantid::API;

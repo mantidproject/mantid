@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <sstream>
 #include <numeric>

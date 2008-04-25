@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "boost/shared_ptr.hpp"
+#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

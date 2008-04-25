@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedDataBlock2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <iostream>
 
 namespace Mantid

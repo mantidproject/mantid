@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <limits>
 
 DECLARE_WORKSPACE(ManagedWorkspace2D)

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/WorkspaceFactory.h"
+//#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
@@ -12,7 +12,6 @@
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/Logger.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <ostream> 
@@ -20,6 +19,12 @@
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace API
 {
 /** @class Workspace Workspace.h
@@ -76,10 +81,9 @@ public:
   Instrument& getInstrument();
   Sample& getSample();
 
-	/// Get the footprint in memory.
-	virtual long int getMemorySize() const {return 0;}	
-	virtual ~Workspace();
-
+  /// Get the footprint in memory.
+  virtual long int getMemorySize() const {return 0;}	
+  virtual ~Workspace();
         
   //section required for iteration
   ///Returns the number of single indexable items in the workspace

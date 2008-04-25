@@ -2,6 +2,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {

@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "NeXusUtils/NeXusUtils.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

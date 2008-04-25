@@ -6,11 +6,14 @@
 
 #include "WorkspaceCreationHelper.hh"
 #include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/Minus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

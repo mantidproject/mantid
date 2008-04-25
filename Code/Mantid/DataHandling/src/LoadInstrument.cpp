@@ -6,6 +6,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
