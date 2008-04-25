@@ -5,11 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace DataObjects
 {
 /** \class Workspace2D

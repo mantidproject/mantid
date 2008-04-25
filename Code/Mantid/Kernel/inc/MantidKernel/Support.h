@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "System.h"
+#include "MantidKernel/System.h"
 #include <iostream>
 #include <sstream>
 #include <vector>

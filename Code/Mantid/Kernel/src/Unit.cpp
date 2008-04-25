@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
 namespace Mantid

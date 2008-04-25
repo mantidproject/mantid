@@ -5,10 +5,15 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidAPI/IErrorHelper.h"
 
 namespace Mantid
 {
+	
+namespace API
+{
+	class IErrorHelper;
+}
+	
 namespace DataObjects
 {
 /**

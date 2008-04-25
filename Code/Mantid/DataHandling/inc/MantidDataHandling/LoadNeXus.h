@@ -5,11 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
+	
+namespace Kernel
+{
+  class Logger;
+}
+
   namespace DataHandling
   {
     /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h

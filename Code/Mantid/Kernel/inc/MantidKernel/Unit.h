@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidKernel/UnitFactory.h"
 #include <string>
 #include <vector>
+#include <map>
 
 namespace Mantid
 {

@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
-#include "MantidKernel/Logger.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -19,6 +18,12 @@ namespace XML {
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace Geometry
 {
 	class CompAssembly;

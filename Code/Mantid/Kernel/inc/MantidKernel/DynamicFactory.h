@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Instantiator.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "boost/shared_ptr.hpp"
 #include <map>
@@ -16,6 +15,8 @@ namespace Mantid
 {
 namespace Kernel
 {
+class Logger;	
+	
 /** @class DynamicFactory DynamicFactory.h Kernel/DynamicFactory.h
 
     The dynamic factory is a base dynamic factory for serving up objects in response to requests from other classes.

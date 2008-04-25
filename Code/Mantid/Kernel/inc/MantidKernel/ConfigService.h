@@ -9,7 +9,6 @@
 #include <string>
 
 #include "MantidKernel/DllExport.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 
 //----------------------------------------------------------------------
@@ -30,6 +29,8 @@ namespace Mantid
 {
 namespace Kernel
 {
+class Logger;	
+	
 /** The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
 	  The class gathers information from config files and the system variables.  
 	  This information is available to all the objects within the framework as well as being used to configure the logging framework.

@@ -4,12 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <iostream>
 #include <string>
 #include <map>
 #include <boost/shared_ptr.hpp>
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/DllExport.h"
 #include "MantidKernel/LibraryWrapper.h"
@@ -18,7 +16,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-
+class Logger;
 /** 
  Class for opening shared libraries.
  

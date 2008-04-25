@@ -5,15 +5,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
-#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/Workspace2D.h"
-
 
 class ISISRAW;
 
-
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
   namespace DataHandling
   {
     /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h

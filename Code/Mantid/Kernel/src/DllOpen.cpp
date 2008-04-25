@@ -18,6 +18,7 @@
 
 #include "MantidKernel/Support.h"
 #include "MantidKernel/DllOpen.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

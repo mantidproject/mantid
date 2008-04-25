@@ -1,6 +1,8 @@
 #ifndef MANTIDKERNEL_COW_PTR_H
 #define MANTIDKERNEL_COW_PTR_H
 
+#include "boost/shared_ptr.hpp"
+
 namespace Mantid
 {
 namespace Kernel

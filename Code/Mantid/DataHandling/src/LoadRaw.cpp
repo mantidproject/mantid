@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -76,8 +77,6 @@ namespace Mantid
       // Read in the number of spectra in the RAW file
       int numberOfSpectra = iraw.t_nsp1;
 
-
-
       int minlist = *min_element(spec_list.begin(),spec_list.end());
       if(minlist == 0)
       {
@@ -122,8 +121,6 @@ namespace Mantid
           }
       }
 
-
-
       // Read in the time bin boundaries 
       lengthIn = channelsPerSpectrum + 1;    
       float* timeChannels = new float[lengthIn];
@@ -132,9 +129,7 @@ namespace Mantid
       boost::shared_ptr<std::vector<double> > timeChannelsVec
         (new std::vector<double>(timeChannels, timeChannels + lengthIn));
 
-
       int* spectrum = new int[lengthIn];
-
 
       if( interval || list)
       {

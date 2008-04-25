@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Property.h"
-#include "Exception.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/Exception.h"
 #include <iostream>
 #include <map>
 #include <ctime>

@@ -1,13 +1,18 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACE1D_H_
 #define MANTID_DATAOBJECTS_WORKSPACE1D_H_
 
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace DataObjects
 {
 

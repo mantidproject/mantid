@@ -7,13 +7,13 @@
 #include <vector>
 #include <map>
 
-#include "Logger.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
+class Logger;
 /** @class PropertyManager PropertyManager.h Kernel/PropertyManager.h
 
  Property manager helper class.

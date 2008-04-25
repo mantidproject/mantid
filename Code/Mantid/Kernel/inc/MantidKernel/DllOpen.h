@@ -4,12 +4,12 @@
 #include <string>
 
 #include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
 namespace Kernel
 {
+class Logger;
 
 /** @class DllOpen DllOpen.h 
 

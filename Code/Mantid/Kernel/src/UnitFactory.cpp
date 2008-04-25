@@ -1,4 +1,5 @@
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

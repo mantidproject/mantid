@@ -5,11 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/DllExport.h"
+#include "MantidKernel/cow_ptr.h"
 #include <fstream>
+#include <vector>
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace DataObjects
 {
 /** Stores a block of 2D data.
