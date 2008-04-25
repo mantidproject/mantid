@@ -360,7 +360,7 @@ public:
 	ISISRAW(ISISCRPT_STRUCT* crpt);
 	int updateFromCRPT();
 
-	int ioRAW(FILE* file, bool from_file);
+	int ioRAW(FILE* file, bool from_file, bool do_data = true);
 	int ioRAW(FILE* file, HDR_STRUCT* s, int len, bool from_file);
 	int ioRAW(FILE* file, ADD_STRUCT* s, int len, bool from_file);
 	int ioRAW(FILE* file, USER_STRUCT* s, int len, bool from_file);
@@ -386,7 +386,7 @@ public:
 	int ioRAW(FILE* file, SE_STRUCT** s, int len, bool from_file);
 	int ioRAW(FILE* file, DDES_STRUCT** s, int len, bool from_file);
 	int ioRAW(FILE* file, LOG_LINE** s, int len, bool from_file);
-	int readFromFile(const char* filename);
+	int readFromFile(const char* filename, bool read_data = true);
 	int writeToFile(const char* filename);
 	int printInfo(std::ostream& os);
 	int getTimeChannels(float* rtcb1, int n);

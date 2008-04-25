@@ -400,7 +400,7 @@ int ISISRAW::updateFromCRPT()
 
 
 /// stuff
-int ISISRAW::ioRAW(FILE* file, bool from_file)
+int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 	{
 		int ndata, len_log, i;
 		fpos_t add_pos, dhdr_pos, keep_pos; 
@@ -468,7 +468,12 @@ int ISISRAW::ioRAW(FILE* file, bool from_file)
 		ioRAW(file, &dhdr, 1, from_file);
 		int ndes, nout, nwords, outbuff_size = 100000, offset;
 		char* outbuff = new char[outbuff_size];
-		if (dhdr.d_comp == 0)
+		if (!read_data)
+		{
+		    ndes = ndata = 0;
+		    dat1 = NULL;
+		}
+		else if (dhdr.d_comp == 0)
 		{
 			ndata = t_nper * (t_nsp1+1) * (t_ntc1+1);
 			ndes = 0;
@@ -991,7 +996,7 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 
 
 /// stuff
-int ISISRAW::readFromFile(const char* filename)
+int ISISRAW::readFromFile(const char* filename, bool read_data)
 {
 #ifdef MS_VISUAL_STUDIO
   FILE* input_file=NULL;
@@ -1004,7 +1009,7 @@ int ISISRAW::readFromFile(const char* filename)
 #endif //_WIN32
 	if (input_file != NULL)
 	{
-		ioRAW(input_file, true);
+		ioRAW(input_file, true, read_data);
 		fclose(input_file);
 		return 0;
 	}
