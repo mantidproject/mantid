@@ -19,6 +19,16 @@ namespace XML {
 
 namespace Mantid
 {
+namespace Geometry
+{
+	class CompAssembly;
+	class Component;
+}
+namespace API
+{
+	class Instrument;
+}
+	
   namespace DataHandling
   {
     /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h

@@ -5,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

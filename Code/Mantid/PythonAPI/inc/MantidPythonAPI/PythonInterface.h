@@ -6,7 +6,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {
@@ -14,6 +13,7 @@ namespace Mantid
 namespace API
 {
 class IAlgorithm;
+class Workspace;
 }
 
 namespace PythonAPI
@@ -57,10 +57,10 @@ public:
 	API::IAlgorithm* CreateAlgorithm(const std::string&);
 
 	//Load Data
-	API::Workspace_sptr LoadIsisRawFile(const std::string&, const std::string&);
+	boost::shared_ptr<API::Workspace> LoadIsisRawFile(const std::string&, const std::string&);
 
 	//Workspace information
-	API::Workspace_sptr RetrieveWorkspace(const std::string& workspaceName);
+	boost::shared_ptr<API::Workspace> RetrieveWorkspace(const std::string& workspaceName);
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
 	std::vector<std::string> GetWorkspaceNames();

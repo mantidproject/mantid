@@ -27,6 +27,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Exception.h" 
+#include "MantidAPI/AlgorithmFactory.h"
 
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below

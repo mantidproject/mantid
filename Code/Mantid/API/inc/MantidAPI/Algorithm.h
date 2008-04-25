@@ -26,12 +26,14 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/AlgorithmHistory.h"
+//#include "MantidAPI/AlgorithmManager.h"
+//#include "MantidAPI/WorkspaceFactory.h"
+//#include "MantidAPI/WorkspaceHistory.h"
+//#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/Logger.h"
+#include "MantidKernel/Property.h"
+//#include "MantidKernel/Logger.h"
 
 #include "boost/shared_ptr.hpp"
 #include <vector>
@@ -43,8 +45,15 @@
 
 namespace Mantid
 {
+	
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace API
 {
+  class Algorithm;
 
   typedef AlgorithmHistory::dateAndTime dateAndTime;
   ///Typedef for a shared pointer to an Algorithm
@@ -115,7 +124,7 @@ public:
   // Make PropertyManager's setProperty methods public
   using Kernel::PropertyManager::setProperty;
 
-  virtual const std::vector< Property*>& getProperties() const
+  virtual const std::vector< Kernel::Property*>& getProperties() const
   {
     return Kernel::PropertyManager::getProperties();
   }

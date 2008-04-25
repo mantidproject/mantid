@@ -7,11 +7,16 @@
 #include <string>
 #include <vector>
 #include "MantidAPI/DllExport.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
+
+	namespace Kernel
+	{
+		class Logger;
+	}
+	
 	namespace API
 	{
 

@@ -4,17 +4,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidKernel/Logger.h"
-#include "MantidAPI/LocatedDataRef.h" 
-#include "MantidAPI/LocatedDataValue.h" 
-
 #include <algorithm>
 #include <functional>
 #include <iterator>
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/LocatedDataRef.h" 
+#include "MantidAPI/LocatedDataValue.h" 
+
 namespace Mantid
 {
+
+namespace Kernel
+{
+	class Logger;
+}
+	
   namespace Algorithms
   {
     /** @class BinaryOperation BinaryOperation.h Algorithms/BinaryOperation.h

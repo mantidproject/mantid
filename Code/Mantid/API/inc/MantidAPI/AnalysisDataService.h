@@ -9,12 +9,17 @@
 #include <vector>
 
 #include "MantidAPI/DllExport.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
 namespace API
 {
 /** The Analysis data service stores instances of the Workspace objects and 

@@ -1,11 +1,15 @@
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/Logger.h"
-
 #include "boost/shared_ptr.hpp"
+
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}
+	
   namespace API
   {
     // Workspace operator overloads

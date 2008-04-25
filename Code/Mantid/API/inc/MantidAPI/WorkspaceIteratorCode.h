@@ -2,7 +2,7 @@
 #include <iterator>
 //#include <boost/shared_ptr.hpp>
 
-#include "LocatedDataRef.h"
+#include "MantidAPI/LocatedDataRef.h"
 
 namespace Mantid 
 {

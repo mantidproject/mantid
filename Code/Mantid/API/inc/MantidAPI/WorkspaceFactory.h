@@ -19,21 +19,16 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
 namespace API
 {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 class Workspace;
-
-/// @cond (documented elsewhere)
-//shared pointer to the workspace base class
+	
+///shared pointer to the workspace base class
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
-/// @endcond
 
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from

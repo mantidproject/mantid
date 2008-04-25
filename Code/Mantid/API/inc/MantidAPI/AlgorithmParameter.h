@@ -11,8 +11,6 @@ namespace Mantid
 {
   namespace API
   {
-
-
     /** @class AlgorithmParameter AlgorithmParameter.h API/MAntidAPI/AlgorithmParameter.h
 
     This class stores information about the parameters used by an algorithm.

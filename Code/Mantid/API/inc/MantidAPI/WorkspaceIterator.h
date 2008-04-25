@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "MantidKernel/System.h"
-#include "LocatedDataRef.h"
+#include "MantidAPI/LocatedDataRef.h"
 
 namespace Mantid
 {

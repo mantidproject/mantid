@@ -1,4 +1,5 @@
 #include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidKernel/Logger.h"
 #include <cmath>
 
 using namespace Mantid::Kernel;

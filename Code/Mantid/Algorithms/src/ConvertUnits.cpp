@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {
@@ -31,8 +33,8 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));  
+  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));  
   declareProperty("Target","",new MandatoryValidator);
   declareProperty("Emode",0);
   declareProperty("Efixed",0.0);
@@ -46,7 +48,7 @@ void ConvertUnits::init()
 void ConvertUnits::exec()
 {
   // Get the workspace
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  API::Workspace_sptr inputWS = getProperty("InputWorkspace");
   
   // Check that the workspace is histogram data
   if (inputWS->dataX(0).size() == inputWS->dataY(0).size())
@@ -65,7 +67,7 @@ void ConvertUnits::exec()
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
   
-  Workspace_sptr outputWS = getProperty("OutputWorkspace");
+  API::Workspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for the output
   if (outputWS != inputWS )
   {

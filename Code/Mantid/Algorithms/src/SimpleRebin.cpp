@@ -9,6 +9,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 
 #include <sstream>

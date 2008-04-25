@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
 #include "MantidAPI/IErrorHelper.h" 
+#include "MantidAPI/AlgorithmFactory.h"
 
 // Register the class into the algorithm factory
 DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Plus)

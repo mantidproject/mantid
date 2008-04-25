@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_WORKSPACE_H_
-#define MANTID_KERNEL_WORKSPACE_H_
+#ifndef MANTID_API_WORKSPACE_H_
+#define MANTID_API_WORKSPACE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,14 +16,12 @@
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <ostream> 
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
 namespace API
 {
-///shared pointer to the workspace base class
-typedef boost::shared_ptr<Workspace> Workspace_sptr;
-
 /** @class Workspace Workspace.h
  
  Base Workspace Abstract Class.
@@ -166,7 +164,10 @@ private:
 	static Kernel::Logger& g_log;
 };
 
+///shared pointer to the workspace base class
+typedef boost::shared_ptr<Workspace> Workspace_sptr;
+
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_WORKSPACE_H_*/
+#endif /*MANTID_API_WORKSPACE_H_*/

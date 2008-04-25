@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

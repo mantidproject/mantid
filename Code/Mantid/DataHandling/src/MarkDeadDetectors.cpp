@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 namespace Mantid
 {

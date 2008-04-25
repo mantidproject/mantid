@@ -5,11 +5,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/IErrorHelper.h"
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  class Logger;
+}	
+
 namespace API
 {
 
