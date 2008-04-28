@@ -4,9 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/IStorable.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 namespace Mantid
 {

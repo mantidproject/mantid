@@ -3,13 +3,7 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/Divide.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Exception.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
-#include "MantidAPI/IErrorHelper.h" 
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmFactory.h"
 
 // Register the class into the algorithm factory
 DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Divide)

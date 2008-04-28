@@ -3,9 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <cmath>

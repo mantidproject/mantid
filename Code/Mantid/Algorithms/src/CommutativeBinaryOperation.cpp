@@ -3,9 +3,6 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Exception.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
 #include "MantidDataObjects/Workspace1D.h" 
 #include "MantidDataObjects/Workspace2D.h" 

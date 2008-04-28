@@ -2,9 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid

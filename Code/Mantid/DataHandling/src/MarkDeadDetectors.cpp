@@ -2,11 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MarkDeadDetectors.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid
 {

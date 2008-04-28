@@ -18,11 +18,6 @@ namespace XML {
 
 namespace Mantid
 {
-
-namespace Kernel
-{
-  class Logger;
-}
 	
 namespace Geometry
 {

@@ -11,12 +11,6 @@ class ISISRAW;
 
 namespace Mantid
 {
-
-namespace Kernel
-{
-  class Logger;
-}
-	
   namespace DataHandling
   {
     /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h

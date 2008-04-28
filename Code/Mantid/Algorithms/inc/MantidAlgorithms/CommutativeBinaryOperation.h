@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidKernel/Logger.h"
 #include "MantidAPI/LocatedDataRef.h" 
 
 #include <algorithm>

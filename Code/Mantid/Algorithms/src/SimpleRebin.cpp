@@ -4,13 +4,7 @@
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/GaussianErrorHelper.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 
 #include <sstream>

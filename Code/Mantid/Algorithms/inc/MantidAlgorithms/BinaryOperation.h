@@ -15,11 +15,6 @@
 
 namespace Mantid
 {
-
-namespace Kernel
-{
-	class Logger;
-}
 	
   namespace Algorithms
   {

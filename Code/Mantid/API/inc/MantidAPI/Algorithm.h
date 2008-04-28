@@ -26,14 +26,14 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmHistory.h"
-//#include "MantidAPI/AlgorithmManager.h"
-//#include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/WorkspaceHistory.h"
-//#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Property.h"
-//#include "MantidKernel/Logger.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Exception.h" 
 
 #include "boost/shared_ptr.hpp"
 #include <vector>
@@ -45,11 +45,6 @@
 
 namespace Mantid
 {
-	
-namespace Kernel
-{
-  class Logger;
-}
 	
 namespace API
 {

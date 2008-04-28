@@ -3,11 +3,8 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Exception.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
-#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

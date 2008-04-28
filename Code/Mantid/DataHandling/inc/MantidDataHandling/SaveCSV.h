@@ -8,12 +8,6 @@
 
 namespace Mantid
 {
-
-namespace Kernel
-{
-  class Logger;
-}	
-
   namespace DataHandling
   {
     /** @class SaveCSV SaveCSV.h DataHandling/SaveCSV.h

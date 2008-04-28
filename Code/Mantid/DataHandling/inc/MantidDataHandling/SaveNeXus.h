@@ -5,16 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
-#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
-	
-namespace Kernel
-{
-  class Logger;
-}
-	
   namespace DataHandling
   {
     /** @class SaveNeXus SaveNeXus.h MantidDataHandling/SaveNeXus.h

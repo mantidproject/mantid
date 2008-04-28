@@ -9,12 +9,6 @@
 
 namespace Mantid
 {
-	
-namespace Kernel
-{
-  class Logger;
-}
-
   namespace DataHandling
   {
     /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h

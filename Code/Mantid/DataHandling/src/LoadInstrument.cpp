@@ -2,18 +2,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/Instrument.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/Component.h"
 
 #include <fstream>
-
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
