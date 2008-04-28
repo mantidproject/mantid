@@ -265,6 +265,11 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
   pNL_loc_for_this_type->release();
 }
 
+void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, int& runningDetID)
+{
+  appendAssembly(parent.get(),pLocElem,runningDetID);
+}
+
 
 /** Assumes second argument is pointing to a leaf, which here mean location element (indirectly 
  *  representing a component element) that contains no sub-components. This component is appended 
@@ -354,7 +359,10 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
   }
 }
 
-
+void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, int& runningDetID)
+{
+	appendLeaf(parent.get(),pLocElem,runningDetID);
+}
 
 /** Set location (position) of comp as specified in XML location element.
  *
