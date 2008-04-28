@@ -151,14 +151,14 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS)
 {  
   // Get a reference to the instrument contained in the workspace
-  API::Instrument &instrument = inputWS->getInstrument();
+  boost::shared_ptr<API::Instrument> instrument = inputWS->getInstrument();
   
   // Get the distance between the source and the sample (assume in metres)
-  Geometry::ObjComponent &samplePos = *instrument.getSamplePos();
+  Geometry::ObjComponent* samplePos = instrument->getSamplePos();
   double l1;
   try 
   {
-    l1 = instrument.getSource()->getDistance(samplePos);
+    l1 = instrument->getSource()->getDistance(*samplePos);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   } 
   catch (Exception::NotFoundError e) 
@@ -189,7 +189,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
       //     - this assumes the incident beam comes in along the z axis
       double twoTheta;
       // Get these two values
-      instrument.detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
+      instrument->detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;

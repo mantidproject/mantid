@@ -88,7 +88,7 @@ void GroupDetectors::exec()
   {
     spectra.push_back(WS->spectraNo(*it));
   }
-  WS->getInstrument().groupDetectors(spectra);
+  WS->getInstrument()->groupDetectors(spectra);
 }
 
 double GroupDetectors::dblSqrt(double in)

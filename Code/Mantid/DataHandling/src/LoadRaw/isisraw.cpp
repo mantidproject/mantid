@@ -1039,7 +1039,7 @@ int ISISRAW::writeToFile(const char* filename)
 #endif //_WIN32
 	if (output_file != NULL)
 	{
-		ioRAW(output_file, false);
+		ioRAW(output_file, false,0);
 		fflush(output_file);
 		// we need to pad to a multiple of 512 bytes for VMS compatibility
 		fseek(output_file, 0, SEEK_END);

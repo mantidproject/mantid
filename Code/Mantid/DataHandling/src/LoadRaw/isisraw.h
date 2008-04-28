@@ -200,8 +200,8 @@ struct ADD_STRUCT
 		int neut_good_low;	///<          good ext. neut tot (low  32 bits)***B
 		int neut_raw_high;	///<          raw  ext. neut tot (high 32 bits)***B
 		int neut_raw_low;	///<          raw  ext. neut tot (low  32 bits)***B
-		int neut_gate_t1;	///<          ext. neutron gate (t1) (µs)   ***B
-		int neut_gate_t2;	///<          ext. neutron gate (t2) (µs)   ***B
+		int neut_gate_t1;	///<          ext. neutron gate (t1) (ï¿½s)   ***B
+		int neut_gate_t2;	///<          ext. neutron gate (t2) (ï¿½s)   ***B
 		int mon1_detector;	///<          detector for MON 1  (12 bits)   ***B
 		int mon1_module;	///<          module   for MON 1  ( 4 bits)   ***B
 		int mon1_crate;		///<          crate    for MON 1  ( 4 bits)   ***B
@@ -212,7 +212,7 @@ struct ADD_STRUCT
 		int mon2_mask;		///<          mask     for MON 2  (c4:m4:d12) ***B		
 		int events_good_high;		///<  total GOOD EVENTS (high 32 bits)***B
 		int events_good_low;	    ///<  total GOOD EVENTS (low  32 bits)***B
-		int a_delay;		///<  frame synch delay (4µs steps) ***B
+		int a_delay;		///<  frame synch delay (4ï¿½s steps) ***B
 		int a_sync;		///<          frm snch origin(0:none/1:ext/2:int)***B
 		int a_smp;		///<			    Secondary Master Pulse (0:en,1:dis)
 		int ext_vetos[3];	///<			External vetoes 0,1,2 (0 dis,1 en)

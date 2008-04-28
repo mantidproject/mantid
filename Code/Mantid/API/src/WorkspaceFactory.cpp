@@ -40,7 +40,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
   const int YLength = parent->blocksize();
   const int NVectors = parent->size() / YLength;
   ws->init(NVectors,XLength,YLength);
-  
+  ws->setInstrument(parent->getInstrument());
   return ws;
 }
 

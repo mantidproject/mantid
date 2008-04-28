@@ -118,7 +118,7 @@ void LoadInstrument::exec()
 
   // Get reference to Instrument and set its name
 
-  instrument = &(localWorkspace->getInstrument());
+  instrument = (localWorkspace->getInstrument());
   if ( pRootElem->hasAttribute("name") ) 
     instrument->setName( pRootElem->getAttribute("name") );
 

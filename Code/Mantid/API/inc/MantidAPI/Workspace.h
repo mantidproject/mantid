@@ -74,11 +74,10 @@ public:
   
   void setTitle(const std::string&);
   void setComment(const std::string&);
-
+  void setInstrument(const boost::shared_ptr<Instrument>&);
   const std::string& getComment() const;
   const std::string& getTitle() const;
-
-  Instrument& getInstrument();
+  boost::shared_ptr<Instrument> getInstrument() const;
   Sample& getSample();
 
   /// Get the footprint in memory.
@@ -152,7 +151,7 @@ private:
   std::string m_comment;
 
   /// The instrument used for this experiment
-  Instrument m_instrument;
+  boost::shared_ptr<Instrument> sptr_instrument;
   /// The information on the sample environment
   Sample m_sample;
 

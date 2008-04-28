@@ -139,8 +139,19 @@ private:
    *  @throw std::runtime_error If an attempt is made to assign a property to a different type
    *  @throw Exception::NotFoundError If the property requested does not exist
    */
-  template<typename T> 
-  T getValue(const std::string &name) const;
+  template<typename T>
+  T getValue(const std::string &name) const
+  {
+	  PropertyWithValue<T> *prop = dynamic_cast<PropertyWithValue<T>* >(getPointerToProperty(name));
+	   if (prop)
+	   {
+	     return *prop;
+	   }
+	   else
+	   {
+	     throw std::runtime_error("Attempt to assign property of incorrect type");
+	   }
+  }
 
   /// Utility class that enables the getProperty() method to effectively be templated on the return type
   struct TypedValue

@@ -95,10 +95,10 @@ namespace API
 
       /// Add XML element to parent assuming the element contains other component elements
       void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
-
+      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, int& runningDetID);
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
-
+      void appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, int& runningDetID);
       /// Set location (position) of comp as specified in XML location element
       void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
 
@@ -119,7 +119,7 @@ namespace API
       static Kernel::Logger& g_log;
 
       /// For convenience added pointer to instrument here
-      API::Instrument* instrument;
+      boost::shared_ptr<API::Instrument> instrument;
     };
 
   } // namespace DataHandling
