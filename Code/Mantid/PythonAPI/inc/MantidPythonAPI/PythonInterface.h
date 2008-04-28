@@ -64,6 +64,7 @@ public:
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
 	std::vector<std::string> GetWorkspaceNames();
+	std::vector<std::string> GetAlgorithmNames();
 
 	//Access Data
 	std::vector<double>* GetXData(const std::string&, int const );

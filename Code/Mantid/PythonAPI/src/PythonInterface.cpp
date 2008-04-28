@@ -5,7 +5,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidDataHandling/LoadRaw.h"
@@ -134,6 +134,15 @@ int PythonInterface::GetBinNumber(const std::string& workspaceName)
 std::vector<std::string> PythonInterface::GetWorkspaceNames()
 {
 	return AnalysisDataService::Instance().getWorkspaceNames();
+}
+
+/**
+ * Returns the name of all the algorithms.
+ * \return Vector of strings.
+ **/
+std::vector<std::string> PythonInterface::GetAlgorithmNames()
+{
+	return AlgorithmManager::Instance().getNames();
 }
 
 /**
