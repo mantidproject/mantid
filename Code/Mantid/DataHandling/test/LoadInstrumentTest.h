@@ -90,16 +90,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
     
-    Instrument& i = output->getInstrument();
-    Component* source = i.getSource();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-    Component* samplepos = i.getSamplePos();
+    Component* samplepos = i->getSamplePos();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
 
-    Detector *ptrDet103 = dynamic_cast<Detector*>(i.getDetector(103));
+    Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.2019,0.01);
@@ -112,10 +112,10 @@ public:
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
     // also a few tests on the last detector and a test for the one beyond the last
-    Detector *ptrDetLast = dynamic_cast<Detector*>(i.getDetector(2184));
+    Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(2184));
     TS_ASSERT_EQUALS( ptrDetLast->getID(), 2184);
     TS_ASSERT_EQUALS( ptrDetLast->getName(), "pixel");
-    TS_ASSERT_THROWS(i.getDetector(2185), Exception::NotFoundError);
+    TS_ASSERT_THROWS(i->getDetector(2185), Exception::NotFoundError);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
@@ -158,16 +158,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
     
-    Instrument& i = output->getInstrument();
-    Component* source = i.getSource();
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-    Component* samplepos = i.getSamplePos();
+    Component* samplepos = i->getSamplePos();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
 
-    Detector *ptrDet = dynamic_cast<Detector*>(i.getDetector(101001));
+    Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
     TS_ASSERT_EQUALS( ptrDet->getName(), "scintillator_B1");
     TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0,0.01);

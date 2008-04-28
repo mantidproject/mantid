@@ -37,19 +37,19 @@ public:
     }
     Detector *d = new Detector;
     d->setID(0);
-    space->getInstrument().markAsDetector(d);
+    space->getInstrument()->markAsDetector(d);
     Detector *d1 = new Detector;
     d1->setID(1);
-    space->getInstrument().markAsDetector(d1);
+    space->getInstrument()->markAsDetector(d1);
     Detector *d2 = new Detector;
     d2->setID(2);
-    space->getInstrument().markAsDetector(d2);
+    space->getInstrument()->markAsDetector(d2);
     Detector *d3 = new Detector;
     d3->setID(3);
-    space->getInstrument().markAsDetector(d3);
+    space->getInstrument()->markAsDetector(d3);
     Detector *d4 = new Detector;
     d4->setID(4);
-    space->getInstrument().markAsDetector(d4);
+    space->getInstrument()->markAsDetector(d4);
       
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
@@ -123,12 +123,12 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    Instrument& i = outputWS->getInstrument();
-    TS_ASSERT( i.getDetector(0)->isDead() )
-    TS_ASSERT( ! i.getDetector(1)->isDead() )
-    TS_ASSERT( ! i.getDetector(2)->isDead() )
-    TS_ASSERT( i.getDetector(3)->isDead() )
-    TS_ASSERT( ! i.getDetector(4)->isDead() )
+    boost::shared_ptr<Instrument> i = outputWS->getInstrument();
+    TS_ASSERT( i->getDetector(0)->isDead() )
+    TS_ASSERT( ! i->getDetector(1)->isDead() )
+    TS_ASSERT( ! i->getDetector(2)->isDead() )
+    TS_ASSERT( i->getDetector(3)->isDead() )
+    TS_ASSERT( ! i->getDetector(4)->isDead() )
     
     marker.setPropertyValue("WorkspaceIndexMin","2");
     // Should cope with me setting this to a high value
@@ -149,11 +149,11 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(4), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataE(4), zeroes )
-    TS_ASSERT( i.getDetector(0)->isDead() )
-    TS_ASSERT( ! i.getDetector(1)->isDead() )
-    TS_ASSERT( i.getDetector(2)->isDead() )
-    TS_ASSERT( i.getDetector(3)->isDead() )
-    TS_ASSERT( i.getDetector(4)->isDead() )
+    TS_ASSERT( i->getDetector(0)->isDead() )
+    TS_ASSERT( ! i->getDetector(1)->isDead() )
+    TS_ASSERT( i->getDetector(2)->isDead() )
+    TS_ASSERT( i->getDetector(3)->isDead() )
+    TS_ASSERT( i->getDetector(4)->isDead() )
   }
   
 private:

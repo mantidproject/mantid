@@ -61,8 +61,8 @@ public:
 
 	void testGetInstrument()
 	{
-	  Instrument& i = ws.getInstrument();
-		TS_ASSERT_EQUALS( ws.getInstrument().type(), "Instrument" )
+	  boost::shared_ptr<Instrument> i = ws.getInstrument();
+		TS_ASSERT_EQUALS( ws.getInstrument()->type(), "Instrument" )
 	}
 
 	void testGetSample()
