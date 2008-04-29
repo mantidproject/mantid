@@ -12,7 +12,7 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace() : m_title(), m_comment(), sptr_instrument(), m_sample(), m_history(), 
+Workspace::Workspace() : m_title(), m_comment(), sptr_instrument(new Instrument), m_sample(), m_history(), 
   m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
 {}
 
@@ -37,14 +37,19 @@ void Workspace::setComment(const std::string& c)
   m_comment=c;
 }
 
-/** Get the workspace title
+/** Set the instrument
  * 
- *  @return The title
+ * \param instr :: The instrument.
  */
 void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
 {
 	sptr_instrument=instr;
 }
+
+/** Get the workspace title
+ * 
+ *  @return The title
+ */
 const std::string& Workspace::getTitle() const
 {
   return m_title;
