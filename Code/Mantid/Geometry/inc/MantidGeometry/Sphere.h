@@ -45,11 +45,11 @@ class DLLExport Sphere : public Quadratic
 
   static Kernel::Logger& PLog;           ///< The official logger  
 
-  Geometry::Vec3D Centre;        ///< Point for centre
+  Geometry::V3D Centre;        ///< Point for centre
   double Radius;                 ///< Radius of sphere
   
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
 
  public:
   
@@ -60,12 +60,12 @@ class DLLExport Sphere : public Quadratic
   ~Sphere();
   
   int setSurface(const std::string&);
-  int side(const Geometry::Vec3D&) const;
-  int onSurface(const Geometry::Vec3D&) const;
-  double distance(const Geometry::Vec3D&) const;
+  int side(const Geometry::V3D&) const;
+  int onSurface(const Geometry::V3D&) const;
+  double distance(const Geometry::V3D&) const;
 
-  void setCentre(const Geometry::Vec3D&);              
-  Geometry::Vec3D getCentre() const { return Centre; } ///< Get Centre
+  void setCentre(const Geometry::V3D&);              
+  Geometry::V3D getCentre() const { return Centre; } ///< Get Centre
   double getRadius() const { return Radius; }          ///< Get Radius
   void setBaseEqn();
 

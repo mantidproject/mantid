@@ -50,14 +50,14 @@ class DLLExport Torus : public Surface
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
-  Geometry::Vec3D Normal;        ///< Normal
+  Geometry::V3D Centre;        ///< Geometry::Vec3D for centre
+  Geometry::V3D Normal;        ///< Normal
   double Iradius;                ///< Inner radius
   double Dradius;                ///< Inner radius
   double Displacement;           ///< Displacement
 
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
 
  public:
 
@@ -72,18 +72,18 @@ class DLLExport Torus : public Surface
   ~Torus();
   
   int setSurface(const std::string&);
-  int side(const Geometry::Vec3D&) const;
-  int onSurface(const Geometry::Vec3D&) const;
-  double distance(const Geometry::Vec3D&) const;   
+  int side(const Geometry::V3D&) const;
+  int onSurface(const Geometry::V3D&) const;
+  double distance(const Geometry::V3D&) const;   
 
   /// Return centre point
-  Geometry::Vec3D getCentre() const { return Centre; }              
+  Geometry::V3D getCentre() const { return Centre; }              
   /// Central normal
-  Geometry::Vec3D getNormal() const { return Normal; }       
-  Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const;
+  Geometry::V3D getNormal() const { return Normal; }       
+  Geometry::V3D surfaceNormal(const Geometry::V3D&) const;
 
-  void setCentre(const Geometry::Vec3D&);              
-  void setNorm(const Geometry::Vec3D&);
+  void setCentre(const Geometry::V3D&);              
+  void setNorm(const Geometry::V3D&);
 
   void write(std::ostream&) const;
 };

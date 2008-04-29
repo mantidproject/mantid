@@ -2,7 +2,7 @@
 #define Object_h
 
 #include "MantidKernel/Logger.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Track.h"
@@ -59,7 +59,7 @@ class Object
   
   int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
-  int checkSurfaceValid(const Geometry::Vec3D&,const Geometry::Vec3D&) const;
+  int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
 
  protected:
   
@@ -100,10 +100,10 @@ class Object
   virtual void print() const;
   void printTree() const;
   
-  int isValid(const Geometry::Vec3D&) const;    ///< Check if a point is valid
+  int isValid(const Geometry::V3D&) const;    ///< Check if a point is valid
   int isValid(const std::map<int,int>&) const;  ///< Check if a set of surfaces are valid.
-  int isOnSide(const Geometry::Vec3D&) const;
-  int calcValidType(const Geometry::Vec3D& Pt,const Geometry::Vec3D& uVec) const;
+  int isOnSide(const Geometry::V3D&) const;
+  int calcValidType(const Geometry::V3D& Pt,const Geometry::V3D& uVec) const;
 
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)

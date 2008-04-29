@@ -22,7 +22,7 @@
 #include "IndexIterator.h"
 #include "MantidGeometry/Triple.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Rules.h"

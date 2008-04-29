@@ -470,7 +470,55 @@ V3D::coLinear(const V3D& Bv,const V3D& Cv) const
   return (Tmp.norm()>Tolerance) ? 0 : 1;
 }
 
+int 
+V3D::nullVector(const double Tol) const
+  /*! 
+    Checks the size of the vector
+    \param Tol :: size of the biggest zero vector allowed.
+    \retval 1 : the vector squared components
+    magnitude are less than Tol 
+    \retval 0 :: Vector bigger than Tol
+  */
+{
+  return ((x*x+y*y+z*z)>Tol) ? 0 :1;
+}
 
+int 
+V3D::masterDir(const double Tol) const
+  /*! 
+     Calculates the index of the primary direction (if there is one)
+     \param Tol :: Tolerance accepted
+     \retval range -3,-2,-1 1,2,3  if the vector
+     is orientaged within Tol on the x,y,z direction (the sign
+     indecates the direction to the +ve side )
+     \retval 0 :: No master direction
+  */
+{
+  // Calc max dist
+  double max=x*x; 
+  double other=max;
+  double u2=y*y;
+  int idx=(x>0) ? 1 : -1;
+  if (u2>max)
+    {
+      max=u2;
+      idx=(y>0) ? 2 : -2;
+    }
+  other+=u2;
+  u2=z*z;
+  if (u2>max)
+    {
+      max=u2;
+      idx=(z>0) ? 3 : -3;
+    }
+  other+=u2;
+  other-=max;
+  if ((other/max)>Tol)    //doesn't have master direction
+    {
+      return 0;
+    }
+  return idx;
+}
 
 /*!
   Read data from a stream.
@@ -481,6 +529,17 @@ void
 V3D::read(std::istream& IX)
 {
   IX>>x>>y>>z;
+  return;
+}
+
+void
+V3D::write(std::ostream& OX) const
+  /*!
+    Write out the point values
+    \param OX :: Output stream
+  */
+{
+  OX<<x<<" "<<y<<" "<<z;
   return;
 }
 

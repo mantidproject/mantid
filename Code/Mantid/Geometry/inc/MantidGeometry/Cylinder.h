@@ -47,13 +47,13 @@ class DLLExport Cylinder : public Quadratic
 
   static Kernel::Logger& PLog;           ///< The official logger
   
-  Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
-  Geometry::Vec3D Normal;        ///< Direction of centre line
+  Geometry::V3D Centre;        ///< Geometry::V3D for centre
+  Geometry::V3D Normal;        ///< Direction of centre line
   int Nvec;            ///< Normal vector is x,y or z :: (1-3) (0 if general)
   double Radius;       ///< Radius of cylinder
   
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
   void setNvec();      ///< check to obtain orientation
 
  public:
@@ -71,18 +71,18 @@ class DLLExport Cylinder : public Quadratic
   virtual void acceptVisitor(BaseVisit& A) const
     {  A.Accept(*this); }
   
-  virtual double lineIntersect(const Geometry::Vec3D&,
-			       const Geometry::Vec3D&) const;
+  virtual double lineIntersect(const Geometry::V3D&,
+			       const Geometry::V3D&) const;
 
-  int side(const Geometry::Vec3D&) const;
-  int onSurface(const Geometry::Vec3D&) const;
-  double distance(const Geometry::Vec3D&) const;
+  int side(const Geometry::V3D&) const;
+  int onSurface(const Geometry::V3D&) const;
+  double distance(const Geometry::V3D&) const;
 
   int setSurface(const std::string&);
-  void setCentre(const Geometry::Vec3D&);              
-  void setNorm(const Geometry::Vec3D&);       
-  Geometry::Vec3D getCentre() const { return Centre; }   ///< Return centre point       
-  Geometry::Vec3D getNormal() const { return Normal; }   ///< Return Central line
+  void setCentre(const Geometry::V3D&);              
+  void setNorm(const Geometry::V3D&);       
+  Geometry::V3D getCentre() const { return Centre; }   ///< Return centre point       
+  Geometry::V3D getNormal() const { return Normal; }   ///< Return Central line
   double getRadius() const { return Radius; }  ///< Get Radius      
   void setBaseEqn();
 

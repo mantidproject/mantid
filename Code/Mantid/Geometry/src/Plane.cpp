@@ -21,7 +21,7 @@
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"
@@ -96,7 +96,7 @@ Plane::setSurface(const std::string& Pstr)
      There are three types : 
      - (A) px Distance
      - (B) p A B C D (equation Ax+By+Cz=D)
-     - (C) p Vec3D Vec3D Vec3D
+     - (C) p V3D V3D V3D
      \param Pstr :: String to make into a plane of type p{xyz} or p 
      \return 0 on success, -ve of failure
   */
@@ -117,21 +117,21 @@ Plane::setSurface(const std::string& Pstr)
 
       if (cnt!=4 && cnt!=9)
 		return -3;
-      if (cnt==9)          // Vec3d type
+      if (cnt==9)          // V3D type
         {
-	  Geometry::Vec3D A=Geometry::Vec3D(surf[0],surf[1],surf[2]);
-	  Geometry::Vec3D B=Geometry::Vec3D(surf[3],surf[4],surf[5]);
-	  Geometry::Vec3D C=Geometry::Vec3D(surf[6],surf[7],surf[8]);
+	  Geometry::V3D A=Geometry::V3D(surf[0],surf[1],surf[2]);
+	  Geometry::V3D B=Geometry::V3D(surf[3],surf[4],surf[5]);
+	  Geometry::V3D C=Geometry::V3D(surf[6],surf[7],surf[8]);
 	  B-=A;
 	  C-=A;
 	  NormV = B*C;
-	  NormV.makeUnit();
-	  Dist=A.dotProd(NormV);
+	  NormV.normalize();
+	  Dist=A.scalar_prod(NormV);
 	}
       else        // Norm Equation:
         { 
-	  NormV=Geometry::Vec3D(surf[0],surf[1],surf[2]);
-	  const double ll=NormV.makeUnit();
+	  NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
+	  const double ll=NormV.normalize();
 	  if (ll<PTolerance)   // avoid 
 	    return -4;
 	  Dist= surf[3]/ll;
@@ -145,7 +145,7 @@ Plane::setSurface(const std::string& Pstr)
       surf[ptype]=1.0;
       if (!StrFunc::convert(Line,Dist))
 	return -6;                      //Too short or no number
-      NormV=Geometry::Vec3D(surf[0],surf[1],surf[2]);
+      NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
     }
   else
     return -3;       // WRONG NAME
@@ -155,7 +155,7 @@ Plane::setSurface(const std::string& Pstr)
 }
 
 int
-Plane::setPlane(const Geometry::Vec3D& P,const Geometry::Vec3D& N) 
+Plane::setPlane(const Geometry::V3D& P,const Geometry::V3D& N) 
   /*!
     Given a point and a normal direction set the plane
     \param P :: Point for plane to pass thought
@@ -164,8 +164,8 @@ Plane::setPlane(const Geometry::Vec3D& P,const Geometry::Vec3D& N)
   */
 {
   NormV=N;
-  NormV.makeUnit();
-  Dist=P.dotProd(NormV);
+  NormV.normalize();
+  Dist=P.scalar_prod(NormV);
   setBaseEqn();
   return 0;
 }
@@ -178,26 +178,26 @@ Plane::rotate(const Geometry::Matrix<double>& MA)
   */
 {
   NormV.rotate(MA);
-  NormV.makeUnit();
+  NormV.normalize();
   Quadratic::rotate(MA);
   return;
 }
 
 void
-Plane::displace(const Geometry::Vec3D& Sp) 
+Plane::displace(const Geometry::V3D& Sp) 
   /*!
     Displace the plane by Point Sp.  
     i.e. r+sp now on the plane 
     \param Sp :: point value of displacement
   */
 {
-  Dist+=NormV.dotProd(Sp);
+  Dist+=NormV.scalar_prod(Sp);
   Quadratic::displace(Sp);
   return;
 }
 
 double
-Plane::distance(const Geometry::Vec3D& A) const
+Plane::distance(const Geometry::V3D& A) const
   /*!
     Determine the distance of point A from the plane 
     returns a value relative to the normal
@@ -205,7 +205,7 @@ Plane::distance(const Geometry::Vec3D& A) const
     \returns singed distance from point
   */
 {
-  return A.dotProd(NormV)-Dist;
+  return A.scalar_prod(NormV)-Dist;
 }
 
 double
@@ -215,10 +215,10 @@ Plane::dotProd(const Plane& A) const
     \returns the Normal.A.Normal dot product
   */
 {
-  return NormV.dotProd(A.NormV);
+  return NormV.scalar_prod(A.NormV);
 }
 
-Geometry::Vec3D
+Geometry::V3D
 Plane::crossProd(const Plane& A) const
   /*!
     Take the cross produce of the normals
@@ -226,13 +226,13 @@ Plane::crossProd(const Plane& A) const
     \returns the Normal x A.Normal cross product 
   */
 {
-  return NormV*A.NormV;
+	return NormV.cross_prod(A.NormV);
 }
 
 
 
 int
-Plane::side(const Geometry::Vec3D& A) const
+Plane::side(const Geometry::V3D& A) const
   /*!
     Calcualates the side that the point is on
     \param A :: test point
@@ -241,7 +241,7 @@ Plane::side(const Geometry::Vec3D& A) const
     \retval 0 :: A is on the plane itself (within tolerence) 
   */
 {
-  double Dp=NormV.dotProd(A);
+  double Dp=NormV.scalar_prod(A);
   Dp-=Dist;
   if (PTolerance<fabs(Dp))
     return (Dp>0) ? 1 : -1;
@@ -249,7 +249,7 @@ Plane::side(const Geometry::Vec3D& A) const
 }
 
 int
-Plane::onSurface(const Geometry::Vec3D& A) const
+Plane::onSurface(const Geometry::V3D& A) const
   /*! 
      Calcuate the side that the point is on
      and returns success if it is on the surface.

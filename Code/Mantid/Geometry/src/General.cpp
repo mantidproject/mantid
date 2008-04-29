@@ -21,7 +21,7 @@
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"

@@ -44,15 +44,15 @@ class LineIntersectVisit : public BaseVisit
   static Kernel::Logger& PLog;           ///< The official logger
     
     Line ATrack;                         ///< The line
-    std::vector<Geometry::Vec3D> PtOut;  ///< The intersection point
+    std::vector<Geometry::V3D> PtOut;  ///< The intersection point
     std::vector<double> DOut;            ///< The distance
     
     void procTrack();
 
   public:
     
-    LineIntersectVisit(const Geometry::Vec3D&,
-		       const Geometry::Vec3D&);
+    LineIntersectVisit(const Geometry::V3D&,
+		       const Geometry::V3D&);
     /// Destructor
     virtual ~LineIntersectVisit() {};
 
@@ -69,13 +69,13 @@ class LineIntersectVisit : public BaseVisit
     const std::vector<double>& getDistance() const 
       { return DOut; }
     /// Get the intersection points
-    const std::vector<Geometry::Vec3D>& getPoints() const 
+    const std::vector<Geometry::V3D>& getPoints() const 
       { return PtOut; }
     /// Get the number of intersection points
     int getNPoints() const { return PtOut.size(); }
 
     /// Re-set the line
-    void setLine(const Geometry::Vec3D&,const Geometry::Vec3D&);
+    void setLine(const Geometry::V3D&,const Geometry::V3D&);
 
   };
 

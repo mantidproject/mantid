@@ -42,7 +42,7 @@ class DLLExport Plane : public Quadratic
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  Geometry::Vec3D NormV;         ///< Normal vector
+  Geometry::V3D NormV;         ///< Normal vector
   double Dist;                   ///< Distance 
 
   int planeType() const;         ///< are we alined on an axis
@@ -60,20 +60,20 @@ class DLLExport Plane : public Quadratic
   Plane& operator=(const Plane&);
   virtual ~Plane();
   
-  int setPlane(const Geometry::Vec3D&,const Geometry::Vec3D&);
+  int setPlane(const Geometry::V3D&,const Geometry::V3D&);
   //  int setPlane(const std::string&);
-  int side(const Geometry::Vec3D&) const;
-  int onSurface(const Geometry::Vec3D&) const;
+  int side(const Geometry::V3D&) const;
+  int onSurface(const Geometry::V3D&) const;
   // stuff for finding intersections etc.
   double dotProd(const Plane&) const;      ///< returns normal dot product
-  Geometry::Vec3D crossProd(const Plane&) const;      ///< returns normal cross product
-  double distance(const Geometry::Vec3D&) const;      ///< distance from a point
+  Geometry::V3D crossProd(const Plane&) const;      ///< returns normal cross product
+  double distance(const Geometry::V3D&) const;      ///< distance from a point
 
   double getDistance() const { return Dist; }  ///< Distance from origin
-  Geometry::Vec3D getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
+  Geometry::V3D getNormal() const { return NormV; }    ///< Normal to plane (+ve surface)
 
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
 
   int setSurface(const std::string&);
   void print() const;

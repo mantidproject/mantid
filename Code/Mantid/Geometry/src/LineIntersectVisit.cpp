@@ -24,7 +24,7 @@
 #include "mathSupport.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"
@@ -44,7 +44,7 @@ namespace Geometry
 
 Kernel::Logger& LineIntersectVisit::PLog(Kernel::Logger::get("LineIntersectVisit"));
 LineIntersectVisit::LineIntersectVisit
-  (const Geometry::Vec3D& Pt,const Geometry::Vec3D& uVec) :
+  (const Geometry::V3D& Pt,const Geometry::V3D& uVec) :
     ATrack(Pt,uVec)
   /*!
     Constructor
@@ -144,7 +144,7 @@ LineIntersectVisit::procTrack()
   // Calculate the distances to the points
   DOut.resize(PtOut.size());
   transform(PtOut.begin(),PtOut.end(),DOut.begin(),
-	    boost::bind(&Geometry::Vec3D::Distance,ATrack.getOrigin(),_1));
+	    boost::bind(&Geometry::V3D::distance,ATrack.getOrigin(),_1));
   return;
 }
 

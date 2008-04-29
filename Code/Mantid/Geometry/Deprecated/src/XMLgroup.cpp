@@ -14,7 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -568,7 +568,7 @@ template int XML::XMLgroup::addComp(const std::string&,const XML::nullObj&);
 template int XML::XMLgroup::addComp(const std::string&,const double&);
 template int XML::XMLgroup::addComp(const std::string&,const int&);
 template int XML::XMLgroup::addComp(const std::string&,const std::string&);
-template int XML::XMLgroup::addComp(const std::string&,const Geometry::Vec3D&);
+template int XML::XMLgroup::addComp(const std::string&,const Geometry::V3D&);
 template XML::XMLgrid<std::vector,double,std::allocator<double> >* 
 XML::XMLgroup::getType(const int) const;
 template XML::XMLgrid<std::vector,double,std::allocator<double> >* 

@@ -22,7 +22,7 @@
 #include "IndexIterator.h"
 #include "MantidGeometry/Triple.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Track.h"
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/BaseVisit.h"
@@ -289,7 +289,7 @@ Intersection::displayAddress() const
 }
 
 int
-Intersection::isValid(const Geometry::Vec3D& Vec) const
+Intersection::isValid(const Geometry::V3D& Vec) const
   /*!
     Calculates if Vec is within the object
     \param Vec :: Point to test
@@ -563,7 +563,7 @@ Union::simplify()
 }
 
 int
-Union::isValid(const Geometry::Vec3D& Vec) const
+Union::isValid(const Geometry::V3D& Vec) const
   /*!
     Calculates if Vec is within the object
     \param Vec :: Point to test
@@ -785,7 +785,7 @@ SurfPoint::simplify()
 }
 
 int
-SurfPoint::isValid(const Geometry::Vec3D& Pt) const
+SurfPoint::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
     \param Pt :: Point to test
@@ -964,7 +964,7 @@ CompObj::findLeaf(const Rule* A) const
 }
 
 int
-CompObj::isValid(const Geometry::Vec3D& Pt) const
+CompObj::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object
@@ -1118,7 +1118,7 @@ BoolValue::findLeaf(const Rule* A) const
 }
 
 int
-BoolValue::isValid(const Geometry::Vec3D& pt) const
+BoolValue::isValid(const Geometry::V3D& pt) const
   /*! 
     Determines if a point  is valid.  
     \param pt :: Point to test
@@ -1316,7 +1316,7 @@ CompGrp::findLeaf(const Rule* R) const
 }
 
 int
-CompGrp::isValid(const Geometry::Vec3D& Pt) const
+CompGrp::isValid(const Geometry::V3D& Pt) const
   /*! 
     Determines if a point  is valid.  
     Checks to see if the point is valid in the object

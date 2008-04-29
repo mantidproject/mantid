@@ -22,7 +22,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"
@@ -133,7 +133,7 @@ Sphere::setSurface(const std::string& Pstr)
   if (!StrFunc::section(Line,R))
     return -7;
 
-  Centre=Geometry::Vec3D(cent);
+  Centre=Geometry::V3D(cent);
   Radius=R;
   setBaseEqn();
   return 0;
@@ -141,7 +141,7 @@ Sphere::setSurface(const std::string& Pstr)
 
 
 int
-Sphere::side(const Geometry::Vec3D& Pt) const
+Sphere::side(const Geometry::V3D& Pt) const
   /*!
      Calculate where the point Pt is relative to the 
      sphere.
@@ -151,15 +151,15 @@ Sphere::side(const Geometry::Vec3D& Pt) const
      \retval 1 :: Pt outside the sphere 
   */
 {
-  const Geometry::Vec3D Xv=Pt-Centre;
-  const double R2(Xv.dotProd(Xv));
+  const Geometry::V3D Xv=Pt-Centre;
+  const double R2(Xv.scalar_prod(Xv));
   if (fabs(R2-Radius*Radius)<STolerance*STolerance)
     return 0;
   return (R2>Radius*Radius) ? 1 : -1;
 }
 
 int
-Sphere::onSurface(const Geometry::Vec3D& Pt) const
+Sphere::onSurface(const Geometry::V3D& Pt) const
   /*!
     Calculate if the point Pt on the surface of the sphere
     (within tolerance CTolerance)
@@ -167,12 +167,12 @@ Sphere::onSurface(const Geometry::Vec3D& Pt) const
     \return 1 :: on the surfacae or 0 if not.
   */
 {
-  const Geometry::Vec3D Xv=Pt-Centre;
-  return (fabs(Xv.dotProd(Xv)-Radius*Radius)>STolerance*STolerance) ? 0 : 1;
+  const Geometry::V3D Xv=Pt-Centre;
+  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>STolerance*STolerance) ? 0 : 1;
 }
 
 double
-Sphere::distance(const Geometry::Vec3D& Pt) const
+Sphere::distance(const Geometry::V3D& Pt) const
   /*! 
     Determine the shortest distance from the Surface 
     to the Point. 
@@ -180,13 +180,13 @@ Sphere::distance(const Geometry::Vec3D& Pt) const
     \return distance (Positive only)
   */
 {
-  const Geometry::Vec3D Amov=Pt-Centre;
-  return fabs(Amov.abs()-Radius);
+  const Geometry::V3D Amov=Pt-Centre;
+  return fabs(Amov.norm()-Radius);
 }
 
 
 void
-Sphere::displace(const Geometry::Vec3D& Pt) 
+Sphere::displace(const Geometry::V3D& Pt) 
   /*!
     Apply a shift of the centre
     \param Pt :: distance to add to the centre
@@ -210,7 +210,7 @@ Sphere::rotate(const Geometry::Matrix<double>& MA)
 }
 
 void 
-Sphere::setCentre(const Geometry::Vec3D& A)
+Sphere::setCentre(const Geometry::V3D& A)
   /*!
     Set the centre point
     \param A :: New Centre Point
@@ -237,7 +237,7 @@ Sphere::setBaseEqn()
   BaseEqn[6]= -2.0*Centre[0];     // G x
   BaseEqn[7]= -2.0*Centre[1];     // H y
   BaseEqn[8]= -2.0*Centre[2];     // J z
-  BaseEqn[9]= Centre.dotProd(Centre)-Radius*Radius;        // K const
+  BaseEqn[9]= Centre.scalar_prod(Centre)-Radius*Radius;        // K const
   return;
 }
 
@@ -316,7 +316,7 @@ Sphere::write(std::ostream& OX) const
   std::ostringstream cx;
   Quadratic::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-  if (Centre.Distance(Geometry::Vec3D(0,0,0))<STolerance)
+  if (Centre.distance(Geometry::V3D(0,0,0))<STolerance)
     {
       cx<<"so "<<Radius;
     }

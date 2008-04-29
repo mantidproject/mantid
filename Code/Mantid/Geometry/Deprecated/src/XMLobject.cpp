@@ -14,7 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
@@ -313,11 +313,11 @@ XMLobject::getValue(const T& DefValue) const
 /// \cond TEMPLATE
 template const double& XML::XMLobject::getValue(const double&) const;
 template const int& XML::XMLobject::getValue(const int&) const;
-template const Geometry::Vec3D& XML::XMLobject::getValue(const Geometry::Vec3D&) const;
+template const Geometry::V3D& XML::XMLobject::getValue(const Geometry::V3D&) const;
 
 template void XML::XMLobject::addAttribute(const std::string&,const double&);
 template void XML::XMLobject::addAttribute(const std::string&,const int&);
-template void XML::XMLobject::addAttribute(const std::string&,const Geometry::Vec3D&);
+template void XML::XMLobject::addAttribute(const std::string&,const Geometry::V3D&);
 
 /// \endcond TEMPLATE
 

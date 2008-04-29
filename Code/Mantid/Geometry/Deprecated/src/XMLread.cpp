@@ -13,7 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"
 #include "XMLnamespace.h"
 #include "XMLattribute.h"
@@ -308,7 +308,7 @@ XMLread::writeXML(std::ostream& OX) const
 \cond TEMPLATE
 */
 
-template int XMLread::convertToObject(Geometry::Vec3D&) const;
+template int XMLread::convertToObject(Geometry::V3D&) const;
 template int XMLread::convertToContainer(std::vector<int>&) const;
 template int XMLread::convertToContainer(std::vector<double>&) const;
 template int XMLread::convertToContainer(const int,std::vector<double>&,

@@ -25,7 +25,7 @@
 #include "MantidKernel/Support.h"
 #include "mathSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/PolyBase.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
@@ -82,7 +82,7 @@ Quadratic::~Quadratic()
 
 
 double 
-Quadratic::eqnValue(const Geometry::Vec3D& Pt) const
+Quadratic::eqnValue(const Geometry::V3D& Pt) const
   /*!
     Helper function to calcuate the value
     of the equation at a fixed point 
@@ -106,7 +106,7 @@ Quadratic::eqnValue(const Geometry::Vec3D& Pt) const
 }
 
 int
-Quadratic::side(const Geometry::Vec3D& Pt) const
+Quadratic::side(const Geometry::V3D& Pt) const
   /*!
     Determine if the the Point is true to the surface or
     on the other side
@@ -123,8 +123,8 @@ Quadratic::side(const Geometry::Vec3D& Pt) const
 }
 
 
-Geometry::Vec3D
-Quadratic::surfaceNormal(const Geometry::Vec3D& Pt) const
+Geometry::V3D
+Quadratic::surfaceNormal(const Geometry::V3D& Pt) const
   /*!
     Given a point on the surface 
     Calculate the normal at the point 
@@ -134,16 +134,16 @@ Quadratic::surfaceNormal(const Geometry::Vec3D& Pt) const
     \return normal unit vector
   */
 {
-   Geometry::Vec3D N(2*BaseEqn[0]*Pt[0]+BaseEqn[3]*Pt[1]+BaseEqn[4]*Pt[2]+BaseEqn[6],
+   Geometry::V3D N(2*BaseEqn[0]*Pt[0]+BaseEqn[3]*Pt[1]+BaseEqn[4]*Pt[2]+BaseEqn[6],
 	   2*BaseEqn[1]*Pt[1]+BaseEqn[3]*Pt[0]+BaseEqn[5]*Pt[2]+BaseEqn[7],
 	   2*BaseEqn[2]*Pt[2]+BaseEqn[4]*Pt[0]+BaseEqn[5]*Pt[1]+BaseEqn[8]);
-   N.makeUnit();
+   N.normalize();
    return N;
 }
 
 void
 Quadratic::matrixForm(Geometry::Matrix<double>& A,
-		      Geometry::Vec3D& B,double& C) const
+		      Geometry::V3D& B,double& C) const
   /*!
     Converts the baseEqn into the matrix form such that
     \f[ x^T A x + B^T x + C =0 \f]
@@ -167,7 +167,7 @@ Quadratic::matrixForm(Geometry::Matrix<double>& A,
 }
 
 double
-Quadratic::distance(const Geometry::Vec3D& Pt) const
+Quadratic::distance(const Geometry::V3D& Pt) const
   /*!
     Proper calcuation of a point to a general surface 
     \param Pt :: Point to calculate distance from surace
@@ -176,7 +176,7 @@ Quadratic::distance(const Geometry::Vec3D& Pt) const
 {
   // Job 1 :: Create matrix and vector representation
   Geometry::Matrix<double> A(3,3);
-  Geometry::Vec3D B;
+  Geometry::V3D B;
   double cc;
   matrixForm(A,B,cc);
   
@@ -189,8 +189,8 @@ Quadratic::distance(const Geometry::Vec3D& Pt) const
       return distance(Pt);
     }
 
-  Geometry::Vec3D alpha=R.Tprime()*Pt;
-  Geometry::Vec3D beta=R.Tprime()*B;
+  Geometry::V3D alpha=R.Tprime()*Pt;
+  Geometry::V3D beta=R.Tprime()*B;
     
   // Calculate fundermental equation:
   const double aa(alpha[0]);  const double aa2(aa*aa);
@@ -263,7 +263,7 @@ Quadratic::distance(const Geometry::Vec3D& Pt) const
     return -1.0;
 
   double Out= -1;
-  Geometry::Vec3D xvec;
+  Geometry::V3D xvec;
   std::vector<double>::const_iterator vc;
   for(vc=TRange.begin();vc!=TRange.end();vc++)
     {
@@ -278,7 +278,7 @@ Quadratic::distance(const Geometry::Vec3D& Pt) const
 	  DI[1][1]=1.0/dbI;
 	  DI[2][2]=1.0/dcI;
 	  xvec = R*(DI*(alpha-beta* *vc));  // care here: to avoid 9*9 +9*3 in favour of 9*3+9*3 ops.
-	  const double Dist=xvec.Distance(Pt);
+	  const double Dist=xvec.distance(Pt);
 	  if (Out<0 || Out>Dist)
 	    Out=Dist;
 	}
@@ -287,7 +287,7 @@ Quadratic::distance(const Geometry::Vec3D& Pt) const
 }
 
 int
-Quadratic::onSurface(const Geometry::Vec3D& Pt) const
+Quadratic::onSurface(const Geometry::V3D& Pt) const
   /*!
     Test to see if a point is on the surface 
     \param Pt :: Point to test
@@ -300,7 +300,7 @@ Quadratic::onSurface(const Geometry::Vec3D& Pt) const
 
 
 void
-Quadratic::displace(const Geometry::Vec3D& Pt)
+Quadratic::displace(const Geometry::V3D& Pt)
   /*!
     Apply a general displacement to the surface
     \param Pt :: Point to add to surface coordinate

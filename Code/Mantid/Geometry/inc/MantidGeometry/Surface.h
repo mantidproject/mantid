@@ -29,7 +29,7 @@ namespace Geometry
 {
 
   class BaseVisit;
-
+  class V3D;
 /*!
   \class  Surface
   \brief Holds a basic quadratic surface
@@ -92,18 +92,18 @@ class DLLExport Surface
   int getName() const { return Name; }             ///< Get Name
 
   void matrixForm(Geometry::Matrix<double>&,
-		  Geometry::Vec3D&,double&) const;          
+		  Geometry::V3D&,double&) const;          
 
   virtual int setSurface(const std::string&) =0; 
-  virtual int side(const Geometry::Vec3D&) const;
+  virtual int side(const Geometry::V3D&) const;
 
   // is point valid on surface 
-  virtual int onSurface(const Geometry::Vec3D&) const =0;
+  virtual int onSurface(const Geometry::V3D&) const =0;
 
-  virtual double distance(const Geometry::Vec3D&) const =0; 
-  virtual Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const =0;
+  virtual double distance(const Geometry::V3D&) const =0; 
+  virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const =0;
 
-  virtual void displace(const Geometry::Vec3D&)  =0;
+  virtual void displace(const Geometry::V3D&)  =0;
   virtual void rotate(const Geometry::Matrix<double>&) =0;
 
   void writeHeader(std::ostream&) const;

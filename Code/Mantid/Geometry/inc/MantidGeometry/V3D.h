@@ -99,7 +99,7 @@ namespace Mantid
       // Send to a stream
       void printSelf(std::ostream&) const;
       void read(std::istream&);
-
+	  void write(std::ostream&) const;
 
       double volume() const { return fabs(x*y*z); }      ///< Calculate the volmue of a cube X*Y*Z
 

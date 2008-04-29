@@ -23,7 +23,7 @@
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/BaseVisit.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/LineIntersectVisit.h"
@@ -374,7 +374,7 @@ Object::procComp(Rule* RItem) const
 }
 
 int
-Object::isOnSide(const Geometry::Vec3D& Pt) const
+Object::isOnSide(const Geometry::V3D& Pt) const
   /*!
     - (a) Uses the Surface list to check those surface
     that the point is on.
@@ -391,7 +391,7 @@ Object::isOnSide(const Geometry::Vec3D& Pt) const
     \returns 1 if the point is on the surface
   */
 {
-  std::list<Geometry::Vec3D> Snorms;     // Normals from the constact surface.
+  std::list<Geometry::V3D> Snorms;     // Normals from the constact surface.
 
   std::vector<const Surface*>::const_iterator vc;
   for(vc=SurList.begin();vc!=SurList.end();vc++)
@@ -405,13 +405,13 @@ Object::isOnSide(const Geometry::Vec3D& Pt) const
 	    return 1;
 	}
     }
-  std::list<Geometry::Vec3D>::const_iterator xs,ys;
-  Geometry::Vec3D NormPair;
+  std::list<Geometry::V3D>::const_iterator xs,ys;
+  Geometry::V3D NormPair;
   for(xs=Snorms.begin();xs!=Snorms.end();xs++)
     for(ys=xs,ys++;ys!=Snorms.end();ys++)
       {
 	NormPair=(*ys)+(*xs);
-	NormPair.makeUnit();
+	NormPair.normalize();
 	if (checkSurfaceValid(Pt,NormPair))
 	  return 1;
       }
@@ -420,7 +420,7 @@ Object::isOnSide(const Geometry::Vec3D& Pt) const
 }
 
 int
-Object::checkSurfaceValid(const Geometry::Vec3D& C,const Geometry::Vec3D& Nm) const
+Object::checkSurfaceValid(const Geometry::V3D& C,const Geometry::V3D& Nm) const
   /*!
     Determine if a point is valid by checking both
     directions of the normal away from the line
@@ -432,7 +432,7 @@ Object::checkSurfaceValid(const Geometry::Vec3D& C,const Geometry::Vec3D& Nm) co
   */
 {
   int status(0);
-  Geometry::Vec3D tmp=C+Nm*(OTolerance*5.0);
+  Geometry::V3D tmp=C+Nm*(OTolerance*5.0);
   status= (!isValid(tmp)) ? 1 : -1;
   tmp-= Nm*(OTolerance*10.0);
   status+= (!isValid(tmp)) ? 1 : -1;
@@ -440,7 +440,7 @@ Object::checkSurfaceValid(const Geometry::Vec3D& C,const Geometry::Vec3D& Nm) co
 }
 
 int
-Object::isValid(const Geometry::Vec3D& Pt) const
+Object::isValid(const Geometry::V3D& Pt) const
 /*! 
   Determines is Pt is within the object 
   or on the surface
@@ -799,7 +799,7 @@ Object::interceptSurface(Geometry::Track& UT) const
   for(vc=SurList.begin();vc!=SurList.end();vc++)
     {
       (*vc)->acceptVisitor(LI);
-      const std::vector<Geometry::Vec3D>& IPts(LI.getPoints());
+      const std::vector<Geometry::V3D>& IPts(LI.getPoints());
       const std::vector<double>& dPts(LI.getDistance());
       for(unsigned int i=0;i<IPts.size();i++)
         {
@@ -816,8 +816,8 @@ Object::interceptSurface(Geometry::Track& UT) const
 }
 
 int
-Object::calcValidType(const Geometry::Vec3D& Pt,
-		      const Geometry::Vec3D& uVec) const
+Object::calcValidType(const Geometry::V3D& Pt,
+		      const Geometry::V3D& uVec) const
   /*!
     Calculate if a point PT is a valid point on the track
     \param Pt :: Point to calculate from.
@@ -827,8 +827,8 @@ Object::calcValidType(const Geometry::Vec3D& Pt,
     \retval -1 :: Exit Point 
    */
 {
-  const Geometry::Vec3D testA(Pt-uVec*OTolerance*25.0);
-  const Geometry::Vec3D testB(Pt+uVec*OTolerance*25.0);
+  const Geometry::V3D testA(Pt-uVec*OTolerance*25.0);
+  const Geometry::V3D testB(Pt+uVec*OTolerance*25.0);
   const int flagA=isValid(testA);
   const int flagB=isValid(testB);
   if (flagA ^ flagB) return 0;

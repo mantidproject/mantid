@@ -20,7 +20,7 @@
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Torus.h"
@@ -108,9 +108,9 @@ Torus::operator==(const Torus& A) const
        (fabs(Dradius-A.Dradius)>TTolerance) )
     return 0;
 
-  if (Centre.Distance(A.Centre)>TTolerance)
+  if (Centre.distance(A.Centre)>TTolerance)
     return 0;
-  if (Normal.Distance(A.Normal)>TTolerance)
+  if (Normal.distance(A.Normal)>TTolerance)
     return 0;
 
   return 1;
@@ -142,9 +142,9 @@ Torus::setSurface(const std::string& Pstr)
   if (ptype<0 || ptype>=3)
     return errAxis;
 
-  Geometry::Vec3D Norm;
-  Geometry::Vec3D Cent;
-  Geometry::Vec3D PtVec;
+  Geometry::V3D Norm;
+  Geometry::V3D Cent;
+  Geometry::V3D PtVec;
   Norm[ptype]=1.0;
 
   // Torus on X/Y/Z axis
@@ -176,7 +176,7 @@ Torus::rotate(const Geometry::Matrix<double>& R)
 }
 
 void 
-Torus::displace(const Geometry::Vec3D& A)
+Torus::displace(const Geometry::V3D& A)
   /*!
     Displace the centre
     Only need to update the centre position 
@@ -188,7 +188,7 @@ Torus::displace(const Geometry::Vec3D& A)
 }
 
 void 
-Torus::setCentre(const Geometry::Vec3D& A)
+Torus::setCentre(const Geometry::V3D& A)
   /*!
     Sets the central point and the Base Equation
     \param A :: New Centre point
@@ -199,22 +199,22 @@ Torus::setCentre(const Geometry::Vec3D& A)
 }
 
 void 
-Torus::setNorm(const Geometry::Vec3D& A)
+Torus::setNorm(const Geometry::V3D& A)
   /*!
     Sets the Normal and the Base Equation
     \param A :: New Normal direction
   */
 {
-  if (A.abs()>TTolerance)
+  if (A.norm()>TTolerance)
     {
       Normal=A;
-      Normal.makeUnit();
+      Normal.normalize();
     }
   return;
 }
 
-Geometry::Vec3D
-Torus::surfaceNormal(const Geometry::Vec3D& Pt) const
+Geometry::V3D
+Torus::surfaceNormal(const Geometry::V3D& Pt) const
   /*!
     Get the normal at a point
     \param A :: New Normal direction
@@ -226,7 +226,7 @@ Torus::surfaceNormal(const Geometry::Vec3D& Pt) const
 
 
 double
-Torus::distance(const Geometry::Vec3D& Pt) const
+Torus::distance(const Geometry::V3D& Pt) const
   /*!
     Calculates the distance from the point to the Torus
     does not calculate the point on the Torusthat is closest
@@ -238,15 +238,15 @@ Torus::distance(const Geometry::Vec3D& Pt) const
     \return distance to Pt
   */
 {
-  const Geometry::Vec3D Px=Pt-Centre;
+  const Geometry::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
-  if(Px.abs()<TTolerance)
-    return Px.abs();
-  return Px.abs();
+  if(Px.norm()<TTolerance)
+    return Px.norm();
+  return Px.norm();
 }
 
 int
-Torus::side(const Geometry::Vec3D& R) const
+Torus::side(const Geometry::V3D& R) const
 
   /*!
     Calculate if the point R is within
@@ -263,7 +263,7 @@ Torus::side(const Geometry::Vec3D& R) const
 }
 
 int
-Torus::onSurface(const Geometry::Vec3D& R) const
+Torus::onSurface(const Geometry::V3D& R) const
 {
   /*! 
      Calculate if the point R is on

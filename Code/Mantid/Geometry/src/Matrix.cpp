@@ -12,7 +12,7 @@
 #include "AuxException.h"
 #include "mathSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 
 
 namespace Mantid
@@ -234,8 +234,8 @@ Matrix<T>::operator*(const std::vector<T>& Vec) const
 }
 
 template<typename T>
-Vec3D 
-Matrix<T>::operator*(const Vec3D& Vx) const
+V3D 
+Matrix<T>::operator*(const V3D& Vx) const
   /*! 
     Matrix multiplication THIS * V
     \param Vx :: Colunm vector to multiply by
@@ -244,8 +244,8 @@ Matrix<T>::operator*(const Vec3D& Vx) const
  */
 {
   if (ny!=3)
-    throw ColErr::MisMatch<int>(ny,3,"Matrix::operator*(Vec3D)");
-  Vec3D X;
+    throw ColErr::MisMatch<int>(ny,3,"Matrix::operator*(V3D)");
+  V3D X;
   for(int i=0;i<nx;i++)
     for(int kk=0;kk<ny;kk++)
       X[i]+=V[i][kk]*Vx[kk];

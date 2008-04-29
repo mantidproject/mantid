@@ -22,7 +22,7 @@
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
@@ -144,15 +144,15 @@ Cylinder::setSurface(const std::string& Pstr)
   if (!StrFunc::section(Line,R) || R<=0.0)
     return errRadius;
 
-  Centre=Geometry::Vec3D(cent);
-  Normal=Geometry::Vec3D(norm);
+  Centre=Geometry::V3D(cent);
+  Normal=Geometry::V3D(norm);
   Radius=R;
   setBaseEqn();
   return 0;
 } 
 
 int 
-Cylinder::side(const Geometry::Vec3D& Pt) const 
+Cylinder::side(const Geometry::V3D& Pt) const 
   /*!
     Calculate if the point PT within the middle
     of the cylinder 
@@ -177,10 +177,10 @@ Cylinder::side(const Geometry::Vec3D& Pt) const
 }
 
 int 
-Cylinder::onSurface(const Geometry::Vec3D& Pt) const 
+Cylinder::onSurface(const Geometry::V3D& Pt) const 
   /*!
     Calculate if the point PT on the cylinder 
-    \param Pt :: Geometry::Vec3D to test
+    \param Pt :: Geometry::V3D to test
     \retval 1 :: on the surface 
     \retval 0 :: not on the surface
   */
@@ -226,14 +226,14 @@ Cylinder::rotate(const Geometry::Matrix<double>& MA)
 {
   Centre.rotate(MA);
   Normal.rotate(MA);
-  Normal.makeUnit();
+  Normal.normalize();
   setNvec();
   Quadratic::rotate(MA);
   return;
 }
 
 void 
-Cylinder::displace(const Geometry::Vec3D& Pt)
+Cylinder::displace(const Geometry::V3D& Pt)
   /*!
     Apply a displacement Pt 
     \param Pt :: Displacement to add to the centre
@@ -251,9 +251,9 @@ Cylinder::displace(const Geometry::Vec3D& Pt)
 }
 
 void
-Cylinder::setCentre(const Geometry::Vec3D& A)
+Cylinder::setCentre(const Geometry::V3D& A)
   /*!
-    Sets the centre Geometry::Vec3D
+    Sets the centre Geometry::V3D
     \param A :: centre point 
   */
 {
@@ -263,7 +263,7 @@ Cylinder::setCentre(const Geometry::Vec3D& A)
 }
 
 void
-Cylinder::setNorm(const Geometry::Vec3D& A)
+Cylinder::setNorm(const Geometry::V3D& A)
   /*! 
     Sets the centre line unit vector 
     A does not need to be a unit vector
@@ -271,7 +271,7 @@ Cylinder::setNorm(const Geometry::Vec3D& A)
   */
 {
   Normal=A;
-  Normal.makeUnit();
+  Normal.normalize();
   setBaseEqn();
   return;
 }
@@ -283,7 +283,7 @@ Cylinder::setBaseEqn()
     \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
   */
 {
-  const double CdotN(Centre.dotProd(Normal));
+  const double CdotN(Centre.scalar_prod(Normal));
   BaseEqn[0]=1.0-Normal[0]*Normal[0];     // A x^2
   BaseEqn[1]=1.0-Normal[1]*Normal[1];     // B y^2
   BaseEqn[2]=1.0-Normal[2]*Normal[2];     // C z^2 
@@ -293,12 +293,12 @@ Cylinder::setBaseEqn()
   BaseEqn[6]= 2.0*(Normal[0]*CdotN-Centre[0]);  // G x
   BaseEqn[7]= 2.0*(Normal[1]*CdotN-Centre[1]);  // H y
   BaseEqn[8]= 2.0*(Normal[2]*CdotN-Centre[2]);  // J z
-  BaseEqn[9]= Centre.dotProd(Centre)-CdotN*CdotN -Radius*Radius;  // K const
+  BaseEqn[9]= Centre.scalar_prod(Centre)-CdotN*CdotN -Radius*Radius;  // K const
   return;
 }
 
 double
-Cylinder::distance(const Geometry::Vec3D& A) const
+Cylinder::distance(const Geometry::V3D& A) const
   /*!
     Calculates the distance of point A from 
     the surface of the  cylinder.
@@ -310,11 +310,11 @@ Cylinder::distance(const Geometry::Vec3D& A) const
   */
 {
   // First find the normal going to the point
-  const Geometry::Vec3D Amov=A-Centre;
-  double lambda=Amov.dotProd(Normal);
-  const Geometry::Vec3D Ccut= Normal*lambda;
+  const Geometry::V3D Amov=A-Centre;
+  double lambda=Amov.scalar_prod(Normal);
+  const Geometry::V3D Ccut= Normal*lambda;
   // The distance is from the centre line to the 
-  return  fabs(Ccut.Distance(Amov)-Radius);
+  return  fabs(Ccut.distance(Amov)-Radius);
 }
 
 void
@@ -367,8 +367,8 @@ Cylinder::write(std::ostream& OX) const
 }
 
 double 
-Cylinder::lineIntersect(const Geometry::Vec3D& Pt,
-			const Geometry::Vec3D& uVec) const
+Cylinder::lineIntersect(const Geometry::V3D& Pt,
+			const Geometry::V3D& uVec) const
   /*!
     Given a track starting from Pt and traveling along
     uVec determine the intersection point (distance)

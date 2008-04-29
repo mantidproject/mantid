@@ -84,7 +84,7 @@ class Rule
   
 
   /// Abstract: The point is within the object
-  virtual int isValid(const Geometry::Vec3D&) const =0;           
+  virtual int isValid(const Geometry::V3D&) const =0;           
   /// Abstract Validity based on surface true/false map
   virtual int isValid(const std::map<int,int>&) const =0; 
   /// Abstract: Can the rule be simplified 
@@ -144,7 +144,7 @@ class Intersection : public Rule
   std::string display() const;
   std::string displayAddress() const;
 
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   int simplify();      ///< apply general intersection simplification
 
@@ -193,7 +193,7 @@ class Union : public Rule
   int type() const { return -1; }   ///< effective name
 
 
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   std::string display() const;
   std::string displayAddress() const;
@@ -241,7 +241,7 @@ class SurfPoint : public Rule
 
   void setKeyN(const int Ky);             ///< set keyNumber
   void setKey(Surface*);
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   int getSign() const { return sign; }         ///< Get Sign
   int getKeyN() const { return keyN; }         ///< Get Key
@@ -292,7 +292,7 @@ class CompObj : public Rule
 
   void setObjN(const int Ky);             ///< set object Number
   void setObj(Object*);               ///< Set a Object state
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   /// Get object number of component
   int getObjN() const { return objN; } 
@@ -342,7 +342,7 @@ class CompGrp : public Rule
   int type() const { return 0; }   ///< Is it a branched object
   int isComplementary() const { return 1; }   ///< Always returns true (1)
 
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   int simplify();
 
@@ -386,7 +386,7 @@ class BoolValue : public Rule
 
   int type() const { return 0; }   //effective name
 
-  int isValid(const Geometry::Vec3D&) const;
+  int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;  ///< isValue :: Based on a surface status map
   int simplify();                             
 

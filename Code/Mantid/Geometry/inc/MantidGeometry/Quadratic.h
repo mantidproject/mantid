@@ -28,9 +28,9 @@ class DLLExport Quadratic : public Surface
   
   static Kernel::Logger& PLog;           ///< The official logger
 
-  double eqnValue(const Geometry::Vec3D&) const;
+  double eqnValue(const Geometry::V3D&) const;
   void matrixForm(Geometry::Matrix<double>&,
-		  Geometry::Vec3D&,double&) const;          
+		  Geometry::V3D&,double&) const;          
 
  protected:
 
@@ -51,15 +51,15 @@ class DLLExport Quadratic : public Surface
 
   const std::vector<double>& copyBaseEqn() const { return BaseEqn; }  ///< access BaseEquation vector
 
-  virtual int side(const Geometry::Vec3D&) const; 
+  virtual int side(const Geometry::V3D&) const; 
 
   virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
 
-  virtual int onSurface(const Geometry::Vec3D&) const;          ///< is point valid on surface 
-  virtual double distance(const Geometry::Vec3D&) const;        ///< distance between point and surface (approx)
-  virtual Geometry::Vec3D surfaceNormal(const Geometry::Vec3D&) const;    ///< Normal at surface
+  virtual int onSurface(const Geometry::V3D&) const;          ///< is point valid on surface 
+  virtual double distance(const Geometry::V3D&) const;        ///< distance between point and surface (approx)
+  virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const;    ///< Normal at surface
 
-  virtual void displace(const Geometry::Vec3D&);
+  virtual void displace(const Geometry::V3D&);
   virtual void rotate(const Geometry::Matrix<double>&);
 
   virtual void write(std::ostream&) const;

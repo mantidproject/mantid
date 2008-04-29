@@ -35,14 +35,14 @@ namespace Geometry
 
 struct TUnit
 {
-  Vec3D PtA;           ///< Init Point
-  Vec3D PtB;           ///< Exit Point
+  V3D PtA;           ///< Init Point
+  V3D PtB;           ///< Exit Point
   double Dist;         ///< Total distance from track begin
   double Length;       ///< Total distance Distance  [at end]
   int ObjID;           ///< ObjectID 
 
 
-  TUnit(const Geometry::Vec3D& A,const Geometry::Vec3D& B,
+  TUnit(const Geometry::V3D& A,const Geometry::V3D& B,
 	const double D,const int ID);
 
   /// Less than operator
@@ -63,10 +63,10 @@ struct TPartial
 {
   int ObjID;           ///< ObjectID 
   int Direction;            ///< Flag direction
-  Vec3D PtA;           ///< Point
+  V3D PtA;           ///< Point
   double Dist;         ///< Total distance from track begin
 
-  TPartial(const int ID,const int flag,const Geometry::Vec3D& PVec,const double D);
+  TPartial(const int ID,const int flag,const Geometry::V3D& PVec,const double D);
 
   int operator<(const TPartial& A) const;
 
@@ -91,30 +91,30 @@ class Track
   static Kernel::Logger& PLog;           ///< The official logger
 
 
-  Geometry::Vec3D iPt;              ///< Start Point
-  Geometry::Vec3D uVec;             ///< unit vector to direction
+  Geometry::V3D iPt;              ///< Start Point
+  Geometry::V3D uVec;             ///< unit vector to direction
   int iObj;                         ///< Initial object
   LType Link;                       ///< Track units
   PType surfPoints;                 ///< Track units
 
  public:
 
-  Track(const Geometry::Vec3D& StartPt,const Geometry::Vec3D& UV,
+  Track(const Geometry::V3D& StartPt,const Geometry::V3D& UV,
 	const int initObj=0);
   Track(const Track&);
   Track& operator=(const Track&);
   ~Track();
 
-  void addPoint(const int ID,const int Direct,const Geometry::Vec3D& Pt);
-  int addTUnit(const int ID,const Geometry::Vec3D& Apt,const Geometry::Vec3D& Bpt);
+  void addPoint(const int ID,const int Direct,const Geometry::V3D& Pt);
+  int addTUnit(const int ID,const Geometry::V3D& Apt,const Geometry::V3D& Bpt);
   
   void removeCoJoins();
   void buildLink();   ///< Not implemented
 
   // get/set
-  void setFirst(const Geometry::Vec3D&,const Geometry::Vec3D&);
-  const Geometry::Vec3D& getInit() const { return iPt; }         ///< Get the start point
-  const Geometry::Vec3D& getUVec() const { return uVec; }        ///< Get the direction
+  void setFirst(const Geometry::V3D&,const Geometry::V3D&);
+  const Geometry::V3D& getInit() const { return iPt; }         ///< Get the start point
+  const Geometry::V3D& getUVec() const { return uVec; }        ///< Get the direction
 
   LType::const_iterator begin() const { return Link.begin(); }   ///< Iterator pointing to start of collection
   LType::const_iterator end() const { return Link.end(); }       ///< Iterator pointing one-past-the-end of collection

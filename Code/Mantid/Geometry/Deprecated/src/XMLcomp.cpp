@@ -13,7 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"
 
 #include "XMLnamespace.h"
@@ -140,7 +140,7 @@ XMLcomp<T>::readObject(std::istream& FX)
 
 template<>
 int
-XMLcomp<Geometry::Vec3D>::readObject(std::istream& FX)
+XMLcomp<Geometry::V3D>::readObject(std::istream& FX)
   /*!
     Generic read from a string
     \param FX :: Filestream to read from
@@ -159,7 +159,7 @@ XMLcomp<Geometry::Vec3D>::readObject(std::istream& FX)
       !StrFunc::section(Lines,c))
     return -2;
   
-  Value=Geometry::Vec3D(a,b,c);
+  Value=Geometry::V3D(a,b,c);
 
   return 0;
 }
@@ -352,7 +352,7 @@ XMLcomp<tm*>::writeXML(std::ostream& OX) const
 template class XML::XMLcomp<double>;
 template class XML::XMLcomp<std::string>;
 template class XML::XMLcomp<int>;
-template class XML::XMLcomp<Mantid::Geometry::Vec3D>;
+template class XML::XMLcomp<Mantid::Geometry::V3D>;
 
 //template class XML::XMLcomp<std::vector<double> >;
 // template class XML::XMLcomp<std::vector<int> >;

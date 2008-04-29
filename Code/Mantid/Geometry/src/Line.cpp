@@ -23,7 +23,7 @@
 #include "mathSupport.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"
@@ -51,13 +51,13 @@ Line::Line() : Origin(),Direct()
   */
 {}
 
-Line::Line(const Geometry::Vec3D& O,const Geometry::Vec3D& D) 
+Line::Line(const Geometry::V3D& O,const Geometry::V3D& D) 
   : Origin(O),Direct(D)
   /*!
     Constructor
   */
 {
-  Direct.makeUnit();
+  Direct.normalize();
 }
 
 Line::Line(const Line& A) : 
@@ -101,7 +101,7 @@ Line::~Line()
   */
 {}
 
-Geometry::Vec3D
+Geometry::V3D
 Line::getPoint(const double lambda) const
   /*!
     Return the point on the line given lambda*direction
@@ -113,21 +113,21 @@ Line::getPoint(const double lambda) const
 }
 
 double
-Line::distance(const Geometry::Vec3D& A) const
+Line::distance(const Geometry::V3D& A) const
   /*!
     Distance of a point from the line
     \param A :: test Point
     \returns absolute distance (not signed)
   */
 {
-  const double lambda=Direct.dotProd(A-Origin);
-  Geometry::Vec3D L=getPoint(lambda);
+  const double lambda=Direct.scalar_prod(A-Origin);
+  Geometry::V3D L=getPoint(lambda);
   L-=A;
-  return L.abs();
+  return L.norm();
 }
 
 int 
-Line::isValid(const Geometry::Vec3D& A) const
+Line::isValid(const Geometry::V3D& A) const
   /*! 
      Calculate is point is on line by using distance to determine
      if the point is within Ltolerance of the line
@@ -149,12 +149,12 @@ Line::rotate(const Geometry::Matrix<double>& MA)
 {
   Origin.rotate(MA);
   Direct.rotate(MA);
-  Direct.makeUnit();
+  Direct.normalize();
   return;
 }
 
 void 
-Line::displace(const Geometry::Vec3D& Pt)
+Line::displace(const Geometry::V3D& Pt)
   /*! 
     Apply a displacement Pt 
     \param Pt :: Point value of the displacement
@@ -167,7 +167,7 @@ Line::displace(const Geometry::Vec3D& Pt)
 int
 Line::lambdaPair(const int ix,const std::pair<
 		 std::complex<double>,std::complex<double> >& SQ,
-		 std::vector<Geometry::Vec3D>& PntOut) const
+		 std::vector<Geometry::V3D>& PntOut) const
   /*! 
     Helper function to decide which roots to take.
     The assumption is that lambda has been solved by quadratic
@@ -185,11 +185,11 @@ Line::lambdaPair(const int ix,const std::pair<
 
   int nCnt(0);          // number of good points
   
-  Geometry::Vec3D Ans;
+  Geometry::V3D Ans;
   if (SQ.first.imag()==0.0)
     {
       const double lambda=SQ.first.real();
-      Geometry::Vec3D Ans=getPoint(lambda);
+      Geometry::V3D Ans=getPoint(lambda);
       PntOut.push_back(Ans);
       if (ix<2)        // only one unique root.
 	return 1;
@@ -203,9 +203,9 @@ Line::lambdaPair(const int ix,const std::pair<
 	  PntOut.push_back(getPoint(lambda));
 	  return 1;
 	}
-      Geometry::Vec3D Ans2=getPoint(lambda);
+      Geometry::V3D Ans2=getPoint(lambda);
       // If points too close return only 1 item.
-      if (Ans.Distance(Ans2)<LTolerance)
+      if (Ans.distance(Ans2)<LTolerance)
 	return 1;
 
       PntOut.push_back(Ans2);
@@ -215,7 +215,7 @@ Line::lambdaPair(const int ix,const std::pair<
 }
 
 int
-Line::intersect(std::vector<Geometry::Vec3D>& VecOut,
+Line::intersect(std::vector<Geometry::V3D>& VecOut,
 		const Quadratic& Sur) const
   /*!
      For the line that intersects the surfaces 
@@ -249,7 +249,7 @@ Line::intersect(std::vector<Geometry::Vec3D>& VecOut,
 }  
 
 int 
-Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Plane& Pln) const
+Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Plane& Pln) const
   /*! 
     For the line that intersects the cylinder generate 
      add the point to the VecOut, return number of points
@@ -261,8 +261,8 @@ Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Plane& Pln) const
   */
 {
 
-  const double OdotN=Origin.dotProd(Pln.getNormal());
-  const double DdotN=Direct.dotProd(Pln.getNormal());
+  const double OdotN=Origin.scalar_prod(Pln.getNormal());
+  const double DdotN=Direct.scalar_prod(Pln.getNormal());
   if (fabs(DdotN)<LTolerance)     // Plane and line parallel
     return 0;
   const double u=(Pln.getDistance()-OdotN)/DdotN;
@@ -273,7 +273,7 @@ Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Plane& Pln) const
 }
 
 int 
-Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Cylinder& Cyl) const
+Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Cylinder& Cyl) const
   /*! 
      For the line that intersects the cylinder generate 
      add the point to the VecOut, return number of points
@@ -285,21 +285,21 @@ Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Cylinder& Cyl) const
   */
 {
   // Nasty stripping of useful stuff from cylinder
-  const Geometry::Vec3D Ax=Origin-Cyl.getCentre();
-  const Geometry::Vec3D N=Cyl.getNormal();
+  const Geometry::V3D Ax=Origin-Cyl.getCentre();
+  const Geometry::V3D N=Cyl.getNormal();
   const double R=Cyl.getRadius();
   // First solve the equation of intersection
   double C[3];
   C[0]=1;
-  C[1]=2.0*Ax.dotProd(Direct)-N.dotProd(Direct);
-  C[2]=Ax.dotProd(Ax)-R*R;
+  C[1]=2.0*Ax.scalar_prod(Direct)-N.scalar_prod(Direct);
+  C[2]=Ax.scalar_prod(Ax)-R*R;
   std::pair<std::complex<double>,std::complex<double> > SQ;
   const int ix = solveQuadratic(C,SQ);
   return lambdaPair(ix,SQ,PntOut);
 }
 
 int 
-Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Sphere& Sph) const
+Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Sphere& Sph) const
   /*! 
      For the line that intersects the cylinder generate 
      add the point to the VecOut, return number of points
@@ -311,13 +311,13 @@ Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Sphere& Sph) const
   */
 {
   // Nasty stripping of useful stuff from cylinder
-  const Geometry::Vec3D Ax=Sph.getCentre()-Origin;
+  const Geometry::V3D Ax=Sph.getCentre()-Origin;
   const double R=Sph.getRadius();
   // First solve the equation of intersection
   double C[3];
   C[0]=1;
-  C[1]=2.0*Ax.dotProd(Direct);
-  C[2]=Ax.dotProd(Ax)-R*R;
+  C[1]=2.0*Ax.scalar_prod(Direct);
+  C[2]=Ax.scalar_prod(Ax)-R*R;
   std::pair<std::complex<double>,std::complex<double> > SQ;
   const int ix = solveQuadratic(C,SQ);
   return lambdaPair(ix,SQ,PntOut);
@@ -326,7 +326,7 @@ Line::intersect(std::vector<Geometry::Vec3D>& PntOut ,const Sphere& Sph) const
 //SETING
 
 int 
-Line::setLine(const Geometry::Vec3D& O,const Geometry::Vec3D& D) 
+Line::setLine(const Geometry::V3D& O,const Geometry::V3D& D) 
   /*!
     sets the line given the Origne and direction
     \param O :: origin
@@ -339,7 +339,7 @@ Line::setLine(const Geometry::Vec3D& O,const Geometry::Vec3D& D)
     return 0;
   Origin=O;
   Direct=D;
-  Direct.makeUnit();
+  Direct.normalize();
   return 1;
 }
 

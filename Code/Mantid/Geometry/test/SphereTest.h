@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "../inc/IndexIterator.h"
-#include "../inc/Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Sphere.h"
 
@@ -27,7 +27,7 @@ public:
     Sphere A;
     // both centre and radius = 0
     TS_ASSERT_EQUALS(extractString(A),"-1 so 0\n");
-    TS_ASSERT_EQUALS(A.getCentre(),Vec3D(0,0,0));
+    TS_ASSERT_EQUALS(A.getCentre(),V3D(0,0,0));
     TS_ASSERT_EQUALS(A.getRadius(),0);
   }
 
@@ -35,27 +35,27 @@ public:
   {
     Sphere A;
     A.setSurface("s 1.1 -2.1 1.1 2");
-    TS_ASSERT_EQUALS(A.getCentre(),Vec3D(1.1,-2.1,1.1));
+    TS_ASSERT_EQUALS(A.getCentre(),V3D(1.1,-2.1,1.1));
     TS_ASSERT_EQUALS(A.getRadius(),2);
-    TS_ASSERT_EQUALS(extractString(A),"-1 s 1.1 -2.1 1.1 2\n");
+    TS_ASSERT_EQUALS(extractString(A),"-1 s [1.1,-2.1,1.1] 2\n");
   }
 
   void testCopyConstructor()
   {
     Sphere A;
     A.setSurface("s 1.1 -2.1 1.1 2");
-    TS_ASSERT_EQUALS(extractString(A),"-1 s 1.1 -2.1 1.1 2\n");
+    TS_ASSERT_EQUALS(extractString(A),"-1 s [1.1,-2.1,1.1] 2\n");
     Sphere B(A);
-    TS_ASSERT_EQUALS(extractString(B),"-1 s 1.1 -2.1 1.1 2\n");
+    TS_ASSERT_EQUALS(extractString(B),"-1 s [1.1,-2.1,1.1] 2\n");
   }
 
   void testClone()
   {
     Sphere A;
     A.setSurface("s 1.1 -2.1 1.1 2");
-    TS_ASSERT_EQUALS(extractString(A),"-1 s 1.1 -2.1 1.1 2\n");
+    TS_ASSERT_EQUALS(extractString(A),"-1 s [1.1,-2.1,1.1] 2\n");
     Sphere* B = A.clone();
-    TS_ASSERT_EQUALS(extractString(*B),"-1 s 1.1 -2.1 1.1 2\n");
+    TS_ASSERT_EQUALS(extractString(*B),"-1 s [1.1,-2.1,1.1] 2\n");
     delete B;
   }
 
@@ -77,31 +77,31 @@ public:
     TS_ASSERT_EQUALS(extractString(A),"-1 so 2\n");
 
     //Origin should be inside
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,0)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(1.9,0,0)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,1.9,0)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,1.9)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,-1.9)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(-1.9,0,0)),-1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,-1.9,0)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,0)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(1.9,0,0)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,1.9,0)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,1.9)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,-1.9)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(-1.9,0,0)),-1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,-1.9,0)),-1);
 
     //should be on the side
-    TS_ASSERT_EQUALS(A.side(Vec3D(2,0,0)),0);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,2,0)),0);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,2)),0);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,-2)),0);
-    TS_ASSERT_EQUALS(A.side(Vec3D(-2,0,0)),0);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,-2,0)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(2,0,0)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(0,2,0)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,2)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,-2)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(-2,0,0)),0);
+    TS_ASSERT_EQUALS(A.side(V3D(0,-2,0)),0);
     //should be outside
-    TS_ASSERT_EQUALS(A.side(Vec3D(2.1,0,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,2.1,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,2.1)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(-2.1,0,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,-2.1,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0,-2.1)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(2,0.1,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0.1,2,0)),1);
-    TS_ASSERT_EQUALS(A.side(Vec3D(0,0.1,2)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(2.1,0,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,2.1,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,2.1)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(-2.1,0,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,-2.1,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0,-2.1)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(2,0.1,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0.1,2,0)),1);
+    TS_ASSERT_EQUALS(A.side(V3D(0,0.1,2)),1);
   }
 
     /// is a point inside outside or on the side!
@@ -113,31 +113,31 @@ public:
     TS_ASSERT_EQUALS(extractString(A),"-1 so 2\n");
 
     //Origin should be inonSurface
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(1.9,0,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,1.9,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,1.9)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,-1.9)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(-1.9,0,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,-1.9,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(1.9,0,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,1.9,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,1.9)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,-1.9)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(-1.9,0,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,-1.9,0)),0);
 
     //should be on the onSurface
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(2,0,0)),1);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,2,0)),1);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,2)),1);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,-2)),1);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(-2,0,0)),1);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,-2,0)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(2,0,0)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,2,0)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,2)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,-2)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(-2,0,0)),1);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,-2,0)),1);
     //should be outonSurface
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(2.1,0,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,2.1,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,2.1)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(-2.1,0,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,-2.1,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0,-2.1)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(2,0.1,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0.1,2,0)),0);
-    TS_ASSERT_EQUALS(A.onSurface(Vec3D(0,0.1,2)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(2.1,0,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,2.1,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,2.1)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(-2.1,0,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,-2.1,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,-2.1)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(2,0.1,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,2,0)),0);
+    TS_ASSERT_EQUALS(A.onSurface(V3D(0,0.1,2)),0);
   }
   
 
@@ -147,28 +147,28 @@ public:
     A.setSurface("so 5");// sphere at origin radius 5
 
     //just outside
-    TS_ASSERT_DELTA(A.distance(Vec3D(5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,5.1)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-5.1)),0.1,1e-5);
 
     //just inside
-    TS_ASSERT_DELTA(A.distance(Vec3D(4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,4.9)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-4.9)),0.1,1e-5);
 
     //distant
-    TS_ASSERT_DELTA(A.distance(Vec3D(100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,100)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-100)),95,1e-5);
   }
 
   void testSphereDistanceTrue()
@@ -177,28 +177,28 @@ public:
     A.setSurface("so 5");// sphere at origin radius 5
 
     //just outside
-    TS_ASSERT_DELTA(A.distance(Vec3D(5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,5.1)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-5.1,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-5.1,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,5.1)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-5.1,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-5.1,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-5.1)),0.1,1e-5);
 
     //just inside
-    TS_ASSERT_DELTA(A.distance(Vec3D(4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,4.9)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-4.9,0,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-4.9,0)),0.1,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,4.9)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-4.9,0,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-4.9,0)),0.1,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-4.9)),0.1,1e-5);
 
     //distant
-    TS_ASSERT_DELTA(A.distance(Vec3D(100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,100)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(-100,0,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,-100,0)),95,1e-5);
-    TS_ASSERT_DELTA(A.distance(Vec3D(0,0,-100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,100)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(-100,0,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,-100,0)),95,1e-5);
+    TS_ASSERT_DELTA(A.distance(V3D(0,0,-100)),95,1e-5);
   }
 
   void testSphereDistanceComplex()
@@ -212,8 +212,8 @@ public:
     std::vector<std::string> SphStr;
     SphStr.push_back("so 1");                // sphere origin
     SphStr.push_back("s 1.5 -2.5 1.8 1");     // sphere 
-    Geometry::Vec3D P(3,7,4);
-    Geometry::Vec3D Q(0,0,4);
+    Geometry::V3D P(3,7,4);
+    Geometry::V3D Q(0,0,4);
     std::vector<std::string>::const_iterator vc;
     Sphere A;
 
@@ -242,14 +242,14 @@ public:
     Sphere A;
     A.setSurface("so 5");
 
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(10,0,0)),Vec3D(1,0,0));
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(0,10,0)),Vec3D(0,1,0));
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(0,0,10)),Vec3D(0,0,1));
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(-10,0,0)),Vec3D(-1,0,0));
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(0,-10,0)),Vec3D(0,-1,0));
-    TS_ASSERT_EQUALS(A.surfaceNormal(Vec3D(0,0,-10)),Vec3D(0,0,-1));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(10,0,0)),V3D(1,0,0));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0,10,0)),V3D(0,1,0));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0,0,10)),V3D(0,0,1));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(-10,0,0)),V3D(-1,0,0));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0,-10,0)),V3D(0,-1,0));
+    TS_ASSERT_EQUALS(A.surfaceNormal(V3D(0,0,-10)),V3D(0,0,-1));
     
-    Vec3D result = A.surfaceNormal(Vec3D(10,10,0));
+    V3D result = A.surfaceNormal(V3D(10,10,0));
     TS_ASSERT_DELTA(result.X(), 0.7071,1e-5);
     TS_ASSERT_DELTA(result.Y(), 0.7071,1e-5);
     TS_ASSERT_DELTA(result.Z(), 0.0,1e-5);
@@ -260,18 +260,18 @@ public:
     Sphere A;
     // centre at origin and radius = 2
     TS_ASSERT_EQUALS(extractString(A),"-1 so 0\n");
-    TS_ASSERT_EQUALS(A.getCentre(),Vec3D(0,0,0));
+    TS_ASSERT_EQUALS(A.getCentre(),V3D(0,0,0));
     TS_ASSERT_EQUALS(A.getRadius(),0);
 
-    Vec3D point(1,1,1);
+    V3D point(1,1,1);
     A.setCentre(point);    
-    TS_ASSERT_EQUALS(extractString(A),"-1 s 1 1 1 0\n");
+    TS_ASSERT_EQUALS(extractString(A),"-1 s [1,1,1] 0\n");
     TS_ASSERT_EQUALS(A.getCentre(),point);
     TS_ASSERT_EQUALS(A.getRadius(),0);
 
-    Vec3D point2(-12.1,51.6,-563.1);
+    V3D point2(-12.1,51.6,-563.1);
     A.setCentre(point2);    
-    TS_ASSERT_EQUALS(extractString(A),"-1 s -12.1 51.6 -563.1 0\n");
+    TS_ASSERT_EQUALS(extractString(A),"-1 s [-12.1,51.6,-563.1] 0\n");
     TS_ASSERT_EQUALS(A.getCentre(),point2);
     TS_ASSERT_EQUALS(A.getRadius(),0);
   }

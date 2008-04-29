@@ -55,41 +55,41 @@ class DLLExport Line
   static Kernel::Logger& PLog;           ///< The official logger
 
 
-  Geometry::Vec3D Origin;   ///< Orign point (on plane)
-  Geometry::Vec3D Direct;   ///< Direction of outer surface (Unit Vector) 
+  Geometry::V3D Origin;   ///< Orign point (on plane)
+  Geometry::V3D Direct;   ///< Direction of outer surface (Unit Vector) 
   
   int lambdaPair(const int ix,const std::pair<std::complex<double>,
-		 std::complex<double> >& SQ,std::vector<Geometry::Vec3D>& PntOut) const;
+		 std::complex<double> >& SQ,std::vector<Geometry::V3D>& PntOut) const;
 
  public: 
 
   Line();
-  Line(const Geometry::Vec3D&,const Geometry::Vec3D&);
+  Line(const Geometry::V3D&,const Geometry::V3D&);
   Line(const Line&);
   Line* clone() const;
   Line& operator=(const Line&);
   
   ~Line();
 
-  Geometry::Vec3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
-  Geometry::Vec3D getOrigin() const { return Origin; }   ///< returns the origin
-  Geometry::Vec3D getDirect() const { return Direct; }   ///< returns the direction
-  double distance(const Geometry::Vec3D&) const;  ///< distance from line
-  int isValid(const Geometry::Vec3D&) const;     ///< Is the point on the line
+  Geometry::V3D getPoint(const double lambda) const;   ///< gets the point O+lam*N
+  Geometry::V3D getOrigin() const { return Origin; }   ///< returns the origin
+  Geometry::V3D getDirect() const { return Direct; }   ///< returns the direction
+  double distance(const Geometry::V3D&) const;  ///< distance from line
+  int isValid(const Geometry::V3D&) const;     ///< Is the point on the line
   void print() const;
 
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
 
-  int setLine(const Geometry::Vec3D&,const Geometry::Vec3D&);     ///< input Origin + direction
+  int setLine(const Geometry::V3D&,const Geometry::V3D&);     ///< input Origin + direction
 
-  int intersect(std::vector<Geometry::Vec3D>&,const Quadratic&) const;
-  int intersect(std::vector<Geometry::Vec3D>&,const Cylinder&) const;
-  int intersect(std::vector<Geometry::Vec3D>&,const Plane&) const;
-  int intersect(std::vector<Geometry::Vec3D>&,const Sphere&) const;
+  int intersect(std::vector<Geometry::V3D>&,const Quadratic&) const;
+  int intersect(std::vector<Geometry::V3D>&,const Cylinder&) const;
+  int intersect(std::vector<Geometry::V3D>&,const Plane&) const;
+  int intersect(std::vector<Geometry::V3D>&,const Sphere&) const;
 
-  // int intersect(std::vector<Geometry::Vec3D>&,const Line*) const;  ///< Not implemented
-  //  int intersect(std::vector<Geometry::Vec3D>&,const Circle*) const;
+  // int intersect(std::vector<Geometry::V3D>&,const Line*) const;  ///< Not implemented
+  //  int intersect(std::vector<Geometry::V3D>&,const Circle*) const;
   
 };
 

@@ -17,7 +17,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
@@ -957,9 +957,9 @@ template int XML::XMLcollect::addNumComp(const std::string&,const int&);
 template int XML::XMLcollect::addNumComp(const std::string&,const std::string&,
 				      const std::vector<double>&,const std::vector<double>&);
 
-#ifdef Geometry_Vec3D_h
-template int XML::XMLcollect::addComp(const std::string&,const Geometry::Vec3D&);
-template int XML::XMLcollect::addNumComp(const std::string&,const Geometry::Vec3D&);
+#ifdef MANTIDGEOMETRY_V3D_H_
+template int XML::XMLcollect::addComp(const std::string&,const Geometry::V3D&);
+template int XML::XMLcollect::addNumComp(const std::string&,const Geometry::V3D&);
 #endif
 
 

@@ -7,7 +7,7 @@
 
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/SupportTempCode.h"
 
@@ -18,9 +18,9 @@ namespace  StrFunc
 
 /// \cond TEMPLATE 
 
-template DLLExport int section(std::string&,Geometry::Vec3D&);
+template DLLExport int section(std::string&,Geometry::V3D&);
 
-template DLLExport int convert(const std::string&,Geometry::Vec3D&);
+template DLLExport int convert(const std::string&,Geometry::V3D&);
 
 /// \endcond TEMPLATE 
 

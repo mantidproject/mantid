@@ -2,13 +2,12 @@
 #define Cone_h
 
 #include "MantidKernel/System.h"
-
+#include "MantidGeometry/V3D.h"
 namespace Mantid
 {
 
 namespace Geometry 
 {
-
 /*!
   \class Cone
   \brief Holds a cone in vector form
@@ -48,13 +47,13 @@ class DLLExport Cone : public Quadratic
 
   static Kernel::Logger& PLog;    ///< The official logger
   
-  Geometry::Vec3D Centre;        ///< Geometry::Vec3D for centre
-  Geometry::Vec3D Normal;        ///< Normal
+  Geometry::V3D Centre;        ///< Geometry::V3D for centre
+  Geometry::V3D Normal;        ///< Normal
   double alpha;                  ///< Angle (degrees)
   double cangle;                 ///< Cos(angle)
   
   void rotate(const Geometry::Matrix<double>&);
-  void displace(const Geometry::Vec3D&);
+  void displace(const Geometry::V3D&);
 
  public:
 
@@ -65,20 +64,20 @@ class DLLExport Cone : public Quadratic
   int operator==(const Cone&) const;
   ~Cone();
   
-  int side(const Geometry::Vec3D&) const;
-  int onSurface(const Geometry::Vec3D&) const;
+  int side(const Geometry::V3D&) const;
+  int onSurface(const Geometry::V3D&) const;
 
   /// Return centre point
-  Geometry::Vec3D getCentre() const { return Centre; }              
+  Geometry::V3D getCentre() const { return Centre; }              
   /// Central normal
-  Geometry::Vec3D getNormal() const { return Normal; }       
+  Geometry::V3D getNormal() const { return Normal; }       
   /// Edge Angle
   double getCosAngle() const { return cangle; } 
-  double distance(const Geometry::Vec3D&) const;   
+  double distance(const Geometry::V3D&) const;   
 
   int setSurface(const std::string&);
-  void setCentre(const Geometry::Vec3D&);              
-  void setNorm(const Geometry::Vec3D&);       
+  void setCentre(const Geometry::V3D&);              
+  void setNorm(const Geometry::V3D&);       
   void setAngle(double const);  
   void setTanAngle(double const);
   void setBaseEqn();

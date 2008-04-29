@@ -17,7 +17,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"

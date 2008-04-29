@@ -23,7 +23,7 @@
 #include "MantidKernel/Support.h"
 #include "mathSupport.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/PolyBase.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
@@ -77,7 +77,7 @@ Surface::~Surface()
 {}
 
 int
-Surface::side(const Geometry::Vec3D&) const
+Surface::side(const Geometry::V3D&) const
   /// Surface side : throw AbsObjMethod
 {
   throw Kernel::Exception::AbsObjMethod("Surface::side");

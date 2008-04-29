@@ -10,7 +10,7 @@
 #include "MantidKernel/Exception.h"
 #include "AuxException.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Track.h"
 
 
@@ -24,24 +24,24 @@ namespace Geometry
 
 Kernel::Logger& Track::PLog(Kernel::Logger::get("Track"));
 
-TUnit::TUnit(const Geometry::Vec3D& A,const Geometry::Vec3D& B,
+TUnit::TUnit(const Geometry::V3D& A,const Geometry::V3D& B,
 	     const double D,const int ID) :
-  PtA(A),PtB(B),Dist(D),Length(A.Distance(B)),ObjID(ID)
+  PtA(A),PtB(B),Dist(D),Length(A.distance(B)),ObjID(ID)
   /*!
     Constuctor
-    \param A :: Vec3D point to start
-    \param B :: Vec3D point to end track
+    \param A :: V3D point to start
+    \param B :: V3D point to end track
     \param D :: Total distance from start of track
     \param ID :: ID number
    */
 {}
 
 TPartial::TPartial(const int ID,const int flag,
-		   const Geometry::Vec3D& PVec,const double D) :
+		   const Geometry::V3D& PVec,const double D) :
   ObjID(ID),Direction(flag),PtA(PVec),Dist(D)
   /*!
     Constuctor
-    \param PVec :: Vec3D point to end track
+    \param PVec :: V3D point to end track
     \param ID :: ID number
     \param flag :: Indicated the direction
     \param D :: Total distance from start of track
@@ -68,8 +68,8 @@ TPartial::operator<(const TPartial& A) const
 //           TRACK
 // --------------------------------------------
 
-Track::Track(const Geometry::Vec3D& StartPt,
-	     const Geometry::Vec3D& UV,const int initObj) : 
+Track::Track(const Geometry::V3D& StartPt,
+	     const Geometry::V3D& UV,const int initObj) : 
   iPt(StartPt),uVec(UV),iObj(initObj)
   /*!
     Constructor
@@ -114,8 +114,8 @@ Track::~Track()
 {}
 
 void 
-Track::setFirst(const Geometry::Vec3D& StartPoint,
-		const Geometry::Vec3D& UV)
+Track::setFirst(const Geometry::V3D& StartPoint,
+		const Geometry::V3D& UV)
   /*!
     Sets the first Point
     \param StartPoint :: First Point
@@ -140,14 +140,14 @@ Track::nonComplete() const
     return 0;
 
   LType::const_iterator ac=Link.begin();
-  if (iPt.Distance(ac->PtA)>TrackTolerance)
+  if (iPt.distance(ac->PtA)>TrackTolerance)
     return 1;
   LType::const_iterator bc=ac;
   bc++;
 
   while(bc!=Link.end())
     {
-      if ((ac->PtB).Distance(bc->PtA)>TrackTolerance)
+      if ((ac->PtB).distance(bc->PtA)>TrackTolerance)
 	return distance(Link.begin(),bc)+1;
       ac++;
       bc++;
@@ -175,7 +175,7 @@ Track::removeCoJoins()
       if (ac->ObjID==bc->ObjID)
         {
 	  ac->PtB=bc->PtB;
-	  ac->Dist=(ac->PtA).Distance(ac->PtB);
+	  ac->Dist=(ac->PtA).distance(ac->PtB);
 	  ac->Length=bc->Length;
 	  Link.erase(bc);
 	  bc=ac;
@@ -192,7 +192,7 @@ Track::removeCoJoins()
 
 void
 Track::addPoint(const int ID,const int Direct,
-		const Geometry::Vec3D& Pt) 
+		const Geometry::V3D& Pt) 
   /*!
     Objective is to merge in partial information
     about the beginning and end of the tracks.
@@ -205,13 +205,13 @@ Track::addPoint(const int ID,const int Direct,
     \param Pt :: Point to go
    */
 {
-  surfPoints.push_back(TPartial(ID,Direct,Pt,Pt.Distance(iPt)));
+  surfPoints.push_back(TPartial(ID,Direct,Pt,Pt.distance(iPt)));
   return;
 }
 
 int
-Track::addTUnit(const int ID,const Geometry::Vec3D& Apt,
-		const Geometry::Vec3D& Bpt)
+Track::addTUnit(const int ID,const Geometry::V3D& Apt,
+		const Geometry::V3D& Bpt)
   /*!
     This adds a whole segment to the track
     \param ID :: Id number of the object
@@ -220,7 +220,7 @@ Track::addTUnit(const int ID,const Geometry::Vec3D& Apt,
     \retval Index point 
    */
 {
-  const double D=Bpt.Distance(Apt);
+  const double D=Bpt.distance(Apt);
   // Process First Point
   if (Link.empty())
     {
@@ -249,7 +249,7 @@ Track::addTUnit(const int ID,const Geometry::Vec3D& Apt,
 //  PType::const_iterator ac=surfPoints.begin();
 //  PType::const_iterator bc=ac;
 //  bc++;
-//  Geometry::Vec3D workPt=iPt;            // last good point
+//  Geometry::V3D workPt=iPt;            // last good point
 //  // First point is not necessarily in an object
 //  // Process first point:
 //  if (ac->Direction==1)

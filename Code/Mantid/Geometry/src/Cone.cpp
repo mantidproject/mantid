@@ -21,7 +21,7 @@
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "Vec3D.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
@@ -138,8 +138,8 @@ Cone::setSurface(const std::string& Pstr)
   if (!StrFunc::section(Line,tanAng))
     return -5;
 
-  Centre=Geometry::Vec3D(cent);
-  Normal=Geometry::Vec3D(norm);
+  Centre=Geometry::V3D(cent);
+  Normal=Geometry::V3D(norm);
   setTanAngle(sqrt(tanAng));
   setBaseEqn();
   return 0;
@@ -158,9 +158,9 @@ Cone::operator==(const Cone& A) const
     return 1;
   if (fabs(cangle-A.cangle)>CTolerance)
     return 0;
-  if (Centre.Distance(A.Centre)>CTolerance)
+  if (Centre.distance(A.Centre)>CTolerance)
     return 0;
-  if (Normal.Distance(A.Normal)>CTolerance)
+  if (Normal.distance(A.Normal)>CTolerance)
     return 0;
 
   return 1;
@@ -174,7 +174,7 @@ Cone::setBaseEqn()
   */
 {
   const double c2(cangle*cangle);
-  const double CdotN(Centre.dotProd(Normal));
+  const double CdotN(Centre.scalar_prod(Normal));
   BaseEqn[0]=c2-Normal[0]*Normal[0];     // A x^2
   BaseEqn[1]=c2-Normal[1]*Normal[1];     // B y^2
   BaseEqn[2]=c2-Normal[2]*Normal[2];     // C z^2 
@@ -184,7 +184,7 @@ Cone::setBaseEqn()
   BaseEqn[6]= 2.0*(Normal[0]*CdotN-Centre[0]*c2) ;     // G x
   BaseEqn[7]= 2.0*(Normal[1]*CdotN-Centre[1]*c2) ;     // H y
   BaseEqn[8]= 2.0*(Normal[2]*CdotN-Centre[2]*c2) ;     // J z
-  BaseEqn[9]= c2*Centre.dotProd(Centre)-CdotN*CdotN;   // K const
+  BaseEqn[9]= c2*Centre.scalar_prod(Centre)-CdotN*CdotN;   // K const
   return;
 }
 
@@ -202,11 +202,11 @@ Cone::rotate(const Geometry::Matrix<double>& R)
 }
 
 void 
-Cone::displace(const Geometry::Vec3D& A)
+Cone::displace(const Geometry::V3D& A)
   /*!
     Displace the centre
     Only need to update the centre position 
-    \param A :: Geometry::Vec3D to add
+    \param A :: Geometry::V3D to add
   */
 {
     Centre+=A;
@@ -215,7 +215,7 @@ Cone::displace(const Geometry::Vec3D& A)
 }
 
 void 
-Cone::setCentre(const Geometry::Vec3D& A)
+Cone::setCentre(const Geometry::V3D& A)
   /*!
     Sets the central point and the Base Equation
     \param A :: New Centre point
@@ -227,16 +227,16 @@ Cone::setCentre(const Geometry::Vec3D& A)
 }
 
 void 
-Cone::setNorm(const Geometry::Vec3D& A)
+Cone::setNorm(const Geometry::V3D& A)
   /*!
     Sets the Normal and the Base Equation
     \param A :: New Normal direction
   */
 {
-  if (A.abs()>CTolerance)
+  if (A.norm()>CTolerance)
     {
       Normal=A;
-      Normal.makeUnit();
+      Normal.normalize();
       setBaseEqn();
     }
   return;
@@ -271,7 +271,7 @@ Cone::setTanAngle(const double A)
 }
 
 double
-Cone::distance(const Geometry::Vec3D& Pt) const
+Cone::distance(const Geometry::V3D& Pt) const
   /*!
     Calculates the distance from the point to the Cone
     does not calculate the point on the cone that is closest
@@ -283,22 +283,22 @@ Cone::distance(const Geometry::Vec3D& Pt) const
     \return distance to Pt
   */
 {
-  const Geometry::Vec3D Px=Pt-Centre;
+  const Geometry::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
-  if(Px.abs()<CTolerance)
-    return Px.abs();
-  double Pangle=Px.dotProd(Normal)/Px.abs();
+  if(Px.norm()<CTolerance)
+    return Px.norm();
+  double Pangle=Px.scalar_prod(Normal)/Px.norm();
   if (Pangle<0.0)
     Pangle=acos(-Pangle);
   else
     Pangle=acos(Pangle);
   
   Pangle-=M_PI*alpha/180.0;
-  return Px.abs()*sin(Pangle);
+  return Px.norm()*sin(Pangle);
 }
 
 int
-Cone::side(const Geometry::Vec3D& R) const
+Cone::side(const Geometry::V3D& R) const
 {
   /*!
     Calculate if the point R is within
@@ -310,9 +310,9 @@ Cone::side(const Geometry::Vec3D& R) const
     \param R :: Point to determine if in/out of cone
     \return Side of R
   */
-  const Geometry::Vec3D cR = R-Centre;
-  double rptAngle=cR.dotProd(Normal);
-  rptAngle*=rptAngle/cR.dotProd(cR);
+  const Geometry::V3D cR = R-Centre;
+  double rptAngle=cR.scalar_prod(Normal);
+  rptAngle*=rptAngle/cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
   if (fabs(eqn-cangle)<CTolerance)
     return 0;
@@ -320,7 +320,7 @@ Cone::side(const Geometry::Vec3D& R) const
 }
 
 int
-Cone::onSurface(const Geometry::Vec3D& R) const
+Cone::onSurface(const Geometry::V3D& R) const
 {
   /*! 
      Calculate if the point R is on
@@ -330,9 +330,9 @@ Cone::onSurface(const Geometry::Vec3D& R) const
      \param R :: Point to check
      \return 1 if on surface and 0 if not not on surface
   */
-  const Geometry::Vec3D cR = R-Centre;
-  double rptAngle=cR.dotProd(Normal);
-  rptAngle*=rptAngle/cR.dotProd(cR);
+  const Geometry::V3D cR = R-Centre;
+  double rptAngle=cR.scalar_prod(Normal);
+  rptAngle*=rptAngle/cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
   
   return (fabs(eqn-cangle)>CTolerance) ? 0 : 1;  
