@@ -60,7 +60,7 @@ namespace Mantid
       /// get parameter list of algorithm in history const
       const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;}
       /// print contents of object
-      void printSelf(std::ostream&,const int = 0)const;
+      void printSelf(std::ostream&,const int indent = 0)const;
 
     private:
       /// The name of the Algorithm
