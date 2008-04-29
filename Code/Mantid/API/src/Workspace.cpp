@@ -3,6 +3,8 @@
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+
 
 namespace Mantid
 {
@@ -12,7 +14,7 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace() : m_title(), m_comment(), sptr_instrument(new Instrument), m_sample(), m_history(), 
+Workspace::Workspace() : m_title(), m_comment(), sptr_instrument(new Instrument),sptr_spectramap(new SpectraDetectorMap), m_sample(), m_history(), 
   m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
 {}
 
@@ -36,10 +38,17 @@ void Workspace::setComment(const std::string& c)
 {
   m_comment=c;
 }
-
+/** Set the Spectra to DetectorMap
+ * 
+ * \param map:: Shared pointer to the SpectraDetectorMap
+ */
+void Workspace::setSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& map)
+{
+	sptr_spectramap=map;
+}
 /** Set the instrument
  * 
- * \param instr :: The instrument.
+ * \param instr :: Shared pointer to an instrument instrument.
  */
 void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
 {
@@ -64,7 +73,16 @@ const std::string& Workspace::getComment() const
   return m_comment;
 }
 
-/** Get the Instrument associated with this workspace
+/** Get a shared pointer to the SpectraDetectorMap associated with this workspace
+ * 
+ *  @return The SpectraDetectorMap
+ */
+boost::shared_ptr<Mantid::API::SpectraDetectorMap> Workspace::getSpectraMap() const
+{
+  return sptr_spectramap;
+}
+
+/** Get a shared pointer to the instrument associated with this workspace
  * 
  *  @return The instrument class
  */

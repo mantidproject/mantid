@@ -58,6 +58,9 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+// Forward declaration
+class SpectraDetectorMap;
+//
 class DLLExport Workspace
 {
 public:
@@ -75,9 +78,11 @@ public:
   void setTitle(const std::string&);
   void setComment(const std::string&);
   void setInstrument(const boost::shared_ptr<Instrument>&);
+  void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>&);
   const std::string& getComment() const;
   const std::string& getTitle() const;
   boost::shared_ptr<Instrument> getInstrument() const;
+  boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
   Sample& getSample();
 
   /// Get the footprint in memory.
@@ -152,6 +157,8 @@ private:
 
   /// The instrument used for this experiment
   boost::shared_ptr<Instrument> sptr_instrument;
+  /// The SpectraDetector table used for this experiment 
+  boost::shared_ptr<SpectraDetectorMap> sptr_spectramap;
   /// The information on the sample environment
   Sample m_sample;
 
