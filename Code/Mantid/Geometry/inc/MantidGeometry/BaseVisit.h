@@ -43,7 +43,7 @@ class Line;
 
  */
 
-class BaseVisit
+class DLLExport BaseVisit
 {
 public:
 
