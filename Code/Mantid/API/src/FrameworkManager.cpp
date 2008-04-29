@@ -58,6 +58,7 @@ void FrameworkManagerImpl::clear()
 /** Creates an instance of an algorithm
  * 
  *  @param algName The name of the algorithm required
+ *  @param version The version of the algorithm
  *  @return A pointer to the created algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
@@ -73,6 +74,7 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, co
  *  @param algName The name of the algorithm required
  *  @param propertiesArray A single string containing properties in the 
  *                         form "Property1:Value1,Property2:Value2,..."
+ *  @param version The version of the algorithm
  *  @return A pointer to the created algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered

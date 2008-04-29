@@ -96,6 +96,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
 	///Private Destructor
 	virtual ~AlgorithmFactoryImpl();
+	/// creates an algorithm name convolved from an name and version
 	std::string createName(const std::string&, const int&)const;
 	///static reference to the logger class
 	Kernel::Logger& g_log;
