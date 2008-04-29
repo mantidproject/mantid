@@ -137,9 +137,7 @@ void LoadInstrument::exec()
     {
       Element* pElem = static_cast<Element*>(pNL_comp->item(i));
 
-      int runningDetID = 1, detectorLastID = 0; // Used for assigning detector IDs
-                                                // The initialisation is to make a
-                                                // check below to be true by default
+      IdList idList; // structure to possibly be populated with detector IDs 
 
       // get all location element contained in component element
 
@@ -155,27 +153,25 @@ void LoadInstrument::exec()
 
       if ( isTypeAssemply[pElem->getAttribute("type")] )
       {
-        // read detertor ID start and end values if idlist specified
-        // (only for 'detector' elements at present)
+        // read detertor IDs into idlist if required
 
         if ( pElem->hasAttribute("idlist") )
         {
           std::string idlist = pElem->getAttribute("idlist");
           Element* pFound = pDoc->getElementById(idlist, "idname");
-          runningDetID = atoi( (pFound->getAttribute("start")).c_str() ); 
-          detectorLastID = atoi( (pFound->getAttribute("end")).c_str() ); 
+          populateIdList(pFound, idList);
         }
 
 
         for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
         {
-          appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
+          appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
         
 
         // a check
 
-        if (runningDetID != detectorLastID+1)
+        if (idList.counted != idList.vec.size())
         {
           g_log.error("The number of detector IDs listed in idlist named "
             + pElem->getAttribute("idlist") + 
@@ -190,7 +186,7 @@ void LoadInstrument::exec()
       {
         for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
         {
-          appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), runningDetID);
+          appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
       }
       pNL_location->release();
@@ -212,7 +208,7 @@ void LoadInstrument::exec()
  *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
  *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
  */
-void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, int& runningDetID)
+void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
   // The location element is required to be a child of a component element. Get this component element
 
@@ -255,19 +251,19 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     std::string typeName = (getParentComponent(pElem))->getAttribute("type");
     if (isTypeAssemply[typeName])
     {
-      appendAssembly(ass, pElem, runningDetID);
+      appendAssembly(ass, pElem, idList);
     }
     else
     {
-      appendLeaf(ass, pElem, runningDetID);
+      appendLeaf(ass, pElem, idList);
     }
   }
   pNL_loc_for_this_type->release();
 }
 
-void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, int& runningDetID)
+void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
-  appendAssembly(parent.get(),pLocElem,runningDetID);
+  appendAssembly(parent.get(), pLocElem, idList);
 }
 
 
@@ -279,7 +275,7 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
  *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add  
  *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
  */
-void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, int& runningDetID)
+void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
   // The location element is required to be a child of a component element. Get this component element
 
@@ -319,8 +315,8 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
 
     // set detector ID and increment it. Finally add the detector to the parent
-    detector.setID(runningDetID);
-    runningDetID++;
+    detector.setID(idList.vec[idList.counted]);
+    idList.counted++;
     int toGetHoldOfDetectorCopy = parent->addCopy(&detector);
     Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
     instrument->markAsDetector(temp);
@@ -359,9 +355,9 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
   }
 }
 
-void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, int& runningDetID)
+void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
-	appendLeaf(parent.get(),pLocElem,runningDetID);
+	appendLeaf(parent.get(), pLocElem, idList);
 }
 
 /** Set location (position) of comp as specified in XML location element.
@@ -460,6 +456,85 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
   }
 
   return pCompElem;
+}
+
+/** Method for populating IdList.
+ *
+ *  @param pElem  Poco::XML element that points a idlist element in the XML doc
+ *  @param idList The structure to populate with detector ID numbers
+ *
+ *  @throw logic_error Thrown if argument is not a child of component element
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+void LoadInstrument::populateIdList(Element* pE, IdList& idList)
+{
+  if ( (pE->tagName()).compare("idlist") )
+  {
+    g_log.error("Argument to function createIdList must be a pointer to an XML element with tag name idlist.");
+    throw std::logic_error( "Argument to function createIdList must be a pointer to an XML element with tag name idlist." );
+  }
+
+  // If idname element has start and end attributes then just use those to populate idlist.
+  // Otherwise id sub-elements
+
+  if ( pE->hasAttribute("start") )
+  {
+    int startID = atoi( (pE->getAttribute("start")).c_str() ); 
+
+    int endID;
+    if ( pE->hasAttribute("end") )
+      endID = atoi( (pE->getAttribute("end")).c_str() ); 
+    else
+      endID = startID;
+
+    for (int i = startID; i <= endID; i++)
+      idList.vec.push_back(i);
+  }
+  else
+  {
+    NodeList* pNL = pE->getElementsByTagName("id");
+
+    if ( pNL->length() == 0 )
+    {
+      g_log.error("idlist element in instrument definition file wrongly specified.");
+      throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);	
+    }
+
+    for (unsigned int i = 0; i < pNL->length(); i++)
+    {  
+      Element* pIDElem = static_cast<Element*>(pNL->item(i));
+
+      if ( pIDElem->hasAttribute("val") )
+      {
+      }
+      else if ( pIDElem->hasAttribute("start") )
+      {
+        int startID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+
+        int endID;
+        if ( pIDElem->hasAttribute("end") )
+          endID = atoi( (pIDElem->getAttribute("end")).c_str() ); 
+        else
+          endID = startID;
+
+        for (int i = startID; i <= endID; i++)
+          idList.vec.push_back(i);
+      }
+      else
+      {
+        // should warn user that no val or start attribute but
+        // better to do this through dtd or schema perhaps....
+        // Anyway for now use the usual way out
+
+        g_log.error("id element in instrument definition file wrongly specified.");
+        throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " + 
+          std::string("element wrongly specified in XML instrument file"), m_filename);	
+      }
+    }
+
+    pNL->release();
+  }
+
 }
 
 } // namespace DataHandling

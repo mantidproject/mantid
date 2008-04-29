@@ -93,12 +93,26 @@ namespace API
       /// Overwrites Algorithm method
       void exec();
 
+      /// Structure for holding detector IDs
+      struct IdList
+      {
+        int counted;
+        std::vector<int> vec;
+
+        IdList() : counted(0) {};
+      };
+
+      /// Method for populating IdList
+      void populateIdList(Poco::XML::Element* pElem, IdList& idList);
+
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
-      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, int& runningDetID);
+      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
+
       /// Add XML element to parent assuming the element contains no other component elements
-      void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, int& runningDetID);
-      void appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, int& runningDetID);
+      void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
+
       /// Set location (position) of comp as specified in XML location element
       void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
 
