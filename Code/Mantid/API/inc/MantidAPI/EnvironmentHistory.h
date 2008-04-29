@@ -49,7 +49,7 @@ namespace Mantid
       EnvironmentHistory& operator=(const EnvironmentHistory& );
       virtual ~EnvironmentHistory();
       /// print contents of object
-      void printSelf(std::ostream&, const int = 0)const;
+      void printSelf(std::ostream&, const int indent = 0)const;
 
     private:
       /// The version of the framework

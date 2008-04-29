@@ -46,7 +46,10 @@ namespace Mantid
       }
       return *this;
     }
-
+    /** Prints a text representation of itself
+    * @param os The ouput stream to write to
+	* @param indent an indentation value to make pretty printing of object and sub-objects
+    */
     void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
     {
       

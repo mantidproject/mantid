@@ -55,6 +55,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
   public:
 	  boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
 
+	  /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
 	  template <class C>
     void subscribe()
 	  {

@@ -77,6 +77,8 @@ namespace Mantid
 			AlgorithmManagerImpl();
 			~AlgorithmManagerImpl();
 			AlgorithmManagerImpl(const AlgorithmManagerImpl&);
+    
+			/// Standard Assignment operator    
 			AlgorithmManagerImpl& operator = (const AlgorithmManagerImpl&);
 
 

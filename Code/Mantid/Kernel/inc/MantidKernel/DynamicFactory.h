@@ -85,12 +85,7 @@ public:
   {
     subscribe(className, new Instantiator<C, Base>);
   }
-  
-  template <class C> 
-  void subscribe(const std::string& className, const int& version)
-  {
-    subscribe(className, new Instantiator<C, Base>);
-  }
+
 
   /// Registers the instantiator for the given class with the DynamicFactory.
   /// The DynamicFactory takes ownership of the instantiator and deletes

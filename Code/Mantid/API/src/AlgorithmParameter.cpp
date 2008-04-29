@@ -69,6 +69,10 @@ namespace Mantid
       os << std::string(indent,' ') << "isDefault: "<< m_isDefault << std::endl; 
       os << std::string(indent,' ') << "Direction :" << getdirectiontext() << std::endl;
     }
+    /** returns the direction of a parameter    
+    * @returns The direction of the parameter as a string
+	* @throws std::invalid_argument if direction of parameter is undefined
+    */ 	
     const std::string AlgorithmParameter::getdirectiontext()const
     { 
       if(m_direction == Mantid::Kernel::Direction::Input) return "Input";

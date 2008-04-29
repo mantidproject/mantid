@@ -57,7 +57,7 @@ namespace Mantid
       /// get direction flag of algorithm parameter const
       const unsigned int& direction()const {return m_direction;};
       /// print contents of object
-      void printSelf(std::ostream&, const int = 0) const;
+      void printSelf(std::ostream&, const int indent = 0) const;
 
     private:
       /// The name of the parameter
