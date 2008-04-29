@@ -2,6 +2,7 @@
 #define XMLgroup_h
 
 #include "XMLobject.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
