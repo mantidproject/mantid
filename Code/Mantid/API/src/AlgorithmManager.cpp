@@ -33,6 +33,7 @@ namespace Mantid
     /** Creates an instance of an algorithm, but does not own that instance
     * 
     *  @param  algName The name of the algorithm required
+	*  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
@@ -60,6 +61,7 @@ namespace Mantid
     /** Creates an instance of an algorithm
     *
     *  @param  algName The name of the algorithm required
+	*  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed
