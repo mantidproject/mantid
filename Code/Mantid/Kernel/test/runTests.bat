@@ -30,7 +30,26 @@ link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_P
 echo "Copying in properties files..."
 copy /Y ..\..\Build\Tests\*properties
 echo "Running the tests..."
+
+SETLOCAL ENABLEEXTENSIONS
+:: Store start time
+FOR /f "tokens=1-4 delims=:.," %%T IN ("%TIME%") DO (
+SET StartTIME=%TIME%
+SET /a Start100S=%%T*360000+%%U*6000+%%V*100+%%W
+)
+
 runner.exe
+
+:: Retrieve Stop time
+FOR /f "tokens=1-4 delims=:.," %%T IN ("%TIME%") DO (
+SET StopTIME=%TIME%
+SET /a Stop100S=%%T*360000+%%U*6000+%%V*100+%%W
+)
+:: Test midnight rollover. If so, add 1 day=8640000 1/100ths secs
+IF %Stop100S% LSS %Start100S% SET /a Stop100S+=8640000
+SET /a TookTime=%Stop100S%-%Start100S%
+
+ECHO Elapsed: %TookTime:~0,-2%.%TookTime:~-2% seconds
 
 REM Remove the generated files to ensure that they're not inadvertently run
 REM   when something in the chain has failed.

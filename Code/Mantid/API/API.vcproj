@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SpectraDetectorMap.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Workspace.cpp"
 				>
 			</File>
@@ -351,6 +355,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SampleTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\SpectraDetectorMap.h"
 				>
 			</File>
 			<File

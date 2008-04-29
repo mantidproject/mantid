@@ -1,6 +1,7 @@
 #ifndef SPECTRADETECTORMAP_
 #define SPECTRADETECTORMAP_
 
+#include "MantidKernel/System.h"
 #ifdef _WIN32
 #include <map>
 #else
