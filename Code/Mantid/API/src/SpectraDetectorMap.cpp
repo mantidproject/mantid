@@ -46,7 +46,25 @@ int SpectraDetectorMap::ndet(int spectra_number) const
 	return _s2dmap.count(spectra_number);
 }
 
-
+void SpectraDetectorMap::getDetectors(int spectra_key,std::vector<Mantid::Geometry::IDetector*>& detectors)
+{
+	int ndets=ndet(spectra_key);
+	
+	if  (ndets<1)
+	{
+		detectors.empty();
+		return;
+	}
+	std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectra_key); 
+	int i=0;
+	detectors.resize(ndets);
+	smap_it it;
+	for (it=det_range.first;it!=det_range.second;it++)
+		detectors[i++]=(*it).second;
+	return;
+}
+	
+	
 	} // Namespace API 
 
 } // Namespace Mantid

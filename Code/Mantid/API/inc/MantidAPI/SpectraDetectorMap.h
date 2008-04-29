@@ -8,6 +8,7 @@
 #include <tr1/unordered_map>
 #endif
 
+#include <vector>
 
 //Forward declaration of IDetector
 class Mantid::Geometry::IDetector; 
@@ -53,16 +54,21 @@ class DLLExport SpectraDetectorMap
 public:
 #ifdef _WIN32
 	typedef std::multimap<int,Mantid::Geometry::IDetector*> smap;
+	typedef std::multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
 #else
 	typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*> smap;
+	typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
 #endif
 	SpectraDetectorMap();
 	SpectraDetectorMap(const SpectraDetectorMap& copy);
 	SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
 	virtual ~SpectraDetectorMap();
+	/// populate the Map with _spec and _udet C array 
 	void populate(int* _spec, int* _udet, int nentries, Instrument*);
 	/// Return number of detectors contributing to this spectra
 	int ndet(int spectra_number) const;
+	/// Get a vector of IDetector contributing to spectra_key
+	void getDetectors(int spectra_key, std::vector<Mantid::Geometry::IDetector*>& detectors);
 private:
 	smap _s2dmap;
 };
