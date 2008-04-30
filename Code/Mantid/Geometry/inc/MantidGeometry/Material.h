@@ -38,7 +38,7 @@ namespace Geometry
 
   */
   
-class Material
+class DLLExport Material
 {
  private:
 

@@ -40,7 +40,7 @@ namespace Geometry
 
 */
 
-class SamGeometry
+class DLLExport SamGeometry
 {
 
  public:

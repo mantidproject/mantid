@@ -10,7 +10,7 @@ namespace Mantid
 namespace StrFunc
 {
 /// Find if a pattern matches a string
-template<typename T> int StrComp(const char*,const boost::regex&,T&,const int=1);
+template<typename T> DLLExport int StrComp(const char*,const boost::regex&,T&,const int=1);
 
 /// Find if a pattern matches
 template<typename T> int StrComp(const std::string&,const boost::regex&,T&,const int=0);

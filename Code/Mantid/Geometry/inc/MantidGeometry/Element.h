@@ -49,7 +49,7 @@ struct Abundance
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class Element
+class DLLExport Element
 {
  private:
 

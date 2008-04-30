@@ -33,7 +33,7 @@ namespace MonteCarlo
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
 
-class Flux
+class DLLExport Flux
 {
  private:
 

@@ -46,7 +46,7 @@ namespace Geometry
 
 */
 
-class BnId
+class DLLExport BnId
 {
  private:
 

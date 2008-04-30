@@ -1,5 +1,6 @@
 #ifndef MatrixBase_h 
 #define MatrixBase_h
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -37,7 +38,7 @@ class Vec3D;
 
 
 template<typename T>
-class MatrixBase
+class DLLExport MatrixBase
 {
  private:
 

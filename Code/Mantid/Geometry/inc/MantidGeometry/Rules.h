@@ -39,7 +39,7 @@ class Surface;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class Rule
+class DLLExport Rule
 {
  private:
 

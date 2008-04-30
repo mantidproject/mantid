@@ -33,7 +33,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
 
-struct TUnit
+struct DLLExport TUnit
 {
   V3D PtA;           ///< Init Point
   V3D PtB;           ///< Exit Point

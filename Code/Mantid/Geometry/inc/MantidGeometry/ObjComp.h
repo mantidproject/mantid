@@ -6,7 +6,7 @@
 namespace Geometry
 {
 
-class ObjComp
+class DLLExport ObjComp
 { 
  private:
  

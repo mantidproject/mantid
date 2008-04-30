@@ -1,6 +1,7 @@
 #ifndef mathLevel_PolyBase_h
 #define mathLevel_PolyBase_h
 
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -24,7 +25,7 @@ namespace mathLevel
     \todo ADD solveQuartic
   */
 
-class PolyBase
+class DLLExport PolyBase
 {
  private:  
 

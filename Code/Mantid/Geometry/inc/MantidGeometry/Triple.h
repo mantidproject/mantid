@@ -1,9 +1,9 @@
 #ifndef Triple_h
 #define Triple_h
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
-
 /*!
   \class Triple
   \brief Triple of three identical types
@@ -35,7 +35,7 @@ namespace Mantid
 */
 
 template<typename T>
-class Triple
+class DLLExport Triple
 {
   public:
   
@@ -71,7 +71,7 @@ class Triple
 */
 
 template<typename F,typename S,typename T>
-class DTriple 
+class DLLExport DTriple 
 {
   public:
   
@@ -91,6 +91,5 @@ class DTriple
   int operator!=(const DTriple<F,S,T>&) const;
 
 };
-
 }  // NAMESPACE Mantid
 #endif

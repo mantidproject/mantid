@@ -34,7 +34,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 template<template<typename T> class V,typename T> 
-class LinkIterator
+class DLLExport LinkIterator
 {
  private:
     
