@@ -63,6 +63,9 @@ namespace Mantid
       /// Destructor
       virtual ~BinaryOperation() {};
 
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "General";}
+
     protected:
       // Overridden Algorithm methods
       void init();

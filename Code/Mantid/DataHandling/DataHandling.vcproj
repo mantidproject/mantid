@@ -258,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidDataHandling\LoadMappingTable.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadNeXus.h"
 				>
 			</File>

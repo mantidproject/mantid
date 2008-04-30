@@ -20,6 +20,7 @@ public:
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
   virtual const int version() const {return(1);}
+  virtual const std::string category() const {return("Cat1");}
 
 };
 
@@ -33,6 +34,7 @@ public:
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
   virtual const int version() const {return(1);}
+  virtual const std::string category() const {return("Cat2");}
 
 };
 
@@ -46,6 +48,7 @@ public:
   void exec() { }
   virtual const std::string name() const {return "AlgTest";}
   virtual const int version() const {return(2);}
+  virtual const std::string category() const {return("Cat4");}
 
 };
 
@@ -59,6 +62,7 @@ public:
   void exec() { }
   virtual const std::string name() const {return "AlgTestSecond";}
   virtual const int version() const {return(1);}
+  virtual const std::string category() const {return("Cat3");}
 
 };
 
@@ -96,11 +100,25 @@ public:
   
   void testGetNames()
   {
-	AlgorithmManager::Instance().clear();
-	TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-	TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
-	std::vector<std::string> names = AlgorithmManager::Instance().getNames();
-	TS_ASSERT_EQUALS(names.size(), 2)
+	  AlgorithmManager::Instance().clear();
+	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
+	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
+	  std::vector<std::string> names = AlgorithmManager::Instance().getNames();
+	  TS_ASSERT_EQUALS(names.size(), 2)
+  }
+
+  void testGetNamesAndCategories()
+  {
+	  AlgorithmManager::Instance().clear();
+	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
+	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
+    std::vector<std::pair<std::string,std::string>> names = AlgorithmManager::Instance().getNamesAndCategories();
+	  TS_ASSERT_EQUALS(names.size(), 2);
+	  TS_ASSERT_EQUALS(names[0].first, "AlgTest");
+	  TS_ASSERT_EQUALS(names[0].second, "Cat4");
+	  TS_ASSERT_EQUALS(names[1].first, "AlgTestSecond");
+	  TS_ASSERT_EQUALS(names[1].second, "Cat3");
+
   }
 
   void testClear()

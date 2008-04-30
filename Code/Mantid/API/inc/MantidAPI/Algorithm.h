@@ -103,11 +103,11 @@ public:
   virtual ~Algorithm();
   /// function to return a name of the algorithm, must be overridden in all algorithms
   virtual const std::string name() const {throw Kernel::Exception::AbsObjMethod("Algorithm");}
-  
+  virtual const int version() const {throw Kernel::Exception::AbsObjMethod("Algorithm");}
+  virtual const std::string category() const {return "Misc";}
 
   // IAlgorithm methods	  
 /// function to return the version of the algorithm, must be overridden in all algorithms
-  virtual const int version() const {throw Kernel::Exception::AbsObjMethod("Algorithm");}
   void initialize();
   void execute();
   virtual bool isInitialized() const; // Protected in Gaudi version

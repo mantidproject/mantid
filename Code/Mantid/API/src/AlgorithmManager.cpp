@@ -16,8 +16,8 @@ namespace Mantid
     /// Private Constructor for singleton class
     AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")), no_of_alg(0)
     {
-		std::cerr << "Algorithm Manager created." << std::endl;
-		g_log.debug() << "Algorithm Manager created." << std::endl;
+      std::cerr << "Algorithm Manager created." << std::endl;
+      g_log.debug() << "Algorithm Manager created." << std::endl;
     }
 
     /** Private destructor
@@ -26,14 +26,14 @@ namespace Mantid
     */
     AlgorithmManagerImpl::~AlgorithmManagerImpl()
     {
-		std::cerr << "Algorithm Manager destroyed." << std::endl;
-//		g_log.debug() << "Algorithm Manager destroyed." << std::endl;
+      std::cerr << "Algorithm Manager destroyed." << std::endl;
+      //		g_log.debug() << "Algorithm Manager destroyed." << std::endl;
     }
 
     /** Creates an instance of an algorithm, but does not own that instance
     * 
     *  @param  algName The name of the algorithm required
-	*  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
+    *  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
@@ -41,27 +41,45 @@ namespace Mantid
     {
       return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
-    
+
     /** Gets the names of all the currently available algorithms
     *
-    *  \return A pointer to the created algorithm
+    *  \return A vector of the algorithm names
     */
     const std::vector<std::string> AlgorithmManagerImpl::getNames() const
     {
-	std::vector<std::string> names;
-	    
-	for (unsigned int i=0; i < regAlg.size(); ++i)
-	{
-		names.push_back(regAlg[i]->name());
-	}
-	    
-        return names;              
+      std::vector<std::string> names;
+
+      for (unsigned int i=0; i < regAlg.size(); ++i)
+      {
+        names.push_back(regAlg[i]->name());
+      }
+
+      return names;              
+    }
+
+    /** Gets the names and categories of all the currently available algorithms
+    *
+    *  \return A vector of pairs of algorithm names and categories
+    */
+    const std::vector<std::pair<std::string,std::string>> 
+      AlgorithmManagerImpl::getNamesAndCategories() const
+    {
+      std::vector<std::pair<std::string,std::string>> retVector;
+
+      for (unsigned int i=0; i < regAlg.size(); ++i)
+      {
+        std::pair<std::string,std::string> alg(regAlg[i]->name(),regAlg[i]->category());
+        retVector.push_back(alg);
+      }
+
+      return retVector;
     }
 
     /** Creates an instance of an algorithm
     *
     *  @param  algName The name of the algorithm required
-	*  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
+    *  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed

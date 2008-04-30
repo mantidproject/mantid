@@ -67,6 +67,8 @@ namespace Mantid
       virtual const std::string name() const { return "LoadMappingTable";};
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "DataHandling\\Instrument";}
     private:
       /// The name and path of the input file
       std::string m_filename;
