@@ -69,7 +69,7 @@ namespace Mantid
 			int size() const { return regAlg.size(); }
 			
 			const std::vector<std::string> getNames() const;
-      const std::vector<std::pair<std::string,std::string>> getNamesAndCategories() const;
+      const std::vector<std::pair<std::string,std::string> > getNamesAndCategories() const;
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;

@@ -62,7 +62,7 @@ namespace Mantid
     *
     *  \return A vector of pairs of algorithm names and categories
     */
-    const std::vector<std::pair<std::string,std::string>> 
+    const std::vector<std::pair<std::string,std::string> > 
       AlgorithmManagerImpl::getNamesAndCategories() const
     {
       std::vector<std::pair<std::string,std::string>> retVector;
