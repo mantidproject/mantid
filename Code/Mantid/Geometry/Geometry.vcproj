@@ -414,11 +414,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
@@ -451,6 +451,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\Cone.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ConeTest.h"
 				>
 			</File>
 			<File
@@ -498,11 +502,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\IndexIterator.h"
+				RelativePath=".\Deprecated\inc\IndexIterator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\IndexIterator.h"
+				RelativePath=".\auxinc\IndexIterator.h"
 				>
 			</File>
 			<File
@@ -511,6 +515,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\LineIntersectVisit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LineIntersectVisitTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LineTest.h"
 				>
 			</File>
 			<File
@@ -530,11 +542,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -698,19 +710,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLgrid.h"
-				>
-			</File>
-			<File
 				RelativePath=".\auxinc\XMLgrid.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLgridSupport.h"
+				RelativePath=".\Deprecated\inc\XMLgrid.h"
 				>
 			</File>
 			<File
 				RelativePath=".\Deprecated\inc\XMLgridSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\auxinc\XMLgridSupport.h"
 				>
 			</File>
 			<File
@@ -730,11 +742,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLnamespace.h"
+				RelativePath=".\Deprecated\inc\XMLnamespace.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLnamespace.h"
+				RelativePath=".\auxinc\XMLnamespace.h"
 				>
 			</File>
 			<File
@@ -766,11 +778,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\XMLvector.h"
+				RelativePath=".\Deprecated\inc\XMLvector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\XMLvector.h"
+				RelativePath=".\auxinc\XMLvector.h"
 				>
 			</File>
 		</Filter>

@@ -1,6 +1,8 @@
 #ifndef General_h
 #define General_h
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
 
@@ -39,7 +41,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class General : public Quadratic
+class DLLExport General : public Quadratic
 {
  private:
 
