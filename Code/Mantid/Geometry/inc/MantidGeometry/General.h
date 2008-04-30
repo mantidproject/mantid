@@ -63,7 +63,7 @@ class DLLExport General : public Quadratic
 
 };
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
 
