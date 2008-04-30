@@ -87,6 +87,10 @@ void MarkDeadDetectors::exec()
   
 }
 
+/** Clears the spectrum data
+* @param index The index of the data to clear
+* @param vectorSize the number of bins for that spectra
+*/
 void MarkDeadDetectors::clearSpectrum(const int& index, const int& vectorSize)
 {
   // Mark associated detector as dead

@@ -80,7 +80,9 @@ class DLLExport BnId
 
   /// Set a MinTerm
   void setMinTerm(const int);
+  /// Add a min term
   void addMinTerm(const BnId&); 
+  /// has a min term
   int hasMinTerm(const int) const;
 
   int equivalent(const BnId&) const;     ///< Equal but - is assume to be ok
@@ -102,7 +104,9 @@ class DLLExport BnId
   
   void mapState(const std::vector<int>&,std::map<int,int>&) const;
 
-  std::string display() const;           
+  /// Displays the value as a string
+  std::string display() const;
+  /// writes the value to a stream
   void write(std::ostream&) const;
 };
 

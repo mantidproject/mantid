@@ -134,7 +134,12 @@ void ConvertUnits::exec()
   
 }
 
-/// Convert the workspace units according to a simple output = a * (input^b) relationship
+/** Convert the workspace units according to a simple output = a * (input^b) relationship
+* @param numberOfSpectra The number of Spectra
+* @param outputWS the output workspace
+* @param factor the conversion factor a to apply
+* @param power the Power b to apply to the conversion
+*/
 void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power)
 {
   // Loop over the histograms (detector spectra)
@@ -147,7 +152,11 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
   }
 }
 
-/// Convert the workspace units using TOF as an intermediate step in the conversion
+/** Convert the workspace units using TOF as an intermediate step in the conversion
+* @param numberOfSpectra The number of Spectra
+* @param inputWS the input workspace
+* @param outputWS the output workspace
+*/
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS)
 {  
   // Get a reference to the instrument contained in the workspace

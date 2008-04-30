@@ -42,7 +42,7 @@ void Workspace::setComment(const std::string& c)
  * 
  * \param map:: Shared pointer to the SpectraDetectorMap
  */
-void Workspace::setSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& map)
+void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
 {
 	sptr_spectramap=map;
 }
@@ -77,7 +77,7 @@ const std::string& Workspace::getComment() const
  * 
  *  @return The SpectraDetectorMap
  */
-boost::shared_ptr<Mantid::API::SpectraDetectorMap> Workspace::getSpectraMap() const
+boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
 {
   return sptr_spectramap;
 }

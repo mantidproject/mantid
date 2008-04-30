@@ -31,7 +31,9 @@ Property::~Property()
 {
 }
 
-/// Copy assignment operator. Does nothing.
+/** Copy assignment operator. Does nothing.
+* @param right The right hand side value
+*/
 Property& Property::operator=( const Property& right )
 {
   return *this;

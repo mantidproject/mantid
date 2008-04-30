@@ -54,7 +54,7 @@ class DLLExport MatrixBase
   MatrixBase(int const =0,int const =0);
   MatrixBase(const std::vector<T>&,const std::vector<T>&); 
   MatrixBase(const MatrixBase<T>&);
-  MatrixBase(const MatrixBase<T>&,const int,const int);
+  MatrixBase(const MatrixBase<T>&,const int nrow,const int ncol);
   MatrixBase<T>& operator=(const MatrixBase<T>&); 
   ~MatrixBase();
 
@@ -83,7 +83,7 @@ class DLLExport MatrixBase
   void print() const;
   void write(std::ostream&,int const =0) const;
   void writeGrid(std::ostream&) const;
-  std::string str(const int =6) const;
+  std::string str(const int spx =6) const;
 
   void zeroMatrix();    
   void identityMatrix();    

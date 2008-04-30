@@ -22,7 +22,6 @@ namespace API
 /** @class GaussianErrorHelper GaussianErrorHelper.h Kernel/GaussianErrorHelper.h
 
     A helper class for calculating the error values using Gaussian errors.
-    WARNING:  This class is NOT thread safe.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 24/01/2008

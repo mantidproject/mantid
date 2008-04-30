@@ -217,7 +217,7 @@ Geometry::V3D
 Torus::surfaceNormal(const Geometry::V3D& Pt) const
   /*!
     Get the normal at a point
-    \param A :: New Normal direction
+    \param Pt :: The Point of interest
     \todo Does not work
   */
 {

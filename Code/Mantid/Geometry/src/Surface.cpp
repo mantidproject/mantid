@@ -180,7 +180,11 @@ Surface::writeXML(const std::string& Fname) const
 }
 
 void
-Surface::write(std::ostream&) const
+Surface::write(std::ostream& out) const  
+/*!
+    The writes the data to the output stream.
+    \param out :: The output stream 
+  */
 {
   throw Kernel::Exception::AbsObjMethod("Surface::write");
 }

@@ -1,5 +1,5 @@
-#ifndef MANTIDAPI_POINTDATAREF_H
-#define MANTIDAPI_POINTDATAREF_H
+#ifndef MANTIDAPI_LOCATEDDATAREF_H
+#define MANTIDAPI_LOCATEDDATAREF_H
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ILocatedData.h"
@@ -67,8 +67,8 @@ namespace API
   double* yPointer;        ///< Pointer to the value of Y
   double* ePointer;        ///< Pointer to the value of E
   double* e2Pointer;       ///< Pointer to the value of E2
-  const IErrorHelper* errorHelper;  
-  int spectraNo;
+  const IErrorHelper* errorHelper;  ///< Pointer to the relevant ErrorHelper
+  int spectraNo;           ///< Pointer to the relevant ErrorHelper
 
 
   LocatedDataRef* clone() const;
@@ -89,4 +89,4 @@ namespace API
 
 }  // NAMESPACE Mantid
 
-#endif //MANTIDAPI_POINTDATAREF_H
+#endif //MANTIDAPI_LOCATEDDATAREF_H

@@ -93,6 +93,7 @@ namespace Mantid
       unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
     
       
+      /// Abstract internal class providing the binary function
       class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
       {
       public:
@@ -102,7 +103,7 @@ namespace Mantid
 
         /** Abstract function that performs each element of the binary function
         * @param a The lhs data element
-        * @param a The rhs data element
+        * @param b The rhs data element
         * @returns The result data element
         */
         virtual API::LocatedDataValue& operator()(const API::ILocatedData& a,const API::ILocatedData& b) =0;

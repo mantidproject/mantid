@@ -40,6 +40,7 @@ class IWorkspaceProperty
 public:
   /// Store a workspace into the AnalysisDataService
   virtual Workspace_sptr getWorkspace() = 0;
+  /// Returns the direction of the workspace property
   virtual const unsigned int direction()const =0;
   /// Virtual destructor
   virtual ~IWorkspaceProperty() {}

@@ -98,9 +98,12 @@ namespace API
       /// Structure for holding detector IDs
       struct IdList
       {
+        ///Counted
         int counted;
+        ///Vector of the values of the ID list
         std::vector<int> vec;
 
+        ///Constructor
         IdList() : counted(0) {};
       };
 
@@ -109,10 +112,12 @@ namespace API
 
       /// Add XML element to parent assuming the element contains other component elements
       void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      /// Add XML element to parent assuming the element contains other component elements
       void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
 
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
 
       /// Set location (position) of comp as specified in XML location element

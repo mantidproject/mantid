@@ -115,7 +115,6 @@ const char* ExistsError::what() const throw()
 // AbsObjMethod
 //-------------------------
 /** Constructor
-	@param Desc Function description
 	@param ObjectName The name of the search object
 */
 AbsObjMethod::AbsObjMethod(const std::string& ObjectName) :

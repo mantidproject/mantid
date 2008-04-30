@@ -272,7 +272,10 @@ LoadLog::kind LoadLog::classify(const std::string& s)
   return LoadLog::number;
 }
 
-/// change each element of the string to lower case
+/** change each element of the string to lower case
+* @param strToConvert The input string
+* @returns The string but with all characters in lower case
+*/
 std::string LoadLog::stringToLower(std::string strToConvert)
 {
   for(unsigned int i=0;i<strToConvert.length();i++)
@@ -282,7 +285,10 @@ std::string LoadLog::stringToLower(std::string strToConvert)
   return strToConvert; //return the converted string
 }
 
-/// looks whether filename has the .txt extension and contain a '_'
+/** looks whether filename has the .txt extension and contain a '_'
+* @param filenamePart The filename to inspect
+* @returns true if the filename has the .txt extension and contain a '_'
+*/
 bool LoadLog::isLogFile(const std::string& filenamePart)
 {
   if ( stringToLower(filenamePart).find(".txt") != std::string::npos && filenamePart.find("_") != std::string::npos )
@@ -291,7 +297,10 @@ bool LoadLog::isLogFile(const std::string& filenamePart)
   return false;
 }
 
-/// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
+/** check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
+* @param str The string to test
+* @returns true if the strings format matched the expected date format
+*/
 bool LoadLog::isDateTimeString(const std::string& str)
 {
   if ( str.size() >= 19 )

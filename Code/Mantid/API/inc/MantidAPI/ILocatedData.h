@@ -1,5 +1,5 @@
-#ifndef MANTIDAPI_IPOINTDATA_H
-#define MANTIDAPI_IPOINTDATA_H
+#ifndef MANTIDAPI_ILOCATEDDATA_H
+#define MANTIDAPI_ILOCATEDDATA_H
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IDataItem.h"
@@ -57,4 +57,4 @@ namespace API
 
 }  // NAMESPACE Mantid
 
-#endif //MANTIDAPI_IPOINTDATA_H
+#endif //MANTIDAPI_ILOCATEDDATA_H

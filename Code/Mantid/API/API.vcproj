@@ -338,6 +338,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\InstrumentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IWorkspaceProperty.h"
 				>
 			</File>
@@ -395,6 +399,10 @@
 			</File>
 			<File
 				RelativePath=".\test\WorkspacePropertyTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspaceTest.h"
 				>
 			</File>
 		</Filter>

@@ -10,7 +10,9 @@ namespace Mantid
 namespace Kernel
 {
 	
-	/// No argument constructor
+	/** Constructor
+  * @param name The class name invoking this logger
+  */
 	Logger::Logger(const std::string& name): _log(Poco::Logger::get(name))
 	{  
 		_name = name;

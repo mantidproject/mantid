@@ -67,6 +67,7 @@ private:
   void init();
   void exec();
   
+  /// Clears the spectrum data
   void clearSpectrum(const int& index, const int& vectorSize);
   
   /// Pointer to the local workspace

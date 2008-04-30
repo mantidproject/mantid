@@ -1,5 +1,5 @@
-#ifndef MANTIDAPI_HISTDATAVALUE_H
-#define MANTIDAPI_HISTDATAVALUE_H
+#ifndef MANTIDAPI_LOCATEDDATAVALUE_H
+#define MANTIDAPI_LOCATEDDATAVALUE_H
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/ILocatedData.h"
@@ -58,8 +58,8 @@ namespace Mantid
       double yValue;        ///< value of Y
       double eValue;        ///< value of E
       double e2Value;       ///< value of E2
-      int spectraNo;
-      const IErrorHelper* errorHelper;
+      int spectraNo;        ///< spectra number
+      const IErrorHelper* errorHelper; ///< Pointer to the approriate error helper
 
       const double& X2() const;
       double& X2();
@@ -80,11 +80,11 @@ namespace Mantid
       int operator==(const LocatedDataValue&) const;
       int operator!=(const LocatedDataValue&) const;
     private:
-      bool _isHistogram;
+      bool _isHistogram; ///< True if the data is a histogram
     };
 
   }  // NAMESPACE API
 
 }  // NAMESPACE Mantid
 
-#endif //MANTIDAPI_HISTDATAVALUE_H
+#endif //MANTIDAPI_LOCATEDDATAVALUE_H

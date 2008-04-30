@@ -85,6 +85,7 @@ class DLLExport Algebra
 
   // Debug Functions::
   int countLiterals() const;
+  ///Displays the algebra string
   std::string display() const;
 
 };

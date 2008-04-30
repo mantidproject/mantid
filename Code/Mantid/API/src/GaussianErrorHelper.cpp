@@ -29,7 +29,7 @@ namespace Mantid
     /**Addition
     * @param lhs The lhs value
     * @param rhs The rhs value
-    * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+    * @param result The result with value and error caluculated, all other values wil be passed through from the lhs value
     */
     const void GaussianErrorHelper::plus (const value_type& lhs,const value_type& rhs, value_type& result) const
     { 
@@ -40,7 +40,7 @@ namespace Mantid
     /**Subtraction
     * @param lhs The lhs value
     * @param rhs The rhs value
-    * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+    * @param result The result with value and error caluculated, all other values wil be passed through from the lhs value
     */
     const void GaussianErrorHelper::minus (const value_type& lhs,const value_type& rhs, value_type& result) const
     {
@@ -51,7 +51,7 @@ namespace Mantid
     /**Multiplication
     * @param lhs The lhs value
     * @param rhs The rhs value
-    * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+    * @param result The result with value and error caluculated, all other values wil be passed through from the lhs value
     */
     const void GaussianErrorHelper::multiply (const value_type& lhs,const value_type& rhs, value_type& result) const
     {
@@ -67,7 +67,7 @@ namespace Mantid
     /**Division
     * @param lhs The lhs value
     * @param rhs The rhs value
-    * @returns The result with value and error caluculated, all other values wil be passed through from the lhs value
+    * @param result The result with value and error caluculated, all other values wil be passed through from the lhs value
     */
     const void GaussianErrorHelper::divide (const value_type& lhs,const value_type& rhs, value_type& result) const
     {

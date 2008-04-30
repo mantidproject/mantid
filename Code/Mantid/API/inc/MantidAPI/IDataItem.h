@@ -49,8 +49,10 @@ class DLLExport IDataItem
   virtual double& E() =0;                               ///< Returns the E value
   virtual double& E2() =0;                              ///< Returns the E2 value
 
+  /// Returns true if the E2 values has been set
   virtual const bool isE2() const {return true;}
 
+  ///virtual destructor
   virtual ~IDataItem()
   {}
 };

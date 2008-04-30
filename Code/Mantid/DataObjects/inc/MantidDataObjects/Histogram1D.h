@@ -133,9 +133,11 @@ public:
   long int getMemorySize() const 
     { return (refX->size()+refY->size()+refE->size()+refE2->size())*sizeof(double); }
 
-  ///Returns the ErrorHelper applicable for this detector
+  ///sets the ErrorHelper applicable for this detector
   void setErrorHelper(const API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
+  ///sets the ErrorHelper applicable for this detector
   void setErrorHelper(API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
+  ///Returns the ErrorHelper applicable for this detector
   const API::IErrorHelper* errorHelper() const { return _errorHelper; }
   /// Returns the spectrum number to which this histogram refers
   const int spectraNo() const { return _spectraNo; }

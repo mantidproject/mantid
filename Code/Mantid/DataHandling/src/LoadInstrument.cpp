@@ -206,7 +206,7 @@ void LoadInstrument::exec()
  *
  *  @param parent CompAssembly to append new component to
  *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
- *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
+ *  @param idList The current IDList
  */
 void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
@@ -273,7 +273,7 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
  *
  *  @param parent CompAssembly to append component to
  *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add  
- *  @param runningDetID Detector ID, which may be incremented if appendLeave is called
+ *  @param idList The current IDList
  */
 void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
@@ -460,13 +460,13 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
 
 /** Method for populating IdList.
  *
- *  @param pElem  Poco::XML element that points a idlist element in the XML doc
+ *  @param pE  Poco::XML element that points a idlist element in the XML doc
  *  @param idList The structure to populate with detector ID numbers
  *
  *  @throw logic_error Thrown if argument is not a child of component element
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-void LoadInstrument::populateIdList(Element* pE, IdList& idList)
+void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 {
   if ( (pE->tagName()).compare("idlist") )
   {

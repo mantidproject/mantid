@@ -49,8 +49,7 @@ public:
 	//opens all suitable libraries on a given path
 	int OpenAllLibraries(const std::string&, bool isRecursive=false);
 
-	int Test()
-	{ return 123;}
+
 
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<LibraryManagerImpl>;

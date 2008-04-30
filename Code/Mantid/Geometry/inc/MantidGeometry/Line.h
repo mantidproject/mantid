@@ -66,7 +66,6 @@ class DLLExport Line
   Line();
   Line(const Geometry::V3D&,const Geometry::V3D&);
   Line(const Line&);
-  Line* clone() const;
   Line& operator=(const Line&);
   
   ~Line();

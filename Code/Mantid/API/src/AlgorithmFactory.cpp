@@ -21,28 +21,37 @@ namespace Mantid
 		AlgorithmFactoryImpl::~AlgorithmFactoryImpl()
 		{
 			std::cerr << "Algorithm Factory destroyed." << std::endl;
-			//		g_log.debug() << "Algorithm Factory destroyed." << std::endl;
 		}
 
-		std::string AlgorithmFactoryImpl::createName(const std::string& className, const int& version)const
+    /** Creates a mangled name for interal storage
+    * @param name the name of the Algrorithm 
+    * @param version the version of the algroithm 
+    * @returns a mangled name string
+    */
+		std::string AlgorithmFactoryImpl::createName(const std::string& name, const int& version)const
 		{
 			std::ostringstream oss;
-			oss << className << "!£$%^&*#~" << version;
+			oss << name << "¦" << version;
 			return(oss.str());
 		}
 
-		boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string& className,const int& version) const
+    /** Creates an instance of an algorithm
+    * @param name the name of the Algrorithm to create
+    * @param version the version of the algroithm to create
+    * @returns a shared pointer to the created algorithm
+    */
+		boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
 		{   
 			int local_version=version;
 			if( version < 0)
 			{
 				if(version == -1)//get latest version since not supplied
 				{
-					versionMap::const_iterator it = _vmap.find(className);
-					if (!className.empty())
+					versionMap::const_iterator it = _vmap.find(name);
+					if (!name.empty())
 					{
 						if(it == _vmap.end() )			  
-							throw std::runtime_error("algorithm not registered "+ className );
+							throw std::runtime_error("algorithm not registered "+ name );
 						else
 							local_version = it->second;						  
 					}
@@ -52,18 +61,18 @@ namespace Mantid
 			}
 			try
 			{
-        return(Kernel::DynamicFactory<Algorithm>::create(createName(className,local_version)));
+        return(Kernel::DynamicFactory<Algorithm>::create(createName(name,local_version)));
 			}
 			catch(Kernel::Exception::NotFoundError& ex)
 			{
-				versionMap::const_iterator it = _vmap.find(className);
+				versionMap::const_iterator it = _vmap.find(name);
 				if(it == _vmap.end() )			  
-					throw std::runtime_error("algorithm not registered "+ className );
+					throw std::runtime_error("algorithm not registered "+ name );
 				else
 				{
-					g_log.error()<< "algorithm "<< className<< " version " << version << " is not registered "<<std::endl;
+					g_log.error()<< "algorithm "<< name<< " version " << version << " is not registered "<<std::endl;
 					g_log.error()<< "the latest registered version is " << it->second<<std::endl;
-					throw std::runtime_error("algorithm not registered "+ createName(className,local_version) );			
+					throw std::runtime_error("algorithm not registered "+ createName(name,local_version) );			
 				}
 			}
 		}

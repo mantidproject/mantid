@@ -52,8 +52,6 @@ class DLLExport Plane : public Quadratic
   /// Effective typename 
   virtual std::string className() const { return "Plane"; }
 
-  static int possibleLine(const std::string&);
-
   Plane();
   Plane(const Plane&);
   Plane* clone() const;

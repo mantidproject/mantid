@@ -74,9 +74,11 @@ namespace Mantid
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
-			//Class cannot be instantiated by normal means
+			///Class cannot be instantiated by normal means
 			AlgorithmManagerImpl();
+      ///destructor
 			~AlgorithmManagerImpl();
+      ///Copy contrstrutor
 			AlgorithmManagerImpl(const AlgorithmManagerImpl&);
     
 			/// Standard Assignment operator    

@@ -103,7 +103,9 @@ public:
   virtual ~Algorithm();
   /// function to return a name of the algorithm, must be overridden in all algorithms
   virtual const std::string name() const {throw Kernel::Exception::AbsObjMethod("Algorithm");}
+  /// function to return a version of the algorithm, must be overridden in all algorithms
   virtual const int version() const {throw Kernel::Exception::AbsObjMethod("Algorithm");}
+  /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Misc";}
 
   // IAlgorithm methods	  

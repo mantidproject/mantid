@@ -53,15 +53,23 @@ class DLLExport SpectraDetectorMap
 {
 public:
 #ifdef _WIN32
+  /// Spectra Detector map typedef
 	typedef std::multimap<int,Mantid::Geometry::IDetector*> smap;
+  /// Spectra Detector map iterator typedef
 	typedef std::multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
 #else
+  /// Spectra Detector map typedef
 	typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*> smap;
+  /// Spectra Detector map iterator typedef
 	typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
 #endif
+  ///Constructor
 	SpectraDetectorMap();
+  ///Copy Contructor
 	SpectraDetectorMap(const SpectraDetectorMap& copy);
+  ///Assignment operator
 	SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
+  ///virtual destructor
 	virtual ~SpectraDetectorMap();
 	/// populate the Map with _spec and _udet C array 
 	void populate(int* _spec, int* _udet, int nentries, Instrument*);
@@ -70,6 +78,7 @@ public:
 	/// Get a vector of IDetector contributing to spectra_key
 	void getDetectors(int spectra_key, std::vector<Mantid::Geometry::IDetector*>& detectors);
 private:
+  /// insternal spectra detector map instance
 	smap _s2dmap;
 };
 

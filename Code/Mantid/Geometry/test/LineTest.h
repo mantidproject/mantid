@@ -35,13 +35,6 @@ public:
 		TS_ASSERT_EQUALS(B.getOrigin(),V3D(1.0,1.0,1.0));
 		TS_ASSERT_EQUALS(B.getDirect(),V3D(1.0,0.0,0.0));
 	}
-    //There is no implementation for clone
-	void xtestClone(){
-		Line A(V3D(1.0,1.0,1.0),V3D(1.0,0.0,0.0));
-		Line *B=A.clone();;
-		TS_ASSERT_EQUALS(B->getOrigin(),V3D(1.0,1.0,1.0));
-		TS_ASSERT_EQUALS(B->getDirect(),V3D(1.0,0.0,0.0));
-	}
 
 	void testAssignment(){
 		Line A(V3D(1.0,1.0,1.0),V3D(1.0,0.0,0.0));

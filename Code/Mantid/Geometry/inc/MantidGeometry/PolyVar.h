@@ -106,6 +106,7 @@ class DLLExport PolyVar  : public PolyFunction
 template<int VCount> 
 std::ostream& operator<<(std::ostream&,const PolyVar<VCount>&);
 
+/// Specialisation for single degree polynomials
 template<> 
 class DLLExport PolyVar<1> : public PolyFunction
 {

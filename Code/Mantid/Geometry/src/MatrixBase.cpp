@@ -89,6 +89,7 @@ MatrixBase<T>::MatrixBase(const MatrixBase<T>& A,const int nrow,const int ncol)
   : nx(A.nx-1),ny(A.ny-1),V(0)
   /*!
     Constructor with for a missing row/column.
+    \param A :: The input matrix
     \param nrow :: number of row to miss
     \param ncol :: number of column to miss
   */
@@ -827,6 +828,7 @@ std::string
 MatrixBase<T>::str(const int spx) const
   /*!
     Convert the matrix into a simple linear string expression 
+    \param spx The precision to use in std::setprecision
     \returns String value of output
   */
 {

@@ -68,7 +68,9 @@ private:
   void init();
   void exec();
   
+  /// Convert the workspace units according to a simple output = a * (input^b) relationship
   void convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power);
+  /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS);
   
   /// Static reference to the logger class

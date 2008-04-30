@@ -74,6 +74,7 @@ namespace Mantid
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 
+      /// Internal class providing the binary function
       class Plus_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
