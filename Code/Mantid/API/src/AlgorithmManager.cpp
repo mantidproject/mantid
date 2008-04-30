@@ -65,7 +65,7 @@ namespace Mantid
     const std::vector<std::pair<std::string,std::string> > 
       AlgorithmManagerImpl::getNamesAndCategories() const
     {
-      std::vector<std::pair<std::string,std::string>> retVector;
+      std::vector<std::pair<std::string,std::string> > retVector;
 
       for (unsigned int i=0; i < regAlg.size(); ++i)
       {
