@@ -112,7 +112,7 @@ public:
 	  AlgorithmManager::Instance().clear();
 	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
 	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
-    std::vector<std::pair<std::string,std::string>> names = AlgorithmManager::Instance().getNamesAndCategories();
+    std::vector<std::pair<std::string,std::string> > names = AlgorithmManager::Instance().getNamesAndCategories();
 	  TS_ASSERT_EQUALS(names.size(), 2);
 	  TS_ASSERT_EQUALS(names[0].first, "AlgTest");
 	  TS_ASSERT_EQUALS(names[0].second, "Cat4");
