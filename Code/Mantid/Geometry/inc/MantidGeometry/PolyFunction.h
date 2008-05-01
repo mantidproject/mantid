@@ -25,7 +25,7 @@ class DLLExport PolyFunction
 
  public:
 
-  static int getMaxSize(const std::string&,const char);
+  static int getMaxSize(const std::string& CLine,const char V);
 
   PolyFunction();
   explicit PolyFunction(double const);
@@ -33,11 +33,9 @@ class DLLExport PolyFunction
   PolyFunction& operator=(const PolyFunction&);
   virtual ~PolyFunction();
 
-    // member access
-  void setDegree(int const);
-  int getDegree() const;
-
+  /// Abstract Self Addition opterator for a double
   virtual PolyFunction& operator+=(const double) =0;
+  /// Abstract Self Division opterator for a double
   virtual PolyFunction& operator/=(const double) =0;
 
   void write(std::ostream&) const;

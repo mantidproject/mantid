@@ -195,6 +195,7 @@ namespace Mantid
       PolyVar<VCount>::setComp(const int Index,const double& V)
       /*!
       Set a component
+      \param Index :: The Index
       \param V :: Value
       */
     {
@@ -210,6 +211,7 @@ namespace Mantid
       PolyVar<VCount>::setComp(const int Index,const PolyVar<ICount>& FX)
       /*!
       Set a component
+      \param Index :: The index
       \param FX :: Base compoenente
       */
     {
@@ -374,7 +376,7 @@ namespace Mantid
       PolyVar<VCount>::operator+(const double V) const
       /*!
       PolyVar addition
-      \param A :: PolyVar 
+      \param V :: PolyVar 
       \return (*this+A);
       */
     {
@@ -820,6 +822,7 @@ namespace Mantid
       /*!
       Basic write command
       \param OX :: output stream
+      \param prePlus :: prePlus
       \retval 0 :: nothing written 
       \retval 1 :: normal equation
       \retval -1 :: unitary equation ("1") 

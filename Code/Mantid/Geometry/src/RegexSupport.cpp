@@ -22,7 +22,7 @@ StrComp(const std::string& Text,const boost::regex& Re,T& Aout,
 	const int compNum) 
   /*!
     Find the match in regular expression and places number in Aout 
-    \param Sx :: string to search
+    \param Text :: string to search
     \param Re :: regular expression to use
     \param Aout :: Place to put Unit found
     \param compNum :: item to extract [0:N-1]
@@ -45,7 +45,7 @@ StrComp(const std::string& Text,const boost::regex& Re,
 	std::string& Aout,const int compNum) 
   /*!
     Find the match in regular expression and places number in Aout 
-    \param Sx :: string to search
+    \param Text :: string to search
     \param Re :: regular expression to use
     \param Aout :: Place to put Unit found
     \param compNum :: item to extract [0:N-1]
@@ -82,7 +82,7 @@ int
 StrLook(const std::string& Text,const boost::regex& Re)
   /*!
     Find the match in regular expression and return 1 if good match 
-    \param Sx :: string to match
+    \param Text :: string to match
     \param Re :: regular expression to use
     \returns 0 on failure and 1 on success
   */
@@ -118,11 +118,11 @@ StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
     Find the match, return the disected items:
     Then remove the whole of the match
     The regexpression must have  one  ( ) around the area to extract
-    \param Sdx :: string to split, is returned with the string after
+    \param Text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: Value to extract
-    \param item :: Index of matches [0->N-1] (-1 :: whole match)
+    \param compNum :: Index of matches [0->N-1] (-1 :: whole match)
     \retval 0 :: failed to match the string or there were no parts to match.
     \retval 1 :: success
    */
@@ -149,7 +149,7 @@ StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
     Find the match, return the disected items:
     Then remove the whole of the match
     The regexpression must have  one  ( ) around the area to extract
-    \param Sdx :: string to split, is returned with the string after
+    \param Text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: Values to extract
@@ -193,7 +193,7 @@ StrFullCut(std::string& Text,const boost::regex& Re,
     The regexpression must have  one  ( ) around the area to extract
     This is specialised for string and thus does not need 
     a convert.
-    \param Sdx :: string to split, is returned with the string after
+    \param Text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: Values to extract
@@ -256,7 +256,7 @@ StrFullSplit(const std::string& text,
     Find the match, return the disected items
     The rege xpression must have ( ) around the area to extract.
     The function appends the results onto Aout.
-    \param Sdx :: string to split, is returned with the string after
+    \param text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: vector to add components to.
@@ -285,7 +285,7 @@ StrSingleSplit(const std::string& text,
     Find the match, return the disected items
     The regexpression must have ( ) around the area to extract.
     The function appends the results onto Aout.
-    \param Sdx :: string to split, is returned with the string after
+    \param text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: vector to add components to.
@@ -316,7 +316,7 @@ StrSingleSplit(const std::string& text,
     The regexpression must have ( ) around the area to extract.
     The function appends the results onto Aout.
     - Specialised to avoid convert for std::string
-    \param Sdx :: string to split, is returned with the string after
+    \param text :: string to split, is returned with the string after
     the find (if successful).
     \param Re :: regular expression to use.
     \param Aout :: vector to add components to.
@@ -451,3 +451,4 @@ template int findComp(std::istream&,const boost::regex&,int&);
 }  // NAMESPACE StrFunc
 
 } // NAMESPACE MAntid
+

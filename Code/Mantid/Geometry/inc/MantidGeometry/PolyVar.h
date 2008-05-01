@@ -50,8 +50,8 @@ class DLLExport PolyVar  : public PolyFunction
   void zeroPoly();
 
   template<int ICount>
-  void setComp(const int,const PolyVar<ICount>&);
-  void setComp(const int,double const&);
+  void setComp(const int Index,const PolyVar<ICount>& FX);
+  void setComp(const int Index,double const& V);
   // get value
   double operator()(const std::vector<double>&) const;
   double operator()(const double*) const;
@@ -94,13 +94,14 @@ class DLLExport PolyVar  : public PolyFunction
   int isUnit(double const) const;
   int isUnitary(double const) const;
   int getCount(double const) const;
+  /// Returns 1 if this is a Double, otherwise 0
   int isDouble() const { return 0; }
   /// Get a double valued coefficient:
   double getDouble() const { return PCoeff[0].getDouble(); }  
   PolyVar<VCount-1> reduce(const PolyVar<VCount>&) const;
 
   int read(const std::string&);
-  int write(std::ostream&,const int=0) const;
+  int write(std::ostream& OX,const int prePlus =0) const;
 };
 
 template<int VCount> 
@@ -153,7 +154,6 @@ class DLLExport PolyVar<1> : public PolyFunction
   PolyVar<1> operator+(const PolyVar<1>&) const;
   PolyVar<1> operator-(const PolyVar<1>&) const;
   PolyVar<1> operator*(const PolyVar<1>&) const;
-  PolyVar<1> operator/(const PolyVar<1>&) const;
 
   PolyVar<1> operator+(double const) const;  // input is degree 0 poly
   PolyVar<1> operator-(double const) const;  // input is degree 0 poly
@@ -180,7 +180,6 @@ class DLLExport PolyVar<1> : public PolyFunction
   PolyVar<1> GetInversion() const;
 
   void compress(double const); 
-  void compress(); 
 
   void divide(const PolyVar<1>&,PolyVar<1>&,PolyVar<1>&,double const =-1.0) const;
 
@@ -191,11 +190,13 @@ class DLLExport PolyVar<1> : public PolyFunction
   int isUnit(double const) const;
   int isUnitary(double const) const;
   int getCount(double const) const;
+  /// Returns 1 if this is a Double, otherwise 0
   int isDouble() const { return 1; }
+  /// Get a double valued coefficient:
   double getDouble() const { return PCoeff[0]; }
 
   int read(const std::string&);
-  int write(std::ostream&,const int =0) const;
+  int write(std::ostream& OX,const int prePlus =0) const;
 };
 
 }  // NAMESPACE mathlevel

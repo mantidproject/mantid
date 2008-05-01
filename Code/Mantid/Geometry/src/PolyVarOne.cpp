@@ -115,6 +115,9 @@ PolyVar<1>::setDegree(const int iD)
 
 void
 PolyVar<1>::zeroPoly()
+      /*!
+      Zeros each polynominal coefficient
+      */
 {
   fill(PCoeff.begin(),PCoeff.end(),0.0);
   return;
@@ -322,8 +325,8 @@ PolyVar<1>
 PolyVar<1>::operator+(const double V) const
   /*!
     PolyBase multiplication
-    \param A :: PolyBase 
-    \return (*this+A);
+    \param V :: PolyBase 
+    \return (*this+V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -334,8 +337,8 @@ PolyVar<1>
 PolyVar<1>::operator-(const double V) const
   /*!
     PolyVar<1> substractr
-    \param A :: PolyBase substract
-    \return (*this-A);
+    \param V :: PolyBase substract
+    \return (*this-V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -346,8 +349,8 @@ PolyVar<1>
 PolyVar<1>::operator*(const double V) const
   /*!
     PolyBase multiplication
-    \param A :: PolyBase multiplication
-    \return (*this*A);
+    \param V :: PolyBase multiplication
+    \return (*this*V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -358,8 +361,8 @@ PolyVar<1>
 PolyVar<1>::operator/(const double V) const
   /*!
     PolyBase division
-    \param A :: PolyBase Division
-    \return (*this/A);
+    \param V :: PolyBase Division
+    \return (*this/V);
    */
 {
   PolyVar<1> kSum(*this);
@@ -730,7 +733,7 @@ PolyVar<1>::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
     Solves Cubic equation
     \param AnsA :: complex roots of the equation 
     \param AnsB :: complex roots of the equation 
-    \parma AnsC :: complex roots of the equation 
+    \param AnsC :: complex roots of the equation 
     \return number of unique solutions 
   */
 
@@ -794,7 +797,8 @@ PolyVar<1>::solveCubic(std::complex<double>& AnsA,std::complex<double>& AnsB,
 int 
 PolyVar<1>::getCount(const double eps) const
   /*!
-    Determine if is zero
+    Get the count
+    \param eps :: Value to used
   */
 {
   int cnt(0);
@@ -808,6 +812,7 @@ int
 PolyVar<1>::isZero(const double eps) const
   /*!
     Determine if is zero
+    \param eps :: Value to used
   */
 {
   int i;
@@ -937,6 +942,7 @@ PolyVar<1>::write(std::ostream& OX,const int prePlus) const
   /*!
     Basic write command
     \param OX :: output stream
+    \param prePlus :: prePlus
     \return 0 :: value ==0.0
   */
 {
