@@ -106,6 +106,7 @@ namespace Mantid
         {
           time(&start_time);
           start = clock();
+		  algorithm_info();
           // Call the concrete algorithm's exec method
           this->exec();
           end = clock();
@@ -119,7 +120,8 @@ namespace Mantid
 
           // RJT, 19/3/08: Moved this up from below the catch blocks 
           setExecuted(true);  
-
+		  g_log.information()<< "Algorithm successful, Duration "<< double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
+			
         }
         catch(std::runtime_error& ex)
         {
@@ -411,6 +413,20 @@ fill each inout with each input history
         IOalg=IOalgHistory;
       }
     }
+
+    /** puts out algorithm parameter information to the logger
+    */
+	void Algorithm::algorithm_info()
+	{
+		g_log.information()<<"Algorithm Name " << this->name() <<" Version "<<this->version()<<std::endl;		
+		const std::vector<Property*>& algProperties = getProperties();		
+		int no_of_props = algProperties.size();
+		for (int i=0; i < no_of_props; i++)
+		{
+			const Property* AP=algProperties[i];
+			g_log.information()<<"Name " <<AP->name()<<" Value "<< AP->value()<<" Default "<<AP->isDefault()<<std::endl;
+		}
+	}
 
     /** Stores any output workspaces into the AnalysisDataService
     *  @throw std::runtime_error If unable to successfully store an output workspace

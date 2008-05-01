@@ -154,6 +154,7 @@ private:
   /// Put any output workspaces into the AnalysisDataService
   void store();
   void fillHistory(dateAndTime, double);
+  void algorithm_info();
 
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;
