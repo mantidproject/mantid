@@ -1012,6 +1012,10 @@ private slots:
 
 	void hideSelectedColumns();
 	void showAllColumns();
+	
+	//Mantid
+	void mantidMenuAboutToShow();
+	void manageMantidWorkspaces();
 
 // TODO: a lot of this stuff should be private
 public:
@@ -1179,6 +1183,9 @@ private:
 	QWidgetList *hiddenWindows;
 	QLineEdit *info;
 
+	//Mantid
+	QMenu *mantidMenu;
+	
 	QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
 	QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu;
 	QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;

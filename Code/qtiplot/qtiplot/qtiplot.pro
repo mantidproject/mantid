@@ -31,11 +31,14 @@ CONFIG          += release
 #############################################################################
 
 INCLUDEPATH       += ../../Third_Party/include/muparser
-INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
-INCLUDEPATH       += ../3rdparty/qwt/src
 INCLUDEPATH       += ../3rdparty/liborigin
 INCLUDEPATH       += ../../Third_Party/include
 INCLUDEPATH       += ../../Third_Party/include/zlib123
+INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
+INCLUDEPATH       += ../3rdparty/qwt/src
+
+INCLUDEPATH       += ../../Mantid/includes/
+INCLUDEPATH       += ../../Third_Party/include/
 
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -44,17 +47,29 @@ INCLUDEPATH       += ../../Third_Party/include/zlib123
 ##################### Linux (Mac OS X) ######################################
 
 # statically link against libraries in 3rdparty
-unix:LIBS         += ../3rdparty/muparser/lib/libmuparser.a
-unix:LIBS         += ../3rdparty/qwtplot3d/lib/libqwtplot3d.a
-unix:LIBS         += ../3rdparty/qwt/lib/libqwt.a
-unix:LIBS         += ../3rdparty/gsl/lib/libgsl.a
-unix:LIBS         += ../3rdparty/gsl/lib/libgslcblas.a
+#unix:LIBS         += ../3rdparty/muparser/lib/libmuparser.a
+#unix:LIBS         += ../3rdparty/qwtplot3d/lib/libqwtplot3d.a
+#unix:LIBS         += ../3rdparty/qwt/lib/libqwt.a
+#unix:LIBS         += ../3rdparty/gsl/lib/libgsl.a
+#unix:LIBS         += ../3rdparty/gsl/lib/libgslcblas.a
 
 # dynamically link against dependencies if they are installed system-wide
-#unix:LIBS         += -lmuparser
-#unix:LIBS         += -lqwtplot3d
-#unix:LIBS         += -lqwt
-#unix:LIBS         += -lgsl -lgslcblas
+unix:LIBS         += -lmuparser
+unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
+unix:LIBS         += -L/usr/local/qwt-0-svn/lib -lqwt
+unix:LIBS         += -lgsl -lgslcblas
+
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidDataHandling
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAlgorithms
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidDataObjects
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
+
+unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoUtil
+unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoXML
+unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoFoundation
 
 ##################### Windows ###############################################
 
@@ -64,6 +79,18 @@ win32:LIBS        += ../../Third_Party/lib/win32/qwt.lib
 win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
 win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
 win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
+
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidPythonAPI.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataHandling.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAlgorithms.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataObjects.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAPI.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidGeometry.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.dll
+
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.dll
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.dll
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.dll
 
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
@@ -272,7 +299,15 @@ HEADERS  += src/ApplicationWindow.h \
             src/TextEditor.h \
             src/CustomActionDialog.h \
             src/DoubleSpinBox.h\
-            src/MatrixCommand.h
+            src/MatrixCommand.h  \
+	    src/Mantid/LoadRawDlg.h \
+	    src/Mantid/WorkspaceMgr.h \
+	    src/Mantid/ExecuteAlgorithm.h \
+	    src/Mantid/ImportWorkspaceDlg.h
+
+###################### FORMS ##############################################
+
+FORMS += src/Mantid/WorkspaceMgr.ui
 
 ###################### SOURCES ##############################################
 
@@ -391,7 +426,11 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/TextEditor.cpp \
             src/CustomActionDialog.cpp \
             src/DoubleSpinBox.cpp\
-            src/MatrixCommand.cpp
+            src/MatrixCommand.cpp \
+	    src/Mantid/LoadRawDlg.cpp \
+	    src/Mantid/WorkspaceMgr.cpp \
+	    src/Mantid/ExecuteAlgorithm.cpp \
+	    src/Mantid/ImportWorkspaceDlg.cpp
 
 ###############################################################
 ##################### Compression (zlib123) ###################

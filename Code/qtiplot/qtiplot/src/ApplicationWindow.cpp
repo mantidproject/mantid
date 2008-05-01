@@ -160,6 +160,9 @@
 #include <zlib.h>
 #include <iostream>
 
+//Mantid
+#include "Mantid/WorkspaceMgr.h"
+
 using namespace Qwt3D;
 
 extern "C"
@@ -1037,6 +1040,11 @@ void ApplicationWindow::initMainMenu()
 
 	foldersMenu = new QMenu(this);
 	foldersMenu->setCheckable(true);
+	
+	//Mantid
+	mantidMenu = new QMenu(this);
+	mantidMenu->setObjectName("mantidMenu");
+	connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
 
 	help = new QMenu(this);
 	help->setObjectName("helpMenu");
@@ -1185,6 +1193,10 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	menuBar()->insertItem(tr("&Edit"), edit);
 	menuBar()->insertItem(tr("&View"), view);
 	menuBar()->insertItem(tr("Scripting"), scriptingMenu);
+	
+	//Mantid
+	menuBar()->insertItem(tr("Mantid"), mantidMenu);
+	mantidMenuAboutToShow();
 
 	scriptingMenu->clear();
 #ifdef SCRIPTING_DIALOG
@@ -15146,4 +15158,20 @@ QString ApplicationWindow::endOfLine()
 		break;
 	}
 	return "\n";
+}
+
+//Mantid
+void ApplicationWindow::manageMantidWorkspaces()
+{
+	WorkspaceMgr* dlg = new WorkspaceMgr(this);
+	dlg->setModal(true);	
+	dlg->exec();
+}
+
+//Mantid
+void ApplicationWindow::mantidMenuAboutToShow()
+{
+	mantidMenu->clear();
+	
+	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 }
