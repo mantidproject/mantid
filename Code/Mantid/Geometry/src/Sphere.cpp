@@ -12,7 +12,6 @@
 #include <boost/regex.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "AuxException.h"
 #include "XMLattribute.h"
 #include "XMLobject.h"
 #include "XMLgroup.h"
@@ -20,7 +19,6 @@
 #include "XMLcollect.h"
 #include "IndexIterator.h"
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
