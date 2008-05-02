@@ -75,7 +75,7 @@ public:
   virtual void setPropertyValue(const std::string& name, const std::string& value) = 0;
 
   /** Set the value of an algorithm property by index
-   *  @param name The index of the property to set
+   *  @param index The index of the property to set
    *  @param value The value to assign to the property
    */
   virtual void setPropertyOrdinal(const int& index, const std::string& value) = 0;
