@@ -17,17 +17,17 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 	setupUi(this);
 	setupActions();
 	
-	interface = new Mantid::PythonAPI::PythonInterface;
-	interface->InitialiseFrameworkManager();
+	m_interface = new Mantid::PythonAPI::PythonInterface;
+	m_interface->InitialiseFrameworkManager();
 	
-	std::vector<std::string> names = interface->GetWorkspaceNames();
+	std::vector<std::string> names = m_interface->GetWorkspaceNames();
 
 	for(unsigned int i = 0; i < names.size(); ++i) 
 	{
 		listWorkspaces->insertItem(0, QString::fromStdString(names[i]));
 	}
 	
-	std::vector<std::string> algs = interface->GetAlgorithmNames();
+	std::vector<std::string> algs = m_interface->GetAlgorithmNames();
 	
 	for(unsigned int i = 0; i < algs.size(); ++i) 
 	{
@@ -59,7 +59,7 @@ void WorkspaceMgr::addWorkspaceClicked()
 	if (!dlg->getFilename().isEmpty())
 	{	
 		
-		Mantid::API::Workspace_sptr ws = interface->LoadIsisRawFile(dlg->getFilename().toStdString(), dlg->getWorkspaceName().toStdString());
+		Mantid::API::Workspace_sptr ws = m_interface->LoadIsisRawFile(dlg->getFilename().toStdString(), dlg->getWorkspaceName().toStdString());
 		if (ws.use_count() == 0)
 		{
 			QMessageBox::warning(this, tr("Mantid"),
@@ -79,7 +79,7 @@ void WorkspaceMgr::selectedWorkspaceChanged()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		Mantid::API::Workspace_sptr ws = interface->RetrieveWorkspace(wsName.toStdString());
+		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
 		
 		int numHists = ws->getHistogramNumber();
 		int numBins = ws->blocksize();
@@ -96,7 +96,7 @@ void WorkspaceMgr::importWorkspace()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		Mantid::API::Workspace_sptr ws = interface->RetrieveWorkspace(wsName.toStdString());
+		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
 		
 		int numHists = ws->getHistogramNumber();
 		int numBins = ws->blocksize();
@@ -118,7 +118,7 @@ void WorkspaceMgr::importWorkspace()
 			{
 				if (row >= start && row <= end)
 				{
-					std::vector<double>* Y = interface->GetYData(wsName.toStdString(), row);
+					std::vector<double>* Y = m_interface->GetYData(wsName.toStdString(), row);
 					for (int col = 0; col < numBins; ++col)
 					{
 						mat->setCell(col, histCount, Y->at(col));

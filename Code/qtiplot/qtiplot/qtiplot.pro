@@ -80,17 +80,17 @@ win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
 win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
 win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
 
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidPythonAPI.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataHandling.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAlgorithms.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataObjects.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAPI.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidGeometry.dll
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.dll
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidPythonAPI.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataHandling.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAlgorithms.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataObjects.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAPI.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidGeometry.lib
+win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.lib
 
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.dll
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.dll
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.dll
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.lib
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.lib
+win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.lib
 
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################

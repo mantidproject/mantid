@@ -8,6 +8,7 @@
 
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IAlgorithm.h"
 
 class WorkspaceMgr : public QDialog, private Ui::Dialog
 {
@@ -26,7 +27,7 @@ private slots:
 
 private:
 	void setupActions();
-	Mantid::PythonAPI::PythonInterface* interface;
+	Mantid::PythonAPI::PythonInterface* m_interface;
 
 	QWidget* m_parent;
 
