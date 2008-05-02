@@ -2,7 +2,7 @@
 #define SPECTRADETECTORMAP_
 
 #include "MantidKernel/System.h"
-#ifdef _WIN32
+#ifndef HAS_UNORDERED_MAP_H
 #include <map>
 #else
 #include <tr1/unordered_map>
@@ -52,7 +52,7 @@ namespace Mantid
 class DLLExport SpectraDetectorMap
 {
 public:
-#ifdef _WIN32
+#ifndef HAS_UNORDERED_MAP_H
   /// Spectra Detector map typedef
 	typedef std::multimap<int,Mantid::Geometry::IDetector*> smap;
   /// Spectra Detector map iterator typedef

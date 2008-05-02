@@ -145,6 +145,12 @@ else:
 	lpts=re.split("\s+",flags)
 	lpts.append('-g')
 	
+#check existence of Header files
+conf = Configure(env)
+if conf.CheckCXXHeader('unordered_map.h'):
+	conf.env.Append('-DHAS_UNORDERED_MAP_H')
+env = conf.Finish()
+
 #GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
 dirpath=os.listdir(uppath)
 while(len(dirpath)):
