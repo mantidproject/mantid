@@ -73,7 +73,14 @@ public:
    *  @param value The value to assign to the property
    */
   virtual void setPropertyValue(const std::string& name, const std::string& value) = 0;
-  
+
+  /** Set the value of an algorithm property by index
+   *  @param name The index of the property to set
+   *  @param value The value to assign to the property
+   */
+  virtual void setPropertyOrdinal(const int& index, const std::string& value) = 0;
+
+
   /** Get the value of a property as a string
    *  @param name The name of the property
    *  @return The value of the property

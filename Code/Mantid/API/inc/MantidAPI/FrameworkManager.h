@@ -67,7 +67,7 @@ namespace Mantid
 			IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version=-1);
 
 			/// Creates an instance of an algorithm, sets the properties provided & then executes it.
-			IAlgorithm* exec(const std::string& algName, const std::string& propertiesArray);
+			IAlgorithm* exec(const std::string& algName, const std::string& propertiesArray,const int& version=-1);
 
 			/// Returns a shared pointer to the workspace requested
 			Workspace* getWorkspace(const std::string& wsName);

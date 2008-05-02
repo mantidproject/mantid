@@ -73,7 +73,7 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName, co
  * 
  *  @param algName The name of the algorithm required
  *  @param propertiesArray A single string containing properties in the 
- *                         form "Property1:Value1,Property2:Value2,..."
+ *                         form "Property1=Value1;Property2=Value2;..."
  *  @param version The version of the algorithm
  *  @return A pointer to the created algorithm
  * 
@@ -87,12 +87,13 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
   // Split up comma-separated properties
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	
-  boost::char_separator<char> sep(",");
+  boost::char_separator<char> sep(";");
   tokenizer propPairs(propertiesArray, sep);
+  int index=0;
   // Iterate over the properties
   for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
   {
-    boost::char_separator<char> sep2(":");
+    boost::char_separator<char> sep2("=");
     tokenizer properties(*it,sep2);
     vector<string> property(properties.begin(), properties.end());
     // Call the appropriate setProperty method on the algorithm
@@ -100,16 +101,17 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
     {
       alg->setPropertyValue(property[0],property[1]);
     }
-//    else if ( property.size() == 1)
-//    {
-//      // This is for a property with no value. Not clear that we will want such a thing.
-//      alg->setProperty("",property[0]);
-//    }
+    else if ( property.size() == 1)
+    {
+      // This is for a property with no value. Not clear that we will want such a thing.
+      alg->setPropertyOrdinal(index,property[0]);
+    }
     // Throw if there's a problem with the string
     else
     {
       throw std::invalid_argument("Misformed properties string");
     }
+	index++;
   }  
   return alg;
 }
@@ -119,17 +121,18 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
  * 
  *  @param algName The name of the algorithm required
  *  @param propertiesArray A single string containing properties in the 
- *                         form "Property1:Value1,Property2:Value2,..."
+ *                         form "Property1=Value1;Property2=Value2;..."
+ *  @param version The version of the algorithm
  *  @return A pointer to the executed algorithm
  * 
  *  @throw NotFoundError Thrown if algorithm requested is not registered
  *  @throw std::invalid_argument Thrown if properties string is ill-formed
  *  @throw runtime_error Thrown if algorithm cannot be executed
  */ 
-IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::string& propertiesArray)
+IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::string& propertiesArray, const int& version)
 {
   // Make use of the previous method for algorithm creation and property setting
-  IAlgorithm *alg = createAlgorithm(algName, propertiesArray);
+  IAlgorithm *alg = createAlgorithm(algName, propertiesArray,version);
   
   // Now execute the algorithm
   alg->execute();

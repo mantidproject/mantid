@@ -60,6 +60,7 @@ public:
   // Sets all the declared properties from 
   virtual void setProperties(const std::string &values);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
+  virtual void setPropertyOrdinal(const int &index, const std::string &value);
 
   virtual bool existsProperty(const std::string &name) const;
   virtual bool validateProperties() const;
@@ -132,6 +133,7 @@ private:
   static Logger& g_log;
 
   Property* getPointerToProperty(const std::string &name) const;
+  Property* getPointerToPropertyOrdinal(const int &index) const;
 
   /** Templated method to get the value of a property
    *  @param name The name of the property (case insensitive)

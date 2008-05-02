@@ -96,6 +96,20 @@ void PropertyManager::setPropertyValue( const std::string &name, const std::stri
   if ( !success ) throw std::invalid_argument("Invalid value for this property");
 }
 
+/** Set the value of a property by an index
+ *  N.B. bool properties must be set using 1/0 rather than true/false
+ *  @param index The index of the property to assign
+ *  @param value The value to assign to the property
+ *  @throw std::runtime_error if the property index is too high
+ */
+void PropertyManager::setPropertyOrdinal( const int& index, const std::string &value )
+{
+  Property *p = getPointerToPropertyOrdinal(index);   // throws runtime_error if property not in vector
+  bool success = p->setValue(value);
+  if ( !success ) throw std::runtime_error("Property index too high");
+}
+
+
 /** Checks whether the named property is already in the list of managed property.
  *  @param name The name of the property (case insensitive)
  *  @return True if the property is already stored
@@ -156,6 +170,21 @@ Property* PropertyManager::getPointerToProperty( const std::string &name ) const
     return it->second;
   }
   throw Exception::NotFoundError("Unknown property", name);
+}
+
+/** Get a property by an index
+ *  @param index The name of the property (case insensitive)
+ *  @return A pointer to the named property
+ *  @throw std::runtime_error if the property index is too high
+ */
+Property* PropertyManager::getPointerToPropertyOrdinal( const int& index) const
+{
+
+	if (index < m_orderedProperties.size())
+	{
+		return m_orderedProperties[index];
+	}
+	throw std::runtime_error("Property index too high");
 }
 
 /** Get the list of managed properties.

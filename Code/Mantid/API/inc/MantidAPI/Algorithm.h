@@ -114,7 +114,7 @@ public:
   void execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
   virtual bool isExecuted() const;
-
+  virtual void setPropertyOrdinal(const int &index, const std::string &value);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
 

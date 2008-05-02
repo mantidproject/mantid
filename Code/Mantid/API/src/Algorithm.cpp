@@ -204,6 +204,13 @@ namespace Mantid
       PropertyManager::setPropertyValue(name, value);
     }
 
+    // IAlgorithm property methods. Pull in PropertyManager implementation.
+    void Algorithm::setPropertyOrdinal(const int &index, const std::string &value)
+    {
+      PropertyManager::setPropertyOrdinal(index, value);
+    }
+
+
     std::string Algorithm::getPropertyValue(const std::string &name) const
     {
       return PropertyManager::getPropertyValue(name);

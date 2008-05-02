@@ -50,7 +50,7 @@ public:
 
   void testcreateAlgorithmWithProps()
   {
-    IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","Prop:Val,P2:V2");
+    IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","Prop=Val;P2=V2");
     std::string prop;
     TS_ASSERT_THROWS_NOTHING( prop = alg->getPropertyValue("Prop") )
 	  TS_ASSERT( ! prop.compare("Val") )
@@ -59,12 +59,12 @@ public:
 	  
     TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","") )
 //    TS_ASSERT_THROWS_NOTHING( manager->createAlgorithm("ToyAlgorithm2","noValProp") )
-    TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","p1:p2:p3"), std::invalid_argument )
+    TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","P1=P2=P3"), std::invalid_argument)
   }
 
   void testExec()
   {
-    IAlgorithm *alg = FrameworkManager::Instance().exec("ToyAlgorithm2","Prop:Val,P2:V2");
+    IAlgorithm *alg = FrameworkManager::Instance().exec("ToyAlgorithm2","Prop=Val;P2=V2");
     TS_ASSERT( alg->isExecuted() )
   }
 
