@@ -97,15 +97,6 @@ public:
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error )
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
   }
-  
-  void testGetNames()
-  {
-	  AlgorithmManager::Instance().clear();
-	  TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") );
-	  TS_ASSERT_THROWS_NOTHING(AlgorithmManager::Instance().create("AlgTestSecond") );
-	  std::vector<std::string> names = AlgorithmManager::Instance().getNames();
-	  TS_ASSERT_EQUALS(names.size(), 2)
-  }
 
   void testGetNamesAndCategories()
   {

@@ -65,6 +65,13 @@ public:
 
 		TS_ASSERT(!temp.empty());
 	}
+	
+	void testGetAlgorithmNames()
+	{
+		std::vector<std::string> temp = inter->GetAlgorithmNames();
+
+		TS_ASSERT(!temp.empty());
+	}
 
 	void testGetXdata()
 	{

@@ -135,6 +135,8 @@ public:
     return _map.find(className) != _map.end();
   }
   
+  ///Returns the keys in the map
+  /// \returns A string vector of keys 
   const std::vector<std::string> getKeys() const
     {
 	std::vector<std::string> names;

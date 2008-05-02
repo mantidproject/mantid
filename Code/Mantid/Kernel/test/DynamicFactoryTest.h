@@ -3,6 +3,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <vector>
+#include <string>
 
 #include "MantidKernel/DynamicFactory.h"
 
@@ -43,6 +45,12 @@ public:
 	  TS_ASSERT( ! factory.exists("testing") );
 		factory.subscribe<int>("testing");
 		TS_ASSERT( factory.exists("testing") );
+	}
+	
+	void testGetKeys()
+	{
+		std::vector<std::string> keys = factory.getKeys();
+		TS_ASSERT(!keys.empty());
 	}
 
 private:
