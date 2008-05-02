@@ -10,6 +10,7 @@
 #include "boost/shared_ptr.hpp"
 #include <map>
 #include <iostream>
+#include <vector>
 
 namespace Mantid
 {
@@ -133,6 +134,20 @@ public:
   {
     return _map.find(className) != _map.end();
   }
+  
+  const std::vector<std::string> getKeys() const
+    {
+	std::vector<std::string> names;
+	
+	typename FactoryMap::const_iterator iter = _map.begin();
+	    
+	for (; iter != _map.end(); ++iter)
+	{
+		names.push_back(iter->first);
+	}
+
+      return names;              
+    }
   
 protected:
   /// Protected constructor for base class

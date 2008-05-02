@@ -68,8 +68,7 @@ namespace Mantid
 			*/
 			int size() const { return regAlg.size(); }
 			
-			const std::vector<std::string> getNames() const;
-      const std::vector<std::pair<std::string,std::string> > getNamesAndCategories() const;
+			const std::vector<std::pair<std::string,std::string> > getNamesAndCategories() const;
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
@@ -83,7 +82,6 @@ namespace Mantid
     
 			/// Standard Assignment operator    
 			AlgorithmManagerImpl& operator = (const AlgorithmManagerImpl&);
-
 
 			/// Static reference to the logger class
 			Kernel::Logger& g_log;

@@ -142,7 +142,7 @@ std::vector<std::string> PythonInterface::GetWorkspaceNames()
  **/
 std::vector<std::string> PythonInterface::GetAlgorithmNames()
 {
-	return AlgorithmManager::Instance().getNames();
+	return AlgorithmFactory::Instance().getKeys();
 }
 
 /**
