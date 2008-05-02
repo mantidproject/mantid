@@ -49,7 +49,7 @@ for test in f:
   temp= test.split('/')
   dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
   dotpdb = temp[-1].strip().rstrip('.h') + '.pdb'
-  os.popen('cxxtestgen.py --error-printer -o ' + dotcpp + ' ' + doth)
+  os.popen('python ../../../Third_Party/src/cxxtest/cxxtestgen.py --error-printer -o ' + dotcpp + ' ' + doth)
   if os.name == 'nt':
 	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
   else:
