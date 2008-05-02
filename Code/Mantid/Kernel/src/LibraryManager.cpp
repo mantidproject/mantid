@@ -39,18 +39,11 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 		bool isRecursive)
 {
 	int libCount = 0;
-	
-	char CurrentPath[255];
-	getcwd(CurrentPath, 255);
-	
-	std::cout << "Current " << CurrentPath << std::endl;
-	std::cout << "Plugins " << filePath << std::endl;
 
 	//validate inputs
 	if (fs::exists(filePath) )
 	{
-		std::cout << "Exists " << std::endl;
-		
+	
 		//iteratate over the available files
 		fs::directory_iterator end_itr; // default construction yields past-the-end
 		for (fs::directory_iterator itr(filePath); itr != end_itr; ++itr)
@@ -66,8 +59,6 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 			{
 				//if they are libraries
 				std::string libName = DllOpen::ConvertToLibName(itr->path().leaf());
-
-				std::cout << "libname " << libName << std::endl;
 				
 				if (libName != "")
 				{
