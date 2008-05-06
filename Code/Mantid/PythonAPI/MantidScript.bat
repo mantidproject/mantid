@@ -1,0 +1,3 @@
+SETLOCAL ENABLEEXTENSIONS
+set PYTHONSTARTUP=MantidStartup.py
+python.exe
