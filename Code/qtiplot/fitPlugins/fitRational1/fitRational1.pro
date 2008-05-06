@@ -13,11 +13,15 @@ DESTDIR           = ../
  
 # statically link against GSL in 3rdparty
 INCLUDEPATH += ../../3rdparty/gsl/include/
-LIBS        += ../../3rdparty/gsl/lib/libgsl.a
-LIBS        += ../../3rdparty/gsl/lib/libgslcblas.a
+INCLUDEPATH += ../../../Third_Party/include
+#LIBS        += ../../3rdparty/gsl/lib/libgsl.a
+#LIBS        += ../../3rdparty/gsl/lib/libgslcblas.a
 
 #dynamically link against GSL installed system-wide
-#unix:LIBS += -L /usr/lib$${libsuff} -lgsl -lgslcblas
+unix:LIBS += -L /usr/lib$${libsuff} -lgsl -lgslcblas
+
+win32:LIBS        += ../../../Third_Party/lib/win32/gsl.lib
+win32:LIBS        += ../../../Third_Party/lib/win32/cblas.lib
 
 target.path=/usr/lib$${libsuff}/qtiplot/plugins
 INSTALLS += target
