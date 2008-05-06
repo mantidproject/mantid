@@ -106,7 +106,7 @@ void PropertyManager::setPropertyOrdinal( const int& index, const std::string &v
 {
   Property *p = getPointerToPropertyOrdinal(index);   // throws runtime_error if property not in vector
   bool success = p->setValue(value);
-  if ( !success ) throw std::runtime_error("Property index too high");
+  if ( !success ) throw std::runtime_error("Invalid value for this property");
 }
 
 
@@ -180,7 +180,7 @@ Property* PropertyManager::getPointerToProperty( const std::string &name ) const
 Property* PropertyManager::getPointerToPropertyOrdinal( const int& index) const
 {
 
-	if (index < m_orderedProperties.size())
+	if ( index < static_cast<int>(m_orderedProperties.size()) )
 	{
 		return m_orderedProperties[index];
 	}

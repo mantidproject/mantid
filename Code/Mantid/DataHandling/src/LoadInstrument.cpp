@@ -171,7 +171,7 @@ void LoadInstrument::exec()
 
         // a check
 
-        if (idList.counted != idList.vec.size())
+        if (idList.counted != static_cast<int>(idList.vec.size()) )
         {
           g_log.error("The number of detector IDs listed in idlist named "
             + pElem->getAttribute("idlist") + 
