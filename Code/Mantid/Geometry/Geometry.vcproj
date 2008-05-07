@@ -332,7 +332,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\surfaceFactory.cpp"
+				RelativePath=".\src\SurfaceFactory.cpp"
 				>
 			</File>
 			<File
@@ -602,7 +602,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\surfaceFactory.h"
+				RelativePath=".\inc\MantidGeometry\SurfaceFactory.h"
 				>
 			</File>
 			<File

@@ -47,24 +47,24 @@ class DLLExport SurfaceFactory
 
   typedef std::map<std::string,Surface*> MapType;     ///< Storage of surface pointers
   
-  static surfaceFactory* FOBJ;             ///< Effective "this"
+  static SurfaceFactory* FOBJ;             ///< Effective "this"
  
   MapType SGrid;                           ///< The tally stack
   std::map<char,std::string> ID;           ///< Short letter identifiers
 
-  surfaceFactory();                        ///< singleton constructor
-  surfaceFactory(const surfaceFactory&);
+  SurfaceFactory();                        ///< singleton constructor
+  SurfaceFactory(const SurfaceFactory&);
 
   /// Dummy assignment operator
-  surfaceFactory& operator=(const surfaceFactory&)   
+  SurfaceFactory& operator=(const SurfaceFactory&)   
     { return *this; } 
 
   void registerSurface();
 
  public:
 
-  static surfaceFactory* Instance();
-  ~surfaceFactory();
+  static SurfaceFactory* Instance();
+  ~SurfaceFactory();
   
   Surface* createSurface(const std::string&) const;
   Surface* createSurfaceID(const std::string&) const;
