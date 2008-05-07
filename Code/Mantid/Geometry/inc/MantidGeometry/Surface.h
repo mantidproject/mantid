@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/BaseVisit.h"
-
+#include "MantidKernel/Logger.h"
 // This is the CORRECT way to do the above then ONLY 
 // Surface.cpp requires the long template build to IndexIterator
 // and only surface needs the above includes.

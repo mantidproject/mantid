@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidKernel/Logger.h"
 namespace Mantid
 {
 
