@@ -47,7 +47,7 @@ class DLLExport SamGeometry
 
   typedef std::vector<Object> ISTORE;             ///< Storage for Objects
   typedef std::map<int,const Surface*> SMAP;      ///< Map of surfaces
-  typedef std::multimap<int,int> MOBJ;            ///< Connecting Objects
+  typedef std::multimap<int,int> MOBJ;            ///< Connecting Surface - Objects
   typedef std::map<int,const Material*> MATMAP;   ///< Map of Materials.
 
  private:

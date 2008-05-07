@@ -370,11 +370,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\AuxException.h"
+				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
+				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
 			<File
@@ -450,6 +450,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\GeneralTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\IDetector.h"
 				>
 			</File>
@@ -490,11 +494,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -515,6 +519,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\Object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ObjectTest.h"
 				>
 			</File>
 			<File
@@ -562,11 +570,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\Deprecated\inc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
@@ -684,10 +692,6 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
-		<File
-			RelativePath=".\test\ObjectTest.hh"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

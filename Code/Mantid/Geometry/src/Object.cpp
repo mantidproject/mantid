@@ -797,8 +797,10 @@ Object::interceptSurface(Geometry::Track& UT) const
   for(vc=SurList.begin();vc!=SurList.end();vc++)
     {
       (*vc)->acceptVisitor(LI);
+    }
       const std::vector<Geometry::V3D>& IPts(LI.getPoints());
       const std::vector<double>& dPts(LI.getDistance());
+ 
       for(unsigned int i=0;i<IPts.size();i++)
         {
 	  if (dPts[i]>0.0)  // only interested in forward going points
@@ -808,7 +810,7 @@ Object::interceptSurface(Geometry::Track& UT) const
 	      UT.addPoint(ObjName,flag,IPts[i]);
 	      cnt++;
 	    }
-	}
+	
     }
   return cnt;
 }

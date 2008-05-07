@@ -25,7 +25,7 @@
 #include "MantidGeometry/General.h"
 #include "MantidGeometry/Sphere.h"
 #include "MantidGeometry/Torus.h"
-#include "MantidGeometry/surfaceFactory.h"
+#include "MantidGeometry/SurfaceFactory.h"
 
 namespace Mantid
 {
@@ -33,25 +33,25 @@ namespace Mantid
 namespace Geometry 
 {
 
-Kernel::Logger& surfaceFactory::PLog(Kernel::Logger::get("surfaceFactory"));
-surfaceFactory* surfaceFactory::FOBJ(0);
+Kernel::Logger& SurfaceFactory::PLog(Kernel::Logger::get("SurfaceFactory"));
+SurfaceFactory* SurfaceFactory::FOBJ(0);
 
 
-surfaceFactory*
-surfaceFactory::Instance() 
+SurfaceFactory*
+SurfaceFactory::Instance() 
   /*!
     Effective new command / this command 
-    \returns Single instance of surfaceFactory
+    \returns Single instance of SurfaceFactory
   */
 {
   if (!FOBJ)
     {
-      FOBJ=new surfaceFactory();
+      FOBJ=new SurfaceFactory();
     }
   return FOBJ;
 }
 
-surfaceFactory::surfaceFactory() 
+SurfaceFactory::SurfaceFactory() 
   /*!
     Constructor
   */
@@ -59,7 +59,7 @@ surfaceFactory::surfaceFactory()
   registerSurface();
 }
 
-surfaceFactory::surfaceFactory(const surfaceFactory& A)  :
+SurfaceFactory::SurfaceFactory(const SurfaceFactory& A)  :
   ID(A.ID)
   /*! 
     Copy constructor 
@@ -73,7 +73,7 @@ surfaceFactory::surfaceFactory(const surfaceFactory& A)  :
 
 }
   
-surfaceFactory::~surfaceFactory()
+SurfaceFactory::~SurfaceFactory()
   /*!
     Destructor removes memory for atom/cluster list
   */
@@ -84,7 +84,7 @@ surfaceFactory::~surfaceFactory()
 }
 
 void
-surfaceFactory::registerSurface()
+SurfaceFactory::registerSurface()
   /*!
     Register tallies to be used
   */
@@ -106,7 +106,7 @@ surfaceFactory::registerSurface()
 }
   
 Surface*
-surfaceFactory::createSurface(const std::string& Key) const
+SurfaceFactory::createSurface(const std::string& Key) const
   /*!
     Creates an instance of tally
     given a valid key. 
@@ -121,14 +121,14 @@ surfaceFactory::createSurface(const std::string& Key) const
   if (vc==SGrid.end())
     {
       throw ColErr::InContainerError<std::string>
-	(Key,"surfaceFactory::createSurface");
+	(Key,"SurfaceFactory::createSurface");
     }
   Surface *X= vc->second->clone();
   return X;
 }
 
 Surface*
-surfaceFactory::createSurfaceID(const std::string& Key) const
+SurfaceFactory::createSurfaceID(const std::string& Key) const
   /*!
     Creates an instance of tally
     given a valid key. 
@@ -144,7 +144,7 @@ surfaceFactory::createSurfaceID(const std::string& Key) const
   if (mc==ID.end())
     {
       throw ColErr::InContainerError<std::string>
-	(Key,"surfaceFactory::createSurfaceID");
+	(Key,"SurfaceFactory::createSurfaceID");
     }
   
   return createSurface(mc->second);

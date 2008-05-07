@@ -63,7 +63,7 @@ struct TPartial
 {
   int ObjID;           ///< ObjectID 
   int Direction;            ///< Flag direction
-  V3D PtA;           ///< Point
+  V3D PtA;             ///< Point
   double Dist;         ///< Total distance from track begin
 
   TPartial(const int ID,const int flag,const Geometry::V3D& PVec,const double D);
@@ -91,8 +91,8 @@ class Track
   static Kernel::Logger& PLog;           ///< The official logger
 
 
-  Geometry::V3D iPt;              ///< Start Point
-  Geometry::V3D uVec;             ///< unit vector to direction
+  Geometry::V3D iPt;                ///< Start Point
+  Geometry::V3D uVec;               ///< unit vector to direction
   int iObj;                         ///< Initial object
   LType Link;                       ///< Track units
   PType surfPoints;                 ///< Track units
