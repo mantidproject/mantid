@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include "Benchmark.h"
+#include "UserAlgorithmTest.h"
 #include "MantidAPI/FrameworkManager.h"
 //#include "MantidAPI/Workspace.h"
 //#include "MantidDataObjects/Workspace1D.h" 
@@ -17,10 +18,11 @@ int main()
 
   FrameworkManager::Instance().initialize();
 
-
+  UserAlgorithmTest userTest;
+  userTest.RunAllTests();
 	
-  Benchmark b;
-  b.RunPlusTest();
+ // Benchmark b;
+ // b.RunPlusTest();
     
 #if defined _DEBUG
 	//NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!

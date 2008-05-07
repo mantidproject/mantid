@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="Main"
-	ProjectGUID="{8214A04F-8650-49FC-8547-FD2716855980}"
-	RootNamespace="Main"
+	Name="UserAlgorithms"
+	ProjectGUID="{F8A52059-A414-478B-9876-7058E3EAF3F5}"
+	RootNamespace="UserAlgorithms"
 	>
 	<Platforms>
 		<Platform
@@ -18,7 +18,8 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -38,10 +39,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
-				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -54,9 +56,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib"
-				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\..\Third_Party\lib\win32;..\Debug"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib $(SolutionName)API.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
+				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
 			/>
 			<Tool
@@ -88,7 +90,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
+			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -108,9 +111,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
-				PreprocessorDefinitions="IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
-				RuntimeLibrary="2"
+				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				RuntimeLibrary="3"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -123,9 +127,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib"
-				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
-				AdditionalLibraryDirectories="..\Release;..\..\Third_Party\lib\win32"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
+				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -162,15 +166,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Benchmark.cpp"
+				RelativePath=".\HelloWorldAlgorithm.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\Main.cpp"
+				RelativePath=".\ModifyData.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\UserAlgorithmTest.cpp"
+				RelativePath=".\PropertyAlgorithm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WorkspaceAlgorithm.cpp"
 				>
 			</File>
 		</Filter>
@@ -180,11 +188,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Benchmark.h"
+				RelativePath=".\HelloWorldAlgorithm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\UserAlgorithmTest.h"
+				RelativePath=".\ModifyData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WorkspaceAlgorithm.h"
 				>
 			</File>
 		</Filter>

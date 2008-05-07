@@ -1,5 +1,5 @@
-#ifndef USER_ALGORITHMS_HELLOWORLDALGORITHM_H_
-#define USER_ALGORITHMS_HELLOWORLDALGORITHM_H_
+#ifndef USER_ALGORITHMS_MODIFYDATA_H_
+#define USER_ALGORITHMS_MODIFYDATA_H_
 
 #include <iostream>
 
@@ -9,14 +9,14 @@ namespace Mantid
 {
 namespace Algorithms
 {
-	/** @class HelloWorldAlgorithm HelloWorldAlgorithm.h
+	/** @class ModifyData ModifyData.h
    	
- 	    Algorithm basic test class.
+ 	    An example algorithm showing how to modify data in a workspace.
    			    	
-      @author Matt Clarke, ISIS, RAL
-      @date 09/11/2007
+      @author Roman Tolchenov, ISIS, RAL
+      @date 02/05/2008
    	    
-      Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+      Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
    	
       This file is part of Mantid.
    	
@@ -36,15 +36,15 @@ namespace Algorithms
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
       Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class HelloWorldAlgorithm : public API::Algorithm
+class ModifyData : public API::Algorithm
 {
 public:
   ///no arg constructor
-  HelloWorldAlgorithm() : API::Algorithm() {}
+  ModifyData() : API::Algorithm() {}
   ///virtual destructor
-  virtual ~HelloWorldAlgorithm() {}
+  virtual ~ModifyData() {}
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "HelloWorldAlgorithm";}
+  virtual const std::string name() const { return "ModifyData";}
   /// Algorithm's version for identification overriding a virtual method
   virtual const int version()const { return (1);}
 
@@ -55,10 +55,11 @@ public:
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
+
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*USER_ALGORITHMS_HELLOWORLDALGORITHM_H_*/
+#endif /*USER_ALGORITHMS_MODIFYDATA_H_*/
 
