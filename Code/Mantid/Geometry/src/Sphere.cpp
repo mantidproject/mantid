@@ -12,12 +12,7 @@
 #include <boost/regex.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
+
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -239,69 +234,6 @@ Sphere::setBaseEqn()
   return;
 }
 
-
-void
-Sphere::procXML(XML::XMLcollect& XOut) const
-  /*!
-    This writes the XML schema
-    \param XOut :: Output parameter
-   */
-{
-  XOut.getCurrent()->addAttribute("type","Sphere");
-  Quadratic::procXML(XOut);
-  XOut.addComp("Centre",Centre);
-  XOut.addComp("Radius",Radius);
-  return;
-}
-
-int
-Sphere::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		  const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this Sphere.
-
-    \param SK :: IndexIterator object
-    \param singleFlag :: single pass through to determine if has key
-    (only for virtual base object)
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  const std::string& KVal=SK->getKey();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  int errNum(1);
-	  if (RPtr)
-	    {
-	      if (KVal=="Centre")
-		errNum=(StrFunc::convert(RPtr->getFront(),Centre)) ? 0 : 1;
-	      else if (KVal=="Radius")
-		errNum=(StrFunc::convert(RPtr->getFront(),Radius)) ? 0 : 1;
-	      else
-		errNum=Quadratic::importXML(SK,1);
-	    }
-	  if (errNum)
-	    {
-	      errCnt++;                 // Not good....
-	      PLog.warning("importXML :: Key failed "+KVal);
-	    }
-	  // Post processing
-	  if (!singleFlag) 
-	    SK++;
-	}
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-
-  // Reset: stuff.
-  if (!singleFlag)
-    setBaseEqn();
-
-  return errCnt;
-}
 
 void 
 Sphere::write(std::ostream& OX) const

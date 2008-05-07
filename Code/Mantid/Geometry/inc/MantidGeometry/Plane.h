@@ -79,9 +79,7 @@ class DLLExport Plane : public Quadratic
 
   void setBaseEqn() ;                      ///< set up to be eqn based
 
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-		int const =0);
+  
 
 };
 

@@ -10,7 +10,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "../inc/IndexIterator.h"
+
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Sphere.h"

@@ -89,9 +89,6 @@ class DLLExport SamGeometry
 		  const Geometry::Vec3D&) const;
 
 
-  void procXML(XML::XMLcollect&) const;      ///< Writes the XML schema
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int);   ///< Read in XML
-
 };
 
 }  // NAMESPACE MonteCarlo

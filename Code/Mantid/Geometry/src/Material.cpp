@@ -13,12 +13,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "AuxException.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
+
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/RefCon.h"
 #include "MantidGeometry/Material.h"
@@ -186,77 +181,6 @@ Material::getScatFrac(const double Wave) const
   return (density>0) ? (scoh+sinc)/(scoh+sinc+Wave*sabs/1.798) : 1.0;
 }
 
-void
-Material::procXML(XML::XMLcollect& XOut) const
-  /*!
-    Write out the XML form
-    \param XOut :: Output collection for the XMLschema
-   */
-{
-  XOut.addComp("name",Name);
-  XOut.addComp("density",density);
-  XOut.addComp("scoh",scoh);
-  XOut.addComp("sinc",sinc);
-  XOut.addComp("sabs",sabs);
-  return;
-}
-
-int
-Material::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		 const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this Material. 
-
-    \param SK :: IndexIterator scheme
-    \param singleFlag :: Single pass identifer
-    \retval 0 :: success
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  const std::string& KVal= SK->getKey();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  
-	  if (RPtr)
-	    {
-	      if (KVal=="density" && RPtr)
-	        {
-		  if (!StrFunc::convert(RPtr->getFront(),density))
-		    errCnt++;
-		}
-	      else if (KVal=="scoh" && RPtr)
-	        {
-		  if (!StrFunc::convert(RPtr->getFront(),scoh))
-		    errCnt++;
-		}
-	      else if (KVal=="sinc" && RPtr)
-	        {
-		  if (!StrFunc::convert(RPtr->getFront(),sinc))
-		    errCnt++;
-		}
-	      else if (KVal=="sabs" && RPtr)
-	        {
-		  if (!StrFunc::convert(RPtr->getFront(),sabs))
-		    errCnt++;
-		}
-	      else
-	        {
-		  errCnt++;
-		  PLog.warning("importXML :: Key failed "+KVal);
-		}
-	    }
-	}
-      if (!singleFlag) SK++;
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-  
-  return errCnt;
-}
 
 
 } // NAMESPACE MonteCarlo

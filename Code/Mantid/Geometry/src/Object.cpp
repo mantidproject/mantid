@@ -7,6 +7,7 @@
 #include <list>
 #include <deque>
 #include <map>
+#include <stack>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -15,11 +16,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
 #include "AuxException.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h"
-#include "IndexIterator.h"
+
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/BaseVisit.h"
@@ -28,6 +25,7 @@
 #include "MantidGeometry/Line.h"
 #include "MantidGeometry/LineIntersectVisit.h"
 #include "MantidGeometry/Object.h"
+#include "MantidGeometry/Rules.h"
 
 
 namespace Mantid
@@ -835,71 +833,6 @@ Object::calcValidType(const Geometry::V3D& Pt,
   return (flagA) ? 1 : -1;
 }
 
-int
-Object::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		    const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this Object.
-
-    \param SK :: IndexIterator object
-    \param singleFlag :: single pass through to determine if has key
-    (only for virtual base object)
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  const std::string& KVal=SK->getKey();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  int errNum(1);
-	  if (RPtr)
-	    {
-	      if (KVal=="ObjName")
-		errNum=(StrFunc::convert(RPtr->getFront(),ObjName)) ? 0 : 1;
-	      else if (KVal=="MatN")
-		errNum=(StrFunc::convert(RPtr->getFront(),MatN)) ? 0 : 1;
-	      else if (KVal=="Temperature")
-		errNum=(StrFunc::convert(RPtr->getFront(),Tmp)) ? 0 : 1;
-	      else if (KVal=="density")
-		errNum=(StrFunc::convert(RPtr->getFront(),density)) ? 0 : 1;
-	      else if (KVal=="cellList")
-		errNum=procString(RPtr->getFullString());
-	    }
-	  if (errNum)
-	    {
-	      errCnt++;                 // Not good....
-	      PLog.warning("importXML :: Key failed "+KVal);
-	    }
-	  // Post processing
-	  if (!singleFlag) 
-	    SK++;
-	}
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-
-  return errCnt;
-}
-
-
-void
-Object::procXML(XML::XMLcollect& XOut) const
-  /*!
-    Output XML schema
-    \param XOut ::  XMLcollect output class
-  */
-{
-  XOut.addComp("ObjName",ObjName);
-  XOut.addComp("MatN",MatN);
-  XOut.addComp("Temperature",Tmp);
-  XOut.addComp("density",density);
-  if (TopRule)
-    XOut.addComp("cellList",TopRule->display());
-  return;
-}
 
 
 }  // NAMESPACE MonteCarlo

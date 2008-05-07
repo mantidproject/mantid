@@ -119,11 +119,7 @@ class DLLExport Simulation
   template<int SGindex> void setObjectMaterial(const int,const int);          ///< Set an object's material
   template<int SGindex> void setObjectMaterial(const int,const std::string&); ///< Set an object's material
 
-  // XML 
-  void procXML(XML::XMLcollect&) const;           ///< Writes the XML schema
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,const int);   ///< Read in XML
-  void writeXML(const std::string&) const;        ///< Write out XML representation
-  int loadXML(const std::string&);                ///< Load the XML schema?
+
 
   // Direct Monte Carlo
   

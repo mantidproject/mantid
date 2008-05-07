@@ -14,12 +14,7 @@
 #include "AuxException.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h" 
-#include "XMLcollect.h" 
-#include "IndexIterator.h"
+
 #include "MantidKernel/Support.h"
 #include "mathSupport.h"
 #include "MantidGeometry/Matrix.h"
@@ -105,79 +100,6 @@ Surface::writeHeader(std::ostream& OX) const
   return;
 }
   
-int
-Surface::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		   const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this Surface. 
-
-    \param SK :: IndexIterator scheme
-    \param singleFlag :: Single pass identifer [expected 1 ]
-    \return Error count
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  int errNum(1);
-	  const std::string& KVal= SK->getKey();
-//	  const std::string KBase= SK->getKeyBase();
-//	  const int Knum =  SK->getKeyNum();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  
-	  if (RPtr)
-	    {
-	      if (KVal=="Name")
-		errNum=1-StrFunc::convert(RPtr->getFront(),Name);
-	    }
-	  // Failure test:
-	  if (errNum)
-	    {
-	      PLog.warning("importXML :: Key failed "+KVal);
-	      errCnt++;
-	    }
-	}
-      if (!singleFlag) SK++;
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-  
-  return errCnt;
-}
-
-void
-Surface::procXML(XML::XMLcollect& XOut) const
-  /*!
-    This writes the XML schema
-    \param XOut :: Output parameter
-   */
-{
-  XOut.addComp("Name",Name);
-  return;
-}
-
-void
-Surface::writeXML(const std::string& Fname) const
-  /*!
-    The generic XML writing system.
-    This should call the virtual function procXML
-    to correctly built the XMLcollection.
-    \param Fname :: Filename 
-  */
-{
-  XML::XMLcollect XOut;
-  XOut.addGrp("Surface");
-  XOut.addAttribute("type","Surface");
-  this->procXML(XOut);          
-  XOut.closeGrp();
-  std::ofstream OX;
-  OX.open(Fname.c_str());
-  XOut.writeXML(OX);
-  return;
-}
 
 void
 Surface::write(std::ostream& out) const  

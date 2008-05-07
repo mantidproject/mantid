@@ -58,8 +58,6 @@ class DLLExport General : public Quadratic
   int setSurface(const std::string&);
   void setBaseEqn();
 
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
 
 };
 

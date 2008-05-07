@@ -13,12 +13,8 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
+
+
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -149,57 +145,6 @@ General::setBaseEqn()
   return;
 }
 
-int
-General::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		    const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this DExpt.
-
-    \param SK :: IndexIterator object
-    \param singleFlag :: single pass through to determine if has key
-    (only for virtual base object)
-    \return Error count
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  const std::string& KVal=SK->getKey();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  int errNum(1);
-	  if (RPtr)
-	    {
-	      errNum=Quadratic::importXML(SK,1);
-	    }
-	  if (errNum)
-	    {
-	      errCnt++;                 // Not good....
-	      PLog.warning("importXML :: Key failed "+KVal);
-	    }
-	  // Post processing
-	  if (!singleFlag) SK++;
-	}
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-
-  return errCnt;
-}
-
-void
-General::procXML(XML::XMLcollect& XOut) const
-  /*!
-    This writes the XML schema
-    \param XOut :: Output parameter
-   */
-{
-  XOut.getCurrent()->addAttribute("type","General");
-  Quadratic::procXML(XOut);
-  return;
-}
 
 }  // NAMESPACE MonteCarlo
 

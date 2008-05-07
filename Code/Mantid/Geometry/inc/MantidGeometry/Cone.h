@@ -84,9 +84,6 @@ class DLLExport Cone : public Quadratic
 
   void write(std::ostream&) const;
 
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
-
 };
 
 }  // NAMESPACE MonteCarlo

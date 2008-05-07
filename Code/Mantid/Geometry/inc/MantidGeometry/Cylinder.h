@@ -90,9 +90,6 @@ class DLLExport Cylinder : public Quadratic
   void write(std::ostream&) const;
   void print() const;
 
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,int const=0);
-  //  void writeXML(const std::string&);
 
 };
 

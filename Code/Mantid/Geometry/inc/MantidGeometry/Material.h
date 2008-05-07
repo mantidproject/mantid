@@ -83,10 +83,6 @@ class DLLExport Material
 
   double calcAtten(const double Wave,const double Length) const;
   
-  virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		const int singleFlag=0);
-
 };
 
 

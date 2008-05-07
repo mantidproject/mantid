@@ -65,10 +65,6 @@ class DLLExport Quadratic : public Surface
   virtual void write(std::ostream&) const;
   virtual void print() const;
 
-  virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-			int const=0);
-  virtual void writeXML(const std::string&) const;
 
 };
 

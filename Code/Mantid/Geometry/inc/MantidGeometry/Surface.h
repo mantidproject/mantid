@@ -2,25 +2,11 @@
 #define Geometry_Surface_h
 
 #include "MantidKernel/System.h"
-#include "XMLcollect.h"
-#include "IndexIterator.h"
 #include "MantidGeometry/BaseVisit.h"
 
 // This is the CORRECT way to do the above then ONLY 
 // Surface.cpp requires the long template build to IndexIterator
 // and only surface needs the above includes.
-namespace Mantid
-{
-namespace XML
-{
-  class XMLobject;
-  class XMLgroup;
-  class XMLcollect;
-  template<typename A,typename B> class IndexIterator;
-  template<typename XMLobject,typename XMLgroup> class IndexIterator;
-}
-
-}
 
 namespace Mantid
 {
@@ -113,10 +99,7 @@ class DLLExport Surface
   virtual void print() const; 
 
 
-  virtual void procXML(XML::XMLcollect&) const;
-  virtual int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>&,
-			int const=0);
-  virtual void writeXML(const std::string&) const;
+  
 
 };
 

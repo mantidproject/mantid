@@ -16,12 +16,7 @@
 
 #include "AuxException.h"
 #include "MantidKernel/Logger.h"
-#include "XMLattribute.h"
-#include "XMLobject.h"
-#include "XMLgroup.h"
-#include "XMLread.h" 
-#include "XMLcollect.h" 
-#include "IndexIterator.h"
+
 #include "MantidKernel/Support.h"
 #include "mathSupport.h"
 #include "MantidGeometry/Matrix.h"
@@ -397,84 +392,7 @@ Quadratic::write(std::ostream& OX) const
   return;
 }
 
-int
-Quadratic::importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		   const int singleFlag)
-  /*!
-    Given a distribution that has been put into an XML base set.
-    The XMLcollection need to have the XMLgroup pointing to
-    the section for this Surface. 
 
-    \param SK :: IndexIterator scheme
-    \param singleFlag :: Single pass identifer [expected 1 ]
-    \return Error count
-   */
-{
-  int errCnt(0);
-  int levelExit(SK.getLevel());
-  do
-    {
-      if (*SK)
-        {
-	  int errNum(1);
-	  const std::string& KVal= SK->getKey();
-//	  const std::string KBase= SK->getKeyBase();
-//	  const int Knum =  SK->getKeyNum();
-	  const XML::XMLread* RPtr=dynamic_cast<const XML::XMLread*>(*SK);
-	  
-	  if (RPtr)
-	    {
-	      if (KVal=="BaseEqn")
-		errNum=RPtr->convertToContainer(BaseEqn);
-	      else
-		errNum=Surface::importXML(SK,1);
-	    }
-	  // Failure test:
-	  if (errNum)
-	    {
-	      PLog.warning("importXML :: Key failed "+KVal);
-	      errCnt++;
-	    }
-	}
-      if (!singleFlag) SK++;
-    } while (!singleFlag && SK.getLevel()>=levelExit);
-  
-  return errCnt;
-}
-
-void
-Quadratic::procXML(XML::XMLcollect& XOut) const
-  /*!
-    This writes the XML schema
-    \param XOut :: Output parameter
-   */
-{
-  Surface::procXML(XOut);
-  XOut.addComp("BaseEqn",BaseEqn);
-  return;
-}
-
-void
-Quadratic::writeXML(const std::string& Fname) const
-  /*!
-    The generic XML writing system.
-    This should call the virtual function procXML
-    to correctly built the XMLcollection.
-    \param Fname :: Filename 
-  */
-{
-  XML::XMLcollect XOut;
-  XOut.addGrp("Surface");
-  XOut.getCurrent()->addAttribute("type","Quadratic");
-  this->procXML(XOut);          
-  XOut.closeGrp();
-  std::ofstream OX;
-  OX.open(Fname.c_str());
-  XOut.writeXML(OX);
-  return;
-}
-
-  
 }   // NAMESPACE Geometry
 
 }   // NAMESPACE Mantid

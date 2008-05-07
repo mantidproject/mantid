@@ -6,7 +6,7 @@
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Track.h"
-#include "XMLcollect.h"
+
 
 namespace Mantid
 {
@@ -122,10 +122,7 @@ class DLLExport Object
   // INTERSECTION
   int interceptSurface(Geometry::Track&) const;
 
-  // XML:
-  void procXML(XML::XMLcollect&) const;
-  int importXML(IndexIterator<XML::XMLobject,XML::XMLgroup>& SK,
-		const int singleFlag=0);
+  
 
 };
 
