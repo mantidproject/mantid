@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadMappingTable.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadNeXus.cpp"
 				>
 			</File>
