@@ -91,7 +91,7 @@ Object::setObject(const int ON,const std::string& Ln)
  /*! 
    Object line ==  cell 
    \param ON :: Object name
-   \param Ln :: Input string must:  {rules}
+   \param Ln :: Input string must be :  {rules}
    \retval 1 on success
    \retval 0 on failure
  */

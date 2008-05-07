@@ -51,7 +51,7 @@ class DLLExport Object
   static Kernel::Logger& PLog;           ///< The official logger
   
   int ObjName;       ///< Creation number
-  int MatN;          ///< Material Number   ???
+  int MatN;          ///< Material Number
   double Tmp;        ///< Temperature (K)   
   double density;    ///< Density           
 
@@ -79,6 +79,7 @@ class DLLExport Object
   void setTemp(const double A) { Tmp=A; }              ///< Set temperature [Kelvin]
   int setObject(const int ON,const std::string& Ln);        
   int procString(const std::string& Line);                 
+  void setMaterial(const int MatIndex) { MatN=MatIndex; }  ///< Set Material index
   void setDensity(const double D) { density=D; }       ///< Set Density [Atom/A^3]
 
   int complementaryObject(const int Cnum,std::string& Ln);     ///< Process a complementary object
