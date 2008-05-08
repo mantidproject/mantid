@@ -13,9 +13,8 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-
-
 #include "MantidKernel/Support.h"
+
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"

@@ -9,8 +9,8 @@
 #include <boost/array.hpp>
 #include <boost/multi_array.hpp>
 
-#include "AuxException.h"
-#include "mathSupport.h"
+#include "MantidGeometry/AuxException.h"
+#include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/MatrixBase.h"
 #include "MantidGeometry/PolyFunction.h"
 #include "MantidGeometry/PolyVar.h"

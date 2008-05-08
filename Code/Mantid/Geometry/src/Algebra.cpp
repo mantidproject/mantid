@@ -12,7 +12,7 @@
 #include <functional>
 #include <iterator>
 
-#include "AuxException.h"
+#include "MantidGeometry/AuxException.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/MapSupport.h"
 #include "MantidGeometry/Algebra.h"

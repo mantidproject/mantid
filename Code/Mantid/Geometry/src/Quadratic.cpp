@@ -14,17 +14,17 @@
 #include <boost/multi_array.hpp>
 #include <gsl/gsl_poly.h>
 
-#include "AuxException.h"
-#include "MantidKernel/Logger.h"
-
-#include "MantidKernel/Support.h"
-#include "mathSupport.h"
+#include "MantidGeometry/AuxException.h"
+#include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/PolyBase.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Quadratic.h"
+
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Support.h"
 
 namespace Mantid
 {

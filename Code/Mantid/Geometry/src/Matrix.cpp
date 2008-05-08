@@ -9,8 +9,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
-#include "AuxException.h"
-#include "mathSupport.h"
+#include "MantidGeometry/AuxException.h"
+#include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 

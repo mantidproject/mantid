@@ -14,10 +14,10 @@
 #include <boost/regex.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "AuxException.h"
+#include "MantidGeometry/AuxException.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Matrix.h"
-#include "RotCounter.h"
+#include "MantidGeometry/RotCounter.h"
 #include "MantidGeometry/Triple.h"
 #include "MantidGeometry/BnId.h"
 #include "MantidGeometry/Acomp.h"

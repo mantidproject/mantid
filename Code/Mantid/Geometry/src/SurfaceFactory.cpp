@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "MantidKernel/Logger.h"
-#include "AuxException.h"
+#include "MantidGeometry/AuxException.h"
 
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"

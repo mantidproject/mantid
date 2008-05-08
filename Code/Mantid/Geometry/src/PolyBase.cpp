@@ -8,7 +8,7 @@
 #include <functional>
 #include <gsl/gsl_poly.h>
 
-#include "AuxException.h"
+#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/PolyBase.h"
 
 namespace Mantid

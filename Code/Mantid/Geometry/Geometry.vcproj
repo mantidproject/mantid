@@ -172,7 +172,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\src\AuxException.cpp"
+				RelativePath=".\src\AuxException.cpp"
 				>
 			</File>
 			<File
@@ -220,7 +220,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\src\mathSupport.cpp"
+				RelativePath=".\src\mathSupport.cpp"
 				>
 			</File>
 			<File
@@ -308,7 +308,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\Deprecated\src\RotCounter.cpp"
+				RelativePath=".\src\RotCounter.cpp"
 				>
 			</File>
 			<File
@@ -367,10 +367,6 @@
 			</File>
 			<File
 				RelativePath=".\test\AlgebraTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Deprecated\inc\AuxException.h"
 				>
 			</File>
 			<File
@@ -490,10 +486,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Deprecated\inc\mathSupport.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
@@ -567,10 +559,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\RegexSupport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\Deprecated\inc\RotCounter.h"
 				>
 			</File>
 			<File

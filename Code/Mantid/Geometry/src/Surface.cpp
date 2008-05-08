@@ -11,12 +11,12 @@
 #include <string>
 #include <algorithm>
 
-#include "AuxException.h"
+#include "MantidGeometry/AuxException.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Support.h"
-#include "mathSupport.h"
+#include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/PolyBase.h"
