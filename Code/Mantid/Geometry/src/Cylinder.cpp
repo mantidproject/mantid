@@ -113,7 +113,7 @@ Cylinder::setSurface(const std::string& Pstr)
     return errDesc;
 
   // Cylinders on X/Y/Z axis
-  const  int itemPt((item[1]=='/' && item.length()==3) ? 2 : 1);
+  const int itemPt((item[1]=='/' && item.length()==3) ? 2 : 1);
   const int ptype=static_cast<int>(tolower(item[itemPt])-'x');
   if (ptype<0 || ptype>=3)
     return errAxis;
@@ -132,7 +132,7 @@ Cylinder::setSurface(const std::string& Pstr)
 	    index++;
 	}
       if (index!=3)
-	return errCent;
+	 return errCent;
     }
   // Now get radius
   double R;
@@ -141,6 +141,7 @@ Cylinder::setSurface(const std::string& Pstr)
 
   Centre=Geometry::V3D(cent);
   Normal=Geometry::V3D(norm);
+  Nvec=ptype+1;
   Radius=R;
   setBaseEqn();
   return 0;
