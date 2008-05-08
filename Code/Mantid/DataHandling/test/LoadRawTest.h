@@ -5,9 +5,10 @@
 
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::API;
@@ -22,7 +23,7 @@ public:
   LoadRawTest()
   {
     //initialise framework manager to allow logging
-	Mantid::API::FrameworkManager::Instance().initialize();
+    Mantid::API::FrameworkManager::Instance().initialize();
   }
   
   void testInit()
@@ -36,7 +37,7 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set    
-    //TS_ASSERT_THROWS(loader.execute(),std::runtime_error);    
+    TS_ASSERT_THROWS(loader.execute(),std::runtime_error);    
     
     // Now set it...  
     // Path to test input file assumes Test directory checked out from SVN
@@ -105,7 +106,7 @@ public:
     
   }
 
-    void testarrayin()
+  void testarrayin()
   {
     if ( !loader2.isInitialized() ) loader2.initialize();
     
@@ -144,7 +145,7 @@ public:
     
   }
   
-   void testfail()
+  void testfail()
   {
     if ( !loader3.isInitialized() ) loader3.initialize();
     
@@ -190,9 +191,24 @@ public:
     loader3.setPropertyValue("spectrum_list", "999,2000");
     loader3.execute();   
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out"));    
-
-
   }
+   
+  void testWithManagedWorkspace()
+  {
+    ConfigService::Instance().loadConfig("UseManagedWS.properties");
+    LoadRaw loader4;
+    loader4.initialize();
+    loader4.setPropertyValue("Filename", "../../../../Test/Data/HET15869.RAW");    
+    loader4.setPropertyValue("OutputWorkspace", "managedws");    
+    TS_ASSERT_THROWS_NOTHING( loader4.execute() )
+    TS_ASSERT( loader4.isExecuted() )
+
+    // Get back workspace and check it really is a ManagedWorkspace2D
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws") );    
+    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
+  }
+   
 private:
   LoadRaw loader,loader2,loader3;
   std::string inputFile;

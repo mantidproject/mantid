@@ -26,6 +26,13 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
     </UL>
 
+    Optional Properties:
+    <UL>
+    <LI> spectrum_min  - The spectrum to start loading from</LI>
+    <LI> spectrum_max  - The specturm to load to</LI>
+    <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
+    </UL>
+
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
 
