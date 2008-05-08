@@ -54,13 +54,13 @@ class DLLExport ManagedDataBlock2D
   friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:
-	ManagedDataBlock2D(const int &minIndex, const int &noVectors, const int &XLength, const int &YLength);
-	virtual ~ManagedDataBlock2D();
-	
-	int minIndex() const;
-	bool hasChanges() const;
+  ManagedDataBlock2D(const int &minIndex, const int &noVectors, const int &XLength, const int &YLength);
+  virtual ~ManagedDataBlock2D();
 
-	// Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
+  int minIndex() const;
+  bool hasChanges() const;
+
+  // Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
   void setX(const int histnumber, const std::vector<double>&);
   void setX(const int histnumber, const Histogram1D::RCtype&);
   void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
@@ -81,6 +81,12 @@ public:
   const std::vector<double>& dataY(const int index) const;
   const std::vector<double>& dataE(const int index) const;
   const std::vector<double>& dataE2(const int index) const;
+  
+  const API::IErrorHelper* errorHelper(int const index) const;
+  void setErrorHelper(int const index,API::IErrorHelper* errorHelper);
+  void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
+  int spectraNo(int const index) const;
+  int& spectraNo(int const index);
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

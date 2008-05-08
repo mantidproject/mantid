@@ -53,7 +53,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   m_XLength = XLength;
   m_YLength = YLength;
   
-  m_vectorSize = ( m_XLength + ( 3*m_YLength ) ) * sizeof(double);
+  m_vectorSize = sizeof(int) + ( m_XLength + ( 3*m_YLength ) ) * sizeof(double);
   
   // CALCULATE BLOCKSIZE
   // Get memory size of a block from config file
@@ -424,6 +424,51 @@ const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE2(index);
 }
 
+///Returns the ErrorHelper applicable for this spectra
+const API::IErrorHelper* ManagedWorkspace2D::errorHelper(const int index) const
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::errorHelper, histogram number out of range");
+
+  return getDataBlock(index)->errorHelper(index);
+}
+
+///Returns the spectrum number to which a given index refers
+int ManagedWorkspace2D::spectraNo(const int index) const
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::spectraNo, histogram number out of range");
+
+  return getDataBlock(index)->spectraNo(index);
+}
+
+///Returns the spectrum number to which a given index refers
+int& ManagedWorkspace2D::spectraNo(const int index)
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::spectraNo, histogram number out of range");
+
+  return getDataBlock(index)->spectraNo(index);
+}
+
+///Sets the ErrorHelper for this spectra
+void ManagedWorkspace2D::setErrorHelper(const int index,API::IErrorHelper* errorHelper)
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::setErrorHelper, histogram number out of range");
+
+  getDataBlock(index)->setErrorHelper(index,errorHelper);
+}
+
+///Sets the ErrorHelper for this spectra
+void ManagedWorkspace2D::setErrorHelper(const int index,const API::IErrorHelper* errorHelper)
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::setErrorHelper, histogram number out of range");
+
+  getDataBlock(index)->setErrorHelper(index,errorHelper);
+}
+
 /** Returns the number of histograms.
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
 	  being virtual so it now just calls this private (and virtual) method which does the work.
@@ -503,11 +548,13 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
     if ( toWrite->hasChanges() )
     {
       int fileIndex = 0;
+      // Check whether we need to pad file with zeroes before writing data
       if ( toWrite->minIndex() > outer.m_indexWrittenTo+outer.m_vectorsPerBlock && outer.m_indexWrittenTo >= 0 )
       {
         fileIndex = outer.m_indexWrittenTo / (outer.m_vectorsPerBlock * outer.m_blocksPerFile);
         
         outer.m_datafile[fileIndex]->seekp(0, std::ios::end);
+        const int speczero = 0;
         const std::vector<double> xzeroes(outer.m_XLength);
         const std::vector<double> yzeroes(outer.m_YLength);
         for (int i = 0; i < (toWrite->minIndex() - outer.m_indexWrittenTo); ++i) 
@@ -522,9 +569,11 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
           outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
           outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
           outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
+          outer.m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
         }
       }
       else
+      // If no padding needed, go to correct place in file
       {
         long long seekPoint = toWrite->minIndex() * outer.m_vectorSize;
 

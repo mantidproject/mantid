@@ -59,15 +59,14 @@ public:
   typedef API::workspace_iterator<const API::LocatedDataRef, const Workspace2D> const_iterator;  
   
   /**
-	Gets the name of the workspace type
-	\return Standard string name
-*/
+  Gets the name of the workspace type
+  \return Standard string name
+   */
   virtual const std::string id() const {return "Workspace2D";}
 
   Workspace2D();
   virtual ~Workspace2D();
 
-  /// For now, does nothing
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
   
   virtual void setHistogramNumber(int const);

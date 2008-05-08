@@ -108,9 +108,9 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
   friend class mru_list;
   
 public:
-	ManagedWorkspace2D();
-	virtual void init(const int &NVectors, const int &XLength, const int &YLength);
-	virtual ~ManagedWorkspace2D();
+  ManagedWorkspace2D();
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  virtual ~ManagedWorkspace2D();
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 	
@@ -143,7 +143,13 @@ public:
   virtual const std::vector<double>& dataY(int const index) const;
   virtual const std::vector<double>& dataE(int const index) const;
   virtual const std::vector<double>& dataE2(int const index) const;
-	
+
+  virtual const API::IErrorHelper* errorHelper(const int index) const;
+  virtual void setErrorHelper(const int index,API::IErrorHelper* errorHelper);
+  virtual void setErrorHelper(const int index,const API::IErrorHelper* errorHelper);
+  virtual int spectraNo(const int index) const;
+  virtual int& spectraNo(const int index);
+
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
   /// Private copy constructor

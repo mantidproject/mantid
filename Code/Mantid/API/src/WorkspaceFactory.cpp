@@ -73,6 +73,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
   if ( (wsSize > triggerSize) && !(className.find("2D") == std::string::npos) )
   {
     ws = this->create("ManagedWorkspace2D");
+    g_log.information("Created a ManagedWorkspace2D");
   }
   else
   {
