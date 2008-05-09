@@ -2,6 +2,7 @@
 #define Object_h
 
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Surface.h"

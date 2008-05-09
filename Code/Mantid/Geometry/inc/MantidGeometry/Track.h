@@ -1,7 +1,7 @@
 #ifndef GeometryTrack_h
 #define GeometryTrack_h
 
-#include "MantidKernel\System.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
