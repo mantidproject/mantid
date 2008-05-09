@@ -151,7 +151,7 @@ void LoadInstrument::exec()
           " even it is just an empty location element of the form <location />", m_filename);
       }
 
-      if ( isTypeAssemply[pElem->getAttribute("type")] )
+      if ( isAssemply(pElem->getAttribute("type")) )
       {
         // read detertor IDs into idlist if required
 
@@ -249,7 +249,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
   {
     Element* pElem = static_cast<Element*>(pNL_loc_for_this_type->item(i));
     std::string typeName = (getParentComponent(pElem))->getAttribute("type");
-    if (isTypeAssemply[typeName])
+    if ( isAssemply(typeName) )
     {
       appendAssembly(ass, pElem, idList);
     }
@@ -274,13 +274,14 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
  *  @param parent CompAssembly to append component to
  *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add  
  *  @param idList The current IDList
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
 void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
 {
   // The location element is required to be a child of a component element. Get this component element
 
   Element* pCompElem = getParentComponent(pLocElem);
-
 
   // get the type element of the component element in order to determine if the type
   // belong to the catogory: "detector", "SamplePos or "Source".
@@ -319,7 +320,17 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     idList.counted++;
     int toGetHoldOfDetectorCopy = parent->addCopy(&detector);
     Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
-    instrument->markAsDetector(temp);
+    try
+    {
+      instrument->markAsDetector(temp);
+    }
+    catch(Kernel::Exception::ExistsError& e)
+    { 
+      std::stringstream convert;
+      convert << temp->getID();
+      throw Kernel::Exception::InstrumentDefinitionError("Detector with ID = " + convert.str() +
+        " present more then once in XML instrument file", m_filename);	
+    }
   }
   else
   {
@@ -506,6 +517,8 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
       if ( pIDElem->hasAttribute("val") )
       {
+        int valID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+        idList.vec.push_back(valID);
       }
       else if ( pIDElem->hasAttribute("start") )
       {
@@ -534,7 +547,27 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
     pNL->release();
   }
+}
 
+
+/** Method for populating IdList.
+ *
+ *  @param type  name of the type of a component in XML instrument definition
+ *
+ *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
+ */
+bool LoadInstrument::isAssemply(std::string type)
+{
+  std::map<std::string,bool>::iterator it;
+  it = isTypeAssemply.find(type);
+
+  if ( it == isTypeAssemply.end() )
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("type with name = " + type +
+      " not defined.", m_filename);	
+  }
+
+  return isTypeAssemply[type];
 }
 
 } // namespace DataHandling

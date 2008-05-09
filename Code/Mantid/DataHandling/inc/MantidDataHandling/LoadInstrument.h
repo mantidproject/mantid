@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
+#include <set>
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -130,6 +131,9 @@ namespace API
       /// assembles, which means whether the type element contains component elements
       std::map<std::string,bool> isTypeAssemply;
 
+      /// Return true if assemply, false if not assemply and throws exception if string not in assemply
+      bool isAssemply(std::string);
+
       /// map which holds names of types and pointers to these type for fast retrievel in code
       std::map<std::string,Poco::XML::Element*> getTypeElement;
 
@@ -141,6 +145,12 @@ namespace API
 
       /// For convenience added pointer to instrument here
       boost::shared_ptr<API::Instrument> instrument;
+
+      /// Container used to check that a user has not by mistake specified the same 
+      /// detector ID twice or more in a XML instrument description file
+
+      //std::set<int> doubleCheckingIdListInput;
+
     };
 
   } // namespace DataHandling

@@ -162,11 +162,17 @@ void Instrument::markAsSource(Geometry::ObjComponent* comp)
 * later retrievel
 *
 * @param det Component to be marked (stored for later retrievel) as a detector Component
+*
+* @throw Exception::ExistsError if cannot add detector to cache
 */
 void Instrument::markAsDetector(Geometry::IDetector* det)
-{
+{  
   if ( !_detectorCache.insert( std::map<int, Geometry::IDetector*>::value_type(det->getID(), det) ).second )
-    g_log.warning("Not successful in adding Detector to _detectorCache.");
+  {
+    std::stringstream convert;
+    convert << det->getID();
+		throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
+  }
 }
 
 

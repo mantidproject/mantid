@@ -161,21 +161,21 @@ public:
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Y(), -10.0,0.01);
 
     Component* samplepos = i->getSamplePos();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
     Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
-    TS_ASSERT_EQUALS( ptrDet->getName(), "scintillator_B1");
+    TS_ASSERT_EQUALS( ptrDet->getName(), "Det16");
     TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0,0.01);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0,0.01);
     double d = ptrDet->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,10.0,0.0001);
+    TS_ASSERT_DELTA(d,0.0,0.0001);
     double cmpDistance = ptrDet->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,10.0,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,0.0,0.0001);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
   }
  
