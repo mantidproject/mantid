@@ -104,7 +104,7 @@ for line in f.readlines():
         if m:
             failCount += int(m.group(1))
             testsPass = False
-	mssgTestsResults = mssgTestsResults + line
+	#mssgTestsResults = mssgTestsResults + line
      
 f.close()
 move(filetestsRun,archiveDir)
@@ -144,8 +144,9 @@ message += 'Test Build stderr <' + httpLinkToArchive + 'testsBuildErr.log>\n'
 #message += mssgTestsRunErr  + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
+message += 'Test Run stdout <' + httpLinkToArchive + 'testsResults.log>\n'
 message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
-message += mssgTestsResults + "\n"
+#message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
