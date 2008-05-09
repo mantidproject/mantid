@@ -8,8 +8,8 @@ namespace Geometry
 {
 
 /*!
-  \class surfaceFactory
-  \brief creates instances of tallies
+  \class SurfaceFactory
+  \brief Creates instances of Surfaces
   \version 1.0
   \date May 2006
   \author S. Ansell

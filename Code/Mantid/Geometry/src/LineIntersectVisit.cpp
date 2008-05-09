@@ -47,10 +47,10 @@ LineIntersectVisit::LineIntersectVisit
 {}
 
 void
-LineIntersectVisit::Accept(const Surface&)
+LineIntersectVisit::Accept(const Surface& Surf)
   /*!
     Process an intersect track
-    \param :: Surface to use int line Interesect
+    \param Surf :: Surface to use int line Interesect
   */
 {
   throw ColErr::ExBase(-1,"LineIntersectVisit::Accept Surface");

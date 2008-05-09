@@ -258,6 +258,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadInstrumentFromRawTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\LoadInstrumentTest.h"
 				>
 			</File>
@@ -287,6 +291,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MarkDeadDetectorsTest.h"
 				>
 			</File>
 			<File

@@ -117,10 +117,11 @@ RotaryCounter::operator<(const RotaryCounter& A) const
 }
 
 int 
-RotaryCounter::operator++(int)
+RotaryCounter::operator++(int a)
   /*!
     Convertion to ++operator (prefix) 
     from operator++ (postfix)
+    \param a ignored
     \return ++operator
    */
 {
@@ -154,10 +155,12 @@ RotaryCounter::operator++()
 }
 
 int 
-RotaryCounter::operator--(int)
+RotaryCounter::operator--(int a)
   /*!
     convertion to --operator (prefix) 
     from operator-- (postfix)
+    \param a ignored
+    \return --operator
    */
 {
   return this->operator--();

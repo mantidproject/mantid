@@ -90,8 +90,7 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../Services/inc \
                          ../Services/src \
                          ../Geometry/inc/MantidGeometry \
-                         ../Geometry/src \
-                         ../Geometry/Deprecated
+                         ../Geometry/src 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = YES

@@ -23,7 +23,7 @@ class RotaryCounter
 
  public:
   
-  RotaryCounter(const int,const int);  ///<Size,Max
+  RotaryCounter(const int S,const int N);  ///<Size,Max
   RotaryCounter(const RotaryCounter&);
   RotaryCounter& operator=(const RotaryCounter&);
   ~RotaryCounter();
@@ -34,9 +34,9 @@ class RotaryCounter
   /// Accessor operator
   int operator[](const int I) const { return RC[I]; }
   int operator++();
-  int operator++(const int);
+  int operator++(const int a);
   int operator--();
-  int operator--(const int);
+  int operator--(const int a);
   
   void write(std::ostream&) const;
 };
