@@ -8,68 +8,72 @@
 namespace Mantid
 {
 
-namespace Geometry
-{
+  namespace Geometry
+  {
 
-/*!
-  \class  Quadratic
-  \brief Holds a basic quadratic surface
-  \author S. Ansell
-  \date April 2004
-  \version 1.0
+    /*!
+    \class  Quadratic
+    \brief Holds a basic quadratic surface
+    \author S. Ansell
+    \date April 2004
+    \version 1.0
 
-  Holds a basic surface with equation form
-  \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
-  
-*/
+    Holds a basic surface with equation form
+    \f[ Ax^2+By^2+Cz^2+Dxy+Exz+Fyz+Gx+Hy+Jz+K=0 \f]
 
-class DLLExport Quadratic : public Surface
-{
- private:
-  
-  static Kernel::Logger& PLog;           ///< The official logger
+    */
 
-  double eqnValue(const Geometry::V3D&) const;
-  void matrixForm(Geometry::Matrix<double>&,
-		  Geometry::V3D&,double&) const;          
+    class DLLExport Quadratic : public Surface
+    {
+    private:
 
- protected:
+      static Kernel::Logger& PLog;           ///< The official logger
 
-  std::vector<double> BaseEqn;     ///< Base equation (as a 10 point vector)
+      double eqnValue(const Geometry::V3D&) const;
+      void matrixForm(Geometry::Matrix<double>&,
+        Geometry::V3D&,double&) const;          
 
- public:
+    protected:
 
-  static const int Nprecision=10;        ///< Precision of the output
+      std::vector<double> BaseEqn;     ///< Base equation (as a 10 point vector)
 
-  Quadratic();
-  Quadratic(const Quadratic&);
-  virtual Quadratic* clone() const =0;   ///< Abstract clone function
-  Quadratic& operator=(const Quadratic&);
-  virtual ~Quadratic();
+    public:
 
-  /// Effective typeid
-  virtual std::string className() const { return "Quadratic"; }
+      static const int Nprecision=10;        ///< Precision of the output
 
-  const std::vector<double>& copyBaseEqn() const { return BaseEqn; }  ///< access BaseEquation vector
+      Quadratic();
+      Quadratic(const Quadratic&);
+      virtual Quadratic* clone() const =0;   ///< Abstract clone function
+      Quadratic& operator=(const Quadratic&);
+      virtual ~Quadratic();
 
-  virtual int side(const Geometry::V3D&) const; 
+      /// Accept visitor for line calculation
+      virtual void acceptVisitor(BaseVisit& A) const
+      {  A.Accept(*this); }
 
-  virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
+      /// Effective typeid
+      virtual std::string className() const { return "Quadratic"; }
 
-  virtual int onSurface(const Geometry::V3D&) const;          ///< is point valid on surface 
-  virtual double distance(const Geometry::V3D&) const;        ///< distance between point and surface (approx)
-  virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const;    ///< Normal at surface
+      const std::vector<double>& copyBaseEqn() const { return BaseEqn; }  ///< access BaseEquation vector
 
-  virtual void displace(const Geometry::V3D&);
-  virtual void rotate(const Geometry::Matrix<double>&);
+      virtual int side(const Geometry::V3D&) const; 
 
-  virtual void write(std::ostream&) const;
-  virtual void print() const;
+      virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
+
+      virtual int onSurface(const Geometry::V3D&) const;          ///< is point valid on surface 
+      virtual double distance(const Geometry::V3D&) const;        ///< distance between point and surface (approx)
+      virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const;    ///< Normal at surface
+
+      virtual void displace(const Geometry::V3D&);
+      virtual void rotate(const Geometry::Matrix<double>&);
+
+      virtual void write(std::ostream&) const;
+      virtual void print() const;
 
 
-};
+    };
 
-}  // NAMESPACE Geometry
+  }  // NAMESPACE Geometry
 
 }  // NAMESPACE Geometry
 

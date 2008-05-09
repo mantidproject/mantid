@@ -1,6 +1,8 @@
 #ifndef GeometryTrack_h
 #define GeometryTrack_h
 
+#include "MantidKernel\System.h"
+
 namespace Mantid
 {
 
@@ -79,7 +81,7 @@ struct TPartial
   \brief Order List of track units.
  */
 
-class Track
+class DLLExport Track
 {
  public:
 

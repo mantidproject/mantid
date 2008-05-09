@@ -799,6 +799,7 @@ namespace Mantid
     {
       int cnt(0);         // Number of intesections
       // Loop over all the surfaces. 
+      
       LineIntersectVisit LI(UT.getInit(),UT.getUVec());
       std::vector<const Surface*>::const_iterator vc;
       for(vc=SurList.begin();vc!=SurList.end();vc++)
@@ -838,8 +839,8 @@ namespace Mantid
       const Geometry::V3D testB(Pt+uVec*OTolerance*25.0);
       const int flagA=isValid(testA);
       const int flagB=isValid(testB);
-      if (flagA ^ flagB) return 0;
-      return (flagA) ? 1 : -1;
+      if (!(flagA ^ flagB)) return 0;
+      return (flagA) ? -1 : 1;
     }
 
 

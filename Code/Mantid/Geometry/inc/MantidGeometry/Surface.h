@@ -4,9 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/BaseVisit.h"
 #include "MantidKernel/Logger.h"
-// This is the CORRECT way to do the above then ONLY 
-// Surface.cpp requires the long template build to IndexIterator
-// and only surface needs the above includes.
 
 namespace Mantid
 {
@@ -69,7 +66,7 @@ class DLLExport Surface
   
   /// Accept visitor for line calculation
   virtual void acceptVisitor(BaseVisit& A) const
-    {  A.Accept(*this); }
+  {  A.Accept(*this); }
 
   //  virtual double lineIntersect(const Geometry::Vec3D&,
   //			       const Geometry::Vec3D&) const;

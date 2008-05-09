@@ -68,6 +68,10 @@ class DLLExport Cone : public Quadratic
   int side(const Geometry::V3D&) const;
   int onSurface(const Geometry::V3D&) const;
 
+   /// Accept visitor for line calculation
+  virtual void acceptVisitor(BaseVisit& A) const
+  {  A.Accept(*this); }
+
   /// Return centre point
   Geometry::V3D getCentre() const { return Centre; }              
   /// Central normal

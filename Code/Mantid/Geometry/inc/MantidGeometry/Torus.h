@@ -71,6 +71,10 @@ class DLLExport Torus : public Surface
   int operator==(const Torus&) const;
   ~Torus();
   
+    /// Accept visitor for line calculation
+  virtual void acceptVisitor(BaseVisit& A) const
+  {  A.Accept(*this); }
+
   int setSurface(const std::string&);
   int side(const Geometry::V3D&) const;
   int onSurface(const Geometry::V3D&) const;

@@ -370,6 +370,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidGeometry\AuxException.h"
+				>
+			</File>
+			<File
 				RelativePath=".\auxinc\AuxException.h"
 				>
 			</File>
@@ -379,10 +383,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\BnId.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\ChebPoly.h"
 				>
 			</File>
 			<File
@@ -486,11 +486,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\mathSupport.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\Matrix.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
@@ -563,6 +567,10 @@
 			</File>
 			<File
 				RelativePath=".\auxinc\RotCounter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File

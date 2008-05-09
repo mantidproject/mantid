@@ -225,6 +225,10 @@
 				RelativePath=".\test\WorkspaceHistoryTest.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\WorkspaceIteratorTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

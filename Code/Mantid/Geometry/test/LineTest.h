@@ -143,6 +143,27 @@ public:
 		TS_ASSERT_EQUALS(pntOut[1],V3D(1.0,0.0,0.0));
 	}
 
+  	//A Line with equation equivalent to x axis will cut A Cylinder with 1 radius with center at 0,0,0  y axis normal 
+	//at two points
+	void testNotOriginIntersectCylinder(){
+		Line A(V3D(-10.0,0.0,0.0),V3D(1.0,0.0,0.0));
+		TS_ASSERT_EQUALS(A.getOrigin(),V3D(-10.0,0.0,0.0));
+		TS_ASSERT_EQUALS(A.getDirect(),V3D(1.0,0.0,0.0));
+
+		Cylinder B;
+		B.setSurface("c/y 0.0 0.0 1.0");
+		TS_ASSERT_EQUALS(B.getCentre(),V3D(0.0,0.0,0.0));
+		TS_ASSERT_EQUALS(B.getRadius(),1);
+		TS_ASSERT_EQUALS(B.getNormal(),V3D(0,1,0));
+
+		std::vector<V3D> pntOut;
+		A.intersect(pntOut,B);
+
+		TS_ASSERT_EQUALS(pntOut.size(),2);	
+		TS_ASSERT_EQUALS(pntOut[0],V3D(1.0,0.0,0.0));
+		TS_ASSERT_EQUALS(pntOut[1],V3D(-1.0,0.0,0.0));
+	}
+
 	//A Line with equation equivalent to x axis will cut a plane YZ with equation x=5 will cut at one point 5,0,0
 	//Some problem here the negative axis plane is not cut need to investigate
 	void testIntersectPlane(){
@@ -173,6 +194,22 @@ public:
 		TS_ASSERT_EQUALS(pntOut.size(),2);		
 		TS_ASSERT_EQUALS(pntOut[0],V3D(-2.0,0.0,0.0));
 		TS_ASSERT_EQUALS(pntOut[1],V3D(2.0,0.0,0.0));
+	}
+
+  //A Line with equation equivalent to x axis starting at -10 will cut A sphere with 2 radius with center at 0,0,0 
+	//at two points
+	void testNotOriginIntersectSphere(){
+		Line A(V3D(-10.0,0.0,0.0),V3D(1.0,0.0,0.0));
+		TS_ASSERT_EQUALS(A.getOrigin(),V3D(-10.0,0.0,0.0));
+		TS_ASSERT_EQUALS(A.getDirect(),V3D(1.0,0.0,0.0));
+
+		Sphere B;
+		B.setSurface("s 0.0 0.0 0.0 2");
+		std::vector<V3D> pntOut;
+		A.intersect(pntOut,B);
+		TS_ASSERT_EQUALS(pntOut.size(),2);	
+		TS_ASSERT_EQUALS(pntOut[0],V3D(2.0,0.0,0.0));
+		TS_ASSERT_EQUALS(pntOut[1],V3D(-2.0,0.0,0.0));
 	}
 };
 

@@ -13,84 +13,13 @@
 #include "MantidGeometry/Sphere.h" 
 #include "MantidGeometry/Plane.h" 
 #include "MantidGeometry/Algebra.h" 
+#include "MantidGeometry/Track.h" 
 
 using namespace Mantid;
 using namespace Geometry;
 
 class testObject: public CxxTest::TestSuite
 {
-private:
-
-  std::map<int,Object> MObj;
-
-  void populateMObj()
-    /*!
-    Populate with simple object
-    the MLis component
-    */
-  {
-    std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
-    std::string ObjB="-4  5  60  -61  62  -63";
-    std::string ObjC="-12 13 60  -61  62  -63";
-    std::string ObjD="80001 ((-80002 80003) : -80004 ) 80005 -80006";
-
-    MObj.erase(MObj.begin(),MObj.end());
-    MObj[3]=Object();
-    MObj[2]=Object();
-    MObj[8]=Object();
-    MObj[10]=Object();
-    MObj[3].setObject(3,ObjA);
-    MObj[2].setObject(2,ObjB);
-    MObj[8].setObject(8,ObjC);
-    MObj[10].setObject(10,ObjD);
-  }
-
-  Object createCappedylinder()
-  {
-    std::string C31="cx 3.0";         // cylinder x-axis radius 3
-    std::string C32="px 1.2";
-    std::string C33="px -3.2";
-    
-    // First create some surfaces
-    std::map<int,Surface*> CylSurMap;
-    CylSurMap[31]=new Cylinder();
-    CylSurMap[32]=new Plane();
-    CylSurMap[33]=new Plane();
-  
-    CylSurMap[31]->setSurface(C31);
-    CylSurMap[32]->setSurface(C32);
-    CylSurMap[33]->setSurface(C33);
-     
-    // Capped cylinder (id 21) 
-    // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
-    std::string ObjCapCylinder="-31 -32 33";
-
-    Object retVal; 
-    retVal.setObject(21,ObjCapCylinder);
-    retVal.populate(CylSurMap);
-
-    return retVal;
-  }
-
-  Object createSphere()
-  {
-    std::string S41="so 4.1";         // Sphere at origin radius 4.1
-    
-    // First create some surfaces
-    std::map<int,Surface*> SphSurMap;
-    SphSurMap[41]=new Sphere();
-    SphSurMap[41]->setSurface(S41);
-         
-    // A sphere 
-    std::string ObjSphere="-41" ;
-
-    Object retVal; 
-    retVal.setObject(41,ObjSphere);
-    retVal.populate(SphSurMap);
-
-    return retVal;
-  }
-
 public:
   void testSetObject1()
   {
@@ -151,14 +80,14 @@ public:
     }
     TS_ASSERT_EQUALS(A.str(),"4 -1 0 (-80001 : -80005 : 80006 : ((-80003 : 80002) 80004)) 1 3 5 -6 -4 -2");
   }
-  
+
   void testMakeComplement()
     /*!
-      Test the making of a given object complementary
-     */
+    Test the making of a given object complementary
+    */
   {
     populateMObj();
-  
+
     TS_ASSERT_EQUALS(MObj[2].str(),"2 -1 0 -63 62 -61 60 5 -4");
     MObj[2].makeComplement();
     TS_ASSERT_EQUALS(MObj[2].str(),"2 -1 0 #( -63 62 -61 60 5 -4 )");
@@ -166,7 +95,7 @@ public:
 
   void testIsOnSideCappedCylinder()
   {
-    Object A = createCappedylinder();
+    Object A = createCappedCylinder();
     //inside
     TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,0)),0); //origin
     TS_ASSERT_EQUALS(A.isOnSide(V3D(0,2.9,0)),0);
@@ -199,9 +128,9 @@ public:
     TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.3,0,0)),0);
   }
 
-   void testIsValidCappedCylinder()
+  void testIsValidCappedCylinder()
   {
-    Object A = createCappedylinder();
+    Object A = createCappedCylinder();
     //inside
     TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),1); //origin
     TS_ASSERT_EQUALS(A.isValid(V3D(0,2.9,0)),1);
@@ -256,7 +185,7 @@ public:
     TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,4.2)),0);
   }
 
-   void testIsValidSphere()
+  void testIsValidSphere()
   {
     Object A = createSphere();
     //inside
@@ -278,6 +207,188 @@ public:
     TS_ASSERT_EQUALS(A.isValid(V3D(0,0,4.2)),0);
   }
 
+  void testCalcValidTypeSphere()
+  {
+    Object A = createSphere();
+    //entry on the normal
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(1,0,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(-1,0,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(1,0,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(-1,0,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-4.1,0),V3D(0,1,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-4.1,0),V3D(0,-1,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,4.1,0),V3D(0,1,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,4.1,0),V3D(0,-1,0)),1);
+
+    //a glancing blow
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(0,1,0)),0);
+    //not quite on the normal
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(0.5,0.5,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(0.5,0.5,0)),-1);
+  }
+
+  void testCalcValidTypeCappedCylinder()
+  {
+    Object A = createCappedCylinder();
+    //entry on the normal
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(1,0,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(-1,0,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(1,0,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(-1,0,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-3,0),V3D(0,1,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-3,0),V3D(0,-1,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,3,0),V3D(0,1,0)),-1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,3,0),V3D(0,-1,0)),1);
+
+    //a glancing blow
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(0,1,0)),0);
+    //not quite on the normal
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(0.5,0.5,0)),1);
+    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(0.5,0.5,0)),-1);
+  }
+
+  void testInterceptSurfaceSphereY()
+  {
+    std::vector<TUnit> expectedResults;
+    Object A = createSphere();
+    Track track(V3D(0,-10,0),V3D(0,1,0));
+
+    //format = startPoint, endPoint, total distance so far, objectID
+    expectedResults.push_back(TUnit(V3D(0,-10,0),V3D(0,-4.1,0),5.9,0));
+    expectedResults.push_back(TUnit(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,A.getName()));
+
+    checkTrackIntercept(A,track,expectedResults);
+  }
+
+  void testInterceptSurfaceSphereX()
+  {
+    std::vector<TUnit> expectedResults;
+    Object A = createSphere();
+    Track track(V3D(-10,0,0),V3D(1,0,0));
+    //format = startPoint, endPoint, total distance so far, objectID
+    expectedResults.push_back(TUnit(V3D(-10,0,0),V3D(-4.1,0,0),5.9,0));
+    expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,A.getName()));
+    checkTrackIntercept(A,track,expectedResults);
+  }
+
+  void testInterceptSurfaceCappedCylinderY()
+  {
+    std::vector<TUnit> expectedResults;
+    Object A = createCappedCylinder();
+    //format = startPoint, endPoint, total distance so far, objectID
+    expectedResults.push_back(TUnit(V3D(0,-10,0),V3D(0,-3,0),7,0));
+    expectedResults.push_back(TUnit(V3D(0,-3,0),V3D(0,3,0),13,A.getName()));
+
+    Track track(V3D(0,-10,0),V3D(0,1,0));
+    checkTrackIntercept(A,track,expectedResults);
+  }
+
+  void testInterceptSurfaceCappedCylinderX()
+  {
+    std::vector<TUnit> expectedResults;
+    Object A = createCappedCylinder();
+    Track track(V3D(-10,0,0),V3D(1,0,0));
+
+    //format = startPoint, endPoint, total distance so far, objectID
+    expectedResults.push_back(TUnit(V3D(-10,0,0),V3D(-3.2,0,0),6.8,0));
+    expectedResults.push_back(TUnit(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,A.getName()));
+
+    checkTrackIntercept(A,track,expectedResults);
+  }
+
+  void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
+  {
+    obj.interceptSurface(track);
+    track.buildLink();
+
+    int index = 0;
+    for (Track::LType::const_iterator it = track.begin(); it!=track.end();++it)
+    {
+      TS_ASSERT_DELTA(it->Dist,expectedResults[index].Dist,1e-6);
+      TS_ASSERT_DELTA(it->Length,expectedResults[index].Length,1e-6);
+      TS_ASSERT_EQUALS(it->ObjID,expectedResults[index].ObjID);
+      TS_ASSERT_EQUALS(it->PtA,expectedResults[index].PtA);
+      TS_ASSERT_EQUALS(it->PtB,expectedResults[index].PtB);
+      ++index;
+    }
+    TS_ASSERT_EQUALS(index,expectedResults.size());
+  }
+
+private:
+
+  std::map<int,Object> MObj;
+
+  void populateMObj()
+    /*!
+    Populate with simple object
+    the MLis component
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
+    std::string ObjB="-4  5  60  -61  62  -63";
+    std::string ObjC="-12 13 60  -61  62  -63";
+    std::string ObjD="80001 ((-80002 80003) : -80004 ) 80005 -80006";
+
+    MObj.erase(MObj.begin(),MObj.end());
+    MObj[3]=Object();
+    MObj[2]=Object();
+    MObj[8]=Object();
+    MObj[10]=Object();
+    MObj[3].setObject(3,ObjA);
+    MObj[2].setObject(2,ObjB);
+    MObj[8].setObject(8,ObjC);
+    MObj[10].setObject(10,ObjD);
+  }
+
+  Object createCappedCylinder()
+  {
+    std::string C31="cx 3.0";         // cylinder x-axis radius 3
+    std::string C32="px 1.2";
+    std::string C33="px -3.2";
+
+    // First create some surfaces
+    std::map<int,Surface*> CylSurMap;
+    CylSurMap[31]=new Cylinder();
+    CylSurMap[32]=new Plane();
+    CylSurMap[33]=new Plane();
+
+    CylSurMap[31]->setSurface(C31);
+    CylSurMap[32]->setSurface(C32);
+    CylSurMap[33]->setSurface(C33);
+    CylSurMap[31]->setName(31);
+    CylSurMap[32]->setName(32);
+    CylSurMap[33]->setName(33);
+
+    // Capped cylinder (id 21) 
+    // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
+    std::string ObjCapCylinder="-31 -32 33";
+
+    Object retVal; 
+    retVal.setObject(21,ObjCapCylinder);
+    retVal.populate(CylSurMap);
+
+    return retVal;
+  }
+
+  Object createSphere()
+  {
+    std::string S41="so 4.1";         // Sphere at origin radius 4.1
+
+    // First create some surfaces
+    std::map<int,Surface*> SphSurMap;
+    SphSurMap[41]=new Sphere();
+    SphSurMap[41]->setSurface(S41);
+    SphSurMap[41]->setName(41);
+
+    // A sphere 
+    std::string ObjSphere="-41" ;
+
+    Object retVal; 
+    retVal.setObject(41,ObjSphere);
+    retVal.populate(SphSurMap);
+
+    return retVal;
+  }
 };
 
 #endif //MANTID_TESTOBJECT__

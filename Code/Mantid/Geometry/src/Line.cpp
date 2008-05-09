@@ -307,7 +307,7 @@ Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Sphere& Sph) const
   */
 {
   // Nasty stripping of useful stuff from cylinder
-  const Geometry::V3D Ax=Sph.getCentre()-Origin;
+  const Geometry::V3D Ax=Sph.getCentre()+Origin;
   const double R=Sph.getRadius();
   // First solve the equation of intersection
   double C[3];
