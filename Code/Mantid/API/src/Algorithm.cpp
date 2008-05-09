@@ -106,7 +106,8 @@ namespace Mantid
         {
           time(&start_time);
           start = clock();
-		  algorithm_info();
+		  // no logging of input if a child algorithm
+		  if (!m_isChildAlgorithm) algorithm_info();
           // Call the concrete algorithm's exec method
           this->exec();
           end = clock();
@@ -120,7 +121,8 @@ namespace Mantid
 
           // RJT, 19/3/08: Moved this up from below the catch blocks 
           setExecuted(true);  
-		  g_log.information()<< "Algorithm successful, Duration "<< double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
+		  if (!m_isChildAlgorithm)
+			  g_log.information()<< "Algorithm successful, Duration "<< double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
 			
         }
         catch(std::runtime_error& ex)
