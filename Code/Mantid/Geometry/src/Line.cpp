@@ -64,16 +64,14 @@ Line::Line(const Line& A) :
    */
 {}
 
-/*Line*
+Line*
 Line::clone() const
-  /* ! 
+  /*! 
     Virtual copy constructor (not currently used)
-  * /
-
+  */
 {
   return new Line(*this);
 }
-*/
 
 Line&
 Line::operator=(const Line& A)
