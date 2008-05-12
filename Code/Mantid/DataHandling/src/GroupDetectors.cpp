@@ -37,12 +37,12 @@ void GroupDetectors::exec()
   // Get the input workspace
   const Workspace2D_sptr WS = getProperty("Workspace");
 
-  const std::vector<int> indexList = getProperty("SpectraList");
+  const std::vector<int> indexList = getProperty("WorkspaceIndexList");
   // Could create a Validator to replace the below
   if ( indexList.empty() )
   {
-    g_log.error("SpectraList property is empty");
-    throw std::invalid_argument("SpectraList property is empty");
+    g_log.error("WorkspaceIndexList property is empty");
+    throw std::invalid_argument("WorkspaceIndexList property is empty");
   }
   
   // Bin boundaries need to be the same so, for now, only allow this action if the workspace unit is TOF
@@ -62,6 +62,16 @@ void GroupDetectors::exec()
   }
   /// @todo Get this algorithm working on a more generic input workspace so the restrictions above can be lost
   
+  // Group the affected detectors
+  std::vector<int> spectra;
+  std::vector<int>::const_iterator it;
+  for (it = indexList.begin(); it != indexList.end(); ++it)
+  {
+    spectra.push_back(WS->spectraNo(*it));
+  }
+  WS->getInstrument()->groupDetectors(spectra);
+
+  // Now add up the spectra
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
@@ -81,14 +91,6 @@ void GroupDetectors::exec()
   /// @todo Deal with Poisson errors (E2)
   std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataE(firstIndex).begin(), dblSqrt);
 
-  // Now group the affected detectors
-  std::vector<int> spectra;
-  std::vector<int>::const_iterator it;
-  for (it = indexList.begin(); it != indexList.end(); ++it)
-  {
-    spectra.push_back(WS->spectraNo(*it));
-  }
-  WS->getInstrument()->groupDetectors(spectra);
 }
 
 double GroupDetectors::dblSqrt(double in)

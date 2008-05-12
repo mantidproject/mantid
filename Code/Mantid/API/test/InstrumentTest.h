@@ -36,39 +36,39 @@ public:
     delete instrument.getSamplePos();
   }
   
-	void testType()
-	{
-		TS_ASSERT_EQUALS( instrument.type(), "Instrument" )
-	}
+  void testType()
+  {
+    TS_ASSERT_EQUALS( instrument.type(), "Instrument" )
+  }
 
-	void testConstructor()
-	{
-	  Instrument i;
-	  TS_ASSERT( ! i.getSource() )
-	  TS_ASSERT( ! i.getSamplePos() )
+  void testConstructor()
+  {
+    Instrument i;
+    TS_ASSERT( ! i.getSource() )
+    TS_ASSERT( ! i.getSamplePos() )
 	  
-	  Instrument ii("anInstrument");
+    Instrument ii("anInstrument");
     TS_ASSERT( ! ii.getSource() )
     TS_ASSERT( ! ii.getSamplePos() )
     TS_ASSERT_EQUALS( ii.getName(), "anInstrument" )
-	}
+  }
 
-	void testSource()
-	{
+  void testSource()
+  {
     Instrument i;
-	  TS_ASSERT( ! i.getSource() )
-	  ObjComponent *s = new ObjComponent;
-	  TS_ASSERT_THROWS_NOTHING( i.markAsSource(s) )
-	  TS_ASSERT_EQUALS( i.getSource(), s )
-	  ObjComponent *ss = new ObjComponent;
-	  TS_ASSERT_THROWS_NOTHING( i.markAsSource(ss) )
+    TS_ASSERT( ! i.getSource() )
+    ObjComponent *s = new ObjComponent;
+    TS_ASSERT_THROWS_NOTHING( i.markAsSource(s) )
+    TS_ASSERT_EQUALS( i.getSource(), s )
+    ObjComponent *ss = new ObjComponent;
+    TS_ASSERT_THROWS_NOTHING( i.markAsSource(ss) )
     TS_ASSERT_EQUALS( i.getSource(), s )
     delete s;
-	  delete ss;
-	}
+    delete ss;
+  }
 
-	void testSamplePos()
-	{
+  void testSamplePos()
+  {
     Instrument i;
     TS_ASSERT( ! i.getSamplePos() )
     ObjComponent *s = new ObjComponent;
@@ -79,59 +79,59 @@ public:
     TS_ASSERT_EQUALS( i.getSamplePos(), s )
     delete s;
     delete ss;
-	}
+  }
 
-	void testDetector()
-	{
-	  TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError )
-	  TS_ASSERT_EQUALS( instrument.getDetector(1), det )
-	  TS_ASSERT_THROWS( instrument.getDetector(2), Exception::NotFoundError )
-	  Detector *d = new Detector;
-	  d->setID(2);
-	  TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
+  void testDetector()
+  {
+    TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError )
+    TS_ASSERT_EQUALS( instrument.getDetector(1), det )
+    TS_ASSERT_THROWS( instrument.getDetector(2), Exception::NotFoundError )
+    Detector *d = new Detector;
+    d->setID(2);
+    TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
     TS_ASSERT_EQUALS( instrument.getDetector(2), d )
     delete d;
-	}
+  }
 
-	void testDetectorLocation()
-	{
-	  double l2, twoTheta;
-	  TS_ASSERT_THROWS_NOTHING( instrument.detectorLocation(1,l2,twoTheta) )
-	  TS_ASSERT_DELTA( l2, 1.0, 0.00001 )
-	  TS_ASSERT_DELTA( twoTheta, M_PI/2.0, 0.00001 )
+  void testDetectorLocation()
+  {
+    double l2, twoTheta;
+    TS_ASSERT_THROWS_NOTHING( instrument.detectorLocation(1,l2,twoTheta) )
+    TS_ASSERT_DELTA( l2, 1.0, 0.00001 )
+    TS_ASSERT_DELTA( twoTheta, M_PI/2.0, 0.00001 )
 
-	  // Should throw because detector ID not in map
-	  TS_ASSERT_THROWS( instrument.detectorLocation(3,l2,twoTheta), Exception::NotFoundError )
+    // Should throw because detector ID not in map
+    TS_ASSERT_THROWS( instrument.detectorLocation(3,l2,twoTheta), Exception::NotFoundError )
 	  
-		Instrument i;
-		double d,dd;
-		// Should throw because sample hasn't been set
-		TS_ASSERT_THROWS( i.detectorLocation(0,d,dd), Exception::NotFoundError )
-	}
+    Instrument i;
+    double d,dd;
+    // Should throw because sample hasn't been set
+    TS_ASSERT_THROWS( i.detectorLocation(0,d,dd), Exception::NotFoundError )
+  }
 
-	void testGroupDetectors()
-	{
-	  TS_ASSERT_THROWS_NOTHING( instrument.getDetector(10) )
+  void testGroupDetectors()
+  {
+    TS_ASSERT_THROWS_NOTHING( instrument.getDetector(10) )
     TS_ASSERT_THROWS_NOTHING( instrument.getDetector(11) )
 	  
-	  std::vector<int> s;
-	  s.push_back(10);
-	  s.push_back(11);
-	  TS_ASSERT_THROWS_NOTHING( instrument.groupDetectors(s) )
-	  IDetector *d;
-	  TS_ASSERT_THROWS_NOTHING( d = instrument.getDetector(10) )
-	  TS_ASSERT( dynamic_cast<DetectorGroup*>(d) )
+    std::vector<int> s;
+    s.push_back(10);
+    s.push_back(11);
+    TS_ASSERT_THROWS_NOTHING( instrument.groupDetectors(s) )
+    IDetector *d;
+    TS_ASSERT_THROWS_NOTHING( d = instrument.getDetector(10) )
+    TS_ASSERT( dynamic_cast<DetectorGroup*>(d) )
     TS_ASSERT_THROWS( instrument.getDetector(11), Exception::NotFoundError )
     TS_ASSERT_THROWS( instrument.groupDetectors(s), Exception::NotFoundError )
-	}
+  }
 	
-	void testCasts()
-	{
-	  Instrument *i = new Instrument;
-	  TS_ASSERT( dynamic_cast<CompAssembly*>(i) )
+  void testCasts()
+  {
+    Instrument *i = new Instrument;
+    TS_ASSERT( dynamic_cast<CompAssembly*>(i) )
     TS_ASSERT( dynamic_cast<Component*>(i) )
     delete i;
-	}
+  }
 	
 private:
   Instrument instrument;

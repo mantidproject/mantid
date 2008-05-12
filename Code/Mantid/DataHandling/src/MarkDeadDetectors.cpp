@@ -69,7 +69,7 @@ void MarkDeadDetectors::exec()
     // Check validity of min/max properties
     if ( min > max )
     {
-      g_log.error() << "WorkspaceIndexMin (" << min << ") cannot be greater than WorkspaceIndexMax (" << max << ")";
+      g_log.error() << "WorkspaceIndexMin (" << min << ") cannot be greater than WorkspaceIndexMax (" << max << ")" << std::endl;
       throw std::invalid_argument("WorkspaceIndexMin cannot be greater than WorkspaceIndexMax");
     }
     // If max goes beyond end of workspace, print warning and set to highest index

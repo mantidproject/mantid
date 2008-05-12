@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DataHandlingCommand.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 class Workspace2D;
 

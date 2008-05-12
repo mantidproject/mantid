@@ -16,9 +16,9 @@ namespace Mantid
 namespace API
 {
 /** @class Instrument Instrument.h
- 	
+
  	  Base Instrument Class.
- 			    	
+
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007
     @author Anders Markvardsen, ISIS, RAL
@@ -32,12 +32,12 @@ namespace API
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
- 	
+
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
- 	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- 	  GNU General Public License for more details.
- 	
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
     You should have received a copy of the GNU General Public License
  	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  	
@@ -55,10 +55,10 @@ public:
   ///Virtual destructor
   virtual ~Instrument() {}
 
-  Geometry::ObjComponent* getSource();
-  Geometry::ObjComponent* getSamplePos();
-  Geometry::IDetector* getDetector(const int &spectrumNo);
-  void detectorLocation(const int &spectrumNo, double &l2, double &twoTheta);
+  Geometry::ObjComponent* getSource() const;
+  Geometry::ObjComponent* getSamplePos() const;
+  Geometry::IDetector* getDetector(const int &spectrumNo) const;
+  void detectorLocation(const int &spectrumNo, double &l2, double &twoTheta) const;
 
   void groupDetectors(const std::vector<int> &spectra);
 
@@ -86,7 +86,7 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 
-  Geometry::Component* getChild(const std::string& name);
+  Geometry::Component* getChild(const std::string& name) const;
 
   /// Map which holds detector-IDs and pointers to detector components 
   /// @todo Needs changing so that spectrum number is the key

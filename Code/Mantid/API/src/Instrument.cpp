@@ -24,21 +24,21 @@ Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
 /**	Gets a pointer to the source
 * @returns a pointer to the source
 */
-Geometry::ObjComponent* Instrument::getSource()
+Geometry::ObjComponent* Instrument::getSource() const
 {
   if ( !_sourceCache )
     g_log.warning("In Instrument::getSource(). No source has been set.");
-	return _sourceCache;
+  return _sourceCache;
 }
 
 /**	Gets a pointer to the Sample Position
 * @returns a pointer to the Sample Position
 */
-Geometry::ObjComponent* Instrument::getSamplePos()
+Geometry::ObjComponent* Instrument::getSamplePos() const
 {
   if ( !_samplePosCache )
     g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-	return _samplePosCache;
+  return _samplePosCache;
 }
 
 /**	Gets a pointer to the detector related to a particular spectrum
@@ -46,20 +46,21 @@ Geometry::ObjComponent* Instrument::getSamplePos()
  *  @returns A pointer to the detector object
  *  @throw   NotFoundError If no detector is found for the spectrum number given
  */
-Geometry::IDetector* Instrument::getDetector(const int &spectrumNo)
+Geometry::IDetector* Instrument::getDetector(const int &spectrumNo) const
 {
   /// @todo Sort out mapping so that spectrum number is the key, not detector ID
   // For now, just pretend they're the same
-  std::map<int, Geometry::IDetector*>::iterator it;
+  std::map<int, Geometry::IDetector*>::const_iterator it;
 
   it = _detectorCache.find(spectrumNo);
   
-	if ( it == _detectorCache.end() )	
+  if ( it == _detectorCache.end() )	
   {
-		throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
+    g_log.error() << "Detector with ID " << spectrumNo << " not found." << std::endl;
+    throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
   }
 
-	return it->second;
+  return it->second;
 }
 
 /** Get the L2 and TwoTheta for the given detector
@@ -68,7 +69,7 @@ Geometry::IDetector* Instrument::getDetector(const int &spectrumNo)
  *  @param twoTheta      Returns the scattering angle for the given detector
  *  @throw NotFoundError If no detector is found for the spectrum number given or the sample has not been set
  */
-void Instrument::detectorLocation(const int &spectrumNo, double &l2, double &twoTheta)
+void Instrument::detectorLocation(const int &spectrumNo, double &l2, double &twoTheta) const
 {
   if ( !_samplePosCache ) throw Kernel::Exception::NotFoundError("Instrument: Sample position has not been set","");
   Geometry::V3D detectorPosition = getDetector(spectrumNo)->getPos();
@@ -103,30 +104,30 @@ void Instrument::groupDetectors(const std::vector<int> &spectra)
 * @param name the name of the object requested (case insensitive)
 * @returns a pointer to the component
 */
-Geometry::Component* Instrument::getChild(const std::string& name)
+Geometry::Component* Instrument::getChild(const std::string& name) const
 {
-	Geometry::Component *retVal = 0;
-	std::string searchName = name;
-	std::transform(searchName.begin(), searchName.end(), searchName.begin(), toupper);
+  Geometry::Component *retVal = 0;
+  std::string searchName = name;
+  std::transform(searchName.begin(), searchName.end(), searchName.begin(), toupper);
 
-	int noOfChildren = this->nelements();
-	for (int i = 0; i < noOfChildren; i++)
-	{
-		Geometry::Component *loopPtr = (*this)[i];
-		std::string loopName = loopPtr->getName();
-		std::transform(loopName.begin(), loopName.end(), loopName.begin(), toupper);
-		if (loopName == searchName)
-		{
-			retVal = loopPtr;
-		}
-	}
+  int noOfChildren = this->nelements();
+  for (int i = 0; i < noOfChildren; i++)
+  {
+    Geometry::Component *loopPtr = (*this)[i];
+    std::string loopName = loopPtr->getName();
+    std::transform(loopName.begin(), loopName.end(), loopName.begin(), toupper);
+    if (loopName == searchName)
+    {
+      retVal = loopPtr;
+    }
+  }
 
-	if (!retVal)
-	{
-		throw Kernel::Exception::NotFoundError("Instrument: Child "+ name + " is not found.",name);
-	}
+  if (!retVal)
+  {
+    throw Kernel::Exception::NotFoundError("Instrument: Child "+ name + " is not found.",name);
+  }
 	
-	return retVal;
+  return retVal;
 }
 
 /** Mark a Component which has already been added to the Instrument class
@@ -171,7 +172,8 @@ void Instrument::markAsDetector(Geometry::IDetector* det)
   {
     std::stringstream convert;
     convert << det->getID();
-		throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
+    g_log.error() << "Not successful in adding Detector " << convert << " to _detectorCache." << std::endl;
+    throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
   }
 }
 
