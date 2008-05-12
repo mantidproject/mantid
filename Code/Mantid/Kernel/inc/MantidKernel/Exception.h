@@ -43,6 +43,9 @@ namespace Kernel
 				<li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
 				<li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
         <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
+        <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
+        <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
+        
 			</ul>
 			</li>
 		</ul>
