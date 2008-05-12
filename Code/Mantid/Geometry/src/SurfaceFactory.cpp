@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
+#include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -112,7 +112,7 @@ SurfaceFactory::createSurface(const std::string& Key) const
     given a valid key. 
     
     \param Key :: Item to get 
-    \throw InContainerError for the key if not found
+    \throw NotFoundError for the key if not found
     \return new tally object.
   */    
 {
@@ -120,8 +120,7 @@ SurfaceFactory::createSurface(const std::string& Key) const
   vc=SGrid.find(Key);
   if (vc==SGrid.end())
     {
-      throw ColErr::InContainerError<std::string>
-	(Key,"SurfaceFactory::createSurface");
+      throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurface",Key);
     }
   Surface *X= vc->second->clone();
   return X;
@@ -134,7 +133,7 @@ SurfaceFactory::createSurfaceID(const std::string& Key) const
     given a valid key. 
     
     \param Key :: Form of first ID
-    \throw InContainerError for the key if not found
+    \throw NotFoundError for the key if not found
     \return new tally object.
   */    
 {
@@ -143,8 +142,7 @@ SurfaceFactory::createSurfaceID(const std::string& Key) const
   mc=(Key.empty()) ? ID.end() : ID.find(tolower(Key[0]));
   if (mc==ID.end())
     {
-      throw ColErr::InContainerError<std::string>
-	(Key,"SurfaceFactory::createSurfaceID");
+      throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID",Key);
     }
   
   return createSurface(mc->second);

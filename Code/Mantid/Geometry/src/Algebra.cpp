@@ -12,7 +12,7 @@
 #include <functional>
 #include <iterator>
 
-#include "MantidGeometry/AuxException.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/MapSupport.h"
 #include "MantidGeometry/Algebra.h"
@@ -208,7 +208,7 @@ Algebra::writeMCNPX() const
 	      std::cout<<"SurfMap size == "<<SurfMap.size()<<std::endl;
 	      for_each(SurfMap.begin(),SurfMap.end(),
 		       MapSupport::mapWrite<int,std::string>());
-	      throw ColErr::InContainerError<std::string>(std::string(1,Out[i]),"Algebra::writeMCNPX");
+        throw Kernel::Exception::NotFoundError("Algebra::writeMCNPX",std::string(1,Out[i]));
 	    }
 	  if (Out[i+1]=='\'')
 	    cx<<" -"<<vc->first;

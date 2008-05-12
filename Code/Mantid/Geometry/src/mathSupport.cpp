@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/mathSupport.h"
 
 namespace Mantid

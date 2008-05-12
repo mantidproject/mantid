@@ -7,7 +7,8 @@
 #include <functional>
 #include <gsl/gsl_poly.h>
 
-#include "MantidGeometry/AuxException.h"
+
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/MatrixBase.h"
 #include "MantidGeometry/PolyVar.h"
@@ -200,7 +201,7 @@ namespace Mantid
       */
     {
       if (Index>iDegree || Index<0)
-        throw ColErr::IndexError(Index,iDegree+1,"PolyVar::setComp(double)");
+        throw Kernel::Exception::IndexError(Index,iDegree+1,"PolyVar::setComp(double)");
       PCoeff[Index] = V;
       return;  
     }
@@ -216,7 +217,7 @@ namespace Mantid
       */
     {
       if (Index>iDegree || Index<0)
-        throw ColErr::IndexError(Index,iDegree+1,"PolyVar::setComp(PolyBase)");
+        throw Kernel::Exception::IndexError(Index,iDegree+1,"PolyVar::setComp(PolyBase)");
       PCoeff[Index] = FX;
       return;
     }
@@ -249,7 +250,7 @@ namespace Mantid
       */
     {
       if (DArray.size()<VCount)
-        throw ColErr::IndexError(DArray.size(),VCount,"PolVar::operator()");
+        throw Kernel::Exception::IndexError(DArray.size(),VCount,"PolVar::operator()");
       double X(1.0);
       double sum(0.0);
       for(int i=0;i<=iDegree;i++)
@@ -773,7 +774,7 @@ namespace Mantid
           } 
         }
         if (bracket)
-          throw ColErr::InvalidLine("PolVar::read",Line,0);
+          throw std::invalid_argument("Invalid line in PolVar::read : " + Line);
 
         std::string Comp;      
         if (bCut>=0)

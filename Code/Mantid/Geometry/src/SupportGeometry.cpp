@@ -5,7 +5,6 @@
 #include <cmath>
 #include <vector>
 
-#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Support.h"

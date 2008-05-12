@@ -13,7 +13,6 @@
 #include <iterator>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
 
 #include "MantidGeometry/Triple.h"
 #include "MantidGeometry/Matrix.h"

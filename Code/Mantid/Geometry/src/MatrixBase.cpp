@@ -9,7 +9,7 @@
 #include <boost/array.hpp>
 #include <boost/multi_array.hpp>
 
-#include "MantidGeometry/AuxException.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/MatrixBase.h"
 #include "MantidGeometry/PolyFunction.h"
@@ -96,10 +96,10 @@ MatrixBase<T>::MatrixBase(const MatrixBase<T>& A,const int nrow,const int ncol)
 {
   // Note:: nx,ny zeroed so setMem always works
   if (nrow>nx || nrow<0)
-    throw ColErr::IndexError(nrow,A.nx,
+    throw Kernel::Exception::IndexError(nrow,A.nx,
 			     "MatrixBase::Constructor without col");
   if (ncol>ny || ncol<0)
-    throw ColErr::IndexError(ncol,A.ny,
+    throw Kernel::Exception::IndexError(ncol,A.ny,
 			     "MatrixBase::Constructor without col");
   std::cerr<<"Setting MBASE Meme"<<std::endl;
   setMem(nx,ny);
@@ -251,7 +251,7 @@ MatrixBase<T>::operator*(const MatrixBase<T>& A) const
  */
 {
   if (ny!=A.nx)
-    throw ColErr::MisMatch<int>(ny,A.nx,"MatrixBase::operator*(MatrixBase)");
+    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"MatrixBase::operator*(MatrixBase)");
   MatrixBase<T> X(nx,A.ny);
   for(int i=0;i<nx;i++)
     for(int j=0;j<A.ny;j++)
@@ -272,7 +272,7 @@ MatrixBase<T>::operator*(const std::vector<T>& Vec) const
 {
   std::vector<T> Out;
   if (ny>static_cast<int>(Vec.size()))
-    throw ColErr::MisMatch<int>(ny,Vec.size(),"MatrixBase::operator*(Vec)");
+    throw Kernel::Exception::MisMatch<int>(ny,Vec.size(),"MatrixBase::operator*(Vec)");
 
   Out.resize(nx);
   for(int i=0;i<nx;i++)
@@ -312,7 +312,7 @@ MatrixBase<T>::operator*=(const MatrixBase<T>& A)
    */
 {
   if (ny!=A.nx)
-    throw ColErr::MisMatch<int>(ny,A.nx,"MatrixBase*=(MatrixBase<T>)");
+    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"MatrixBase*=(MatrixBase<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
   return *this;
@@ -432,7 +432,7 @@ MatrixBase<T>::Row(const int RowI) const
    */
 {
   if (RowI<0 || RowI>=nx)
-    throw ColErr::IndexError(RowI,nx,"MatrixBase::Row");
+    throw Kernel::Exception::IndexError(RowI,nx,"MatrixBase::Row");
   std::vector<T> Out(V[RowI],V[RowI]+ny);
   return Out;
 }
@@ -447,7 +447,7 @@ MatrixBase<T>::Column(const int ColI) const
    */
 {
   if (ColI<0 || ColI>=ny)
-    throw ColErr::IndexError(ColI,ny,"MatrixBase::Column");
+    throw Kernel::Exception::IndexError(ColI,ny,"MatrixBase::Column");
   std::vector<T> Out(nx);
   for(int i=0;i<nx;i++)
     Out[i]=V[i][ColI];
@@ -581,7 +581,7 @@ MatrixBase<T>::fDiagonal(const std::vector<T>& Dvec) const
     {
       std::ostringstream cx;
       cx<<"MatrixBase::fDiagonal Size: "<<Dvec.size()<<" "<<nx<<" "<<ny;
-      throw ColErr::ExBase(0,cx.str());
+      throw std::runtime_error(cx.str());
     }
   MatrixBase<T> X(Dvec.size(),ny);
   for(int i=0;i<static_cast<int>(Dvec.size());i++)
@@ -606,7 +606,7 @@ MatrixBase<T>::bDiagonal(const std::vector<T>& Dvec) const
       std::ostringstream cx;
       cx<<"Error MatrixBase::bDiaognal size:: "<<Dvec.size()
 	<<" "<<nx<<" "<<ny;
-      throw ColErr::ExBase(0,cx.str());
+      throw std::runtime_error(cx.str());
     }
 
   MatrixBase<T> X(nx,Dvec.size());

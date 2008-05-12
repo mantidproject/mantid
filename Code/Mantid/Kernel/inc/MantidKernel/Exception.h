@@ -138,6 +138,7 @@ NotFoundError : public std::runtime_error
 
  public:
   NotFoundError(const std::string&,const std::string&);
+  NotFoundError(const std::string&,const int&);
   NotFoundError(const NotFoundError& A);
   /// Assignment operator
   NotFoundError& operator=(const NotFoundError& A);
@@ -240,6 +241,66 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
 
   const char* what() const throw();
 };
+
+  /*!
+  \class MisMatch
+  \brief Error when two numbers should be identical (or close)
+  \date October 2005
+  \version 1.0
+
+  Records the object being looked for
+  and the range required.
+  */
+  template<typename T>
+  class MisMatch : public std::runtime_error
+  {
+  private:
+
+    const T Aval;        ///< Number A 
+    const T Bval;        ///< container size
+
+  public:
+
+    MisMatch(const T&,const T&,const std::string&);
+
+
+    MisMatch(const MisMatch<T>& A);
+    ~MisMatch() throw() {}
+
+    /// Overloaded reporting method
+    const char* what() const throw();
+
+  };
+
+
+  /*!
+  \class IndexError
+  \brief Exception for index errors
+  \author Stuart Ansell
+  \date Sept 2005
+  \version 1.0
+
+  Called when an index falls out of range
+
+  */
+  class DLLExport IndexError : public std::runtime_error
+  {
+  private:
+
+    const int Val;     ///< Actual value called 
+    const int maxVal;  ///< Maximum value
+
+  public:
+
+    IndexError(const int V,const int B, const std::string& Place);
+    IndexError(const IndexError& A);
+    ~IndexError() throw() {}
+
+    /// Overloaded reporting method
+    const char* what() const throw();
+
+  };
+
 
 } //namespace Exception
 } // namespace Kernel

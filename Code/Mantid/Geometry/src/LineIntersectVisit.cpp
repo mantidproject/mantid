@@ -14,7 +14,6 @@
 #include <boost/bind.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
 
 #include "MantidGeometry/mathSupport.h"
 #include "MantidKernel/Support.h"
@@ -53,7 +52,7 @@ LineIntersectVisit::Accept(const Surface& Surf)
     \param Surf :: Surface to use int line Interesect
   */
 {
-  throw ColErr::ExBase(-1,"LineIntersectVisit::Accept Surface");
+  throw std::runtime_error("LineIntersectVisit::Accept Surface");
   return;
 }
 

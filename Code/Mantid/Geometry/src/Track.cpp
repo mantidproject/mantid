@@ -8,7 +8,6 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Track.h"

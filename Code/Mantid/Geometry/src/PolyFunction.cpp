@@ -7,7 +7,6 @@
 #include <functional>
 #include <gsl/gsl_poly.h>
 
-#include "MantidGeometry/AuxException.h"
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/PolyFunction.h"
 

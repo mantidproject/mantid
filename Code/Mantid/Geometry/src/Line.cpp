@@ -13,7 +13,6 @@
 #include <boost/regex.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
 
 
 #include "MantidGeometry/mathSupport.h"

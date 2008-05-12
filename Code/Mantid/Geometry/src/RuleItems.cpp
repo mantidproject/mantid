@@ -13,7 +13,6 @@
 #include <iterator>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
 
 #include "MantidGeometry/Triple.h"
 #include "MantidGeometry/Matrix.h"
@@ -246,7 +245,7 @@ Intersection::display() const
 {
   std::string out;
   if (!A || !B)
-    throw ColErr::ExBase(2,"Intersection::display incomplete type");
+    throw std::runtime_error("Intersection::display incomplete type");
   if (A->type()==-1)
     out="("+A->display()+")";
   else
@@ -596,7 +595,7 @@ Union::display() const
 {
   std::string out;
   if (!A || !B)
-    throw ColErr::ExBase(2,"Intersection::display incomplete type");
+    throw std::runtime_error("Intersection::display incomplete type");
   if (A->type()==1)
     out="("+A->display()+")";
   else

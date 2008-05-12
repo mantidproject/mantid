@@ -15,7 +15,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/AuxException.h"
+#include "MantidKernel/Exception.h"
 
 #include "MantidGeometry/RegexSupport.h"
 #include "MantidGeometry/Matrix.h"
@@ -150,7 +150,7 @@ namespace Mantid
           cx<<"(";
           std::map<int,Object>::const_iterator vc=MList.find(cN);
           if (vc==MList.end())
-            throw ColErr::InContainerError<int>(cN,"Object::cellStr");
+            throw Kernel::Exception::NotFoundError("Not found in the list of indexable hulls (Object::cellStr)",cN);
           // Not the recusion :: This will cause no end of problems 
           // if there is an infinite loop.
           cx<<vc->second.cellStr(MList);
@@ -187,7 +187,7 @@ namespace Mantid
       std::string::size_type posB;
       posB=Ln.find_first_of("()",posA);
       if (posB==std::string::npos)
-        throw ColErr::ExBase(posA,"Object::complemenet :: "+Ln);
+        throw std::runtime_error("Object::complemenet :: "+Ln);
 
       brackCnt=(Ln[posB] == '(') ? 1 : 0;
       while (posB!=std::string::npos && brackCnt)
@@ -212,7 +212,7 @@ namespace Mantid
         return 1;
       }
 
-      throw ColErr::ExBase(0,"Object::complemenet :: "+Part);
+      throw std::runtime_error("Object::complemenet :: "+Part);
       return 0;
     }
 
@@ -266,7 +266,7 @@ namespace Mantid
             else 
             {
               PLog.error("Error finding key");
-              throw ColErr::InContainerError<int>(KV->getKeyN(),"Object::populate");
+              throw Kernel::Exception::NotFoundError("Object::populate",KV->getKeyN());
             }	
           }
           // Not a surface : Determine leaves etc and add to stack:
@@ -726,7 +726,7 @@ namespace Mantid
           int SN;
           int nLen=StrFunc::convPartNum(Ln.substr(i),SN);
           if (!nLen)
-            throw ColErr::InvalidLine(Ln,"Object::ProcString",i);
+            throw std::invalid_argument("Invalid surface string in Object::ProcString : " + Line);
           // Process #Number
           if (i!=0 && Ln[i-1]=='#')
           {

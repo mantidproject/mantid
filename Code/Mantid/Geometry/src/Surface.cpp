@@ -11,7 +11,6 @@
 #include <string>
 #include <algorithm>
 
-#include "MantidGeometry/AuxException.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 

@@ -12,7 +12,6 @@
 #include <boost/regex.hpp>
 
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/AuxException.h"
 
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/RefCon.h"

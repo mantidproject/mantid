@@ -8,7 +8,7 @@
 #include <functional>
 #include <gsl/gsl_poly.h>
 
-#include "MantidGeometry/AuxException.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/PolyBase.h"
 
 namespace Mantid
@@ -128,7 +128,7 @@ PolyBase::operator[](const int i) const
    */
 {
   if (i>iDegree || i<0)
-    throw ColErr::IndexError(i,iDegree+1,"PolyBase::operator[] const");
+    throw Kernel::Exception::IndexError(i,iDegree+1,"PolyBase::operator[] const");
   return afCoeff[i];
 }
 
@@ -141,7 +141,7 @@ PolyBase::operator[](const int i)
    */
 {
   if (i>iDegree || i<0)
-    throw ColErr::IndexError(i,iDegree+1,"PolyBase::operator[]");
+    throw Kernel::Exception::IndexError(i,iDegree+1,"PolyBase::operator[]");
   return afCoeff[i];
 }
 

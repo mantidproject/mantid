@@ -9,7 +9,6 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -200,7 +199,7 @@ Matrix<T>::operator*(const Matrix<T>& A) const
  */
 {
   if (ny!=A.nx)
-    throw ColErr::MisMatch<int>(ny,A.nx,"Matrix::operator*(Matrix)");
+    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"Matrix::operator*(Matrix)");
   Matrix<T> X(nx,A.ny);
   for(int i=0;i<nx;i++)
     for(int j=0;j<A.ny;j++)
@@ -221,7 +220,7 @@ Matrix<T>::operator*(const std::vector<T>& Vec) const
 {
   std::vector<T> Out;
   if (ny>static_cast<int>(Vec.size()))
-    throw ColErr::MisMatch<int>(ny,Vec.size(),"Matrix::operator*(Vec)");
+    throw Kernel::Exception::MisMatch<int>(ny,Vec.size(),"Matrix::operator*(Vec)");
 
   Out.resize(nx);
   for(int i=0;i<nx;i++)
@@ -244,7 +243,7 @@ Matrix<T>::operator*(const V3D& Vx) const
  */
 {
   if (ny!=3)
-    throw ColErr::MisMatch<int>(ny,3,"Matrix::operator*(V3D)");
+    throw Kernel::Exception::MisMatch<int>(ny,3,"Matrix::operator*(V3D)");
   V3D X;
   for(int i=0;i<nx;i++)
     for(int kk=0;kk<ny;kk++)
@@ -280,7 +279,7 @@ Matrix<T>::operator*=(const Matrix<T>& A)
    */
 {
   if (ny!=A.nx)
-    throw ColErr::MisMatch<int>(ny,A.nx,"Matrix*=(Matrix<T>)");
+    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"Matrix*=(Matrix<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
   return *this;
@@ -527,7 +526,7 @@ Matrix<T>::fDiagonal(const std::vector<T>& Dvec) const
     {
       std::ostringstream cx;
       cx<<"Matrix::fDiagonal Size: "<<Dvec.size()<<" "<<nx<<" "<<ny;
-      throw ColErr::ExBase(0,cx.str());
+      throw std::runtime_error(cx.str());
     }
   Matrix<T> X(Dvec.size(),ny);
   for(int i=0;i<static_cast<int>(Dvec.size());i++)
@@ -554,7 +553,7 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
       std::ostringstream cx;
       cx<<"Error Matrix::bDiaognal size:: "<<Dvec.size()
 	<<" "<<nx<<" "<<ny;
-      throw ColErr::ExBase(0,cx.str());
+      throw std::runtime_error(cx.str());
     }
 
   Matrix<T> X(nx,Dvec.size());
@@ -688,7 +687,7 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
 		  }
 	    }
 	  else if (pivoted[j]>1)
-	    throw ColErr::ExBase(j,"Error doing G-J elem on a singular matrix");
+	    throw std::runtime_error("Error doing G-J elem on a singular matrix");
 	}
 
 
@@ -748,7 +747,7 @@ Matrix<T>::Faddeev(Matrix<T>& InvOut)
   */
 {
   if (nx!=ny)
-    throw ColErr::MisMatch<int>(nx,ny,"Matrix::Faddev(Matrix)");
+    throw Kernel::Exception::MisMatch<int>(nx,ny,"Matrix::Faddev(Matrix)");
 
   Matrix<T>& A(*this);
   Matrix<T> B(A);
@@ -824,7 +823,7 @@ Matrix<T>::determinant() const
   */
 {
   if (nx!=ny)
-    throw ColErr::MisMatch<int>(nx,ny,
+    throw Kernel::Exception::MisMatch<int>(nx,ny,
 	"Determinate error :: Matrix is not NxN");
 
   Matrix<T> Mt(*this);         //temp copy
@@ -842,7 +841,7 @@ Matrix<T>::factor()
   */
 {
   if (nx!=ny || nx<1)
-    throw ColErr::ExBase(0,"Matirx::fractor Matrix is not NxN");
+    throw std::runtime_error("Matirx::fractor Matrix is not NxN");
 
   double Pmax;
   double deter=1.0;

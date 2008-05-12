@@ -14,7 +14,6 @@
 #include <boost/multi_array.hpp>
 #include <gsl/gsl_poly.h>
 
-#include "MantidGeometry/AuxException.h"
 #include "MantidGeometry/mathSupport.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
