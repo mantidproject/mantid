@@ -14,22 +14,6 @@ ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent)
 	: QDialog(parent)
 {
 	m_parent = parent;
-	
-	label = new QLabel(tr("Select Raw File to Load:"));
-	//~ lineFile = new QLineEdit;
-	//~ lineFile->setReadOnly(true);
-	//~ label->setBuddy(lineFile);
-		
-	exitButton = new QPushButton(tr("Exit"));
-	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
-	
-	QHBoxLayout *bottomRowLayout = new QHBoxLayout;
-	bottomRowLayout->addStretch();
-	bottomRowLayout->addWidget(exitButton);
-	
-	setLayout(bottomRowLayout);
-	setWindowTitle(tr("ExecuteAlgorithm"));
-	setFixedHeight(sizeHint().height());
 }
 
 ExecuteAlgorithm::~ExecuteAlgorithm()
@@ -37,8 +21,49 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 	
 }
 
-void ExecuteAlgorithm::PassPythonInterface(Mantid::PythonAPI::PythonInterface*)
+void ExecuteAlgorithm::CreateLayout(std::vector<std::string>& properties)
 {
+	QGridLayout *grid = new QGridLayout(this);
+	
+	for (int i = 0; i < properties.size(); ++i)
+	{
+		QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]));
+		QLineEdit *tempEdit = new QLineEdit;
+		tempLbl->setBuddy(tempEdit);
+		
+		grid->addWidget(tempLbl, i, 0, 0);
+		grid->addWidget(tempEdit, i, 1, 0);
+		
+		edits.append(tempEdit);
+	}
+	
+	okButton = new QPushButton(tr("OK"));
+	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+	okButton->setDefault(true);
+	
+	exitButton = new QPushButton(tr("Cancel"));
+	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
+	
+	QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+	buttonRowLayout->addStretch();
+	buttonRowLayout->addWidget(exitButton);
+	buttonRowLayout->addWidget(okButton);
+	
+	grid->addLayout(buttonRowLayout,  properties.size() , 1, 0);
+	
+	setLayout(grid);
+	
+	setWindowTitle(tr("Enter Properties"));
+	setFixedHeight(sizeHint().height());
+}
 
+void ExecuteAlgorithm::okClicked()
+{
+	for (int i = 0; i < edits.size(); ++i)
+	{
+		results.push_back(edits[i]->text().toStdString());
+	}
+	
+	accept();
 }
 

@@ -6175,43 +6175,48 @@ The following special codes can be used:
 <context>
     <name>Dialog</name>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="13"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="19"/>
         <source>Mantid Workspace Manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="25"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="165"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="38"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="117"/>
         <source>Execute Algorithm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="51"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="104"/>
         <source>Available Algorithms:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="79"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="36"/>
         <source>Current Workspaces:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="93"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="83"/>
         <source>Workspace Information:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="114"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="49"/>
         <source>Add Workspace</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/Mantid/WorkspaceMgr.ui" line="134"/>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="76"/>
         <source>Import Workspace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/Mantid/WorkspaceMgr.ui" line="56"/>
+        <source>Remove Workspace</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

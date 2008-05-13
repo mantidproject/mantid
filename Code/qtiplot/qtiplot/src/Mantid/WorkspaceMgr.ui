@@ -5,89 +5,79 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>677</width>
-    <height>544</height>
+    <width>823</width>
+    <height>466</height>
    </rect>
+  </property>
+  <property name="sizePolicy" >
+   <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle" >
    <string>Mantid Workspace Manager</string>
   </property>
-  <widget class="QPushButton" name="pushExit" >
-   <property name="geometry" >
-    <rect>
-     <x>510</x>
-     <y>510</y>
-     <width>80</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Exit</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushExecuteAlg" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>450</y>
-     <width>119</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Execute Algorithm</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>230</y>
-     <width>125</width>
-     <height>18</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Available Algorithms:</string>
-   </property>
-  </widget>
-  <widget class="QListWidget" name="listAlgorithms" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>250</y>
-     <width>161</width>
-     <height>192</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QWidget" name="" >
+  <widget class="QWidget" name="layoutWidget" >
    <property name="geometry" >
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>655</width>
-     <height>222</height>
+     <width>801</width>
+     <height>446</height>
     </rect>
    </property>
-   <layout class="QHBoxLayout" >
-    <item>
-     <layout class="QVBoxLayout" >
-      <item>
+   <layout class="QGridLayout" >
+    <item rowspan="3" row="0" column="0" >
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
        <widget class="QLabel" name="label" >
         <property name="text" >
          <string>Current Workspaces:</string>
         </property>
+        <property name="buddy" >
+         <cstring>listWorkspaces</cstring>
+        </property>
        </widget>
       </item>
-      <item>
+      <item rowspan="4" row="1" column="0" >
        <widget class="QListWidget" name="listWorkspaces" />
       </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" >
-      <item>
+      <item row="1" column="1" >
+       <widget class="QPushButton" name="pushAddWorkspace" >
+        <property name="text" >
+         <string>Add Workspace</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QPushButton" name="removeWorkspaceButton" >
+        <property name="text" >
+         <string>Remove Workspace</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="4" column="1" >
+       <widget class="QPushButton" name="pushImportWorkspace" >
+        <property name="text" >
+         <string>Import Workspace</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" >
        <widget class="QLabel" name="label_2" >
         <property name="text" >
          <string>Workspace Information:</string>
@@ -97,49 +87,84 @@
         </property>
        </widget>
       </item>
-      <item>
-       <layout class="QHBoxLayout" >
-        <item>
-         <widget class="QTextEdit" name="textWorkspaceInfo" >
-          <property name="readOnly" >
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" >
-          <item>
-           <widget class="QPushButton" name="pushAddWorkspace" >
-            <property name="text" >
-             <string>Add Workspace</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer>
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" >
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushImportWorkspace" >
-            <property name="text" >
-             <string>Import Workspace</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+      <item row="6" column="0" >
+       <widget class="QTextEdit" name="textWorkspaceInfo" >
+        <property name="readOnly" >
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
+    </item>
+    <item row="0" column="1" colspan="2" >
+     <layout class="QGridLayout" >
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label_3" >
+        <property name="text" >
+         <string>Available Algorithms:</string>
+        </property>
+        <property name="buddy" >
+         <cstring>listAlgorithms</cstring>
+        </property>
+       </widget>
+      </item>
+      <item rowspan="2" row="1" column="0" >
+       <widget class="QListWidget" name="listAlgorithms" />
+      </item>
+      <item row="1" column="1" >
+       <widget class="QPushButton" name="pushExecuteAlg" >
+        <property name="text" >
+         <string>Execute Algorithm</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="2" >
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="2" column="1" >
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="2" column="2" >
+     <widget class="QPushButton" name="pushExit" >
+      <property name="text" >
+       <string>Exit</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

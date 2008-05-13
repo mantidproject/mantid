@@ -24,9 +24,12 @@ private slots:
 	void addWorkspaceClicked();
 	void selectedWorkspaceChanged();
 	void importWorkspace();
+	void executeAlgorithm();
 
 private:
 	void setupActions();
+	void getWorkspaces();
+	void getAlgorithms();
 	Mantid::PythonAPI::PythonInterface* m_interface;
 
 	QWidget* m_parent;

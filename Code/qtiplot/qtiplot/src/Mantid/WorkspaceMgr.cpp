@@ -20,20 +20,9 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 	m_interface = new Mantid::PythonAPI::PythonInterface;
 	m_interface->InitialiseFrameworkManager();
 	
-	std::vector<std::string> names = m_interface->GetWorkspaceNames();
-
-	for(unsigned int i = 0; i < names.size(); ++i) 
-	{
-		listWorkspaces->insertItem(0, QString::fromStdString(names[i]));
-	}
+	getWorkspaces();
 	
-	std::vector<std::string> algs = m_interface->GetAlgorithmNames();
-	
-	for(unsigned int i = 0; i < algs.size(); ++i) 
-	{
-		listAlgorithms->insertItem(0, QString::fromStdString(algs[i]));
-	}
-	
+	getAlgorithms();	
 }
 
 WorkspaceMgr::~WorkspaceMgr()
@@ -47,7 +36,31 @@ void WorkspaceMgr::setupActions()
 	connect(pushAddWorkspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
 	connect(listWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectedWorkspaceChanged()));
 	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspace()));
-	connect(pushExecuteAlg, SIGNAL(clicked()), this, SLOT(importWorkspace()));
+	connect(pushExecuteAlg, SIGNAL(clicked()), this, SLOT(executeAlgorithm()));
+}
+
+void WorkspaceMgr::getWorkspaces()
+{
+	listWorkspaces->clear();
+	
+	std::vector<std::string> names = m_interface->GetWorkspaceNames();
+
+	for(unsigned int i = 0; i < names.size(); ++i) 
+	{
+		listWorkspaces->insertItem(0, QString::fromStdString(names[i]));
+	}
+}
+
+void WorkspaceMgr::getAlgorithms()
+{
+	listAlgorithms->clear();
+	
+	std::vector<std::string> algs = m_interface->GetAlgorithmNames();
+	
+	for(unsigned int i = 0; i < algs.size(); ++i) 
+	{
+		listAlgorithms->insertItem(0, QString::fromStdString(algs[i]));
+	}
 }
 
 void WorkspaceMgr::addWorkspaceClicked()
@@ -85,13 +98,12 @@ void WorkspaceMgr::selectedWorkspaceChanged()
 		int numBins = ws->blocksize();
 		
 		textWorkspaceInfo->setPlainText("Number of histograms: " + QString::number(numHists) + "\nNumber of bins: " + QString::number(numBins));
-		
 	}
 }
 
 void WorkspaceMgr::importWorkspace()
 {
-	if (listWorkspaces->currentRow() != -1)
+	if (listWorkspaces->currentRow() != -1) //&& listWorkspaces->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
@@ -126,6 +138,38 @@ void WorkspaceMgr::importWorkspace()
 					++histCount;
 				}
 			}	
+		}
+	}
+}
+
+void WorkspaceMgr:: executeAlgorithm()
+{
+	if (listAlgorithms->currentRow() != -1)
+	{
+		QListWidgetItem *selected = listAlgorithms->item(listAlgorithms->currentRow());
+		QString algName = (selected->text()).split("|")[0];
+		
+		std::vector<std::string> propList = m_interface->GetAlgorithmProperties(algName.toStdString());
+
+		if (propList.size() > 0)
+		{
+			ExecuteAlgorithm* dlg = new ExecuteAlgorithm(this);
+			dlg->CreateLayout(propList);
+			dlg->setModal(true);
+		
+			if (dlg->exec()== QDialog::Accepted)
+			{
+				Mantid::API::IAlgorithm* alg = m_interface->CreateAlgorithm(algName.toStdString());
+				
+				for (int i = 0; i < dlg->results.size(); ++i)
+				{
+					alg->setPropertyValue(propList[i], dlg->results[i]);
+				}
+				
+				alg->execute();
+				
+				getWorkspaces();
+			}
 		}
 	}
 }

@@ -2,6 +2,8 @@
 #define EXECUTEALGORITHM_H
 
 #include <QDialog>
+#include <vector>
+#include <string>
 
 class QLabel;
 class QLineEdit;
@@ -18,19 +20,21 @@ class ExecuteAlgorithm : public QDialog
 public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
-	void PassPythonInterface(Mantid::PythonAPI::PythonInterface*);
+	void CreateLayout(std::vector<std::string>& properties);
+	std::vector<std::string> results;
 
 protected:
 	
 private slots:
+	void okClicked();
 
 private:
-	Mantid::PythonAPI::PythonInterface* interface;
-
 	QWidget* m_parent;
-
-	QLabel *label;
+	QVector<QLineEdit*> edits;
+	QPushButton *okButton;
 	QPushButton *exitButton;
+
+	
 
 };
 
