@@ -166,7 +166,10 @@ void WorkspaceMgr:: executeAlgorithm()
 					alg->setPropertyValue(propList[i], dlg->results[i]);
 				}
 				
-				alg->execute();
+				if (alg->execute() == true)
+				{
+					//Algorithm executed properly
+				}
 				
 				getWorkspaces();
 			}
