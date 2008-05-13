@@ -56,13 +56,14 @@ public:
 	//Algorithms
 	API::IAlgorithm* CreateAlgorithm(const std::string&);
 	std::vector<std::string> GetAlgorithmNames();
-	//std::vector<std::string> GetAlgorithmProperties(const std::string&);
+	std::vector<std::string> GetAlgorithmProperties(const std::string&);
 
 	//Load Data
 	boost::shared_ptr<API::Workspace> LoadIsisRawFile(const std::string&, const std::string&);
 
 	//Workspace information
 	boost::shared_ptr<API::Workspace> RetrieveWorkspace(const std::string& workspaceName);
+	bool DeleteWorkspace(const std::string&);
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
 	std::vector<std::string> GetWorkspaceNames();

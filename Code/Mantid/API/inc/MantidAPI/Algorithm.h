@@ -36,6 +36,7 @@
 #include "MantidKernel/Exception.h" 
 
 #include "boost/shared_ptr.hpp"
+#include <string>
 #include <vector>
 #include <map>
 
@@ -117,7 +118,8 @@ public:
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
-
+  virtual const std::vector<std::string> getRequiredProperties( ) const;
+  
   // Make PropertyManager's setProperty methods public
   using Kernel::PropertyManager::setProperty;
 

@@ -93,6 +93,7 @@ void AnalysisDataServiceImpl::remove(const std::string& name)
   }
   //no need to delete it is a shared pointer
   m_spaces.erase(it);
+  
   return;
 }
 

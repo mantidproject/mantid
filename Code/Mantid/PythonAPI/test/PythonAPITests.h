@@ -101,6 +101,15 @@ public:
 
 		TS_ASSERT_EQUALS(ws.use_count(), 0);
 	}
+	
+	void testDeleteWorkspace()
+	{
+		inter->DeleteWorkspace("TestWorkspace1");
+
+		std::vector<std::string> temp = inter->GetWorkspaceNames();
+
+		TS_ASSERT(temp.empty());
+	}
 
 };
 

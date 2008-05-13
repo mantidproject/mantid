@@ -31,7 +31,7 @@ namespace Mantid
 		std::string AlgorithmFactoryImpl::createName(const std::string& name, const int& version)const
 		{
 			std::ostringstream oss;
-			oss << name << "¦" << version;
+			oss << name << "|" << version;
 			return(oss.str());
 		}
 

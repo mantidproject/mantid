@@ -4,6 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <string>
+#include <vector>
 #include "MantidKernel/INamedInterface.h"
 
 namespace Mantid
@@ -86,6 +88,11 @@ public:
    *  @return The value of the property
    */
   virtual std::string getPropertyValue( const std::string &name ) const = 0;
+  
+  /** Get the properties required to run this algorithm as a string vector
+   *  \return The a vector of strings
+   */
+  virtual const std::vector<std::string> getRequiredProperties( ) const = 0;
 };
 
 } // namespace API

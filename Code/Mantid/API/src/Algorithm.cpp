@@ -219,6 +219,13 @@ namespace Mantid
     {
       return PropertyManager::getPropertyValue(name);
     }
+    
+    const std::vector<std::string> Algorithm::getRequiredProperties( ) const
+    {
+	    std::vector<std::string> props;
+	    
+	    return props;
+    }
 
     //----------------------------------------------------------------------
     // Protected Member Functions

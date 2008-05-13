@@ -24,7 +24,7 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
-	std::cerr << "Framwork Manager created." << std::endl;
+	std::cerr << "Framework Manager created." << std::endl;
 	g_log.debug() << "FrameworkManager created." << std::endl;
 }
 

@@ -43,7 +43,7 @@ void PythonInterface::InitialiseFrameworkManager()
  **/
 IAlgorithm* PythonInterface::CreateAlgorithm(const std::string& algName)
 {
-	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
+	IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName);
 
 	return alg;
 }
@@ -94,6 +94,16 @@ Workspace_sptr PythonInterface::RetrieveWorkspace(const std::string& workspaceNa
 	Workspace_sptr empty;
 	
 	return empty;
+}
+
+/**
+ * Delete a workspace by name.
+ * \param workspaceName :: The name under which the workspace is stored in Mantid.
+ * \return Boolean result.
+ **/
+bool PythonInterface::DeleteWorkspace(const std::string& workspaceName)
+{
+	return FrameworkManager::Instance().deleteWorkspace(workspaceName);
 }
 
 /**
@@ -148,11 +158,11 @@ std::vector<std::string> PythonInterface::GetAlgorithmNames()
  * Returns the required properties for the algorithm.
  * \return Vector of strings.
  **/
-//~ std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
-//~ {
-	//~ IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
-	//~ return alg->getRequiredProperties();
-//~ }
+std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
+{
+	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
+	return alg->getRequiredProperties();
+}
 
 /**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
