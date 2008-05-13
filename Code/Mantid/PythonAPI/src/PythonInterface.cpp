@@ -48,7 +48,6 @@ IAlgorithm* PythonInterface::CreateAlgorithm(const std::string& algName)
 	return alg;
 }
 
-
 /**
  * Loads a standard ISIS raw file into Mantid, using the LoadRaw algorithm.
  * \param fileName :: The filepath of the raw file to be opened.
@@ -149,11 +148,11 @@ std::vector<std::string> PythonInterface::GetAlgorithmNames()
  * Returns the required properties for the algorithm.
  * \return Vector of strings.
  **/
-std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
-{
-	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
-	return alg->getRequiredProperties();
-}
+//~ std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
+//~ {
+	//~ IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
+	//~ return alg->getRequiredProperties();
+//~ }
 
 /**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
