@@ -111,7 +111,7 @@ public:
   // IAlgorithm methods	  
 /// function to return the version of the algorithm, must be overridden in all algorithms
   void initialize();
-  void execute();
+  bool execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
   virtual bool isExecuted() const;
   virtual void setPropertyOrdinal(const int &index, const std::string &value);

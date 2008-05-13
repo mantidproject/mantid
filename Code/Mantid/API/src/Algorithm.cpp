@@ -82,7 +82,7 @@ namespace Mantid
     * 
     *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be executed
     */
-    void Algorithm::execute()
+    bool Algorithm::execute()
     {
       clock_t start,end;
       time_t start_time;
@@ -128,11 +128,13 @@ namespace Mantid
         catch(std::runtime_error& ex)
         {
           g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<< ex.what()<<std::endl;
           if (m_isChildAlgorithm) throw;
         }
         catch(std::logic_error& ex)
         {
           g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<< ex.what()<<std::endl;
           if (m_isChildAlgorithm) throw;
         }
 
@@ -157,7 +159,7 @@ namespace Mantid
 
 
       // Only gets to here if algorithm ended normally
-      return;
+      return isExecuted();
     }
 
     /// Has the Algorithm already been initialized

@@ -61,7 +61,7 @@ public:
   virtual void initialize() = 0;
 
   /// System execution. This method invokes the exec() method of a concrete algorithm.
-  virtual void execute() = 0;
+  virtual bool execute() = 0;
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
