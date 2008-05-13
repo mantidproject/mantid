@@ -130,7 +130,14 @@ namespace Mantid
 
       if( interval || list)
       {
-        int total_specs=(spec_max-spec_min+1)+spec_list.size();
+        int total_specs;
+        if(interval && list)
+          total_specs=(spec_max-spec_min+1)+spec_list.size();
+        if(interval && !list)
+          total_specs=(spec_max-spec_min+1);
+        if(!interval && list)
+          total_specs=spec_list.size();
+
         // Create the 2D workspace for the output
         m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>
           (API::WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
