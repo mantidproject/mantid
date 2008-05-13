@@ -148,6 +148,32 @@ SurfaceFactory::createSurfaceID(const std::string& Key) const
   return createSurface(mc->second);
 }
 
+Surface*
+SurfaceFactory::processLine(const std::string& Line) const
+  /*!
+    Creates an instance of a surface
+    given a valid line
+    
+    \param Line :: Full description of line
+    \throw InContainerError for the key if not found
+    \return new surface object.
+  */    
+{
+  std::string key;
+  if (!StrFunc::convert(Line,key))
+      throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine",Line);
+  
+  Surface *X = createSurfaceID(key);
+  if (X->setSurface(Line))
+    {
+      std::cerr<<"X:: "<<X->setSurface(Line)<<std::endl;
+      throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine",Line);
+
+    }
+  
+  return X;
+}
+
 }  // NAMESPACE Geometry
  
 }  // NAMESPACE Mantid 

@@ -208,58 +208,99 @@ namespace Mantid
     }
 
     int Track::addTUnit(const int ID,const Geometry::V3D& Apt,
-      const Geometry::V3D& Bpt)
+      const Geometry::V3D& Bpt,const double D)
       /*!
       This adds a whole segment to the track : This currently assumes that links are added in order
       \param ID :: Id number of the object
       \param Apt :: first Point
       \param Bpt :: second Point
+      \param D :: Distance along track
       \retval Index point 
       */
     {
-      double D = 0.0;
-      //calculate distance so far
-      for(unsigned int i=0;i<Link.size();i++)
-      {
-        D += Link[i].Length;
-      }
-      //add the current track distance
-      D += Bpt.distance(Apt);
-      Link.push_back(TUnit(Apt,Bpt,D,ID));
-      return Link.size()-1;
-    }
+      // Process First Point
+      if (Link.empty())
+        {
+	  Link.push_back(TUnit(Apt,Bpt,D,ID));
+	  return 0;
+	}
+      std::vector<TUnit>::iterator xV=
+	lower_bound(Link.begin(),Link.end(),D);
 
+      Link.insert(xV,TUnit(Apt,Bpt,D,ID));
+      return distance(Link.begin(),xV);
+    }
 
     void Track::buildLink()
+      /*!
+	Builds a set of linking track components.
+	This version deals with touching surfaces 
+      */
     {
       if (surfPoints.empty())
-        return;
+	return;
 
-      // First sort surfPoints
+      // First forst surfPoints
       sort(surfPoints.begin(),surfPoints.end());
-
+      
       PType::const_iterator ac=surfPoints.begin();
-
+      PType::const_iterator bc=ac;
+      bc++;
       Geometry::V3D workPt=iPt;            // last good point
-      int workObject=0;                    // current objectID
-
-      while(ac!=surfPoints.end())
-      {
-        if (ac->Direction==-1) //leaving an object
+      // First point is not necessarily in an object
+      // Process first point:
+      while(ac!=surfPoints.end() && ac->Direction != 1)    // stepping from an object.
         {
-          workObject =ac->ObjID;  
-        }
-        if (ac->Direction!=0)
+	  if (ac->Direction==-1)
+	    {
+	      addTUnit(ac->ObjID,iPt,ac->PtA,ac->Dist);  // from the void
+	      workPt=ac->PtA;
+	    }
+	  ac++;
+	  if (bc!=surfPoints.end())
+	    bc++;
+	} 
+      workPt=ac->PtA;      
+      
+      while(bc!=surfPoints.end())      // Since bc > ac
         {
-          addTUnit(workObject,workPt,ac->PtA);  // from the void
-          workPt=ac->PtA;
-          workObject=ac->ObjID;
-
-        }
-        ac++;
-      }
+	  if (ac->Direction==1 && bc->Direction==-1)
+	    {
+	      // Touching surface / identical surface
+	      if (fabs(ac->Dist-bc->Dist)>surfaceTolerance)
+	        {
+		  // track leave ac into bc.
+		  addTUnit(ac->ObjID,ac->PtA,bc->PtA,bc->Dist);
+		}
+	      // Points with intermediate void
+	      else
+	        {
+		  addTUnit(ac->ObjID,workPt,ac->PtA,ac->Dist);
+		}
+	      workPt=bc->PtA;
+		  
+	      // ADDING to ac twice: since processing pairs
+	      ac++;
+	      ac++;
+	      bc++;    // can I do this past the end ? 
+	      if (bc!=surfPoints.end())
+		bc++;
+	    }
+	  else         // Test for glacing point / or void edges
+	    {          // These all can be skipped
+	      ac++;
+	      bc++;
+	    }
+	}	
+      
       surfPoints.clear();        // While vector 
+      return;
     }
+
+
+
+
+
 
   } // NAMESPACE Geometry
 

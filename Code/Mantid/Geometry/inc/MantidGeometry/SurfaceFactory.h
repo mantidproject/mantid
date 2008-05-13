@@ -68,6 +68,7 @@ class DLLExport SurfaceFactory
   
   Surface* createSurface(const std::string&) const;
   Surface* createSurfaceID(const std::string&) const;
+  Surface* processLine(const std::string&) const;
 
 };
 

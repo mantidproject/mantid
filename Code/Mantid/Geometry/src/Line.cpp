@@ -277,18 +277,21 @@ Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Cylinder& Cyl) const
      \return Number of points found by intersection
   */
 {
-  // Nasty stripping of useful stuff from cylinder
-  const Geometry::V3D Ax=Origin-Cyl.getCentre();
-  const Geometry::V3D N=Cyl.getNormal();
+  const Geometry::V3D Cent=Cyl.getCentre();
+  const Geometry::V3D Ax=Origin-Cent;
+  const Geometry::V3D N= Cyl.getNormal();
   const double R=Cyl.getRadius();
+  const double vDn = N.scalar_prod(Direct);
+  const double vDA = N.scalar_prod(Ax);
   // First solve the equation of intersection
   double C[3];
-  C[0]=1;
-  C[1]=2.0*Ax.scalar_prod(Direct)-N.scalar_prod(Direct);
-  C[2]=Ax.scalar_prod(Ax)-R*R;
+  C[0]= 1.0-(vDn*vDn);
+  C[1]= 2.0*(Ax.scalar_prod(Direct)-vDA*vDn);
+  C[2]= Ax.scalar_prod(Ax)-(R*R+vDA*vDA);
   std::pair<std::complex<double>,std::complex<double> > SQ;
   const int ix = solveQuadratic(C,SQ);
-  return lambdaPair(ix,SQ,PntOut);
+  // This takes the centre displacement into account:
+  return lambdaPair(ix,SQ,PntOut);  
 }
 
 int 
@@ -303,9 +306,9 @@ Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Sphere& Sph) const
      \returns Number of points found by intersection
   */
 {
-  // Nasty stripping of useful stuff from cylinder
-  const Geometry::V3D Ax=Sph.getCentre()+Origin;
-  const double R=Sph.getRadius();
+  // Nasty stripping of useful stuff from sphere
+  const Geometry::V3D Ax=Origin-Sph.getCentre();
+   const double R=Sph.getRadius();
   // First solve the equation of intersection
   double C[3];
   C[0]=1;

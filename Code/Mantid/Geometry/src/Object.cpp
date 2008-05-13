@@ -27,7 +27,6 @@
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/Rules.h"
 
-
 namespace Mantid
 {
 
@@ -790,7 +789,7 @@ namespace Mantid
     }
 
     int
-      Object::interceptSurface(Geometry::Track& UT) const 
+    Object::interceptSurface(Geometry::Track& UT) const 
       /*!
       Given a track, fill the track with valid section
       \param UT :: Initial track 
@@ -810,16 +809,16 @@ namespace Mantid
       const std::vector<double>& dPts(LI.getDistance());
 
       for(unsigned int i=0;i<IPts.size();i++)
-      {
-        if (dPts[i]>0.0)  // only interested in forward going points
         {
-          // Is the point and enterance/exit Point
-          const int flag=calcValidType(IPts[i],UT.getUVec());
-          UT.addPoint(ObjName,flag,IPts[i]);
-          cnt++;
-        }
-
-      }
+	  if (dPts[i]>0.0)  // only interested in forward going points
+	    {
+	      // Is the point and enterance/exit Point
+	      const int flag=calcValidType(IPts[i],UT.getUVec());
+	      UT.addPoint(ObjName,flag,IPts[i]);
+	      cnt++;
+	    }
+         }
+      UT.buildLink();
       return cnt;
     }
 

@@ -13,6 +13,7 @@
 #include "MantidGeometry/Sphere.h" 
 #include "MantidGeometry/Plane.h" 
 #include "MantidGeometry/Algebra.h" 
+#include "MantidGeometry/SurfaceFactory.h" 
 #include "MantidGeometry/Track.h" 
 
 using namespace Mantid;
@@ -20,7 +21,12 @@ using namespace Geometry;
 
 class testObject: public CxxTest::TestSuite
 {
+  private:
+
+
 public:
+
+
   void testSetObject1()
   {
     Object A;
@@ -247,6 +253,34 @@ public:
     TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(0.5,0.5,0)),-1);
   }
 
+  void testInterceptSurfaceSphereZ()
+  {
+    std::vector<TUnit> expectedResults;
+    std::string S41="s 1 1 1 4";         // Sphere at (1,1,1) radius 4
+
+    // First create some surfaces
+    std::map<int,Surface*> SphSurMap;
+    SphSurMap[41]=new Sphere();
+    SphSurMap[41]->setSurface(S41);
+    SphSurMap[41]->setName(41);
+
+    // A sphere 
+    std::string ObjSphere="-41" ;
+
+    Object A; 
+    A.setObject(41,ObjSphere);
+    A.populate(SphSurMap);
+
+
+    Track track(V3D(-1,1.5,1),V3D(1,0,0));
+
+    // format = startPoint, endPoint, total distance so far, objectID
+    expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
+				    V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,A.getName()));
+
+    checkTrackIntercept(A,track,expectedResults);
+  }
+
   void testInterceptSurfaceSphereY()
   {
     std::vector<TUnit> expectedResults;
@@ -254,7 +288,6 @@ public:
     Track track(V3D(0,-10,0),V3D(0,1,0));
 
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-10,0),V3D(0,-4.1,0),5.9,0));
     expectedResults.push_back(TUnit(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,A.getName()));
 
     checkTrackIntercept(A,track,expectedResults);
@@ -266,7 +299,6 @@ public:
     Object A = createSphere();
     Track track(V3D(-10,0,0),V3D(1,0,0));
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-10,0,0),V3D(-4.1,0,0),5.9,0));
     expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,A.getName()));
     checkTrackIntercept(A,track,expectedResults);
   }
@@ -276,7 +308,6 @@ public:
     std::vector<TUnit> expectedResults;
     Object A = createCappedCylinder();
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-10,0),V3D(0,-3,0),7,0));
     expectedResults.push_back(TUnit(V3D(0,-3,0),V3D(0,3,0),13,A.getName()));
 
     Track track(V3D(0,-10,0),V3D(0,1,0));
@@ -290,17 +321,13 @@ public:
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-10,0,0),V3D(-3.2,0,0),6.8,0));
     expectedResults.push_back(TUnit(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,A.getName()));
 
     checkTrackIntercept(A,track,expectedResults);
   }
 
-  void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
+  void checkTrackIntercept(Track& track, std::vector<TUnit>& expectedResults)
   {
-    obj.interceptSurface(track);
-    track.buildLink();
-
     int index = 0;
     for (Track::LType::const_iterator it = track.begin(); it!=track.end();++it)
     {
@@ -311,17 +338,152 @@ public:
       TS_ASSERT_EQUALS(it->PtB,expectedResults[index].PtB);
       ++index;
     }
-    TS_ASSERT_EQUALS(index,expectedResults.size());
+    TS_ASSERT_EQUALS(index,static_cast<int>(expectedResults.size()));
   }
 
-private:
+  void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
+    {
+      obj.interceptSurface(track);
+      //    track.buildLink();
+      checkTrackIntercept(track,expectedResults);
+    }
 
-  std::map<int,Object> MObj;
+void testTrackTwoIsolatedCubes()
+  /*!
+    Test a track going through an object
+   */
+{
+  std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
+  std::string ObjB="80001 -80002 60003 -60004 60005 -60006";
+  MObj.erase(MObj.begin(),MObj.end());
+  MObj[3]=Object();
+  MObj[3].setObject(3,ObjA);
+
+  MObj[4]=Object();
+  MObj[4].setObject(4,ObjB);
+
+  createSurfaces();
+  
+  Track TL(Geometry::V3D(-5,0,0),
+	   Geometry::V3D(1,0,0));
+
+  // CARE: This CANNOT be called twice
+  TS_ASSERT(MObj[3].interceptSurface(TL)!=0)
+  TS_ASSERT(MObj[4].interceptSurface(TL)!=0)
+
+  std::vector<TUnit> expectedResults;
+  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
+  expectedResults.push_back(TUnit(V3D(4.5,0,0),V3D(6.5,0,0),11.5,4));
+  checkTrackIntercept(TL,expectedResults);
+
+}
+
+void testTrackTwoTouchingCubes()
+  /*!
+    Test a track going through an object
+   */
+{
+  std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
+  std::string ObjB="60002 -80002 60003 -60004 60005 -60006";
+  MObj.erase(MObj.begin(),MObj.end());
+  MObj[3]=Object();
+  MObj[3].setObject(3,ObjA);
+
+  MObj[4]=Object();
+  MObj[4].setObject(4,ObjB);
+
+  createSurfaces();
+  
+  Track TL(Geometry::V3D(-5,0,0),
+	   Geometry::V3D(1,0,0));
+
+  // CARE: This CANNOT be called twice
+  TS_ASSERT(MObj[3].interceptSurface(TL)!=0)
+  TS_ASSERT(MObj[4].interceptSurface(TL)!=0)
+
+  std::vector<TUnit> expectedResults;
+  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
+  expectedResults.push_back(TUnit(V3D(1,0,0),V3D(6.5,0,0),11.5,4));
+
+  checkTrackIntercept(TL,expectedResults);
+}
+
+void testTrackCubeWithInternalSphere()
+  /*!
+    Test a track going through an object
+  */
+{
+  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 71";
+  std::string ObjB="-71";
+  MObj.erase(MObj.begin(),MObj.end());
+  MObj[3]=Object();
+  MObj[3].setObject(3,ObjA);
+
+  MObj[4]=Object();
+  MObj[4].setObject(4,ObjB);
+
+  createSurfaces();
+  
+  Track TL(Geometry::V3D(-5,0,0),
+	   Geometry::V3D(1,0,0));
+
+  // CARE: This CANNOT be called twice
+  TS_ASSERT(MObj[3].interceptSurface(TL)!=0);
+  TS_ASSERT(MObj[4].interceptSurface(TL)!=0);
+
+  std::vector<TUnit> expectedResults;
+  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.8,0,0),4.2,3));
+  expectedResults.push_back(TUnit(V3D(-0.8,0,0),V3D(0.8,0,0),5.8,4));
+  expectedResults.push_back(TUnit(V3D(0.8,0,0),V3D(1,0,0),6,3));
+  checkTrackIntercept(TL,expectedResults);
+
+}
+
+void testTrack_CubePlusInternalEdgeTouchSpheres()
+  /*!
+    Test a track going through an object
+  */
+{
+  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
+  std::string ObjB="(-72 : -73)";
+  MObj.erase(MObj.begin(),MObj.end());
+  MObj[3]=Object();
+  MObj[3].setObject(3,ObjA);
+
+  MObj[4]=Object();
+  MObj[4].setObject(4,ObjB);
+
+  createSurfaces();
+  
+  Track TL(Geometry::V3D(-5,0,0),
+	   Geometry::V3D(1,0,0));
+
+
+  // CARE: This CANNOT be called twice
+  TS_ASSERT(MObj[3].interceptSurface(TL)!=0);
+  TS_ASSERT(MObj[4].interceptSurface(TL)!=0);
+
+  std::vector<TUnit> expectedResults;
+  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.4,0,0),4.6,4));
+  expectedResults.push_back(TUnit(V3D(-0.4,0,0),V3D(0.2,0,0),5.2,3));
+  expectedResults.push_back(TUnit(V3D(0.2,0,0),V3D(1,0,0),6,4));
+  checkTrackIntercept(TL,expectedResults);
+}
+
+private:
+ 
+  /// Surface type
+  typedef std::map<int,Surface*> STYPE ; 
+  /// Object type
+  typedef std::map<int,Object> MTYPE;  
+
+  STYPE SMap;   ///< Surface Map
+  MTYPE MObj;   ///< Master object lis
 
   void populateMObj()
     /*!
-    Populate with simple object
-    the MLis component
+      Populate with simple object
+      the MLis component
     */
   {
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
@@ -389,6 +551,75 @@ private:
 
     return retVal;
   }
+
+  void clearSurfMap()
+  /*!
+    Clears the surface map for a new test
+    or destruction.
+   */
+{
+  STYPE::iterator mc;
+  for(mc=SMap.begin();mc!=SMap.end();mc++)
+    delete mc->second;
+  SMap.erase(SMap.begin(),SMap.end());
+  return;
+}
+
+  void createSurfaces()
+    /*!
+      Creates a list of surfaces for used in the objects
+      and populates the MObj layers.
+    */
+   {
+      clearSurfMap();
+  
+      // PLANE SURFACES:
+      
+      typedef std::pair<int,std::string> SCompT;
+      std::vector<SCompT> SurfLine;
+      SurfLine.push_back(SCompT(60001,"px -1"));
+      SurfLine.push_back(SCompT(60002,"px 1"));
+      SurfLine.push_back(SCompT(60003,"py -2"));
+      SurfLine.push_back(SCompT(60004,"py 2"));
+      SurfLine.push_back(SCompT(60005,"pz -3"));
+      SurfLine.push_back(SCompT(60006,"pz 3"));
+      
+      SurfLine.push_back(SCompT(80001,"px 4.5"));
+      SurfLine.push_back(SCompT(80002,"px 6.5"));
+      
+      SurfLine.push_back(SCompT(71,"so 0.8"));
+      SurfLine.push_back(SCompT(72,"s -0.7 0 0 0.3"));
+      SurfLine.push_back(SCompT(73,"s 0.6 0 0 0.4"));
+
+      std::vector<SCompT>::const_iterator vc;
+
+      // Note that the testObject now manages the "new Plane"
+      Geometry::Surface* A;
+      for(vc=SurfLine.begin();vc!=SurfLine.end();vc++)
+	{  
+	  A=Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+	  if (!A)
+	    {
+	      std::cerr<<"Failed to process line "<<vc->second<<std::endl;
+	      exit(1);
+	    }
+	  A->setName(vc->first);
+	  SMap.insert(STYPE::value_type(vc->first,A));
+	}
+
+      //   Now populate all the objects with the corresponding surface
+      MTYPE::iterator mc;
+      for(mc=MObj.begin();mc!=MObj.end();mc++)
+	{
+	  mc->second.populate(SMap);
+	  //	  mc->second.write(std::cout);
+	}
+
+      return;
+  
+}
+
+
 };
 
 #endif //MANTID_TESTOBJECT__

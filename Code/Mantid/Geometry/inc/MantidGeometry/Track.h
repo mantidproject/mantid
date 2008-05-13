@@ -108,7 +108,8 @@ class DLLExport Track
   ~Track();
 
   void addPoint(const int ID,const int Direct,const Geometry::V3D& Pt);
-  int addTUnit(const int ID,const Geometry::V3D& Apt,const Geometry::V3D& Bpt);
+  int addTUnit(const int ID,const Geometry::V3D& Apt,const Geometry::V3D& Bpt,
+	       const double D);
   
   void removeCoJoins();
   void buildLink();   ///< Not implemented
