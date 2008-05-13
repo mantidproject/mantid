@@ -61,7 +61,6 @@ void LoadInstrumentFromRaw::exec()
   boost::shared_ptr<API::Instrument> instrument = (localWorkspace->getInstrument());
   instrument->setName(iraw.i_inst);
 
-
   // add detectors
 
   int numDetector = iraw.i_det; // number of detectors
@@ -103,7 +102,20 @@ void LoadInstrumentFromRaw::exec()
   instrument->add(source);
   source->setName("Unknown");
   instrument->markAsSource(source);
-  source->setPos(0.0,0.0,0.0); 
+  source->setPos(0.0,-10.0,0.0); 
+
+
+  // Information to the user about what info is extracted from raw file
+
+  g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
+    << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
+    << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
+    << "the remaining spherical coordinate phi was set to zero.\n"
+    << "Source component added with position set to (0,-10,0). In standard configuration, with \n"
+    << "the beam along y-axis pointing from source to sample, this implies the source is 10m in front \n"
+    << "of the sample (L1=10m). To change the value of L1 the easiest is to move the source component.\n"
+    << "You can get hold of the source component by using the Instrument::getSource() method.\n";
+    
 
   return;
 }
