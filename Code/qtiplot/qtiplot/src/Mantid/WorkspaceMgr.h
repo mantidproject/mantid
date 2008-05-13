@@ -22,6 +22,7 @@ protected:
 	
 private slots:
 	void addWorkspaceClicked();
+	void deleteWorkspaceClicked();
 	void selectedWorkspaceChanged();
 	void importWorkspace();
 	void executeAlgorithm();

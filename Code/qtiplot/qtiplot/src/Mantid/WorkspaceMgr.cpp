@@ -34,6 +34,7 @@ void WorkspaceMgr::setupActions()
 {
 	connect(pushExit, SIGNAL(clicked()), this, SLOT(close()));
 	connect(pushAddWorkspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
+	connect(removeWorkspaceButton, SIGNAL(clicked()), this, SLOT(deleteWorkspaceClicked()));
 	connect(listWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectedWorkspaceChanged()));
 	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspace()));
 	connect(pushExecuteAlg, SIGNAL(clicked()), this, SLOT(executeAlgorithm()));
@@ -81,9 +82,26 @@ void WorkspaceMgr::addWorkspaceClicked()
 			return;
 		}
 		
-		listWorkspaces->insertItem(0, dlg->getWorkspaceName() );
+		getWorkspaces();
+
 	}
 }
+
+void WorkspaceMgr::deleteWorkspaceClicked()
+{
+	if (listWorkspaces->currentRow() != -1)
+	{
+		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
+		QString wsName = selected->text();
+		
+		m_interface->DeleteWorkspace(wsName.toStdString());
+		
+		listWorkspaces->setCurrentRow(-1);
+		
+		getWorkspaces();
+	}
+}
+
 
 void WorkspaceMgr::selectedWorkspaceChanged()
 {
@@ -166,9 +184,13 @@ void WorkspaceMgr:: executeAlgorithm()
 					alg->setPropertyValue(propList[i], dlg->results[i]);
 				}
 				
-				if (alg->execute() == true)
+				if (!alg->execute() == true)
 				{
-					//Algorithm executed properly
+					//Algorithm did not execute properly
+					int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+						tr("The algorithm failed to execute correctly. "
+						"Please see the Mantid log for details."),
+						QMessageBox::Ok);
 				}
 				
 				getWorkspaces();
