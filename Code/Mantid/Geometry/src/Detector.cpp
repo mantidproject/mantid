@@ -61,7 +61,7 @@ bool Detector::isDead() const
 
 void Detector::markDead()
 {
-  if ( !m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead.";
+  if ( !m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead." << std::endl;
   m_isDead = true;
 }
 

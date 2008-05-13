@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
@@ -11,7 +12,7 @@ namespace Algorithms
 {
 
 // Register with the algorithm factory
-	DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,ConvertUnits)
+DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,ConvertUnits)
 
 using namespace Kernel;
 using namespace API;
@@ -159,15 +160,17 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 */
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS)
 {  
-  // Get a reference to the instrument contained in the workspace
+  // Get a pointer to the instrument contained in the workspace
   boost::shared_ptr<API::Instrument> instrument = inputWS->getInstrument();
+  // And one to the SpectraDetectorMap
+  boost::shared_ptr<API::SpectraDetectorMap> specMap = inputWS->getSpectraMap();
   
   // Get the distance between the source and the sample (assume in metres)
-  Geometry::ObjComponent* samplePos = instrument->getSamplePos();
+  Geometry::ObjComponent* sample = instrument->getSample();
   double l1;
   try 
   {
-    l1 = instrument->getSource()->getDistance(*samplePos);
+    l1 = instrument->getSource()->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   } 
   catch (Exception::NotFoundError e) 
@@ -192,13 +195,19 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
     const double delta = 0.0;
     
     try {
-      // The sample-detector distance for this detector (in metres)
-      double l2;
+      // Get the spectrum number for this histogram
+      const int spec = inputWS->spectraNo(i);
+      // Now get the detector to which this relates
+      Geometry::V3D detPos = specMap->getDetector(spec)->getPos();
+      Geometry::V3D samplePos = sample->getPos();
+      // Get the sample-detector distance for this detector (in metres)
+      const double l2 = detPos.distance(samplePos);
       // The scattering angle for this detector (in radians).
       //     - this assumes the incident beam comes in along the z axis
-      double twoTheta;
-      // Get these two values
-      instrument->detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
+      const double twoTheta = detPos.zenith(samplePos);
+//      double twoTheta;
+//      // Get these two values
+//      instrument->detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;

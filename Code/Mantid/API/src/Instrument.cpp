@@ -13,12 +13,12 @@ Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
 Instrument::Instrument() : Geometry::CompAssembly(),
-                           _detectorCache(),_sourceCache(0),_samplePosCache(0)
+                           _detectorCache(),_sourceCache(0),_sampleCache(0)
 {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
-                           _detectorCache(),_sourceCache(0),_samplePosCache(0)
+                           _detectorCache(),_sourceCache(0),_sampleCache(0)
 {}
 
 /**	Gets a pointer to the source
@@ -34,62 +34,45 @@ Geometry::ObjComponent* Instrument::getSource() const
 /**	Gets a pointer to the Sample Position
 * @returns a pointer to the Sample Position
 */
-Geometry::ObjComponent* Instrument::getSamplePos() const
+Geometry::ObjComponent* Instrument::getSample() const
 {
-  if ( !_samplePosCache )
+  if ( !_sampleCache )
     g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-  return _samplePosCache;
+  return _sampleCache;
 }
 
-/**	Gets a pointer to the detector related to a particular spectrum
- *  @param   spectrumNo The spectrum number 
+/**	Gets a pointer to the detector from its ID
+ *  @param   detector_id The requested detector ID
  *  @returns A pointer to the detector object
- *  @throw   NotFoundError If no detector is found for the spectrum number given
+ *  @throw   NotFoundError If no detector is found for the detector ID given
  */
-Geometry::IDetector* Instrument::getDetector(const int &spectrumNo) const
+Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
 {
-  /// @todo Sort out mapping so that spectrum number is the key, not detector ID
-  // For now, just pretend they're the same
   std::map<int, Geometry::IDetector*>::const_iterator it;
 
-  it = _detectorCache.find(spectrumNo);
+  it = _detectorCache.find(detector_id);
   
   if ( it == _detectorCache.end() )	
   {
-    g_log.error() << "Detector with ID " << spectrumNo << " not found." << std::endl;
+    g_log.error() << "Detector with ID " << detector_id << " not found." << std::endl;
     throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
   }
 
   return it->second;
 }
 
-/** Get the L2 and TwoTheta for the given detector
- *  @param spectrumNo    The spectrum number 
- *  @param l2            Returns the sample-detector distance
- *  @param twoTheta      Returns the scattering angle for the given detector
- *  @throw NotFoundError If no detector is found for the spectrum number given or the sample has not been set
- */
-void Instrument::detectorLocation(const int &spectrumNo, double &l2, double &twoTheta) const
-{
-  if ( !_samplePosCache ) throw Kernel::Exception::NotFoundError("Instrument: Sample position has not been set","");
-  Geometry::V3D detectorPosition = getDetector(spectrumNo)->getPos();
-  Geometry::V3D samplePosition = getSamplePos()->getPos();
-  l2 = detectorPosition.distance(samplePosition);
-  twoTheta = detectorPosition.zenith(samplePosition);
-}
-
 /** Group several detector objects in the map into a single DetectorGroup object.
- *  The new grouped object will be be linked to the first spectrum in the argument vector
- *  @param spectra A vector containing the spectrum numbers whose detectors should be grouped
- *  @throw NotFoundError If any spectrum number does not have an associated detector
+ *  The new grouped object will have the ID of the first element in the argument vector
+ *  @param detector_ids A vector containing the ID numbers of the detectors that should be grouped
+ *  @throw NotFoundError If any detector ID number does not have an associated detector
  */
-void Instrument::groupDetectors(const std::vector<int> &spectra)
+void Instrument::groupDetectors(const std::vector<int> &detector_ids)
 {
   Geometry::DetectorGroup *group = new Geometry::DetectorGroup;
   
-  // Loop over the spectrum numbers
+  // Loop over the ID numbers
   std::vector<int>::const_iterator it;
-  for (it = spectra.begin(); it != spectra.end(); ++it)
+  for (it = detector_ids.begin(); it != detector_ids.end(); ++it)
   {
     group->addDetector(getDetector(*it));
     // Remove the detector just added from the map
@@ -97,7 +80,7 @@ void Instrument::groupDetectors(const std::vector<int> &spectra)
   }
   
   // Add a new entry in the map with the key of the first element
-  _detectorCache[spectra[0]] = group;
+  _detectorCache[detector_ids[0]] = group;
 }
 
 /**	Gets a pointer to the requested child component
@@ -138,10 +121,10 @@ Geometry::Component* Instrument::getChild(const std::string& name) const
 */
 void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
 {
-  if ( !_samplePosCache )
-    _samplePosCache = comp;
+  if ( !_sampleCache )
+    _sampleCache = comp;
   else
-    g_log.warning("Have already added samplePos component to the _samplePosCache.");
+    g_log.warning("Have already added samplePos component to the _sampleCache.");
 }
 
 /** Mark a Component which has already been added to the Instrument class

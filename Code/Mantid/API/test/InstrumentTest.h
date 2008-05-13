@@ -33,7 +33,7 @@ public:
   ~InstrumentTest()
   {
     delete det, det2, det3;
-    delete instrument.getSamplePos();
+    delete instrument.getSample();
   }
   
   void testType()
@@ -45,11 +45,11 @@ public:
   {
     Instrument i;
     TS_ASSERT( ! i.getSource() )
-    TS_ASSERT( ! i.getSamplePos() )
+    TS_ASSERT( ! i.getSample() )
 	  
     Instrument ii("anInstrument");
     TS_ASSERT( ! ii.getSource() )
-    TS_ASSERT( ! ii.getSamplePos() )
+    TS_ASSERT( ! ii.getSample() )
     TS_ASSERT_EQUALS( ii.getName(), "anInstrument" )
   }
 
@@ -70,13 +70,13 @@ public:
   void testSamplePos()
   {
     Instrument i;
-    TS_ASSERT( ! i.getSamplePos() )
+    TS_ASSERT( ! i.getSample() )
     ObjComponent *s = new ObjComponent;
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(s) )
-    TS_ASSERT_EQUALS( i.getSamplePos(), s )
+    TS_ASSERT_EQUALS( i.getSample(), s )
     ObjComponent *ss = new ObjComponent;
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(ss) )
-    TS_ASSERT_EQUALS( i.getSamplePos(), s )
+    TS_ASSERT_EQUALS( i.getSample(), s )
     delete s;
     delete ss;
   }
@@ -91,22 +91,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
     TS_ASSERT_EQUALS( instrument.getDetector(2), d )
     delete d;
-  }
-
-  void testDetectorLocation()
-  {
-    double l2, twoTheta;
-    TS_ASSERT_THROWS_NOTHING( instrument.detectorLocation(1,l2,twoTheta) )
-    TS_ASSERT_DELTA( l2, 1.0, 0.00001 )
-    TS_ASSERT_DELTA( twoTheta, M_PI/2.0, 0.00001 )
-
-    // Should throw because detector ID not in map
-    TS_ASSERT_THROWS( instrument.detectorLocation(3,l2,twoTheta), Exception::NotFoundError )
-	  
-    Instrument i;
-    double d,dd;
-    // Should throw because sample hasn't been set
-    TS_ASSERT_THROWS( i.detectorLocation(0,d,dd), Exception::NotFoundError )
   }
 
   void testGroupDetectors()

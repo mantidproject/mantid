@@ -56,11 +56,10 @@ public:
   virtual ~Instrument() {}
 
   Geometry::ObjComponent* getSource() const;
-  Geometry::ObjComponent* getSamplePos() const;
-  Geometry::IDetector* getDetector(const int &spectrumNo) const;
-  void detectorLocation(const int &spectrumNo, double &l2, double &twoTheta) const;
+  Geometry::ObjComponent* getSample() const;
+  Geometry::IDetector* getDetector(const int &detector_id) const;
 
-  void groupDetectors(const std::vector<int> &spectra);
+  void groupDetectors(const std::vector<int> &detector_ids);
 
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -89,8 +88,6 @@ private:
   Geometry::Component* getChild(const std::string& name) const;
 
   /// Map which holds detector-IDs and pointers to detector components 
-  /// @todo Needs changing so that spectrum number is the key
-  // May want to change this to an unordered map (hash map) at some point
   std::map<int, Geometry::IDetector*> _detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to
@@ -99,7 +96,7 @@ private:
 
   /// Purpose to hold copy of samplePos component. For now assumed to
   /// be just one component
-  Geometry::ObjComponent* _samplePosCache;
+  Geometry::ObjComponent* _sampleCache;
 };
 
 } // namespace API

@@ -43,7 +43,7 @@ void DetectorGroup::addDetector(IDetector* det)
   // Warn if adding a dead detector
   if ( det->isDead() )
   {
-    g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as dead.";
+    g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as dead." << std::endl;
   }
   
   // For now at least, the ID is the same as the first detector that is added
@@ -51,11 +51,11 @@ void DetectorGroup::addDetector(IDetector* det)
   
   if ( m_detectors.insert( DetCollection::value_type(det->getID(), det) ).second )
   {
-    g_log.information() << "Detector with ID " << det->getID() << " added to group.";
+    g_log.information() << "Detector with ID " << det->getID() << " added to group." << std::endl;
   }
   else
   {
-    g_log.warning() << "Detector with ID " << det->getID() << " is already in group.";
+    g_log.warning() << "Detector with ID " << det->getID() << " is already in group." << std::endl;
   }
 }
 
@@ -95,7 +95,7 @@ bool DetectorGroup::isDead() const
 
 void DetectorGroup::markDead()
 {
-  if ( !m_isDead ) g_log.warning() << "Detector Group" << getID() << " is already marked as dead.";
+  if ( !m_isDead ) g_log.warning() << "Detector Group" << getID() << " is already marked as dead." << std::endl;
   // Marks only overall effective detector as dead - leaves underlying flags unchanged
   m_isDead = true;
 }

@@ -75,7 +75,7 @@ public:
     TS_ASSERT_EQUALS( source->getName(), "Unknown");
     TS_ASSERT_DELTA( source->getPos().Y(), -10.0,0.01);
 
-    Component* samplepos = i->getSamplePos();
+    Component* samplepos = i->getSample();
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
     Detector *ptrDetSp = dynamic_cast<Detector*>(i->getDetector(5));
