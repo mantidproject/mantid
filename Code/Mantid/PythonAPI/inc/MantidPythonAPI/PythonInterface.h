@@ -55,6 +55,8 @@ public:
 
 	//Algorithms
 	API::IAlgorithm* CreateAlgorithm(const std::string&);
+	std::vector<std::string> GetAlgorithmNames();
+	std::vector<std::string> GetAlgorithmProperties(const std::string&);
 
 	//Load Data
 	boost::shared_ptr<API::Workspace> LoadIsisRawFile(const std::string&, const std::string&);
@@ -64,8 +66,7 @@ public:
 	int GetHistogramNumber(const std::string&);
 	int GetBinNumber(const std::string&);
 	std::vector<std::string> GetWorkspaceNames();
-	std::vector<std::string> GetAlgorithmNames();
-
+	
 	//Access Data
 	std::vector<double>* GetXData(const std::string&, int const );
 	std::vector<double>* GetYData(const std::string&, int const );

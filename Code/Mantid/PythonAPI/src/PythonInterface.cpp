@@ -106,10 +106,10 @@ int PythonInterface::GetHistogramNumber(const std::string& workspaceName)
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
-	return output2D->getHistogramNumber();
+	return output->getHistogramNumber();
 }
 
 /**
@@ -121,10 +121,10 @@ int PythonInterface::GetBinNumber(const std::string& workspaceName)
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 	
-	return output2D->dataX(0).size();
+	return output->dataX(0).size();
 }
 
 /**
@@ -146,6 +146,16 @@ std::vector<std::string> PythonInterface::GetAlgorithmNames()
 }
 
 /**
+ * Returns the required properties for the algorithm.
+ * \return Vector of strings.
+ **/
+std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
+{
+	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
+	return alg->getRequiredProperties();
+}
+
+/**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
  * The pointer returned to Python may become invalid if the workspace is subsequently altered;
  * for example, if the workspace was closed in Mantid, the Python pointer would be left hanging.
@@ -157,10 +167,10 @@ std::vector<double>* PythonInterface::GetXData(const std::string& workspaceName,
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return &output2D->dataX(index);
+	return &output->dataX(index);
 }
 
 /**
@@ -175,10 +185,10 @@ std::vector<double>* PythonInterface::GetYData(const std::string& workspaceName,
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return &output2D->dataY(index);
+	return &output->dataY(index);
 }
 
 /**
@@ -193,10 +203,10 @@ std::vector<double>* PythonInterface::GetEData(const std::string& workspaceName,
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return &output2D->dataE(index);
+	return &output->dataE(index);
 }
 
 /**
@@ -211,10 +221,10 @@ std::vector<double>* PythonInterface::GetE2Data(const std::string& workspaceName
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return &output2D->dataE2(index);
+	return &output->dataE2(index);
 }
 
 /**
@@ -229,10 +239,10 @@ unsigned long PythonInterface::GetAddressXData(const std::string& workspaceName,
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return reinterpret_cast<unsigned long>(&output2D->dataX(index)[0]);
+	return reinterpret_cast<unsigned long>(&output->dataX(index)[0]);
 }
 
 /**
@@ -247,10 +257,10 @@ unsigned long PythonInterface::GetAddressYData(const std::string& workspaceName,
 {
 	//Retrieve workspace
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	Mantid::DataObjects::Workspace2D_sptr output2D =
-	boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
+	//Mantid::DataObjects::Workspace2D_sptr output2D =
+	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
 
-	return reinterpret_cast<unsigned long>(&output2D->dataY(index)[0]);
+	return reinterpret_cast<unsigned long>(&output->dataY(index)[0]);
 }
 
 }
