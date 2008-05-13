@@ -21,7 +21,6 @@ namespace Mantid
 {
 namespace API
 {
-	
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
@@ -160,6 +159,30 @@ Workspace* FrameworkManagerImpl::getWorkspace(const std::string& wsName)
     throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
   return space;
+}
+
+/** Removes and deletes a workspace from the data service store.
+ * 
+ *  @param wsName The user-given name for the workspace 
+ *  @return true if the workspace was found and deleted
+ * 
+ *  @throw NotFoundError Thrown if workspace cannot be found
+ */
+bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
+{
+  bool retVal = false;
+  try
+  {
+    AnalysisDataService::Instance().remove(wsName);
+    retVal = true;
+  }
+  catch (Kernel::Exception::NotFoundError& ex)
+  {
+    //workspace was not found
+    g_log.error()<<"Workspace "<<wsName<<" could not be found."<<std::endl;
+    retVal = false;
+  }
+  return retVal;
 }
 
 } // namespace API

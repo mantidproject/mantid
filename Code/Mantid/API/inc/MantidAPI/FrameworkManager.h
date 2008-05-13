@@ -8,6 +8,7 @@
 #include <vector>
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -71,6 +72,9 @@ namespace Mantid
 
 			/// Returns a shared pointer to the workspace requested
 			Workspace* getWorkspace(const std::string& wsName);
+
+      /// Deletes a workspace from the framework
+      bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName);
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;

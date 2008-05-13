@@ -80,7 +80,7 @@ void AnalysisDataServiceImpl::addOrReplace(const std::string& name, Workspace_sp
  *  Upon removal, the workspace itself will be deleted.
  * 
  *  @param name The user-given name for the workspace 
- *  @throw runtime_error Thrown if workspace cannot be found
+ *  @throw NotFoundError Thrown if workspace cannot be found
  */
 void AnalysisDataServiceImpl::remove(const std::string& name)
 {  
