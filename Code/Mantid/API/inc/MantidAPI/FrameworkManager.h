@@ -74,7 +74,7 @@ namespace Mantid
 			Workspace* getWorkspace(const std::string& wsName);
 
       /// Deletes a workspace from the framework
-      bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName);
+      bool deleteWorkspace(const std::string& wsName);
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
