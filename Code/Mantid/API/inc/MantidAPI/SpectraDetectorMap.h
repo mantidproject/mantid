@@ -12,7 +12,7 @@
 
 //Forward declaration of IDetector
 class Mantid::Geometry::IDetector;
-class Instrument;
+class Mantid::API::Instrument;
 //
 
 namespace Mantid

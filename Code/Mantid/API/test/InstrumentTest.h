@@ -93,22 +93,6 @@ public:
     delete d;
   }
 
-  void testGroupDetectors()
-  {
-    TS_ASSERT_THROWS_NOTHING( instrument.getDetector(10) )
-    TS_ASSERT_THROWS_NOTHING( instrument.getDetector(11) )
-	  
-    std::vector<int> s;
-    s.push_back(10);
-    s.push_back(11);
-    TS_ASSERT_THROWS_NOTHING( instrument.groupDetectors(s) )
-    IDetector *d;
-    TS_ASSERT_THROWS_NOTHING( d = instrument.getDetector(10) )
-    TS_ASSERT( dynamic_cast<DetectorGroup*>(d) )
-    TS_ASSERT_THROWS( instrument.getDetector(11), Exception::NotFoundError )
-    TS_ASSERT_THROWS( instrument.groupDetectors(s), Exception::NotFoundError )
-  }
-	
   void testCasts()
   {
     Instrument *i = new Instrument;

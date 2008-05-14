@@ -59,8 +59,6 @@ public:
   Geometry::ObjComponent* getSample() const;
   Geometry::IDetector* getDetector(const int &detector_id) const;
 
-//  void groupDetectors(const std::vector<int> &detector_ids);
-
   /// mark a Component which has already been added to the Instrument class
   /// to be 'the' samplePos Component. For now it is assumed that we have
   /// at most one of these.
