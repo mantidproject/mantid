@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
@@ -62,21 +63,14 @@ void GroupDetectors::exec()
   }
   /// @todo Get this algorithm working on a more generic input workspace so the restrictions above can be lost
   
-  // Group the affected detectors
-  std::vector<int> spectra;
-  std::vector<int>::const_iterator it;
-  for (it = indexList.begin(); it != indexList.end(); ++it)
-  {
-    spectra.push_back(WS->spectraNo(*it));
-  }
-  WS->getInstrument()->groupDetectors(spectra);
-
-  // Now add up the spectra
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
+  const int firstSpectrum = WS->spectraNo(firstIndex);
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
   {
     const int currentIndex = indexList[i+1];
+    // Move the current detector to belong to the first spectrum
+    WS->getSpectraMap()->remap(WS->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
     std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataY(currentIndex).begin(),
                    WS->dataY(firstIndex).begin(), std::plus<double>());

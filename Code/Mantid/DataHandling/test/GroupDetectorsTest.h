@@ -10,6 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/DetectorGroup.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using Mantid::DataHandling::GroupDetectors;
 using namespace Mantid::Kernel;
@@ -28,11 +29,13 @@ public:
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(6,10.0);
     std::vector<double>  vec(5,1.0);
+    int forSpecDetMap[5];
     for (int j = 0; j < 5; ++j) 
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
       space2D->spectraNo(j) = j;
+      forSpecDetMap[j] = j;
     }
     Detector *d = new Detector;
     d->setID(0);
@@ -50,6 +53,9 @@ public:
     d4->setID(4);
     space->getInstrument()->markAsDetector(d4);
       
+    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
+    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 5, space->getInstrument().get() );
+    
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("GroupTestWS", space);    
   }
@@ -131,15 +137,15 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
     TS_ASSERT_EQUALS( outputWS->spectraNo(4), 4 )
    
-    boost::shared_ptr<Instrument> instrument = outputWS->getInstrument();
+    boost::shared_ptr<SpectraDetectorMap> sdm = outputWS->getSpectraMap();
     IDetector *det;
-    TS_ASSERT_THROWS_NOTHING( det = instrument->getDetector(0) )
+    TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(0) )
     TS_ASSERT( dynamic_cast<DetectorGroup*>(det) )
-    TS_ASSERT_THROWS_NOTHING( det = instrument->getDetector(1) )
+    TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(1) )
     TS_ASSERT( dynamic_cast<Detector*>(det) )
-    TS_ASSERT_THROWS( instrument->getDetector(2), Exception::NotFoundError )
-    TS_ASSERT_THROWS( instrument->getDetector(3), Exception::NotFoundError )
-    TS_ASSERT_THROWS_NOTHING( det = instrument->getDetector(4) )
+    TS_ASSERT_THROWS( sdm->getDetector(2), Exception::NotFoundError )
+    TS_ASSERT_THROWS( sdm->getDetector(3), Exception::NotFoundError )
+    TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(4) )
     TS_ASSERT( dynamic_cast<Detector*>(det) )
   }
 	

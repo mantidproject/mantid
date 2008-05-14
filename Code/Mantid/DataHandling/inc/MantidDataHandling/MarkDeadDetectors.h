@@ -11,7 +11,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-/** An algorithm to mark a detector, or set or range of detectors, as dead.
+/** An algorithm to mark a detector, or range of detectors, as dead.
     The workspace spectra associated with those detectors are zeroed.
 
     Required Properties:

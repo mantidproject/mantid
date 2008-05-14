@@ -56,12 +56,12 @@ public:
   /// Spectra Detector map typedef
   typedef std::multimap<int,Mantid::Geometry::IDetector*> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
+  typedef std::multimap<int,Mantid::Geometry::IDetector*>::const_iterator smap_it;
 #else
   /// Spectra Detector map typedef
   typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*>::iterator smap_it;
+  typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*>::const_iterator smap_it;
 #endif
   ///Constructor
   SpectraDetectorMap();
@@ -69,12 +69,14 @@ public:
   virtual ~SpectraDetectorMap();
   /// populate the Map with _spec and _udet C array 
   void populate(int* _spec, int* _udet, int nentries, Instrument*);
+  /// Move a detector from one spectrum to another
+  void remap(const int oldSpectrum, const int newSpectrum);
   /// Return number of detectors contributing to this spectrum
-  int ndet(int spectrum_number) const;
+  const int ndet(const int spectrum_number) const;
   /// Get a vector of IDetector contributing to a spectrum
-  void getDetectors(int spectrum_number, std::vector<Mantid::Geometry::IDetector*>& detectors);
+  void getDetectors(const int spectrum_number, std::vector<Geometry::IDetector*>& detectors) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
-  Geometry::IDetector* getDetector(int spectrum_number);
+  Geometry::IDetector* getDetector(const int spectrum_number) const;
 
 private:
   ///Copy Contructor

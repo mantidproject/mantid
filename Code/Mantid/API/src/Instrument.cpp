@@ -61,27 +61,27 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
   return it->second;
 }
 
-/** Group several detector objects in the map into a single DetectorGroup object.
- *  The new grouped object will have the ID of the first element in the argument vector
- *  @param detector_ids A vector containing the ID numbers of the detectors that should be grouped
- *  @throw NotFoundError If any detector ID number does not have an associated detector
- */
-void Instrument::groupDetectors(const std::vector<int> &detector_ids)
-{
-  Geometry::DetectorGroup *group = new Geometry::DetectorGroup;
-  
-  // Loop over the ID numbers
-  std::vector<int>::const_iterator it;
-  for (it = detector_ids.begin(); it != detector_ids.end(); ++it)
-  {
-    group->addDetector(getDetector(*it));
-    // Remove the detector just added from the map
-    _detectorCache.erase(*it);
-  }
-  
-  // Add a new entry in the map with the key of the first element
-  _detectorCache[detector_ids[0]] = group;
-}
+///** Group several detector objects in the map into a single DetectorGroup object.
+// *  The new grouped object will have the ID of the first element in the argument vector
+// *  @param detector_ids A vector containing the ID numbers of the detectors that should be grouped
+// *  @throw NotFoundError If any detector ID number does not have an associated detector
+// */
+//void Instrument::groupDetectors(const std::vector<int> &detector_ids)
+//{
+//  Geometry::DetectorGroup *group = new Geometry::DetectorGroup;
+//  
+//  // Loop over the ID numbers
+//  std::vector<int>::const_iterator it;
+//  for (it = detector_ids.begin(); it != detector_ids.end(); ++it)
+//  {
+//    group->addDetector(getDetector(*it));
+//    // Remove the detector just added from the map
+//    _detectorCache.erase(*it);
+//  }
+//  
+//  // Add a new entry in the map with the key of the first element
+//  _detectorCache[detector_ids[0]] = group;
+//}
 
 /**	Gets a pointer to the requested child component
 * @param name the name of the object requested (case insensitive)

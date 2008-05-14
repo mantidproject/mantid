@@ -8,6 +8,8 @@ namespace Mantid
 namespace API
 {
 
+using Geometry::IDetector;
+
 // Get a reference to the logger
 Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
@@ -23,7 +25,7 @@ void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries
   {
     throw std::invalid_argument("Populate : number of entries should be >0");
   }
-  Mantid::Geometry::IDetector* current;
+  IDetector* current;
   for (int i=0; i<nentries; ++i)
   {
     try
@@ -37,19 +39,48 @@ void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries
       ++_udettable;
       continue;
     }
-    _s2dmap.insert(std::pair<int,Mantid::Geometry::IDetector*>(*_spectable,current)); // Insert current detector with Spectra number as key 
+    _s2dmap.insert(std::pair<int,IDetector*>(*_spectable,current)); // Insert current detector with Spectra number as key 
     ++_spectable;
     ++_udettable;
   }
   return;
 }
 
-int SpectraDetectorMap::ndet(int spectrum_number) const
+/** Moves all detectors assigned to a particular spectrum number to a different one.
+ *  Does nothing if the oldSpectrum number does not exist in the map.
+ *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
+ *  @param newSpectrum The spectrum number to map the detectors to
+ *  @todo Write a test for this method
+ */
+void SpectraDetectorMap::remap(const int oldSpectrum, const int newSpectrum)
+{
+  // Do nothing if the two spectrum numbers given are the same
+  if (oldSpectrum == newSpectrum) return;
+  // For now at least, the newSpectrum must already exist in the map
+  if ( ndet(newSpectrum) == 0 )
+  {
+    g_log.error("Invalid value of newSpectrum. It is forbidden to create a new spectrum number with this method.");
+    return;
+  }
+  // Get the list of detectors that contribute to the old spectrum
+  std::vector<IDetector*> dets;
+  getDetectors(oldSpectrum,dets);
+  // Add them to the map with the new spectrum number as the key
+  std::vector<IDetector*>::const_iterator it;
+  for (it = dets.begin(); it != dets.end(); ++it)
+  {
+    _s2dmap.insert( std::pair<int,IDetector*>(newSpectrum,*it) );
+  }
+  // Finally, remove the old spectrum number from the map
+  _s2dmap.erase(oldSpectrum);
+}
+
+const int SpectraDetectorMap::ndet(const int spectrum_number) const
 {
   return _s2dmap.count(spectrum_number);
 }
 
-void SpectraDetectorMap::getDetectors(int spectrum_number,std::vector<Mantid::Geometry::IDetector*>& detectors)
+void SpectraDetectorMap::getDetectors(const int spectrum_number,std::vector<Geometry::IDetector*>& detectors) const
 {
   int ndets=ndet(spectrum_number);
 
@@ -69,7 +100,14 @@ void SpectraDetectorMap::getDetectors(int spectrum_number,std::vector<Mantid::Ge
   return;
 }
 
-Geometry::IDetector* SpectraDetectorMap::getDetector(int spectrum_number)
+/** Get the effective detector for this spectrum number.
+ *  @param spectrum_number The spectrum number for which the detector is required
+ *  @return A single detector object representing the detector(s) contributing
+ *  to the given spectrum number. If more than one detector contributes then
+ *  the returned object's concrete type will be DetectorGroup.
+ *  @todo Write a test for this method
+ */
+Geometry::IDetector* SpectraDetectorMap::getDetector(const int spectrum_number) const
 {
   int ndets=ndet(spectrum_number);
   if ( ndets == 0 )
