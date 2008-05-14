@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/DetectorGroup.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -11,20 +12,20 @@ namespace Geometry
 // Get a reference to the logger
 Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
-/// Default Constructor
-DetectorGroup::DetectorGroup() : IDetector(), m_id(0), m_detectors(), m_isDead(false)
-{
-}
-
 /** Constructor that takes a list of detectors to add
  *  @param dets The vector of IDetector pointers that this virtual detector will hold
+ *  @throw 
  */
 DetectorGroup::DetectorGroup(const std::vector<IDetector*>& dets) : 
   IDetector(),
   m_id(),
-  m_detectors(),
-  m_isDead(false)
+  m_detectors()
 {
+  if ( dets.empty() )
+  {
+    g_log.error("Illegal attempt to create and empty DetectorGroup");
+    throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
+  }
   std::vector<IDetector*>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it) 
   {
@@ -89,15 +90,22 @@ double DetectorGroup::getDistance(const Component& comp) const
 
 bool DetectorGroup::isDead() const
 {
-  // Perhaps this should check whether all children are dead
-  return m_isDead;
+  bool isDead = true;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    if ( !(*it).second->isDead() ) isDead = false;
+  }
+  return isDead;
 }
 
 void DetectorGroup::markDead()
 {
-  if ( !m_isDead ) g_log.warning() << "Detector Group" << getID() << " is already marked as dead." << std::endl;
-  // Marks only overall effective detector as dead - leaves underlying flags unchanged
-  m_isDead = true;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    (*it).second->markDead();
+  }
 }
 
 } // namespace Geometry

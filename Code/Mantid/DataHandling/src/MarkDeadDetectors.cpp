@@ -4,6 +4,7 @@
 #include "MantidDataHandling/MarkDeadDetectors.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -94,7 +95,7 @@ void MarkDeadDetectors::exec()
 void MarkDeadDetectors::clearSpectrum(const int& index, const int& vectorSize)
 {
   // Mark associated detector as dead
-  m_localWorkspace->getInstrument()->getDetector(m_localWorkspace->spectraNo(index))->markDead();
+  m_localWorkspace->getSpectraMap()->getDetector(m_localWorkspace->spectraNo(index))->markDead();
 
   // Zero the workspace spectra (data and errors, not X values)
   m_localWorkspace->dataY(index).assign(vectorSize,0.0);

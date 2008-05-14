@@ -46,7 +46,6 @@ namespace Geometry
 class DLLExport DetectorGroup : public IDetector
 {
 public:
-  DetectorGroup();
   DetectorGroup(const std::vector<IDetector*>& dets);
   virtual ~DetectorGroup();
 	
@@ -73,8 +72,6 @@ private:
   typedef std::map<int, IDetector*> DetCollection;
   /// The collection of grouped detectors
   DetCollection m_detectors;
-  /// Flags if the detector group is dead
-  bool m_isDead;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

@@ -74,7 +74,7 @@ public:
   /// Return number of detectors contributing to this spectrum
   const int ndet(const int spectrum_number) const;
   /// Get a vector of IDetector contributing to a spectrum
-  void getDetectors(const int spectrum_number, std::vector<Geometry::IDetector*>& detectors) const;
+  std::vector<Geometry::IDetector*> getDetectors(const int spectrum_number) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
   Geometry::IDetector* getDetector(const int spectrum_number) const;
 

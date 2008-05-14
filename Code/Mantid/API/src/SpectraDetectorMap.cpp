@@ -63,8 +63,7 @@ void SpectraDetectorMap::remap(const int oldSpectrum, const int newSpectrum)
     return;
   }
   // Get the list of detectors that contribute to the old spectrum
-  std::vector<IDetector*> dets;
-  getDetectors(oldSpectrum,dets);
+  std::vector<IDetector*> dets = getDetectors(oldSpectrum);
   // Add them to the map with the new spectrum number as the key
   std::vector<IDetector*>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it)
@@ -80,14 +79,15 @@ const int SpectraDetectorMap::ndet(const int spectrum_number) const
   return _s2dmap.count(spectrum_number);
 }
 
-void SpectraDetectorMap::getDetectors(const int spectrum_number,std::vector<Geometry::IDetector*>& detectors) const
+std::vector<Geometry::IDetector*> SpectraDetectorMap::getDetectors(const int spectrum_number) const
 {
+  std::vector<Geometry::IDetector*> detectors;
   int ndets=ndet(spectrum_number);
 
   if (ndets<1)
   {
     detectors.clear();
-    return;
+    return detectors;
   }
   std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
   int i=0;
@@ -97,7 +97,7 @@ void SpectraDetectorMap::getDetectors(const int spectrum_number,std::vector<Geom
   {
     detectors[i++]=(*it).second;
   }
-  return;
+  return detectors;
 }
 
 /** Get the effective detector for this spectrum number.
@@ -117,18 +117,18 @@ Geometry::IDetector* SpectraDetectorMap::getDetector(const int spectrum_number) 
   }
   else if ( ndets == 1) 
   {
-    // Just only 1 detector for the spectrum number, just return it
+    // If only 1 detector for the spectrum number, just return it
     return _s2dmap.find(spectrum_number)->second;
   }
   
   // Else need to construct a DetectorGroup and return that
   // @todo MEMORY LEAK ALERT!!!
-  Geometry::DetectorGroup *group = new Geometry::DetectorGroup;
-  std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
-  for (smap_it it=det_range.first; it!=det_range.second; ++it)
-  {
-    group->addDetector( (*it).second );
-  }
+  Geometry::DetectorGroup *group = new Geometry::DetectorGroup(getDetectors(spectrum_number));
+//  std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
+//  for (smap_it it=det_range.first; it!=det_range.second; ++it)
+//  {
+//    group->addDetector( (*it).second );
+//  }
   return group;
 }
 
