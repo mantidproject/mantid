@@ -6,8 +6,8 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-#localServerName = 'http://130.246.49.183/'
-localServerName = 'file://c|/Program Files/CruiseControl/'
+localServerName = 'http://130.246.49.183/'
+#localServerName = 'file://c|/Program Files/CruiseControl/'
 
 RECIPIENTS = ['r.tolchenov@rl.ac.uk']
 SENDER = 'Installer@mantidproject.org'
@@ -51,7 +51,7 @@ if buildSuccess:
      exit(0)
 
 #Construct Message
-httpLinkToArchive = '' + localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Build Passed: ' + str(buildSuccess) + "\n"
 message += 'BUILD LOG\n\n'

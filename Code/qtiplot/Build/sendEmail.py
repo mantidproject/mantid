@@ -6,8 +6,8 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-#localServerName = 'http://130.246.49.183/'
-localServerName = 'file://c|/Program Files/CruiseControl/'
+localServerName = 'http://130.246.49.183/'
+#localServerName = 'file://c|/Program Files/CruiseControl/'
 
 RECIPIENTS = ['r.tolchenov@rl.ac.uk']
 SENDER = 'QtiPlot@mantidproject.org'
@@ -55,7 +55,7 @@ if buildSuccess:
 
 
 #Construct Message
-httpLinkToArchive = '' + localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'QTIPlot Build Passed: ' + str(buildSuccess) + "\n"
 message += 'QTIPLOT BUILD LOG\n\n'
