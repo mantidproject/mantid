@@ -247,17 +247,23 @@ namespace Mantid
       for (unsigned int i = 0; i < instrumentID.size(); i++) 
         instrumentID[i] = toupper(instrumentID[i]); 
 
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+      std::string fullPathIDF1 = directoryName + "/" + instrumentID + "_Definition.xml";
+      std::string fullPathIDF2 = directoryName + "/" + instrumentID + "_definition.xml"; // to allow lower case
 
 
       // If IDF present in search directory run LoadInstrument otherwise LoadInstrumentFromRaw
 
-      fs::path l_pathIDF( fullPathIDF );  // create boost path to do the check below
+      fs::path l_pathIDF1( fullPathIDF1 );  // create boost path to do the check below
+      fs::path l_pathIDF2( fullPathIDF2 );  // lower case 
 
-      if ( fs::exists( l_pathIDF ) )
+      if ( fs::exists( l_pathIDF1 ) || fs::exists( l_pathIDF2 ) )
       {
         Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-        loadInst->setPropertyValue("Filename", fullPathIDF);
+
+        if ( fs::exists( l_pathIDF1 ) )
+          loadInst->setPropertyValue("Filename", fullPathIDF1);
+        else
+          loadInst->setPropertyValue("Filename", fullPathIDF2);
 
         // Set the workspace property to be the same one filled above
         loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
