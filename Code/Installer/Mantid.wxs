@@ -79,6 +79,9 @@
               <Shortcut Id='desktopQTIPlot' Directory='DesktopFolder' Name='QTIPlot'
                 WorkingDirectory='QTIPlotDir'/>
             </File>
+            <File Id='qtiplotrcPYC' Name='qtirc.pyc' LongName='qtiplotrc.pyc' Vital='yes' DiskId='1'
+              Source='qtiplotrc.pyc'/>
+
 
             <File Id='zlib1DLL_1' Name='zlib1.dll' DiskId='1' 
               Source='..\Third_Party\lib\win32\zlib1.dll' Vital='yes'/>

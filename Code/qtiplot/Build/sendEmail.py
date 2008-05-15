@@ -9,7 +9,8 @@ smtpserver = 'outbox.rl.ac.uk'
 localServerName = 'http://130.246.49.183/'
 #localServerName = 'file://c|/Program Files/CruiseControl/'
 
-RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+#RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = 'QtiPlot@mantidproject.org'
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
