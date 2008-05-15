@@ -4,6 +4,10 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ConfigService.h"
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -20,6 +24,8 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using namespace DataObjects;
+
+    namespace fs = boost::filesystem; // to help clarify which bits are boost in code below
 
     Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
@@ -217,31 +223,88 @@ namespace Mantid
       //     - no account taken of bin widths/units etc.
     }
 
-    /// Run the sub-algorithms (LoadInstrument & LoadLog)
+    /// Run the sub-algorithms: LoadInstrument (or LoadInstrumentFromRaw) and LoadLog
     void LoadRaw::runSubAlgorithms()
     {
-      // First deal with LoadInstruments
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      // Hardcoded filename for now...this will certainly change
-      loadInst->setPropertyValue("Filename","../../../../Test/Instrument/HET_cutdown_version.xml");
-      // Set the workspace property to be the same one filled above
+      // First deal with loading of instrument definition information
 
-      loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      // Determine the search directory for XML instrument definition files (IDFs)
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      try
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefintion.directory");
+      
+      if ( directoryName.empty() )
+        directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
+
+      // Determine the name of IDF to search for.
+      // Get hold of the 1st 3 letters of the raw file. Use only these three letter to construct the
+      // IDF filename to search for
+
+      fs::path l_path( m_filename );
+      std::string instrumentID = l_path.leaf().substr(0,3);  // get the 1st 3 letters of filename part
+
+      // force ID to upper case
+
+      for (unsigned int i = 0; i < instrumentID.size(); i++) 
+        instrumentID[i] = toupper(instrumentID[i]); 
+
+      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+
+
+      // If IDF present in search directory run LoadInstrument otherwise LoadInstrumentFromRaw
+
+      fs::path l_pathIDF( fullPathIDF );  // create boost path to do the check below
+
+      if ( fs::exists( l_pathIDF ) )
       {
-        loadInst->execute();
+        Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+        loadInst->setPropertyValue("Filename", fullPathIDF);
+
+        // Set the workspace property to be the same one filled above
+        loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+
+        // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          loadInst->execute();
+        }
+        catch (std::runtime_error& err)
+        {
+          g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+        }
+
+        if ( ! loadInst->isExecuted() )
+        {
+          g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+        }
+
       }
-      catch (std::runtime_error& err)
+      else
       {
-        g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
+          << "the instrument from raw data file.\n";
+
+        Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
+        loadInst->setPropertyValue("Filename", m_filename);
+
+        // Set the workspace property to be the same one filled above
+        loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+
+        // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          loadInst->execute();
+        }
+        catch (std::runtime_error& err)
+        {
+          g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
+        }
+
+        if ( ! loadInst->isExecuted() )
+        {
+          g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
+        }
       }
 
-      if ( ! loadInst->isExecuted() )
-      {
-        g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
-      }
 
       // Now do LoadLog
       Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
