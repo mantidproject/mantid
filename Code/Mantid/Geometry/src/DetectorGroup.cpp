@@ -14,7 +14,7 @@ Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
 /** Constructor that takes a list of detectors to add
  *  @param dets The vector of IDetector pointers that this virtual detector will hold
- *  @throw 
+ *  @throw std::invalid_argument If an empty vector is passed as argument
  */
 DetectorGroup::DetectorGroup(const std::vector<IDetector*>& dets) : 
   IDetector(),

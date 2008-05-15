@@ -40,8 +40,8 @@ Geometry::operator<<(std::ostream& OX,
   /*!
     External outputs point to a stream 
     \param A :: MatrixBase to write out
-    \param of :: output stream
-    \returns The output stream (of)
+    \param OX :: output stream
+    \returns The output stream (OX)
   */
 {
   OX<<std::endl;

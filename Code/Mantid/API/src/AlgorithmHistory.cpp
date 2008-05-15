@@ -84,7 +84,7 @@ namespace Mantid
     }
     /** Prints a text representation
     * @param os The ouput stream to write to
-    * @param AP The AlgorithmHistory to output
+    * @param AH The AlgorithmHistory to output
     * @returns The ouput stream
     */
     std::ostream& operator<<(std::ostream& os, const AlgorithmHistory& AH)
