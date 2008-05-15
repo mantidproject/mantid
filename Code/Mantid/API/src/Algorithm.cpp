@@ -220,11 +220,23 @@ namespace Mantid
       return PropertyManager::getPropertyValue(name);
     }
     
+    /** Gets a list of the property names that are required for this algorithm.
+    * The algorithm must have been initialised for the properties to have been created.
+    * This is normally done automatically by the AlgorithmManager.
+    * @returns a list of  property names
+    */
     const std::vector<std::string> Algorithm::getRequiredProperties( ) const
     {
-	    std::vector<std::string> props;
-	    
-	    return props;
+      std::vector<std::string> retVector;
+
+      //extract all the properties
+      std::vector< Kernel::Property*> properties = getProperties();
+      for (int i = 0; i < properties.size(); i++)
+      {
+        Kernel::Property* prop = properties[i];
+	      retVector.push_back(prop->name());
+      }
+      return retVector;
     }
 
     //----------------------------------------------------------------------
@@ -491,6 +503,7 @@ fill each inout with each input history
     {
       m_isChildAlgorithm = isChild;
     }
+
 
   } // namespace API
 } // namespace Mantid

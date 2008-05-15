@@ -127,6 +127,14 @@ public:
     TS_ASSERT( vec.size() == 2 )
     TS_ASSERT( ! vec[0]->name().compare("prop1") )
   }    
+
+  void testGetRequiredProperties()
+  {
+    std::vector<std::string> vec = alg.getRequiredProperties();
+    TS_ASSERT( ! vec.empty() )
+    TS_ASSERT( vec.size() == 2 )
+    TS_ASSERT( ! vec[0].compare("prop1") )
+  } 
 private:
   ToyAlgorithm alg;	
 };
