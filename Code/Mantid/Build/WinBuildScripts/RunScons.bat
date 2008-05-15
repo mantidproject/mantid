@@ -7,6 +7,6 @@ svn log -v -rBASE > ..\..\..\..\logs\Mantid\svn.log
 svn up ../Third_Party
 svn up ../../Test
 cd Build
-doxygen Mantid.doxyfile 2> ..\..\..\..\logs\Mantid\doxy.log
+doxygen Mantid.doxyfile 2> ..\..\..\..\..\logs\Mantid\doxy.log
 cd ..
 build.bat "skiptest=1" 1> ..\..\..\..\logs\Mantid\scons.log 2> ..\..\..\..\logs\Mantid\sconsErr.log

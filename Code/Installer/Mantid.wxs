@@ -285,8 +285,8 @@
                 Source='..\Mantid\Geometry\inc\MantidGeometry\BaseVisit.h'/>
               <File Id='BnIdH' Name='BnId.h' LongName='BnId.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\BnId.h'/>
-              <File Id='ChebPolyH' Name='ChebPoly.h' LongName='ChebPoly.h' DiskId='1' 
-                Source='..\Mantid\Geometry\inc\MantidGeometry\ChebPoly.h'/>
+              <!--File Id='ChebPolyH' Name='ChebPoly.h' LongName='ChebPoly.h' DiskId='1' 
+                Source='..\Mantid\Geometry\inc\MantidGeometry\ChebPoly.h'/-->
               <File Id='CompAssemblyH' Name='CompAs.h' LongName='CompAssembly.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\CompAssembly.h'/>
               <File Id='ComponentH' Name='Comp.h' LongName='Component.h' DiskId='1' 

@@ -6,12 +6,13 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-#localServerName = '130.246.49.183'
-localServerName = 'file://c|/Program Files/CruiseControl/'
+localServerName = 'http://130.246.49.183/'
+#localServerName = 'file://c|/Program Files/CruiseControl/'
 
-RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+#RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 #,'mantid-developers@mantidproject.org'
-SENDER = 'Mantid@mantidproject.org'
+SENDER = 'BuildServer1@mantidproject.org'
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
 else:
@@ -115,12 +116,11 @@ mssgSvn = open(filesvn,'r').read()
 move(filesvn,archiveDir)
 
 #Read doxygen log
-#filedoxy = logDir+'doxy.log'
-#mssgDoxy = open(filedoxy,'r').read()
-#move(filedoxy,archiveDir)
+filedoxy = logDir+'doxy.log'
+mssgDoxy = open(filedoxy,'r').read()
+move(filedoxy,archiveDir)
 
 #Construct Message
-#httpLinkToArchive = 'http://' + localServerName + archiveDir.replace('..','') + '/'
 httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
