@@ -4,7 +4,7 @@ f=open('../TestsToRun', 'r')
 
 g=open('TestsScript.bat', 'w')
 
-logfile = '../../../logs/testResults.log'
+logfile = '../../../../../../logs/Mantid/testResults.log'
 g.write('set PATH=../../../Third_Party\lib\win32;%PATH%\n')
 g.write('set PATH=../../Bin/Shared;%PATH%\n')
 

@@ -6,12 +6,12 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = '130.246.49.183'
+#localServerName = '130.246.49.183'
+localServerName = 'file://c|/Program Files/CruiseControl/'
 
-#RECIPIENTS = ['n.draper@rl.ac.uk']
-RECIPIENTS = ['mantid-buildserver@mantidproject.org']
+RECIPIENTS = ['r.tolchenov@rl.ac.uk']
 #,'mantid-developers@mantidproject.org'
-SENDER = 'BuildServer1@mantidproject.org'
+SENDER = 'Mantid@mantidproject.org'
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
 else:
@@ -32,7 +32,7 @@ mssgTestsRunErr = ''
 mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
-logDir = '../logs/'
+logDir = '../../../../logs/Mantid/'
 
 testCount = 0
 failCount = 0
@@ -104,7 +104,7 @@ for line in f.readlines():
         if m:
             failCount += int(m.group(1))
             testsPass = False
-	#mssgTestsResults = mssgTestsResults + line
+	mssgTestsResults = mssgTestsResults + line
      
 f.close()
 move(filetestsRun,archiveDir)
@@ -115,12 +115,13 @@ mssgSvn = open(filesvn,'r').read()
 move(filesvn,archiveDir)
 
 #Read doxygen log
-filedoxy = logDir+'doxy.log'
-mssgDoxy = open(filedoxy,'r').read()
-move(filedoxy,archiveDir)
+#filedoxy = logDir+'doxy.log'
+#mssgDoxy = open(filedoxy,'r').read()
+#move(filedoxy,archiveDir)
 
 #Construct Message
-httpLinkToArchive = 'http://' + localServerName + archiveDir.replace('..','') + '/'
+#httpLinkToArchive = 'http://' + localServerName + archiveDir.replace('..','') + '/'
+httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
@@ -144,9 +145,8 @@ message += 'Test Build stderr <' + httpLinkToArchive + 'testsBuildErr.log>\n'
 #message += mssgTestsRunErr  + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
-message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
 message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
-#message += mssgTestsResults + "\n"
+message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
@@ -191,3 +191,11 @@ Server said: %s
 
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
     raise smtplib.SMTPException, errstr
+
+if not buildSuccess:
+     exit(1)
+else:
+     fileLaunchQTIPlot = logDir+'LaunchQTIPlot.txt'
+     f = open(fileLaunchQTIPlot,'w')
+     f.write('launch')
+
