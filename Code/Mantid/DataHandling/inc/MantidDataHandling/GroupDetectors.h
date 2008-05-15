@@ -12,6 +12,8 @@ namespace DataHandling
 {
 /** An algorithm for grouping detectors and the spectra associated with them
     into a single DetectorGroup and spectrum.
+    The algorithm can currently only be used with a workspace that has units of time-of-flight
+    and with the data stored as raw counts.
     
     Required Properties:
     <UL>
