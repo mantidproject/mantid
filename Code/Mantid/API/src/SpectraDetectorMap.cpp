@@ -5,6 +5,18 @@
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+  /// An object for constructing a shared_ptr that won't ever delete its pointee
+  struct NullDeleter
+  {
+    /// Does nothing
+    void operator()(void const *) const
+    {}  
+  };
+} // namespace Kernel
+
 namespace API
 {
 
@@ -86,16 +98,13 @@ std::vector<Geometry::IDetector*> SpectraDetectorMap::getDetectors(const int spe
 
   if (ndets<1)
   {
-    detectors.clear();
+    // Will just return an empty vector
     return detectors;
   }
   std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
-  int i=0;
-  detectors.resize(ndets);
-  smap_it it;
-  for (it=det_range.first; it!=det_range.second; ++it)
+  for (smap_it it=det_range.first; it!=det_range.second; ++it)
   {
-    detectors[i++]=(*it).second;
+    detectors.push_back(it->second);
   }
   return detectors;
 }
@@ -107,7 +116,7 @@ std::vector<Geometry::IDetector*> SpectraDetectorMap::getDetectors(const int spe
  *  the returned object's concrete type will be DetectorGroup.
  *  @todo Write a test for this method
  */
-Geometry::IDetector* SpectraDetectorMap::getDetector(const int spectrum_number) const
+boost::shared_ptr<Geometry::IDetector> SpectraDetectorMap::getDetector(const int spectrum_number) const
 {
   int ndets=ndet(spectrum_number);
   if ( ndets == 0 )
@@ -118,18 +127,13 @@ Geometry::IDetector* SpectraDetectorMap::getDetector(const int spectrum_number) 
   else if ( ndets == 1) 
   {
     // If only 1 detector for the spectrum number, just return it
-    return _s2dmap.find(spectrum_number)->second;
+    // Have to create the shared pointer with a null deleter in this case so that the detector
+    //   doesn't get deleted when the shared pointer goes out of scope
+    return boost::shared_ptr<IDetector>(_s2dmap.find(spectrum_number)->second, Kernel::NullDeleter());
   }
   
   // Else need to construct a DetectorGroup and return that
-  // @todo MEMORY LEAK ALERT!!!
-  Geometry::DetectorGroup *group = new Geometry::DetectorGroup(getDetectors(spectrum_number));
-//  std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
-//  for (smap_it it=det_range.first; it!=det_range.second; ++it)
-//  {
-//    group->addDetector( (*it).second );
-//  }
-  return group;
+  return boost::shared_ptr<IDetector>(new Geometry::DetectorGroup(getDetectors(spectrum_number)));
 }
 
 } // Namespace API 

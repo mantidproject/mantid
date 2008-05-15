@@ -2,6 +2,7 @@
 #define SPECTRADETECTORMAP_
 
 #include "MantidKernel/System.h"
+#include "boost/shared_ptr.hpp"
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
 #else
@@ -29,7 +30,7 @@ namespace API
  @author Laurent C Chapon, ISIS, RAL
  @date 29/04/2008
  
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
  
  This file is part of Mantid.
  
@@ -76,7 +77,7 @@ public:
   /// Get a vector of IDetector contributing to a spectrum
   std::vector<Geometry::IDetector*> getDetectors(const int spectrum_number) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
-  Geometry::IDetector* getDetector(const int spectrum_number) const;
+  boost::shared_ptr<Geometry::IDetector> getDetector(const int spectrum_number) const;
 
 private:
   ///Copy Contructor

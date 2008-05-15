@@ -138,15 +138,15 @@ public:
     TS_ASSERT_EQUALS( outputWS->spectraNo(4), 4 )
    
     boost::shared_ptr<SpectraDetectorMap> sdm = outputWS->getSpectraMap();
-    IDetector *det;
+    boost::shared_ptr<IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(0) )
-    TS_ASSERT( dynamic_cast<DetectorGroup*>(det) )
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
     TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(1) )
-    TS_ASSERT( dynamic_cast<Detector*>(det) )
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
     TS_ASSERT_THROWS( sdm->getDetector(2), Exception::NotFoundError )
     TS_ASSERT_THROWS( sdm->getDetector(3), Exception::NotFoundError )
     TS_ASSERT_THROWS_NOTHING( det = sdm->getDetector(4) )
-    TS_ASSERT( dynamic_cast<Detector*>(det) )
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
   }
 	
 private:
