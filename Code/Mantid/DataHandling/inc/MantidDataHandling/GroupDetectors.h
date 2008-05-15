@@ -16,9 +16,13 @@ namespace DataHandling
     Required Properties:
     <UL>
     <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
-    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
     </UL>
-    @todo Modify so that a list of spectra is passed in instead of raw indices
+
+    Optional Properties (One or the other should be set. SpectraList is used if both are set.):
+    <UL>
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
+    <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
+    </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 17/04/2008

@@ -5,6 +5,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include <set>
 
 namespace Mantid
 {
@@ -32,75 +33,60 @@ void MarkDeadDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
-  
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-  mustBePositive->setLower(0);
-  declareProperty("WorkspaceIndexMin",0, mustBePositive);
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
-  declareProperty("WorkspaceIndexMax",0, mustBePositive->clone());
+  declareProperty(new ArrayProperty<int>("SpectraList"));
 }
 
 void MarkDeadDetectors::exec()
 {
   // Get the input workspace
-  m_localWorkspace = getProperty("Workspace");
+  const Workspace2D_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
-  const int vectorSize = m_localWorkspace->blocksize();
+  const int vectorSize = WS->blocksize();
 
-  Property *DeadDetectorList = getProperty("WorkspaceIndexList");
-  // This is an optional property - only do something if it's actually been set.
-  if ( ! DeadDetectorList->isDefault() )
+  Property *wil = getProperty("WorkspaceIndexList");
+  Property *sl = getProperty("SpectraList");
+  // Could create a Validator to replace the below
+  if ( wil->isDefault() && sl->isDefault() )
   {
-    std::vector<int> detList = getProperty("WorkspaceIndexList");
-    std::vector<int>::const_iterator it;
-    for (it = detList.begin(); it != detList.end(); ++it) 
-    {
-      clearSpectrum(*it,vectorSize);
-    }
+    g_log.error("WorkspaceIndexList & SpectraList properties are both empty");
+    throw std::invalid_argument("WorkspaceIndexList & SpectraList properties are both empty");
   }
   
-  Property *minDet = getProperty("WorkspaceIndexMin");
-  Property *maxDet = getProperty("WorkspaceIndexMax");
-  // These are optional properties - only do something if they've actually been set.
-  if ( !minDet->isDefault() && !maxDet->isDefault() )
+  std::vector<int> indexList = getProperty("WorkspaceIndexList");
+
+  // If the spectraList property has been set, need to loop over the workspace looking for the
+  // appropriate spectra number and adding the indices they are linked to the list to be processed
+  if ( ! sl->isDefault() )
   {
-    int min = getProperty("WorkspaceIndexMin");
-    int max = getProperty("WorkspaceIndexMax");
-    // Check validity of min/max properties
-    if ( min > max )
-    {
-      g_log.error() << "WorkspaceIndexMin (" << min << ") cannot be greater than WorkspaceIndexMax (" << max << ")" << std::endl;
-      throw std::invalid_argument("WorkspaceIndexMin cannot be greater than WorkspaceIndexMax");
-    }
-    // If max goes beyond end of workspace, print warning and set to highest index
-    if (max >= m_localWorkspace->getHistogramNumber() )
-    {
-      g_log.warning("WorkspaceIndexMax is greater than workspace size - will go to end of workspace");
-      max = m_localWorkspace->getHistogramNumber()-1;
-    }
+    const std::vector<int> spectraList = getProperty("SpectraList");
+    // Convert the vector of properties into a set for easy searching
+    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
+    indexList.clear();
     
-    for (int i = min; i <= max; ++i) 
+    for (int i = 0; i < WS->getHistogramNumber(); ++i)
     {
-      clearSpectrum(i,vectorSize);
-    }
+      int currentSpec = WS->spectraNo(i);
+      if ( spectraSet.find(currentSpec) != spectraSet.end() )
+      {
+        indexList.push_back(i);
+      }
+    }  
+  }
+  // End dealing with spectraList
+
+  std::vector<int>::const_iterator it;
+  for (it = indexList.begin(); it != indexList.end(); ++it) 
+  {
+    // Mark associated detector as dead
+    WS->getSpectraMap()->getDetector(WS->spectraNo(*it))->markDead();
+
+    // Zero the workspace spectra (data and errors, not X values)
+    WS->dataY(*it).assign(vectorSize,0.0);
+    WS->dataE(*it).assign(vectorSize,0.0);
+    WS->dataE2(*it).assign(vectorSize,0.0);
   }
   
-}
-
-/** Clears the spectrum data
-* @param index The index of the data to clear
-* @param vectorSize the number of bins for that spectra
-*/
-void MarkDeadDetectors::clearSpectrum(const int& index, const int& vectorSize)
-{
-  // Mark associated detector as dead
-  m_localWorkspace->getSpectraMap()->getDetector(m_localWorkspace->spectraNo(index))->markDead();
-
-  // Zero the workspace spectra (data and errors, not X values)
-  m_localWorkspace->dataY(index).assign(vectorSize,0.0);
-  m_localWorkspace->dataE(index).assign(vectorSize,0.0);
-  m_localWorkspace->dataE2(index).assign(vectorSize,0.0);
 }
 
 } // namespace DataHandling

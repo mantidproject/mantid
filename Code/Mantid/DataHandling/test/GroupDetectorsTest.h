@@ -85,7 +85,7 @@ public:
     TS_ASSERT( gd.isInitialized() );
     
     std::vector<Property*> props = gd.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 2 )
+    TS_ASSERT_EQUALS( props.size(), 3 )
     
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
@@ -94,6 +94,10 @@ public:
     TS_ASSERT_EQUALS( props[1]->name(), "WorkspaceIndexList" )
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
+
+    TS_ASSERT_EQUALS( props[2]->name(), "SpectraList" )
+    TS_ASSERT( props[2]->isDefault() )
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
  	}
 	
   void testExec()
@@ -104,10 +108,17 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( !grouper.isExecuted() );
 
-    grouper.setPropertyValue("WorkspaceIndexList","0,2,3");
+    grouper.setPropertyValue("WorkspaceIndexList","0,2");
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
     
+    GroupDetectors grouper2;
+    grouper2.initialize();
+    grouper2.setPropertyValue("Workspace","GroupTestWS");
+    grouper2.setPropertyValue("SpectraList","0,3");
+    TS_ASSERT_THROWS_NOTHING( grouper2.execute());
+    TS_ASSERT( grouper2.isExecuted() );
+   
     Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve("GroupTestWS");
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);

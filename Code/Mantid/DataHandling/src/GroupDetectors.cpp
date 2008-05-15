@@ -5,6 +5,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <set>
 
 namespace Mantid
 {
@@ -31,6 +32,7 @@ void GroupDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
+  declareProperty(new ArrayProperty<int>("SpectraList"));
 }
 
 void GroupDetectors::exec()
@@ -38,12 +40,13 @@ void GroupDetectors::exec()
   // Get the input workspace
   const Workspace2D_sptr WS = getProperty("Workspace");
 
-  const std::vector<int> indexList = getProperty("WorkspaceIndexList");
+  Property *wil = getProperty("WorkspaceIndexList");
+  Property *sl = getProperty("SpectraList");
   // Could create a Validator to replace the below
-  if ( indexList.empty() )
+  if ( wil->isDefault() && sl->isDefault() )
   {
-    g_log.error("WorkspaceIndexList property is empty");
-    throw std::invalid_argument("WorkspaceIndexList property is empty");
+    g_log.error("WorkspaceIndexList & SpectraList properties are both empty");
+    throw std::invalid_argument("WorkspaceIndexList & SpectraList properties are both empty");
   }
   
   // Bin boundaries need to be the same so, for now, only allow this action if the workspace unit is TOF
@@ -63,6 +66,29 @@ void GroupDetectors::exec()
   }
   /// @todo Get this algorithm working on a more generic input workspace so the restrictions above can be lost
   
+  std::vector<int> indexList = getProperty("WorkspaceIndexList");
+
+  // If the spectraList property has been set, need to loop over the workspace looking for the
+  // appropriate spectra number and adding the indices they are linked to the list to be processed
+  if ( ! sl->isDefault() )
+  {
+    const std::vector<int> spectraList = getProperty("SpectraList");
+    // Convert the vector of properties into a set for easy searching
+    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
+    indexList.clear();
+    
+    for (int i = 0; i < WS->getHistogramNumber(); ++i)
+    {
+      int currentSpec = WS->spectraNo(i);
+      if ( spectraSet.find(currentSpec) != spectraSet.end() )
+      {
+        indexList.push_back(i);
+      }
+    }  
+  }
+  // End dealing with spectraList
+  
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
   const int firstSpectrum = WS->spectraNo(firstIndex);
@@ -74,7 +100,7 @@ void GroupDetectors::exec()
     // Add up all the Y spectra and store the result in the first one
     std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataY(currentIndex).begin(),
                    WS->dataY(firstIndex).begin(), std::plus<double>());
-    // Now zero the now redundant spectrum and set it's spectra number to indicate this (using -1)
+    // Now zero the now redundant spectrum and set its spectraNo to indicate this (using -1)
     // N.B. Deleting spectra would cause issues for ManagedWorkspace2D, hence the the approach taken here
     WS->dataY(currentIndex).assign(vectorSize,0.0);
     WS->dataE(currentIndex).assign(vectorSize,0.0);

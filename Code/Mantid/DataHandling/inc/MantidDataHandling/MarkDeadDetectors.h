@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "DataHandlingCommand.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -19,11 +18,10 @@ namespace DataHandling
     <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
     </UL>
 
-    Optional Properties (one or the other should be set or nothing will happen!):
+    Optional Properties (One or the other should be set. SpectraList is used if both are set.):
     <UL>
-    <LI> WorkspaceIndexList - An ArrayProperty containing a list of workspace indices whose detectors should be marked as dead </LI>
-    <LI> WorkspaceIndexMin  - The lower bound of a range of workspace indices whose detectors should be marked as dead </LI>
-    <LI> WorkspaceIndexMax  - The upper bound of a range of workspace indices whose detectors should be marked as dead </LI>
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
+    <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -66,12 +64,6 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  
-  /// Clears the spectrum data
-  void clearSpectrum(const int& index, const int& vectorSize);
-  
-  /// Pointer to the local workspace
-  DataObjects::Workspace2D_sptr m_localWorkspace;  
   
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

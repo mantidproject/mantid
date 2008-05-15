@@ -81,6 +81,7 @@ public:
     TS_ASSERT( mdd.isInitialized() );
     
     std::vector<Property*> props = mdd.getProperties();
+    TS_ASSERT_EQUALS( props.size(), 3 )
     
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
@@ -90,13 +91,9 @@ public:
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
     
-    TS_ASSERT_EQUALS( props[2]->name(), "WorkspaceIndexMin" )
+    TS_ASSERT_EQUALS( props[2]->name(), "SpectraList" )
     TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<int>* >(props[2]) )
-
-    TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexMax" )
-    TS_ASSERT( props[3]->isDefault() )
-    TS_ASSERT( dynamic_cast<PropertyWithValue<int>* >(props[3]) )
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
   }
   
   void testExec()
@@ -106,40 +103,22 @@ public:
     marker.setPropertyValue("Workspace","testSpace");
     
     TS_ASSERT_THROWS_NOTHING( marker.execute());
-    TS_ASSERT( marker.isExecuted() );
+    TS_ASSERT( !marker.isExecuted() );
     
     marker.setPropertyValue("WorkspaceIndexList","0,3");
     TS_ASSERT_THROWS_NOTHING( marker.execute());
+    
+    MarkDeadDetectors marker2;
+    marker2.initialize();
+    marker2.setPropertyValue("Workspace","testSpace");
+    marker2.setPropertyValue("SpectraList","2");
+    TS_ASSERT_THROWS_NOTHING( marker2.execute());
+    TS_ASSERT( marker2.isExecuted() );
+    
     Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve("testSpace");
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
     std::vector<double> zeroes(5,0.0);
-    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(0), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(1), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
-    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(2), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(2), ones )
-    TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
-    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    boost::shared_ptr<Instrument> i = outputWS->getInstrument();
-    TS_ASSERT( i->getDetector(0)->isDead() )
-    TS_ASSERT( ! i->getDetector(1)->isDead() )
-    TS_ASSERT( ! i->getDetector(2)->isDead() )
-    TS_ASSERT( i->getDetector(3)->isDead() )
-    TS_ASSERT( ! i->getDetector(4)->isDead() )
-    
-    marker.setPropertyValue("WorkspaceIndexMin","2");
-    // Should cope with me setting this to a high value
-    marker.setPropertyValue("WorkspaceIndexMax","8");
-    TS_ASSERT_THROWS_NOTHING( marker.execute());
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(0), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataE(0), zeroes )
@@ -153,13 +132,14 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(4), zeroes )
-    TS_ASSERT_EQUALS( outputWS->dataE(4), zeroes )
+    TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
+    boost::shared_ptr<Instrument> i = outputWS->getInstrument();
     TS_ASSERT( i->getDetector(0)->isDead() )
     TS_ASSERT( ! i->getDetector(1)->isDead() )
     TS_ASSERT( i->getDetector(2)->isDead() )
     TS_ASSERT( i->getDetector(3)->isDead() )
-    TS_ASSERT( i->getDetector(4)->isDead() )
+    TS_ASSERT( ! i->getDetector(4)->isDead() )
   }
   
 private:
