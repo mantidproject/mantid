@@ -4,9 +4,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/FilterChannel.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
+#include "Poco/LoggingFactory.h"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -22,6 +24,10 @@ namespace Kernel
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
 		m_pConf = 0;
+
+    //Register the FilterChannel with the Poco logging factory
+    Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel",new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
+
 		//attempt to load the default properties filename
 		loadConfig("Mantid.properties");
 		g_log.debug() << "ConfigService created." << std::endl;
@@ -64,8 +70,11 @@ namespace Kernel
 			std::string propFile = 
 				"logging.loggers.root.level = debug\n"
 				"logging.loggers.root.channel.class = SplitterChannel\n"
-				"logging.loggers.root.channel.channel1 = consoleChannel\n"
+				"logging.loggers.root.channel.channel1 = consoleChannelFilter\n"
 				"logging.loggers.root.channel.channel2 = fileChannel\n"
+				"logging.channels.consoleChannelFilter.class = FilterChannel\n"
+				"logging.channels.consoleChannelFilter.channel = ConsoleChannel\n"
+				"logging.channels.consoleChannelFilter.level = information\n"
 				"logging.channels.consoleChannel.class = ConsoleChannel\n"
 				"logging.channels.consoleChannel.formatter = f1\n"
 				"logging.channels.fileChannel.class = FileChannel\n"

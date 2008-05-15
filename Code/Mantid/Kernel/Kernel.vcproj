@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FilterChannel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LibraryManager.cpp"
 				>
 			</File>
@@ -283,6 +287,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\FilterChannel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FilterChannelTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\INamedInterface.h"
 				>
 			</File>
@@ -376,6 +388,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\System.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TestChannel.hh"
 				>
 			</File>
 			<File
