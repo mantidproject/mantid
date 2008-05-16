@@ -3,8 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
-
 #include <sstream>
 #include <numeric>
 #include <math.h>
@@ -19,21 +17,19 @@ DECLARE_ALGORITHM(SimpleIntegration)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using DataObjects::Workspace1D_sptr;
-using DataObjects::Workspace1D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
 // Get a reference to the logger
 Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
 
-/** Initialisation method. Does nothing at present.
+/** Initialisation method.
  * 
  */
 void SimpleIntegration::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace1D>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
   
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -80,20 +76,23 @@ void SimpleIntegration::exec()
     g_log.information("StartY out of range! Set to 0.");
     m_MinY = 0;
   }
-  if ( !m_MaxY ) m_MaxY = numberOfYBins;
-  if ( m_MaxY > numberOfYBins || m_MaxY < m_MinY ) 
+  if ( !m_MaxY ) m_MaxY = numberOfYBins-1;
+  if ( m_MaxY > numberOfYBins-1 || m_MaxY < m_MinY ) 
   {
     g_log.information("EndY out of range! Set to max detector number");
     m_MaxY = numberOfYBins;
   }
+
+  // Create the 1D workspace for the output
+  Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D",m_MaxY-m_MinY+1,1,1));
   
   // Create vectors to hold result
-  std::vector<double> detectorNumber;
-  std::vector<double> sums;
-  std::vector<double> errors;
+  const std::vector<double> XValue(1,0.0);
+  std::vector<double> YSum(1);
+  std::vector<double> YError(1);
   // Loop over spectra
-  for (int i = m_MinY; i < m_MaxY; ++i) {
-    
+  for (int i = m_MinY, j = 0; i <= m_MaxY; ++i,++j) 
+  {  
     // Retrieve the spectrum into a vector
     const std::vector<double>& YValues = localworkspace->dataY(i);
     const std::vector<double>& YErrors = localworkspace->dataE(i);
@@ -107,7 +106,14 @@ void SimpleIntegration::exec()
         g_log.information("StartX out of range! Set to 0");
         m_MinX = 0;
       }
-      if ( !m_MaxX ) m_MaxX = numberOfXBins;
+      if ( !m_MaxX ) 
+      {
+        m_MaxX = numberOfXBins;  
+      }
+      else
+      {
+        ++m_MaxX;
+      }
       if ( m_MaxX > numberOfXBins || m_MaxX < m_MinX)
       {
         g_log.information("EndX out of range! Set to max number");
@@ -116,25 +122,16 @@ void SimpleIntegration::exec()
     }
     
     // Sum up the required elements of the vector
-    double YSum = std::accumulate(YValues.begin()+m_MinX,YValues.begin()+m_MaxX,0.0);
+    YSum[0] = std::accumulate(YValues.begin()+m_MinX,YValues.begin()+m_MaxX,0.0);
     // Error propagation - sqrt(sum of squared elements)
-    double YError = sqrt(std::inner_product(YErrors.begin()+m_MinX,YErrors.begin()+m_MaxX,
+    YError[0] = sqrt(std::inner_product(YErrors.begin()+m_MinX,YErrors.begin()+m_MaxX,
                                         YErrors.begin()+m_MinX,0.0));
     
-    // Add the results to the vectors for the new workspace
-    // Warning: Counting detector number from 0
-    detectorNumber.push_back(i);
-    sums.push_back(YSum);    
-    errors.push_back(YError);
-
+    outputWorkspace->dataX(j) = XValue;
+    outputWorkspace->dataY(j) = YSum;
+    outputWorkspace->dataE(j) = YError;
+    outputWorkspace->spectraNo(j) = localworkspace->spectraNo(i);
   }
-  
-  // Create the 1D workspace for the output
-  Workspace1D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace1D>(API::WorkspaceFactory::Instance().create("Workspace1D"));
-
-  // Populate the 1D workspace
-  outputWorkspace->setX(detectorNumber);
-  outputWorkspace->setData(sums, errors);
   
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);

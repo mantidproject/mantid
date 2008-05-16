@@ -2,10 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleRebin.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayProperty.h"
-
 
 #include <sstream>
 #include <numeric>

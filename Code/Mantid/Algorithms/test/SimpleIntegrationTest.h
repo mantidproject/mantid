@@ -7,7 +7,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -36,7 +35,7 @@ public:
     }
       
     // Register the workspace in the data service
-	AnalysisDataService::Instance().add("testSpace", space);
+    AnalysisDataService::Instance().add("testSpace", space);
     
   }
   
@@ -56,7 +55,7 @@ public:
     alg.setPropertyValue("OutputWorkspace",outputSpace);
 
     alg.setPropertyValue("StartX","1");
-    alg.setPropertyValue("EndX","4");
+    alg.setPropertyValue("EndX","3");
     alg.setPropertyValue("StartY","2");
     alg.setPropertyValue("EndY","4");
     
@@ -79,17 +78,25 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     
-    Workspace1D_sptr output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
-    std::vector<double> y = output1D->dataY();
-    std::vector<double> e = output1D->dataE();
-    unsigned int two = 2;
-    TS_ASSERT_EQUALS( y.size(), two );
-    TS_ASSERT_EQUALS( e.size(), two );
-    
-    TS_ASSERT_EQUALS( y[0], 36);
-    TS_ASSERT_EQUALS( y[1], 51);
-    TS_ASSERT_EQUALS( e[0], 6);
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    int max;
+    TS_ASSERT_EQUALS( max = output2D->getHistogramNumber(), 3)
+    double yy[3] = {36,51,66};
+    for (int i = 0; i < max; ++i)
+    {
+      std::vector<double> &x = output2D->dataX(i);
+      std::vector<double> &y = output2D->dataY(i);
+      std::vector<double> &e = output2D->dataE(i);
 
+      TS_ASSERT_EQUALS( x.size(), 1 )
+      TS_ASSERT_EQUALS( y.size(), 1 );
+      TS_ASSERT_EQUALS( e.size(), 1 );
+    
+      TS_ASSERT_EQUALS( x[0], 0.0 );
+      TS_ASSERT_EQUALS( y[0], yy[i] );
+      TS_ASSERT_DELTA( e[0], sqrt(yy[i]), 0.001 );
+    }
+  
     if ( !alg2.isInitialized() ) alg2.initialize();
     
     // Check setting of invalid property value causes failure
@@ -104,17 +111,11 @@ public:
     // Get back the saved workspace
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
     
-    output1D = boost::dynamic_pointer_cast<Workspace1D>(output);
-    y = output1D->dataY();
-    e = output1D->dataE();
-    unsigned int five = 5;
-    TS_ASSERT_EQUALS( y.size(), five );
-    TS_ASSERT_EQUALS( e.size(), five );
-    
-    TS_ASSERT_EQUALS( y[0], 10 );
-    TS_ASSERT_EQUALS( y[4], 110 );
-    TS_ASSERT_DELTA ( e[2], 7.746, 0.001 );
-
+    output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 5)
+    TS_ASSERT_EQUALS( output2D->dataY(0)[0], 10 );
+    TS_ASSERT_EQUALS( output2D->dataY(4)[0], 110 );
+    TS_ASSERT_DELTA ( output2D->dataE(2)[0], 7.746, 0.001 );
   }
   
 private:

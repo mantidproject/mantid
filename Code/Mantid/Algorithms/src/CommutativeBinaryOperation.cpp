@@ -4,19 +4,13 @@
 #include <cmath>
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 #include "MantidAPI/WorkspaceIterator.h" 
-#include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/Workspace2D.h" 
-
-using namespace Mantid::DataObjects;
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
 
 namespace Mantid
 {
   namespace Algorithms
   {
     // Get a reference to the logger
-    Logger& CommutativeBinaryOperation::g_log = Logger::get("CommutativeBinaryOperation");
+    Kernel::Logger& CommutativeBinaryOperation::g_log = Kernel::Logger::get("CommutativeBinaryOperation");
 
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
     * In order to be size compatible then the larger workspace 
