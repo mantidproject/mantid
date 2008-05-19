@@ -8,6 +8,7 @@
 
 #include "MantidDataObjects/Workspace1D.h" 
 #include "MantidDataObjects/Workspace2D.h" 
+#include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidAPI/LocatedDataRef.h" 
 #include "MantidAPI/WorkspaceIterator.h" 
 
@@ -35,6 +36,7 @@ private:
   typedef boost::shared_ptr<std::vector<double> > parray;
   typedef boost::shared_ptr<Workspace1D> W1D;
   typedef boost::shared_ptr<Workspace2D> W2D;
+  typedef boost::shared_ptr<WorkspaceSingleValue> WSV;
   typedef boost::shared_ptr<Workspace> Wbase;
 
 public:
@@ -355,6 +357,64 @@ public:
       TS_ASSERT_EQUALS(count,size*histogramCount*loopCount);
     }
   }
+
+  void testIteratorWorkspaceSingleValueLength()
+  {
+    Wbase workspace = WSV(new WorkspaceSingleValue(1.1,2.2,3.3));
+
+    int count = 0;
+    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    {
+      TS_ASSERT_THROWS_NOTHING
+      (
+        LocatedDataRef tr = *ti;
+        TS_ASSERT_EQUALS(tr.X(),workspace->dataX(0)[count]);
+        TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(0)[count]);
+        TS_ASSERT_EQUALS(tr.E(),workspace->dataE(0)[count]);
+      )
+        count++;
+    }
+    TS_ASSERT_EQUALS(count,1);
+  }
+
+  void testHorizontalLoopIteratorWorkspaceSingleValue()
+  {
+    int size = 1;
+    int histogramCount = 1;
+    Wbase workspace = WSV(new WorkspaceSingleValue(1.4,2.4,3.4));
+
+    const int loopCountArrayLength = 4;
+    int loopCountArray[loopCountArrayLength];
+    loopCountArray[0] = 1;
+    loopCountArray[1] = 50;
+    loopCountArray[2] = 200;
+    loopCountArray[3] = 0;
+    
+    for (int i = 0; i < loopCountArrayLength; i++)
+    {
+      int loopCount = loopCountArray[i];
+      int count = 0;
+      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      {
+        TS_ASSERT_THROWS_NOTHING
+        (
+          LocatedDataRef tr = *ti;
+          int indexPosition = count%(size*histogramCount);
+          int datablock = indexPosition/size;
+          int blockindex = indexPosition%size;
+          TS_ASSERT_EQUALS(tr.X(),workspace->dataX(datablock)[blockindex]);
+          TS_ASSERT_EQUALS(tr.Y(),workspace->dataY(datablock)[blockindex]);
+          TS_ASSERT_EQUALS(tr.E(),workspace->dataE(datablock)[blockindex]);
+        )
+          count++;
+      }
+      TS_ASSERT_EQUALS(count,size*histogramCount*loopCount);
+    }
+  }
+
+
+  
+
 
 };
 #endif /*TRIPLEITERATORTEST_*/

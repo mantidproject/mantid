@@ -183,6 +183,10 @@
 				RelativePath=".\src\Workspace2D.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WorkspaceSingleValue.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -227,6 +231,14 @@
 			</File>
 			<File
 				RelativePath=".\test\WorkspaceIteratorTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\WorkspaceSingleValue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WorkspaceSingleValueTest.h"
 				>
 			</File>
 		</Filter>
