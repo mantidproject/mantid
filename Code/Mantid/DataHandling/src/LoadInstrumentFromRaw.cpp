@@ -61,32 +61,6 @@ void LoadInstrumentFromRaw::exec()
   boost::shared_ptr<API::Instrument> instrument = (localWorkspace->getInstrument());
   instrument->setName(iraw.i_inst);
 
-  // add detectors
-
-  int numDetector = iraw.i_det; // number of detectors
-  int* detID = iraw.udet;      // detector IDs
-  float* r = iraw.len2;         // distance from sample
-  float* angle = iraw.tthe;     // angle between indicent beam and direction from sample to detector (two-theta)
-
-  Geometry::Detector detector;
-  detector.setName("det");
-
-  for (int i = 0; i < numDetector; i++)
-  {
-
-    Geometry::V3D pos;
-    pos.spherical(r[i], angle[i], 0.0);
-    detector.setPos(pos);
-
-    // set detector ID, add copy to instrument and mark it
-
-    detector.setID(detID[i]);
-    int toGetHoldOfDetectorCopy = instrument->addCopy(&detector);
-    Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*instrument)[toGetHoldOfDetectorCopy-1]);
-    instrument->markAsDetector(temp);
-  }
-
-
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample position
 
@@ -104,6 +78,29 @@ void LoadInstrumentFromRaw::exec()
   instrument->markAsSource(source);
   source->setPos(0.0,-10.0,0.0); 
 
+  // add detectors
+
+  int numDetector = iraw.i_det; // number of detectors
+  int* detID = iraw.udet;      // detector IDs
+  float* r = iraw.len2;         // distance from sample
+  float* angle = iraw.tthe;     // angle between indicent beam and direction from sample to detector (two-theta)
+
+  Geometry::Detector detector("det",samplepos);
+
+  for (int i = 0; i < numDetector; i++)
+  {
+
+    Geometry::V3D pos;
+    pos.spherical(r[i], angle[i], 0.0);
+    detector.setPos(pos);
+
+    // set detector ID, add copy to instrument and mark it
+
+    detector.setID(detID[i]);
+    int toGetHoldOfDetectorCopy = instrument->addCopy(&detector);
+    Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*instrument)[toGetHoldOfDetectorCopy-1]);
+    instrument->markAsDetector(temp);
+  }
 
   // Information to the user about what info is extracted from raw file
 
@@ -114,8 +111,8 @@ void LoadInstrumentFromRaw::exec()
     << "Source component added with position set to (0,-10,0). In standard configuration, with \n"
     << "the beam along y-axis pointing from source to sample, this implies the source is 10m in front \n"
     << "of the sample (L1=10m). To change the value of L1 the easiest is to move the source component.\n"
-    << "You can get hold of the source component by using the Instrument::getSource() method.\n";
-    
+    << "You can get hold of the source component by using the Instrument::getSource() method.\n"
+    << "eg. fm.getWorkspace(\"MyWS\")->getInstrument()->getSource()->setPos(0,-12.5,0);.\n";
 
   return;
 }
