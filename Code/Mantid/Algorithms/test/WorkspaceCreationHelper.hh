@@ -7,6 +7,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using namespace Mantid::DataObjects;
 
@@ -87,6 +88,12 @@ public:
 
     return retVal;
   }  
+
+  static WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
+  {
+    WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value,sqrt(value)));
+    return retVal;
+  }
 
 };
 

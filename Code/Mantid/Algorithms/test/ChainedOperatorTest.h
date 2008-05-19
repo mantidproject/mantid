@@ -38,7 +38,7 @@ public:
     Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
     Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
-    Workspace_sptr out_work = (in_work1 + in_work2)/(in_work1 - in_work2);
+    Workspace_sptr out_work = (in_work1 + in_work2)/(in_work1 - in_work2)+3;
     setProperty("OutputWorkspace",out_work);
   }
   virtual const std::string name() const {return "ComplexOpTest";}
@@ -102,7 +102,7 @@ private:
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double sig2 = work_in2->dataY(ws2Index/work_in1->blocksize())[ws2Index%work_in1->blocksize()];
       double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
-      TS_ASSERT_DELTA((sig1 + sig2)/(sig1-sig2), sig3, 0.0001);
+      TS_ASSERT_DELTA((sig1 + sig2)/(sig1-sig2)+3, sig3, 0.0001);
       //Note err calculation not checked due to complexity.
   }
   

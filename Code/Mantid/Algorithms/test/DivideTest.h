@@ -206,6 +206,66 @@ public:
     AnalysisDataService::Instance().remove(wsNameOut);
   }
 
+    void testExec1DSingleValue()
+  {
+    int sizex = 10;
+    // Register the workspace in the data service
+
+    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    Workspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
+    AnalysisDataService::Instance().add("test_in11", work_in1);
+    AnalysisDataService::Instance().add("test_in12", work_in2);
+
+    Divide alg;
+
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace_1","test_in11");
+    alg.setPropertyValue("InputWorkspace_2","test_in12");    
+    alg.setPropertyValue("OutputWorkspace","test_out1");
+    alg.execute();
+
+    Workspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve("test_out1"));
+
+    checkData(work_in1, work_in2, work_out1);
+
+    AnalysisDataService::Instance().remove("test_out1");
+    AnalysisDataService::Instance().remove("test_in11");
+    AnalysisDataService::Instance().remove("test_in12");
+
+  } 
+  
+  void testExec2DSingleValue()
+  {
+    int sizex = 5,sizey=300;
+    // Register the workspace in the data service
+    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    Workspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+
+    Divide alg;
+
+    std::string wsName1 = "test_in2D1D21";
+    std::string wsName2 = "test_in2D1D22";
+    std::string wsNameOut = "test_out2D1D";
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace_1",wsName1);
+    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("OutputWorkspace",wsNameOut);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+    Workspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve(wsNameOut));
+
+    checkData(work_in1, work_in2, work_out1);
+
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);
+   
+  }
+
 private:
 
   void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)

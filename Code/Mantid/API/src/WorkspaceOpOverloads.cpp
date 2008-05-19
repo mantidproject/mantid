@@ -21,6 +21,17 @@ namespace Mantid
     {
       return executeBinaryOperation("Plus",lhs,rhs);
     }
+
+    /** Adds a workspace to a single value
+    *  @param lhs left hand side workspace shared pointer
+    *  @param rhs the single value (error is taken as sqrt(value))
+    *  @returns The result in a workspace shared pointer
+    */
+    Workspace_sptr operator+(const Workspace_sptr lhs, const double rhsValue)
+    {
+      return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue));
+    }
+
     /** Subtracts two workspaces
     *  @param lhs left hand side workspace shared pointer
     *  @param rhs left hand side workspace shared pointer
@@ -30,6 +41,17 @@ namespace Mantid
     {
       return executeBinaryOperation("Minus",lhs,rhs);
     }
+
+    /** Subtracts  a single value from a workspace
+    *  @param lhs left hand side workspace shared pointer
+    *  @param rhs the single value (error is taken as sqrt(value))
+    *  @returns The result in a workspace shared pointer
+    */
+    Workspace_sptr operator-(const Workspace_sptr lhs, const double rhsValue)
+    {
+      return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
+    }
+
     /** Multiply two workspaces
     *  @param lhs left hand side workspace shared pointer
     *  @param rhs left hand side workspace shared pointer
@@ -39,6 +61,17 @@ namespace Mantid
     {
       return executeBinaryOperation("Multiply",lhs,rhs);
     }
+
+    /** Multiply a workspace and a single value
+    *  @param lhs left hand side workspace shared pointer
+    *  @param rhs the single value (error is taken as sqrt(value))
+    *  @returns The result in a workspace shared pointer
+    */
+    Workspace_sptr operator*(const Workspace_sptr lhs, const double rhsValue)
+    {
+      return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
+    }
+
     /** Divide two workspaces
     *  @param lhs left hand side workspace shared pointer
     *  @param rhs left hand side workspace shared pointer
@@ -47,6 +80,16 @@ namespace Mantid
     Workspace_sptr operator/(const Workspace_sptr lhs, const Workspace_sptr rhs)
     {
       return executeBinaryOperation("Divide",lhs,rhs);
+    }
+
+    /** Divide a workspace by a single value
+    *  @param lhs left hand side workspace shared pointer
+    *  @param rhs the single value (error is taken as sqrt(value)
+    *  @returns The result in a workspace shared pointer
+    */
+    Workspace_sptr operator/(const Workspace_sptr lhs, const double rhsValue)
+    {
+      return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
     }
 
     /** Performs a binary operation on two workspaces
@@ -94,9 +137,22 @@ namespace Mantid
 
       throw Kernel::Exception::NotFoundError("Required output workspace property not found on sub algorithm" ,"OutputWorkspace");
 
-      //Hoeerndous code inclusion to satisfy compilers that all code paths return a value
+      //Horendous code inclusion to satisfy compilers that all code paths return a value
       // in reality the above code should either throw or return successfully.
       Workspace_sptr retVal = WorkspaceFactory::Instance().create("Workspace2D");
+      return retVal;
+    }
+
+    /** Creates a temporary single value workspace the error is set to sqrt(value)
+    *  @param rhsValue the value to use
+    *  @returns The value in a workspace shared pointer
+    */
+    Workspace_sptr createWorkspaceSingleValue(const double rhsValue)
+    {
+      Workspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
+      retVal->dataY(0)[0]=rhsValue;
+      retVal->dataE(0)[0]=sqrt(rhsValue);
+      
       return retVal;
     }
   }

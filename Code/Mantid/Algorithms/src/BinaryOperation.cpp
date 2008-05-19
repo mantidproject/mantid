@@ -82,6 +82,9 @@ namespace Mantid
     */
     const bool BinaryOperation::checkXarrayCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const
     {
+      // single values are compatible with anything
+      if ((rhs->size() ==1) || (lhs->size() ==1)) return true;
+
       const std::vector<double>& w1x = lhs->dataX(0);
       const std::vector<double>& w2x = rhs->dataX(0);
 

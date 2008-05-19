@@ -18,7 +18,14 @@ namespace Kernel
     Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const Workspace_sptr rhs);
     Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const Workspace_sptr rhs);
 
-    Workspace_sptr DLLExport executeBinaryOperation(std::string AlgorithmName, 
+    Workspace_sptr DLLExport operator+(const Workspace_sptr lhs, const double rhsValue);
+    Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const double rhsValue);
+    Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const double rhsValue);
+    Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const double rhsValue);
+
+    Workspace_sptr executeBinaryOperation(std::string AlgorithmName, 
       const Workspace_sptr lhs, const Workspace_sptr rhs);
+
+    Workspace_sptr createWorkspaceSingleValue(const double rhsValue);
   }
 }
