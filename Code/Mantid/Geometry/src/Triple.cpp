@@ -5,7 +5,7 @@ namespace Mantid
 {
 
 template<typename T>
-Triple<T>::Triple() 
+Triple<T>::Triple() : first(),second(),third()
   /*!
     Standard Constructor
   */
@@ -173,7 +173,7 @@ Triple<T>::operator[](const int A) const
 */
 
 template<typename F,typename S,typename T>
-DTriple<F,S,T>::DTriple() 
+DTriple<F,S,T>::DTriple() : first(),second(),third()
   /*!
     Standard Constructor
   */
