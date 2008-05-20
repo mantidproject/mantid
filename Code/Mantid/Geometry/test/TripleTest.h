@@ -7,7 +7,6 @@
 #include "MantidGeometry/Triple.h"
 
 using namespace Mantid;
-using namespace Geometry;
 
 class testTriple: public CxxTest::TestSuite
 {
