@@ -114,8 +114,6 @@ public:
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 	
-  virtual void setHistogramNumber(int const) {}  // Does nothing
-
   virtual void setX(const int histnumber, const std::vector<double>&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);

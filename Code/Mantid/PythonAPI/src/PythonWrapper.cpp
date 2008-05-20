@@ -31,7 +31,7 @@ struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
     }
 
     bool execute() {
-        call_method< void >(py_self, "execute");
+        return call_method< bool >(py_self, "execute");
     }
 
     bool isInitialized() const {

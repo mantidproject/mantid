@@ -65,7 +65,7 @@ public:
   {
     std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,2),e1(xlen,3);
     Workspace2D_sptr retVal(new Workspace2D);
-    retVal->setHistogramNumber(ylen);
+    retVal->init(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
@@ -79,7 +79,7 @@ public:
   {
     std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,5),e1(xlen,4);
     Workspace2D_sptr retVal(new Workspace2D);
-    retVal->setHistogramNumber(ylen);
+    retVal->init(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     

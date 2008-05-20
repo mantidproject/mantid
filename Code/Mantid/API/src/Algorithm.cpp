@@ -231,7 +231,7 @@ namespace Mantid
 
       //extract all the properties
       std::vector< Kernel::Property*> properties = getProperties();
-      for (int i = 0; i < properties.size(); i++)
+      for (unsigned int i = 0; i < properties.size(); i++)
       {
         Kernel::Property* prop = properties[i];
 	      retVector.push_back(prop->name());

@@ -10,6 +10,9 @@
 namespace Mantid
 {
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
 namespace Kernel
 {
   class Logger;
@@ -26,7 +29,7 @@ namespace DataObjects
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
     
@@ -69,8 +72,6 @@ public:
 
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
   
-  virtual void setHistogramNumber(int const);
-
   virtual void setX(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&, const std::vector<double>&);
@@ -133,12 +134,14 @@ private:
 
   virtual const int getHistogramNumberHelper() const;
   
+//  Kernel::Axis y_axis;
+  
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };
 
-  ///shared pointer to the Workspace2D class
-  typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
+///shared pointer to the Workspace2D class
+typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
 
 } // namespace DataObjects
 } // Namespace Mantid 

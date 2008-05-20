@@ -37,7 +37,7 @@ namespace Mantid
         throw std::out_of_range("All arguments to init must be positive and non-zero");
       }
 
-      setHistogramNumber(NVectors);
+      data.resize(NVectors);
 
       Histogram1D::RCtype t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero 
@@ -48,19 +48,6 @@ namespace Mantid
         // Y,E,E2 arrays populated
         this->setData(i,t2,t2,t2);
       }
-    }
-
-    /**
-    Set the histogram count.
-    \todo FIX this can't be right since we have not dimensioned the internal arrays
-    \param nhist The number of histograms
-    */
-    void 
-      Workspace2D::setHistogramNumber(const int nhist)
-    {
-      if (nhist<0) 
-        throw std::invalid_argument("Workspace2D::setHistogramNumber, invalid histograms number <0");
-      data.resize(nhist);
     }
 
     /**

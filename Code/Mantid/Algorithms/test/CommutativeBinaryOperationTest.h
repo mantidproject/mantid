@@ -95,14 +95,12 @@ public:
     Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
-    Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
     CommutativeBinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in5));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in6));
-    TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in7));
   }
 
   void testcreateOutputWorkspace1D1D()
@@ -153,14 +151,12 @@ public:
     Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
-    Workspace2D_sptr work_in7 = WorkspaceCreationHelper::Create2DWorkspace(0,0);
     CommutativeBinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in5),work_in1,work_in5);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in6),work_in1,work_in6);
-    checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in7),work_in1,work_in7);
   }
 
   void checkOutputWorkspace(Workspace_sptr ws, Workspace_sptr wsIn1,Workspace_sptr wsIn2 ) const

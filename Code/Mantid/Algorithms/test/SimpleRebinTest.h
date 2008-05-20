@@ -165,7 +165,7 @@ private:
     std::vector<double> x1(xlen,0.0),y1(xlen-1,3.0),e1(xlen-1,sqrt(3.0)),e2(xlen-1,0);
 
     Workspace2D_sptr retVal(new Workspace2D);
-    retVal->setHistogramNumber(ylen);
+    retVal->init(ylen,xlen,xlen-1);
     double j=1.0;
 
     for (int i=0; i<xlen; i++)    

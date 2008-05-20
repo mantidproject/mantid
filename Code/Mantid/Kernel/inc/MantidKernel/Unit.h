@@ -234,7 +234,7 @@ public:
   ~QSquared() {}
 };
 
-/// Energy in milli-electronvolts
+/// Energy transfer in milli-electronvolts
 class DLLExport DeltaE : public Unit
 {
 public:

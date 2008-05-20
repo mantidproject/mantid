@@ -60,7 +60,7 @@ public:
   W2D Create2DWorkspace(int histogramCount,int size)
   {
     W2D retVal(new Workspace2D);
-    retVal->setHistogramNumber(histogramCount);
+    retVal->init(histogramCount,size,size);
     for (int i = 0; i < histogramCount; i++)
     {
       retVal->setX(i,CreateRandomArray(size));
