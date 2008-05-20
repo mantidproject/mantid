@@ -133,14 +133,19 @@ private:
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   WorkspaceSingleValue& operator=(const WorkspaceSingleValue&);
 
+  ///Internal cache of X data
   std::vector<double> _X;
+  ///Internal cache of Y data
   std::vector<double> _Y;
+  ///Internal cache of E data
   std::vector<double> _E;
+  ///Internal cache of E2 data
   std::vector<double> _E2;
+  ///Internal cache of Spectra No
   int _SpectraNo;
 
+  ///Internal cache of applicable errorhelper
   API::IErrorHelper* _ErrorHelper;
-  std::vector<double>& constructVector(double);
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
