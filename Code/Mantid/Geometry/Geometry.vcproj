@@ -426,14 +426,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Element.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\Flux.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidGeometry\General.h"
 				>
 			</File>
@@ -463,10 +455,6 @@
 			</File>
 			<File
 				RelativePath=".\test\LineTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\LinkIterator.h"
 				>
 			</File>
 			<File
