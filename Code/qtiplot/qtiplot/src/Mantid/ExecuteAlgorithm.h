@@ -12,6 +12,7 @@ class QString;
 
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/Property.h"
 
 class ExecuteAlgorithm : public QDialog
 {
@@ -20,7 +21,7 @@ class ExecuteAlgorithm : public QDialog
 public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
-	void CreateLayout(std::vector<std::string>& properties);
+	void CreateLayout(std::vector<Mantid::Kernel::Property*>& properties);
 	std::vector<std::string> results;
 
 protected:

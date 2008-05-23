@@ -9,6 +9,8 @@
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+
 
 class WorkspaceMgr : public QDialog, private Ui::Dialog
 {

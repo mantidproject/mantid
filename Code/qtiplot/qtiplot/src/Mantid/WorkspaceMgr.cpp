@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <QMessageBox>
 #include <QListWidgetItem>
 
@@ -9,6 +10,8 @@
 #include "LoadRawDlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "ExecuteAlgorithm.h"
+
+#include "MantidKernel/Property.h"
 
 WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 {
@@ -160,14 +163,16 @@ void WorkspaceMgr::importWorkspace()
 	}
 }
 
-void WorkspaceMgr:: executeAlgorithm()
+void WorkspaceMgr::executeAlgorithm()
 {
 	if (listAlgorithms->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listAlgorithms->item(listAlgorithms->currentRow());
 		QString algName = (selected->text()).split("|")[0];
 		
-		std::vector<std::string> propList = m_interface->GetAlgorithmProperties(algName.toStdString());
+		Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>(m_interface->CreateAlgorithm(algName.toStdString()));
+		
+		std::vector<Mantid::Kernel::Property*> propList = alg->getProperties();
 
 		if (propList.size() > 0)
 		{
@@ -177,11 +182,32 @@ void WorkspaceMgr:: executeAlgorithm()
 		
 			if (dlg->exec()== QDialog::Accepted)
 			{
-				Mantid::API::IAlgorithm* alg = m_interface->CreateAlgorithm(algName.toStdString());
-				
 				for (int i = 0; i < dlg->results.size(); ++i)
 				{
-					alg->setPropertyValue(propList[i], dlg->results[i]);
+					try
+					{
+						alg->setPropertyValue(propList[i]->name(), dlg->results[i]);
+					}
+					catch (std::invalid_argument err)
+					{
+						int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+						tr(QString::fromStdString(propList[i]->name()) + " was invalid."),
+						QMessageBox::Ok);
+					
+						return;
+					}
+				}
+				
+				//Check properties valid
+				if (!alg->checkPropertiesValid())
+				{
+					//Properties not valid
+					int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+						tr("One or more of the property values entered was invalid. "
+						"Please see the Mantid log for details."),
+						QMessageBox::Ok);
+					
+					return;
 				}
 				
 				if (!alg->execute() == true)

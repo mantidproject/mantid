@@ -21,13 +21,13 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 	
 }
 
-void ExecuteAlgorithm::CreateLayout(std::vector<std::string>& properties)
+void ExecuteAlgorithm::CreateLayout(std::vector<Mantid::Kernel::Property*>& properties)
 {
 	QGridLayout *grid = new QGridLayout(this);
 	
 	for (int i = 0; i < properties.size(); ++i)
 	{
-		QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]));
+		QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]->name()));
 		QLineEdit *tempEdit = new QLineEdit;
 		tempLbl->setBuddy(tempEdit);
 		
