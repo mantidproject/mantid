@@ -41,19 +41,6 @@ void SimpleIntegration::init()
   declareProperty("EndY",0, mustBePositive->clone());
 }
 
-/** Get the properties required to run the algorithm 
- * 
- *   \return Standard vector of strings.
- */
-const std::vector<std::string> SimpleIntegration::getRequiredProperties( ) const
-{
-	std::vector<std::string> props;
-	props.push_back("InputWorkspace");
-	props.push_back("OutputWorkspace");	
-	
-	return props;
-}
-
 /** Executes the algorithm
  * 
  *  @throw runtime_error Thrown if algorithm cannot execute

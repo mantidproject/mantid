@@ -155,16 +155,6 @@ std::vector<std::string> PythonInterface::GetAlgorithmNames()
 }
 
 /**
- * Returns the required properties for the algorithm.
- * \return Vector of strings.
- **/
-std::vector<std::string> PythonInterface::GetAlgorithmProperties(const std::string& algName)
-{
-	IAlgorithm* alg =FrameworkManager::Instance().createAlgorithm(algName);
-	return alg->getRequiredProperties();
-}
-
-/**
  * Gives Python access to the X data of a specified spectra of a chosen workspace.
  * The pointer returned to Python may become invalid if the workspace is subsequently altered;
  * for example, if the workspace was closed in Mantid, the Python pointer would be left hanging.

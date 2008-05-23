@@ -92,21 +92,6 @@ namespace Mantid
 
       return;  
     }
-    
-/** Get the properties required to run the algorithm 
- * 
- *   \return Standard vector of strings.
- */
-const std::vector<std::string> SimpleRebin::getRequiredProperties( ) const
-{
-	std::vector<std::string> props;
-	props.push_back("InputWorkspace");
-	props.push_back("OutputWorkspace");	
-	props.push_back("params");	
-	
-	return props;
-}
-
 
     /** Rebins the data according to new output X array
     *
