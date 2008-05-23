@@ -2,6 +2,7 @@
 #define GeometryTrack_h
 
 #include "MantidKernel/System.h"
+#include "MantidGeometry/V3D.h"
 
 namespace Mantid
 {
