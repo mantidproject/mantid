@@ -127,7 +127,7 @@ Torus::setSurface(const std::string& Pstr)
 
   std::string item;
   if (!StrFunc::section(Line,item) || 
-      tolower(item[0])!='t' || item.length()!=2) 
+      tolower(item[0])!='t' || item.length()!=3) 
     return errDesc;
 
   // Torus on X/Y/Z axis
@@ -145,11 +145,8 @@ Torus::setSurface(const std::string& Pstr)
   if (!StrFunc::section(Line,Centre))
     return errCent;
   if (!StrFunc::section(Line,PtVec))
-    return errCent;
+    return errNormal;
 
-  for(int i=0;i<3;i++)
-    return errCent;
-  
   Iradius=PtVec[1];
   Dradius=PtVec[2];
   Displacement=PtVec[0];
@@ -288,11 +285,11 @@ Torus::write(std::ostream& OX) const
     }
   std::ostringstream cx;
   Surface::writeHeader(cx);
-  cx<<" t"<<Tailends[Ndir+3]<<" ";
+  cx<<"t"<<Tailends[Ndir+3]<<" ";
   cx.precision(Surface::Nprecision);
   // Name and transform 
    
-  cx<<Centre<<" "<<Displacement<<" "<<Dradius<<" "<<Iradius<<std::endl;
+  cx<<Centre<<" "<<Displacement<<" "<<Iradius<<" "<<Dradius;
   StrFunc::writeMCNPX(cx.str(),OX);
   return;
 }
