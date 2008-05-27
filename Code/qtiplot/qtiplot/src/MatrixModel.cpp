@@ -44,6 +44,23 @@
 #include <qwt_color_map.h>
 #include <stdlib.h>
 
+MatrixModel::MatrixModel(QObject *parent)
+     : QAbstractTableModel(parent),
+	 d_matrix((Matrix*)parent)
+{
+	init();
+	
+	if (d_matrix){
+		d_txt_format = d_matrix->textFormat().toAscii();
+		d_num_precision = d_matrix->precision();
+		d_locale = d_matrix->locale();
+	}
+
+	d_rows = 0;
+	d_cols = 0;
+
+}
+
 MatrixModel::MatrixModel(int rows, int cols, QObject *parent)
      : QAbstractTableModel(parent),
 	 d_matrix((Matrix*)parent)
@@ -167,7 +184,7 @@ void MatrixModel::setDimensions(int rows, int cols)
 	QApplication::restoreOverrideCursor();
 }
 
-double MatrixModel::cell(int row, int col)
+double MatrixModel::cell(int row, int col) const
 {
     int i = d_cols*row + col;
     double val = d_data[i];
@@ -188,10 +205,7 @@ void MatrixModel::setCell(int row, int col, double val)
 
 QString MatrixModel::text(int row, int col)
 {
-	int i = d_cols*row + col;
-	double val = d_data[i];
-    if (i < 0 || i>= d_rows*d_cols || gsl_isnan(val))
-        return "";
+	double val = cell(row,col);
 
 	if (d_matrix){
 		QLocale locale = d_matrix->locale();
@@ -491,7 +505,7 @@ QImage MatrixModel::renderImage()
     for ( int i = 0; i < d_rows; i++ ){
     	QRgb *line = (QRgb *)image.scanLine(i);
 		for ( int j = 0; j < d_cols; j++){
-		    double val = d_data[i*d_cols + j];
+		    double val = cell(i,j);//d_data[i*d_cols + j];
 		    if (gsl_isnan (val))
                 *line++ = color_map.rgb(intensityRange, 0.0);
 			else if(fabs(val) < HUGE_VAL)
@@ -1006,4 +1020,10 @@ void MatrixModel::pasteData(double *clipboardBuffer, int topRow, int leftCol, in
         for (int j = leftCol; j <= rightCol; j++)
             d_data[row++] = clipboardBuffer[cell++];
     }
+}
+
+
+MatrixModel::~MatrixModel()
+{
+    free(d_data);
 }

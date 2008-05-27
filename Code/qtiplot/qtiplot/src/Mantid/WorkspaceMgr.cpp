@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QListWidgetItem>
 
+#include "WorkspaceMatrix.h"
 #include "WorkspaceMgr.h"
 #include "../ApplicationWindow.h"
 #include "../Matrix.h"
@@ -39,7 +40,8 @@ void WorkspaceMgr::setupActions()
 	connect(pushAddWorkspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
 	connect(removeWorkspaceButton, SIGNAL(clicked()), this, SLOT(deleteWorkspaceClicked()));
 	connect(listWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectedWorkspaceChanged()));
-	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspace()));
+//	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspace()));
+	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspaceMatrix()));
 	connect(pushExecuteAlg, SIGNAL(clicked()), this, SLOT(executeAlgorithm()));
 }
 
@@ -163,7 +165,34 @@ void WorkspaceMgr::importWorkspace()
 	}
 }
 
-void WorkspaceMgr::executeAlgorithm()
+void WorkspaceMgr::importWorkspaceMatrix()
+{
+	if (listWorkspaces->currentRow() != -1) //&& listWorkspaces->currentRow() != -1)
+	{
+		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
+		QString wsName = selected->text();
+		
+		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
+		
+		int numHists = ws->getHistogramNumber();
+		int numBins = ws->blocksize();
+		
+		ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(this, numHists);
+		dlg->setModal(true);	
+		if (dlg->exec() == QDialog::Accepted) 
+		{
+			int start = dlg->getLowerLimit();
+			int end = dlg->getUpperLimit();
+			int diff = end - start;
+			
+			ApplicationWindow* temp = dynamic_cast<ApplicationWindow*>(m_parent);
+			WorkspaceMatrix *mat = dynamic_cast<WorkspaceMatrix*>(temp->newWMatrix(wsName,ws,start,end));
+
+		}
+	}
+}
+
+void WorkspaceMgr:: executeAlgorithm()
 {
 	if (listAlgorithms->currentRow() != -1)
 	{

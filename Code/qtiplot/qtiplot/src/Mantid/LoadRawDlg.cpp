@@ -55,9 +55,23 @@ loadRawDlg::~loadRawDlg()
 
 void loadRawDlg::browseClicked()
 {
-	QString s( QFileDialog::getOpenFileName(this, tr("Select Raw File"), QString::null, tr("Raw File (*.RAW)") ) );
+    static QString curDir = "";
+
+	QString s( QFileDialog::getOpenFileName(this, tr("Select Raw File"), curDir, tr("Raw File (*.RAW)") ) );
 		if ( s.isEmpty() )  return;
 	lineFile->setText(s);
+
+    // Suggest a name for the workspace
+    int i = s.lastIndexOf('\\');
+    if (i < 0) i = s.lastIndexOf('/');
+    if (i < 0) i = 0;
+    int j = s.lastIndexOf('.');
+    if (j < 0) j = s.length();
+    lineName->setText(s.mid(i+1,j - i - 1));
+    lineName->setSelection(0,lineName->text().length());
+    lineName->setFocus(Qt::OtherFocusReason);
+    curDir = s.remove(i,s.length()-i);
+
 }
 
 void loadRawDlg::loadClicked()

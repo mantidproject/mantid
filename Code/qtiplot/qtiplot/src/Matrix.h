@@ -61,6 +61,9 @@ class Matrix: public MdiSubWindow, public scripted
 {
     Q_OBJECT
 
+protected:
+	Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+
 public:
 
 	/*!
@@ -127,8 +130,8 @@ public:
 	void resetView();
 	void moveCell(const QModelIndex& index);
 
-	void flipVertically();
-	void flipHorizontally();
+	virtual void flipVertically();
+	virtual void flipHorizontally();
 	void rotate90(bool clockwise = true);
     void fft(bool inverse = false);
 
@@ -160,6 +163,8 @@ public:
 	void importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
 					bool simplifySpaces, const QString& commentString, ImportMode importAs = Overwrite,
 					const QLocale& l = QLocale(), int endLineChar = 0, int maxRows = -1);
+
+    const char **matrixIcon(){return m_matrix_icon;}
 
 public slots:
 	void exportPDF(const QString& fileName);
@@ -294,7 +299,10 @@ public slots:
 	
 	bool canCalculate(bool useMuParser = true);
 
-private:
+protected:
+    MatrixModel *d_matrix_model;
+    QColor m_bk_color;
+
 	//! Initialize the matrix
 	void initTable(int rows, int cols);
 	void initImage(const QImage& image);
@@ -302,9 +310,10 @@ private:
 	void initTableView();
     void initGlobals();
 	bool ignoreUndo();
+    const char **m_matrix_icon;
 
+//private:
     QStackedWidget *d_stack;
-    MatrixModel *d_matrix_model;
 	//! Pointer to the table view
     QTableView *d_table_view;
 	//! Used to display the image view

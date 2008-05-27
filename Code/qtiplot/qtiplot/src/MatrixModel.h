@@ -34,6 +34,7 @@
 #include <QVector>
 #include <QLocale>
 #include <QSize>
+#include <QMessageBox>
 
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_permutation.h>
@@ -44,76 +45,82 @@ class MatrixModel : public QAbstractTableModel
 {
     Q_OBJECT
 
+protected:
+    MatrixModel(QObject *parent);
+
 public:
     MatrixModel(int rows = 32, int cols = 32, QObject *parent = 0);
     MatrixModel(const QImage& image, QObject *parent);
-    ~MatrixModel(){free(d_data);};
+    ~MatrixModel();
 
     Matrix *matrix(){return d_matrix;};
 
 	Qt::ItemFlags flags( const QModelIndex & index ) const;
 
-    bool canResize(int rows, int cols);
-	void setDimensions(int rows, int cols);
+    virtual bool canResize(int rows, int cols);
+	virtual void setDimensions(int rows, int cols);
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	void setRowCount(int rows);
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual void setRowCount(int rows);
 
-    int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	void setColumnCount(int cols);
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual void setColumnCount(int cols);
 
-	bool removeRows(int row, int count, const QModelIndex & parent = QModelIndex());
-	bool insertRows(int row, int count, const QModelIndex & parent = QModelIndex());
+	virtual bool removeRows(int row, int count, const QModelIndex & parent = QModelIndex());
+	virtual bool insertRows(int row, int count, const QModelIndex & parent = QModelIndex());
 
-	bool removeColumns(int column, int count, const QModelIndex & parent = QModelIndex());
-	bool insertColumns(int column, int count, const QModelIndex & parent = QModelIndex());
+	virtual bool removeColumns(int column, int count, const QModelIndex & parent = QModelIndex());
+	virtual bool insertColumns(int column, int count, const QModelIndex & parent = QModelIndex());
 
-	double x(int col) const;
-	double y(int row) const;
+	virtual double x(int col) const;
+	virtual double y(int row) const;
 
-	double cell(int row, int col);
-	void setCell(int row, int col, double val);
+	virtual double cell(int row, int col) const;
+	virtual void setCell(int row, int col, double val);
 
-	QString text(int row, int col);
-	void setText(int row, int col, const QString&);
+	virtual QString text(int row, int col);
+	virtual void setText(int row, int col, const QString&);
 
-	QString saveToString();
-	QImage renderImage();
+	virtual QString saveToString();
+	virtual QImage renderImage();
 
-	double data(int row, int col) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	bool setData(const QModelIndex & index, const QVariant & value, int role);
+	virtual double data(int row, int col) const;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	virtual bool setData(const QModelIndex & index, const QVariant & value, int role);
 
-    double* dataVector(){return d_data;};
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+    virtual double* dataVector(){return d_data;};
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-	void setImage(const QImage& image);
+	virtual void setImage(const QImage& image);
 
-	bool importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
+	virtual 
+    bool importASCII(const QString &fname, const QString &sep, int ignoredLines, bool stripSpaces,
 					bool simplifySpaces, const QString& commentString, int importAs,
 					const QLocale& locale, int endLineChar = 0, int maxRows = -1);
 
 	void setLocale(const QLocale& locale){d_locale = locale;};
 	void setNumericFormat(char f, int prec);
 
-	bool initWorkspace();
-	void invert();
-	void transpose();
-	void flipVertically();
-	void flipHorizontally();
-	void rotate90(bool clockwise);
-	void fft(bool inverse);
-	void clear(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
-	bool calculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
-	bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
-	double* dataCopy(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
-	void pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols);
+	virtual bool initWorkspace();
+	virtual void invert();
+	virtual void transpose();
+	virtual void flipVertically();
+	virtual void flipHorizontally();
+	virtual void rotate90(bool clockwise);
+	virtual void fft(bool inverse);
+	virtual void clear(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+	virtual bool calculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+	virtual bool muParserCalculate(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+	virtual double* dataCopy(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1);
+	virtual void pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols);
 
-private:
-	void init();
-    int d_rows, d_cols;
-    double *d_data;
+protected:
 	Matrix *d_matrix;
+    int d_rows, d_cols;
+
+//private:
+	void init();
+    double *d_data;
 	//! Format code for displaying numbers
 	char d_txt_format;
 	//! Number of significant digits

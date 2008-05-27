@@ -27,6 +27,7 @@ private slots:
 	void deleteWorkspaceClicked();
 	void selectedWorkspaceChanged();
 	void importWorkspace();
+	void importWorkspaceMatrix();
 	void executeAlgorithm();
 
 private:

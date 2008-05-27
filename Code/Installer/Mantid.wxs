@@ -302,10 +302,6 @@
                 Source='..\Mantid\Geometry\inc\MantidGeometry\Detector.h'/>
               <File Id='DetectorGroupH' Name='DetGroup.h' LongName='DetectorGroup.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\DetectorGroup.h'/>
-              <File Id='ElementH' Name='Element.h' LongName='Element.h' DiskId='1' 
-                Source='..\Mantid\Geometry\inc\MantidGeometry\Element.h'/>
-              <File Id='FluxH' Name='Flux.h' LongName='Flux.h' DiskId='1' 
-                Source='..\Mantid\Geometry\inc\MantidGeometry\Flux.h'/>
               <File Id='GeneralH' Name='General.h' LongName='General.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\General.h'/>
               <File Id='IDetectorH' Name='IDetect.h' LongName='IDetector.h' DiskId='1' 
@@ -314,8 +310,6 @@
                 Source='..\Mantid\Geometry\inc\MantidGeometry\Line.h'/>
               <File Id='LineIntersectVisitH' Name='LinInter.h' LongName='LineIntersectVisit.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\LineIntersectVisit.h'/>
-              <File Id='LinkIteratorH' Name='LinkIter.h' LongName='LinkIterator.h' DiskId='1' 
-                Source='..\Mantid\Geometry\inc\MantidGeometry\LinkIterator.h'/>
               <File Id='MapSupportH' Name='MapSupp.h' LongName='MapSupport.h' DiskId='1' 
                 Source='..\Mantid\Geometry\inc\MantidGeometry\MapSupport.h'/>
               <File Id='MaterialH' Name='Material.h' LongName='Material.h' DiskId='1' 

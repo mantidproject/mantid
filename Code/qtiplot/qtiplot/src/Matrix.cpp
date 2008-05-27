@@ -32,6 +32,7 @@
 #include "ApplicationWindow.h"
 #include "muParserScript.h"
 #include "ScriptingEnv.h"
+#include "pixmaps.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -63,15 +64,26 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
 
+Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
+: MdiSubWindow(label, parent, name, f), scripted(env)
+{
+    m_bk_color = QColor(255, 255, 128);
+    m_matrix_icon = matrix_xpm;
+}
+
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
 : MdiSubWindow(label, parent, name, f), scripted(env)
 {
+    m_bk_color = QColor(255, 255, 128);
+    m_matrix_icon = matrix_xpm;
 	initTable(r, c);
 }
 
 Matrix::Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
 : MdiSubWindow(label, parent, name, f), scripted(env)
 {
+    m_bk_color = QColor(255, 255, 128);
+    m_matrix_icon = matrix_xpm;
 	initImage(image);
 }
 
@@ -1221,7 +1233,7 @@ void Matrix::initTableView()
     d_table_view->setFocus();
 
     QPalette pal = d_table_view->palette();
-	pal.setColor(QColorGroup::Base, QColor(255, 255, 128));
+	pal.setColor(QColorGroup::Base, m_bk_color);
 	d_table_view->setPalette(pal);
 
 	// set header properties

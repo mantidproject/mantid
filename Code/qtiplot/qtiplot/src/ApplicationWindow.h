@@ -45,6 +45,8 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
+#include "MantidAPI/Workspace.h"
+
 class QPixmap;
 class QCloseEvent;
 class QDropEvent;
@@ -322,6 +324,7 @@ public slots:
 	Matrix* newMatrix(int rows = 32, int columns = 32);
 	//! To be used when opening a project file only!
 	Matrix* newMatrix(const QString& caption, int r, int c);
+	Matrix* newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start=-1,int end=-1);
 	Matrix* matrix(const QString& name);
 	Matrix* convertTableToMatrix();
 	Matrix* tableToMatrix(Table* t);
@@ -957,6 +960,9 @@ public slots:
 
 	void showToolBarsMenu();
 
+    // WorkspaceMatrix
+    void copyRowToTable();
+
 signals:
 	void modified();
 
@@ -1266,5 +1272,7 @@ private:
     QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
     QList<QAction *> d_user_actions;
     QUndoView *d_undo_view;
+    //  WorkspaceMatrix
+    QAction *actionCopyRowToTable;
 };
 #endif

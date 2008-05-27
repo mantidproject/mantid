@@ -303,7 +303,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/WorkspaceMgr.h \
 	    src/Mantid/ExecuteAlgorithm.h \
-	    src/Mantid/ImportWorkspaceDlg.h
+	    src/Mantid/ImportWorkspaceDlg.h \
+	    src/Mantid/WorkspaceMatrix.h \
+	    src/Mantid/WorkspaceMatrixModel.h
 
 ###################### FORMS ##############################################
 
@@ -430,7 +432,9 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/WorkspaceMgr.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
-	    src/Mantid/ImportWorkspaceDlg.cpp
+	    src/Mantid/ImportWorkspaceDlg.cpp \
+	    src/Mantid/WorkspaceMatrix.cpp \
+	    src/Mantid/WorkspaceMatrixModel.cpp
 
 ###############################################################
 ##################### Compression (zlib123) ###################
