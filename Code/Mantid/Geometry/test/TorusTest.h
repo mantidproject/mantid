@@ -54,9 +54,9 @@ public:
 		Torus A;
 		TS_ASSERT_EQUALS(A.setSurface("t/x 1 1 1 2 3 4"),0);
 		TS_ASSERT_EQUALS(extractString(A),"-1 tx [1,1,1] 2 3 4\n");
-		Torus B;
+		Torus *B;
 		B=A.clone();
-		TS_ASSERT_EQUALS(extractString(B),"-1 tx [1,1,1] 2 3 4\n");
+		TS_ASSERT_EQUALS(extractString(*B),"-1 tx [1,1,1] 2 3 4\n");
 	}
 
 	void testEquality(){
@@ -104,6 +104,7 @@ public:
 	}
 
 	void testSetNorm(){
+		Torus A;
 		TS_ASSERT_EQUALS(A.setSurface("t/x 0 0 0 1 2 3"),0);
 		TS_ASSERT_EQUALS(extractString(A),"-1 tx [0,0,0] 1 2 3\n");
 		TS_ASSERT_EQUALS(A.getNormal(),V3D(1.0,0.0,0.0));
