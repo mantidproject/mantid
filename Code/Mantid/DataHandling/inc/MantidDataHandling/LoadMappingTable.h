@@ -20,7 +20,7 @@ namespace Mantid
     The key of the multimap is the spectra number and the value
     is the pointer to IDetector. The association is one to many, i.e. a spectrum can have one or many 
     detectors contributing to it. Alternatively the same spectrum can contributes to different spectra 
-    (for example in DAE2 when a spectra containing electronically focussed data is created simultaneously 
+    (for example in DAE2 (Data Aquisition Electronic) when a spectra containing electronically focussed data is created simultaneously 
     with indivudual spectra). LoadMappingTable is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
