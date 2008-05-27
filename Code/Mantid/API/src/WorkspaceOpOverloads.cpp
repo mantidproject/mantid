@@ -151,7 +151,6 @@ namespace Mantid
     {
       Workspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
       retVal->dataY(0)[0]=rhsValue;
-      retVal->dataE(0)[0]=sqrt(rhsValue);
       
       return retVal;
     }
