@@ -33,7 +33,7 @@ void LoadMappingTable::exec()
 	// Get the input workspace
 	const Workspace_sptr localWorkspace = getProperty("Workspace");
 	
-	ISISRAW iraw(NULL);
+	ISISRAW iraw(0);
 	if (iraw.readFromFile(m_filename.c_str(),0) != 0) // ReadFrom File with no data
 	{
 	    g_log.error("Unable to open file " + m_filename);
