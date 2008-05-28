@@ -52,6 +52,18 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   ///Returns the spectra number
     virtual int spectraNo(int const index) const{ return dummy;}
     virtual int& spectraNo(int const index) { return dummy;}
+    
+  //Methods for getting data via python. Do not use for anything else!
+  ///Returns the x data const
+  virtual const std::vector<double>& getX(int const index) const {return data;}
+  ///Returns the y data const
+  virtual const std::vector<double>& getY(int const index) const {return data;}
+  ///Returns the error const
+  virtual const std::vector<double>& getE(int const index) const {return data;}
+  ///Returns the error const
+  virtual const std::vector<double>& getE2(int const index) const {return data;}
+  
+    
   private:
     std::vector<double> data;
     int dummy;
