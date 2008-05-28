@@ -118,6 +118,10 @@ public:
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
+  /**
+	Method to check that supplied properties are valid. Calls protected method of PropertyManager.
+	\returns Boolean result.
+    **/
   virtual bool checkPropertiesValid() const { return validateProperties(); }
   
   // Make PropertyManager's setProperty methods public
