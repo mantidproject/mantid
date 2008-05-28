@@ -45,7 +45,7 @@ namespace PythonAPI
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class DLLExport PythonInterface
+class PythonInterface
 {
 public:
 	PythonInterface();

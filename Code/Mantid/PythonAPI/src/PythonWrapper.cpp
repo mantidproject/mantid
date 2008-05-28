@@ -79,22 +79,6 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
         return call_method< int >(py_self, "blocksize");
     }
 
-    std::vector<double,std::allocator<double> >& dataX(const int p0) {
-        return call_method< std::vector<double,std::allocator<double> >& >(py_self, "dataX", p0);
-    }
-
-    std::vector<double,std::allocator<double> >& dataY(const int p0) {
-        return call_method< std::vector<double,std::allocator<double> >& >(py_self, "dataY", p0);
-    }
-
-    std::vector<double,std::allocator<double> >& dataE(const int p0) {
-        return call_method< std::vector<double,std::allocator<double> >& >(py_self, "dataE", p0);
-    }
-
-    std::vector<double,std::allocator<double> >& dataE2(const int p0) {
-        return call_method< std::vector<double,std::allocator<double> >& >(py_self, "dataE2", p0);
-    }
-
     int spectraNo(const int p0) const {
         return call_method< int >(py_self, "spectraNo", p0);
     }
@@ -102,21 +86,21 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     int& spectraNo(const int p0) {
         return call_method< int& >(py_self, "spectraNo", p0);
     }
-
-    const std::vector<double,std::allocator<double> >& dataX(const int p0) const {
-        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "dataX", p0);
+    
+    const std::vector<double,std::allocator<double> >& getX(const int p0) const {
+        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getX", p0);
     }
 
-    const std::vector<double,std::allocator<double> >& dataY(const int p0) const {
-        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "dataY", p0);
+    const std::vector<double,std::allocator<double> >& getY(const int p0) const {
+        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getY", p0);
     }
 
-    const std::vector<double,std::allocator<double> >& dataE(const int p0) const {
-        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "dataE", p0);
+    const std::vector<double,std::allocator<double> >& getE(const int p0) const {
+        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getE", p0);
     }
 
-    const std::vector<double,std::allocator<double> >& dataE2(const int p0) const {
-        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "dataE2", p0);
+    const std::vector<double,std::allocator<double> >& getE2(const int p0) const {
+        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getE2", p0);
     }
 
     PyObject* py_self;
@@ -146,11 +130,11 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def(init< const Mantid::PythonAPI::PythonInterface& >())
         .def("InitialiseFrameworkManager", &Mantid::PythonAPI::PythonInterface::InitialiseFrameworkManager)
         .def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm, return_value_policy< manage_new_object>())
+	.def("GetAlgorithmNames", &Mantid::PythonAPI::PythonInterface::GetAlgorithmNames)
         .def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)
-        .def("GetXData", &Mantid::PythonAPI::PythonInterface::GetXData, return_value_policy< manage_new_object >())
-        .def("GetYData", &Mantid::PythonAPI::PythonInterface::GetYData, return_value_policy< manage_new_object >())
-        .def("GetEData", &Mantid::PythonAPI::PythonInterface::GetEData, return_value_policy< manage_new_object >())
-        .def("GetE2Data", &Mantid::PythonAPI::PythonInterface::GetE2Data, return_value_policy< manage_new_object >())
+	.def("RetrieveWorkspace", &Mantid::PythonAPI::PythonInterface::RetrieveWorkspace)
+	.def("DeleteWorkspace", &Mantid::PythonAPI::PythonInterface::DeleteWorkspace)
+	.def("GetWorkspaceNames", &Mantid::PythonAPI::PythonInterface::GetWorkspaceNames)
         .def("GetAddressXData", &Mantid::PythonAPI::PythonInterface::GetAddressXData)
         .def("GetAddressYData", &Mantid::PythonAPI::PythonInterface::GetAddressYData)
 	;
@@ -170,24 +154,17 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
         .def("size", pure_virtual(&Mantid::API::Workspace::size))
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
-        //.def("dataX", pure_virtual((std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) )&Mantid::API::Workspace::dataX), return_value_policy< manage_new_object >())
-        //.def("dataY", pure_virtual((std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) )&Mantid::API::Workspace::dataY), return_value_policy< manage_new_object >())
-        //.def("dataE", pure_virtual((std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) )&Mantid::API::Workspace::dataE), return_value_policy< manage_new_object >())
-        //.def("dataE2", pure_virtual((std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) )&Mantid::API::Workspace::dataE2), return_value_policy< manage_new_object >())
         .def("spectraNo", pure_virtual((int (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::spectraNo))
-        //.def("spectraNo", pure_virtual((int& (Mantid::API::Workspace::*)(const int) )&Mantid::API::Workspace::spectraNo))
-        //.def("dataX", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::dataX), return_value_policy< manage_new_object >())
-        //.def("dataY", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::dataY), return_value_policy< manage_new_object >())
-        //.def("dataE", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::dataE), return_value_policy< manage_new_object >())
-        //.def("dataE2", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::dataE2), return_value_policy< manage_new_object >())
         .def("setTitle", &Mantid::API::Workspace::setTitle)
         .def("setComment", &Mantid::API::Workspace::setComment)
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
         .def("XUnit", (const boost::shared_ptr<Mantid::Kernel::Unit>& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::XUnit, return_value_policy< copy_const_reference >())
-        //.def("XUnit", (boost::shared_ptr<Mantid::Kernel::Unit>& (Mantid::API::Workspace::*)() )&Mantid::API::Workspace::XUnit, return_value_policy< copy_const_reference >())
         .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
-        //def("isDistribution", (bool& (Mantid::API::Workspace::*)(bool) )&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
+	.def("getX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getX), return_value_policy< manage_new_object >())
+        .def("getY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getY), return_value_policy< manage_new_object >())
+        .def("getE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE), return_value_policy< manage_new_object >())
+        .def("getE2", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE2), return_value_policy< manage_new_object >())
     ;
 
 

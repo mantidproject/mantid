@@ -141,6 +141,17 @@ public:
   const bool& isDistribution() const;
   bool& isDistribution(bool newValue);
   
+  //Methods for getting data via python. Do not use for anything else!
+  ///Returns the x data const
+  virtual const std::vector<double>& getX(int const index) const = 0;
+  ///Returns the y data const
+  virtual const std::vector<double>& getY(int const index) const =0;
+  ///Returns the error const
+  virtual const std::vector<double>& getE(int const index) const =0;
+  ///Returns the error const
+  virtual const std::vector<double>& getE2(int const index) const =0;
+
+  
 protected:
   Workspace();
 

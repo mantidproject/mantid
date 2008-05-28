@@ -118,6 +118,16 @@ public:
   ///Returns the spectrum number to which this workspace refers
   virtual int& spectraNo(int const index){ return Histogram1D::spectraNo(); }
 
+  //Methods for getting data via python. Do not use for anything else!
+  ///Returns the x data const
+  virtual const std::vector<double>& getX(int const index) const {return dataX();}
+  ///Returns the y data const
+  virtual const std::vector<double>& getY(int const index) const {return dataY();}
+  ///Returns the error const
+  virtual const std::vector<double>& getE(int const index) const {return dataE();}
+  ///Returns the error const
+  virtual const std::vector<double>& getE2(int const index) const {return dataE2();}
+  
 private:
   /// Private copy constructor. NO COPY ALLOWED
   Workspace1D(const Workspace1D&);

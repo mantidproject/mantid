@@ -125,6 +125,16 @@ public:
   ///Returns the spectrum number to which a given index refers
   virtual int spectraNo(int const index) const;
   virtual int& spectraNo(int const index);
+  
+  //Methods for getting data via python. Do not use for anything else!
+  ///Returns the x data const
+  virtual const std::vector<double>& getX(int const index) const;
+  ///Returns the y data const
+  virtual const std::vector<double>& getY(int const index) const;
+  ///Returns the error const
+  virtual const std::vector<double>& getE(int const index) const;
+  ///Returns the error const
+  virtual const std::vector<double>& getE2(int const index) const;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
