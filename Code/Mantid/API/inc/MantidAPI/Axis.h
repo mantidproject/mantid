@@ -69,7 +69,7 @@ public:
 	const bool isNumeric() const;
 	
   virtual const double operator()(const int index, const int verticalIndex = 0) const;
-//	void setValue(const int index, const double value);
+	virtual void setValue(const int index, const double value);
 	
 	const int& spectraNo(const int index) const;
   int& spectraNo(const int index);

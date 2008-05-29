@@ -51,5 +51,11 @@ const double RefAxis::operator()(const int index, const int verticalIndex) const
   return m_parentWS->dataX(verticalIndex)[index];
 }
 
+/// Method not available for RefAxis. Will always throw.
+void RefAxis::setValue(const int index, const double value)
+{
+  throw std::domain_error("This method cannot be used on a RefAxis.")
+}
+
 } // namespace API
 } // namespace Mantid

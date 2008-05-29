@@ -48,6 +48,7 @@ public:
 	Axis* clone(const Workspace* const parentWorkspace);
 	
   virtual const double operator()(const int index, const int verticalIndex) const;
+  virtual void setValue(const int index, const double value);
 
 private:
   RefAxis(const RefAxis& right, const Workspace* const parentWorkspace);

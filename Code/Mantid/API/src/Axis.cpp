@@ -106,22 +106,27 @@ const double Axis::operator()(const int index, const int verticalIndex) const
   }
 }
 
-//void Axis::setValue(const int index, const double value)
-//{
-//  if (index < 0 || index >= m_size)
-//  {
-//    throw Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
-//  }
-//  
-//  if (m_isSpectra)
-//  {
-//    m_spectraValues[index] = static_cast<int>(value);
-//  }
-//  else
-//  {
-//    m_numericValues[index] = value;
-//  }  
-//}
+/** Sets the axis value at a given position
+ *  @param index The position along the axis for which to set the value
+ *  @param value The new value
+ *  @throw  IndexError If the index requested is not in the range of this axis
+ */
+void Axis::setValue(const int index, const double value)
+{
+  if (index < 0 || index >= m_size)
+  {
+    throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
+  }
+  
+  if (m_isSpectra)
+  {
+    m_spectraValues[index] = static_cast<int>(value);
+  }
+  else
+  {
+    m_numericValues[index] = value;
+  }  
+}
 
 /** Returns the spectrum number at the position given (Spectra axis only)
  *  @param  index The position for which the value is required
