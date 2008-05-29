@@ -54,7 +54,7 @@ const double RefAxis::operator()(const int index, const int verticalIndex) const
 /// Method not available for RefAxis. Will always throw.
 void RefAxis::setValue(const int index, const double value)
 {
-  throw std::domain_error("This method cannot be used on a RefAxis.")
+  throw std::domain_error("This method cannot be used on a RefAxis.");
 }
 
 } // namespace API
