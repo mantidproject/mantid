@@ -1,9 +1,8 @@
-#ifndef TOFTOWAVELENGTHTEST_H_
-#define TOFTOWAVELENGTHTEST_H_
+#ifndef CONVERTUNITSTEST_H_
+#define CONVERTUNITSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-//#include "MantidAlgorithms/TOFtoWavelength.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,11 +16,11 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class TOFtoWavelengthTest : public CxxTest::TestSuite
+class ConvertUnitsTest : public CxxTest::TestSuite
 {
 public:
   
-  TOFtoWavelengthTest()
+  ConvertUnitsTest()
   {   
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2584,11,10);
@@ -43,7 +42,7 @@ public:
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
-      space2D->spectraNo(j) = j;
+      space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
     
@@ -55,7 +54,7 @@ public:
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../../Test/Instrument/HET_cutdown_version.xml";
+    std::string inputFile = "../../../../Test/Instrument/HET_definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
@@ -63,7 +62,7 @@ public:
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
     space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 2584, space->getInstrument().get() );
     
-    space->XUnit() = UnitFactory::Instance().create("TOF");
+    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
   
   void testInit()
@@ -104,9 +103,9 @@ public:
     TS_ASSERT_EQUALS( y[4], yIn[4] );
     TS_ASSERT_EQUALS( e[1], eIn[1] );
     // Test that spectra that should have been zeroed have been
-    std::vector<double> x = output2D->dataX(1);
-    y = output2D->dataY(134);
-    e = output2D->dataE(382);
+    std::vector<double> x = output2D->dataX(2300);
+    y = output2D->dataY(2408);
+    e = output2D->dataE(2276);
     TS_ASSERT_EQUALS( x[7], 0 );
     TS_ASSERT_EQUALS( y[1], 0 );
     TS_ASSERT_EQUALS( e[9], 0 );
@@ -131,10 +130,9 @@ public:
   
   
 private:
-//  TOFtoWavelength alg;
   ConvertUnits alg;
   std::string inputSpace;
   std::string outputSpace;
 };
 
-#endif /*TOFTOWAVELENGTHTEST_H_*/
+#endif /*CONVERTUNITSTEST_H_*/

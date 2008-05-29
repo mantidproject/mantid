@@ -53,14 +53,6 @@ public:
     TS_ASSERT( ! t.quickConversion(tof,factor,power) )
   }
 
-  void testUnit_GetSetDescription()
-  {
-    UnitTester t;
-    TS_ASSERT_EQUALS( t.description(), "" )
-    t.setDescription("testing");
-    TS_ASSERT_EQUALS( t.description(), "testing" )
-  }
-
   //----------------------------------------------------------------------
   // TOF tests
   //----------------------------------------------------------------------

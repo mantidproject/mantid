@@ -31,8 +31,6 @@ public:
   const IErrorHelper* errorHelper(int const index) const {return NULL;}
   void setErrorHelper(int const,IErrorHelper*) {}
   void setErrorHelper(int const,const IErrorHelper*) {}
-  int spectraNo(int const) const {return spec;}
-  int& spectraNo(int const) {return spec;}
   
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
@@ -96,14 +94,7 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( ws.getWorkspaceHistory() = hh )
 	}
 
-	void test_global_Mantid_API_Workspace_XUnit()
-	{
-	  TS_ASSERT( ! ws.XUnit().get() )
-	  boost::shared_ptr<Unit> u;
-	  TS_ASSERT_THROWS_NOTHING( ws.XUnit() = u )
-	}
-
-	void test_global_Mantid_API_Workspace_isDistribution()
+	void testIsDistribution()
 	{
 	  TS_ASSERT( ! ws.isDistribution() )
 	  TS_ASSERT( ws.isDistribution(true) )

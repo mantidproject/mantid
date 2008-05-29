@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidAPI/Axis.h"
 #include "MantidKernel/Unit.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -38,7 +39,7 @@ namespace API
  @author Laurent C Chapon, ISIS, RAL
  @date 26/09/2007
  
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
  
  This file is part of Mantid.
  
@@ -64,6 +65,8 @@ class SpectraDetectorMap;
 class DLLExport Workspace
 {
 public:
+  // The Workspace Factory create from parent method needs direct access to the axes.
+  friend class WorkspaceFactoryImpl;
   /// Typedef for the workspace_iterator to use with a Workspace
   typedef workspace_iterator<LocatedDataRef, Workspace> iterator;
   /// Typedef for the const workspace_iterator to use with a Workspace
@@ -113,11 +116,6 @@ public:
   ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) =0;
 
-  ///Returns the spectrum number to which a given index refers
-  virtual int spectraNo(int const index) const =0;
-  ///Returns the spectrum number to which a given index refers (non const)
-  virtual int& spectraNo(int const index) =0;
-
   //Get methods return the histogram number 
   ///Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const = 0;
@@ -133,9 +131,7 @@ public:
   ///Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
 
-  /// Returns the unit object
-  const boost::shared_ptr<Kernel::Unit>& XUnit() const;
-  boost::shared_ptr<Kernel::Unit>& XUnit();
+  Axis* const getAxis(const int axisIndex) const;
   
   /// Are the Y-values dimensioned?
   const bool& isDistribution() const;
@@ -154,6 +150,8 @@ public:
   
 protected:
   Workspace();
+  /// A vector of pointers to the axes for this workspace
+  std::vector<Axis*> m_axes;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -176,8 +174,6 @@ private:
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
   
-  /// The unit of the x axis
-  boost::shared_ptr<Kernel::Unit> m_xUnit;
   /// Flag indicating whether the Y-values are dimensioned. False by default
   bool m_isDistribution;
   

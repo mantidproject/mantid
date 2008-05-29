@@ -13,13 +13,13 @@ namespace Mantid
     */
     LocatedDataRef::LocatedDataRef(const LocatedDataRef& A) : ILocatedData(),
       xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),e2Pointer(A.e2Pointer),
-      errorHelper(A.errorHelper),spectraNo(A.spectraNo)
+      errorHelper(A.errorHelper)
     {}
 
     /// Default constructor
     LocatedDataRef::LocatedDataRef(): ILocatedData(),
       xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),e2Pointer(0),
-      errorHelper(0),spectraNo(0)
+      errorHelper(0)
     {}
 
     /*!
@@ -43,7 +43,6 @@ namespace Mantid
           *x2Pointer= *A.x2Pointer;
         }
         errorHelper = A.errorHelper;
-        spectraNo = A.spectraNo;
       }
       return *this;
     }
@@ -69,7 +68,6 @@ namespace Mantid
           *x2Pointer= A.X2();
         }
         errorHelper = A.ErrorHelper();
-        spectraNo = A.SpectraNo();
       }
       return *this;
     }
@@ -150,14 +148,6 @@ namespace Mantid
     {
       return errorHelper; 
     }
-
-    /** Const Accessor for Spectra Number
-    @return The Spectra Number
-    */
-    int LocatedDataRef::SpectraNo() const
-    {
-      return spectraNo; 
-    } 
 
     /** Const Accessor for X value
     @return The X value

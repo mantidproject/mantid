@@ -49,9 +49,6 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     ///Sets the ErrorHelper for this spectra
     virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
-  ///Returns the spectra number
-    virtual int spectraNo(int const index) const{ return dummy;}
-    virtual int& spectraNo(int const index) { return dummy;}
     
   //Methods for getting data via python. Do not use for anything else!
   ///Returns the x data const

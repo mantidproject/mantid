@@ -184,7 +184,7 @@ namespace Mantid
       delete[] spectrum;
 
       // Set the unit on the workspace to TOF
-      m_localWorkspace->XUnit() = UnitFactory::Instance().create("TOF");
+      m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       
       // Run the sub-algorithms (LoadInstrument & LoadRaw)
       runSubAlgorithms();
@@ -218,7 +218,7 @@ namespace Mantid
       m_localWorkspace->setData(hist, v, e);
       m_localWorkspace->setX(hist, tcbs);
       m_localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
-      m_localWorkspace->spectraNo(hist)= i;
+      m_localWorkspace->getAxis(1)->spectraNo(hist)= i;
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
@@ -230,7 +230,7 @@ namespace Mantid
 
       // Determine the search directory for XML instrument definition files (IDFs)
 
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefintion.directory");
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
       
       if ( directoryName.empty() )
         directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs

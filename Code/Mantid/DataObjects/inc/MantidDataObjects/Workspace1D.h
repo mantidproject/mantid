@@ -20,7 +20,7 @@ namespace DataObjects
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007 	
     
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
     
@@ -113,10 +113,6 @@ public:
   virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
    ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
-  ///Returns the spectrum number to which this workspace refers
-  virtual int spectraNo(int const index) const { return Histogram1D::spectraNo(); }
-  ///Returns the spectrum number to which this workspace refers
-  virtual int& spectraNo(int const index){ return Histogram1D::spectraNo(); }
 
   //Methods for getting data via python. Do not use for anything else!
   ///Returns the x data const

@@ -128,7 +128,6 @@ namespace Mantid
 
           //get cached block level data objects
           m_CPoint.errorHelper = m_workspace->errorHelper(m_dataBlockIndex);
-          m_CPoint.spectraNo = m_workspace->spectraNo(m_dataBlockIndex);
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();

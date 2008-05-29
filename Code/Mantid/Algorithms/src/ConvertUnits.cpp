@@ -58,7 +58,8 @@ void ConvertUnits::exec()
   }
   
   // Check that the input workspace has had its unit set
-  if ( ! inputWS->XUnit() )
+  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
+  if ( ! inputUnit )
   {
     g_log.error("Input workspace has not had its unit set");
     throw std::runtime_error("Input workspace has not had its unit set");
@@ -75,7 +76,8 @@ void ConvertUnits::exec()
     setProperty("OutputWorkspace",outputWS);
   }
   // Set the final unit that our output workspace will have
-  outputWS->XUnit() = UnitFactory::Instance().create(getPropertyValue("Target"));
+  boost::shared_ptr<Unit> outputUnit = 
+         outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(getPropertyValue("Target"));
   
   // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
   const bool distribution = outputWS->isDistribution(inputWS->isDistribution());
@@ -108,7 +110,7 @@ void ConvertUnits::exec()
   
   // Check whether there is a quick conversion available
   double factor, power;
-  if ( inputWS->XUnit()->quickConversion(*outputWS->XUnit(),factor,power) )
+  if ( inputUnit->quickConversion(*outputUnit,factor,power) )
   // If test fails, could also check whether a quick conversion in the opposite direction has been entered
   {
     convertQuickly(numberOfSpectra,outputWS,factor,power);
@@ -165,6 +167,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
   // And one to the SpectraDetectorMap
   boost::shared_ptr<API::SpectraDetectorMap> specMap = inputWS->getSpectraMap();
   
+  // Get the unit object for each workspace
+  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
+  boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit();
+  
   // Get the distance between the source and the sample (assume in metres)
   Geometry::ObjComponent* sample = instrument->getSample();
   double l1;
@@ -196,7 +202,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
     
     try {
       // Get the spectrum number for this histogram
-      const int spec = inputWS->spectraNo(i);
+      const int spec = inputWS->getAxis(1)->spectraNo(i);
       // Now get the detector to which this relates
       Geometry::V3D detPos = specMap->getDetector(spec)->getPos();
       Geometry::V3D samplePos = sample->getPos();
@@ -205,9 +211,6 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
       // The scattering angle for this detector (in radians).
       //     - this assumes the incident beam comes in along the z axis
       const double twoTheta = detPos.zenith(samplePos);
-//      double twoTheta;
-//      // Get these two values
-//      instrument->detectorLocation(inputWS->spectraNo(i),l2,twoTheta);
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
@@ -215,9 +218,9 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr
       }
       
       // Convert the input unit to time-of-flight
-      inputWS->XUnit()->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      inputUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
-      outputWS->XUnit()->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      outputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
    } catch (Exception::NotFoundError e) {
       // Get to here if exception thrown when calculating distance to detector

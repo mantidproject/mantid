@@ -379,26 +379,6 @@ const API::IErrorHelper* ManagedDataBlock2D::errorHelper(int const index) const
   return m_data[index-m_minIndex].errorHelper();
 }
 
-///Returns the spectrum number to which a given index refers
-int ManagedDataBlock2D::spectraNo(int const index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::spectraNo, histogram number out of range");
-
-  return m_data[index-m_minIndex].spectraNo();
-}
-
-///Returns the spectrum number to which a given index refers
-int& ManagedDataBlock2D::spectraNo(int const index)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::spectraNo, histogram number out of range");
-
-  return m_data[index-m_minIndex].spectraNo();
-}
-
 ///Sets the ErrorHelper for this spectra
 void ManagedDataBlock2D::setErrorHelper(int const index,API::IErrorHelper* errorHelper)
 {
@@ -455,8 +435,6 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
     }
     fs.write((char *) &*it->dataE2().begin(), data.m_YLength * sizeof(double));
     
-    // Write out the spectrum number member of Histogram1D
-    fs.write((char *) &it->spectraNo(), sizeof(int));
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
   return fs;
@@ -481,8 +459,6 @@ std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
     it->dataE2().resize(data.m_YLength, 0.0);
     fs.read((char *) &*it->dataE2().begin(), data.m_YLength * sizeof(double));
     
-    // Read in the spectrum number member of Histogram1D
-    fs.read((char *) &it->spectraNo(), sizeof(int));
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
   return fs;

@@ -14,7 +14,7 @@ namespace Mantid
     */
     LocatedDataValue::LocatedDataValue(const LocatedDataValue& A) : ILocatedData(),
       xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),e2Value(A.e2Value),
-      spectraNo(A.spectraNo), errorHelper(A.errorHelper),x2Value(A.x2Value),_isHistogram(A._isHistogram)
+      errorHelper(A.errorHelper),x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
     /*!
@@ -23,7 +23,7 @@ namespace Mantid
     */
     LocatedDataValue::LocatedDataValue(const ILocatedData& A) : ILocatedData(),
       xValue(A.X()),yValue(A.Y()),eValue(A.E()),e2Value(A.E2()),
-      spectraNo(A.SpectraNo()),errorHelper(A.ErrorHelper()),
+      errorHelper(A.ErrorHelper()),
       x2Value(0),_isHistogram(A.isHistogram())
     {
       if (isHistogram())
@@ -35,7 +35,7 @@ namespace Mantid
     /// Default constructor
     LocatedDataValue::LocatedDataValue(): ILocatedData(),
       xValue(0),yValue(0),eValue(0),e2Value(0),
-      spectraNo(0),errorHelper(0),x2Value(0),_isHistogram(false)
+      errorHelper(0),x2Value(0),_isHistogram(false)
     {}
 
     /*!
@@ -53,7 +53,6 @@ namespace Mantid
         eValue= A.eValue;
         e2Value= A.e2Value;
         errorHelper = A.errorHelper;
-        spectraNo = A.spectraNo;
         _isHistogram = A._isHistogram;
       }
       return *this;
@@ -82,7 +81,6 @@ namespace Mantid
           e2Value= A.E2();
         }
         errorHelper = A.ErrorHelper();
-        spectraNo = A.SpectraNo();
       }
       return *this;
     }
@@ -196,14 +194,6 @@ namespace Mantid
     {
       return errorHelper; 
     }
-
-    /** Const Accessor for Spectra Number
-    @return The Spectra Number
-    */
-    int LocatedDataValue::SpectraNo() const
-    {
-      return spectraNo; 
-    } 
 
     /** Const Accessor for X value
     @return The X value

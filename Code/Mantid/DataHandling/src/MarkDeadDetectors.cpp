@@ -42,6 +42,8 @@ void MarkDeadDetectors::exec()
   const Workspace2D_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
   const int vectorSize = WS->blocksize();
+  // Get hold of the axis that holds the spectrum numbers
+  Axis *spectraAxis = WS->getAxis(1);
 
   Property *wil = getProperty("WorkspaceIndexList");
   Property *sl = getProperty("SpectraList");
@@ -66,7 +68,7 @@ void MarkDeadDetectors::exec()
     
     for (int i = 0; i < WS->getHistogramNumber(); ++i)
     {
-      int currentSpec = WS->spectraNo(i);
+      int currentSpec = spectraAxis->spectraNo(i);
       if ( spectraSet.find(currentSpec) != spectraSet.end() )
       {
         indexList.push_back(i);
@@ -79,7 +81,7 @@ void MarkDeadDetectors::exec()
   for (it = indexList.begin(); it != indexList.end(); ++it) 
   {
     // Mark associated detector as dead
-    WS->getSpectraMap()->getDetector(WS->spectraNo(*it))->markDead();
+    WS->getSpectraMap()->getDetector(spectraAxis->spectraNo(*it))->markDead();
 
     // Zero the workspace spectra (data and errors, not X values)
     WS->dataY(*it).assign(vectorSize,0.0);

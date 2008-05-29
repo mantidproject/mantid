@@ -35,7 +35,7 @@ public:
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
-      space2D->spectraNo(j) = j;
+      space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
     Detector *d = new Detector;

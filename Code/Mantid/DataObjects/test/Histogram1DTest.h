@@ -133,15 +133,6 @@ public:
     //TS_ASSERT_THROWS(h.setData(pa,pb),const std::invalid_argument&);
   }
 
-  void testSpectraNo()
-  {
-    int sn1 =32, sn2=67;
-    h.spectraNo()=sn1;
-    TS_ASSERT_EQUALS(h.spectraNo(),sn1);
-    h.spectraNo()=sn2;
-    TS_ASSERT_EQUALS(h.spectraNo(),sn2);
-  }
-
   void testErrorHelper()
   {
     //default should be Gaussian

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <limits>
 
@@ -50,6 +51,9 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   }
   
   m_noVectors = NVectors;
+  m_axes.resize(2);
+  m_axes[0] = new API::RefAxis(this);
+  m_axes[1] = new API::Axis(API::AxisType::Spectra,NVectors);
   m_XLength = XLength;
   m_YLength = YLength;
   
@@ -431,24 +435,6 @@ const API::IErrorHelper* ManagedWorkspace2D::errorHelper(const int index) const
     throw std::range_error("ManagedWorkspace2D::errorHelper, histogram number out of range");
 
   return getDataBlock(index)->errorHelper(index);
-}
-
-///Returns the spectrum number to which a given index refers
-int ManagedWorkspace2D::spectraNo(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::spectraNo, histogram number out of range");
-
-  return getDataBlock(index)->spectraNo(index);
-}
-
-///Returns the spectrum number to which a given index refers
-int& ManagedWorkspace2D::spectraNo(const int index)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::spectraNo, histogram number out of range");
-
-  return getDataBlock(index)->spectraNo(index);
 }
 
 ///Sets the ErrorHelper for this spectra

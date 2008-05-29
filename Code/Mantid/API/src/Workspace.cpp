@@ -14,13 +14,18 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace() : m_title(), m_comment(), sptr_instrument(new Instrument),sptr_spectramap(new SpectraDetectorMap), m_sample(), m_history(), 
-  m_xUnit(boost::shared_ptr<Kernel::Unit>()), m_isDistribution(false)
+Workspace::Workspace() : m_axes(), m_title(), m_comment(), sptr_instrument(new Instrument),
+  sptr_spectramap(new SpectraDetectorMap), m_sample(), m_history(), m_isDistribution(false)
 {}
 
 /// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
 Workspace::~Workspace()
-{}
+{
+  for (unsigned int i = 0; i < m_axes.size(); ++i)
+  {
+    delete m_axes[i];
+  }
+}
 	
 /** Set the title of the workspace
  * 
@@ -100,20 +105,18 @@ Sample& Workspace::getSample()
   return m_sample;
 }
 
-/** The unit for the X axes in this workspace
- *  @return A shared pointer to the unit object
+/** Get a pointer to a workspace axis
+ *  @param axisIndex The index of the axis required
+ *  @throw IndexError If the argument given is outside the range of axes held by this workspace
  */
-const boost::shared_ptr<Kernel::Unit>& Workspace::XUnit() const
+Axis* const Workspace::getAxis(const int axisIndex) const
 {
-  return m_xUnit;
-}
-
-/** The unit object for this workspace (non const version)
- *  @return A shared pointer to the unit object
- */
-boost::shared_ptr<Kernel::Unit>& Workspace::XUnit()
-{
-  return m_xUnit;
+  if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
+  {
+    throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
+  }
+  
+  return m_axes[axisIndex];
 }
 
 /// Are the Y-values in this workspace dimensioned?

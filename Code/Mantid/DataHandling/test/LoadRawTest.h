@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->XUnit()->unitID(), "TOF" )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
 
     //----------------------------------------------------------------------

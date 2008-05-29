@@ -28,7 +28,7 @@ namespace DataObjects
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2008
     
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
   
@@ -145,8 +145,8 @@ public:
   virtual const API::IErrorHelper* errorHelper(const int index) const;
   virtual void setErrorHelper(const int index,API::IErrorHelper* errorHelper);
   virtual void setErrorHelper(const int index,const API::IErrorHelper* errorHelper);
-  virtual int spectraNo(const int index) const;
-  virtual int& spectraNo(const int index);
+//  virtual int spectraNo(const int index) const;
+//  virtual int& spectraNo(const int index);
 
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
@@ -160,7 +160,7 @@ private:
   ManagedDataBlock2D* getDataBlock(const int index) const;
   
   /// The number of vectors in the workspace
-  int m_noVectors;
+//  int m_noVectors;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
   int m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 

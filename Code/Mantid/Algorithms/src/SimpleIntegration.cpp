@@ -117,7 +117,7 @@ void SimpleIntegration::exec()
     outputWorkspace->dataX(j) = XValue;
     outputWorkspace->dataY(j) = YSum;
     outputWorkspace->dataE(j) = YError;
-    outputWorkspace->spectraNo(j) = localworkspace->spectraNo(i);
+    outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
   }
   
   // Assign it to the output workspace property

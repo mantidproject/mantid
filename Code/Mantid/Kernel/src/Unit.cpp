@@ -56,22 +56,6 @@ bool Unit::quickConversion(std::string destUnitName, double& factor, double& pow
   return true;
 }
 
-/** Get the description attached to a unit instance
- *  @return A string containing the description
- */
-const std::string& Unit::description() const
-{
-  return m_description;
-}
-
-/** Set the description of a unit instance
- *  @param value The new description
- */ 
-void Unit::setDescription(const std::string& value)
-{
-  m_description = value;
-}
-
 // Initialise the static map holding the 'quick conversions'
 Unit::ConversionsMap Unit::s_conversionFactors = Unit::ConversionsMap();
 

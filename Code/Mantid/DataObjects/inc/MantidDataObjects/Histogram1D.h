@@ -23,7 +23,7 @@ namespace DataObjects
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007  
     
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
  	
@@ -57,7 +57,6 @@ private:
   RCtype refE;   ///< RefCounted Error
   RCtype refE2;  ///< Second error value for when Poisson errors used
   const API::IErrorHelper* _errorHelper; ///<pointer to the error helper class for this spectra
-  int _spectraNo; ///< The spectra no for this histogram 0 = not set
 
 public:
   Histogram1D();
@@ -139,10 +138,6 @@ public:
   void setErrorHelper(API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
   ///Returns the ErrorHelper applicable for this detector
   const API::IErrorHelper* errorHelper() const { return _errorHelper; }
-  /// Returns the spectrum number to which this histogram refers
-  const int spectraNo() const { return _spectraNo; }
-  /// The spectrum number to which this histogram refers
-  int& spectraNo() { return _spectraNo; }
 
 };
 

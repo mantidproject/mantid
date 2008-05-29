@@ -1,5 +1,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -18,7 +19,7 @@ namespace Mantid
 
     /// Constructor
     Workspace2D::Workspace2D()
-    { }
+    {}
 
     ///Destructor
     Workspace2D::~Workspace2D()
@@ -37,12 +38,17 @@ namespace Mantid
         throw std::out_of_range("All arguments to init must be positive and non-zero");
       }
 
-      data.resize(NVectors);
+      m_noVectors = NVectors;
+      data.resize(m_noVectors);
+      m_axes.resize(2);
+      m_axes[0] = new API::RefAxis(this);
+      // This axis is always a spectra one for now
+      m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
 
       Histogram1D::RCtype t1,t2;
       t1.access().resize(XLength); //this call initializes array to zero 
       t2.access().resize(YLength);
-      for (int i=0;i<NVectors;i++)
+      for (int i=0;i<m_noVectors;i++)
       {
         this->setX(i,t1);
         // Y,E,E2 arrays populated
@@ -68,7 +74,7 @@ namespace Mantid
     void 
       Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
       data[histnumber].dataX()=Vec;
@@ -83,7 +89,7 @@ namespace Mantid
     void 
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
       data[histnumber].setX(Vec);
@@ -98,7 +104,7 @@ namespace Mantid
     void 
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
       data[histnumber].setX(PA);
@@ -113,7 +119,7 @@ namespace Mantid
     void 
       Workspace2D::setData(const int histnumber, const std::vector<double>& Vec)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setDAta, histogram number out of range");
 
       data[histnumber].dataY()=Vec;
@@ -129,7 +135,7 @@ namespace Mantid
       Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
       const std::vector<double>& VecErr)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].dataY()=Vec;
@@ -148,7 +154,7 @@ namespace Mantid
       Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
       const std::vector<double>& VecErr, const std::vector<double>& VecErr2)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].dataY()=Vec;
@@ -165,7 +171,7 @@ namespace Mantid
     void 
       Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY);
@@ -180,7 +186,7 @@ namespace Mantid
     void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
       const Histogram1D::RCtype& PE)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY,PE);
@@ -197,7 +203,7 @@ namespace Mantid
     void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
       const Histogram1D::RCtype& PE,const Histogram1D::RCtype& PE2)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY,PE,PE2);
@@ -213,7 +219,7 @@ namespace Mantid
     void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
       const Histogram1D::RCtype::ptr_type& PE)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY,PE);
@@ -230,7 +236,7 @@ namespace Mantid
     void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
       const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
     {
-      if (histnumber<0 || histnumber>=static_cast<int>(data.size()))
+      if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY,PE,PE2);
@@ -254,7 +260,7 @@ namespace Mantid
     const std::vector<double>& 
       Workspace2D::dataX(const int index) const
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataX, histogram number out of range");
 
       return data[index].dataX();
@@ -268,7 +274,7 @@ namespace Mantid
     const std::vector<double>& 
       Workspace2D::dataY(const int index) const
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
       return data[index].dataY();
@@ -282,7 +288,7 @@ namespace Mantid
     const std::vector<double>& 
       Workspace2D::dataE(const int index) const
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
       return data[index].dataE();
@@ -296,7 +302,7 @@ namespace Mantid
     const std::vector<double>& 
       Workspace2D::dataE2(const int index) const
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataE2, histogram number out of range");
 
       return data[index].dataE2();
@@ -317,7 +323,7 @@ namespace Mantid
     ///Returns the x data
     std::vector<double>& Workspace2D::dataX(int const index)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataX, histogram number out of range");
 
       return data[index].dataX();
@@ -325,7 +331,7 @@ namespace Mantid
     ///Returns the y data
     std::vector<double>& Workspace2D::dataY(int const index)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataY, histogram number out of range");
 
       return data[index].dataY();
@@ -333,7 +339,7 @@ namespace Mantid
     ///Returns the error data
     std::vector<double>& Workspace2D::dataE(int const index)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
       return data[index].dataE();
@@ -341,7 +347,7 @@ namespace Mantid
     ///Returns the error data
     std::vector<double>& Workspace2D::dataE2(int const index)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::dataE2, histogram number out of range");
 
       return data[index].dataE2();
@@ -359,34 +365,16 @@ namespace Mantid
     ///Returns the ErrorHelper applicable for this spectra
     const API::IErrorHelper* Workspace2D::errorHelper(int const index) const
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::errorHelper, histogram number out of range");
 
       return data[index].errorHelper();
     }
 
-    ///Returns the spectrum number to which a given index refers
-    int Workspace2D::spectraNo(int const index) const
-    {
-      if (index<0 || index>=static_cast<int>(data.size()))
-        throw std::range_error("Workspace2D::spectraNo, histogram number out of range");
-
-      return data[index].spectraNo();
-    }
-
-    ///Returns the spectrum number to which a given index refers
-    int& Workspace2D::spectraNo(int const index)
-    {
-      if (index<0 || index>=static_cast<int>(data.size()))
-        throw std::range_error("Workspace2D::spectraNo, histogram number out of range");
-
-      return data[index].spectraNo();
-    }
-
     ///Sets the ErrorHelper for this spectra
     void Workspace2D::setErrorHelper(int const index,API::IErrorHelper* errorHelper)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::setErrorHelper, histogram number out of range");
 
       data[index].setErrorHelper(errorHelper);
@@ -395,7 +383,7 @@ namespace Mantid
     ///Sets the ErrorHelper for this spectra
     void Workspace2D::setErrorHelper(int const index,const API::IErrorHelper* errorHelper)
     {
-      if (index<0 || index>=static_cast<int>(data.size()))
+      if (index<0 || index>=m_noVectors)
         throw std::range_error("Workspace2D::setErrorHelper, histogram number out of range");
 
       data[index].setErrorHelper(errorHelper);

@@ -41,6 +41,13 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
   const int NVectors = parent->size() / YLength;
   ws->init(NVectors,XLength,YLength);
   ws->setInstrument(parent->getInstrument());
+  for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+  {
+    // Need to delete the existing axis created in init above
+    delete ws->m_axes[i];
+    // Now set to a copy of the parent workspace's axis
+    ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
+  }
   return ws;
 }
 

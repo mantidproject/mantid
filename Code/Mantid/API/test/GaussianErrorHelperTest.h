@@ -46,7 +46,6 @@ public:
     TS_ASSERT_DELTA(result.Y(),values[1]+values[4],0.0001);
     TS_ASSERT_DELTA(result.E(),sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
   void testMinus()
@@ -55,7 +54,6 @@ public:
     TS_ASSERT_DELTA(result.Y(),values[1]-values[4],0.0001);
     TS_ASSERT_DELTA(result.E(),sqrt(pow(values[2],2)+pow(values[5],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
   void testMultiply()
@@ -64,7 +62,6 @@ public:
     TS_ASSERT_DELTA(result.Y(),values[1]*values[4],0.0001);
     TS_ASSERT_DELTA(result.E(),values[1]*values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
   void testDivision()
@@ -73,7 +70,6 @@ public:
     TS_ASSERT_DELTA(result.Y(),values[1]/values[4],0.0001);
     TS_ASSERT_DELTA(result.E(),values[1]/values[4]*sqrt(pow(values[2]/values[1],2)+pow(values[5]/values[4],2)),0.0001);
     TS_ASSERT_EQUALS( result.ErrorHelper(), lhs.ErrorHelper());
-    TS_ASSERT_EQUALS( result.SpectraNo(), lhs.SpectraNo());
   }
 
 private:

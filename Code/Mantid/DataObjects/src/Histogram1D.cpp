@@ -13,7 +13,7 @@ namespace DataObjects
  Constructor
  Defaults to use the Gaussian Error Helper
  */
-Histogram1D::Histogram1D() : _errorHelper(API::GaussianErrorHelper::Instance()), _spectraNo(0)
+Histogram1D::Histogram1D() : _errorHelper(API::GaussianErrorHelper::Instance())
 {}
 
 /*!
@@ -21,8 +21,7 @@ Histogram1D::Histogram1D() : _errorHelper(API::GaussianErrorHelper::Instance()),
  \param A :: Histogram to copy
  */
 Histogram1D::Histogram1D(const Histogram1D& A) :
-  refX(A.refX), refY(A.refY), refE(A.refE), refE2(A.refE2), _errorHelper(A._errorHelper),
-      _spectraNo(A._spectraNo)
+  refX(A.refX), refY(A.refY), refE(A.refE), refE2(A.refE2), _errorHelper(A._errorHelper)
 {}
 
 /*!
@@ -39,7 +38,7 @@ Histogram1D& Histogram1D::operator=(const Histogram1D& A)
     refE=A.refE;
     refE2=A.refE2;
     _errorHelper = A._errorHelper;
-    _spectraNo = A._spectraNo;
+//    _spectraNo = A._spectraNo;
   }
   return *this;
 }

@@ -11,11 +11,12 @@ namespace Mantid
 {
 
 //----------------------------------------------------------------------
-// Forward declaration
+// Forward declarations
 //----------------------------------------------------------------------
 namespace Kernel
 {
   class Logger;
+//  class Axis;
 }
 	
 namespace DataObjects
@@ -51,10 +52,6 @@ namespace DataObjects
 */ 	
 class DLLExport Workspace2D : public API::Workspace
 {
-private:
-  /// A vector that holds the 1D histograms 
-  std::vector<Histogram1D> data;
-
 public:
   /// Typedef for the workspace_iterator to use with a Workspace2D
   typedef API::workspace_iterator<API::LocatedDataRef, Workspace2D> iterator;
@@ -122,10 +119,6 @@ public:
   ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
 
-  ///Returns the spectrum number to which a given index refers
-  virtual int spectraNo(int const index) const;
-  virtual int& spectraNo(int const index);
-  
   //Methods for getting data via python. Do not use for anything else!
   ///Returns the x data const
   virtual const std::vector<double>& getX(int const index) const;
@@ -136,6 +129,10 @@ public:
   ///Returns the error const
   virtual const std::vector<double>& getE2(int const index) const;
 
+protected:
+  /// The number of vectors in the workspace
+  int m_noVectors;
+  
 private:
   /// Private copy constructor. NO COPY ALLOWED
   Workspace2D(const Workspace2D&);
@@ -144,8 +141,9 @@ private:
 
   virtual const int getHistogramNumberHelper() const;
   
-//  Kernel::Axis y_axis;
-  
+  /// A vector that holds the 1D histograms 
+  std::vector<Histogram1D> data;
+
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };

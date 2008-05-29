@@ -83,7 +83,7 @@ namespace Mantid
         // Populate the output workspace X values
         outputW->dataX(hist)=XValues_new;
         //copy oer the spectrum No and ErrorHelper
-        outputW->spectraNo(hist)=inputW->spectraNo(hist);
+//        outputW->getAxis()->spectraNo(hist)=inputW->getAxis()->spectraNo(hist);
         outputW->setErrorHelper(hist,inputW->errorHelper(hist));
       }
 

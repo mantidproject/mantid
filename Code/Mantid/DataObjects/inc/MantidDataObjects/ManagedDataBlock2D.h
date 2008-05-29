@@ -13,6 +13,9 @@
 namespace Mantid
 {
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
 namespace Kernel
 {
   class Logger;
@@ -28,7 +31,7 @@ namespace DataObjects
     @author Russell Taylor, Tessella Support Services plc
     @date 18/01/2008
     
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
   
@@ -85,8 +88,6 @@ public:
   const API::IErrorHelper* errorHelper(int const index) const;
   void setErrorHelper(int const index,API::IErrorHelper* errorHelper);
   void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
-  int spectraNo(int const index) const;
-  int& spectraNo(int const index);
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

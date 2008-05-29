@@ -20,7 +20,7 @@ namespace API
 
   \author N. Draper
     
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
  	
@@ -46,7 +46,6 @@ namespace API
   const double& E() const;
   const double& E2() const;
   const IErrorHelper* ErrorHelper() const;
-  int SpectraNo() const;
 
   double& X();
   double& E();
@@ -68,8 +67,6 @@ namespace API
   double* ePointer;        ///< Pointer to the value of E
   double* e2Pointer;       ///< Pointer to the value of E2
   const IErrorHelper* errorHelper;  ///< Pointer to the relevant ErrorHelper
-  int spectraNo;           ///< Pointer to the relevant ErrorHelper
-
 
   LocatedDataRef* clone() const;
 

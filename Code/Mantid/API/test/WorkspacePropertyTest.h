@@ -46,9 +46,6 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Sets the ErrorHelper for this spectra
     virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
-    ///Returns the spectra number
-    virtual int spectraNo(int const index) const{ return dummy;}
-    virtual int& spectraNo(int const index) { return dummy;}
     
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
@@ -97,9 +94,6 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Sets the ErrorHelper for this spectra
     virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
-    ///Returns the spectra number
-    virtual int spectraNo(int const index) const{ return dummy;}
-    virtual int& spectraNo(int const index) { return dummy;}
     
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
@@ -166,7 +160,7 @@ public:
     WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
 
     // The other two need the input workspace to exist in the ADS
-	Workspace_sptr space;
+    Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest") );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
     TS_ASSERT( wsp1->isValid() )
@@ -188,9 +182,9 @@ public:
     // Since no workspace has been assigned to this output property, it should throw
     TS_ASSERT_THROWS( wsp2->store(), std::runtime_error )
     // So now create and assign the workspace and test again
-	Workspace_sptr space;
+    Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest") );
-	*wsp2 = space;
+    *wsp2 = space;
     TS_ASSERT( wsp2->store() )
     // Check it really has been stored in the ADS
     Workspace_sptr storedspace;

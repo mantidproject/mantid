@@ -51,7 +51,7 @@ void GroupDetectors::exec()
   
   // Bin boundaries need to be the same so, for now, only allow this action if the workspace unit is TOF
   // Later, could include conversion into TOF and back again after combination (or some other solution)
-  if ( WS->XUnit()->unitID().compare("TOF") )
+  if ( WS->getAxis(0)->unit()->unitID().compare("TOF") )
   {
     g_log.error("Can only group if the workspace unit is time-of-flight");
     throw std::runtime_error("Can only group if the workspace unit is time-of-flight");
@@ -67,6 +67,8 @@ void GroupDetectors::exec()
   /// @todo Get this algorithm working on a more generic input workspace so the restrictions above can be lost
   
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
+  // Get hold of the axis that holds the spectrum numbers
+  Axis *spectraAxis = WS->getAxis(1);
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
   // appropriate spectra number and adding the indices they are linked to the list to be processed
@@ -80,7 +82,7 @@ void GroupDetectors::exec()
     
     for (int i = 0; i < WS->getHistogramNumber(); ++i)
     {
-      int currentSpec = WS->spectraNo(i);
+      int currentSpec = spectraAxis->spectraNo(i);
       if ( spectraSet.find(currentSpec) != spectraSet.end() )
       {
         indexList.push_back(i);
@@ -91,12 +93,12 @@ void GroupDetectors::exec()
   
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
-  const int firstSpectrum = WS->spectraNo(firstIndex);
+  const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
   {
     const int currentIndex = indexList[i+1];
     // Move the current detector to belong to the first spectrum
-    WS->getSpectraMap()->remap(WS->spectraNo(currentIndex),firstSpectrum);
+    WS->getSpectraMap()->remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
     std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataY(currentIndex).begin(),
                    WS->dataY(firstIndex).begin(), std::plus<double>());
@@ -105,7 +107,7 @@ void GroupDetectors::exec()
     WS->dataY(currentIndex).assign(vectorSize,0.0);
     WS->dataE(currentIndex).assign(vectorSize,0.0);
     WS->dataE2(currentIndex).assign(vectorSize,0.0);
-    WS->spectraNo(currentIndex) = -1;
+    spectraAxis->spectraNo(currentIndex) = -1;
   }
   // Deal with the errors (assuming Gaussian)
   /// @todo Deal with Poisson errors (E2)

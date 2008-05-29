@@ -18,7 +18,7 @@ namespace Mantid
     
     \author N. Draper
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -45,7 +45,6 @@ namespace Mantid
       const double& E() const;
       const double& E2() const;
       const IErrorHelper* ErrorHelper() const;
-      int SpectraNo() const;
 
       double& X();
       double& E();
@@ -58,7 +57,6 @@ namespace Mantid
       double yValue;        ///< value of Y
       double eValue;        ///< value of E
       double e2Value;       ///< value of E2
-      int spectraNo;        ///< spectra number
       const IErrorHelper* errorHelper; ///< Pointer to the approriate error helper
 
       const double& X2() const;

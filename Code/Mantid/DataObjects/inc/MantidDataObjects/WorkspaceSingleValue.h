@@ -19,7 +19,7 @@ namespace DataObjects
     @author Nicholas Draper
     @date 19/05/2008
     
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
     
@@ -123,9 +123,6 @@ public:
   virtual void setErrorHelper(API::IErrorHelper* errorHelper) { _ErrorHelper=errorHelper; }
    ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(const API::IErrorHelper* errorHelper) { _ErrorHelper=const_cast<API::IErrorHelper*>(errorHelper); }
-  ///Returns the spectrum number to which this workspace refers
-  virtual int spectraNo(int const index) const { return _SpectraNo; }
-  virtual int& spectraNo(int const index) { return _SpectraNo; }
   
   //Methods for getting data via python. Do not use for anything else!
   ///Returns the x data const
@@ -151,8 +148,6 @@ private:
   std::vector<double> _E;
   ///Internal cache of E2 data
   std::vector<double> _E2;
-  ///Internal cache of Spectra No
-  int _SpectraNo;
 
   ///Internal cache of applicable errorhelper
   API::IErrorHelper* _ErrorHelper;

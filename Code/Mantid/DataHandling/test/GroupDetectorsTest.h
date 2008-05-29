@@ -25,7 +25,7 @@ public:
   {
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
-    space->XUnit() = UnitFactory::Instance().create("TOF");
+    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(6,10.0);
     std::vector<double>  vec(5,1.0);
@@ -34,7 +34,7 @@ public:
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
-      space2D->spectraNo(j) = j;
+      space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
     Detector *d = new Detector;
@@ -130,23 +130,23 @@ public:
     {
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], 1.7321, 0.0001 )
     }
-    TS_ASSERT_EQUALS( outputWS->spectraNo(0), 0 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 0 )
     TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(1), ones )
     TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
-    TS_ASSERT_EQUALS( outputWS->spectraNo(1), 1 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 1 )
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(2), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataE(2), zeroes )
-    TS_ASSERT_EQUALS( outputWS->spectraNo(2), -1 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), -1 )
     TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(3), zeroes )
     TS_ASSERT_EQUALS( outputWS->dataE(3), zeroes )
-    TS_ASSERT_EQUALS( outputWS->spectraNo(3), -1 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), -1 )
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    TS_ASSERT_EQUALS( outputWS->spectraNo(4), 4 )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 4 )
    
     boost::shared_ptr<SpectraDetectorMap> sdm = outputWS->getSpectraMap();
     boost::shared_ptr<IDetector> det;

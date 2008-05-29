@@ -21,7 +21,7 @@ namespace Kernel
     @author Russell Taylor, Tessella Support Services plc
     @date 25/02/2008
     
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
   
@@ -56,10 +56,6 @@ public:
   // Check whether the unit can be converted to another via a simple factor
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
   bool quickConversion(std::string destUnitName, double& factor, double& power) const;
-  
-  // Methods dealing with instance-level description
-  const std::string& description() const;
-  void setDescription(const std::string& value);
   
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xdata    The array of X data to be converted
@@ -97,9 +93,6 @@ protected:
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
   
 private:
-  /// The optional description that can be attached to an instance of a concrete unit
-  std::string m_description;
-  
   /// A 'quick conversion' requires the constant by which to multiply the input and the power to which to raise it
   typedef std::pair< double, double > ConstantAndPower;
   /// Lists, for a given starting unit, the units to which a 'quick conversion' can be made

@@ -17,7 +17,7 @@ namespace API
 
   \author N. Draper
     
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
  	
@@ -43,7 +43,6 @@ class DLLExport IDataItem
   virtual const double& E() const =0;                   ///< Returns the E value
   virtual const double& E2() const =0;                  ///< Returns the E2 value
   virtual const IErrorHelper* ErrorHelper() const =0;   ///< Returns a pointer to the errorhelper
-  virtual int SpectraNo() const =0;                     ///< Returns the spectra number
   
   virtual double& Y() =0;                               ///< Returns the Y value
   virtual double& E() =0;                               ///< Returns the E value

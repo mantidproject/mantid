@@ -18,7 +18,7 @@ namespace Mantid
     /// Constructor
     WorkspaceSingleValue::WorkspaceSingleValue(double value,double error1,double error2) : 
         API::Workspace(), 
-        _X(1,0),_Y(1,value),_E(1,error1),_E2(1,error2),_SpectraNo(0),
+        _X(1,0),_Y(1,value),_E(1,error1),_E2(1,error2),
         _ErrorHelper(API::GaussianErrorHelper::Instance())
     { }
 
