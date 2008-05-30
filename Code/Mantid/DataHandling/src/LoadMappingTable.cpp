@@ -24,7 +24,7 @@ LoadMappingTable::LoadMappingTable()
 void LoadMappingTable::init()
 {
 	declareProperty("Filename","",new MandatoryValidator); // Filename for RAW file
-	declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut)); // Associated workspace
+	declareProperty(new WorkspaceProperty<Workspace>("Workspace","",Direction::InOut)); // Associated workspace
 }
 void LoadMappingTable::exec()
 {
@@ -32,8 +32,7 @@ void LoadMappingTable::exec()
 	m_filename = getPropertyValue("Filename");
 	// Get the input workspace
 	const Workspace_sptr localWorkspace = getProperty("Workspace");
-	
-	ISISRAW iraw(0);
+	ISISRAW iraw(NULL);
 	if (iraw.readFromFile(m_filename.c_str(),0) != 0) // ReadFrom File with no data
 	{
 	    g_log.error("Unable to open file " + m_filename);
