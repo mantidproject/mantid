@@ -1,4 +1,5 @@
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/RefAxis.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -23,6 +24,7 @@ namespace Mantid
     /// Destructor
     Workspace1D::~Workspace1D()
     {}
+    
     /** Sets the size of the workspace and initializes arrays to zero
     *  @param NVectors This value can only be equal to one, otherwise exception is thrown
     *  @param XLength The number of X data points/bin boundaries 
@@ -38,6 +40,10 @@ namespace Mantid
 
       if(NVectors > 1)
         throw std::invalid_argument("Workspace1D::init() cannot create a workspace1D with Nvectors > 1");
+
+      m_axes.resize(1);
+      m_axes[0] = new API::RefAxis(XLength, this);
+
       Histogram1D::RCtype t1,t2;
       t1.access().resize(XLength);//this call initializes array to zero  
       t2.access().resize(YLength);

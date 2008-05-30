@@ -12,10 +12,12 @@ namespace API
 /** Constructor
  *  @param parentWorkspace A pointer to the workspace that holds this axis
  */
-RefAxis::RefAxis(const Workspace* const parentWorkspace) : 
+RefAxis::RefAxis(const int length, const Workspace* const parentWorkspace) : 
   Axis(AxisType::Numeric, 0),
   m_parentWS(parentWorkspace)
-{}
+{
+  m_size = length;
+}
 
 /** Private, specialised copy constructor. Needed because it's necessary to pass in
  *  a pointer to the parent of the new workspace, rather than having the copy point
@@ -44,10 +46,16 @@ Axis* RefAxis::clone(const Workspace* const parentWorkspace)
  *  @param  index The position along the axis for which the value is required
  *  @param  verticalIndex The position along the orthogonal axis
  *  @return The value of the axis as a double
- *  @throw  IndexError If either index requested is not in the range of this axis
+ *  @throw  IndexError If 'index' is not in the range of this axis
+ *  @throw  std::range_error If 'verticalIndex' is not in the range of the parent workspace
  */
 const double RefAxis::operator()(const int index, const int verticalIndex) const
 {
+  if (index < 0 || index >= m_size)
+  {
+    throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
+  }
+
   return m_parentWS->dataX(verticalIndex)[index];
 }
 

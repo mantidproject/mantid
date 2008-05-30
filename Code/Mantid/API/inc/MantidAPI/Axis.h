@@ -57,7 +57,7 @@ public:
 	Axis(const bool type, const int length);
 	virtual ~Axis();
 	
-	virtual Axis* clone(const Workspace* const parentWorkspace);
+	virtual Axis* clone(const Workspace* const parentWorkspace = NULL);
 	
   const std::string& title() const;
   std::string& title();
@@ -76,6 +76,9 @@ public:
  
 protected:
   Axis(const Axis& right);
+
+  /// The length of this axis
+  int m_size;
   
 private:
   /// Private, undefined copy assignment operator
@@ -87,8 +90,6 @@ private:
   boost::shared_ptr<Kernel::Unit> m_unit;
   /// Is this axis of spectra or numeric type? if true it's spectra
   const bool m_isSpectra;
-  /// The length of this axis
-  const int m_size;
   /// A vector holding the axis values for a spectra axis. Empty otherwise.
   std::vector<int> m_spectraValues;
   /// A vector holding the axis values for a numeric axis. Empty otherwise.

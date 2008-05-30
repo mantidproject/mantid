@@ -41,7 +41,7 @@ namespace Mantid
       m_noVectors = NVectors;
       data.resize(m_noVectors);
       m_axes.resize(2);
-      m_axes[0] = new API::RefAxis(this);
+      m_axes[0] = new API::RefAxis(XLength, this);
       // This axis is always a spectra one for now
       m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
 

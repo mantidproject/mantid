@@ -11,8 +11,8 @@ namespace API
 
 /// Constructor
 Axis::Axis(const bool type, const int length) :
-  m_title(), m_unit(boost::shared_ptr<Kernel::Unit>()), m_isSpectra(type),
-  m_size(length), m_spectraValues(), m_numericValues()
+  m_size(length), m_title(), m_unit(boost::shared_ptr<Kernel::Unit>()),
+  m_isSpectra(type), m_spectraValues(), m_numericValues()
 {
   if (m_isSpectra)
   {
@@ -26,8 +26,8 @@ Axis::Axis(const bool type, const int length) :
 
 /// Protected copy constructor
 Axis::Axis(const Axis& right) : 
-  m_title(right.m_title), m_unit(right.m_unit), m_isSpectra(right.m_isSpectra),
-  m_size(right.m_size), m_spectraValues(right.m_spectraValues), m_numericValues(right.m_numericValues)
+  m_size(right.m_size), m_title(right.m_title), m_unit(right.m_unit), m_isSpectra(right.m_isSpectra),
+  m_spectraValues(right.m_spectraValues), m_numericValues(right.m_numericValues)
 {}
 
 /// Virtual destructor

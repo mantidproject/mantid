@@ -42,7 +42,7 @@ namespace API
 class DLLExport RefAxis : public Axis
 {
 public:
-	explicit RefAxis(const Workspace* const parentWorkspace);
+	RefAxis(const int length, const Workspace* const parentWorkspace);
 	virtual ~RefAxis();
 
 	Axis* clone(const Workspace* const parentWorkspace);
