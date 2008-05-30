@@ -10,6 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -93,7 +94,6 @@ public:
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.2019,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 4.0199,0.01);
-    
 
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
@@ -103,6 +103,46 @@ public:
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    
+    //----------------------------------------------------------------------
+    // Tests to check that Loading SpectraDetectorMap is done correctly
+    //----------------------------------------------------------------------
+    
+    /** LCC/ 30/05/2008
+     * This is working but requires that the correct definition for HET geometry is loaded.
+     * At the moment only loadInstrumentFromRaw is doing it correclty. The XML definition
+     * is not complete yet (does not contain individual pixel geometric information
+     * 
+     * 
+     * 
+     * 
+        map= output->getSpectraMap();
+        
+        // Check the total number of elements in the map for HET
+        TS_ASSERT_EQUALS(map->nElements(),24964);
+        
+        // Test one to one mapping, for example spectra 6 has only 1 pixel
+        TS_ASSERT_EQUALS(map->ndet(6),1);
+        
+        // Test one to many mapping, for example 10 pixels contribute to spectra 2084
+        TS_ASSERT_EQUALS(map->ndet(2084),10);
+        // Check the id number of all pixels contributing
+        std::vector<Mantid::Geometry::IDetector*> detectorgroup;
+        detectorgroup=map->getDetectors(2084);
+        std::vector<Mantid::Geometry::IDetector*>::iterator it;
+        int pixnum=101191;
+        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
+        TS_ASSERT_EQUALS((*it)->getID(),pixnum++);
+        
+        // Test with spectra that does not exist
+        	// Test that number of pixel=0
+        TS_ASSERT_EQUALS(map->ndet(5),0);
+        	// Test that trying to get the Detector throws.
+        boost::shared_ptr<Mantid::Geometry::IDetector> test;
+        TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
+        *
+        *
+        **/
     
   }
 
@@ -213,7 +253,7 @@ private:
   LoadRaw loader,loader2,loader3;
   std::string inputFile;
   std::string outputSpace;
-  
+  boost::shared_ptr<SpectraDetectorMap> map;
 };
   
 #endif /*LOADRAWTEST_H_*/

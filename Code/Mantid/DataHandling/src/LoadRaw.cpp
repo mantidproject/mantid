@@ -310,6 +310,24 @@ namespace Mantid
           g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
         }
       }
+      
+      // Now determine the spectra to detector map calling sub-algoorithm LoadMappingTable
+      // There is a small penalty in re-opening the raw file but nothing major. 
+      Algorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
+      loadmap->setPropertyValue("Filename", m_filename);
+      loadmap->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      try
+      {
+    	loadmap->execute();  
+      }catch (std::runtime_error& err)
+      {
+    	  g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
+      }
+      
+      if ( ! loadmap->isExecuted() )
+      {
+          g_log.error("LoadMappingTable sub-algorithm is not executed");
+       }
 
 
       // Now do LoadLog

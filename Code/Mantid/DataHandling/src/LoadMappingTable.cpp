@@ -24,7 +24,7 @@ LoadMappingTable::LoadMappingTable()
 void LoadMappingTable::init()
 {
 	declareProperty("Filename","",new MandatoryValidator); // Filename for RAW file
-	declareProperty(new WorkspaceProperty<Workspace>("Workspace","",Direction::InOut)); // Associated workspace
+	declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut)); // Associated workspace
 }
 void LoadMappingTable::exec()
 {
