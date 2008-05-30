@@ -78,7 +78,8 @@ public:
   std::vector<Geometry::IDetector*> getDetectors(const int spectrum_number) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
   boost::shared_ptr<Geometry::IDetector> getDetector(const int spectrum_number) const;
-
+  /// Return the size of the map 
+  int nElements() const {return _s2dmap.size();}
 private:
   ///Copy Contructor
   SpectraDetectorMap(const SpectraDetectorMap& copy);
