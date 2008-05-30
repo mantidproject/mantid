@@ -70,7 +70,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
 
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Instrument/HET_definition.xml";
+    inputFile = "../../../../Test/Instrument/not_working_HET_definition.xml";
     loader.setPropertyValue("Filename", inputFile);
 
     loader.setPropertyValue("Workspace", wsName);

@@ -7,7 +7,7 @@
 #include "MantidDataHandling/DataHandlingCommand.h"
 #include "MantidKernel/Logger.h"
 
-class Workspace;
+//class Workspace;
 
 namespace Mantid
 {
@@ -71,21 +71,15 @@ namespace Mantid
     private:
       /// The name and path of the input file
       std::string m_filename;
-      /// Shared pointer to a Workspace
-     boost::shared_ptr<Workspace> m_localWorkspace;
+
       /// Overwrites Algorithm method.
       void init();
 
       /// Overwrites Algorithm method
       void exec();  
       
-      /// Pointer to the local workspace
-
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-
-      /// Run the sub-algorithms
-      void runSubAlgorithms();
     };
 
   } // namespace DataHandling
