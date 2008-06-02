@@ -113,11 +113,11 @@
               Source='C:\Qt\bin\QtNetwork4.dll' Vital='yes'/>
             <File Id='QtOpenGL4DLL' Name='QtOGL4.dll' LongName='QtOpenGL4.dll' DiskId='1' 
               Source='C:\Qt\bin\QtOpenGL4.dll' Vital='yes'/>
-            <File Id='QtSql4DLL' Name='QtSql4.dll' LongName='QtSqlGL4.dll' DiskId='1' 
+            <File Id='QtSql4DLL' Name='QtSql4.dll' LongName='QtSql4.dll' DiskId='1' 
               Source='C:\Qt\bin\QtSql4.dll' Vital='yes'/>
-            <File Id='QtSvg4DLL' Name='QtSvg4.dll' LongName='QtSvgGL4.dll' DiskId='1' 
+            <File Id='QtSvg4DLL' Name='QtSvg4.dll' LongName='QtSvg4.dll' DiskId='1' 
               Source='C:\Qt\bin\QtSvg4.dll' Vital='yes'/>
-            <File Id='QtXml4DLL' Name='QtXml4.dll' LongName='QtXmlGL4.dll' DiskId='1' 
+            <File Id='QtXml4DLL' Name='QtXml4.dll' LongName='QtXml4.dll' DiskId='1' 
               Source='C:\Qt\bin\QtXml4.dll' Vital='yes'/>
           </Component>
           <Directory Id='Tests' Name='tests'>

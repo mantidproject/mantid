@@ -2708,9 +2708,9 @@ Matrix* ApplicationWindow::newMatrix(const QString& caption, int r, int c)
 	return w;
 }
 
-Matrix* ApplicationWindow::newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start,int end)
+Matrix* ApplicationWindow::newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start,int end, bool filter, double maxv)
 {
-	Matrix* w = dynamic_cast<Matrix*>(new WorkspaceMatrix(ws, scriptEnv, "", this, 0, 0, start, end));
+	Matrix* w = dynamic_cast<Matrix*>(new WorkspaceMatrix(ws, scriptEnv, "", this, 0, 0, start, end, filter, maxv));
 	initMatrix(w, caption);
 	if (w->objectName() != caption)//the matrix was renamed
 		renamedTables << caption << w->objectName();
@@ -8719,9 +8719,7 @@ void ApplicationWindow::showWindowContextMenu()
 	} else if (w->isA("WorkspaceMatrix")) {
 		Matrix *t = (Matrix *)w;
 		if (t->viewType() == Matrix::TableView){
-            cm.insertItem(QPixmap(cut_xpm),tr("Cu&t"), t, SLOT(cutSelection()));
             cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
-            cm.insertItem(QPixmap(paste_xpm),tr("&Paste"), t, SLOT(pasteSelection()));
             cm.addAction(actionCopyRowToTable);
 		} else if (t->viewType() == Matrix::ImageView){
             cm.addAction(actionExportMatrix);
@@ -12436,6 +12434,11 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 	Graph* plot = g->activeGraph();
 	setPreferences(plot);
 
+    if (m->isA("WorkspaceMatrix"))
+    {
+        static_cast<WorkspaceMatrix*>(m)->setGraph(plot);
+    }
+
 	Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
 	if (!s)
 		return 0;
@@ -15224,7 +15227,6 @@ void ApplicationWindow::mantidMenuAboutToShow()
 
  void ApplicationWindow::copyRowToTable()
  {
-     //QMessageBox::information(this,"copyRowToTable","OK");
      Matrix* m = (Matrix*)activeWindow(MatrixWindow);
      if (!m || !m->isA("WorkspaceMatrix")) return;
      WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
@@ -15233,14 +15235,21 @@ void ApplicationWindow::mantidMenuAboutToShow()
      wsm->getSelectedRows(i0,i1);
      if (i0 < 0 || i1 < 0) return;
 
-     //QMessageBox::information(this,"copyRowToTable","OK "+QString::number(i0)+" "+QString::number(i1));
+     Table *t = newTable(generateUniqueName(wsm->name()+"-"),wsm->numCols(),2*(i1 - i0 + 1) + 1);
 
-     Table *t = newTable(generateUniqueName(wsm->name()+"-"),wsm->numCols(),i1 - i0 + 2);
-
+     int kY,kErr;
      for(int i=i0;i<=i1;i++)
-     for(int j=0;j<wsm->numCols();j++)
      {
-         if (i == i0) t->setCell(j,0,wsm->dataX(i,j));
-         t->setCell(j,i-i0+1,wsm->cell(i,j));
+         kY = 2*(i-i0)+1;
+         t->setColName(kY,"Y"+QString::number(i));
+         kErr = 2*(i - i0) + 2;
+         t->setColPlotDesignation(kErr,Table::yErr);
+         t->setColName(kErr,"Err"+QString::number(i));
+         for(int j=0;j<wsm->numCols();j++)
+         {
+             if (i == i0) t->setCell(j,0,wsm->dataX(i,j));
+             t->setCell(j,kY,wsm->cell(i,j)); 
+             t->setCell(j,kErr,wsm->dataE(i,j));
+         }
      }
  }

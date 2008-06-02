@@ -186,7 +186,7 @@ void WorkspaceMgr::importWorkspaceMatrix()
 			int diff = end - start;
 			
 			ApplicationWindow* temp = dynamic_cast<ApplicationWindow*>(m_parent);
-			WorkspaceMatrix *mat = dynamic_cast<WorkspaceMatrix*>(temp->newWMatrix(wsName,ws,start,end));
+			WorkspaceMatrix *mat = dynamic_cast<WorkspaceMatrix*>(temp->newWMatrix(wsName,ws,start,end,dlg->isFiltered(),dlg->getMaxValue()));
 
 		}
 	}

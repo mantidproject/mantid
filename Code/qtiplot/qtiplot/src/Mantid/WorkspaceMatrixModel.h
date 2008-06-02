@@ -13,7 +13,7 @@ class WorkspaceMatrixModel : public MatrixModel
 	
 public:
 
-    WorkspaceMatrixModel(Mantid::API::Workspace_sptr& ws, QObject *parent, int start=-1, int end=-1);
+    WorkspaceMatrixModel(Mantid::API::Workspace_sptr& ws, QObject *parent, int start=-1, int end=-1, bool filter=false, double maxv=0.);
     //~WorkspaceMatrixModel();
 
     void setGraph(Graph* g);
@@ -40,7 +40,6 @@ public:
 
 	double cell(int row, int col) const;
 	void setCell(int row, int col, double val){}
-	double dataX(int row, int col) const;
 
     //QString text(int row, int col){return "0o0";}
     void setText(int row, int col, const QString&){}
@@ -78,11 +77,18 @@ public:
 	double* dataCopy(int startRow = 0, int endRow = -1, int startCol = 0, int endCol = -1){return 0;}
     void pasteData(double *clipboardBuffer, int topRow, int leftCol, int rows, int cols){}
 
+    // New functions
+	double dataX(int row, int col) const;
+	double dataE(int row, int col) const;
+    int indexX(double s)const;
+
 private:
 
     Mantid::API::Workspace_sptr m_workspace;
     int m_start;
     int m_end;
+    bool m_filter;
+    double m_maxValue;
 
 };
 

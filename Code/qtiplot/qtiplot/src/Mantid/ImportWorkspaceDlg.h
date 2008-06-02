@@ -7,6 +7,7 @@
 class QLabel;
 class QLineEdit;
 class QPushButton;
+class QCheckBox;
 class QString;
 
 class ImportWorkspaceDlg : public QDialog
@@ -19,16 +20,21 @@ public:
 
 	int getLowerLimit() { return lowerLimit; }
 	int getUpperLimit() { return upperLimit; }
+    bool isFiltered(){ return filtered; }
+    double getMaxValue(){ return maxValue; }
 
 protected:
 	
 private slots:
 	void okClicked();
+    void enableFilter(int state);
 
 private:
 	int numHists;
 	int lowerLimit;
 	int upperLimit;
+    bool filtered;
+    double maxValue;
 
 	QLabel *label;
 	QLabel *labelLow;
@@ -36,6 +42,10 @@ private:
 
 	QLineEdit *lineLow;
 	QLineEdit *lineHigh;
+
+    QCheckBox *checkFilter;
+	QLabel *labelFilterMaximum;
+	QLineEdit *lineFilterMaximum;
 
 	QPushButton *okButton;
 	QPushButton *cancelButton;

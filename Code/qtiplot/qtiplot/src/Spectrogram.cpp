@@ -31,6 +31,8 @@
 #include <QPen>
 #include <qwt_scale_widget.h>
 
+#include "Mantid/WorkspaceMatrix.h"
+
 Spectrogram::Spectrogram():
 	QwtPlotSpectrogram(),
 	d_matrix(0),
@@ -302,6 +304,12 @@ y -= 0.5*dy;
 	
 int i = abs((y - y_start)/dy);
 int j = abs((x - x_start)/dx);
+
+if (d_matrix->isA("WorkspaceMatrix"))
+{
+    int jj = static_cast<WorkspaceMatrixModel*>(d_matrix->matrixModel())->indexX(x);
+    if (jj >= 0) j = jj;
+}
 	
 if (d_m && i >= 0 && i < n_rows && j >=0 && j < n_cols)
 	return d_m[i][j];

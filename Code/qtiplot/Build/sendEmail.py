@@ -11,7 +11,7 @@ localServerName = 'http://130.246.49.183/'
 
 #RECIPIENTS = ['r.tolchenov@rl.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = 'QtiPlot@mantidproject.org'
+SENDER = 'BuildServer1@mantidproject.org'
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
 else:

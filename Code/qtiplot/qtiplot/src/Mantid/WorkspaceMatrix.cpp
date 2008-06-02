@@ -3,11 +3,11 @@
 
 #include <QMessageBox>
 
-WorkspaceMatrix::WorkspaceMatrix(Mantid::API::Workspace_sptr ws, ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f, int start, int end):
+WorkspaceMatrix::WorkspaceMatrix(Mantid::API::Workspace_sptr ws, ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f, int start, int end, bool filter, double maxv):
 Matrix(env, label, parent, name, f)
 {
 
-    d_matrix_model = static_cast<MatrixModel*> (new WorkspaceMatrixModel(ws,this,start,end));
+    d_matrix_model = static_cast<MatrixModel*> (new WorkspaceMatrixModel(ws,this,start,end,filter,maxv));
     
     initGlobals();
 	d_view_type = TableView;

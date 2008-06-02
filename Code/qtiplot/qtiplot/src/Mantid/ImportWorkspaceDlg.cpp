@@ -17,6 +17,13 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	lineHigh = new QLineEdit;
 	lineHigh->setText(QString::number(numHists));
 	labelHigh->setBuddy(lineHigh);
+
+    checkFilter = new QCheckBox(tr("Replace large abs. values with a constant"));
+	labelFilterMaximum = new QLabel(tr("Maximum value"));
+	lineFilterMaximum = new QLineEdit;   
+    lineFilterMaximum->setText("10000.");
+	labelFilterMaximum->setBuddy(lineFilterMaximum);
+    enableFilter(QCheckBox::Off);
 	
 	okButton = new QPushButton(tr("OK"));
 	okButton->setDefault(true);
@@ -24,6 +31,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 
 	connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
 	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+	connect(checkFilter, SIGNAL(stateChanged(int)), this, SLOT(enableFilter(int)));
 	
 	//Set the appearance
 	QHBoxLayout *topRowLayout = new QHBoxLayout;
@@ -34,6 +42,11 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	middleRowLayout->addWidget(lineLow);
 	middleRowLayout->addWidget(labelHigh);
 	middleRowLayout->addWidget(lineHigh);
+
+    QVBoxLayout *filterLayout = new QVBoxLayout;
+	filterLayout->addWidget(checkFilter);
+	filterLayout->addWidget(labelFilterMaximum);
+	filterLayout->addWidget(lineFilterMaximum);
 	
 	QHBoxLayout *bottomRowLayout = new QHBoxLayout;
 	bottomRowLayout->addStretch();
@@ -43,6 +56,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(topRowLayout);
 	mainLayout->addLayout(middleRowLayout);
+	mainLayout->addLayout(filterLayout);
 	mainLayout->addLayout(bottomRowLayout);
 	
 	setLayout(mainLayout);
@@ -91,8 +105,32 @@ void ImportWorkspaceDlg::okClicked()
 			lowerLimit = low;
 			upperLimit = high;
 		}
+
+        if (checkFilter->checkState() == Qt::Checked)
+        {
+            filtered = true;
+            maxValue = lineFilterMaximum->text().toDouble(&ok); 
+		    if (!ok || maxValue < 0)
+		    {
+		    	QMessageBox::warning(this, tr("Mantid"),
+                   		tr("Maximum value is not valid - please change it.\n")
+                    		, QMessageBox::Ok, QMessageBox::Ok);
+	    		return;
+            }
+        }
+        else
+        {
+            filtered = false;
+            maxValue = 0.; 
+        }
 		
 		accept();
 	}
+}
+
+void ImportWorkspaceDlg::enableFilter(int state)
+{
+    if (state == QCheckBox::Off) lineFilterMaximum->setReadOnly(true);
+    if (state == QCheckBox::On ) lineFilterMaximum->setReadOnly(false);
 }
 

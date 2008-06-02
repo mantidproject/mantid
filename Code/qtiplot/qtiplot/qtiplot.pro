@@ -12,6 +12,7 @@ DEFINES         += SCRIPTING_CONSOLE
 # a dialog for selecting the scripting language on a per-project basis
 DEFINES         += SCRIPTING_DIALOG
 #DEFINES         += QTIPLOT_DEMO
+DEFINES         += GSL_DLL
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
 #RESTRICTED_MODULES += EMF
@@ -36,6 +37,8 @@ INCLUDEPATH       += ../../Third_Party/include
 INCLUDEPATH       += ../../Third_Party/include/zlib123
 INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
 INCLUDEPATH       += ../3rdparty/qwt/src
+
+INCLUDEPATH       += ../../Third_Party/src/gsl
 
 INCLUDEPATH       += ../../Mantid/includes/
 INCLUDEPATH       += ../../Third_Party/include/

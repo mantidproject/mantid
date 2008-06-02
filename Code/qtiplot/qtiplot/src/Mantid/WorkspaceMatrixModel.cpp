@@ -1,9 +1,11 @@
 #include "WorkspaceMatrixModel.h"
 #include "WorkspaceMatrix.h"
+#include "../plot2D/ScaleEngine.h"
 
 #include <gsl/gsl_math.h>
+#include <fstream>
 
-WorkspaceMatrixModel::WorkspaceMatrixModel(Mantid::API::Workspace_sptr& ws, QObject *parent, int start, int end):
+WorkspaceMatrixModel::WorkspaceMatrixModel(Mantid::API::Workspace_sptr& ws, QObject *parent, int start, int end, bool filter, double maxv):
 MatrixModel(parent)
 {
 
@@ -23,6 +25,8 @@ MatrixModel(parent)
     m_end   = (end<0 || end>=ws->getHistogramNumber() || end < start)?ws->getHistogramNumber()-1:end;
     d_rows = m_end - m_start + 1;
 	d_cols = ws->blocksize(); 
+    m_filter = filter;
+    m_maxValue = maxv;
 
 }
 
@@ -31,15 +35,27 @@ double WorkspaceMatrixModel::cell(int row, int col) const
     if (!m_workspace || row >= rowCount() || col >= columnCount()) return 0.;
     double res = m_workspace->dataY(row + startRow())[col];
 
-    return abs(res)>10000.?0.:res;
-    //return res;
-
+    if (m_filter)
+    {
+        if (res > m_maxValue) res =  m_maxValue;
+        if (res < 0.) res =  0.;
+    }
+    
+    return res;
 }
 
 double WorkspaceMatrixModel::dataX(int row, int col) const
 {
     if (!m_workspace || row >= rowCount() || col >= columnCount()) return 0.;
     double res = m_workspace->dataX(row + startRow())[col];
+    return res;
+
+}
+
+double WorkspaceMatrixModel::dataE(int row, int col) const
+{
+    if (!m_workspace || row >= rowCount() || col >= columnCount()) return 0.;
+    double res = m_workspace->dataE(row + startRow())[col];
     return res;
 
 }
@@ -68,5 +84,27 @@ void WorkspaceMatrixModel::setGraph(Graph* g)
     g->setXAxisTitle(tr("Time of flight"));
     //g->setScale(Graph::Bottom,1,2000);
     g->setYAxisTitle(tr("Histogram"));
+}
+
+int WorkspaceMatrixModel::indexX(double s)const
+{
+    int n = m_workspace->blocksize();
+
+    if (n == 0 || s < m_workspace->dataX(0)[0] || s > m_workspace->dataX(0)[n-1]) return -1;
+
+    int i = 0, j = n-1, k = n/2;
+    double ss;
+    int it;
+    for(it=0;it<n;it++)
+    {
+        ss = m_workspace->dataX(0)[k];
+        if (ss == s || abs(i - j) <2) break;
+        if (s > ss) i = k;
+        else
+            j = k;
+        k = i + (j - i)/2;
+    }
+
+    return i;
 }
 

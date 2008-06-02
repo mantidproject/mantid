@@ -324,7 +324,7 @@ public slots:
 	Matrix* newMatrix(int rows = 32, int columns = 32);
 	//! To be used when opening a project file only!
 	Matrix* newMatrix(const QString& caption, int r, int c);
-	Matrix* newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start=-1,int end=-1);
+	Matrix* newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start=-1,int end=-1, bool filter=false, double maxv=0.);
 	Matrix* matrix(const QString& name);
 	Matrix* convertTableToMatrix();
 	Matrix* tableToMatrix(Table* t);
