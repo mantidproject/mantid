@@ -10,6 +10,7 @@ namespace API
 {
 
 /** Constructor
+ *  @param length The length of this axis
  *  @param parentWorkspace A pointer to the workspace that holds this axis
  */
 RefAxis::RefAxis(const int length, const Workspace* const parentWorkspace) : 

@@ -7,8 +7,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/RefAxis.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Exception.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -18,9 +19,13 @@ class RefAxisTest : public CxxTest::TestSuite
 public:
   RefAxisTest()
   {
-    // Set up a small workspace for these tests
-    space = WorkspaceFactory::Instance().create("Workspace2D",5,25,25);
-    space2 = WorkspaceFactory::Instance().create("Workspace2D",1,5,5);
+    // Set up two small workspaces for these tests
+    space = new Mantid::DataObjects::Workspace2D;
+    space->init(5,25,25);
+    space2 = new Mantid::DataObjects::Workspace2D;
+    space2->init(1,5,5);
+
+    // Fill them
     double *a = new double[25];
     double *b = new double[25];
     for (int i = 0; i < 25; ++i)
@@ -32,7 +37,8 @@ public:
     }
     delete a,b;
     
-    refAxis = new RefAxis(5, space.get());
+    // Create the axis that the tests will be performed on
+    refAxis = new RefAxis(5, space);
     refAxis->title() = "test axis";
     refAxis->unit() = UnitFactory::Instance().create("TOF");
   }
@@ -40,6 +46,7 @@ public:
   ~RefAxisTest()
   {
     delete refAxis;
+    delete space, space2;
   }
   
   void testConstructor()
@@ -53,7 +60,7 @@ public:
 
   void testClone()
   {
-    Axis *clonedAxis = refAxis->clone(space2.get());
+    Axis *clonedAxis = refAxis->clone(space2);
     TS_ASSERT_DIFFERS( clonedAxis, refAxis )
     TS_ASSERT( dynamic_cast<RefAxis*>(clonedAxis) )
     TS_ASSERT_EQUALS( clonedAxis->title(), "test axis" )
@@ -81,7 +88,7 @@ public:
   }
 
 private:
-  Workspace_sptr space, space2;
+  Workspace *space, *space2;
   RefAxis *refAxis;
 };
 
