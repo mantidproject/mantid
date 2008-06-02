@@ -58,7 +58,7 @@ Workspace_sptr PythonInterface::LoadIsisRawFile(const std::string& fileName,
 		const std::string& workspaceName)
 {
 	//Check workspace does not exist
-	if (!AnalysisDataService::Instance().doesWorkspaceExist(workspaceName))
+	if (!AnalysisDataService::Instance().doesExist(workspaceName))
 	{
 		IAlgorithm* alg = CreateAlgorithm("LoadRaw");
 		alg->setPropertyValue("Filename", fileName);
@@ -84,7 +84,7 @@ Workspace_sptr PythonInterface::LoadIsisRawFile(const std::string& fileName,
 Workspace_sptr PythonInterface::RetrieveWorkspace(const std::string& workspaceName)
 {
 	//Check workspace does exist
-	if (AnalysisDataService::Instance().doesWorkspaceExist(workspaceName))
+	if (AnalysisDataService::Instance().doesExist(workspaceName))
 	{
 		Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
 
@@ -142,7 +142,7 @@ int PythonInterface::GetBinNumber(const std::string& workspaceName)
  **/
 std::vector<std::string> PythonInterface::GetWorkspaceNames()
 {
-	return AnalysisDataService::Instance().getWorkspaceNames();
+	return AnalysisDataService::Instance().getObjectNames();
 }
 
 /**

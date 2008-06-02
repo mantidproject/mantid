@@ -13,5 +13,5 @@ InstrumentDataServiceImpl::~InstrumentDataServiceImpl()
 	
 }
 
-} // Namspace API
+} // Namespace API
 } // Namespace Mantid

@@ -38,7 +38,8 @@ public:
     AnalysisDataService::Instance().add("MySpace",space);
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("MySpace"));
     TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("MySpace"),std::runtime_error);    
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().remove("ttttt"),std::runtime_error);
+    // Remove should not throw but give a warning in the log file, changed by LCC 05/2008
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("ttttt"));
   }
 
   void testRetrieve()
