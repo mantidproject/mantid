@@ -267,6 +267,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\DataService.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\DllExport.h"
 				>
 			</File>

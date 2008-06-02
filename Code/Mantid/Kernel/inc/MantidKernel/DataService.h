@@ -6,7 +6,7 @@
 #include <map>
 #include <vector>
 
-#include "MantidAPI/DllExport.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -47,7 +47,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename T> class EXPORT_OPT_MANTID_API DataService
+template <typename T> class DLLExport DataService
 {
 public:
   /// Add an object to the service

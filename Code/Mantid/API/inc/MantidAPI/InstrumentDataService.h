@@ -36,7 +36,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::API::Instrument>
+class EXPORT_OPT_MANTID_API InstrumentDataServiceImpl : public Mantid::Kernel::DataService<Mantid::API::Instrument>
 {
 private:
 	friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;

@@ -208,6 +208,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\InstrumentDataService.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LocatedDataRef.cpp"
 				>
 			</File>
@@ -294,6 +298,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\Axis.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\AxisTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\DeclareUserAlg.h"
 				>
 			</File>
@@ -346,6 +358,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\InstrumentDataService.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\InstrumentDataServiceTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\InstrumentTest.h"
 				>
 			</File>
@@ -359,6 +379,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\LocatedDataValue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\RefAxis.h"
 				>
 			</File>
 			<File

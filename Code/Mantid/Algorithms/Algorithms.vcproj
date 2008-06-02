@@ -232,6 +232,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ConvertUnitsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Divide.h"
 				>
 			</File>
@@ -277,10 +281,6 @@
 			</File>
 			<File
 				RelativePath=".\test\SimpleRebinTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\TOFtoWavelengthTest.h"
 				>
 			</File>
 		</Filter>
