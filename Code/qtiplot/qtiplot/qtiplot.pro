@@ -2,6 +2,8 @@
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
 
+QMAKESPEC=win32-msvc2005 
+
 # building without muParser doesn't work yet
 SCRIPTING_LANGS += muParser
 SCRIPTING_LANGS += Python
@@ -37,8 +39,6 @@ INCLUDEPATH       += ../../Third_Party/include
 INCLUDEPATH       += ../../Third_Party/include/zlib123
 INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
 INCLUDEPATH       += ../3rdparty/qwt/src
-
-INCLUDEPATH       += ../../Third_Party/src/gsl
 
 INCLUDEPATH       += ../../Mantid/includes/
 INCLUDEPATH       += ../../Third_Party/include/
@@ -79,7 +79,8 @@ unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoFoundation
 win32:LIBS        += ../../Third_Party/lib/win32/muparser.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwtplot3d.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwt.lib
-win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
+win32:LIBS        += C:/Mantid/Code/qtiplot/qtiplot/gsl.lib
+#win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
 win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
 win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
 
@@ -136,7 +137,7 @@ contains(CONFIG, CustomInstall){
 	DEFINES       += MANUAL_PATH="\\\"$$replace(manual.path," ","\ ")\\\"
 	}
 	
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS QWT_DLL
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS QWT_DLL WIN32
 QT            += opengl qt3support network svg xml
 
 MOC_DIR        = ../tmp/qtiplot
