@@ -79,8 +79,7 @@ unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoFoundation
 win32:LIBS        += ../../Third_Party/lib/win32/muparser.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwtplot3d.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwt.lib
-win32:LIBS        += C:/Mantid/Code/qtiplot/qtiplot/gsl.lib
-#win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
+win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
 win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
 win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
 
