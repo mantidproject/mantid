@@ -7,6 +7,9 @@
 #include "MantidDataHandling/DataHandlingCommand.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
 class ISISRAW;
 
 namespace Mantid
@@ -29,7 +32,7 @@ namespace Mantid
     Optional Properties:
     <UL>
     <LI> spectrum_min  - The spectrum to start loading from</LI>
-    <LI> spectrum_max  - The specturm to load to</LI>
+    <LI> spectrum_max  - The spectrum to load to</LI>
     <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
     </UL>
 
@@ -88,10 +91,11 @@ namespace Mantid
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
-      /// Run the sub-algorithms
-      void runSubAlgorithms();
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int* );
 
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , int& , int* );
+      void runLoadInstrument();
+      void runLoadMappingTable();
+      void runLoadLog();
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);

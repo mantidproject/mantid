@@ -25,6 +25,8 @@ public:
   {
     //initialise framework manager to allow logging
     Mantid::API::FrameworkManager::Instance().initialize();
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Data/HET15869.RAW";
   }
   
   void testInit()
@@ -41,8 +43,6 @@ public:
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);    
     
     // Now set it...  
-    // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setPropertyValue("Filename", inputFile);
 
     outputSpace = "outer";
@@ -151,9 +151,6 @@ public:
   {
     if ( !loader2.isInitialized() ) loader2.initialize();
     
-    // Now set it...  
-    // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
     loader2.setPropertyValue("Filename", inputFile);    
     loader2.setPropertyValue("OutputWorkspace", "outWS");    
     loader2.setPropertyValue("spectrum_list", "998,999,1000");
@@ -190,9 +187,6 @@ public:
   {
     if ( !loader3.isInitialized() ) loader3.initialize();
     
-    // Now set it...  
-    // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
     loader3.setPropertyValue("Filename", inputFile);    
     loader3.setPropertyValue("OutputWorkspace", "out");    
     loader3.setPropertyValue("spectrum_list", "0,999,1000");
@@ -210,12 +204,12 @@ public:
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "3");
-     loader3.execute();   
+    loader3.execute();   
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "5");
-     loader3.execute();   
+    loader3.execute();   
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out"),std::runtime_error);    
 
     loader3.setPropertyValue("spectrum_min", "5");
@@ -239,7 +233,7 @@ public:
     ConfigService::Instance().loadConfig("UseManagedWS.properties");
     LoadRaw loader4;
     loader4.initialize();
-    loader4.setPropertyValue("Filename", "../../../../Test/Data/HET15869.RAW");    
+    loader4.setPropertyValue("Filename", inputFile);    
     loader4.setPropertyValue("OutputWorkspace", "managedws");    
     TS_ASSERT_THROWS_NOTHING( loader4.execute() )
     TS_ASSERT( loader4.isExecuted() )
