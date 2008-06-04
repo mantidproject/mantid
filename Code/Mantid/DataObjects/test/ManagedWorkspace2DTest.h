@@ -13,7 +13,7 @@ public:
   ManagedWorkspace2DTest()
   {
     smallWorkspace.setTitle("smallWorkspace");
-    smallWorkspace.init(2,4,3);
+    smallWorkspace.initialize(2,4,3);
     std::vector<double> x(4), xx(4);
     for (int i = 0; i < 4; ++i)
     {
@@ -37,7 +37,7 @@ public:
     bigWorkspace.setTitle("bigWorkspace");
     int nVec = 1250;
     int vecLength = 25;
-    bigWorkspace.init(nVec, vecLength, vecLength);
+    bigWorkspace.initialize(nVec, vecLength, vecLength);
     for (int i=0; i< nVec; i++)
     {
       std::vector<double> x1(vecLength,1+i),y1(vecLength,5+i),e1(vecLength,4+i),e2(vecLength,4+i);
@@ -50,6 +50,7 @@ public:
   {
     ManagedWorkspace2D ws;
     ws.setTitle("testInit");
+    TS_ASSERT_THROWS_NOTHING( ws.init(5,5,5) )
     TS_ASSERT_THROWS_NOTHING( ws.init(5,5,5) )
     TS_ASSERT_EQUALS( ws.getHistogramNumber(), 5 )
     TS_ASSERT_EQUALS( ws.blocksize(), 5 )

@@ -88,11 +88,14 @@ public:
     TS_ASSERT_EQUALS( ws.getSpectraMap(), s )
   }	
 	
-  void testGetSample()
+  void testGetSetSample()
   {
-    Sample& s = ws.getSample();
-    ws.getSample().setName("test");
-    TS_ASSERT_EQUALS( ws.getSample().getName(), "test" )
+    TS_ASSERT( ws.getSample() )
+    boost::shared_ptr<Sample> s(new Sample);
+    TS_ASSERT_THROWS_NOTHING( ws.setSample(s) )
+    TS_ASSERT_EQUALS( ws.getSample(), s )
+    ws.getSample()->setName("test");
+    TS_ASSERT_EQUALS( ws.getSample()->getName(), "test" )
   }
 
   void testGetMemorySize()

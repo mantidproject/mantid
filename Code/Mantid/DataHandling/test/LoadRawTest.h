@@ -99,8 +99,8 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    Sample& sample = output->getSample();
-    Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HET15869_TEMP1.txt") );
+    boost::shared_ptr<Sample> sample = output->getSample();
+    Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HET15869_TEMP1.txt") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -243,7 +243,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws") );    
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
   }
-   
+  
 private:
   LoadRaw loader,loader2,loader3;
   std::string inputFile;

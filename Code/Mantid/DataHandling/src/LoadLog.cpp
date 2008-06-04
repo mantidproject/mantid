@@ -72,7 +72,7 @@ void LoadLog::exec()
   // the log file(s) will be loaded into the Sample container of the workspace 
 
   const Workspace_sptr localWorkspace = getProperty("Workspace");
-  API::Sample& sample = localWorkspace->getSample();
+  boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
 
 
   // If m_filename is the filename of a raw datafile then search for potential log files
@@ -234,12 +234,12 @@ void LoadLog::exec()
 
     if ( l_kind == LoadLog::number )
     {
-      sample.addLogData(l_PropertyDouble);
+      sample->addLogData(l_PropertyDouble);
       delete l_PropertyString;
     }
     else
     {
-      sample.addLogData(l_PropertyString);
+      sample->addLogData(l_PropertyString);
       delete l_PropertyDouble;
     }
 

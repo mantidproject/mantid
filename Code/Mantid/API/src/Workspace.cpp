@@ -14,8 +14,9 @@ namespace API
 Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
-Workspace::Workspace() : m_axes(), m_title(), m_comment(), sptr_instrument(new Instrument),
-  sptr_spectramap(new SpectraDetectorMap), m_sample(), m_history(), m_isDistribution(false)
+Workspace::Workspace() : m_axes(), m_isInitialized(false), m_title(), m_comment(),
+  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap), sptr_sample(new Sample),
+  m_history(), m_isDistribution(false)
 {}
 
 /// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
@@ -26,7 +27,30 @@ Workspace::~Workspace()
     delete m_axes[i];
   }
 }
-	
+
+/** Initialize the workspace. Calls the protected init() method, which is implemented in each type of
+ *  workspace. Returns immediately if the workspace is already initialized.
+ */
+void Workspace::initialize(const int &NVectors, const int &XLength, const int &YLength)
+{
+  // Bypass the initialization if the workspace has already been initialized.
+  if (m_isInitialized) return;
+
+  // Invoke init() method of the derived class inside a try/catch clause
+  try
+  {
+    this->init(NVectors, XLength, YLength);
+  }
+  catch(std::runtime_error& ex)
+  {
+    g_log.error() << "Error initializing the workspace" << ex.what() << std::endl;
+    throw;
+  }
+
+  // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
+  m_isInitialized = true;
+}
+
 /** Set the title of the workspace
  * 
  *  @param t The title
@@ -43,6 +67,7 @@ void Workspace::setComment(const std::string& c)
 {
   m_comment=c;
 }
+
 /** Set the Spectra to DetectorMap
  * 
  * \param map:: Shared pointer to the SpectraDetectorMap
@@ -51,13 +76,23 @@ void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
 {
 	sptr_spectramap=map;
 }
+
 /** Set the instrument
  * 
- * \param instr :: Shared pointer to an instrument instrument.
+ * \param instr Shared pointer to an instrument.
  */
 void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
 {
 	sptr_instrument=instr;
+}
+
+/** Set the sample
+ * 
+ *  @param sample A shared pointer to the sample
+ */
+void Workspace::setSample(const boost::shared_ptr<Sample>& sample)
+{
+  sptr_sample = sample;
 }
 
 /** Get the workspace title
@@ -100,9 +135,9 @@ boost::shared_ptr<Instrument> Workspace::getInstrument() const
  * 
  *  @return The sample class
  */
-Sample& Workspace::getSample()
+boost::shared_ptr<Sample> Workspace::getSample() const
 {
-  return m_sample;
+  return sptr_sample;
 }
 
 /** Get a pointer to a workspace axis

@@ -150,7 +150,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
 	class_< Mantid::API::Workspace, boost::noncopyable, Mantid_API_Workspace_Wrapper >("Workspace", no_init)
         .def("id", pure_virtual(&Mantid::API::Workspace::id))
-        .def("init", pure_virtual(&Mantid::API::Workspace::init))
+        .def("initialize", &Mantid::API::Workspace::initialize)
         .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
         .def("size", pure_virtual(&Mantid::API::Workspace::size))
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))

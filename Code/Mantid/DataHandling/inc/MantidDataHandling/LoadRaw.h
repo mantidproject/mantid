@@ -26,10 +26,11 @@ namespace Mantid
     Required Properties:
     <UL>
     <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
+         (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
     </UL>
 
-    Optional Properties:
+    Optional Properties: (note that these options are not available if reading a multiperiod file)
     <UL>
     <LI> spectrum_min  - The spectrum to start loading from</LI>
     <LI> spectrum_max  - The spectrum to load to</LI>
@@ -64,38 +65,49 @@ namespace Mantid
     public:
       /// Default constructor
       LoadRaw();
-
       /// Destructor
       ~LoadRaw() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadRaw";};
+      virtual const std::string name() const { return "LoadRaw"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1;};
+      virtual const int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "DataHandling";}
+      virtual const std::string category() const { return "DataHandling"; }
 
     private:
-
       /// Overwrites Algorithm method.
       void init();
-
       /// Overwrites Algorithm method
       void exec();
 
-      /// The name and path of the input file
-      std::string m_filename;
-
-      /// Pointer to the local workspace
-      DataObjects::Workspace2D_sptr m_localWorkspace;
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
+      void checkOptionalProperties();
       void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int* );
-
       void runLoadInstrument();
+      void runLoadInstrumentFromRaw();
       void runLoadMappingTable();
       void runLoadLog();
+
+      /// The name and path of the input file
+      std::string m_filename;
+      /// Pointer to the local workspace
+      DataObjects::Workspace2D_sptr m_localWorkspace;
+      /// The number of spectra in the raw file
+      int m_numberOfSpectra;
+      /// The number of periods in the raw file
+      int m_numberOfPeriods;
+      /// Has the spectrum_list property been set?
+      bool m_list;
+      /// Have the spectrum_min/max properties been set?
+      bool m_interval;
+      /// The value of the spectrum_list property
+      std::vector<int> m_spec_list;
+      /// The value of the spectrum_min property
+      int m_spec_min;
+      /// The value of the spectrum_max property
+      int m_spec_max;
+      
+      ///static reference to the logger class
+      static Kernel::Logger& g_log;
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);

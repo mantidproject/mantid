@@ -75,18 +75,18 @@ public:
   /// Return the workspace typeID 
   virtual const std::string id() const = 0;
 
-  /// Initialises the workspace. sets the size and lengths in the arrays, must be overloaded
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength) = 0;
-  
+  void initialize(const int &NVectors, const int &XLength, const int &YLength);
+
   void setTitle(const std::string&);
   void setComment(const std::string&);
   void setInstrument(const boost::shared_ptr<Instrument>&);
   void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
+  void setSample(const boost::shared_ptr<Sample>& sample);
   const std::string& getComment() const;
   const std::string& getTitle() const;
   boost::shared_ptr<Instrument> getInstrument() const;
   boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
-  Sample& getSample();
+  boost::shared_ptr<Sample> getSample() const;
 
   /// Get the footprint in memory.
   virtual long int getMemorySize() const {return 0;}	
@@ -150,6 +150,10 @@ public:
   
 protected:
   Workspace();
+  
+  /// Initialises the workspace. sets the size and lengths in the arrays, must be overloaded
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength) = 0;
+  
   /// A vector of pointers to the axes for this workspace
   std::vector<Axis*> m_axes;
 
@@ -158,6 +162,9 @@ private:
   Workspace(const Workspace&);
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace& operator=(const Workspace&);
+  
+  /// Has this workspace been initialised?
+  bool m_isInitialized;
   
   /// The title of the workspace
   std::string m_title;
@@ -169,7 +176,7 @@ private:
   /// The SpectraDetector table used for this experiment 
   boost::shared_ptr<SpectraDetectorMap> sptr_spectramap;
   /// The information on the sample environment
-  Sample m_sample;
+  boost::shared_ptr<Sample> sptr_sample;
 
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;

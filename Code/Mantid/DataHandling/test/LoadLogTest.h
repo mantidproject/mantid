@@ -68,9 +68,9 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     
-	  Sample& sample = output->getSample();
+	  boost::shared_ptr<Sample> sample = output->getSample();
 
-    Property *l_property = sample.getLogData(inputFile);
+    Property *l_property = sample->getLogData(inputFile);
     TimeSeriesProperty<std::string> *l_timeSeries = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
 
     std::string timeSeriesString = l_timeSeries->value();
@@ -114,31 +114,31 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
    
-	  Sample& sample = output->getSample(); 
+    boost::shared_ptr<Sample> sample = output->getSample(); 
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_ICPevent.txt") );
+    Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37125_ICPevent.txt") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,28), "2007-Nov-13 15:19:13   BEGIN" );
 
-    l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_cphs_6.txt") );
+    l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37125_cphs_6.txt") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
-    l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_PROP3.txt") );
+    l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37125_PROP3.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
-    l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_SE_He_Level.txt") );
+    l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37125_SE_He_Level.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2007-Nov-13 15:17:08  -1" );
 
-    l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37125_TEMP1.txt") );
+    l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37125_TEMP1.txt") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -181,11 +181,11 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
    
-	  Sample& sample = output->getSample(); 
+    boost::shared_ptr<Sample> sample = output->getSample(); 
 
     // obtain the expected log files which should be in the same directory as the raw datafile
 
-    Property *l_property = sample.getLogData( std::string("../../../../Test/Data/HRP37129_ICPevent.txt") );
+    Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HRP37129_ICPevent.txt") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );

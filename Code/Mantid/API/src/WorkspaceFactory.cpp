@@ -39,7 +39,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
   const int XLength = parent->dataX(0).size();
   const int YLength = parent->blocksize();
   const int NVectors = parent->size() / YLength;
-  ws->init(NVectors,XLength,YLength);
+  ws->initialize(NVectors,XLength,YLength);
   ws->setInstrument(parent->getInstrument());
   for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
   {
@@ -87,7 +87,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
     ws = this->create(className);
   }
   
-  ws->init(NVectors,XLength,YLength);
+  ws->initialize(NVectors,XLength,YLength);
   return ws;
 }
 
