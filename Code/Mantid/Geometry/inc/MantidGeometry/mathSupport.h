@@ -2,6 +2,8 @@
 #define mathSupport_h
 
 #include <functional>
+#include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -10,16 +12,16 @@ namespace Mantid
 
 /// Create an index of the vector in sorted order.
 template<typename T> 
-void indexSort(const std::vector<T>&,std::vector<int>&);
+DLLExport void indexSort(const std::vector<T>&,std::vector<int>&);
 
 /// Solve a Quadratic equation
 template<typename InputIter>
-int solveQuadratic(InputIter,
+DLLExport int solveQuadratic(InputIter,
 	     std::pair<std::complex<double>,std::complex<double> >&);
 
 /// Solve a Cubic equation
 template<typename InputIter>
-int solveCubic(const InputIter,std::complex<double>&,
+DLLExport int solveCubic(InputIter,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 
 /*!

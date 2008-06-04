@@ -16,12 +16,12 @@ template<typename T> DLLExport int StrComp(const char*,const boost::regex&,T&,co
 template<typename T> int StrComp(const std::string&,const boost::regex&,T&,const int=0);
 
 /// Find is a pattern matches
-int StrLook(const char*,const boost::regex&);
+DLLExport int StrLook(const char*,const boost::regex&);
 /// Find is a pattern matches
-int StrLook(const std::string&,const boost::regex&);
+DLLExport int StrLook(const std::string&,const boost::regex&);
 
 /// Split  a line into component parts
-std::vector<std::string> 
+DLLExport std::vector<std::string> 
 StrParts(std::string,const boost::regex&);
 
 /// Split  a line searched parts

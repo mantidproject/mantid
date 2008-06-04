@@ -86,7 +86,7 @@ class DLLExport Material
 };
 
 
-} // NAMESPACE MonteCarlo
+} // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
 

@@ -91,9 +91,9 @@ solveQuadratic(const InputIter Coef,std::pair<std::complex<double>,
   return 2;
 }
 
-template<typename InputIter>
+template<typename CInputIter>
 int
-solveCubic(const InputIter Coef,std::complex<double>& AnsA,
+solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
 	   std::complex<double>& AnsB,std::complex<double>& AnsC)
   /*!
     Solves Cubic equation
@@ -184,27 +184,31 @@ solveCubic(const InputIter Coef,std::complex<double>& AnsA,
 /// \cond TEMPLATE  
 
 template
-int solveQuadratic(const double*,
+DLLExport int solveQuadratic(const double*,
+       std::pair<std::complex<double>,std::complex<double> >&);
+ template
+DLLExport int solveQuadratic(double*,
        std::pair<std::complex<double>,std::complex<double> >&);
 template
-int solveQuadratic(double*,
+ DLLExport int solveQuadratic(const std::vector<double>::const_iterator,
        std::pair<std::complex<double>,std::complex<double> >&);
 template
-int solveQuadratic(const std::vector<double>::const_iterator,
-       std::pair<std::complex<double>,std::complex<double> >&);
-template
-int solveCubic(const double*,std::complex<double>&,
+ DLLExport int solveCubic(const double*,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 template
-int solveCubic(const std::vector<double>::iterator,std::complex<double>&,
+ DLLExport int solveCubic(double*,std::complex<double>&,
+	       std::complex<double>&,std::complex<double>&);
+
+template
+ DLLExport int solveCubic(const std::vector<double>::iterator,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 template
-int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
+ DLLExport int solveCubic(const std::vector<double>::const_iterator,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 
 
-template void indexSort(const std::vector<double>&,std::vector<int>&);
-template void indexSort(const std::vector<int>&,std::vector<int>&);
+template  DLLExport void indexSort(const std::vector<double>&,std::vector<int>&);
+template  DLLExport void indexSort(const std::vector<int>&,std::vector<int>&);
 
 
 /// \endcond TEMPLATE 
