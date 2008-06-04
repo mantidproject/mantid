@@ -30,6 +30,9 @@ Workspace::~Workspace()
 
 /** Initialize the workspace. Calls the protected init() method, which is implemented in each type of
  *  workspace. Returns immediately if the workspace is already initialized.
+ *  @param NVectors The number of spectra in the workspace (only relevant for a 2D workspace
+ *  @param XLength The number of X data points/bin boundaries in each vector (must all be the same)
+ *  @param YLength The number of data/error points in each vector (must all be the same)
  */
 void Workspace::initialize(const int &NVectors, const int &XLength, const int &YLength)
 {

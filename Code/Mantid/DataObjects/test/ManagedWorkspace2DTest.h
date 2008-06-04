@@ -50,8 +50,7 @@ public:
   {
     ManagedWorkspace2D ws;
     ws.setTitle("testInit");
-    TS_ASSERT_THROWS_NOTHING( ws.init(5,5,5) )
-    TS_ASSERT_THROWS_NOTHING( ws.init(5,5,5) )
+    TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) )
     TS_ASSERT_EQUALS( ws.getHistogramNumber(), 5 )
     TS_ASSERT_EQUALS( ws.blocksize(), 5 )
     TS_ASSERT_EQUALS( ws.size(), 25 )
@@ -99,7 +98,7 @@ public:
   {
     ManagedWorkspace2D ws;
     ws.setTitle("testSetX");
-    ws.init(1,1,1);
+    ws.initialize(1,1,1);
     double aNumber = 5.5;
     std::vector<double> v(1, aNumber);
     TS_ASSERT_THROWS_NOTHING( ws.setX(0,v) )
@@ -118,7 +117,7 @@ public:
   {
     ManagedWorkspace2D ws;
     ws.setTitle("testSetData");
-    ws.init(1,1,1);
+    ws.initialize(1,1,1);
     double aNumber = 9.9;
     std::vector<double> v(1, aNumber);
     double anotherNumber = 3.3;
