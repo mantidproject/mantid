@@ -118,9 +118,20 @@ If you want to contribute code, please read the notes on \ref style "coding styl
   - For indentations, tabs are preferred because they allow everyone to choose the indentation depth for him/herself.
 */
 
+#include <QDir>
+
 int main( int argc, char ** argv )
 {
     QApplication app( argc, argv );
+
+    QString path = argv[0];
+    int i = path.lastIndexOf('/');
+    if (i < 0) i = path.lastIndexOf('\\');
+    if (i>=0) 
+    {
+        path.remove(i,1000);
+        QDir::setCurrent(path);
+    }
 
 	QStringList args = app.arguments();
 	args.removeFirst(); // remove application name

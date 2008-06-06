@@ -35,11 +35,11 @@ class FrameworkManagerTest : public CxxTest::TestSuite
 {
 public:
 
-  void testInitialize()
-  {
-    // Not really much to test
-    TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().initialize() )
-  }
+  //void testInitialize()
+  //{
+  //  // Not really much to test
+  //  TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().initialize() )
+  //}
 
   void testcreateAlgorithm()
   {

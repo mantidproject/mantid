@@ -126,7 +126,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="PocoFoundation.lib  PocoUtil.lib"
+				AdditionalDependencies="PocoFoundation.lib  PocoUtil.lib libboost_signals-vc80-mt-1_34_1.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../../Third_Party/lib/win32"
 			/>
@@ -206,6 +206,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PropertyWithValue.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SignalChannel.cpp"
 				>
 			</File>
 			<File
@@ -372,6 +376,14 @@
 			</File>
 			<File
 				RelativePath=".\test\PropertyWithValueTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\Signal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\SignalChannel.h"
 				>
 			</File>
 			<File

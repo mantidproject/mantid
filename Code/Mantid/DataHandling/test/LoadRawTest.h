@@ -24,7 +24,7 @@ public:
   LoadRawTest()
   {
     //initialise framework manager to allow logging
-    Mantid::API::FrameworkManager::Instance().initialize();
+    //Mantid::API::FrameworkManager::Instance().initialize();
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HET15869.RAW";
   }

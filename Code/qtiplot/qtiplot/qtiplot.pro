@@ -94,6 +94,7 @@ win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.lib
+win32:LIBS		+= ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib
 
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
@@ -308,7 +309,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/ExecuteAlgorithm.h \
 	    src/Mantid/ImportWorkspaceDlg.h \
 	    src/Mantid/WorkspaceMatrix.h \
-	    src/Mantid/WorkspaceMatrixModel.h
+	    src/Mantid/WorkspaceMatrixModel.h \
+	    src/Mantid/AbstractMantidLog.h \
+	    src/Mantid/MantidLog.h 
 
 ###################### FORMS ##############################################
 
@@ -437,7 +440,9 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
 	    src/Mantid/ImportWorkspaceDlg.cpp \
 	    src/Mantid/WorkspaceMatrix.cpp \
-	    src/Mantid/WorkspaceMatrixModel.cpp
+	    src/Mantid/WorkspaceMatrixModel.cpp \
+	    src/Mantid/AbstractMantidLog.cpp \
+	    src/Mantid/MantidLog.cpp 
 
 ###############################################################
 ##################### Compression (zlib123) ###################

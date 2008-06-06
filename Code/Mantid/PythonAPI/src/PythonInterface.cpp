@@ -23,17 +23,12 @@ namespace PythonAPI
 ///Constructor
 PythonInterface::PythonInterface()
 {
+    FrameworkManager::Instance();
 }
 
 ///Destructor
 PythonInterface::~PythonInterface()
 {
-}
-
-///Initialises the FrameworkManager.
-void PythonInterface::InitialiseFrameworkManager()
-{
-	FrameworkManager::Instance().initialize();
 }
 
 /**

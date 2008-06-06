@@ -5,6 +5,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
+#include "MantidKernel/SignalChannel.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -24,11 +25,14 @@ namespace Kernel
 		//getting at system details
 		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
 		m_pConf = 0;
+        
+        //Register the FilterChannel with the Poco logging factory
+        Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel",new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
 
-    //Register the FilterChannel with the Poco logging factory
-    Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel",new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
+        //Register the SignalChannel with the Poco logging factory
+        Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel",new Poco::Instantiator<Poco::SignalChannel, Poco::Channel>);
 
-		//attempt to load the default properties filename
+        //attempt to load the default properties filename
 		loadConfig("Mantid.properties");
 		g_log.debug() << "ConfigService created." << std::endl;
 	}

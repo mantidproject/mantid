@@ -23,10 +23,10 @@ public:
 		inter = new PythonInterface();
 	}
 
-	void testFrameworkInitialise()
-	{
-		TS_ASSERT_THROWS_NOTHING(inter->InitialiseFrameworkManager());
-	}
+	//void testFrameworkInitialise()
+	//{
+	//	TS_ASSERT_THROWS_NOTHING(inter->InitialiseFrameworkManager());
+	//}
 
 	void testCreateAlgorithm()
 	{

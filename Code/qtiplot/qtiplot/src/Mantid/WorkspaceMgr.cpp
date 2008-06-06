@@ -1,8 +1,3 @@
-#include <vector>
-#include <string>
-#include <stdexcept>
-#include <QMessageBox>
-#include <QListWidgetItem>
 
 #include "WorkspaceMatrix.h"
 #include "WorkspaceMgr.h"
@@ -13,6 +8,13 @@
 #include "ExecuteAlgorithm.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidLog.h"
+
+#include <vector>
+#include <string>
+#include <stdexcept>
+#include <QMessageBox>
+#include <QListWidgetItem>
 
 WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 {
@@ -22,16 +24,26 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 	setupActions();
 	
 	m_interface = new Mantid::PythonAPI::PythonInterface;
-	m_interface->InitialiseFrameworkManager();
 	
 	getWorkspaces();
 	
 	getAlgorithms();	
+
+    /// Make connection to Mantid's SignalChannel
+    if (parent->isA("ApplicationWindow"))
+    {
+        MantidLog::connect(static_cast<ApplicationWindow*>(parent));
+    }
+    else
+    {
+        QMessageBox::warning(this,"Workspace Manager","Main window is not an ApplicationWindow");
+    }
+
 }
 
 WorkspaceMgr::~WorkspaceMgr()
 {
-	
+    delete m_interface;
 }
 
 void WorkspaceMgr::setupActions()

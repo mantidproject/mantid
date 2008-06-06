@@ -11,7 +11,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
-
 class WorkspaceMgr : public QDialog, private Ui::Dialog
 {
 	Q_OBJECT

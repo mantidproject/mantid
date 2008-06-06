@@ -28,7 +28,7 @@ public:
   LoadInstrumentTest()
   {	
 	//initialise framework manager to allow logging
-	Mantid::API::FrameworkManager::Instance().initialize();
+	//Mantid::API::FrameworkManager::Instance().initialize();
   }
   void testInit()
   {

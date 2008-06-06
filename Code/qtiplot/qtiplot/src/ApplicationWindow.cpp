@@ -15214,6 +15214,7 @@ void ApplicationWindow::manageMantidWorkspaces()
 	WorkspaceMgr* dlg = new WorkspaceMgr(this);
 	dlg->setModal(true);	
 	dlg->exec();
+    delete dlg;
 }
 
 //Mantid

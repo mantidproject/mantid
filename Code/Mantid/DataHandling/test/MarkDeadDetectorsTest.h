@@ -23,7 +23,7 @@ class MarkDeadDetectorsTest : public CxxTest::TestSuite
 public:
   MarkDeadDetectorsTest()
   {
-    FrameworkManager::Instance().initialize();
+    //FrameworkManager::Instance().initialize();
     
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);

@@ -51,8 +51,6 @@ public:
 	PythonInterface();
 	~PythonInterface();
 
-	void InitialiseFrameworkManager();
-
 	//Algorithms
 	API::IAlgorithm* CreateAlgorithm(const std::string&);
 	std::vector<std::string> GetAlgorithmNames();

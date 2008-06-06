@@ -24,8 +24,13 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
-	std::cerr << "Framework Manager created." << std::endl;
-	g_log.debug() << "FrameworkManager created." << std::endl;
+  std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
+  if (pluginDir.length() > 0)
+  {
+    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
+  }
+  std::cerr << "Framework Manager created." << std::endl;
+  g_log.debug() << "FrameworkManager created." << std::endl;
 }
 
 /// Destructor
@@ -33,17 +38,6 @@ FrameworkManagerImpl::~FrameworkManagerImpl()
 {
 //	std::cerr << "FrameworkManager destroyed." << std::endl;
 //	g_log.debug() << "FrameworkManager destroyed." << std::endl;
-}
-
-/// Creates all of the required services
-void FrameworkManagerImpl::initialize()
-{ 
-  std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
-  if (pluginDir.length() > 0)
-  {
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
-  }
-  return;
 }
 
 /** At the moment clears all memory associated with AlgorithmManager.

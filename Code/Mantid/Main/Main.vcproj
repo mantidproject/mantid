@@ -123,7 +123,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)DataObjects.lib $(SolutionName)UserAlgorithms.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).exe"
 				AdditionalLibraryDirectories="..\Release;..\..\Third_Party\lib\win32"
 			/>

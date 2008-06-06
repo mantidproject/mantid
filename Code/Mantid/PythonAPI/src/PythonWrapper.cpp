@@ -128,7 +128,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	//Mantid stuff
 	class_< Mantid::PythonAPI::PythonInterface >("PythonInterface", init<  >())
         .def(init< const Mantid::PythonAPI::PythonInterface& >())
-        .def("InitialiseFrameworkManager", &Mantid::PythonAPI::PythonInterface::InitialiseFrameworkManager)
+//        .def("InitialiseFrameworkManager", &Mantid::PythonAPI::PythonInterface::InitialiseFrameworkManager)
         .def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm, return_value_policy< manage_new_object>())
 	.def("GetAlgorithmNames", &Mantid::PythonAPI::PythonInterface::GetAlgorithmNames)
         .def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)

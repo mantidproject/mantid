@@ -7,7 +7,8 @@ namespace Mantid
 namespace Algorithms
 {
 
-DECLARE_ALGORITHM(PropertyAlgorithm);
+//DECLARE_ALGORITHM(PropertyAlgorithm);
+DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,PropertyAlgorithm)
 
 using namespace Kernel;
 

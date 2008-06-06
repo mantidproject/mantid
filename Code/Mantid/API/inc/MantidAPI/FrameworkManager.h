@@ -56,7 +56,7 @@ namespace Mantid
 		{
 		public:
 			/// Creates all of the required services
-			void initialize();
+			//void initialize();
 
 			/// Clears all memory associated with the AlgorithmManager 
 			void clear();
