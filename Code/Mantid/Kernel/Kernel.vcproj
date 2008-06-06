@@ -379,11 +379,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\Signal.h"
+				RelativePath=".\inc\MantidKernel\SignalChannel.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\SignalChannel.h"
+				RelativePath=".\test\SignalChannelTest.h"
 				>
 			</File>
 			<File

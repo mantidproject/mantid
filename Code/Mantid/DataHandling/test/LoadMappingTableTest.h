@@ -27,7 +27,7 @@ public:
 		 inputFile = "../../../../Test/Data/HET15869.RAW";
 		 outputSpace = "outer";
 		//initialise framework manager to allow logging
-		Mantid::API::FrameworkManager::Instance().initialize();
+		Mantid::API::FrameworkManager::Instance();
 		// Create the workspace and add it to the analysis data service
 		work1=Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 		Mantid::API::AnalysisDataService::Instance().add(outputSpace, work1);

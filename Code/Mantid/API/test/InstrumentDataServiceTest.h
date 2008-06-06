@@ -12,7 +12,7 @@ class InstrumentDataServiceTest : public CxxTest::TestSuite
 public:
 	InstrumentDataServiceTest():inst1(new Mantid::API::Instrument), inst2(new Mantid::API::Instrument)
 	{
-		Mantid::API::FrameworkManager::Instance().initialize();
+		Mantid::API::FrameworkManager::Instance();
 	}
 	void testAdd()
 	{

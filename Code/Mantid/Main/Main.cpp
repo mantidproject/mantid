@@ -16,7 +16,7 @@ using namespace Mantid::API;
 int main()
 {
 
-  FrameworkManager::Instance().initialize();
+  FrameworkManager::Instance();
 
   UserAlgorithmTest userTest;
   userTest.RunAllTests();
