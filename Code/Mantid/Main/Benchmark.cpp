@@ -27,7 +27,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 //  Workspace2D_sptr retVal(new ManagedWorkspace2D);
 //  retVal->setTitle("ws123");
   Workspace2D_sptr retVal(new Workspace2D);
-  retVal->init(ylen,xlen,xlen);
+  retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     
@@ -43,7 +43,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace154(int xlen, int ylen)
 //  Workspace2D_sptr retVal(new ManagedWorkspace2D);
 //  retVal->setTitle("ws154");
   Workspace2D_sptr retVal(new Workspace2D);
-  retVal->init(ylen,xlen,xlen);
+  retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     
@@ -63,7 +63,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
 //  Workspace2D_sptr retVal(new ManagedWorkspace2D);
 //  retVal->setTitle("ws154");
   Workspace2D_sptr retVal(new Workspace2D);
-  retVal->init(ylen,xlen+1,xlen);
+  retVal->initialize(ylen,xlen+1,xlen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     
@@ -79,7 +79,7 @@ Workspace2D_sptr Benchmark::Create2DWorkspace154Hist(int xlen, int ylen)
 //  Workspace2D_sptr retVal(new ManagedWorkspace2D);
 //  retVal->setTitle("ws154");
   Workspace2D_sptr retVal(new Workspace2D);
-  retVal->init(ylen,xlen+1,xlen);
+  retVal->initialize(ylen,xlen+1,xlen);
   for (int i=0; i< ylen; i++)
   {
     retVal->setX(i,x1);     

@@ -24,7 +24,7 @@ Workspace2D_sptr UserAlgorithmTest::Create2DWorkspace(int xlen, int ylen)
 {
   std::vector<double> x1(xlen),y1(xlen),e1(xlen),e2(xlen);
   Workspace2D_sptr retVal(new Workspace2D);
-  retVal->init(ylen,xlen,xlen);
+  retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
   {
     for(int j=0;j<xlen;j++)
