@@ -57,8 +57,6 @@ public:
 
   Workspace1D();
   virtual ~Workspace1D();
-  // allocates space in a new workspace
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
@@ -129,6 +127,9 @@ private:
   Workspace1D(const Workspace1D&);
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace1D& operator=(const Workspace1D&);
+
+  // allocates space in a new workspace
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

@@ -58,9 +58,6 @@ public:
 
   virtual ~WorkspaceSingleValue();
   
-  // allocates space in a new workspace - does nothing in this case
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
-
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
   virtual int size() const 
@@ -139,6 +136,9 @@ private:
   WorkspaceSingleValue(const WorkspaceSingleValue&);
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   WorkspaceSingleValue& operator=(const WorkspaceSingleValue&);
+
+  // allocates space in a new workspace - does nothing in this case
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   ///Internal cache of X data
   std::vector<double> _X;

@@ -67,8 +67,6 @@ public:
   Workspace2D();
   virtual ~Workspace2D();
 
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
-  
   virtual void setX(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&, const std::vector<double>&);
@@ -139,6 +137,8 @@ private:
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace2D& operator=(const Workspace2D&);
 
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  
   virtual const int getHistogramNumberHelper() const;
   
   /// A vector that holds the 1D histograms 

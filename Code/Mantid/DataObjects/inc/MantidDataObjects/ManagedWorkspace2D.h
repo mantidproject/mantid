@@ -109,7 +109,6 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
   
 public:
   ManagedWorkspace2D();
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
   virtual ~ManagedWorkspace2D();
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
@@ -155,6 +154,8 @@ private:
   /// Private copy assignment operator
   ManagedWorkspace2D& operator=(const ManagedWorkspace2D&);
     
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+
   virtual const int getHistogramNumberHelper() const;
 
   ManagedDataBlock2D* getDataBlock(const int index) const;

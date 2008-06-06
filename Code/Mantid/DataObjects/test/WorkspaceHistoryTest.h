@@ -36,7 +36,7 @@ public:
 
     std::vector<double> x1(xlen,1), y1(xlen,signal), e1(xlen,error);
     Workspace2D_sptr outWS(new Workspace2D);
-    outWS->init(ylen,xlen,xlen);
+    outWS->initialize(ylen,xlen,xlen);
     for (int i=0; i< ylen; i++)
     {
       outWS->setX(i,x1);     
