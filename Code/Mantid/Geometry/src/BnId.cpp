@@ -148,7 +148,7 @@ BnId::operator>(const BnId& A) const
   */
 {
   return (&A!=this) ? 
-	  (A>*this) : 0;
+	  !(*this<A) : 0;
 }
 
 int
@@ -392,6 +392,7 @@ BnId::reverse()
 {
   transform(Tval.begin(),Tval.end(),Tval.begin(),
 	    std::bind2nd(std::multiplies<int>(),-1));
+  setCounters();
   return;
 }
 
@@ -418,6 +419,10 @@ BnId::display() const
   cx<<"("<<Tnum<<":"<<Znum<<")";
   return Out+cx.str();
   
+}
+
+void BnId::write(std::ostream& os) const{
+	os<<display();
 }
 
 } // NAMESPACE Geometry

@@ -29,20 +29,23 @@ StrComp(const std::string& Text,const boost::regex& Re,T& Aout,
     \returns 0 on failure and 1 on success
   */
 {
-  boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
-  boost::sregex_iterator empty;
-  // Failed search
-  if (m1==empty || 
-      static_cast<int>((*m1).size())<=compNum+1)  
-    return 0;
-  return convert( (*m1)[compNum+1].str(),Aout);
+	boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
+	boost::sregex_iterator empty;
+	// Failed search
+	if (m1==empty || 
+		static_cast<int>((*m1).size())<compNum)  
+		return 0;
+	int count=compNum;
+	for(;count!=0;count--)
+		m1++;
+	return convert( (*m1)[0].str(),Aout);
 }
 
 
-template<>
+template<typename T>
 int
-StrComp(const std::string& Text,const boost::regex& Re,
-	std::string& Aout,const int compNum) 
+StrComp(const char* Text,const boost::regex& Re,
+	T& Aout,const int compNum) 
   /*!
     Find the match in regular expression and places number in Aout 
     \param Text :: string to search
@@ -52,14 +55,7 @@ StrComp(const std::string& Text,const boost::regex& Re,
     \returns 0 on failure and 1 on success
   */
 {
-  boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
-  boost::sregex_iterator empty;
-  // Failed search
-  if (m1==empty || 
-      static_cast<int>((*m1).size())<=compNum+1)  
-    return 0;
-  Aout=(*m1)[compNum+1].str();
-  return 1;
+	return StrComp(std::string(Text),Re,Aout,compNum);
 }
 
 
@@ -335,7 +331,7 @@ StrSingleSplit(const std::string& text,
   return 0;
 }
 
-int
+DLLExport int
 findPattern(std::istream& fh,const boost::regex& Re,std::string& Out)
   /*! 
     Finds the start of the tally 
@@ -392,7 +388,7 @@ findComp(std::istream& fh,const boost::regex& Re,T& Out)
 }
 
 template<>
-int 
+DLLExport int 
 findComp(std::istream& fh,const boost::regex& Re,std::string& Out)
   /*! 
     Finds the start of the tally 
@@ -422,30 +418,31 @@ findComp(std::istream& fh,const boost::regex& Re,std::string& Out)
 
 /// \cond TEMPLATE 
 
-template int StrFullCut(std::string&,const boost::regex&,
+template DLLExport int StrFullCut(std::string&,const boost::regex&,
 			std::string&,const int);
-template int StrFullCut(std::string&,const boost::regex&,int&,const int);
-template int StrFullCut(std::string&,const boost::regex&,double&,const int);
+template DLLExport int StrFullCut(std::string&,const boost::regex&,int&,const int);
+template DLLExport int StrFullCut(std::string&,const boost::regex&,double&,const int);
 
 
 // --------------------------------------------------------
-template int StrFullSplit(const std::string&,const boost::regex&,
+template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<int>&);
-template int StrFullSplit(const std::string&,const boost::regex&,
+template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<double>&);
-template int StrFullSplit(const std::string&,const boost::regex&,
+template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<std::string>&);
 // --------------------------------------------------------
-template int StrSingleSplit(const std::string&,const boost::regex&,
+template DLLExport int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<int>&);
-template int StrSingleSplit(const std::string&,const boost::regex&,
+template DLLExport int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<double>&);
 // --------------------------------------------------------
-
-template int StrComp(const std::string&,const boost::regex&,double&,const int);
-template int StrComp(const std::string&,const boost::regex&,int&,const int);
+template DLLExport int StrComp(const char*,const boost::regex&,double&,const int);
+template DLLExport int StrComp(const char*,const boost::regex&,int&,const int);
+template DLLExport int StrComp(const std::string&,const boost::regex&,double&,const int);
+template DLLExport int StrComp(const std::string&,const boost::regex&,int&,const int);
 // ------------------------------------------------------------------
-template int findComp(std::istream&,const boost::regex&,int&);
+template DLLExport int findComp(std::istream&,const boost::regex&,int&);
 
 /// \endcond TEMPLATE 
 }  // NAMESPACE StrFunc

@@ -78,6 +78,7 @@ class DLLExport BnId
   int operator--(int);        ///< subtraction operator (returns !carry flag)
   int operator--();           ///< subtraction operator (returns !carry flag)
 
+  //TODO: MinTerm are not implemented
   /// Set a MinTerm
   void setMinTerm(const int);
   /// Add a min term

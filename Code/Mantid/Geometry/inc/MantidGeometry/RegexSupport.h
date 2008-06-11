@@ -10,10 +10,10 @@ namespace Mantid
 namespace StrFunc
 {
 /// Find if a pattern matches a string
-template<typename T> DLLExport int StrComp(const char*,const boost::regex&,T&,const int=1);
+template<typename T> DLLExport int StrComp(const char*,const boost::regex&,T&,const int=0);
 
 /// Find if a pattern matches
-template<typename T> int StrComp(const std::string&,const boost::regex&,T&,const int=0);
+template<typename T> DLLExport int StrComp(const std::string&,const boost::regex&,T&,const int=0);
 
 /// Find is a pattern matches
 DLLExport int StrLook(const char*,const boost::regex&);
@@ -39,13 +39,13 @@ template<typename T> int StrFullCut(std::string&,const boost::regex&,T&,const in
 template<typename T> int StrFullCut(std::string&,const boost::regex&,std::vector<T>&);
 
 /// Extract a section from a string
-int StrRemove(std::string&,std::string&,const boost::regex&);
+DLLExport int StrRemove(std::string&,std::string&,const boost::regex&);
 
 /// Find a compmonent in a Regex in a file
-template<typename T> int findComp(std::istream&,const boost::regex&,T&);
+template<typename T> DLLExport int findComp(std::istream&,const boost::regex&,T&);
 
 /// Finds a pattern in a file
-template<typename T> int findPattern(std::istream&,const boost::regex&,T&,std::string&);
+DLLExport int findPattern(std::istream&,const boost::regex&,std::string&);
 
 }
 

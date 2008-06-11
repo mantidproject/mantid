@@ -113,7 +113,7 @@ class DLLExport Rule
     valid rule B 
   */
 
-class Intersection : public Rule
+class DLLExport Intersection : public Rule
 {
 
  private:
@@ -162,7 +162,7 @@ class Intersection : public Rule
   valid rule B 
 */
 
-class Union : public Rule
+class DLLExport Union : public Rule
 {
 
  private:
@@ -213,7 +213,7 @@ class Union : public Rule
   be calculated
 */
 
-class SurfPoint : public Rule
+class DLLExport SurfPoint : public Rule
 {
  private:
 
@@ -265,7 +265,7 @@ class SurfPoint : public Rule
   Care must be taken to avoid a cyclic loop
 */
 
-class CompObj : public Rule
+class DLLExport CompObj : public Rule
 {
  private:
 
@@ -316,7 +316,7 @@ class CompObj : public Rule
   Care must be taken to avoid a cyclic loop
 */
 
-class CompGrp : public Rule
+class DLLExport CompGrp : public Rule
 {
  private:
 
@@ -362,7 +362,7 @@ class CompGrp : public Rule
   but can be true/false/unknown.
 */
 
-class BoolValue : public Rule
+class DLLExport BoolValue : public Rule
 {
  private:
 

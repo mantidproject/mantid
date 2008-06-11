@@ -1,6 +1,14 @@
 #ifndef RotaryCounter_h
 #define RotaryCounter_h
 
+#include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
+
+namespace Mantid
+{
+
+namespace Geometry
+{
 /*!
   \class RotaryCounter
   \version 1.0
@@ -12,7 +20,7 @@
   going to 1,2,N-1 and then 1,3,4 etc...
 */
 
-class RotaryCounter
+class DLLExport RotaryCounter
 {
   friend std::ostream& operator<<(std::ostream&,const RotaryCounter&);
 
@@ -42,6 +50,7 @@ class RotaryCounter
 };
 
 std::ostream& operator<<(std::ostream&,const RotaryCounter&);
-
+}
+}
 
 #endif
