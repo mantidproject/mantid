@@ -1,5 +1,6 @@
 #include "WorkspaceMatrix.h"
 #include "../pixmaps.h"
+#include "../ApplicationWindow.h"
 
 #include <QMessageBox>
 
@@ -52,4 +53,57 @@ void WorkspaceMatrix::getSelectedRows(int& i0,int& i1)
             }else
                 i1++;
 	}
+}
+
+Table* WorkspaceMatrix::createTableFromSelectedRows(bool visible, bool errs)
+{
+     //Matrix* m = (Matrix*)activeWindow(MatrixWindow);
+     //if (!m || !m->isA("WorkspaceMatrix")) return 0;
+     //WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
+
+     int i0,i1; 
+     getSelectedRows(i0,i1);
+     if (i0 < 0 || i1 < 0) return 0;
+
+     int c = errs?2:1;
+
+     //Table *t = newTable(generateUniqueName(wsm->name()+"-"),wsm->numCols(),c*(i1 - i0 + 1) + 1);
+
+	 Table* t = new Table(scriptEnv, numCols(), c*(i1 - i0 + 1) + 1, "", applicationWindow(), 0);
+	 applicationWindow()->initTable(t, applicationWindow()->generateUniqueName(name()+"-"));
+     if (visible) t->showNormal();
+
+    
+     int kY,kErr;
+     for(int i=i0;i<=i1;i++)
+     {
+         kY = c*(i-i0)+1;
+         t->setColName(kY,"Y"+QString::number(i));
+         if (errs)
+         {
+             kErr = 2*(i - i0) + 2;
+             t->setColPlotDesignation(kErr,Table::yErr);
+             t->setColName(kErr,"Err"+QString::number(i));
+         }
+         for(int j=0;j<numCols();j++)
+         {
+             if (i == i0) t->setCell(j,0,dataX(i,j));
+             t->setCell(j,kY,cell(i,j)); 
+             if (errs) t->setCell(j,kErr,dataE(i,j));
+         }
+     }
+     return t;
+ }
+
+void WorkspaceMatrix::createGraphFromSelectedRows(bool visible, bool errs)
+{
+    Table *t = createTableFromSelectedRows(visible,errs);
+    if (!t) return;
+
+    QStringList cn;
+    cn<<t->colName(1);
+    if (errs) cn<<t->colName(2);
+    Graph *g = applicationWindow()->multilayerPlot(t,t->colNames(),Graph::Line)->activeGraph();
+    applicationWindow()->polishGraph(g,Graph::Line);
+    setGraph1D(g);
 }

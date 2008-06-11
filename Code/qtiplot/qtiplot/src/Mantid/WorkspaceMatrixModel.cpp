@@ -1,6 +1,7 @@
 #include "WorkspaceMatrixModel.h"
 #include "WorkspaceMatrix.h"
 #include "../plot2D/ScaleEngine.h"
+#include "MantidAPI/Axis.h"
 
 #include <gsl/gsl_math.h>
 #include <fstream>
@@ -78,12 +79,29 @@ QVariant WorkspaceMatrixModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 }
 
-void WorkspaceMatrixModel::setGraph(Graph* g)
+void WorkspaceMatrixModel::setGraph2D(Graph* g)
 {
     g->setTitle(tr("Workspace ")+d_matrix->name());
-    g->setXAxisTitle(tr("Time of flight"));
-    //g->setScale(Graph::Bottom,1,2000);
-    g->setYAxisTitle(tr("Histogram"));
+    Mantid::API::Axis* ax = m_workspace->getAxis(0);
+    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
+    g->setXAxisTitle(tr(s.c_str()));
+    ax = m_workspace->getAxis(1);
+    if (ax->isNumeric()) 
+    {
+        s = ax->unit()->caption() + " / " + ax->unit()->label();
+        g->setYAxisTitle(tr(s.c_str())); 
+    }
+    else
+        g->setYAxisTitle(tr("Spectrum")); 
+}
+
+void WorkspaceMatrixModel::setGraph1D(Graph* g)
+{
+    g->setTitle(tr("Workspace ")+d_matrix->name());
+    Mantid::API::Axis* ax = m_workspace->getAxis(0);
+    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
+    g->setXAxisTitle(tr(s.c_str()));
+    g->setYAxisTitle(tr("Counts")); 
 }
 
 int WorkspaceMatrixModel::indexX(double s)const

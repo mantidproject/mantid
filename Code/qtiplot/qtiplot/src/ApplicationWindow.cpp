@@ -880,12 +880,17 @@ void ApplicationWindow::initToolBars()
 		connect(t, SIGNAL(actionTriggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
 
   	actionCopyRowToTable = new QAction(tr("Copy to Table"), this);
-	//actionCopyRowToTable->setShortcut( tr("ALT+T") );
-	actionCopyRowToTable->setIcon(QIcon(QPixmap(workspace_matrix_xpm)));
-	//actionCopyRowToTable->setCheckable(true);
+	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 	//plotTools->addAction(actionCopyRowToTable);
 
+  	actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
+	actionCopyRowToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
+
+  	actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
+	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
 }
 
@@ -8721,6 +8726,8 @@ void ApplicationWindow::showWindowContextMenu()
 		if (t->viewType() == Matrix::TableView){
             cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
             cm.addAction(actionCopyRowToTable);
+            cm.addAction(actionCopyRowToGraph);
+            cm.addAction(actionCopyRowToGraphErr);
 		} else if (t->viewType() == Matrix::ImageView){
             cm.addAction(actionExportMatrix);
             cm.insertSeparator();
@@ -12436,7 +12443,7 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 
     if (m->isA("WorkspaceMatrix"))
     {
-        static_cast<WorkspaceMatrix*>(m)->setGraph(plot);
+        static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
     }
 
 	Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
@@ -12475,7 +12482,7 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
 
     if (m->isA("WorkspaceMatrix"))
     {
-        static_cast<WorkspaceMatrix*>(m)->setGraph(plot);
+        static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
     }
 
 	plot->plotSpectrogram(m, type);
@@ -15226,31 +15233,28 @@ void ApplicationWindow::mantidMenuAboutToShow()
 }
 
 
- void ApplicationWindow::copyRowToTable()
- {
-     Matrix* m = (Matrix*)activeWindow(MatrixWindow);
-     if (!m || !m->isA("WorkspaceMatrix")) return;
-     WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
+void ApplicationWindow::copyRowToTable()
+{
+    Matrix* m = (Matrix*)activeWindow(MatrixWindow);
+    if (!m || !m->isA("WorkspaceMatrix")) return;
+    WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
+    wsm->createTableFromSelectedRows();
+}
 
-     int i0,i1; 
-     wsm->getSelectedRows(i0,i1);
-     if (i0 < 0 || i1 < 0) return;
+void ApplicationWindow::copyRowToGraph()
+{
+    Matrix* m = (Matrix*)activeWindow(MatrixWindow);
+    if (!m || !m->isA("WorkspaceMatrix")) return;
+    WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
+    wsm->createGraphFromSelectedRows(false,false);
+  
+}
 
-     Table *t = newTable(generateUniqueName(wsm->name()+"-"),wsm->numCols(),2*(i1 - i0 + 1) + 1);
-
-     int kY,kErr;
-     for(int i=i0;i<=i1;i++)
-     {
-         kY = 2*(i-i0)+1;
-         t->setColName(kY,"Y"+QString::number(i));
-         kErr = 2*(i - i0) + 2;
-         t->setColPlotDesignation(kErr,Table::yErr);
-         t->setColName(kErr,"Err"+QString::number(i));
-         for(int j=0;j<wsm->numCols();j++)
-         {
-             if (i == i0) t->setCell(j,0,wsm->dataX(i,j));
-             t->setCell(j,kY,wsm->cell(i,j)); 
-             t->setCell(j,kErr,wsm->dataE(i,j));
-         }
-     }
- }
+void ApplicationWindow::copyRowToGraphErr()
+{
+    Matrix* m = (Matrix*)activeWindow(MatrixWindow);
+    if (!m || !m->isA("WorkspaceMatrix")) return;
+    WorkspaceMatrix *wsm = static_cast<WorkspaceMatrix*>(m);
+    wsm->createGraphFromSelectedRows(false);
+  
+}

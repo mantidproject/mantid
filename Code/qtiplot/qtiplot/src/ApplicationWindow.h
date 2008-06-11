@@ -962,6 +962,8 @@ public slots:
 
     // WorkspaceMatrix
     void copyRowToTable();
+    void copyRowToGraph();
+    void copyRowToGraphErr();
 
 signals:
 	void modified();
@@ -1274,5 +1276,7 @@ private:
     QUndoView *d_undo_view;
     //  WorkspaceMatrix
     QAction *actionCopyRowToTable;
+    QAction *actionCopyRowToGraph;
+    QAction *actionCopyRowToGraphErr;
 };
 #endif

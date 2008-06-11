@@ -16,7 +16,8 @@ public:
     WorkspaceMatrixModel(Mantid::API::Workspace_sptr& ws, QObject *parent, int start=-1, int end=-1, bool filter=false, double maxv=0.);
     //~WorkspaceMatrixModel();
 
-    void setGraph(Graph* g);
+    void setGraph2D(Graph* g);
+    void setGraph1D(Graph* g);
     int startRow()const{return m_start;}
     int endRow()const{return m_end;}
 
