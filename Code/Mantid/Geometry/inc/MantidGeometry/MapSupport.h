@@ -30,7 +30,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-
+#include "MantidKernel/System.h"
 
 
 namespace MapSupport

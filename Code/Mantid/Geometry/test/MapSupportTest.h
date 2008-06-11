@@ -5,12 +5,15 @@
 #include <vector>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/MapSupport.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid;
 
 
 class testMapSupport: public CxxTest::TestSuite{
 public:
-
+	void testConstructor(){
+	}
 };
 #endif
