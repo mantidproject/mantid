@@ -146,11 +146,6 @@ namespace API
       /// For convenience added pointer to instrument here
       boost::shared_ptr<API::Instrument> instrument;
 
-      /// Container used to check that a user has not by mistake specified the same 
-      /// detector ID twice or more in a XML instrument description file
-
-      //std::set<int> doubleCheckingIdListInput;
-
     };
 
   } // namespace DataHandling

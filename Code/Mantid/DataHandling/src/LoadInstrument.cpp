@@ -14,6 +14,8 @@
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::XMLReader;
@@ -21,6 +23,8 @@ using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
+using Poco::XML::NodeFilter;
 
 
 namespace Mantid
@@ -98,7 +102,8 @@ void LoadInstrument::exec()
     throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);	
   }
 
-  for (unsigned int iType = 0; iType < pNL_type->length(); iType++)
+  int numberTypes = pNL_type->length();
+  for (unsigned int iType = 0; iType < numberTypes; iType++)
   {  
     Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
     std::string typeName = pTypeElem->getAttribute("name");
@@ -243,22 +248,25 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
   // location elements
 
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
-  NodeList* pNL_loc_for_this_type = pType->getElementsByTagName("location");
+	NodeIterator it(pType, NodeFilter::SHOW_ELEMENT);
 
-  for (unsigned int i = 0; i < pNL_loc_for_this_type->length(); i++)
+  Node* pNode = it.nextNode();
+  while (pNode)
   {
-    Element* pElem = static_cast<Element*>(pNL_loc_for_this_type->item(i));
-    std::string typeName = (getParentComponent(pElem))->getAttribute("type");
-    if ( isAssemply(typeName) )
+    if ( pNode->nodeName().compare("location")==0 )
     {
-      appendAssembly(ass, pElem, idList);
+      Element* pElem = static_cast<Element*>(pNode);
+
+      std::string typeName = (getParentComponent(pElem))->getAttribute("type");
+
+      if ( isAssemply(typeName) )
+        appendAssembly(ass, pElem, idList);
+      else
+        appendLeaf(ass, pElem, idList);      
     }
-    else
-    {
-      appendLeaf(ass, pElem, idList);
-    }
+
+    pNode = it.nextNode();
   }
-  pNL_loc_for_this_type->release();
 }
 
 void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
@@ -297,37 +305,37 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
   if ( category.compare("detector") == 0 )
   {
-    Geometry::Detector detector;
+    Geometry::Detector* detector = new Geometry::Detector;
 
     if ( pLocElem->hasAttribute("name") )
-      detector.setName(pLocElem->getAttribute("name"));
+      detector->setName(pLocElem->getAttribute("name"));
     else if ( pCompElem->hasAttribute("name") )
     {
-      detector.setName(pCompElem->getAttribute("name"));
+      detector->setName(pCompElem->getAttribute("name"));
     }
     else
     {
-      detector.setName(pCompElem->getAttribute("type"));
+      detector->setName(pCompElem->getAttribute("type"));
     }
 
     // set location for this comp
 
-    setLocation(&detector, pLocElem);
+    setLocation(detector, pLocElem);
 
 
     // set detector ID and increment it. Finally add the detector to the parent
-    detector.setID(idList.vec[idList.counted]);
+    detector->setID(idList.vec[idList.counted]);
     idList.counted++;
-    int toGetHoldOfDetectorCopy = parent->addCopy(&detector);
-    Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
+    int toGetHoldOfDetectorCopy = parent->add(detector);
+    //Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
     try
     {
-      instrument->markAsDetector(temp);
+      instrument->markAsDetector(detector);
     }
     catch(Kernel::Exception::ExistsError& e)
     { 
       std::stringstream convert;
-      convert << temp->getID();
+      convert << detector->getID();
       throw Kernel::Exception::InstrumentDefinitionError("Detector with ID = " + convert.str() +
         " present more then once in XML instrument file", m_filename);	
     }
@@ -503,49 +511,56 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
   }
   else
   {
+    // test first if any id elements
+
     NodeList* pNL = pE->getElementsByTagName("id");
 
     if ( pNL->length() == 0 )
     {
-      g_log.error("idlist element in instrument definition file wrongly specified.");
       throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);	
     }
 
-    for (unsigned int i = 0; i < pNL->length(); i++)
-    {  
-      Element* pIDElem = static_cast<Element*>(pNL->item(i));
-
-      if ( pIDElem->hasAttribute("val") )
-      {
-        int valID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
-        idList.vec.push_back(valID);
-      }
-      else if ( pIDElem->hasAttribute("start") )
-      {
-        int startID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
-
-        int endID;
-        if ( pIDElem->hasAttribute("end") )
-          endID = atoi( (pIDElem->getAttribute("end")).c_str() ); 
-        else
-          endID = startID;
-
-        for (int i = startID; i <= endID; i++)
-          idList.vec.push_back(i);
-      }
-      else
-      {
-        // should warn user that no val or start attribute but
-        // better to do this through dtd or schema perhaps....
-        // Anyway for now use the usual way out
-
-        g_log.error("id element in instrument definition file wrongly specified.");
-        throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " + 
-          std::string("element wrongly specified in XML instrument file"), m_filename);	
-      }
-    }
-
     pNL->release();
+
+
+    // get id numbers
+
+	  NodeIterator it(pE, NodeFilter::SHOW_ELEMENT);
+
+    Node* pNode = it.nextNode();
+    while (pNode)
+    {
+      if ( pNode->nodeName().compare("id")==0 )
+      {
+        Element* pIDElem = static_cast<Element*>(pNode);
+
+        if ( pIDElem->hasAttribute("val") )
+        {
+          int valID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+          idList.vec.push_back(valID);
+        }
+        else if ( pIDElem->hasAttribute("start") )
+        {
+          int startID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+
+          int endID;
+          if ( pIDElem->hasAttribute("end") )
+            endID = atoi( (pIDElem->getAttribute("end")).c_str() ); 
+          else
+            endID = startID;
+
+          for (int i = startID; i <= endID; i++)
+            idList.vec.push_back(i);
+        }
+        else
+        {
+          throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " + 
+            std::string("element wrongly specified in XML instrument file"), m_filename);	
+        }  
+      }
+
+      pNode = it.nextNode();
+    } // end while loop
   }
 }
 

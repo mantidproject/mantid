@@ -54,7 +54,7 @@ public:
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "../../../../Test/Instrument/not_working_HET_definition.xml";
+    std::string inputFile = "../../../../Test/Instrument/HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
@@ -121,8 +121,8 @@ public:
     
     // Check that a couple of x bin boundaries have been correctly converted
     x = output2D->dataX(103);
-    TS_ASSERT_DELTA( x[5], 1.410, 0.001 );
-    TS_ASSERT_DELTA( x[10], 2.8201, 0.001 );
+    TS_ASSERT_DELTA( x[5], 1.5808, 0.001 );
+    TS_ASSERT_DELTA( x[10], 3.1617, 0.001 );
     // Just check that an input bin boundary is unchanged
     std::vector<double> xIn = input2D->dataX(2066);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
