@@ -7,6 +7,7 @@
 
 // Includes ====================================================================
 #include "MantidPythonAPI/PythonInterface.h"
+#include "MantidPythonAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 
@@ -106,6 +107,10 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     PyObject* py_self;
 };
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1_2, createAlgorithm, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2_3, createAlgorithm, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2_3, execute, 2, 3)
+
 
 #if _WIN32
 BOOST_PYTHON_MODULE(MantidPythonAPI)
@@ -167,6 +172,14 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getE2", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE2), return_value_policy< manage_new_object >())
     ;
 
+	class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())
+        .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1_2())
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2_3())
+        .def("execute", &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< manage_new_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2_3())
+        .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
+        .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
+    ;
 
 }
 
