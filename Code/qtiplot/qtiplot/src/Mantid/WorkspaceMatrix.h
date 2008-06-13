@@ -3,9 +3,23 @@
 
 #include "../Matrix.h"
 #include "../Graph.h"
+#include "../Graph3D.h"
 #include "../Table.h"
 #include "WorkspaceMatrixModel.h"
 #include "MantidAPI/Workspace.h"
+
+class WorkspaceMatrix;
+
+class WorkspaceMatrixFunction: public UserHelperFunction
+{
+public:
+    WorkspaceMatrixFunction(WorkspaceMatrix* wsm):m_wsmatrix(wsm){}
+    double operator()(double x, double y);
+    void init();
+private:
+    WorkspaceMatrix* m_wsmatrix;
+    double m_dx,m_dy;
+};
 
 class WorkspaceMatrix : public Matrix
 {
@@ -28,6 +42,9 @@ public:
     double dataE(int row, int col){return static_cast<WorkspaceMatrixModel*>(d_matrix_model)->dataE(row, col);}
     Table* createTableFromSelectedRows(bool vis = true, bool errs = true);
     void createGraphFromSelectedRows(bool vis = true, bool errs = true);
+    Graph3D * WorkspaceMatrix::plotGraph3D();
+private:
+     WorkspaceMatrixFunction m_funct;
 };
 
 #endif /* WORKSPACEMATRIX_H */

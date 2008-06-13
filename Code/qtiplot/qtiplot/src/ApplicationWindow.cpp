@@ -12373,6 +12373,11 @@ Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 			return 0;
 	}
 
+    if (m->isA("WorkspaceMatrix"))
+    {
+        return static_cast<WorkspaceMatrix*>(m)->plotGraph3D();
+    }
+
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	QString label = generateUniqueName(tr("Graph"));
 

@@ -1,11 +1,12 @@
 #include "WorkspaceMatrix.h"
 #include "../pixmaps.h"
 #include "../ApplicationWindow.h"
+#include "../Graph3D.h"
 
 #include <QMessageBox>
 
 WorkspaceMatrix::WorkspaceMatrix(Mantid::API::Workspace_sptr ws, ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f, int start, int end, bool filter, double maxv):
-Matrix(env, label, parent, name, f)
+Matrix(env, label, parent, name, f),m_funct(this)
 {
 
     d_matrix_model = static_cast<MatrixModel*> (new WorkspaceMatrixModel(ws,this,start,end,filter,maxv));
@@ -20,15 +21,29 @@ Matrix(env, label, parent, name, f)
 
     double xs = ws->dataX(0)[0];
     double xe = ws->dataX(0)[ws->blocksize()];
+    // What if y is not a spectrum number?
     double ys = double(static_cast<WorkspaceMatrixModel*>(d_matrix_model)->startRow());
     double ye = double(static_cast<WorkspaceMatrixModel*>(d_matrix_model)->endRow());
 
     setCoordinates(xs,xe,ys,ye);
 
-/*	// resize the table
-	setGeometry(50, 50, QMIN(_Matrix_initial_columns_, d_matrix_model->columnCount())*d_table_view->horizontalHeader()->sectionSize(0) + 55,
-                (QMIN(_Matrix_initial_rows_,d_matrix_model->rowCount())+1)*d_table_view->verticalHeader()->sectionSize(0));
-*/
+    m_funct.init();
+
+}
+
+Graph3D * WorkspaceMatrix::plotGraph3D()
+{
+    ApplicationWindow* a = applicationWindow();
+	QString labl = a->generateUniqueName(tr("Graph"));
+
+	Graph3D *plot = new Graph3D("", a);
+	plot->resize(500,400);
+	plot->setWindowTitle(labl);
+	plot->setName(labl);
+	a->customPlot3D(plot);
+	plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), 0, 2000, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
+	a->initPlot3D(plot);
+    return plot;
 }
 
 WorkspaceMatrix::~WorkspaceMatrix()
@@ -106,4 +121,33 @@ void WorkspaceMatrix::createGraphFromSelectedRows(bool visible, bool errs)
     Graph *g = applicationWindow()->multilayerPlot(t,t->colNames(),Graph::Line)->activeGraph();
     applicationWindow()->polishGraph(g,Graph::Line);
     setGraph1D(g);
+}
+
+void WorkspaceMatrixFunction::init()
+{
+    int nx = m_wsmatrix->numCols();
+    int ny = m_wsmatrix->numRows();
+
+    m_dx = (m_wsmatrix->xEnd() - m_wsmatrix->xStart()) / (nx > 1? nx - 1 : 1);
+    m_dy = (m_wsmatrix->yEnd() - m_wsmatrix->yStart()) / (ny > 1? ny - 1 : 1);
+
+    if (m_dx == 0.) m_dx = 1.;//?
+    if (m_dy == 0.) m_dy = 1.;//?
+}
+
+double WorkspaceMatrixFunction::operator()(double x, double y)
+{
+    x += 0.5*m_dx;
+    y -= 0.5*m_dy;
+    	
+    int i = abs((y - m_wsmatrix->yStart())/m_dy);
+    int j = abs((x - m_wsmatrix->xStart())/m_dx);
+
+    int jj = static_cast<WorkspaceMatrixModel*>(m_wsmatrix->matrixModel())->indexX(x);
+    if (jj >= 0) j = jj;
+
+    if (i >= 0 && i < m_wsmatrix->numRows() && j >=0 && j < m_wsmatrix->numCols())
+	    return m_wsmatrix->cell(i,j);
+    else
+	    return 0.0;
 }

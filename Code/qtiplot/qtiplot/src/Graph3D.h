@@ -44,6 +44,7 @@ using namespace Qwt3D;
 
 class UserFunction;
 class UserParametricSurface;
+class UserHelperFunction;
 
 /*!\brief 3D graph widget.
  *
@@ -71,7 +72,7 @@ public slots:
 	void initPlot();
 	void initCoord();
 	void addFunction(const QString& s, double xl, double xr, double yl,
-						  double yr, double zl, double zr, int columns, int rows);
+						  double yr, double zl, double zr, int columns, int rows, UserHelperFunction* hfun = 0);
 	void addParametricSurface(const QString& xFormula, const QString& yFormula,
 						const QString& zFormula, double ul, double ur, double vl, double vr,
 						int columns, int rows, bool uPeriodic, bool vPeriodic);
@@ -397,10 +398,12 @@ public:
 	unsigned int rows(){return d_rows;};
 	unsigned int columns(){return d_columns;};
 	void setMesh (unsigned int columns, unsigned int rows);
+    void setHlpFun(UserHelperFunction* hlp){m_hlpFun = hlp;}
 
 private:
 	  QString formula;
 	  unsigned int d_rows, d_columns;
+      UserHelperFunction* m_hlpFun;
 };
 
 //! Class for user defined parametric surfaces
@@ -435,4 +438,11 @@ private:
 	bool d_u_periodic, d_v_periodic;
 	double d_ul, d_ur, d_vl, d_vr;
 };
+
+class UserHelperFunction
+{
+public:
+    virtual double operator()(double x, double y)=0;
+};
+
 #endif // Plot3D_H
