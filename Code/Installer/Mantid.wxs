@@ -102,23 +102,23 @@
               Source='..\Third_Party\lib\win32\boost_regex-vc80-mt-1_34_1.dll' Vital='yes'/>
 
             <File Id='Qt3Support4DLL' Name='Qt3Supp4.dll' LongName='Qt3Support4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\Qt3Support4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\Qt3Support4.dll' Vital='yes'/>
             <File Id='QtAssistantClient4DLL' Name='QtAC4.dll' LongName='QtAssistantClient4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtAssistantClient4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtAssistantClient4.dll' Vital='yes'/>
             <File Id='QtCore4DLL' Name='QtCore4.dll' LongName='QtCore4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtCore4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtCore4.dll' Vital='yes'/>
             <File Id='QtGui4DLL' Name='QtGui4.dll' LongName='QtGui4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtGui4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtGui4.dll' Vital='yes'/>
             <File Id='QtNetwork4DLL' Name='QtNet4.dll' LongName='QtNetwork4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtNetwork4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtNetwork4.dll' Vital='yes'/>
             <File Id='QtOpenGL4DLL' Name='QtOGL4.dll' LongName='QtOpenGL4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtOpenGL4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtOpenGL4.dll' Vital='yes'/>
             <File Id='QtSql4DLL' Name='QtSql4.dll' LongName='QtSql4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtSql4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtSql4.dll' Vital='yes'/>
             <File Id='QtSvg4DLL' Name='QtSvg4.dll' LongName='QtSvg4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtSvg4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtSvg4.dll' Vital='yes'/>
             <File Id='QtXml4DLL' Name='QtXml4.dll' LongName='QtXml4.dll' DiskId='1' 
-              Source='C:\Qt\4_4_0\bin\QtXml4.dll' Vital='yes'/>
+              Source='C:\Qt\bin\QtXml4.dll' Vital='yes'/>
           </Component>
           <Directory Id='Tests' Name='tests'>
             <Component Id='TestsDir' Guid='{A9026C7E-2DB1-4767-9519-B05B12F1DB53}' SharedDllRefCount='no' 
