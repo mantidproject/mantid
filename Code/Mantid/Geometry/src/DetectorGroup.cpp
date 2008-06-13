@@ -52,7 +52,7 @@ void DetectorGroup::addDetector(IDetector* det)
   
   if ( m_detectors.insert( DetCollection::value_type(det->getID(), det) ).second )
   {
-    g_log.information() << "Detector with ID " << det->getID() << " added to group." << std::endl;
+    g_log.debug() << "Detector with ID " << det->getID() << " added to group." << std::endl;
   }
   else
   {

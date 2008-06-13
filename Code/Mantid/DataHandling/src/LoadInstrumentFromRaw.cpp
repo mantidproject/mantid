@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
 #include "MantidAPI/Instrument.h"
 
+#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/Component.h"
@@ -76,7 +77,12 @@ void LoadInstrumentFromRaw::exec()
   instrument->add(source);
   source->setName("Unknown");
   instrument->markAsSource(source);
-  source->setPos(0.0,-10.0,0.0); 
+  double l1;
+  if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
+  {
+    l1 = 10.0;
+  }
+  source->setPos(0.0,-1.0*l1,0.0); 
 
   // add detectors
 
@@ -108,11 +114,9 @@ void LoadInstrumentFromRaw::exec()
     << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
     << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
     << "the remaining spherical coordinate phi was set to zero.\n"
-    << "Source component added with position set to (0,-10,0). In standard configuration, with \n"
-    << "the beam along y-axis pointing from source to sample, this implies the source is 10m in front \n"
-    << "of the sample (L1=10m). To change the value of L1 the easiest is to move the source component.\n"
-    << "You can get hold of the source component by using the Instrument::getSource() method.\n"
-    << "eg. fm.getWorkspace(\"MyWS\")->getInstrument()->getSource()->setPos(0,-12.5,0);.\n";
+    << "Source component added with position set to (0,-" << l1 << ",0). In standard configuration, with \n"
+    << "the beam along y-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"
+    << "of the sample. This value can be changed via the 'instrument.l1' configuration property.\n";
 
   return;
 }
