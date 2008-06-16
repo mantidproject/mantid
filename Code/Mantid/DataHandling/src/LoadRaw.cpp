@@ -112,17 +112,17 @@ namespace Mantid
       for (int period = 0; period < m_numberOfPeriods; ++period) {
         
         // Create the 2D workspace for the output
-        m_localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                  (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
         // Set the unit on the workspace to TOF
-        m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
              
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
-          loadData(timeChannelsVec,counter,histToRead,iraw,lengthIn,spectrum);
+          loadData(timeChannelsVec,counter,histToRead,iraw,lengthIn,spectrum,localWorkspace );
           counter++;
         }
         // Read in the spectra in the optional list parameter, if set
@@ -130,7 +130,7 @@ namespace Mantid
         {
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(timeChannelsVec,counter,m_spec_list[i],iraw,lengthIn,spectrum);
+            loadData(timeChannelsVec,counter,m_spec_list[i],iraw,lengthIn,spectrum, localWorkspace );
             counter++;
           }
         }
@@ -141,13 +141,13 @@ namespace Mantid
         if (period == 0)
         {
           // Only run the sub-algorithms once
-          runLoadInstrument();
-          runLoadMappingTable();
-          runLoadLog();
+          runLoadInstrument(localWorkspace );
+          runLoadMappingTable(localWorkspace );
+          runLoadLog(localWorkspace );
           // Cache these for copying to workspaces for later periods
-          instrument = m_localWorkspace->getInstrument();
-          specMap = m_localWorkspace->getSpectraMap();
-          sample = m_localWorkspace->getSample();
+          instrument = localWorkspace->getInstrument();
+          specMap = localWorkspace->getSpectraMap();
+          sample = localWorkspace->getSample();
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -160,13 +160,13 @@ namespace Mantid
           localWSName += "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,localWSName,Direction::Output));
           // Copy the shared instrument, sample & spectramap onto the workspace for this period
-          m_localWorkspace->setInstrument(instrument);
-          m_localWorkspace->setSpectraMap(specMap);
-          m_localWorkspace->setSample(sample);
+          localWorkspace->setInstrument(instrument);
+          localWorkspace->setSpectraMap(specMap);
+          localWorkspace->setSample(sample);
         }
         
         // Assign the result to the output workspace property
-        setProperty(outputWorkspace,m_localWorkspace);
+        setProperty(outputWorkspace,localWorkspace);
         g_log.information() << "Workspace " << localWSName << " created. \n";
         
       } // loop over periods
@@ -231,7 +231,7 @@ namespace Mantid
      *  @param lengthIn The number of elements in a spectrum
      *  @param spectrum Pointer to the array into which the spectrum will be read
      */
-    void LoadRaw::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum)
+    void LoadRaw::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
       memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));
@@ -242,16 +242,16 @@ namespace Mantid
       std::vector<double> e(lengthIn-1);
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-      m_localWorkspace->setData(hist, v, e);
-      m_localWorkspace->setX(hist, tcbs);
-      m_localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
-      m_localWorkspace->getAxis(1)->spectraNo(hist)= i;
+      localWorkspace->setData(hist, v, e);
+      localWorkspace->setX(hist, tcbs);
+      localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
+      localWorkspace->getAxis(1)->spectraNo(hist)= i;
       // NOTE: Raw numbers go straight into the workspace 
       //     - no account taken of bin widths/units etc.
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
-    void LoadRaw::runLoadInstrument()
+    void LoadRaw::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Determine the search directory for XML instrument definition files (IDFs)
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
@@ -265,7 +265,7 @@ namespace Mantid
       
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -280,12 +280,12 @@ namespace Mantid
       // If loading instrument definition file fails, run LoadInstrumentFromRaw instead
       if ( ! loadInst->isExecuted() )
       {
-        runLoadInstrumentFromRaw();
+        runLoadInstrumentFromRaw(localWorkspace);
       }
     }
     
     /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
-    void LoadRaw::runLoadInstrumentFromRaw()
+    void LoadRaw::runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr localWorkspace)
     {
       g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
         << "the instrument from raw data file.\n";
@@ -293,7 +293,7 @@ namespace Mantid
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above
-      loadInst->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -309,13 +309,13 @@ namespace Mantid
     }
     
     /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
-    void LoadRaw::runLoadMappingTable()
+    void LoadRaw::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
       // There is a small penalty in re-opening the raw file but nothing major. 
       Algorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
       loadmap->setPropertyValue("Filename", m_filename);
-      loadmap->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      loadmap->setProperty<Workspace_sptr>("Workspace",localWorkspace);
       try
       {
         loadmap->execute();  
@@ -329,13 +329,13 @@ namespace Mantid
     }
 
     /// Run the LoadLog sub-algorithm
-    void LoadRaw::runLoadLog()
+    void LoadRaw::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {
       Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
-      loadLog->setProperty<Workspace_sptr>("Workspace",m_localWorkspace);
+      loadLog->setProperty<Workspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try

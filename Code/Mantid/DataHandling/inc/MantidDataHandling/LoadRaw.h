@@ -81,16 +81,15 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int* );
-      void runLoadInstrument();
-      void runLoadInstrumentFromRaw();
-      void runLoadMappingTable();
-      void runLoadLog();
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
+      void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
+      void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
-      /// Pointer to the local workspace
-      DataObjects::Workspace2D_sptr m_localWorkspace;
+     
       /// The number of spectra in the raw file
       int m_numberOfSpectra;
       /// The number of periods in the raw file
