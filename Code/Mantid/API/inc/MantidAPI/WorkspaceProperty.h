@@ -147,21 +147,20 @@ public:
    */
   virtual bool store()
   {
+    bool result = false;
+	  
     if ( m_direction )
     {
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
       // Note use of addOrReplace rather than add
       API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()() );
-      return true;
-    }
-    else
-    {
-      // Come here if an input workspace
-      return false;
+      result = true;
     }
     //always clear the internal pointer after storing
     clear();
+    
+    return result;
   }
   
   /// Reset the pointer to the workspace
