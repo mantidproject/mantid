@@ -386,6 +386,7 @@ class DLLExport BoolValue : public Rule
 
   int type() const { return 0; }   //effective name
 
+  void setStatus(int val){ if(val==0||val==1||val==-1)status=val;}
   int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;  ///< isValue :: Based on a surface status map
   int simplify();                             

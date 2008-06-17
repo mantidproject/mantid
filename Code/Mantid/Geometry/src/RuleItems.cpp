@@ -596,7 +596,7 @@ Union::display() const
 {
   std::string out;
   if (!A || !B)
-    throw std::runtime_error("Intersection::display incomplete type");
+    throw std::runtime_error("Union::display incomplete type");
   if (A->type()==1)
     out="("+A->display()+")";
   else
@@ -698,7 +698,7 @@ SurfPoint::setLeaf(Rule* nR,const int)
     \param int :: ignored
   */
 {
-  std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+ // std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
   SurfPoint* newX = dynamic_cast<SurfPoint*>(nR);
   if (newX)
     *this = *newX;
@@ -713,7 +713,7 @@ SurfPoint::setLeaves(Rule* aR,Rule*)
     \param aR :: new rule
   */
 {
-  std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
+  //std::cerr<<"Calling SurfPoint setLeaf"<<std::endl;
   SurfPoint* newX = dynamic_cast<SurfPoint*>(aR);
   if (newX)
     *this = *newX;
@@ -904,6 +904,17 @@ CompObj::setObjN(const int Ky)
 }
 
 void
+CompObj::setObj(Object *val)
+  /*!
+    Sets the object
+    \param val :: Object value 
+  */
+{
+  key= val;
+  return;
+}
+
+void
 CompObj::setLeaf(Rule* aR,const int)
   /*!
     Replaces a leaf with a rule.
@@ -1083,7 +1094,7 @@ BoolValue::setLeaf(Rule* aR,const int)
     \param int :: Null side point
   */
 {
-  std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
+  //std::cerr<<"Calling BoolValue setLeaf"<<std::endl;
   BoolValue* newX = dynamic_cast<BoolValue*>(aR);
   if (newX)
     *this = *newX;
@@ -1099,7 +1110,7 @@ BoolValue::setLeaves(Rule* aR,Rule* oR)
     \param oR :: Null other rule
   */
 {
-  std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
+  //std::cerr<<"Calling BoolValue setLeaves"<<std::endl;
   BoolValue* newX = dynamic_cast<BoolValue*>(aR);
   if (newX)
     *this = *newX;
@@ -1156,10 +1167,10 @@ BoolValue::display() const
     {
     case 1:
       return " True ";
-    case -1:
+    case 0:
       return " False ";
     }
-  return " Unkown ";
+  return " Unknown ";
 }
 
 
