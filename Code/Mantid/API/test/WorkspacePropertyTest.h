@@ -197,15 +197,10 @@ public:
 
   void testClear()
   {
-    TS_ASSERT( wsp1->operator()() )
-    TS_ASSERT( wsp2->operator()() )
-    TS_ASSERT( wsp3->operator()() )
-    wsp1->clear();
+	//Should be cleared as part of store so these should be empty
     TS_ASSERT( ! wsp1->operator()() )
-    wsp2->clear();
     TS_ASSERT( ! wsp2->operator()() )
-    wsp3->clear();
-    TS_ASSERT( ! wsp3->operator()() )
+     TS_ASSERT( ! wsp3->operator()() )
     
   }
 
