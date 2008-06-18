@@ -69,6 +69,7 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
+      if (m_numberOfPeriods > 1) ws->setValue( localWSName + "_1" );
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<SpectraDetectorMap> specMap;
@@ -183,6 +184,17 @@ namespace Mantid
       m_list = !(specList->isDefault());
       Property *specMax = getProperty("spectrum_max");
       m_interval = !(specMax->isDefault());
+      
+      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
+      if ( m_numberOfPeriods > 1)
+      {
+        if ( m_list || m_interval )
+        {
+          m_list = false;
+          m_interval = false;
+          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
+        }
+      }
 
       // Check validity of spectra list property, if set
       if ( m_list )
@@ -208,17 +220,6 @@ namespace Mantid
         {
           g_log.error("Invalid Spectrum min/max properties");
           throw std::invalid_argument("Inconsistent properties defined"); 
-        }
-      }
-      
-      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-      if ( m_numberOfPeriods > 1)
-      {
-        if ( m_list || m_interval )
-        {
-          m_list = false;
-          m_interval = false;
-          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
         }
       }
     }

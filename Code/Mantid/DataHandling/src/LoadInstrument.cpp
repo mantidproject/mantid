@@ -102,7 +102,7 @@ void LoadInstrument::exec()
     throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);	
   }
 
-  int numberTypes = pNL_type->length();
+  unsigned int numberTypes = pNL_type->length();
   for (unsigned int iType = 0; iType < numberTypes; iType++)
   {  
     Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
@@ -131,8 +131,8 @@ void LoadInstrument::exec()
   // do analysis for each top level compoment element
 
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
-
-  for (unsigned int i = 0; i < pNL_comp->length(); i++)
+  unsigned int pNL_comp_length = pNL_comp->length();
+  for (unsigned int i = 0; i < pNL_comp_length; i++)
   {
     // we are only interest in the top level component elements hence
     // the reason for the if statement below
@@ -147,7 +147,8 @@ void LoadInstrument::exec()
       // get all location element contained in component element
 
       NodeList* pNL_location = pElem->getElementsByTagName("location");
-      if (pNL_location->length() == 0)
+      unsigned int pNL_location_length = pNL_location->length();
+      if (pNL_location_length == 0)
       {
         g_log.error(std::string("All component elements must contain at least one location element") +
           " even it is just an empty location element of the form <location />");
@@ -168,7 +169,7 @@ void LoadInstrument::exec()
         }
 
 
-        for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
           appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
@@ -189,7 +190,7 @@ void LoadInstrument::exec()
       }
       else
       {
-        for (unsigned int i_loc = 0; i_loc < pNL_location->length(); i_loc++)
+        for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
           appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
@@ -326,8 +327,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     // set detector ID and increment it. Finally add the detector to the parent
     detector->setID(idList.vec[idList.counted]);
     idList.counted++;
-    int toGetHoldOfDetectorCopy = parent->add(detector);
-    //Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*parent)[toGetHoldOfDetectorCopy-1]);
+    parent->add(detector);
     try
     {
       instrument->markAsDetector(detector);

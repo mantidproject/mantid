@@ -100,10 +100,7 @@ public:
     if ( !alg2.isInitialized() ) alg2.initialize();
     
     // Check setting of invalid property value causes failure
-    alg2.setPropertyValue("StartY","-1");
-    TS_ASSERT_THROWS( alg2.execute(),std::runtime_error);
-    // Set back to default value
-    alg2.setPropertyValue("StartY","0");
+    TS_ASSERT_THROWS( alg2.setPropertyValue("StartY","-1"), std::invalid_argument) ;
     
     TS_ASSERT_THROWS_NOTHING( alg2.execute());
     TS_ASSERT( alg2.isExecuted() );

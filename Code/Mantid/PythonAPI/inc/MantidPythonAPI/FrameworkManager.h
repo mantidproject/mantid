@@ -74,8 +74,8 @@ public:
 
 private:
 
-	FrameworkManager(const FrameworkManager&) {};
-	FrameworkManager& operator = (const FrameworkManager&) {};
+	FrameworkManager(const FrameworkManager&);
+	FrameworkManager& operator = (const FrameworkManager&);
 
 };
 

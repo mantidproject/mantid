@@ -42,7 +42,7 @@ class DLLExport BoundedValidator : public IValidator<TYPE>
 {
 public:
   /// No-arg Constructor
-  BoundedValidator() :
+  BoundedValidator() : IValidator<TYPE>(),
     m_hasLowerBound( false), 
     m_hasUpperBound( false), 
     m_lowerBound(TYPE() ), 

@@ -11,6 +11,7 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/ListValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tokenizer.hpp>
@@ -202,6 +203,10 @@ public:
     {
       return false;
     }
+    catch ( std::invalid_argument )
+    {
+      return false;
+    }
   }
 
   /// Copy assignment operator. Only assigns the value.
@@ -223,9 +228,18 @@ public:
    */
   virtual TYPE& operator=( const TYPE& value )
   {
+    TYPE oldValue = m_value;
     m_value = value;
-    m_isDefault = false;
-    return m_value;
+    if ( this->isValid() )
+    {
+      m_isDefault = false;
+      return m_value;
+    }
+    else
+    {
+      m_value = oldValue;
+      throw std::invalid_argument("Attempt to set property to an invalid value");
+    }
   }
 
   /// Allows you to get the value of the property via an expression like myProperty()
@@ -250,6 +264,23 @@ public:
     return m_validator->isValid(m_value);
   }
 
+  /** Returns the set of valid values for this property, if such a set exists.
+   *  If not, it returns an empty set.
+   */  
+  virtual const std::set<std::string> allowedValues() const
+  {
+    ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
+    if (list)
+    {
+      return list->allowedValues();
+    }
+    else
+    {
+      // Just return an empty set if the property does not have a ListValidator
+      return std::set<std::string>();
+    }
+  }
+  
 protected:
   /// The value of the property
   mutable TYPE m_value;  // mutable so that it can be set in WorkspaceProperty::isValid() method

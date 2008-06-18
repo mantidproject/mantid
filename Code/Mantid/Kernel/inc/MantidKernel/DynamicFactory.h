@@ -25,7 +25,7 @@ class Logger;
     @author Nick Draper, Tessella Support Services plc
     @date 10/10/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -138,18 +138,17 @@ public:
   ///Returns the keys in the map
   /// \returns A string vector of keys 
   const std::vector<std::string> getKeys() const
-    {
-	std::vector<std::string> names;
+  {
+    std::vector<std::string> names;
 	
-	typename FactoryMap::const_iterator iter = _map.begin();
-	    
-	for (; iter != _map.end(); ++iter)
-	{
-		names.push_back(iter->first);
-	}
-
-      return names;              
+    typename FactoryMap::const_iterator iter = _map.begin();
+    for (; iter != _map.end(); ++iter)
+    {
+      names.push_back(iter->first);
     }
+
+    return names;
+  }
   
 protected:
   /// Protected constructor for base class

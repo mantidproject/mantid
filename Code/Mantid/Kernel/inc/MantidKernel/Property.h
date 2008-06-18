@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <typeinfo>
+#include <set>
 #include "System.h"
 
 namespace Mantid
@@ -61,6 +62,8 @@ public:
 	virtual std::string value() const = 0;
 	/// Set the value of the property via a string
 	virtual bool setValue( const std::string& value ) = 0;
+	
+	virtual const std::set<std::string> allowedValues() const;
 	
 protected:
   /// Constructor

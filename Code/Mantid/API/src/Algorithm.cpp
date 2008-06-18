@@ -106,8 +106,8 @@ namespace Mantid
         {
           time(&start_time);
           start = clock();
-		  // no logging of input if a child algorithm
-		  if (!m_isChildAlgorithm) algorithm_info();
+          // no logging of input if a child algorithm
+          if (!m_isChildAlgorithm) algorithm_info();
           // Call the concrete algorithm's exec method
           this->exec();
           end = clock();
@@ -435,7 +435,8 @@ fill each inout with each input history
 		for (int i=0; i < no_of_props; i++)
 		{
 			const Property* AP=algProperties[i];
-			g_log.information()<<"Name " <<AP->name()<<" Value "<< AP->value()<<" Default "<<AP->isDefault()<<std::endl;
+			g_log.information() << "Name: " << AP->name() << ", Value: " << AP->value() 
+			                    << ", Default: "<< (AP->isDefault()?"Yes":"No") <<std::endl;
 		}
 	}
 

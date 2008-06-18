@@ -44,7 +44,7 @@ public:
   ///virtual Destructor
   virtual ~IValidator() {}
 
-  /** Checks the value based on the validators rules
+  /** Checks the value based on the validator's rules
    * 
    *  @param value The value to test
    */

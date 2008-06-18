@@ -49,7 +49,7 @@ void FrameworkManagerImpl::clear()
   AnalysisDataService::Instance().clear();
 }
 
-/** Creates an instance of an algorithm
+/** Creates and initialises an instance of an algorithm
  * 
  *  @param algName The name of the algorithm required
  *  @param version The version of the algorithm

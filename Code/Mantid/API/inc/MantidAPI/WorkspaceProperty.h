@@ -163,24 +163,24 @@ public:
     return result;
   }
   
-  /// Reset the pointer to the workspace
-  void clear()
-  {
-    this->operator=( boost::shared_ptr<TYPE>( ) );
-  }
-
   Workspace_sptr getWorkspace()
   {
     return this->operator()();
   }
   
-  /// returnd the direction of the property
-  const unsigned int direction()const
+  /// returns the direction of the property
+  const unsigned int direction() const
   {
     return m_direction;
   }
 
 private:
+  /// Reset the pointer to the workspace
+  void clear()
+  {
+    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::shared_ptr<TYPE>();
+  }
+
   /// The name of the workspace (as used by the AnalysisDataService)
   std::string m_workspaceName;
   /// Whether the workspace is used as input, output or both to an algorithm

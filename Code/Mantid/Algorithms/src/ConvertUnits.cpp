@@ -34,8 +34,11 @@ ConvertUnits::~ConvertUnits()
 void ConvertUnits::init()
 {
   declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));  
-  declareProperty("Target","",new MandatoryValidator);
+  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
+
+  // Extract the current contents of the UnitFactory to be the allowed values of the Target property
+  std::vector<std::string> allUnits = UnitFactory::Instance().getKeys();
+  declareProperty("Target","",new ListValidator(allUnits));
   declareProperty("Emode",0);
   declareProperty("Efixed",0.0);
 }

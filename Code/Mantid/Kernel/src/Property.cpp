@@ -98,5 +98,13 @@ void Property::setDocumentation( const std::string& documentation )
   m_documentation = documentation;
 }
 
+/** Returns the set of valid values for this property, if such a set exists.
+ *  If not, it returns an empty set.
+ */
+const std::set<std::string> Property::allowedValues() const
+{
+  return std::set<std::string>();
+}
+
 } // namespace Kernel
 } // namespace Mantid

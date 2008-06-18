@@ -60,7 +60,7 @@ namespace Mantid
       return retVector;
     }
 
-    /** Creates an instance of an algorithm
+    /** Creates and initialises an instance of an algorithm
     *
     *  @param  algName The name of the algorithm required
     *  @param  version The version of the algorithm required, if not defined most recent version is used -> version =-1
