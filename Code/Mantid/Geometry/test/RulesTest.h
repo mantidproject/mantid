@@ -3,11 +3,14 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <vector>
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Plane.h"
 #include "MantidGeometry/Sphere.h"
 #include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Cone.h"
 
 using namespace Mantid;
 using namespace Geometry;
