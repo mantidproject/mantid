@@ -1038,7 +1038,7 @@ CompObj::displayAddress() const
 
 Kernel::Logger& BoolValue::PLog(Kernel::Logger::get("BoolValue"));
 
-BoolValue::BoolValue() : Rule()
+BoolValue::BoolValue() : Rule(), status(-1)
   /*!
     Constructor
   */
