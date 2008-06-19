@@ -36,6 +36,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
+	class BaseVisit;
     class DLLExport Plane : public Quadratic
     {
     private:

@@ -5,7 +5,9 @@
 #include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
+
 #include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Plane.h"
 #include "MantidGeometry/Sphere.h"
