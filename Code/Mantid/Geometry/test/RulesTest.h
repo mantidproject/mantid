@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quadratic.h"
+#include "MantidGeometry/Object.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Plane.h"
 #include "MantidGeometry/Sphere.h"
