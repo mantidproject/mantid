@@ -73,7 +73,7 @@ public:
   }
 
   /// Returns the set of valid values
-  const std::set<std::string> allowedValues() const
+  const std::set<std::string>& allowedValues() const
   {
     return m_allowedValues;
   }

@@ -38,26 +38,26 @@ public:
     TS_ASSERT( sProp->isDefault() )
   }
   
-	void testValue()
-	{
-		TS_ASSERT( ! iProp->value().compare("1") )
+  void testValue()
+  {
+    TS_ASSERT( ! iProp->value().compare("1") )
     TS_ASSERT( ! dProp->value().compare("9.99") )
     TS_ASSERT( ! sProp->value().compare("theValue") )
-	}
+  }
 
-	void testSetValue()
-	{
-		PropertyWithValue<int> i("test", 1);
-		TS_ASSERT( i.setValue("10") )
-		TS_ASSERT_EQUALS( i, 10 )
-		TS_ASSERT( ! i.setValue("9.99") )
-		TS_ASSERT( ! i.setValue("garbage") )
-		
-		PropertyWithValue<double> d("test", 5.55);
-		TS_ASSERT( d.setValue("-9.99") )
-		TS_ASSERT_EQUALS( d, -9.99 )
-		TS_ASSERT( d.setValue("0") )
-	  TS_ASSERT_EQUALS( d, 0 )
+  void testSetValue()
+  {
+    PropertyWithValue<int> i("test", 1);
+    TS_ASSERT( i.setValue("10") )
+    TS_ASSERT_EQUALS( i, 10 )
+    TS_ASSERT( ! i.setValue("9.99") )
+    TS_ASSERT( ! i.setValue("garbage") )
+    
+    PropertyWithValue<double> d("test", 5.55);
+    TS_ASSERT( d.setValue("-9.99") )
+    TS_ASSERT_EQUALS( d, -9.99 )
+    TS_ASSERT( d.setValue("0") )
+    TS_ASSERT_EQUALS( d, 0 )
     TS_ASSERT( ! d.setValue("garbage") )
     
     PropertyWithValue<std::string> s("test", "test");
@@ -67,11 +67,11 @@ public:
     TS_ASSERT_EQUALS( s.operator()(), "0" )
     TS_ASSERT( s.setValue("it works") )
     TS_ASSERT_EQUALS( s.operator()(), "it works" )
-	}
+  }
 
-	void testCopyConstructor()
-	{
-	  PropertyWithValue<int> i = *iProp;
+  void testCopyConstructor()
+  {
+    PropertyWithValue<int> i = *iProp;
     TS_ASSERT( ! i.name().compare("intProp") )
     TS_ASSERT( ! i.documentation().compare("") )
     TS_ASSERT( typeid( int ) == *i.type_info()  )
@@ -91,10 +91,10 @@ public:
     TS_ASSERT( typeid( std::string ) == *s.type_info()  )
     TS_ASSERT( s.isDefault() )
     TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
-	}
+  }
 	
-	void testCopyAssignmentOperator()
-	{
+  void testCopyAssignmentOperator()
+  {
     PropertyWithValue<int> i("Prop1",5);
     i = *iProp;
     TS_ASSERT( ! i.name().compare("Prop1") )
@@ -115,13 +115,13 @@ public:
     TS_ASSERT( ! s.documentation().compare("") )
     TS_ASSERT( ! s.isDefault() )
     TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
-	}
+  }
 
-	void testAssignmentOperator()
-	{
+  void testAssignmentOperator()
+  {
     PropertyWithValue<int> i("Prop1",5);
-	  TS_ASSERT_EQUALS( i = 2, 2 )
-	  PropertyWithValue<double> d("Prop2",5.5);
+    TS_ASSERT_EQUALS( i = 2, 2 )
+    PropertyWithValue<double> d("Prop2",5.5);
     TS_ASSERT_EQUALS( d = 7.77, 7.77 )
     PropertyWithValue<std::string> s("Prop3", "testing");
     s = "test";
@@ -141,30 +141,38 @@ public:
     s = ss = "tested";
     TS_ASSERT_EQUALS( ss.operator()(), "tested" )
     TS_ASSERT_EQUALS( s.operator()(), "tested" )
-	}
+  }
 
-	void testOperatorBrackets()
-	{
+  void testOperatorBrackets()
+  {
     TS_ASSERT_EQUALS( iProp->operator()(), 1 )
     TS_ASSERT_EQUALS( dProp->operator()(), 9.99 )
     TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
-	}
+  }
 
-	void testOperatorNothing()
-	{
+  void testOperatorNothing()
+  {
     int i = *iProp;
     TS_ASSERT_EQUALS( i, 1 )
     double d = *dProp;
     TS_ASSERT_EQUALS( d, 9.99 )
     std::string str(*sProp);
     TS_ASSERT( ! str.compare("theValue") )
+  }
+	
+	void testAllowedValues()
+	{
+	  TS_ASSERT( iProp->allowedValues().empty() )
+    TS_ASSERT( dProp->allowedValues().empty() )
+    TS_ASSERT( sProp->allowedValues().empty() )
+    // Tests using a ListValidator are below
 	}
 	
 	void testCasting()
 	{	  
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) )
     PropertyWithValue<int> i("Prop1",5);
-	  Property *p = dynamic_cast<Property*>(&i);
+    Property *p = dynamic_cast<Property*>(&i);
     TS_ASSERT( ! p->name().compare("Prop1") )
     TS_ASSERT( ! p->value().compare("5") )
     TS_ASSERT( p->setValue("10") )
@@ -192,69 +200,82 @@ public:
 
 	void testMandatoryValidator()
 	{
-		PropertyWithValue<std::string> p("test", "", new MandatoryValidator());
-		TS_ASSERT_EQUALS(p.isValid(),false);
-		TS_ASSERT( p.setValue("I'm here"));
-		TS_ASSERT_EQUALS(p.isValid(),true);
-		TS_ASSERT( ! p.setValue(""));
-		TS_ASSERT_EQUALS(p.value(),"I'm here");
+	  PropertyWithValue<std::string> p("test", "", new MandatoryValidator());
+	  TS_ASSERT_EQUALS(p.isValid(),false);
+	  TS_ASSERT( p.setValue("I'm here"));
+	  TS_ASSERT_EQUALS(p.isValid(),true);
+	  TS_ASSERT( ! p.setValue(""));
+	  TS_ASSERT_EQUALS(p.value(),"I'm here");
 	}
 
 	void testIntBoundedValidator()
 	{
-		PropertyWithValue<int> p("test", 11, new BoundedValidator<int>(1,10));
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( ! p.setValue("0") );
-    TS_ASSERT_EQUALS(p.value(),"11");
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( p.setValue("1") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( p.setValue("10") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( ! p.setValue("11") );
-    TS_ASSERT_EQUALS(p.value(),"10");
-		TS_ASSERT_EQUALS(p.isValid(), true);
+	  PropertyWithValue<int> p("test", 11, new BoundedValidator<int>(1,10));
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( ! p.setValue("0") );
+	  TS_ASSERT_EQUALS(p.value(),"11");
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( p.setValue("1") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( p.setValue("10") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( ! p.setValue("11") );
+	  TS_ASSERT_EQUALS(p.value(),"10");
+	  TS_ASSERT_EQUALS(p.isValid(), true);
 	}
 
 	void testDoubleBoundedValidator()
 	{
-		PropertyWithValue<double> p("test", 11.0, new BoundedValidator<double>(1.0,10.0));
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( ! p.setValue("0.9") );
-    TS_ASSERT_EQUALS(p.value(),"11");
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( p.setValue("1") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( p.setValue("10") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( ! p.setValue("10.1") );
-    TS_ASSERT_EQUALS(p.value(),"10");
-		TS_ASSERT_EQUALS(p.isValid(), true);
+	  PropertyWithValue<double> p("test", 11.0, new BoundedValidator<double>(1.0,10.0));
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( ! p.setValue("0.9") );
+	  TS_ASSERT_EQUALS(p.value(),"11");
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( p.setValue("1") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( p.setValue("10") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( ! p.setValue("10.1") );
+	  TS_ASSERT_EQUALS(p.value(),"10");
+	  TS_ASSERT_EQUALS(p.isValid(), true);
 	}
 	
 	void testStringBoundedValidator()
 	{
-
-		PropertyWithValue<std::string> p("test", "", new BoundedValidator<std::string>("B","T"));
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( ! p.setValue("AZ") );
-    TS_ASSERT_EQUALS(p.value(),"");
-		TS_ASSERT_EQUALS(p.isValid(), false);
-		TS_ASSERT( p.setValue("B") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( p.setValue("T") );
-		TS_ASSERT_EQUALS(p.isValid(), true);
-		TS_ASSERT( ! p.setValue("TA") );
-    TS_ASSERT_EQUALS(p.value(),"T");
-		TS_ASSERT_EQUALS(p.isValid(), true);
+	  PropertyWithValue<std::string> p("test", "", new BoundedValidator<std::string>("B","T"));
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( ! p.setValue("AZ") );
+	  TS_ASSERT_EQUALS(p.value(),"");
+	  TS_ASSERT_EQUALS(p.isValid(), false);
+	  TS_ASSERT( p.setValue("B") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( p.setValue("T") );
+	  TS_ASSERT_EQUALS(p.isValid(), true);
+	  TS_ASSERT( ! p.setValue("TA") );
+	  TS_ASSERT_EQUALS(p.value(),"T");
+	  TS_ASSERT_EQUALS(p.isValid(), true);
 	}
 
-	
+  void testListValidator()
+  {
+    std::vector<std::string> vec;
+    vec.push_back("one");
+    vec.push_back("two");
+    PropertyWithValue<std::string> p("test","", new ListValidator(vec));
+    TS_ASSERT( ! p.isValid() )
+    TS_ASSERT( p.setValue("one") )
+    TS_ASSERT( p.isValid() )
+    TS_ASSERT( p.setValue("two") )
+    TS_ASSERT( p.isValid() )
+    TS_ASSERT( ! p.setValue("three") )
+    TS_ASSERT_EQUALS( p.value(), "two" )
+    TS_ASSERT( p.isValid() )
+  }
 
 private:
-	PropertyWithValue<int> *iProp;
-	PropertyWithValue<double> *dProp;
-	PropertyWithValue<std::string> *sProp;
+  PropertyWithValue<int> *iProp;
+  PropertyWithValue<double> *dProp;
+  PropertyWithValue<std::string> *sProp;
 };
 
 #endif /*PROPERTYWITHVALUETEST_H_*/

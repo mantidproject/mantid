@@ -192,12 +192,8 @@ public:
     TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
     
     // This one should pass
-    //TS_ASSERT(
-        wsp3->store();// )
-  }
+    TS_ASSERT( wsp3->store() )
 
-  void testClear()
-  {
     //Should be cleared as part of store so these should be empty
     TS_ASSERT( ! wsp1->operator()() )
     TS_ASSERT( ! wsp2->operator()() )

@@ -24,48 +24,53 @@ public:
     p = new PropertyHelper;
   }
   
-	void testName()
-	{
-		TS_ASSERT( ! p->name().compare("Test") )
-	}
+  void testName()
+  {
+    TS_ASSERT( ! p->name().compare("Test") )
+  }
 
-	void testDocumentation()
-	{
-	  Property *pp = new PropertyHelper;
-	  TS_ASSERT( ! pp->documentation().compare("") )
-	}
+  void testDocumentation()
+  {
+    Property *pp = new PropertyHelper;
+    TS_ASSERT( ! pp->documentation().compare("") )
+  }
 
-	void testType_info()
-	{
-	  TS_ASSERT( typeid( int ) == *p->type_info()  )
-	}
+  void testType_info()
+  {
+    TS_ASSERT( typeid( int ) == *p->type_info()  )
+  }
 
-	void testType()
-	{
+  void testType()
+  {
 #ifdef __GNUC__
-		TS_ASSERT( ! p->type().compare("i") )
+    TS_ASSERT( ! p->type().compare("i") )
 #else
     TS_ASSERT( ! p->type().compare("int") )
 #endif		
-	}
+  }
 
-	void testIsValid()
-	{
-		TS_ASSERT( p->isValid() )
-	}
+  void testIsValid()
+  {
+    TS_ASSERT( p->isValid() )
+  }
 
-	void testIsDefault()
-	{
+  void testIsDefault()
+  {
     TS_ASSERT( p->isDefault() )
-	}
+  }
 
-	void testSetDocumentation()
-	{
-	  const std::string str("Documentation comment");
-	  p->setDocumentation(str);
-	  TS_ASSERT( ! p->documentation().compare(str) )
-	}
+  void testSetDocumentation()
+  {
+    const std::string str("Documentation comment");
+    p->setDocumentation(str);
+    TS_ASSERT( ! p->documentation().compare(str) )
+  }
 
+  void testAllowedValues()
+  {
+    TS_ASSERT( p->allowedValues().empty() )
+  }
+	
 private:
   Property *p;
 	
