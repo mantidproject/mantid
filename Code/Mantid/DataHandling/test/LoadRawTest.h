@@ -217,39 +217,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out"));    
   }
    
-  void testMultiPeriod()
-  {
-    LoadRaw loader5;
-    loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP73897.RAW");
-    loader5.setPropertyValue("OutputWorkspace", "multiperiod");
-    // Set these properties to check they're ignored
-    loader5.setPropertyValue("spectrum_list", "998,999,1000");
-    loader5.setPropertyValue("spectrum_min", "5");
-    loader5.setPropertyValue("spectrum_max", "10");
-    
-    TS_ASSERT_THROWS_NOTHING( loader5.execute() )
-    TS_ASSERT( loader5.isExecuted() )
-    
-    // Get back the workspaces
-    Workspace_sptr output1;
-    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("multiperiod_1") );
-    TS_ASSERT_EQUALS( output1->getHistogramNumber(), 4 )
-    Workspace_sptr output2;
-    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieve("multiperiod_2") );    
-    TS_ASSERT_EQUALS( output2->getHistogramNumber(), 4 )
-
-    // The histogram bins should be the same
-    TS_ASSERT_EQUALS( output1->dataX(0), output2->dataX(0) )
-    // But the data should be different
-    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output2->dataY(1)[555] )
-    
-    // Check these are the same
-    TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
-    TS_ASSERT_EQUALS( output1->getSpectraMap(), output2->getSpectraMap() )
-    TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
-  }
-
   void testWithManagedWorkspace()
   {
     ConfigService::Instance().loadConfig("UseManagedWS.properties");
