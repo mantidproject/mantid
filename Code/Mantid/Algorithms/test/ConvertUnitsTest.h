@@ -23,7 +23,7 @@ public:
   ConvertUnitsTest()
   {   
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2584,11,10);
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",256,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(11);
     for (int i = 0; i < 11; ++i) 
@@ -37,8 +37,8 @@ public:
       a[i]=i;
       e[i]=sqrt(double(i));
     }
-    int forSpecDetMap[2584];
-    for (int j = 0; j < 2584; ++j) {
+    int forSpecDetMap[256];
+    for (int j = 0; j < 256; ++j) {
       space2D->setX(j, x);
       space2D->setData(j, a, e);
       // Just set the spectrum number to match the index
@@ -60,7 +60,7 @@ public:
     loader.execute();
     
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 2584, space->getInstrument().get() );
+    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256, space->getInstrument().get() );
     
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
@@ -103,9 +103,9 @@ public:
     TS_ASSERT_EQUALS( y[4], yIn[4] );
     TS_ASSERT_EQUALS( e[1], eIn[1] );
     // Test that spectra that should have been zeroed have been
-    std::vector<double> x = output2D->dataX(2300);
-    y = output2D->dataY(2408);
-    e = output2D->dataE(2276);
+    std::vector<double> x = output2D->dataX(0);
+    y = output2D->dataY(0);
+    e = output2D->dataE(0);
     TS_ASSERT_EQUALS( x[7], 0 );
     TS_ASSERT_EQUALS( y[1], 0 );
     TS_ASSERT_EQUALS( e[9], 0 );
@@ -113,10 +113,10 @@ public:
     //    vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
     std::vector<double> tester(test, test+10);
-    output2D->setData(1837, tester);
-    y = output2D->dataY(1837);
+    output2D->setData(111, tester);
+    y = output2D->dataY(111);
     TS_ASSERT_EQUALS( y[3], 44.0);
-    yIn = input2D->dataY(1837);
+    yIn = input2D->dataY(111);
     TS_ASSERT_EQUALS( yIn[3], 3.0);
     
     // Check that a couple of x bin boundaries have been correctly converted
@@ -124,7 +124,7 @@ public:
     TS_ASSERT_DELTA( x[5], 1.5808, 0.001 );
     TS_ASSERT_DELTA( x[10], 3.1617, 0.001 );
     // Just check that an input bin boundary is unchanged
-    std::vector<double> xIn = input2D->dataX(2066);
+    std::vector<double> xIn = input2D->dataX(66);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
   }
   

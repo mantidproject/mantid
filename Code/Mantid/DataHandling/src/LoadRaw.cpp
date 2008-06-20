@@ -231,6 +231,7 @@ namespace Mantid
      *  @param iraw     A reference to the ISISRAW object
      *  @param lengthIn The number of elements in a spectrum
      *  @param spectrum Pointer to the array into which the spectrum will be read
+     *  @param localWorkspace A pointer to the workspace in which the data will be stored
      */
     void LoadRaw::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {
