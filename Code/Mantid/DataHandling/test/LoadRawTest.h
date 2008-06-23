@@ -23,8 +23,6 @@ public:
   
   LoadRawTest()
   {
-    //initialise framework manager to allow logging
-    //Mantid::API::FrameworkManager::Instance().initialize();
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HET15869.RAW";
   }
@@ -108,8 +106,6 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    
-
     map= output->getSpectraMap();
     
     // Check the total number of elements in the map for HET
@@ -129,9 +125,9 @@ public:
     TS_ASSERT_EQUALS((*it)->getID(),pixnum++);
     
     // Test with spectra that does not exist
-    	// Test that number of pixel=0
+    // Test that number of pixel=0
     TS_ASSERT_EQUALS(map->ndet(5),0);
-    	// Test that trying to get the Detector throws.
+    // Test that trying to get the Detector throws.
     boost::shared_ptr<Mantid::Geometry::IDetector> test;
     TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
   }
@@ -217,6 +213,95 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out"));    
   }
    
+  void testMultiPeriod()
+  {
+    LoadRaw loader5;
+    loader5.initialize();
+    loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP78173.raw");
+    loader5.setPropertyValue("OutputWorkspace", "multiperiod");
+    // Set these properties to check they're ignored
+    loader5.setPropertyValue("spectrum_list", "998,999,1000");
+    loader5.setPropertyValue("spectrum_min", "5");
+    loader5.setPropertyValue("spectrum_max", "10");
+    
+    TS_ASSERT_THROWS_NOTHING( loader5.execute() )
+    TS_ASSERT( loader5.isExecuted() )
+    
+    // Get back the workspaces
+    Workspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("multiperiod") );
+    TS_ASSERT_EQUALS( output1->getHistogramNumber(), 4 )
+    Workspace_sptr output2;
+    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieve("multiperiod_2") );    
+    TS_ASSERT_EQUALS( output2->getHistogramNumber(), 4 )
+    Workspace_sptr output3;
+    TS_ASSERT_THROWS_NOTHING( output3 = AnalysisDataService::Instance().retrieve("multiperiod_3") );
+    TS_ASSERT_EQUALS( output3->getHistogramNumber(), 4 )
+    Workspace_sptr output4;
+    TS_ASSERT_THROWS_NOTHING( output4 = AnalysisDataService::Instance().retrieve("multiperiod_4") );    
+    TS_ASSERT_EQUALS( output4->getHistogramNumber(), 4 )
+    Workspace_sptr output5;
+    TS_ASSERT_THROWS_NOTHING( output5 = AnalysisDataService::Instance().retrieve("multiperiod_5") );
+    TS_ASSERT_EQUALS( output5->getHistogramNumber(), 4 )
+    Workspace_sptr output6;
+    TS_ASSERT_THROWS_NOTHING( output6 = AnalysisDataService::Instance().retrieve("multiperiod_6") );    
+    TS_ASSERT_EQUALS( output6->getHistogramNumber(), 4 )
+    Workspace_sptr output7;
+    TS_ASSERT_THROWS_NOTHING( output7 = AnalysisDataService::Instance().retrieve("multiperiod_7") );
+    TS_ASSERT_EQUALS( output7->getHistogramNumber(), 4 )
+    Workspace_sptr output8;
+    TS_ASSERT_THROWS_NOTHING( output8 = AnalysisDataService::Instance().retrieve("multiperiod_8") );    
+    TS_ASSERT_EQUALS( output8->getHistogramNumber(), 4 )
+    Workspace_sptr output9;
+    TS_ASSERT_THROWS_NOTHING( output9 = AnalysisDataService::Instance().retrieve("multiperiod_9") );
+    TS_ASSERT_EQUALS( output9->getHistogramNumber(), 4 )
+    Workspace_sptr output10;
+    TS_ASSERT_THROWS_NOTHING( output10 = AnalysisDataService::Instance().retrieve("multiperiod_10") );    
+    TS_ASSERT_EQUALS( output10->getHistogramNumber(), 4 )
+    Workspace_sptr output11;
+    TS_ASSERT_THROWS_NOTHING( output11 = AnalysisDataService::Instance().retrieve("multiperiod_11") );
+    TS_ASSERT_EQUALS( output11->getHistogramNumber(), 4 )
+    Workspace_sptr output12;
+    TS_ASSERT_THROWS_NOTHING( output12 = AnalysisDataService::Instance().retrieve("multiperiod_12") );    
+    TS_ASSERT_EQUALS( output12->getHistogramNumber(), 4 )
+
+    // The histogram bins should be the same
+    TS_ASSERT_EQUALS( output1->dataX(0), output2->dataX(0) )
+    TS_ASSERT_EQUALS( output1->dataX(0), output3->dataX(0) )
+    TS_ASSERT_EQUALS( output1->dataX(0), output4->dataX(0) )
+    TS_ASSERT_EQUALS( output1->dataX(1), output5->dataX(1) )
+    TS_ASSERT_EQUALS( output1->dataX(1), output6->dataX(1) )
+    TS_ASSERT_EQUALS( output1->dataX(1), output7->dataX(1) )
+    TS_ASSERT_EQUALS( output1->dataX(2), output8->dataX(2) )
+    TS_ASSERT_EQUALS( output1->dataX(2), output9->dataX(2) )
+    TS_ASSERT_EQUALS( output1->dataX(2), output10->dataX(2) )
+    TS_ASSERT_EQUALS( output1->dataX(3), output11->dataX(3) )
+    TS_ASSERT_EQUALS( output1->dataX(3), output12->dataX(3) )
+    // But the data should be different
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output2->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output3->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output4->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output5->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output6->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output7->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output8->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output9->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output10->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output11->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output12->dataY(1)[555] )
+    
+    // Check these are the same
+    TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getSpectraMap(), output2->getSpectraMap() )
+    TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
+    TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getSpectraMap(), output6->getSpectraMap() )
+    TS_ASSERT_EQUALS( output1->getSample(), output6->getSample() )
+    TS_ASSERT_EQUALS( output1->getInstrument(), output12->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getSpectraMap(), output12->getSpectraMap() )
+    TS_ASSERT_EQUALS( output1->getSample(), output12->getSample() )
+  }
+ 
   void testWithManagedWorkspace()
   {
     ConfigService::Instance().loadConfig("UseManagedWS.properties");

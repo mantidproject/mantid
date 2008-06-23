@@ -69,7 +69,6 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-      if (m_numberOfPeriods > 1) ws->setValue( localWSName + "_1" );
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<SpectraDetectorMap> specMap;
@@ -158,8 +157,9 @@ namespace Mantid
           std::stringstream suffix;
           suffix << (period+1);
           outputWorkspace += suffix.str();
-          localWSName += "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,localWSName,Direction::Output));
+          std::string WSName = localWSName + "_" + suffix.str();
+          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
+          g_log.information() << "Workspace " << WSName << " created. \n";
           // Copy the shared instrument, sample & spectramap onto the workspace for this period
           localWorkspace->setInstrument(instrument);
           localWorkspace->setSpectraMap(specMap);
@@ -168,7 +168,6 @@ namespace Mantid
         
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
-        g_log.information() << "Workspace " << localWSName << " created. \n";
         
       } // loop over periods
       
