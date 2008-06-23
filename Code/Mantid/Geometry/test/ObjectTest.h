@@ -470,6 +470,62 @@ void testTrack_CubePlusInternalEdgeTouchSpheres()
   checkTrackIntercept(TL,expectedResults);
 }
 
+
+void testSolidAngleSphere()
+  /*!
+    Test solid angle calculation for a sphere
+  */
+{
+    Object A = createSphere();
+    double satol=2e-2; // tolerence for solid angle, quite coarse at present
+
+    // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
+    // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
+    // where R is sphere radius and r is distance of observer from sphere centre
+    TS_ASSERT_DELTA(A.solidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(4.1,0,0)),2*M_PI,satol);
+    // distant points
+    TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.133442,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.0013204,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),1.32025e-5,satol);
+}
+
+void testSolidAngleCappedCylinder()
+  /*!
+    Test solid angle calculation for a capped cylinder
+  */
+{
+    Object A = createCappedCylinder();
+    double satol=2e-2; // tolerence for solid angle, quite coarse at present
+
+    // solid angle at distance 4 from capped cyl -3.2 1.2 in x, rad 3
+	//
+	// ** These tests do not work as (a) expected solid angle not yet
+	//    determined AND (b) because interceptSurface(track) gives error
+	//    if track does not intersect cylinder in forward direction.
+	//
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(4.2,0,0)),-1,satol);
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(-7.2,0,0)),-1,satol);
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,7)),-1,satol);
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(0,7,0)),-1,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(1.2,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(-3.2,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,3,0)),2*M_PI,satol);
+    // distant points (see above problems)
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),-1,satol);
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),-1,satol);
+    //TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),-1,satol);
+}
+
 private:
  
   /// Surface type

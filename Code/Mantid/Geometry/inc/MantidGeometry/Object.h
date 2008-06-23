@@ -124,6 +124,8 @@ class DLLExport Object
   // INTERSECTION
   int interceptSurface(Geometry::Track&) const;
 
+  // Solid angle
+  double solidAngle(const Geometry::V3D& observer) const;
   
 
 };
