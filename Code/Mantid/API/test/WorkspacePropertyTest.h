@@ -174,6 +174,20 @@ public:
     TS_ASSERT( wsp3->isValid() )
   }
 
+  void testAllowedValues()
+  {
+    std::vector<std::string> vals;
+    TS_ASSERT_THROWS_NOTHING( vals = wsp1->allowedValues() )
+    TS_ASSERT_EQUALS( vals.size(), 2 )
+    TS_ASSERT_EQUALS( vals[0], "ws1" )
+    TS_ASSERT_EQUALS( vals[1], "ws3" )
+    
+    TS_ASSERT( wsp2->allowedValues().empty() )
+
+    TS_ASSERT_THROWS_NOTHING( vals = wsp3->allowedValues() )
+    TS_ASSERT_EQUALS( vals.size(), 2 )
+  }
+  
   void testStore()
   {
     // This is an input workspace so should return false
@@ -200,6 +214,13 @@ public:
     TS_ASSERT( ! wsp3->operator()() )
   }
 
+  void testDirection()
+  {
+    TS_ASSERT_EQUALS( wsp1->direction(), 0 )
+    TS_ASSERT_EQUALS( wsp2->direction(), 1 )
+    TS_ASSERT_EQUALS( wsp3->direction(), 2 )
+  }
+  
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;

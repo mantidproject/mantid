@@ -265,19 +265,20 @@ public:
   }
 
   /** Returns the set of valid values for this property, if such a set exists.
-   *  If not, it returns an empty set.
+   *  If not, it returns an empty vector.
    */  
-  virtual const std::set<std::string> allowedValues() const
+  virtual const std::vector<std::string> allowedValues() const
   {
     ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
     if (list)
     {
-      return list->allowedValues();
+      const std::set<std::string>& vals = list->allowedValues();
+      return std::vector<std::string>(vals.begin(), vals.end());
     }
     else
     {
-      // Just return an empty set if the property does not have a ListValidator
-      return std::set<std::string>();
+      // Just return an empty vector if the property does not have a ListValidator
+      return std::vector<std::string>();
     }
   }
   

@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include <string>
 #include <typeinfo>
-#include <set>
+#include <vector>
 #include "System.h"
 
 namespace Mantid
@@ -21,7 +21,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 13/11/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -63,7 +63,7 @@ public:
 	/// Set the value of the property via a string
 	virtual bool setValue( const std::string& value ) = 0;
 	
-	virtual const std::set<std::string> allowedValues() const;
+	virtual const std::vector<std::string> allowedValues() const;
 	
 protected:
   /// Constructor

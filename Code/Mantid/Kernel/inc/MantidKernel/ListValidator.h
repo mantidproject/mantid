@@ -48,7 +48,7 @@ public:
   /** Constructor
    *  @param values A vector of strings containing the valid values 
    */
-  explicit ListValidator(const std::vector<std::string> values) : 
+  explicit ListValidator(const std::vector<std::string>& values) : 
     IValidator<std::string>(),
     m_allowedValues(values.begin(),values.end())
   {}

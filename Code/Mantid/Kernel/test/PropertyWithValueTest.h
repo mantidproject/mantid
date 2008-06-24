@@ -270,6 +270,11 @@ public:
     TS_ASSERT( ! p.setValue("three") )
     TS_ASSERT_EQUALS( p.value(), "two" )
     TS_ASSERT( p.isValid() )
+    std::vector<std::string> vals;
+    TS_ASSERT_THROWS_NOTHING( vals = p.allowedValues() )
+    TS_ASSERT_EQUALS( vals.size(), 2 )
+    TS_ASSERT_EQUALS( vals[0], "one" )
+    TS_ASSERT_EQUALS( vals[1], "two" )
   }
 
 private:

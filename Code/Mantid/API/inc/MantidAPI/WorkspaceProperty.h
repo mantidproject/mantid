@@ -24,7 +24,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 10/12/2007
     
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -120,27 +120,47 @@ public:
     // Assume that any declared WorkspaceProperty must have a name set (i.e. is not an optional property)
     if ( m_workspaceName.empty() ) return false;
     
-    // If an input workspace, check that it exists in the AnalysisDataService & can be cast to correct type
-    if ( ( m_direction==0 ) || ( m_direction==2 ) )
+    // If the WorkspaceProperty already points to something, don't go looking in the ADS
+    if ( ! this->operator()() )
     {
-      // If the WorkspaceProperty already points to something, don't go looking in the ADS
-      if ( ! this->operator()() )
-      {
-        try {
-          API::Workspace_sptr ws = API::AnalysisDataService::Instance().retrieve(m_workspaceName);
-          // Check retrieved workspace is the type that it should be
-          Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
-          if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
-        } catch (Kernel::Exception::NotFoundError&) {
+      try {
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_workspaceName);
+        // Check retrieved workspace is the type that it should be
+        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
+        if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
+      } catch (Kernel::Exception::NotFoundError&) {
+        // Only concerned with failing to find workspace in ADS if it's an input type
+        if ( ( m_direction==0 ) || ( m_direction==2 ) )
+        {
           return false;
+        }
+        else
+        {
+          return true;
         }
       }
     }
-    // Would be nice if we could do the creation of the output workspace here
     
     return true;
   }
 
+  /** Returns the current contents of the AnalysisDataService for input workspaces.
+   *  For output workspaces, an empty vector is returned
+   */
+  virtual const std::vector<std::string> allowedValues() const
+  {
+    if ( ( m_direction==0 ) || ( m_direction==2 ) )
+    {
+      // If an input workspace, get the list of workspaces currently in the ADS
+      return AnalysisDataService::Instance().getObjectNames();
+    }
+    else
+    {
+      // For output workspaces, just return an empty vector
+      return std::vector<std::string>();
+    }
+  }
+  
   /** If this is an output workspace, store it into the AnalysisDataService
    *  @return True if the workspace is an output workspace and has been stored
    *  @throw std::runtime_error if unable to store the workspace successfully

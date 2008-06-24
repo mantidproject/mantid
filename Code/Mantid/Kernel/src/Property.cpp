@@ -101,9 +101,9 @@ void Property::setDocumentation( const std::string& documentation )
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.
  */
-const std::set<std::string> Property::allowedValues() const
+const std::vector<std::string> Property::allowedValues() const
 {
-  return std::set<std::string>();
+  return std::vector<std::string>();
 }
 
 } // namespace Kernel
