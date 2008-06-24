@@ -88,6 +88,7 @@ void PropertyManager::setProperties( const std::string &values )
  *  @param name The name of the property (case insensitive)
  *  @param value The value to assign to the property
  *  @throw Exception::NotFoundError if the named property is unknown
+ *  @throw std::invalid_argument If the value is not valid for the property given
  */
 void PropertyManager::setPropertyValue( const std::string &name, const std::string &value )
 {
