@@ -58,15 +58,14 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, std::vector<Mantid:
 		}
 		else
 		{
+			QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]->name()));
+			QLineEdit *tempEdit = new QLineEdit;
+			tempLbl->setBuddy(tempEdit);
 		
-		QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]->name()));
-		QLineEdit *tempEdit = new QLineEdit;
-		tempLbl->setBuddy(tempEdit);
+			grid->addWidget(tempLbl, i, 0, 0);
+			grid->addWidget(tempEdit, i, 1, 0);
 		
-		grid->addWidget(tempLbl, i, 0, 0);
-		grid->addWidget(tempEdit, i, 1, 0);
-		
-		edits[tempEdit] = properties[i]->name();
+			edits[tempEdit] = properties[i]->name();
 		}
 	}
 	
@@ -98,12 +97,24 @@ void ExecuteAlgorithm::okClicked()
 	
 	for (; editItr != edits.end(); ++editItr)
 	{	
-			results[editItr->second] = editItr->first->text().toStdString();
+		std::string value = editItr->first->text().trimmed().toStdString();
+		
+		//Only set a property if it is not nothing
+		if (value != "")
+		{
+			results[editItr->second] = value;
+		}
 	}
 	
 	for (; comboItr != combos.end(); ++comboItr)
 	{	
-			results[comboItr->second] = comboItr->first->currentText().toStdString();
+		std::string value = comboItr->first->currentText().trimmed().toStdString();
+		
+		//Only set a property if it is not nothing
+		if (value != "")
+		{
+			results[comboItr->second] = value;
+		}
 	}
 	accept();
 }
