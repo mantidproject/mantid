@@ -3,6 +3,7 @@
 #include "../ApplicationWindow.h"
 #include "../Graph3D.h"
 
+#include <QApplication>
 #include <QMessageBox>
 
 WorkspaceMatrix::WorkspaceMatrix(Mantid::API::Workspace_sptr ws, ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f, int start, int end, bool filter, double maxv):
@@ -31,8 +32,10 @@ Matrix(env, label, parent, name, f),m_funct(this)
 
 }
 
-Graph3D * WorkspaceMatrix::plotGraph3D()
+Graph3D * WorkspaceMatrix::plotGraph3D(int style)
 {
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
     ApplicationWindow* a = applicationWindow();
 	QString labl = a->generateUniqueName(tr("Graph"));
 
@@ -40,9 +43,42 @@ Graph3D * WorkspaceMatrix::plotGraph3D()
 	plot->resize(500,400);
 	plot->setWindowTitle(labl);
 	plot->setName(labl);
+    plot->setTitle(tr("Workspace ")+name());
 	a->customPlot3D(plot);
-	plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), 0, 2000, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
-	a->initPlot3D(plot);
+	plot->customPlotStyle(style);
+    int resCol = numCols() / 200;
+    int resRow = numRows() / 200;
+    plot->setResolution( qMax(resCol,resRow) );
+
+    double zMin =  1e300;
+    double zMax = -1e300;
+    for(int i=0;i<numRows();i++)
+    for(int j=0;j<numCols();j++)
+    {
+        if (cell(i,j) < zMin) zMin = cell(i,j);
+        if (cell(i,j) > zMax) zMax = cell(i,j);
+    }
+    
+	plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
+	
+    Mantid::API::Axis* ax = wsModel()->workspace().getAxis(0);
+    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
+    plot->setXAxisLabel(tr(s.c_str()));
+    
+    ax = wsModel()->workspace().getAxis(1);
+    if (ax->isNumeric()) 
+    {
+        s = ax->unit()->caption() + " / " + ax->unit()->label();
+        plot->setYAxisLabel(tr(s.c_str())); 
+    }
+    else
+        plot->setYAxisLabel(tr("Spectrum")); 
+
+    plot->setZAxisLabel(tr("Counts")); 
+
+    a->initPlot3D(plot);
+	QApplication::restoreOverrideCursor();
+
     return plot;
 }
 

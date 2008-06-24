@@ -360,7 +360,7 @@ void Plot3DDialog::initGeneralPage()
     QGridLayout *gl2 = new QGridLayout();
     gl2->addWidget(new QLabel(tr( "Zoom (%)" )), 0, 0);
 	boxZoom = new QSpinBox();
-    boxZoom->setRange(1, 10000);
+    boxZoom->setRange(1, 100000);
     boxZoom->setSingleStep(10);
 
     gl2->addWidget(boxZoom, 0, 1);
@@ -498,10 +498,28 @@ void Plot3DDialog::setPlot(Graph3D *g)
 	boxTitle->setText(g->plotTitle());
 	titleFont = g->titleFont();
 
-	boxZoom->setValue(int(g->zoom()*100));
-	boxXScale->setValue(int(g->xScale()*100));
-	boxYScale->setValue(int(g->yScale()*100));
-	boxZScale->setValue(int(g->zScale()*100));
+    double xSc = g->xScale();
+    double ySc = g->yScale();
+    double zSc = g->zScale();
+    double zoo = g->zoom();
+
+    double minSc = qMin(xSc,ySc);
+    if (zSc < minSc) minSc = zSc;
+
+    if (minSc < 0.01)
+    {
+        double tmp = 0.01/minSc;
+        xSc *= tmp;
+        ySc *= tmp;
+        zSc *= tmp;
+        zoo /= tmp;
+    }
+
+	boxZoom->setValue(int(zoo*100));
+	boxXScale->setValue(int(xSc*100));
+	boxYScale->setValue(int(ySc*100));
+	boxZScale->setValue(int(zSc*100));
+
 	boxResolution->setValue(g->resolution());
 	boxLegend->setChecked(g->isLegendOn());
 	boxOrthogonal->setChecked(g->isOrthogonal());

@@ -2347,7 +2347,9 @@ MultiLayer* ApplicationWindow::multilayerPlot(Table* w, const QStringList& colLi
 	polishGraph(ag, style);
 	ag->newLegend();
 
-	QApplication::restoreOverrideCursor();
+    ag->setAutoScale();
+
+    QApplication::restoreOverrideCursor();
 	return g;
 }
 
@@ -12375,7 +12377,7 @@ Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 
     if (m->isA("WorkspaceMatrix"))
     {
-        return static_cast<WorkspaceMatrix*>(m)->plotGraph3D();
+        return static_cast<WorkspaceMatrix*>(m)->plotGraph3D(style);
     }
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -12446,11 +12448,6 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 	Graph* plot = g->activeGraph();
 	setPreferences(plot);
 
-    if (m->isA("WorkspaceMatrix"))
-    {
-        static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
-    }
-
 	Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
 	if (!s)
 		return 0;
@@ -12465,6 +12462,11 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 	plot->setAxisTitle(QwtPlot::yLeft, QString::null);
 	plot->setAxisTitle(QwtPlot::xTop, QString::null);
 	plot->setTitle(QString::null);
+
+    if (m->isA("WorkspaceMatrix"))
+    {
+        static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
+    }
 
 	emit modified();
 	QApplication::restoreOverrideCursor();
@@ -12484,13 +12486,13 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
     
     Graph* plot = g->activeGraph();
 	setPreferences(plot);
+	plot->plotSpectrogram(m, type);
 
     if (m->isA("WorkspaceMatrix"))
     {
         static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
     }
 
-	plot->plotSpectrogram(m, type);
 	QApplication::restoreOverrideCursor();
 	return g;
 }

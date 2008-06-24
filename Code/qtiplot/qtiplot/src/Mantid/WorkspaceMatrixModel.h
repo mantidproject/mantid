@@ -82,6 +82,7 @@ public:
 	double dataX(int row, int col) const;
 	double dataE(int row, int col) const;
     int indexX(double s)const;
+    Mantid::API::Workspace& workspace(){return *m_workspace;}
 
 private:
 

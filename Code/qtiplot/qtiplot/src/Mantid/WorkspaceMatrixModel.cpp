@@ -57,6 +57,7 @@ double WorkspaceMatrixModel::dataE(int row, int col) const
 {
     if (!m_workspace || row >= rowCount() || col >= columnCount()) return 0.;
     double res = m_workspace->dataE(row + startRow())[col];
+    if (res == 0.) res = 1.;//  quick fix of the fitting problem
     return res;
 
 }

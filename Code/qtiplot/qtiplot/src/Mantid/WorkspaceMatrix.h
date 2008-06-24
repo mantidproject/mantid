@@ -42,7 +42,8 @@ public:
     double dataE(int row, int col){return static_cast<WorkspaceMatrixModel*>(d_matrix_model)->dataE(row, col);}
     Table* createTableFromSelectedRows(bool vis = true, bool errs = true);
     void createGraphFromSelectedRows(bool vis = true, bool errs = true);
-    Graph3D * WorkspaceMatrix::plotGraph3D();
+    Graph3D * WorkspaceMatrix::plotGraph3D(int style);
+    WorkspaceMatrixModel* wsModel(){return static_cast<WorkspaceMatrixModel*>(d_matrix_model);}
 private:
      WorkspaceMatrixFunction m_funct;
 };
