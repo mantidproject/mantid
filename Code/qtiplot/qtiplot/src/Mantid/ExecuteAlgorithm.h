@@ -3,12 +3,15 @@
 
 #include <QDialog>
 #include <vector>
+#include <map>
 #include <string>
 
 class QLabel;
 class QLineEdit;
 class QPushButton;
 class QString;
+class QComboBox;
+class QStringList;
 
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
@@ -21,8 +24,8 @@ class ExecuteAlgorithm : public QDialog
 public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
-	void CreateLayout(std::vector<Mantid::Kernel::Property*>& properties);
-	std::vector<std::string> results;
+	void CreateLayout(QStringList& workspaces, std::vector<Mantid::Kernel::Property*>& properties);
+	std::map<std::string, std::string> results;
 
 protected:
 	
@@ -31,9 +34,12 @@ private slots:
 
 private:
 	QWidget* m_parent;
-	QVector<QLineEdit*> edits;
 	QPushButton *okButton;
 	QPushButton *exitButton;
+
+	std::map<QLineEdit*, std::string> edits;
+	std::map<QComboBox*, std::string> combos;
+
 
 	
 

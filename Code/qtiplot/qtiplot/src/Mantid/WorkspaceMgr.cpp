@@ -15,6 +15,7 @@
 #include <stdexcept>
 #include <QMessageBox>
 #include <QListWidgetItem>
+#include <QStringList>
 
 WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 {
@@ -52,7 +53,6 @@ void WorkspaceMgr::setupActions()
 	connect(pushAddWorkspace, SIGNAL(clicked()), this, SLOT(addWorkspaceClicked()));
 	connect(removeWorkspaceButton, SIGNAL(clicked()), this, SLOT(deleteWorkspaceClicked()));
 	connect(listWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectedWorkspaceChanged()));
-//	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspace()));
 	connect(pushImportWorkspace, SIGNAL(clicked()), this, SLOT(importWorkspaceMatrix()));
 	connect(pushExecuteAlg, SIGNAL(clicked()), this, SLOT(executeAlgorithm()));
 }
@@ -138,7 +138,7 @@ void WorkspaceMgr::selectedWorkspaceChanged()
 
 void WorkspaceMgr::importWorkspace()
 {
-	if (listWorkspaces->currentRow() != -1) //&& listWorkspaces->currentRow() != -1)
+	if (listWorkspaces->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
@@ -179,7 +179,7 @@ void WorkspaceMgr::importWorkspace()
 
 void WorkspaceMgr::importWorkspaceMatrix()
 {
-	if (listWorkspaces->currentRow() != -1) //&& listWorkspaces->currentRow() != -1)
+	if (listWorkspaces->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
@@ -206,6 +206,14 @@ void WorkspaceMgr::importWorkspaceMatrix()
 
 void WorkspaceMgr:: executeAlgorithm()
 {
+	QStringList wkspaces;
+	
+	//Get list of workspaces
+	for (int i =0; i < listWorkspaces->count(); ++i)
+	{
+		wkspaces << listWorkspaces->item(i)->text();
+	}
+	
 	if (listAlgorithms->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listAlgorithms->item(listAlgorithms->currentRow());
@@ -218,21 +226,27 @@ void WorkspaceMgr:: executeAlgorithm()
 		if (propList.size() > 0)
 		{
 			ExecuteAlgorithm* dlg = new ExecuteAlgorithm(this);
-			dlg->CreateLayout(propList);
+			dlg->CreateLayout(wkspaces, propList);
 			dlg->setModal(true);
 		
 			if (dlg->exec()== QDialog::Accepted)
 			{
-				for (int i = 0; i < dlg->results.size(); ++i)
-				{
+					QMessageBox::warning(this, tr("Mantid Algorithm"),
+						QString::number(dlg->results.size()),
+						QMessageBox::Ok);			
+				
+				std::map<std::string, std::string>::iterator resItr = dlg->results.begin();
+				
+				for (; resItr != dlg->results.end(); ++resItr)
+				{				
 					try
 					{
-						alg->setPropertyValue(propList[i]->name(), dlg->results[i]);
+						alg->setPropertyValue(resItr->first, resItr->second);
 					}
 					catch (std::invalid_argument err)
 					{
 						int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
-						tr(QString::fromStdString(propList[i]->name()) + " was invalid."),
+						tr(QString::fromStdString(resItr->first) + " was invalid."),
 						QMessageBox::Ok);
 					
 						return;
