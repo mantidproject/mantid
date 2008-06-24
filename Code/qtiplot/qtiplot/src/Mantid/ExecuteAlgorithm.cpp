@@ -31,34 +31,22 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, std::vector<Mantid:
 	
 	for (int i = 0; i < properties.size(); ++i)
 	{
-		if (properties[i]->name() == "InputWorkspace")
-		{
-			//If it is input workspace then use the names of the loaded workspaces
-			//in a combo box
-			QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]->name()));
-			QComboBox *tempCombo = new QComboBox;
-			tempLbl->setBuddy(tempCombo);
-					
-			tempCombo->addItems(workspaces);
-			
-			grid->addWidget(tempLbl, i, 0, 0);
-			grid->addWidget(tempCombo, i, 1, 0);
-			
-			combos[tempCombo] = properties[i]->name();
-		}
-		else if (properties[i]->allowedValues().size() > 0)
-		{
+
+		if (properties[i]->allowedValues().size() > 0)
+		{		
 			//If the property has allowed values then use a combo box.			
 			QLabel *tempLbl = new QLabel(QString::fromStdString(properties[i]->name()));
 			QComboBox *tempCombo = new QComboBox;
 			tempLbl->setBuddy(tempCombo);
 			
 			QStringList list;
-			std::vector<std::string>::iterator itr = properties[i]->allowedValues().begin();
+
+			std::vector<std::string> temp = properties[i]->allowedValues();
+			std::vector<std::string>::const_iterator vals_iter = temp.begin();
 			
-			for (; itr != properties[i]->allowedValues().end(); ++itr)
+			for (;  vals_iter != temp.end(); ++vals_iter)
 			{
-				list << QString::fromStdString(*itr);
+				list << QString::fromStdString(*vals_iter);
 			}
 			
 			tempCombo->addItems(list);

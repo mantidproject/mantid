@@ -230,11 +230,7 @@ void WorkspaceMgr:: executeAlgorithm()
 			dlg->setModal(true);
 		
 			if (dlg->exec()== QDialog::Accepted)
-			{
-					QMessageBox::warning(this, tr("Mantid Algorithm"),
-						QString::number(dlg->results.size()),
-						QMessageBox::Ok);			
-				
+			{			
 				std::map<std::string, std::string>::iterator resItr = dlg->results.begin();
 				
 				for (; resItr != dlg->results.end(); ++resItr)
