@@ -107,7 +107,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createA
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2_3, createAlgorithm, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2_3, execute, 2, 3)
 
-
 #if _WIN32
 BOOST_PYTHON_MODULE(MantidPythonAPI)
 #else

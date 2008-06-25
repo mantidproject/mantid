@@ -78,6 +78,12 @@ public:
     return m_allowedValues;
   }
   
+  ///Return the type of the validator
+  const std::string getType() const
+  {
+	  return "list";
+  }
+  
   /// Adds the argument to the set of valid values
   void addAllowedValue(const std::string &value)
   {

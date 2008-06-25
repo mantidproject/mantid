@@ -82,6 +82,14 @@ const bool Property::isValid() const
   return true;
 }
 
+/** Returns the type of the validator as a string
+   *  \returns Returns ""
+   */
+ const std::string Property::getValidatorType() const
+  {
+    return "";
+  }
+
 /** Returns true if the property has not been changed since initialisation
  *  @return True if the property still has its default value
  */

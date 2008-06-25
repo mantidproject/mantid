@@ -66,6 +66,12 @@ public:
   virtual ~BoundedValidator()
   {
   }
+  
+    ///Return the type of the validator
+  const std::string getType() const
+  {
+	  return "bounded";
+  }
 
   /** Check if the value is within bounds.
    *  Checks the value based on the validator's rules

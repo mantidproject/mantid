@@ -53,6 +53,7 @@ public:
 	const std::type_info* type_info() const;
 	const std::string type() const;
 	virtual const bool isValid() const;
+	virtual const std::string getValidatorType() const;
 	const bool isDefault() const;
 	
 	// Setter

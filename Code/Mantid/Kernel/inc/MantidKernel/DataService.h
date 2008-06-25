@@ -53,6 +53,7 @@ public:
   /// Add an object to the service
   void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
+	  std::cerr << "Adding " << name << std::endl;
   // Don't permit an empty name for the workspace
     if (name.empty())
     {
@@ -81,6 +82,8 @@ public:
   /// Add or replace an object
   void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
+	  std::cerr << "Adding or replacing" << name << std::endl;
+	  
     //find if the Tobject already exists
 	svc_it it = datamap.find(name);
     if (it!=datamap.end())
@@ -92,12 +95,17 @@ public:
   /// Remove an object 
   void remove( const std::string& name)
   {
+
 	  svc_it it = datamap.find(name);
 	   if (it==datamap.end())
 	   {
 	     g_log.warning(" remove '" + name + "' cannot be found");
+	     std::cerr << "Could not find " << name << std::endl;
 	     return;
-	   }
+	   }   
+	   
+	   std::cerr << "RefCount = " << it->second.use_count() << std::endl;
+	   
 	   datamap.erase(it);
 	   return;
   }

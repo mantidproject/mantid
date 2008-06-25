@@ -6,6 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileValidator.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -33,7 +34,10 @@ namespace Mantid
     /// Initialisation method.
     void LoadRaw::init()
     {
-      declareProperty("Filename","",new MandatoryValidator);
+      std::vector<std::string> exts;
+      exts.push_back("RAW");
+      exts.push_back("raw");		
+      declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();

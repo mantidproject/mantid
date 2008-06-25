@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/FileValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tokenizer.hpp>
@@ -263,6 +264,14 @@ public:
   {
     return m_validator->isValid(m_value);
   }
+  
+  /** Returns the type of the validator as a string
+   *  \returns String describing the type of the validator
+   */
+  virtual const std::string getValidatorType() const
+  {
+    return m_validator->getType();
+  }
 
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
@@ -270,10 +279,17 @@ public:
   virtual const std::vector<std::string> allowedValues() const
   {
     ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
+    
+    FileValidator *file = dynamic_cast<FileValidator*>(m_validator);	  
+	  
     if (list)
     {
       const std::set<std::string>& vals = list->allowedValues();
       return std::vector<std::string>(vals.begin(), vals.end());
+    }
+    else if (file)
+    {
+	   return file->allowedValues();
     }
     else
     {

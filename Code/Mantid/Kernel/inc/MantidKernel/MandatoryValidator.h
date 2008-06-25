@@ -48,6 +48,12 @@ public:
    */
   const bool isValid(const std::string &value) const { return !(value.empty()); }
   
+   ///Return the type of the validator
+  const std::string getType() const
+  {
+	  return "mandatory";
+  }
+  
   IValidator<std::string>* clone() { return new MandatoryValidator(*this); }
 };
 

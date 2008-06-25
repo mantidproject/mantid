@@ -48,6 +48,12 @@ public:
    */
   const bool isValid(const TYPE &value) const { return true; }
   
+    ///Return the type of the validator
+  const std::string getType() const
+  {
+	  return "null";
+  }
+  
   IValidator<TYPE>* clone() { return new NullValidator(*this); }
 };
 

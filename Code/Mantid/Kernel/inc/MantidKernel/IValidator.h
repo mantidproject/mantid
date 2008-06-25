@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include <string>
 
 namespace Mantid
 {
@@ -49,6 +50,12 @@ public:
    *  @param value The value to test
    */
   virtual const bool isValid(const TYPE &value) const = 0;
+
+  /** Gets the type of the validator as a string
+   * 
+   *  \return String describing the type
+   */	  
+  virtual const std::string getType() const = 0;
 
   /// Make a copy of the present type of validator
   virtual IValidator* clone() = 0;
