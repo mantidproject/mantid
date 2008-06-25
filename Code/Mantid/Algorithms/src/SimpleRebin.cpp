@@ -86,7 +86,7 @@ namespace Mantid
 //        outputW->getAxis()->spectraNo(hist)=inputW->getAxis()->spectraNo(hist);
         outputW->setErrorHelper(hist,inputW->errorHelper(hist));
       }
-
+	  outputW->isDistribution(dist);
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputW);
 

@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Rebunch.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
 				>
 			</File>
@@ -265,6 +269,14 @@
 			</File>
 			<File
 				RelativePath=".\test\PlusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Rebunch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RebunchTest.h"
 				>
 			</File>
 			<File
