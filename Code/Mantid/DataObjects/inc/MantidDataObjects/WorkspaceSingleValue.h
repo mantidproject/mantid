@@ -77,8 +77,6 @@ public:
   virtual std::vector<double>& dataY(int const index) { return _Y; }
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index) { return _E; }
-  ///Returns the error data
-  virtual std::vector<double>& dataE2(int const index) { return _E2; }
 
 
   //inheritance redirections
@@ -88,16 +86,12 @@ public:
   virtual std::vector<double>& dataY() { return _Y; }
   ///Returns non-const vector of the error data
   virtual std::vector<double>& dataE() { return _E; }
-  ///Returns non-const vector of the error data
-  virtual std::vector<double>& dataE2() { return _E2; }
   /// Returns the x data const
   virtual const std::vector<double>& dataX() const { return _X; }  
   /// Returns the y data const
   virtual const std::vector<double>& dataY() const { return _Y; }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return _E; }
-  /// Returns the error data const
-  virtual const std::vector<double>& dataE2() const { return _E2; }
 
   /// Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const {return _X;}
@@ -105,8 +99,6 @@ public:
   virtual const std::vector<double>& dataY(int const index) const {return _Y;}
   /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const {return _E;}
-  /// Returns the error const
-  virtual const std::vector<double>& dataE2(int const index) const {return _E2;}
 
   ///Returns the ErrorHelper applicable for this detector
   virtual const API::IErrorHelper* errorHelper(int const index) const { return _ErrorHelper; }
@@ -128,8 +120,6 @@ public:
   virtual const std::vector<double>& getY(int const index) const {return _Y;}
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const {return _E;}
-  ///Returns the error const
-  virtual const std::vector<double>& getE2(int const index) const {return _E2;}
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -146,8 +136,6 @@ private:
   std::vector<double> _Y;
   ///Internal cache of E data
   std::vector<double> _E;
-  ///Internal cache of E2 data
-  std::vector<double> _E2;
 
   ///Internal cache of applicable errorhelper
   API::IErrorHelper* _ErrorHelper;

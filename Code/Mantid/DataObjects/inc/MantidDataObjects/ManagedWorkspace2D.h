@@ -118,15 +118,9 @@ public:
   virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
   virtual void setData(const int histnumber, const std::vector<double>&);
   virtual void setData(const int histnumber, const std::vector<double>&, const std::vector<double>&);
-  virtual void setData(const int histnumber, const std::vector<double>&, const std::vector<double>&,
-                       const std::vector<double>&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  virtual void setData(int const histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&, 
-                       const Histogram1D::RCtype&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
-  virtual void setData(int const histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&,
-                       const Histogram1D::RCtype::ptr_type&);  
 
   //section required for iteration
   virtual int size() const;
@@ -135,17 +129,13 @@ public:
   virtual std::vector<double>& dataX(const int index);
   virtual std::vector<double>& dataY(const int index);
   virtual std::vector<double>& dataE(const int index);
-  virtual std::vector<double>& dataE2(const int index);
   virtual const std::vector<double>& dataX(int const index) const;
   virtual const std::vector<double>& dataY(int const index) const;
   virtual const std::vector<double>& dataE(int const index) const;
-  virtual const std::vector<double>& dataE2(int const index) const;
 
   virtual const API::IErrorHelper* errorHelper(const int index) const;
   virtual void setErrorHelper(const int index,API::IErrorHelper* errorHelper);
   virtual void setErrorHelper(const int index,const API::IErrorHelper* errorHelper);
-//  virtual int spectraNo(const int index) const;
-//  virtual int& spectraNo(const int index);
 
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
@@ -160,8 +150,6 @@ private:
 
   ManagedDataBlock2D* getDataBlock(const int index) const;
   
-  /// The number of vectors in the workspace
-//  int m_noVectors;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
   int m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 

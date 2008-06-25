@@ -21,7 +21,6 @@ public:
     TS_ASSERT_DELTA(0.0,ws.dataX()[0],1e-6);
     TS_ASSERT_DELTA(0.0,ws.dataY()[0],1e-6);
     TS_ASSERT_DELTA(0.0,ws.dataE()[0],1e-6);
-    TS_ASSERT_DELTA(0.0,ws.dataE2()[0],1e-6);
   }
   void testConstructor()
   {
@@ -29,7 +28,6 @@ public:
     TS_ASSERT_DELTA(0.0,ws.dataX()[0],1e-6);
     TS_ASSERT_DELTA(1,ws.dataY()[0],1e-6);
     TS_ASSERT_DELTA(2,ws.dataE()[0],1e-6);
-    TS_ASSERT_DELTA(3,ws.dataE2()[0],1e-6);
   }
 
   void testsetgetXvector()
@@ -55,14 +53,6 @@ public:
     TS_ASSERT_EQUALS(v1,ws.dataE());
   } 
   
-  void testsetgetE2vector()
-  {
-    WorkspaceSingleValue ws;
-    std::vector<double> v1(1,1.1);
-    ws.dataE2() = v1;
-    TS_ASSERT_EQUALS(v1,ws.dataE2());
-  } 
- 
   void testErrorHelper()
   {
     WorkspaceSingleValue ws;

@@ -204,24 +204,6 @@ std::vector<double>* PythonInterface::GetEData(const std::string& workspaceName,
 }
 
 /**
- * Gives Python access to the E2 data of a specified spectra of a chosen workspace.
- * The pointer returned to Python may become invalid if the workspace is subsequently altered;
- * for example, if the workspace was closed in Mantid, the Python pointer would be left hanging.
- * \param workspaceName :: The name under which the workspace is stored in Mantid.
- * \param index :: The spectra number to return.
- * \return Pointer to a std::vector<double>.
- **/
-std::vector<double>* PythonInterface::GetE2Data(const std::string& workspaceName, int const index)
-{
-	//Retrieve workspace
-	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName);
-	//Mantid::DataObjects::Workspace2D_sptr output2D =
-	//boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(output);
-
-	return &output->dataE2(index);
-}
-
-/**
  * Gives Python the address of the X data of a specified spectra of a chosen workspace.
  * This is used for passing an address to the data from Mantid to a another programme
  * via Python. For example, it has been used with QtiPlot.

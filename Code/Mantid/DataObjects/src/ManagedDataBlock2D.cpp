@@ -18,7 +18,7 @@ Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBloc
  *  @param minIndex The index of the workspace that this data block starts at
  *  @param NVectors The number of Histogram1D's in this data block
  *  @param XLength  The number of elements in the X data
- *  @param YLength  The number of elements in the Y/E/E2 data
+ *  @param YLength  The number of elements in the Y/E data
  */
 ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors, 
     const int &XLength, const int &YLength) :
@@ -35,7 +35,6 @@ ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors,
     it->dataX().resize(m_XLength);
     it->dataY().resize(m_YLength);
     it->dataE().resize(m_YLength);
-    it->dataE2().resize(m_YLength);
   }
 }
 
@@ -143,27 +142,6 @@ void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec
 }
 
 /**
- Sets the data in the workspace (including errors)
- @param index The histogram to be set
- @param vec A vector containing the data 
- @param vecErr A vector containing the corresponding errors
- @param vecErr2 A vector containing the 2nd error values
- */
-void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec,
-    const std::vector<double>& vecErr, const std::vector<double>& vecErr2)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].dataY()=vec;
-  m_data[index-m_minIndex].dataE()=vecErr;
-  m_data[index-m_minIndex].dataE2()=vecErr2;  
-  m_hasChanges = true;
-  return;
-}
-
-/**
  Sets the data in the workspace
  @param index The histogram to be set
  @param PY A reference counted data range  
@@ -202,25 +180,6 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
  @param index The histogram to be set
  @param PY A reference counted data range  
  @param PE A reference containing the corresponding errors
- @param PE2 A reference containing the 2nd error values
- */
-void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype& PY,
-    const Histogram1D::RCtype& PE, const Histogram1D::RCtype& PE2)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].setData(PY, PE, PE2);
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Sets the data in the workspace
- @param index The histogram to be set
- @param PY A reference counted data range  
- @param PE A reference containing the corresponding errors
  */
 void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr_type& PY,
     const Histogram1D::RCtype::ptr_type& PE)
@@ -230,25 +189,6 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
   m_data[index-m_minIndex].setData(PY, PE);
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Sets the data in the workspace
- @param index The histogram to be set
- @param PY A reference counted data range  
- @param PE A reference containing the corresponding errors
- @param PE2 A reference containing the second error values
- */
-void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr_type& PY,
-    const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].setData(PY, PE, PE2);
   m_hasChanges = true;
   return;
 }
@@ -299,21 +239,6 @@ std::vector<double>& ManagedDataBlock2D::dataE(const int index)
 }
 
 /**
-  Get the error data for a specified histogram
-  @param index The number of the histogram
-  @return A vector of doubles containing the error (second value) data
-*/
-std::vector<double>& ManagedDataBlock2D::dataE2(const int index)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataE2, histogram number out of range");
-
-  m_hasChanges = true;
-  return m_data[index-m_minIndex].dataE2();
-}
-
-/**
   Get the x data of a specified histogram
   @param index The number of the histogram
   @return A vector of doubles containing the x data
@@ -353,20 +278,6 @@ const std::vector<double>& ManagedDataBlock2D::dataE(const int index) const
     throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
 
   return m_data[index-m_minIndex].dataE();
-}
-
-/**
-  Get the error data for a specified histogram
-  @param index The number of the histogram
-  @return A vector of doubles containing the error (second value) data
-*/
-const std::vector<double>& ManagedDataBlock2D::dataE2(const int index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::dataE2, histogram number out of range");
-
-  return m_data[index-m_minIndex].dataE2();
 }
 
 ///Returns the ErrorHelper applicable for this spectra
@@ -428,12 +339,6 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
       ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
     fs.write((char *) &*it->dataE().begin(), data.m_YLength * sizeof(double));
-    if (it->dataE2().size() != static_cast<unsigned int>(data.m_YLength))
-    {
-      it->dataE2().resize(data.m_YLength, 0.0);
-      ManagedDataBlock2D::g_log.warning() << "E2 vector resized to " << data.m_YLength << " elements.";
-    }
-    fs.write((char *) &*it->dataE2().begin(), data.m_YLength * sizeof(double));
     
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
@@ -456,8 +361,6 @@ std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
     fs.read((char *) &*it->dataY().begin(), data.m_YLength * sizeof(double));
     it->dataE().resize(data.m_YLength, 0.0);
     fs.read((char *) &*it->dataE().begin(), data.m_YLength * sizeof(double));
-    it->dataE2().resize(data.m_YLength, 0.0);
-    fs.read((char *) &*it->dataE2().begin(), data.m_YLength * sizeof(double));
     
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }

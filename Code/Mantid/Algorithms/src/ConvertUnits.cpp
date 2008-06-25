@@ -103,7 +103,6 @@ void ConvertUnits::exec()
       // Just copy over
       outputWS->dataY(i) = inputWS->dataY(i);
       outputWS->dataE(i) = inputWS->dataE(i); 
-      /// @todo Will also need to deal with E2
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
     outputWS->dataX(i) = inputWS->dataX(i);
@@ -132,7 +131,6 @@ void ConvertUnits::exec()
         const double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
         outputWS->dataY(i)[j] = inputWS->dataY(i)[j]/width;
         outputWS->dataE(i)[j] = inputWS->dataE(i)[j]/width;
-        // Again, will also need to deal with E2
       }
     }
   }

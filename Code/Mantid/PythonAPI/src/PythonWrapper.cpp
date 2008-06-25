@@ -100,10 +100,6 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
         return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getE", p0);
     }
 
-    const std::vector<double,std::allocator<double> >& getE2(const int p0) const {
-        return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getE2", p0);
-    }
-
     PyObject* py_self;
 };
 
@@ -159,17 +155,14 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
         .def("size", pure_virtual(&Mantid::API::Workspace::size))
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
-        //.def("spectraNo", pure_virtual((int (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::spectraNo))
         .def("setTitle", &Mantid::API::Workspace::setTitle)
         .def("setComment", &Mantid::API::Workspace::setComment)
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
-        //.def("XUnit", (const boost::shared_ptr<Mantid::Kernel::Unit>& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::XUnit, return_value_policy< copy_const_reference >())
         .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
-	.def("getX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getX), return_value_policy< manage_new_object >())
+        .def("getX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getX), return_value_policy< manage_new_object >())
         .def("getY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getY), return_value_policy< manage_new_object >())
         .def("getE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE), return_value_policy< manage_new_object >())
-        .def("getE2", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE2), return_value_policy< manage_new_object >())
     ;
 
 	class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())

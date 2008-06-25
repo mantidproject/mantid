@@ -31,8 +31,8 @@ public:
       yy[i] = i*100;
       ee[i] = sqrt(yy[i]);     
     }
-    smallWorkspace.setData(0,y,e,e);
-    smallWorkspace.setData(1,yy,ee,ee);
+    smallWorkspace.setData(0,y,e);
+    smallWorkspace.setData(1,yy,ee);
     
     bigWorkspace.setTitle("bigWorkspace");
     int nVec = 1250;
@@ -40,9 +40,9 @@ public:
     bigWorkspace.initialize(nVec, vecLength, vecLength);
     for (int i=0; i< nVec; i++)
     {
-      std::vector<double> x1(vecLength,1+i),y1(vecLength,5+i),e1(vecLength,4+i),e2(vecLength,4+i);
+      std::vector<double> x1(vecLength,1+i),y1(vecLength,5+i),e1(vecLength,4+i);
       bigWorkspace.setX(i,x1);     
-      bigWorkspace.setData(i,y1,e1,e2);
+      bigWorkspace.setData(i,y1,e1);
     }
   }
   
@@ -60,7 +60,6 @@ public:
       TS_ASSERT_EQUALS( ws.dataX(i).size(), 5 )
       TS_ASSERT_EQUALS( ws.dataY(i).size(), 5 )
       TS_ASSERT_EQUALS( ws.dataE(i).size(), 5 )
-      TS_ASSERT_EQUALS( ws.dataE2(i).size(), 5 )
     }
 
     // Test all is as it should be with the temporary file
@@ -137,10 +136,9 @@ public:
     
     double oneMoreNumber = 8478.6728;
     std::vector<double> vec(25, oneMoreNumber);
-    TS_ASSERT_THROWS_NOTHING( bigWorkspace.setData(49, vec, vec, vec) )
+    TS_ASSERT_THROWS_NOTHING( bigWorkspace.setData(49, vec, vec) )
     TS_ASSERT_EQUALS( bigWorkspace.dataY(49)[0], oneMoreNumber )
     TS_ASSERT_EQUALS( bigWorkspace.dataE(49)[9], oneMoreNumber )
-    TS_ASSERT_EQUALS( bigWorkspace.dataE2(49)[19], oneMoreNumber )
   }
 
   void testSize()
@@ -261,42 +259,6 @@ public:
     TS_ASSERT_EQUALS( bigWorkspace.dataE(249)[2], 253 )
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.dataE(11)[11] = 4.44 )
     TS_ASSERT_EQUALS( bigWorkspace.dataE(11)[11], 4.44 )
-  }
-
-  void testDataE2()
-  {
-    std::vector<double> e;
-    TS_ASSERT_THROWS( smallWorkspace.dataE2(-1), std::range_error )
-    TS_ASSERT_THROWS_NOTHING( e = smallWorkspace.dataE2(0) )
-    std::vector<double> ee;
-    TS_ASSERT_THROWS_NOTHING( ee = smallWorkspace.dataE2(1) )
-    TS_ASSERT_THROWS( smallWorkspace.dataE2(2), std::range_error )
-    TS_ASSERT_EQUALS( e.size(), 3 )
-    TS_ASSERT_EQUALS( ee.size(), 3 )
-    for (unsigned int i = 0; i < e.size(); ++i)
-    {
-      TS_ASSERT_EQUALS( e[i], sqrt(i*10.0) )
-      TS_ASSERT_EQUALS( ee[i], sqrt(i*100.0) )
-    }    
-    
-    // test const version
-    const ManagedWorkspace2D &constRefToData = smallWorkspace;
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataE2(-1), std::range_error )
-    const std::vector<double> ec = constRefToData.dataE2(0);
-    const std::vector<double> eec = constRefToData.dataE2(1);
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataE2(2), std::range_error )
-    TS_ASSERT_EQUALS( ec.size(), 3 )
-    TS_ASSERT_EQUALS( eec.size(), 3 )
-    for (unsigned int i = 0; i < ec.size(); ++i)
-    {
-      TS_ASSERT_EQUALS( ec[i], sqrt(i*10.0) )
-      TS_ASSERT_EQUALS( eec[i], sqrt(i*100.0) )
-    }    
-
-    TS_ASSERT_EQUALS( bigWorkspace.dataE2(66)[11], 70 )
-    TS_ASSERT_EQUALS( bigWorkspace.dataE2(188)[9], 192 )
-    TS_ASSERT_THROWS_NOTHING( bigWorkspace.dataE2(234)[23] = 4.45 )
-    TS_ASSERT_EQUALS( bigWorkspace.dataE2(234)[23], 4.45 )
   }
 
   void testDestructor()

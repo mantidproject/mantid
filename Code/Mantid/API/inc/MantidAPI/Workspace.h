@@ -4,7 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
@@ -12,11 +11,11 @@
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <ostream> 
-#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -103,8 +102,6 @@ public:
   virtual std::vector<double>& dataY(int const index) =0;
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index)  =0;  
-  ///Returns the error data
-  virtual std::vector<double>& dataE2(int const index) =0;
 	
   ///Returns the number of histograms in the workspace
   virtual const int getHistogramNumber()  const = 0;
@@ -123,8 +120,6 @@ public:
   virtual const std::vector<double>& dataY(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& dataE(int const index) const =0;
-  ///Returns the error const
-  virtual const std::vector<double>& dataE2(int const index) const =0;
 
   ///Returns a reference to the WorkspaceHistory
   WorkspaceHistory& getWorkspaceHistory() { return m_history; }
@@ -144,9 +139,6 @@ public:
   virtual const std::vector<double>& getY(int const index) const =0;
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const =0;
-  ///Returns the error const
-  virtual const std::vector<double>& getE2(int const index) const =0;
-
   
 protected:
   Workspace();

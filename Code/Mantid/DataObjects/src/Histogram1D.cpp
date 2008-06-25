@@ -21,7 +21,7 @@ Histogram1D::Histogram1D() : _errorHelper(API::GaussianErrorHelper::Instance())
  \param A :: Histogram to copy
  */
 Histogram1D::Histogram1D(const Histogram1D& A) :
-  refX(A.refX), refY(A.refY), refE(A.refE), refE2(A.refE2), _errorHelper(A._errorHelper)
+  refX(A.refX), refY(A.refY), refE(A.refE), _errorHelper(A._errorHelper)
 {}
 
 /*!
@@ -36,9 +36,7 @@ Histogram1D& Histogram1D::operator=(const Histogram1D& A)
     refX=A.refX;
     refY=A.refY;
     refE=A.refE;
-    refE2=A.refE2;
     _errorHelper = A._errorHelper;
-//    _spectraNo = A._spectraNo;
   }
   return *this;
 }

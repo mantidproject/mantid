@@ -55,7 +55,6 @@ private:
   RCtype refX;   ///< RefCounted X
   RCtype refY;   ///< RefCounted Y
   RCtype refE;   ///< RefCounted Error
-  RCtype refE2;  ///< Second error value for when Poisson errors used
   const API::IErrorHelper* _errorHelper; ///<pointer to the error helper class for this spectra
 
 public:
@@ -68,31 +67,23 @@ public:
   void setX(const StorageType& X) {  refX.access()=X; }
   /// Sets the data.
   void setData(const StorageType& Y) {  refY.access()=Y; };
-  /// Sets the data and single-value errors
+  /// Sets the data and errors
   void setData(const StorageType& Y, const StorageType& E) 
     {  refY.access()=Y; refE.access()=E; }
-  /// Sets the data and errors
-  void setData(const StorageType& Y, const StorageType& E, const StorageType& E2) 
-    {  refY.access()=Y; refE.access()=E; refE2.access(); }
 
   /// Sets the x data.
   void setX(const RCtype& X) { refX=X; }
   /// Sets the data.
   void setData(const RCtype& Y) { refY=Y; }
-  /// Sets the data and single-value errors
-  void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
   /// Sets the data and errors
-  void setData(const RCtype& Y, const RCtype& E, const RCtype& E2) { refY=Y; refE=E; refE2=E2; }  
+  void setData(const RCtype& Y, const RCtype& E) { refY=Y; refE=E;}
   
   /// Sets the x data
   void setX(const RCtype::ptr_type& X) { refX=X; }
   /// Sets the data.
   void setData(const RCtype::ptr_type& Y) { refY=Y; }
-  /// Sets the data and single-value errors
-  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
   /// Sets the data and errors
-  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E, const RCtype::ptr_type& E2) 
-    { refY=Y; refE=E; refE2=E2; }
+  void setData(const RCtype::ptr_type& Y, const RCtype::ptr_type& E) { refY=Y; refE=E;}
 
   // Get the array data
   /// Returns the x data const
@@ -101,8 +92,6 @@ public:
   virtual const StorageType& dataY() const { return *refY; }
   /// Returns the error data const
   virtual const StorageType& dataE() const { return *refE; }
-  /// Returns the second error value data const
-  virtual const StorageType& dataE2() const { return *refE2; }
 
   ///Returns the x data
   virtual StorageType& dataX() { return refX.access(); }
@@ -110,8 +99,6 @@ public:
   virtual StorageType& dataY() { return refY.access(); }
   ///Returns the error data
   virtual StorageType& dataE() { return refE.access(); }
-  ///Returns the second error value data
-  virtual StorageType& dataE2() { return refE2.access(); }
 
   ///Clear the x data
   StorageType& emptyX() { refX.access().clear(); return refX.access(); }
@@ -119,8 +106,6 @@ public:
   StorageType& emptyY() { refY.access().clear(); return refY.access(); }
   ///Clear the error data
   StorageType& emptyE() { refE.access().clear(); return refE.access(); }
-  ///Clear the second error value data
-  StorageType& emptyE2() { refE2.access().clear(); return refE2.access(); }
 
   int nxbin() const { return refX->size(); }         ///< Return the number of X bins
   int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
@@ -130,7 +115,7 @@ public:
   bool isError() const { return refE->empty(); }
   /// Gets the memory size of the histogram
   long int getMemorySize() const 
-    { return (refX->size()+refY->size()+refE->size()+refE2->size())*sizeof(double); }
+    { return (refX->size()+refY->size()+refE->size())*sizeof(double); }
 
   ///sets the ErrorHelper applicable for this detector
   void setErrorHelper(const API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }

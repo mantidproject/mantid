@@ -70,18 +70,11 @@ public:
   virtual void setX(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&);
   virtual void setData(int const, const std::vector<double>&, const std::vector<double>&);
-  virtual void setData(int const, const std::vector<double>&, const std::vector<double>&,
-    const std::vector<double>&);
   virtual void setX(int const, const Histogram1D::RCtype&);
   virtual void setX(int const, const Histogram1D::RCtype::ptr_type&);
   virtual void setData(int const, const Histogram1D::RCtype&);
   virtual void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  virtual void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&, 
-    const Histogram1D::RCtype&);
   virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
-  virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&,
-    const Histogram1D::RCtype::ptr_type&);
-
   
   /// Returns the histogram number
   const int getHistogramNumber() const;
@@ -94,9 +87,6 @@ public:
   virtual std::vector<double>& dataY(int const index);
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index);
-  ///Returns the error data
-  virtual std::vector<double>& dataE2(int const index);
-
 
   //Get methods return the histogram number 
   /// Returns the x data const
@@ -105,8 +95,6 @@ public:
   virtual const std::vector<double>& dataY(int const index) const;
   /// Returns the error const 
   virtual const std::vector<double>& dataE(int const index) const;
-  /// Returns the error const 
-  virtual const std::vector<double>& dataE2(int const index) const;
 
   virtual long int getMemorySize() const;
 
@@ -124,8 +112,6 @@ public:
   virtual const std::vector<double>& getY(int const index) const;
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const;
-  ///Returns the error const
-  virtual const std::vector<double>& getE2(int const index) const;
 
 protected:
   /// The number of vectors in the workspace

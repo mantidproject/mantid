@@ -51,8 +51,8 @@ namespace Mantid
       for (int i=0;i<m_noVectors;i++)
       {
         this->setX(i,t1);
-        // Y,E,E2 arrays populated
-        this->setData(i,t2,t2,t2);
+        // Y,E arrays populated
+        this->setData(i,t2,t2);
       }
     }
 
@@ -144,26 +144,6 @@ namespace Mantid
     }
 
     /**
-    Sets the data in the workspace (including errors)
-    \param histnumber The histogram to be set
-    \param Vec A vector containing the data	
-    \param VecErr A vector containing the corresponding errors
-    \param VecErr2 A vector containing the corresponding second error value
-    */
-    void 
-      Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
-      const std::vector<double>& VecErr, const std::vector<double>& VecErr2)
-    {
-      if (histnumber<0 || histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].dataY()=Vec;
-      data[histnumber].dataE()=VecErr;
-      data[histnumber].dataE2()=VecErr2;
-      return;
-    }
-
-    /**
     Sets the data in the workspace
     \param histnumber The histogram to be set
     \param PY A reference counted data range	
@@ -198,23 +178,6 @@ namespace Mantid
     \param histnumber The histogram to be set
     \param PY A reference counted data range	
     \param PE A reference containing the corresponding errors
-    \param PE2 A reference containing the corresponding error second value
-    */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
-      const Histogram1D::RCtype& PE,const Histogram1D::RCtype& PE2)
-    {
-      if (histnumber<0 || histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].setData(PY,PE,PE2);
-      return;
-    }
-
-    /**
-    Sets the data in the workspace
-    \param histnumber The histogram to be set
-    \param PY A reference counted data range	
-    \param PE A reference containing the corresponding errors
     */
     void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
       const Histogram1D::RCtype::ptr_type& PE)
@@ -223,23 +186,6 @@ namespace Mantid
         throw std::range_error("Workspace2D::setData, histogram number out of range");
 
       data[histnumber].setData(PY,PE);
-      return;
-    }
-
-    /**
-    Sets the data in the workspace
-    \param histnumber The histogram to be set
-    \param PY A reference counted data range	
-    \param PE A reference containing the corresponding errors
-    \param PE2 A reference containing the corresponding error second value	
-    */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
-      const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
-    {
-      if (histnumber<0 || histnumber>=m_noVectors)
-        throw std::range_error("Workspace2D::setData, histogram number out of range");
-
-      data[histnumber].setData(PY,PE,PE2);
       return;
     }
 
@@ -294,20 +240,6 @@ namespace Mantid
       return data[index].dataE();
     }
 
-    /**
-    Get the error data for a specified histogram
-    @param index The number of the histogram
-    @return A vector of doubles containing the error data
-    */
-    const std::vector<double>& 
-      Workspace2D::dataE2(const int index) const
-    {
-      if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataE2, histogram number out of range");
-
-      return data[index].dataE2();
-    }
-
     /// get pseudo size
     int Workspace2D::size() const 
     { 
@@ -328,6 +260,7 @@ namespace Mantid
 
       return data[index].dataX();
     }
+    
     ///Returns the y data
     std::vector<double>& Workspace2D::dataY(int const index)
     {
@@ -336,6 +269,7 @@ namespace Mantid
 
       return data[index].dataY();
     }
+    
     ///Returns the error data
     std::vector<double>& Workspace2D::dataE(int const index)
     {
@@ -343,14 +277,6 @@ namespace Mantid
         throw std::range_error("Workspace2D::dataE, histogram number out of range");
 
       return data[index].dataE();
-    }
-    ///Returns the error data
-    std::vector<double>& Workspace2D::dataE2(int const index)
-    {
-      if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::dataE2, histogram number out of range");
-
-      return data[index].dataE2();
     }
 
     /** Returns the number of histograms.
@@ -390,7 +316,7 @@ namespace Mantid
     }
     
     
-     /**
+    /**
     Get the x data of a specified histogram thru python
     \param index The number of the histogram
     \return A vector of doubles containing the x data
@@ -421,17 +347,6 @@ namespace Mantid
       Workspace2D::getE(const int index) const
     {
       return Workspace2D::dataE(index);
-    }
-
-    /**
-    Get the error data for a specified histogram thru python
-    \param index The number of the histogram
-    \return A vector of doubles containing the error data
-    */
-    const std::vector<double>& 
-      Workspace2D::getE2(const int index) const
-    {
-      return Workspace2D::dataE2(index);
     }
 
   } // namespace DataObjects

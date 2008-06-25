@@ -86,7 +86,6 @@ void MarkDeadDetectors::exec()
     // Zero the workspace spectra (data and errors, not X values)
     WS->dataY(*it).assign(vectorSize,0.0);
     WS->dataE(*it).assign(vectorSize,0.0);
-    WS->dataE2(*it).assign(vectorSize,0.0);
   }
   
 }

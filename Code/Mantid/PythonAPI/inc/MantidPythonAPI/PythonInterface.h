@@ -69,7 +69,6 @@ public:
 	std::vector<double>* GetXData(const std::string&, int const );
 	std::vector<double>* GetYData(const std::string&, int const );
 	std::vector<double>* GetEData(const std::string&, int const );
-	std::vector<double>* GetE2Data(const std::string&, int const );
 
 	//Needed for QTIPLOT
 	unsigned long GetAddressXData(const std::string&, int const );

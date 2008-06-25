@@ -106,11 +106,10 @@ void GroupDetectors::exec()
     // N.B. Deleting spectra would cause issues for ManagedWorkspace2D, hence the the approach taken here
     WS->dataY(currentIndex).assign(vectorSize,0.0);
     WS->dataE(currentIndex).assign(vectorSize,0.0);
-    WS->dataE2(currentIndex).assign(vectorSize,0.0);
     spectraAxis->spectraNo(currentIndex) = -1;
   }
   // Deal with the errors (assuming Gaussian)
-  /// @todo Deal with Poisson errors (E2)
+  /// @todo Deal with Poisson errors
   std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataE(firstIndex).begin(), dblSqrt);
 
 }

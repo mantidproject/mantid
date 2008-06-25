@@ -243,22 +243,6 @@ void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>
 
 /** Set the data values
  *  @param histnumber Index of the histogram to be set
- *  @param Vec The data to enter
- *  @param VecErr The corresponding errors
- *  @param VecErr2 The corresponding error second values
- */
-void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
-                                 const std::vector<double>& VecErr, const std::vector<double>& VecErr2)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, Vec, VecErr, VecErr2);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
  *  @param PY The data to enter
  */
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
@@ -289,22 +273,6 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
  *  @param histnumber Index of the histogram to be set
  *  @param PY The data to enter
  *  @param PE The corresponding errors
- *  @param PE2 The corresponding error second values
- */
-void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
-        const Histogram1D::RCtype& PE,const Histogram1D::RCtype& PE2)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE, PE2);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param PY The data to enter
- *  @param PE The corresponding errors
  */
 void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
         const Histogram1D::RCtype::ptr_type& PE)
@@ -313,22 +281,6 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
     throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param PY The data to enter
- *  @param PE The corresponding errors
- *  @param PE2 The corresponding error second values
- */
-void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
-        const Histogram1D::RCtype::ptr_type& PE, const Histogram1D::RCtype::ptr_type& PE2)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, PY, PE, PE2);
   return;
 }
 
@@ -368,18 +320,6 @@ std::vector<double>& ManagedWorkspace2D::dataE(const int index)
   return getDataBlock(index)->dataE(index);
 }
 
-/** Get the error (second value) data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the error (second value) data
- */
-std::vector<double>& ManagedWorkspace2D::dataE2(const int index)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataE2, histogram number out of range");
-
-  return getDataBlock(index)->dataE2(index);
-}
-
 /** Get the x data of a specified histogram
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the x data
@@ -414,18 +354,6 @@ const std::vector<double>& ManagedWorkspace2D::dataE(const int index) const
     throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
-}
-
-/** Get the error (second value) data of a specified histogram
- *  @param index The number of the histogram
- *  @return A vector of doubles containing the error (second value) data
- */
-const std::vector<double>& ManagedWorkspace2D::dataE2(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::dataE2, histogram number out of range");
-
-  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE2(index);
 }
 
 ///Returns the ErrorHelper applicable for this spectra

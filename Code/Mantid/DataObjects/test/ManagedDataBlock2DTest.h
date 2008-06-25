@@ -45,11 +45,9 @@ public:
     TS_ASSERT_EQUALS( aBlock.dataX(0).size(), 2 )
     TS_ASSERT_EQUALS( aBlock.dataY(0).size(), 2 )
     TS_ASSERT_EQUALS( aBlock.dataE(0).size(), 2 )
-    TS_ASSERT_EQUALS( aBlock.dataE2(0).size(), 2 )
     TS_ASSERT_EQUALS( aBlock.dataX(1).size(), 2 )
     TS_ASSERT_EQUALS( aBlock.dataY(1).size(), 2 )
     TS_ASSERT_EQUALS( aBlock.dataE(1).size(), 2 )
-    TS_ASSERT_EQUALS( aBlock.dataE2(1).size(), 2 )
   }
     
   void testSetX()
@@ -101,22 +99,6 @@ public:
     dataETester(data);
   }
   
-  void testDataE2()
-  {
-    std::vector<double> e;
-    TS_ASSERT_THROWS( data.dataE2(-1), std::range_error )
-    TS_ASSERT_THROWS_NOTHING( e = data.dataE2(0) )
-    std::vector<double> ee;
-    TS_ASSERT_THROWS_NOTHING( ee = data.dataE2(1) )
-    TS_ASSERT_THROWS( data.dataE2(2), std::range_error )
-    
-    // test const version
-    TS_ASSERT_THROWS( const std::vector<double> v = data.dataE2(-1), std::range_error )
-    const std::vector<double> ec = data.dataE2(0);
-    const std::vector<double> eec = data.dataE2(1);
-    TS_ASSERT_THROWS( const std::vector<double> v = data.dataE2(2), std::range_error )
-  }
-  
   void testStreamOperators()
   {
     std::fstream outfile("ManagedDataBlock2DTest.tmp", std::ios::binary | std::ios::out);
@@ -128,22 +110,8 @@ public:
     TS_ASSERT( infile )
     ManagedDataBlock2D readData(0,2,4,3);
     infile >> readData;
-    // test for E2 data is different because writing out should have padded out vector with zeroes
     // use const methods so that I can check the changes flag behaves as it should
     TS_ASSERT( ! readData.hasChanges() )
-    const ManagedDataBlock2D &temp(readData);
-    const std::vector<double> ec = temp.dataE2(0);
-    TS_ASSERT( ! readData.hasChanges() )
-    const std::vector<double>& eec = temp.dataE2(1);
-    TS_ASSERT_EQUALS( ec.size(), 3 )
-    TS_ASSERT_EQUALS( eec.size(), 3 )
-    for (unsigned int i = 0; i < ec.size(); ++i)
-    {
-      TS_ASSERT_EQUALS( ec[i], 0.0 )
-      TS_ASSERT_EQUALS( eec[i], 0.0 )
-    }
-    TS_ASSERT( ! readData.hasChanges() )
-
     dataXTester(readData);
     dataYTester(readData);
     dataETester(readData);

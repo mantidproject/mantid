@@ -44,13 +44,10 @@ namespace API
   public:
   const double& X() const;
   const double& E() const;
-  const double& E2() const;
   const IErrorHelper* ErrorHelper() const;
 
   double& X();
   double& E();
-  double& E2();
-  virtual const bool isE2() const {return (e2Pointer!=0);}
 
   const double& Y() const;
   double& Y();
@@ -65,7 +62,6 @@ namespace API
   double* x2Pointer;        ///< Pointer to the value of X
   double* yPointer;        ///< Pointer to the value of Y
   double* ePointer;        ///< Pointer to the value of E
-  double* e2Pointer;       ///< Pointer to the value of E2
   const IErrorHelper* errorHelper;  ///< Pointer to the relevant ErrorHelper
 
   LocatedDataRef* clone() const;

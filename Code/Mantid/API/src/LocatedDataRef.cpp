@@ -12,13 +12,13 @@ namespace Mantid
     \param A :: LocatedDataRef Item to copy
     */
     LocatedDataRef::LocatedDataRef(const LocatedDataRef& A) : ILocatedData(),
-      xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),e2Pointer(A.e2Pointer),
+      xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),
       errorHelper(A.errorHelper)
     {}
 
     /// Default constructor
     LocatedDataRef::LocatedDataRef(): ILocatedData(),
-      xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),e2Pointer(0),
+      xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),
       errorHelper(0)
     {}
 
@@ -34,10 +34,6 @@ namespace Mantid
         *xPointer= *A.xPointer;
         *yPointer= *A.yPointer;
         *ePointer= *A.ePointer;
-        if (A.e2Pointer)
-        {
-          *e2Pointer= *A.e2Pointer;
-        }        
         if (A.x2Pointer)
         {
           *x2Pointer= *A.x2Pointer;
@@ -59,10 +55,6 @@ namespace Mantid
         *xPointer= A.X();
         *yPointer= A.Y();
         *ePointer= A.E();
-        if(e2Pointer)
-        {
-          *e2Pointer= A.E2();
-        }        
         if(x2Pointer)
         {
           *x2Pointer= A.X2();
@@ -88,7 +80,7 @@ namespace Mantid
     int LocatedDataRef::operator==(const LocatedDataRef& A) const
     {
       return  (*xPointer!=*A.xPointer || *yPointer!=*A.yPointer || 
-        *ePointer!=*A.ePointer || *e2Pointer!=*A.e2Pointer) ? 0 : 1;
+        *ePointer!=*A.ePointer) ? 0 : 1;
     }
 
     /*! 
@@ -99,7 +91,7 @@ namespace Mantid
     int LocatedDataRef::operator!=(const LocatedDataRef& A) const
     {
       return  (*xPointer==*A.xPointer && *yPointer == *A.yPointer &&
-        *ePointer== *A.ePointer  && *e2Pointer!=*A.e2Pointer) ? 0 : 1;
+        *ePointer== *A.ePointer) ? 0 : 1;
     }
 
     /*! 
@@ -123,8 +115,6 @@ namespace Mantid
           return 0;
         if (*yPointer< *A.yPointer)
           return 1;
-        if (*e2Pointer < *A.e2Pointer)
-          return 0;
       }
       return 0;
     }
@@ -195,22 +185,6 @@ namespace Mantid
     double& LocatedDataRef::E()
     {
       return *ePointer; 
-    }
-
-    /** Const Accessor for E2 value
-    @return The E2 value
-    */
-    const double& LocatedDataRef::E2() const
-    {
-      return *e2Pointer; 
-    }
-
-    /** Accessor for E2 value
-    @return The E2 value
-    */
-    double& LocatedDataRef::E2()
-    {
-      return *e2Pointer; 
     }
 
     /** Const Accessor for X2 value, this should only be used if isHistogram() == true

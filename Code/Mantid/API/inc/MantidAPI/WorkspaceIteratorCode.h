@@ -1,6 +1,5 @@
 #include <vector>
 #include <iterator>
-//#include <boost/shared_ptr.hpp>
 
 #include "MantidAPI/LocatedDataRef.h"
 
@@ -14,8 +13,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator() :
       m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),
-        m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),
-        m_IsE2Present(false),m_IsX2Present(false)
+      m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),
+      m_IsX2Present(false)
     {}
 
     /*!
@@ -26,7 +25,7 @@ namespace Mantid
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA) :
       m_workspace(&WA),m_CPoint(),m_loopCount(1),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
+      m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -42,7 +41,7 @@ namespace Mantid
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(0),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
+      m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -61,7 +60,7 @@ namespace Mantid
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(loopOrientation),m_index(0),
       m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsE2Present(m_workspace->dataE2(0).size() > 0),m_IsX2Present(false)
+      m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -77,10 +76,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(const workspace_iterator<_Iterator, _Container>& A) :
       m_workspace(A.m_workspace),m_CPoint(A.m_CPoint),m_loopCount(A.m_loopCount),m_loopOrientation(A.m_loopOrientation),
-      m_index(A.m_index),m_wsSize(A.m_wsSize),
-      m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
-      m_IsE2Present(A.m_IsE2Present),m_IsX2Present(A.m_IsX2Present),
-      it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE),it_dataE2(A.it_dataE2)
+      m_index(A.m_index),m_wsSize(A.m_wsSize),m_blocksize(A.m_blocksize),m_blockMin(A.m_blockMin),m_blockMax(A.m_blockMax),
+      m_IsX2Present(A.m_IsX2Present),it_dataX(A.it_dataX),it_dataY(A.it_dataY),it_dataE(A.it_dataE)
     {
       validateIndex();
     }
@@ -131,10 +128,6 @@ namespace Mantid
           it_dataX = m_workspace->dataX(m_dataBlockIndex).begin();
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
-          if(m_IsE2Present)
-          {
-            it_dataE2 = m_workspace->dataE2(m_dataBlockIndex).begin();
-          }
         }
         int iteratorPos;
         if ((m_loopCount != 1) && (m_loopOrientation))
@@ -151,10 +144,6 @@ namespace Mantid
         m_CPoint.xPointer  = const_cast<double*>(&(it_dataX[iteratorPos]));
         m_CPoint.yPointer = const_cast<double*>(&(it_dataY[iteratorPos]));
         m_CPoint.ePointer  = const_cast<double*>(&(it_dataE[iteratorPos]));
-        if(m_IsE2Present)
-        {
-          m_CPoint.e2Pointer  = const_cast<double*>(&(it_dataE2[iteratorPos]));
-        }
         if(m_IsX2Present)
         {
           m_CPoint.x2Pointer  = const_cast<double*>(&(it_dataX[iteratorPos+1]));

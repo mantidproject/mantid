@@ -148,7 +148,7 @@ public:
 private:
   Workspace1D_sptr Create1DWorkspace(int size)
   {
-    std::vector<double> x1(size,0.0),y1(size-1,3.0),e1(size-1,sqrt(3.0)),e2(size-1,0);
+    std::vector<double> x1(size,0.0),y1(size-1,3.0),e1(size-1,sqrt(3.0));
     Workspace1D_sptr retVal(new Workspace1D);
     double j=1.0;
     for (int i=0; i<size; i++)    
@@ -157,12 +157,12 @@ private:
       j+=1.5;
     }
     retVal->setX(x1);
-    retVal->setData(y1,e1,e2);
+    retVal->setData(y1,e1);
     return retVal;
   }
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
   {
-    std::vector<double> x1(xlen,0.0),y1(xlen-1,3.0),e1(xlen-1,sqrt(3.0)),e2(xlen-1,0);
+    std::vector<double> x1(xlen,0.0),y1(xlen-1,3.0),e1(xlen-1,sqrt(3.0));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen,xlen,xlen-1);
@@ -177,7 +177,7 @@ private:
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
-      retVal->setData(i,y1,e1,e2);
+      retVal->setData(i,y1,e1);
     }
 
     return retVal;

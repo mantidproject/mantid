@@ -69,21 +69,16 @@ public:
   void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
   void setData(const int histnumber, const std::vector<double>&);
   void setData(const int histnumber, const std::vector<double>&, const std::vector<double>&);
-  void setData(const int histnumber, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&);
   void setData(const int histnumber, const Histogram1D::RCtype&);
   void setData(const int histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
-  void setData(const int histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
   void setData(const int histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
-  void setData(const int histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
 	
   std::vector<double>& dataX(const int index);
   std::vector<double>& dataY(const int index);
   std::vector<double>& dataE(const int index);
-  std::vector<double>& dataE2(const int index);
   const std::vector<double>& dataX(const int index) const;
   const std::vector<double>& dataY(const int index) const;
   const std::vector<double>& dataE(const int index) const;
-  const std::vector<double>& dataE2(const int index) const;
   
   const API::IErrorHelper* errorHelper(int const index) const;
   void setErrorHelper(int const index,API::IErrorHelper* errorHelper);

@@ -22,7 +22,7 @@ Workspace1D_sptr UserAlgorithmTest::Create1DWorkspace(int size)
 }
 Workspace2D_sptr UserAlgorithmTest::Create2DWorkspace(int xlen, int ylen)
 {
-  std::vector<double> x1(xlen),y1(xlen),e1(xlen),e2(xlen);
+  std::vector<double> x1(xlen),y1(xlen),e1(xlen);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
@@ -34,7 +34,7 @@ Workspace2D_sptr UserAlgorithmTest::Create2DWorkspace(int xlen, int ylen)
         e1[j] = x1[j]/10;
     }
     retVal->setX(i,x1);     
-    retVal->setData(i,y1,e1,e2);
+    retVal->setData(i,y1,e1);
   }
 
   return retVal;

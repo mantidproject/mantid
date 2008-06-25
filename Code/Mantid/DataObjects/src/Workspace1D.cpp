@@ -48,8 +48,8 @@ namespace Mantid
       t1.access().resize(XLength);//this call initializes array to zero  
       t2.access().resize(YLength);
       this->setX(t1);
-      // Y,E,E2 arrays populated
-      this->setData(t2,t2,t2);
+      // Y,E arrays populated
+      this->setData(t2,t2);
     }
 
     /** Returns the size of the workspace

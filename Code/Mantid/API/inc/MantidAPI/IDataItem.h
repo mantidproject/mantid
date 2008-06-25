@@ -13,7 +13,7 @@ namespace API
   class IErrorHelper;
 
 /**
-  Interface IDataItem of an X value, two error values E and E2 together with a pointer to an ErrorHelper and a specta number.
+  Interface IDataItem of a Y and error value, together with a pointer to an ErrorHelper.
 
   \author N. Draper
     
@@ -41,15 +41,10 @@ class DLLExport IDataItem
   public:
   virtual const double& Y() const =0;                   ///< Returns the Y value
   virtual const double& E() const =0;                   ///< Returns the E value
-  virtual const double& E2() const =0;                  ///< Returns the E2 value
   virtual const IErrorHelper* ErrorHelper() const =0;   ///< Returns a pointer to the errorhelper
   
   virtual double& Y() =0;                               ///< Returns the Y value
   virtual double& E() =0;                               ///< Returns the E value
-  virtual double& E2() =0;                              ///< Returns the E2 value
-
-  /// Returns true if the E2 values has been set
-  virtual const bool isE2() const {return true;}
 
   ///virtual destructor
   virtual ~IDataItem()

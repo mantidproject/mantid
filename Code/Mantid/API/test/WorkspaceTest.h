@@ -29,11 +29,9 @@ public:
   std::vector<double>& dataX(int const index) {return vec;}
   std::vector<double>& dataY(int const index) {return vec;}
   std::vector<double>& dataE(int const index) {return vec;}
-  std::vector<double>& dataE2(int const index) {return vec;}
   const std::vector<double>& dataX(int const index) const {return vec;}
   const std::vector<double>& dataY(int const index) const {return vec;}
   const std::vector<double>& dataE(int const index) const {return vec;}
-  const std::vector<double>& dataE2(int const index) const {return vec;}
   const IErrorHelper* errorHelper(int const index) const {return NULL;}
   void setErrorHelper(int const,IErrorHelper*) {}
   void setErrorHelper(int const,const IErrorHelper*) {}
@@ -45,8 +43,6 @@ public:
   virtual const std::vector<double>& getY(int const index) const {return vec;}
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const {return vec;}
-  ///Returns the error const
-  virtual const std::vector<double>& getE2(int const index) const {return vec;}
   
   
 private:

@@ -17,7 +17,7 @@ namespace API
  \date November 2007
  \version 1.0 
  
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
  
@@ -63,8 +63,6 @@ private:
   int m_blockMin;
   ///Internal cache of the current datablock index maximum value
   int m_blockMax;
-  ///Internal flag to indicate if the E2 value is present
-  bool m_IsE2Present;
   ///Internal flag to indicate if the X2 value is present
   bool m_IsX2Present;
   
@@ -95,8 +93,6 @@ private:
   iterator_type it_dataY;
   ///Internal cache of E iterator for current datablock
   iterator_type it_dataE;
-  ///Internal cache of E iterator for current datablock
-  iterator_type it_dataE2;
 
   ///Validates the index and updates the current m_CPoint
   void validateIndex();

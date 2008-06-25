@@ -2,14 +2,12 @@
 #set_policy(PI.GetXData, return_value_policy(manage_new_object))
 #set_policy(PI.GetYData, return_value_policy(manage_new_object))
 #set_policy(PI.GetEData, return_value_policy(manage_new_object))
-#set_policy(PI.GetE2Data, return_value_policy(manage_new_object))
 #set_policy(PI.CreateAlgorithm, return_value_policy(manage_new_object))
 
 #WS = Class("Mantid::API::Workspace", "Workspace.h")
 #set_policy(WS.dataX, return_value_policy(manage_new_object))
 #set_policy(WS.dataY, return_value_policy(manage_new_object))
 #set_policy(WS.dataE, return_value_policy(manage_new_object))
-#set_policy(WS.dataE2, return_value_policy(manage_new_object))
 
 FM = Class("Mantid::PythonAPI::FrameworkManager", "FrameworkManager.h")
 set_policy(FM.createAlgorithm, return_value_policy(manage_new_object))

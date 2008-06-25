@@ -74,8 +74,6 @@ public:
   virtual std::vector<double>& dataY(int const index) { return Histogram1D::dataY(); }
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index) { return Histogram1D::dataE(); }
-  ///Returns the error data
-  virtual std::vector<double>& dataE2(int const index) { return Histogram1D::dataE2(); }
 
 
   //inheritance redirections
@@ -85,16 +83,12 @@ public:
   virtual std::vector<double>& dataY() { return Histogram1D::dataY(); }
   ///Returns non-const vector of the error data
   virtual std::vector<double>& dataE() { return Histogram1D::dataE(); }
-  ///Returns non-const vector of the error data
-  virtual std::vector<double>& dataE2() { return Histogram1D::dataE2(); }
   /// Returns the x data const
   virtual const std::vector<double>& dataX() const { return Histogram1D::dataX(); }  
   /// Returns the y data const
   virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
-  /// Returns the error data const
-  virtual const std::vector<double>& dataE2() const { return Histogram1D::dataE2(); }
 
   /// Returns the x data const
   virtual const std::vector<double>& dataX(int const index) const {return dataX();}
@@ -102,8 +96,6 @@ public:
   virtual const std::vector<double>& dataY(int const index) const {return dataY();}
   /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const {return dataE();}
-  /// Returns the error const
-  virtual const std::vector<double>& dataE2(int const index) const {return dataE2();}
 
   ///Returns the ErrorHelper applicable for this detector
   virtual const API::IErrorHelper* errorHelper(int const index) const { return Histogram1D::errorHelper(); }
@@ -119,8 +111,6 @@ public:
   virtual const std::vector<double>& getY(int const index) const {return dataY();}
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const {return dataE();}
-  ///Returns the error const
-  virtual const std::vector<double>& getE2(int const index) const {return dataE2();}
   
 private:
   /// Private copy constructor. NO COPY ALLOWED

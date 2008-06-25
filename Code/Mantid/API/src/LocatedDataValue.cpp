@@ -13,7 +13,7 @@ namespace Mantid
     \param A :: LocatedDataValue Item to copy
     */
     LocatedDataValue::LocatedDataValue(const LocatedDataValue& A) : ILocatedData(),
-      xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),e2Value(A.e2Value),
+      xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),
       errorHelper(A.errorHelper),x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
@@ -22,7 +22,7 @@ namespace Mantid
     \param A :: LocatedDataValue Item to copy
     */
     LocatedDataValue::LocatedDataValue(const ILocatedData& A) : ILocatedData(),
-      xValue(A.X()),yValue(A.Y()),eValue(A.E()),e2Value(A.E2()),
+      xValue(A.X()),yValue(A.Y()),eValue(A.E()),
       errorHelper(A.ErrorHelper()),
       x2Value(0),_isHistogram(A.isHistogram())
     {
@@ -34,7 +34,7 @@ namespace Mantid
 
     /// Default constructor
     LocatedDataValue::LocatedDataValue(): ILocatedData(),
-      xValue(0),yValue(0),eValue(0),e2Value(0),
+      xValue(0),yValue(0),eValue(0),
       errorHelper(0),x2Value(0),_isHistogram(false)
     {}
 
@@ -51,7 +51,6 @@ namespace Mantid
         x2Value= A.x2Value;
         yValue= A.yValue;
         eValue= A.eValue;
-        e2Value= A.e2Value;
         errorHelper = A.errorHelper;
         _isHistogram = A._isHistogram;
       }
@@ -76,10 +75,6 @@ namespace Mantid
 
         yValue= A.Y();
         eValue= A.E();
-        if (A.isE2())
-        {
-          e2Value= A.E2();
-        }
         errorHelper = A.ErrorHelper();
       }
       return *this;
@@ -100,7 +95,7 @@ namespace Mantid
     int LocatedDataValue::operator==(const LocatedDataValue& A) const
     {
       return  (xValue!=A.xValue || x2Value!=A.x2Value || yValue!=A.yValue || 
-        eValue!=A.eValue || e2Value!=A.e2Value) ? 0 : 1;
+        eValue!=A.eValue) ? 0 : 1;
     }
 
     /*! 
@@ -111,7 +106,7 @@ namespace Mantid
     int LocatedDataValue::operator!=(const LocatedDataValue& A) const
     {
       return  (xValue==A.xValue && x2Value==A.x2Value && yValue == A.yValue &&
-        eValue== A.eValue  && e2Value!=A.e2Value) ? 0 : 1;
+        eValue== A.eValue) ? 0 : 1;
     }
 
     /*! 
@@ -139,8 +134,6 @@ namespace Mantid
           return 0;
         if (yValue< A.yValue)
           return 1;
-        if (e2Value < A.e2Value)
-          return 0;
       }
       return 0;
     }
@@ -241,22 +234,6 @@ namespace Mantid
     double& LocatedDataValue::E()
     {
       return eValue; 
-    }
-
-    /** Const Accessor for E2 value
-    @return The E2 value
-    */
-    const double& LocatedDataValue::E2() const
-    {
-      return e2Value; 
-    }
-
-    /** Accessor for E2 value
-    @return The E2 value
-    */
-    double& LocatedDataValue::E2()
-    {
-      return e2Value; 
     }
 
     const bool LocatedDataValue::isHistogram() const

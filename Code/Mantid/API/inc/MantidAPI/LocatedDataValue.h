@@ -14,7 +14,7 @@ namespace Mantid
     class IErrorHelper;
 
     /**
-    IDataItem of an X value, two error values E and E2 together with a pointer to an ErrorHelper and a specta number.
+    IDataItem of a Y and error value, together with a pointer to an ErrorHelper.
     
     \author N. Draper
 
@@ -43,12 +43,10 @@ namespace Mantid
 
       const double& X() const;
       const double& E() const;
-      const double& E2() const;
       const IErrorHelper* ErrorHelper() const;
 
       double& X();
       double& E();
-      double& E2();
 
       const double& Y() const;
       double& Y();
@@ -56,7 +54,6 @@ namespace Mantid
       double xValue;        ///< value of X
       double yValue;        ///< value of Y
       double eValue;        ///< value of E
-      double e2Value;       ///< value of E2
       const IErrorHelper* errorHelper; ///< Pointer to the approriate error helper
 
       const double& X2() const;
