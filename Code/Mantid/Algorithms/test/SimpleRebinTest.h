@@ -46,7 +46,8 @@ public:
     TS_ASSERT_DELTA(outX[17],32.0  ,0.000001);
     TS_ASSERT_DELTA(outY[17],3.0 ,0.000001);
     TS_ASSERT_DELTA(outE[17],sqrt(2.25) ,0.000001);
-
+	bool dist=rebindata->isDistribution();
+    TS_ASSERT(dist);
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out");    
   }
@@ -77,7 +78,8 @@ public:
     TS_ASSERT_DELTA(outX[17],32  ,0.000001);
     TS_ASSERT_DELTA(outY[17],4.0 ,0.000001);
     TS_ASSERT_DELTA(outE[17],sqrt(4.0)  ,0.000001);
-
+	bool dist=rebindata->isDistribution();
+    TS_ASSERT(!dist);
     AnalysisDataService::Instance().remove("test_in1D");
     AnalysisDataService::Instance().remove("test_out"); 
   }
@@ -110,7 +112,8 @@ public:
     TS_ASSERT_DELTA(outX[17],32.0  ,0.000001);
     TS_ASSERT_DELTA(outY[17],3.0 ,0.000001);
     TS_ASSERT_DELTA(outE[17],sqrt(2.25)  ,0.000001);
-
+	bool dist=rebindata->isDistribution();
+    TS_ASSERT(dist);
 
     AnalysisDataService::Instance().remove("test_in2D");
     AnalysisDataService::Instance().remove("test_out");
@@ -140,7 +143,8 @@ public:
     TS_ASSERT_DELTA(outX[17],32  ,0.000001);
     TS_ASSERT_DELTA(outY[17],4.0 ,0.000001);
     TS_ASSERT_DELTA(outE[17],sqrt(4.0)  ,0.000001);
-
+	bool dist=rebindata->isDistribution();
+    TS_ASSERT(!dist);
     AnalysisDataService::Instance().remove("test_in2D");
     AnalysisDataService::Instance().remove("test_out");
   }
