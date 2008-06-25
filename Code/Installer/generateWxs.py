@@ -184,7 +184,8 @@ QTIPlotEXE = addFileV('QTIPlotEXE','qtiplot.exe','qtiplot.exe','../qtiplot/qtipl
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'QTIPlot','WorkingDirectory':'binDir'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'QTIPlot','WorkingDirectory':'binir'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
-manifestFile = addFileV('qtiplot_manifest','qtiexe.man','qtiplot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
+if (QTDIR == 'C:/Qt/4_4_0'):
+    manifestFile = addFileV('qtiplot_manifest','qtiexe.man','qtiplot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 
