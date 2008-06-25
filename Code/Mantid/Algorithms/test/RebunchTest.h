@@ -164,7 +164,8 @@ private:
       j+=1;
     }
     retVal->setX(x1);
-    retVal->setData(y1,e1,e2);
+    retVal->setData(y1,e1);
+
     return retVal;
   }
    Workspace1D_sptr Create1DWorkspacePnt(int size)
@@ -180,7 +181,8 @@ private:
       j+=1.0;
     }
     retVal->setX(x1);
-    retVal->setData(y1,e1,e2);
+    retVal->setData(y1,e1);
+
     return retVal;
   }
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen)
@@ -207,7 +209,8 @@ private:
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
-      retVal->setData(i,y1,e1,e2);
+      retVal->setData(y1,e1);
+
     }
 
     return retVal;
@@ -231,7 +234,8 @@ private:
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
-      retVal->setData(i,y1,e1,e2);
+      retVal->setData(y1,e1);
+
     }
 
     return retVal;

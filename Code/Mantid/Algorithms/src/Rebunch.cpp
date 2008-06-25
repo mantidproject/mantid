@@ -239,10 +239,8 @@ namespace Mantid
 
 		{
 			int i,j;
-			int size_x=xold.size();
 			int size_y=yold.size();
 			double xsum,ysum,esum;
-			int hi_index=size_y-1;
 			int wbins=size_y/n_bunch;
 			int rem=size_y%n_bunch;
 
