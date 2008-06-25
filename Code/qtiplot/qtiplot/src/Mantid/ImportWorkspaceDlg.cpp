@@ -18,12 +18,12 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	lineHigh->setText(QString::number(numHists));
 	labelHigh->setBuddy(lineHigh);
 
-    checkFilter = new QCheckBox(tr("Replace large abs. values with a constant"));
+        checkFilter = new QCheckBox(tr("Replace large abs. values with a constant"));
 	labelFilterMaximum = new QLabel(tr("Maximum value"));
 	lineFilterMaximum = new QLineEdit;   
-    lineFilterMaximum->setText("10000.");
+        lineFilterMaximum->setText("10000.");
 	labelFilterMaximum->setBuddy(lineFilterMaximum);
-    enableFilter(QCheckBox::Off);
+        enableFilter(QCheckBox::Off);
 	
 	okButton = new QPushButton(tr("OK"));
 	okButton->setDefault(true);
@@ -43,7 +43,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	middleRowLayout->addWidget(labelHigh);
 	middleRowLayout->addWidget(lineHigh);
 
-    QVBoxLayout *filterLayout = new QVBoxLayout;
+        QVBoxLayout *filterLayout = new QVBoxLayout;
 	filterLayout->addWidget(checkFilter);
 	filterLayout->addWidget(labelFilterMaximum);
 	filterLayout->addWidget(lineFilterMaximum);

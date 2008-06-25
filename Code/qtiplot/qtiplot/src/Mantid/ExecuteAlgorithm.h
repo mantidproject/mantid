@@ -17,6 +17,14 @@ class QStringList;
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Property.h"
 
+/**
+* This class is used for entering values for properties to use in algorithms.
+* It may be inefficient as a number of maps have been added as more functionality
+* was added. It may be possible to tidy this up somehow, especially the
+* browseClicked method!
+**/
+
+
 class ExecuteAlgorithm : public QDialog
 {
 	Q_OBJECT
@@ -31,17 +39,18 @@ protected:
 	
 private slots:
 	void okClicked();
+	void browseClicked();
 
 private:
+	std::vector<Mantid::Kernel::Property*> m_props;
+
 	QWidget* m_parent;
 	QPushButton *okButton;
 	QPushButton *exitButton;
 
 	std::map<QLineEdit*, std::string> edits;
 	std::map<QComboBox*, std::string> combos;
-
-
-	
+	std::map<QPushButton*, QLineEdit*> buttonsToEdits;
 
 };
 
