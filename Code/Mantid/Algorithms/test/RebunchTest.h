@@ -209,7 +209,7 @@ private:
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
-      retVal->setData(y1,e1);
+      retVal->setData(i,y1,e1);
 
     }
 
@@ -234,7 +234,7 @@ private:
     for (int i=0; i< ylen; i++)
     {
       retVal->setX(i,x1);     
-      retVal->setData(y1,e1);
+      retVal->setData(i,y1,e1);
 
     }
 
