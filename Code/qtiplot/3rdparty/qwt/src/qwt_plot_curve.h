@@ -134,13 +134,13 @@ public:
     virtual QwtDoubleRect boundingRect() const;
 
     //! boundingRect().left()
-    inline double minXValue() const { return boundingRect().left(); }
+    double minXValue() const ;//{ return boundingRect().left(); }
     //! boundingRect().right()
-    inline double maxXValue() const { return boundingRect().right(); }
+    double maxXValue() const ;//{ return boundingRect().right(); }
     //! boundingRect().top()
-    inline double minYValue() const { return boundingRect().top(); }
+    double minYValue() const ;//{ return boundingRect().top(); }
     //! boundingRect().bottom()
-    inline double maxYValue() const { return boundingRect().bottom(); }
+    double maxYValue() const ;//{ return boundingRect().bottom(); }
 
     void setCurveAttribute(CurveAttribute, bool on = true);
     bool testCurveAttribute(CurveAttribute) const;

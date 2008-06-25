@@ -35,10 +35,6 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
     {
         MantidLog::connect(static_cast<ApplicationWindow*>(parent));
     }
-    else
-    {
-        QMessageBox::warning(this,"Workspace Manager","Main window is not an ApplicationWindow");
-    }
 
 }
 
@@ -134,6 +130,8 @@ void WorkspaceMgr::selectedWorkspaceChanged()
 		
 		textWorkspaceInfo->setPlainText("Number of histograms: " + QString::number(numHists) + "\nNumber of bins: " + QString::number(numBins));
 	}
+    else
+        textWorkspaceInfo->setPlainText("");
 }
 
 void WorkspaceMgr::importWorkspace()

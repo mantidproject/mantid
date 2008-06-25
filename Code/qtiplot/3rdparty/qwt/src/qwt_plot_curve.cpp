@@ -631,6 +631,21 @@ void QwtPlotCurve::drawCurve(QPainter *painter, int style,
     }
 }
 
+bool canIntersect(const QRect& rect, const QPoint& p1, const QPoint& p2)
+{
+    int left = rect.left();
+    int top = rect.top();
+    int right = rect.right();
+    int bottom = rect.bottom();
+
+    if (p1.x() < left && p2.x() < left) return false;
+    if (p1.x() > right && p2.x() > right) return false;
+    if (p1.y() < top && p2.y() < top) return false;
+    if (p1.y() > bottom && p2.y() > bottom) return false;
+
+    return true;
+}
+
 /*!
   \brief Draw lines
 
@@ -719,24 +734,62 @@ void QwtPlotCurve::drawLines(QPainter *painter,
     else
     {
         polyline.resize(size);
-
-        if ( d_data->paintAttributes & PaintFiltered )
+        bool paintFiltered = d_data->paintAttributes & PaintFiltered;
+        if ( size > 4 )
         {
-            QPoint pp( xMap.transform(x(from)), yMap.transform(y(from)) );
-            polyline.setPoint(0, pp);
+            QRect vp = painter->viewport();
+            QPoint pp( -100, -100 );
+ 
+            QPoint p0( xMap.transform(x(from)), yMap.transform(y(from)) );
+            QPoint p1( xMap.transform(x(from+1)), yMap.transform(y(from+1)) );
+            bool ok0 = vp.contains(p0);
+            bool ok1 = vp.contains(p1);
 
-            int count = 1;
-            for (int i = from + 1; i <= to; i++)
+            int count = 0;
+            if (ok0 || ok1 || canIntersect(vp,p0,p1))
             {
-                const QPoint pi(xMap.transform(x(i)), yMap.transform(y(i)));
-                if ( pi != pp )
-                {
-                    polyline.setPoint(count, pi);
-                    count++;
-
-                    pp = pi;
-                }
+                pp = p0;
+                polyline.setPoint(0, p0);
+                count = 1;
             }
+
+            for (int i = from + 2; i <= to; i++)
+            {
+                const QPoint p2(xMap.transform(x(i)), yMap.transform(y(i)));
+                bool ok2 = vp.contains(p2);
+
+                bool includePoint = !( paintFiltered && p1 == pp );
+                if (includePoint)
+                    if (!ok0 && !ok1 && !ok2) 
+                    {
+                        // check if lines 0-1 and 1-2 can intersect viewport
+                        if (canIntersect(vp,p0,p1) || canIntersect(vp,p1,p2))
+                            includePoint = true;
+                        else
+                            includePoint = false;
+                    }
+                    else
+                        includePoint = true;
+
+
+                if (includePoint)
+                {
+                    polyline.setPoint(count, p1);
+                    count++;
+                    pp = p1;
+                }
+
+                p0 = p1;
+                p1 = p2;
+                ok0 = ok1;
+                ok1 = ok2;
+            }
+            
+            if (ok0 || ok1 || canIntersect(vp,p0,p1))
+            {
+                polyline.setPoint(count++, p1);
+            }
+
             if ( count != size )
                 polyline.resize(count);
         }
@@ -1286,3 +1339,12 @@ void QwtPlotCurve::updateLegend(QwtLegend *legend) const
     legendItem->setUpdatesEnabled(doUpdate);
     legendItem->update();
 }
+
+    //! boundingRect().left()
+double QwtPlotCurve::minXValue() const { return boundingRect().left(); }
+    //! boundingRect().right()
+double QwtPlotCurve::maxXValue() const { return boundingRect().right(); }
+    //! boundingRect().top()
+double QwtPlotCurve::minYValue() const { return boundingRect().top(); }
+    //! boundingRect().bottom()
+double QwtPlotCurve::maxYValue() const { return boundingRect().bottom(); }

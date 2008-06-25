@@ -159,7 +159,6 @@
 
 #include <zlib.h>
 #include <iostream>
-#include <fstream>
 
 //Mantid
 #include "Mantid/WorkspaceMgr.h"
@@ -878,7 +877,7 @@ void ApplicationWindow::initToolBars()
 	QList<QToolBar *> toolBars = toolBarsList();
 	foreach (QToolBar *t, toolBars)
 		connect(t, SIGNAL(actionTriggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
-
+    // Mantid
   	actionCopyRowToTable = new QAction(tr("Copy to Table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
@@ -1287,14 +1286,14 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 				actionUndo->setEnabled(true);
 				actionRedo->setEnabled(true);
 			}
-		} else if (w->inherits("Matrix")){
+		} else if (w->inherits("Matrix")){//  Mantid changes
 			actionTableRecalculate->setEnabled(true);
 			menuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
 			menuBar()->insertItem(tr("&Matrix"), matrixMenu);
 			matrixMenuAboutToShow();
-            if (w->isA("Matrix")){
-			    menuBar()->insertItem(tr("&Analysis"), analysisMenu);
-			    analysisMenuAboutToShow();
+            if (w->isA("Matrix")){// Mantid
+                menuBar()->insertItem(tr("&Analysis"), analysisMenu);
+                analysisMenuAboutToShow();
             }
 			d_undo_view->setEmptyLabel(w->objectName() + ": " + tr("Empty Stack"));
 			QUndoStack *stack = ((Matrix *)w)->undoStack();
@@ -1417,8 +1416,7 @@ void ApplicationWindow::customToolBars(QMdiSubWindow* w)
             columnTools->setEnabled (true);
             customColumnActions();
         }
-//    } else if (w->isA("Matrix") && d_matrix_tool_bar){
-    } else if (w->inherits("Matrix") && d_matrix_tool_bar){
+    } else if (w->inherits("Matrix") && d_matrix_tool_bar){// Mantid
          if(!plotMatrixBar->isVisible())
             plotMatrixBar->show();
         plotMatrixBar->setEnabled (true);
@@ -2347,7 +2345,7 @@ MultiLayer* ApplicationWindow::multilayerPlot(Table* w, const QStringList& colLi
 	polishGraph(ag, style);
 	ag->newLegend();
 
-    ag->setAutoScale();
+    ag->setAutoScale();// Mantid
 
     QApplication::restoreOverrideCursor();
 	return g;
@@ -2715,6 +2713,7 @@ Matrix* ApplicationWindow::newMatrix(const QString& caption, int r, int c)
 	return w;
 }
 
+// Mantid
 Matrix* ApplicationWindow::newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start,int end, bool filter, double maxv)
 {
 	Matrix* w = dynamic_cast<Matrix*>(new WorkspaceMatrix(ws, scriptEnv, "", this, 0, 0, start, end, filter, maxv));
@@ -2740,7 +2739,7 @@ void ApplicationWindow::viewMatrixImage()
 
 void ApplicationWindow::viewMatrixTable()
 {
-	Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+	Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2752,7 +2751,7 @@ void ApplicationWindow::viewMatrixTable()
 
 void ApplicationWindow::viewMatrixXY()
 {
-    Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+    Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2764,7 +2763,7 @@ void ApplicationWindow::viewMatrixXY()
 
 void ApplicationWindow::viewMatrixColumnRow()
 {
-    Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+    Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2776,7 +2775,7 @@ void ApplicationWindow::viewMatrixColumnRow()
 
 void ApplicationWindow::setMatrixGrayScale()
 {
-	Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+	Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2789,7 +2788,7 @@ void ApplicationWindow::setMatrixGrayScale()
 
 void ApplicationWindow::setMatrixRainbowScale()
 {
-	Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+	Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2802,7 +2801,7 @@ void ApplicationWindow::setMatrixRainbowScale()
 
 void ApplicationWindow::showColorMapDialog()
 {
-	Matrix* m = dynamic_cast<Matrix*>(activeWindow(MatrixWindow));
+	Matrix* m = static_cast<Matrix*>(activeWindow(MatrixWindow));
 	if (!m)
 		return;
 
@@ -2970,7 +2969,7 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
 
 	m->setWindowTitle(name);
 	m->setName(name);
-	m->setIcon( QPixmap(m->matrixIcon()) );
+	m->setIcon( QPixmap(m->matrixIcon()) );// Mantid
 	m->askOnCloseEvent(confirmCloseMatrix);
 	m->setNumericPrecision(d_decimal_digits);
 
@@ -3094,7 +3093,7 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
 		break;
 
 		case MatrixWindow:
-			if (d_active_window->inherits("Matrix"))
+			if (d_active_window->inherits("Matrix"))// Mantid
 				return d_active_window;
 			else
 				return NULL;
@@ -7308,7 +7307,7 @@ void ApplicationWindow::copySelection()
 
 	if (m->inherits("Table"))
 		((Table*)m)->copySelection();
-	else if (m->inherits("Matrix"))
+	else if (m->inherits("Matrix"))// Mantid
 		((Matrix*)m)->copySelection();
 	else if (m->isA("MultiLayer")){
 		MultiLayer* plot = (MultiLayer*)m;
@@ -8452,7 +8451,7 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
 
 				cm.insertItem(tr("D&epending Graphs"),&plots);
 			}
-		} else if (w->inherits("Matrix")){
+		} else if (w->inherits("Matrix")){// Mantid
 			QStringList graphs = depending3DPlots((Matrix*)w);
 			if (int(graphs.count())>0){
 				cm.insertSeparator();
@@ -8723,7 +8722,7 @@ void ApplicationWindow::showWindowContextMenu()
             cm.addAction(actionTransposeMatrix);
             cm.addAction(actionInvertMatrix);
 		}
-	} else if (w->isA("WorkspaceMatrix")) {
+	} else if (w->isA("WorkspaceMatrix")) {// Mantid
 		Matrix *t = (Matrix *)w;
 		if (t->viewType() == Matrix::TableView){
             cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
@@ -12375,7 +12374,7 @@ Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 			return 0;
 	}
 
-    if (m->isA("WorkspaceMatrix"))
+    if (m->isA("WorkspaceMatrix"))// Mantid
     {
         return static_cast<WorkspaceMatrix*>(m)->plotGraph3D(style);
     }
@@ -12429,8 +12428,6 @@ MultiLayer* ApplicationWindow::plotColorMap(Matrix *m)
 			return 0;
 	}
 
-    //QMessageBox::information(this,"ColorMap",QString::number(m->matrixModel()->rowCount()));
-
 	return plotSpectrogram(m, Graph::ColorMap);
 }
 
@@ -12463,7 +12460,7 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 	plot->setAxisTitle(QwtPlot::xTop, QString::null);
 	plot->setTitle(QString::null);
 
-    if (m->isA("WorkspaceMatrix"))
+    if (m->isA("WorkspaceMatrix"))// Mantid
     {
         static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
     }
@@ -12483,15 +12480,16 @@ MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 	MultiLayer* g = multilayerPlot(generateUniqueName(tr("Graph")));
-    
     Graph* plot = g->activeGraph();
 	setPreferences(plot);
+
 	plot->plotSpectrogram(m, type);
 
-    if (m->isA("WorkspaceMatrix"))
+    if (m->isA("WorkspaceMatrix"))// Mantid
     {
         static_cast<WorkspaceMatrix*>(m)->setGraph2D(plot);
     }
+    plot->setAutoScale();// Mantid
 
 	QApplication::restoreOverrideCursor();
 	return g;
@@ -14388,7 +14386,7 @@ void ApplicationWindow::goToRow()
 	if (!w)
 		return;
 
-	if (w->inherits("Table") || w->inherits("Matrix")){
+	if (w->inherits("Table") || w->inherits("Matrix")){// Mantid
 		bool ok;
 		int row = QInputDialog::getInteger(this, tr("QtiPlot - Enter row number"), tr("Row"),
 				1, 0, 1000000, 1, &ok, windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint );
@@ -14397,7 +14395,7 @@ void ApplicationWindow::goToRow()
 
 		if (w->inherits("Table"))
 			((Table *)w)->goToRow(row);
-		else if (w->inherits("Matrix"))
+		else if (w->inherits("Matrix"))// Mantid
 			((Matrix *)w)->goToRow(row);
 	}
 }
@@ -14408,7 +14406,7 @@ void ApplicationWindow::goToColumn()
 	if (!w)
 		return;
 
-	if (w->inherits("Table") || w->inherits("Matrix")){
+	if (w->inherits("Table") || w->inherits("Matrix")){// Mantid
 		bool ok;
 		int col = QInputDialog::getInteger(this, tr("QtiPlot - Enter column number"), tr("Column"),
 				1, 0, 1000000, 1, &ok, windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint );
@@ -14417,7 +14415,7 @@ void ApplicationWindow::goToColumn()
 
 		if (w->inherits("Table"))
 			((Table *)w)->goToColumn(col);
-		else if (w->inherits("Matrix"))
+		else if (w->inherits("Matrix"))// Mantid
 			((Matrix *)w)->goToColumn(col);
 	}
 }
@@ -14578,7 +14576,7 @@ MultiLayer* ApplicationWindow::generate2DGraph(Graph::CurveType type)
         Q3TableSelection sel = table->getSelection();
         return multilayerPlot(table, table->drawableColumnSelection(), type, sel.topRow(), sel.bottomRow());
     } else if (w->isA("Matrix")){
-        Matrix *m = dynamic_cast<Matrix *>(w);
+        Matrix *m = static_cast<Matrix *>(w);
         return plotHistogram(m);
     }
 	return 0;
@@ -15239,7 +15237,7 @@ void ApplicationWindow::mantidMenuAboutToShow()
 	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 }
 
-
+// Mantid
 void ApplicationWindow::copyRowToTable()
 {
     Matrix* m = (Matrix*)activeWindow(MatrixWindow);
@@ -15248,6 +15246,7 @@ void ApplicationWindow::copyRowToTable()
     wsm->createTableFromSelectedRows();
 }
 
+// Mantid
 void ApplicationWindow::copyRowToGraph()
 {
     Matrix* m = (Matrix*)activeWindow(MatrixWindow);
@@ -15257,6 +15256,7 @@ void ApplicationWindow::copyRowToGraph()
   
 }
 
+// Mantid
 void ApplicationWindow::copyRowToGraphErr()
 {
     Matrix* m = (Matrix*)activeWindow(MatrixWindow);

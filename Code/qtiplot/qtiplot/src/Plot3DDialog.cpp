@@ -360,7 +360,7 @@ void Plot3DDialog::initGeneralPage()
     QGridLayout *gl2 = new QGridLayout();
     gl2->addWidget(new QLabel(tr( "Zoom (%)" )), 0, 0);
 	boxZoom = new QSpinBox();
-    boxZoom->setRange(1, 100000);
+    boxZoom->setRange(1, 10000);
     boxZoom->setSingleStep(10);
 
     gl2->addWidget(boxZoom, 0, 1);
@@ -498,27 +498,15 @@ void Plot3DDialog::setPlot(Graph3D *g)
 	boxTitle->setText(g->plotTitle());
 	titleFont = g->titleFont();
 
-    double xSc = g->xScale();
-    double ySc = g->yScale();
-    double zSc = g->zScale();
-    double zoo = g->zoom();
+    xScale = d_plot->xScale();
+    yScale = d_plot->yScale();
+    zScale = d_plot->zScale();
+    zoom   = d_plot->zoom();
 
-    double minSc = qMin(xSc,ySc);
-    if (zSc < minSc) minSc = zSc;
-
-    if (minSc < 0.01)
-    {
-        double tmp = 0.01/minSc;
-        xSc *= tmp;
-        ySc *= tmp;
-        zSc *= tmp;
-        zoo /= tmp;
-    }
-
-	boxZoom->setValue(int(zoo*100));
-	boxXScale->setValue(int(xSc*100));
-	boxYScale->setValue(int(ySc*100));
-	boxZScale->setValue(int(zSc*100));
+	boxZoom->setValue(100);
+	boxXScale->setValue(100);
+	boxYScale->setValue(100);
+	boxZScale->setValue(100);
 
 	boxResolution->setValue(g->resolution());
 	boxLegend->setChecked(g->isLegendOn());
@@ -718,8 +706,8 @@ void Plot3DDialog::changeZoom(int)
 		return;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	d_plot->setZoom(boxZoom->value()*0.01);
-    d_plot->setScale(boxXScale->value()*0.01, boxYScale->value()*0.01, boxZScale->value()*0.01);
+	d_plot->setZoom(zoom*boxZoom->value()*0.01);
+    d_plot->setScale(xScale*boxXScale->value()*0.01, yScale*boxYScale->value()*0.01, zScale*boxZScale->value()*0.01);
     d_plot->update();
     QApplication::restoreOverrideCursor();
 }
@@ -776,8 +764,8 @@ bool Plot3DDialog::updatePlot()
 		d_plot->setMeshLineWidth(boxMeshLineWidth->value());
 		d_plot->setLabelsDistance(boxDistance->value());
 		d_plot->setNumbersFont(numbersFont);
-		d_plot->setZoom(boxZoom->value()*0.01);
-		d_plot->setScale(boxXScale->value()*0.01, boxYScale->value()*0.01, boxZScale->value()*0.01);
+		d_plot->setZoom(zoom*boxZoom->value()*0.01);
+		d_plot->setScale(xScale*boxXScale->value()*0.01, yScale*boxYScale->value()*0.01, zScale*boxZScale->value()*0.01);
 	} else if (generalDialog->currentPage()==(QWidget*)scale){
 		int axis = axesList->currentRow();
 		QString from=boxFrom->text().lower();
