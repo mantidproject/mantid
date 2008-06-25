@@ -28,8 +28,8 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, std::vector<Mantid::Kernel::Property*>& properties)
 {
 	m_props = properties;
-	
-	QGridLayout *grid = new QGridLayout(this);
+
+	QGridLayout *grid = new QGridLayout();
 	
 	for (int i = 0; i < m_props.size(); ++i)
 	{
@@ -94,14 +94,17 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, std::vector<Mantid:
 	exitButton = new QPushButton(tr("Cancel"));
 	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
 	
+	QVBoxLayout *mainLay = new QVBoxLayout(this);
+	mainLay->addLayout(grid);
+	
 	QHBoxLayout *buttonRowLayout = new QHBoxLayout;
 	buttonRowLayout->addStretch();
 	buttonRowLayout->addWidget(exitButton);
 	buttonRowLayout->addWidget(okButton);
 	
-	grid->addLayout(buttonRowLayout,  m_props.size() , 1, 0);
+	mainLay->addLayout(buttonRowLayout);
 	
-	setLayout(grid);
+	setLayout(mainLay);
 	
 	setWindowTitle(tr("Enter properties"));
 	setFixedHeight(sizeHint().height());
@@ -132,7 +135,7 @@ void ExecuteAlgorithm::browseClicked()
 	
 	if (exts.size() > 0)
 	{
-		allowed = "(";
+		allowed = "Files (";
 		
 		std::vector<std::string>::iterator extItr = exts.begin();
 		for (; extItr != exts.end(); ++extItr)
@@ -149,7 +152,7 @@ void ExecuteAlgorithm::browseClicked()
 	}
 	else
 	{
-		allowed = "*.*";
+		allowed = "All Files (*.*)";
 	}
 
 	QString s( QFileDialog::getOpenFileName(this, tr("Select File"), curDir, allowed));
