@@ -3,8 +3,8 @@ import os
 import xml
 import xml.dom.minidom
 
-QTDIR = 'C:/qt/bin'
-#QTDIR = 'C:/Qt/4_4_0'
+#QTDIR = 'C:/qt/bin'
+QTDIR = 'C:/Qt/4_4_0'
 
 # Adds directory longName to parent.
 # parent is a python variable (not string) representing an xml element
@@ -179,7 +179,7 @@ addDlls('../Third_Party/lib/win32','3dDll',MantidDlls)
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
-addDlls(QTDIR,'qt',QTIPlot)
+addDlls(QTDIR+'/bin','qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','qtiplot.exe','qtiplot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'QTIPlot','WorkingDirectory':'binDir'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'QTIPlot','WorkingDirectory':'binir'})
@@ -221,6 +221,8 @@ Python25Dir = addDirectory('Python25Dir','Python25','Python25',TargetDir)
 LibDir = addDirectory('LibDir','Lib','Lib',Python25Dir)
 SitePackagesDir = addDirectory('SitePackagesDir','sitepack','site-packages',LibDir)
 PyQtDir = addDirectory('PyQtDir','PyQt4','PyQt4',SitePackagesDir)
+Sip = addComponent('Sip','{A051F48C-CA96-4cd5-B936-D446CBF67588}',SitePackagesDir)
+addAllFiles('toget/sip','sip',Sip)
 PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
 
@@ -247,6 +249,7 @@ QTIPlotExec = addFeature('QTIPlotExec','QtiPlot','QtiPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
 PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',MantidExec)
+addCRef('Sip',PyQtF)
 addCRef('PyQt',PyQtF)
 
 SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1',Complete)
