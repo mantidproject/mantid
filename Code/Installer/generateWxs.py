@@ -3,8 +3,8 @@ import os
 import xml
 import xml.dom.minidom
 
-#QTDIR = 'C:/qt/bin'
-QTDIR = 'C:/Qt/4_4_0'
+QTDIR = 'C:/qt/bin'
+#QTDIR = 'C:/Qt/4_4_0'
 
 # Adds directory longName to parent.
 # parent is a python variable (not string) representing an xml element
