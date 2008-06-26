@@ -65,10 +65,10 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      void rebunch_hist(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& , 
-          std::vector<double>& , std::vector<double>&, std::vector<double>&, const int , const bool);
-      void rebunch_point(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& , 
-          std::vector<double>& , std::vector<double>&, std::vector<double>&, const int);
+      void rebunch_hist(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch, const bool distribution);
+      void rebunch_point(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch);
 	  /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
