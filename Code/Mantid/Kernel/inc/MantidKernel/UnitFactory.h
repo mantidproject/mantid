@@ -1,11 +1,11 @@
 #ifndef MANTID_KERNEL_UNITFACTORYIMPL_H_
 #define MANTID_KERNEL_UNITFACTORYIMPL_H_
 
-/* Used to register unit classes into the factory. creates a global object in an 
+/* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
- * is used in the call to its constructor to effect a call to the factory's 
+ * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
- * 
+ *
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
  */
@@ -38,11 +38,14 @@ class Logger;
 
 /** Creates instances of concrete units.
     The factory is a singleton that hands out shared pointers to the base Unit class.
+    It overrides the base class DynamicFactory::create method so that only a single
+    instance of a given unit is ever created, and a pointer to that same instance
+    is passed out each time the unit is requested.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 13/03/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -59,16 +62,19 @@ class Logger;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class EXPORT_OPT_MANTID_KERNEL UnitFactoryImpl : public DynamicFactory<Unit>
 {
+public:
+  virtual boost::shared_ptr<Unit> create(const std::string& className) const;
+
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
 
   /// Private Constructor for singleton class
-  UnitFactoryImpl(); 
+  UnitFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
   UnitFactoryImpl(const UnitFactoryImpl&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
@@ -76,9 +82,11 @@ private:
   ///Private Destructor
   virtual ~UnitFactoryImpl();
 
-  ///static reference to the logger class
-  Kernel::Logger& g_log;
+  /// Stores pointers to already created unit instances, with their name as the key
+  mutable std::map< std::string, boost::shared_ptr<Unit> > m_createdUnits;
 
+  /// Reference to the logger class
+  Kernel::Logger& m_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) .
@@ -89,7 +97,7 @@ private:
 /// The specialisation of the SingletonHolder class that holds the UnitFactory
 typedef SingletonHolder<UnitFactoryImpl> UnitFactory;
 
-}
-}
+} // namespace Kernel
+} // namespace Mantid
 
 #endif /*MANTID_KERNEL_UNITFACTORYIMPL_H_*/
