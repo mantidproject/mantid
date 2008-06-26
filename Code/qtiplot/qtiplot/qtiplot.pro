@@ -95,6 +95,7 @@ win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib
+win32:LIBS		+= ../../Third_Party/lib/win32/libboost_filesystem-vc80-mt-1_34_1.lib
 
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
