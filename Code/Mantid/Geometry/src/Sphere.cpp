@@ -257,6 +257,24 @@ Sphere::write(std::ostream& OX) const
   StrFunc::writeMCNPX(cx.str(),OX);
   return;
 }
+/**
+* Calculates the bounding box for the sphere and returns the bounding box values.
+* @param xmax :: input and output for the bounding box X axis max value
+* @param ymax :: input and output for the bounding box Y axis max value
+* @param zmax :: input and output for the bounding box Z axis max value
+* @param xmin :: input and output for the bounding box X axis min value
+* @param ymin :: input and output for the bounding box Y axis min value
+* @param zmin :: input and output for the bounding box Z axis min value
+*/
+void Sphere::getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
+{
+	xmax=Centre[0]+Radius;
+	ymax=Centre[1]+Radius;
+	zmax=Centre[2]+Radius;
+	xmin=Centre[0]-Radius;
+	ymin=Centre[1]-Radius;
+	zmin=Centre[2]-Radius;
+}
 
 }  // NAMESPACE Geometry
 

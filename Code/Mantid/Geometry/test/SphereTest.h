@@ -275,6 +275,32 @@ public:
     TS_ASSERT_EQUALS(A.getRadius(),0);
   }
 
+  void testGetBoundingBox(){
+    Sphere A;
+	A.setSurface("so 1");
+    TS_ASSERT_EQUALS(extractString(A),"-1 so 1\n");
+
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=ymax=zmax=20;
+	xmin=ymin=zmin=-20;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_DELTA(xmax,1.0,0.00001);
+	TS_ASSERT_DELTA(ymax,1.0,0.00001);
+	TS_ASSERT_DELTA(zmax,1.0,0.00001);
+	TS_ASSERT_DELTA(xmin,-1.0,0.00001);
+	TS_ASSERT_DELTA(ymin,-1.0,0.00001);
+	TS_ASSERT_DELTA(zmin,-1.0,0.00001);
+	xmax=ymax=zmax=0.5;
+	xmin=ymin=zmin=-20;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_DELTA(xmax,1.0,0.00001);
+	TS_ASSERT_DELTA(ymax,1.0,0.00001);
+	TS_ASSERT_DELTA(zmax,1.0,0.00001);
+	TS_ASSERT_DELTA(xmin,-1.0,0.00001);
+	TS_ASSERT_DELTA(ymin,-1.0,0.00001);
+	TS_ASSERT_DELTA(zmin,-1.0,0.00001);
+  }
+
 private:
 
 std::string extractString(const Surface& pv)

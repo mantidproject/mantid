@@ -62,20 +62,28 @@ namespace Mantid
       // Visit acceptor
       virtual void acceptVisitor(BaseVisit& A) const
       {  A.Accept(*this); }
-
+	  ///Set the sphere defination by input string in MCNP format	
       int setSurface(const std::string&);
+	  ///Checks the given input point to be inside, outside or on the surface of sphere
       int side(const Geometry::V3D&) const;
+	  ///Checks whether the give input point is on the surface
       int onSurface(const Geometry::V3D&) const;
+	  ///Gets the distance from the sphere to the input point
       double distance(const Geometry::V3D&) const;
-
+	  ///Setter for centre of sphere
       void setCentre(const Geometry::V3D&);              
-      Geometry::V3D getCentre() const { return Centre; } ///< Get Centre
-      double getRadius() const { return Radius; }          ///< Get Radius
+	  ///< Get Centre
+      Geometry::V3D getCentre() const { return Centre; } 
+	  ///< Get Radius
+      double getRadius() const { return Radius; }          
+	  ///Generates the quadratic equation.
       void setBaseEqn();
-
+	  ///Writes the sphere equatation in MCNP format
       void write(std::ostream&) const; 
 
-
+	  ///This will get the bounding box for the sphere
+	  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
+								
     };
 
   }   // NAMESPACE Geometry
