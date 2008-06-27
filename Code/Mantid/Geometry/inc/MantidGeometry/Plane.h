@@ -84,9 +84,9 @@ namespace Mantid
       void setBaseEqn() ;                      ///< set up to be eqn based
 	
 	  int  LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output);
+	  ///This will get the bounding box for the plane, give the approximate bounding
+	  ///start with + and - infinity (Double Max) then refine when more appropriate is available
 	  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
-								///This will get the bounding box for the plane
-								///start with + and - infinity (Double Max)
 
 
     };
