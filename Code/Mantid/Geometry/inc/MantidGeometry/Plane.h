@@ -82,7 +82,11 @@ namespace Mantid
       void write(std::ostream&) const;        ///< Write in MCNPX form
 
       void setBaseEqn() ;                      ///< set up to be eqn based
-
+	
+	  int  LineIntersectionWithPlane(V3D startpt,V3D endpt,V3D& output);
+	  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
+								///This will get the bounding box for the plane
+								///start with + and - infinity (Double Max)
 
 
     };

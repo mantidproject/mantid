@@ -98,6 +98,11 @@ public:
 		Dist.push_back(1.0);
 		Dist.push_back(1.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);	
+
+		LineIntersectVisit C(V3D(1.1,0.0,0.0),V3D(-1.0,0.0,0.0));
+		C.Accept(B);
+		TS_ASSERT_EQUALS(C.getNPoints(),2);
+		TS_ASSERT_EQUALS(C.getPoints(),pntOut);
 	}
 
 	void testAcceptGeneral(){
