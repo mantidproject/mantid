@@ -7,7 +7,8 @@
 #include <string>
 #include "MantidGeometry/Component.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h" 
+#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid::Geometry;
 
@@ -24,13 +25,13 @@ public:
 		//as there is no parent GetPos should equal getRelativePos
 		TS_ASSERT_EQUALS(q.getRelativePos(),q.getPos());
 	}
-	
+
 	void testNameValueConstructor()
 	{
 		Component q("Name");
 		TS_ASSERT_EQUALS(q.getName(),"Name");
 		TS_ASSERT(!q.getParent());
-		TS_ASSERT_EQUALS(q.getPos(),V3D(0,0,0));		
+		TS_ASSERT_EQUALS(q.getPos(),V3D(0,0,0));
 		TS_ASSERT_EQUALS(q.getRelativeRot(),Quat(1,0,0,0));
 		//as there is no parent GetPos should equal getRelativePos
 		TS_ASSERT_EQUALS(q.getRelativePos(),q.getPos());
@@ -46,7 +47,7 @@ public:
 		TS_ASSERT(q.getParent());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent.getName());
 
-		TS_ASSERT_EQUALS(q.getPos(),V3D(0,0,0));		
+		TS_ASSERT_EQUALS(q.getPos(),V3D(0,0,0));
 		TS_ASSERT_EQUALS(q.getRelativeRot(),Quat(1,0,0,0));
 		//as the parent is at 0,0,0 GetPos should equal getRelativePos
 		TS_ASSERT_EQUALS(q.getRelativePos(),q.getPos());
@@ -62,11 +63,11 @@ public:
 		TS_ASSERT(q.getParent());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent.getName());
 
-		TS_ASSERT_EQUALS(q.getRelativePos(),V3D(5,6,7));	
-		TS_ASSERT_EQUALS(q.getPos(),V3D(6,7,8));		
+		TS_ASSERT_EQUALS(q.getRelativePos(),V3D(5,6,7));
+		TS_ASSERT_EQUALS(q.getPos(),V3D(6,7,8));
 		TS_ASSERT_EQUALS(q.getRelativeRot(),Quat(1,0,0,0));
-	}	
-	
+	}
+
 	void testNameLocationOrientationParentValueConstructor()
 	{
 		Component parent("Parent",V3D(1,1,1));
@@ -77,8 +78,8 @@ public:
 		TS_ASSERT(q.getParent());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent.getName());
 
-		TS_ASSERT_EQUALS(q.getRelativePos(),V3D(5,6,7));	
-		TS_ASSERT_EQUALS(q.getPos(),V3D(8,6,7));		
+		TS_ASSERT_EQUALS(q.getRelativePos(),V3D(5,6,7));
+		TS_ASSERT_EQUALS(q.getPos(),V3D(8,6,7));
 		TS_ASSERT_EQUALS(q.getRelativeRot(),Quat(1,1,1,1));
 	}
 
@@ -90,8 +91,8 @@ public:
 		Component copy = q;
 		TS_ASSERT_EQUALS(q.getName(),copy.getName());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),copy.getParent()->getName());
-		TS_ASSERT_EQUALS(q.getRelativePos(),copy.getRelativePos());	
-		TS_ASSERT_EQUALS(q.getPos(),copy.getPos());		
+		TS_ASSERT_EQUALS(q.getRelativePos(),copy.getRelativePos());
+		TS_ASSERT_EQUALS(q.getPos(),copy.getPos());
 		TS_ASSERT_EQUALS(q.getRelativeRot(),copy.getRelativeRot());
 	}
 
@@ -103,47 +104,47 @@ public:
 		Component *copy = q.clone();
 		TS_ASSERT_EQUALS(q.getName(),copy->getName());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),copy->getParent()->getName());
-		TS_ASSERT_EQUALS(q.getRelativePos(),copy->getRelativePos());	
-		TS_ASSERT_EQUALS(q.getPos(),copy->getPos());		
+		TS_ASSERT_EQUALS(q.getRelativePos(),copy->getRelativePos());
+		TS_ASSERT_EQUALS(q.getPos(),copy->getPos());
 		TS_ASSERT_EQUALS(q.getRelativeRot(),copy->getRelativeRot());
 	}
 
 	void testGetParent()
 	{
 		Component parent("Parent",V3D(1,1,1),Quat(1,1,1,1));
-		
+
 		Component q("Child",V3D(5,6,7),&parent);
-		
+
 		TS_ASSERT(q.getParent());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent.getName());
-		TS_ASSERT_EQUALS(q.getParent()->getPos(),V3D(1,1,1));				
-		TS_ASSERT_EQUALS(q.getParent()->getRelativeRot(),Quat(1,1,1,1));				
+		TS_ASSERT_EQUALS(q.getParent()->getPos(),V3D(1,1,1));
+		TS_ASSERT_EQUALS(q.getParent()->getRelativeRot(),Quat(1,1,1,1));
 	}
 
 	void testSetParent()
 	{
 		Component parent("Parent",V3D(1,1,1));
 		Component parent2("Parent2",V3D(10,10,10));
-		
+
 		Component q("Child",V3D(5,6,7),Quat(1,0,0,0),&parent);
-		
+
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent.getName());
-		TS_ASSERT_EQUALS(q.getPos(),V3D(6,7,8));		
+		TS_ASSERT_EQUALS(q.getPos(),V3D(6,7,8));
 		q.setParent(&parent2);
 		TS_ASSERT_DIFFERS(q.getParent()->getName(),parent.getName());
 		TS_ASSERT_EQUALS(q.getParent()->getName(),parent2.getName());
 		//check that the absolute pos has moved
-		TS_ASSERT_EQUALS(q.getPos(),V3D(15,16,17));		
+		TS_ASSERT_EQUALS(q.getPos(),V3D(15,16,17));
 	}
 
 	void testSetName()
 	{
 		Component q("fred");
-		TS_ASSERT_EQUALS(q.getName(),"fred");		
+		TS_ASSERT_EQUALS(q.getName(),"fred");
 		q.setName("bertie");
-		TS_ASSERT_EQUALS(q.getName(),"bertie");	
+		TS_ASSERT_EQUALS(q.getName(),"bertie");
 	}
-	
+
 	void testSetPos()
 	{
 		V3D pos1(0,0,0);
@@ -151,13 +152,13 @@ public:
 		V3D pos3(-999999,999999,999999);
 		V3D pos4(0.31,-0.000000000000000001,999999999999.8);
 		Component q("testSetPos",pos1);
-		TS_ASSERT_EQUALS(q.getPos(),pos1);		
+		TS_ASSERT_EQUALS(q.getPos(),pos1);
 		q.setPos(pos2);
-		TS_ASSERT_EQUALS(q.getPos(),pos2);		
+		TS_ASSERT_EQUALS(q.getPos(),pos2);
 		q.setPos(pos3);
-		TS_ASSERT_EQUALS(q.getPos(),pos3);		
+		TS_ASSERT_EQUALS(q.getPos(),pos3);
 		q.setPos(pos4.X(),pos4.Y(),pos4.Z());
-		TS_ASSERT_EQUALS(q.getPos(),pos4);	
+		TS_ASSERT_EQUALS(q.getPos(),pos4);
 	}
 
 	void testSetRot()
@@ -166,11 +167,11 @@ public:
 		Quat rot2(-1,0.01,-0.01,9999);
 		Quat rot3(-999999,999999,999999,-9999999);
 		Component q("testSetRot",V3D(1,1,1),rot1);
-		TS_ASSERT_EQUALS(q.getRelativeRot(),rot1);		
+		TS_ASSERT_EQUALS(q.getRelativeRot(),rot1);
 		q.setRot(rot2);
-		TS_ASSERT_EQUALS(q.getRelativeRot(),rot2);		
+		TS_ASSERT_EQUALS(q.getRelativeRot(),rot2);
 		q.setRot(rot3);
-		TS_ASSERT_EQUALS(q.getRelativeRot(),rot3);		
+		TS_ASSERT_EQUALS(q.getRelativeRot(),rot3);
 	}
 
 	void testCopyRot()
@@ -179,16 +180,16 @@ public:
 		Quat rot2(-1,0.01,-0.01,9999);
 		Component p("testCopyRot",V3D(1,1,1),rot1);
 		Component q("testCopyRot2",V3D(2,2,2),rot2);
-		TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);	
-		TS_ASSERT_EQUALS(q.getRelativeRot(),rot2);	
-		q.copyRot(p);		
-		TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);	
-		TS_ASSERT_EQUALS(q.getRelativeRot(),rot1);	
+		TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);
+		TS_ASSERT_EQUALS(q.getRelativeRot(),rot2);
+		q.copyRot(p);
+		TS_ASSERT_EQUALS(p.getRelativeRot(),rot1);
+		TS_ASSERT_EQUALS(q.getRelativeRot(),rot1);
 		//check it just copied the rotation and not everything else
-		TS_ASSERT_EQUALS(q.getPos(),V3D(2,2,2));		
-		TS_ASSERT_EQUALS(q.getName(),"testCopyRot2");	
+		TS_ASSERT_EQUALS(q.getPos(),V3D(2,2,2));
+		TS_ASSERT_EQUALS(q.getName(),"testCopyRot2");
 	}
-	
+
 	void testTranslate()
 	{
 		V3D pos1(1,1,1);
@@ -196,13 +197,13 @@ public:
 		V3D pos2(6,7,8);
 		V3D translate2(-16,-17,-18);
 		V3D pos3(-10,-10,-10);
-		
+
 		Component q("testTranslate",pos1);
-		TS_ASSERT_EQUALS(q.getPos(),pos1);	
+		TS_ASSERT_EQUALS(q.getPos(),pos1);
 		q.translate(translate1);
-		TS_ASSERT_EQUALS(q.getPos(),pos2);	
+		TS_ASSERT_EQUALS(q.getPos(),pos2);
 		q.translate(translate2.X(),translate2.Y(),translate2.Z());
-		TS_ASSERT_EQUALS(q.getPos(),pos3);	
+		TS_ASSERT_EQUALS(q.getPos(),pos3);
 	}
 
 	void testRelativeTranslate()
@@ -213,17 +214,17 @@ public:
 		V3D pos2(6,7,8);
 		V3D translate2(-16,-17,-18);
 		V3D pos3(-10,-10,-10);
-		
+
 		Component parent("testTranslate",parentPos);
 		Component child("testTranslate",pos1,&parent);
 		TS_ASSERT_EQUALS(child.getPos(),pos1+parentPos);
-		TS_ASSERT_EQUALS(child.getRelativePos(),pos1);		
+		TS_ASSERT_EQUALS(child.getRelativePos(),pos1);
 		child.translate(translate1);
 		TS_ASSERT_EQUALS(child.getPos(),pos2+parentPos);
-		TS_ASSERT_EQUALS(child.getRelativePos(),pos2);	
+		TS_ASSERT_EQUALS(child.getRelativePos(),pos2);
 		child.translate(translate2.X(),translate2.Y(),translate2.Z());
-		TS_ASSERT_EQUALS(child.getPos(),pos3+parentPos);	
-		TS_ASSERT_EQUALS(child.getRelativePos(),pos3);	
+		TS_ASSERT_EQUALS(child.getPos(),pos3+parentPos);
+		TS_ASSERT_EQUALS(child.getRelativePos(),pos3);
 	}
 
 	void testRotate()
@@ -231,9 +232,11 @@ public:
 		Quat rot1(1,1,1,1);
 		Quat rot2(-1,2,1,3);
 		Component comp("testSetRot",V3D(1,1,1),rot1);
-		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);		
+		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);
 		comp.rotate(rot2);
-		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);	
+		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
+
+		TS_ASSERT_THROWS(comp.rotate(45,V3D(1,1,1)), Mantid::Kernel::Exception::NotImplementedError )
 	}
 
 	void testRelativeRotate()
@@ -242,9 +245,9 @@ public:
 		Quat rot2(-1,2,1,3);
 		Quat parentRot(1,2,3,4);
 		Component comp("testSetRot",V3D(1,1,1),rot1);
-		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);		
+		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);
 		comp.rotate(rot2);
-		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);		
+		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
 		//Note: there is no GetRot function to get the absolute rotation
 		//Get the location of the component
 		V3D beforeParentPos = comp.getPos();
@@ -253,10 +256,10 @@ public:
 		comp.setParent(&parent);
 		//check relative values have not moved
 		TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
-		TS_ASSERT_EQUALS(comp.getRelativePos(),beforeParentPos);	
+		TS_ASSERT_EQUALS(comp.getRelativePos(),beforeParentPos);
 		//but the absolute pos should have changed due to the parents roatation (the parent is centered on the origin)
-		TS_ASSERT_DIFFERS(comp.getPos(),beforeParentPos);	
-		TS_ASSERT_EQUALS(comp.getPos(),V3D(1,-0.2,1.4));	
+		TS_ASSERT_DIFFERS(comp.getPos(),beforeParentPos);
+		TS_ASSERT_EQUALS(comp.getPos(),V3D(1,-0.2,1.4));
 
 	}
 
@@ -276,8 +279,8 @@ public:
 		TS_ASSERT_EQUALS(compOrigin.getDistance(comp1),10);
 		TS_ASSERT_EQUALS(compOrigin.getDistance(comp2),10);
 		TS_ASSERT_EQUALS(compOrigin.getDistance(comp3),5);
-		TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001) 
-		TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001) 
+		TS_ASSERT_DELTA(compOrigin.getDistance(comp4), 17.3205, 0.001)
+		TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001)
 	}
 
 	void testType()

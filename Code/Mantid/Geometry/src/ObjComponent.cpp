@@ -1,25 +1,42 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidGeometry/ObjComponent.h"
 
 namespace Mantid
 {
 namespace Geometry
 {
-/** No arg construtor
-*/
-ObjComponent::ObjComponent():Component()
-{
-}
+
 /** Constructor
- * @param n The name of the component
- * @param reference the Parent geometry object of this component
+ *  @param name   The name of the component
+ *  @param parent The Parent geometry object of this component
  */
-ObjComponent::ObjComponent(const std::string& n, Component* reference):Component(n,reference)
+ObjComponent::ObjComponent(const std::string& name, Component* parent) :
+  Component(name,parent), obj(0)
 {
 }
-///Destructor
+
+/** Constructor
+ *  @param name   The name of the component
+ *  @param shape  A pointer to the object describing the shape of this component
+ *  @param parent The Parent geometry object of this component
+ */
+ObjComponent::ObjComponent(const std::string& name, Object* shape, Component* parent) :
+  Component(name,parent), obj(shape)
+{
+}
+
+/// Copy constructor
+ObjComponent::ObjComponent(const ObjComponent& rhs) :
+  Component(rhs), obj(rhs.obj)
+{
+}
+
+/// Destructor
 ObjComponent::~ObjComponent()
 {
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Geometry
+} // namespace Mantid

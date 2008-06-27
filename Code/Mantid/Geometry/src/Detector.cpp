@@ -8,17 +8,18 @@ namespace Geometry
 // Get a reference to the logger
 Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
 
-///Constructor
-Detector::Detector() : ObjComponent(), IDetector(), m_id(0), m_isDead(false)
+/** Constructor
+ *  @param name The name of the component
+ *  @param parent The parent component
+ */
+Detector::Detector(const std::string& name, Component* parent) :
+  ObjComponent(name,parent), IDetector(), m_id(0), m_isDead(false)
 {
 }
 
-/** Constructor
- *  @param n The name of the component
- *  @param reference The parent component
- */
-Detector::Detector(const std::string& n, Component* reference) : 
-  ObjComponent(n,reference), IDetector(), m_id(0), m_isDead(false)
+/// Copy constructor
+Detector::Detector(const Detector& rhs) :
+  ObjComponent(rhs), m_id(rhs.m_id), m_isDead(rhs.m_isDead)
 {
 }
 
@@ -46,12 +47,12 @@ int Detector::getID() const
 // IDetector methods. Just pull in Component implementation
 V3D Detector::getPos() const
 {
-  return Component::getPos();
+  return ObjComponent::getPos();
 }
 
 double Detector::getDistance(const Component& comp) const
 {
-  return Component::getDistance(comp);
+  return ObjComponent::getDistance(comp);
 }
 
 bool Detector::isDead() const

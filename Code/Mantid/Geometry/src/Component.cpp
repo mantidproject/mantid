@@ -1,5 +1,5 @@
 #include "MantidGeometry/Component.h"
-#include "MantidGeometry/Quat.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -21,18 +21,18 @@ Component::Component(const std::string& n, Component* reference):name(n),parent(
 {
 }
 
-/*! Constructor by value 
+/*! Constructor by value
  * 	@param n :: Component name
- * 	@param v :: position 
+ * 	@param v :: position
  * 	absolute or relative if the reference if defined
  * 	@param reference :: parent Component
- */ 
+ */
 Component::Component(const std::string& n, const V3D& v, Component* reference):name(n),pos(v),parent(reference)
 {
 	if (reference) parent=reference;
 }
 
-/*! Constructor 
+/*! Constructor
  *  @param n :: Component name
  *  @param v :: position
  *  @param q :: orientation quaternion
@@ -46,7 +46,7 @@ Component::~Component(){}
 
 /*! Copy constructor
  * 	@param comp :: Component to copy
- * 	
+ *
  *  All properties of comp are copied including the parent Component
  */
 Component::Component(const Component& comp)
@@ -74,8 +74,8 @@ void Component::setParent(Component* comp)
 	parent=comp;
 }
 
-/*! Get a pointer to the parent. 
- *  @return this.parent 
+/*! Get a pointer to the parent.
+ *  @return this.parent
  */
 const Component* Component::getParent() const
 {
@@ -168,15 +168,15 @@ void Component::rotate(const Quat& r)
  * @param angle the number of degrees to rotate
  * @param axis The Vector to rotate around
  */
-void Component::rotate(double angle, const V3D& axis) 
+void Component::rotate(double angle, const V3D& axis)
 {
-  //throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been impletmented");
+  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been impletmented");
 }
 
 /** Gets the position relative to the parent
  * @returns A vector of the relative position
  */
-V3D Component::getRelativePos() const 
+V3D Component::getRelativePos() const
 {
 	return pos;
 }
@@ -186,7 +186,7 @@ V3D Component::getRelativePos() const
  */
 V3D Component::getPos() const
 {
-	
+
 	if (!parent)
 	return pos;
 	else
@@ -225,8 +225,8 @@ void Component::printSelf(std::ostream& os) const
 	if (parent)
 		os << "Parent: " << parent->name << std::endl;
 	else
-	os << "Parent: None" << std::endl; 
-	
+	os << "Parent: None" << std::endl;
+
 	os << "Position : " << getPos() << std::endl;
 	os << "Orientation :" << rot << std::endl;
 }
@@ -243,5 +243,5 @@ std::ostream& operator<<(std::ostream& os, const Component& comp)
 }
 
 
-} //Namespace Geometry 
+} //Namespace Geometry
 } //Namespace Mantid

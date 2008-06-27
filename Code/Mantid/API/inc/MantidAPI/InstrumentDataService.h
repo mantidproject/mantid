@@ -12,10 +12,10 @@ namespace API
 {
 /** InstrumentDataService Class. Derived from DataService.
     Class to store shared_pointer to Instrument Objects.
-    
+
     @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 30/05/2008
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -42,9 +42,9 @@ private:
 	friend struct Mantid::Kernel::CreateUsingNew<InstrumentDataServiceImpl>;
 	// Constructors
 	InstrumentDataServiceImpl();
-	// Not implemented
+  /// Private, unimplemented copy constructor
 	InstrumentDataServiceImpl(const InstrumentDataServiceImpl&);
-	//Not implemented
+  /// Private, unimplemented copy assignment operator
 	InstrumentDataServiceImpl& operator=(const InstrumentDataServiceImpl&);
 	~InstrumentDataServiceImpl();
 };

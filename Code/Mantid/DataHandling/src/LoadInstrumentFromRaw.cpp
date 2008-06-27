@@ -39,7 +39,7 @@ void LoadInstrumentFromRaw::init()
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
- * 
+ *
  *  @throw FileError Thrown if unable to parse XML file
  */
 void LoadInstrumentFromRaw::exec()
@@ -55,7 +55,7 @@ void LoadInstrumentFromRaw::exec()
   if (iraw.readFromFile(m_filename.c_str()) != 0)
   {
     g_log.error("Unable to open file " + m_filename);
-    throw Exception::FileError("Unable to open File:" , m_filename);	  
+    throw Exception::FileError("Unable to open File:" , m_filename);
   }
 
   // Get reference to Instrument and set its name
@@ -65,24 +65,20 @@ void LoadInstrumentFromRaw::exec()
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample position
 
-  Geometry::ObjComponent *samplepos = new Geometry::ObjComponent;
-  samplepos->setParent(instrument.get());
+  Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Unknown",instrument.get());
   instrument->add(samplepos);
-  samplepos->setName("Unknown");
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0,0.0,0.0);
 
-  Geometry::ObjComponent *source = new Geometry::ObjComponent;
-  source->setParent(instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Unknown",instrument.get());
   instrument->add(source);
-  source->setName("Unknown");
   instrument->markAsSource(source);
   double l1;
   if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
   {
     l1 = 10.0;
   }
-  source->setPos(0.0,-1.0*l1,0.0); 
+  source->setPos(0.0,-1.0*l1,0.0);
 
   // add detectors
 

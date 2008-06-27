@@ -59,7 +59,7 @@ namespace Mantid
     Object&
       Object::operator=(const Object& A)
       /*!
-      Assignment operator 
+      Assignment operator
       \param A :: Object to copy
       \return *this
       */
@@ -87,8 +87,8 @@ namespace Mantid
 
     int
       Object::setObject(const int ON,const std::string& Ln)
-      /*! 
-      Object line ==  cell 
+      /*!
+      Object line ==  cell
       \param ON :: Object name
       \param Ln :: Input string must be :  {rules}
       \retval 1 on success
@@ -96,7 +96,7 @@ namespace Mantid
       */
     {
       // Split line
-      std::string part;  
+      std::string part;
       const boost::regex letters("[a-zA-Z]");  // Does the string now contain junk...
       if (StrFunc::StrLook(Ln,letters))
         return 0;
@@ -113,7 +113,7 @@ namespace Mantid
     }
 
     void
-      Object::convertComplement(const std::map<int,Object>& MList) 
+      Object::convertComplement(const std::map<int,Object>& MList)
       /*!
       Returns just the cell string object
       \param MList :: List of indexable Hulls
@@ -150,7 +150,7 @@ namespace Mantid
           std::map<int,Object>::const_iterator vc=MList.find(cN);
           if (vc==MList.end())
             throw Kernel::Exception::NotFoundError("Not found in the list of indexable hulls (Object::cellStr)",cN);
-          // Not the recusion :: This will cause no end of problems 
+          // Not the recusion :: This will cause no end of problems
           // if there is an infinite loop.
           cx<<vc->second.cellStr(MList);
           cx<<") ";
@@ -220,7 +220,7 @@ namespace Mantid
       /*!
       Determine if the object has a complementary object
 
-      \retval 1 :: true 
+      \retval 1 :: true
       \retval 0 :: false
       */
     {
@@ -230,11 +230,11 @@ namespace Mantid
       return 0;
     }
 
-    int 
+    int
       Object::populate(const std::map<int,Surface*>& Smap)
-      /*! 
+      /*!
       Goes through the cell objects and adds the pointers
-      to the SurfPoint keys (using their keyN) 
+      to the SurfPoint keys (using their keyN)
       \param Smap :: Map of surface Keys and Surface Pointers
       \retval 1000+ keyNumber :: Error with keyNumber
       \retval 0 :: successfully populated all the whole Object.
@@ -262,11 +262,11 @@ namespace Mantid
               KV->setKey(mf->second);
               Rcount++;
             }
-            else 
+            else
             {
               PLog.error("Error finding key");
               throw Kernel::Exception::NotFoundError("Object::populate",KV->getKeyN());
-            }	
+            }
           }
           // Not a surface : Determine leaves etc and add to stack:
           else
@@ -291,9 +291,9 @@ namespace Mantid
     int
       Object::procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const
       /*!
-      This takes a string Ln, finds the first two 
-      Rxxx function, determines their join type 
-      make the rule,  adds to vector then removes two old rules from 
+      This takes a string Ln, finds the first two
+      Rxxx function, determines their join type
+      make the rule,  adds to vector then removes two old rules from
       the vector, updates string
       \param Ln :: String to porcess
       \param Rlist :: Map of rules (added to)
@@ -309,11 +309,11 @@ namespace Mantid
       for(Rstart=0;Rstart<Ln.size() &&
         Ln[Rstart]!='R';Rstart++);
 
-        int type=0;      //intersection 
+        int type=0;      //intersection
 
       //plus 1 to skip 'R'
       if (Rstart==Ln.size() || !StrFunc::convert(Ln.c_str()+Rstart+1,Ra) ||
-        Rlist.find(Ra)==Rlist.end())  
+        Rlist.find(Ra)==Rlist.end())
         return 0;
 
       for(Rend=Rstart+1;Rend<Ln.size() &&
@@ -323,12 +323,12 @@ namespace Mantid
           type=1;        //make union
       }
       if (Rend==Ln.size() || !StrFunc::convert(Ln.c_str()+Rend+1,Rb) ||
-        Rlist.find(Rb)==Rlist.end())  
+        Rlist.find(Rb)==Rlist.end())
         return 0;
 
       // Get end of number (digital)
-      for(Rend++;Rend<Ln.size() && 
-        Ln[Rend]>='0' && Ln[Rend]<='9';Rend++);     
+      for(Rend++;Rend<Ln.size() &&
+        Ln[Rend]>='0' && Ln[Rend]<='9';Rend++);
 
         // Get rules
         Rule* RRA=Rlist[Ra];
@@ -336,13 +336,13 @@ namespace Mantid
       Rule* Join=(type) ? static_cast<Rule*>(new Union(RRA,RRB)) :
         static_cast<Rule*>(new Intersection(RRA,RRB));
       Rlist[Ra]=Join;
-      Rlist.erase(Rlist.find(Rb));     
+      Rlist.erase(Rlist.find(Rb));
 
       // Remove space round pair
       int fb;
       for(fb=Rstart-1;fb>=0 && Ln[fb]==' ';fb--);
-      Rstart=(fb<0) ? 0 : fb; 
-      for(fb=Rend;fb<static_cast<int>(Ln.size()) && Ln[fb]==' ';fb++); 
+      Rstart=(fb<0) ? 0 : fb;
+      for(fb=Rend;fb<static_cast<int>(Ln.size()) && Ln[fb]==' ';fb++);
       Rend=fb;
 
       std::stringstream cx;
@@ -378,16 +378,16 @@ namespace Mantid
       - (a) Uses the Surface list to check those surface
       that the point is on.
       - (b) Creates a list of normals to the touching surfaces
-      - (c) Checks if normals and "normal pair bisection vector" 
+      - (c) Checks if normals and "normal pair bisection vector"
       are contary.
-      If any are found to be so the the point is 
-      on a surface. 
+      If any are found to be so the the point is
+      on a surface.
       - (d) Return 1 / 0 depending on test (c)
 
       \todo This needs to be completed to deal with apex points
-            In the case of a apex (e.g. top of a pyramid) you need 
+            In the case of a apex (e.g. top of a pyramid) you need
             to interate over all clusters of points on the Snorm
-            ie. sum of 2, sum of 3 sum of 4. etc. to be certain 
+            ie. sum of 2, sum of 3 sum of 4. etc. to be certain
             to get a correct normal test.
 
       \param Pt :: Point to check
@@ -428,7 +428,7 @@ namespace Mantid
       Determine if a point is valid by checking both
       directions of the normal away from the line
       A good point will have one valid and one invalid.
-      \param C :: Point on a basic surface to check 
+      \param C :: Point on a basic surface to check
       \param Nm :: Direction +/- to be checked
       \retval +1 ::  Point outlayer (ie not in object)
       \retval -1 :: Point included (e.g at convex intersection)
@@ -445,8 +445,8 @@ namespace Mantid
 
     int
       Object::isValid(const Geometry::V3D& Pt) const
-      /*! 
-      Determines is Pt is within the object 
+      /*!
+      Determines is Pt is within the object
       or on the surface
       \param Pt :: Point to be tested
       \returns 1 if true and 0 if false
@@ -459,7 +459,7 @@ namespace Mantid
 
     int
       Object::isValid(const std::map<int,int>& SMap) const
-      /*! 
+      /*!
       Determines is group of surface maps are valid
       \param SMap :: map of SurfaceNumber : status
       \returns 1 if true and 0 if false
@@ -472,13 +472,13 @@ namespace Mantid
 
     int
       Object::createSurfaceList(const int outFlag)
-      /*! 
+      /*!
       Uses the topRule* to create a surface list
       by iterating throught the tree
       \param outFlag Sends output to standard error if true
       \return 1 (should be number of surfaces)
       */
-    { 
+    {
       SurList.clear();
       std::stack<const Rule*> TreeLine;
       TreeLine.push(TopRule);
@@ -537,14 +537,14 @@ namespace Mantid
 
     int
       Object::removeSurface(const int SurfN)
-      /*! 
-      Removes a surface and then re-builds the 
-      cell. This could be done by just removing 
+      /*!
+      Removes a surface and then re-builds the
+      cell. This could be done by just removing
       the surface from the object.
       \param SurfN :: Number for the surface
       \return number of surfaces removes
       */
-    { 
+    {
       if (!TopRule)
         return -1;
       const int cnt=Rule::removeItem(TopRule,SurfN);
@@ -555,15 +555,15 @@ namespace Mantid
 
     int
       Object::substituteSurf(const int SurfN,const int NsurfN,Surface* SPtr)
-      /*! 
-      Removes a surface and then re-builds the 
+      /*!
+      Removes a surface and then re-builds the
       cell.
       \param SurfN :: Number for the surface
       \param NsurfN :: New surface number
       \param SPtr :: Surface pointer for surface NsurfN
       \return number of surfaces substituted
       */
-    { 
+    {
       if (!TopRule)
         return 0;
       const int out=TopRule->substituteSurf(SurfN,NsurfN,SPtr);
@@ -572,10 +572,10 @@ namespace Mantid
       return out;
     }
 
-    void 
+    void
       Object::print() const
       /*!
-      Prints almost everything 
+      Prints almost everything
       */
     {
       std::deque<Rule*> Rst;
@@ -632,10 +632,10 @@ namespace Mantid
     }
 
 
-    void 
+    void
       Object::printTree() const
       /*!
-      Displays the rule tree 
+      Displays the rule tree
       */
     {
       std::cout<<"Name == "<<ObjName<<std::endl;
@@ -663,7 +663,7 @@ namespace Mantid
       Object::str() const
       /*!
       Write the object to a string.
-      This includes the Name , material and density but 
+      This includes the Name , material and density but
       not post-fix operators
       \return Object Line
       */
@@ -679,7 +679,7 @@ namespace Mantid
       return cx.str();
     }
 
-    void 
+    void
       Object::write(std::ostream& OX) const
       /*!
       Write the object to a standard stream
@@ -697,10 +697,10 @@ namespace Mantid
     }
 
     int
-      Object::procString(const std::string& Line) 
+      Object::procString(const std::string& Line)
       /*!
       Processes the cell string. This is an internal function
-      to process a string with 
+      to process a string with
       - String type has #( and ( )
       \param Line :: String value
       \returns 1 on success
@@ -708,8 +708,8 @@ namespace Mantid
     {
       delete TopRule;
       TopRule=0;
-      std::map<int,Rule*> RuleList;    //List for the rules 
-      int Ridx=0;                     //Current index (not necessary size of RuleList 
+      std::map<int,Rule*> RuleList;    //List for the rules
+      int Ridx=0;                     //Current index (not necessary size of RuleList
       // SURFACE REPLACEMENT
       // Now replace all free planes/Surfaces with appropiate Rxxx
       SurfPoint* TmpR(0);       //Tempory Rule storage position
@@ -717,7 +717,7 @@ namespace Mantid
 
       std::string Ln=Line;
       // Remove all surfaces :
-      std::ostringstream cx; 
+      std::ostringstream cx;
       for(int i=0;i<static_cast<int>(Ln.length());i++)
       {
         if (isdigit(Ln[i]) || Ln[i]=='-')
@@ -752,14 +752,14 @@ namespace Mantid
       while (brack_exists)
       {
         std::string::size_type rbrack=Ln.find(')');
-        std::string::size_type lbrack=Ln.rfind('(',rbrack);  
-        if (rbrack!=std::string::npos && lbrack!=std::string::npos)    
+        std::string::size_type lbrack=Ln.rfind('(',rbrack);
+        if (rbrack!=std::string::npos && lbrack!=std::string::npos)
         {
           std::string Lx=Ln.substr(lbrack+1,rbrack-lbrack-1);
-          // Check to see if a #( unit 
+          // Check to see if a #( unit
           int compUnit(0);
           while(procPair(Lx,RuleList,compUnit));
-          Ln.replace(lbrack,1+rbrack-lbrack,Lx);     
+          Ln.replace(lbrack,1+rbrack-lbrack,Lx);
           // Search back and find if # ( exists.
           int hCnt;
           for(hCnt=lbrack-1;hCnt>=0 && isspace(Ln[hCnt]);hCnt--);
@@ -775,7 +775,7 @@ namespace Mantid
       }
       // Do outside loop...
       int nullInt;
-      while(procPair(Ln,RuleList,nullInt));      
+      while(procPair(Ln,RuleList,nullInt));
 
       if (RuleList.size()!=1)
       {
@@ -785,20 +785,20 @@ namespace Mantid
         return 0;
       }
       TopRule=(RuleList.begin())->second;
-      return 1; 
+      return 1;
     }
 
     int
-    Object::interceptSurface(Geometry::Track& UT) const 
+    Object::interceptSurface(Geometry::Track& UT) const
       /*!
       Given a track, fill the track with valid section
-      \param UT :: Initial track 
-      \return Number of segments added 
+      \param UT :: Initial track
+      \return Number of segments added
       */
     {
       int cnt(0);         // Number of intesections
-      // Loop over all the surfaces. 
-      
+      // Loop over all the surfaces.
+
       LineIntersectVisit LI(UT.getInit(),UT.getUVec());
       std::vector<const Surface*>::const_iterator vc;
       for(vc=SurList.begin();vc!=SurList.end();vc++)
@@ -831,7 +831,7 @@ namespace Mantid
       \param uVec :: Unit vector of the track
       \retval 0 :: Not valid / double valid
       \retval 1 :: Entry point
-      \retval -1 :: Exit Point 
+      \retval -1 :: Exit Point
       */
     {
       const Geometry::V3D testA(Pt-uVec*OTolerance*25.0);
@@ -843,7 +843,7 @@ namespace Mantid
     }
 
     double
-      Object::solidAngle(const Geometry::V3D& observer) const 
+      Object::solidAngle(const Geometry::V3D& observer) const
       /*!
       Given an observer position find the approximate solid angle of the object
       \param observer :: position of the observer (V3D)
@@ -879,7 +879,7 @@ namespace Mantid
 	           sum+=dtheta*dphi*cos(theta);
 	        }
 	     }
-       
+
       //Line dir(cos(theta)*cos(phi),cos(theta)*sin(phi),sin(theta));
       return sum;
       // return -1;

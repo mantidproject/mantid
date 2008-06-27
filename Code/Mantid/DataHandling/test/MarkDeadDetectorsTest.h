@@ -23,44 +23,42 @@ class MarkDeadDetectorsTest : public CxxTest::TestSuite
 public:
   MarkDeadDetectorsTest()
   {
-    //FrameworkManager::Instance().initialize();
-    
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(6,10.0);
     std::vector<double>  vec(5,1.0);
     int forSpecDetMap[5];
-    for (int j = 0; j < 5; ++j) 
+    for (int j = 0; j < 5; ++j)
     {
       space2D->setX(j,x);
       space2D->setData(j,vec,vec);
       space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
-    Detector *d = new Detector;
+    Detector *d = new Detector("det",0);
     d->setID(0);
     space->getInstrument()->markAsDetector(d);
-    Detector *d1 = new Detector;
+    Detector *d1 = new Detector("det",0);
     d1->setID(1);
     space->getInstrument()->markAsDetector(d1);
-    Detector *d2 = new Detector;
+    Detector *d2 = new Detector("det",0);
     d2->setID(2);
     space->getInstrument()->markAsDetector(d2);
-    Detector *d3 = new Detector;
+    Detector *d3 = new Detector("det",0);
     d3->setID(3);
     space->getInstrument()->markAsDetector(d3);
-    Detector *d4 = new Detector;
+    Detector *d4 = new Detector("det",0);
     d4->setID(4);
     space->getInstrument()->markAsDetector(d4);
-      
+
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
     space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 5, space->getInstrument().get() );
-    
+
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
   }
-  
+
   void testName()
   {
     TS_ASSERT_EQUALS( marker.name(), "MarkDeadDetectors" )
@@ -72,49 +70,49 @@ public:
   }
 
   void testInit()
-  {    
+  {
     TS_ASSERT_THROWS_NOTHING( marker.initialize() )
     TS_ASSERT( marker.isInitialized() );
 
     MarkDeadDetectors mdd;
     TS_ASSERT_THROWS_NOTHING( mdd.initialize() )
     TS_ASSERT( mdd.isInitialized() );
-    
+
     std::vector<Property*> props = mdd.getProperties();
     TS_ASSERT_EQUALS( props.size(), 3 )
-    
+
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
     TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace2D>* >(props[0]) )
-    
+
     TS_ASSERT_EQUALS( props[1]->name(), "WorkspaceIndexList" )
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
-    
+
     TS_ASSERT_EQUALS( props[2]->name(), "SpectraList" )
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
   }
-  
+
   void testExec()
   {
     if ( !marker.isInitialized() ) marker.initialize();
 
     marker.setPropertyValue("Workspace","testSpace");
-    
+
     TS_ASSERT_THROWS_NOTHING( marker.execute());
     TS_ASSERT( !marker.isExecuted() );
-    
+
     marker.setPropertyValue("WorkspaceIndexList","0,3");
     TS_ASSERT_THROWS_NOTHING( marker.execute());
-    
+
     MarkDeadDetectors marker2;
     marker2.initialize();
     marker2.setPropertyValue("Workspace","testSpace");
     marker2.setPropertyValue("SpectraList","2");
     TS_ASSERT_THROWS_NOTHING( marker2.execute());
     TS_ASSERT( marker2.isExecuted() );
-    
+
     Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve("testSpace");
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
@@ -141,7 +139,7 @@ public:
     TS_ASSERT( i->getDetector(3)->isDead() )
     TS_ASSERT( ! i->getDetector(4)->isDead() )
   }
-  
+
 private:
   MarkDeadDetectors marker;
 };

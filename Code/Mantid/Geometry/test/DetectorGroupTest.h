@@ -13,20 +13,17 @@ class DetectorGroupTest : public CxxTest::TestSuite
 public:
   DetectorGroupTest()
   {
-//    group = new DetectorGroup(detvec);
-    d1 = new Detector;
+    d1 = new Detector("d1",0);
     d1->setID(99);
     d1->setPos(2.0,2.0,2.0);
     detvec.push_back(d1);
     group = new DetectorGroup(detvec);
-//    group->addDetector(d1);
-    d2 = new Detector;
+    d2 = new Detector("d2",0);
     d2->setID(11);
     d2->setPos(3.0,4.0,5.0);
     group->addDetector(d2);
     dg = new DetectorGroup( *(new std::vector<IDetector*>(1,group)) );
-//    dg->addDetector(group);
-    d3 = new Detector;
+    d3 = new Detector("d3",0);
     d3->setID(10);
     d3->setPos(5.0,5.0,5.0);
     dg->addDetector(d3);
@@ -37,7 +34,7 @@ public:
     delete d1, d2, d3;
     delete dg, group;
   }
-  
+
   void testConstructors()
   {
     std::vector<IDetector*> vec;
@@ -57,7 +54,7 @@ public:
     TS_ASSERT_EQUALS( detg.getPos()[0], 2.0 )
     TS_ASSERT_EQUALS( detg.getPos()[1], 2.0 )
     TS_ASSERT_EQUALS( detg.getPos()[2], 2.0 )
-    Detector *d = new Detector;
+    Detector *d = new Detector("d",0);
     d->setID(5);
     d->setPos(6.0, 3.0, 2.0);
 
@@ -99,7 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( dg->markDead() )
     TS_ASSERT( dg->isDead() )
     // Re-flagging as dead doesn't throw, just prints a warning
-    TS_ASSERT_THROWS_NOTHING( dg->markDead() )  
+    TS_ASSERT_THROWS_NOTHING( dg->markDead() )
     TS_ASSERT( dg->isDead() )
   }
 

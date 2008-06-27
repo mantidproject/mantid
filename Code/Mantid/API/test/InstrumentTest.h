@@ -16,26 +16,26 @@ class InstrumentTest : public CxxTest::TestSuite
 public:
   InstrumentTest()
   {
-    ObjComponent *sample = new ObjComponent;
+    ObjComponent *sample = new ObjComponent("sample");
     instrument.markAsSamplePos(sample);
-    det = new Detector;
+    det = new Detector("det",0);
     det->setID(1);
     det->setPos(1.0,0.0,0.0);
     instrument.markAsDetector(det);
-    det2 = new Detector;
+    det2 = new Detector("det",0);
     det2->setID(10);
     instrument.markAsDetector(det2);
-    det3 = new Detector;
+    det3 = new Detector("det",0);
     det3->setID(11);
     instrument.markAsDetector(det3);
   }
-  
+
   ~InstrumentTest()
   {
     delete det, det2, det3;
     delete instrument.getSample();
   }
-  
+
   void testType()
   {
     TS_ASSERT_EQUALS( instrument.type(), "Instrument" )
@@ -46,7 +46,7 @@ public:
     Instrument i;
     TS_ASSERT( ! i.getSource() )
     TS_ASSERT( ! i.getSample() )
-	  
+
     Instrument ii("anInstrument");
     TS_ASSERT( ! ii.getSource() )
     TS_ASSERT( ! ii.getSample() )
@@ -57,10 +57,10 @@ public:
   {
     Instrument i;
     TS_ASSERT( ! i.getSource() )
-    ObjComponent *s = new ObjComponent;
+    ObjComponent *s = new ObjComponent("source");
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(s) )
     TS_ASSERT_EQUALS( i.getSource(), s )
-    ObjComponent *ss = new ObjComponent;
+    ObjComponent *ss = new ObjComponent("source2");
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(ss) )
     TS_ASSERT_EQUALS( i.getSource(), s )
     delete s;
@@ -71,10 +71,10 @@ public:
   {
     Instrument i;
     TS_ASSERT( ! i.getSample() )
-    ObjComponent *s = new ObjComponent;
+    ObjComponent *s = new ObjComponent("sample");
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(s) )
     TS_ASSERT_EQUALS( i.getSample(), s )
-    ObjComponent *ss = new ObjComponent;
+    ObjComponent *ss = new ObjComponent("sample2");
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(ss) )
     TS_ASSERT_EQUALS( i.getSample(), s )
     delete s;
@@ -86,7 +86,7 @@ public:
     TS_ASSERT_THROWS( instrument.getDetector(0), Exception::NotFoundError )
     TS_ASSERT_EQUALS( instrument.getDetector(1), det )
     TS_ASSERT_THROWS( instrument.getDetector(2), Exception::NotFoundError )
-    Detector *d = new Detector;
+    Detector *d = new Detector("det",0);
     d->setID(2);
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
     TS_ASSERT_EQUALS( instrument.getDetector(2), d )
@@ -100,7 +100,7 @@ public:
     TS_ASSERT( dynamic_cast<Component*>(i) )
     delete i;
   }
-	
+
 private:
   Instrument instrument;
   Detector *det, *det2, *det3;

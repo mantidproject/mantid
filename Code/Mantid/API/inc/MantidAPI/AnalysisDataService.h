@@ -13,20 +13,20 @@ namespace Mantid
 {
 namespace API
 {
-/** The Analysis data service stores instances of the Workspace objects and 
-    anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.  
+/** The Analysis data service stores instances of the Workspace objects and
+    anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.
     This is the primary data service that
     the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
     This is the manager/owner of Workspace* when registered.
-    
+
     @author Russell Taylor, Tessella Support Services plc
     @date 01/10/2007
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
-    
+
     Modified to inherit from DataService
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -46,25 +46,25 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class AnalysisDataServiceImpl : public Mantid::Kernel::DataService<Mantid::API::Workspace>
+class AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
 private:
-	friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
-	// Constructors
-	AnalysisDataServiceImpl();
-	// Not implemented
-	AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
-	//Not implemented
-	AnalysisDataServiceImpl& operator=(const AnalysisDataServiceImpl&);
-	~AnalysisDataServiceImpl();
+  friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
+  // Constructors
+  AnalysisDataServiceImpl();
+  /// Private, unimplemented copy constructor
+  AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
+  /// Private, unimplemented copy assignment operator
+  AnalysisDataServiceImpl& operator=(const AnalysisDataServiceImpl&);
+  ~AnalysisDataServiceImpl();
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
+  // this breaks new namespace declaraion rules; need to find a better fix
+  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 #endif /* _WIN32 */
-typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
+  typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
 
 } // Namespace API
 } // Namespace Mantid

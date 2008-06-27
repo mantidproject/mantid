@@ -53,7 +53,7 @@ void LoadInstrument::init()
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
- * 
+ *
  *  @throw FileError Thrown if unable to parse XML file
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
@@ -68,16 +68,16 @@ void LoadInstrument::exec()
 
   // Set up the DOM parser and parse xml file
 
-  DOMParser pParser; 
+  DOMParser pParser;
   Document* pDoc;
-  try 
+  try
   {
     pDoc = pParser.parse(m_filename);
   }
   catch(...)
   {
     g_log.error("Unable to XML parse file " + m_filename);
-    throw Kernel::Exception::FileError("Unable to XML parse File:" , m_filename);	      
+    throw Kernel::Exception::FileError("Unable to XML parse File:" , m_filename);
   }
 
 
@@ -88,7 +88,7 @@ void LoadInstrument::exec()
   if ( !pRootElem->hasChildNodes() )
   {
     g_log.error("XML file: " + m_filename + "contains no root element.");
-    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);	 
+    throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
   }
 
 
@@ -99,12 +99,12 @@ void LoadInstrument::exec()
   if ( pNL_type->length() == 0 )
   {
     g_log.error("XML file: " + m_filename + "contains no type elements.");
-    throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);	
+    throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
   }
 
   unsigned int numberTypes = pNL_type->length();
   for (unsigned int iType = 0; iType < numberTypes; iType++)
-  {  
+  {
     Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
     std::string typeName = pTypeElem->getAttribute("name");
     getTypeElement[typeName] = pTypeElem;
@@ -124,7 +124,7 @@ void LoadInstrument::exec()
   // Get reference to Instrument and set its name
 
   instrument = (localWorkspace->getInstrument());
-  if ( pRootElem->hasAttribute("name") ) 
+  if ( pRootElem->hasAttribute("name") )
     instrument->setName( pRootElem->getAttribute("name") );
 
 
@@ -137,12 +137,12 @@ void LoadInstrument::exec()
     // we are only interest in the top level component elements hence
     // the reason for the if statement below
 
-    if ( (pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE && 
-        ((pNL_comp->item(i))->nodeName()).compare("component") == 0 ) 
+    if ( (pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
+        ((pNL_comp->item(i))->nodeName()).compare("component") == 0 )
     {
       Element* pElem = static_cast<Element*>(pNL_comp->item(i));
 
-      IdList idList; // structure to possibly be populated with detector IDs 
+      IdList idList; // structure to possibly be populated with detector IDs
 
       // get all location element contained in component element
 
@@ -173,16 +173,16 @@ void LoadInstrument::exec()
         {
           appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
-        
+
 
         // a check
 
         if (idList.counted != static_cast<int>(idList.vec.size()) )
         {
           g_log.error("The number of detector IDs listed in idlist named "
-            + pElem->getAttribute("idlist") + 
+            + pElem->getAttribute("idlist") +
             " is not equal to the number of detectors listed in type = "
-            + pElem->getAttribute("type")); 
+            + pElem->getAttribute("type"));
           throw Kernel::Exception::InstrumentDefinitionError(
             "Number of IDs listed in idlist does not match number of detectors listed in type = "
             + pElem->getAttribute("type"), m_filename);
@@ -207,7 +207,7 @@ void LoadInstrument::exec()
 
 /** Assumes second argument is a XML location element and its parent is a component element
  *  which is assigned to be an assemble. This method appends the parent component element of
- %  the location element to the CompAssemply passed as the 1st arg. Note this method may call 
+ %  the location element to the CompAssemply passed as the 1st arg. Note this method may call
  %  itself, i.e. it may act recursively.
  *
  *  @param parent CompAssembly to append new component to
@@ -239,7 +239,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     ass->setName(pCompElem->getAttribute("type"));
   }
 
-  // set location for this newly added comp. 
+  // set location for this newly added comp.
 
   setLocation(ass, pLocElem);
 
@@ -263,7 +263,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
       if ( isAssemply(typeName) )
         appendAssembly(ass, pElem, idList);
       else
-        appendLeaf(ass, pElem, idList);      
+        appendLeaf(ass, pElem, idList);
     }
 
     pNode = it.nextNode();
@@ -276,12 +276,12 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
 }
 
 
-/** Assumes second argument is pointing to a leaf, which here mean location element (indirectly 
- *  representing a component element) that contains no sub-components. This component is appended 
- %  to the parent (1st argument). 
+/** Assumes second argument is pointing to a leaf, which here mean location element (indirectly
+ *  representing a component element) that contains no sub-components. This component is appended
+ %  to the parent (1st argument).
  *
  *  @param parent CompAssembly to append component to
- *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add  
+ *  @param pLocElem  Poco::XML element that points to the element in the XML doc we want to add
  *  @param idList The current IDList
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
@@ -297,8 +297,8 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
   Element* pType = getTypeElement[pCompElem->getAttribute("type")];
 
-  std::string category = ""; 
-  if (pType->hasAttribute("is")) 
+  std::string category = "";
+  if (pType->hasAttribute("is"))
     category = pType->getAttribute("is");
 
 
@@ -306,23 +306,24 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
   if ( category.compare("detector") == 0 )
   {
-    Geometry::Detector* detector = new Geometry::Detector;
-
+    std::string name;
     if ( pLocElem->hasAttribute("name") )
-      detector->setName(pLocElem->getAttribute("name"));
+    {
+      name = pLocElem->getAttribute("name");
+    }
     else if ( pCompElem->hasAttribute("name") )
     {
-      detector->setName(pCompElem->getAttribute("name"));
+      name = pCompElem->getAttribute("name");
     }
     else
     {
-      detector->setName(pCompElem->getAttribute("type"));
+      name = pCompElem->getAttribute("type");
     }
 
+    Geometry::Detector* detector = new Geometry::Detector(name,parent);
+
     // set location for this comp
-
     setLocation(detector, pLocElem);
-
 
     // set detector ID and increment it. Finally add the detector to the parent
     detector->setID(idList.vec[idList.counted]);
@@ -332,31 +333,30 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     {
       instrument->markAsDetector(detector);
     }
-    catch(Kernel::Exception::ExistsError& e)
-    { 
+    catch(Kernel::Exception::ExistsError&)
+    {
       std::stringstream convert;
       convert << detector->getID();
       throw Kernel::Exception::InstrumentDefinitionError("Detector with ID = " + convert.str() +
-        " present more then once in XML instrument file", m_filename);	
+        " present more then once in XML instrument file", m_filename);
     }
   }
   else
   {
-    Geometry::ObjComponent *comp = new Geometry::ObjComponent;
-
-    comp->setParent(parent);
-    parent->add(comp);
-
+    std::string name;
     if ( pLocElem->hasAttribute("name") )
-      comp->setName(pLocElem->getAttribute("name"));
+      name = pLocElem->getAttribute("name");
     else if ( pCompElem->hasAttribute("name") )
     {
-      comp->setName(pCompElem->getAttribute("name"));
+      name = pCompElem->getAttribute("name");
     }
     else
     {
-      comp->setName(pCompElem->getAttribute("type"));
+      name = pCompElem->getAttribute("type");
     }
+
+    Geometry::ObjComponent *comp = new Geometry::ObjComponent(name,parent);
+    parent->add(comp);
 
     // check if special Source or SamplePos Component
     if ( category.compare("Source") == 0 )
@@ -382,7 +382,7 @@ void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent
 /** Set location (position) of comp as specified in XML location element.
  *
  *  @param comp To set position/location off
- *  @param pElem  Poco::XML element that points a location element in the XML doc  
+ *  @param pElem  Poco::XML element that points a location element in the XML doc
  *
  *  @throw logic_error Thrown if second argument is not a pointer to component XML element
  */
@@ -403,16 +403,16 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
     if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
     if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-    if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());    
+    if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
 
     Geometry::V3D pos;
     pos.spherical(R,theta,phi);
     comp->setPos(pos);
   }
-  else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || 
-    pElem->hasAttribute("p") ) 
+  else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
+    pElem->hasAttribute("p") )
   // This is alternative way a user may specify sphecical coordinates
-  // which may be preferred in the long run to the more verbose of 
+  // which may be preferred in the long run to the more verbose of
   // using R, theta and phi.
   {
     double R=0.0, theta=0.0, phi=0.0;
@@ -422,7 +422,7 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     if ( pElem->hasAttribute("t") )
       theta = atof((pElem->getAttribute("t")).c_str());
     if ( pElem->hasAttribute("p") )
-      phi = atof((pElem->getAttribute("p")).c_str());    
+      phi = atof((pElem->getAttribute("p")).c_str());
 
     Geometry::V3D pos;
     pos.spherical(R,theta,phi);
@@ -435,14 +435,14 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
     if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
     if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
-    
+
     comp->setPos(Geometry::V3D(x,y,z));
   }
 }
 
 /** Get parent component element of location element.
  *
- *  @param pLocElem  Poco::XML element that points a location element in the XML doc  
+ *  @param pLocElem  Poco::XML element that points a location element in the XML doc
  *
  *  @throw logic_error Thrown if argument is not a child of component element
  */
@@ -456,7 +456,7 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
 
   // The location element is required to be a child of a component element. Get this component element
 
-  Node* pCompNode = pLocElem->parentNode(); 
+  Node* pCompNode = pLocElem->parentNode();
 
   Element* pCompElem;
   if (pCompNode->nodeType() == 1)
@@ -465,13 +465,13 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
     if ( (pCompElem->tagName()).compare("component") )
     {
       g_log.error("Argument to function getParentComponent must be a XML element sitting inside a component element.");
-      throw std::logic_error( "Argument to function getParentComponent must be a XML element sitting inside a component element." );      
+      throw std::logic_error( "Argument to function getParentComponent must be a XML element sitting inside a component element." );
     }
   }
   else
   {
     g_log.error("Argument to function getParentComponent must be a XML element whos parent is an element.");
-    throw std::logic_error( "Argument to function getParentComponent must be a XML element whos parent is an element." );      
+    throw std::logic_error( "Argument to function getParentComponent must be a XML element whos parent is an element." );
   }
 
   return pCompElem;
@@ -498,11 +498,11 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
   if ( pE->hasAttribute("start") )
   {
-    int startID = atoi( (pE->getAttribute("start")).c_str() ); 
+    int startID = atoi( (pE->getAttribute("start")).c_str() );
 
     int endID;
     if ( pE->hasAttribute("end") )
-      endID = atoi( (pE->getAttribute("end")).c_str() ); 
+      endID = atoi( (pE->getAttribute("end")).c_str() );
     else
       endID = startID;
 
@@ -517,7 +517,7 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
     if ( pNL->length() == 0 )
     {
-      throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);	
+      throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);
     }
 
     pNL->release();
@@ -536,16 +536,16 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
         if ( pIDElem->hasAttribute("val") )
         {
-          int valID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+          int valID = atoi( (pIDElem->getAttribute("start")).c_str() );
           idList.vec.push_back(valID);
         }
         else if ( pIDElem->hasAttribute("start") )
         {
-          int startID = atoi( (pIDElem->getAttribute("start")).c_str() ); 
+          int startID = atoi( (pIDElem->getAttribute("start")).c_str() );
 
           int endID;
           if ( pIDElem->hasAttribute("end") )
-            endID = atoi( (pIDElem->getAttribute("end")).c_str() ); 
+            endID = atoi( (pIDElem->getAttribute("end")).c_str() );
           else
             endID = startID;
 
@@ -554,9 +554,9 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
         }
         else
         {
-          throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " + 
-            std::string("element wrongly specified in XML instrument file"), m_filename);	
-        }  
+          throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " +
+            std::string("element wrongly specified in XML instrument file"), m_filename);
+        }
       }
 
       pNode = it.nextNode();
@@ -579,7 +579,7 @@ bool LoadInstrument::isAssemply(std::string type)
   if ( it == isTypeAssemply.end() )
   {
     throw Kernel::Exception::InstrumentDefinitionError("type with name = " + type +
-      " not defined.", m_filename);	
+      " not defined.", m_filename);
   }
 
   return isTypeAssemply[type];

@@ -2,40 +2,34 @@
 #define MANTID_TESTOBJCOMPNENT__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/ObjComponent.h" 
-#include "MantidGeometry/Component.h" 
+#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/Component.h"
 
-using namespace Mantid;
-using namespace Geometry;
+using namespace Mantid::Geometry;
 
-class testObjComponent : public CxxTest::TestSuite
+class ObjComponentTest : public CxxTest::TestSuite
 {
 public:
-  void testEmptyConstructor()
-    {
-      ObjComponent objComp;
-      TS_ASSERT_EQUALS(objComp.getName(),"");
-      TS_ASSERT(!objComp.getParent());
-    }
   void testNameConstructor()
-    {
-      ObjComponent objComp("objComp1");
-      TS_ASSERT_EQUALS(objComp.getName(),"objComp1");
-      TS_ASSERT(!objComp.getParent());
-    }	
+  {
+    ObjComponent objComp("objComp1");
+    TS_ASSERT_EQUALS(objComp.getName(),"objComp1");
+    TS_ASSERT(!objComp.getParent());
+  }
+
   void testNameParentConstructor()
-    {
-      Component parent("Parent");
-      ObjComponent objComp("objComp1", &parent);
-      TS_ASSERT_EQUALS(objComp.getName(),"objComp1");
-      TS_ASSERT(objComp.getParent());
-    }
-  
+  {
+    Component parent("Parent");
+    ObjComponent objComp("objComp1", &parent);
+    TS_ASSERT_EQUALS(objComp.getName(),"objComp1");
+    TS_ASSERT(objComp.getParent());
+  }
+
   void testType()
-    {
-      ObjComponent objComp;
-      TS_ASSERT_EQUALS(objComp.type(),"PhysicalComponent");
-    }
+  {
+    ObjComponent objComp("objComp");
+    TS_ASSERT_EQUALS(objComp.type(),"PhysicalComponent");
+  }
 };
 
 #endif
