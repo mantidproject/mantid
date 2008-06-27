@@ -245,9 +245,8 @@ namespace Mantid
       if (surfPoints.empty())
         return;
 
-      // First forst surfPoints
+      // First sort surfPoints
       sort(surfPoints.begin(),surfPoints.end());
-
       PType::const_iterator ac=surfPoints.begin();
       PType::const_iterator bc=ac;
       bc++;
@@ -265,6 +264,15 @@ namespace Mantid
         if (bc!=surfPoints.end())
           bc++;
       } 
+
+      //have we now passed over all of the potential intersections without actually hitting the object
+      if (ac==surfPoints.end())
+      {
+        //yes
+        surfPoints.clear();
+        return;
+      }
+
       workPt=ac->PtA;      
 
       while(bc!=surfPoints.end())      // Since bc > ac

@@ -122,6 +122,7 @@ class DLLExport Track
 
   LType::const_iterator begin() const { return Link.begin(); }   ///< Iterator pointing to start of collection
   LType::const_iterator end() const { return Link.end(); }       ///< Iterator pointing one-past-the-end of collection
+  int count() const { return Link.size(); }       ///< The number of link items in the track
     
   // tests
   int nonComplete() const;

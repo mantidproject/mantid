@@ -819,7 +819,7 @@ namespace Mantid
 	    }
          }
       UT.buildLink();
-      return cnt;
+      return UT.count();
     }
 
     int

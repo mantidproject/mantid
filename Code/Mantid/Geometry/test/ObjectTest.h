@@ -325,6 +325,15 @@ public:
 
     checkTrackIntercept(A,track,expectedResults);
   }
+  
+  void testInterceptSurfaceCappedCylinderMiss()
+  {
+    std::vector<TUnit> expectedResults; //left empty as there are no expected results
+    Object A = createCappedCylinder();
+    Track track(V3D(-10,0,0),V3D(1,1,0));
+
+    checkTrackIntercept(A,track,expectedResults);
+  }
 
   void checkTrackIntercept(Track& track, std::vector<TUnit>& expectedResults)
   {
@@ -343,8 +352,8 @@ public:
 
   void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
     {
-      obj.interceptSurface(track);
-      //    track.buildLink();
+      int unitCount = obj.interceptSurface(track);
+      TS_ASSERT_EQUALS(unitCount,expectedResults.size())
       checkTrackIntercept(track,expectedResults);
     }
 
@@ -470,6 +479,34 @@ void testTrack_CubePlusInternalEdgeTouchSpheres()
   checkTrackIntercept(TL,expectedResults);
 }
 
+void testTrack_CubePlusInternalEdgeTouchSpheresMiss()
+  /*!
+    Test a track missing an object
+  */
+{
+  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
+  std::string ObjB="(-72 : -73)";
+  MObj.erase(MObj.begin(),MObj.end());
+  MObj[3]=Object();
+  MObj[3].setObject(3,ObjA);
+
+  MObj[4]=Object();
+  MObj[4].setObject(4,ObjB);
+
+  createSurfaces();
+  
+  Track TL(Geometry::V3D(-5,0,0),
+	   Geometry::V3D(0,1,0));
+
+
+  // CARE: This CANNOT be called twice
+  TS_ASSERT_EQUALS(MObj[3].interceptSurface(TL),0);
+  TS_ASSERT_EQUALS(MObj[4].interceptSurface(TL),0);
+
+  std::vector<TUnit> expectedResults; //left empty as this should miss
+  checkTrackIntercept(TL,expectedResults);
+}
+
 
 void testSolidAngleSphere()
   /*!
@@ -507,9 +544,8 @@ void testSolidAngleCappedCylinder()
     // solid angle at distance 4 from capped cyl -3.2 1.2 in x, rad 3
 	//
 	// ** These tests do not work as (a) expected solid angle not yet
-	//    determined AND (b) because interceptSurface(track) gives error
-	//    if track does not intersect cylinder in forward direction.
-	//
+	//    determined 
+    // Point (b) is now fixed
     //TS_ASSERT_DELTA(A.solidAngle(V3D(4.2,0,0)),-1,satol);
     //TS_ASSERT_DELTA(A.solidAngle(V3D(-7.2,0,0)),-1,satol);
     //TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,7)),-1,satol);
