@@ -850,39 +850,43 @@ namespace Mantid
       \return Solid angle estimate in steradians
       */
     {
-      // Trial calculation of solid angle as numerical double integral over all
+      // Calculation of solid angle as numerical double integral over all
       // angles. This could be optimised in many ways, e.g. using adaptive
       // integration and the object bounding box, if it had one.
       // Using the interceptSurface method is sub-optimal as it does more work
       // than is necessary.
-      // Will not work when observer is very close to non-convex objects or on
-      // object edges.
+      // May be wrong on object edges.
       //
-      int itheta,jphi,res=200;
+      int itheta,jphi,res=200,res_phi;
       double theta,phi,sum=0.0,dphi,dtheta;
       if( this->isValid(observer) && ! this->isOnSide(observer) )
-	      return 4*M_PI;  // internal point
+         return 4*M_PI;  // internal point
       if( this->isOnSide(observer) )
-	      return 2*M_PI;  // this is wrong if on an edge
-      dtheta=M_PI/(res);
-      dphi=M_PI/(res);
+         return 2*M_PI;  // this is wrong if on an edge
+      dtheta=M_PI/res;
       for(itheta=1;itheta<=res;itheta++)
          {
-         // only itegrate over 0->pi in phi as function checks both directions, hence
-	     // problems close to concave object...
-         theta=M_PI*(itheta-res*0.5-0.5)/res;
-	     for(jphi=1;jphi<=res;jphi++)
+         // itegrate over 0->2pi in phi
+         theta=M_PI*(itheta-0.5)/res;
+         res_phi=res*sin(theta);
+         if(res_phi<20) res_phi=20;
+         dphi=2*M_PI/res_phi;
+         for(jphi=1;jphi<=res_phi;jphi++)
             {
-	        phi=1.0*M_PI*(jphi-0.5)/res;
-            Track tr(observer, Geometry::V3D(cos(theta)*cos(phi),cos(theta)*sin(phi),sin(theta)));
+            phi=2.0*M_PI*(jphi-0.5)/res_phi;
+            Track tr(observer, Geometry::V3D(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)));
             if(this->interceptSurface(tr)>0)
-	           sum+=dtheta*dphi*cos(theta);
-	        }
-	     }
-
-      //Line dir(cos(theta)*cos(phi),cos(theta)*sin(phi),sin(theta));
+               {
+               // work around for -ve intercepts being reported for some objects
+               // check that track is in same direction as UVec
+               if( tr.getUVec().scalar_prod( tr.begin()->PtB - tr.begin()->PtA ) > 0 )
+                  {
+                  sum+=dtheta*dphi*sin(theta);
+                  }
+               }
+            }
+         }
       return sum;
-      // return -1;
     }
 
 

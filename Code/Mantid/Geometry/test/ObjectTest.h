@@ -514,11 +514,12 @@ void testSolidAngleSphere()
   */
 {
     Object A = createSphere();
-    double satol=2e-2; // tolerence for solid angle, quite coarse at present
+    double satol=2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
+    // Intercept for track in reverse direction now worked round
     TS_ASSERT_DELTA(A.solidAngle(V3D(8.1,0,0)),0.864364,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,8.1,0)),0.864364,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,8.1)),0.864364,satol);
@@ -539,27 +540,48 @@ void testSolidAngleCappedCylinder()
   */
 {
     Object A = createCappedCylinder();
-    double satol=2e-2; // tolerence for solid angle, quite coarse at present
+    double satol=2e-2; // tolerance for solid angle
 
     // solid angle at distance 4 from capped cyl -3.2 1.2 in x, rad 3
-	//
-	// ** These tests do not work as (a) expected solid angle not yet
-	//    determined 
-    // Point (b) is now fixed
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(4.2,0,0)),-1,satol);
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(-7.2,0,0)),-1,satol);
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,7)),-1,satol);
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(0,7,0)),-1,satol);
+    //
+    // soild angle of circle radius 3, distance 3 is 2pi(1-cos(t)) where
+    // t is atan(3/3), should be 1.840302,
+    // Work round for reverse track intercept has been made in Object.cpp
+    TS_ASSERT_DELTA(A.solidAngle(V3D(4.2,0,0)),1.840302,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(-7.2,0,0)),1.25663708,satol);
+    // No analytic value for side on SA, using hi-res value
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,7)),0.7531,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,7,0)),0.7531,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
     TS_ASSERT_DELTA(A.solidAngle(V3D(1.2,0,0)),2*M_PI,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(-3.2,0,0)),2*M_PI,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,3,0)),2*M_PI,satol);
-    // distant points (see above problems)
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),-1,satol);
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),-1,satol);
-    //TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),-1,satol);
+    // distant points
+    TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.07850147,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.000715295,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),7.08131e-6,satol);
+}
+
+void testSolidAngleCube()
+  /*!
+    Test solid angle calculation for a cube
+  */
+{
+    Object A = createUnitCube();
+    double satol=2e-2; // tolerance for solid angle
+
+    // solid angle at distance 0.5 should be 4pi/6 by symmetry
+    //
+    TS_ASSERT_DELTA(A.solidAngle(V3D(1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(-1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
 }
 
 private:
@@ -710,6 +732,49 @@ private:
       return;
   
 }
+
+
+  Object createUnitCube()
+  {
+    std::string C1="px -0.5";         // cube +/-0.5
+    std::string C2="px 0.5";
+    std::string C3="py -0.5";
+    std::string C4="py 0.5";
+    std::string C5="pz -0.5";
+    std::string C6="pz 0.5";
+
+    // Create surfaces
+    std::map<int,Surface*> CubeSurMap;
+    CubeSurMap[1]=new Plane();
+    CubeSurMap[2]=new Plane();
+    CubeSurMap[3]=new Plane();
+    CubeSurMap[4]=new Plane();
+    CubeSurMap[5]=new Plane();
+    CubeSurMap[6]=new Plane();
+
+    CubeSurMap[1]->setSurface(C1);
+    CubeSurMap[2]->setSurface(C2);
+    CubeSurMap[3]->setSurface(C3);
+    CubeSurMap[4]->setSurface(C4);
+    CubeSurMap[5]->setSurface(C5);
+    CubeSurMap[6]->setSurface(C6);
+    CubeSurMap[1]->setName(1);
+    CubeSurMap[2]->setName(2);
+    CubeSurMap[3]->setName(3);
+    CubeSurMap[4]->setName(4);
+    CubeSurMap[5]->setName(5);
+    CubeSurMap[6]->setName(6);
+
+    // Cube (id 68) 
+    // using surface ids:  1-6
+    std::string ObjCube="1 -2 3 -4 5 -6";
+
+    Object retVal; 
+    retVal.setObject(68,ObjCube);
+    retVal.populate(CubeSurMap);
+
+    return retVal;
+  }
 
 
 };
