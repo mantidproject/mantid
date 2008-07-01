@@ -17,13 +17,13 @@ class PythonFrameworkTest : public CxxTest::TestSuite
 {
 
 private:
-	FrameworkManager* mgr;
+	Mantid::PythonAPI::FrameworkManager* mgr;
 
 public:
 
 	PythonFrameworkTest()
 	{
-		mgr = new FrameworkManager;
+		mgr = new Mantid::PythonAPI::FrameworkManager;
 	}
 
 	void testCreateAlgorithm()
