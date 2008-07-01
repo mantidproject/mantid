@@ -41,6 +41,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
   const int NVectors = parent->size() / YLength;
   ws->initialize(NVectors,XLength,YLength);
   ws->setInstrument(parent->getInstrument());
+  ws->setSpectraMap(parent->getSpectraMap());
   for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
   {
     // Need to delete the existing axis created in init above
