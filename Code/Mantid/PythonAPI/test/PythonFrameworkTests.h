@@ -26,7 +26,7 @@ public:
 		mgr = new Mantid::PythonAPI::FrameworkManager;
 	}
 
-	void testCreateAlgorithm()
+	void testCreateAlgorithmMethod1()
 	{
 		API::IAlgorithm* alg = mgr->createAlgorithm("HelloWorldAlgorithm");
 		API::Algorithm* temp = dynamic_cast<API::Algorithm*>(alg);
@@ -57,6 +57,30 @@ public:
 	void testDeleteWorkspace()
 	{
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace1"));
+	}
+	
+	void testCreateAlgorithmMethod2()
+	{
+		API::IAlgorithm* alg = mgr->createAlgorithm("LoadRaw", "Filename=../../../../Test/Data/HET15869.RAW;OutputWorkspace=TestWorkspace2");
+
+		TS_ASSERT_THROWS_NOTHING(alg->execute());
+		
+		API::Workspace* ws = mgr->getWorkspace("TestWorkspace2");
+
+		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
+		
+		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace2"));
+	}
+	
+	void testExecuteAlgorithmMethod()
+	{
+		API::IAlgorithm* alg = mgr->execute("LoadRaw", "Filename=../../../../Test/Data/HET15869.RAW;OutputWorkspace=TestWorkspace3");
+		
+		API::Workspace* ws = mgr->getWorkspace("TestWorkspace3");
+
+		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
+		
+		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace3"));
 	}
 
 };

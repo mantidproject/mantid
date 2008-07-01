@@ -125,20 +125,12 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
 	
-	//Mantid stuff
-	class_< Mantid::PythonAPI::PythonInterface >("PythonInterface", init<  >())
-        .def(init< const Mantid::PythonAPI::PythonInterface& >())
-//        .def("InitialiseFrameworkManager", &Mantid::PythonAPI::PythonInterface::InitialiseFrameworkManager)
-        .def("CreateAlgorithm", &Mantid::PythonAPI::PythonInterface::CreateAlgorithm, return_value_policy< manage_new_object>())
-	.def("GetAlgorithmNames", &Mantid::PythonAPI::PythonInterface::GetAlgorithmNames)
-        .def("LoadIsisRawFile", &Mantid::PythonAPI::PythonInterface::LoadIsisRawFile)
-	.def("RetrieveWorkspace", &Mantid::PythonAPI::PythonInterface::RetrieveWorkspace)
-	.def("DeleteWorkspace", &Mantid::PythonAPI::PythonInterface::DeleteWorkspace)
-	.def("GetWorkspaceNames", &Mantid::PythonAPI::PythonInterface::GetWorkspaceNames)
-        .def("GetAddressXData", &Mantid::PythonAPI::PythonInterface::GetAddressXData)
-        .def("GetAddressYData", &Mantid::PythonAPI::PythonInterface::GetAddressYData)
-	;
+	//Namespace Functions
+        def("LoadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
+	def("GetAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
+	def("GetWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
 	
+	//IAlgorithm Class
 	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
         .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
         .def("execute", pure_virtual(&Mantid::API::IAlgorithm::execute))
@@ -147,7 +139,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("setPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::setPropertyValue))
         .def("getPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::getPropertyValue))
 	;
-
+	
+	//Workspace Class
 	class_< Mantid::API::Workspace, boost::noncopyable, Mantid_API_Workspace_Wrapper >("Workspace", no_init)
         .def("id", pure_virtual(&Mantid::API::Workspace::id))
         .def("initialize", &Mantid::API::Workspace::initialize)
@@ -164,6 +157,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE), return_value_policy< manage_new_object >())
     ;
 
+	//Framework Class
 	class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())
         .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
         .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< manage_new_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1_2())
