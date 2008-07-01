@@ -62,3 +62,4 @@ public:
 };
 
 #endif /*MANTID_PYTHONFRAMEWORKTESTS_H_*/
+
