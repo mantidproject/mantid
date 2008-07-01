@@ -15,14 +15,14 @@ namespace Exception
 //-------------------------
 /** Constructor
 	@param Desc Function description
-	@param FName Filename 
+	@param FName Filename
 */
 FileError::FileError(const std::string& Desc,const std::string& FName) :
 std::runtime_error(Desc),fileName(FName)
 {
 	outMessage = std::string(std::runtime_error::what()) + " in " + fileName;
 }
- 
+
 /// Copy constructor
 FileError::FileError(const FileError& A) :
   std::runtime_error(A),fileName(A.fileName)
@@ -45,7 +45,7 @@ const char* FileError::what() const throw()
 NotImplementedError::NotImplementedError(const std::string& Desc) :
 std::logic_error(Desc)
 {}
- 
+
 /// Copy constructor
 NotImplementedError::NotImplementedError(const NotImplementedError& A) :
   std::logic_error(A)
@@ -68,7 +68,7 @@ const char* NotImplementedError::what() const throw()
 */
 NotFoundError::NotFoundError(const std::string& Desc,const std::string& ObjectName) :
 std::runtime_error(Desc),objectName(ObjectName)
-{ 
+{
 	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
 
@@ -78,14 +78,14 @@ std::runtime_error(Desc),objectName(ObjectName)
 */
 NotFoundError::NotFoundError(const std::string& Desc,const int& ObjectNum) :
 std::runtime_error(Desc)
-{ 
+{
   std::stringstream ss;
   std::string obName;
   ss << ObjectNum;
   ss >> obName;
 	outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
 }
- 
+
 /// Copy constructor
 NotFoundError::NotFoundError(const NotFoundError& A) :
   std::runtime_error(A),objectName(A.objectName)
@@ -111,7 +111,7 @@ std::runtime_error(Desc),objectName(ObjectName)
 {
 	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
- 
+
 /// Copy constructor
 ExistsError::ExistsError(const ExistsError& A) :
   std::runtime_error(A),objectName(A.objectName)
@@ -136,7 +136,7 @@ AbsObjMethod::AbsObjMethod(const std::string& ObjectName) :
 {
   outMessage = std::string("AbsObjMethod object: ") + objectName;
 }
- 
+
 /// Copy constructor
 AbsObjMethod::AbsObjMethod(const AbsObjMethod& A) :
   std::runtime_error(A),objectName(A.objectName)
@@ -162,7 +162,7 @@ std::runtime_error(Desc),objectName(ObjectName)
 {
 	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
- 
+
 /// Copy constructor
 InstrumentDefinitionError::InstrumentDefinitionError(const InstrumentDefinitionError& A) :
   std::runtime_error(A),objectName(A.objectName)
@@ -181,9 +181,9 @@ const char* InstrumentDefinitionError::what() const throw()
 // MisMatch
 //-------------------------
 
-template<typename T> 
+template<typename T>
 MisMatch<T>::MisMatch(const T& A,const T& B,const std::string& Place) :
-  std::runtime_error(Place),Aval(A),Bval(B) 
+  std::runtime_error(Place),Aval(A),Bval(B)
   /*!
     Constructor store two mismatched items
     \param A :: Item to store
@@ -192,7 +192,7 @@ MisMatch<T>::MisMatch(const T& A,const T& B,const std::string& Place) :
   */
 {}
 
-template<typename T> 
+template<typename T>
 MisMatch<T>::MisMatch(const MisMatch<T>& A) :
   std::runtime_error(A.what()),Aval(A.Aval),Bval(A.Bval)
    /*!
@@ -201,7 +201,7 @@ MisMatch<T>::MisMatch(const MisMatch<T>& A) :
   */
 {}
 
-template<typename T> 
+template<typename T>
 const char*
 MisMatch<T>::what() const throw()
   /*!
@@ -215,8 +215,14 @@ MisMatch<T>::what() const throw()
   return cx.str().c_str();
 }
 
+/// \cond TEMPLATE
+template class DLLExport MisMatch<int>;
+/// \endcond TEMPLATE
+
+//-------------------------
 // Index Error class
-  
+//-------------------------
+
 /*!
   Constructor
   \param V :: Value of index
@@ -224,7 +230,7 @@ MisMatch<T>::what() const throw()
   \param Place :: Location of Error
 */
 IndexError::IndexError(const int V,const int B, const std::string& Place) :
-  std::runtime_error(Place),Val(V),maxVal(B) 
+  std::runtime_error(Place),Val(V),maxVal(B)
 {}
 
 /*!
@@ -246,11 +252,30 @@ IndexError::what() const throw()
   return cx.str().c_str();
 }
 
+//-------------------------
+// NullPointerException class
+//-------------------------
 
+/** Constructor
+ *  @param place      The class & function where the exception occurred
+ *  @param objectName The name of the pointer
+ */
+NullPointerException::NullPointerException(const std::string& place, const std::string& objectName) :
+  std::runtime_error(place),
+  outMessage("Attempt to dereference zero pointer ("+objectName+") in function "+place)
+{}
 
-/// \cond TEMPLATE
-template class DLLExport MisMatch<int>;
-/// \endcond TEMPLATE
+/** Copy Constructor
+ *  @param rhs The NullPointerException to copy
+ */
+NullPointerException::NullPointerException(const NullPointerException& rhs) :
+  std::runtime_error(rhs), outMessage(rhs.outMessage)
+{}
+
+const char* NullPointerException::what() const throw()
+{
+  return outMessage.c_str();
+}
 
 } // namespace Exception
 } // namespace Kernel

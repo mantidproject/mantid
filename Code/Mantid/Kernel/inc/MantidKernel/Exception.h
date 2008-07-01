@@ -23,7 +23,7 @@ namespace Kernel
 			<li><b>std::bad_exception</b> - Thrown if an exception is thrown which is not listed in a function's exception specification.</li>
 			<li><b>std::bad_cast</b> - Thrown if you attempt an invalid dynamic_cast expression</li>
 			<li><b>std::bad_typeid</b> - Thrown if you use a NULL pointer in a typeid expression</li>
-			<li><b>std::logic_error</b> - Superclass for all logic errors, never thrown itself. Logic errors represent problems in the internal logic of a program; in theory, these are preventable, and even detectable before the program runs (e.g., violations of class invariants). 
+			<li><b>std::logic_error</b> - Superclass for all logic errors, never thrown itself. Logic errors represent problems in the internal logic of a program; in theory, these are preventable, and even detectable before the program runs (e.g., violations of class invariants).
 			<ul>
 				<li><b>std::length_error</b> - Thrown when an object is constructed that would exceed its maximum
 				permitted size (e.g., a string instance).</li>
@@ -34,7 +34,7 @@ namespace Kernel
 				<li><b>NotImplementedError</b> - Thrown if accessing areas of code that are not implmented yet.</li>
 			</ul>
 			</li>
-			<li><b>std::runtime_error</b> - Superclass for all runtime errors, never thrown itself. Runtime errors represent problems outside the scope of a program; they cannot be easily predicted and can generally only be caught as the program executes. 
+			<li><b>std::runtime_error</b> - Superclass for all runtime errors, never thrown itself. Runtime errors represent problems outside the scope of a program; they cannot be easily predicted and can generally only be caught as the program executes.
 			<ul>
 				<li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
 				<li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
@@ -45,17 +45,17 @@ namespace Kernel
         <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
         <li><b>MisMatch</b> - Error when two numbers should be identical (or close).</li>
         <li><b>IndexError</b> - Error when an incorrect index value is given.</li>
-        
+        <li><b>NullPointerException</b> - Thrown when a zero pointer is dereferenced.</li>
 			</ul>
 			</li>
 		</ul>
 		</li>
 	</ul>
-    
+
     @author Nick Draper, Tessella Support Services plc
     @date 8/11/2007
-    
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -112,7 +112,7 @@ DLLExport
 DLLImport
 #endif /* IN_MANTID_KERNEL */
 NotImplementedError : public std::logic_error
-{ 
+{
  public:
   NotImplementedError(const std::string&);
   NotImplementedError(const NotImplementedError& A);
@@ -178,12 +178,12 @@ ExistsError : public std::runtime_error
 };
 
 /*!
-  \class AbsObjMethod 
+  \class AbsObjMethod
   \brief Exception for a call to an abstract class function
-  
-  For a method virtual abstract class exists that 
+
+  For a method virtual abstract class exists that
   needs to have instance because of interation over
-  a base class pointer. e.g 
+  a base class pointer. e.g
   vector<AbsBase*> Vec;
   for(vc=Vec.begin();vc!=Vec.end();vc++)
      (*vc)->method();
@@ -191,7 +191,7 @@ ExistsError : public std::runtime_error
    but: X=new AbsBase() is forbidden by the compiler
    but it always possible to obtain a pure AbsBase pointer
    by casting and this exception is to be placed in these sorts
-   of methods in the Abstract class. 
+   of methods in the Abstract class.
 
    It is a runtime error constructed a runtime reinterpret cast.
 
@@ -225,7 +225,7 @@ AbsObjMethod : public std::runtime_error
 };
 
 /// Exception for errors associated with the instrument definition.
-/// This might e.g. occur while reading the instrument definition file. 
+/// This might e.g. occur while reading the instrument definition file.
 class DLLExport InstrumentDefinitionError : public std::runtime_error
 {
  private:
@@ -259,7 +259,7 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
   {
   private:
 
-    const T Aval;        ///< Number A 
+    const T Aval;        ///< Number A
     const T Bval;        ///< container size
 
   public:
@@ -290,7 +290,7 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
   {
   private:
 
-    const int Val;     ///< Actual value called 
+    const int Val;     ///< Actual value called
     const int maxVal;  ///< Maximum value
 
   public:
@@ -304,6 +304,30 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
 
   };
 
+  /** Exception thrown when an attempt is made to dereference a null pointer
+   *
+   *  @author Russell Taylor, Tessella Support Services plc
+   *  @date 01/07/2008
+   */
+  class
+  #ifdef IN_MANTID_KERNEL
+    DLLExport
+  #else
+    DLLImport
+  #endif /* IN_MANTID_KERNEL */
+  NullPointerException : public std::runtime_error
+  {
+  private:
+    /// The message returned by what()
+    const std::string outMessage;
+  public:
+    NullPointerException(const std::string& place, const std::string& objectName);
+    NullPointerException(const NullPointerException&);
+    ~NullPointerException() throw() {}
+
+    /// Overloaded reporting method
+    const char* what() const throw();
+  };
 
 } //namespace Exception
 } // namespace Kernel
