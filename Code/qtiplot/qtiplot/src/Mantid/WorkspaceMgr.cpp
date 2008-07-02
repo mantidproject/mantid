@@ -9,6 +9,7 @@
 
 #include "MantidKernel/Property.h"
 #include "MantidLog.h"
+#include "MantidUI.h"
 
 #include <vector>
 #include <string>
@@ -24,7 +25,7 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 	setupUi(this);
 	setupActions();
 	
-	m_interface = new Mantid::PythonAPI::PythonInterface;
+	//m_interface = new Mantid::PythonAPI::PythonInterface;
 	
 	getWorkspaces();
 	
@@ -40,7 +41,7 @@ WorkspaceMgr::WorkspaceMgr(QWidget *parent) : QDialog(parent)
 
 WorkspaceMgr::~WorkspaceMgr()
 {
-    delete m_interface;
+    //delete m_interface;
 }
 
 void WorkspaceMgr::setupActions()
@@ -57,11 +58,11 @@ void WorkspaceMgr::getWorkspaces()
 {
 	listWorkspaces->clear();
 	
-	std::vector<std::string> names = m_interface->GetWorkspaceNames();
+	QStringList names = static_cast<ApplicationWindow*>(m_parent)->mantidUI->getWorkspaceNames();
 
 	for(unsigned int i = 0; i < names.size(); ++i) 
 	{
-		listWorkspaces->insertItem(0, QString::fromStdString(names[i]));
+		listWorkspaces->insertItem(0, names[i]);
 	}
 }
 
@@ -69,11 +70,11 @@ void WorkspaceMgr::getAlgorithms()
 {
 	listAlgorithms->clear();
 	
-	std::vector<std::string> algs = m_interface->GetAlgorithmNames();
+	QStringList algs = static_cast<ApplicationWindow*>(m_parent)->mantidUI->getAlgorithmNames();
 	
 	for(unsigned int i = 0; i < algs.size(); ++i) 
 	{
-		listAlgorithms->insertItem(0, QString::fromStdString(algs[i]));
+		listAlgorithms->insertItem(0, algs[i]);
 	}
 }
 
@@ -86,7 +87,7 @@ void WorkspaceMgr::addWorkspaceClicked()
 	if (!dlg->getFilename().isEmpty())
 	{	
 		
-		Mantid::API::Workspace_sptr ws = m_interface->LoadIsisRawFile(dlg->getFilename().toStdString(), dlg->getWorkspaceName().toStdString());
+		Mantid::API::Workspace_sptr ws = static_cast<ApplicationWindow*>(m_parent)->mantidUI->LoadIsisRawFile(dlg->getFilename(), dlg->getWorkspaceName());
 		if (ws.use_count() == 0)
 		{
 			QMessageBox::warning(this, tr("Mantid"),
@@ -107,7 +108,7 @@ void WorkspaceMgr::deleteWorkspaceClicked()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		m_interface->DeleteWorkspace(wsName.toStdString());
+		static_cast<ApplicationWindow*>(m_parent)->mantidUI->deleteWorkspace(wsName);
 		
 		listWorkspaces->setCurrentRow(-1);
 		
@@ -123,9 +124,9 @@ void WorkspaceMgr::selectedWorkspaceChanged()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
+        Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
 		
-		int numHists = ws->getHistogramNumber();
+		int numHists = ws->getNumberHistograms();
 		int numBins = ws->blocksize();
 		
 		textWorkspaceInfo->setPlainText("Number of histograms: " + QString::number(numHists) + "\nNumber of bins: " + QString::number(numBins));
@@ -141,9 +142,9 @@ void WorkspaceMgr::importWorkspace()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
+		Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
 		
-		int numHists = ws->getHistogramNumber();
+		int numHists = ws->getNumberHistograms();
 		int numBins = ws->blocksize();
 		
 		ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(this, numHists);
@@ -163,7 +164,7 @@ void WorkspaceMgr::importWorkspace()
 			{
 				if (row >= start && row <= end)
 				{
-					std::vector<double>* Y = m_interface->GetYData(wsName.toStdString(), row);
+					std::vector<double>* Y = &ws->dataY(row);
 					for (int col = 0; col < numBins; ++col)
 					{
 						mat->setCell(col, histCount, Y->at(col));
@@ -182,9 +183,9 @@ void WorkspaceMgr::importWorkspaceMatrix()
 		QListWidgetItem *selected = listWorkspaces->item(listWorkspaces->currentRow());
 		QString wsName = selected->text();
 		
-		Mantid::API::Workspace_sptr ws = m_interface->RetrieveWorkspace(wsName.toStdString());
+		Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
 		
-		int numHists = ws->getHistogramNumber();
+		int numHists = ws->getNumberHistograms();
 		int numBins = ws->blocksize();
 		
 		ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(this, numHists);
@@ -217,7 +218,7 @@ void WorkspaceMgr:: executeAlgorithm()
 		QListWidgetItem *selected = listAlgorithms->item(listAlgorithms->currentRow());
 		QString algName = (selected->text()).split("|")[0];
 		
-		Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>(m_interface->CreateAlgorithm(algName.toStdString()));
+		Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>(Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString()));
 		
 		std::vector<Mantid::Kernel::Property*> propList = alg->getProperties();
 

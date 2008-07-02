@@ -312,7 +312,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/WorkspaceMatrix.h \
 	    src/Mantid/WorkspaceMatrixModel.h \
 	    src/Mantid/AbstractMantidLog.h \
-	    src/Mantid/MantidLog.h 
+	    src/Mantid/MantidLog.h \
+	    src/Mantid/MantidUI.h \
+	    src/Mantid/MantidMatrix.h 
 
 ###################### FORMS ##############################################
 
@@ -443,7 +445,9 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/WorkspaceMatrix.cpp \
 	    src/Mantid/WorkspaceMatrixModel.cpp \
 	    src/Mantid/AbstractMantidLog.cpp \
-	    src/Mantid/MantidLog.cpp 
+	    src/Mantid/MantidLog.cpp \
+	    src/Mantid/MantidUI.cpp \
+	    src/Mantid/MantidMatrix.cpp 
 
 ###############################################################
 ##################### Compression (zlib123) ###################

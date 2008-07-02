@@ -88,6 +88,9 @@ class ImageMarker;
 class TextEditor;
 class AssociationsDialog;
 
+//Mantid
+class MantidUI;
+
 /**
  * \brief QtiPlot's main window.
  *
@@ -1279,5 +1282,8 @@ private:
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;
     QAction *actionCopyRowToGraphErr;
+public:
+    MantidUI *mantidUI;
+    void initMantid();
 };
 #endif

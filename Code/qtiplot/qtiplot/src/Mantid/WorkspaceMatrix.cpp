@@ -62,13 +62,18 @@ Graph3D * WorkspaceMatrix::plotGraph3D(int style)
 	plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
 	
     Mantid::API::Axis* ax = wsModel()->workspace().getAxis(0);
-    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
+    std::string s;
+    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    else
+        s = "X Axis";
     plot->setXAxisLabel(tr(s.c_str()));
     
     ax = wsModel()->workspace().getAxis(1);
     if (ax->isNumeric()) 
     {
-        s = ax->unit()->caption() + " / " + ax->unit()->label();
+        if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+        else
+            s = "Y Axis";
         plot->setYAxisLabel(tr(s.c_str())); 
     }
     else

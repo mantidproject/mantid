@@ -791,7 +791,19 @@ bool Plot3DDialog::updatePlot()
 			return false;
 		}
 
+        /*double xsc = d_plot->xScale();
+        double ysc = d_plot->yScale();
+        double zsc = d_plot->zScale();
+        if (axis == 2)
+        {
+            double start0 = scales[0].toDouble();
+            double end0 = scales[1].toDouble();
+            zsc *= (end0 - start0)/(end - start);
+            QMessageBox::information(this,"OK","OK");
+        }*/
+
         d_plot->updateScale(axis, scaleOptions(axis, start, end, boxMajors->text(), boxMinors->text()));
+        //d_plot->setScale(xsc,ysc,zsc*0.1);
 	} else if (generalDialog->currentPage()==(QWidget*)axes){
 		int axis = axesList2->currentRow();
 		labels[axis] = boxLabel->text();

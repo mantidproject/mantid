@@ -2,6 +2,7 @@
 #include "WorkspaceMatrix.h"
 #include "../plot2D/ScaleEngine.h"
 #include "MantidAPI/Axis.h"
+#include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_math.h>
 #include <fstream>
@@ -22,8 +23,8 @@ MatrixModel(parent)
         return;
     }
 
-    m_start = (start<0 || start>=ws->getHistogramNumber())?0:start;
-    m_end   = (end<0 || end>=ws->getHistogramNumber() || end < start)?ws->getHistogramNumber()-1:end;
+    m_start = (start<0 || start>=ws->getNumberHistograms())?0:start;
+    m_end   = (end<0 || end>=ws->getNumberHistograms() || end < start)?ws->getNumberHistograms()-1:end;
     d_rows = m_end - m_start + 1;
 	d_cols = ws->blocksize(); 
     m_filter = filter;
@@ -83,25 +84,52 @@ QVariant WorkspaceMatrixModel::data(const QModelIndex &index, int role) const
 void WorkspaceMatrixModel::setGraph2D(Graph* g)
 {
     g->setTitle(tr("Workspace ")+d_matrix->name());
-    Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
-    g->setXAxisTitle(tr(s.c_str()));
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric()) 
+    Mantid::API::Axis* ax;
+    try
     {
-        s = ax->unit()->caption() + " / " + ax->unit()->label();
-        g->setYAxisTitle(tr(s.c_str())); 
+        ax = m_workspace->getAxis(0);
+        std::string s;
+        if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+        else
+            s = "X axis";
+        g->setXAxisTitle(tr(s.c_str()));
+        ax = m_workspace->getAxis(1);
+        if (ax->isNumeric()) 
+        {
+            if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+            else
+                s = "Y axis";
+            g->setYAxisTitle(tr(s.c_str())); 
+        }
+        else
+            g->setYAxisTitle(tr("Spectrum")); 
     }
-    else
-        g->setYAxisTitle(tr("Spectrum")); 
+    catch(Mantid::Kernel::Exception::IndexError& e)
+    {
+        QMessageBox::critical(0,"WorkspaceMatrixModel error",e.what());
+        g->setXAxisTitle(tr("X axis"));
+        g->setYAxisTitle(tr("Y axis"));
+    }
 }
 
 void WorkspaceMatrixModel::setGraph1D(Graph* g)
 {
     g->setTitle(tr("Workspace ")+d_matrix->name());
-    Mantid::API::Axis* ax = m_workspace->getAxis(0);
-    std::string s = ax->unit()->caption() + " / " + ax->unit()->label();
-    g->setXAxisTitle(tr(s.c_str()));
+    Mantid::API::Axis* ax;
+    try
+    {
+        ax = m_workspace->getAxis(0);
+        std::string s;
+        if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+        else
+            s = "X axis";
+        g->setXAxisTitle(tr(s.c_str()));
+    }
+    catch(Mantid::Kernel::Exception::IndexError& e)
+    {
+        QMessageBox::critical(0,"WorkspaceMatrixModel error",e.what());
+        g->setXAxisTitle(tr("X axis"));
+    }
     g->setYAxisTitle(tr("Counts")); 
 }
 
