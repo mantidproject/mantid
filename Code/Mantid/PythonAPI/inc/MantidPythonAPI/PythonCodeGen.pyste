@@ -4,7 +4,7 @@
 #set_policy(PI.GetEData, return_value_policy(manage_new_object))
 #set_policy(PI.CreateAlgorithm, return_value_policy(manage_new_object))
 
-#WS = Class("Mantid::API::Workspace", "Workspace.h")
+WS = Class("Mantid::API::Workspace", "Workspace.h")
 #set_policy(WS.dataX, return_value_policy(manage_new_object))
 #set_policy(WS.dataY, return_value_policy(manage_new_object))
 #set_policy(WS.dataE, return_value_policy(manage_new_object))
@@ -13,15 +13,3 @@
 #set_policy(FM.createAlgorithm, return_value_policy(manage_new_object))
 #set_policy(FM.execute, return_value_policy(manage_new_object))
 #set_policy(FM.getWorkspace, return_value_policy(manage_new_object))
-
-CA = Class("Mantid::Geometry::CompAssembly", "CompAssembly.h")
-set_policy(CA.clone, return_value_policy(manage_new_object))
-
-COMP = Class("Mantid::Geometry::Component", "Component.h")
-set_policy(COMP.getParent, return_value_policy(manage_new_object))
-set_policy(COMP.clone, return_value_policy(manage_new_object))
-
-I = Class("Mantid::API::Instrument", "Instrument.h")
-set_policy(I.getSample, return_value_policy(manage_new_object))
-set_policy(I.getDetector, return_value_policy(manage_new_object))
-set_policy(I.getSource, return_value_policy(manage_new_object))

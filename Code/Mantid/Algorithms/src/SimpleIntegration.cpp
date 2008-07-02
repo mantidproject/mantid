@@ -56,7 +56,7 @@ void SimpleIntegration::exec()
   // Get the input workspace
   Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
   
-  const int numberOfYBins = localworkspace->getHistogramNumber();
+  const int numberOfYBins = localworkspace->getNumberHistograms();
   // Check 'StartX' is in range 0-numberOfSpectra
   if ( (0 > m_MinY) || (m_MinY > numberOfYBins))
   {

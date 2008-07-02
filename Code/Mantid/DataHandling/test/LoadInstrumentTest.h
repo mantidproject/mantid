@@ -120,7 +120,7 @@ public:
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 
-    TS_ASSERT_EQUALS( output2DInst->getHistogramNumber(), histogramNumber);
+    TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
   }
 
   void xtestExecGEM()

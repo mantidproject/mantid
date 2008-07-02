@@ -18,7 +18,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class WorkspaceTest: public Workspace
   {
   public:
-	virtual const int getHistogramNumber() const { return 1;}
+	virtual const int getNumberHistograms() const { return 1;}
   
     WorkspaceTest() : data(std::vector<double>(1,1)) {}
     virtual const std::string id() const {return "WorkspaceTest";}
@@ -63,7 +63,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class Workspace1DTest: public WorkspaceTest
   {
   public:
-    const int getHistogramNumber() const { return 1;}
+    const int getNumberHistograms() const { return 1;}
     const std::string id() const {return "Workspace1DTest";}
   };
 
@@ -71,7 +71,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   {
   public:
     const std::string id() const {return "Workspace2DTest";}
-    const int getHistogramNumber() const { return 2;}
+    const int getNumberHistograms() const { return 2;}
     
     void init(const int &NVectors, const int &XLength, const int &YLength)
     {
@@ -86,7 +86,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   {
   public:
     const std::string id() const {return "ManagedWorkspace2D";}
-    const int getHistogramNumber() const { return 2;}
+    const int getNumberHistograms() const { return 2;}
   };
 
   class NotInFactory : public WorkspaceTest

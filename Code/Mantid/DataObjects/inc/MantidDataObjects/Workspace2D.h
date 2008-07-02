@@ -77,7 +77,7 @@ public:
   virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
   
   /// Returns the histogram number
-  const int getHistogramNumber() const;
+  const int getNumberHistograms() const;
 
   //section required for iteration
   virtual int size() const;       

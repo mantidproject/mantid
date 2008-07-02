@@ -51,7 +51,7 @@ public:
     ManagedWorkspace2D ws;
     ws.setTitle("testInit");
     TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) )
-    TS_ASSERT_EQUALS( ws.getHistogramNumber(), 5 )
+    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 )
     TS_ASSERT_EQUALS( ws.blocksize(), 5 )
     TS_ASSERT_EQUALS( ws.size(), 25 )
 
@@ -84,13 +84,13 @@ public:
     TS_ASSERT( ! smallWorkspace.id().compare("ManagedWorkspace2D") )
   }
 
-  void testGetHistogramNumber()
+  void testgetNumberHistograms()
   {
-    TS_ASSERT_EQUALS( smallWorkspace.getHistogramNumber(), 2 )
-    TS_ASSERT_EQUALS( bigWorkspace.getHistogramNumber(), 1250 )
+    TS_ASSERT_EQUALS( smallWorkspace.getNumberHistograms(), 2 )
+    TS_ASSERT_EQUALS( bigWorkspace.getNumberHistograms(), 1250 )
     
     Workspace2D &ws = dynamic_cast<Workspace2D&>(smallWorkspace);
-    TS_ASSERT_EQUALS( ws.getHistogramNumber(), 2);
+    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 2);
   }
 
   void testSetX()

@@ -64,7 +64,7 @@ void ModifyData::exec()
     {
         g_log.information() << "Option 1. Original values:" << std::endl; 
         // Get the count of histograms in the input workspace
-        int histogramCount = inputW->getHistogramNumber();
+        int histogramCount = inputW->getNumberHistograms();
         // Loop over spectra
         for (int i = 0; i < histogramCount; ++i) 
         {

@@ -58,7 +58,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
-    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 2584);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
     // Check two Y arrays have the same number of elements
@@ -151,7 +151,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     // Should be 6 for selected input
-    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 9);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 9);
     
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(1)) == (output2D->dataX(5)) );
@@ -230,40 +230,40 @@ public:
     // Get back the workspaces
     Workspace_sptr output1;
     TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("multiperiod") );
-    TS_ASSERT_EQUALS( output1->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output1->getNumberHistograms(), 4 )
     Workspace_sptr output2;
     TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieve("multiperiod_2") );    
-    TS_ASSERT_EQUALS( output2->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
     Workspace_sptr output3;
     TS_ASSERT_THROWS_NOTHING( output3 = AnalysisDataService::Instance().retrieve("multiperiod_3") );
-    TS_ASSERT_EQUALS( output3->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output3->getNumberHistograms(), 4 )
     Workspace_sptr output4;
     TS_ASSERT_THROWS_NOTHING( output4 = AnalysisDataService::Instance().retrieve("multiperiod_4") );    
-    TS_ASSERT_EQUALS( output4->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output4->getNumberHistograms(), 4 )
     Workspace_sptr output5;
     TS_ASSERT_THROWS_NOTHING( output5 = AnalysisDataService::Instance().retrieve("multiperiod_5") );
-    TS_ASSERT_EQUALS( output5->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output5->getNumberHistograms(), 4 )
     Workspace_sptr output6;
     TS_ASSERT_THROWS_NOTHING( output6 = AnalysisDataService::Instance().retrieve("multiperiod_6") );    
-    TS_ASSERT_EQUALS( output6->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output6->getNumberHistograms(), 4 )
     Workspace_sptr output7;
     TS_ASSERT_THROWS_NOTHING( output7 = AnalysisDataService::Instance().retrieve("multiperiod_7") );
-    TS_ASSERT_EQUALS( output7->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output7->getNumberHistograms(), 4 )
     Workspace_sptr output8;
     TS_ASSERT_THROWS_NOTHING( output8 = AnalysisDataService::Instance().retrieve("multiperiod_8") );    
-    TS_ASSERT_EQUALS( output8->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output8->getNumberHistograms(), 4 )
     Workspace_sptr output9;
     TS_ASSERT_THROWS_NOTHING( output9 = AnalysisDataService::Instance().retrieve("multiperiod_9") );
-    TS_ASSERT_EQUALS( output9->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output9->getNumberHistograms(), 4 )
     Workspace_sptr output10;
     TS_ASSERT_THROWS_NOTHING( output10 = AnalysisDataService::Instance().retrieve("multiperiod_10") );    
-    TS_ASSERT_EQUALS( output10->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output10->getNumberHistograms(), 4 )
     Workspace_sptr output11;
     TS_ASSERT_THROWS_NOTHING( output11 = AnalysisDataService::Instance().retrieve("multiperiod_11") );
-    TS_ASSERT_EQUALS( output11->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output11->getNumberHistograms(), 4 )
     Workspace_sptr output12;
     TS_ASSERT_THROWS_NOTHING( output12 = AnalysisDataService::Instance().retrieve("multiperiod_12") );    
-    TS_ASSERT_EQUALS( output12->getHistogramNumber(), 4 )
+    TS_ASSERT_EQUALS( output12->getNumberHistograms(), 4 )
 
     // The histogram bins should be the same
     TS_ASSERT_EQUALS( output1->dataX(0), output2->dataX(0) )

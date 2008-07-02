@@ -65,7 +65,7 @@ namespace DataHandling
     else if (workspaceID == "Workspace2D")
     {
         const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
-        const int numberOfHist = localworkspace->getHistogramNumber();
+        const int numberOfHist = localworkspace->getNumberHistograms();
 	for(int i=0; i<numberOfHist; i++)
 	{
             std::ostringstream oss;

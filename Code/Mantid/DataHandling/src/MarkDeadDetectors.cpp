@@ -66,7 +66,7 @@ void MarkDeadDetectors::exec()
     // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
     indexList.clear();
     
-    for (int i = 0; i < WS->getHistogramNumber(); ++i)
+    for (int i = 0; i < WS->getNumberHistograms(); ++i)
     {
       int currentSpec = spectraAxis->spectraNo(i);
       if ( spectraSet.find(currentSpec) != spectraSet.end() )

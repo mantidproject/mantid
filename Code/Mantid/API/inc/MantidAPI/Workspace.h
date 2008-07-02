@@ -104,7 +104,7 @@ public:
   virtual std::vector<double>& dataE(int const index)  =0;  
 	
   ///Returns the number of histograms in the workspace
-  virtual const int getHistogramNumber()  const = 0;
+  virtual const int getNumberHistograms()  const = 0;
 
   ///Returns the ErrorHelper applicable for this spectra
   virtual const IErrorHelper* errorHelper(int const index)  const=0;

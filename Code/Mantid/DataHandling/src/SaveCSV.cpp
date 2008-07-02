@@ -139,7 +139,7 @@ void SaveCSV::exec()
 
     // Get info from 2D workspace
 
-    const int numberOfHist = localworkspace->getHistogramNumber();
+    const int numberOfHist = localworkspace->getNumberHistograms();
 
     // Add first x-axis line to output file
 

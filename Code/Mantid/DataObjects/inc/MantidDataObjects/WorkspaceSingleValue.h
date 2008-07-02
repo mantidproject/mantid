@@ -67,7 +67,7 @@ public:
   virtual int blocksize() const 
   { return 1; }
   
-  const int getHistogramNumber() const 
+  const int getNumberHistograms() const 
   { return 1; }
 
   //inheritance redirections

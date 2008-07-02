@@ -18,7 +18,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest: public Workspace
   {
   public:
-    virtual const int getHistogramNumber() const { return 1;}
+    virtual const int getNumberHistograms() const { return 1;}
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
@@ -60,7 +60,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest2 : public Workspace
   {
   public:
-     virtual const int getHistogramNumber() const { return 1;}
+     virtual const int getNumberHistograms() const { return 1;}
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}

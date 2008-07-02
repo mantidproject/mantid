@@ -80,7 +80,7 @@ public:
     
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     int max;
-    TS_ASSERT_EQUALS( max = output2D->getHistogramNumber(), 3)
+    TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3)
     double yy[3] = {36,51,66};
     for (int i = 0; i < max; ++i)
     {
@@ -109,7 +109,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
     
     output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT_EQUALS( output2D->getHistogramNumber(), 5)
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5)
     TS_ASSERT_EQUALS( output2D->dataY(0)[0], 10 );
     TS_ASSERT_EQUALS( output2D->dataY(4)[0], 110 );
     TS_ASSERT_DELTA ( output2D->dataE(2)[0], 7.746, 0.001 );

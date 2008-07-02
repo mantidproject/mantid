@@ -193,7 +193,7 @@ namespace Mantid
     \return Integer
     */
     const int 
-      Workspace2D::getHistogramNumber() const
+      Workspace2D::getNumberHistograms() const
     {
       return getHistogramNumberHelper();
     }

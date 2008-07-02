@@ -75,6 +75,10 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     int size() const {
         return call_method< int >(py_self, "size");
     }
+    
+    const int getNumberHistograms() const {
+        return call_method< const int >(py_self, "getNumberHistograms");
+    }
 
     int blocksize() const {
         return call_method< int >(py_self, "blocksize");
@@ -149,6 +153,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
         .def("setTitle", &Mantid::API::Workspace::setTitle)
         .def("setComment", &Mantid::API::Workspace::setComment)
+	.def("getNumberHistograms", pure_virtual(&Mantid::API::Workspace::getNumberHistograms))
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
         .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())

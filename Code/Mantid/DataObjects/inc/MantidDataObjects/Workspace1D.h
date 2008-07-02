@@ -65,7 +65,7 @@ public:
   ///Returns the size of each block of data returned by the dataX accessors
   virtual int blocksize() const;
   
-  const int getHistogramNumber() const { return 1; }
+  const int getNumberHistograms() const { return 1; }
 
   //inheritance redirections
   ///Returns the x data

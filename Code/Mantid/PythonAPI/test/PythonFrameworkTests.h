@@ -51,7 +51,7 @@ public:
 	{
 		API::Workspace* ws = mgr->getWorkspace("TestWorkspace1");
 
-		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
+		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
 	}
 	
 	void testDeleteWorkspace()
@@ -67,7 +67,7 @@ public:
 		
 		API::Workspace* ws = mgr->getWorkspace("TestWorkspace2");
 
-		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
+		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
 		
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace2"));
 	}
@@ -78,7 +78,7 @@ public:
 		
 		API::Workspace* ws = mgr->getWorkspace("TestWorkspace3");
 
-		TS_ASSERT_EQUALS(ws->getHistogramNumber(), 2584);
+		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
 		
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace3"));
 	}
