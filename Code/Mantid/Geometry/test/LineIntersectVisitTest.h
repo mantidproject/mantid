@@ -44,13 +44,14 @@ public:
 		Sphere B;
 		B.setSurface("s 0.0 0.0 0.0 2");
 		A.Accept(B);
-		std::vector<V3D> pntOut;		
-		pntOut.push_back(V3D(-2.0,0.0,0.0));
+		std::vector<V3D> pntOut;
+		// changed for forward going only intercepts on quadratice surfaces
+		//pntOut.push_back(V3D(-2.0,0.0,0.0));
 		pntOut.push_back(V3D(2.0,0.0,0.0));
-		TS_ASSERT_EQUALS(A.getNPoints(),2);
+		TS_ASSERT_EQUALS(A.getNPoints(),1);
 		TS_ASSERT_EQUALS(A.getPoints(),pntOut);
 		std::vector<double> Dist;
-		Dist.push_back(2.0);
+		//Dist.push_back(2.0);
 		Dist.push_back(2.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);		
 	}
@@ -63,20 +64,21 @@ public:
 		TS_ASSERT_EQUALS(B.getCentre(),V3D(0.0,1.0,0.0));
 		
 		A.Accept(B);
-		TS_ASSERT_EQUALS(A.getNPoints(),2);
+		// change for forward only intercept
+		TS_ASSERT_EQUALS(A.getNPoints(),1);
 		std::vector<V3D> pntOut;
 		pntOut=A.getPoints();
-		TS_ASSERT_DELTA(pntOut[0].X(),-1,0.0000001);
+		//TS_ASSERT_DELTA(pntOut[0].X(),-1,0.0000001);
+		//TS_ASSERT_DELTA(pntOut[0].Y(),0.0,0.0000001);
+		//TS_ASSERT_DELTA(pntOut[0].Z(),0.0,0.0000001);
+		TS_ASSERT_DELTA(pntOut[0].X(),1,0.0000001);
 		TS_ASSERT_DELTA(pntOut[0].Y(),0.0,0.0000001);
 		TS_ASSERT_DELTA(pntOut[0].Z(),0.0,0.0000001);
-		TS_ASSERT_DELTA(pntOut[1].X(),1,0.0000001);
-		TS_ASSERT_DELTA(pntOut[1].Y(),0.0,0.0000001);
-		TS_ASSERT_DELTA(pntOut[1].Z(),0.0,0.0000001);
 
 		std::vector<double> Dist;
 		Dist=A.getDistance();
 		TS_ASSERT_DELTA(Dist[0],1.0,0.0000001);
-		TS_ASSERT_DELTA(Dist[1],1.0,0.0000001);		
+		//TS_ASSERT_DELTA(Dist[1],1.0,0.0000001);		
 	}
 
 	void testAcceptCylinder(){
@@ -90,19 +92,23 @@ public:
 
 		A.Accept(B);
 		std::vector<V3D> pntOut;
-		pntOut.push_back(V3D(-1.0,0.0,0.0));
+		// forward only
+		//pntOut.push_back(V3D(-1.0,0.0,0.0));
 		pntOut.push_back(V3D(1.0,0.0,0.0));
-		TS_ASSERT_EQUALS(A.getNPoints(),2);
+		TS_ASSERT_EQUALS(A.getNPoints(),1);
 		TS_ASSERT_EQUALS(A.getPoints(),pntOut);
 		std::vector<double> Dist;
-		Dist.push_back(1.0);
+		//Dist.push_back(1.0);
 		Dist.push_back(1.0);
 		TS_ASSERT_EQUALS(A.getDistance(),Dist);	
 
 		LineIntersectVisit C(V3D(1.1,0.0,0.0),V3D(-1.0,0.0,0.0));
 		C.Accept(B);
 		TS_ASSERT_EQUALS(C.getNPoints(),2);
-		TS_ASSERT_EQUALS(C.getPoints(),pntOut);
+        std::vector<V3D> pntOut2;
+		pntOut2.push_back(V3D(-1.0,0.0,0.0));
+		pntOut2.push_back(V3D(1.0,0.0,0.0));
+		TS_ASSERT_EQUALS(C.getPoints(),pntOut2);
 	}
 
 	void testAcceptGeneral(){

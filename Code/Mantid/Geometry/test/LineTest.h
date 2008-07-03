@@ -138,9 +138,10 @@ public:
 		std::vector<V3D> pntOut;
 		A.intersect(pntOut,B);
 
-		TS_ASSERT_EQUALS(pntOut.size(),2);		
-		TS_ASSERT_EQUALS(pntOut[0],V3D(-1.0,0.0,0.0));
-		TS_ASSERT_EQUALS(pntOut[1],V3D(1.0,0.0,0.0));
+		// forward only solution for cylinders
+		TS_ASSERT_EQUALS(pntOut.size(),1);		
+		//TS_ASSERT_EQUALS(pntOut[0],V3D(-1.0,0.0,0.0));
+		TS_ASSERT_EQUALS(pntOut[0],V3D(1.0,0.0,0.0));
 	}
 
   	//A Line with equation equivalent to x axis will cut A Cylinder with 1 radius with center at 0,0,0  y axis normal 
@@ -191,9 +192,10 @@ public:
 		B.setSurface("s 0.0 0.0 0.0 2");
 		std::vector<V3D> pntOut;
 		A.intersect(pntOut,B);
-		TS_ASSERT_EQUALS(pntOut.size(),2);		
-		TS_ASSERT_EQUALS(pntOut[0],V3D(-2.0,0.0,0.0));
-		TS_ASSERT_EQUALS(pntOut[1],V3D(2.0,0.0,0.0));
+		// forward only solutions
+		TS_ASSERT_EQUALS(pntOut.size(),1);		
+		//TS_ASSERT_EQUALS(pntOut[0],V3D(-2.0,0.0,0.0));
+		TS_ASSERT_EQUALS(pntOut[0],V3D(2.0,0.0,0.0));
 	}
 
   //A Line with equation equivalent to x axis starting at -10 will cut A sphere with 2 radius with center at 0,0,0 

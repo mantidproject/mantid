@@ -275,7 +275,9 @@ public:
     Track track(V3D(-1,1.5,1),V3D(1,0,0));
 
     // format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
+	// forward only intercepts means that start point should be track origin
+    //expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
+    expectedResults.push_back(TUnit(V3D(-1,1.5,1),
 				    V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,A.getName()));
 
     checkTrackIntercept(A,track,expectedResults);

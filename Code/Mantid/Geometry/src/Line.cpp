@@ -165,7 +165,11 @@ Line::lambdaPair(const int ix,const std::pair<
     Helper function to decide which roots to take.
     The assumption is that lambda has been solved by quadratic
     equation and we require the points that correspond to these
-    values. 
+    values.
+    Note: have changed this so that only positive roots are returned.
+    This makes the quadratic solutions consistent with the ones returned
+    when asking if a line hits a plane. It is not clear if some other use
+    cases exist.
     \param ix : number of solutions in SQ (0,1,2)
     \param SQ : solutions to lambda (the distance along the line
     \param PntOut : Output vector of points (added to)
@@ -179,7 +183,7 @@ Line::lambdaPair(const int ix,const std::pair<
   int nCnt(0);          // number of good points
   
   Geometry::V3D Ans;
-  if (SQ.first.imag()==0.0)
+  if (SQ.first.imag()==0.0 && SQ.first.real()>=0.0) // +ve roots only
     {
       const double lambda=SQ.first.real();
       Geometry::V3D Ans=getPoint(lambda);
@@ -188,7 +192,7 @@ Line::lambdaPair(const int ix,const std::pair<
 	return 1;
       nCnt=1;
     }
-  if (SQ.second.imag()==0.0)
+  if (SQ.second.imag()==0.0 && SQ.second.real()>=0.0) // +ve roots only
     {
       const double lambda=SQ.second.real();
       if (!nCnt)   // first point wasn't good.
