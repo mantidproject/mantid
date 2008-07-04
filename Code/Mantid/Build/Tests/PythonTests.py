@@ -108,7 +108,7 @@ results.append(TestDeleteWorkspace())
 
 f=open('../../../logs/PythonResults.log', 'w')
 for res in results:
-	f.write(res)
+	f.write(res) + '\n'
 	
 f.close
 	
