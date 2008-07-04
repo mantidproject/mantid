@@ -14,6 +14,7 @@ testsBuildSuccess = False
 sconsResult = ''
 testsResult = ''
 testsPass = True
+pythonPass = True
 
 mssgScons = ''
 mssgSconsErr = ''
@@ -21,6 +22,7 @@ mssgTestsBuild = ''
 mssgTestsErr = ''
 mssgTestsRunErr = ''
 mssgTestsResults = ''
+mssgPythonResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
 
@@ -73,6 +75,17 @@ for line in f.readlines():
      
 f.close()
 
+#Get python tests result
+f = open('../logs/PythonResults.log','r')
+
+for line in f.readlines():
+	if line.endswith('FAILED')  != -1):
+		#A test failed
+		pythonPass = False
+	mssgPythonResults = mssgPythonResults + line
+     
+f.close()
+
 #Read svn log
 mssgSvn = open('../logs/svn.log','r').read()
 
@@ -85,7 +98,14 @@ message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
+message += 'Python Tests Passed: ' + str(pythonPass) + "\n\n"
 message += mssgSvn + "\n"
+message += 'UNIT TESTs LOG\n\n'
+message += mssgTestsResults + "\n"
+message += '------------------------------------------------------------------------\n'
+message += 'PYTHON TESTs LOG\n\n'
+message += mssgPythonResults + "\n"
+message += '------------------------------------------------------------------------\n'
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += mssgScons + "\n\n"
 message += mssgSconsErr + "\n"
@@ -94,9 +114,6 @@ message += 'TESTS BUILD LOG\n\n'
 message += mssgTestsBuild + "\n\n"
 message += mssgTestsErr + "\n"
 message += mssgTestsRunErr  + "\n"
-message += '------------------------------------------------------------------------\n'
-message += 'UNIT TEST LOG\n\n'
-message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += mssgDoxy + "\n"
