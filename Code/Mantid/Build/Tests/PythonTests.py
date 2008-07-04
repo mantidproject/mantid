@@ -96,7 +96,7 @@ def TestDeleteWorkspace():
 		return "RESULT: TestDeleteWorkspace FAILED"
 
 #List tests to run here
-results[]
+results = []
 
 results.append(TestLoadRaw())
 results.append(TestGetAlgorithmNames())

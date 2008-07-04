@@ -3,6 +3,7 @@ rm ../logs/testsBuild.log
 rm ../logs/testsBuildErr.log
 rm ../logs/testResults.log
 rm ../logs/testsRunErr.log
+rm ../logs/PythonResults.log
 cd ../checkout/Build/Tests
 pwd
 sh build.sh >> ../../../logs/testsBuild.log 2> ../../../logs/testsBuildErr.log
