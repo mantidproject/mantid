@@ -79,10 +79,10 @@ f.close()
 f = open('../logs/PythonResults.log','r')
 
 for line in f.readlines():
-	if line.endswith('FAILED')  != -1):
+	if line.endswith('FAILED')  != -1:
 		#A test failed
 		pythonPass = False
-	mssgPythonResults = mssgPythonResults + line
+	mssgPythonResults = mssgPythonResults + line + '\n'
      
 f.close()
 
