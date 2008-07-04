@@ -48,7 +48,7 @@ void LoadInstrument::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("Filename","",new MandatoryValidator);
+  declareProperty("Filename","",new MandatoryValidator<std::string>);
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

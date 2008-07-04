@@ -11,7 +11,7 @@ class PropertyManagerHelper : public PropertyManager
 {
 public:
   PropertyManagerHelper() : PropertyManager() {}
-  
+
   using PropertyManager::declareProperty;
   using PropertyManager::setProperty;
 };
@@ -26,7 +26,7 @@ public:
     manager.declareProperty("anotherProp",1.11);
     manager.declareProperty("yetAnotherProp","itsValue");
   }
-  
+
 	void testConstructor()
 	{
 	  PropertyManagerHelper mgr;
@@ -41,7 +41,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty(p) )
 		TS_ASSERT( mgr.existsProperty(p->name()) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
-		
+
 		TS_ASSERT_THROWS( mgr.declareProperty(p), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty(new PropertyWithValue<int>("",0)), std::invalid_argument )
 	}
@@ -51,18 +51,18 @@ public:
 		PropertyManagerHelper mgr;
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 1) )
 		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("1") )
-		
+
 		TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty("", 5), std::invalid_argument )
 	}
 
-	void testdeclareProperty_double() 
+	void testdeclareProperty_double()
 	{
     PropertyManagerHelper mgr;
     BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
-    
+
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5.5), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", 5.5), std::invalid_argument )
 	}
@@ -70,12 +70,12 @@ public:
 	void testdeclareProperty_string()
 	{
     PropertyManagerHelper mgr;
-    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator, "hello") )
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator<std::string>, "hello") )
     TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
     Property *p;
     TS_ASSERT_THROWS_NOTHING( p = mgr.getProperty("myProp") )
     TS_ASSERT( ! p->documentation().compare("hello") )
-    
+
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", "aValue"), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", "aValue"), std::invalid_argument )
 	}
@@ -84,7 +84,7 @@ public:
 	{
 	  TS_ASSERT_THROWS( manager.setProperties(""), Exception::NotImplementedError )
 	}
-	
+
 	void testSetPropertyValue()
 	{
 		manager.setPropertyValue("APROP","10");
@@ -101,7 +101,7 @@ public:
 	  TS_ASSERT_THROWS( manager.setProperty("APROP","value"), std::invalid_argument )
     TS_ASSERT_THROWS_NOTHING( manager.setProperty("AProp",1) )
 	}
-	
+
 	void testExistsProperty()
 	{
 	  Property *p = new PropertyWithValue<int>("sjfudh",0);
@@ -116,12 +116,12 @@ public:
 	void testValidateProperties()
 	{
 	  TS_ASSERT( manager.validateProperties() )
-	  
+
 	  PropertyManagerHelper mgr;
-	  mgr.declareProperty("someProp","", new MandatoryValidator);
+	  mgr.declareProperty("someProp","", new MandatoryValidator<std::string>);
 	  TS_ASSERT( ! mgr.validateProperties() )
 	}
-	
+
 	void testGetPropertyValue()
 	{
 		TS_ASSERT( ! manager.getPropertyValue("APROP").compare("1") )
@@ -136,9 +136,9 @@ public:
 		TS_ASSERT( ! p->value().compare("1") )
 		TS_ASSERT( ! p->documentation().compare("") )
 		TS_ASSERT( typeid(int) == *p->type_info() )
-		
+
 		TS_ASSERT_THROWS( p = manager.getProperty("werhui"), Exception::NotFoundError )
-		
+
 		int i;
 		TS_ASSERT_THROWS_NOTHING( i = manager.getProperty("aprop") )
 		TS_ASSERT_EQUALS( i, 1 );
@@ -151,7 +151,7 @@ public:
     TS_ASSERT_THROWS( int ii = manager.getProperty("anotherprop"), std::runtime_error )
 		std::string ss = manager.getProperty("anotherprop");
     TS_ASSERT( ! ss.compare("1.11") )
-    
+
     // This works, but CANNOT at present declare the string on a separate line and then assign
     //               (as I did for the int & double above)
     std::string sss = manager.getProperty("yetanotherprop");
@@ -169,7 +169,7 @@ public:
 
 private:
   PropertyManagerHelper manager;
-	
+
 };
 
 #endif /*PROPERTYMANAGERTEST_H_*/

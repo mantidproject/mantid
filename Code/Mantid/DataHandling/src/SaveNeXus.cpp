@@ -31,18 +31,18 @@ namespace DataHandling
   }
 
   /** Initialisation method.
-   * 
+   *
    */
   void SaveNeXus::init()
   {
-    declareProperty("FileName","",new MandatoryValidator);
-    declareProperty("EntryName","",new MandatoryValidator);
+    declareProperty("FileName","",new MandatoryValidator<std::string>);
+    declareProperty("EntryName","",new MandatoryValidator<std::string>);
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
   }
-  
+
   /** Executes the algorithm. Reading in the file and creating and populating
    *  the output workspace
-   * 
+   *
    *  @throw runtime_error Thrown if algorithm cannot execute
    */
   void SaveNeXus::exec()

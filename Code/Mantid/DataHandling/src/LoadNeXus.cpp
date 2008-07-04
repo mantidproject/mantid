@@ -30,24 +30,24 @@ namespace DataHandling
   }
 
   /** Initialisation method.
-   * 
+   *
    */
   void LoadNeXus::init()
   {
-    declareProperty("Filename","",new MandatoryValidator);
+    declareProperty("Filename","",new MandatoryValidator<std::string>);
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
   }
-  
+
   /** Executes the algorithm. Reading in the file and creating and populating
    *  the output workspace
-   * 
+   *
    *  @throw runtime_error Thrown if algorithm cannot execute
    */
   void LoadNeXus::exec()
   {
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
-    
+
     // Get a pointer to the workspace factory (later will be shared)
     m_localWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D"));
 
@@ -55,7 +55,7 @@ namespace DataHandling
     setProperty("OutputWorkspace",m_localWorkspace);
 
     testNX();
-    
+
     return;
   }
 

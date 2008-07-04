@@ -18,7 +18,7 @@ public:
     dProp = new PropertyWithValue<double>("doubleProp", 9.99);
     sProp = new PropertyWithValue<std::string>("stringProp", "theValue");
   }
-  
+
   void testConstructor()
   {
     // Test that all the base class member variables are correctly assigned to
@@ -26,18 +26,18 @@ public:
     TS_ASSERT( ! iProp->documentation().compare("") )
     TS_ASSERT( typeid( int ) == *iProp->type_info()  )
     TS_ASSERT( iProp->isDefault() )
-    
+
     TS_ASSERT( ! dProp->name().compare("doubleProp") )
     TS_ASSERT( ! dProp->documentation().compare("") )
     TS_ASSERT( typeid( double ) == *dProp->type_info()  )
     TS_ASSERT( dProp->isDefault() )
-    
+
     TS_ASSERT( ! sProp->name().compare("stringProp") )
     TS_ASSERT( ! sProp->documentation().compare("") )
     TS_ASSERT( typeid( std::string ) == *sProp->type_info()  )
     TS_ASSERT( sProp->isDefault() )
   }
-  
+
   void testValue()
   {
     TS_ASSERT( ! iProp->value().compare("1") )
@@ -52,14 +52,14 @@ public:
     TS_ASSERT_EQUALS( i, 10 )
     TS_ASSERT( ! i.setValue("9.99") )
     TS_ASSERT( ! i.setValue("garbage") )
-    
+
     PropertyWithValue<double> d("test", 5.55);
     TS_ASSERT( d.setValue("-9.99") )
     TS_ASSERT_EQUALS( d, -9.99 )
     TS_ASSERT( d.setValue("0") )
     TS_ASSERT_EQUALS( d, 0 )
     TS_ASSERT( ! d.setValue("garbage") )
-    
+
     PropertyWithValue<std::string> s("test", "test");
     TS_ASSERT( s.setValue("-9.99") )
     TS_ASSERT_EQUALS( s.operator()(), "-9.99" )
@@ -77,14 +77,14 @@ public:
     TS_ASSERT( typeid( int ) == *i.type_info()  )
     TS_ASSERT( i.isDefault() )
     TS_ASSERT_EQUALS( i, 1 )
-    
+
     PropertyWithValue<double> d = *dProp;
     TS_ASSERT( ! d.name().compare("doubleProp") )
     TS_ASSERT( ! d.documentation().compare("") )
     TS_ASSERT( typeid( double ) == *d.type_info()  )
     TS_ASSERT( d.isDefault() )
     TS_ASSERT_EQUALS( d, 9.99 )
-    
+
     PropertyWithValue<std::string> s = *sProp;
     TS_ASSERT( ! s.name().compare("stringProp") )
     TS_ASSERT( ! s.documentation().compare("") )
@@ -92,7 +92,7 @@ public:
     TS_ASSERT( s.isDefault() )
     TS_ASSERT_EQUALS( sProp->operator()(), "theValue" )
   }
-	
+
   void testCopyAssignmentOperator()
   {
     PropertyWithValue<int> i("Prop1",5);
@@ -101,14 +101,14 @@ public:
     TS_ASSERT( ! i.documentation().compare("") )
     TS_ASSERT( ! i.isDefault() )
     TS_ASSERT_EQUALS( i, 1 )
-    
+
     PropertyWithValue<double> d("Prop2",5.5);
     d = *dProp;
     TS_ASSERT( ! d.name().compare("Prop2") )
     TS_ASSERT( ! d.documentation().compare("") )
     TS_ASSERT( ! d.isDefault() )
     TS_ASSERT_EQUALS( d, 9.99 )
-    
+
     PropertyWithValue<std::string> s("Prop3","test");
     s = *sProp;
     TS_ASSERT( ! s.name().compare("Prop3") )
@@ -126,17 +126,17 @@ public:
     PropertyWithValue<std::string> s("Prop3", "testing");
     s = "test";
     TS_ASSERT_EQUALS( s.operator()(), "test" )
-    
+
     PropertyWithValue<int> ii("Prop1.1",6);
     i = ii = 10;
     TS_ASSERT_EQUALS( ii, 10 )
     TS_ASSERT_EQUALS( i, 10 )
-    
+
     PropertyWithValue<double> dd("Prop2.2",6.5);
     d = dd = 1.111;
     TS_ASSERT_EQUALS( dd, 1.111 )
     TS_ASSERT_EQUALS( d, 1.111 )
-    
+
     PropertyWithValue<std::string> ss("Prop3", "testing2");
     s = ss = "tested";
     TS_ASSERT_EQUALS( ss.operator()(), "tested" )
@@ -159,7 +159,7 @@ public:
     std::string str(*sProp);
     TS_ASSERT( ! str.compare("theValue") )
   }
-	
+
   void testAllowedValues()
   {
     TS_ASSERT( iProp->allowedValues().empty() )
@@ -167,9 +167,9 @@ public:
     TS_ASSERT( sProp->allowedValues().empty() )
     // Tests using a ListValidator are below
   }
-	
+
   void testCasting()
-  {	  
+  {
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) )
     PropertyWithValue<int> i("Prop1",5);
     Property *p = dynamic_cast<Property*>(&i);
@@ -178,7 +178,7 @@ public:
     TS_ASSERT( p->setValue("10") )
     TS_ASSERT( ! p->value().compare("10") )
     TS_ASSERT_EQUALS( i, 10 )
-	  
+
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) )
     PropertyWithValue<double> d("Prop2",5.5);
     Property *pp = dynamic_cast<Property*>(&d);
@@ -187,7 +187,7 @@ public:
     TS_ASSERT( pp->setValue("7.777") )
     TS_ASSERT( ! pp->value().compare("7.777") )
     TS_ASSERT_EQUALS( d, 7.777 )
-    
+
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) )
     PropertyWithValue<std::string> s("Prop3", "testing");
     Property *ppp = dynamic_cast<Property*>(&s);
@@ -200,7 +200,7 @@ public:
 
   void testMandatoryValidator()
   {
-    PropertyWithValue<std::string> p("test", "", new MandatoryValidator());
+    PropertyWithValue<std::string> p("test", "", new MandatoryValidator<std::string>());
     TS_ASSERT_EQUALS(p.isValid(),false);
     TS_ASSERT( p.setValue("I'm here"));
     TS_ASSERT_EQUALS(p.isValid(),true);
@@ -239,7 +239,7 @@ public:
     TS_ASSERT_EQUALS(p.value(),"10");
     TS_ASSERT_EQUALS(p.isValid(), true);
   }
-	
+
   void testStringBoundedValidator()
   {
     PropertyWithValue<std::string> p("test", "", new BoundedValidator<std::string>("B","T"));

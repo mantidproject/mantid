@@ -21,31 +21,30 @@ namespace Mantid
     using API::WorkspaceProperty;
     using API::Workspace_sptr;
     using API::Workspace;
- 
+
     // Get a reference to the logger
     Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
 
     /** Initialisation method. Declares properties to be used in algorithm.
-    * 
+    *
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
+      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      declareProperty(new ArrayProperty<double>("params"));
-
+      declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
     }
 
     /** Executes the rebin algorithm
-    * 
-    *  @throw runtime_error Thrown if 
+    *
+    *  @throw runtime_error Thrown if
     */
     void SimpleRebin::exec()
     {
       // retrieve the properties
       std::vector<double> rb_params=getProperty("params");
-      
+
       // Get the input workspace
       Workspace_sptr inputW = getProperty("InputWorkspace");
 
@@ -67,13 +66,13 @@ namespace Mantid
           g_log.error("Can only rebin Gaussian data");
           throw std::invalid_argument("Invalid input Workspace");
         }
-          
-      
+
+
         // get const references to input Workspace arrays (no copying)
         const std::vector<double>& XValues = inputW->dataX(hist);
         const std::vector<double>& YValues = inputW->dataY(hist);
         const std::vector<double>& YErrors = inputW->dataE(hist);
- 
+
         //get references to output workspace data (no copying)
         std::vector<double>& YValues_new=outputW->dataY(hist);
         std::vector<double>& YErrors_new=outputW->dataE(hist);
@@ -90,7 +89,7 @@ namespace Mantid
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputW);
 
-      return;  
+      return;
     }
 
     /** Rebins the data according to new output X array
@@ -141,15 +140,15 @@ namespace Mantid
           delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
           width = xo_high - xo_low;
           if ( (delta <= 0.0) || (width <= 0.0) )
-          {            
+          {
             g_log.error("SimpleRebin: no bin overlap detected");
-            throw std::runtime_error("no bin overlap detected");            
+            throw std::runtime_error("no bin overlap detected");
           }
           /*
           *        yoldp contains counts/unit time, ynew contains counts
           *	       enew contains counts**2
           *        ynew has been filled with zeros on creation
-          */          
+          */
           if(distribution)
           {
             // yold/eold data is distribution
@@ -217,7 +216,7 @@ namespace Mantid
       std::vector<double>& xnew)
     {
       double xcurr, xs;
-      int ibound(2), istep(1), inew(1);      
+      int ibound(2), istep(1), inew(1);
       int ibounds=params.size(); //highest index in params array containing a bin boundary
       int isteps=ibounds-1; // highest index in params array containing a step
 
@@ -227,9 +226,9 @@ namespace Mantid
       while( (ibound <= ibounds) && (istep <= isteps) )
       {
         // if step is negative then it is logarithmic step
-        if ( params[istep] >= 0.0)        
-          xs = params[istep];        
-        else 
+        if ( params[istep] >= 0.0)
+          xs = params[istep];
+        else
           xs = xcurr * fabs(params[istep]);
         /* continue stepping unless we get to almost where we want to */
         if ( (xcurr + xs) < (params[ibound] - (xs * 1.E-6)) )

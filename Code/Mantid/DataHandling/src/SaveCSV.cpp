@@ -1,4 +1,4 @@
-/*    
+/*
  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
  This file is part of Mantid.
@@ -16,7 +16,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
- File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
 
 //----------------------------------------------------------------------
@@ -29,7 +29,7 @@
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below
 
-/* @class SaveCSV 
+/* @class SaveCSV
 
  @author Anders J. Markvardsen, ISIS, RAL
  @date 15/10/2007
@@ -60,21 +60,21 @@ SaveCSV::SaveCSV()
 }
 
 /** Initialisation method. Does nothing at present.
- * 
+ *
  */
 void SaveCSV::init()
 {
   declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-  declareProperty("Filename", "", new Kernel::MandatoryValidator);
+  declareProperty("Filename", "", new Kernel::MandatoryValidator<std::string>);
   declareProperty("Separator", ",");
   declareProperty("LineSeparator", "\n");
 }
 
 /** Executes the algorithm. Retrieve the Filename, separator and Lineseparator
- *  properties and save workspace to Filename. 
- * 
+ *  properties and save workspace to Filename.
+ *
  *  @throw NotImplementedError Thrown if workspace to save is not a 1D or 2D workspace
- *  @throw Mantid::Kernel::Exception::FileError  Thrown if errors with file opening and existence 
+ *  @throw Mantid::Kernel::Exception::FileError  Thrown if errors with file opening and existence
  */
 void SaveCSV::exec()
 {
@@ -84,7 +84,7 @@ void SaveCSV::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  // Get the values of the optional parameters 
+  // Get the values of the optional parameters
   m_separator = getPropertyValue("Separator");
   m_lineSeparator = getPropertyValue("LineSeparator");
   g_log.debug() << "Parameters: Filename='" << m_filename << "' " <<
@@ -103,7 +103,7 @@ void SaveCSV::exec()
 
   // Get the input workspace
   const Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
-  
+
   // get workspace ID string. Used to differentiate between
   // workspace1D and workspace2D in the if statement below
 
@@ -210,7 +210,7 @@ void SaveCSV::exec()
   }
   else
   {
-    outCSV_File.close(); // and should probably delete file from disk as well			
+    outCSV_File.close(); // and should probably delete file from disk as well
     throw Exception::NotImplementedError("SaveCSV currently only works for 1D and 2D workspaces.");
   }
   outCSV_File.close();

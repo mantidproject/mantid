@@ -17,8 +17,8 @@ namespace Kernel
 
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
- 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -34,21 +34,33 @@ namespace Kernel
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-template <typename T> 
+template <typename T>
 class DLLExport ArrayProperty : public PropertyWithValue< std::vector<T> >
 {
 public:
   /** Constructor
-   *  @param name The name to assign to the property
-   *  @param vec  The initial vector of values to assign to the property. 
-   *              Default constructed vector if not provided.
+   *  @param name      The name to assign to the property
+   *  @param vec       The initial vector of values to assign to the property.
+   *                   Default constructed vector if not provided.
+   *  @param validator The validator to use for this property, if required.
    */
-  ArrayProperty(const std::string &name, std::vector<T> vec = std::vector<T>()) :
-    PropertyWithValue< std::vector<T> >(name, vec, new NullValidator<std::vector<T> >)
+  ArrayProperty(const std::string &name, const std::vector<T> &vec,
+                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
+    PropertyWithValue< std::vector<T> >(name, vec, validator)
+  {
+  }
+
+  /** Constructor
+   *  @param name      The name to assign to the property
+   *  @param validator The validator to use for this property, if required
+   */
+  ArrayProperty(const std::string &name,
+                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator)
   {
   }
 
@@ -79,7 +91,7 @@ public:
 
   // Unhide the base class assignment operator
   using PropertyWithValue< std::vector<T> >::operator=;
-  
+
   /** Returns the values stored in the ArrayProperty
    *  @return The stored values as a comma-separated list
    */

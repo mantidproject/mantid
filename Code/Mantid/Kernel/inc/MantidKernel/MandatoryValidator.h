@@ -13,11 +13,13 @@ namespace Kernel
 {
 /** @class MandatoryValidator MandatoryValidator.h Kernel/MandatoryValidator.h
 
-    MandatoryValidator is a validator that requires a string to be set to a none blank value.
+    Validator to check that a property is not left empty.
+    MandatoryValidator is a validator that requires a string to be set to a non-blank value
+    or a vector (i.e. ArrayProperty) is not empty.
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -38,23 +40,24 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MandatoryValidator : public IValidator<std::string>
+template< class TYPE >
+class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
 
   /** Checks the value based on the validators rules
-   * 
+   *
    *  @param value The value to test
    */
-  const bool isValid(const std::string &value) const { return !(value.empty()); }
-  
+  const bool isValid(const TYPE& value) const { return !(value.empty()); }
+
    ///Return the type of the validator
   const std::string getType() const
   {
 	  return "mandatory";
   }
-  
-  IValidator<std::string>* clone() { return new MandatoryValidator(*this); }
+
+  IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }
 };
 
 } // namespace Kernel

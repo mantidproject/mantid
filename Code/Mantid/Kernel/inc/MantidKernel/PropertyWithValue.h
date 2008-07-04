@@ -26,14 +26,14 @@ namespace Kernel
 
     The concrete, templated class for properties.
     The supported types at present are int, double, bool & std::string.
-    
+
     With reference to the Gaudi structure, this class can be seen as the equivalent of both the
     Gaudi class of the same name and its sub-classses.
 
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -50,7 +50,7 @@ namespace Kernel
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -72,7 +72,7 @@ private:
     {
       return boost::lexical_cast<std::string>( value );
     }
-    
+
     /** Performs the lexical_cast for the PropertyWithValue::setValue method
      *  @param value The value to assign to the property
      *  @param result The result of the lexical_cast
@@ -121,7 +121,7 @@ private:
     {
       // Split up comma-separated properties
       typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-      
+
       boost::char_separator<char> sep(",");
       tokenizer values(value, sep);
       std::vector<T> vec;
@@ -144,7 +144,7 @@ private:
       result = vec;
     }
   };
-  
+
 //----------------------------------------------------------------------
 // Now the PropertyWithValue class itself
 //----------------------------------------------------------------------
@@ -154,7 +154,7 @@ public:
    *  @param value The initial value to assign to the property
    *  @param validator The validator to use for this property (this class will take ownership of the validator)
    */
-  PropertyWithValue( const std::string &name, TYPE value, IValidator<TYPE> *validator = new NullValidator<TYPE> ) :
+  PropertyWithValue( const std::string &name, const TYPE& value, IValidator<TYPE> *validator = new NullValidator<TYPE> ) :
     Property( name, typeid( TYPE ) ),
     m_value( value ),
     m_validator( validator )
@@ -166,15 +166,15 @@ public:
     Property( right ),
     m_value( right.m_value ),
     m_validator( right.m_validator->clone() )
-  {  
+  {
   }
-	
+
   /// Virtual destructor
   virtual ~PropertyWithValue()
   {
     delete m_validator;
   }
-	
+
   /** Get the value of the property as a string
    *  @return The property's value
    */
@@ -183,7 +183,7 @@ public:
     PropertyUtility<TYPE> helper;
     return helper.value(m_value);
   }
-	
+
   /** Set the value of the property from a string representation.
    *  Note that "1" & "0" must be used for bool properties rather than true/false.
    *  @param value The value to assign to the property
@@ -221,7 +221,7 @@ public:
     m_validator = right.m_validator->clone();
     return *this;
   }
-	
+
   /** Assignment operator.
    *  Allows assignment of a new value to the property by writing,
    *  e.g., myProperty = 3;
@@ -264,7 +264,7 @@ public:
   {
     return m_validator->isValid(m_value);
   }
-  
+
   /** Returns the type of the validator as a string
    *  \returns String describing the type of the validator
    */
@@ -275,13 +275,13 @@ public:
 
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
-   */  
+   */
   virtual const std::vector<std::string> allowedValues() const
   {
     ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
-    
-    FileValidator *file = dynamic_cast<FileValidator*>(m_validator);	  
-	  
+
+    FileValidator *file = dynamic_cast<FileValidator*>(m_validator);
+
     if (list)
     {
       const std::set<std::string>& vals = list->allowedValues();
@@ -297,18 +297,18 @@ public:
       return std::vector<std::string>();
     }
   }
-  
+
 protected:
   /// The value of the property
   mutable TYPE m_value;  // mutable so that it can be set in WorkspaceProperty::isValid() method
-  
+
 private:
   /// Visitor validator class
   IValidator<TYPE> *m_validator;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
-  
+
   /// Private default constructor
   PropertyWithValue();
 };

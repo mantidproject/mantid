@@ -125,7 +125,7 @@ public:
     }
     else
     {
-      g_log.error(" Data Object '"+name+"' not found");
+      g_log.warning(" Data Object '"+name+"' not found");
       throw Kernel::Exception::NotFoundError("Data Object",name);
     }
   }
