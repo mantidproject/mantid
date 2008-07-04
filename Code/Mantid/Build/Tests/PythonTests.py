@@ -106,7 +106,7 @@ results.append(TestCreateFrameworkManager())
 results.append(TestCreateLoadRawAlgorithm())
 results.append(TestDeleteWorkspace())
 
-f=open('../../logs/PythonResults.log', 'w')
+f=open('../../../logs/PythonResults.log', 'w')
 for res in results:
 	f.write(res)
 	
