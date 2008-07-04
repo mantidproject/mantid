@@ -58,6 +58,17 @@ namespace Mantid
 			const unsigned int& direction()const {return m_direction;};
 			/// print contents of object
 			void printSelf(std::ostream&, const int indent = 0) const;
+			
+			//this is required for boost.python
+			bool operator==(const AlgorithmParameter &other) const 
+			{
+				if (name() == other.name() && value() == other.value() && 
+					type() == other.type() && isDefault() == other.isDefault())
+				{
+					return true;
+				}
+				return false;
+			}
 
 		private:
 			/// The name of the parameter

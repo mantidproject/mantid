@@ -61,6 +61,17 @@ namespace Mantid
       const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;}
       /// print contents of object
       void printSelf(std::ostream&,const int indent = 0)const;
+      
+      //this is required for boost.python
+      bool operator==(const AlgorithmHistory &other) const 
+      {
+	      if (name() == other.name() && version() == other.version() && getParameters() == other.getParameters())
+	      {
+	      	      return true;
+	      }
+	      
+	      return false;
+      }
 
     private:
       /// The name of the Algorithm
