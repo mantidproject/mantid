@@ -56,8 +56,8 @@ namespace Mantid
       std::vector<AlgorithmHistory>& getAlgorithms() { return m_algorithms; };
       ///Returns a reference to the algorithmHistory const
       const std::vector<AlgorithmHistory>& getAlgorithms() const { return m_algorithms; };
-      
-      const std::vector<AlgorithmHistory>& getAlgorithmHistories() const { return m_algorithms; };
+      ///Required for Boost.Python as cannot overload  based on const 
+      const std::vector<AlgorithmHistory>& getAlgorithmHistories() const { return getAlgorithms(); };
 
       void printSelf(std::ostream&, const int indent  = 0) const;
     private:

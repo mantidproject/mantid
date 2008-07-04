@@ -23,6 +23,7 @@ using namespace boost::python;
 typedef std::vector< std::string > string_vec;
 typedef std::vector< double > double_vec;
 typedef std::vector< Mantid::API::AlgorithmHistory > algorithmHistory_vec;
+typedef std::vector< Mantid::API::AlgorithmParameter > algorithmParameter_vec;
 
 struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
 {
@@ -228,7 +229,11 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	
 	class_< algorithmHistory_vec >( "AlgHistVec" )
 	.def( vector_indexing_suite< algorithmHistory_vec >() )
-	;	
+	;
+	
+	class_< algorithmParameter_vec >( "AlgParVec" )
+	.def( vector_indexing_suite< algorithmParameter_vec >() )
+	;
 	
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
@@ -282,6 +287,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getX), return_value_policy< manage_new_object >())
         .def("getY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getY), return_value_policy< manage_new_object >())
         .def("getE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE), return_value_policy< manage_new_object >())
+	.def("getHistory", &Mantid::API::Workspace::getHistory, return_value_policy< copy_const_reference >())
 	;
 
 	//Framework Class

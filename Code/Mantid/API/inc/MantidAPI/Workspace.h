@@ -125,6 +125,8 @@ public:
   WorkspaceHistory& getWorkspaceHistory() { return m_history; }
   ///Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
+  ///Required for Boost.Python as cannot overload  based on const 
+  const WorkspaceHistory& getHistory() const { return getWorkspaceHistory();}
 
   Axis* const getAxis(const int axisIndex) const;
   
