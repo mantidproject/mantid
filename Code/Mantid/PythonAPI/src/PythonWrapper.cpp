@@ -239,9 +239,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
 	
 	//Namespace Functions
-        def("LoadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
-	def("GetAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
-	def("GetWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
+        def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
+	def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
+	def("getWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
 	
 	//IAlgorithm Class
 	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
