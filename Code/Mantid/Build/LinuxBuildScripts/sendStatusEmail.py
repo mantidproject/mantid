@@ -82,7 +82,7 @@ for line in f.readlines():
 	if line.endswith('FAILED')  != -1:
 		#A test failed
 		pythonPass = False
-	mssgPythonResults = mssgPythonResults + line + '\n'
+	mssgPythonResults = mssgPythonResults + line
      
 f.close()
 
