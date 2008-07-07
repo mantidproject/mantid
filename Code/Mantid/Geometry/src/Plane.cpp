@@ -385,14 +385,14 @@ Plane::getBoundingBox(double& xmax, double &ymax, double &zmax, double &xmin, do
 	//(xmax,ymin,zmax)--- (xmax,ymax,zmax)  11
 	//(xmin,ymin,zmax)--- (xmin,ymax,zmax)  12
 	std::vector<V3D> listOfPoints;
-	if(this->side(vertex1)>=0)listOfPoints.push_back(vertex1);
-	if(this->side(vertex2)>=0)listOfPoints.push_back(vertex2);
-	if(this->side(vertex3)>=0)listOfPoints.push_back(vertex3);
-	if(this->side(vertex4)>=0)listOfPoints.push_back(vertex4);
-	if(this->side(vertex5)>=0)listOfPoints.push_back(vertex5);
-	if(this->side(vertex6)>=0)listOfPoints.push_back(vertex6);
-	if(this->side(vertex7)>=0)listOfPoints.push_back(vertex7);
-	if(this->side(vertex8)>=0)listOfPoints.push_back(vertex8);
+	if(this->side(vertex1)<=0)listOfPoints.push_back(vertex1);
+	if(this->side(vertex2)<=0)listOfPoints.push_back(vertex2);
+	if(this->side(vertex3)<=0)listOfPoints.push_back(vertex3);
+	if(this->side(vertex4)<=0)listOfPoints.push_back(vertex4);
+	if(this->side(vertex5)<=0)listOfPoints.push_back(vertex5);
+	if(this->side(vertex6)<=0)listOfPoints.push_back(vertex6);
+	if(this->side(vertex7)<=0)listOfPoints.push_back(vertex7);
+	if(this->side(vertex8)<=0)listOfPoints.push_back(vertex8);
 	V3D edge1,edge2,edge3,edge4,edge5,edge6,edge7,edge8,edge9,edge10,edge11,edge12;
 	if(LineIntersectionWithPlane(vertex1,vertex2,edge1)==1)listOfPoints.push_back(edge1);
 	if(LineIntersectionWithPlane(vertex2,vertex3,edge2)==1)listOfPoints.push_back(edge2);
@@ -410,7 +410,7 @@ Plane::getBoundingBox(double& xmax, double &ymax, double &zmax, double &xmin, do
 //	std::cout<<listOfPoints.size()<<std::endl;
 	if(listOfPoints.size()>0){
 		xmin=ymin=zmin=DBL_MAX;
-		xmax=ymax=zmax=DBL_MIN;
+		xmax=ymax=zmax=-DBL_MAX;
 		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
 //			std::cout<<(*it)<<std::endl;
 			if((*it)[0]<xmin)xmin=(*it)[0];

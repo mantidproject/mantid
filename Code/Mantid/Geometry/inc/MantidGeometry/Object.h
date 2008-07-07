@@ -125,6 +125,8 @@ class DLLExport Object
   // Solid angle
   double solidAngle(const Geometry::V3D& observer) const;
 
+  // Axis Aligned Bounding box
+  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);	
 
 };
 

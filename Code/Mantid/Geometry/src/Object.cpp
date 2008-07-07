@@ -890,6 +890,23 @@ namespace Mantid
       return sum;
     }
 
+	/**
+	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the 
+	 * object and returns them back in max and min points.
+	 *
+	 * @param xmax :: Maximum value for the bounding box in x direction
+	 * @param ymax :: Maximum value for the bounding box in y direction
+	 * @param zmax :: Maximum value for the bounding box in z direction
+	 * @param xmin :: Minimum value for the bounding box in x direction
+	 * @param ymin :: Minimum value for the bounding box in y direction
+	 * @param zmin :: Minimum value for the bounding box in z direction
+	 */
+	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+	{
+		if (!TopRule)
+			return;
+		TopRule->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	}
 
   }  // NAMESPACE MonteCarlo
 

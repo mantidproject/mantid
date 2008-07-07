@@ -294,6 +294,11 @@ Torus::write(std::ostream& OX) const
   return;
 }
 
+void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
+{
+	///TODO:
+}
+
 }  // NAMESPACE MonteCarlo
 
 }  // NAMESPACE Mantid

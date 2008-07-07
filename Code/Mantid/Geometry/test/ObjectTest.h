@@ -586,6 +586,23 @@ void testSolidAngleCube()
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
 }
 
+void testGetBoundingBox()
+/*!
+  Test bounding box for a object capped cylinder
+*/
+{
+    Object A = createCappedCylinder();
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=ymax=zmax=100;
+	xmin=ymin=zmin=-100;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_DELTA(xmax,1.2,0.0001);
+	TS_ASSERT_DELTA(ymax,3.0,0.0001);
+	TS_ASSERT_DELTA(zmax,3.0,0.0001);
+	TS_ASSERT_DELTA(xmin,-3.2,0.0001);
+	TS_ASSERT_DELTA(ymin,-3.0,0.0001);
+	TS_ASSERT_DELTA(zmin,-3.0,0.0001);
+}
 private:
  
   /// Surface type

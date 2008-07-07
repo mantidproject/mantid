@@ -57,7 +57,7 @@ class DLLExport General : public Quadratic
   
   int setSurface(const std::string&);
   void setBaseEqn();
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 
 };
 

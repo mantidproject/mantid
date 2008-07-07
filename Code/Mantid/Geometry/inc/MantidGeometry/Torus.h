@@ -90,6 +90,7 @@ class DLLExport Torus : public Surface
   void setNorm(const Geometry::V3D&);
 
   void write(std::ostream&) const;
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 };
 
 } // NAMESPACE

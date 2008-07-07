@@ -80,10 +80,7 @@ namespace Mantid
       void setBaseEqn();
 	  ///Writes the sphere equatation in MCNP format
       void write(std::ostream&) const; 
-
-	  ///This will get the bounding box for the sphere
-	  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
-								
+	  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
     };
 
   }   // NAMESPACE Geometry

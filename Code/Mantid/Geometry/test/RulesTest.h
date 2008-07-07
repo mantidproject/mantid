@@ -368,6 +368,32 @@ public:
 		TS_ASSERT_EQUALS(A.isValid(V3D(10,0.0,0.0)),1);
 		TS_ASSERT_EQUALS(A.isValid(V3D(10.1,0.0,0.0)),0);//on other side of the plane
 	}
+
+	void testBoundingBox(){
+		SurfPoint *S1,*S2,S3;
+		Plane P1;
+		Sphere Sp1;
+		P1.setSurface("px 5"); //yz plane with x=5
+		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+		S1=new SurfPoint();
+		S2=new SurfPoint();
+		S1->setKey(&P1);
+		S1->setKeyN(10);
+		S2->setKey(&Sp1);
+		S2->setKeyN(-11);
+		Intersection A;
+		A.setLeaves(S1,S2);
+		double xmax,ymax,zmax,xmin,ymin,zmin;
+		xmax=ymax=zmax=DBL_MAX;
+		xmin=ymin=zmin=-DBL_MAX;
+		A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+		TS_ASSERT_DELTA(xmax,10.0,0.001);
+		TS_ASSERT_DELTA(xmin,0.0,0.001);
+		TS_ASSERT_DELTA(ymax,5.0,0.001);
+		TS_ASSERT_DELTA(ymin,-5.0,0.001);
+		TS_ASSERT_DELTA(zmax,5.0,0.0001);
+		TS_ASSERT_DELTA(zmin,-5.0,0.0001);
+	}
 };
 //-----------------------------------------------End of Intersection---------------------------------------
 class testUnion:public CxxTest::TestSuite{

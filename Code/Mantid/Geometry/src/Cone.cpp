@@ -375,7 +375,11 @@ Cone::write(std::ostream& OX) const
   return;
 }
 
-
+void Cone::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
+{
+	///TODO: its bit difficult to find resonable AABB 
+	///For now it will return the same bounding box as input
+}
 
 }  // NAMESPACE Geometry
 

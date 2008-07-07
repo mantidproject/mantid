@@ -94,7 +94,8 @@ class DLLExport Surface
   void writeHeader(std::ostream&) const;
   virtual void write(std::ostream&) const;
   virtual void print() const; 
-
+  //bounding box for the surface
+  virtual void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)=0;	
 
   
 

@@ -177,19 +177,19 @@ public :
 		Xmax=Ymax=Zmax=20;
 		Xmin=Ymin=Zmin=-20;
 		A.getBoundingBox(Xmax,Ymax,Zmax,Xmin,Ymin,Zmin);
-		TS_ASSERT_DELTA(Xmax,20.0,0.0001);
+		TS_ASSERT_DELTA(Xmax,5.0,0.0001);
 		TS_ASSERT_DELTA(Ymax,20.0,0.0001);
 		TS_ASSERT_DELTA(Zmax,20.0,0.0001);
-		TS_ASSERT_DELTA(Xmin,5.0,0.0001);
+		TS_ASSERT_DELTA(Xmin,-20,0.0001);
 		TS_ASSERT_DELTA(Ymin,-20.0,0.0001);
 		TS_ASSERT_DELTA(Zmin,-20.0,0.0001);
 		A.setSurface("p -1 -1 -1 -1"); //removing just one vertex
 		Xmax=Ymax=Zmax=20;
 		Xmin=Ymin=Zmin=0;
 		A.getBoundingBox(Xmax,Ymax,Zmax,Xmin,Ymin,Zmin);
-		TS_ASSERT_DELTA(Xmax,1,0.0001);
-		TS_ASSERT_DELTA(Ymax,1,0.0001);
-		TS_ASSERT_DELTA(Zmax,1,0.0001);
+		TS_ASSERT_DELTA(Xmax,20,0.0001);
+		TS_ASSERT_DELTA(Ymax,20,0.0001);
+		TS_ASSERT_DELTA(Zmax,20,0.0001);
 		TS_ASSERT_DELTA(Xmin,0.0,0.0001);
 		TS_ASSERT_DELTA(Ymin,0.0,0.0001);
 		TS_ASSERT_DELTA(Zmin,0.0,0.0001);
@@ -197,9 +197,9 @@ public :
 		Xmax=Ymax=Zmax=20;
 		Xmin=Ymin=Zmin=0;
 		A.getBoundingBox(Xmax,Ymax,Zmax,Xmin,Ymin,Zmin);
-		TS_ASSERT_DELTA(Xmax,20,0.0001);
-		TS_ASSERT_DELTA(Ymax,20,0.0001);
-		TS_ASSERT_DELTA(Zmax,20,0.0001);
+		TS_ASSERT_DELTA(Xmax,1.732,0.0001);
+		TS_ASSERT_DELTA(Ymax,1.732,0.0001);
+		TS_ASSERT_DELTA(Zmax,1.732,0.0001);
 		TS_ASSERT_DELTA(Xmin,0.0,0.0001);
 		TS_ASSERT_DELTA(Ymin,0.0,0.0001);
 		TS_ASSERT_DELTA(Zmin,0.0,0.0001);

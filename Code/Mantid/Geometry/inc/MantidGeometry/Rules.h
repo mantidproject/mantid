@@ -99,7 +99,8 @@ class DLLExport Rule
   virtual std::string display() const=0;
   /// Abstract Display Address
   virtual std::string displayAddress() const=0;
-  
+
+  virtual void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin) =0; ///bounding box 
 };
 
   /*!
@@ -147,7 +148,7 @@ class DLLExport Intersection : public Rule
   int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;    
   int simplify();      ///< apply general intersection simplification
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 };
 
 
@@ -198,7 +199,7 @@ class DLLExport Union : public Rule
   std::string display() const;
   std::string displayAddress() const;
   int simplify();      ///< apply general intersection simplification
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 };
 
 /*!
@@ -250,7 +251,7 @@ class DLLExport SurfPoint : public Rule
   Surface* getKey() const { return key; }     ///< Get Surface Ptr
   std::string display() const;
   std::string displayAddress() const;  
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 };
 
 /*!
@@ -301,6 +302,7 @@ class DLLExport CompObj : public Rule
   Object* getObj() const { return key; }   ///< Get Object Ptr
   std::string display() const;      
   std::string displayAddress() const;  
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 
 };
 
@@ -348,7 +350,7 @@ class DLLExport CompGrp : public Rule
 
   std::string display() const;      
   std::string displayAddress() const;  
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 };
 
 /*!
@@ -394,7 +396,7 @@ class DLLExport BoolValue : public Rule
 
   std::string display() const;
   std::string displayAddress() const;  
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin); ///bounding box 
 };
 
 }  // NAMESPACE  Geometry

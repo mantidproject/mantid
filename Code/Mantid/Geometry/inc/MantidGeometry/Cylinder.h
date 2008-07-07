@@ -89,7 +89,7 @@ class DLLExport Cylinder : public Quadratic
 
   void write(std::ostream&) const;
   void print() const;
-
+  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 
 };
 

@@ -78,16 +78,26 @@ class DLLExport Cone : public Quadratic
   Geometry::V3D getNormal() const { return Normal; }       
   /// Edge Angle
   double getCosAngle() const { return cangle; } 
+  ///This method returns the distance of the point from the cone
   double distance(const Geometry::V3D&) const;   
 
+  ///This method sets the cone surface using the input string in MCNPx format
   int setSurface(const std::string&);
+  ///This method sets the centre of the cone
   void setCentre(const Geometry::V3D&);              
-  void setNorm(const Geometry::V3D&);       
+  ///This method sets the cone normal
+  void setNorm(const Geometry::V3D&);
+  ///This method sets the angle of the cone
   void setAngle(double const);  
+  ///This method sets the tan angle which will be converted to cos used for MCNPX format
   void setTanAngle(double const);
+  ///This method generates the quadratic equation for cone
   void setBaseEqn();
-
+  ///This method will write the cone equation in MCNP geometry format
   void write(std::ostream&) const;
+
+  ///This will get the bounding box for the cone
+  void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
 
 };
 

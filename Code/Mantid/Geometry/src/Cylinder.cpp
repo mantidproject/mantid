@@ -390,6 +390,69 @@ Cylinder::print() const
   return;
 }
 
+void Cylinder::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
+{
+	//Cylinder bounding box
+	//find the intersection points of the axis of cylinder with the input bounding box.
+	//using the end points calculate the bounding box
+	std::vector<V3D> listOfPoints;
+	double txmax,tymax,tzmax,txmin,tymin,tzmin;
+	txmax=xmax;tymax=ymax;tzmax=zmax;txmin=xmin;tymin=ymin;tzmin=zmin;
+	V3D xminPoint,xmaxPoint,yminPoint,ymaxPoint,zminPoint,zmaxPoint;
+	//xmin and max plane
+	if(Normal[0]!=0)
+	{
+		xminPoint=Centre+Normal*((xmin-Centre[0])/Normal[0]);
+		xmaxPoint=Centre+Normal*((xmax-Centre[0])/Normal[0]);
+		listOfPoints.push_back(xminPoint);
+		listOfPoints.push_back(xmaxPoint);
+	}
+
+	if(Normal[1]!=0)
+	{
+		//ymin plane
+		yminPoint=Centre+Normal*((ymin-Centre[1])/Normal[1]);
+		//ymax plane
+		ymaxPoint=Centre+Normal*((ymax-Centre[1])/Normal[1]);
+		listOfPoints.push_back(yminPoint);
+		listOfPoints.push_back(ymaxPoint);
+	}
+	if(Normal[2]!=0)
+	{
+		//zmin plane
+		zminPoint=Centre+Normal*((zmin-Centre[2])/Normal[2]);
+		//zmax plane
+		zmaxPoint=Centre+Normal*((zmin-Centre[2])/Normal[2]);
+		listOfPoints.push_back(zminPoint);
+		listOfPoints.push_back(zmaxPoint);
+	}	
+	if(listOfPoints.size()>0){
+		xmin=ymin=zmin=DBL_MAX;
+		xmax=ymax=zmax=DBL_MIN;
+		for(std::vector<V3D>::const_iterator it=listOfPoints.begin();it!=listOfPoints.end();++it){
+//			std::cout<<(*it)<<std::endl;
+			if((*it)[0]<xmin)xmin=(*it)[0];
+			if((*it)[1]<ymin)ymin=(*it)[1];
+			if((*it)[2]<zmin)zmin=(*it)[2];
+			if((*it)[0]>xmax)xmax=(*it)[0];
+			if((*it)[1]>ymax)ymax=(*it)[1];
+			if((*it)[2]>zmax)zmax=(*it)[2];
+		}
+		xmax+=Radius;
+		ymax+=Radius;
+		zmax+=Radius;
+		xmin-=Radius;
+		ymin-=Radius;
+		zmin-=Radius;
+		if(xmax>txmax)xmax=txmax;
+		if(xmin<txmin)xmin=txmin;
+		if(ymax>tymax)ymax=tymax;
+		if(ymin<tymin)ymin=tymin;
+		if(zmax>tzmax)zmax=tzmax;
+		if(zmin<tzmin)zmin=tzmin;
+	}
+}
+
 
 }   // NAMESPACE MonteCarlo
 

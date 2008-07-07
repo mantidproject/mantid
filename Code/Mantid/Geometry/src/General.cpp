@@ -144,6 +144,10 @@ General::setBaseEqn()
   return;
 }
 
+void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+{
+	//TODO: Bounding box
+}
 
 }  // NAMESPACE MonteCarlo
 

@@ -271,6 +271,21 @@ public:
     TS_ASSERT_EQUALS(A.getRadius(),0);
   }
 
+  void testGetBoundingBox()
+  {
+    Cylinder A;
+    A.setSurface("cx 5");
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=ymax=zmax=100;
+	xmin=ymin=zmin=-100;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_DELTA(xmax,100,0.0001);
+	TS_ASSERT_DELTA(ymax,  5,0.0001);
+	TS_ASSERT_DELTA(zmax,  5,0.0001);
+	TS_ASSERT_DELTA(xmin,-100,0.0001);
+	TS_ASSERT_DELTA(ymin, -5,0.0001);
+	TS_ASSERT_DELTA(zmin, -5,0.0001);
+  }
 private:
 
   std::string extractString(Surface& pv)
