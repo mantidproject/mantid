@@ -5,7 +5,7 @@
 #include <vector>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-
+#include <cfloat>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Object.h"
