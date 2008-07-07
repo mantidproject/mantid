@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <cmath>
+#include <cfloat>
 #include <complex>
 #include <list>
 #include <vector>
