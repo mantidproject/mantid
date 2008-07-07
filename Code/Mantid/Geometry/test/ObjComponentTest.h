@@ -88,6 +88,7 @@ public:
     TS_ASSERT( ocyl.isOnSide(V3D(10,-3,-0.5)) )
     TS_ASSERT( ocyl.isOnSide(V3D(9.7,1.2,0.3)) )
     TS_ASSERT( ocyl.isOnSide(V3D(10,-3.2,0)) )
+    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
     // Now add a parent with a rotation of its own;
     Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
@@ -97,6 +98,7 @@ public:
     TS_ASSERT( ocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
     TS_ASSERT( ocyl.isOnSide(V3D(-0.5,10,-11.2)) )
     TS_ASSERT( ocyl.isOnSide(V3D(0,9.5,-6.8)) )
+    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
     // Take out component's rotation - it should make no difference because it's about the cylinder axis
     ocyl.setRot(Quat(1,0,0,0));
     // and repeat tests above
@@ -106,6 +108,7 @@ public:
     TS_ASSERT( ocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
     TS_ASSERT( ocyl.isOnSide(V3D(-0.5,10,-11.2)) )
     TS_ASSERT( ocyl.isOnSide(V3D(0,9.5,-6.8)) )
+    TS_ASSERT( ! ocyl.isOnSide(V3D(0,0,0)) )
 
     // An ObjComponent without an associated geometric object is regarded as a point
     ObjComponent comp("noShape");
@@ -150,28 +153,35 @@ public:
     TS_ASSERT_THROWS( comp.interceptSurface(track), Exception::NullPointerException )
   }
 
-private:
-//  boost::shared_ptr<Object> createSphere()
-//  {
-////    std::string S41="s 5 0 0 4.1";         // Sphere
-//    std::string S41="so 4.1";         // Sphere at origin radius 4.1
-//
-//    // First create some surfaces
-//    std::map<int,Surface*> SphSurMap;
-//    SphSurMap[41]=new Sphere();
-//    SphSurMap[41]->setSurface(S41);
-//    SphSurMap[41]->setName(41);
-//
-//    // A sphere
-//    std::string ObjSphere="-41" ;
-//
-//    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
-//    retVal->setObject(41,ObjSphere);
-//    retVal->populate(SphSurMap);
-//
-//    return retVal;
-//  }
+  void testSolidAngleCappedCylinder()
+  {
+    ObjComponent A("ocyl", createCappedCylinder());
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+    double satol=2e-2; // tolerance for solid angle
 
+    TS_ASSERT_DELTA(A.solidAngle(V3D(10,1.7,0)),1.840302,satol);
+    // Surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(10,-1,0.5)),2*M_PI,satol);
+
+    // Add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    A.setParent(&parent);
+
+    // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset of them
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-11.7)),1.840302,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-6.13333333)),1.25663708,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-10)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0.5,10,-10)),2*M_PI,satol);
+
+    // Calling on an ObjComponent without an associated geometric object will throw
+    ObjComponent B("noShape");
+    TS_ASSERT_THROWS( B.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
+  }
+
+private:
   boost::shared_ptr<Object> createCappedCylinder()
   {
     std::string C31="cx 0.5";         // cylinder x-axis radius 0.5

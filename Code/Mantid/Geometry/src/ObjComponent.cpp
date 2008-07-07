@@ -89,6 +89,14 @@ int ObjComponent::interceptSurface(Track& track) const
   return intercepts;
 }
 
+double ObjComponent::solidAngle(const V3D& observer) const
+{
+  // If the form of this component is not defined, throw NullPointerException
+  if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
+  // Otherwise pass through the shifted point to the Object::solidAngle method
+  return shape->solidAngle( factorOutComponentPosition(observer) );
+}
+
 /// Find the point that's in the same place relative to the constituent geometrical Object
 /// if the position and rotation introduced by the Component is ignored
 const V3D ObjComponent::factorOutComponentPosition(const V3D& point) const

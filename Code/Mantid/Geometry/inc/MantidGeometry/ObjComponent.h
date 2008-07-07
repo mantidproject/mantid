@@ -65,6 +65,7 @@ public:
   bool isValid(const V3D& point) const;
   bool isOnSide(const V3D& point) const;
   int interceptSurface(Track& track) const;
+  double solidAngle(const V3D& observer) const;
 
 protected:
   ObjComponent(const ObjComponent&);
