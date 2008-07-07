@@ -89,6 +89,11 @@ int ObjComponent::interceptSurface(Track& track) const
   return intercepts;
 }
 
+/** Finds the approximate solid angle covered by the component when viewed from the point given
+ *  @param observer The position from which the component is being viewed
+ *  @returns The solid angle in steradians
+ *  @throw NullPointerException if the underlying geometrical Object has not been set
+ */
 double ObjComponent::solidAngle(const V3D& observer) const
 {
   // If the form of this component is not defined, throw NullPointerException
