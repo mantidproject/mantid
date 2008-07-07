@@ -14,34 +14,36 @@ Component::Component() : name(), pos(), rot(), parent(NULL)
 }
 
 /*! Constructor by value
- *  @param n :: Component name
- * 	@param reference :: parent Component (optional)
+ *  @param name :: Component name
+ * 	@param parent :: parent Component (optional)
  */
-Component::Component(const std::string& n, Component* reference):name(n),parent(reference)
+Component::Component(const std::string& name, Component* parent) :
+  name(name), pos(), rot(), parent(parent)
 {
 }
 
 /*! Constructor by value
- * 	@param n :: Component name
- * 	@param v :: position
- * 	absolute or relative if the reference if defined
- * 	@param reference :: parent Component
+ * 	@param name :: Component name
+ * 	@param position :: position
+ * 	absolute or relative if the parent is defined
+ * 	@param parent :: parent Component
  */
-Component::Component(const std::string& n, const V3D& v, Component* reference):name(n),pos(v),parent(reference)
+Component::Component(const std::string& name, const V3D& position, Component* parent) :
+  name(name), pos(position), rot(), parent(parent)
 {
-	if (reference) parent=reference;
 }
 
 /*! Constructor
- *  @param n :: Component name
- *  @param v :: position
- *  @param q :: orientation quaternion
- * 	@param reference :: parent Component (optional)
+ *  @param name :: Component name
+ *  @param position :: position (relative to parent, if present)
+ *  @param rotation :: orientation quaternion (relative to parent, if present)
+ * 	@param parent :: parent Component (optional)
  */
-Component::Component(const std::string& n, const V3D& v, const Quat& q, Component* reference):name(n),pos(v),rot(q),parent(reference)
+Component::Component(const std::string& name, const V3D& position, const Quat& rotation, Component* parent) :
+  name(name),pos(position),rot(rotation),parent(parent)
 {
-	if (reference) parent=reference;
 }
+
 Component::~Component(){}
 
 /*! Copy constructor
@@ -51,10 +53,10 @@ Component::~Component(){}
  */
 Component::Component(const Component& comp)
 {
-	name=comp.name;
-	parent=comp.parent;
-	pos=comp.pos;
-	rot=comp.rot;
+  name=comp.name;
+  parent=comp.parent;
+  pos=comp.pos;
+  rot=comp.rot;
 }
 
 /*! Clone method
@@ -63,7 +65,7 @@ Component::Component(const Component& comp)
  */
 Component* Component::clone() const
 {
-	 return new Component(*this);
+  return new Component(*this);
 }
 
 /*! Set the parent. Previous parenting is lost.
@@ -71,7 +73,7 @@ Component* Component::clone() const
  */
 void Component::setParent(Component* comp)
 {
-	parent=comp;
+  parent=comp;
 }
 
 /*! Get a pointer to the parent.
@@ -79,7 +81,7 @@ void Component::setParent(Component* comp)
  */
 const Component* Component::getParent() const
 {
-	return parent;
+  return parent;
 }
 
 /*! Set the name of the component
@@ -87,7 +89,7 @@ const Component* Component::getParent() const
  */
 void Component::setName(const std::string& s)
 {
-	name=s;
+  name=s;
 }
 
 /*! Get the name of the component
@@ -95,7 +97,7 @@ void Component::setName(const std::string& s)
  */
 std::string Component::getName() const
 {
-	return name;
+  return name;
 }
 
 /*! Set the position of the component
@@ -106,7 +108,7 @@ std::string Component::getName() const
  */
 void Component::setPos(double x, double y, double z)
 {
-	pos(x,y,z);
+  pos(x,y,z);
 }
 
 /*! Set the position of the component
@@ -115,7 +117,7 @@ void Component::setPos(double x, double y, double z)
  */
 void Component::setPos(const V3D& v)
 {
-	pos=v;
+  pos=v;
 }
 
 /*! Set the orientation of the component
@@ -124,7 +126,7 @@ void Component::setPos(const V3D& v)
  */
 void Component::setRot(const Quat& q)
 {
-	rot=q;
+  rot=q;
 }
 
 /*! Copy the orientationmatrix from another component
@@ -132,7 +134,7 @@ void Component::setRot(const Quat& q)
  */
 void Component::copyRot(const Component& comp)
 {
-	rot=comp.rot;
+  rot=comp.rot;
 }
 
 /*! Translate the component relative to the parent component
@@ -141,11 +143,12 @@ void Component::copyRot(const Component& comp)
  *  @param z :: translation on the z-axis
  */
 void Component::translate(double x, double y, double z)
+
 {
-	pos[0]+=x;
-	pos[1]+=y;
-	pos[2]+=z;
-	return;
+  pos[0]+=x;
+  pos[1]+=y;
+  pos[2]+=z;
+  return;
 }
 
 /*! Translate the component relative to the parent component
@@ -153,8 +156,8 @@ void Component::translate(double x, double y, double z)
  */
 void Component::translate(const V3D& v)
 {
-	pos+=v;
-	return;
+  pos+=v;
+  return;
 }
 
 /*! Rotate the component relative to the parent component
@@ -162,15 +165,16 @@ void Component::translate(const V3D& v)
  */
 void Component::rotate(const Quat& r)
 {
-	rot=r*rot;
+  rot=r*rot;
 }
+
 /*! Rotate the component by an angle in degrees with respect to an axis.
  * @param angle the number of degrees to rotate
  * @param axis The Vector to rotate around
  */
 void Component::rotate(double angle, const V3D& axis)
 {
-  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been impletmented");
+  throw Kernel::Exception::NotImplementedError("Rotate(double angle, const V3D& axis) has not been implemented");
 }
 
 /** Gets the position relative to the parent
@@ -178,7 +182,7 @@ void Component::rotate(double angle, const V3D& axis)
  */
 V3D Component::getRelativePos() const
 {
-	return pos;
+  return pos;
 }
 
 /** Gets the absolute position of the component
@@ -186,16 +190,20 @@ V3D Component::getRelativePos() const
  */
 V3D Component::getPos() const
 {
-
-	if (!parent)
-	return pos;
-	else
-	{
-		V3D temp(pos);
-		rot.rotate(temp);
-		temp+=parent->getPos();
-		return temp;
-	}
+  if (!parent)
+  {
+    return pos;
+  }
+  else
+  {
+    V3D temp(pos);
+    // RJT: I think that the parent's rotation should be used here instead of the child's
+    // @todo Have a discussion with Laurent to clarify this
+//    rot.rotate(temp);
+    parent->getRelativeRot().rotate(temp);
+    temp+=parent->getPos();
+    return temp;
+  }
 }
 
 /** Gets the rotation relative to the parent
@@ -203,7 +211,22 @@ V3D Component::getPos() const
  */
 const Quat& Component::getRelativeRot() const
 {
-	return rot;
+  return rot;
+}
+
+/** Returns the absolute rotation of the component
+ *  @return A quaternion representing the total rotation
+ */
+const Quat Component::getRotation() const
+{
+  if (!parent)
+  {
+    return rot;
+  }
+  else
+  {
+    return rot*parent->getRotation();
+  }
 }
 
 /** Gets the distance between two components
@@ -212,7 +235,7 @@ const Quat& Component::getRelativeRot() const
  */
 double Component::getDistance(const Component& comp) const
 {
-	return getPos().distance(comp.getPos());
+  return getPos().distance(comp.getPos());
 }
 
 /** Prints a text representation of itself
@@ -220,15 +243,15 @@ double Component::getDistance(const Component& comp) const
  */
 void Component::printSelf(std::ostream& os) const
 {
-	os << "Name : " << name << std::endl;
-	os << "Type: " << this->type() << std::endl;
-	if (parent)
-		os << "Parent: " << parent->name << std::endl;
-	else
-	os << "Parent: None" << std::endl;
+  os << "Name : " << name << std::endl;
+  os << "Type: " << this->type() << std::endl;
+  if (parent)
+    os << "Parent: " << parent->name << std::endl;
+  else
+    os << "Parent: None" << std::endl;
 
-	os << "Position : " << getPos() << std::endl;
-	os << "Orientation :" << rot << std::endl;
+  os << "Position : " << getPos() << std::endl;
+  os << "Orientation :" << rot << std::endl;
 }
 
 /** Prints a text representation
@@ -238,10 +261,9 @@ void Component::printSelf(std::ostream& os) const
  */
 std::ostream& operator<<(std::ostream& os, const Component& comp)
 {
-	comp.printSelf(os);
-	return os;
+  comp.printSelf(os);
+  return os;
 }
-
 
 } //Namespace Geometry
 } //Namespace Mantid

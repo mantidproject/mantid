@@ -7,7 +7,7 @@
 #include <string>
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quat.h" 
+#include "MantidGeometry/Quat.h"
 
 using namespace Mantid::Geometry;
 
@@ -300,14 +300,13 @@ public:
   {
     Quat rot1(1, 1, 1, 1);
     Quat rot2(-1, 2, 1, 3);
-    Quat parentRot(1, 2, 3, 4);
+    Quat parentRot(90.0,V3D(0,0,1));
     CompAssembly comp("testSetRot");
     comp.setPos(V3D(1, 1, 1));
     comp.setRot(rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1);
     comp.rotate(rot2);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot2*rot1);
-    //Note: there is no GetRot function to get the absolute rotation
     //Get the location of the CompAssembly
     V3D beforeParentPos = comp.getPos();
     //assign a parent
@@ -318,8 +317,7 @@ public:
     TS_ASSERT_EQUALS(comp.getRelativePos(), beforeParentPos);
     //but the absolute pos should have changed due to the parents roatation (the parent is centered on the origin)
     TS_ASSERT_DIFFERS(comp.getPos(), beforeParentPos);
-    TS_ASSERT_EQUALS(comp.getPos(), V3D(1, -0.2, 1.4));
-
+    TS_ASSERT_EQUALS(comp.getPos(),V3D(-1,1,1));
   }
 
   void testGetDistance()

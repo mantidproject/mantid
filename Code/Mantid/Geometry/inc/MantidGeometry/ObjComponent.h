@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Component.h"
+#include "MantidGeometry/Track.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
@@ -50,15 +52,19 @@ public:
   ///type string
   virtual std::string type() {return "PhysicalComponent";}
 
-  // Looking to get rid of the first of these constructors in due course
+  // Looking to get rid of the first of these constructors in due course (and probably add others)
   explicit ObjComponent(const std::string& name, Component* parent=0);
-  explicit ObjComponent(const std::string& name, Object* shape, Component* parent=0);
+  explicit ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent=0);
   virtual ~ObjComponent();
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
    */
   virtual Component* clone() const {return new ObjComponent(*this);}
+
+  bool isValid(const V3D& point) const;
+  bool isOnSide(const V3D& point) const;
+  int interceptSurface(Track& track) const;
 
 protected:
   ObjComponent(const ObjComponent&);
@@ -67,10 +73,13 @@ private:
   /// Private, unimplemented copy assignment operator
   ObjComponent& operator=(const ObjComponent&);
 
+  const V3D factorOutComponentPosition(const V3D& point) const;
+  const V3D takeOutRotation(V3D point) const;
+
   /// The phyical geometry representation
-  // Made a const pointer to a const object initially, could remove one or both of these restrictions
-  // if later found to be necessary
-	const Object * const obj;
+  // Defaulted to a const pointer to a const object initially, could remove one or both of
+  // these restrictions if later found to be necessary
+	const boost::shared_ptr<const Object> shape;
 };
 
 } // namespace Geometry

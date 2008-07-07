@@ -1,7 +1,7 @@
 #ifndef MANTID_QUAT_H_
 #define MANTID_QUAT_H_
 
-#include <iostream> 
+#include <iostream>
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -9,20 +9,20 @@ namespace Mantid
   namespace Geometry
   {
     //Forward declarations
-    class V3D; 
+    class V3D;
     class M33;
 
     /** @class Quat Quat.h Geometry/Quat.h
-    @brief Class for quaternions 
+    @brief Class for quaternions
     @version 1.0
     @author Laurent C Chapon, ISIS RAL
     @date 10/10/2007
 
-    Templated class for quaternions. 
+    Templated class for quaternions.
     Quaternions are the 3D generalization of complex numbers
-    Quaternions are used for roations in 3D spaces and  
+    Quaternions are used for roations in 3D spaces and
     often implemented for computer graphics applications.
-    Quaternion can be written q=W+ai+bj+ck where 
+    Quaternion can be written q=W+ai+bj+ck where
     w is the scalar part, and a, b, c the 3 imaginary parts.
     Quaternion multiplication is non-commutative.<br>
     i*j=-j*i=k<br>
@@ -32,7 +32,7 @@ namespace Mantid
     written W=cos(theta/2), a=u*sin(theta/2), b=v*sin(theta/2), c=w*sin(theta/2)
     This class support all arithmetic operations for quaternions
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -55,8 +55,8 @@ namespace Mantid
     {
 
     public:
-      Quat();       
-      Quat(const double, const double, const double, const double); 
+      Quat();
+      Quat(const double, const double, const double, const double);
       Quat(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
@@ -65,7 +65,7 @@ namespace Mantid
       Quat& operator=(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
       void operator()(const double angle, const V3D&);
-      //! Set quaternion from a 3x3 matrix
+      // Set quaternion from a 3x3 matrix
       //void operator()(const M33&);
       void set(const double ww, const double aa, const double bb, const double cc);
       void setAngleAxis(const double _deg, const V3D& _axis);
@@ -74,15 +74,15 @@ namespace Mantid
       double len() const;
       //! Norm squared
       double len2() const;
-      //! Initialized to identity
+      //! Re-initialize to identity
       void init();
-      //! Nornmalize
+      //! Normalize
       void normalize();
       //! Take the complex conjugate
-      void conjugate();  
-      //! Inverse a quaternion (in the sense of rotayion inversion)
+      void conjugate();
+      //! Inverse a quaternion (in the sense of rotation inversion)
       void inverse();
-      //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix 
+      //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
       void GLMatrix(double[16]);

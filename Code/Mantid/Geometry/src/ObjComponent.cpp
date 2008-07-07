@@ -2,6 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/Object.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -13,7 +15,7 @@ namespace Geometry
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, Component* parent) :
-  Component(name,parent), obj(0)
+  Component(name,parent), shape()
 {
 }
 
@@ -22,20 +24,89 @@ ObjComponent::ObjComponent(const std::string& name, Component* parent) :
  *  @param shape  A pointer to the object describing the shape of this component
  *  @param parent The Parent geometry object of this component
  */
-ObjComponent::ObjComponent(const std::string& name, Object* shape, Component* parent) :
-  Component(name,parent), obj(shape)
+ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
+  Component(name,parent), shape(shape)
 {
 }
 
 /// Copy constructor
 ObjComponent::ObjComponent(const ObjComponent& rhs) :
-  Component(rhs), obj(rhs.obj)
+  Component(rhs), shape(rhs.shape)
 {
 }
 
 /// Destructor
 ObjComponent::~ObjComponent()
 {
+}
+
+/// Does the point given lie within this object component?
+bool ObjComponent::isValid(const V3D& point) const
+{
+  // If the form of this component is not defined, just treat as a point
+  if (!shape) return (this->getPos() == point);
+  // Otherwise pass through the shifted point to the Object::isValid method
+  return shape->isValid( factorOutComponentPosition(point) );
+}
+
+/// Does the point given lie on the surface of this object component?
+bool ObjComponent::isOnSide(const V3D& point) const
+{
+  // If the form of this component is not defined, just treat as a point
+  if (!shape) return (this->getPos() == point);
+  // Otherwise pass through the shifted point to the Object::isOnSide method
+  return shape->isOnSide( factorOutComponentPosition(point) );
+}
+
+/** Checks whether the track given will pass through this Component.
+ *  @param track The Track object to test (N.B. Will be modified if hits are found)
+ *  @returns The number of track segments added (i.e. 1 if the track enters and exits the object once each)
+ *  @throw NullPointerException if the underlying geometrical Object has not been set
+ */
+int ObjComponent::interceptSurface(Track& track) const
+{
+  // If the form of this component is not defined, throw NullPointerException
+  if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::interceptSurface","shape");
+
+  V3D trkStart = factorOutComponentPosition(track.getInit());
+  V3D trkDirection = takeOutRotation(track.getUVec());
+
+  Track probeTrack(trkStart, trkDirection);
+  int intercepts = shape->interceptSurface(probeTrack);
+
+  Track::LType::const_iterator it;
+  for (it = probeTrack.begin(); it < probeTrack.end(); ++it)
+  {
+    V3D in = it->PtA;
+    this->getRotation().rotate(in);
+    in += this->getPos();
+    V3D out = it->PtB;
+    this->getRotation().rotate(out);
+    out += this->getPos();
+    track.addTUnit(shape->getName(),in,out,it->Dist);
+  }
+
+  return intercepts;
+}
+
+/// Find the point that's in the same place relative to the constituent geometrical Object
+/// if the position and rotation introduced by the Component is ignored
+const V3D ObjComponent::factorOutComponentPosition(const V3D& point) const
+{
+  // First subtract the component's position, then undo the rotation
+  return takeOutRotation( point - this->getPos() );
+}
+
+/// Rotates a point by the reverse of the component's rotation
+const V3D ObjComponent::takeOutRotation(V3D point) const
+{
+  // Get the total rotation of this component and calculate the inverse (reverse rotation)
+  Quat unRotate = this->getRotation();
+  unRotate.inverse();
+  // Now rotate our point by the angle calculated above
+  unRotate.rotate(point);
+
+  return point;
 }
 
 } // namespace Geometry

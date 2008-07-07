@@ -796,7 +796,7 @@ namespace Mantid
       \return Number of segments added
       */
     {
-      int cnt(0);         // Number of intesections
+      int cnt = UT.count();    // Number of intersections original track
       // Loop over all the surfaces.
 
       LineIntersectVisit LI(UT.getInit(),UT.getUVec());
@@ -809,17 +809,18 @@ namespace Mantid
       const std::vector<double>& dPts(LI.getDistance());
 
       for(unsigned int i=0;i<IPts.size();i++)
+      {
+        if (dPts[i]>0.0)  // only interested in forward going points
         {
-	  if (dPts[i]>0.0)  // only interested in forward going points
-	    {
-	      // Is the point and enterance/exit Point
-	      const int flag=calcValidType(IPts[i],UT.getUVec());
-	      UT.addPoint(ObjName,flag,IPts[i]);
-	      cnt++;
-	    }
-         }
+          // Is the point and enterance/exit Point
+          const int flag=calcValidType(IPts[i],UT.getUVec());
+          UT.addPoint(ObjName,flag,IPts[i]);
+        }
+      }
       UT.buildLink();
-      return UT.count();
+      // Get number of track segments added
+      cnt = UT.count() - cnt;
+      return cnt;
     }
 
     int

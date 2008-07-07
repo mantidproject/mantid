@@ -56,11 +56,11 @@ public:
   //! Create Empty Component at Origin, with no orientation and null parent
   Component();
   //! Create a named component with a parent component (optional)
-  Component(const std::string&, Component* reference=0);
+  explicit Component(const std::string& name, Component* parent=0);
   //! Create a named component with positioning vector, and parent component (optional)
-  Component(const std::string&, const V3D&, Component* reference=0);
+  Component(const std::string& name, const V3D& position, Component* parent=0);
   //! Create a named component with positioning vector, orientation and parent component
-  Component(const std::string&, const V3D&, const Quat&, Component* reference=0);
+  Component(const std::string& name, const V3D& position, const Quat& rotation, Component* parent=0);
   //Copy constructors
   //! Copy constructor
   Component(const Component&);
@@ -97,6 +97,8 @@ public:
   V3D getPos() const;
   //! Get the relative Orientation
   const Quat& getRelativeRot() const;
+  //! Get the absolute orientation of the component
+  const Quat getRotation() const;
   //! Get the distance to another component
   double getDistance(const Component&) const;
   void printSelf(std::ostream&) const;
