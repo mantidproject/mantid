@@ -535,13 +535,17 @@ void testFindPointInCube()
 	Object C =createCuboid(planes);
     TS_ASSERT_EQUALS(C.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,-21,0));
-	// not on principle axis, fails at present
+	// not on principle axis, now works using getBoundingBox
 	planes.clear();
 	planes.push_back("px 0.5"); planes.push_back("px 1.5");
 	planes.push_back("py -22"); planes.push_back("py -21");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
 	Object D =createCuboid(planes);
-    TS_ASSERT_EQUALS(D.getPointInObject(pt),0);
+    TS_ASSERT_EQUALS(D.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(pt,V3D(1.0,-21.5,0));
+    Object E = createSphere();
+    TS_ASSERT_EQUALS(E.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
 }
 
 

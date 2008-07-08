@@ -905,7 +905,7 @@ namespace Mantid
 
 
 	int
-      Object::getPointInObject(Geometry::V3D& point) const
+      Object::getPointInObject(Geometry::V3D& point)
       /*!
       Try to find a point that lies within (or on) the object
       \param point :: on exit set to the point value, if found
@@ -914,9 +914,50 @@ namespace Mantid
     {
       // 
       // Simple method - check if origin in object, if not search directions along
-	  // axes.
-		point=Geometry::V3D(0,0,0);
-		if(this->isValid(point))
+	  // axes. If that fails, try centre of boundingBox, and paths about there
+	  //
+		Geometry::V3D testPt(0,0,0);
+		if(searchForObject(testPt))
+		{
+			point=testPt;
+			return 1;
+		}
+		//
+		// Try centre of bounding box, if one can be found
+		// Note that if initial bounding box estimate greater than ~O(1e16) times
+		// actual size, boundingBox may be wrong.
+		//
+		const double big(1e10);
+		double xmin,ymin,zmin,xmax,ymax,zmax;
+		xmin=ymin=zmin=-big;
+		xmax=ymax=zmax=big;
+		this->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+		if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
+		{
+		   testPt=Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
+		   if(searchForObject(testPt)>0)
+		   {
+			   point=testPt;
+			   return 1;
+		   }
+		}
+		return 0;
+	}
+
+	int
+      Object::searchForObject(Geometry::V3D& point) const
+      /*!
+      Try to find a point that lies within (or on) the object, given a seed point
+      \param point :: on entry the seed point, on exit point in object, if found
+      \return 1 if point found, 0 otherwise
+      */
+    {
+      // 
+      // Method - check if point in object, if not search directions along
+	  // principle axes. 
+	  //
+		Geometry::V3D testPt;
+		if(isValid(point))
 			return 1;
 		std::vector<Geometry::V3D> axes;
 		axes.push_back(Geometry::V3D(1,0,0)); axes.push_back(Geometry::V3D(-1,0,0));
@@ -925,7 +966,7 @@ namespace Mantid
 		std::vector<Geometry::V3D>::const_iterator  dir;
 		for(dir=axes.begin();dir!=axes.end();dir++)
 		{
-			Geometry::Track tr(Geometry::V3D(0,0,0),(*dir));
+			Geometry::Track tr(point,(*dir));
 			if(this->interceptSurface(tr)>0)
 			{
 				point=tr.begin()->PtA;

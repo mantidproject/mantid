@@ -59,6 +59,7 @@ class DLLExport Object
   int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
+  int searchForObject(Geometry::V3D&) const;
 
  protected:
 
@@ -129,7 +130,7 @@ class DLLExport Object
   void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);	
 
   // find internal point to object
-  int getPointInObject(Geometry::V3D& point) const;
+  int getPointInObject(Geometry::V3D& point);
 
 
 };
