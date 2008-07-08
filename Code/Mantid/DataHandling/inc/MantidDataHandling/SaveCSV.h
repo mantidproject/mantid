@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/DataHandlingCommand.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -79,7 +79,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport SaveCSV : public DataHandlingCommand
+    class DLLExport SaveCSV : public API::Algorithm
     {
     public:
       /// Default constructor

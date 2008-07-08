@@ -8,7 +8,7 @@
 #define F_OK 0	/* MinGW has this defined, Visual Studio doesn't */
 #endif
 #endif /* _WIN32 */
-#include "NeXusUtils.h"
+#include "MantidNexus/NeXusUtils.h"
 
 // quick and dirty illustation of NeXus writing of a workspace
 // I've got better code I will bring in from elsewhere later

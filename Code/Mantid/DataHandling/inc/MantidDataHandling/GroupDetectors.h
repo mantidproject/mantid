@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "DataHandlingCommand.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -49,7 +49,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GroupDetectors : public DataHandlingCommand
+  class DLLExport GroupDetectors : public API::Algorithm
 {
 public:
 	GroupDetectors();

@@ -1,0 +1,18 @@
+#For MantidNexus
+
+import os
+import MantidBuild
+
+#GET LIST OF CPPS files
+codeFolder = os.path.abspath('./src')
+listCpps = MantidBuild.getCPPFiles(codeFolder)#Import environment
+Import('env')
+myenv = env.Clone()
+myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1)])
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
+
+#BUILD CODE
+shared = myenv.SharedLibrary('lib/MantidNexus', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidNexus.pdb')
+static = myenv.StaticLibrary('libstatic/MantidNexus', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'],PDB='libstatic/MantidNexus.pdb')
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': ['MantidNexus'] }
+Return('retval')

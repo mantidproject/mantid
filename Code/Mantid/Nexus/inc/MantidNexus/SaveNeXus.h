@@ -1,17 +1,16 @@
-#ifndef MANTID_DATAHANDLING_LOADNEXUS_H_
-#define MANTID_DATAHANDLING_LOADNEXUS_H_
+#ifndef MANTID_DATAHANDLING_SAVENEXUS_H_
+#define MANTID_DATAHANDLING_SAVENEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/DataHandlingCommand.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace NeXus
   {
-    /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h
+    /** @class SaveNeXus SaveNeXus.h MantidDataHandling/SaveNeXus.h
 
     Loads a file in NeXus format and stores it in a 2D workspace 
     (Workspace2D class). LoadNeXus is an algorithm and as such inherits
@@ -47,16 +46,16 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadNeXus : public DataHandlingCommand
+    class DLLExport SaveNeXus : public API::Algorithm
     {
     public:
       /// Default constructor
-      LoadNeXus();
+      SaveNeXus();
 
       /// Destructor
-      ~LoadNeXus() {}
+      ~SaveNeXus() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadNexus";};
+      virtual const std::string name() const { return "SaveNeXus";};
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
@@ -72,16 +71,18 @@ namespace Mantid
 
       /// The name and path of the input file
       std::string m_filename;
+      /// The name and path of the input file
+      std::string m_entryname;
 
       /// Pointer to the local workspace
-      DataObjects::Workspace2D_sptr m_localWorkspace;
+      API::Workspace_sptr m_inputWorkspace;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
     };
 
-  } // namespace DataHandling
+  } // namespace NeXus
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_SAVENEXUS_H_*/

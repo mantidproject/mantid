@@ -7,11 +7,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataHandling/SaveNeXus.h"
+#include "MantidNexus/SaveNeXus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
+using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class SaveNeXusTest : public CxxTest::TestSuite

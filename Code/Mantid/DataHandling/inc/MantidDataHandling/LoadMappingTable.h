@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/DataHandlingCommand.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Logger.h"
 
 //class Workspace;
@@ -54,7 +54,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadMappingTable : public DataHandlingCommand
+    class DLLExport LoadMappingTable : public API::Algorithm
     {
     public:
       /// Default constructor

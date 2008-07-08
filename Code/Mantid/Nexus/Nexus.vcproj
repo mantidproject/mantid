@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="DataHandling"
-	ProjectGUID="{296392B7-E931-4821-A68D-3412E7DD554A}"
-	RootNamespace="DataHandling"
+	Name="Nexus"
+	ProjectGUID="{BE798261-2E8D-4A11-A00A-03693B6606E7}"
+	RootNamespace="Nexus"
 	>
 	<Platforms>
 		<Platform
@@ -19,7 +19,6 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -39,8 +38,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_DATA_HANDLING=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../../Third_Party/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_DATA_OBJECTS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -55,7 +54,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib libnexus-0.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -90,7 +89,6 @@
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
-			UseOfATL="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -109,9 +107,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="3"
-				AdditionalIncludeDirectories="inc;../DataObjects/inc;../API/inc;../../Third_Party/include;../Kernel/inc;../Geometry/inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_DATA_HANDLING=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../API/inc;../../Third_Party/include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_DATA_OBJECTS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
 			<Tool
@@ -125,7 +122,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib libnexus-0.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
@@ -164,51 +161,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\LoadRaw\byte_rel_comp.cpp"
+				RelativePath=".\src\LoadNeXus.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GroupDetectors.cpp"
+				RelativePath=".\src\NeXusUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\LoadRaw\isisraw.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadRaw\item_struct.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadInstrument.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadInstrumentFromRaw.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadLog.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadMappingTable.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadRaw.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\MarkDeadDetectors.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\SaveCSV.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadRaw\vms_convert.cpp"
+				RelativePath=".\src\SaveNeXus.cpp"
 				>
 			</File>
 		</Filter>
@@ -218,79 +179,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
+				RelativePath=".\inc\MantidNexus\LoadNeXus.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidDataHandling\GroupDetectors.h"
+				RelativePath=".\inc\MantidNexus\NeXusUtils.h"
 				>
 			</File>
 			<File
-				RelativePath=".\src\LoadRaw\isisraw.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadRaw\item_struct.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LoadInstrument.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LoadInstrumentFromRaw.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\LoadInstrumentFromRawTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\LoadInstrumentTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LoadLog.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\LoadLogTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LoadMappingTable.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\LoadRawTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\MarkDeadDetectorsTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\SaveCSV.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\SaveCSVTest.h"
+				RelativePath=".\inc\MantidNexus\SaveNeXus.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\SaveNeXusTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LoadRaw\vms_convert.h"
 				>
 			</File>
 		</Filter>

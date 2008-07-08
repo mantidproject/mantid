@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/DataHandlingCommand.h"
+#include "MantidAPI/Algorithm.h"
 #include <set>
 
 //----------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace API
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport LoadInstrument : public DataHandlingCommand
+    class DLLExport LoadInstrument : public API::Algorithm
     {
     public:
       /// Default constructor

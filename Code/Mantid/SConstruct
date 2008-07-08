@@ -208,6 +208,7 @@ subProjs.append('API')
 subProjs.append('DataObjects')
 subProjs.append('Algorithms')
 subProjs.append('DataHandling')
+subProjs.append('Nexus')
 subProjs.append('PythonAPI')
 #subProjs.append('Services')
 

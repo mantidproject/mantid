@@ -3,16 +3,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidNexus/LoadNeXus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "NeXusUtils/NeXusUtils.h"
+#include "MantidNexus/NeXusUtils.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-namespace DataHandling
+namespace NeXus
 {
 
   // Register the algorithm into the algorithm factory
@@ -59,5 +59,5 @@ namespace DataHandling
     return;
   }
 
-} // namespace DataHandling
+} // namespace NeXus
 } // namespace Mantid
