@@ -16,7 +16,7 @@ Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
  *  @param dets The vector of IDetector pointers that this virtual detector will hold
  *  @throw std::invalid_argument If an empty vector is passed as argument
  */
-DetectorGroup::DetectorGroup(const std::vector<IDetector*>& dets) : 
+DetectorGroup::DetectorGroup(const std::vector<IDetector*>& dets) :
   IDetector(),
   m_id(),
   m_detectors()
@@ -27,7 +27,7 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector*>& dets) :
     throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
   }
   std::vector<IDetector*>::const_iterator it;
-  for (it = dets.begin(); it != dets.end(); ++it) 
+  for (it = dets.begin(); it != dets.end(); ++it)
   {
     addDetector(*it);
   }
@@ -46,13 +46,13 @@ void DetectorGroup::addDetector(IDetector* det)
   {
     g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as dead." << std::endl;
   }
-  
+
   // For now at least, the ID is the same as the first detector that is added
   if ( m_detectors.empty() ) m_id = det->getID();
-  
+
   if ( m_detectors.insert( DetCollection::value_type(det->getID(), det) ).second )
   {
-    g_log.debug() << "Detector with ID " << det->getID() << " added to group." << std::endl;
+    //g_log.debug() << "Detector with ID " << det->getID() << " added to group." << std::endl;
   }
   else
   {
@@ -66,7 +66,7 @@ int DetectorGroup::getID() const
 }
 
 /** Returns the position of the DetectorGroup.
- *  In the absence of a full surface/solid angle implementation, this is a simple 
+ *  In the absence of a full surface/solid angle implementation, this is a simple
  *  average of the component detectors (i.e. there's no weighting for size or if one
  *  or more of the detectors is dead). Also, no regard is made to whether a
  *  constituent detector is itself a DetectorGroup - it's just treated as a single,

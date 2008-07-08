@@ -74,9 +74,13 @@ void LoadInstrumentFromRaw::exec()
   instrument->add(source);
   instrument->markAsSource(source);
   double l1;
+  // If user has provided an L1, use that
   if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
   {
-    l1 = 10.0;
+    // Otherwise try and get it from the raw file
+    l1 = iraw.ivpb.i_l1;
+    // Default to 10 if the raw file doesn't have it set
+    if (l1 == 0)  l1 = 10.0;
   }
   source->setPos(0.0,-1.0*l1,0.0);
 

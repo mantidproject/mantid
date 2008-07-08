@@ -23,20 +23,20 @@ using namespace Mantid::DataObjects;
 
 class LoadInstrumentFromRawTest : public CxxTest::TestSuite
 {
-public: 
-  
+public:
+
   LoadInstrumentFromRawTest()
-  {	
+  {
 	//initialise framework manager to allow logging
 	//Mantid::API::FrameworkManager::Instance().initialize();
   }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());    
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
   }
-  
+
   void testExecHET()
   {
     if ( !loader.isInitialized() ) loader.initialize();
@@ -47,33 +47,33 @@ public:
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set properties and check this are set ok
     inputFile = "../../../../Test/Data/HET15869.RAW";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", wsName);
-    
+
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(wsName));
- 
+
     // execute
     TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT( loader.isExecuted() );    
+    TS_ASSERT( loader.isExecuted() );
 
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
-    
+
     boost::shared_ptr<Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "HET     ");
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "Unknown");
-    TS_ASSERT_DELTA( source->getPos().Y(), -10.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Y(), -11.8,0.01);
 
     Component* samplepos = i->getSample();
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
@@ -96,13 +96,13 @@ public:
     TS_ASSERT_THROWS(i->getDetector(718049), Exception::NotFoundError);
   }
 
- 
-  
+
+
 private:
   LoadInstrumentFromRaw loader;
   std::string inputFile;
   std::string wsName;
-  
+
 };
-  
+
 #endif /*LOADINSTRUMENTTESTFROMRAW_H_*/
