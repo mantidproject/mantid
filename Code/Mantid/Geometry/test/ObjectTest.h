@@ -509,6 +509,41 @@ void testTrack_CubePlusInternalEdgeTouchSpheresMiss()
   checkTrackIntercept(TL,expectedResults);
 }
 
+void testFindPointInCube()
+  /*!
+    Test find point in cube
+  */
+{
+    Object A = createUnitCube();
+    // initial guess in object
+	Geometry::V3D pt;
+	TS_ASSERT_EQUALS(A.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(pt,V3D(0,0,0));
+	// initial guess not in object, but on x-axis
+	std::vector<std::string> planes;
+	planes.push_back("px 10"); planes.push_back("px 11");
+	planes.push_back("py -0.5"); planes.push_back("py 0.5");
+    planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
+	Object B =createCuboid(planes);
+    TS_ASSERT_EQUALS(B.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(pt,V3D(10,0,0));
+	// on y axis
+	planes.clear();
+	planes.push_back("px -0.5"); planes.push_back("px 0.5");
+	planes.push_back("py -22"); planes.push_back("py -21");
+    planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
+	Object C =createCuboid(planes);
+    TS_ASSERT_EQUALS(C.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(pt,V3D(0,-21,0));
+	// not on principle axis, fails at present
+	planes.clear();
+	planes.push_back("px 0.5"); planes.push_back("px 1.5");
+	planes.push_back("py -22"); planes.push_back("py -21");
+    planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
+	Object D =createCuboid(planes);
+    TS_ASSERT_EQUALS(D.getPointInObject(pt),0);
+}
+
 
 void testSolidAngleSphere()
   /*!
@@ -581,7 +616,7 @@ void testSolidAngleCube()
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
 }
@@ -795,6 +830,48 @@ private:
     return retVal;
   }
 
+
+  Object createCuboid(std::vector<std::string>& planes)
+  {
+    std::string C1=planes[0];
+    std::string C2=planes[1];
+    std::string C3=planes[2];
+    std::string C4=planes[3];
+    std::string C5=planes[4];
+    std::string C6=planes[5];
+
+    // Create surfaces
+    std::map<int,Surface*> CubeSurMap;
+    CubeSurMap[1]=new Plane();
+    CubeSurMap[2]=new Plane();
+    CubeSurMap[3]=new Plane();
+    CubeSurMap[4]=new Plane();
+    CubeSurMap[5]=new Plane();
+    CubeSurMap[6]=new Plane();
+
+    CubeSurMap[1]->setSurface(C1);
+    CubeSurMap[2]->setSurface(C2);
+    CubeSurMap[3]->setSurface(C3);
+    CubeSurMap[4]->setSurface(C4);
+    CubeSurMap[5]->setSurface(C5);
+    CubeSurMap[6]->setSurface(C6);
+    CubeSurMap[1]->setName(1);
+    CubeSurMap[2]->setName(2);
+    CubeSurMap[3]->setName(3);
+    CubeSurMap[4]->setName(4);
+    CubeSurMap[5]->setName(5);
+    CubeSurMap[6]->setName(6);
+
+    // Cube (id 68) 
+    // using surface ids:  1-6
+    std::string ObjCube="1 -2 3 -4 5 -6";
+
+    Object retVal; 
+    retVal.setObject(68,ObjCube);
+    retVal.populate(CubeSurMap);
+
+    return retVal;
+  }
 
 };
 

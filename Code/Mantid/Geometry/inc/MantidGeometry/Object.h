@@ -128,6 +128,10 @@ class DLLExport Object
   // Axis Aligned Bounding box
   void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);	
 
+  // find internal point to object
+  int getPointInObject(Geometry::V3D& point) const;
+
+
 };
 
 }  // NAMESPACE Geometry

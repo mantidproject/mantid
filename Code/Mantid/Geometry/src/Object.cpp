@@ -878,12 +878,7 @@ namespace Mantid
             Track tr(observer, Geometry::V3D(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)));
             if(this->interceptSurface(tr)>0)
                {
-               // work around for -ve intercepts being reported for some objects
-               // check that track is in same direction as UVec
-               if( tr.getUVec().scalar_prod( tr.begin()->PtB - tr.begin()->PtA ) > 0 )
-                  {
                   sum+=dtheta*dphi*sin(theta);
-                  }
                }
             }
          }
@@ -906,6 +901,38 @@ namespace Mantid
 		if (!TopRule)
 			return;
 		TopRule->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	}
+
+
+	int
+      Object::getPointInObject(Geometry::V3D& point) const
+      /*!
+      Try to find a point that lies within (or on) the object
+      \param point :: on exit set to the point value, if found
+      \return 1 if point found, 0 otherwise
+      */
+    {
+      // 
+      // Simple method - check if origin in object, if not search directions along
+	  // axes.
+		point=Geometry::V3D(0,0,0);
+		if(this->isValid(point))
+			return 1;
+		std::vector<Geometry::V3D> axes;
+		axes.push_back(Geometry::V3D(1,0,0)); axes.push_back(Geometry::V3D(-1,0,0));
+		axes.push_back(Geometry::V3D(0,1,0)); axes.push_back(Geometry::V3D(0,-1,0));
+		axes.push_back(Geometry::V3D(0,0,1)); axes.push_back(Geometry::V3D(0,0,-1));
+		std::vector<Geometry::V3D>::const_iterator  dir;
+		for(dir=axes.begin();dir!=axes.end();dir++)
+		{
+			Geometry::Track tr(Geometry::V3D(0,0,0),(*dir));
+			if(this->interceptSurface(tr)>0)
+			{
+				point=tr.begin()->PtA;
+				return 1;
+			}
+		}
+		return 0;
 	}
 
   }  // NAMESPACE MonteCarlo
