@@ -25,11 +25,11 @@ namespace Mantid
 		Logger& Rebunch::g_log = Logger::get("Rebunch");
 
 		/** Initialisation method. Declares properties to be used in algorithm.
-		* 
+		*
 		*/
 		void Rebunch::init()
 		{
-			declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));  
+			declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
 			declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -39,8 +39,8 @@ namespace Mantid
 		}
 
 		/** Executes the rebin algorithm
-		* 
-		*  @throw runtime_error Thrown if 
+		*
+		*  @throw runtime_error Thrown if
 		*/
 		void Rebunch::exec()
 		{
@@ -55,7 +55,7 @@ namespace Mantid
 			// workspace independent determination of length
 			int histnumber = inputW->size()/inputW->blocksize();
 
-			/*      
+			/*
 			const std::vector<double>& Xold = inputW->dataX(0);
 			const std::vector<double>& Yold = inputW->dataY(0);
 			int size_x=Xold.size();
@@ -77,7 +77,7 @@ namespace Mantid
 			}
 
 			// make output Workspace the same type is the input, but with new length of signal array
-			API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW->id(),histnumber,nx,ny);
+			API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
 
 			for (int hist=0; hist <  histnumber;hist++)
 			{
@@ -118,7 +118,7 @@ namespace Mantid
 			// Assign it to the output workspace property
 			setProperty("OutputWorkspace",outputW);
 
-			return;  
+			return;
 		}
 
 		/** Rebunches histogram data data according to n_bunch input
@@ -149,7 +149,7 @@ namespace Mantid
 
 			int i_in=0;
 			j=0;
-			while (j < wbins )			  
+			while (j < wbins )
 			{
 				ysum=0.0;
 				esum=0.0;
@@ -196,12 +196,12 @@ namespace Mantid
 				}
 				ynew[j]=ysum;
 				enew[j]=sqrt(esum);
-			}		      
+			}
 
 			j=0;
 			xnew[j]=xold[0];
 			j++;
-			for(i=n_bunch;i<hi_index;i+=n_bunch) 
+			for(i=n_bunch;i<hi_index;i+=n_bunch)
 			{
 				xnew[j]=xold[i];
 				j++;
@@ -210,7 +210,7 @@ namespace Mantid
 
 			if(distribution)
 				for(i=0;i<ynew.size();i++)
-				{			
+				{
 					width=xnew[i+1]-xnew[i];
 					ynew[i]=ynew[i]/width;
 					enew[i]=enew[i]/width;
@@ -242,7 +242,7 @@ namespace Mantid
 
 			int i_in=0;
 			j=0;
-			while (j < wbins )			  
+			while (j < wbins )
 			{
 				xsum=0.0;
 				ysum=0.0;
@@ -275,7 +275,7 @@ namespace Mantid
 				xnew[j]=xsum/(double)rem;
 				ynew[j]=ysum/(double)rem;
 				enew[j]=sqrt(esum)/(double)rem;
-			}		      
+			}
 
 		}
 

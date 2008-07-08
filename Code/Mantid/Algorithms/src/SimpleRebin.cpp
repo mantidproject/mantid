@@ -56,7 +56,7 @@ namespace Mantid
       // create new output X axis
       int ntcnew = newAxis(rb_params,XValues_new);
       // make output Workspace the same type is the input, but with new length of signal array
-      API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW->id(),histnumber,ntcnew,ntcnew-1);
+      API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
 
       for (int hist=0; hist <  histnumber;hist++)
       {
@@ -85,7 +85,7 @@ namespace Mantid
 //        outputW->getAxis()->spectraNo(hist)=inputW->getAxis()->spectraNo(hist);
         outputW->setErrorHelper(hist,inputW->errorHelper(hist));
       }
-	  outputW->isDistribution(dist);
+      outputW->isDistribution(dist);
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputW);
 

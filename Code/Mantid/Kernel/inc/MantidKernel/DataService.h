@@ -89,9 +89,14 @@ public:
     //find if the Tobject already exists
     svc_it it = datamap.find(name);
     if (it!=datamap.end())
-     datamap[name] = Tobject;
+    {
+      g_log.warning("Data Object '"+ name +"' replaced in data service.");
+      datamap[name] = Tobject;
+    }
     else
+    {
       add(name,Tobject);
+    }
     return;
   }
 

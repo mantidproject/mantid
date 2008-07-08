@@ -13,7 +13,7 @@ namespace Mantid
 {
   namespace DataObjects
   {
-  
+
     // Get a reference to the logger
     Kernel::Logger& Workspace2D::g_log = Kernel::Logger::get("Workspace2D");
 
@@ -32,12 +32,6 @@ namespace Mantid
     */
     void Workspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
-      if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
-      {
-        g_log.error("All arguments to init must be positive and non-zero");
-        throw std::out_of_range("All arguments to init must be positive and non-zero");
-      }
-
       m_noVectors = NVectors;
       data.resize(m_noVectors);
       m_axes.resize(2);
@@ -46,7 +40,7 @@ namespace Mantid
       m_axes[1] = new API::Axis(API::AxisType::Spectra,m_noVectors);
 
       Histogram1D::RCtype t1,t2;
-      t1.access().resize(XLength); //this call initializes array to zero 
+      t1.access().resize(XLength); //this call initializes array to zero
       t2.access().resize(YLength);
       for (int i=0;i<m_noVectors;i++)
       {
@@ -60,8 +54,8 @@ namespace Mantid
     Get the amount of memory used by the 2D workspace
     \todo to be changed
     */
-    long int 
-      Workspace2D::getMemorySize() const 
+    long int
+      Workspace2D::getMemorySize() const
     {
       return 0;
     }
@@ -71,7 +65,7 @@ namespace Mantid
     \param histnumber :: Index to the histogram
     \param Vec :: Vec to set [Should be typedef]
     */
-    void 
+    void
       Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -86,7 +80,7 @@ namespace Mantid
     \param histnumber :: Index to the histogram
     \param Vec :: Shared ptr base object
     */
-    void 
+    void
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -101,7 +95,7 @@ namespace Mantid
     \param histnumber :: Index to the histogram
     \param PA :: Reference counted histogram
     */
-    void 
+    void
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -114,9 +108,9 @@ namespace Mantid
     /**
     Sets the data in the workspace
     \param histnumber The histogram to be set
-    \param Vec A vector containing the data	
+    \param Vec A vector containing the data
     */
-    void 
+    void
       Workspace2D::setData(const int histnumber, const std::vector<double>& Vec)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -128,11 +122,11 @@ namespace Mantid
     /**
     Sets the data in the workspace (including errors)
     \param histnumber The histogram to be set
-    \param Vec A vector containing the data	
+    \param Vec A vector containing the data
     \param VecErr A vector containing the corresponding errors
     */
-    void 
-      Workspace2D::setData(const int histnumber, const std::vector<double>& Vec, 
+    void
+      Workspace2D::setData(const int histnumber, const std::vector<double>& Vec,
       const std::vector<double>& VecErr)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -146,9 +140,9 @@ namespace Mantid
     /**
     Sets the data in the workspace
     \param histnumber The histogram to be set
-    \param PY A reference counted data range	
+    \param PY A reference counted data range
     */
-    void 
+    void
       Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -160,10 +154,10 @@ namespace Mantid
     /**
     Sets the data in the workspace
     \param histnumber The histogram to be set
-    \param PY A reference counted data range	
+    \param PY A reference counted data range
     \param PE A reference containing the corresponding errors
     */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY, 
+    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype& PY,
       const Histogram1D::RCtype& PE)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -176,10 +170,10 @@ namespace Mantid
     /**
     Sets the data in the workspace
     \param histnumber The histogram to be set
-    \param PY A reference counted data range	
+    \param PY A reference counted data range
     \param PE A reference containing the corresponding errors
     */
-    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY, 
+    void Workspace2D::setData(const int histnumber, const Histogram1D::RCtype::ptr_type& PY,
       const Histogram1D::RCtype::ptr_type& PE)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -192,7 +186,7 @@ namespace Mantid
     /** Gets the number of histograms
     \return Integer
     */
-    const int 
+    const int
       Workspace2D::getNumberHistograms() const
     {
       return getHistogramNumberHelper();
@@ -203,7 +197,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the x data
     */
-    const std::vector<double>& 
+    const std::vector<double>&
       Workspace2D::dataX(const int index) const
     {
       if (index<0 || index>=m_noVectors)
@@ -217,7 +211,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the y data
     */
-    const std::vector<double>& 
+    const std::vector<double>&
       Workspace2D::dataY(const int index) const
     {
       if (index<0 || index>=m_noVectors)
@@ -231,7 +225,7 @@ namespace Mantid
     @param index The number of the histogram
     @return A vector of doubles containing the error data
     */
-    const std::vector<double>& 
+    const std::vector<double>&
       Workspace2D::dataE(const int index) const
     {
       if (index<0 || index>=m_noVectors)
@@ -241,10 +235,10 @@ namespace Mantid
     }
 
     /// get pseudo size
-    int Workspace2D::size() const 
-    { 
-      return data.size() * blocksize(); 
-    } 
+    int Workspace2D::size() const
+    {
+      return data.size() * blocksize();
+    }
 
     ///get the size of each vector
     int Workspace2D::blocksize() const
@@ -260,7 +254,7 @@ namespace Mantid
 
       return data[index].dataX();
     }
-    
+
     ///Returns the y data
     std::vector<double>& Workspace2D::dataY(int const index)
     {
@@ -269,7 +263,7 @@ namespace Mantid
 
       return data[index].dataY();
     }
-    
+
     ///Returns the error data
     std::vector<double>& Workspace2D::dataE(int const index)
     {
@@ -314,14 +308,14 @@ namespace Mantid
 
       data[index].setErrorHelper(errorHelper);
     }
-    
-    
+
+
     /**
     Get the x data of a specified histogram thru python
     \param index The number of the histogram
     \return A vector of doubles containing the x data
     */
-    const std::vector<double>& 
+    const std::vector<double>&
       Workspace2D::getX(const int index) const
     {
       return Workspace2D::dataX(index);
@@ -343,7 +337,7 @@ namespace Mantid
     \param index The number of the histogram
     \return A vector of doubles containing the error data
     */
-    const std::vector<double>& 
+    const std::vector<double>&
       Workspace2D::getE(const int index) const
     {
       return Workspace2D::dataE(index);
@@ -370,7 +364,7 @@ namespace Mantid
     template<> DLLExport
       Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
     {
-      PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop = 
+      PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
       if (prop)
       {
@@ -384,7 +378,7 @@ namespace Mantid
     template<> DLLExport
       boost::shared_ptr<const Mantid::DataObjects::Workspace2D> PropertyManager::getValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >(const std::string &name) const
     {
-      PropertyWithValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >* prop = 
+      PropertyWithValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >* prop =
         dynamic_cast<PropertyWithValue<boost::shared_ptr<const Mantid::DataObjects::Workspace2D> >*>(getPointerToProperty(name));
       if (prop)
       {

@@ -21,9 +21,16 @@ namespace API
     of property also holds the name of the workspace (as used by the AnalysisDataService)
     and an indication of whether it is an input or output to an algorithm (or both).
 
+    The pointers to the workspaces are fetched from the ADS when the properties are validated
+    (i.e. when the PropertyManager::validateProperties() method calls isValid() ).
+    Pointers to output workspaces are also fetched, if they exist, and can then be used within
+    an algorithm. (An example of when this might be useful is if the user wants to write the
+    output into the same workspace as is used for input - this avoids creating a new workspace
+    and the overwriting the old one at the end.)
+
     @author Russell Taylor, Tessella Support Services plc
     @date 10/12/2007
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -40,15 +47,15 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, 
+class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >,
   public Kernel::IStorable, public API::IWorkspaceProperty
 {
-public:  
+public:
   /** Constructor.
    *  Sets the property and workspace names but initialises the workspace pointer to null.
    *  @param name The name to assign to the property
@@ -73,7 +80,7 @@ public:
     m_direction( right.m_direction )
   {
   }
-    
+
   /// Copy assignment operator. Only copies the value (i.e. the pointer to the workspace)
   WorkspaceProperty& operator=( const WorkspaceProperty& right )
   {
@@ -81,10 +88,10 @@ public:
     Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( right );
     return *this;
   }
-  
+
   // Unhide the base class assignment operator
   using Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=;
-  
+
   /// Virtual destructor
   virtual ~WorkspaceProperty()
   {
@@ -111,15 +118,18 @@ public:
     // Setting an empty workspace name is not allowed
     return false;
   }
-  
-  /** Checks whether the property is valid
+
+  /** Checks whether the property is valid.
+   *  To be valid, a property must not have an empty name and must exist in the AnalysisDataService
+   *  if it is an input workspace (Direction::Input or Direction::InOut).
+   *  This method also fetches the pointer to an output workspace, if it exists in the ADS.
    *  @returns True if the property is valid, otherwise false.
    */
   virtual const bool isValid() const
   {
     // Assume that any declared WorkspaceProperty must have a name set (i.e. is not an optional property)
     if ( m_workspaceName.empty() ) return false;
-    
+
     // If the WorkspaceProperty already points to something, don't go looking in the ADS
     if ( ! this->operator()() )
     {
@@ -140,7 +150,7 @@ public:
         }
       }
     }
-    
+
     return true;
   }
 
@@ -160,7 +170,7 @@ public:
       return std::vector<std::string>();
     }
   }
-  
+
   /** If this is an output workspace, store it into the AnalysisDataService
    *  @return True if the workspace is an output workspace and has been stored
    *  @throw std::runtime_error if unable to store the workspace successfully
@@ -168,7 +178,7 @@ public:
   virtual bool store()
   {
     bool result = false;
-	  
+
     if ( m_direction )
     {
       // Check that workspace exists
@@ -179,15 +189,15 @@ public:
     }
     //always clear the internal pointer after storing
     clear();
-    
+
     return result;
   }
-  
+
   Workspace_sptr getWorkspace()
   {
     return this->operator()();
   }
-  
+
   /// returns the direction of the property
   const unsigned int direction() const
   {
@@ -220,11 +230,11 @@ struct Direction
 {
   /// Enum giving the possible directions
   enum
-  { 
+  {
     Input,    ///< An input workspace
     Output,   ///< An output workspace
     InOut,     ///< Both an input & output workspace
-    None 
+    None
   };
 };
 

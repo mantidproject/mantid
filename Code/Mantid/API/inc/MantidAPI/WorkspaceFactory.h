@@ -1,9 +1,9 @@
 #ifndef MANTID_KERNEL_WORKSPACEFACTORY_H_
 #define MANTID_KERNEL_WORKSPACEFACTORY_H_
 
-/* Used to register classes into the factory. creates a global object in an 
+/* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
- * is used in the call to its constructor to effect a call to the factory's 
+ * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
 #define DECLARE_WORKSPACE(classname) \
@@ -25,17 +25,16 @@ namespace Mantid
 {
 namespace API
 {
-
 /** The WorkspaceFactory class is in charge of the creation of all types
     of workspaces. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.
-    
+
     @author Laurent C Chapon, ISIS, RAL
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
-    
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -58,36 +57,36 @@ namespace API
 class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
 {
 public:
- 
   // Unhide the inherited create method
   using Kernel::DynamicFactory<Workspace>::create;
-  
-  Workspace_sptr create(const Workspace_sptr& parent) const;
-  Workspace_sptr create(const std::string& className, const int& NVectors, 
+
+  Workspace_sptr create(const Workspace_sptr& parent,
+                        int NVectors = -1, int XLength = -1, int YLength = -1) const;
+  Workspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;
-  
+
 private:
-	friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
-  
-	/// Private Constructor for singleton class
-	WorkspaceFactoryImpl();	
-	/// Private copy constructor - NO COPY ALLOWED
-	WorkspaceFactoryImpl(const WorkspaceFactoryImpl&);
-	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	WorkspaceFactoryImpl& operator = (const WorkspaceFactoryImpl&);
-	///Private Destructor
-	virtual ~WorkspaceFactoryImpl();
-	
-	/// Static reference to the logger class
-	Kernel::Logger& g_log;
+  friend struct Mantid::Kernel::CreateUsingNew<WorkspaceFactoryImpl>;
+
+  /// Private Constructor for singleton class
+  WorkspaceFactoryImpl();
+  /// Private copy constructor - NO COPY ALLOWED
+  WorkspaceFactoryImpl(const WorkspaceFactoryImpl&);
+  /// Private assignment operator - NO ASSIGNMENT ALLOWED
+  WorkspaceFactoryImpl& operator = (const WorkspaceFactoryImpl&);
+  ///Private Destructor
+  virtual ~WorkspaceFactoryImpl();
+
+  /// Static reference to the logger class
+  Kernel::Logger& g_log;
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
-// this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
+  // this breaks new namespace declaraion rules; need to find a better fix
+  template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl>;
 #endif /* _WIN32 */
-	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
+typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceFactoryImpl> WorkspaceFactory;
 
 } // namespace Kernel
 } // namespace Mantid

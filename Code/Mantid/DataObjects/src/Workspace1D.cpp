@@ -17,35 +17,29 @@ namespace Mantid
     Kernel::Logger& Workspace1D::g_log = Kernel::Logger::get("Workspace1D");
 
     /// Constructor
-    Workspace1D::Workspace1D() : API::Workspace(), 
+    Workspace1D::Workspace1D() : API::Workspace(),
       Histogram1D()
     { }
 
     /// Destructor
     Workspace1D::~Workspace1D()
     {}
-    
+
     /** Sets the size of the workspace and initializes arrays to zero
     *  @param NVectors This value can only be equal to one, otherwise exception is thrown
-    *  @param XLength The number of X data points/bin boundaries 
-    *  @param YLength The number of data/error points 
+    *  @param XLength The number of X data points/bin boundaries
+    *  @param YLength The number of data/error points
     */
     void Workspace1D::init(const int &NVectors, const int &XLength, const int &YLength)
     {
-      if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
-      {
-        g_log.error("All arguments to init must be positive and non-zero");
-        throw std::out_of_range("All arguments to init must be positive and non-zero");
-      }
-
-      if(NVectors > 1)
-        throw std::invalid_argument("Workspace1D::init() cannot create a workspace1D with Nvectors > 1");
+      if(NVectors != 1)
+        throw std::out_of_range("Workspace1D::init() cannot create a workspace1D with Nvectors > 1");
 
       m_axes.resize(1);
       m_axes[0] = new API::RefAxis(XLength, this);
 
       Histogram1D::RCtype t1,t2;
-      t1.access().resize(XLength);//this call initializes array to zero  
+      t1.access().resize(XLength);//this call initializes array to zero
       t2.access().resize(YLength);
       this->setX(t1);
       // Y,E arrays populated
@@ -70,7 +64,7 @@ namespace Mantid
         //set the reteurn value to the length of the first vector
         retVal = size();
       }
-      return retVal; 
+      return retVal;
     }
 
 
@@ -90,7 +84,7 @@ namespace Kernel
     template<> DLLExport
       Mantid::DataObjects::Workspace1D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace1D_sptr>(const std::string &name) const
     {
-      PropertyWithValue<Mantid::DataObjects::Workspace1D_sptr>* prop = 
+      PropertyWithValue<Mantid::DataObjects::Workspace1D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace1D_sptr>*>(getPointerToProperty(name));
       if (prop)
       {

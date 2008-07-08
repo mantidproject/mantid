@@ -18,7 +18,7 @@ WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
 }
 
 /** Private destructor
- *  Prevents client from calling 'delete' on the pointer handed 
+ *  Prevents client from calling 'delete' on the pointer handed
  *  out by Instance
  */
 WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
@@ -27,21 +27,38 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
 }
 
 /** Create a new instance of the same type of workspace as that given as argument.
- *  Also initialises the workspace to be the same size as the parent.
- *  @param  parent A shared pointer to the parent workspace
+ *  If the optional size parameters are given, the workspace will be initialised using
+ *  those; otherwise it will be initialised to the same size as the parent.
+ *  This method should be used when you want to carry over the Workspace data members
+ *  relating to the Instrument, Spectra-Detector Map, Sample & Axes to the new workspace.
+ *  @param  parent    A shared pointer to the parent workspace
+ *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in the workspace
+ *  @param  XLength   (Optional) The number of X data points/bin boundaries in each vector (must all be the same)
+ *  @param  YLength   (Optional) The number of data/error points in each vector (must all be the same)
  *  @return A shared pointer to the newly created instance
+ *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
+Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent,
+                                            int NVectors, int XLength, int YLength) const
 {
   Workspace_sptr ws = this->create(parent->id());
-  // Find out the size of the parent
-  const int XLength = parent->dataX(0).size();
-  const int YLength = parent->blocksize();
-  const int NVectors = parent->size() / YLength;
+
+  // If the size parameters have not been specified, get them from the parent
+  if ( YLength < 0 )
+  {
+    // Find out the size of the parent
+    XLength = parent->dataX(0).size();
+    YLength = parent->blocksize();
+    NVectors = parent->size() / YLength;
+  }
+
   ws->initialize(NVectors,XLength,YLength);
+
+  // Copy over certain parent data members
   ws->setInstrument(parent->getInstrument());
   ws->setSpectraMap(parent->getSpectraMap());
+  ws->setSample(parent->getSample());
   for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
   {
     // Need to delete the existing axis created in init above
@@ -49,18 +66,20 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent) const
     // Now set to a copy of the parent workspace's axis
     ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
   }
+
   return ws;
 }
 
 /** Creates a new instance of the class with the given name, and allocates memory for the arrays
  *  where it creates and initialises either a Workspace1D, Workspace2D or a ManagedWorkspace2D
- *  according to the size requested and the value of the configuration parameter 
- *  ManagedWorkspace.MinSize (default 25M elements) Workspace2D only.    
+ *  according to the size requested and the value of the configuration parameter
+ *  ManagedWorkspace.MinSize (default 25M elements) Workspace2D only.
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the workspace
  *  @param  XLength   The number of X data points/bin boundaries in each vector (must all be the same)
  *  @param  YLength   The number of data/error points in each vector (must all be the same)
  *  @return A shared pointer to the newly created instance
+ *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
 Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors,
@@ -87,7 +106,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
   {
     ws = this->create(className);
   }
-  
+
   ws->initialize(NVectors,XLength,YLength);
   return ws;
 }

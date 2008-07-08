@@ -36,6 +36,13 @@ Workspace::~Workspace()
  */
 void Workspace::initialize(const int &NVectors, const int &XLength, const int &YLength)
 {
+  // Check validity of arguments
+  if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
+  {
+    g_log.error("All arguments to init must be positive and non-zero");
+    throw std::out_of_range("All arguments to init must be positive and non-zero");
+  }
+
   // Bypass the initialization if the workspace has already been initialized.
   if (m_isInitialized) return;
 
@@ -55,7 +62,7 @@ void Workspace::initialize(const int &NVectors, const int &XLength, const int &Y
 }
 
 /** Set the title of the workspace
- * 
+ *
  *  @param t The title
  */
 void Workspace::setTitle(const std::string& t)
@@ -63,7 +70,7 @@ void Workspace::setTitle(const std::string& t)
   m_title=t;
 }
 /** Set the comment field of the workspace
- * 
+ *
  *  @param c The comment
  */
 void Workspace::setComment(const std::string& c)
@@ -72,7 +79,7 @@ void Workspace::setComment(const std::string& c)
 }
 
 /** Set the Spectra to DetectorMap
- * 
+ *
  * \param map:: Shared pointer to the SpectraDetectorMap
  */
 void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
@@ -81,7 +88,7 @@ void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
 }
 
 /** Set the instrument
- * 
+ *
  * \param instr Shared pointer to an instrument.
  */
 void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
@@ -90,7 +97,7 @@ void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
 }
 
 /** Set the sample
- * 
+ *
  *  @param sample A shared pointer to the sample
  */
 void Workspace::setSample(const boost::shared_ptr<Sample>& sample)
@@ -99,7 +106,7 @@ void Workspace::setSample(const boost::shared_ptr<Sample>& sample)
 }
 
 /** Get the workspace title
- * 
+ *
  *  @return The title
  */
 const std::string& Workspace::getTitle() const
@@ -108,7 +115,7 @@ const std::string& Workspace::getTitle() const
 }
 
 /** Get the workspace comment
- * 
+ *
  *  @return The comment
  */
 const std::string& Workspace::getComment() const
@@ -117,7 +124,7 @@ const std::string& Workspace::getComment() const
 }
 
 /** Get a shared pointer to the SpectraDetectorMap associated with this workspace
- * 
+ *
  *  @return The SpectraDetectorMap
  */
 boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
@@ -126,7 +133,7 @@ boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
 }
 
 /** Get a shared pointer to the instrument associated with this workspace
- * 
+ *
  *  @return The instrument class
  */
 boost::shared_ptr<Instrument> Workspace::getInstrument() const
@@ -135,7 +142,7 @@ boost::shared_ptr<Instrument> Workspace::getInstrument() const
 }
 
 /** Get the sample associated with this workspace
- * 
+ *
  *  @return The sample class
  */
 boost::shared_ptr<Sample> Workspace::getSample() const
@@ -153,7 +160,7 @@ Axis* const Workspace::getAxis(const int axisIndex) const
   {
     throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
   }
-  
+
   return m_axes[axisIndex];
 }
 
@@ -187,7 +194,7 @@ namespace Kernel
 template<> DLLExport
 Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
 {
-  PropertyWithValue<Mantid::API::Workspace_sptr>* prop = 
+  PropertyWithValue<Mantid::API::Workspace_sptr>* prop =
                     dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr>*>(getPointerToProperty(name));
   if (prop)
   {
