@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,14 +27,15 @@ public:
     std::vector<double> lVecY; for(double d=0.0; d<0.95; d=d+0.1) lVecY.push_back(d);
     std::vector<double> lVecE; for(double d=0.0; d<0.95; d=d+0.1) lVecE.push_back(d);
    
-    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace1D");
+    Workspace_sptr localWorkspace = Workspace_sptr(new Workspace1D);
+    
     Workspace1D_sptr localWorkspace1D = boost::dynamic_pointer_cast<Workspace1D>(localWorkspace);
-
+   
     localWorkspace1D->setX(lVecX);
     localWorkspace1D->setData(lVecY, lVecE);
 
     AnalysisDataService::Instance().add("SAVENEXUSTEST-testSpace", localWorkspace);
-  }
+}
   
   
   void testInit()
@@ -45,6 +47,7 @@ public:
   
   void testExec()
   {
+    
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
     algToBeTested.setPropertyValue("InputWorkspace", "SAVENEXUSTEST-testSpace");     
