@@ -121,8 +121,8 @@ public:
     
     // Check that a couple of x bin boundaries have been correctly converted
     x = output2D->dataX(103);
-    TS_ASSERT_DELTA( x[5], 1.5808, 0.001 );
-    TS_ASSERT_DELTA( x[10], 3.1617, 0.001 );
+    TS_ASSERT_DELTA( x[5], 1.4854, 0.001 );
+    TS_ASSERT_DELTA( x[10], 2.9709, 0.001 );
     // Just check that an input bin boundary is unchanged
     std::vector<double> xIn = input2D->dataX(66);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );

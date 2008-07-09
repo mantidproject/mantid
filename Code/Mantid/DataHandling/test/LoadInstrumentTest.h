@@ -105,9 +105,9 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,2.512,0.0001);
+    TS_ASSERT_DELTA(d,3.3158,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,3.3158,0.0001);
 
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
