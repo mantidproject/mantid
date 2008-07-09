@@ -1290,7 +1290,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 				actionUndo->setEnabled(true);
 				actionRedo->setEnabled(true);
 			}
-		} else if (w->inherits("Matrix")){//  Mantid changes
+		} else if (w->inherits("Matrix")){//Mantid changes
 			actionTableRecalculate->setEnabled(true);
 			menuBar()->insertItem(tr("3D &Plot"), plot3DMenu);
 			menuBar()->insertItem(tr("&Matrix"), matrixMenu);
@@ -1318,8 +1318,8 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 			connect(actionNoteExecute, SIGNAL(activated()), w, SLOT(execute()));
 			connect(actionNoteExecuteAll, SIGNAL(activated()), w, SLOT(executeAll()));
 			connect(actionNoteEvaluate, SIGNAL(activated()), w, SLOT(evaluate()));
-		} else
-			disableActions();
+		} else if (!mantidUI->menuAboutToShow(w))
+            disableActions();
 	} else
 		disableActions();
 
@@ -7799,6 +7799,8 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow* w)
 			btnPointer->setChecked(true);
 	} else if (w->isA("Matrix"))
 		remove3DMatrixPlots((Matrix*)w);
+    else
+        mantidUI->removeWindowFromLists(w);
 
 	if (hiddenWindows->contains(w))
 		hiddenWindows->takeAt(hiddenWindows->indexOf(w));
@@ -8261,7 +8263,9 @@ void ApplicationWindow::timerEvent ( QTimerEvent *e)
 
 void ApplicationWindow::dropEvent( QDropEvent* e )
 {
-	QStringList fileNames;
+    if (mantidUI->drop(e)) return;//Mantid
+
+    QStringList fileNames;
 	if (Q3UriDrag::decodeLocalFiles(e, fileNames)){
 		QList<QByteArray> lst = QImageReader::supportedImageFormats() << "JPG";
 		QStringList asciiFiles;
@@ -8294,11 +8298,20 @@ void ApplicationWindow::dropEvent( QDropEvent* e )
 void ApplicationWindow::dragEnterEvent( QDragEnterEvent* e )
 {
 	if (e->source()){
-		e->ignore();
+		//e->ignore();//Mantid
+        e->accept();//Mantid
 		return;
 	}
+    else//Mantid
+        e->accept(Q3UriDrag::canDecode(e));
+}
 
-	e->accept(Q3UriDrag::canDecode(e));
+//Mantid
+void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
+{
+    if (centralWidget()->geometry().contains(e->pos())) e->accept();
+    else
+        e->ignore();
 }
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
@@ -8494,7 +8507,7 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
 					cm.insertItem(tr("Function"), &plots);
 				}
 			}
-		}
+        }
 		cm.exec(p);
 	}
 }
@@ -8643,6 +8656,7 @@ void ApplicationWindow::showWindowContextMenu()
 	if (!w)
 		return;
 
+
 	QMenu cm(this);
 	QMenu plot3D(this);
 	if (w->isA("MultiLayer")){
@@ -8739,7 +8753,8 @@ void ApplicationWindow::showWindowContextMenu()
             cm.addAction(actionSetMatrixProperties);
             cm.addAction(actionSetMatrixDimensions);
 		}
-	}
+	} else
+            mantidUI->showContextMenu(cm,w);//Mantid
 	cm.exec(QCursor::pos());
 }
 
@@ -12373,6 +12388,9 @@ Graph3D * ApplicationWindow::openMatrixPlot3D(const QString& caption, const QStr
 Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 {
 	if (!m) {
+        //Mantid
+        Graph3D *plot = mantidUI->plot3DMatrix(style);
+        if (plot) return plot;
 		m = (Matrix*)activeWindow(MatrixWindow);
 		if (!m)
 			return 0;
@@ -12405,6 +12423,9 @@ Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 MultiLayer* ApplicationWindow::plotGrayScale(Matrix *m)
 {
 	if (!m) {
+        //Mantid
+        MultiLayer* plot = mantidUI->plotSpectrogram(Graph::GrayScale);
+        if (plot) return plot;
 		m = (Matrix*)activeWindow(MatrixWindow);
 		if (!m)
 			return 0;
@@ -12416,6 +12437,9 @@ MultiLayer* ApplicationWindow::plotGrayScale(Matrix *m)
 MultiLayer* ApplicationWindow::plotContour(Matrix *m)
 {
 	if (!m) {
+        //Mantid
+        MultiLayer* plot = mantidUI->plotSpectrogram(Graph::Contour);
+        if (plot) return plot;
 		m = (Matrix*)activeWindow(MatrixWindow);
 		if (!m)
 			return 0;
@@ -12427,6 +12451,9 @@ MultiLayer* ApplicationWindow::plotContour(Matrix *m)
 MultiLayer* ApplicationWindow::plotColorMap(Matrix *m)
 {
 	if (!m) {
+        //Mantid
+        MultiLayer* plot = mantidUI->plotSpectrogram(Graph::ColorMap);
+        if (plot) return plot;
 		m = (Matrix*)activeWindow(MatrixWindow);
 		if (!m)
 			return 0;

@@ -45,6 +45,7 @@
 
 #include <QPainter>
 #include <QMessageBox>
+#include <iostream>
 
 Plot::Plot(int width, int height, QWidget *parent, const char *)
 : QwtPlot(parent)

@@ -121,6 +121,7 @@ static const char *unzoom_xpm[]={
 #include "PlotCurve.h"
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
+#include "UserFunction.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
@@ -4447,6 +4448,31 @@ Spectrogram* Graph::plotSpectrogram(Matrix *m, CurveType type)
   		return 0;
 
   	Spectrogram *d_spectrogram = new Spectrogram(m);
+
+    return plotSpectrogram(d_spectrogram,type);
+}
+Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type)
+{
+	if (type != GrayScale && type != ColorMap && type != Contour)
+  		return 0;
+
+  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,left,top,width,height,minz,maxz);
+
+    return plotSpectrogram(d_spectrogram,type);
+}
+
+Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, CurveType type)
+{
+	if (type != GrayScale && type != ColorMap && type != Contour)
+  		return 0;
+
+  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
+
+    return plotSpectrogram(d_spectrogram,type);
+}
+
+Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
+{
   	if (type == GrayScale)
   		d_spectrogram->setGrayScale();
   	else if (type == Contour)
@@ -4459,18 +4485,16 @@ Spectrogram* Graph::plotSpectrogram(Matrix *m, CurveType type)
   	    d_spectrogram->setDefaultColorMap();
   	    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   	    }
-
   	c_keys.resize(++n_curves);
   	c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
 
   	c_type.resize(n_curves);
   	c_type[n_curves-1] = type;
 
-  	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+    QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
   	rightAxis->setColorBarEnabled(type != Contour);
   	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
-
-  	d_plot->setAxisScale(QwtPlot::yRight,
+    d_plot->setAxisScale(QwtPlot::yRight,
   	d_spectrogram->data().range().minValue(),
   	d_spectrogram->data().range().maxValue());
   	d_plot->enableAxis(QwtPlot::yRight, type != Contour);

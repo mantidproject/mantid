@@ -5,6 +5,7 @@
 #include "../Graph.h"
 #include "../Graph3D.h"
 #include "../Table.h"
+#include "../UserFunction.h"
 #include "WorkspaceMatrixModel.h"
 #include "MantidAPI/Workspace.h"
 

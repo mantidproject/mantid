@@ -32,10 +32,11 @@
 #include <qwt_scale_widget.h>
 
 #include "Mantid/WorkspaceMatrix.h"
+#include <iostream>
 
 Spectrogram::Spectrogram():
 	QwtPlotSpectrogram(),
-	d_matrix(0),
+	d_matrix(0),d_funct(0),//Mantid
 	color_axis(QwtPlot::yRight),
 	color_map_policy(Default),
 	color_map(QwtLinearColorMap())
@@ -44,7 +45,7 @@ Spectrogram::Spectrogram():
 
 Spectrogram::Spectrogram(Matrix *m):
 	QwtPlotSpectrogram(QString(m->objectName())),
-	d_matrix(m),
+	d_matrix(m),d_funct(0),//Mantid
 	color_axis(QwtPlot::yRight),
 	color_map_policy(Default),
 	color_map(QwtLinearColorMap())
@@ -58,6 +59,43 @@ for ( double level = data().range().minValue() + step;
     contourLevels += level;
 
 setContourLevels(contourLevels);
+}
+
+Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
+:	QwtPlotSpectrogram(),
+	d_matrix(0),d_funct(f),
+	color_axis(QwtPlot::yRight),
+	color_map_policy(Default),
+	color_map(QwtLinearColorMap())
+{
+    setData(FunctionData(f,nrows,ncols,left,top,width,height,minz,maxz));
+    double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
+
+    QwtValueList contourLevels;
+    for ( double level = data().range().minValue() + step;
+	    level < data().range().maxValue(); level += step )
+        contourLevels += level;
+
+    setContourLevels(contourLevels);
+}
+
+Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
+:	QwtPlotSpectrogram(),
+	d_matrix(0),d_funct(f),
+	color_axis(QwtPlot::yRight),
+	color_map_policy(Default),
+	color_map(QwtLinearColorMap())
+{
+    setTitle("UserHelperFunction");
+    setData(FunctionData(f,nrows,ncols,bRect,minz,maxz));
+    double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
+
+    QwtValueList contourLevels;
+    for ( double level = data().range().minValue() + step;
+	    level < data().range().maxValue(); level += step )
+        contourLevels += level;
+
+    setContourLevels(contourLevels);
 }
 
 void Spectrogram::updateData(Matrix *m)
@@ -75,7 +113,6 @@ setLevelsNumber(levels());
 QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
 if (colorAxis)
 	colorAxis->setColorMap(data().range(), colorMap());
-
 plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
 plot->replot();
 }
@@ -294,7 +331,7 @@ return s+"</spectrogram>\n";
 
 QwtDoubleRect Spectrogram::boundingRect() const
 {
-	return d_matrix->boundingRect();
+    return d_matrix?d_matrix->boundingRect() : data().boundingRect();
 }
 
 double MatrixData::value(double x, double y) const

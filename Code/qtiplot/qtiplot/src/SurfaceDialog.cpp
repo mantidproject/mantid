@@ -30,6 +30,7 @@
 #include "MyParser.h"
 #include "ApplicationWindow.h"
 #include "Graph3D.h"
+#include "UserFunction.h"
 
 #include <QMessageBox>
 #include <QLayout>

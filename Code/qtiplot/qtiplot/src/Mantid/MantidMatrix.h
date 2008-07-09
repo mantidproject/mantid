@@ -7,8 +7,9 @@
 #include <QMessageBox>
 
 #include "MantidAPI/Workspace.h"
-//#include "MatrixModel.h"
+#include "../UserFunction.h"
 #include "../MdiSubWindow.h"
+#include "../Graph.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -19,6 +20,21 @@ class QLabel;
 class QStackedWidget;
 class QShortcut;
 class MantidMatrixModel;
+class MantidMatrix;
+class ApplicationWindow;
+class Graph3D;
+class MultiLayer;
+
+class MantidMatrixFunction: public UserHelperFunction
+{
+public:
+    MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
+    double operator()(double x, double y);
+    void init();
+private:
+    MantidMatrix* m_matrix;
+    double m_dx,m_dy;
+};
 
 class MantidMatrix: public MdiSubWindow
 {
@@ -33,10 +49,20 @@ public:
 	MantidMatrixModel * model(){return m_model;};
 	QItemSelectionModel * selectionModel(){return m_table_view->selectionModel();};
 
-	int numRows();
-	int numCols();
+    int numRows()const{return m_rows;}
+    int numCols()const{return m_cols;}
+	double dataX(int row, int col) const;
+	double dataE(int row, int col) const;
+    int indexX(double s)const;
 
     const char **matrixIcon(){return m_matrix_icon;}
+    //void copy(Matrix *m);
+    ApplicationWindow *appWindow(){return m_appWindow;}
+    Graph3D *plotGraph3D(int style);
+    MultiLayer* plotGraph2D(Graph::CurveType type);
+    void setGraph1D(Graph* g);
+    void removeWindow();
+    void getSelectedRows(int& i0,int& i1);
 
 public slots:
 
@@ -85,9 +111,9 @@ public slots:
 
 	int verticalHeaderWidth(){return m_table_view->verticalHeader()->width();}
 
-    //void copy(Matrix *m);
 protected:
 
+    ApplicationWindow *m_appWindow;
     Mantid::API::Workspace_sptr m_workspace;
     QTableView *m_table_view;
     MantidMatrixModel *m_model;
@@ -97,23 +123,29 @@ protected:
 	x_end,  //!< X value corresponding to the last column
 	y_start,  //!< Y value corresponding to row 1
 	y_end;  //!< Y value corresponding to the last row
+    int m_rows,m_cols;
+    int m_startRow;
+    int m_endRow;
+    bool m_filter;
+    double m_maxv;
 
 	//! Column width in pixels;
 	int m_column_width;
+    MantidMatrixFunction m_funct;
 };
 
 class MantidMatrixModel:public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    MantidMatrixModel(QObject *parent, Mantid::API::Workspace_sptr ws, int start=-1, int end=-1, bool filter=false, double maxv=0):
-      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv)
+    MantidMatrixModel(QObject *parent, Mantid::API::Workspace_sptr ws, int rows,int cols,int start=-1, int end=-1, bool filter=false, double maxv=0):
+      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols)
       {
           m_startRow = start >= 0? start : 0;
           m_endRow = end >= m_startRow? end : m_workspace->getNumberHistograms();
       }
-    int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_workspace->getNumberHistograms();}
-    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_workspace->blocksize();}
+    int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
+    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_cols;}
     double data(int row, int col) const
     {
         double val = m_workspace->dataY(row + m_startRow)[col];
@@ -141,6 +173,7 @@ private:
     int m_endRow;
     bool m_filter;
     double m_maxv;
+    int m_rows,m_cols;
     QLocale m_locale;
 };
 

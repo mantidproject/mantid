@@ -305,6 +305,7 @@ HEADERS  += src/ApplicationWindow.h \
             src/CustomActionDialog.h \
             src/DoubleSpinBox.h\
             src/MatrixCommand.h  \
+            src/UserFunction.h  \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/WorkspaceMgr.h \
 	    src/Mantid/ExecuteAlgorithm.h \
@@ -314,7 +315,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/AbstractMantidLog.h \
 	    src/Mantid/MantidLog.h \
 	    src/Mantid/MantidUI.h \
-	    src/Mantid/MantidMatrix.h 
+	    src/Mantid/MantidMatrix.h \
+	    src/Mantid/MantidDock.h 
 
 ###################### FORMS ##############################################
 
@@ -438,6 +440,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/CustomActionDialog.cpp \
             src/DoubleSpinBox.cpp\
             src/MatrixCommand.cpp \
+            src/UserFunction.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/WorkspaceMgr.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
@@ -447,7 +450,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/AbstractMantidLog.cpp \
 	    src/Mantid/MantidLog.cpp \
 	    src/Mantid/MantidUI.cpp \
-	    src/Mantid/MantidMatrix.cpp 
+	    src/Mantid/MantidMatrix.cpp \
+	    src/Mantid/MantidDock.cpp 
 
 ###############################################################
 ##################### Compression (zlib123) ###################

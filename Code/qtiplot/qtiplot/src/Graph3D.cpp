@@ -31,6 +31,7 @@
 #include "Cone3D.h"
 #include "MyParser.h"
 #include "MatrixModel.h"
+#include "UserFunction.h"//Mantid
 
 #include <QApplication>
 #include <QMessageBox>
@@ -47,42 +48,6 @@
 
 #include <gsl/gsl_vector.h>
 #include <fstream>
-
-UserFunction::UserFunction(const QString& s, SurfacePlot& pw)
-: Function(pw), formula(s), m_hlpFun(0)
-{}
-
-double UserFunction::operator()(double x, double y)
-{
-    if (m_hlpFun) 
-        return (*m_hlpFun)(x,y);
-
-	if (formula.isEmpty())
-		return 0.0;
-
-	MyParser parser;
-	double result=0.0;
-	try
-	{
-		parser.DefineVar("x", &x);
-		parser.DefineVar("y", &y);
-
-		parser.SetExpr((const std::string)formula.ascii());
-		result=parser.Eval();
-	}
-	catch(mu::ParserError &e)
-	{
-		QMessageBox::critical(0,"QtiPlot - Input function error",QString::fromStdString(e.GetMsg()));
-	}
-	return result;
-}
-
-void UserFunction::setMesh (unsigned int columns, unsigned int rows)
-{
-	Function::setMesh (columns, rows);
-	d_columns = columns;
-	d_rows = rows;
-}
 
 UserParametricSurface::UserParametricSurface(const QString& xFormula, const QString& yFormula,
 											 const QString& zFormula, SurfacePlot& pw)
@@ -259,7 +224,8 @@ void Graph3D::initCoord()
 }
 
 void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
-						double yr, double zl, double zr, int columns, int rows, UserHelperFunction* hfun)
+						double yr, double zl, double zr, int columns, int rows, 
+                        UserHelperFunction* hfun)//Mantid
 {
 	if (d_surface)
 		delete d_surface;
@@ -271,7 +237,7 @@ void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
 
 	d_func = new UserFunction(s, *sp);
 
-    d_func->setHlpFun(hfun);
+    d_func->setHlpFun(hfun);//Mantid
 
 	d_func->setMesh(columns, rows);
 	d_func->setDomain(xl, xr, yl, yr);

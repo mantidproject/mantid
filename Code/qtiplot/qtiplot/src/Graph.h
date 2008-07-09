@@ -72,6 +72,7 @@ class FunctionCurve;
 class VectorCurve;
 class BoxCurve;
 class QwtHistogram;
+class UserHelperFunction;
 
 //! Structure containing curve layout parameters
 typedef struct{
@@ -628,6 +629,9 @@ class Graph: public QWidget
 
 		//! Add a spectrogram to the graph
   		Spectrogram* plotSpectrogram(Matrix *m, CurveType type);
+        Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type);//Mantid
+        Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, CurveType type);//Mantid
+        Spectrogram* plotSpectrogram(Spectrogram *d_spectrogram, CurveType type);//Mantid
 		//! Restores a spectrogram. Used when opening a project file.
   		void restoreSpectrogram(ApplicationWindow *app, const QStringList& lst);
         //! Add a matrix histogram  to the graph

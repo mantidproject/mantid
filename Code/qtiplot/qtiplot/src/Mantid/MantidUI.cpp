@@ -1,11 +1,23 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
+#include "MantidDock.h"
+#include "WorkspaceMatrix.h"
 #include "LoadRawDlg.h"
+#include "ImportWorkspaceDlg.h"
+#include "../Spectrogram.h"
+#include "../pixmaps.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
 #include <QMdiArea>
+#include <QMenuBar>
+#include <QApplication>
+#include <QToolBar>
+#include <QMenu>
+
+#include <iostream>
+using namespace std;
 
 using namespace Mantid::API;
 
@@ -13,19 +25,43 @@ void ApplicationWindow::initMantid()
 {
 
     mantidUI = new MantidUI(this);
-    mantidUI->init();
     mantidUI->d_workspace = d_workspace;
+    mantidUI->aw_menuBar = menuBar();
+    mantidUI->aw_plot2DMenu = plot2DMenu;
+    mantidUI->aw_plot3DMenu = plot3DMenu;
+    mantidUI->aw_plotMatrixBar = plotMatrixBar;
+    mantidUI->aw_scriptEnv = scriptEnv;
+    mantidUI->aw_view = view;
+    mantidUI->aw_actionShowUndoStack = actionShowUndoStack;
 
+    mantidUI->init();
 }
 
 
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
 {
     m_exploreMantid = new MantidDockWidget(this,aw);
+
+  	actionCopyRowToTable = new QAction(tr("Copy to Table"), this);
+	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
+	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
+
+  	actionCopyRowToGraph = new QAction(tr("Plot spectra (values only)"), this);
+	actionCopyRowToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyRowToGraph, SIGNAL(activated()), this, SLOT(copyRowToGraph()));
+
+  	actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
+	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 }
 
 void MantidUI::init()
 {
+	actionToggleMantid = m_exploreMantid->toggleViewAction();
+    cerr<<"action="<<actionToggleMantid<<endl;
+	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
+	actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
+    aw_view->addAction(actionToggleMantid);
 
     //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060");
     update();
@@ -150,6 +186,18 @@ Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()
 	return empty;//??
 }
 
+Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
+{
+	if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
+	{
+		return AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+	}
+	
+	Workspace_sptr empty;
+	
+	return empty;//??
+}
+
 int MantidUI::getHistogramNumber(const QString& workspaceName)
 {
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
@@ -159,72 +207,167 @@ int MantidUI::getHistogramNumber(const QString& workspaceName)
 int MantidUI::getBinNumber(const QString& workspaceName)
 {
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
-	return output->dataX(0).size();
+	return output->blocksize();
+}
+
+bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
+{
+    if (w->isA("MantidMatrix"))
+    {
+        aw_menuBar->insertItem(tr("3D &Plot"), aw_plot3DMenu);
+
+        aw_plotMatrixBar->setEnabled (true);
+    }
+
+    return false;
+}
+
+Graph3D *MantidUI::plot3DMatrix(int style)
+{
+    QMdiSubWindow *w = appWindow()->activeWindow();
+    if (w->isA("MantidMatrix"))
+    {
+        return static_cast<MantidMatrix*>(w)->plotGraph3D(style);
+    }
+
+    return 0;
+}
+
+MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
+{
+    MantidMatrix *m = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+    if (m) return m->plotGraph2D(type);
+    return 0;
+
 }
 
 void MantidUI::tst()
 {
+    cerr<<"\n\n\ntst\n\n\n";
+}
+
+void MantidUI::importWorkspace()
+{
     Workspace_sptr ws = getSelectedWorkspace();
     if (!ws.get()) return;
-	MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",getSelectedWorkspaceName() );
-	/*initMatrix(w, caption);
-	if (w->objectName() != caption)//the matrix was renamed
-		renamedTables << caption << w->objectName();*/
 
-    d_workspace->addSubWindow(w);
-	w->showNormal(); 
-    QString str = QString::number(w->numRows(),'g',6);
-    w->goTo(100,20);
-    //QMessageBox::information(appWindow(),"MantidUI",str);
+	ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
+	dlg->setModal(true);	
+	if (dlg->exec() == QDialog::Accepted)
+	{
+		int start = dlg->getLowerLimit();
+		int end = dlg->getUpperLimit();
+		
+	    MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",getSelectedWorkspaceName(), start, end,dlg->isFiltered(),dlg->getMaxValue() );
+   	    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+	    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+	    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+
+        d_workspace->addSubWindow(w);
+	    w->showNormal(); 
+	}
+
 }
 
-//------------------------------------------------------------------------------------------
-MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *w):
-QDockWidget(w)
+void MantidUI::removeWindowFromLists(MdiSubWindow* m)
 {
-    m_mantidUI = mui;
-    setWindowTitle(tr("Mantid Explorer"));
-	setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
-	setMinimumHeight(150);
-	setMinimumWidth(200);
-	w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
+	if (!m)
+		return;
 
-    QFrame *f = new QFrame(this);
-    setWidget(f);
+	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    m_tree = new QTreeWidget();
-    m_tree->setHeaderLabel("Workspaces");
+    if (m->isA("MantidMatrix")) static_cast<MantidMatrix*>(m)->removeWindow();
 
-    QHBoxLayout * buttonLayout = new QHBoxLayout();
-    m_loadButton = new QPushButton("Load");
-    m_deleteButton = new QPushButton("Delete");
-    QPushButton *tstButton = new QPushButton("Test");
-    buttonLayout->addWidget(m_loadButton);
-    buttonLayout->addWidget(m_deleteButton);
-    buttonLayout->addWidget(tstButton);
-    buttonLayout->addStretch();
-    //
-    QVBoxLayout * layout = new QVBoxLayout();
-    f->setLayout(layout);
-    layout->addLayout(buttonLayout);
-    layout->addWidget(m_tree);
-    //
-    connect(m_loadButton,SIGNAL(clicked()),m_mantidUI,SLOT(loadWorkspace()));
-    connect(m_deleteButton,SIGNAL(clicked()),m_mantidUI,SLOT(deleteWorkspace()));
-    connect(tstButton,SIGNAL(clicked()),m_mantidUI,SLOT(tst()));
+	QApplication::restoreOverrideCursor();
 }
 
-void MantidDockWidget::update()
+void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
-    QStringList sl = m_mantidUI->getWorkspaceNames();
-    m_tree->clear();
-    for(int i=0;i<sl.size();i++)
+    if (w->isA("MantidMatrix")) 
     {
-        QTreeWidgetItem *wsItem = new QTreeWidgetItem(QStringList(sl[i]));
-        wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-        wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(m_mantidUI->getHistogramNumber(sl[i])))));
-        wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(m_mantidUI->getBinNumber(sl[i])))));
-        m_tree->addTopLevelItem(wsItem);
+        //cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
+        cm.addAction(actionCopyRowToTable);
+        cm.addAction(actionCopyRowToGraph);
+        cm.addAction(actionCopyRowToGraphErr);
     }
 }
 
+void MantidUI::copyRowToTable()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createTableFromSelectedRows(m,true,true);
+}
+
+void MantidUI::copyRowToGraph()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createGraphFromSelectedRows(m,false,false);
+  
+}
+
+void MantidUI::copyRowToGraphErr()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createGraphFromSelectedRows(m,false);
+  
+}
+
+Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
+{
+     int i0,i1; 
+     m->getSelectedRows(i0,i1);
+     if (i0 < 0 || i1 < 0) return 0;
+
+     int c = errs?2:1;
+
+	 Table* t = new Table(aw_scriptEnv, m->numCols(), c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
+     if (visible) t->showNormal();
+    
+     int kY,kErr;
+     for(int i=i0;i<=i1;i++)
+     {
+         kY = c*(i-i0)+1;
+         t->setColName(kY,"Y"+QString::number(i));
+         if (errs)
+         {
+             kErr = 2*(i - i0) + 2;
+             t->setColPlotDesignation(kErr,Table::yErr);
+             t->setColName(kErr,"Err"+QString::number(i));
+         }
+         for(int j=0;j<m->numCols();j++)
+         {
+             if (i == i0) t->setCell(j,0,m->dataX(i,j));
+             t->setCell(j,kY,m->cell(i,j)); 
+             if (errs) t->setCell(j,kErr,m->dataE(i,j));
+         }
+     }
+     return t;
+ }
+
+void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
+{
+    Table *t = createTableFromSelectedRows(m,visible,errs);
+    if (!t) return;
+
+    QStringList cn;
+    cn<<t->colName(1);
+    if (errs) cn<<t->colName(2);
+    Graph *g = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line)->activeGraph();
+    appWindow()->polishGraph(g,Graph::Line);
+    m->setGraph1D(g);
+}
+
+bool MantidUI::drop(QDropEvent* e)
+{
+    if (e->source() == m_exploreMantid->m_tree) 
+    {
+        importWorkspace();
+        return true;
+    }
+
+    return false;
+}

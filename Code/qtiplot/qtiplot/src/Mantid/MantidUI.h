@@ -2,6 +2,7 @@
 #define MANTIDUI_H
 
 #include "../ApplicationWindow.h"
+#include "../Graph.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -13,23 +14,10 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 
-class MantidUI;
-
-class MantidDockWidget: public QDockWidget
-{
-    Q_OBJECT
-public:
-    MantidDockWidget(QWidget*w):QDockWidget(w){}
-    MantidDockWidget(MantidUI *mui, ApplicationWindow *w);
-    void update();
-protected:
-    QTreeWidget *m_tree;
-    friend class MantidUI;
-private:
-    QPushButton *m_loadButton;
-    QPushButton *m_deleteButton;
-    MantidUI *m_mantidUI;
-};
+class Graph3D;
+class ScriptingEnv;
+class MantidMatrix;
+class MantidDockWidget;
 
 class MantidUI:public QObject
 {
@@ -47,8 +35,17 @@ public:
     ApplicationWindow *appWindow(){return m_appWindow;}
     QString getSelectedWorkspaceName();
     Mantid::API::Workspace_sptr getSelectedWorkspace();
+    Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
     int getBinNumber(const QString& workspaceName);
     int getHistogramNumber(const QString& workspaceName);
+    bool menuAboutToShow(QMdiSubWindow *w);
+    Graph3D *plot3DMatrix(int style);
+    MultiLayer *plotSpectrogram(Graph::CurveType type);
+    void removeWindowFromLists(MdiSubWindow* w);
+    void showContextMenu(QMenu& cm, MdiSubWindow* w);
+    Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
+    void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
+    bool drop(QDropEvent* e);
 
     void update();
 
@@ -57,11 +54,26 @@ public slots:
     void tst();
     void loadWorkspace();
     void deleteWorkspace();
+    void importWorkspace();
+    void copyRowToTable();
+    void copyRowToGraph();
+    void copyRowToGraphErr();
 
 public:
     ApplicationWindow *m_appWindow;
     QMdiArea *d_workspace;// ApplicationWindow's private member
+    QMenuBar *aw_menuBar;
+    QMenu *aw_plot2DMenu, *aw_plot3DMenu;
+    QToolBar *aw_plotMatrixBar;
+    ScriptingEnv *aw_scriptEnv;
+    QMenu *aw_view;
+    QAction *aw_actionShowUndoStack;
+
     MantidDockWidget *m_exploreMantid;
+    QAction *actionCopyRowToTable;
+    QAction *actionCopyRowToGraph;
+    QAction *actionCopyRowToGraphErr;
+    QAction *actionToggleMantid;
 };
 
 static const char * mantid_matrix_xpm[] = { 
@@ -98,5 +110,23 @@ static const char * mantid_matrix_xpm[] = {
 "{]]{]]{]]{]]{",
 "{]]{]]{]]{]]{",
 "{{{{{{{{{{{{{"};
+
+static const char * mantid_xpm[] = { 
+"13 12 3 1",
+" 	c None",
+".	c #000821",
+"+	c #000720",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             ",
+"             "};
 
 #endif

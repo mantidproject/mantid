@@ -30,10 +30,13 @@
 #define SPECTROGRAM_H
 
 #include "Matrix.h"
+#include "UserFunction.h"
 #include <qwt_raster_data.h>
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_color_map.h>
+
+#include <fstream>
 
 class MatrixData;
 
@@ -42,11 +45,14 @@ class Spectrogram: public QwtPlotSpectrogram
 public:
 	Spectrogram();
     Spectrogram(Matrix *m);
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
 
 	enum ColorMapPolicy{GrayScale, Default, Custom};
 
 	Spectrogram* copy();
 	Matrix * matrix(){return d_matrix;};
+    UserHelperFunction *funct(){return d_funct;}
 
 	int levels(){return (int)contourLevels().size() + 1;};
 	void setLevelsNumber(int levels);
@@ -75,6 +81,7 @@ public:
 protected:
 	//! Pointer to the source data matrix
 	Matrix *d_matrix;
+    UserHelperFunction *d_funct;
 
 	//! Axis used to display the color scale
 	int color_axis;
@@ -158,6 +165,57 @@ private:
 
 	//! Y axis bottom value in the data matrix
 	double y_start;
+};
+
+class FunctionData: public QwtRasterData
+{
+public:
+    FunctionData(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
+        QwtRasterData(QwtDoubleRect(left, top, width, height)),
+		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
+    {
+    }
+
+    FunctionData(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
+        QwtRasterData(bRect),
+		d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
+    {
+    }
+
+	~FunctionData()
+	{
+	};
+
+    virtual QwtRasterData *copy() const
+    {
+        return new FunctionData(d_funct, n_rows, n_cols,boundingRect(),min_z,max_z);
+    }
+
+    virtual QwtDoubleInterval range() const
+    {
+        return QwtDoubleInterval(min_z, max_z);
+    }
+
+	virtual QSize rasterHint (const QwtDoubleRect &) const
+	{
+		return QSize(n_cols, n_rows);
+	}
+
+    virtual double value(double x, double y) const
+    {
+        //static std::ofstream f("funct.txt");
+        //f<<x<<' '<<y<<' '<<d_funct->operator()(x,y)<<'\n';
+        return d_funct->operator()(x,y);
+    }
+
+private:
+	UserHelperFunction *d_funct;
+
+	//! Data size
+	int n_rows, n_cols;
+
+	//! Min and max values in the source data matrix
+	double min_z, max_z;
 };
 
 #endif

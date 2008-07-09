@@ -625,6 +625,7 @@ public slots:
 	void closeEvent( QCloseEvent*);
 	void timerEvent ( QTimerEvent *e);
 	void dragEnterEvent( QDragEnterEvent* e );
+    void dragMoveEvent( QDragMoveEvent* e );//Mantid
 	void dropEvent( QDropEvent* e );
 	void customEvent( QEvent* e);
 	//@}
