@@ -11,34 +11,34 @@ namespace Kernel
 {
   class Logger;
 }
-	
+
 namespace DataObjects
 {
 
-/** Concrete workspace implementation. Data is a single double value      	
+/** Concrete workspace implementation. Data is a single double value
     @author Nicholas Draper
     @date 19/05/2008
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
-    
+
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
-    
+
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/ 	
+*/
 class DLLExport WorkspaceSingleValue : public API::Workspace
 {
 
@@ -46,8 +46,8 @@ public:
   /// Typedef for the workspace_iterator to use with a WorkspaceSingleValue
   typedef API::workspace_iterator<API::LocatedDataRef, WorkspaceSingleValue> iterator;
   /// Typedef for the const workspace_iterator to use with a WorkspaceSingleValue
-  typedef API::workspace_iterator<const API::LocatedDataRef, const WorkspaceSingleValue> const_iterator;  
-  
+  typedef API::workspace_iterator<const API::LocatedDataRef, const WorkspaceSingleValue> const_iterator;
+
   /**
   	Gets the name of the workspace type
   	\return Standard string name
@@ -57,17 +57,17 @@ public:
   WorkspaceSingleValue(double value=0.0,double error1=0.0,double error2=0.0);
 
   virtual ~WorkspaceSingleValue();
-  
+
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
-  virtual int size() const 
+  virtual int size() const
   { return 1; }
 
   ///Returns the size of each block of data returned by the dataX accessors
-  virtual int blocksize() const 
+  virtual int blocksize() const
   { return 1; }
-  
-  const int getNumberHistograms() const 
+
+  const int getNumberHistograms() const
   { return 1; }
 
   //inheritance redirections
@@ -87,7 +87,7 @@ public:
   ///Returns non-const vector of the error data
   virtual std::vector<double>& dataE() { return _E; }
   /// Returns the x data const
-  virtual const std::vector<double>& dataX() const { return _X; }  
+  virtual const std::vector<double>& dataX() const { return _X; }
   /// Returns the y data const
   virtual const std::vector<double>& dataY() const { return _Y; }
   /// Returns the error data const
@@ -112,14 +112,6 @@ public:
   virtual void setErrorHelper(API::IErrorHelper* errorHelper) { _ErrorHelper=errorHelper; }
    ///Sets the ErrorHelper for this spectra
   virtual void setErrorHelper(const API::IErrorHelper* errorHelper) { _ErrorHelper=const_cast<API::IErrorHelper*>(errorHelper); }
-  
-  //Methods for getting data via python. Do not use for anything else!
-  ///Returns the x data const
-  virtual const std::vector<double>& getX(int const index) const {return _X;}
-  ///Returns the y data const
-  virtual const std::vector<double>& getY(int const index) const {return _Y;}
-  ///Returns the error const
-  virtual const std::vector<double>& getE(int const index) const {return _E;}
 
 private:
   /// Private copy constructor. NO COPY ALLOWED

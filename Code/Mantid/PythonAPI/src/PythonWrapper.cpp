@@ -81,7 +81,7 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     int size() const {
         return call_method< int >(py_self, "size");
     }
-    
+
     const int getNumberHistograms() const {
         return call_method< const int >(py_self, "getNumberHistograms");
     }
@@ -97,7 +97,7 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     int& spectraNo(const int p0) {
         return call_method< int& >(py_self, "spectraNo", p0);
     }
-    
+
     const std::vector<double,std::allocator<double> >& getX(const int p0) const {
         return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getX", p0);
     }
@@ -217,32 +217,32 @@ BOOST_PYTHON_MODULE(MantidPythonAPI)
 #else
 BOOST_PYTHON_MODULE(libMantidPythonAPI)
 #endif
-{	
+{
 	//Vectors
 	class_< string_vec >( "StringVec" )
 	.def( vector_indexing_suite< string_vec >() )
         ;
-	
+
 	class_< double_vec >( "DoubleVec" )
 	.def( vector_indexing_suite< double_vec >() )
 	;
-	
+
 	class_< algorithmHistory_vec >( "AlgHistVec" )
 	.def( vector_indexing_suite< algorithmHistory_vec >() )
 	;
-	
+
 	class_< algorithmParameter_vec >( "AlgParVec" )
 	.def( vector_indexing_suite< algorithmParameter_vec >() )
 	;
-	
+
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
-	
+
 	//Namespace Functions
         def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
 	def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
 	def("getWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
-	
+
 	//IAlgorithm Class
 	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
         .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
@@ -252,7 +252,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("setPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::setPropertyValue))
         .def("getPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::getPropertyValue))
 	;
-	
+
 	//Algorithm Class
 	class_< Mantid::API::Algorithm, bases<Mantid::API::IAlgorithm>, boost::noncopyable, Mantid_API_Algorithm_Wrapper >("Algorithm", no_init)
         .def("name", &Mantid::API::Algorithm::name, &Mantid_API_Algorithm_Wrapper::default_name)
@@ -270,7 +270,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("isChild", &Mantid::API::Algorithm::isChild)
         .def("setChild", &Mantid::API::Algorithm::setChild)
         ;
-	
+
 	//Workspace Class
 	class_< Mantid::API::Workspace, boost::noncopyable, Mantid_API_Workspace_Wrapper >("Workspace", no_init)
         .def("id", pure_virtual(&Mantid::API::Workspace::id))
@@ -284,9 +284,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
         .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
-        .def("getX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getX), return_value_policy< manage_new_object >())
-        .def("getY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getY), return_value_policy< manage_new_object >())
-        .def("getE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::getE), return_value_policy< manage_new_object >())
+        .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readX), return_value_policy< manage_new_object >())
+        .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readY), return_value_policy< manage_new_object >())
+        .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readE), return_value_policy< manage_new_object >())
 	.def("getHistory", &Mantid::API::Workspace::getHistory, return_value_policy< copy_const_reference >())
 	;
 
@@ -299,7 +299,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
 	;
-    
+
 	//AlgorithmParameter Class
         class_< Mantid::API::AlgorithmParameter >("AlgorithmParameter", no_init)
         .def("name", &Mantid::API::AlgorithmParameter::name, return_value_policy< copy_const_reference >())
@@ -309,7 +309,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("direction", &Mantid::API::AlgorithmParameter::direction, return_value_policy< copy_const_reference >())
         //.def("printSelf", &Mantid::API::AlgorithmParameter::printSelf, Mantid_API_AlgorithmParameter_printSelf_overloads_1_2())
 	;
-    
+
 	//AlgorithmHistory Class
 	class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", init<  >())
         .def(init< const Mantid::API::AlgorithmHistory& >())
@@ -317,7 +317,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("version", &Mantid::API::AlgorithmHistory::version, return_value_policy< copy_const_reference >())
         .def("getParameters", &Mantid::API::AlgorithmHistory::getParameters, return_value_policy< copy_const_reference >())
 	;
-    
+
 	//WorkspaceHistory Class
         class_< Mantid::API::WorkspaceHistory >("WorkspaceHistory", no_init)
         //.def("getAlgorithms", &Mantid::API::WorkspaceHistory::getAlgorithms, return_value_policy< copy_const_reference >())

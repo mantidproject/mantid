@@ -14,7 +14,7 @@ class WorkspaceTester : public Workspace
 public:
   WorkspaceTester() : Workspace() {}
   virtual ~WorkspaceTester() {}
-  
+
   // Empty overrides of virtual methods
   virtual const int getNumberHistograms() const { return 1;}
   const std::string id() const {return "WorkspaceTester";}
@@ -22,7 +22,7 @@ public:
   {
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(1);
-    m_axes[0] = new Axis(AxisType::Numeric,1);    
+    m_axes[0] = new Axis(AxisType::Numeric,1);
   }
   int size() const {return 0;}
   int blocksize() const {return 0;}
@@ -35,7 +35,7 @@ public:
   const IErrorHelper* errorHelper(int const index) const {return NULL;}
   void setErrorHelper(int const,IErrorHelper*) {}
   void setErrorHelper(int const,const IErrorHelper*) {}
-  
+
   //Methods for getting data via python. Do not use for anything else!
   ///Returns the x data const
   virtual const std::vector<double>& getX(int const index) const {return vec;}
@@ -43,8 +43,8 @@ public:
   virtual const std::vector<double>& getY(int const index) const {return vec;}
   ///Returns the error const
   virtual const std::vector<double>& getE(int const index) const {return vec;}
-  
-  
+
+
 private:
   std::vector<double> vec;
   int spec;
@@ -53,7 +53,7 @@ private:
 class WorkspaceTest : public CxxTest::TestSuite
 {
 public:
-  
+
   void testGetSetTitle()
   {
     TS_ASSERT_EQUALS( ws.getTitle(), "" )
@@ -82,8 +82,8 @@ public:
     boost::shared_ptr<SpectraDetectorMap> s(new SpectraDetectorMap);
     TS_ASSERT_THROWS_NOTHING( ws.setSpectraMap(s) )
     TS_ASSERT_EQUALS( ws.getSpectraMap(), s )
-  }	
-	
+  }
+
   void testGetSetSample()
   {
     TS_ASSERT( ws.getSample() )
@@ -96,7 +96,7 @@ public:
 
   void testGetMemorySize()
   {
-    TS_ASSERT_EQUALS( ws.getMemorySize(), 0 )
+    TS_ASSERT_THROWS( ws.getMemorySize(), Exception::NotImplementedError )
   }
 
   void testGetWorkspaceHistory()
@@ -115,17 +115,17 @@ public:
     TS_ASSERT( ws.getAxis(0) )
     TS_ASSERT_THROWS( ws.getAxis(1), Exception::IndexError )
   }
-	
+
   void testIsDistribution()
   {
     TS_ASSERT( ! ws.isDistribution() )
     TS_ASSERT( ws.isDistribution(true) )
-    TS_ASSERT( ws.isDistribution() )	  
+    TS_ASSERT( ws.isDistribution() )
   }
 
 private:
   WorkspaceTester ws;
-	
+
 };
 
 #endif /*WORKSPACETEST_H_*/

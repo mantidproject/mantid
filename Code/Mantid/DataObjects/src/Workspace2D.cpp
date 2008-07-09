@@ -51,16 +51,6 @@ namespace Mantid
     }
 
     /**
-    Get the amount of memory used by the 2D workspace
-    \todo to be changed
-    */
-    long int
-      Workspace2D::getMemorySize() const
-    {
-      return 0;
-    }
-
-    /**
     Set the x values
     \param histnumber :: Index to the histogram
     \param Vec :: Vec to set [Should be typedef]
@@ -307,40 +297,6 @@ namespace Mantid
         throw std::range_error("Workspace2D::setErrorHelper, histogram number out of range");
 
       data[index].setErrorHelper(errorHelper);
-    }
-
-
-    /**
-    Get the x data of a specified histogram thru python
-    \param index The number of the histogram
-    \return A vector of doubles containing the x data
-    */
-    const std::vector<double>&
-      Workspace2D::getX(const int index) const
-    {
-      return Workspace2D::dataX(index);
-    }
-
-    /**
-    Get the y data of a specified histogram thru python
-    \param index The number of the histogram
-    \return A vector of doubles containing the y data
-    */
-    const std::vector<double>&
-      Workspace2D::getY(const int index) const
-    {
-      return Workspace2D::dataY(index);
-    }
-
-    /**
-    Get the error data for a specified histogram thru python
-    \param index The number of the histogram
-    \return A vector of doubles containing the error data
-    */
-    const std::vector<double>&
-      Workspace2D::getE(const int index) const
-    {
-      return Workspace2D::dataE(index);
     }
 
   } // namespace DataObjects
