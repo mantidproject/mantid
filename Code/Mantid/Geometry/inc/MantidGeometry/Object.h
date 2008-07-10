@@ -60,6 +60,12 @@ class DLLExport Object
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
   int searchForObject(Geometry::V3D&) const;
+  int inBoundingBox(const Geometry::V3D&,
+	                const double&, const double&, const double&,
+	                const double&, const double&, const double& ) const;
+  int lineHitsBoundingBox(const Geometry::V3D&, const Geometry::V3D&,
+	                              const double&, const double&, const double&,
+	                              const double&, const double&, const double& ) const;
 
  protected:
 
@@ -127,10 +133,10 @@ class DLLExport Object
   double solidAngle(const Geometry::V3D& observer) const;
 
   // Axis Aligned Bounding box
-  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);	
+  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;	
 
   // find internal point to object
-  int getPointInObject(Geometry::V3D& point);
+  int getPointInObject(Geometry::V3D& point) const;
 
 
 };

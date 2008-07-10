@@ -864,24 +864,42 @@ namespace Mantid
          return 4*M_PI;  // internal point
       if( this->isOnSide(observer) )
          return 2*M_PI;  // this is wrong if on an edge
+	  // Use BB if available, and if observer not within it
+	  const double big(1e10);
+	  double xmin,ymin,zmin,xmax,ymax,zmax;
+	  xmin=ymin=zmin=-big;
+	  xmax=ymax=zmax=big;
+	  (this)->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	  bool useBB=false;
+	  int count(0);
+	  if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
+      {
+			if( !inBoundingBox(observer,xmax,ymax,zmax,xmin,ymin,zmin) )
+				useBB=true;
+      }
+	     
       dtheta=M_PI/res;
       for(itheta=1;itheta<=res;itheta++)
-         {
+      {
          // itegrate over 0->2pi in phi
          theta=M_PI*(itheta-0.5)/res;
          res_phi=res*sin(theta);
          if(res_phi<20) res_phi=20;
          dphi=2*M_PI/res_phi;
          for(jphi=1;jphi<=res_phi;jphi++)
-            {
+         {
             phi=2.0*M_PI*(jphi-0.5)/res_phi;
-            Track tr(observer, Geometry::V3D(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)));
-            if(this->interceptSurface(tr)>0)
+			Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+			if( !useBB || lineHitsBoundingBox(observer,dir,xmax,ymax,zmax,xmin,ymin,zmin) )
+			{
+               Track tr(observer, dir);
+               if(this->interceptSurface(tr)>0)
                {
                   sum+=dtheta*dphi*sin(theta);
-               }
-            }
-         }
+		       }
+			}
+		 }
+	  }
       return sum;
     }
 
@@ -896,7 +914,7 @@ namespace Mantid
 	 * @param ymin :: Minimum value for the bounding box in y direction
 	 * @param zmin :: Minimum value for the bounding box in z direction
 	 */
-	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 	{
 		if (!TopRule)
 			return;
@@ -905,7 +923,7 @@ namespace Mantid
 
 
 	int
-      Object::getPointInObject(Geometry::V3D& point)
+      Object::getPointInObject(Geometry::V3D& point) const
       /*!
       Try to find a point that lies within (or on) the object
       \param point :: on exit set to the point value, if found
@@ -923,7 +941,7 @@ namespace Mantid
 			return 1;
 		}
 		//
-		// Try centre of bounding box, if one can be found
+		// Try centre of bounding box as initial guess, if one can be found
 		// Note that if initial bounding box estimate greater than ~O(1e16) times
 		// actual size, boundingBox may be wrong.
 		//
@@ -931,7 +949,7 @@ namespace Mantid
 		double xmin,ymin,zmin,xmax,ymax,zmax;
 		xmin=ymin=zmin=-big;
 		xmax=ymax=zmax=big;
-		this->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+		getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
 		if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
 		{
 		   testPt=Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
@@ -954,7 +972,7 @@ namespace Mantid
     {
       // 
       // Method - check if point in object, if not search directions along
-	  // principle axes. 
+	  // principle axes using interceptSurface
 	  //
 		Geometry::V3D testPt;
 		if(isValid(point))
@@ -976,6 +994,116 @@ namespace Mantid
 		return 0;
 	}
 
+    int
+      Object::lineHitsBoundingBox(const Geometry::V3D& orig, const Geometry::V3D& dir,
+	                              const double& xmax, const double& ymax, const double& zmax,
+	                              const double& xmin, const double& ymin, const double& zmin ) const
+      /*!
+      Fast test to determine if Line hits BoundingBox. 
+      \param orig :: Origin of line to test
+	  \param dir  :: direction of line
+	  \param xmax :: Maximum value for the bounding box in x direction
+	  \param ymax :: Maximum value for the bounding box in y direction
+	  \param zmax :: Maximum value for the bounding box in z direction
+	  \param xmin :: Minimum value for the bounding box in x direction
+	  \param ymin :: Minimum value for the bounding box in y direction
+	  \param zmin :: Minimum value for the bounding box in z direction
+      \return 1 if line hits, 0 otherwise
+      */
+    {
+      // 
+      // Method - Loop through planes looking for ones that are visible and check intercept
+	  // Assume that orig is outside of BoundingBox.
+	  //
+		double lambda;
+		const double tol=1e-6;
+		if(orig.X()>xmax)
+		{
+			if(dir.X()<-tol)
+			{
+	           lambda=(xmax-orig.X())/dir.X();
+			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+					  return 1;
+			}
+		}
+		if(orig.X()<xmin)
+		{
+			if(dir.X()>tol)
+			{
+	           lambda=(xmin-orig.X())/dir.X();
+			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+					  return 1;
+			}
+		}
+		if(orig.Y()>ymax)
+		{
+			if(dir.Y()<-tol)
+			{
+	           lambda=(ymax-orig.Y())/dir.Y();
+			   if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+					  return 1;
+			}
+		}
+		if(orig.Y()<ymin)
+		{
+			if(dir.Y()>tol)
+			{
+	           lambda=(ymin-orig.Y())/dir.Y();
+			   if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+					  return 1;
+			}
+		}
+		if(orig.Z()>zmax)
+		{
+			if(dir.Z()<-tol)
+			{
+	           lambda=(zmax-orig.Z())/dir.Z();
+			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+                  if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+					  return 1;
+			}
+		}
+		if(orig.Z()<zmin)
+		{
+			if(dir.Z()>tol)
+			{
+	           lambda=(zmin-orig.Z())/dir.Z();
+			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+                  if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+					  return 1;
+			}
+		}
+		return 0;
+			 
+    }
+
+    int
+      Object::inBoundingBox(const Geometry::V3D& point,
+	                        const double& xmax, const double& ymax, const double& zmax,
+	                        const double& xmin, const double& ymin, const double& zmin ) const
+      /*!
+      Test point in BoundingBox 
+      \param point :: Point to test
+	  \param xmax :: Maximum value for the bounding box in x direction
+	  \param ymax :: Maximum value for the bounding box in y direction
+	  \param zmax :: Maximum value for the bounding box in z direction
+	  \param xmin :: Minimum value for the bounding box in x direction
+	  \param ymin :: Minimum value for the bounding box in y direction
+	  \param zmin :: Minimum value for the bounding box in z direction
+      \return 1 if in, 0 otherwise
+      */
+    {
+      //
+	   const double tol=1e-6;
+	   if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymax-tol
+		  && point.Z()<=zmax+tol && point.Z()>=zmax-tol )
+		   return 1;
+	   return 0;
+	}
   }  // NAMESPACE MonteCarlo
 
 }  // NAMESPACE Mantid
