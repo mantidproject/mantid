@@ -1,12 +1,18 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_
 #define MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IErrorHelper.h"
 
 namespace Mantid
 {
 
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
 namespace Kernel
 {
   class Logger;
@@ -14,7 +20,6 @@ namespace Kernel
 
 namespace DataObjects
 {
-
 /** Concrete workspace implementation. Data is a single double value
     @author Nicholas Draper
     @date 19/05/2008
@@ -41,7 +46,6 @@ namespace DataObjects
 */
 class DLLExport WorkspaceSingleValue : public API::Workspace
 {
-
 public:
   /// Typedef for the workspace_iterator to use with a WorkspaceSingleValue
   typedef API::workspace_iterator<API::LocatedDataRef, WorkspaceSingleValue> iterator;
@@ -77,9 +81,13 @@ public:
   virtual std::vector<double>& dataY(int const index) { return _Y; }
   ///Returns the error data
   virtual std::vector<double>& dataE(int const index) { return _E; }
+  /// Returns the x data const
+  virtual const std::vector<double>& dataX(int const index) const {return _X;}
+  /// Returns the y data const
+  virtual const std::vector<double>& dataY(int const index) const {return _Y;}
+  /// Returns the error const
+  virtual const std::vector<double>& dataE(int const index) const {return _E;}
 
-
-  //inheritance redirections
   ///Returns non-const vector of the x data
   virtual std::vector<double>& dataX() { return _X; }
   ///Returns non-const vector of the y data
@@ -92,13 +100,6 @@ public:
   virtual const std::vector<double>& dataY() const { return _Y; }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return _E; }
-
-  /// Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const {return _X;}
-  /// Returns the y data const
-  virtual const std::vector<double>& dataY(int const index) const {return _Y;}
-  /// Returns the error const
-  virtual const std::vector<double>& dataE(int const index) const {return _E;}
 
   ///Returns the ErrorHelper applicable for this detector
   virtual const API::IErrorHelper* errorHelper(int const index) const { return _ErrorHelper; }
@@ -140,7 +141,6 @@ private:
   typedef boost::shared_ptr<WorkspaceSingleValue> WorkspaceSingleValue_sptr;
 
 } // namespace DataObjects
-
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_*/

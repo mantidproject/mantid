@@ -1,21 +1,23 @@
-#ifndef IWORKSPACEPROPERTY_H_
-#define IWORKSPACEPROPERTY_H_
+#ifndef MANTID_API_IWORKSPACEPROPERTY_H_
+#define MANTID_API_IWORKSPACEPROPERTY_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
 namespace API
 {
-/** @class IWorkspaceProperty IWorkspaceProperty.h Kernel/IWorkspaceProperty.h
-
-    An interface that is implemented by WorkspaceProperty.
+/** An interface that is implemented by WorkspaceProperty.
     Used for non templated workspace operations.
 
     @author Nick Draper, Tessella Support Services plc
-    @date 21-01-2008
-    
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    @author Russell Taylor, Tessella Support Services plc
+    @date 11/12/2007
+
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -31,7 +33,7 @@ namespace API
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -39,14 +41,18 @@ class IWorkspaceProperty
 {
 public:
   /// Store a workspace into the AnalysisDataService
-  virtual Workspace_sptr getWorkspace() = 0;
+  virtual bool store() = 0;
+  /// Clear the stored pointer
+  virtual void clear() = 0;
+  /// Get a pointer to the workspace
+  virtual Workspace_sptr getWorkspace() const = 0;
   /// Returns the direction of the workspace property
-  virtual const unsigned int direction()const =0;
+  virtual const unsigned int direction() const = 0;
   /// Virtual destructor
   virtual ~IWorkspaceProperty() {}
 };
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
-#endif /*IWORKSPACEPROPERTY_H_*/
+#endif /*MANTID_API_IWORKSPACEPROPERTY_H_*/

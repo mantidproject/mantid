@@ -5,10 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/IStorable.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -52,8 +51,7 @@ namespace API
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <typename TYPE>
-class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >,
-  public Kernel::IStorable, public API::IWorkspaceProperty
+class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, public IWorkspaceProperty
 {
 public:
   /** Constructor.
@@ -193,7 +191,7 @@ public:
     return result;
   }
 
-  Workspace_sptr getWorkspace()
+  Workspace_sptr getWorkspace() const
   {
     return this->operator()();
   }

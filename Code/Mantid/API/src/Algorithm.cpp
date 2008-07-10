@@ -4,7 +4,6 @@
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/IStorable.h"
 
 namespace Mantid
 {
@@ -17,8 +16,8 @@ namespace Mantid
     /// Constructor
     Algorithm::Algorithm() :
     PropertyManager(),
-      m_isInitialized(false), 
-      m_isExecuted(false), 
+      m_isInitialized(false),
+      m_isExecuted(false),
       m_isChildAlgorithm(false)
     {
     }
@@ -32,9 +31,9 @@ namespace Mantid
     /** Initialization method invoked by the framework. This method is responsible
     *  for any bookkeeping of initialization required by the framework itself.
     *  It will in turn invoke the init() method of the derived algorithm,
-    *  and of any sub-algorithms which it creates. 
+    *  and of any sub-algorithms which it creates.
     *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be initialised
-    * 
+    *
     */
     void Algorithm::initialize()
     {
@@ -67,19 +66,19 @@ namespace Mantid
         // (1) perform the printout
         g_log.fatal("UNKNOWN Exception is caught");
         throw;
-        // Gaudi: 
+        // Gaudi:
       }
 
-      // Only gets to here if everything worked normally    
+      // Only gets to here if everything worked normally
       return;
     }
 
     /** The actions to be performed by the algorithm on a dataset. This method is
     *  invoked for top level algorithms by the application manager.
-    *  This method invokes exec() method. 
-    *  For sub-algorithms either the execute() method or exec() method 
+    *  This method invokes exec() method.
+    *  For sub-algorithms either the execute() method or exec() method
     *  must be EXPLICITLY invoked by  the parent algorithm.
-    * 
+    *
     *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be executed
     */
     bool Algorithm::execute()
@@ -114,16 +113,16 @@ namespace Mantid
           // need it to throw before trying to run fillhistory() on an algorithm which has failed
           // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
           if (!isChild())
-          { 
+          {
             fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC);
             this->store();
           }
 
-          // RJT, 19/3/08: Moved this up from below the catch blocks 
-          setExecuted(true);  
+          // RJT, 19/3/08: Moved this up from below the catch blocks
+          setExecuted(true);
 		  if (!m_isChildAlgorithm)
 			  g_log.information()<< "Algorithm successful, Duration "<< double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
-			
+
         }
         catch(std::runtime_error& ex)
         {
@@ -143,9 +142,9 @@ namespace Mantid
       // Gaudi also specifically catches GaudiException & std:exception.
       catch (...)
       {
-        // Gaudi sets the executed flag to true here despite the exception 
+        // Gaudi sets the executed flag to true here despite the exception
         // This allows it to move to the next command or it just loops indefinitely.
-        // we will set it to false (see Nick Draper) 6/12/07 
+        // we will set it to false (see Nick Draper) 6/12/07
         setExecuted(false);
 
         g_log.error("UNKNOWN Exception is caught ");
@@ -176,8 +175,8 @@ namespace Mantid
 
 
     /** Create a sub algorithm.  A call to this method creates a child algorithm object.
-    *  Using this mechanism instead of creating daughter 
-    *  algorithms directly via the new operator is prefered since then 
+    *  Using this mechanism instead of creating daughter
+    *  algorithms directly via the new operator is prefered since then
     *  the framework can take care of all of the necessary book-keeping.
     *
     *  @param name    The concrete algorithm class of the sub algorithm
@@ -190,7 +189,7 @@ namespace Mantid
       alg->setChild(true);
 
       // Initialise the sub-algorithm
-      try 
+      try
       {
         alg->initialize();
       }
@@ -247,7 +246,7 @@ namespace Mantid
     *  @param duration a double defining the length of duration of the algorithm
     */
     void Algorithm::fillHistory(dateAndTime start,double duration)
-    {     
+    {
       //std::vector<AlgorithmParameter>* algParameters = new std::vector<AlgorithmParameter>;
       //references didn't work as not initialised
       std::vector<WorkspaceHistory>  inW_History,outW_History,inoutW_History,OUT_inoutW_History;
@@ -263,20 +262,20 @@ namespace Mantid
         if (wsProp)
         {
           const unsigned int i = wsProp->direction();
-          if( (i == Mantid::Kernel::Direction::InOut) )            
+          if( (i == Mantid::Kernel::Direction::InOut) )
           {
             ioflag=true;
             inout_work = wsProp->getWorkspace();
             inoutW_History.push_back( inout_work->getWorkspaceHistory());
           }
 
-          else if( (i == Mantid::Kernel::Direction::Input) )            
+          else if( (i == Mantid::Kernel::Direction::Input) )
           {
             iflag=true;
             in_work = wsProp->getWorkspace();
             inW_History.push_back( in_work->getWorkspaceHistory());
           }
-          else if( (i == Mantid::Kernel::Direction::Output) )            
+          else if( (i == Mantid::Kernel::Direction::Output) )
           {
             oflag=true;
             out_work = wsProp->getWorkspace();
@@ -294,7 +293,7 @@ fill each inout with each input history
       {
         //loop over input workspaces to fill output workspace history with constituent input histories
         for (unsigned int j=0; j<inW_History.size();j++)
-        { 
+        {
           std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
           if(  in_algH.size() != 0)
           {
@@ -316,7 +315,7 @@ fill each inout with each input history
       {
         //loop over inout workspaces to fill output workspace history with constituent inout histories
         for (unsigned int j=0; j<inoutW_History.size();j++)
-        { 
+        {
           std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
           if(  inout_algH.size() != 0)
           {
@@ -339,7 +338,7 @@ fill each inout with each input history
       {
         //loop over inout workspaces to fill inout workspace history other inout histories
         for (unsigned int j=0; j<inoutW_History.size();j++)
-        { 
+        {
           std::vector<AlgorithmHistory>& inout_algH = inoutW_History[j].getAlgorithms();
           if(  inout_algH.size() != 0)
           {
@@ -347,7 +346,7 @@ fill each inout with each input history
             {
               // don't want to copy the history of an inout workspace into itself
               if(i!=j)
-              {          
+              {
                 // copy each algorithmhistory from each inout workspace into each inout history (except for the same one)
                 for(unsigned int k=0; k<inout_algH.size();k++)
                 {
@@ -363,7 +362,7 @@ fill each inout with each input history
       {
         //loop over input workspaces to fill inout workspace history with constituent input histories
         for (unsigned int j=0; j<inW_History.size();j++)
-        { 
+        {
           std::vector<AlgorithmHistory>& in_algH = inW_History[j].getAlgorithms();
           if(  in_algH.size() != 0)
           {
@@ -382,7 +381,7 @@ fill each inout with each input history
       }
 
 
-      // 
+      //
 
       int no_of_props = algProperties.size();
       for (int i=0; i < no_of_props; i++)
@@ -403,7 +402,7 @@ fill each inout with each input history
       }
 
       if(oflag)
-      { 
+      {
         // get the reference  to output workspace without it going out of scope, and it's not a copy
         std::vector<AlgorithmHistory>& OalgHistory = (outW_History.front()).getAlgorithms();
         //increment output workspace history with new algorithm properties
@@ -429,13 +428,13 @@ fill each inout with each input history
     */
 	void Algorithm::algorithm_info()
 	{
-		g_log.information()<<"Algorithm Name " << this->name() <<" Version "<<this->version()<<std::endl;		
-		const std::vector<Property*>& algProperties = getProperties();		
+		g_log.information()<<"Algorithm Name " << this->name() <<" Version "<<this->version()<<std::endl;
+		const std::vector<Property*>& algProperties = getProperties();
 		int no_of_props = algProperties.size();
 		for (int i=0; i < no_of_props; i++)
 		{
 			const Property* AP=algProperties[i];
-			g_log.information() << "Name: " << AP->name() << ", Value: " << AP->value() 
+			g_log.information() << "Name: " << AP->name() << ", Value: " << AP->value()
 			                    << ", Default: "<< (AP->isDefault()?"Yes":"No") <<std::endl;
 		}
 	}
@@ -448,18 +447,12 @@ fill each inout with each input history
       const std::vector< Property*> &props = getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-        Kernel::IStorable *wsProp = dynamic_cast<Kernel::IStorable*>(props[i]);
+        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
         if (wsProp)
         {
           try
           {
-            // Store the workspace. Will only be 1 output workspace so stop looping if true
-            // fill history has been designed to create history for potentially multiple inout
-            // and multiple out workspaces
-            
-            //if ( 
               wsProp->store();
-            //) break;
           }
           catch (std::runtime_error& e)
           {
