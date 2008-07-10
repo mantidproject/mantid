@@ -126,7 +126,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(SolutionName)API.lib $(SolutionName)DataHandling.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).pyd"
-				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32;c:\Python25\libs"
+				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32;c:\Python25\libs"
 			/>
 			<Tool
 				Name="VCALinkTool"
