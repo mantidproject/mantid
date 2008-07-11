@@ -1,9 +1,11 @@
 #include "MantidUI.h"
+#include "MantidLog.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
 #include "WorkspaceMatrix.h"
 #include "LoadRawDlg.h"
 #include "ImportWorkspaceDlg.h"
+#include "ExecuteAlgorithm.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 
@@ -41,6 +43,7 @@ void ApplicationWindow::initMantid()
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
 {
     m_exploreMantid = new MantidDockWidget(this,aw);
+    m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
   	actionCopyRowToTable = new QAction(tr("Copy to Table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
@@ -57,11 +60,18 @@ MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
 
 void MantidUI::init()
 {
+    FrameworkManager::Instance();
+    MantidLog::connect(appWindow());
+
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
-    cerr<<"action="<<actionToggleMantid<<endl;
 	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
 	actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
     aw_view->addAction(actionToggleMantid);
+
+	actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
+	//actionToggleAlgorithms->setIcon(QPixmap(mantid_matrix_xpm));
+	actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
+    aw_view->addAction(actionToggleAlgorithms);
 
     //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060");
     update();
@@ -158,6 +168,7 @@ void MantidUI::deleteWorkspace()
 void MantidUI::update()
 {
     m_exploreMantid->update();
+    m_exploreAlgorithms->update();
 }
 
 QString MantidUI::getSelectedWorkspaceName()
@@ -370,4 +381,90 @@ bool MantidUI::drop(QDropEvent* e)
     }
 
     return false;
+}
+
+void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
+{
+    QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
+    if (items.size() == 0 || items[0]->parent() == 0) 
+    {
+        algName = "";
+        version = 0;
+    }
+    else
+    {
+        QString str = items[0]->text(0);
+        QStringList lst = str.split(" v.");
+        algName = lst[0];
+        version = lst[1].toInt();
+    }
+}
+
+void MantidUI::executeAlgorithm()
+{
+    QString algName;
+    int version;
+    getSelectedAlgorithm(algName,version);
+    if (algName.isEmpty())
+    {
+        QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
+        return;
+    }
+    Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>
+          (Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString(),version));
+
+	std::vector<Mantid::Kernel::Property*> propList = alg->getProperties();
+
+	if (propList.size() > 0)
+	{
+      	QStringList wkspaces = getWorkspaceNames();
+
+		ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
+		dlg->CreateLayout(wkspaces, propList);
+		dlg->setModal(true);
+	
+		if (dlg->exec()== QDialog::Accepted)
+		{			
+			std::map<std::string, std::string>::iterator resItr = dlg->results.begin();
+			
+			for (; resItr != dlg->results.end(); ++resItr)
+			{				
+				try
+				{
+					alg->setPropertyValue(resItr->first, resItr->second);
+				}
+				catch (std::invalid_argument err)
+				{
+					int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
+					tr(QString::fromStdString(resItr->first) + " was invalid."),
+					QMessageBox::Ok);
+				
+					return;
+				}
+			}
+			
+			//Check properties valid
+			if (!alg->checkPropertiesValid())
+			{
+				//Properties not valid
+				int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
+					tr("One or more of the property values entered was invalid. "
+					"Please see the Mantid log for details."),
+					QMessageBox::Ok);
+				
+				return;
+			}
+			
+			if (!alg->execute() == true)
+			{
+				//Algorithm did not execute properly
+				int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
+					tr("The algorithm failed to execute correctly. "
+					"Please see the Mantid log for details."),
+					QMessageBox::Ok);
+			}
+			
+			update();
+		}
+	}
 }

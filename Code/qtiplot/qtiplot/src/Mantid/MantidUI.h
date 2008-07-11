@@ -18,6 +18,7 @@ class Graph3D;
 class ScriptingEnv;
 class MantidMatrix;
 class MantidDockWidget;
+class AlgorithmDockWidget;
 
 class MantidUI:public QObject
 {
@@ -27,26 +28,46 @@ class MantidUI:public QObject
 public:
     MantidUI(ApplicationWindow *aw);
     void init();
+    // Pointer to QtiPLot main window
+    ApplicationWindow *appWindow(){return m_appWindow;}
+
+    // Returns a list of open workspaces
     QStringList getWorkspaceNames();
+    // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
     Mantid::API::Workspace_sptr LoadIsisRawFile(const QString& fileName, const QString& workspaceName);
     Mantid::API::IAlgorithm* CreateAlgorithm(const QString& algName);
-    bool deleteWorkspace(const QString& workspaceName);
-    ApplicationWindow *appWindow(){return m_appWindow;}
-    QString getSelectedWorkspaceName();
-    Mantid::API::Workspace_sptr getSelectedWorkspace();
+    // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
+
+    // Deletes workspace from QtiPlot
+    bool deleteWorkspace(const QString& workspaceName);
+    // Returns the name of selected workspace in exploreMantid window
+    QString getSelectedWorkspaceName();
+    // Returns the pointer of workspace selected in exploreMantid window
+    Mantid::API::Workspace_sptr getSelectedWorkspace();
+
+    void getSelectedAlgorithm(QString& algName, int& version);
     int getBinNumber(const QString& workspaceName);
     int getHistogramNumber(const QString& workspaceName);
+    // Adjusts QtiPlot's main menu
     bool menuAboutToShow(QMdiSubWindow *w);
+    // Creates a 3D plot in QtiPlot if the active window is a MantidMatrix
     Graph3D *plot3DMatrix(int style);
+    // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
     MultiLayer *plotSpectrogram(Graph::CurveType type);
+    // Removes referances to MantidMatrix w in QtiPlot
     void removeWindowFromLists(MdiSubWindow* w);
+    // Prepares the contex menu for MantidMatrix
     void showContextMenu(QMenu& cm, MdiSubWindow* w);
+    // Copies selected rows from m to Y and errY columns of a new Table. If vis == true the table is visible,
+    // if errs == true errors are copied
     Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
-    bool drop(QDropEvent* e);
 
+    // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
+    bool drop(QDropEvent* e);
+    // Updates Mantid user interfase
     void update();
 
 public slots:
@@ -58,7 +79,7 @@ public slots:
     void copyRowToTable();
     void copyRowToGraph();
     void copyRowToGraphErr();
-
+    void executeAlgorithm();
 public:
     ApplicationWindow *m_appWindow;
     QMdiArea *d_workspace;// ApplicationWindow's private member
@@ -70,10 +91,12 @@ public:
     QAction *aw_actionShowUndoStack;
 
     MantidDockWidget *m_exploreMantid;
+    AlgorithmDockWidget *m_exploreAlgorithms;
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;
     QAction *actionCopyRowToGraphErr;
     QAction *actionToggleMantid;
+    QAction *actionToggleAlgorithms;
 };
 
 static const char * mantid_matrix_xpm[] = { 

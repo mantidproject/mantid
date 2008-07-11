@@ -18,7 +18,6 @@ public:
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
 protected:
-    //void mousePressEvent ( QMouseEvent * event );
     QTreeWidget *m_tree;
     friend class MantidUI;
 private:
@@ -33,6 +32,31 @@ class MantidTreeWidget:public QTreeWidget
     Q_OBJECT
 public:
     MantidTreeWidget(QWidget *w):QTreeWidget(w){}
+    void mousePressEvent (QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
+private:
+    QPoint m_dragStartPosition;
+};
+
+class AlgorithmDockWidget: public QDockWidget
+{
+    Q_OBJECT
+public:
+    AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
+    void update();
+protected:
+    QTreeWidget *m_tree;
+    friend class MantidUI;
+private:
+    MantidUI *m_mantidUI;
+};
+
+
+class AlgorithmTreeWidget:public QTreeWidget
+{
+    Q_OBJECT
+public:
+    AlgorithmTreeWidget(QWidget *w):QTreeWidget(w){}
     void mousePressEvent (QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
 private:

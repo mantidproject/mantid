@@ -19,6 +19,13 @@ namespace Kernel
 namespace API
 {
 
+struct Algorithm_descriptor
+{
+  std::string name;
+  std::string category;
+  int version;
+};
+
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -81,6 +88,8 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 			  Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
 		  }
 	  }
+    
+    const std::vector<Algorithm_descriptor> getDescriptors() const;
 
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
