@@ -111,6 +111,7 @@ public:
     if ( ! value.empty() )
     {
       m_workspaceName = value;
+      Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::m_isDefault = false;
       return true;
     }
     // Setting an empty workspace name is not allowed

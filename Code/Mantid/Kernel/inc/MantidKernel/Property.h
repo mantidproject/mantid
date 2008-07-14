@@ -67,7 +67,6 @@ public:
 
 	virtual const std::vector<std::string> allowedValues() const;
 
-	/// Create a PropertyHistory object representing the current state of the Property.
 	virtual const PropertyHistory createHistory() const;
 
 protected:

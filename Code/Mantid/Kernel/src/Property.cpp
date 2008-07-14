@@ -114,6 +114,7 @@ const std::vector<std::string> Property::allowedValues() const
   return std::vector<std::string>();
 }
 
+/// Create a PropertyHistory object representing the current state of the Property.
 const PropertyHistory Property::createHistory() const
 {
   return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault());

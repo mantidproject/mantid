@@ -41,7 +41,7 @@ public:
     correctOutput = correctOutput + "\n";
     correctOutput = correctOutput + "  Name: arg1_param\n";
     correctOutput = correctOutput + "  Value: 20\n";
-    correctOutput = correctOutput + "  isDefault: Yes\n";
+    correctOutput = correctOutput + "  isDefault: No\n";
     correctOutput = correctOutput + "  Direction: Input\n";
     correctOutput = correctOutput + "\n";
     correctOutput = correctOutput + "  Name: arg2_param\n";

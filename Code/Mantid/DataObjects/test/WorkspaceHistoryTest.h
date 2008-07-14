@@ -199,15 +199,15 @@ public:
     // isdefault is true for all parameters because a setProperty has not been called on them
     TS_ASSERT_EQUALS(C_AP[0].name(),"InWS_1");
     TS_ASSERT_EQUALS(C_AP[0].value(),"A");
-    TS_ASSERT_EQUALS(C_AP[0].isDefault(),true);
+    TS_ASSERT_EQUALS(C_AP[0].isDefault(),false);
     TS_ASSERT_EQUALS(C_AP[0].direction(),0);
     TS_ASSERT_EQUALS(C_AP[1].name(),"InWS_2");
     TS_ASSERT_EQUALS(C_AP[1].value(),"B");
-    TS_ASSERT_EQUALS(C_AP[1].isDefault(),true);
+    TS_ASSERT_EQUALS(C_AP[1].isDefault(),false);
     TS_ASSERT_EQUALS(C_AP[1].direction(),0);
     TS_ASSERT_EQUALS(C_AP[2].name(),"InoutWS");
     TS_ASSERT_EQUALS(C_AP[2].value(),"C");
-    TS_ASSERT_EQUALS(C_AP[2].isDefault(),true);
+    TS_ASSERT_EQUALS(C_AP[2].isDefault(),false);
     TS_ASSERT_EQUALS(C_AP[2].direction(),2);
 
     // Test streamed output.

@@ -12,8 +12,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 class WorkspacePropertyTest : public CxxTest::TestSuite
-{ 
-  
+{
+
   //private test class - using this removes the dependency on the DataObjects library
   class WorkspaceTest: public Workspace
   {
@@ -28,7 +28,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual std::vector<double>& dataY(int const index) {return data;}
     ///Returns the error data
     virtual std::vector<double>& dataE(int const index) {return data;}
- 
+
     virtual const std::vector<double>& dataX(int const index)const {return data;}
     ///Returns the y data
     virtual const std::vector<double>& dataY(int const index)const {return data;}
@@ -42,7 +42,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Sets the ErrorHelper for this spectra
     virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
-    
+
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
     virtual const std::vector<double>& getX(int const index) const {return data;}
@@ -50,7 +50,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const std::vector<double>& getY(int const index) const {return data;}
     ///Returns the error const
     virtual const std::vector<double>& getE(int const index) const {return data;}
-  
+
   private:
     std::vector<double> data;
     int dummy;
@@ -70,7 +70,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual std::vector<double>& dataY(int const index) {return data;}
     ///Returns the error data
     virtual std::vector<double>& dataE(int const index) {return data;}
- 
+
     virtual const std::vector<double>& dataX(int const index)const {return data;}
     ///Returns the y data
     virtual const std::vector<double>& dataY(int const index)const {return data;}
@@ -84,7 +84,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Sets the ErrorHelper for this spectra
     virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
 
-    
+
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
     virtual const std::vector<double>& getX(int const index) const {return data;}
@@ -92,7 +92,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const std::vector<double>& getY(int const index) const {return data;}
     ///Returns the error const
     virtual const std::vector<double>& getE(int const index) const {return data;}
-  
+
   private:
     std::vector<double> data;
     int dummy;
@@ -117,7 +117,7 @@ public:
   {
     TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
   }
-  
+
   void testValue()
   {
     TS_ASSERT( ! wsp1->value().compare("ws1") )
@@ -152,7 +152,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest") );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
     TS_ASSERT( wsp1->isValid() )
-    
+
     // Put workspace of wrong type and check validation fails
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
     TS_ASSERT( ! wsp3->isValid() )
@@ -169,18 +169,43 @@ public:
     TS_ASSERT_EQUALS( vals.size(), 2 )
     TS_ASSERT_EQUALS( vals[0], "ws1" )
     TS_ASSERT_EQUALS( vals[1], "ws3" )
-    
+
     TS_ASSERT( wsp2->allowedValues().empty() )
 
     TS_ASSERT_THROWS_NOTHING( vals = wsp3->allowedValues() )
     TS_ASSERT_EQUALS( vals.size(), 2 )
   }
-  
+
+  void testCreateHistory()
+  {
+    PropertyHistory history = wsp1->createHistory();
+    TS_ASSERT_EQUALS( history.name(), "workspace1" )
+    TS_ASSERT_EQUALS( history.value(), "ws1" )
+    TS_ASSERT( ! history.isDefault() )
+    TS_ASSERT_EQUALS( history.type(), wsp1->type() )
+    TS_ASSERT_EQUALS( history.direction(), 0 )
+
+    PropertyHistory history2 = wsp2->createHistory();
+    TS_ASSERT_EQUALS( history2.name(), "workspace2" )
+    TS_ASSERT_EQUALS( history2.value(), "ws2" )
+    TS_ASSERT( ! history2.isDefault() )
+    TS_ASSERT_EQUALS( history2.type(), wsp2->type() )
+    TS_ASSERT_EQUALS( history2.direction(), 1 )
+
+    PropertyHistory history3 = wsp3->createHistory();
+    TS_ASSERT_EQUALS( history3.name(), "workspace3" )
+    TS_ASSERT_EQUALS( history3.value(), "ws3" )
+    TS_ASSERT( history3.isDefault() )
+    TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
+    TS_ASSERT_EQUALS( history3.direction(), 2 )
+
+  }
+
   void testStore()
   {
     // This is an input workspace so should return false
     TS_ASSERT( ! wsp1->store() )
-    
+
     // Since no workspace has been assigned to this output property, it should throw
     TS_ASSERT_THROWS( wsp2->store(), std::runtime_error )
     // So now create and assign the workspace and test again
@@ -192,7 +217,7 @@ public:
     Workspace_sptr storedspace;
     TS_ASSERT_THROWS_NOTHING( storedspace = AnalysisDataService::Instance().retrieve("ws2") )
     TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
-    
+
     // This one should pass
     TS_ASSERT( wsp3->store() )
 
@@ -208,7 +233,7 @@ public:
     TS_ASSERT_EQUALS( wsp2->direction(), 1 )
     TS_ASSERT_EQUALS( wsp3->direction(), 2 )
   }
-  
+
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;

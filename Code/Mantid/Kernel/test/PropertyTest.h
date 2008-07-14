@@ -23,7 +23,7 @@ public:
   {
     p = new PropertyHelper;
   }
-  
+
   void testName()
   {
     TS_ASSERT( ! p->name().compare("Test") )
@@ -46,7 +46,7 @@ public:
     TS_ASSERT( ! p->type().compare("i") )
 #else
     TS_ASSERT( ! p->type().compare("int") )
-#endif		
+#endif
   }
 
   void testIsValid()
@@ -70,10 +70,20 @@ public:
   {
     TS_ASSERT( p->allowedValues().empty() )
   }
-	
+
+  void testCreateHistory()
+  {
+    PropertyHistory history = p->createHistory();
+    TS_ASSERT_EQUALS( history.name(), "Test" )
+    TS_ASSERT_EQUALS( history.value(), "Nothing" )
+    TS_ASSERT( history.isDefault() )
+    TS_ASSERT_EQUALS( history.type(), p->type() )
+    TS_ASSERT_EQUALS( history.direction(), 99 )
+  }
+
 private:
   Property *p;
-	
+
 };
 
 #endif /*PROPERTYTEST_H_*/
