@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DiffractionFocussing.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Divide.cpp"
 				>
 			</File>
@@ -241,6 +245,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ConvertUnitsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\DiffractionFocussing.h"
 				>
 			</File>
 			<File

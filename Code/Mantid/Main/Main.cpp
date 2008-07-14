@@ -16,16 +16,33 @@ using namespace Mantid::API;
 int main()
 {
 
-  FrameworkManager::Instance();
+  FrameworkManagerImpl& fm = FrameworkManager::Instance();
 
-  UserAlgorithmTest userTest;
-  userTest.RunAllTests();
+//  UserAlgorithmTest userTest;
+ // userTest.RunAllTests();
   
  // Benchmark b;
  // b.RunPlusTest();
     
 #if defined _DEBUG
   //NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!
+  //load a raw file
+    IAlgorithm* loader = fm.createAlgorithm("LoadRaw");
+    loader->setPropertyValue("Filename", "../../../Test/Data/HET15869.RAW");
+
+    std::string outputSpace = "outer";
+    loader->setPropertyValue("OutputWorkspace", outputSpace);    
+
+    loader->execute();
+
+    IAlgorithm* focus = fm.createAlgorithm("DiffractionFocussing");
+    focus->setPropertyValue("GroupingFileName", "../debug/offsets_2006_cycle064.cal");
+
+    std::string resultSpace = "result";
+    focus->setPropertyValue("InputWorkspace", outputSpace); 
+    focus->setPropertyValue("OutputWorkspace", resultSpace);    
+
+    focus->execute();
 
 
 #endif

@@ -59,7 +59,7 @@ namespace Mantid
       /// Destructor
       virtual ~SimpleIntegration() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "SimpleIntegration";}
+      virtual const std::string name() const { return "Integration";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
