@@ -180,10 +180,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\AlgorithmParameter.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\AnalysisDataService.cpp"
 				>
 			</File>

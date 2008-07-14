@@ -201,6 +201,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PropertyHistory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PropertyManager.cpp"
 				>
 			</File>
@@ -295,6 +299,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\FileValidator.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\FilterChannel.h"
 				>
 			</File>
@@ -311,10 +319,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidKernel\IStorable.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidKernel\IValidator.h"
 				>
 			</File>
@@ -328,6 +332,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\LibraryWrapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\ListValidator.h"
 				>
 			</File>
 			<File
@@ -356,6 +364,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\Property.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\PropertyHistory.h"
 				>
 			</File>
 			<File
