@@ -131,11 +131,9 @@ public:
   virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) = 0;
 
   /// Returns a reference to the WorkspaceHistory
-  WorkspaceHistory& getWorkspaceHistory() { return m_history; }
+  WorkspaceHistory& history() { return m_history; }
   /// Returns a reference to the WorkspaceHistory const
-  const WorkspaceHistory& getWorkspaceHistory() const { return m_history; }
-  /// Required for Boost.Python as cannot overload based on const
-  const WorkspaceHistory& getHistory() const { return getWorkspaceHistory(); }
+  const WorkspaceHistory& getHistory() const { return m_history; }
 
   Axis* const getAxis(const int axisIndex) const;
 

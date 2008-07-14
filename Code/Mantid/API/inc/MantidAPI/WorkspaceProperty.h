@@ -169,6 +169,11 @@ public:
     }
   }
 
+  virtual const Kernel::PropertyHistory createHistory() const
+  {
+    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),m_direction);
+  }
+
   /** If this is an output workspace, store it into the AnalysisDataService
    *  @return True if the workspace is an output workspace and has been stored
    *  @throw std::runtime_error if unable to store the workspace successfully
@@ -216,27 +221,6 @@ private:
 };
 
 } // namespace API
-} // namespace Mantid
-
-
-namespace Mantid
-{
-namespace Kernel
-{
-/// Describes the direction (within an algorithm) of a WorkspaceProperty
-struct Direction
-{
-  /// Enum giving the possible directions
-  enum
-  {
-    Input,    ///< An input workspace
-    Output,   ///< An output workspace
-    InOut,     ///< Both an input & output workspace
-    None
-  };
-};
-
-} // namespace Kernel
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_WORKSPACEPROPERTY_H_*/

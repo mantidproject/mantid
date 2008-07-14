@@ -2,18 +2,35 @@
 #define ALGORITHMHISTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include <sstream>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
+// 'Empty' algorithm class for tests
+class testalg : public Algorithm
+{
+public:
+  testalg() : Algorithm() {}
+  virtual ~testalg() {}
+  const std::string name() const { return "testalg";} ///< Algorithm's name for identification
+  const int version() const { return 1;} ///< Algorithm's version for identification
+  const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
+  void init()
+  {
+    declareProperty(new WorkspaceProperty<Workspace>("arg1_param","x",Direction::Input));
+    declareProperty("arg2_param",23);
+  }
+  void exec() {}
+};
 
 class AlgorithmHistoryTest : public CxxTest::TestSuite
 {
 public:
-
   void testPopulate()
   {
     std::string correctOutput = "Name : testalg\n";
@@ -22,17 +39,15 @@ public:
     correctOutput = correctOutput + "Execution Duration: 14 seconds\n";
     correctOutput = correctOutput + "Parameters:\n";
     correctOutput = correctOutput + "\n";
-    correctOutput = correctOutput + "  Name : arg1_param\n";
+    correctOutput = correctOutput + "  Name: arg1_param\n";
     correctOutput = correctOutput + "  Value: 20\n";
-    correctOutput = correctOutput + "  Type: argument\n";
-    correctOutput = correctOutput + "  isDefault: 1\n";
-    correctOutput = correctOutput + "  Direction :Input\n";
+    correctOutput = correctOutput + "  isDefault: Yes\n";
+    correctOutput = correctOutput + "  Direction: Input\n";
     correctOutput = correctOutput + "\n";
-    correctOutput = correctOutput + "  Name : arg2_param\n";
+    correctOutput = correctOutput + "  Name: arg2_param\n";
     correctOutput = correctOutput + "  Value: 23\n";
-    correctOutput = correctOutput + "  Type: argument\n";
-    correctOutput = correctOutput + "  isDefault: 1\n";
-    correctOutput = correctOutput + "  Direction :Inout\n";
+    correctOutput = correctOutput + "  isDefault: Yes\n";
+    correctOutput = correctOutput + "  Direction: N/A\n";
 
     //set the time
     std::time_t rawtime;
@@ -50,11 +65,11 @@ public:
     std::time_t execTime = mktime ( timeinfo );
 
     // Not really much to test
-    std::vector<AlgorithmParameter> aps;
-    aps.push_back(AlgorithmParameter("arg1_param","20","argument",true,Mantid::Kernel::Direction::Input));
-    aps.push_back(AlgorithmParameter("arg2_param","23","argument",true,Mantid::Kernel::Direction::InOut));
+    Algorithm *alg = new testalg;
+    alg->initialize();
+    alg->setPropertyValue("arg1_param","20");
 
-    AlgorithmHistory AH("testalg",1,execTime,14.0,aps);
+    AlgorithmHistory AH(alg,execTime,14.0);
     //dump output to sting
     std::ostringstream output;
     output.exceptions( std::ios::failbit | std::ios::badbit );

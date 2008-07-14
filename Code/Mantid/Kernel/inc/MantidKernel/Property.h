@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/PropertyHistory.h"
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -20,7 +21,7 @@ namespace Kernel
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 13/11/2007
-    
+
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -37,7 +38,7 @@ namespace Kernel
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -46,7 +47,7 @@ class DLLExport Property
 public:
   /// Virtual destructor
 	virtual ~Property();
-	
+
 	// Getters
 	const std::string& name() const;
 	const std::string& documentation() const;
@@ -55,17 +56,20 @@ public:
 	virtual const bool isValid() const;
 	virtual const std::string getValidatorType() const;
 	const bool isDefault() const;
-	
+
 	// Setter
 	void setDocumentation( const std::string& documentation );
-	
+
 	/// Returns the value of the property as a string
 	virtual std::string value() const = 0;
 	/// Set the value of the property via a string
 	virtual bool setValue( const std::string& value ) = 0;
-	
+
 	virtual const std::vector<std::string> allowedValues() const;
-	
+
+	/// Create a PropertyHistory object representing the current state of the Property.
+	virtual const PropertyHistory createHistory() const;
+
 protected:
   /// Constructor
   Property( const std::string& name, const std::type_info& type );
@@ -75,7 +79,7 @@ protected:
   virtual Property& operator=( const Property& right );
   /// Whether the property has been changed since initialisation
   bool m_isDefault;
-  
+
 private:
   /// The name of the property
   const std::string m_name;
@@ -83,7 +87,7 @@ private:
   std::string m_documentation;
   /// The type of the property
   const std::type_info* m_typeinfo;
-  
+
   /// Private default constructor
   Property();
 };

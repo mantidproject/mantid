@@ -36,15 +36,6 @@ public:
   void setErrorHelper(int const,IErrorHelper*) {}
   void setErrorHelper(int const,const IErrorHelper*) {}
 
-  //Methods for getting data via python. Do not use for anything else!
-  ///Returns the x data const
-  virtual const std::vector<double>& getX(int const index) const {return vec;}
-  ///Returns the y data const
-  virtual const std::vector<double>& getY(int const index) const {return vec;}
-  ///Returns the error const
-  virtual const std::vector<double>& getE(int const index) const {return vec;}
-
-
 private:
   std::vector<double> vec;
   int spec;
@@ -99,12 +90,12 @@ public:
     TS_ASSERT_THROWS( ws.getMemorySize(), Exception::NotImplementedError )
   }
 
-  void testGetWorkspaceHistory()
+  void testHistory()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws.getWorkspaceHistory() )
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws.history() )
     const WorkspaceTester wsc;
-    const WorkspaceHistory& hh = wsc.getWorkspaceHistory();
-    TS_ASSERT_THROWS_NOTHING( ws.getWorkspaceHistory() = hh )
+    const WorkspaceHistory& hh = wsc.getHistory();
+    TS_ASSERT_THROWS_NOTHING( ws.history() = hh )
   }
 
   void testGetAxis()

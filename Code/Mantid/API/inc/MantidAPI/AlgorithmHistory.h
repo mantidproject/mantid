@@ -4,23 +4,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmParameter.h"
+#include "MantidKernel/PropertyHistory.h"
 #include <ctime>
 #include <vector>
 
 namespace Mantid
 {
-  namespace API
-  {
-
-    /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
+namespace API
+{
+class Algorithm;
+/** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
     This class stores information about the Command History used by algorithms on a workspace.
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -40,55 +40,56 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport AlgorithmHistory
+class DLLExport AlgorithmHistory
+{
+public:
+  /// The date-and-time will be stored as the ctime time_t type
+  typedef time_t dateAndTime;
+
+  explicit AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start = 0, const double& duration = -1);
+  virtual ~AlgorithmHistory();
+  AlgorithmHistory& operator=(const AlgorithmHistory&);
+  AlgorithmHistory(const AlgorithmHistory&);
+
+  void addExecutionInfo(const dateAndTime& start, const double& duration);
+
+  // get functions
+  /// get name of algorithm in history const
+  const std::string& name() const {return m_name;}
+  /// get version number of algorithm in history const
+  const int& version() const {return m_version;}
+  /// get parameter list of algorithm in history const
+  const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
+  /// print contents of object
+  void printSelf(std::ostream&,const int indent = 0) const;
+
+  ///this is required for boost.python
+  bool operator==(const AlgorithmHistory &other) const
+  {
+    if (name() == other.name() && version() == other.version() && getProperties() == other.getProperties())
     {
-    public:
-      /// The date-and-time will be stored as the ctime time_t type
-      typedef time_t dateAndTime;
-      AlgorithmHistory();
-      AlgorithmHistory(const std::string&, const int&, 
-        const dateAndTime&, const double&,
-        const std::vector<AlgorithmParameter>&);
-      virtual ~AlgorithmHistory();
-      AlgorithmHistory& operator=(const AlgorithmHistory&);
-      AlgorithmHistory(const AlgorithmHistory&);
-      // get functions
-      /// get name of algorithm in history const
-      const std::string& name()const {return m_name;}
-      /// get version number of algorithm in history const
-      const int& version()const {return m_version;}
-      /// get parameter list of algorithm in history const
-      const std::vector<AlgorithmParameter>& getParameters() const {return m_parameters;}
-      /// print contents of object
-      void printSelf(std::ostream&,const int indent = 0)const;
-      
-      //this is required for boost.python
-      bool operator==(const AlgorithmHistory &other) const 
-      {
-	      if (name() == other.name() && version() == other.version() && getParameters() == other.getParameters())
-	      {
-	      	      return true;
-	      }
-	      
-	      return false;
-      }
+      return true;
+    }
 
-    private:
-      /// The name of the Algorithm
-      std::string m_name;
-      /// The version of the algorithm
-      int m_version;
-      /// The execution date of the algorithm
-      dateAndTime m_executionDate;
-      /// The execution duration of the algorithm
-      double m_executionDuration;
-      /// The AlgorithmParameter's defined for each the algorithm
-      std::vector<AlgorithmParameter> m_parameters;
-    };
+    return false;
+  }
 
-    DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
+private:
+  /// The name of the Algorithm
+  std::string m_name;
+  /// The version of the algorithm
+  int m_version;
+  /// The execution date of the algorithm
+  dateAndTime m_executionDate;
+  /// The execution duration of the algorithm
+  double m_executionDuration;
+  /// The PropertyHistory's defined for the algorithm
+  std::vector<Kernel::PropertyHistory> m_properties;
+};
 
-  } // namespace API
+DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
+
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_ALGORITHMHISTORY_H_*/

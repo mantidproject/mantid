@@ -114,5 +114,11 @@ const std::vector<std::string> Property::allowedValues() const
   return std::vector<std::string>();
 }
 
+const PropertyHistory Property::createHistory() const
+{
+  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault());
+}
+
+
 } // namespace Kernel
 } // namespace Mantid

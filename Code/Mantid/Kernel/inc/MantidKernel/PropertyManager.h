@@ -13,12 +13,16 @@ namespace Mantid
 {
 namespace Kernel
 {
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
 class Logger;
+
 /** @class PropertyManager PropertyManager.h Kernel/PropertyManager.h
 
  Property manager helper class.
  This class is used by algorithms and services for helping to manage their own set of properties.
- 
+
  N.B. ONCE YOU HAVE DECLARED A PROPERTY TO THE MANAGER IT IS OWNED BY THIS CLASS (I.E. DON'T DELETE IT!)
 
  Property values of any type except std::string can be extracted using getProperty().
@@ -27,8 +31,8 @@ class Logger;
  @author Russell Taylor, Tessella Support Services plc
  @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 20/11/2007
- 
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -44,7 +48,7 @@ class Logger;
 
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
@@ -57,14 +61,14 @@ public:
   // Function to declare properties (i.e. store them)
   virtual void declareProperty(Property *p);
 
-  // Sets all the declared properties from 
+  // Sets all the declared properties from
   virtual void setProperties(const std::string &values);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
 
   virtual bool existsProperty(const std::string &name) const;
   virtual bool validateProperties() const;
-  
+
   virtual std::string getPropertyValue(const std::string &name) const;
   virtual const std::vector< Property*>& getProperties() const;
 
@@ -87,7 +91,7 @@ public:
       throw std::invalid_argument("Attempt to assign to property of incorrect type");
     }
   }
-  
+
   /// Specialised version of setProperty template method
   void setProperty(const std::string &name, const char* value)
   {
@@ -115,6 +119,8 @@ protected:
   // Specialised version of above function
   virtual void declareProperty(const std::string &name, const char* value,
       IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="");
+
+
 
 private:
   /// Private copy constructor.
@@ -155,7 +161,7 @@ private:
     TypedValue(const PropertyManager& p, const std::string &name) : pm(p), prop(name) {}
 
     /// Templated cast operator so that a TypedValue can be cast to what is actually wanted
-    template<typename T> 
+    template<typename T>
     operator T() { return pm.getValue<T>(prop); }
   };
 

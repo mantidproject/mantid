@@ -2,97 +2,108 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
-  namespace API
+namespace API
+{
+
+/** Constructor
+ *  @param alg      A pointer to the algorithm for which the history should be constructed
+ *  @param start    The start time of the algorithm execution (optional)
+ *  @param duration The time (in seconds) that it took to run this algorithm (optional)
+ */
+AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start, const double& duration) :
+  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration)
+{
+  // Now go through the algorithm's properties and create the PropertyHistory objects.
+  // Would like to have PropertyManager & Property do this but can't because PropertyHistory has to know
+  // about Workspace Properties, which is in API whereas PropertyManager/Property are in Kernel.
+  const std::vector<Property*>& properties = alg->getProperties();
+  std::vector<Property*>::const_iterator it;
+  for (it = properties.begin(); it != properties.end(); ++it)
   {
+    m_properties.push_back( (*it)->createHistory() );
+  }
+}
 
-    /// Constructor
-    AlgorithmHistory::AlgorithmHistory(const std::string& name, const int& version, 
-      const dateAndTime& start, const double& duration,
-      const std::vector<AlgorithmParameter>& parameters):
-    m_name(name),
-      m_version(version),
-      m_executionDate(start),
-      m_executionDuration(duration),
-      m_parameters(parameters)
-    {  
-    }
+/// Destructor
+AlgorithmHistory::~AlgorithmHistory()
+{}
 
-    /// Default Constructor
-    AlgorithmHistory::AlgorithmHistory()
-      // strings have their own default constructor
-      :
-    m_executionDuration(0.0)
-    {
-    }
-
-    /// Destructor
-    AlgorithmHistory::~AlgorithmHistory()
-    {
-    }
-    /*!
+/*!
     Standard Copy Constructor
     \param A :: AlgorithmHistory Item to copy
-    */
+ */
+AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
+  m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
+  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties)
+{
+}
 
-    AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A)
-      :
-    m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
-      m_executionDuration(A.m_executionDuration),m_parameters(A.m_parameters)
-    {
-    }
-    /** Prints a text representation of itself
-    * @param os The ouput stream to write to
-	* @param indent an indentation value to make pretty printing of object and sub-objects
-    */
-    void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
-    {
-      os << std::string(indent,' ') << "Name : " << m_name << std::endl;
-      os << std::string(indent,' ') << "Version: " << m_version << std::endl;
-      char buffer [25];
-      strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&m_executionDate));
-      os << std::string(indent,' ') << "Execution Date: " << buffer<<std::endl;
-      os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl; 
-      std::vector<AlgorithmParameter>::const_iterator it;
-      os << std::string(indent,' ') << "Parameters:" <<std::endl;
+/** Add details of an algorithm's execution to an existing history object
+ *  @param start    The start time of the algorithm execution
+ *  @param duration The time (in seconds) that it took to run this algorithm
+ */
+void AlgorithmHistory::addExecutionInfo(const dateAndTime& start, const double& duration)
+{
+  m_executionDate = start;
+  m_executionDuration = duration;
+}
 
-      for (it=m_parameters.begin();it!=m_parameters.end();it++)
-      {
-        os << std::endl;
-        it->printSelf( os, indent+2 );
-      }
-    }
- 
-    /*!
+/** Prints a text representation of itself
+ *  @param os The ouput stream to write to
+ *  @param indent an indentation value to make pretty printing of object and sub-objects
+ */
+void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
+{
+  os << std::string(indent,' ') << "Name : " << m_name << std::endl;
+  os << std::string(indent,' ') << "Version: " << m_version << std::endl;
+  if (m_executionDate)
+  {
+    char buffer [25];
+    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&m_executionDate));
+    os << std::string(indent,' ') << "Execution Date: " << buffer<<std::endl;
+    os << std::string(indent,' ') << "Execution Duration: "<< m_executionDuration << " seconds" << std::endl;
+  }
+  std::vector<Kernel::PropertyHistory>::const_iterator it;
+  os << std::string(indent,' ') << "Parameters:" <<std::endl;
+
+  for (it=m_properties.begin();it!=m_properties.end();it++)
+  {
+    os << std::endl;
+    it->printSelf( os, indent+2 );
+  }
+}
+
+/*!
     Standard Assignment operator
     \param A :: AlgorithmHistory Item to assign to 'this'
-    */
-    AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
-    {
-      if (this!=&A)
-      {
-        m_name=A.m_name;
-        m_version=A.m_version;
-        m_executionDate=A.m_executionDate;
-        m_executionDuration=A.m_executionDuration;
-        m_parameters=A.m_parameters;
-      }
-      return *this;
-    }
-    /** Prints a text representation
-    * @param os The ouput stream to write to
-    * @param AH The AlgorithmHistory to output
-    * @returns The ouput stream
-    */
-    std::ostream& operator<<(std::ostream& os, const AlgorithmHistory& AH)
-    {
-      AH.printSelf(os);
-      return os;
-    }
+ */
+AlgorithmHistory& AlgorithmHistory::operator=(const AlgorithmHistory& A)
+{
+  if (this!=&A)
+  {
+    m_name=A.m_name;
+    m_version=A.m_version;
+    m_executionDate=A.m_executionDate;
+    m_executionDuration=A.m_executionDuration;
+    m_properties=A.m_properties;
+  }
+  return *this;
+}
 
-  } // namespace API
+/** Prints a text representation
+ * @param os The ouput stream to write to
+ * @param AH The AlgorithmHistory to output
+ * @returns The ouput stream
+ */
+std::ostream& operator<<(std::ostream& os, const AlgorithmHistory& AH)
+{
+  AH.printSelf(os);
+  return os;
+}
+
+} // namespace API
 } // namespace Mantid
-

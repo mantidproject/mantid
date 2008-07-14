@@ -521,6 +521,8 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../DataObjects/src \
                          ../DataHandling/inc/MantidDataHandling \
                          ../DataHandling/src \
+                         ../Nexus/inc/MantidNexus \
+                         ../Nexus/src \
                          ../Algorithms/inc/MantidAlgorithms \
                          ../Algorithms/src \
                          ../Services/inc \

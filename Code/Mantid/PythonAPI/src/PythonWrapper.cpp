@@ -23,7 +23,7 @@ using namespace boost::python;
 typedef std::vector< std::string > string_vec;
 typedef std::vector< double > double_vec;
 typedef std::vector< Mantid::API::AlgorithmHistory > algorithmHistory_vec;
-typedef std::vector< Mantid::API::AlgorithmParameter > algorithmParameter_vec;
+typedef std::vector< Mantid::Kernel::PropertyHistory > PropertyHistory_vec;
 
 struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
 {
@@ -210,7 +210,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createA
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2_3, createAlgorithm, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2_3, execute, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_WorkspaceHistory_printSelf_overloads_1_2, printSelf, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_AlgorithmParameter_printSelf_overloads_1_2, printSelf, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_PropertyHistory_printSelf_overloads_1_2, printSelf, 1, 2)
 
 #if _WIN32
 BOOST_PYTHON_MODULE(MantidPythonAPI)
@@ -231,8 +231,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	.def( vector_indexing_suite< algorithmHistory_vec >() )
 	;
 
-	class_< algorithmParameter_vec >( "AlgParVec" )
-	.def( vector_indexing_suite< algorithmParameter_vec >() )
+	class_< PropertyHistory_vec >( "AlgParVec" )
+	.def( vector_indexing_suite< PropertyHistory_vec >() )
 	;
 
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
@@ -300,22 +300,23 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
 	;
 
-	//AlgorithmParameter Class
-        class_< Mantid::API::AlgorithmParameter >("AlgorithmParameter", no_init)
-        .def("name", &Mantid::API::AlgorithmParameter::name, return_value_policy< copy_const_reference >())
-        .def("value", &Mantid::API::AlgorithmParameter::value, return_value_policy< copy_const_reference >())
-        .def("type", &Mantid::API::AlgorithmParameter::type, return_value_policy< copy_const_reference >())
-        .def("isDefault", &Mantid::API::AlgorithmParameter::isDefault, return_value_policy< copy_const_reference >())
-        .def("direction", &Mantid::API::AlgorithmParameter::direction, return_value_policy< copy_const_reference >())
-        //.def("printSelf", &Mantid::API::AlgorithmParameter::printSelf, Mantid_API_AlgorithmParameter_printSelf_overloads_1_2())
+	//PropertyHistory Class
+        class_< Mantid::Kernel::PropertyHistory >("PropertyHistory", no_init)
+        .def("name", &Mantid::Kernel::PropertyHistory::name, return_value_policy< copy_const_reference >())
+        .def("value", &Mantid::Kernel::PropertyHistory::value, return_value_policy< copy_const_reference >())
+        .def("type", &Mantid::Kernel::PropertyHistory::type, return_value_policy< copy_const_reference >())
+        .def("isDefault", &Mantid::Kernel::PropertyHistory::isDefault, return_value_policy< copy_const_reference >())
+        .def("direction", &Mantid::Kernel::PropertyHistory::direction, return_value_policy< copy_const_reference >())
+        //.def("printSelf", &Mantid::API::PropertyHistory::printSelf, Mantid_API_PropertyHistory_printSelf_overloads_1_2())
 	;
 
 	//AlgorithmHistory Class
-	class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", init<  >())
-        .def(init< const Mantid::API::AlgorithmHistory& >())
+        class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", no_init)
+//	class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", init<  >())
+//        .def(init< const Mantid::API::AlgorithmHistory& >())
         .def("name", &Mantid::API::AlgorithmHistory::name, return_value_policy< copy_const_reference >())
         .def("version", &Mantid::API::AlgorithmHistory::version, return_value_policy< copy_const_reference >())
-        .def("getParameters", &Mantid::API::AlgorithmHistory::getParameters, return_value_policy< copy_const_reference >())
+        .def("getProperties", &Mantid::API::AlgorithmHistory::getProperties, return_value_policy< copy_const_reference >())
 	;
 
 	//WorkspaceHistory Class
