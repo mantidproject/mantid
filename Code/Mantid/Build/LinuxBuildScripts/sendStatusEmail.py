@@ -79,7 +79,7 @@ f.close()
 f = open('../logs/PythonResults.log','r')
 
 for line in f.readlines():
-	if line.endswith('FAILED')  != -1:
+	if line.endswith('FAILED'):
 		#A test failed
 		pythonPass = False
 	mssgPythonResults = mssgPythonResults + line
@@ -100,10 +100,10 @@ message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
 message += 'Python Tests Passed: ' + str(pythonPass) + "\n\n"
 message += mssgSvn + "\n"
-message += 'UNIT TESTs LOG\n\n'
+message += 'UNIT TESTS LOG\n\n'
 message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
-message += 'PYTHON TESTs LOG\n\n'
+message += 'PYTHON TESTS LOG\n\n'
 message += mssgPythonResults + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'FRAMEWORK BUILD LOG\n\n'
