@@ -183,8 +183,8 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
         return call_method< bool >(py_self, "checkPropertiesValid");
     }
 
-    bool default_checkPropertiesValid() const {
-        return Mantid::API::Algorithm::checkPropertiesValid();
+    bool default_validateProperties() const {
+        return Mantid::API::Algorithm::validateProperties();
     }
 
     const std::vector<Mantid::API::Property*,std::allocator<Mantid::API::Property*> >& getProperties() const {
@@ -263,7 +263,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("setPropertyOrdinal", &Mantid::API::Algorithm::setPropertyOrdinal, &Mantid_API_Algorithm_Wrapper::default_setPropertyOrdinal)
         .def("setPropertyValue", &Mantid::API::Algorithm::setPropertyValue, &Mantid_API_Algorithm_Wrapper::default_setPropertyValue)
         .def("getPropertyValue", &Mantid::API::Algorithm::getPropertyValue, &Mantid_API_Algorithm_Wrapper::default_getPropertyValue)
-        .def("checkPropertiesValid", &Mantid::API::Algorithm::checkPropertiesValid, &Mantid_API_Algorithm_Wrapper::default_checkPropertiesValid)
+        .def("validateProperties", &Mantid::API::Algorithm::validateProperties, &Mantid_API_Algorithm_Wrapper::default_validateProperties)
         .def("getProperties", &Mantid::API::Algorithm::getProperties, &Mantid_API_Algorithm_Wrapper::default_getProperties, return_value_policy< copy_const_reference >())
         .def("initialize", &Mantid::API::Algorithm::initialize)
         .def("execute", &Mantid::API::Algorithm::execute)

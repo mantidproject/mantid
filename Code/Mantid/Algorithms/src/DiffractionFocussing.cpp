@@ -84,28 +84,27 @@ namespace Mantid
 
       boost::shared_ptr<Kernel::Unit>& xUnit = workspace->getAxis(0)->unit();
 
-        g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
+      g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 
-        API::Algorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
-        childAlg->setPropertyValue("InputWorkspace", "Anonymous");
-        childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
-        childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
-        childAlg->setPropertyValue("Target",CONVERSION_UNIT);
+      API::Algorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
+      childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+      childAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
+      childAlg->setPropertyValue("Target",CONVERSION_UNIT);
 
-        // Now execute the sub-algorithm. Catch and log any error
-        try
-        {
-          childAlg->execute();
-        }
-        catch (std::runtime_error& err)
-        {
-          g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
-          throw;
-        }
+      // Now execute the sub-algorithm. Catch and log any error
+      try
+      {
+        childAlg->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
+        throw;
+      }
 
-        if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");      
+      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");      
 
-        return childAlg->getProperty("OutputWorkspace");
+      return childAlg->getProperty("OutputWorkspace");
     }
 
     /// Run Rebin as a sub-algorithm to harmionise the bin boundaries

@@ -77,7 +77,7 @@ namespace API
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
  
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+ Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -97,7 +97,7 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Algorithm : public IAlgorithm, virtual protected Kernel::PropertyManager
+class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManager
 {
 public:
   Algorithm();
@@ -110,7 +110,6 @@ public:
   virtual const std::string category() const {return "Misc";}
 
   // IAlgorithm methods	  
-/// function to return the version of the algorithm, must be overridden in all algorithms
   void initialize();
   bool execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
@@ -118,19 +117,7 @@ public:
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
-  /**
-	Method to check that supplied properties are valid. Calls protected method of PropertyManager.
-	\returns Boolean result.
-    **/
-  virtual bool checkPropertiesValid() const { return validateProperties(); }
-  
-  // Make PropertyManager's setProperty methods public
-  using Kernel::PropertyManager::setProperty;
-
-  virtual const std::vector< Kernel::Property*>& getProperties() const
-  {
-    return Kernel::PropertyManager::getProperties();
-  }
+  // End of IAlgorithm methods
 
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
@@ -149,6 +136,9 @@ protected:
 
   void setInitialized();
   void setExecuted(bool state);
+
+  // Make PropertyManager's declareProperty methods protected in Algorithm
+  using Kernel::PropertyManager::declareProperty;
 
 private:
 
