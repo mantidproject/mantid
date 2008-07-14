@@ -130,7 +130,7 @@ namespace Mantid
       childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
       childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
       childAlg->setProperty<Workspace_sptr>("OutputWorkspace", workspace);
-      childAlg->setProperty<std::vector<double>>("params",paramArray);
+      childAlg->setProperty<std::vector<double> >("params",paramArray);
 
       // Now execute the sub-algorithm. Catch and log any error
       try
