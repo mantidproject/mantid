@@ -183,6 +183,8 @@ private:
 
 ///shared pointer to the workspace base class
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
+///shared pointer to the workspace base class (const version)
+typedef const boost::shared_ptr<const Workspace> const_Workspace_sptr;
 
 } // namespace API
 } // namespace Mantid
