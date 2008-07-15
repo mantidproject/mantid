@@ -188,10 +188,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\EnvironmentHistory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -274,10 +270,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\AlgorithmParameter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\AlgorithmParameterTest.h"
 				>
 			</File>
@@ -307,10 +299,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\DllExport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\EnvironmentHistory.h"
 				>
 			</File>
 			<File
