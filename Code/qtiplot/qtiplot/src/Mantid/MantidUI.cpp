@@ -444,7 +444,7 @@ void MantidUI::executeAlgorithm()
 			}
 			
 			//Check properties valid
-			if (!alg->checkPropertiesValid())
+			if (!alg->validateProperties())
 			{
 				//Properties not valid
 				int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),

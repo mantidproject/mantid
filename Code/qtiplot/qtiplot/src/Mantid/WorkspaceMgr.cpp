@@ -249,7 +249,7 @@ void WorkspaceMgr:: executeAlgorithm()
 				}
 				
 				//Check properties valid
-				if (!alg->checkPropertiesValid())
+				if (!alg->validateProperties())
 				{
 					//Properties not valid
 					int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
