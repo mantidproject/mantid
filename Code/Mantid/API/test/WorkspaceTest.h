@@ -94,8 +94,7 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws.history() )
     const WorkspaceTester wsc;
-    const WorkspaceHistory& hh = wsc.getHistory();
-    TS_ASSERT_THROWS_NOTHING( ws.history() = hh )
+    TS_ASSERT_THROWS_NOTHING( const WorkspaceHistory& hh = wsc.getHistory() )
   }
 
   void testGetAxis()

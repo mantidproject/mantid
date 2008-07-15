@@ -1,20 +1,18 @@
-#ifndef MANTID_API_WORKSPACEHISTORY_H_
-#define MANTID_API_WORKSPACEHISTORY_H_
+#ifndef MANTID_KERNEL_ENVIRONMENTHISTORY_H_
+#define MANTID_KERNEL_ENVIRONMENTHISTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidKernel/EnvironmentHistory.h"
-#include <ctime>
-#include <vector>
+#include "MantidKernel/System.h"
+#include <string>
+#include <iostream>
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
-/** This class stores information about the Workspace History used by algorithms
-    on a workspace and the environment history.
+/** This class stores information about the Environment of the computer used by the framework.
 
     @author Dickon Champion, ISIS, RAL
     @date 21/01/2008
@@ -39,32 +37,32 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport WorkspaceHistory
+class DLLExport EnvironmentHistory
 {
 public:
-  WorkspaceHistory();
-  virtual ~WorkspaceHistory();
-  WorkspaceHistory(const WorkspaceHistory&);
-
-  const std::vector<AlgorithmHistory>& getAlgorithmHistories() const;
-  void copyAlgorithmHistory(const WorkspaceHistory& otherHistory);
-  void addAlgorithmHistory(const AlgorithmHistory& algHistory);
-
-  void printSelf(std::ostream&, const int indent  = 0) const;
+  EnvironmentHistory();
+  EnvironmentHistory(const EnvironmentHistory&);
+  virtual ~EnvironmentHistory();
+  /// print contents of object
+  void printSelf(std::ostream&, const int indent = 0)const;
 
 private:
   /// Private, unimplemented copy assignment operator
-  WorkspaceHistory& operator=(const WorkspaceHistory& );
+  EnvironmentHistory& operator=(const EnvironmentHistory& );
 
-  /// The environment of the workspace
-  const Kernel::EnvironmentHistory m_environment;
-  /// The algorithms which have been called on the workspace
-  std::vector<AlgorithmHistory> m_algorithms;
+  /// The version of the framework
+  const std::string m_version;
+  /// The name of the operating system
+  const std::string m_osName;
+  /// The version of the operating system
+  const std::string m_osVersion;
+  /// The name of the user running the framwork
+  const std::string m_userName;
 };
 
-DLLExport std::ostream& operator<<(std::ostream&, const WorkspaceHistory&);
+DLLExport std::ostream& operator<<(std::ostream&, const EnvironmentHistory&);
 
-} // namespace API
+} // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_API_WORKSPACEHISTORY_H_*/
+#endif /*MANTID_KERNEL_ENVIRONMENTHISTORY_H_*/

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_ALGORITHMHISTORY_H_
-#define MANTID_DATAOBJECTS_ALGORITHMHISTORY_H_
+#ifndef MANTID_API_ALGORITHMHISTORY_H_
+#define MANTID_API_ALGORITHMHISTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -92,4 +92,4 @@ DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_DATAOBJECTS_ALGORITHMHISTORY_H_*/
+#endif /*MANTID_API_ALGORITHMHISTORY_H_*/

@@ -31,6 +31,7 @@ echo
 echo "Running the tests..."
 ln ../../Build/Tests/Mantid.properties
 ln ../../Build/Tests/MantidTest.properties
+touch FileValidatorTest.cpp
 ./runner.exe
 echo
 
@@ -40,4 +41,5 @@ echo "Cleaning up..."
 rm -rf runner.*
 rm -f Mantid*.properties
 rm -f *Test.log
+rm FileValidatorTest.cpp
 echo "Done."

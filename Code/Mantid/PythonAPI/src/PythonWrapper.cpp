@@ -13,7 +13,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/EnvironmentHistory.h"
+#include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -419,7 +419,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
 	;
-	
+
 	//Property Class
 	class_< Mantid::Kernel::Property, boost::noncopyable, Mantid_Kernel_Property_Wrapper >("Property", no_init)
         .def("isValid", &Mantid::Kernel::Property::isValid, &Mantid_Kernel_Property_Wrapper::default_isValid)

@@ -222,7 +222,7 @@ public:
     char c[21];
     s.getline(c,21);
     std::string ss(c);
-    TS_ASSERT( ! ss.compare("Framework Version : ") )
+    TS_ASSERT( ! ss.compare("Framework Version: 1") )
   }
 };
 
