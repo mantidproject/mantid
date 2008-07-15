@@ -42,7 +42,7 @@ def TestWorkspaceHistory():
 	ws = libMantidPythonAPI.loadIsisRawFile(file, "HetWorkspace1")
 	h = ws.getHistory()
 	a = h.getAlgorithmHistories()
-	p = a[0].getParameters()
+	p = a[0].getProperties()
 
 	if p[0].value() == file:
 		print "RESULT: TestWorkspaceHistory PASSED"

@@ -14,6 +14,8 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/EnvironmentHistory.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyManager.h"
 
 // Using =======================================================================
 using namespace boost::python;
@@ -108,6 +110,112 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
 
     const std::vector<double,std::allocator<double> >& getE(const int p0) const {
         return call_method< const std::vector<double,std::allocator<double> >& >(py_self, "getE", p0);
+    }
+
+    PyObject* py_self;
+};
+
+struct Mantid_Kernel_PropertyManager_Wrapper: Mantid::Kernel::PropertyManager
+{
+    //~ void declareProperty(Mantid::Kernel::Property* p0) {
+        //~ call_method< void >(py_self, "declareProperty", p0);
+    //~ }
+
+    //~ void default_declareProperty(Mantid::Kernel::Property* p0) {
+        //~ Mantid::Kernel::PropertyManager::declareProperty(p0);
+    //~ }
+
+    void setProperties(const std::string& p0) {
+        call_method< void >(py_self, "setProperties", p0);
+    }
+
+    void default_setProperties(const std::string& p0) {
+        Mantid::Kernel::PropertyManager::setProperties(p0);
+    }
+
+    void setPropertyValue(const std::string& p0, const std::string& p1) {
+        call_method< void >(py_self, "setPropertyValue", p0, p1);
+    }
+
+    void default_setPropertyValue(const std::string& p0, const std::string& p1) {
+        Mantid::Kernel::PropertyManager::setPropertyValue(p0, p1);
+    }
+
+    void setPropertyOrdinal(const int& p0, const std::string& p1) {
+        call_method< void >(py_self, "setPropertyOrdinal", p0, p1);
+    }
+
+    void default_setPropertyOrdinal(const int& p0, const std::string& p1) {
+        Mantid::Kernel::PropertyManager::setPropertyOrdinal(p0, p1);
+    }
+
+    bool existsProperty(const std::string& p0) const {
+        return call_method< bool >(py_self, "existsProperty", p0);
+    }
+
+    bool default_existsProperty(const std::string& p0) const {
+        return Mantid::Kernel::PropertyManager::existsProperty(p0);
+    }
+
+    bool validateProperties() const {
+        return call_method< bool >(py_self, "validateProperties");
+    }
+
+    bool default_validateProperties() const {
+        return Mantid::Kernel::PropertyManager::validateProperties();
+    }
+
+    std::string getPropertyValue(const std::string& p0) const {
+        return call_method< std::string >(py_self, "getPropertyValue", p0);
+    }
+
+    std::string default_getPropertyValue(const std::string& p0) const {
+        return Mantid::Kernel::PropertyManager::getPropertyValue(p0);
+    }
+
+    const std::vector<Mantid::Kernel::Property*,std::allocator<Mantid::Kernel::Property*> >& getProperties() const {
+        return call_method< const std::vector<Mantid::Kernel::Property*,std::allocator<Mantid::Kernel::Property*> >& >(py_self, "getProperties");
+    }
+
+    const std::vector<Mantid::Kernel::Property*,std::allocator<Mantid::Kernel::Property*> >& default_getProperties() const {
+        return Mantid::Kernel::PropertyManager::getProperties();
+    }
+
+    PyObject* py_self;
+};
+
+struct Mantid_Kernel_Property_Wrapper: Mantid::Kernel::Property
+{
+    const bool isValid() const {
+        return call_method< const bool >(py_self, "isValid");
+    }
+
+    const bool default_isValid() const {
+        return Mantid::Kernel::Property::isValid();
+    }
+
+    const std::string getValidatorType() const {
+        return call_method< const std::string >(py_self, "getValidatorType");
+    }
+
+    const std::string default_getValidatorType() const {
+        return Mantid::Kernel::Property::getValidatorType();
+    }
+
+    std::string value() const {
+        return call_method< std::string >(py_self, "value");
+    }
+
+    bool setValue(const std::string& p0) {
+        return call_method< bool >(py_self, "setValue", p0);
+    }
+
+    const std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > allowedValues() const {
+        return call_method< const std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >(py_self, "allowedValues");
+    }
+
+    const std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > default_allowedValues() const {
+        return Mantid::Kernel::Property::allowedValues();
     }
 
     PyObject* py_self;
@@ -253,8 +361,20 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::getPropertyValue))
 	;
 
+	//PropertyManager Class
+	class_< Mantid::Kernel::PropertyManager, boost::noncopyable, Mantid_Kernel_PropertyManager_Wrapper >("PropertyManager", no_init)
+        //.def("declareProperty", &Mantid::Kernel::PropertyManager::declareProperty, &Mantid_Kernel_PropertyManager_Wrapper::default_declareProperty)
+        .def("setProperties", &Mantid::Kernel::PropertyManager::setProperties, &Mantid_Kernel_PropertyManager_Wrapper::default_setProperties)
+        .def("setPropertyValue", &Mantid::Kernel::PropertyManager::setPropertyValue, &Mantid_Kernel_PropertyManager_Wrapper::default_setPropertyValue)
+        .def("setPropertyOrdinal", &Mantid::Kernel::PropertyManager::setPropertyOrdinal, &Mantid_Kernel_PropertyManager_Wrapper::default_setPropertyOrdinal)
+        .def("existsProperty", &Mantid::Kernel::PropertyManager::existsProperty, &Mantid_Kernel_PropertyManager_Wrapper::default_existsProperty)
+        .def("validateProperties", &Mantid::Kernel::PropertyManager::validateProperties, &Mantid_Kernel_PropertyManager_Wrapper::default_validateProperties)
+        .def("getPropertyValue", &Mantid::Kernel::PropertyManager::getPropertyValue, &Mantid_Kernel_PropertyManager_Wrapper::default_getPropertyValue)
+        .def("getProperties", &Mantid::Kernel::PropertyManager::getProperties, &Mantid_Kernel_PropertyManager_Wrapper::default_getProperties, return_value_policy< copy_const_reference >())
+        ;
+
 	//Algorithm Class
-	class_< Mantid::API::Algorithm, bases<Mantid::API::IAlgorithm>, boost::noncopyable, Mantid_API_Algorithm_Wrapper >("Algorithm", no_init)
+	class_< Mantid::API::Algorithm, bases<Mantid::Kernel::PropertyManager, Mantid::API::IAlgorithm>, boost::noncopyable, Mantid_API_Algorithm_Wrapper >("Algorithm", no_init)
         .def("name", &Mantid::API::Algorithm::name, &Mantid_API_Algorithm_Wrapper::default_name)
         .def("version", &Mantid::API::Algorithm::version, &Mantid_API_Algorithm_Wrapper::default_version)
         .def("category", &Mantid::API::Algorithm::category, &Mantid_API_Algorithm_Wrapper::default_category)
@@ -299,6 +419,21 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< manage_new_object >())
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
 	;
+	
+	//Property Class
+	class_< Mantid::Kernel::Property, boost::noncopyable, Mantid_Kernel_Property_Wrapper >("Property", no_init)
+        .def("isValid", &Mantid::Kernel::Property::isValid, &Mantid_Kernel_Property_Wrapper::default_isValid)
+        .def("getValidatorType", &Mantid::Kernel::Property::getValidatorType, &Mantid_Kernel_Property_Wrapper::default_getValidatorType)
+        .def("value", pure_virtual(&Mantid::Kernel::Property::value))
+        .def("setValue", pure_virtual(&Mantid::Kernel::Property::setValue))
+        .def("allowedValues", &Mantid::Kernel::Property::allowedValues, &Mantid_Kernel_Property_Wrapper::default_allowedValues)
+        .def("name", &Mantid::Kernel::Property::name, return_value_policy< copy_const_reference >())
+        .def("documentation", &Mantid::Kernel::Property::documentation, return_value_policy< copy_const_reference >())
+        .def("type_info", &Mantid::Kernel::Property::type_info, return_value_policy< manage_new_object >())
+        .def("type", &Mantid::Kernel::Property::type)
+        .def("isDefault", &Mantid::Kernel::Property::isDefault)
+        .def("setDocumentation", &Mantid::Kernel::Property::setDocumentation)
+        ;
 
 	//PropertyHistory Class
         class_< Mantid::Kernel::PropertyHistory >("PropertyHistory", no_init)
