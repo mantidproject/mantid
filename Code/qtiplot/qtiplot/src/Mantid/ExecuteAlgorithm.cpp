@@ -25,65 +25,69 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 	
 }
 
-void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, std::vector<Mantid::Kernel::Property*>& properties)
+void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algorithm* alg)
 {
-	m_props = properties;
-
 	QGridLayout *grid = new QGridLayout();
 	
-	for (int i = 0; i < m_props.size(); ++i)
-	{
-		if (m_props[i]->getValidatorType() == "file")
-		{
-			QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
-			QLineEdit *tempEdit = new QLineEdit;
-			QPushButton *tempBtn = new QPushButton(tr("Browse"));
-			
-			connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
-			
-			tempLbl->setBuddy(tempEdit);
-		
-			grid->addWidget(tempLbl, i, 0, 0);
-			grid->addWidget(tempEdit, i, 1, 0);
-			grid->addWidget(tempBtn, i, 2, 0);
-		
-			edits[tempEdit] = m_props[i]->name();
-			buttonsToEdits[tempBtn] = tempEdit;
-		}
-		else if (m_props[i]->allowedValues().size() > 0)
-		{		
-			//If the property has allowed values then use a combo box.			
-			QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
-			QComboBox *tempCombo = new QComboBox;
-			tempLbl->setBuddy(tempCombo);
-			
-			QStringList list;
+	m_alg = alg;
+	m_props = m_alg->getProperties();
 
-			std::vector<std::string> temp = m_props[i]->allowedValues();
-			std::vector<std::string>::const_iterator vals_iter = temp.begin();
-			
-			for (;  vals_iter != temp.end(); ++vals_iter)
-			{
-				list << QString::fromStdString(*vals_iter);
-			}
-			
-			tempCombo->addItems(list);
-			
-			grid->addWidget(tempLbl, i, 0, 0);
-			grid->addWidget(tempCombo, i, 1, 0);
-			
-			combos[tempCombo] = m_props[i]->name();
-		}
-		else
+	if (m_props.size() > 0)
+	{
+		for (int i = 0; i < m_props.size(); ++i)
 		{
-			QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
-			QLineEdit *tempEdit = new QLineEdit;
-			tempLbl->setBuddy(tempEdit);
+			if (m_props[i]->getValidatorType() == "file")
+			{
+				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
+				QLineEdit *tempEdit = new QLineEdit;
+				QPushButton *tempBtn = new QPushButton(tr("Browse"));
+			
+				connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
+			
+				tempLbl->setBuddy(tempEdit);
 		
-			grid->addWidget(tempLbl, i, 0, 0);
-			grid->addWidget(tempEdit, i, 1, 0);
+				grid->addWidget(tempLbl, i, 0, 0);
+				grid->addWidget(tempEdit, i, 1, 0);
+				grid->addWidget(tempBtn, i, 2, 0);
 		
-			edits[tempEdit] = m_props[i]->name();
+				edits[tempEdit] = m_props[i]->name();
+				buttonsToEdits[tempBtn] = tempEdit;
+			}
+			else if (m_props[i]->allowedValues().size() > 0)
+			{		
+				//If the property has allowed values then use a combo box.			
+				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
+				QComboBox *tempCombo = new QComboBox;
+				tempLbl->setBuddy(tempCombo);
+			
+				QStringList list;
+
+				std::vector<std::string> temp = m_props[i]->allowedValues();
+				std::vector<std::string>::const_iterator vals_iter = temp.begin();
+			
+				for (;  vals_iter != temp.end(); ++vals_iter)
+				{
+					list << QString::fromStdString(*vals_iter);
+				}
+				
+				tempCombo->addItems(list);
+			
+				grid->addWidget(tempLbl, i, 0, 0);
+				grid->addWidget(tempCombo, i, 1, 0);
+			
+				combos[tempCombo] = m_props[i]->name();
+			}
+			else
+			{
+				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
+				QLineEdit *tempEdit = new QLineEdit;
+				tempLbl->setBuddy(tempEdit);
+		
+				grid->addWidget(tempLbl, i, 0, 0);
+				grid->addWidget(tempEdit, i, 1, 0);
+		
+				edits[tempEdit] = m_props[i]->name();
+			}
 		}
 	}
 	
@@ -187,6 +191,56 @@ void ExecuteAlgorithm::okClicked()
 			results[comboItr->second] = value;
 		}
 	}
-	accept();
+	
+	if (execute())
+	{	
+		accept();
+	}
+}
+
+bool ExecuteAlgorithm::execute()
+{
+	std::map<std::string, std::string>::iterator resItr = results.begin();
+				
+	for (; resItr != results.end(); ++resItr)
+	{				
+		try
+		{
+			m_alg->setPropertyValue(resItr->first, resItr->second);
+		}
+		catch (std::invalid_argument err)
+		{
+			int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+					tr(QString::fromStdString(resItr->first) + " was invalid."),
+					QMessageBox::Ok);
+				
+			return false;
+		}
+	}
+				
+	//Check properties valid
+	if (!m_alg->validateProperties())
+	{
+		//Properties not valid
+		int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+			tr("One or more of the property values entered was invalid. "
+			"Please see the Mantid log for details."),
+			QMessageBox::Ok);
+					
+		return false;
+	}
+				
+	if (!m_alg->execute() == true)
+	{
+		//Algorithm did not execute properly
+		int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+			tr("The algorithm failed to execute correctly. "
+			"Please see the Mantid log for details."),
+			QMessageBox::Ok);
+		
+		return false;
+	}
+	
+	return true;
 }
 

@@ -461,61 +461,20 @@ void MantidUI::executeAlgorithm()
         QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
         return;
     }
+    
+    QStringList wkspaces = getWorkspaceNames();
+    
     Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>
           (Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString(),version));
 
-	std::vector<Mantid::Kernel::Property*> propList = alg->getProperties();
-
-	if (propList.size() > 0)
-	{
-      	QStringList wkspaces = getWorkspaceNames();
-
+	if (alg)
+	{		
 		ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
-		dlg->CreateLayout(wkspaces, propList);
+		dlg->CreateLayout(wkspaces, alg);
 		dlg->setModal(true);
 	
-		if (dlg->exec()== QDialog::Accepted)
-		{			
-			std::map<std::string, std::string>::iterator resItr = dlg->results.begin();
-			
-			for (; resItr != dlg->results.end(); ++resItr)
-			{				
-				try
-				{
-					alg->setPropertyValue(resItr->first, resItr->second);
-				}
-				catch (std::invalid_argument err)
-				{
-					int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
-					tr(QString::fromStdString(resItr->first) + " was invalid."),
-					QMessageBox::Ok);
-				
-					return;
-				}
-			}
-			
-			//Check properties valid
-			if (!alg->validateProperties())
-			{
-				//Properties not valid
-				int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
-					tr("One or more of the property values entered was invalid. "
-					"Please see the Mantid log for details."),
-					QMessageBox::Ok);
-				
-				return;
-			}
-			
-			if (!alg->execute() == true)
-			{
-				//Algorithm did not execute properly
-				int ret = QMessageBox::warning(appWindow(), tr("Mantid Algorithm"),
-					tr("The algorithm failed to execute correctly. "
-					"Please see the Mantid log for details."),
-					QMessageBox::Ok);
-			}
-			
-			update();
-		}
+		dlg->exec();	
+		
+		update();
 	}
 }

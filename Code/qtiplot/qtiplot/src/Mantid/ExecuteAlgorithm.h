@@ -16,6 +16,7 @@ class QStringList;
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Property.h"
+#include "MantidAPI/Algorithm.h"
 
 /**
 * This class is used for entering values for properties to use in algorithms.
@@ -32,7 +33,7 @@ class ExecuteAlgorithm : public QDialog
 public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
-	void CreateLayout(QStringList& workspaces, std::vector<Mantid::Kernel::Property*>& properties);
+	void CreateLayout(QStringList& workspaces, Mantid::API::Algorithm* alg);
 	std::map<std::string, std::string> results;
 
 protected:
@@ -42,6 +43,7 @@ private slots:
 	void browseClicked();
 
 private:
+	Mantid::API::Algorithm* m_alg;
 	std::vector<Mantid::Kernel::Property*> m_props;
 
 	QWidget* m_parent;
@@ -51,6 +53,8 @@ private:
 	std::map<QLineEdit*, std::string> edits;
 	std::map<QComboBox*, std::string> combos;
 	std::map<QPushButton*, QLineEdit*> buttonsToEdits;
+
+	bool execute();
 
 };
 
