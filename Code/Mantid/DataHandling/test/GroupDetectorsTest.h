@@ -85,7 +85,7 @@ public:
     TS_ASSERT( gd.isInitialized() );
 
     std::vector<Property*> props = gd.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 3 )
+    TS_ASSERT_EQUALS( props.size(), 4 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
@@ -98,6 +98,10 @@ public:
     TS_ASSERT_EQUALS( props[2]->name(), "SpectraList" )
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
+
+    TS_ASSERT_EQUALS( props[3]->name(), "DetectorList" )
+    TS_ASSERT( props[3]->isDefault() )
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) )
  	}
 
   void testExec()
