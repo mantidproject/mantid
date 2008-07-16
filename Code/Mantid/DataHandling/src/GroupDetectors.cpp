@@ -6,6 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <set>
+#include <numeric>
 
 namespace Mantid
 {
@@ -159,22 +160,11 @@ double GroupDetectors::dblSqrt(double in)
 /// Checks if all histograms have the same boundaries by comparing their sums
 bool GroupDetectors::hasSameBoundaries(const Workspace2D_sptr WS)
 {
-    class double_sum
-    {
-    public:
-        double_sum():m_sum(0){}
-        double m_sum;
-        void operator()(const double& d)
-        {
-            m_sum += d;
-        }
-        operator double(){return m_sum;}
-    };
 
     if (!WS->blocksize()) return true;
-    double commonSum = for_each(WS->dataX(0).begin(),WS->dataX(0).end(),double_sum());
+    double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
     for (int i = 1; i < WS->getNumberHistograms(); ++i)
-        if ( commonSum != for_each(WS->dataX(0).begin(),WS->dataX(0).end(),double_sum()) )
+        if ( commonSum != std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) )
             return false;
     return true;
 }

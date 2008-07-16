@@ -14,8 +14,6 @@
 #include <numeric>
 #include <math.h>
 
-#include <iostream>
-
 namespace Mantid
 {
   namespace Algorithms
@@ -88,14 +86,11 @@ namespace Mantid
       std::set<int> groupNumbers;
       for(std::multimap<int,int>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
       {
-          //std::cerr<<"d "<<d->first<<' '<<d->second<<std::endl;
           if (groupNumbers.find(d->first) == groupNumbers.end())
           {
-              std::cerr<<"    insert "<<d->first<<std::endl;
               groupNumbers.insert(d->first);
           }
       }
-      std::cerr<<"OK "<<groupNumbers.size()<<std::endl;
       for(std::set<int>::const_iterator g = groupNumbers.begin();g!=groupNumbers.end();g++)
       {
           std::multimap<int,int>::const_iterator from = detectorGroups.lower_bound(*g);
