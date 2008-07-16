@@ -83,7 +83,11 @@ namespace Mantid
         // Populate the output workspace X values
         outputW->dataX(hist)=XValues_new;
         //copy oer the spectrum No and ErrorHelper
-//        outputW->getAxis()->spectraNo(hist)=inputW->getAxis()->spectraNo(hist);
+        try {
+          outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+        } catch (Exception::IndexError) {
+          // OK, so this isn't a Workspace2D
+        }
         outputW->setErrorHelper(hist,inputW->errorHelper(hist));
       }
       outputW->isDistribution(dist);

@@ -31,6 +31,7 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  those; otherwise it will be initialised to the same size as the parent.
  *  This method should be used when you want to carry over the Workspace data members
  *  relating to the Instrument, Spectra-Detector Map, Sample & Axes to the new workspace.
+ *  Note that the axes are NOT copied when the size parameters are given.
  *  @param  parent    A shared pointer to the parent workspace
  *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in the workspace
  *  @param  XLength   (Optional) The number of X data points/bin boundaries in each vector (must all be the same)
@@ -44,8 +45,12 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
 {
   Workspace_sptr ws = this->create(parent->id());
 
+  // Flag to indicate whether this workspace is the same size as the parent
+  bool differentSize = true;
+  if ( YLength < 0 ) differentSize = false;
+
   // If the size parameters have not been specified, get them from the parent
-  if ( YLength < 0 )
+  if ( !differentSize )
   {
     // Find out the size of the parent
     XLength = parent->dataX(0).size();
@@ -59,12 +64,17 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
   ws->setInstrument(parent->getInstrument());
   ws->setSpectraMap(parent->getSpectraMap());
   ws->setSample(parent->getSample());
-  for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+
+  // Only copy the axes over if new sizes are not given
+  if ( !differentSize )
   {
-    // Need to delete the existing axis created in init above
-    delete ws->m_axes[i];
-    // Now set to a copy of the parent workspace's axis
-    ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
+    for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+    {
+      // Need to delete the existing axis created in init above
+      delete ws->m_axes[i];
+      // Now set to a copy of the parent workspace's axis
+      ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
+    }
   }
 
   return ws;
