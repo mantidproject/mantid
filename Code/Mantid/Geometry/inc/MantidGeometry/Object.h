@@ -67,7 +67,7 @@ class DLLExport Object
   int lineHitsBoundingBox(const Geometry::V3D&, const Geometry::V3D&,
 	                              const double&, const double&, const double&,
 	                              const double&, const double&, const double& ) const;
-  double Object::bbAngularWidth(const Geometry::V3D&,
+  double bbAngularWidth(const Geometry::V3D&,
 	                         const double&, const double&, const double&,
 	                         const double&, const double&, const double& ) const;
 
@@ -137,7 +137,7 @@ class DLLExport Object
   double solidAngle(const Geometry::V3D& observer) const;
 
   // Axis Aligned Bounding box
-  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;	
+  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
 
   // find internal point to object
   int getPointInObject(Geometry::V3D& point) const;
