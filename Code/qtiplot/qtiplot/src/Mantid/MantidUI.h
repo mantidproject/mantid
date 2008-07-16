@@ -64,15 +64,16 @@ public:
     // if errs == true errors are copied
     Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
+    Table* createTableDetectors(MantidMatrix *m);
 
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
     // Updates Mantid user interfase
-    void update();
 
 public slots:
 
     void tst();
+    void update();
     void loadWorkspace();
     void deleteWorkspace();
     void importWorkspace();
@@ -80,6 +81,7 @@ public slots:
     void copyRowToGraph();
     void copyRowToGraphErr();
     void executeAlgorithm();
+    void copyDetectorsToTable();
 public:
     ApplicationWindow *m_appWindow;
     QMdiArea *d_workspace;// ApplicationWindow's private member
@@ -97,6 +99,7 @@ public:
     QAction *actionCopyRowToGraphErr;
     QAction *actionToggleMantid;
     QAction *actionToggleAlgorithms;
+    QAction *actionCopyDetectorsToTable;
 };
 
 static const char * mantid_matrix_xpm[] = { 

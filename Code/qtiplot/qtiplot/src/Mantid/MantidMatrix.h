@@ -55,6 +55,8 @@ public:
 	double dataE(int row, int col) const;
     int indexX(double s)const;
 
+    Mantid::API::Workspace_sptr workspace(){return m_workspace;}
+
     const char **matrixIcon(){return m_matrix_icon;}
     //void copy(Matrix *m);
     ApplicationWindow *appWindow(){return m_appWindow;}

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -66,6 +67,7 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+  bool hasSameBoundaries(const DataObjects::Workspace2D_sptr WS);
   
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);

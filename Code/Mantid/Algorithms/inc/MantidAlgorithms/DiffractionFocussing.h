@@ -77,8 +77,9 @@ namespace Mantid
       void init();
       void exec();
       API::Workspace_sptr convertUnitsToDSpacing(API::Workspace_sptr workspace, std::string outputWorkspaceName);
-      void RebinWorkspace(API::Workspace_sptr workspace);
-      void calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,int& step);
+      void RebinWorkspace(API::Workspace_sptr& workspace);
+      void calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step);
+      bool readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups);
     
       
 	  /// Static reference to the logger class

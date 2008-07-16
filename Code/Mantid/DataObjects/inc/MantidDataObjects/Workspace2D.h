@@ -124,7 +124,7 @@ private:
   static Kernel::Logger &g_log;
 };
 
-///shared pointer to the Workspace2D class
+///shared pointer to the Workspace2D class 
 typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
 
 } // namespace DataObjects

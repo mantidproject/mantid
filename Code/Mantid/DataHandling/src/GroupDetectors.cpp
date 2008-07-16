@@ -33,6 +33,7 @@ void GroupDetectors::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty(new ArrayProperty<int>("SpectraList"));
+  declareProperty(new ArrayProperty<int>("DetectorList"));
 }
 
 void GroupDetectors::exec()
@@ -42,20 +43,21 @@ void GroupDetectors::exec()
 
   Property *wil = getProperty("WorkspaceIndexList");
   Property *sl = getProperty("SpectraList");
+  Property *dl = getProperty("DetectorList");
   // Could create a Validator to replace the below
-  if ( wil->isDefault() && sl->isDefault() )
+  if ( wil->isDefault() && sl->isDefault() && dl->isDefault() )
   {
-    g_log.error("WorkspaceIndexList & SpectraList properties are both empty");
-    throw std::invalid_argument("WorkspaceIndexList & SpectraList properties are both empty");
+    g_log.error("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
+    throw std::invalid_argument("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
   }
   
-  // Bin boundaries need to be the same so, for now, only allow this action if the workspace unit is TOF
-  // Later, could include conversion into TOF and back again after combination (or some other solution)
-  if ( WS->getAxis(0)->unit()->unitID().compare("TOF") )
+  // Bin boundaries need to be the same so, check if they actually are
+//  if ( WS->getAxis(0)->unit()->unitID().compare("TOF") )
+  if ( !hasSameBoundaries(WS) )
   {
     g_log.error("Can only group if the workspace unit is time-of-flight");
     throw std::runtime_error("Can only group if the workspace unit is time-of-flight");
-  }
+  }//*/
   // If passes the above check, assume X bin boundaries are the same
   
   // I'm also going to insist for the time being that Y just contains raw counts 
@@ -88,8 +90,43 @@ void GroupDetectors::exec()
         indexList.push_back(i);
       }
     }  
+  }// End dealing with spectraList
+  else if ( ! dl->isDefault() )
+  {// Dealing with DetectorList
+    const std::vector<int> detectorList = getProperty("DetectorList");
+    // Convert the vector of properties into a set for easy searching
+    std::set<int> detectorSet(detectorList.begin(),detectorList.end());
+    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
+    indexList.clear();
+    boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
+
+    for (int i = 0; i < WS->getNumberHistograms(); ++i)
+    {
+      int currentSpec = spectraAxis->spectraNo(i);
+      if (currentSpec < 0) continue;
+      boost::shared_ptr<Geometry::IDetector> det;
+      try
+      {
+          det = spectraMap->getDetector(currentSpec);
+      }
+      catch(...)
+      {
+          continue;
+      }
+      int detID = det->getID();
+      if ( detectorSet.find(detID) != detectorSet.end() )
+      {
+        indexList.push_back(i);
+      }
+    }  
   }
-  // End dealing with spectraList
+
+  if ( indexList.size() == 0 )
+  {
+      g_log.warning("Nothing to group");
+      return;
+  }
+  
   
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
@@ -119,5 +156,30 @@ double GroupDetectors::dblSqrt(double in)
   return sqrt(in);
 }
 
+/// Checks if all histograms have the same boundaries by comparing their sums
+bool GroupDetectors::hasSameBoundaries(const Workspace2D_sptr WS)
+{
+    class double_sum
+    {
+    public:
+        double_sum():m_sum(0){}
+        double m_sum;
+        void operator()(const double& d)
+        {
+            m_sum += d;
+        }
+        operator double(){return m_sum;}
+    };
+
+    if (!WS->blocksize()) return true;
+    double commonSum = for_each(WS->dataX(0).begin(),WS->dataX(0).end(),double_sum());
+    for (int i = 1; i < WS->getNumberHistograms(); ++i)
+        if ( commonSum != for_each(WS->dataX(0).begin(),WS->dataX(0).end(),double_sum()) )
+            return false;
+    return true;
+}
+
+
 } // namespace DataHandling
 } // namespace Mantid
+

@@ -9,6 +9,8 @@
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 
+#include "MantidAPI/SpectraDetectorMap.h"
+
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -56,6 +58,11 @@ MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
   	actionCopyRowToGraphErr = new QAction(tr("Plot spectra (values + errors)"), this);
 	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
+
+    actionCopyDetectorsToTable = new QAction(tr("Copy Detectors to Table"), this);
+	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
+	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
+
 }
 
 void MantidUI::init()
@@ -298,6 +305,7 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
     {
         //cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
         cm.addAction(actionCopyRowToTable);
+        cm.addAction(actionCopyDetectorsToTable);
         cm.addAction(actionCopyRowToGraph);
         cm.addAction(actionCopyRowToGraphErr);
     }
@@ -324,6 +332,13 @@ void MantidUI::copyRowToGraphErr()
     if (!m || !m->isA("MantidMatrix")) return;
     createGraphFromSelectedRows(m,false);
   
+}
+
+void MantidUI::copyDetectorsToTable()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createTableDetectors(m);
 }
 
 Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
@@ -371,6 +386,42 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
     appWindow()->polishGraph(g,Graph::Line);
     m->setGraph1D(g);
 }
+
+Table* MantidUI::createTableDetectors(MantidMatrix *m)
+{
+	 Table* t = new Table(aw_scriptEnv, m->numRows(), 3, "", appWindow(), 0);
+	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-Detectors-"));
+     t->showNormal();
+    
+     Mantid::API::Workspace_sptr ws = m->workspace();
+     Mantid::API::Axis *spectraAxis = ws->getAxis(1);
+     boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap = ws->getSpectraMap();
+     for(int i=0;i<m->numRows();i++)
+     {
+         
+         int currentSpec = spectraAxis->spectraNo(i);
+         
+         int detID = 0;
+         try
+         {
+             boost::shared_ptr<Mantid::Geometry::IDetector> det = spectraMap->getDetector(currentSpec);
+             detID = det->getID();
+         }
+         catch(...)
+         {
+             detID = 0;
+         }
+         t->setCell(i,0,i); 
+         t->setColName(0,"Index");
+
+         t->setCell(i,1,currentSpec); 
+         t->setColName(1,"Spectra");
+
+         t->setCell(i,2,detID); 
+         t->setColName(2,"Detectors");
+     }
+     return t;
+ }
 
 bool MantidUI::drop(QDropEvent* e)
 {

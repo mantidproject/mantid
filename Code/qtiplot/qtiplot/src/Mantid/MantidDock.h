@@ -43,6 +43,7 @@ class AlgorithmDockWidget: public QDockWidget
     Q_OBJECT
 public:
     AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
+public slots:
     void update();
 protected:
     QTreeWidget *m_tree;

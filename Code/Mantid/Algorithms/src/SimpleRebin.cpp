@@ -55,6 +55,7 @@ namespace Mantid
       std::vector<double> XValues_new;
       // create new output X axis
       int ntcnew = newAxis(rb_params,XValues_new);
+
       // make output Workspace the same type is the input, but with new length of signal array
       API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
 

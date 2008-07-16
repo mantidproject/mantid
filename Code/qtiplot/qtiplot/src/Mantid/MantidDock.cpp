@@ -124,9 +124,11 @@ QDockWidget(w)
     m_tree->setHeaderLabel("Algorithms");
 
     QHBoxLayout * buttonLayout = new QHBoxLayout();
-    QPushButton *execButton = new QPushButton("Exec");
+    QPushButton *execButton = new QPushButton("Execute");
+    QPushButton *refreshButton = new QPushButton("Refresh");
 
     buttonLayout->addWidget(execButton);
+    buttonLayout->addWidget(refreshButton);
     buttonLayout->addStretch();
     //
     QVBoxLayout * layout = new QVBoxLayout();
@@ -135,6 +137,7 @@ QDockWidget(w)
     layout->addWidget(m_tree);
     //
     connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
+    connect(refreshButton,SIGNAL(clicked()),this,SLOT(update()));
 
     setWidget(f);
     update();
