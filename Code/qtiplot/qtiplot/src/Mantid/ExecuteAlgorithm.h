@@ -34,15 +34,16 @@ public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
 	void CreateLayout(QStringList& workspaces, Mantid::API::Algorithm* alg);
-	std::map<std::string, std::string> results;
 
 protected:
 	
 private slots:
 	void okClicked();
 	void browseClicked();
+	void textChanged();
 
 private:
+	std::map<std::string, std::string> results;
 	Mantid::API::Algorithm* m_alg;
 	std::vector<Mantid::Kernel::Property*> m_props;
 
@@ -55,6 +56,8 @@ private:
 	std::map<QPushButton*, QLineEdit*> buttonsToEdits;
 
 	bool execute();
+        void updateResults();
+	bool validateEntries();
 
 };
 

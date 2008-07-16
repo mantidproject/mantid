@@ -13,6 +13,7 @@
 #include "../Matrix.h"
 #include "LoadRawDlg.h"
 #include "ImportWorkspaceDlg.h"
+#include "MantidKernel/Property.h"
 
 ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent) 
 	: QDialog(parent)
@@ -42,6 +43,7 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 				QLineEdit *tempEdit = new QLineEdit;
 				QPushButton *tempBtn = new QPushButton(tr("Browse"));
 			
+				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 				connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
 			
 				tempLbl->setBuddy(tempEdit);
@@ -82,6 +84,8 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
 				QLineEdit *tempEdit = new QLineEdit;
 				tempLbl->setBuddy(tempEdit);
+				
+				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 		
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempEdit, i, 1, 0);
@@ -94,6 +98,7 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 	okButton = new QPushButton(tr("OK"));
 	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
 	okButton->setDefault(true);
+	okButton->setEnabled(false);
 	
 	exitButton = new QPushButton(tr("Cancel"));
 	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -165,7 +170,56 @@ void ExecuteAlgorithm::browseClicked()
 	temp->setText(s);
 }
 
-void ExecuteAlgorithm::okClicked()
+void ExecuteAlgorithm::textChanged()
+{
+	okButton->setEnabled(validateEntries());
+}
+
+bool ExecuteAlgorithm::validateEntries()
+{
+	//Validate all the current values
+	bool propsOK = true;
+	
+	updateResults();
+	
+	std::map<std::string, std::string>::iterator resItr = results.begin();
+				
+	for (; resItr != results.end(); ++resItr)
+	{				
+		try
+		{
+			m_alg->setPropertyValue(resItr->first, resItr->second);
+		}
+		catch (std::invalid_argument err)
+		{
+			//TODO: Highlight that value is invalid
+				
+			propsOK = false;
+		}
+	}
+				
+	//Check properties valid
+	const std::vector< Mantid::Kernel::Property*>& props = m_alg->getProperties();
+
+	if (m_props.size() > 0)
+	{
+
+		std::vector< Mantid::Kernel::Property*>::const_iterator propItr = props.begin();
+		for (; propItr != props.end(); ++propItr)
+		{
+			if (!(*propItr)->isValid())
+			{
+				//TODO: Highlight that value is invalid
+				
+				propsOK = false;
+			}
+		}
+	}
+	
+	return propsOK;
+}
+
+void ExecuteAlgorithm::updateResults()
 {
 	std::map<QLineEdit*, std::string>::iterator editItr = edits.begin();
 	std::map<QComboBox*, std::string>::iterator comboItr = combos.begin();
@@ -179,6 +233,7 @@ void ExecuteAlgorithm::okClicked()
 		{
 			results[editItr->second] = value;
 		}
+		//TODO: If property exists then it needs to be cleared.
 	}
 	
 	for (; comboItr != combos.end(); ++comboItr)
@@ -191,7 +246,10 @@ void ExecuteAlgorithm::okClicked()
 			results[comboItr->second] = value;
 		}
 	}
-	
+}
+
+void ExecuteAlgorithm::okClicked()
+{
 	if (execute())
 	{	
 		accept();
@@ -200,33 +258,8 @@ void ExecuteAlgorithm::okClicked()
 
 bool ExecuteAlgorithm::execute()
 {
-	std::map<std::string, std::string>::iterator resItr = results.begin();
-				
-	for (; resItr != results.end(); ++resItr)
-	{				
-		try
-		{
-			m_alg->setPropertyValue(resItr->first, resItr->second);
-		}
-		catch (std::invalid_argument err)
-		{
-			int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
-					tr(QString::fromStdString(resItr->first) + " was invalid."),
-					QMessageBox::Ok);
-				
-			return false;
-		}
-	}
-				
-	//Check properties valid
-	if (!m_alg->validateProperties())
+	if (!validateEntries())
 	{
-		//Properties not valid
-		int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
-			tr("One or more of the property values entered was invalid. "
-			"Please see the Mantid log for details."),
-			QMessageBox::Ok);
-					
 		return false;
 	}
 				
