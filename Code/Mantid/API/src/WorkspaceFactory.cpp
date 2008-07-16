@@ -39,7 +39,7 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_sptr& parent,
+Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
                                             int NVectors, int XLength, int YLength) const
 {
   Workspace_sptr ws = this->create(parent->id());

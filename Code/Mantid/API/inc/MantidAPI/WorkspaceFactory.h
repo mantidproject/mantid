@@ -60,7 +60,7 @@ public:
   // Unhide the inherited create method
   using Kernel::DynamicFactory<Workspace>::create;
 
-  Workspace_sptr create(const Workspace_sptr& parent,
+  Workspace_sptr create(const Workspace_const_sptr& parent,
                         int NVectors = -1, int XLength = -1, int YLength = -1) const;
   Workspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;

@@ -205,6 +205,21 @@ Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_spt
     throw std::runtime_error("Attempt to assign property of incorrect type");
   }
 }
+
+template<> DLLExport
+Mantid::API::Workspace_const_sptr PropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const
+{
+  PropertyWithValue<Mantid::API::Workspace_const_sptr>* prop =
+                    dynamic_cast<PropertyWithValue<Mantid::API::Workspace_const_sptr>*>(getPointerToProperty(name));
+  if (prop)
+  {
+    return *prop;
+  }
+  else
+  {
+    throw std::runtime_error("Attempt to assign property of incorrect type");
+  }
+}
 } // namespace Kernel
 } // namespace Mantid
 
