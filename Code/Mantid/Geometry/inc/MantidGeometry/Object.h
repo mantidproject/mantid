@@ -7,6 +7,7 @@
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Track.h"
+#include "MantidGeometry/Quat.h"
 
 
 namespace Mantid
@@ -66,6 +67,9 @@ class DLLExport Object
   int lineHitsBoundingBox(const Geometry::V3D&, const Geometry::V3D&,
 	                              const double&, const double&, const double&,
 	                              const double&, const double&, const double& ) const;
+  double Object::bbAngularWidth(const Geometry::V3D&,
+	                         const double&, const double&, const double&,
+	                         const double&, const double&, const double& ) const;
 
  protected:
 

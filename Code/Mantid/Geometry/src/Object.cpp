@@ -848,57 +848,118 @@ namespace Mantid
       /*!
       Given an observer position find the approximate solid angle of the object
       \param observer :: position of the observer (V3D)
-      \return Solid angle estimate in steradians
+      \return Solid angle in steradians (+/- 1% if accurate bounding box available)
       */
     {
       // Calculation of solid angle as numerical double integral over all
-      // angles. This could be optimised in many ways, e.g. using adaptive
-      // integration and the object bounding box, if it had one.
-      // Using the interceptSurface method is sub-optimal as it does more work
-      // than is necessary.
-      // May be wrong on object edges.
+      // angles. This could be optimised further e.g. by 
+      // using a light weight version of the interceptSurface method - this does more work
+      // than is necessary in this application.
+      // Accuracy is of the order of 1% for objects with an accurate boundng box, though
+      // less in the case of high aspect ratios.
       //
-      int itheta,jphi,res=200,res_phi;
-      double theta,phi,sum=0.0,dphi,dtheta;
+	  // resBB controls accuracy and cost - linear accuracy improvement with increasing res,
+	  // but quadratic increase in run time. If no bounding box found, resNoBB used instead.
+	  const int resNoBB=200,resBB=100,resPhiMin=10;
+      int res=resNoBB,itheta,jphi,resPhi;
+      double theta,phi,sum,dphi,dtheta,angWidth=M_PI;
       if( this->isValid(observer) && ! this->isOnSide(observer) )
          return 4*M_PI;  // internal point
       if( this->isOnSide(observer) )
          return 2*M_PI;  // this is wrong if on an edge
 	  // Use BB if available, and if observer not within it
 	  const double big(1e10);
-	  double xmin,ymin,zmin,xmax,ymax,zmax;
+	  double xmin,ymin,zmin,xmax,ymax,zmax,thetaMax=M_PI;
+	  bool useBB=false,usePt=false;
+	  Geometry::V3D ptInObject,axis;
+	  Quat zToPt;
+
 	  xmin=ymin=zmin=-big;
 	  xmax=ymax=zmax=big;
-	  (this)->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	  bool useBB=false;
-	  int count(0);
+	  getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	  // Is the bounding box a reasonable one?
 	  if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
       {
+            // If observer not inside bounding box, then can make use of it
 			if( !inBoundingBox(observer,xmax,ymax,zmax,xmin,ymin,zmin) )
-				useBB=true;
+			{
+				useBB=usePt=true;
+				thetaMax=bbAngularWidth(observer,xmax,ymax,zmax,xmin,ymin,zmin);
+				ptInObject=Geometry::V3D(0.5*(xmin+xmax),0.5*(ymin+ymax),0.5*(zmin+zmax));
+				res=resBB;
+			}
       }
-	     
-      dtheta=M_PI/res;
+	  // Try and find a point in the object if useful bounding box not found
+      if( !useBB )
+		  usePt=getPointInObject(ptInObject)==1;
+	  if( usePt )
+	  {
+		  // found point in object, now get rotation that maps z axis to this direction from observer
+		  ptInObject-=observer;
+		  double theta0=-180.0/M_PI*acos(ptInObject.Z()/ptInObject.norm());
+		  axis=ptInObject.cross_prod(Geometry::V3D (0.0,0.0,1.0));
+		  if(axis.nullVector()) axis=Geometry::V3D (1.0,0.0,0.0);
+		  zToPt(theta0,axis);
+	  }
+      dtheta=thetaMax/res;
+	  int count=0,countPhi;
+	  sum=0.;
       for(itheta=1;itheta<=res;itheta++)
       {
-         // itegrate over 0->2pi in phi
-         theta=M_PI*(itheta-0.5)/res;
-         res_phi=res*sin(theta);
-         if(res_phi<20) res_phi=20;
-         dphi=2*M_PI/res_phi;
-         for(jphi=1;jphi<=res_phi;jphi++)
+         // itegrate theta from 0 to maximum from bounding box, or PI otherwise 
+         theta=thetaMax*(itheta-0.5)/res;
+         resPhi=res*sin(theta);
+         if(resPhi<resPhiMin) resPhi=resPhiMin;
+         dphi=2*M_PI/resPhi;
+		 countPhi=0;
+         for(jphi=1;jphi<=resPhi;jphi++)
          {
-            phi=2.0*M_PI*(jphi-0.5)/res_phi;
+		    // integrate phi from 0 to 2*PI
+            phi=2.0*M_PI*(jphi-0.5)/resPhi;
 			Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+			if( usePt ) zToPt.rotate(dir);
 			if( !useBB || lineHitsBoundingBox(observer,dir,xmax,ymax,zmax,xmin,ymin,zmin) )
 			{
                Track tr(observer, dir);
                if(this->interceptSurface(tr)>0)
                {
                   sum+=dtheta*dphi*sin(theta);
+				  countPhi++;
 		       }
 			}
 		 }
+		 // this break (only used in no BB defined) may be wrong if object has hole in middle
+		 if(!useBB && countPhi==0) break;
+		 count+=countPhi;
+	  }
+	  if(!useBB && count<resPhiMin+1)
+	  {
+		  // case of no bound box defined and object has few if any points in sum
+		  // redo integration on finer scale
+	     thetaMax=thetaMax*(itheta-0.5)/res;
+         dtheta=thetaMax/res;
+	     sum=0;
+         for(itheta=1;itheta<=res;itheta++)
+         {
+            theta=thetaMax*(itheta-0.5)/res;
+            resPhi=res*sin(theta);
+            if(resPhi<resPhiMin) resPhi=resPhiMin;
+            dphi=2*M_PI/resPhi;
+			countPhi=0;
+            for(jphi=1;jphi<=resPhi;jphi++)
+            {
+               phi=2.0*M_PI*(jphi-0.5)/resPhi;
+	    	   Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+			   if( usePt ) zToPt.rotate(dir);
+               Track tr(observer, dir);
+               if(this->interceptSurface(tr)>0)
+               {
+                  sum+=dtheta*dphi*sin(theta);
+			      countPhi++;
+		       }
+		    }
+		    if(countPhi==0) break;
+	     }
 	  }
       return sum;
     }
@@ -1103,6 +1164,44 @@ namespace Mantid
 		  && point.Z()<=zmax+tol && point.Z()>=zmax-tol )
 		   return 1;
 	   return 0;
+	}
+
+    double
+		Object::bbAngularWidth(const Geometry::V3D& observer,
+	                         const double& xmax, const double& ymax, const double& zmax,
+	                         const double& xmin, const double& ymin, const double& zmin ) const
+      /*!
+      Find maximum angular half width of the bounding box from the observer, that is
+	  the greatest angle between the centre point and any corner point
+      \param observer :: Viewing point
+	  \param xmax :: Maximum value for the bounding box in x direction
+	  \param ymax :: Maximum value for the bounding box in y direction
+	  \param zmax :: Maximum value for the bounding box in z direction
+	  \param xmin :: Minimum value for the bounding box in x direction
+	  \param ymin :: Minimum value for the bounding box in y direction
+	  \param zmin :: Minimum value for the bounding box in z direction
+      \return 1 if in, 0 otherwise
+      */
+    {
+		double theta,thetaMax=-1;
+		Geometry::V3D centre(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
+		centre-=observer;
+		std::vector<Geometry::V3D> pts;
+		pts.push_back(Geometry::V3D(xmin,ymin,zmin)-observer);
+		pts.push_back(Geometry::V3D(xmin,ymin,zmax)-observer);
+		pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
+		pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
+		pts.push_back(Geometry::V3D(xmax,ymin,zmin)-observer);
+		pts.push_back(Geometry::V3D(xmax,ymin,zmax)-observer);
+		pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
+		pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
+		std::vector<Geometry::V3D>::const_iterator ip;
+		for(ip=pts.begin();ip!=pts.end();ip++)
+		{
+			theta=acos((ip)->scalar_prod(centre)/((ip)->norm()*centre.norm()));
+			if(theta>thetaMax) thetaMax=theta;
+		}
+		return thetaMax;
 	}
   }  // NAMESPACE MonteCarlo
 
