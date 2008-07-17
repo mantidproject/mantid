@@ -862,7 +862,7 @@ namespace Mantid
 	  // but quadratic increase in run time. If no bounding box found, resNoBB used instead.
 	  const int resNoBB=200,resBB=100,resPhiMin=10;
       int res=resNoBB,itheta,jphi,resPhi;
-      double theta,phi,sum,dphi,dtheta,angWidth=M_PI;
+      double theta,phi,sum,dphi,dtheta;
       if( this->isValid(observer) && ! this->isOnSide(observer) )
          return 4*M_PI;  // internal point
       if( this->isOnSide(observer) )
@@ -908,7 +908,7 @@ namespace Mantid
       {
          // itegrate theta from 0 to maximum from bounding box, or PI otherwise 
          theta=thetaMax*(itheta-0.5)/res;
-         resPhi=res*sin(theta);
+         resPhi=static_cast<int> (res*sin(theta));
          if(resPhi<resPhiMin) resPhi=resPhiMin;
          dphi=2*M_PI/resPhi;
 		 countPhi=0;
@@ -942,7 +942,7 @@ namespace Mantid
          for(itheta=1;itheta<=res;itheta++)
          {
             theta=thetaMax*(itheta-0.5)/res;
-            resPhi=res*sin(theta);
+            resPhi=static_cast<int> (res*sin(theta));
             if(resPhi<resPhiMin) resPhi=resPhiMin;
             dphi=2*M_PI/resPhi;
 			countPhi=0;

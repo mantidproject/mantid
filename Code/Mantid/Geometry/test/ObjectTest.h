@@ -542,7 +542,9 @@ void testFindPointInCube()
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
 	Object D =createCuboid(planes);
     TS_ASSERT_EQUALS(D.getPointInObject(pt),1);
-    TS_ASSERT_EQUALS(pt,V3D(1.0,-21.5,0));
+    TS_ASSERT_DELTA(pt.X(),1.0,1e-6);
+    TS_ASSERT_DELTA(pt.Y(),-21.5,1e-6);
+    TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
     Object E = createSphere();
     TS_ASSERT_EQUALS(E.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
