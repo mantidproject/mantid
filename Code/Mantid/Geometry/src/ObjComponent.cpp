@@ -94,7 +94,7 @@ int ObjComponent::interceptSurface(Track& track) const
  *  @returns The solid angle in steradians
  *  @throw NullPointerException if the underlying geometrical Object has not been set
  */
-double ObjComponent::solidAngle(const V3D& observer) const
+double ObjComponent::solidAngle(const V3D& observer)
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");

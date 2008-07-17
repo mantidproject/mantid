@@ -60,6 +60,8 @@ class DLLExport Object
   int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
+  double AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin; ///< Axis Aligned Bounding Box Cache
+  bool  boolBounded;
   int searchForObject(Geometry::V3D&) const;
   int inBoundingBox(const Geometry::V3D&,
 	                const double&, const double&, const double&,
@@ -134,13 +136,13 @@ class DLLExport Object
   int interceptSurface(Geometry::Track&) const;
 
   // Solid angle
-  double solidAngle(const Geometry::V3D& observer) const;
+  double solidAngle(const Geometry::V3D& observer);
 
   // Axis Aligned Bounding box
-  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
+  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);
 
   // find internal point to object
-  int getPointInObject(Geometry::V3D& point) const;
+  int getPointInObject(Geometry::V3D& point);
 
 
 };

@@ -40,7 +40,7 @@ namespace Mantid
     /// @endcond
 
     Object::Object() :
-    ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0)
+    ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
@@ -49,7 +49,13 @@ namespace Mantid
     Object::Object(const Object& A) :
     ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
       TopRule((A.TopRule) ? A.TopRule->clone() : 0),
-      SurList(A.SurList)
+	  SurList(A.SurList),
+	  AABBxMax(A.AABBxMax),
+	  AABByMax(A.AABByMax),
+	  AABBzMax(A.AABBzMax),
+	  AABBxMin(A.AABBxMin),
+	  AABByMin(A.AABByMin),
+	  AABBzMin(A.AABBzMin),boolBounded(A.boolBounded)
       /*!
       Copy constructor
       \param A :: Object to copy
@@ -73,6 +79,13 @@ namespace Mantid
         delete TopRule;
         TopRule=(A.TopRule) ? A.TopRule->clone() : 0;
         SurList=A.SurList;
+		AABBxMax=A.AABBxMax;
+		AABByMax=A.AABByMax;
+		AABBzMax=A.AABBzMax;
+		AABBxMin=A.AABBxMin;
+		AABByMin=A.AABByMin;
+		AABBzMin=A.AABBzMin;
+		boolBounded=A.boolBounded;
       }
       return *this;
     }
@@ -844,7 +857,7 @@ namespace Mantid
     }
 
     double
-      Object::solidAngle(const Geometry::V3D& observer) const
+      Object::solidAngle(const Geometry::V3D& observer)
       /*!
       Given an observer position find the approximate solid angle of the object
       \param observer :: position of the observer (V3D)
@@ -975,16 +988,26 @@ namespace Mantid
 	 * @param ymin :: Minimum value for the bounding box in y direction
 	 * @param zmin :: Minimum value for the bounding box in z direction
 	 */
-	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
+	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 	{
 		if (!TopRule)
 			return;
-		TopRule->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+		if(!boolBounded){
+			AABBxMax=xmax;AABByMax=ymax;AABBzMax=zmax;
+			AABBxMin=xmin;AABByMin=ymin;AABBzMin=zmin;
+			TopRule->getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+			if(AABBxMax>=xmax||AABBxMin<=xmin||AABByMax>=ymax||AABByMin<=ymin||AABBzMax>=zmax||AABBzMin<=zmin)
+				boolBounded=false;
+			else
+				boolBounded=true;
+		}
+		xmax=AABBxMax;	ymax=AABByMax;	zmax=AABBzMax;
+		xmin=AABBxMin;	ymin=AABByMin;	zmin=AABBzMin;
 	}
 
 
 	int
-      Object::getPointInObject(Geometry::V3D& point) const
+      Object::getPointInObject(Geometry::V3D& point)
       /*!
       Try to find a point that lies within (or on) the object
       \param point :: on exit set to the point value, if found
@@ -1010,7 +1033,7 @@ namespace Mantid
 		double xmin,ymin,zmin,xmax,ymax,zmax;
 		xmin=ymin=zmin=-big;
 		xmax=ymax=zmax=big;
-		getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+		this->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
 		if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
 		{
 		   testPt=Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));

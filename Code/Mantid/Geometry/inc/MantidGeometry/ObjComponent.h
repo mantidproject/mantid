@@ -65,7 +65,7 @@ public:
   bool isValid(const V3D& point) const;
   bool isOnSide(const V3D& point) const;
   int interceptSurface(Track& track) const;
-  double solidAngle(const V3D& observer) const;
+  double solidAngle(const V3D& observer) ;
 
 protected:
   ObjComponent(const ObjComponent&);
@@ -80,7 +80,7 @@ private:
   /// The phyical geometry representation
   // Defaulted to a const pointer to a const object initially, could remove one or both of
   // these restrictions if later found to be necessary
-	const boost::shared_ptr<const Object> shape;
+	const boost::shared_ptr<Object> shape;
 };
 
 } // namespace Geometry
