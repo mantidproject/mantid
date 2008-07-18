@@ -13,9 +13,9 @@ public:
 
   void testPopulate()
   {
-    std::string correctOutput = "Name: arg1_param\n";
-    correctOutput = correctOutput + "Value: 20\n";
-    correctOutput = correctOutput + "isDefault: Yes\n";
+    std::string correctOutput = "Name: arg1_param, ";
+    correctOutput = correctOutput + "Value: 20, ";
+    correctOutput = correctOutput + "Default?: Yes, ";
     correctOutput = correctOutput + "Direction: Input\n";
 
     // Not really much to test

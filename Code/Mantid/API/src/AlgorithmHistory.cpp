@@ -18,8 +18,6 @@ AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime
   m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration)
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
-  // Would like to have PropertyManager & Property do this but can't because PropertyHistory has to know
-  // about Workspace Properties, which is in API whereas PropertyManager/Property are in Kernel.
   const std::vector<Property*>& properties = alg->getProperties();
   std::vector<Property*>::const_iterator it;
   for (it = properties.begin(); it != properties.end(); ++it)
@@ -58,8 +56,8 @@ void AlgorithmHistory::addExecutionInfo(const dateAndTime& start, const double& 
  */
 void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 {
-  os << std::string(indent,' ') << "Name : " << m_name << std::endl;
-  os << std::string(indent,' ') << "Version: " << m_version << std::endl;
+  os << std::string(indent,' ') << "Algorithm: " << m_name;
+  os << std::string(indent,' ') << " v" << m_version << std::endl;
   if (m_executionDate)
   {
     char buffer [25];
@@ -72,7 +70,6 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 
   for (it=m_properties.begin();it!=m_properties.end();it++)
   {
-    os << std::endl;
     it->printSelf( os, indent+2 );
   }
 }

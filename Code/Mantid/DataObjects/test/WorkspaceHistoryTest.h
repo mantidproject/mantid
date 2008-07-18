@@ -216,7 +216,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( s << C_WH )
     // Check size (in bytes) of output
     int i = s.tellp();
-    TS_ASSERT_LESS_THAN( 1350, i )
+    TS_ASSERT_LESS_THAN( 1200, i )
     // Check first line
     s.seekp(0);
     char c[21];

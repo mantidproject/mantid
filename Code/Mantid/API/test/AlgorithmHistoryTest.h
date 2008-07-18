@@ -33,21 +33,19 @@ class AlgorithmHistoryTest : public CxxTest::TestSuite
 public:
   void testPopulate()
   {
-    std::string correctOutput = "Name : testalg\n";
-    correctOutput = correctOutput + "Version: 1\n";
+    std::string correctOutput = "Algorithm: testalg ";
+    correctOutput = correctOutput + "v1\n";
     correctOutput = correctOutput + "Execution Date: 2008-Feb-29 09:54:49\n";
     correctOutput = correctOutput + "Execution Duration: 14 seconds\n";
     correctOutput = correctOutput + "Parameters:\n";
-    correctOutput = correctOutput + "\n";
-    correctOutput = correctOutput + "  Name: arg1_param\n";
-    correctOutput = correctOutput + "  Value: 20\n";
-    correctOutput = correctOutput + "  isDefault: No\n";
-    correctOutput = correctOutput + "  Direction: Input\n";
-    correctOutput = correctOutput + "\n";
-    correctOutput = correctOutput + "  Name: arg2_param\n";
-    correctOutput = correctOutput + "  Value: 23\n";
-    correctOutput = correctOutput + "  isDefault: Yes\n";
-    correctOutput = correctOutput + "  Direction: N/A\n";
+    correctOutput = correctOutput + "  Name: arg1_param, ";
+    correctOutput = correctOutput + "Value: 20, ";
+    correctOutput = correctOutput + "Default?: No, ";
+    correctOutput = correctOutput + "Direction: Input\n";
+    correctOutput = correctOutput + "  Name: arg2_param, ";
+    correctOutput = correctOutput + "Value: 23, ";
+    correctOutput = correctOutput + "Default?: Yes, ";
+    correctOutput = correctOutput + "Direction: N/A\n";
 
     //set the time
     std::time_t rawtime;

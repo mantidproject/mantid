@@ -50,10 +50,10 @@ PropertyHistory& PropertyHistory::operator=(const PropertyHistory& A)
  */
 void PropertyHistory::printSelf(std::ostream& os, const int indent) const
 {
-  os << std::string(indent,' ') << "Name: " << m_name << std::endl;
-  os << std::string(indent,' ') << "Value: " << m_value << std::endl;
-  os << std::string(indent,' ') << "isDefault: "<< (m_isDefault ? "Yes" : "No") << std::endl;
-  os << std::string(indent,' ') << "Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
+  os << std::string(indent,' ') << "Name: " << m_name;
+  os << ", Value: " << m_value;
+  os << ", Default?: "<< (m_isDefault ? "Yes" : "No");
+  os << ", Direction: " << Kernel::Direction::asText(m_direction) << std::endl;
 }
 
 /** Prints a text representation
