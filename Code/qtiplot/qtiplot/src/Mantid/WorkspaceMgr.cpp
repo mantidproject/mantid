@@ -205,14 +205,6 @@ void WorkspaceMgr::importWorkspaceMatrix()
 
 void WorkspaceMgr:: executeAlgorithm()
 {
-	QStringList wkspaces;
-	
-	//Get list of workspaces
-	for (int i =0; i < listWorkspaces->count(); ++i)
-	{
-		wkspaces << listWorkspaces->item(i)->text();
-	}
-	
 	if (listAlgorithms->currentRow() != -1)
 	{
 		QListWidgetItem *selected = listAlgorithms->item(listAlgorithms->currentRow());
@@ -223,7 +215,7 @@ void WorkspaceMgr:: executeAlgorithm()
 		if (alg)
 		{		
 			ExecuteAlgorithm* dlg = new ExecuteAlgorithm(this);
-			dlg->CreateLayout(wkspaces, alg);
+			dlg->CreateLayout(alg);
 			dlg->setModal(true);
 		
 			dlg->exec();	

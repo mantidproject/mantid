@@ -461,16 +461,14 @@ void MantidUI::executeAlgorithm()
         QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
         return;
     }
-    
-    QStringList wkspaces = getWorkspaceNames();
-    
+
     Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>
           (Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString(),version));
 
 	if (alg)
 	{		
 		ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
-		dlg->CreateLayout(wkspaces, alg);
+		dlg->CreateLayout(alg);
 		dlg->setModal(true);
 	
 		dlg->exec();	

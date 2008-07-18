@@ -7,6 +7,8 @@
 #include <QStringList>
 #include <QtGui>
 #include <QObject>
+#include <QPalette>
+#include <QColor>
 
 #include "ExecuteAlgorithm.h"
 #include "../ApplicationWindow.h"
@@ -26,7 +28,7 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 	
 }
 
-void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algorithm* alg)
+void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 {
 	QGridLayout *grid = new QGridLayout();
 	
@@ -47,10 +49,16 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 				connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
 			
 				tempLbl->setBuddy(tempEdit);
+				
+				QLabel *validLbl = new QLabel("*");
+				QPalette pal = validLbl->palette();
+				pal.setColor(QPalette::WindowText, Qt::red);
+				validators[m_props[i]->name()] = validLbl;
 		
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempEdit, i, 1, 0);
-				grid->addWidget(tempBtn, i, 2, 0);
+				grid->addWidget(validLbl, i, 2, 0);
+				grid->addWidget(tempBtn, i, 3, 0);
 		
 				edits[tempEdit] = m_props[i]->name();
 				buttonsToEdits[tempBtn] = tempEdit;
@@ -73,9 +81,15 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 				}
 				
 				tempCombo->addItems(list);
+				
+				QLabel *validLbl = new QLabel("*");
+				QPalette pal = validLbl->palette();
+				pal.setColor(QPalette::WindowText, Qt::red);
+				validators[m_props[i]->name()] = validLbl;
 			
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempCombo, i, 1, 0);
+				grid->addWidget(validLbl, i, 2, 0);
 			
 				combos[tempCombo] = m_props[i]->name();
 			}
@@ -85,10 +99,16 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 				QLineEdit *tempEdit = new QLineEdit;
 				tempLbl->setBuddy(tempEdit);
 				
+				QLabel *validLbl = new QLabel("*");
+				QPalette pal = validLbl->palette();
+				pal.setColor(QPalette::WindowText, Qt::red);
+				validators[m_props[i]->name()] = validLbl;
+				
 				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 		
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempEdit, i, 1, 0);
+				grid->addWidget(validLbl, i, 2, 0);
 		
 				edits[tempEdit] = m_props[i]->name();
 			}
@@ -98,7 +118,7 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 	okButton = new QPushButton(tr("OK"));
 	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
 	okButton->setDefault(true);
-	okButton->setEnabled(false);
+	//okButton->setEnabled(false);
 	
 	exitButton = new QPushButton(tr("Cancel"));
 	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -117,6 +137,8 @@ void ExecuteAlgorithm::CreateLayout(QStringList& workspaces, Mantid::API::Algori
 	
 	setWindowTitle(tr("Enter properties"));
 	setFixedHeight(sizeHint().height());
+	
+	setPropertiesAndValidate();
 }
 
 void ExecuteAlgorithm::browseClicked()
@@ -168,59 +190,20 @@ void ExecuteAlgorithm::browseClicked()
 	if ( s.isEmpty() )  return;
 		
 	temp->setText(s);
+	
+	setPropertiesAndValidate();
 }
 
 void ExecuteAlgorithm::textChanged()
 {
-	okButton->setEnabled(validateEntries());
+	//okButton->setEnabled(validateEntries());
+	setPropertiesAndValidate();
 }
 
-bool ExecuteAlgorithm::validateEntries()
+bool ExecuteAlgorithm::setPropertiesAndValidate()
 {
-	//Validate all the current values
 	bool propsOK = true;
 	
-	updateResults();
-	
-	std::map<std::string, std::string>::iterator resItr = results.begin();
-				
-	for (; resItr != results.end(); ++resItr)
-	{				
-		try
-		{
-			m_alg->setPropertyValue(resItr->first, resItr->second);
-		}
-		catch (std::invalid_argument err)
-		{
-			//TODO: Highlight that value is invalid
-				
-			propsOK = false;
-		}
-	}
-				
-	//Check properties valid
-	const std::vector< Mantid::Kernel::Property*>& props = m_alg->getProperties();
-
-	if (m_props.size() > 0)
-	{
-
-		std::vector< Mantid::Kernel::Property*>::const_iterator propItr = props.begin();
-		for (; propItr != props.end(); ++propItr)
-		{
-			if (!(*propItr)->isValid())
-			{
-				//TODO: Highlight that value is invalid
-				
-				propsOK = false;
-			}
-		}
-	}
-	
-	return propsOK;
-}
-
-void ExecuteAlgorithm::updateResults()
-{
 	std::map<QLineEdit*, std::string>::iterator editItr = edits.begin();
 	std::map<QComboBox*, std::string>::iterator comboItr = combos.begin();
 		
@@ -228,12 +211,16 @@ void ExecuteAlgorithm::updateResults()
 	{	
 		std::string value = editItr->first->text().trimmed().toStdString();
 		
-		//Only set a property if it is not nothing
-		if (value != "")
+		if (!setPropertyValue(editItr->second, value) || !validateProperty(editItr->second))
 		{
-			results[editItr->second] = value;
+			//Highlight that value is invalid
+			showValidator(editItr->second);	
+			propsOK = false;
 		}
-		//TODO: If property exists then it needs to be cleared.
+		else
+		{			
+			hideValidator(editItr->second);
+		}
 	}
 	
 	for (; comboItr != combos.end(); ++comboItr)
@@ -243,9 +230,67 @@ void ExecuteAlgorithm::updateResults()
 		//Only set a property if it is not nothing
 		if (value != "")
 		{
-			results[comboItr->second] = value;
+			if (!setPropertyValue(comboItr->second, value) || !validateProperty(comboItr->second))
+			{
+				//Highlight that value is invalid
+				showValidator(comboItr->second);	
+				propsOK = false;
+			}
+			else
+			{
+				hideValidator(comboItr->second);	
+			}
 		}
 	}
+	
+	return propsOK;
+}
+
+bool ExecuteAlgorithm::setPropertyValue(const std::string& name, const std::string& value)
+{
+	try
+	{
+		//If the value enter is "" then use the default value if there is one
+		//else flag it as a invalid entry.
+		//Note: once the default value is overwritten it cannot be retrieved and
+		//entering "" is invalid.
+		if (value == "" )
+		{
+			std::vector< Mantid::Kernel::Property*>::const_iterator propItr = m_props.begin();
+	
+			for (; propItr != m_props.end(); ++propItr)
+			{
+				if ((*propItr)->name() == name)
+				{
+					return (*propItr)->isDefault();
+				}
+			}
+		}
+		
+		m_alg->setPropertyValue(name, value);
+		
+		return true;
+	}
+	catch (std::invalid_argument err)
+	{
+		return false;
+	}
+}
+
+bool ExecuteAlgorithm::validateProperty(const std::string& name)
+{
+	std::vector< Mantid::Kernel::Property*>::const_iterator propItr = m_props.begin();
+	
+	for (; propItr != m_props.end(); ++propItr)
+	{
+		if ((*propItr)->name() == name)
+		{
+			return (*propItr)->isValid();
+		}
+	}
+	
+	//Should never reach here
+	return false;
 }
 
 void ExecuteAlgorithm::okClicked()
@@ -258,15 +303,19 @@ void ExecuteAlgorithm::okClicked()
 
 bool ExecuteAlgorithm::execute()
 {
-	if (!validateEntries())
+	if (!setPropertiesAndValidate())
 	{
+		QMessageBox::warning(this, tr("Mantid Algorithm"),
+			tr("At least one parameter entered is incorrect. "
+			"Incorrect entries are marked with an asterisk."),
+			QMessageBox::Ok);
 		return false;
 	}
 				
 	if (!m_alg->execute() == true)
 	{
 		//Algorithm did not execute properly
-		int ret = QMessageBox::warning(this, tr("Mantid Algorithm"),
+		QMessageBox::warning(this, tr("Mantid Algorithm"),
 			tr("The algorithm failed to execute correctly. "
 			"Please see the Mantid log for details."),
 			QMessageBox::Ok);
@@ -275,5 +324,25 @@ bool ExecuteAlgorithm::execute()
 	}
 	
 	return true;
+}
+
+void ExecuteAlgorithm::showValidator(const std::string& propName)
+{
+	std::map<std::string, QLabel*>::iterator itr  = validators.find(propName);
+	
+	if (itr != validators.end())
+	{
+		itr->second->show();
+	}
+}
+
+void ExecuteAlgorithm::hideValidator(const std::string& propName)
+{
+	std::map<std::string, QLabel*>::iterator itr  = validators.find(propName);
+	
+	if (itr != validators.end())
+	{
+		itr->second->hide();
+	}
 }
 

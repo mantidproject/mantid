@@ -33,7 +33,7 @@ class ExecuteAlgorithm : public QDialog
 public:
 	ExecuteAlgorithm(QWidget *parent = 0);
 	~ExecuteAlgorithm();
-	void CreateLayout(QStringList& workspaces, Mantid::API::Algorithm* alg);
+	void CreateLayout(Mantid::API::Algorithm* alg);
 
 protected:
 	
@@ -43,7 +43,6 @@ private slots:
 	void textChanged();
 
 private:
-	std::map<std::string, std::string> results;
 	Mantid::API::Algorithm* m_alg;
 	std::vector<Mantid::Kernel::Property*> m_props;
 
@@ -54,11 +53,14 @@ private:
 	std::map<QLineEdit*, std::string> edits;
 	std::map<QComboBox*, std::string> combos;
 	std::map<QPushButton*, QLineEdit*> buttonsToEdits;
+	std::map<std::string, QLabel*> validators;
 
 	bool execute();
-        void updateResults();
-	bool validateEntries();
-
+        bool setPropertiesAndValidate();
+        bool setPropertyValue(const std::string& name, const std::string& value);
+	bool validateProperty(const std::string& name);
+	void showValidator(const std::string& propName);
+	void hideValidator(const std::string& propName);
 };
 
 #endif /* EXECUTEALGORITHM_H */
