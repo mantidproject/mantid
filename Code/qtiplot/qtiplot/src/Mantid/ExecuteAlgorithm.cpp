@@ -50,9 +50,11 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			
 				tempLbl->setBuddy(tempEdit);
 				
+				//Add validator
 				QLabel *validLbl = new QLabel("*");
 				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::red);
+				pal.setColor(QPalette::WindowText, Qt::darkRed);
+				validLbl->setPalette(pal);
 				validators[m_props[i]->name()] = validLbl;
 		
 				grid->addWidget(tempLbl, i, 0, 0);
@@ -82,9 +84,11 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 				
 				tempCombo->addItems(list);
 				
+				//Add validator
 				QLabel *validLbl = new QLabel("*");
 				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::red);
+				pal.setColor(QPalette::WindowText, Qt::darkRed);
+				validLbl->setPalette(pal);
 				validators[m_props[i]->name()] = validLbl;
 			
 				grid->addWidget(tempLbl, i, 0, 0);
@@ -99,9 +103,11 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 				QLineEdit *tempEdit = new QLineEdit;
 				tempLbl->setBuddy(tempEdit);
 				
+				//Add validator
 				QLabel *validLbl = new QLabel("*");
 				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::red);
+				pal.setColor(QPalette::WindowText, Qt::darkRed);
+				validLbl->setPalette(pal);
 				validators[m_props[i]->name()] = validLbl;
 				
 				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
