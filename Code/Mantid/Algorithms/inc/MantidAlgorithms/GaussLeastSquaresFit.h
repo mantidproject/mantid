@@ -116,12 +116,15 @@ namespace Mantid
       static Mantid::Kernel::Logger& g_log;
     };
 
+
+    
     /** Gaussian function in GSL format
 * @param x Input function arguments  
 * @param params Input data
 * @param f Output function value
 * @return A GSL status information
 */
+    /*
 int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
     size_t n = ((struct FitData *)params)->n;
     double *X = ((struct FitData *)params)->X;
@@ -138,7 +141,7 @@ int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
         gsl_vector_set (f, i, (Yi - Y[i])/sigma[i]);
     }
     return GSL_SUCCESS;
-}
+}*/
 
 /** Calculates Gaussian derivatives in GSL format
 * @param x Input function arguments  
@@ -146,6 +149,7 @@ int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
 * @param J Output derivatives
 * @return A GSL status information
 */
+/*
 int gauss_df (const gsl_vector * x, void *params,
               gsl_matrix * J) 
 {
@@ -170,7 +174,7 @@ int gauss_df (const gsl_vector * x, void *params,
         gsl_matrix_set (J, i, 3, diff*diff*A*e/(w*w*w));
     }
     return GSL_SUCCESS;
-}
+} */
 
 /** Calculates Gaussian derivatives and function value in GSL format
 * @param x Input function arguments  
@@ -179,12 +183,13 @@ int gauss_df (const gsl_vector * x, void *params,
 * @param J Output derivatives
 * @return A GSL status information
 */
-int gauss_fdf (const gsl_vector * x, void *params,
+
+/*int gauss_fdf (const gsl_vector * x, void *params,
                gsl_vector * f, gsl_matrix * J) {
     gauss_f (x, params, f);
     gauss_df (x, params, J);
     return GSL_SUCCESS;
-}
+} */
 
 
 

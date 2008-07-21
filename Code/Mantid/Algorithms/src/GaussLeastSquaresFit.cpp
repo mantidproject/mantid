@@ -37,7 +37,7 @@ Logger& GaussLeastSquaresFit::g_log = Logger::get("GaussLeastSquaresFit");
 void GaussLeastSquaresFit::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
-  //declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+  //declareProperty(new WorkspaceProperty<Work-space2D>("OutputWorkspace","",Direction::Output));
   
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -47,6 +47,22 @@ void GaussLeastSquaresFit::init()
   declareProperty("StartX",0, mustBePositive->clone());
   declareProperty("EndX",0, mustBePositive->clone());  
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
+  declareProperty("Output Status",""); 
+  declareProperty("Output Chi^2/DoF",0.0);
+  declareProperty("Output y0",0.0);
+  declareProperty("Output A",0.0);
+  declareProperty("Output w",0.0);
+  declareProperty("Output xc",0.0);
+
+  //declareProperty("MaxIterations",500, mustBePositive->clone());
+
+
+  // to output gaussian fit parameters....
+ /* declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+    "Chi^2/DoF = " << chi*chi / dof << "\n" <<
+    "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
+    "; w = " << gsl_vector_get(s->x,2) << "; xc = " << gsl_vector_get(s->x,3) << "\n";
+    */
 }
 
 /** Executes the algorithm
@@ -170,12 +186,24 @@ void GaussLeastSquaresFit::exec()
   double chi = gsl_blas_dnrm2(s->f);
   double dof = l_data.n - l_data.p;
 
+  std::string fisse = gsl_strerror(status);
+
   g_log.information() << "Attempt to fit: y0+A*sqrt(2/PI)/w*exp(-2*((x-xc)/w)^2)\n" <<
     "Iteration = " << iter << "\n" <<
     "Status = " << gsl_strerror(status) << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
     "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
     "; w = " << gsl_vector_get(s->x,2) << "; xc = " << gsl_vector_get(s->x,3) << "\n";
+
+
+  // also output summary to properties...
+
+  setProperty("Output Status", fisse);
+  setProperty("Output Chi^2/DoF", chi*chi / dof);
+  setProperty("Output y0", gsl_vector_get(s->x,0));
+  setProperty("Output A", gsl_vector_get(s->x,1));
+  setProperty("Output w", gsl_vector_get(s->x,2));
+  setProperty("Output xc", gsl_vector_get(s->x,3));
 
 
   // clean up dynamically allocated gsl stuff
@@ -231,6 +259,77 @@ void GaussLeastSquaresFit::guessInitialValues(const FitData& data, gsl_vector* p
 	gsl_vector_set(param_init, 2, width);
 	gsl_vector_set(param_init, 3, offset);
 }
+
+
+    /** Gaussian function in GSL format
+* @param x Input function arguments  
+* @param params Input data
+* @param f Output function value
+* @return A GSL status information
+*/
+int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
+    size_t n = ((struct FitData *)params)->n;
+    double *X = ((struct FitData *)params)->X;
+    double *Y = ((struct FitData *)params)->Y;
+    double *sigma = ((struct FitData *)params)->sigma;
+    double Y0 = gsl_vector_get (x, 0);
+    double A = gsl_vector_get (x, 1);
+    double C = gsl_vector_get (x, 2);
+    double w = gsl_vector_get (x, 3);
+    size_t i;
+    for (i = 0; i < n; i++) {
+        double diff=X[i]-C;
+        double Yi = A*exp(-0.5*diff*diff/(w*w))+Y0;
+        gsl_vector_set (f, i, (Yi - Y[i])/sigma[i]);
+    }
+    return GSL_SUCCESS;
+}
+
+/** Calculates Gaussian derivatives in GSL format
+* @param x Input function arguments  
+* @param params Input data
+* @param J Output derivatives
+* @return A GSL status information
+*/
+int gauss_df (const gsl_vector * x, void *params,
+              gsl_matrix * J) 
+{
+    size_t n = ((struct FitData *)params)->n;
+    double *X = ((struct FitData *)params)->X;
+    double *sigma = ((struct FitData *)params)->sigma;
+    double A = gsl_vector_get (x, 1);
+    double C = gsl_vector_get (x, 2);
+    double w = gsl_vector_get (x, 3);
+    size_t i;
+    for (i = 0; i < n; i++) {
+        // Jacobian matrix J(i,j) = dfi / dxj,	 
+        // where fi = Yi - yi,					
+        // Yi = y=A*exp[-(Xi-xc)^2/(2*w*w)]+B		
+        // and the xj are the parameters (B,A,C,w) 
+        double s = sigma[i];
+        double diff = X[i]-C;
+        double e = exp(-0.5*diff*diff/(w*w))/s;
+        gsl_matrix_set (J, i, 0, 1/s);
+        gsl_matrix_set (J, i, 1, e);
+        gsl_matrix_set (J, i, 2, diff*A*e/(w*w));
+        gsl_matrix_set (J, i, 3, diff*diff*A*e/(w*w*w));
+    }
+    return GSL_SUCCESS;
+} 
+
+/** Calculates Gaussian derivatives and function value in GSL format
+* @param x Input function arguments  
+* @param params Input data
+* @param f Output function value
+* @param J Output derivatives
+* @return A GSL status information
+*/
+int gauss_fdf (const gsl_vector * x, void *params,
+               gsl_vector * f, gsl_matrix * J) {
+    gauss_f (x, params, f);
+    gauss_df (x, params, J);
+    return GSL_SUCCESS;
+} 
 
 
 

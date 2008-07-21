@@ -52,6 +52,17 @@ public:
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
+
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 101.027,0.01);
+    dummy = alg.getProperty("Output y0");
+    TS_ASSERT_DELTA( dummy, -2509.1 ,0.1);
+    dummy = alg.getProperty("Output A");
+    TS_ASSERT_DELTA( dummy, 8618.4 ,0.1);
+    dummy = alg.getProperty("Output w");
+    TS_ASSERT_DELTA( dummy, 10080.6 ,0.1);
+    dummy = alg.getProperty("Output xc");
+    TS_ASSERT_DELTA( dummy, 6349.74 ,0.1);
   }
   
   
