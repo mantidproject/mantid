@@ -133,7 +133,7 @@ namespace Mantid
         throw std::invalid_argument("Regroup: regrouping not possible on point data");
       }
 
-      for(int i=0;i<xoldIndex.size()-1;i++)
+      for(int i=0;i<int(xoldIndex.size()-1);i++)
       {
 
           int n = xoldIndex[i];// start the group
@@ -254,26 +254,15 @@ bool Regroup::hasSameBoundaries(const Workspace_sptr WS)
 
 bool Regroup::areParamsValid(const std::vector<double>& params)
 {
-    struct propCheck
+    if (params.size()/2*2 == params.size() && params.size() == 1) return false;
+    double previous = params[0];
+    for(int i=2;i<int(params.size());i+=2)
     {
-        propCheck():m_i(0),m_result(true){}
-        void operator()(const double& p)
-        {
-            if (!m_i) m_previous = p;
-            else if (m_i/2*2 == m_i)
-            {
-                if (p <= m_previous) m_result = false;
-                m_previous = p;
-            }
-            m_i++;
-        }
-        size_t m_i;
-        double m_previous;
-        bool m_result;
-        operator bool(){return m_result;}
-    };
-    if (params.size()/2*2 == params.size()) return false;
-    return for_each(params.begin(),params.end(),propCheck());
+        if (params[i] <= previous) return false;
+        else
+            previous = params[i];
+    }
+    return true;
 }
 
   } // namespace Algorithm
