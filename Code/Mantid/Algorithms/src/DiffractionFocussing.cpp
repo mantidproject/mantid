@@ -14,6 +14,11 @@
 #include <numeric>
 #include <math.h>
 
+#include <boost/lexical_cast.hpp>
+#define lex_cast( x ) boost::lexical_cast<std::string>( x )
+
+#include <iostream>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -64,24 +69,10 @@ namespace Mantid
       }
 
       //Convert to d-spacing units
-      API::Workspace_sptr outputW = convertUnitsToDSpacing(inputW,outputWorkspaceName);
+      API::Workspace_sptr tmpW = convertUnitsToDSpacing(inputW,"tmp");
 
       //Rebin to a common set of bins
-      RebinWorkspace(outputW);
-
-      //The spectra are grouped according to the grouping file
-
-      // make output Workspace the same type is the input, but with new length of signal array
-      //API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
-
-
-      //copy over the spectrum No and ErrorHelper
-      //boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap = inputW->getSpectraMap();
-      /*for(int hist=0;hist<outputW->getNumberHistograms();hist++)
-      {
-          outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
-          outputW->setErrorHelper(hist,inputW->errorHelper(hist));
-      }*/
+      RebinWorkspace(tmpW);
 
       std::set<int> groupNumbers;
       for(std::multimap<int,int>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
@@ -91,6 +82,8 @@ namespace Mantid
               groupNumbers.insert(d->first);
           }
       }
+
+      std::vector<int> resultIndeces;
       for(std::set<int>::const_iterator g = groupNumbers.begin();g!=groupNumbers.end();g++)
       {
           std::multimap<int,int>::const_iterator from = detectorGroups.lower_bound(*g);
@@ -100,12 +93,18 @@ namespace Mantid
               detectorList.push_back(d->second);
           API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
           childAlg->setPropertyValue("Workspace", "Anonymous");
-          DataObjects::Workspace2D_sptr outputW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputW);
-          childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", outputW2D);
+          DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
+          childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
           childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
           try
           {
               childAlg->execute();
+              // get the index of the combined spectrum
+              int ri = childAlg->getProperty("ResultIndex");
+              if (ri >= 0) 
+              {
+                  resultIndeces.push_back(ri);
+              }
           }
           catch(...)
           {
@@ -114,6 +113,80 @@ namespace Mantid
           }
       }
 
+      API::Axis *spectraAxis = tmpW->getAxis(1);
+      int newHistNumber = 0;
+      int oldHistNumber = tmpW->getNumberHistograms();
+      int newSize = tmpW->blocksize();
+
+      //Combine left-over spectra into one
+      std::vector<int> indexList;
+      for(int i=0;i<oldHistNumber;i++)
+          if ( spectraAxis->spectraNo(i) >= 0 && 
+              find(resultIndeces.begin(),resultIndeces.end(),i) == resultIndeces.end())
+          {
+              indexList.push_back(i);
+          }
+
+      if (indexList.size() > 0)
+      {
+          g_log.warning()<<"Remaining "+boost::lexical_cast<std::string>(indexList.size())+
+              " spectra are grouped into one";
+          API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
+          childAlg->setPropertyValue("Workspace", "Anonymous");
+          DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
+          childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
+          childAlg->setProperty< std::vector<int> >("WorkspaceIndexList",indexList);
+          try
+          {
+              childAlg->execute();
+              // get the index of the combined spectrum
+              int ri = childAlg->getProperty("ResultIndex");
+              if (ri >= 0) resultIndeces.push_back(ri);
+          }
+          catch(...)
+          {
+              g_log.error()<<"Unable to successfully run GroupDetectors sub-algorithm";
+              throw std::runtime_error("Unable to successfully run GroupDetectors sub-algorithm");
+          }
+      }//*/
+
+      for(int i=0;i<oldHistNumber;i++)
+      {
+          if ( spectraAxis->spectraNo(i) >= 0) newHistNumber++;
+      }
+
+      API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,newHistNumber,newSize+1,newSize);
+      API::Axis *spectraAxisNew = outputW->getAxis(1);
+
+      for(int hist=0;hist<resultIndeces.size();hist++)
+      {
+          int i = resultIndeces[hist];
+          int spNo = spectraAxis->spectraNo(i);
+          std::vector<double> &tmpY = tmpW->dataY(i);
+          std::vector<double> &outY = outputW->dataY(hist);
+          std::vector<double> &tmpX = tmpW->dataX(i);
+          std::vector<double> &outX = outputW->dataX(hist);
+          outY.assign(tmpY.begin(),tmpY.end());
+          outX.assign(tmpX.begin(),tmpX.end());
+          spectraAxisNew->setValue(hist,spNo);
+          spectraAxis->setValue(i,-1);
+      }
+      int hist = resultIndeces.size();
+      for(int i=0;i<oldHistNumber;i++)
+      {
+          int spNo = spectraAxis->spectraNo(i);
+          if ( spNo >= 0)
+          {
+              std::vector<double> &tmpY = tmpW->dataY(i);
+              std::vector<double> &outY = outputW->dataY(hist);
+              std::vector<double> &tmpX = tmpW->dataX(i);
+              std::vector<double> &outX = outputW->dataX(hist);
+              outY.assign(tmpY.begin(),tmpY.end());
+              outX.assign(tmpX.begin(),tmpX.end());
+              spectraAxisNew->setValue(hist,spNo);
+              hist++;
+          }
+      }
 
       //outputW->isDistribution(dist);
       // Assign it to the output workspace property
@@ -239,7 +312,8 @@ namespace Mantid
             int n,udet,sel,group;
             double offset;
             istr>>n>>udet>>offset>>sel>>group;
-            detectorGroups.insert(std::make_pair(group,udet));
+            if (sel)
+                detectorGroups.insert(std::make_pair(group,udet));
         }
         return true;
     }

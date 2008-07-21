@@ -35,7 +35,7 @@ public:
     QStringList getWorkspaceNames();
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
-    Mantid::API::Workspace_sptr LoadIsisRawFile(const QString& fileName, const QString& workspaceName);
+    Mantid::API::Workspace_sptr LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max);
     Mantid::API::IAlgorithm* CreateAlgorithm(const QString& algName);
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
@@ -68,11 +68,11 @@ public:
 
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
-    // Updates Mantid user interfase
 
 public slots:
 
     void tst();
+    // Updates Mantid user interfase
     void update();
     void loadWorkspace();
     void deleteWorkspace();
@@ -81,6 +81,7 @@ public slots:
     void copyRowToGraph();
     void copyRowToGraphErr();
     void executeAlgorithm();
+    void executeAlgorithm(QString algName, int version);
     void copyDetectorsToTable();
 public:
     ApplicationWindow *m_appWindow;
@@ -91,6 +92,7 @@ public:
     ScriptingEnv *aw_scriptEnv;
     QMenu *aw_view;
     QAction *aw_actionShowUndoStack;
+    QTextEdit *aw_results;
 
     MantidDockWidget *m_exploreMantid;
     AlgorithmDockWidget *m_exploreAlgorithms;

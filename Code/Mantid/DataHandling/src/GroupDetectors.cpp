@@ -35,6 +35,7 @@ void GroupDetectors::init()
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty(new ArrayProperty<int>("SpectraList"));
   declareProperty(new ArrayProperty<int>("DetectorList"));
+  declareProperty("ResultIndex",-1);
 }
 
 void GroupDetectors::exec()
@@ -45,6 +46,7 @@ void GroupDetectors::exec()
   Property *wil = getProperty("WorkspaceIndexList");
   Property *sl = getProperty("SpectraList");
   Property *dl = getProperty("DetectorList");
+
   // Could create a Validator to replace the below
   if ( wil->isDefault() && sl->isDefault() && dl->isDefault() )
   {
@@ -132,6 +134,7 @@ void GroupDetectors::exec()
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
   const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
+  setProperty("ResultIndex",firstIndex);
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
   {
     const int currentIndex = indexList[i+1];

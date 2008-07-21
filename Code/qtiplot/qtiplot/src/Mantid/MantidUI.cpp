@@ -37,6 +37,7 @@ void ApplicationWindow::initMantid()
     mantidUI->aw_scriptEnv = scriptEnv;
     mantidUI->aw_view = view;
     mantidUI->aw_actionShowUndoStack = actionShowUndoStack;
+    mantidUI->aw_results = results;
 
     mantidUI->init();
 }
@@ -68,7 +69,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
 void MantidUI::init()
 {
     FrameworkManager::Instance();
-    MantidLog::connect(appWindow());
+//    MantidLog::connect(appWindow());
+    MantidLog::connect(aw_results);
 
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
 	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
@@ -113,7 +115,7 @@ IAlgorithm* MantidUI::CreateAlgorithm(const QString& algName)
 	return alg;
 }
 
-Workspace_sptr MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName)
+Workspace_sptr MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max)
 {
 	//Check workspace does not exist
 	if (!AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
@@ -121,6 +123,11 @@ Workspace_sptr MantidUI::LoadIsisRawFile(const QString& fileName,const QString& 
 		IAlgorithm* alg = CreateAlgorithm("LoadRaw");
 		alg->setPropertyValue("Filename", fileName.toStdString());
 		alg->setPropertyValue("OutputWorkspace", workspaceName.toStdString());
+        if ( !spectrum_min.isEmpty() && !spectrum_max.isEmpty() )
+        {
+		    alg->setPropertyValue("spectrum_min", spectrum_min.toStdString());
+		    alg->setPropertyValue("spectrum_max", spectrum_max.toStdString());
+        }
 
 		alg->execute();
 
@@ -144,7 +151,10 @@ void MantidUI::loadWorkspace()
 	if (!dlg->getFilename().isEmpty())
 	{	
 		
-		Mantid::API::Workspace_sptr ws = LoadIsisRawFile(dlg->getFilename(), dlg->getWorkspaceName());
+		Mantid::API::Workspace_sptr ws = LoadIsisRawFile(dlg->getFilename(), 
+                                                         dlg->getWorkspaceName(),
+                                                         dlg->getSpectrumMin(),
+                                                         dlg->getSpectrumMax());
 		if (ws.use_count() == 0)
 		{
 			QMessageBox::warning(m_appWindow, tr("Mantid"),
@@ -156,6 +166,8 @@ void MantidUI::loadWorkspace()
 		update();
 
 	}
+
+    //executeAlgorithm("LoadRaw",1);
 }
 
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
@@ -367,7 +379,7 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
          for(int j=0;j<m->numCols();j++)
          {
              if (i == i0) t->setCell(j,0,m->dataX(i,j));
-             t->setCell(j,kY,m->cell(i,j)); 
+             t->setCell(j,kY,m->dataY(i,j)); 
              if (errs) t->setCell(j,kErr,m->dataE(i,j));
          }
      }
@@ -399,7 +411,8 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
      for(int i=0;i<m->numRows();i++)
      {
          
-         int currentSpec = spectraAxis->spectraNo(i);
+         int ws_index = m->workspaceIndex(i);
+         int currentSpec = spectraAxis->spectraNo(ws_index);
          
          int detID = 0;
          try
@@ -411,7 +424,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          {
              detID = 0;
          }
-         t->setCell(i,0,i); 
+         t->setCell(i,0,ws_index); 
          t->setColName(0,"Index");
 
          t->setCell(i,1,currentSpec); 
@@ -461,6 +474,11 @@ void MantidUI::executeAlgorithm()
         QMessageBox::warning(appWindow(),"Mantid","Please select an algorithm");
         return;
     }
+    executeAlgorithm(algName, version);
+}
+
+void MantidUI::executeAlgorithm(QString algName, int version)
+{
 
     Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>
           (Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString(),version));

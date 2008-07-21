@@ -120,7 +120,7 @@ QDockWidget(w)
 
     QFrame *f = new QFrame(this);
 
-    m_tree = new AlgorithmTreeWidget(f);
+    m_tree = new AlgorithmTreeWidget(f,mui);
     m_tree->setHeaderLabel("Algorithms");
 
     QHBoxLayout * buttonLayout = new QHBoxLayout();
@@ -219,5 +219,18 @@ void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e)
     drag->setMimeData(mimeData);
 
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
+}
+
+void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    QString algName;
+    int version;
+    m_mantidUI->getSelectedAlgorithm(algName,version);
+    if ( ! algName.isEmpty() )
+    {
+        m_mantidUI->executeAlgorithm(algName, version);
+    }
+
+    return QTreeWidget::mouseDoubleClickEvent(e);
 }
 

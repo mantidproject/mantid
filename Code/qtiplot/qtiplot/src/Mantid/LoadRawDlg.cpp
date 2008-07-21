@@ -18,7 +18,7 @@ loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspa
 	browseButton = new QPushButton(tr("Browse"));
 	loadButton = new QPushButton(tr("Load"));
 	cancelButton = new QPushButton(tr("Cancel"));
-	
+
 	connect(browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()));
 	connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 	connect(loadButton, SIGNAL(clicked()), this, SLOT(loadClicked()));
@@ -38,9 +38,20 @@ loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspa
 	bottomRowLayout->addWidget(cancelButton);
 	bottomRowLayout->addWidget(loadButton);
 	
-	QVBoxLayout *mainLayout = new QVBoxLayout;
+	QGridLayout *paramsLayout = new QGridLayout;
+    QLabel *minSpLabel = new QLabel("Starting spectrum");
+    minSpLineEdit = new QLineEdit;
+    paramsLayout->addWidget(minSpLabel,0,0);
+    paramsLayout->addWidget(minSpLineEdit,0,1);
+    QLabel *maxSpLabel = new QLabel("Ending spectrum");
+    maxSpLineEdit = new QLineEdit;
+    paramsLayout->addWidget(maxSpLabel,1,0);
+    paramsLayout->addWidget(maxSpLineEdit,1,1);
+
+    mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(topRowLayout);
 	mainLayout->addLayout(middleRowLayout);
+	mainLayout->addLayout(paramsLayout);
 	mainLayout->addLayout(bottomRowLayout);
 	
 	setLayout(mainLayout);
@@ -79,6 +90,8 @@ void loadRawDlg::loadClicked()
 	{
 		fileName = lineFile->text();
 		workspaceName = lineName->text();
+        spectrum_min = minSpLineEdit->text();
+        spectrum_max = maxSpLineEdit->text();
 		close();
 	}
 }

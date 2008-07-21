@@ -57,11 +57,13 @@ class AlgorithmTreeWidget:public QTreeWidget
 {
     Q_OBJECT
 public:
-    AlgorithmTreeWidget(QWidget *w):QTreeWidget(w){}
+    AlgorithmTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui){}
     void mousePressEvent (QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent *e);
 private:
     QPoint m_dragStartPosition;
+    MantidUI *m_mantidUI;
 };
 
 #endif

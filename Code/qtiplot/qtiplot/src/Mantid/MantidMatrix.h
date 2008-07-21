@@ -5,6 +5,7 @@
 #include <QTableView>
 #include <QPrinter>
 #include <QMessageBox>
+#include <QAction>
 
 #include "MantidAPI/Workspace.h"
 #include "../UserFunction.h"
@@ -24,6 +25,7 @@ class MantidMatrix;
 class ApplicationWindow;
 class Graph3D;
 class MultiLayer;
+class QTabWidget;
 
 class MantidMatrixFunction: public UserHelperFunction
 {
@@ -52,6 +54,7 @@ public:
     int numRows()const{return m_rows;}
     int numCols()const{return m_cols;}
 	double dataX(int row, int col) const;
+	double dataY(int row, int col) const;
 	double dataE(int row, int col) const;
     int indexX(double s)const;
 
@@ -65,6 +68,12 @@ public:
     void setGraph1D(Graph* g);
     void removeWindow();
     void getSelectedRows(int& i0,int& i1);
+
+    int workspaceIndex(int row){return row + m_startRow;}
+    bool yShown(){return m_tabs->currentIndex() == 0;}
+    QTableView *activeView(){return yShown()? m_table_view : m_table_viewX;}
+    MantidMatrixModel *activeModel(){return yShown()? m_model : m_modelX;}
+
 
 public slots:
 
@@ -113,12 +122,17 @@ public slots:
 
 	int verticalHeaderWidth(){return m_table_view->verticalHeader()->width();}
 
+    void showX();
+
 protected:
 
     ApplicationWindow *m_appWindow;
     Mantid::API::Workspace_sptr m_workspace;
+    QTabWidget *m_tabs;
     QTableView *m_table_view;
+    QTableView *m_table_viewX;
     MantidMatrixModel *m_model;
+    MantidMatrixModel *m_modelX;
     QColor m_bk_color;
     const char **m_matrix_icon;
 	double x_start, //!< X value corresponding to column 1
@@ -134,31 +148,54 @@ protected:
 	//! Column width in pixels;
 	int m_column_width;
     MantidMatrixFunction m_funct;
+
+    QAction *m_actionShowX;
 };
 
 class MantidMatrixModel:public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    MantidMatrixModel(QObject *parent, Mantid::API::Workspace_sptr ws, int rows,int cols,int start=-1, int end=-1, bool filter=false, double maxv=0):
-      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols)
+    MantidMatrixModel(QObject *parent, 
+                      Mantid::API::Workspace_sptr ws, 
+                      int rows,
+                      int cols,
+                      int start, 
+                      int end, 
+                      bool filter, 
+                      double maxv,
+                      bool shX=false):
+      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols),m_showX(shX)
       {
           m_startRow = start >= 0? start : 0;
           m_endRow = end >= m_startRow? end : m_workspace->getNumberHistograms();
+          if (ws->blocksize() != 0)
+              m_colNumCorr = ws->dataX(0).size() != ws->dataY(0).size() ? 1 : 0;
+          else
+              m_colNumCorr = 0;
       }
     int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
-    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_cols;}
+    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_showX? m_cols + m_colNumCorr : m_cols;}
     double data(int row, int col) const
     {
-        double val = m_workspace->dataY(row + m_startRow)[col];
-        if (m_filter && val > m_maxv) val = m_maxv;
+        double val;
+        if (m_showX)
+        {
+            val = m_workspace->dataX(row + m_startRow)[col];
+        }
+        else
+        {
+            val = m_workspace->dataY(row + m_startRow)[col];
+            if (m_filter && val > m_maxv) val = m_maxv;
+        }
         return val;
     }
     QVariant data(const QModelIndex &index, int role) const
     {
         
         if (role != Qt::DisplayRole) return QVariant();
-        double val = m_workspace->dataY(index.row() + m_startRow)[index.column()];
+        double val = m_showX? m_workspace->dataX(index.row() + m_startRow)[index.column()]:
+                              m_workspace->dataY(index.row() + m_startRow)[index.column()];
         return QVariant(m_locale.toString(val,'f',6));
     }
     Qt::ItemFlags flags(const QModelIndex & index ) const
@@ -168,14 +205,18 @@ public:
 	    else
             return Qt::ItemIsEnabled;
     }
+    bool showX(){return m_showX;}
+    void showX(bool on){m_showX = on;}
 
 private:
     Mantid::API::Workspace_sptr m_workspace;
-    int m_startRow;
+    int m_startRow; // starting workspace index to display
     int m_endRow;
     bool m_filter;
     double m_maxv;
     int m_rows,m_cols;
+    bool m_showX;// if true display bin boundaries indstead of Y values
+    int m_colNumCorr;// = 1 for histograms and = 0 for point data
     QLocale m_locale;
 };
 

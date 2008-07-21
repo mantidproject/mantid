@@ -87,7 +87,11 @@ void WorkspaceMgr::addWorkspaceClicked()
 	if (!dlg->getFilename().isEmpty())
 	{	
 		
-		Mantid::API::Workspace_sptr ws = static_cast<ApplicationWindow*>(m_parent)->mantidUI->LoadIsisRawFile(dlg->getFilename(), dlg->getWorkspaceName());
+		Mantid::API::Workspace_sptr ws = 
+            static_cast<ApplicationWindow*>(m_parent)->mantidUI->LoadIsisRawFile(dlg->getFilename(), 
+                                                                                 dlg->getWorkspaceName(),
+                                                                                 dlg->getSpectrumMin(),
+                                                                                 dlg->getSpectrumMax());
 		if (ws.use_count() == 0)
 		{
 			QMessageBox::warning(this, tr("Mantid"),

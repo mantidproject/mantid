@@ -27,9 +27,11 @@
 #include <QSvgGenerator>
 #include <QFile>
 #include <QUndoStack>
+#include <QCheckBox>
+#include <QTabWidget>
 
 #include <stdlib.h>
-#include <stdio.h>
+#include <iostream>
 
 MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end, bool filter, double maxv)
 : MdiSubWindow(label, parent, name, 0),m_workspace(ws),m_funct(this)
@@ -88,13 +90,50 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
 	vHeader->setMovable(false);
 	vHeader->setResizeMode(QHeaderView::ResizeToContents);
 
-    setWidget(m_table_view);
+//--------------------------
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,true);
+
+    m_table_viewX = new QTableView();
+    m_table_viewX->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    m_table_viewX->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
+    m_table_viewX->setModel(m_modelX);
+    m_table_viewX->setEditTriggers(QAbstractItemView::DoubleClicked);
+    m_table_viewX->setFocusPolicy(Qt::StrongFocus);
+    //m_table_viewX->setFocus();
+
+	// set header properties
+	hHeader = (QHeaderView*)m_table_viewX->horizontalHeader();
+	hHeader->setMovable(false);
+	hHeader->setResizeMode(QHeaderView::Fixed);
+	hHeader->setDefaultSectionSize(m_column_width);
+
+    cols = numCols();
+	for(int i=0; i<cols; i++)
+		m_table_viewX->setColumnWidth(i, m_column_width);
+
+	vHeader = (QHeaderView*)m_table_viewX->verticalHeader();
+	vHeader->setMovable(false);
+	vHeader->setResizeMode(QHeaderView::ResizeToContents);
+
+    pal = m_table_viewX->palette();
+	pal.setColor(QColorGroup::Base, m_bk_color);
+	m_table_viewX->setPalette(pal);
+
+    m_tabs = new QTabWidget(this);
+    m_tabs->insertTab(0,m_table_view,"Y values");
+    m_tabs->insertTab(1,m_table_viewX,"X values");
+    setWidget(m_tabs);
+
+//--------------------------
+
+    //setWidget(m_table_view);
+
     // recreate keyboard shortcut
 	//d_select_all_shortcut = new QShortcut(QKeySequence(tr("Ctrl+A", "Matrix: select all")), this);
 	//connect(d_select_all_shortcut, SIGNAL(activated()), d_table_view, SLOT(selectAll()));
 
     setGeometry(50, 50, QMIN(5, numCols())*m_table_view->horizontalHeader()->sectionSize(0) + 55,
-                (QMIN(10,numRows())+1)*m_table_view->verticalHeader()->sectionSize(0));
+                (QMIN(10,numRows())+1)*m_table_view->verticalHeader()->sectionSize(0)+100);
 
 	setWindowTitle(name);
 	setName(name);
@@ -110,7 +149,7 @@ double MantidMatrix::cell(int row, int col)
 
 QString MantidMatrix::text(int row, int col)
 {
-    return QString::number(m_model->data(row, col));
+    return QString::number(activeModel()->data(row, col));
 }
 
 void MantidMatrix::setColumnsWidth(int width)
@@ -120,17 +159,21 @@ void MantidMatrix::setColumnsWidth(int width)
 
     m_column_width = width;
     m_table_view->horizontalHeader()->setDefaultSectionSize(m_column_width);
+    m_table_viewX->horizontalHeader()->setDefaultSectionSize(m_column_width);
 
     int cols = numCols();
     for(int i=0; i<cols; i++)
+    {
         m_table_view->setColumnWidth(i, width);
+        m_table_viewX->setColumnWidth(i, width);
+    }
 
 	emit modifiedWindow(this);
 }
 
 void MantidMatrix::copySelection()
 {
-	QItemSelectionModel *selModel = m_table_view->selectionModel();
+    QItemSelectionModel *selModel = activeView()->selectionModel();
 	QString s = "";
 	QString eol = applicationWindow()->endOfLine();
 	if (!selModel->hasSelection()){
@@ -218,7 +261,7 @@ void MantidMatrix::goTo(int row,int col)
 	if(col < 1 || col > numCols())
 		return;
 
-	m_table_view->scrollTo(m_model->index(row - 1, col - 1), QAbstractItemView::PositionAtTop);
+	activeView()->scrollTo(activeModel()->index(row - 1, col - 1), QAbstractItemView::PositionAtTop);
 }
 
 void MantidMatrix::goToRow(int row)
@@ -226,8 +269,8 @@ void MantidMatrix::goToRow(int row)
 	if(row < 1 || row > numRows())
 		return;
 
-	m_table_view->selectRow(row - 1);
-	m_table_view->scrollTo(m_model->index(row - 1, 0), QAbstractItemView::PositionAtTop);
+	activeView()->selectRow(row - 1);
+	activeView()->scrollTo(activeModel()->index(row - 1, 0), QAbstractItemView::PositionAtTop);
 }
 
 void MantidMatrix::goToColumn(int col)
@@ -235,14 +278,22 @@ void MantidMatrix::goToColumn(int col)
 	if(col < 1 || col > numCols())
 		return;
 
-	m_table_view->selectColumn(col - 1);
-	m_table_view->scrollTo(m_model->index(0, col - 1), QAbstractItemView::PositionAtCenter);
+	activeView()->selectColumn(col - 1);
+	activeView()->scrollTo(activeModel()->index(0, col - 1), QAbstractItemView::PositionAtCenter);
 }
 
 double MantidMatrix::dataX(int row, int col) const
 {
     if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
     double res = m_workspace->dataX(row + m_startRow)[col];
+    return res;
+
+}
+
+double MantidMatrix::dataY(int row, int col) const
+{
+    if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
+    double res = m_workspace->dataY(row + m_startRow)[col];
     return res;
 
 }
@@ -336,6 +387,7 @@ QwtDoubleRect MantidMatrix::boundingRect()
 MantidMatrix::~MantidMatrix()
 {
 	delete m_model;
+    delete m_modelX;
 }
 
 //----------------------------------------------------------------------------
@@ -363,7 +415,7 @@ double MantidMatrixFunction::operator()(double x, double y)
     if (jj >= 0) j = jj;
 
     if (i >= 0 && i < m_matrix->numRows() && j >=0 && j < m_matrix->numCols())
-	    return m_matrix->cell(i,j);
+	    return m_matrix->dataY(i,j);
     else
 	    return 0.0;
 }
@@ -498,7 +550,8 @@ void MantidMatrix::removeWindow()
 void MantidMatrix::getSelectedRows(int& i0,int& i1)
 {
     i0 = i1 = -1;
-	QItemSelectionModel *selModel = m_table_view->selectionModel();
+    QTableView *tv = activeView();
+	QItemSelectionModel *selModel = activeView()->selectionModel();
 	if (!selModel || !selModel->hasSelection())
 		return;
 
@@ -513,5 +566,12 @@ void MantidMatrix::getSelectedRows(int& i0,int& i1)
             }else
                 i1++;
 	}
+}
+
+void MantidMatrix::showX()
+{
+    m_model->showX( !m_model->showX() );
+    //m_table_view->repaint();
+    repaint();
 }
 

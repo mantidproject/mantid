@@ -56,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl_d.lib cblas_d.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl.lib cblas.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Regroup.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
 				>
 			</File>
@@ -293,6 +297,14 @@
 			</File>
 			<File
 				RelativePath=".\test\RebunchTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Regroup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RegroupTest.h"
 				>
 			</File>
 			<File

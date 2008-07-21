@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 
 class ApplicationWindow;
+class QTextEdit;
 
 class MantidLog: public AbstractMantidLog
 {
@@ -18,9 +19,21 @@ public:
         {
             s_Instance.reset(new MantidLog);
             s_appWin = w;
+            s_logEdit = 0;
             s_Instance->AbstractMantidLog::connect();
         }
         if (w) s_appWin = w;
+    }
+    static void connect(QTextEdit* te)
+    {
+        if (!s_Instance)
+        {
+            s_Instance.reset(new MantidLog);
+            s_appWin = 0;
+            s_logEdit = te;
+            s_Instance->AbstractMantidLog::connect();
+        }
+        if (te) s_logEdit = te;
     }
     static long count()
     {
@@ -35,6 +48,7 @@ private:
 
     static boost::shared_ptr<MantidLog> s_Instance;
     static ApplicationWindow* s_appWin;
+    static QTextEdit* s_logEdit;
 
 };
 

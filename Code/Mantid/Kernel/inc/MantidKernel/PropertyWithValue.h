@@ -129,7 +129,13 @@ private:
       {
         try
         {
-          vec.push_back( boost::lexical_cast<T>( *it ) );
+          // remove leading and trailing spaces
+          size_t i0 = it->find_first_not_of(" \t");
+          size_t i1 = it->find_last_not_of(" \t");
+          if (i0 == std::string::npos) throw boost::bad_lexical_cast();
+          std::string str = it->substr(i0,i1-i0+1);
+
+          vec.push_back( boost::lexical_cast<T>( str ) );
         }
         catch (boost::bad_lexical_cast e)
         {
