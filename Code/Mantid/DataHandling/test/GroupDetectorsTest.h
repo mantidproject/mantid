@@ -85,7 +85,7 @@ public:
     TS_ASSERT( gd.isInitialized() );
 
     std::vector<Property*> props = gd.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 4 )
+    TS_ASSERT_EQUALS( props.size(), 5 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
