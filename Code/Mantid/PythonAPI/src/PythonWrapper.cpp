@@ -16,6 +16,8 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 // Using =======================================================================
 using namespace boost::python;
@@ -83,6 +85,10 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     int size() const {
         return call_method< int >(py_self, "size");
     }
+    
+    //~ boost::shared_ptr<Mantid::API::SpectraDetectorMap> getSpectraMap() const {
+        //~ return call_method< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >(py_self, "getSpectraMap");
+    //~ }
 
     const int getNumberHistograms() const {
         return call_method< const int >(py_self, "getNumberHistograms");
@@ -117,13 +123,6 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
 
 struct Mantid_Kernel_PropertyManager_Wrapper: Mantid::Kernel::PropertyManager
 {
-    //~ void declareProperty(Mantid::Kernel::Property* p0) {
-        //~ call_method< void >(py_self, "declareProperty", p0);
-    //~ }
-
-    //~ void default_declareProperty(Mantid::Kernel::Property* p0) {
-        //~ Mantid::Kernel::PropertyManager::declareProperty(p0);
-    //~ }
 
     void setProperties(const std::string& p0) {
         call_method< void >(py_self, "setProperties", p0);
@@ -314,6 +313,29 @@ struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
     PyObject* py_self;
 };
 
+struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
+{
+    Mantid_Geometry_IDetector_Wrapper(PyObject* py_self_, const Mantid::Geometry::IDetector& p0):
+        Mantid::Geometry::IDetector(p0), py_self(py_self_) {}
+
+    Mantid_Geometry_IDetector_Wrapper(PyObject* py_self_):
+        Mantid::Geometry::IDetector(), py_self(py_self_) {}
+
+    int getID() const {
+        return call_method< int >(py_self, "getID");
+    }
+
+    bool isDead() const {
+        return call_method< bool >(py_self, "isDead");
+    }
+
+    void markDead() {
+        call_method< void >(py_self, "markDead");
+    }
+
+    PyObject* py_self;
+};
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1_2, createAlgorithm, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2_3, createAlgorithm, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2_3, execute, 2, 3)
@@ -345,6 +367,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
+	register_ptr_to_python< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >();
 
 	//Namespace Functions
         def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
@@ -397,6 +420,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("initialize", &Mantid::API::Workspace::initialize)
         .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
         .def("size", pure_virtual(&Mantid::API::Workspace::size))
+	.def("getSpectraMap", &Mantid::API::Workspace::getSpectraMap)
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
         .def("setTitle", &Mantid::API::Workspace::setTitle)
         .def("setComment", &Mantid::API::Workspace::setComment)
@@ -460,6 +484,22 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	.def("getAlgorithmHistories", (const std::vector<Mantid::API::AlgorithmHistory,std::allocator<Mantid::API::AlgorithmHistory> >& (Mantid::API::WorkspaceHistory::*)() const)&Mantid::API::WorkspaceHistory::getAlgorithmHistories, return_value_policy< copy_const_reference >())
         //.def("printSelf", &Mantid::API::WorkspaceHistory::printSelf, Mantid_API_WorkspaceHistory_printSelf_overloads_1_2())
 	;
+	
+	//IDetector Class
+	class_< Mantid::Geometry::IDetector, boost::noncopyable, Mantid_Geometry_IDetector_Wrapper >("IDetector", no_init)
+        .def("getID", pure_virtual(&Mantid::Geometry::IDetector::getID))
+        .def("isDead", pure_virtual(&Mantid::Geometry::IDetector::isDead))
+        .def("markDead", pure_virtual(&Mantid::Geometry::IDetector::markDead))
+        ;
+	
+	//SpectraDetectorMap Class
+	class_< Mantid::API::SpectraDetectorMap, boost::noncopyable >("SpectraDetectorMap", no_init)
+        .def("remap", &Mantid::API::SpectraDetectorMap::remap)
+        .def("ndet", &Mantid::API::SpectraDetectorMap::ndet)
+        .def("getDetectors", &Mantid::API::SpectraDetectorMap::getDetectors)
+        .def("getDetector", &Mantid::API::SpectraDetectorMap::getDetector)
+        .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
+        ;
 
 }
 

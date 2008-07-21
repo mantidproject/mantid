@@ -15,6 +15,18 @@ def TestLoadRaw():
 	else:
 		print "RESULT: TestLoadRaw FAILED"
 		return "RESULT: TestLoadRaw FAILED"
+		
+def TestGetSpectraMap():
+	mgr = libMantidPythonAPI.FrameworkManager()
+	ws = mgr.getWorkspace("MariWorkspace1")
+	sdm = ws.getSpectraMap()
+	
+	if sdm.ndet(0) == 0 and sdm.ndet(1) == 1:
+		print "RESULT: TestGetSpectraMap PASSED"
+		return "RESULT: TestGetSpectraMap PASSED"
+	else:
+		print "RESULT: TestGetSpectraMap FAILED"
+		return "RESULT: TestGetSpectraMap FAILED"
 
 def TestGetAlgorithmNames():
 	algs = libMantidPythonAPI.getAlgorithmNames()
@@ -99,6 +111,7 @@ def TestDeleteWorkspace():
 results = []
 
 results.append(TestLoadRaw())
+results.append(TestGetSpectraMap())
 results.append(TestGetAlgorithmNames())
 results.append(TestGetWorkspaceNames())
 results.append(TestWorkspaceHistory())

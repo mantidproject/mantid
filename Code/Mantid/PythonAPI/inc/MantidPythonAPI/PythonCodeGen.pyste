@@ -4,7 +4,7 @@
 #set_policy(PI.GetEData, return_value_policy(manage_new_object))
 #set_policy(PI.CreateAlgorithm, return_value_policy(manage_new_object))
 
-#WS = Class("Mantid::API::Workspace", "Workspace.h")
+WS = Class("Mantid::API::Workspace", "Workspace.h")
 #set_policy(WS.dataX, return_value_policy(manage_new_object))
 #set_policy(WS.dataY, return_value_policy(manage_new_object))
 #set_policy(WS.dataE, return_value_policy(manage_new_object))
@@ -14,4 +14,14 @@
 #set_policy(FM.execute, return_value_policy(manage_new_object))
 #set_policy(FM.getWorkspace, return_value_policy(manage_new_object))
 
-ALG = Class("Mantid::API::Algorithm", "Algorithm.h")
+#ALG = Class("Mantid::API::Algorithm", "Algorithm.h")
+
+#PM = Class("Mantid::Kernel::PropertyManager", "PropertyManager.h")
+
+#PM = Class("Mantid::Kernel::Property", "Property.h")
+#set_policy(PM.type_info, return_value_policy(manage_new_object))
+
+#D = Class("Mantid::Geometry::IDetector", "IDetector.h")
+
+#SDM = Class("Mantid::API::SpectraDetectorMap", "SpectraDetectorMap.h")
+

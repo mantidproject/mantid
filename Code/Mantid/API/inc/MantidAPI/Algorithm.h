@@ -112,6 +112,7 @@ public:
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual std::string getPropertyValue(const std::string &name) const;
   // End of IAlgorithm methods
+  using Kernel::PropertyManager::getProperty;
 
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
