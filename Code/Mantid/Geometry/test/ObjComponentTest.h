@@ -180,6 +180,29 @@ public:
     ObjComponent B("noShape");
     TS_ASSERT_THROWS( B.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
   }
+void testBoundingBoxCappedCylinder()
+  {
+    // Check that getBoundingBox transforms input guess to Object coordinates and
+    // result back to ObjComponent
+    ObjComponent A("ocyl", createCappedCylinder());
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+	const double big=1e6;
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=15; ymax=15; zmax=3;
+	xmin=5;  ymin=-5; zmin=-3;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_DELTA(xmax,10.5,1e-5);
+    // Add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    A.setParent(&parent);
+	// note that input values are ignored in this case as cached results used.
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	// consistent with the solid angle results
+    TS_ASSERT_DELTA(zmax,-6.8,1e-5);
+    TS_ASSERT_DELTA(zmin,-11.2,1e-5);
+  }
+
 
 private:
   boost::shared_ptr<Object> createCappedCylinder()

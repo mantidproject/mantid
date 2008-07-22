@@ -102,6 +102,68 @@ double ObjComponent::solidAngle(const V3D& observer)
   return shape->solidAngle( factorOutComponentPosition(observer) );
 }
 
+	/**
+     * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
+	 * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
+	 * The returned BB will be the frame of the ObjComponent and may not be optimal.
+	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the 
+	 * object and returns them back in max and min points. Cached values used after first call.
+	 *
+	 * @param xmax :: Maximum value for the bounding box in x direction
+	 * @param ymax :: Maximum value for the bounding box in y direction
+	 * @param zmax :: Maximum value for the bounding box in z direction
+	 * @param xmin :: Minimum value for the bounding box in x direction
+	 * @param ymin :: Minimum value for the bounding box in y direction
+	 * @param zmin :: Minimum value for the bounding box in z direction
+	 */
+void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+{
+  // If the form of this component is not defined, throw NullPointerException
+  if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
+  // transform input box and find new bounds
+  Geometry::V3D V0(xmin,ymin,zmin),V1(xmin,ymin,zmax),V2(xmin,ymax,zmin),V3(xmin,ymax,zmax),
+                V4(xmax,ymin,zmin),V5(xmax,ymin,zmax),V6(xmax,ymax,zmin),V7(xmax,ymax,zmax);
+  std::vector<V3D> points;
+  points.push_back(V0); points.push_back(V1); points.push_back(V2); points.push_back(V3);
+  points.push_back(V4); points.push_back(V5); points.push_back(V6); points.push_back(V7);
+  std::vector<V3D>::const_iterator vc;
+  Geometry::V3D maxT(-DBL_MAX,-DBL_MAX,-DBL_MAX);
+  Geometry::V3D minT(DBL_MAX,DBL_MAX,DBL_MAX);
+  for(vc=points.begin();vc!=points.end();vc++)
+  {
+     Geometry::V3D pt=takeOutRotation( (*vc) - this->getPos() );
+     for(int i=0;i<3;i++)
+     {
+        if(maxT[i]<pt[i]) maxT[i]=pt[i];
+        if(minT[i]>pt[i]) minT[i]=pt[i];
+     }
+  }
+  // pass bounds to getBoundingBox
+  shape->getBoundingBox(maxT[0],maxT[1],maxT[2],minT[0],minT[1],minT[2]);
+  // transform result back and find new bounds by transforming all corner points and finding min/max box
+  Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
+                v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
+  points.clear();
+  points.push_back(v0); points.push_back(v1); points.push_back(v2); points.push_back(v3);
+  points.push_back(v4); points.push_back(v5); points.push_back(v6); points.push_back(v7);
+  maxT[0]=-DBL_MAX;maxT[1]=-DBL_MAX;maxT[2]=-DBL_MAX;
+  minT[0]=DBL_MAX; minT[1]=DBL_MAX; minT[2]=DBL_MAX;
+  Quat Rotate = this->getRotation();
+  for(vc=points.begin();vc!=points.end();vc++)
+  {
+     Geometry::V3D pt= (*vc);
+	 Rotate.rotate(pt);
+     pt+=this->getPos();
+     for(int i=0;i<3;i++)
+     {
+        if(maxT[i]<pt[i]) maxT[i]=pt[i];
+        if(minT[i]>pt[i]) minT[i]=pt[i];
+     }
+  }
+  xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
+  xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
+}
+
 /// Find the point that's in the same place relative to the constituent geometrical Object
 /// if the position and rotation introduced by the Component is ignored
 const V3D ObjComponent::factorOutComponentPosition(const V3D& point) const
