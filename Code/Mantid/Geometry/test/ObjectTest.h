@@ -545,8 +545,30 @@ void testFindPointInCube()
     TS_ASSERT_DELTA(pt.X(),1.0,1e-6);
     TS_ASSERT_DELTA(pt.Y(),-21.5,1e-6);
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
-    Object E = createSphere();
+	planes.clear();
+	// Test non axis aligned (AA) case - getPointInObject works because the object is on a principle axis
+	// However, if not on a principle axis then the getBoundingBox fails to find correct minima (maxima are OK)
+	// This is related to use of the complement for -ve surfaces and might be avoided by only using +ve surfaces
+	// for defining non-AA objects. However, BoundingBox is poor for non-AA and needs improvement if these are
+	// common
+	planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
+	planes.push_back("p 0 .70710678118 .70710678118 -1.1"); planes.push_back("p 0 .70710678118 .70710678118 -0.1");
+    planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
+	Object E =createCuboid(planes);
     TS_ASSERT_EQUALS(E.getPointInObject(pt),1);
+    TS_ASSERT_DELTA(pt.X(),0.0,1e-6);
+    TS_ASSERT_DELTA(pt.Y(),-0.1414213562373,1e-6);
+    TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
+	planes.clear();
+	// This test fails to find a point in object, as object not on a principle axis
+	// and getBoundingBox does not give a useful result in this case
+	planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
+	planes.push_back("p 0  .70710678118 .70710678118 -2"); planes.push_back("p 0  .70710678118 .70710678118 -1");
+    planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
+	Object F =createCuboid(planes);
+    TS_ASSERT_EQUALS(F.getPointInObject(pt),0);
+    Object S = createSphere();
+    TS_ASSERT_EQUALS(S.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
 }
 
