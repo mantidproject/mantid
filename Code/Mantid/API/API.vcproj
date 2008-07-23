@@ -382,6 +382,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SpectraDetectorMapTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\Workspace.h"
 				>
 			</File>

@@ -68,6 +68,8 @@ private:
   void init();
   void exec();
   bool hasSameBoundaries(const DataObjects::Workspace2D_sptr WS);
+  void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList, 
+    const DataObjects::Workspace2D_sptr WS);
   
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);

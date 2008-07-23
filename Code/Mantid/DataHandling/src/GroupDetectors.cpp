@@ -79,49 +79,17 @@ void GroupDetectors::exec()
   // appropriate spectra number and adding the indices they are linked to the list to be processed
   if ( ! sl->isDefault() )
   {
-    const std::vector<int> spectraList = getProperty("SpectraList");
-    // Convert the vector of properties into a set for easy searching
-    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
-    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
-    indexList.clear();
-    
-    for (int i = 0; i < WS->getNumberHistograms(); ++i)
-    {
-      int currentSpec = spectraAxis->spectraNo(i);
-      if ( spectraSet.find(currentSpec) != spectraSet.end() )
-      {
-        indexList.push_back(i);
-      }
-    }  
+    std::vector<int> spectraList = getProperty("SpectraList");
+    fillIndexListFromSpectra(indexList,spectraList,WS);
   }// End dealing with spectraList
   else if ( ! dl->isDefault() )
   {// Dealing with DetectorList
     const std::vector<int> detectorList = getProperty("DetectorList");
-    // Convert the vector of properties into a set for easy searching
-    std::set<int> detectorSet(detectorList.begin(),detectorList.end());
-    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
-    indexList.clear();
+    //convert from detectors to spectra numbers
     boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
-
-    for (int i = 0; i < WS->getNumberHistograms(); ++i)
-    {
-      int currentSpec = spectraAxis->spectraNo(i);
-      if (currentSpec < 0) continue;
-      boost::shared_ptr<Geometry::IDetector> det;
-      try
-      {
-          det = spectraMap->getDetector(currentSpec);
-      }
-      catch(...)
-      {
-          continue;
-      }
-      int detID = det->getID();
-      if ( detectorSet.find(detID) != detectorSet.end() )
-      {
-        indexList.push_back(i);
-      }
-    }  
+    std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
+    //then from spectra numbers to indices
+    fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
 
   if ( indexList.size() == 0 )
@@ -170,6 +138,26 @@ bool GroupDetectors::hasSameBoundaries(const Workspace2D_sptr WS)
         if ( commonSum != std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) )
             return false;
     return true;
+}
+
+void GroupDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList, 
+    const Workspace2D_sptr WS)
+{
+    // Convert the vector of properties into a set for easy searching
+    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+    // Next line means that anything in Clear the index list first
+    indexList.clear();
+    //get the spectra axis
+    Axis *spectraAxis = WS->getAxis(1);
+    
+    for (int i = 0; i < WS->getNumberHistograms(); ++i)
+    {
+      int currentSpec = spectraAxis->spectraNo(i);
+      if ( spectraSet.find(currentSpec) != spectraSet.end() )
+      {
+        indexList.push_back(i);
+      }
+    }   
 }
 
 

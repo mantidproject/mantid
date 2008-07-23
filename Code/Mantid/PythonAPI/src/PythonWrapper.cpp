@@ -498,6 +498,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("ndet", &Mantid::API::SpectraDetectorMap::ndet)
         .def("getDetectors", &Mantid::API::SpectraDetectorMap::getDetectors)
         .def("getDetector", &Mantid::API::SpectraDetectorMap::getDetector)
+        .def("getSpectra", &Mantid::API::SpectraDetectorMap::getSpectra)
         .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
         ;
 
