@@ -356,7 +356,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
 	class_< double_vec >( "DoubleVec" )
 	.def( vector_indexing_suite< double_vec >() )
-	.def("push_back", double_vec::push_back)
+	.def("push_back", &double_vec::push_back)
 	;
 
 	class_< algorithmHistory_vec >( "AlgHistVec" )
