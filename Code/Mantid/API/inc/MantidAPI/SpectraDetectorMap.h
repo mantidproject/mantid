@@ -82,9 +82,9 @@ public:
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map 
   int nElements() const {return _s2dmap.size();}
-private:
   ///Copy Contructor
   SpectraDetectorMap(const SpectraDetectorMap& copy);
+private:
   ///Assignment operator
   SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
   /// insternal spectra detector map instance

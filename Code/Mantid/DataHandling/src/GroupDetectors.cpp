@@ -97,6 +97,8 @@ void GroupDetectors::exec()
       g_log.warning("Nothing to group");
       return;
   }
+
+  WS->copySpectraMap(WS->getSpectraMap());
   
   
   const int vectorSize = WS->blocksize();

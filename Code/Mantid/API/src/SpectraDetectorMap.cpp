@@ -28,8 +28,13 @@ namespace Mantid
     SpectraDetectorMap::SpectraDetectorMap()
     {}
 
-    SpectraDetectorMap::~SpectraDetectorMap()
-    {}
+SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
+{
+    _s2dmap.insert(copy._s2dmap.begin(),copy._s2dmap.end());
+}
+
+SpectraDetectorMap::~SpectraDetectorMap()
+{}
 
     void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries, Instrument* instr)
     {

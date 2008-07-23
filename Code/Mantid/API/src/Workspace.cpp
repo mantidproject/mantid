@@ -87,6 +87,15 @@ void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
 	sptr_spectramap=map;
 }
 
+/** Set the Spectra to a copy DetectorMap
+ *
+ * \param map:: Shared pointer to the SpectraDetectorMap
+ */
+void Workspace::copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
+{
+	sptr_spectramap.reset(new SpectraDetectorMap(*map));
+}
+
 /** Set the instrument
  *
  * \param instr Shared pointer to an instrument.

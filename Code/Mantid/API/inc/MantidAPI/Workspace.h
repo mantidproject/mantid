@@ -79,6 +79,7 @@ public:
   void setComment(const std::string&);
   void setInstrument(const boost::shared_ptr<Instrument>&);
   void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
+  void copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
   void setSample(const boost::shared_ptr<Sample>& sample);
   const std::string& getTitle() const;
   const std::string& getComment() const;
