@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/GaussLeastSquaresFit.h"
+#include "MantidAlgorithms/BackToBackExponentialPeakFit.h"
 #include "MantidDataObjects/Workspace2D.h"
 //#include "MantidAPI/SpectraDetectorMap.h"
 #include <sstream>
@@ -11,6 +11,7 @@
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_sf_erf.h>
 
 namespace Mantid
 {
@@ -18,7 +19,7 @@ namespace Algorithms
 {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(GaussLeastSquaresFit)
+DECLARE_ALGORITHM(BackToBackExponentialPeakFit)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
@@ -27,11 +28,11 @@ using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
 // Get a reference to the logger
-Logger& GaussLeastSquaresFit::g_log = Logger::get("GaussLeastSquaresFit");
+Logger& BackToBackExponentialPeakFit::g_log = Logger::get("BackToBackExponentialPeakFit");
 
 
 /// Initialisation method
-void GaussLeastSquaresFit::init()
+void BackToBackExponentialPeakFit::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
   //declareProperty(new WorkspaceProperty<Work-space2D>("OutputWorkspace","",Direction::Output));
@@ -46,17 +47,19 @@ void GaussLeastSquaresFit::init()
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
   declareProperty("Output Status",""); 
   declareProperty("Output Chi^2/DoF",0.0);
-  declareProperty("Output y0",0.0);
-  declareProperty("Output A",0.0);
-  declareProperty("Output xc",0.0);
-  declareProperty("Output w",0.0);
+  declareProperty("Output I",0.0);
+  declareProperty("Output a",0.0);
+  declareProperty("Output b",0.0);
+  declareProperty("Output c",0.0);
+  declareProperty("Output s",0.0);
+  declareProperty("Output bk",0.0);
 }
 
 /** Executes the algorithm
  * 
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void GaussLeastSquaresFit::exec()
+void BackToBackExponentialPeakFit::exec()
 {
   // Try and retrieve the optional properties
   m_spectrumNumber = getProperty("SpectrumNumber");
@@ -114,7 +117,7 @@ void GaussLeastSquaresFit::exec()
   FitData l_data;
 
   l_data.n = m_maxX - m_minX; 
-  l_data.p = 4; // number of gaussian parameters to fit 
+  l_data.p = 6; // number of gaussian parameters to fit 
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
   l_data.sigma = new double[l_data.n];
@@ -131,21 +134,20 @@ void GaussLeastSquaresFit::exec()
   gsl_vector *initFuncArg; 
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-  gsl_vector_set(initFuncArg, 0, getProperty("Output y0"));
-	gsl_vector_set(initFuncArg, 1, getProperty("Output A"));
-	gsl_vector_set(initFuncArg, 2, getProperty("Output xc"));
-	gsl_vector_set(initFuncArg, 3, getProperty("Output w"));
+	gsl_vector_set(initFuncArg, 0, getProperty("Output I"));
+	gsl_vector_set(initFuncArg, 1, getProperty("Output a"));
+	gsl_vector_set(initFuncArg, 2, getProperty("Output b"));
+	gsl_vector_set(initFuncArg, 3, getProperty("Output c"));
+	gsl_vector_set(initFuncArg, 4, getProperty("Output s"));
+	gsl_vector_set(initFuncArg, 5, getProperty("Output bk"));
 
-
-
-  //guessInitialValues(l_data, initFuncArg);
 
   // set-up GSL least squares container
 
   gsl_multifit_function_fdf f;
-  f.f = &gauss_f;
-  f.df = &gauss_df;
-  f.fdf = &gauss_fdf;
+  f.f = &bTbExpo_f;
+  f.df = &bTbExpo_df;
+  f.fdf = &bTbExpo_fdf;
   f.n = l_data.n;
   f.p = l_data.p;
   f.params = &l_data;
@@ -182,24 +184,25 @@ void GaussLeastSquaresFit::exec()
 
   std::string fisse = gsl_strerror(status);
 
-  g_log.information() << "Attempt to fit: y0+A*sqrt(2/PI)/w*exp(-2*((x-xc)/w)^2)\n" <<
+  g_log.information() << "Attempt to fit: I*(exp(a/2*(a*s^2+2*(x-c)))*erfc((a*s^2+(x-c))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-c)))*erfc((b*s^2-(x-c))/sqrt(s*s^2)))+bk" << "\n" <<
     "Iteration = " << iter << "\n" <<
     "Status = " << gsl_strerror(status) << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
-    "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
-    "; xc = " << gsl_vector_get(s->x,2) << "; w = " << gsl_vector_get(s->x,3) << "\n";
+    "I = " << gsl_vector_get(s->x,0) << "; a = " << gsl_vector_get(s->x,1) <<
+    "; b = " << gsl_vector_get(s->x,2) << "; c = " << gsl_vector_get(s->x,3) <<
+    "; s = " << gsl_vector_get(s->x,4) << "; bk = " << gsl_vector_get(s->x,5) << "\n";
 
 
   // also output summary to properties...
 
   setProperty("Output Status", fisse);
   setProperty("Output Chi^2/DoF", chi*chi / dof);
-  setProperty("Output y0", gsl_vector_get(s->x,0));
-  setProperty("Output A", gsl_vector_get(s->x,1));
-  setProperty("Output xc", gsl_vector_get(s->x,2));
-  setProperty("Output w", gsl_vector_get(s->x,3));
-
-
+  setProperty("Output I", gsl_vector_get(s->x,0));
+  setProperty("Output a", gsl_vector_get(s->x,1));
+  setProperty("Output b", gsl_vector_get(s->x,2));
+  setProperty("Output c", gsl_vector_get(s->x,3));
+  setProperty("Output s", gsl_vector_get(s->x,4));
+  setProperty("Output bk", gsl_vector_get(s->x,5));
 
   // clean up dynamically allocated gsl stuff
 
@@ -214,71 +217,33 @@ void GaussLeastSquaresFit::exec()
   return;  
 }
 
-/** Method which guesses initial parameter values
-* @param data The data to be fitted against  
-* @param param_init Output parameter values
-*/
-/*
-void GaussLeastSquaresFit::guessInitialValues(const FitData& data, gsl_vector* param_init)
-{
-	size_t imin, imax;
-	gsl_stats_minmax_index(&imin, &imax, data.Y, 1, data.n);
 
-	double min_out = data.Y[imin];  // minimum y value
-	double max_out = data.Y[imax];  // maximum y value
-
-  size_t imax_temp;
-  {
-    double* temp = new double[data.n];
- 
-  	for (int i = 0; i < data.n; i++)
-	  	temp[i] = fabs(data.Y[i]);
-
-	  imax_temp = gsl_stats_max_index(temp, 1, data.n); // get the index of the max value in temp
-    delete [] temp;
-  }
-
-	double offset, area;
-	if (imax_temp == imax)
-		offset = min_out;
-	else //reversed bell
-		offset = max_out;
-
-	double xc = data.X[imax_temp];
-	double width = 2.0 * gsl_stats_sd(data.X, 1, data.n);
-
-  double pi_div_2 = 1.57079632679489661923;
-  area = sqrt(pi_div_2)*width*fabs(max_out - min_out);
-
-	gsl_vector_set(param_init, 0, area);   // guess for y0 (background)
-	gsl_vector_set(param_init, 1, xc);     // guess for A 
-	gsl_vector_set(param_init, 2, width);  // guess for xc (where max is)
-	gsl_vector_set(param_init, 3, offset); // guess for standard deviation
-
-  std::cout << area << "  " << xc << "  " << width << "  " << offset << std::endl;
-}
-*/
-
-    /** Gaussian function in GSL format
+/** Gaussian function in GSL format
 * @param x Input function arguments  
 * @param params Input data
 * @param f Output function value
 * @return A GSL status information
 */
-int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
+int bTbExpo_f (const gsl_vector * x, void *params, gsl_vector * f) {
     size_t n = ((struct FitData *)params)->n;
     double *X = ((struct FitData *)params)->X;
     double *Y = ((struct FitData *)params)->Y;
     double *sigma = ((struct FitData *)params)->sigma;
-    double Y0 = gsl_vector_get (x, 0);
-    double A = gsl_vector_get (x, 1);
-    double C = gsl_vector_get (x, 2);
-    double w = gsl_vector_get (x, 3);
+    double I = gsl_vector_get (x, 0);
+    double a = gsl_vector_get (x, 1);
+    double b = gsl_vector_get (x, 2);
+    double c = gsl_vector_get (x, 3);
+    double s = gsl_vector_get (x, 4);
+    double bk = gsl_vector_get (x, 5);
+
     size_t i;
+
+    double s2 = s*s;
     for (i = 0; i < n; i++) {
-        double diff=X[i]-C;
-        double Yi = A*exp(-0.5*diff*diff/(w*w))+Y0;
-        gsl_vector_set (f, i, (Yi - Y[i])/sigma[i]);
+      double diff=X[i]-c;
+      double Yi = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
+                    + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(s*s2)))+bk;
+      gsl_vector_set (f, i, (Yi - Y[i])/sigma[i]);
     }
     return GSL_SUCCESS;
 }
@@ -289,28 +254,46 @@ int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
 * @param J Output derivatives
 * @return A GSL status information
 */
-int gauss_df (const gsl_vector * x, void *params,
+int bTbExpo_df (const gsl_vector * x, void *params,
               gsl_matrix * J) 
 {
     size_t n = ((struct FitData *)params)->n;
     double *X = ((struct FitData *)params)->X;
     double *sigma = ((struct FitData *)params)->sigma;
-    double A = gsl_vector_get (x, 1);
-    double C = gsl_vector_get (x, 2);
-    double w = gsl_vector_get (x, 3);
+    double I = gsl_vector_get (x, 0);
+    double a = gsl_vector_get (x, 1);
+    double b = gsl_vector_get (x, 2);
+    double c = gsl_vector_get (x, 3);
+    double s = gsl_vector_get (x, 4);
     size_t i;
+
+
+    double s2 = s*s;
     for (i = 0; i < n; i++) {
-        // Jacobian matrix J(i,j) = dfi / dxj,	 
-        // where fi = Yi - yi,					
-        // Yi = y=A*exp[-(Xi-xc)^2/(2*w*w)]+B		
-        // and the xj are the parameters (B,A,C,w) 
-        double s = sigma[i];
-        double diff = X[i]-C;
-        double e = exp(-0.5*diff*diff/(w*w))/s;
-        gsl_matrix_set (J, i, 0, 1/s);
-        gsl_matrix_set (J, i, 1, e);
-        gsl_matrix_set (J, i, 2, diff*A*e/(w*w));
-        gsl_matrix_set (J, i, 3, diff*diff*A*e/(w*w*w));
+
+        double diff = X[i]-c;
+
+        double e_a = exp(0.5*a*(a*s2+2*diff));
+        double e_b = exp(0.5*b*(b*s2-2*diff));
+        double erfc_a = gsl_sf_erfc((a*s2+diff)/sqrt(2*s2));
+        double erfc_b = gsl_sf_erfc((b*s2-diff)/sqrt(s*s2));
+
+        // apart from a prefactor terms arising from defivative or argument of erfc's
+        double div_erfc_a = exp(-(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff))*M_SQRT2/M_SQRTPI;
+        double div_erfc_b = exp(-(b*s2-diff)*(b*s2-diff)/(s*s2)+0.5*b*(b*s2-2.0*diff))*2.0*sqrt(s)/M_SQRTPI;
+
+
+        gsl_matrix_set (J, i, 0, (e_a*erfc_a+e_b*erfc_b)/sigma[i]);    // deriv I 
+        gsl_matrix_set (J, i, 1,                                       // deriv a
+          I*( - s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )/sigma[i]);
+        gsl_matrix_set (J, i, 2,                                       // deriv b
+          I*( - div_erfc_b + e_b*(b*s2-diff)*erfc_a )/sigma[i]);
+        gsl_matrix_set (J, i, 3,                                                    // deriv c
+          I*( (div_erfc_a-div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )/sigma[i]);
+        gsl_matrix_set (J, i, 4,                                                    // deriv s
+          I*( - div_erfc_b*(3*diff/s2-b)/s-div_erfc_a*(a-diff/s2) 
+              + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a )/sigma[i]);
+        gsl_matrix_set (J, i, 5, 1/sigma[i]);                                       // deriv bk
     }
     return GSL_SUCCESS;
 } 
@@ -322,10 +305,10 @@ int gauss_df (const gsl_vector * x, void *params,
 * @param J Output derivatives
 * @return A GSL status information
 */
-int gauss_fdf (const gsl_vector * x, void *params,
+int bTbExpo_fdf (const gsl_vector * x, void *params,
                gsl_vector * f, gsl_matrix * J) {
-    gauss_f (x, params, f);
-    gauss_df (x, params, J);
+    bTbExpo_f (x, params, f);
+    bTbExpo_df (x, params, J);
     return GSL_SUCCESS;
 } 
 
