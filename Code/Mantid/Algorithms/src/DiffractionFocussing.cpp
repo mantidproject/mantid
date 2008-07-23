@@ -61,6 +61,8 @@ namespace Mantid
       Workspace_sptr inputW = getProperty("InputWorkspace");
       std::string outputWorkspaceName=getProperty("OutputWorkspace");
 
+      bool dist = inputW->isDistribution();
+
       //do this first to check that a valid file is available before doing any work
       std::multimap<int,int> detectorGroups;// <group, UDET>
       if (!readGroupingFile(groupingFileName, detectorGroups))
@@ -71,8 +73,11 @@ namespace Mantid
       //Convert to d-spacing units
       API::Workspace_sptr tmpW = convertUnitsToDSpacing(inputW,"tmp");
 
-      //Rebin to a common set of bins
+       //Rebin to a common set of bins
       RebinWorkspace(tmpW);
+
+      //setProperty("OutputWorkspace",tmpW);
+      //return;
 
       std::set<int> groupNumbers;
       for(std::multimap<int,int>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
@@ -156,6 +161,10 @@ namespace Mantid
       }
 
       API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,newHistNumber,newSize+1,newSize);
+      // Copy units
+      outputW->getAxis(0)->unit() = tmpW->getAxis(0)->unit();
+      outputW->getAxis(1)->unit() = tmpW->getAxis(1)->unit();
+
       API::Axis *spectraAxisNew = outputW->getAxis(1);
 
       for(int hist=0;hist<resultIndeces.size();hist++)
@@ -188,7 +197,8 @@ namespace Mantid
           }
       }
 
-      //outputW->isDistribution(dist);
+      outputW->isDistribution(dist);
+
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputW);
 

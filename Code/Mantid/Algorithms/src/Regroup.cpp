@@ -103,6 +103,11 @@ namespace Mantid
       }
 
       outputW->isDistribution(dist);
+
+      // Copy units
+      outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
+      outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
+
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",outputW);
 
