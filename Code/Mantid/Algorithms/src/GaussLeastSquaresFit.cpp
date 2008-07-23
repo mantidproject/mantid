@@ -51,18 +51,8 @@ void GaussLeastSquaresFit::init()
   declareProperty("Output Chi^2/DoF",0.0);
   declareProperty("Output y0",0.0);
   declareProperty("Output A",0.0);
-  declareProperty("Output w",0.0);
   declareProperty("Output xc",0.0);
-
-  //declareProperty("MaxIterations",500, mustBePositive->clone());
-
-
-  // to output gaussian fit parameters....
- /* declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
-    "Chi^2/DoF = " << chi*chi / dof << "\n" <<
-    "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
-    "; w = " << gsl_vector_get(s->x,2) << "; xc = " << gsl_vector_get(s->x,3) << "\n";
-    */
+  declareProperty("Output w",0.0);
 }
 
 /** Executes the algorithm
@@ -144,7 +134,14 @@ void GaussLeastSquaresFit::exec()
   gsl_vector *initFuncArg; 
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-  guessInitialValues(l_data, initFuncArg);
+  gsl_vector_set(initFuncArg, 0, getProperty("Output y0"));
+	gsl_vector_set(initFuncArg, 1, getProperty("Output A"));
+	gsl_vector_set(initFuncArg, 2, getProperty("Output xc"));
+	gsl_vector_set(initFuncArg, 3, getProperty("Output w"));
+
+
+
+  //guessInitialValues(l_data, initFuncArg);
 
   // set-up GSL least squares container
 
@@ -193,7 +190,7 @@ void GaussLeastSquaresFit::exec()
     "Status = " << gsl_strerror(status) << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
     "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
-    "; w = " << gsl_vector_get(s->x,2) << "; xc = " << gsl_vector_get(s->x,3) << "\n";
+    "; xc = " << gsl_vector_get(s->x,2) << "; w = " << gsl_vector_get(s->x,3) << "\n";
 
 
   // also output summary to properties...
@@ -202,8 +199,9 @@ void GaussLeastSquaresFit::exec()
   setProperty("Output Chi^2/DoF", chi*chi / dof);
   setProperty("Output y0", gsl_vector_get(s->x,0));
   setProperty("Output A", gsl_vector_get(s->x,1));
-  setProperty("Output w", gsl_vector_get(s->x,2));
-  setProperty("Output xc", gsl_vector_get(s->x,3));
+  setProperty("Output xc", gsl_vector_get(s->x,2));
+  setProperty("Output w", gsl_vector_get(s->x,3));
+
 
 
   // clean up dynamically allocated gsl stuff
@@ -223,13 +221,14 @@ void GaussLeastSquaresFit::exec()
 * @param data The data to be fitted against  
 * @param param_init Output parameter values
 */
+/*
 void GaussLeastSquaresFit::guessInitialValues(const FitData& data, gsl_vector* param_init)
 {
 	size_t imin, imax;
 	gsl_stats_minmax_index(&imin, &imax, data.Y, 1, data.n);
 
-	double min_out = data.Y[imin];
-	double max_out = data.Y[imax];
+	double min_out = data.Y[imin];  // minimum y value
+	double max_out = data.Y[imax];  // maximum y value
 
   size_t imax_temp;
   {
@@ -238,7 +237,7 @@ void GaussLeastSquaresFit::guessInitialValues(const FitData& data, gsl_vector* p
   	for (int i = 0; i < data.n; i++)
 	  	temp[i] = fabs(data.Y[i]);
 
-	  imax_temp = gsl_stats_max_index(temp, 1, data.n);  
+	  imax_temp = gsl_stats_max_index(temp, 1, data.n); // get the index of the max value in temp
     delete [] temp;
   }
 
@@ -254,12 +253,14 @@ void GaussLeastSquaresFit::guessInitialValues(const FitData& data, gsl_vector* p
   double pi_div_2 = 1.57079632679489661923;
   area = sqrt(pi_div_2)*width*fabs(max_out - min_out);
 
-	gsl_vector_set(param_init, 0, area);
-	gsl_vector_set(param_init, 1, xc);
-	gsl_vector_set(param_init, 2, width);
-	gsl_vector_set(param_init, 3, offset);
-}
+	gsl_vector_set(param_init, 0, area);   // guess for y0 (background)
+	gsl_vector_set(param_init, 1, xc);     // guess for A 
+	gsl_vector_set(param_init, 2, width);  // guess for xc (where max is)
+	gsl_vector_set(param_init, 3, offset); // guess for standard deviation
 
+  std::cout << area << "  " << xc << "  " << width << "  " << offset << std::endl;
+}
+*/
 
     /** Gaussian function in GSL format
 * @param x Input function arguments  

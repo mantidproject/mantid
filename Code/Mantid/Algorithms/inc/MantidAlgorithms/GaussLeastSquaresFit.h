@@ -8,14 +8,6 @@
 
 #include <gsl/gsl_matrix.h>
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-/// @cond Exclude from doxygen documentation
-//namespace GSL {
-	struct FitData; // redefined in .cpp file
-//}
-/// @endcond
 
 namespace Mantid
 {
@@ -62,19 +54,15 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    /// Structure to contain least squares data
 
-    //struct FitData; // redefined in .cpp file
     /// Structure to contain least squares data
-//namespace GSL {
-  struct FitData {
-    size_t n; // number of points to be fitted (size of X, Y and sigma arrays)
-    size_t p; // number of fit parameters
-    double * X; // the data to be fitted (abscissae) 
-    double * Y; // the data to be fitted (ordinates)
-    double * sigma; // the weighting data
-  };
-//}
+    struct FitData {
+      size_t n; // number of points to be fitted (size of X, Y and sigma arrays)
+      size_t p; // number of fit parameters
+      double * X; // the data to be fitted (abscissae) 
+      double * Y; // the data to be fitted (ordinates)
+      double * sigma; // the weighting data
+    };
     
 
     class DLLExport GaussLeastSquaresFit : public API::Algorithm

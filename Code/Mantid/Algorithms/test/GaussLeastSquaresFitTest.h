@@ -45,6 +45,12 @@ public:
     // Set the properties
     alg.setPropertyValue("InputWorkspace",outputSpace);
     alg.setPropertyValue("SpectrumNumber","3");
+
+    alg.setPropertyValue("Output y0", "-2000.0");
+    alg.setPropertyValue("Output A", "8000.0");
+    alg.setPropertyValue("Output xc", "10000.0");
+    alg.setPropertyValue("Output w", "6000.0");
+
   }
   
   void testExec()
@@ -59,9 +65,9 @@ public:
     TS_ASSERT_DELTA( dummy, -2509.1 ,0.1);
     dummy = alg.getProperty("Output A");
     TS_ASSERT_DELTA( dummy, 8618.4 ,0.1);
-    dummy = alg.getProperty("Output w");
-    TS_ASSERT_DELTA( dummy, 10080.6 ,0.1);
     dummy = alg.getProperty("Output xc");
+    TS_ASSERT_DELTA( dummy, 10080.6 ,0.1);
+    dummy = alg.getProperty("Output w");
     TS_ASSERT_DELTA( dummy, 6349.74 ,0.1);
   }
   
