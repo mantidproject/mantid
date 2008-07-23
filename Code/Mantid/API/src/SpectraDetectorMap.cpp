@@ -163,8 +163,9 @@ SpectraDetectorMap::~SpectraDetectorMap()
       {
         try
         {
-          int spectra = dsMap.find(*it)->second;
-          spectraList.push_back(spectra);
+            std::multimap<int,int>::iterator found = dsMap.find(*it);
+            int spectra = found != dsMap.end()? found->second : 0;
+            spectraList.push_back(spectra);
         }
         catch (std::runtime_error& ex)
         {

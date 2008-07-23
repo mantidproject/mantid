@@ -9,6 +9,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
 
+#include <iostream>
+
 namespace Mantid
 {
 namespace API
@@ -129,17 +131,14 @@ public:
     // Assume that any declared WorkspaceProperty must have a name set (i.e. is not an optional property)
     if ( m_workspaceName.empty() ) return false;
 
-    // If the WorkspaceProperty already points to something, don't go looking in the ADS
-    if ( ! this->operator()() )
-    {
-      try {
+    try {
         Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_workspaceName);
         // Check retrieved workspace is the type that it should be
         Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
         if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
-      } catch (Kernel::Exception::NotFoundError&) {
+    } catch (Kernel::Exception::NotFoundError&) {
         // Only concerned with failing to find workspace in ADS if it's an input type
-        if ( ( m_direction==0 ) || ( m_direction==2 ) )
+        if ( !this->operator()() && (( m_direction==0 ) || ( m_direction==2 )) )
         {
           return false;
         }
@@ -147,7 +146,6 @@ public:
         {
           return true;
         }
-      }
     }
 
     return true;
