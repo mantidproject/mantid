@@ -351,10 +351,12 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	//Vectors
 	class_< string_vec >( "StringVec" )
 	.def( vector_indexing_suite< string_vec >() )
+	.def("push_back", &string_vec::push_back)
         ;
 
 	class_< double_vec >( "DoubleVec" )
 	.def( vector_indexing_suite< double_vec >() )
+	.def("push_back", double_vec::push_back)
 	;
 
 	class_< algorithmHistory_vec >( "AlgHistVec" )
@@ -498,7 +500,6 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("ndet", &Mantid::API::SpectraDetectorMap::ndet)
         .def("getDetectors", &Mantid::API::SpectraDetectorMap::getDetectors)
         .def("getDetector", &Mantid::API::SpectraDetectorMap::getDetector)
-        .def("getSpectra", &Mantid::API::SpectraDetectorMap::getSpectra)
         .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
         ;
 
