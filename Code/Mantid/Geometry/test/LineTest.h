@@ -105,6 +105,11 @@ public:
 		
 		TS_ASSERT_EQUALS(A.isValid(V3D(1.1,1.0,1.0)),1);
 		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,1.0,1.0)),1);
+		// test tolerance default 1e-6
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,1.0+1e-7,1.0+1e-7)),1);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,1.0+2e-6,1.0+2e-6)),0);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,1.0-1e-7,1.0-1e-7)),1);
+		TS_ASSERT_EQUALS(A.isValid(V3D(0.9,1.0-2e-6,1.0-2e-6)),0);
 
 		TS_ASSERT_EQUALS(A.isValid(V3D(1.0,0.9,1.0)),0);
 		TS_ASSERT_EQUALS(A.isValid(V3D(1.0,1.1,1.0)),0);

@@ -78,6 +78,11 @@ public:
 		TS_ASSERT_EQUALS(A.side(V3D(0.1,val,val-0.1)),1);
 		//Point on the Cone
 		TS_ASSERT_EQUALS(A.side(V3D(0.1,val,val)),0);		
+        // tolerance at default 1e-6
+		TS_ASSERT_EQUALS(A.side(V3D(0.1,val+1e-7,val+1e-7)),0);
+		TS_ASSERT_EQUALS(A.side(V3D(0.1,val+2e-6,val+2e-6)),-1);
+		TS_ASSERT_EQUALS(A.side(V3D(0.1,val-1e-7,val-1e-7)),0);
+		TS_ASSERT_EQUALS(A.side(V3D(0.1,val-2e-6,val-2e-6)),1);
 		//Point inside the cone
 		TS_ASSERT_EQUALS(A.side(V3D(0.1,val+0.001,val+0.001)),-1);
 		TS_ASSERT_EQUALS(A.side(V3D(0.1,val+0.001,val)),-1);
@@ -99,7 +104,12 @@ public:
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val-0.1,val)),0);	
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val,val-0.1)),0);
 		//Point on the Cone
-		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val,val)),1);		
+		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val,val)),1);
+        // tolerance at default 1e-6
+		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val+1e-7,val+1e-7)),1);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val+2e-6,val+2e-6)),0);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val-1e-7,val-1e-7)),1);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val-2e-6,val-2e-6)),0);
 		//Point inside the cone
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val+0.001,val+0.001)),0);
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0.1,val+0.001,val)),0);

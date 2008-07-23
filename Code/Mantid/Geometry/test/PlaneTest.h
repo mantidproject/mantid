@@ -66,6 +66,11 @@ public :
 		//Point on the plane
 		TS_ASSERT_EQUALS(A.side(V3D(0,0,5)),0);
 		TS_ASSERT_EQUALS(A.side(V3D(10,10,5)),0);
+		// test tolerance default 1e-6
+		TS_ASSERT_EQUALS(A.side(V3D(10,10,5+1e-7)),0);
+		TS_ASSERT_EQUALS(A.side(V3D(10,10,5+2e-6)),1);
+		TS_ASSERT_EQUALS(A.side(V3D(10,10,5-1e-7)),0);
+		TS_ASSERT_EQUALS(A.side(V3D(10,10,5-2e-6)),-1);
 		//Point on flip side of the plane
 		TS_ASSERT_EQUALS(A.side(V3D(0,0,2)),-1);
 		TS_ASSERT_EQUALS(A.side(V3D(10,10,1)),-1);
@@ -84,6 +89,11 @@ public :
 		//Point on the plane
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,5)),1);
 		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,5)),1);
+		// test tolerance default 1e-6
+		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,5+1e-7)),1);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,5+2e-6)),0);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,5-1e-7)),1);
+		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,5-2e-6)),0);
 		//Point on flip side of the plane
 		TS_ASSERT_EQUALS(A.onSurface(V3D(0,0,2)),0);
 		TS_ASSERT_EQUALS(A.onSurface(V3D(10,10,1)),0);

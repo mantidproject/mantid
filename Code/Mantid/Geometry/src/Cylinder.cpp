@@ -187,7 +187,7 @@ Cylinder::onSurface(const Geometry::V3D& Pt) const
       x*=x;
       double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
       y*=y;
-      return (fabs((x+y)-Radius*Radius)>CTolerance*CTolerance) ? 0 : 1;
+      return (fabs((x+y)-Radius*Radius)>CTolerance) ? 0 : 1;
     }
   return Quadratic::onSurface(Pt);
 }

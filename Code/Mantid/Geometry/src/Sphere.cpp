@@ -146,7 +146,7 @@ Sphere::side(const Geometry::V3D& Pt) const
 {
   const Geometry::V3D Xv=Pt-Centre;
   const double R2(Xv.scalar_prod(Xv));
-  if (fabs(R2-Radius*Radius)<STolerance*STolerance)
+  if (fabs(R2-Radius*Radius)<STolerance)
     return 0;
   return (R2>Radius*Radius) ? 1 : -1;
 }
@@ -161,7 +161,7 @@ Sphere::onSurface(const Geometry::V3D& Pt) const
   */
 {
   const Geometry::V3D Xv=Pt-Centre;
-  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>STolerance*STolerance) ? 0 : 1;
+  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>STolerance) ? 0 : 1;
 }
 
 double
