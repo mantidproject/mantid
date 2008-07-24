@@ -164,6 +164,23 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
   xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
 }
 
+// Find a point in the object
+int ObjComponent::getPointInObject(V3D& point)
+{
+  // If the form of this component is not defined, throw NullPointerException
+  if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
+  // Call the Object::getPointInObject method, which may give a point in Object coordinates
+  int result= shape->getPointInObject( point );
+  // transform point back to component space
+  if(result)
+  {
+     Quat Rotate = this->getRotation();
+     Rotate.rotate(point);
+     point+=this->getPos();
+  }
+  return result;
+}
+
 /// Find the point that's in the same place relative to the constituent geometrical Object
 /// if the position and rotation introduced by the Component is ignored
 const V3D ObjComponent::factorOutComponentPosition(const V3D& point) const

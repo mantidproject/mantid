@@ -203,6 +203,44 @@ void testBoundingBoxCappedCylinder()
     TS_ASSERT_DELTA(zmin,-11.2,1e-5);
   }
 
+void testgetPointInObject()
+  {
+    // Check that getPointInObject transforms result back to ObjComponent
+    ObjComponent A("ocyl", createCappedCylinder());
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+    V3D point;
+    TS_ASSERT_EQUALS(A.getPointInObject(point),1);
+    TS_ASSERT_DELTA(point.X(),10.0,1e-6);
+    TS_ASSERT_DELTA(point.Y(),0.0,1e-6);
+    TS_ASSERT_DELTA(point.Z(),0.0,1e-6);
+    // Add a parent with a rotation/translation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    A.setParent(&parent);
+    TS_ASSERT_EQUALS(A.getPointInObject(point),1);
+    TS_ASSERT_DELTA(point.X(),0.0,1e-6);
+    TS_ASSERT_DELTA(point.Y(),10.0,1e-6);
+    TS_ASSERT_DELTA(point.Z(),-10.0,1e-6);
+    // Cuboid not on principle axes
+    std::vector<std::string> planes;
+    planes.push_back("px 0.5"); planes.push_back("px 1.5");
+    planes.push_back("py -22"); planes.push_back("py -21");
+    planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
+    ObjComponent D("ocube", createCuboid(planes));
+    D.setPos(10,0,0);
+    D.setRot(Quat(90.0,V3D(0,0,1)));
+    TS_ASSERT_EQUALS(D.getPointInObject(point),1);
+    TS_ASSERT_DELTA(point.X(),31.5,1e-6);
+    TS_ASSERT_DELTA(point.Y(),1.0,1e-6);
+    TS_ASSERT_DELTA(point.Z(),0.0,1e-6);
+    // Add a parent with a rotation/translation of its own;
+    //Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    D.setParent(&parent);
+    TS_ASSERT_EQUALS(D.getPointInObject(point),1);
+    TS_ASSERT_DELTA(point.X(),21.5,1e-6);
+    TS_ASSERT_DELTA(point.Y(),10.0,1e-6);
+    TS_ASSERT_DELTA(point.Z(),-11.0,1e-6);
+  }
 
 private:
   boost::shared_ptr<Object> createCappedCylinder()
@@ -231,6 +269,48 @@ private:
     boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
     retVal->setObject(21,ObjCapCylinder);
     retVal->populate(CylSurMap);
+
+    return retVal;
+  }
+
+boost::shared_ptr<Object> createCuboid(std::vector<std::string>& planes)
+  {
+    std::string C1=planes[0];
+    std::string C2=planes[1];
+    std::string C3=planes[2];
+    std::string C4=planes[3];
+    std::string C5=planes[4];
+    std::string C6=planes[5];
+
+    // Create surfaces
+    std::map<int,Surface*> CubeSurMap;
+    CubeSurMap[1]=new Plane();
+    CubeSurMap[2]=new Plane();
+    CubeSurMap[3]=new Plane();
+    CubeSurMap[4]=new Plane();
+    CubeSurMap[5]=new Plane();
+    CubeSurMap[6]=new Plane();
+
+    CubeSurMap[1]->setSurface(C1);
+    CubeSurMap[2]->setSurface(C2);
+    CubeSurMap[3]->setSurface(C3);
+    CubeSurMap[4]->setSurface(C4);
+    CubeSurMap[5]->setSurface(C5);
+    CubeSurMap[6]->setSurface(C6);
+    CubeSurMap[1]->setName(1);
+    CubeSurMap[2]->setName(2);
+    CubeSurMap[3]->setName(3);
+    CubeSurMap[4]->setName(4);
+    CubeSurMap[5]->setName(5);
+    CubeSurMap[6]->setName(6);
+
+    // Cube (id 68) 
+    // using surface ids:  1-6
+    std::string ObjCube="1 -2 3 -4 5 -6";
+
+    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    retVal->setObject(68,ObjCube);
+    retVal->populate(CubeSurMap);
 
     return retVal;
   }

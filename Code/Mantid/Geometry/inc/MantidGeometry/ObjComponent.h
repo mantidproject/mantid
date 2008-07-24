@@ -69,6 +69,7 @@ public:
   int interceptSurface(Track& track) const;
   double solidAngle(const V3D& observer) ;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
+  int getPointInObject(V3D& point);
 
 protected:
   ObjComponent(const ObjComponent&);
