@@ -28,13 +28,13 @@ namespace Mantid
     SpectraDetectorMap::SpectraDetectorMap()
     {}
 
-SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
-{
-    _s2dmap.insert(copy._s2dmap.begin(),copy._s2dmap.end());
-}
+    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
+    {
+      _s2dmap.insert(copy._s2dmap.begin(),copy._s2dmap.end());
+    }
 
-SpectraDetectorMap::~SpectraDetectorMap()
-{}
+    SpectraDetectorMap::~SpectraDetectorMap()
+    {}
 
     void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries, Instrument* instr)
     {
@@ -81,7 +81,7 @@ SpectraDetectorMap::~SpectraDetectorMap()
       }
       // Get the list of detectors that contribute to the old spectrum
       std::vector<IDetector*> dets = getDetectors(oldSpectrum);
-      
+
       // Add them to the map with the new spectrum number as the key
       std::vector<IDetector*>::const_iterator it;
       for (it = dets.begin(); it != dets.end(); ++it)
@@ -175,9 +175,6 @@ SpectraDetectorMap::~SpectraDetectorMap()
       }
       return spectraList;
     }
-
-
-
 
   } // Namespace API 
 } // Namespace Mantid

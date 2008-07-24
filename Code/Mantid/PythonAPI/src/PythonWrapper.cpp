@@ -26,6 +26,7 @@ using namespace boost::python;
 
 typedef std::vector< std::string > string_vec;
 typedef std::vector< double > double_vec;
+typedef std::vector< int > int_vec;
 typedef std::vector< Mantid::API::AlgorithmHistory > algorithmHistory_vec;
 typedef std::vector< Mantid::Kernel::PropertyHistory > PropertyHistory_vec;
 
@@ -359,6 +360,11 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	.def("push_back", &double_vec::push_back)
 	;
 
+	class_< int_vec >( "IntVec" )
+	.def( vector_indexing_suite< int_vec >() )
+	.def("push_back", &int_vec::push_back)
+	;
+
 	class_< algorithmHistory_vec >( "AlgHistVec" )
 	.def( vector_indexing_suite< algorithmHistory_vec >() )
 	;
@@ -500,6 +506,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("ndet", &Mantid::API::SpectraDetectorMap::ndet)
         .def("getDetectors", &Mantid::API::SpectraDetectorMap::getDetectors)
         .def("getDetector", &Mantid::API::SpectraDetectorMap::getDetector)
+        .def("getSpectra", &Mantid::API::SpectraDetectorMap::getSpectra)
         .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
         ;
 
