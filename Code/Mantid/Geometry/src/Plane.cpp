@@ -32,7 +32,7 @@ namespace Geometry
 
 Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
-/// Numerical tolerance
+/// Numerical tolerance, now set by Surface::getSurfaceTolerance()
 //const double PTolerance(1e-6); 
 
 Plane::Plane() : Quadratic(),
@@ -249,7 +249,7 @@ Plane::onSurface(const Geometry::V3D& A) const
   /*! 
      Calcuate the side that the point is on
      and returns success if it is on the surface.
-     - Uses PTolerance to determine the closeness
+     - Uses getSurfaceTolerance to determine the closeness
      \retval 1 if on the surface 
      \retval 0 if off the surface 
      

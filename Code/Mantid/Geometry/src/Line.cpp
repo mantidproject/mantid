@@ -38,7 +38,7 @@ namespace Geometry
 Kernel::Logger& Line::PLog(Kernel::Logger::get("Line"));
 
 
-const double LTolerance(1e-6);  ///< Tolerance
+//const double LTolerance(1e-6);  ///< Tolerance
 
 Line::Line() : Origin(),Direct()
   /*!
@@ -123,13 +123,13 @@ int
 Line::isValid(const Geometry::V3D& A) const
   /*! 
      Calculate is point is on line by using distance to determine
-     if the point is within Ltolerance of the line
+     if the point is within Surface::getSurfaceTolerance() of the line
      \param A :: Point to test
      \retval 1 : the point is on the line
      \retval 0 : Point is not on the line
   */ 
 {
-  return (distance(A)>LTolerance) ? 0 : 1;
+  return (distance(A)>Surface::getSurfaceTolerance()) ? 0 : 1;
 }
 
 void
@@ -202,7 +202,7 @@ Line::lambdaPair(const int ix,const std::pair<
 	}
       Geometry::V3D Ans2=getPoint(lambda);
       // If points too close return only 1 item.
-      if (Ans.distance(Ans2)<LTolerance)
+      if (Ans.distance(Ans2)<Surface::getSurfaceTolerance())
 	return 1;
 
       PntOut.push_back(Ans2);
@@ -260,7 +260,7 @@ Line::intersect(std::vector<Geometry::V3D>& PntOut ,const Plane& Pln) const
 
   const double OdotN=Origin.scalar_prod(Pln.getNormal());
   const double DdotN=Direct.scalar_prod(Pln.getNormal());
-  if (fabs(DdotN)<LTolerance)     // Plane and line parallel
+  if (fabs(DdotN)<Surface::getSurfaceTolerance())     // Plane and line parallel
     return 0;
   const double u=(Pln.getDistance()-OdotN)/DdotN;
   if (u<=0)

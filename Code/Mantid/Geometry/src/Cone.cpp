@@ -145,7 +145,7 @@ Cone::operator==(const Cone& A) const
     Equality operator. Checks angle,centre and 
     normal separately
     \param A :: Cone to compare
-    \return A==this within CTolerance
+    \return A==this within SurfaceTolerance
   */
 {
   if(this==&A)

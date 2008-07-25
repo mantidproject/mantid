@@ -11,9 +11,10 @@
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Track.h"
+#include "MantidGeometry/Surface.h"
 
 
-const double surfaceTolerance(1e-5);       ///< Below this two point touch.
+//const double surfaceTolerance(1e-5);       ///< Below this two point touch.
 
 namespace Mantid
 {
@@ -59,7 +60,7 @@ namespace Mantid
       */
     {
       const double dL=fabs(Dist-A.Dist);
-      return (dL>surfaceTolerance) ? 
+      return (dL>Surface::getSurfaceTolerance()) ? 
         Dist<A.Dist : Direction<A.Direction;
     }
 
@@ -280,7 +281,7 @@ namespace Mantid
         if (ac->Direction==1 && bc->Direction==-1)
         {
           // Touching surface / identical surface
-          if (fabs(ac->Dist-bc->Dist)>surfaceTolerance)
+          if (fabs(ac->Dist-bc->Dist)>Surface::getSurfaceTolerance())
           {
             // track leave ac into bc.
             addTUnit(ac->ObjID,ac->PtA,bc->PtA,bc->Dist);

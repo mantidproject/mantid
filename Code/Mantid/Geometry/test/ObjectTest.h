@@ -561,12 +561,18 @@ void testFindPointInCube()
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
 	planes.clear();
 	// This test fails to find a point in object, as object not on a principle axis
-	// and getBoundingBox does not give a useful result in this case
+	// and getBoundingBox does not give a useful result in this case.
+	// Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and rotated 45deg
+	// to these two axes
 	planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
 	planes.push_back("p 0  .70710678118 .70710678118 -2"); planes.push_back("p 0  .70710678118 .70710678118 -1");
     planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
 	Object F =createCuboid(planes);
     TS_ASSERT_EQUALS(F.getPointInObject(pt),0);
+	// Test use of defineBoundingBox to explictly set the bounding box, when the automatic method fails
+	F.defineBoundingBox(0.5,-1/(2.0*sqrt(2.0)),-1.0/(2.0*sqrt(2.0)),
+		               -0.5,-sqrt(2.0)-1.0/(2.0*sqrt(2.0)),-sqrt(2.0)-1.0/(2.0*sqrt(2.0)));
+    TS_ASSERT_EQUALS(F.getPointInObject(pt),1);
     Object S = createSphere();
     TS_ASSERT_EQUALS(S.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
@@ -665,6 +671,28 @@ void testGetBoundingBox()
 	TS_ASSERT_DELTA(xmin,-3.2,0.0001);
 	TS_ASSERT_DELTA(ymin,-3.0,0.0001);
 	TS_ASSERT_DELTA(zmin,-3.0,0.0001);
+}
+
+void defineBoundingBox()
+/*!
+  Test use of defineBoundingBox
+*/
+{
+    Object A = createCappedCylinder();
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=1.2;ymax=3.0;zmax=3.0;
+	xmin=-3.2;ymin=-3.0;zmin=-3.0;
+	A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	TS_ASSERT_EQUALS(xmax,1.2);
+	TS_ASSERT_EQUALS(ymax,3.0);
+	TS_ASSERT_EQUALS(zmax,3.0);
+	TS_ASSERT_EQUALS(xmin,-3.2);
+	TS_ASSERT_EQUALS(ymin,-3.0);
+	TS_ASSERT_EQUALS(zmin,-3.0);
+	xmax=1.2;xmin=3.0;
+    TS_ASSERT_THROWS(A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
+
 }
 private:
  

@@ -138,8 +138,11 @@ class DLLExport Object
   // Solid angle
   double solidAngle(const Geometry::V3D& observer) const;
 
-  // Axis Aligned Bounding box
+  // Calculate (or return cached value of) Axis Aligned Bounding box
   void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
+
+  // Define Axis Aligned Bounding box
+  void defineBoundingBox(const double& xmax,const double& ymax,const double& zmax,const double& xmin,const double& ymin,const double& zmin);
 
   // find internal point to object
   int getPointInObject(Geometry::V3D& point) const;

@@ -36,7 +36,7 @@ namespace Mantid
     Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 
     /// @cond
-    const double OTolerance(1e-6);
+    //const double OTolerance(1e-6);
     /// @endcond
 
     Object::Object() :
@@ -450,9 +450,9 @@ namespace Mantid
       */
     {
       int status(0);
-      Geometry::V3D tmp=C+Nm*(OTolerance*5.0);
+	  Geometry::V3D tmp=C+Nm*(Surface::getSurfaceTolerance()*5.0);
       status= (!isValid(tmp)) ? 1 : -1;
-      tmp-= Nm*(OTolerance*10.0);
+      tmp-= Nm*(Surface::getSurfaceTolerance()*10.0);
       status+= (!isValid(tmp)) ? 1 : -1;
       return status/2;
     }
@@ -849,8 +849,8 @@ namespace Mantid
       \retval -1 :: Exit Point
       */
     {
-      const Geometry::V3D testA(Pt-uVec*OTolerance*25.0);
-      const Geometry::V3D testB(Pt+uVec*OTolerance*25.0);
+      const Geometry::V3D testA(Pt-uVec*Surface::getSurfaceTolerance()*25.0);
+      const Geometry::V3D testB(Pt+uVec*Surface::getSurfaceTolerance()*25.0);
       const int flagA=isValid(testA);
       const int flagB=isValid(testB);
       if (!(flagA ^ flagB)) return 0;
@@ -1006,6 +1006,27 @@ namespace Mantid
 		xmin=AABBxMin;	ymin=AABByMin;	zmin=AABBzMin;
 	}
 
+	/**
+	 * Takes input axis aligned bounding box max and min points and stores these as the
+	 * bounding box for the object. Can be used when getBoundingBox fails and bounds are
+	 * known.
+	 *
+	 * @param xmax :: Maximum value for the bounding box in x direction
+	 * @param ymax :: Maximum value for the bounding box in y direction
+	 * @param zmax :: Maximum value for the bounding box in z direction
+	 * @param xmin :: Minimum value for the bounding box in x direction
+	 * @param ymin :: Minimum value for the bounding box in y direction
+	 * @param zmin :: Minimum value for the bounding box in z direction
+	 */
+	void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax, const double &xMin, const double &yMin, const double &zMin)
+	{
+		if(xMax<xMin || yMax<yMin || zMax<zMin)
+            throw std::invalid_argument("Invalid range in Object::defineBoundingBox");
+		AABBxMax=xMax;	AABByMax=yMax;	AABBzMax=zMax;
+		AABBxMin=xMin;	AABByMin=yMin;	AABBzMin=zMin;
+		boolBounded=true;
+	}
+
 
 	int
       Object::getPointInObject(Geometry::V3D& point) const
@@ -1101,7 +1122,7 @@ namespace Mantid
 	  // Assume that orig is outside of BoundingBox.
 	  //
 		double lambda;
-		const double tol=1e-6;
+		const double tol=Surface::getSurfaceTolerance();
 		if(orig.X()>xmax)
 		{
 			if(dir.X()<-tol)
@@ -1183,9 +1204,9 @@ namespace Mantid
       */
     {
       //
-	   const double tol=1e-6;
-	   if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymax-tol
-		  && point.Z()<=zmax+tol && point.Z()>=zmax-tol )
+      const double tol=Surface::getSurfaceTolerance();
+      if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymax-tol
+         && point.Z()<=zmax+tol && point.Z()>=zmax-tol )
 		   return 1;
 	   return 0;
 	}

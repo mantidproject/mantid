@@ -30,8 +30,8 @@ namespace Geometry
 
 Kernel::Logger& Surface::PLog = Kernel::Logger::get("Surface"); 
 
-/// Tolerance for floating point
-const double STolerance(1e-6);
+/// Tolerance for floating point, now set by getSurfaceTolerance()
+//const double STolerance(1e-6);
 
 Surface::Surface() : 
   Name(-1)
