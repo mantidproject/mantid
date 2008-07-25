@@ -34,7 +34,7 @@ namespace Geometry
 Kernel::Logger& Quadratic::PLog(Kernel::Logger::get("Quadratic"));
 
 /// Numerical tolerance
-const double QTolerance(1e-6);
+//const double QTolerance(1e-6);
 
 Quadratic::Quadratic() : Surface(),
   BaseEqn(10)
@@ -111,7 +111,7 @@ Quadratic::side(const Geometry::V3D& Pt) const
   */
 {
   double res=eqnValue(Pt);
-  if (fabs(res)<QTolerance)
+  if (fabs(res)<getSurfaceTolerance())
     return 0;
   return (res>0) ? 1 : -1;
 }
@@ -264,8 +264,8 @@ Quadratic::distance(const Geometry::V3D& Pt) const
       const double daI=1.0+2* (*vc) *da;
       const double dbI=1.0+2* (*vc) *db;
       const double dcI=1.0+2* (*vc) *dc;
-      if ((daI*daI)>QTolerance || (dbI*dbI)>QTolerance 
-	  && (dcI*dcI)<QTolerance)
+      if ((daI*daI)>getSurfaceTolerance() || (dbI*dbI)>getSurfaceTolerance() 
+	  && (dcI*dcI)<getSurfaceTolerance())
         {
 	  Geometry::Matrix<double> DI(3,3);
 	  DI[0][0]=1.0/daI;
@@ -289,7 +289,7 @@ Quadratic::onSurface(const Geometry::V3D& Pt) const
   */
 {
   const double res=eqnValue(Pt);
-  return (fabs(res)>QTolerance) ? 0 : 1;
+  return (fabs(res)>getSurfaceTolerance()) ? 0 : 1;
 }
 
 

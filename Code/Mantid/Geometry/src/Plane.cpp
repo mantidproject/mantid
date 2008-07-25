@@ -33,7 +33,7 @@ namespace Geometry
 Kernel::Logger& Plane::PLog(Kernel::Logger::get("Plane"));
 
 /// Numerical tolerance
-const double PTolerance(1e-6); 
+//const double PTolerance(1e-6); 
 
 Plane::Plane() : Quadratic(),
   NormV(1.0,0.0,0.0),Dist(0)
@@ -128,7 +128,7 @@ Plane::setSurface(const std::string& Pstr)
         { 
 	  NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
 	  const double ll=NormV.normalize();
-	  if (ll<PTolerance)   // avoid 
+	  if (ll<getSurfaceTolerance())   // avoid 
 	    return -4;
 	  Dist= surf[3]/ll;
 	}
@@ -239,7 +239,7 @@ Plane::side(const Geometry::V3D& A) const
 {
   double Dp=NormV.scalar_prod(A);
   Dp-=Dist;
-  if (PTolerance<fabs(Dp))
+  if (getSurfaceTolerance()<fabs(Dp))
     return (Dp>0) ? 1 : -1;
   return 0;
 }
@@ -281,7 +281,7 @@ Plane::planeType() const
   */
 {
   for(int i=0;i<3;i++)
-    if (fabs(NormV[i])>(1.0-PTolerance))
+    if (fabs(NormV[i])>(1.0-getSurfaceTolerance()))
       return i+1;
   return 0;
 }

@@ -26,7 +26,7 @@ namespace Geometry
 
 Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
-const double TTolerance(1e-6);       ///< Tolerance to the surfaces.
+//const double TTolerance(1e-6);       ///< Tolerance to the surfaces.
   
 Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
@@ -96,14 +96,14 @@ Torus::operator==(const Torus& A) const
   if(this==&A)
     return 1;
 
-  if ( (fabs(Displacement-A.Displacement)>TTolerance) ||
-       (fabs(Iradius-A.Iradius)>TTolerance) ||
-       (fabs(Dradius-A.Dradius)>TTolerance) )
+  if ( (fabs(Displacement-A.Displacement)>getSurfaceTolerance()) ||
+       (fabs(Iradius-A.Iradius)>getSurfaceTolerance()) ||
+       (fabs(Dradius-A.Dradius)>getSurfaceTolerance()) )
     return 0;
 
-  if (Centre.distance(A.Centre)>TTolerance)
+  if (Centre.distance(A.Centre)>getSurfaceTolerance())
     return 0;
-  if (Normal.distance(A.Normal)>TTolerance)
+  if (Normal.distance(A.Normal)>getSurfaceTolerance())
     return 0;
 
   return 1;
@@ -195,7 +195,7 @@ Torus::setNorm(const Geometry::V3D& A)
     \param A :: New Normal direction
   */
 {
-  if (A.norm()>TTolerance)
+  if (A.norm()>getSurfaceTolerance())
     {
       Normal=A;
       Normal.normalize();
@@ -230,7 +230,7 @@ Torus::distance(const Geometry::V3D& Pt) const
 {
   const Geometry::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
-  if(Px.norm()<TTolerance)
+  if(Px.norm()<getSurfaceTolerance())
     return Px.norm();
   return Px.norm();
 }
@@ -277,7 +277,7 @@ Torus::write(std::ostream& OX) const
 {
   //               -3 -2 -1 0 1 2 3        
   const char Tailends[]="zyx xyz";
-  const int Ndir=Normal.masterDir(TTolerance);
+  const int Ndir=Normal.masterDir(getSurfaceTolerance());
   if (Ndir==0)
     {
       Surface::write(OX);

@@ -33,7 +33,7 @@ namespace Geometry
 Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
 
 
-const double CTolerance(1e-6);  ///< Tolerance
+//const double CTolerance(1e-6);  ///< Tolerance
 
 Cylinder::Cylinder() : Quadratic(),
    Centre(),Normal(1,0,0),Nvec(0),Radius(0.0)
@@ -165,7 +165,7 @@ Cylinder::side(const Geometry::V3D& Pt) const
       double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
       y*=y;
       const double displace=x+y-Radius*Radius;
-      if (fabs(displace)<CTolerance)
+      if (fabs(displace)<getSurfaceTolerance())
 	return 0;
       return (displace>0.0) ? 1 : -1;
     }
@@ -187,7 +187,7 @@ Cylinder::onSurface(const Geometry::V3D& Pt) const
       x*=x;
       double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
       y*=y;
-      return (fabs((x+y)-Radius*Radius)>CTolerance) ? 0 : 1;
+      return (fabs((x+y)-Radius*Radius)>getSurfaceTolerance()) ? 0 : 1;
     }
   return Quadratic::onSurface(Pt);
 }
@@ -203,7 +203,7 @@ Cylinder::setNvec()
   Nvec=0;
   for(int i=0;i<3;i++)
     {
-      if (fabs(Normal[i])>(1.0-CTolerance))
+      if (fabs(Normal[i])>(1.0-getSurfaceTolerance()))
 	{
 	  Nvec=i+1;
 	  return;
@@ -322,7 +322,7 @@ Cylinder::write(std::ostream& OX) const
 {
   //               -3 -2 -1 0 1 2 3        
   const char Tailends[]="zyx xyz";
-  const int Ndir=Normal.masterDir(CTolerance);
+  const int Ndir=Normal.masterDir(getSurfaceTolerance());
   if (Ndir==0)
     {
       // general surface
@@ -330,14 +330,14 @@ Cylinder::write(std::ostream& OX) const
       return;
     }
   
-  const int Cdir=Centre.masterDir(CTolerance);
+  const int Cdir=Centre.masterDir(getSurfaceTolerance());
   std::ostringstream cx;
 
   writeHeader(cx);
   cx.precision(Surface::Nprecision);
   // Name and transform 
    
-  if (Cdir*Cdir==Ndir*Ndir || Centre.nullVector(CTolerance))
+  if (Cdir*Cdir==Ndir*Ndir || Centre.nullVector(getSurfaceTolerance()))
     {
       cx<<"c";
       cx<< Tailends[Ndir+3]<<" ";          // set x,y,z based on Ndir

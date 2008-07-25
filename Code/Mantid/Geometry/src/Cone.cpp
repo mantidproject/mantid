@@ -31,7 +31,7 @@ namespace Geometry
 Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
 
 /// Floating point tolerance
-const double CTolerance(1e-6);
+//const double CTolerance(1e-6);
 
 Cone::Cone() : Quadratic(),
   Centre(), Normal(1,0,0), alpha(0.0), cangle(1.0)
@@ -150,11 +150,11 @@ Cone::operator==(const Cone& A) const
 {
   if(this==&A)
     return 1;
-  if (fabs(cangle-A.cangle)>CTolerance)
+  if (fabs(cangle-A.cangle)>getSurfaceTolerance())
     return 0;
-  if (Centre.distance(A.Centre)>CTolerance)
+  if (Centre.distance(A.Centre)>getSurfaceTolerance())
     return 0;
-  if (Normal.distance(A.Normal)>CTolerance)
+  if (Normal.distance(A.Normal)>getSurfaceTolerance())
     return 0;
 
   return 1;
@@ -227,7 +227,7 @@ Cone::setNorm(const Geometry::V3D& A)
     \param A :: New Normal direction
   */
 {
-  if (A.norm()>CTolerance)
+  if (A.norm()>getSurfaceTolerance())
     {
       Normal=A;
       Normal.normalize();
@@ -279,7 +279,7 @@ Cone::distance(const Geometry::V3D& Pt) const
 {
   const Geometry::V3D Px=Pt-Centre;
   // test is the centre to point distance is zero
-  if(Px.norm()<CTolerance)
+  if(Px.norm()<getSurfaceTolerance())
     return Px.norm();
   double Pangle=Px.scalar_prod(Normal)/Px.norm();
   if (Pangle<0.0)
@@ -308,7 +308,7 @@ Cone::side(const Geometry::V3D& R) const
   double rptAngle=cR.scalar_prod(Normal);
   rptAngle*=rptAngle/cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
-  if (fabs(eqn-cangle)<CTolerance)
+  if (fabs(eqn-cangle)<getSurfaceTolerance())
     return 0;
   return (eqn>cangle) ? 1 : -1;  
 }
@@ -329,7 +329,7 @@ Cone::onSurface(const Geometry::V3D& R) const
   rptAngle*=rptAngle/cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
   
-  return (fabs(eqn-cangle)>CTolerance) ? 0 : 1;  
+  return (fabs(eqn-cangle)>getSurfaceTolerance()) ? 0 : 1;  
 }
 
 void
@@ -342,7 +342,7 @@ Cone::write(std::ostream& OX) const
 {
   //               -3 -2 -1 0 1 2 3        
   const char Tailends[]="zyx xyz";
-  const int Ndir=Normal.masterDir(CTolerance);
+  const int Ndir=Normal.masterDir(getSurfaceTolerance());
   if (Ndir==0)
     {
       Quadratic::write(OX);
@@ -351,11 +351,11 @@ Cone::write(std::ostream& OX) const
   std::ostringstream cx;
   Quadratic::writeHeader(cx);
   
-  const int Cdir=Centre.masterDir(CTolerance);
+  const int Cdir=Centre.masterDir(getSurfaceTolerance());
   cx.precision(Surface::Nprecision);
   // Name and transform 
    
-  if (Cdir || Centre.nullVector(CTolerance))
+  if (Cdir || Centre.nullVector(getSurfaceTolerance()))
     {
       cx<<" k";
       cx<< Tailends[Ndir+3]<<" ";          // set x,y,z based on Ndir

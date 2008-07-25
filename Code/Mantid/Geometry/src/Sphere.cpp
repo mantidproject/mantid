@@ -29,7 +29,7 @@ namespace Geometry
  
 Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 
-const double STolerance(1e-6);  ///< Tolerance (should be replaced with boost::)
+//const double STolerance(1e-6);  ///< Tolerance (should be replaced with boost::)
 
 Sphere::Sphere() : Quadratic(),
   Centre(0,0,0),Radius(0.0)
@@ -146,7 +146,7 @@ Sphere::side(const Geometry::V3D& Pt) const
 {
   const Geometry::V3D Xv=Pt-Centre;
   const double R2(Xv.scalar_prod(Xv));
-  if (fabs(R2-Radius*Radius)<STolerance)
+  if (fabs(R2-Radius*Radius)<getSurfaceTolerance())
     return 0;
   return (R2>Radius*Radius) ? 1 : -1;
 }
@@ -161,7 +161,7 @@ Sphere::onSurface(const Geometry::V3D& Pt) const
   */
 {
   const Geometry::V3D Xv=Pt-Centre;
-  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>STolerance) ? 0 : 1;
+  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>getSurfaceTolerance()) ? 0 : 1;
 }
 
 double
@@ -246,7 +246,7 @@ Sphere::write(std::ostream& OX) const
   std::ostringstream cx;
   Quadratic::writeHeader(cx);
   cx.precision(Surface::Nprecision);
-  if (Centre.distance(Geometry::V3D(0,0,0))<STolerance)
+  if (Centre.distance(Geometry::V3D(0,0,0))<getSurfaceTolerance())
     {
       cx<<"so "<<Radius;
     }
