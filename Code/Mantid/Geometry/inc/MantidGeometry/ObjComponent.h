@@ -4,8 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cfloat>
-
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Component.h"
 #include "MantidGeometry/Track.h"
@@ -67,9 +65,9 @@ public:
   bool isValid(const V3D& point) const;
   bool isOnSide(const V3D& point) const;
   int interceptSurface(Track& track) const;
-  double solidAngle(const V3D& observer) ;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
-  int getPointInObject(V3D& point);
+  double solidAngle(const V3D& observer) const;
+  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+  int getPointInObject(V3D& point) const;
 
 protected:
   ObjComponent(const ObjComponent&);
@@ -82,9 +80,9 @@ private:
   const V3D takeOutRotation(V3D point) const;
 
   /// The phyical geometry representation
-  // Defaulted to a const pointer to a const object initially, could remove one or both of
-  // these restrictions if later found to be necessary
-	const boost::shared_ptr<Object> shape;
+  // Made a const pointer to a const object. Since this is a shared object we shouldn't be
+  // exposing non-const methods of Object through this class.
+  const boost::shared_ptr<const Object> shape;
 };
 
 } // namespace Geometry

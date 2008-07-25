@@ -40,22 +40,23 @@ namespace Mantid
     /// @endcond
 
     Object::Object() :
-    ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
+      ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
+      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
     {}
 
     Object::Object(const Object& A) :
-    ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
+      ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
       TopRule((A.TopRule) ? A.TopRule->clone() : 0),
-	  SurList(A.SurList),
-	  AABBxMax(A.AABBxMax),
-	  AABByMax(A.AABByMax),
-	  AABBzMax(A.AABBzMax),
-	  AABBxMin(A.AABBxMin),
-	  AABByMin(A.AABByMin),
-	  AABBzMin(A.AABBzMin),boolBounded(A.boolBounded)
+      AABBxMax(A.AABBxMax),
+      AABByMax(A.AABByMax),
+      AABBzMax(A.AABBzMax),
+      AABBxMin(A.AABBxMin),
+      AABByMin(A.AABByMin),
+      AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),
+      SurList(A.SurList)
       /*!
       Copy constructor
       \param A :: Object to copy
@@ -79,13 +80,13 @@ namespace Mantid
         delete TopRule;
         TopRule=(A.TopRule) ? A.TopRule->clone() : 0;
         SurList=A.SurList;
-		AABBxMax=A.AABBxMax;
-		AABByMax=A.AABByMax;
-		AABBzMax=A.AABBzMax;
-		AABBxMin=A.AABBxMin;
-		AABByMin=A.AABByMin;
-		AABBzMin=A.AABBzMin;
-		boolBounded=A.boolBounded;
+        AABBxMax=A.AABBxMax;
+        AABByMax=A.AABByMax;
+        AABBzMax=A.AABBzMax;
+        AABBxMin=A.AABBxMin;
+        AABByMin=A.AABByMin;
+        AABBzMin=A.AABBzMin;
+        boolBounded=A.boolBounded;
       }
       return *this;
     }
@@ -857,7 +858,7 @@ namespace Mantid
     }
 
     double
-      Object::solidAngle(const Geometry::V3D& observer)
+      Object::solidAngle(const Geometry::V3D& observer) const
       /*!
       Given an observer position find the approximate solid angle of the object
       \param observer :: position of the observer (V3D)
@@ -865,7 +866,7 @@ namespace Mantid
       */
     {
       // Calculation of solid angle as numerical double integral over all
-      // angles. This could be optimised further e.g. by 
+      // angles. This could be optimised further e.g. by
       // using a light weight version of the interceptSurface method - this does more work
       // than is necessary in this application.
       // Accuracy is of the order of 1% for objects with an accurate boundng box, though
@@ -919,7 +920,7 @@ namespace Mantid
 	  sum=0.;
       for(itheta=1;itheta<=res;itheta++)
       {
-         // itegrate theta from 0 to maximum from bounding box, or PI otherwise 
+         // itegrate theta from 0 to maximum from bounding box, or PI otherwise
          theta=thetaMax*(itheta-0.5)/res;
          resPhi=static_cast<int> (res*sin(theta));
          if(resPhi<resPhiMin) resPhi=resPhiMin;
@@ -978,7 +979,7 @@ namespace Mantid
     }
 
 	/**
-	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the 
+	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
 	 * object and returns them back in max and min points.
 	 *
 	 * @param xmax :: Maximum value for the bounding box in x direction
@@ -988,7 +989,7 @@ namespace Mantid
 	 * @param ymin :: Minimum value for the bounding box in y direction
 	 * @param zmin :: Minimum value for the bounding box in z direction
 	 */
-	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 	{
 		if (!TopRule)
 			return;
@@ -1007,14 +1008,14 @@ namespace Mantid
 
 
 	int
-      Object::getPointInObject(Geometry::V3D& point)
+      Object::getPointInObject(Geometry::V3D& point) const
       /*!
       Try to find a point that lies within (or on) the object
       \param point :: on exit set to the point value, if found
       \return 1 if point found, 0 otherwise
       */
     {
-      // 
+      //
       // Simple method - check if origin in object, if not search directions along
 	  // axes. If that fails, try centre of boundingBox, and paths about there
 	  //
@@ -1054,7 +1055,7 @@ namespace Mantid
       \return 1 if point found, 0 otherwise
       */
     {
-      // 
+      //
       // Method - check if point in object, if not search directions along
 	  // principle axes using interceptSurface
 	  //
@@ -1083,7 +1084,7 @@ namespace Mantid
 	                              const double& xmax, const double& ymax, const double& zmax,
 	                              const double& xmin, const double& ymin, const double& zmin ) const
       /*!
-      Fast test to determine if Line hits BoundingBox. 
+      Fast test to determine if Line hits BoundingBox.
       \param orig :: Origin of line to test
 	  \param dir  :: direction of line
 	  \param xmax :: Maximum value for the bounding box in x direction
@@ -1095,7 +1096,7 @@ namespace Mantid
       \return 1 if line hits, 0 otherwise
       */
     {
-      // 
+      //
       // Method - Loop through planes looking for ones that are visible and check intercept
 	  // Assume that orig is outside of BoundingBox.
 	  //
@@ -1162,7 +1163,7 @@ namespace Mantid
 			}
 		}
 		return 0;
-			 
+
     }
 
     int
@@ -1170,7 +1171,7 @@ namespace Mantid
 	                        const double& xmax, const double& ymax, const double& zmax,
 	                        const double& xmin, const double& ymin, const double& zmin ) const
       /*!
-      Test point in BoundingBox 
+      Test point in BoundingBox
       \param point :: Point to test
 	  \param xmax :: Maximum value for the bounding box in x direction
 	  \param ymax :: Maximum value for the bounding box in y direction

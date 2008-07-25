@@ -4,6 +4,7 @@
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Object.h"
 #include "MantidKernel/Exception.h"
+#include <cfloat>
 
 namespace Mantid
 {
@@ -94,7 +95,7 @@ int ObjComponent::interceptSurface(Track& track) const
  *  @returns The solid angle in steradians
  *  @throw NullPointerException if the underlying geometrical Object has not been set
  */
-double ObjComponent::solidAngle(const V3D& observer)
+double ObjComponent::solidAngle(const V3D& observer) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
@@ -102,21 +103,21 @@ double ObjComponent::solidAngle(const V3D& observer)
   return shape->solidAngle( factorOutComponentPosition(observer) );
 }
 
-	/**
-     * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
-	 * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
-	 * The returned BB will be the frame of the ObjComponent and may not be optimal.
-	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the 
-	 * object and returns them back in max and min points. Cached values used after first call.
-	 *
-	 * @param xmax :: Maximum value for the bounding box in x direction
-	 * @param ymax :: Maximum value for the bounding box in y direction
-	 * @param zmax :: Maximum value for the bounding box in z direction
-	 * @param xmin :: Minimum value for the bounding box in x direction
-	 * @param ymin :: Minimum value for the bounding box in y direction
-	 * @param zmin :: Minimum value for the bounding box in z direction
-	 */
-void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
+/**
+ * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
+ * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
+ * The returned BB will be the frame of the ObjComponent and may not be optimal.
+ * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
+ * object and returns them back in max and min points. Cached values used after first call.
+ *
+ * @param xmax :: Maximum value for the bounding box in x direction
+ * @param ymax :: Maximum value for the bounding box in y direction
+ * @param zmax :: Maximum value for the bounding box in z direction
+ * @param xmin :: Minimum value for the bounding box in x direction
+ * @param ymin :: Minimum value for the bounding box in y direction
+ * @param zmin :: Minimum value for the bounding box in z direction
+ */
+void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
@@ -131,12 +132,12 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
   Geometry::V3D minT(DBL_MAX,DBL_MAX,DBL_MAX);
   for(vc=points.begin();vc!=points.end();vc++)
   {
-     Geometry::V3D pt=takeOutRotation( (*vc) - this->getPos() );
-     for(int i=0;i<3;i++)
-     {
-        if(maxT[i]<pt[i]) maxT[i]=pt[i];
-        if(minT[i]>pt[i]) minT[i]=pt[i];
-     }
+    Geometry::V3D pt=takeOutRotation( (*vc) - this->getPos() );
+    for(int i=0;i<3;i++)
+    {
+      if(maxT[i]<pt[i]) maxT[i]=pt[i];
+      if(minT[i]>pt[i]) minT[i]=pt[i];
+    }
   }
   // pass bounds to getBoundingBox
   shape->getBoundingBox(maxT[0],maxT[1],maxT[2],minT[0],minT[1],minT[2]);
@@ -151,21 +152,25 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
   Quat Rotate = this->getRotation();
   for(vc=points.begin();vc!=points.end();vc++)
   {
-     Geometry::V3D pt= (*vc);
-	 Rotate.rotate(pt);
-     pt+=this->getPos();
-     for(int i=0;i<3;i++)
-     {
-        if(maxT[i]<pt[i]) maxT[i]=pt[i];
-        if(minT[i]>pt[i]) minT[i]=pt[i];
-     }
+    Geometry::V3D pt= (*vc);
+    Rotate.rotate(pt);
+    pt+=this->getPos();
+    for(int i=0;i<3;i++)
+    {
+      if(maxT[i]<pt[i]) maxT[i]=pt[i];
+      if(minT[i]>pt[i]) minT[i]=pt[i];
+    }
   }
   xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
   xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
 }
 
-// Find a point in the object
-int ObjComponent::getPointInObject(V3D& point)
+/**
+ * Try to find a point that lies within (or on) the object
+ * @param point On exit, set to the point value (if found)
+ * @return 1 if point found, 0 otherwise
+ */
+int ObjComponent::getPointInObject(V3D& point) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
@@ -174,9 +179,9 @@ int ObjComponent::getPointInObject(V3D& point)
   // transform point back to component space
   if(result)
   {
-     Quat Rotate = this->getRotation();
-     Rotate.rotate(point);
-     point+=this->getPos();
+    Quat Rotate = this->getRotation();
+    Rotate.rotate(point);
+    point+=this->getPos();
   }
   return result;
 }

@@ -24,7 +24,7 @@ namespace Geometry
   An object is a collection of Rules and
   surface object
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
 
@@ -60,8 +60,8 @@ class DLLExport Object
   int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
-  double AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin; ///< Axis Aligned Bounding Box Cache
-  bool  boolBounded;
+  mutable double AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin; ///< Axis Aligned Bounding Box Cache
+  mutable bool  boolBounded;
   int searchForObject(Geometry::V3D&) const;
   int inBoundingBox(const Geometry::V3D&,
 	                const double&, const double&, const double&,
@@ -136,13 +136,13 @@ class DLLExport Object
   int interceptSurface(Geometry::Track&) const;
 
   // Solid angle
-  double solidAngle(const Geometry::V3D& observer);
+  double solidAngle(const Geometry::V3D& observer) const;
 
   // Axis Aligned Bounding box
-  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin);
+  void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;
 
   // find internal point to object
-  int getPointInObject(Geometry::V3D& point);
+  int getPointInObject(Geometry::V3D& point) const;
 
 
 };
