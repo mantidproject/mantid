@@ -1,8 +1,11 @@
 import MantidPythonAPI
 print "Mantid Interactive Scripting Interface"
-mantid = MantidPythonAPI.PythonInterface()
-print "Mantid API object 'mantid' ready\n"
-
+mtd = MantidPythonAPI.FrameworkManager()
+print ""
+print "Mantid Framework Manager 'mtd' ready"
+print "Available Algorithms"
+algNames= MantidPythonAPI.getAlgorithmNames()
+for i in range(len(algNames)):
+	print "\t" + algNames[i]
 print 'To load a raw file execute:'
-print '\tMantid.LoadIsisRawFile("MAR11060.RAW","TestWorkspace");'
-#print mantid.GetAlgorithmNames()
+print '\tmtd.execute("LoadRaw","Data/MAR11060.RAW;TestWorkspace",-1)'
