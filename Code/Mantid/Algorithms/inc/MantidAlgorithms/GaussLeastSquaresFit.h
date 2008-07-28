@@ -53,18 +53,6 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-
-    /// Structure to contain least squares data
-    struct FitData {
-      size_t n; // number of points to be fitted (size of X, Y and sigma arrays)
-      size_t p; // number of fit parameters
-      double * X; // the data to be fitted (abscissae) 
-      double * Y; // the data to be fitted (ordinates)
-      double * sigma; // the weighting data
-    };
-    
-
     class DLLExport GaussLeastSquaresFit : public API::Algorithm
     {
     public:
@@ -91,8 +79,9 @@ namespace Mantid
       /// The X bin to finish the fitting at
       int m_maxX;
 
-      /// function which guesses initial parameter values
-      void guessInitialValues(const FitData& data, gsl_vector* param_init);
+      // function which guesses initial parameter values
+      // This method need further work done to it. 
+      //void guessInitialValues(const FitData& data, gsl_vector* param_init);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
