@@ -20,9 +20,9 @@ using namespace Mantid::DataHandling;
 class GaussLeastSquaresFitTest : public CxxTest::TestSuite
 {
 public:
-  
+
   GaussLeastSquaresFitTest()
-  {   
+  {
     std::string inputFile = "../../../../Test/Data/MAR11060.RAW";
 
     LoadRaw loader;
@@ -31,17 +31,17 @@ public:
 
     loader.setPropertyValue("Filename", inputFile);
 
-    outputSpace = "outer";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);    
-    
+    outputSpace = "GaussOuter";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+
     loader.execute();
   }
-  
+
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());    
-    TS_ASSERT( alg.isInitialized() );    
-    
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
     // Set the properties
     alg.setPropertyValue("InputWorkspace",outputSpace);
     alg.setPropertyValue("SpectrumNumber","3");
@@ -52,7 +52,7 @@ public:
     alg.setPropertyValue("Output w", "6000.0");
 
   }
-  
+
   void testExec()
   {
     if ( !alg.isInitialized() ) alg.initialize();
@@ -70,8 +70,8 @@ public:
     dummy = alg.getProperty("Output w");
     TS_ASSERT_DELTA( dummy, 6349.74 ,0.1);
   }
-  
-  
+
+
 private:
   GaussLeastSquaresFit alg;
   std::string inputSpace;
