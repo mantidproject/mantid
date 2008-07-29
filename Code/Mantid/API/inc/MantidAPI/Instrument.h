@@ -59,20 +59,23 @@ public:
   Geometry::ObjComponent* getSample() const;
   Geometry::IDetector* getDetector(const int &detector_id) const;
 
-  /// mark a Component which has already been added to the Instrument class
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
   /// at most one of these.
   void markAsSamplePos(Geometry::ObjComponent*);
 
-  /// mark a Component which has already been added to the Instrument class
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' source Component. For now it is assumed that we have
   /// at most one of these.
   void markAsSource(Geometry::ObjComponent*);
 
-  /// mark a Component which has already been added to the Instrument class
-  /// to be a Detector component, and add it to a detector cache for possible
-  /// later retrieval
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be a Detector component by adding it to _detectorCache
   void markAsDetector(Geometry::IDetector*);
+
+  /// mark a Component which has already been added to the Instrument (as a child comp.)
+  /// to be a monitor and also add it to _detectorCache for possible later retrieval
+  void markAsMonitor(Geometry::IDetector*);
 
 private:
   /// Private copy assignment operator

@@ -91,7 +91,7 @@ Geometry::Component* Instrument::getChild(const std::string& name) const
   return retVal;
 }
 
-/** Mark a Component which has already been added to the Instrument class
+/** Mark a Component which has already been added to the Instrument (as a child component)
 * to be 'the' samplePos Component. For now it is assumed that we have
 * at most one of these.
 *
@@ -105,7 +105,7 @@ void Instrument::markAsSamplePos(Geometry::ObjComponent* comp)
     g_log.warning("Have already added samplePos component to the _sampleCache.");
 }
 
-/** Mark a Component which has already been added to the Instrument class
+/** Mark a Component which has already been added to the Instrument (as a child component)
 * to be 'the' source Component. For now it is assumed that we have
 * at most one of these.
 *
@@ -119,9 +119,8 @@ void Instrument::markAsSource(Geometry::ObjComponent* comp)
     g_log.warning("Have already added source component to the _sourceCache.");
 }
 
-/** Mark a Component which has already been added to the Instrument class
-* to be a Detector component. Add it to a detector cache for possible
-* later retrievel
+/** Mark a Component which has already been added to the Instrument (as a child component)
+* to be a Detector by adding it to a detector cache.
 *
 * @param det Component to be marked (stored for later retrievel) as a detector Component
 *
@@ -136,6 +135,21 @@ void Instrument::markAsDetector(Geometry::IDetector* det)
     g_log.error() << "Not successful in adding Detector " << convert << " to _detectorCache." << std::endl;
     throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
   }
+}
+
+/** Mark a Component which has already been added to the Instrument class
+* as a monitor and add it to the detector cache.
+*
+* @param det Component to be marked (stored for later retrievel) as a detector Component
+*
+* @throw Exception::ExistsError if cannot add detector to cache
+*/
+void Instrument::markAsMonitor(Geometry::IDetector* det)
+{  
+  // attempt to add monitor to instrument detector cache 
+  markAsDetector(det);
+
+  // put in code below to mark detector as a monitor
 }
 
 
