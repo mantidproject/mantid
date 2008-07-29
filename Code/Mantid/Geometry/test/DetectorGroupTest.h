@@ -16,11 +16,13 @@ public:
     d1 = new Detector("d1",0);
     d1->setID(99);
     d1->setPos(2.0,2.0,2.0);
+    d1->markAsMonitor();
     detvec.push_back(d1);
     group = new DetectorGroup(detvec);
     d2 = new Detector("d2",0);
     d2->setID(11);
     d2->setPos(3.0,4.0,5.0);
+    d2->markAsMonitor();
     group->addDetector(d2);
     dg = new DetectorGroup( *(new std::vector<IDetector*>(1,group)) );
     d3 = new Detector("d3",0);
@@ -98,6 +100,12 @@ public:
     // Re-flagging as dead doesn't throw, just prints a warning
     TS_ASSERT_THROWS_NOTHING( dg->markDead() )
     TS_ASSERT( dg->isDead() )
+  }
+
+  void testIsMonitor()
+  {
+    TS_ASSERT( group->isMonitor() )
+    TS_ASSERT( ! dg->isMonitor() )
   }
 
 private:

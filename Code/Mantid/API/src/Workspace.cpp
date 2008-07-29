@@ -218,11 +218,11 @@ Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_spt
 template<> DLLExport
 Mantid::API::Workspace_const_sptr PropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const
 {
-  PropertyWithValue<Mantid::API::Workspace_const_sptr>* prop =
-                    dynamic_cast<PropertyWithValue<Mantid::API::Workspace_const_sptr>*>(getPointerToProperty(name));
+  PropertyWithValue<Mantid::API::Workspace_sptr>* prop =
+                    dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr>*>(getPointerToProperty(name));
   if (prop)
   {
-    return *prop;
+    return prop->operator()();
   }
   else
   {

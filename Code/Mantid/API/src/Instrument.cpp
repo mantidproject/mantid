@@ -51,8 +51,8 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
   std::map<int, Geometry::IDetector*>::const_iterator it;
 
   it = _detectorCache.find(detector_id);
-  
-  if ( it == _detectorCache.end() )	
+
+  if ( it == _detectorCache.end() )
   {
     g_log.information() << "Detector with ID " << detector_id << " not found." << std::endl;
     throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
@@ -87,7 +87,7 @@ Geometry::Component* Instrument::getChild(const std::string& name) const
   {
     throw Kernel::Exception::NotFoundError("Instrument: Child "+ name + " is not found.",name);
   }
-	
+
   return retVal;
 }
 
@@ -127,7 +127,7 @@ void Instrument::markAsSource(Geometry::ObjComponent* comp)
 * @throw Exception::ExistsError if cannot add detector to cache
 */
 void Instrument::markAsDetector(Geometry::IDetector* det)
-{  
+{
   if ( !_detectorCache.insert( std::map<int, Geometry::IDetector*>::value_type(det->getID(), det) ).second )
   {
     std::stringstream convert;
@@ -145,11 +145,20 @@ void Instrument::markAsDetector(Geometry::IDetector* det)
 * @throw Exception::ExistsError if cannot add detector to cache
 */
 void Instrument::markAsMonitor(Geometry::IDetector* det)
-{  
-  // attempt to add monitor to instrument detector cache 
+{
+  // attempt to add monitor to instrument detector cache
   markAsDetector(det);
 
   // put in code below to mark detector as a monitor
+  Geometry::Detector *d = dynamic_cast<Geometry::Detector*>(det);
+  if (d)
+  {
+    d->markAsMonitor();
+  }
+  else
+  {
+    throw std::invalid_argument("The IDetector pointer does not point to a Detector object");
+  }
 }
 
 

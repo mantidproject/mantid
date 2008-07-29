@@ -108,5 +108,22 @@ void DetectorGroup::markDead()
   }
 }
 
+/** Indicates whether this is a monitor.
+ *  Will return false if even one member of the group is not flagged as a monitor
+ */
+bool DetectorGroup::isMonitor() const
+{
+  // Would you ever want to group monitors?
+  // For now, treat as NOT a monitor if even one isn't
+  bool isMonitor = true;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    if ( !(*it).second->isMonitor() ) isMonitor = false;
+  }
+  return isMonitor;
+
+}
+
 } // namespace Geometry
 } // namespace Mantid

@@ -56,6 +56,10 @@ public:
 	double getDistance(const Component& comp) const;
 	bool isDead() const;
 	void markDead();
+	bool isMonitor() const;
+	// end IDetector methods
+
+	void markAsMonitor();
 
 protected:
   Detector(const Detector&);
@@ -68,6 +72,8 @@ private:
 	int m_id;
 	/// Flags if the detector is dead
 	bool m_isDead;
+	/// Flags if this is a monitor
+	bool m_isMonitor;
 
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

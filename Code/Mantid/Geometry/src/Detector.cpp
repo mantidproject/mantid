@@ -13,13 +13,13 @@ Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
  *  @param parent The parent component
  */
 Detector::Detector(const std::string& name, Component* parent) :
-  ObjComponent(name,parent), IDetector(), m_id(0), m_isDead(false)
+  ObjComponent(name,parent), IDetector(), m_id(0), m_isDead(false), m_isMonitor(false)
 {
 }
 
 /// Copy constructor
 Detector::Detector(const Detector& rhs) :
-  ObjComponent(rhs), m_id(rhs.m_id), m_isDead(rhs.m_isDead)
+  ObjComponent(rhs), m_id(rhs.m_id), m_isDead(rhs.m_isDead), m_isMonitor(rhs.m_isMonitor)
 {
 }
 
@@ -62,8 +62,20 @@ bool Detector::isDead() const
 
 void Detector::markDead()
 {
-  if ( !m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead." << std::endl;
+  if ( m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead." << std::endl;
   m_isDead = true;
+}
+
+bool Detector::isMonitor() const
+{
+  return m_isMonitor;
+}
+
+/// Flags this detector object as being a monitor
+void Detector::markAsMonitor()
+{
+  m_isMonitor = true;
+  return;
 }
 
 } //Namespace Geometry
