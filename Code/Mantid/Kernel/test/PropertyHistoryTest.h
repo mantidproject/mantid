@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Property.h"
 #include <sstream>
 
 using namespace Mantid::Kernel;

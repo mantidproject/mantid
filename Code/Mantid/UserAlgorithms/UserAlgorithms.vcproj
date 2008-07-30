@@ -26,6 +26,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="copy $(OutDir)\$(SolutionName)$(ProjectName).dll $(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll /Y"
+				Outputs="$(SolutionDir)/Bin/Plugins/$(SolutionName)$(ProjectName).dll"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

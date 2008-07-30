@@ -54,12 +54,12 @@ void GaussLeastSquaresFit::init()
   declareProperty("StartX",0, mustBePositive->clone());
   declareProperty("EndX",0, mustBePositive->clone());  
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
-  declareProperty("Output Status",""); 
-  declareProperty("Output Chi^2/DoF",0.0);
-  declareProperty("Output y0",0.0);
-  declareProperty("Output A",0.0);
-  declareProperty("Output xc",0.0);
-  declareProperty("Output w",0.0);
+  declareProperty("Output Status","", Direction::Output); 
+  declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+  declareProperty("Output y0",0.0, Direction::Output);
+  declareProperty("Output A",0.0, Direction::Output);
+  declareProperty("Output xc",0.0, Direction::Output);
+  declareProperty("Output w",0.0, Direction::Output);
 }
 
 /** Executes the algorithm

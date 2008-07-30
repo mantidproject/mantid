@@ -55,14 +55,14 @@ void BackToBackExponentialPeakFit::init()
   declareProperty("StartX",0, mustBePositive->clone());
   declareProperty("EndX",0, mustBePositive->clone());  
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
-  declareProperty("Output Status",""); 
-  declareProperty("Output Chi^2/DoF",0.0);
-  declareProperty("Output I",0.0);
-  declareProperty("Output a",0.0);
-  declareProperty("Output b",0.0);
-  declareProperty("Output c",0.0);
-  declareProperty("Output s",0.0);
-  declareProperty("Output bk",0.0);
+  declareProperty("Output Status","", Direction::Output); 
+  declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+  declareProperty("Output I",0.0, Direction::Output);
+  declareProperty("Output a",0.0, Direction::Output);
+  declareProperty("Output b",0.0, Direction::Output);
+  declareProperty("Output c",0.0, Direction::Output);
+  declareProperty("Output s",0.0, Direction::Output);
+  declareProperty("Output bk",0.0, Direction::Output);
 }
 
 /** Executes the algorithm

@@ -272,7 +272,8 @@ void Algorithm::findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorksp
     const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*it);
     if (wsProp)
     {
-      unsigned int direction = wsProp->direction();
+      const Property *wsPropProp = dynamic_cast<Property*>(*it);
+      unsigned int direction = wsPropProp->direction();
       if (direction == Direction::Input || direction == Direction::InOut)
       {
         inputWorkspaces.push_back(wsProp->getWorkspace());

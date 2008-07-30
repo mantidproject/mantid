@@ -67,10 +67,10 @@ void PropertyManager::declareProperty( Property *p )
    *  @throw std::invalid_argument  if the name argument is empty
  */
 void PropertyManager::declareProperty( const std::string &name, const char* value,
-                                       IValidator<std::string> *validator, const std::string &doc )
+                                       IValidator<std::string> *validator, const std::string &doc, const unsigned int direction )
 {
   // Simply call templated method, converting character array to a string
-  declareProperty(name, std::string(value), validator, doc);
+  declareProperty(name, std::string(value), validator, doc, direction);
 }
 
 /** Set the ordered list of properties by one string of values.

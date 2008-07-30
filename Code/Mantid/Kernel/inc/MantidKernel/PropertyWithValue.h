@@ -159,11 +159,19 @@ public:
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property
    *  @param validator The validator to use for this property (this class will take ownership of the validator)
+   *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
-  PropertyWithValue( const std::string &name, const TYPE& value, IValidator<TYPE> *validator = new NullValidator<TYPE> ) :
-    Property( name, typeid( TYPE ) ),
+  PropertyWithValue( const std::string &name, const TYPE& value, IValidator<TYPE> *validator = new NullValidator<TYPE>, const unsigned int direction = Direction::Input ) :
+    Property( name, typeid( TYPE ), direction ),
     m_value( value ),
     m_validator( validator )
+  {
+  }
+
+  PropertyWithValue( const std::string &name, const TYPE& value, const unsigned int direction) :
+    Property( name, typeid( TYPE ), direction ),
+    m_value( value ),
+    m_validator( new NullValidator<TYPE> )
   {
   }
 
@@ -268,6 +276,7 @@ public:
    */
   virtual const bool isValid() const
   {
+    //if (direction() == Direction::Output && ! isDefault()) return false;
     return m_validator->isValid(m_value);
   }
 

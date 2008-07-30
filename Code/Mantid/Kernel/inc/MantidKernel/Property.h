@@ -14,6 +14,32 @@ namespace Mantid
 {
 namespace Kernel
 {
+
+/// Describes the direction (within an algorithm) of a Property. Used by WorkspaceProperty.
+struct Direction
+{
+  /// Enum giving the possible directions
+  enum
+  {
+    Input,    ///< An input workspace
+    Output,   ///< An output workspace
+    InOut,     ///< Both an input & output workspace
+    None
+  };
+
+  /// Returns a text representation of the input Direction enum
+  static const std::string asText(const unsigned int& direction)
+  {
+    switch (direction)
+    {
+    case Input:  return "Input";
+    case Output: return "Output";
+    case InOut:  return "InOut";
+    default:     return "N/A";
+    }
+  }
+};
+
 /** @class Property Property.h Kernel/Property.h
 
     Base class for properties. Allows access without reference to templated concrete type.
@@ -69,10 +95,16 @@ public:
 
 	virtual const PropertyHistory createHistory() const;
 
+    /// returns the direction of the property
+    const unsigned int direction() const
+    {
+      return m_direction;
+    }
+
 protected:
   /// Constructor
-  Property( const std::string& name, const std::type_info& type );
-	/// Copy constructor
+  Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
+  /// Copy constructor
   Property( const Property& right );
   /// Copy assignment operator
   virtual Property& operator=( const Property& right );
@@ -86,6 +118,8 @@ private:
   std::string m_documentation;
   /// The type of the property
   const std::type_info* m_typeinfo;
+  /// Whether the property is used as input, output or both to an algorithm
+  const unsigned int m_direction;
 
   /// Private default constructor
   Property();

@@ -35,7 +35,7 @@ void GroupDetectors::init()
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty(new ArrayProperty<int>("SpectraList"));
   declareProperty(new ArrayProperty<int>("DetectorList"));
-  declareProperty("ResultIndex",-1);
+  declareProperty("ResultIndex",-1, Direction::Output);
 }
 
 void GroupDetectors::exec()

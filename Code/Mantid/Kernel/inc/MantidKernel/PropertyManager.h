@@ -109,17 +109,30 @@ protected:
    */
   template <typename T>
   void declareProperty(const std::string &name, T value,
-                       IValidator<T> *validator = new NullValidator<T>, const std::string &doc="")
+      IValidator<T> *validator = new NullValidator<T>, const std::string &doc="", const unsigned int direction = Direction::Input)
   {
-    Property *p = new PropertyWithValue<T>(name, value, validator);
+    Property *p = new PropertyWithValue<T>(name, value, validator, direction);
     p->setDocumentation(doc);
+    declareProperty(p);
+  }
+
+  template <typename T>
+  void declareProperty(const std::string &name, T value, const unsigned int direction)
+  {
+    Property *p = new PropertyWithValue<T>(name, value, new NullValidator<T>, direction);
+    p->setDocumentation("");
     declareProperty(p);
   }
 
   // Specialised version of above function
   virtual void declareProperty(const std::string &name, const char* value,
-      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="");
+      IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="", const unsigned int direction = Direction::Input);
 
+  // Specialised version of above function
+  virtual void declareProperty(const std::string &name, const char* value, const unsigned int direction)
+  {
+      declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
+  }
 
 
 private:

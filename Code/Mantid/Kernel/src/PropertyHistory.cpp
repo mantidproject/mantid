@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyHistory.h"
+#include "MantidKernel/Property.h"
 
 namespace Mantid
 {

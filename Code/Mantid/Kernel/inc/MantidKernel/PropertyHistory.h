@@ -92,31 +92,6 @@ private:
 DLLExport std::ostream& operator<<(std::ostream&, const PropertyHistory&);
 
 
-/// Describes the direction (within an algorithm) of a Property. Used by WorkspaceProperty.
-struct Direction
-{
-  /// Enum giving the possible directions
-  enum
-  {
-    Input,    ///< An input workspace
-    Output,   ///< An output workspace
-    InOut,     ///< Both an input & output workspace
-    None
-  };
-
-  /// Returns a text representation of the input Direction enum
-  static const std::string asText(const unsigned int& direction)
-  {
-    switch (direction)
-    {
-    case Input:  return "Input";
-    case Output: return "Output";
-    case InOut:  return "InOut";
-    default:     return "N/A";
-    }
-  }
-};
-
 } // namespace Kernel
 } // namespace Mantid
 

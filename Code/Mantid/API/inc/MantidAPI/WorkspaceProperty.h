@@ -64,20 +64,15 @@ public:
    *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
    */
   WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction ) :
-    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ) ),
-    m_workspaceName( wsName ),
-    m_direction( direction )
+    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), direction ),
+    m_workspaceName( wsName )
   {
-    // Make sure a random int hasn't been passed in for the direction
-    // Property & PropertyWithValue destructors will be called in this case
-    if (m_direction > 2) throw std::out_of_range("direction should be a member of the Direction enum");
   }
 
   /// Copy constructor
   WorkspaceProperty( const WorkspaceProperty& right ) :
     Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
-    m_workspaceName( right.m_workspaceName ),
-    m_direction( right.m_direction )
+    m_workspaceName( right.m_workspaceName )
   {
   }
 
@@ -138,7 +133,7 @@ public:
         if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
     } catch (Kernel::Exception::NotFoundError&) {
         // Only concerned with failing to find workspace in ADS if it's an input type
-        if ( !this->operator()() && (( m_direction==0 ) || ( m_direction==2 )) )
+        if ( !this->operator()() && (( direction() == 0 ) || ( direction() == 2 )) )
         {
           return false;
         }
@@ -156,7 +151,7 @@ public:
    */
   virtual const std::vector<std::string> allowedValues() const
   {
-    if ( ( m_direction==0 ) || ( m_direction==2 ) )
+    if ( ( direction() == 0 ) || ( direction() == 2 ) )
     {
       // If an input workspace, get the list of workspaces currently in the ADS
       return AnalysisDataService::Instance().getObjectNames();
@@ -170,7 +165,7 @@ public:
 
   virtual const Kernel::PropertyHistory createHistory() const
   {
-    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),m_direction);
+    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),direction());
   }
 
   /** If this is an output workspace, store it into the AnalysisDataService
@@ -181,7 +176,7 @@ public:
   {
     bool result = false;
 
-    if ( m_direction )
+    if ( direction() )
     {
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
@@ -200,12 +195,6 @@ public:
     return this->operator()();
   }
 
-  /// returns the direction of the property
-  const unsigned int direction() const
-  {
-    return m_direction;
-  }
-
 private:
   /// Reset the pointer to the workspace
   void clear()
@@ -215,8 +204,6 @@ private:
 
   /// The name of the workspace (as used by the AnalysisDataService)
   std::string m_workspaceName;
-  /// Whether the workspace is used as input, output or both to an algorithm
-  const unsigned int m_direction;
 };
 
 } // namespace API

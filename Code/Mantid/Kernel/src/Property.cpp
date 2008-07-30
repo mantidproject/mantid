@@ -9,12 +9,16 @@ namespace Kernel
  *  @param name The name of the property
  *  @param type The type of the property
  */
-Property::Property( const std::string &name, const std::type_info &type ) :
+Property::Property( const std::string &name, const std::type_info &type, const unsigned int direction ) :
   m_isDefault( true ),
   m_name( name ),
   m_documentation( "" ),
-  m_typeinfo( &type )
+  m_typeinfo( &type ),
+  m_direction( direction )
 {
+    // Make sure a random int hasn't been passed in for the direction
+    // Property & PropertyWithValue destructors will be called in this case
+    if (m_direction > 2) throw std::out_of_range("direction should be a member of the Direction enum");
 }
 
 /// Copy constructor
@@ -22,7 +26,8 @@ Property::Property( const Property& right ) :
   m_isDefault( right.m_isDefault ),
   m_name( right.m_name ),
   m_documentation( right.m_documentation ),
-  m_typeinfo( right.m_typeinfo )
+  m_typeinfo( right.m_typeinfo ),
+  m_direction( right.m_direction )
 {
 }
 
@@ -117,7 +122,7 @@ const std::vector<std::string> Property::allowedValues() const
 /// Create a PropertyHistory object representing the current state of the Property.
 const PropertyHistory Property::createHistory() const
 {
-  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault());
+  return PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),this->direction());
 }
 
 
