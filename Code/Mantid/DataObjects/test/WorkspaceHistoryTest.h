@@ -126,12 +126,12 @@ public:
     TS_ASSERT_EQUALS(A_AP[0].name(),"signal");
     TS_ASSERT_EQUALS(A_AP[0].value(),"5");
     TS_ASSERT_EQUALS(A_AP[0].isDefault(),true);
-    TS_ASSERT_EQUALS(A_AP[0].direction(),99);
+    TS_ASSERT_EQUALS(A_AP[0].direction(),0);
 
     TS_ASSERT_EQUALS(A_AP[1].name(),"error");
     TS_ASSERT_EQUALS(A_AP[1].value(),"3");
     TS_ASSERT_EQUALS(A_AP[1].isDefault(),true);
-    TS_ASSERT_EQUALS(A_AP[1].direction(),99);
+    TS_ASSERT_EQUALS(A_AP[1].direction(),0);
 
     TS_ASSERT_EQUALS(A_AP[2].name(),"OutWS");
     TS_ASSERT_EQUALS(A_AP[2].value(),"A");
@@ -158,13 +158,13 @@ public:
     TS_ASSERT_EQUALS(B_AP.size(), 3);
     TS_ASSERT_EQUALS(B_AP[0].name(),"signal");
     TS_ASSERT_EQUALS(B_AP[0].value(),"32");
-    TS_ASSERT_EQUALS(B_AP[0].direction(),99);
+    TS_ASSERT_EQUALS(B_AP[0].direction(),0);
     TS_ASSERT_EQUALS(B_AP[0].isDefault(),false);
 
     TS_ASSERT_EQUALS(B_AP[1].name(),"error");
     TS_ASSERT_EQUALS(B_AP[1].value(),"4");
     TS_ASSERT_EQUALS(B_AP[1].isDefault(),false);
-    TS_ASSERT_EQUALS(B_AP[1].direction(),99);
+    TS_ASSERT_EQUALS(B_AP[1].direction(),0);
 
     TS_ASSERT_EQUALS(B_AP[2].name(),"OutWS");
     TS_ASSERT_EQUALS(B_AP[2].value(),"B");

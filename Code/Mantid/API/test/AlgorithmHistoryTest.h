@@ -45,7 +45,7 @@ public:
     correctOutput = correctOutput + "  Name: arg2_param, ";
     correctOutput = correctOutput + "Value: 23, ";
     correctOutput = correctOutput + "Default?: Yes, ";
-    correctOutput = correctOutput + "Direction: N/A\n";
+    correctOutput = correctOutput + "Direction: Input\n";
 
     //set the time
     std::time_t rawtime;

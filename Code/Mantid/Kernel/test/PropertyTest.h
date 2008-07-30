@@ -78,7 +78,7 @@ public:
     TS_ASSERT_EQUALS( history.value(), "Nothing" )
     TS_ASSERT( history.isDefault() )
     TS_ASSERT_EQUALS( history.type(), p->type() )
-    TS_ASSERT_EQUALS( history.direction(), 99 )
+    TS_ASSERT_EQUALS( history.direction(), 0 )
   }
 
 private:
