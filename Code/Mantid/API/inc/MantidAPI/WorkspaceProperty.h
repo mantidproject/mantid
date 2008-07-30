@@ -133,7 +133,9 @@ public:
         if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
     } catch (Kernel::Exception::NotFoundError&) {
         // Only concerned with failing to find workspace in ADS if it's an input type
-        if ( !this->operator()() && (( direction() == 0 ) || ( direction() == 2 )) )
+        if ( !this->operator()() && 
+             (( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) || 
+              ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 )) )
         {
           return false;
         }
@@ -151,7 +153,8 @@ public:
    */
   virtual const std::vector<std::string> allowedValues() const
   {
-    if ( ( direction() == 0 ) || ( direction() == 2 ) )
+    if ( ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) || 
+         ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 ) )
     {
       // If an input workspace, get the list of workspaces currently in the ADS
       return AnalysisDataService::Instance().getObjectNames();
@@ -165,7 +168,7 @@ public:
 
   virtual const Kernel::PropertyHistory createHistory() const
   {
-    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),direction());
+    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
   }
 
   /** If this is an output workspace, store it into the AnalysisDataService
@@ -176,7 +179,7 @@ public:
   {
     bool result = false;
 
-    if ( direction() )
+    if ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() )
     {
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
