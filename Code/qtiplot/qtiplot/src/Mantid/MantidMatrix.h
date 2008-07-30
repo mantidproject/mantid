@@ -131,8 +131,10 @@ protected:
     QTabWidget *m_tabs;
     QTableView *m_table_view;
     QTableView *m_table_viewX;
+    QTableView *m_table_viewE;
     MantidMatrixModel *m_model;
     MantidMatrixModel *m_modelX;
+    MantidMatrixModel *m_modelE;
     QColor m_bk_color;
     const char **m_matrix_icon;
 	double x_start, //!< X value corresponding to column 1
@@ -156,6 +158,7 @@ class MantidMatrixModel:public QAbstractTableModel
 {
     Q_OBJECT
 public:
+      typedef enum {Y,X,E} Type;
     MantidMatrixModel(QObject *parent, 
                       Mantid::API::Workspace_sptr ws, 
                       int rows,
@@ -164,8 +167,8 @@ public:
                       int end, 
                       bool filter, 
                       double maxv,
-                      bool shX=false):
-      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols),m_showX(shX)
+                      Type type):
+      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols),m_type(type)
       {
           m_startRow = start >= 0? start : 0;
           m_endRow = end >= m_startRow? end : m_workspace->getNumberHistograms();
@@ -175,27 +178,34 @@ public:
               m_colNumCorr = 0;
       }
     int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
-    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_showX? m_cols + m_colNumCorr : m_cols;}
+    int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_type == X? m_cols + m_colNumCorr : m_cols;}
     double data(int row, int col) const
     {
         double val;
-        if (m_showX)
+        if (m_type == X)
         {
             val = m_workspace->dataX(row + m_startRow)[col];
         }
-        else
+        else if (m_type == Y)
         {
             val = m_workspace->dataY(row + m_startRow)[col];
             if (m_filter && val > m_maxv) val = m_maxv;
+        }
+        else
+        {
+            val = m_workspace->dataE(row + m_startRow)[col];
         }
         return val;
     }
     QVariant data(const QModelIndex &index, int role) const
     {
-        
         if (role != Qt::DisplayRole) return QVariant();
-        double val = m_showX? m_workspace->dataX(index.row() + m_startRow)[index.column()]:
-                              m_workspace->dataY(index.row() + m_startRow)[index.column()];
+        double val;
+        
+        if (m_type == X)  val = m_workspace->dataX(index.row() + m_startRow)[index.column()];
+        else if (m_type == Y) val = m_workspace->dataY(index.row() + m_startRow)[index.column()];
+        else  val = m_workspace->dataE(index.row() + m_startRow)[index.column()];
+
         return QVariant(m_locale.toString(val,'f',6));
     }
     Qt::ItemFlags flags(const QModelIndex & index ) const
@@ -218,6 +228,7 @@ private:
     bool m_showX;// if true display bin boundaries indstead of Y values
     int m_colNumCorr;// = 1 for histograms and = 0 for point data
     QLocale m_locale;
+    Type m_type;
 };
 
 #endif

@@ -39,6 +39,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	{
 		for (int i = 0; i < m_props.size(); ++i)
 		{
+            if ( m_props[i]->direction() == Mantid::Kernel::Direction::Output &&
+                !dynamic_cast<Mantid::API::IWorkspaceProperty*>(m_props[i])) continue;
 			if (m_props[i]->getValidatorType() == "file")
 			{
 				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));

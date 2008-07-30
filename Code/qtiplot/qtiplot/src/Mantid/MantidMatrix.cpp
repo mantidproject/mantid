@@ -62,7 +62,7 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
     m_bk_color = QColor(128, 255, 255);
     m_matrix_icon = mantid_matrix_xpm;
     m_column_width = 100;
-    m_model = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv);
+    m_model = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::Y);
 
     m_table_view = new QTableView();
     m_table_view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
@@ -90,8 +90,8 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
 	vHeader->setMovable(false);
 	vHeader->setResizeMode(QHeaderView::ResizeToContents);
 
-//--------------------------
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,true);
+//-------------------------- X Values View
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::X);
 
     m_table_viewX = new QTableView();
     m_table_viewX->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
@@ -119,9 +119,39 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
 	pal.setColor(QColorGroup::Base, m_bk_color);
 	m_table_viewX->setPalette(pal);
 
+//-------------------------- E Values View
+    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::E);
+
+    m_table_viewE = new QTableView();
+    m_table_viewE->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    m_table_viewE->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
+    m_table_viewE->setModel(m_modelE);
+    m_table_viewE->setEditTriggers(QAbstractItemView::DoubleClicked);
+    m_table_viewE->setFocusPolicy(Qt::StrongFocus);
+    //m_table_viewE->setFocus();
+
+	// set header properties
+	hHeader = (QHeaderView*)m_table_viewE->horizontalHeader();
+	hHeader->setMovable(false);
+	hHeader->setResizeMode(QHeaderView::Fixed);
+	hHeader->setDefaultSectionSize(m_column_width);
+
+    cols = numCols();
+	for(int i=0; i<cols; i++)
+		m_table_viewE->setColumnWidth(i, m_column_width);
+
+	vHeader = (QHeaderView*)m_table_viewE->verticalHeader();
+	vHeader->setMovable(false);
+	vHeader->setResizeMode(QHeaderView::ResizeToContents);
+
+    pal = m_table_viewE->palette();
+	pal.setColor(QColorGroup::Base, m_bk_color);
+	m_table_viewE->setPalette(pal);
+
     m_tabs = new QTabWidget(this);
     m_tabs->insertTab(0,m_table_view,"Y values");
     m_tabs->insertTab(1,m_table_viewX,"X values");
+    m_tabs->insertTab(2,m_table_viewE,"Errors");
     setWidget(m_tabs);
 
 //--------------------------
@@ -388,6 +418,7 @@ MantidMatrix::~MantidMatrix()
 {
 	delete m_model;
     delete m_modelX;
+    delete m_modelE;
 }
 
 //----------------------------------------------------------------------------
