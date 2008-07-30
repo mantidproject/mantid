@@ -1,4 +1,5 @@
 #include "MantidKernel/Property.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
