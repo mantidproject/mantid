@@ -149,7 +149,7 @@ void Instrument::markAsMonitor(Geometry::IDetector* det)
   // attempt to add monitor to instrument detector cache
   markAsDetector(det);
 
-  // put in code below to mark detector as a monitor
+  // mark detector as a monitor
   Geometry::Detector *d = dynamic_cast<Geometry::Detector*>(det);
   if (d)
   {

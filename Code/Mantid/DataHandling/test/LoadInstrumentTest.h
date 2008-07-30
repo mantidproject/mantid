@@ -111,6 +111,11 @@ public:
 
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
+    // test if detector with det_id=603 has been marked as a monitor
+    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(601));
+    TS_ASSERT( ptrMonitor->isMonitor() );
+
+
     // also a few tests on the last detector and a test for the one beyond the last
     Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(718048));
     TS_ASSERT_EQUALS( ptrDetLast->getID(), 718048);
@@ -177,6 +182,10 @@ public:
     double cmpDistance = ptrDet->getDistance(*samplepos);
     TS_ASSERT_DELTA(cmpDistance,0.0,0.0001);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
+
+    // test if detector with det_id=621 has been marked as a monitor
+    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(621));
+    TS_ASSERT( ptrMonitor->isMonitor() );
   }
  
   

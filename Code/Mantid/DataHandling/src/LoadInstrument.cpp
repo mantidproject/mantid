@@ -276,7 +276,7 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
 }
 
 
-/** Assumes second argument is pointing to a leaf, which here mean location element (indirectly
+/** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
  *  representing a component element) that contains no sub-components. This component is appended
  %  to the parent (1st argument).
  *
@@ -330,8 +330,11 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     idList.counted++;
     parent->add(detector);
     try
-    {
-      instrument->markAsDetector(detector);
+    { 
+      if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
+        instrument->markAsMonitor(detector);
+      else
+        instrument->markAsDetector(detector);
     }
     catch(Kernel::Exception::ExistsError&)
     {
