@@ -162,7 +162,7 @@ public:
 	void setMatrixUndoStackSize(int size);
 
 	QString endOfLine();
-	bool lautoUpdateTableValues(){return d_auto_update_table_values;};
+	bool autoUpdateTableValues(){return d_auto_update_table_values;};
 	void setAutoUpdateTableValues(bool on = true);
 
 public slots:
