@@ -242,7 +242,7 @@ int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSD
 	n = send(s, (char*)&comm, sizeof(comm), 0);
 	if ( (n == sizeof(comm)) && (data != NULL) && (len_data > 0) )
 	{
-		n = send(s, data, len_data, 0);
+		n = send(s, (const char*)data, len_data, 0);
 	}
 	return n;
 }
