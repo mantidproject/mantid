@@ -8,6 +8,7 @@ codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder) 
 listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder + '/LoadRaw')
 listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder + '/NeXusUtils')
+listCpps = listCpps + MantidBuild.getCPPFiles(codeFolder + '/LoadDAE')
 
 #Import environment
 Import('env')
