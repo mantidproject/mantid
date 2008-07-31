@@ -4,7 +4,7 @@ from time import strftime
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 
-RECIPIENTS = ['m.j.clarke@rl.ac.uk']#'mantid-buildserver@mantidproject.org']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 #,'mantid-developers@mantidproject.org'
 SENDER = 'BuildServer1@mantidproject.org'
 
