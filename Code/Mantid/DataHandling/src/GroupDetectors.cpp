@@ -111,8 +111,9 @@ void GroupDetectors::exec()
     // Move the current detector to belong to the first spectrum
     WS->getSpectraMap()->remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
-    std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataY(currentIndex).begin(),
-                   WS->dataY(firstIndex).begin(), std::plus<double>());
+    std::vector<double> &current = WS->dataY(currentIndex);
+    std::vector<double> &first = WS->dataY(firstIndex);
+    std::transform(first.begin(), first.end(), current.begin(), first.begin(), std::plus<double>());
     // Now zero the now redundant spectrum and set its spectraNo to indicate this (using -1)
     // N.B. Deleting spectra would cause issues for ManagedWorkspace2D, hence the the approach taken here
     WS->dataY(currentIndex).assign(vectorSize,0.0);

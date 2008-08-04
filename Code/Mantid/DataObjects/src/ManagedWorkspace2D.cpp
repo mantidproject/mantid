@@ -51,7 +51,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   m_XLength = XLength;
   m_YLength = YLength;
 
-  m_vectorSize = sizeof(int) + ( m_XLength + ( 3*m_YLength ) ) * sizeof(double);
+  m_vectorSize = sizeof(int) + ( m_XLength + ( 2*m_YLength ) ) * sizeof(double);
 
   // CALCULATE BLOCKSIZE
   // Get memory size of a block from config file
