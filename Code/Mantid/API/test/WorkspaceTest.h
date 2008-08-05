@@ -87,7 +87,7 @@ public:
 
   void testGetMemorySize()
   {
-    TS_ASSERT_THROWS( ws.getMemorySize(), Exception::NotImplementedError )
+    TS_ASSERT_THROWS_NOTHING( ws.getMemorySize() )
   }
 
   void testHistory()
