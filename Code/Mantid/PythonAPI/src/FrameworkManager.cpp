@@ -3,7 +3,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidPythonAPI/MantidSpectrogram.h"
 
 #include "MantidPythonAPI/FrameworkManager.h"
 
@@ -110,7 +109,6 @@ bool FrameworkManager::deleteWorkspace(const std::string& wsName)
 {
 	return API::FrameworkManager::Instance().deleteWorkspace(wsName);
 }
-
 
 
 }
