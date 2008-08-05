@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
@@ -172,11 +172,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadDAE\idc.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadDAE\isisds_command.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\isisraw.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\item_struct.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadDAE.cpp"
 				>
 			</File>
 			<File
@@ -226,11 +238,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadDAE\idc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadDAE\isisds_command.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\isisraw.h"
 				>
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\item_struct.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadDAE.h"
 				>
 			</File>
 			<File

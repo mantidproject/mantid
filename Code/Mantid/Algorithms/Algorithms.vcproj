@@ -228,6 +228,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\test\BackToBackExponentialFitTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\BackToBackExponentialPeakFit.h"
 				>
 			</File>
@@ -273,6 +277,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\GaussLeastSquaresFit.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\GaussLeastSquaresFitTest.h"
 				>
 			</File>
 			<File
