@@ -58,19 +58,23 @@ public:
 	void clear();
 
 	/// Creates and instance of an algorithm
-	API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version=-1);
+	API::IAlgorithm* createAlgorithm(const std::string& algName);
+	API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version);
 
 	/// Creates an instance of an algorithm and sets the properties provided
-	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version=-1);
+	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
+	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version);
 
 	/// Creates an instance of an algorithm, sets the properties provided & then executes it.
-	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version=-1);
+	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray);
+	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version);
 
 	/// Returns a shared pointer to the workspace requested
 	API::Workspace* getWorkspace(const std::string& wsName);
 
 	/// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
+
 
 private:
 
