@@ -87,8 +87,8 @@ public:
   boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
   boost::shared_ptr<Sample> getSample() const;
 
-  /// Get the footprint in memory. @todo Not implemented yet
-  long int getMemorySize() const { throw Kernel::Exception::NotImplementedError("Workspace::getMemorySize"); }
+  /// Get the footprint in memory in KB.
+  virtual long int getMemorySize() const;
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace

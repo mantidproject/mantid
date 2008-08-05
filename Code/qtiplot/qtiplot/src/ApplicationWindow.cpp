@@ -414,7 +414,7 @@ void ApplicationWindow::initGlobalConstants()
 	show_windows_policy = ActiveFolder;
 	d_script_win_on_top = true;
 	d_script_win_rect = QRect(0, 0, 500, 300);
-	d_init_window_type = TableWindow;
+	d_init_window_type = NoWindow;
 
 	QString aux = qApp->applicationDirPath();
 	workingDir = aux;

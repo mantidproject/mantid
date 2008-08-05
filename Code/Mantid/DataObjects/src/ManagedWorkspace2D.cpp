@@ -63,13 +63,20 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
     blockMemory = 1024*1024;
   }
 
+
   m_vectorsPerBlock = blockMemory / m_vectorSize;
   // Should this ever come out to be zero, then actually set it to 1
   if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
+  
+  //g_log.debug()<<"blockMemory: "<<blockMemory<<"\n";
+  //g_log.debug()<<"m_vectorSize: "<<m_vectorSize<<"\n";
+  //g_log.debug()<<"m_vectorsPerBlock: "<<m_vectorsPerBlock<<"\n";
+  //g_log.debug()<<"Memeory: "<<getMemorySize()<<"\n";
+
 
   // Calculate the number of blocks that will go into a file
   m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * m_vectorSize);
-  if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile;
+  if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile; 
 
   // Now work out the number of files needed
   int totalBlocks = m_noVectors / m_vectorsPerBlock;
@@ -510,6 +517,11 @@ void ManagedWorkspace2D::mru_list::clear()
     delete *it;
   }
   il.clear();
+}
+
+long int ManagedWorkspace2D::getMemorySize() const
+{
+    return (long int)(double(m_vectorSize)/1024)*m_bufferedData.size()*m_vectorsPerBlock;
 }
 
 } // namespace DataObjects

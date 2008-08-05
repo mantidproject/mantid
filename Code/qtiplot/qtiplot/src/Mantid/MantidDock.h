@@ -45,6 +45,7 @@ public:
     AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
 public slots:
     void update();
+    void tst();
 protected:
     QTreeWidget *m_tree;
     friend class MantidUI;

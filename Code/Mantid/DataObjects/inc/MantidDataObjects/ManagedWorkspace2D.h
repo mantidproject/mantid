@@ -65,6 +65,7 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
 
     void insert(ManagedDataBlock2D* item);
     void clear();
+    size_t size()const{return il.size();}
 
   private:
     /// typedef for the container holding the list
@@ -136,6 +137,8 @@ public:
   virtual const API::IErrorHelper* errorHelper(const int index) const;
   virtual void setErrorHelper(const int index,API::IErrorHelper* errorHelper);
   virtual void setErrorHelper(const int index,const API::IErrorHelper* errorHelper);
+
+  long int getMemorySize() const;
 
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

@@ -186,6 +186,12 @@ bool& Workspace::isDistribution(bool newValue)
   return m_isDistribution;
 }
 
+long int Workspace::getMemorySize() const 
+{ 
+    return 3*size()*sizeof(double)/1024;
+}
+
+
 } // namespace API
 } // Namespace Mantid
 

@@ -2,6 +2,7 @@
 #include "MantidUI.h"
 #include "../ApplicationWindow.h"
 #include <MantidAPI/AlgorithmFactory.h>
+#include <MantidAPI/MemoryManager.h>
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -62,7 +63,6 @@ void MantidDockWidget::update()
         Mantid::API::Workspace_sptr ws = m_mantidUI->getWorkspace(sl[i]);
         wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
-        //wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(m_mantidUI->getBinNumber(sl[i])))));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
         Mantid::API::Axis* ax;
         ax = ws->getAxis(0);
@@ -70,7 +70,9 @@ void MantidDockWidget::update()
         if (ax->unit().get()) s += ax->unit()->caption() + " / " + ax->unit()->label();
         else
             s += "Unknown";
-        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
+        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
+        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(ws->id()))));
+        wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
         m_tree->addTopLevelItem(wsItem);
     }
 }
@@ -138,6 +140,7 @@ QDockWidget(w)
     //
     connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
     connect(refreshButton,SIGNAL(clicked()),this,SLOT(update()));
+    //connect(refreshButton,SIGNAL(clicked()),this,SLOT(tst()));
 
     setWidget(f);
     update();
@@ -194,6 +197,10 @@ void AlgorithmDockWidget::update()
     }
 }
 
+void AlgorithmDockWidget::tst()
+{
+    MemoryManager::Instance().getMemoryInfo();
+}
 //-------------------- AlgorithmTreeWidget ----------------------//
 
 void AlgorithmTreeWidget::mousePressEvent (QMouseEvent *e)
