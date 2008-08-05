@@ -35,6 +35,9 @@ public:
 
   void testExec()
   {
+    TS_TRACE("TEST DISABLED: testExec - needs a reliable Stub for the DAE");
+    return;
+
     if ( !m_loader.isInitialized() ) m_loader.initialize();
 
     // Should fail because mandatory parameter has not been set    
