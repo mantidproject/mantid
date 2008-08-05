@@ -24,7 +24,7 @@ public:
   LoadDAETest()
   {
     // Hostname of computer with DAE to connect to
-    m_inputDAE = "NDWFREDDIE";
+    m_inputDAE = "NDW161.isis.cclrc.ac.uk";
   }
 
   void testInit()
@@ -35,8 +35,6 @@ public:
 
   void testExec()
   {
-    TS_TRACE("TEST DISABLED: testExec - needs a reliable Stub for the DAE");
-    return;
 
     if ( !m_loader.isInitialized() ) m_loader.initialize();
 
