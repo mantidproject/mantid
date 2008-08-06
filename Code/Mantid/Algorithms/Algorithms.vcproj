@@ -221,6 +221,10 @@
 				RelativePath=".\src\SimpleRebin.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\Unwrap.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -337,6 +341,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SimpleRebinTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Unwrap.h"
 				>
 			</File>
 		</Filter>
