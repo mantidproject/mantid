@@ -171,10 +171,13 @@ namespace Mantid
       {
           int i = resultIndeces[hist];
           int spNo = spectraAxis->spectraNo(i);
+          std::vector<double> &tmpE = tmpW->dataE(i);
+          std::vector<double> &outE = outputW->dataE(hist);
           std::vector<double> &tmpY = tmpW->dataY(i);
           std::vector<double> &outY = outputW->dataY(hist);
           std::vector<double> &tmpX = tmpW->dataX(i);
           std::vector<double> &outX = outputW->dataX(hist);
+          outE.assign(tmpE.begin(),tmpE.end());
           outY.assign(tmpY.begin(),tmpY.end());
           outX.assign(tmpX.begin(),tmpX.end());
           spectraAxisNew->setValue(hist,spNo);
