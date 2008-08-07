@@ -19,8 +19,8 @@
 		public:
 			MuonNexusReader();
 			~MuonNexusReader();
-			int MuonNexusReader::readFromFile(const std::string& filename);
-			int MuonNexusReader::getTimeChannels(float* timechannels, int len);
+			int readFromFile(const std::string& filename);
+			int getTimeChannels(float* timechannels, int len);
 			// from ISISRAW.h
 			int t_nsp1;			///< number of spectra in time regime 1
 			int t_ntc1;			///< number of time channels in time regime 1
