@@ -59,7 +59,7 @@ public:
 	bool isMonitor() const;
 	// end IDetector methods
 
-	void markAsMonitor();
+	void markAsMonitor(const bool flag = true);
 
 protected:
   Detector(const Detector&);

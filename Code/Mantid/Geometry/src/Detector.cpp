@@ -71,10 +71,12 @@ bool Detector::isMonitor() const
   return m_isMonitor;
 }
 
-/// Flags this detector object as being a monitor
-void Detector::markAsMonitor()
+/** Sets the flag for whether this detector object is a monitor
+ *  @param flag True to mark the detector a monitor (default), false otherwise
+ */
+void Detector::markAsMonitor(const bool flag)
 {
-  m_isMonitor = true;
+  m_isMonitor = flag;
   return;
 }
 

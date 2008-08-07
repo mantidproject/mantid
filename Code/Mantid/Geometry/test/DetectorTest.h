@@ -66,6 +66,8 @@ public:
     TS_ASSERT( ! det.isMonitor() )
     TS_ASSERT_THROWS_NOTHING( det.markAsMonitor() )
     TS_ASSERT( det.isMonitor() )
+    TS_ASSERT_THROWS_NOTHING( det.markAsMonitor(false) )
+    TS_ASSERT( ! det.isMonitor() )
   }
 };
 

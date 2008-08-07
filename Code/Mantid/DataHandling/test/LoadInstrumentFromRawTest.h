@@ -94,6 +94,16 @@ public:
     Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(718048));
     TS_ASSERT_EQUALS( ptrDetLast->getID(), 718048);
     TS_ASSERT_THROWS(i->getDetector(718049), Exception::NotFoundError);
+
+    // Check the monitors are correctly marked
+    TS_ASSERT( i->getDetector(601)->isMonitor() )
+    TS_ASSERT( i->getDetector(602)->isMonitor() )
+    TS_ASSERT( i->getDetector(603)->isMonitor() )
+    TS_ASSERT( i->getDetector(604)->isMonitor() )
+    // ...and that a normal detector isn't
+    TS_ASSERT( ! i->getDetector(1)->isMonitor() )
+    TS_ASSERT( ! i->getDetector(101256)->isMonitor() )
+    TS_ASSERT( ! i->getDetector(718048)->isMonitor() )
   }
 
 

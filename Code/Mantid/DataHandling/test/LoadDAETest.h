@@ -1,5 +1,5 @@
-#ifndef LOADRAWTEST_H_
-#define LOADRAWTEST_H_
+#ifndef LOADDAETEST_H_
+#define LOADDAETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,7 +29,7 @@ public:
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( m_loader.initialize());    
+    TS_ASSERT_THROWS_NOTHING( m_loader.initialize());
     TS_ASSERT( m_loader.isInitialized() );
   }
 
@@ -38,8 +38,8 @@ public:
 
     if ( !m_loader.isInitialized() ) m_loader.initialize();
 
-    // Should fail because mandatory parameter has not been set    
-    TS_ASSERT_THROWS(m_loader.execute(),std::runtime_error);    
+    // Should fail because mandatory parameter has not been set
+    TS_ASSERT_THROWS(m_loader.execute(),std::runtime_error);
 
     // Set inputs
     m_loader.setPropertyValue("DAEname", m_inputDAE);
@@ -47,18 +47,18 @@ public:
     m_loader.setPropertyValue("spectrum_max", "2");
 
     m_outputSpace = "outer";
-    m_loader.setPropertyValue("OutputWorkspace", m_outputSpace);    
+    m_loader.setPropertyValue("OutputWorkspace", m_outputSpace);
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = m_loader.getPropertyValue("DAEname") )
       TS_ASSERT( ! result.compare(m_inputDAE));
 
-    TS_ASSERT_THROWS_NOTHING(m_loader.execute());    
-    TS_ASSERT_EQUALS( m_loader.isExecuted(),true);    
+    TS_ASSERT_THROWS_NOTHING(m_loader.execute());
+    TS_ASSERT_EQUALS( m_loader.isExecuted(),true);
 
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_outputSpace));    
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(m_outputSpace));
     if (output != 0)
     {
       Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);

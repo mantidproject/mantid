@@ -85,31 +85,37 @@ void LoadInstrumentFromRaw::exec()
   source->setPos(0.0,-1.0*l1,0.0);
 
   // add detectors
+  const int numDetector = iraw.i_det;    // number of detectors
+  const int* const detID = iraw.udet;    // detector IDs
+  const float* const r = iraw.len2;      // distance from sample
+  const float* const angle = iraw.tthe;  // angle between indicent beam and direction from sample to detector (two-theta)
 
-  int numDetector = iraw.i_det; // number of detectors
-  int* detID = iraw.udet;      // detector IDs
-  float* r = iraw.len2;         // distance from sample
-  float* angle = iraw.tthe;     // angle between indicent beam and direction from sample to detector (two-theta)
-
-  Geometry::Detector detector("det",samplepos);
-
-  for (int i = 0; i < numDetector; i++)
+  for (int i = 0; i < numDetector; ++i)
   {
-
+    // Create a new detector. Instrument will take ownership of pointer so no need to delete.
+    Geometry::Detector *detector = new Geometry::Detector("det",samplepos);
     Geometry::V3D pos;
     pos.spherical(r[i], angle[i], 0.0);
-    detector.setPos(pos);
+    detector->setPos(pos);
 
     // set detector ID, add copy to instrument and mark it
+    detector->setID(detID[i]);
+    instrument->add(detector);
+    instrument->markAsDetector(detector);
+  }
 
-    detector.setID(detID[i]);
-    int toGetHoldOfDetectorCopy = instrument->addCopy(&detector);
-    Geometry::Detector* temp = dynamic_cast<Geometry::Detector*>((*instrument)[toGetHoldOfDetectorCopy-1]);
-    instrument->markAsDetector(temp);
+  // Now mark the up the monitors
+  const int numMonitors = iraw.i_mon;     // The number of monitors
+  const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
+  for (int j = 0; j < numMonitors; ++j)
+  {
+    const int detectorToMark = detID[monIndex[j]-1];
+    Geometry::Detector *det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(detectorToMark));
+    det->markAsMonitor();
+    g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }
 
   // Information to the user about what info is extracted from raw file
-
   g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
     << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
     << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
