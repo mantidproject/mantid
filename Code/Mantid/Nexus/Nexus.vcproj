@@ -161,7 +161,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\LoadMuonNexus.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadNeXus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\MuonNexusReader.cpp"
 				>
 			</File>
 			<File
@@ -179,7 +187,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\inc\MantidNexus\LoadMuonNexus.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidNexus\LoadNeXus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\MuonNexusReader.h"
 				>
 			</File>
 			<File
