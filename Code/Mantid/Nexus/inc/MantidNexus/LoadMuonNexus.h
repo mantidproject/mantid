@@ -26,9 +26,10 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input RAW file </LI>
+    <LI> Filename - The name of and path to the input Nexus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
-         (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
+         (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
+		 [ not yet implemented for Nexus ]</LI>
     </UL>
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
@@ -81,7 +82,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
- //     void checkOptionalProperties();
+     void checkOptionalProperties();
      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int& , int*, DataObjects::Workspace2D_sptr );
  //     void runLoadInstrument(DataObjects::Workspace2D_sptr);
  //     void runLoadInstrumentFromMuonNexus(DataObjects::Workspace2D_sptr);

@@ -199,9 +199,45 @@ public:
     TS_ASSERT( ! output-> isDistribution() )
 
   }
+
+  void testarrayin()
+  {
+    if ( !nxload3.isInitialized() ) nxload3.initialize();
+    
+    nxload3.setPropertyValue("Filename", inputFile);    
+    nxload3.setPropertyValue("OutputWorkspace", "outWS");    
+    nxload3.setPropertyValue("spectrum_list", "29,30,31");
+    nxload3.setPropertyValue("spectrum_min", "5");
+    nxload3.setPropertyValue("spectrum_max", "10");
+    
+    TS_ASSERT_THROWS_NOTHING(nxload3.execute());    
+    TS_ASSERT( nxload3.isExecuted() );    
+    
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));    
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    
+    // Should be 6 for selected input
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 9);
+    
+    // Check two X vectors are the same
+    TS_ASSERT( (output2D->dataX(1)) == (output2D->dataX(5)) );
+    
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(7).size() );
+
+    // Check one particular value
+    TS_ASSERT_EQUALS( output2D->dataY(8)[479], 144);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataE(8)[479], 12);
+    // Check that the error on that value is correct
+    TS_ASSERT_DELTA( output2D->dataX(8)[479], 7.410, 0.0001);
+    
+  }
   
 private:
-  LoadMuonNexus nxLoad,nxload2;
+  LoadMuonNexus nxLoad,nxload2,nxload3;
   std::string outputSpace;
   std::string entryName;
   std::string inputFile;

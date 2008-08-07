@@ -78,9 +78,9 @@ namespace Mantid
 //-      boost::shared_ptr<SpectraDetectorMap> specMap;
 //-      boost::shared_ptr<Sample> sample;
 //-      
-//-      // Call private method to validate the optional parameters, if set
-//-      checkOptionalProperties();
-//-            
+      // Call private method to validate the optional parameters, if set
+      checkOptionalProperties();
+           
       // Read the number of time channels (i.e. bins) from the Nexus file
       const int channelsPerSpectrum = nxload.t_ntc1;
       // Read in the time bin boundaries 
@@ -95,16 +95,16 @@ namespace Mantid
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
-//-      if( m_interval || m_list)
-//-      {
-//-        total_specs = m_spec_list.size();
-//-        if (m_interval)
-//-        {
-//-          total_specs += (m_spec_max-m_spec_min+1);
-//-          m_spec_max += 1;
-//-        }
-//-      }
-//-      else
+      if( m_interval || m_list)
+      {
+		total_specs = m_spec_list.size();
+        if (m_interval)
+        {
+          total_specs += (m_spec_max-m_spec_min+1);
+          m_spec_max += 1;
+        }
+      }
+      else
       {
         total_specs = m_numberOfSpectra;
         // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
@@ -130,17 +130,17 @@ namespace Mantid
           loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,spectrum,localWorkspace ); // added -1 for NeXus
           counter++;
         }
-//-        // Read in the spectra in the optional list parameter, if set
-//-        if (m_list)
-//-        {
-//-          for(unsigned int i=0; i < m_spec_list.size(); ++i)
-//-          {
-//-            loadData(timeChannelsVec,counter,m_spec_list[i],iraw,lengthIn,spectrum, localWorkspace );
-//-            counter++;
-//-          }
-//-        }
-//-        // Just a sanity check
-//-        assert(counter == total_specs);
+        // Read in the spectra in the optional list parameter, if set
+        if (m_list)
+        {
+          for(unsigned int i=0; i < m_spec_list.size(); ++i)
+          {
+            loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1,spectrum, localWorkspace );
+            counter++;
+          }
+        }
+        // Just a sanity check
+        assert(counter == total_specs);
       
         std::string outputWorkspace = "OutputWorkspace";
         if (period == 0)
@@ -181,52 +181,52 @@ namespace Mantid
       delete[] spectrum;
     }
 
-//-    /// Validates the optional 'spectra to read' properties, if they have been set
-//-    void LoadMuonNexus::checkOptionalProperties()
-//-    {
-//-      Property *specList = getProperty("spectrum_list");
-//-      m_list = !(specList->isDefault());
-//-      Property *specMax = getProperty("spectrum_max");
-//-      m_interval = !(specMax->isDefault());
-//-      
-//-      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-//-      if ( m_numberOfPeriods > 1)
-//-      {
-//-        if ( m_list || m_interval )
-//-        {
-//-          m_list = false;
-//-          m_interval = false;
-//-          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-//-        }
-//-      }
-//-
-//-      // Check validity of spectra list property, if set
-//-      if ( m_list )
-//-      {
-//-        m_list = true;
-//-        m_spec_list = getProperty("spectrum_list");
-//-        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-//-        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
-//-        if ( maxlist > m_numberOfSpectra || minlist == 0)
-//-        {
-//-          g_log.error("Invalid list of spectra");
-//-          throw std::invalid_argument("Inconsistent properties defined"); 
-//-        } 
-//-      }
-//-           
-//-      // Check validity of spectra range, if set
-//-      if ( m_interval )
-//-      {
-//-        m_interval = true;
-//-        m_spec_min = getProperty("spectrum_min");
-//-        m_spec_max = getProperty("spectrum_max");
-//-        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
-//-        {
-//-          g_log.error("Invalid Spectrum min/max properties");
-//-          throw std::invalid_argument("Inconsistent properties defined"); 
-//-        }
-//-      }
-//-    }
+    /// Validates the optional 'spectra to read' properties, if they have been set
+    void LoadMuonNexus::checkOptionalProperties()
+    {
+      Property *specList = getProperty("spectrum_list");
+      m_list = !(specList->isDefault());
+      Property *specMax = getProperty("spectrum_max");
+      m_interval = !(specMax->isDefault());
+      
+      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
+      if ( m_numberOfPeriods > 1)
+      {
+        if ( m_list || m_interval )
+        {
+          m_list = false;
+          m_interval = false;
+          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
+        }
+      }
+
+      // Check validity of spectra list property, if set
+      if ( m_list )
+      {
+        m_list = true;
+        m_spec_list = getProperty("spectrum_list");
+        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+        if ( maxlist > m_numberOfSpectra || minlist == 0)
+        {
+          g_log.error("Invalid list of spectra");
+          throw std::invalid_argument("Inconsistent properties defined"); 
+        } 
+      }
+           
+      // Check validity of spectra range, if set
+      if ( m_interval )
+      {
+        m_interval = true;
+        m_spec_min = getProperty("spectrum_min");
+        m_spec_max = getProperty("spectrum_max");
+        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
+        {
+          g_log.error("Invalid Spectrum min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined"); 
+        }
+	  }
+    }
     
     /** Load in a single spectrum taken from a NeXus file
      *  @param tcbs     The vector containing the time bin boundaries
