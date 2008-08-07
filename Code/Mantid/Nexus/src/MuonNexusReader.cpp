@@ -1,7 +1,7 @@
 #include <vector>
 #include <sstream>
 #include <napi.h>
-#include "MantidNexus/MuonNeXusReader.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 
 
