@@ -1,9 +1,10 @@
 #ifndef LOADMUONNEXUSTEST_H_
 #define LOADMUONNEXUSTEST_H_
 
-// This include seems to make the difference between initialization of the
-// workspace names (workspace2D/1D etc) and not for this test case.
+// These includes seem to make the difference between initialization of the
+// workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
+#include "MantidDataHandling/LoadInstrument.h" 
 //
 
 #include <fstream>
@@ -21,6 +22,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
 class LoadMuonNexusTest : public CxxTest::TestSuite
@@ -79,7 +81,6 @@ public:
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
-
 
     /*  - other tests from LoadRawTest
     //----------------------------------------------------------------------

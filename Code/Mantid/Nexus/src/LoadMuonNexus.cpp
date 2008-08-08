@@ -66,6 +66,8 @@ namespace Mantid
         throw Exception::FileError("Unable to open File:" , m_filename);  
       }
 
+      // Read in the instrument name from the Nexus file
+      m_instrument_name = nxload.getInstrumentName();
       // Read in the number of spectra in the Nexus file
       m_numberOfSpectra = nxload.t_nsp1;
       // Read the number of periods in this file
@@ -146,7 +148,7 @@ namespace Mantid
         if (period == 0)
         {
           // Only run the sub-algorithms once
-//-          runLoadInstrument(localWorkspace );
+          runLoadInstrument(localWorkspace );
 //-          runLoadMappingTable(localWorkspace );
 //-          runLoadLog(localWorkspace );
 //-          // Cache these for copying to workspaces for later periods
@@ -255,63 +257,67 @@ namespace Mantid
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
     }
 
-//-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
-//-    void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
-//-    {
-//-      // Determine the search directory for XML instrument definition files (IDFs)
-//-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
-//-      if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
-//-
-//-      const int stripPath = m_filename.find_last_of("\\/");
-//-      std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
-//-      // force ID to upper case
-//-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-//-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
-//-      
-//-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-//-      loadInst->setPropertyValue("Filename", fullPathIDF);
-//-      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
-//-
-//-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-//-      try
-//-      {
-//-        loadInst->execute();
-//-      }
-//-      catch (std::runtime_error& err)
-//-      {
-//-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-//-      }
-//-
-//-      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
-//-      if ( ! loadInst->isExecuted() )
-//-      {
-//-        runLoadInstrumentFromNexus(localWorkspace);
-//-      }
-//-    }
-//-    
-//-    /// Run LoadInstrumentFromNexus as a sub-algorithm (only if loading from instrument definition file fails)
-//-    void LoadMuonNexus::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
-//-    {
-//-      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-//-        << "the instrument from raw data file.\n";
-//-
-//-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
-//-      loadInst->setPropertyValue("Filename", m_filename);
-//-      // Set the workspace property to be the same one filled above
-//-      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
-//-
-//-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-//-      try
-//-      {
-//-        loadInst->execute();
-//-      }
-//-      catch (std::runtime_error& err)
-//-      {
-//-        g_log.error("Unable to successfully run LoadInstrumentFromNexus sub-algorithm");
-//-      }
-//-
-//-      if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");      
-//-    }
+    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    void LoadMuonNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      // Determine the search directory for XML instrument definition files (IDFs)
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
+      if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
+
+      //const int stripPath = m_filename.find_last_of("\\/");
+      // For Nexus, Instrument name given by MuonNexusReader from Nexus file
+      std::string instrumentID = m_instrument_name; //m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
+      // force ID to upper case
+      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+      
+      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      loadInst->setPropertyValue("Filename", fullPathIDF);
+      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadInst->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+      }
+
+      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
+	  // This does not work at present as the example files do not hold the necessary data
+	  // but is a place holder. Hopefully the new version of Nexus Muon files should be more
+	  // complete.
+      if ( ! loadInst->isExecuted() )
+      {
+        runLoadInstrumentFromNexus(localWorkspace);
+      }
+    }
+    
+    /// Run LoadInstrumentFromNexus as a sub-algorithm (only if loading from instrument definition file fails)
+    void LoadMuonNexus::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
+        << "the instrument from raw data file.\n";
+
+      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
+      loadInst->setPropertyValue("Filename", m_filename);
+      // Set the workspace property to be the same one filled above
+      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadInst->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.error("Unable to successfully run LoadInstrumentFromNexus sub-algorithm");
+      }
+
+      if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");      
+    }
 //-    
 //-    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
 //-    void LoadMuonNexus::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)

@@ -82,15 +82,17 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-     void checkOptionalProperties();
-     void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int& , int*, DataObjects::Workspace2D_sptr );
- //     void runLoadInstrument(DataObjects::Workspace2D_sptr);
- //     void runLoadInstrumentFromMuonNexus(DataObjects::Workspace2D_sptr);
+      void checkOptionalProperties();
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int& , int*, DataObjects::Workspace2D_sptr );
+      void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
  //     void runLoadMappingTable(DataObjects::Workspace2D_sptr);
  //     void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
+      /// The instrument name from Nexus
+      std::string m_instrument_name;
      
       /// The number of spectra in the raw file
       int m_numberOfSpectra;

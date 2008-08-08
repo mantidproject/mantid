@@ -5,7 +5,7 @@
 
 
 
-MuonNexusReader::MuonNexusReader() : counts(0)
+MuonNexusReader::MuonNexusReader() : counts(0), nexus_instrument_name()
 {
 }
 
@@ -38,38 +38,52 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    // read histogram data
    stat=NXopengroup(fileID,"histogram_data_1","NXdata");
    if(stat==NX_ERROR) return(1);
-   stat=NXopendata(fileID,"counts");
-   int rank,type,dims[4];
-   stat=NXgetinfo(fileID,&rank,dims,&type);
-   // Number of time channels and number of spectra made public
-   t_ntc1=dims[1];
-   t_nsp1=dims[0];
-   //
+    stat=NXopendata(fileID,"counts");
+     int rank,type,dims[4];
+     stat=NXgetinfo(fileID,&rank,dims,&type);
+     // Number of time channels and number of spectra made public
+     t_ntc1=dims[1];
+     t_nsp1=dims[0];
+     //
+     if(stat==NX_ERROR) return(1);
+     // allocate temp space for histogram data
+     counts = new int[dims[0]*dims[1]];
+     stat=NXgetdata(fileID,counts);
+     if(stat==NX_ERROR) return(1);
+     // temp check on data vaues
+     //int i,j,sum=0;
+     //for (i=0;i<dims[0]*dims[1];i++)
+     //  sum+=counts[i];
+     //
+    stat=NXclosedata(fileID);
+    if(stat==NX_ERROR) return(1);
+    // read corrected time
+    stat=NXopendata(fileID,"corrected_time");
+     if(stat==NX_ERROR) return(1);
+     stat=NXgetinfo(fileID,&rank,dims,&type);
+     if(stat==NX_ERROR) return(1);
+     corrected_times = new float[dims[0]];
+     if(stat==NX_ERROR) return(1);
+     stat=NXgetdata (fileID, corrected_times);
+     if(stat==NX_ERROR) return(1);
+     // assume only one data set in file
+     t_nper=1;
+     //
+    stat=NXclosedata (fileID);
+   stat=NXclosegroup (fileID);
    if(stat==NX_ERROR) return(1);
-   // allocate temp space for histogram data
-   counts = new int[dims[0]*dims[1]];
-   stat=NXgetdata(fileID,counts);
-   if(stat==NX_ERROR) return(1);
-   // temp check on data vaues
-   //int i,j,sum=0;
-   //for (i=0;i<dims[0]*dims[1];i++)
-   //  sum+=counts[i];
-   //
-   stat=NXclosedata(fileID);
-   if(stat==NX_ERROR) return(1);
-   // read corrected time
-   stat=NXopendata(fileID,"corrected_time");
-   if(stat==NX_ERROR) return(1);
-   stat=NXgetinfo(fileID,&rank,dims,&type);
-   if(stat==NX_ERROR) return(1);
-   corrected_times = new float[dims[0]];
-   if(stat==NX_ERROR) return(1);
-   stat=NXgetdata (fileID, corrected_times);
-   if(stat==NX_ERROR) return(1);
-   // assume only one data set in file
-   t_nper=1;
-   //
-   stat=NXclosedata (fileID);
+    // get instrument name
+    stat=NXopengroup(fileID,"instrument","NXinstrument");
+    if(stat==NX_ERROR) return(1);
+     stat=NXopendata(fileID,"name");
+     if(stat==NX_ERROR) return(1);
+     stat=NXgetinfo(fileID,&rank,dims,&type);
+     char* instrument=new char[dims[0]+1];
+     stat=NXgetdata(fileID,instrument);
+	 instrument[dims[0]]='\0'; // null terminate for copy
+     nexus_instrument_name=instrument;
+     delete[] instrument;
+    stat=NXclosedata(fileID);
    // close file
    if(stat==NX_ERROR) return(1);
    stat=NXclosegroup (fileID);
@@ -97,7 +111,10 @@ int MuonNexusReader::getTimeChannels(float* timebnds, int nbnds)
    return(0);
 }
 
-
+std::string MuonNexusReader::getInstrumentName()
+{
+	return(nexus_instrument_name);
+}
 
 
 

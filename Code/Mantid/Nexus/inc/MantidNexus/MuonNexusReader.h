@@ -10,6 +10,7 @@
 class MuonNexusReader
 {
 	private:
+		std::string nexus_instrument_name;
 
 
 	public:
@@ -24,6 +25,7 @@ class MuonNexusReader
 		// for nexus
 		float* corrected_times; ///< temp store for corrected times
 		int* counts;         ///< temp store of histogram data
+		std::string getInstrumentName(); ///< return instrument name
 };
 
 
