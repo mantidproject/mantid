@@ -53,24 +53,14 @@ void GroupDetectors::exec()
     g_log.error("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
     throw std::invalid_argument("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
   }
-  
-  // Bin boundaries need to be the same so, check if they actually are
-//  if ( WS->getAxis(0)->unit()->unitID().compare("TOF") )
+
+  // Bin boundaries need to be the same, so check if they actually are
   if ( !hasSameBoundaries(WS) )
   {
-    g_log.error("Can only group if the workspace unit is time-of-flight");
-    throw std::runtime_error("Can only group if the workspace unit is time-of-flight");
-  }//*/
-  // If passes the above check, assume X bin boundaries are the same
-  
-  // I'm also going to insist for the time being that Y just contains raw counts 
-  if ( WS->isDistribution() )
-  {
-    g_log.error("GroupDetectors at present only works if spectra contain raw counts");
-    throw Exception::NotImplementedError("GroupDetectors at present only works if spectra contain raw counts");    
+    g_log.error("Can only group if the histograms have common bin boundaries");
+    throw std::runtime_error("Can only group if the histograms have common bin boundaries");
   }
-  /// @todo Get this algorithm working on a more generic input workspace so the restrictions above can be lost
-  
+
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
   // Get hold of the axis that holds the spectrum numbers
   Axis *spectraAxis = WS->getAxis(1);
@@ -98,69 +88,72 @@ void GroupDetectors::exec()
       return;
   }
 
+  // Copy the spectra-detector map because it's going to be changed
   WS->copySpectraMap(WS->getSpectraMap());
-  
-  
+
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
   const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
   setProperty("ResultIndex",firstIndex);
+  // loop over the spectra to group
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
   {
     const int currentIndex = indexList[i+1];
     // Move the current detector to belong to the first spectrum
     WS->getSpectraMap()->remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
-    std::vector<double> &current = WS->dataY(currentIndex);
-    std::vector<double> &first = WS->dataY(firstIndex);
-    std::transform(first.begin(), first.end(), current.begin(), first.begin(), std::plus<double>());
+    // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
+    std::vector<double> &firstY = WS->dataY(firstIndex);
+    std::vector<double>::iterator fYit;
+    std::vector<double>::iterator fEit = WS->dataE(firstIndex).begin();
+    std::vector<double>::iterator Yit = WS->dataY(currentIndex).begin();
+    std::vector<double>::iterator Eit = WS->dataE(currentIndex).begin();
+    for (fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
+    {
+      *fYit += *Yit;
+      // Assume 'normal' (i.e. Gaussian) combination of errors
+      *fEit = sqrt( (*fEit)*(*fEit) + (*Eit)*(*Eit) );
+    }
     // Now zero the now redundant spectrum and set its spectraNo to indicate this (using -1)
     // N.B. Deleting spectra would cause issues for ManagedWorkspace2D, hence the the approach taken here
     WS->dataY(currentIndex).assign(vectorSize,0.0);
     WS->dataE(currentIndex).assign(vectorSize,0.0);
     spectraAxis->spectraNo(currentIndex) = -1;
   }
-  // Deal with the errors (assuming Gaussian)
-  /// @todo Deal with Poisson errors
-  std::transform(WS->dataY(firstIndex).begin(), WS->dataY(firstIndex).end(), WS->dataE(firstIndex).begin(), dblSqrt);
 
-}
-
-double GroupDetectors::dblSqrt(double in)
-{
-  return sqrt(in);
 }
 
 /// Checks if all histograms have the same boundaries by comparing their sums
-bool GroupDetectors::hasSameBoundaries(const Workspace2D_sptr WS)
+bool GroupDetectors::hasSameBoundaries(const DataObjects::Workspace2D_sptr WS)
 {
-
-    if (!WS->blocksize()) return true;
-    double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
-    for (int i = 1; i < WS->getNumberHistograms(); ++i)
-        if ( commonSum != std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) )
-            return false;
-    return true;
+  if (!WS->blocksize()) return true;
+  double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
+  for (int i = 1; i < WS->getNumberHistograms(); ++i)
+  {
+    if ( commonSum != std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) ) return false;
+  }
+  return true;
 }
 
-void GroupDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList, 
-    const Workspace2D_sptr WS)
+/// Convert a list of spectra numbers into the corresponding workspace indices
+void GroupDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
+                                              const DataObjects::Workspace2D_sptr WS)
 {
-    // Convert the vector of properties into a set for easy searching
-    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
-    // Next line means that anything in Clear the index list first
-    indexList.clear();
-    //get the spectra axis
-    Axis *spectraAxis = WS->getAxis(1);
-    
-    for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  // Convert the vector of properties into a set for easy searching
+  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+  // Next line means that anything in Clear the index list first
+  indexList.clear();
+  //get the spectra axis
+  Axis *spectraAxis = WS->getAxis(1);
+
+  for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  {
+    int currentSpec = spectraAxis->spectraNo(i);
+    if ( spectraSet.find(currentSpec) != spectraSet.end() )
     {
-      int currentSpec = spectraAxis->spectraNo(i);
-      if ( spectraSet.find(currentSpec) != spectraSet.end() )
-      {
-        indexList.push_back(i);
-      }
-    }   
+      indexList.push_back(i);
+    }
+  }
 }
 
 

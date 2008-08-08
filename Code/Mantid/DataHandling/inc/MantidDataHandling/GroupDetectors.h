@@ -15,16 +15,17 @@ namespace DataHandling
     into a single DetectorGroup and spectrum.
     The algorithm can currently only be used with a workspace that has units of time-of-flight
     and with the data stored as raw counts.
-    
+
     Required Properties:
     <UL>
     <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
     </UL>
 
-    Optional Properties (One or the other should be set. SpectraList is used if both are set.):
+    Optional Properties (Only one of these should be set. Priority to highest listed below if more than one is set.):
     <UL>
-    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
     <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
+    <LI> DetectorList - An ArrayProperty containing a list of detector ID's to combine
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -47,10 +48,10 @@ namespace DataHandling
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport GroupDetectors : public API::Algorithm
+class DLLExport GroupDetectors : public API::Algorithm
 {
 public:
 	GroupDetectors();
@@ -62,20 +63,17 @@ public:
   virtual const int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "DataHandling\\Detectors";}
-	
+
 private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
   bool hasSameBoundaries(const DataObjects::Workspace2D_sptr WS);
-  void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList, 
-    const DataObjects::Workspace2D_sptr WS);
-  
-  /// Personal wrapper for sqrt to allow msvs to compile
-  static double dblSqrt(double in);
-  
+  void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
+                                const DataObjects::Workspace2D_sptr WS);
+
   /// Static reference to the logger class
-  static Kernel::Logger& g_log;  
+  static Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling
