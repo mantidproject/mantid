@@ -17,6 +17,16 @@ Detector::Detector(const std::string& name, Component* parent) :
 {
 }
 
+/** Constructor
+ *  @param name The name of the component
+ *  @param shape  A pointer to the object describing the shape of this component
+ *  @param parent The parent component
+ */
+Detector::Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
+  ObjComponent(name,shape,parent), IDetector(), m_id(0), m_isDead(false), m_isMonitor(false)
+{
+}
+
 /// Copy constructor
 Detector::Detector(const Detector& rhs) :
   ObjComponent(rhs), m_id(rhs.m_id), m_isDead(rhs.m_isDead), m_isMonitor(rhs.m_isMonitor)

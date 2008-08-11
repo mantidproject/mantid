@@ -42,7 +42,7 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
 
     //create a workspace with some sample data
-    wsName = "LoadInstrumentTest";
+    wsName = "LoadInstrumentTestHET";
     int histogramNumber = 2584;
     int timechannels = 100;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -128,7 +128,7 @@ public:
     TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
   }
 
-  void xtestExecGEM()
+  void testExecGEM()
   {
     LoadInstrument loaderGEM;
 
@@ -166,11 +166,11 @@ public:
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), -10.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
     Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 17.0,0.01);
 
     Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
@@ -178,14 +178,26 @@ public:
     TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0,0.01);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0,0.01);
     double d = ptrDet->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,0.0,0.0001);
+    TS_ASSERT_DELTA(d,17.0,0.0001);
     double cmpDistance = ptrDet->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,0.0,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,17.0,0.0001);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
 
     // test if detector with det_id=621 has been marked as a monitor
     Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(621));
     TS_ASSERT( ptrMonitor->isMonitor() );
+
+    // test if shape on for 1st monitor
+    Detector *ptrMonitorShape = dynamic_cast<Detector*>(i->getDetector(611));
+    TS_ASSERT( ptrMonitorShape->isMonitor() );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(4.1,2.1,8.1)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(-4.1,-2.1,-8.1)) );
+
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0)) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0.01)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(100,100,100)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(-200.0,-200.0,-200.1)) );
+
   }
  
   

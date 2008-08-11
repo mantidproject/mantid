@@ -163,6 +163,15 @@ std::runtime_error(Desc),objectName(ObjectName)
 	outMessage = std::string(std::runtime_error::what()) + " search object " + objectName;
 }
 
+/** Constructor
+	@param Desc Function description
+*/
+InstrumentDefinitionError::InstrumentDefinitionError(const std::string& Desc) :
+std::runtime_error(Desc)
+{
+	outMessage = std::string(std::runtime_error::what());
+}
+
 /// Copy constructor
 InstrumentDefinitionError::InstrumentDefinitionError(const InstrumentDefinitionError& A) :
   std::runtime_error(A),objectName(A.objectName)

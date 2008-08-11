@@ -236,6 +236,7 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
 
  public:
   InstrumentDefinitionError(const std::string&,const std::string&);
+  InstrumentDefinitionError(const std::string&);
   InstrumentDefinitionError(const InstrumentDefinitionError& A);
   /// Assignment operator
   InstrumentDefinitionError& operator=(const InstrumentDefinitionError& A);

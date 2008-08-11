@@ -46,6 +46,7 @@ public:
   ///A string representation of the component type
 	virtual std::string type() const {return "DetectorComponent";}
 	Detector(const std::string& name, Component* parent);
+  Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent);
 	virtual ~Detector();
 	virtual Component* clone() const {return new Detector(*this);}
 	void setID(int);

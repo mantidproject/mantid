@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 
 #include "MantidGeometry/Detector.h"
@@ -92,7 +93,9 @@ void LoadInstrument::exec()
   }
 
 
-  // create 'hash' tables for the type elements
+  // create maps: isTypeAssemply and mapTypeNameToShape
+
+  ShapeFactory shapeCreator;
 
   NodeList* pNL_type = pRootElem->getElementsByTagName("type");
 
@@ -113,7 +116,13 @@ void LoadInstrument::exec()
     // with tag name 'component'
     NodeList* pNL_local = pTypeElem->getElementsByTagName("component");
     if (pNL_local->length() == 0)
+    {
       isTypeAssemply[typeName] = false;
+
+      // for now try to create a geometry shape associated with every type
+      // that is does not contain any component elements
+      mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+    }
     else
       isTypeAssemply[typeName] = true;
     pNL_local->release();
@@ -295,7 +304,8 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
   // get the type element of the component element in order to determine if the type
   // belong to the catogory: "detector", "SamplePos or "Source".
 
-  Element* pType = getTypeElement[pCompElem->getAttribute("type")];
+  std::string typeName = pCompElem->getAttribute("type");
+  Element* pType = getTypeElement[typeName];
 
   std::string category = "";
   if (pType->hasAttribute("is"))
@@ -317,10 +327,10 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     }
     else
     {
-      name = pCompElem->getAttribute("type");
+      name = typeName;
     }
 
-    Geometry::Detector* detector = new Geometry::Detector(name,parent);
+    Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
 
     // set location for this comp
     setLocation(detector, pLocElem);
@@ -355,10 +365,10 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     }
     else
     {
-      name = pCompElem->getAttribute("type");
+      name = typeName;
     }
 
-    Geometry::ObjComponent *comp = new Geometry::ObjComponent(name,parent);
+    Geometry::ObjComponent *comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
     parent->add(comp);
 
     // check if special Source or SamplePos Component
@@ -387,7 +397,7 @@ void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent
  *  @param comp To set position/location off
  *  @param pElem  Poco::XML element that points a location element in the XML doc
  *
- *  @throw logic_error Thrown if second argument is not a pointer to component XML element
+ *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
  */
 void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* pElem)
 {
@@ -446,6 +456,7 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 /** Get parent component element of location element.
  *
  *  @param pLocElem  Poco::XML element that points a location element in the XML doc
+ *  @return Parent XML element to a location XML element
  *
  *  @throw logic_error Thrown if argument is not a child of component element
  */
@@ -522,7 +533,6 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
     {
       throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);
     }
-
     pNL->release();
 
 
@@ -539,7 +549,7 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
 
         if ( pIDElem->hasAttribute("val") )
         {
-          int valID = atoi( (pIDElem->getAttribute("start")).c_str() );
+          int valID = atoi( (pIDElem->getAttribute("val")).c_str() );
           idList.vec.push_back(valID);
         }
         else if ( pIDElem->hasAttribute("start") )

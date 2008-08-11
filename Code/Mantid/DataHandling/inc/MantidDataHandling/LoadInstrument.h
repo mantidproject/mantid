@@ -24,6 +24,7 @@ namespace Geometry
 {
 	class CompAssembly;
 	class Component;
+  class Object;
 }
 namespace API
 {
@@ -130,6 +131,9 @@ namespace API
       /// map which holds names of types and whether or not they are catagorised as being 
       /// assembles, which means whether the type element contains component elements
       std::map<std::string,bool> isTypeAssemply;
+
+      /// map which maps the type name to a shared pointer to a geometric shape
+      std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
 
       /// Return true if assemply, false if not assemply and throws exception if string not in assemply
       bool isAssemply(std::string);

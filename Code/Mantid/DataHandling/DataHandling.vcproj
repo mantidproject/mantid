@@ -220,6 +220,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ShapeFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\vms_convert.cpp"
 				>
 			</File>
@@ -311,6 +315,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveNeXusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\ShapeFactory.h"
 				>
 			</File>
 			<File

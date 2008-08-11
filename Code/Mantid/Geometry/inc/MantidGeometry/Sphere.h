@@ -76,7 +76,9 @@ namespace Mantid
 	  ///< Get Centre
       Geometry::V3D getCentre() const { return Centre; } 
 	  ///< Get Radius
-      double getRadius() const { return Radius; }          
+      double getRadius() const { return Radius; }      
+	  /// Set Radius
+      void setRadius(const double& r) { Radius=r; }   
 	  ///Generates the quadratic equation.
       void setBaseEqn();
 	  ///Writes the sphere equatation in MCNP format
