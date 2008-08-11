@@ -257,9 +257,9 @@ Cylinder* ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem)
  *  @param pElem XML element whose attributes contain position coordinates
  *  @return Position coordinates in the form of a V3D object 
  */
-Geometry::V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)
+V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)
 {
-  Geometry::V3D retVal;
+  V3D retVal;
 
   if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
   {
