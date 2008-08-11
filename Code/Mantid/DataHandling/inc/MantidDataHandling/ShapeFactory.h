@@ -78,7 +78,7 @@ namespace Mantid
       Geometry::Cylinder* parseInfiniteCylinder(Poco::XML::Element* pElem);
 
       /// Parse any XML element containing position attributes and return as V3D
-      Geometry::V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem);
+      Geometry::V3D parsePosition(Poco::XML::Element* pElem);
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
