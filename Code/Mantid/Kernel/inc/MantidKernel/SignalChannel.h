@@ -55,10 +55,10 @@ public:
     SignalChannel();
 
     /// Connects a slot to the channel.
-    void connect(void(const Message& msg));
+    void connect(void(*slt)(const Message& msg));
 
     /// Sends the given Message. 
-	void log(const Message& msg);
+	  void log(const Message& msg);
 
     signal_t& sig(){return _sig;}
 

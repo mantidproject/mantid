@@ -43,50 +43,47 @@
 
 namespace Poco {
 
-
+/// This channel sends a message to multiple
+/// channels simultaneously.
 class DLLExport FilterChannel: public Channel
-	/// This channel sends a message to multiple
-	/// channels simultaneously.
+
 {
 public:
+	/// Creates the SplitterChannel.
 	FilterChannel();
-		/// Creates the SplitterChannel.
 
+  ///destructor
 	~FilterChannel();
 
+	/// Attaches a channel, which may not be null.
 	void addChannel(Channel* pChannel);
-		/// Attaches a channel, which may not be null.
 
+	/// Returns the channel pointer.
   Channel* getChannel() {return _channel;}
-	  /// Returns the channel pointer.
 
+	/// Attaches a channel, which may not be null.
   const FilterChannel& setPriority(const std::string& priority);
-		/// Attaches a channel, which may not be null.
 
+  /// Returns the integer representation of the priority
   const unsigned int getPriority() const { return _priority; }
-    /// Returns the integer representation of the priority
 		
+	/// Sends the given Message to the attached channel. 
 	void log(const Message& msg);
-		/// Sends the given Message to all
-		/// attaches channels. 
 
+  /// Sets or changes a configuration property.
 	void setProperty(const std::string& name, const std::string& value);
-		/// Sets or changes a configuration property.
-		///
-		/// Only the "channel" property is supported, which allows
-		/// adding a comma-separated list of channels via the LoggingRegistry.
-		/// The "channel" property is set-only.
-		/// To simplify file-based configuration, all property
-		/// names starting with "channel" are treated as "channel".
 
+  /// Removes all channels.
 	void close();
-		/// Removes all channels.
 		
 protected:
 
 private:
+  ///private pointer to the channel to pass messages onto
 	Channel*        _channel;
+  ///The priority used to filter messages
   unsigned int _priority;
+  ///A mutex lock to prevent race conditions
 	mutable FastMutex _mutex;
 };
 

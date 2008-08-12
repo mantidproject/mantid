@@ -104,6 +104,7 @@ protected:
    *  @param value The initial value to assign to the property
    *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
    *  @param doc The (optional) documentation string
+   *  @param direction The (optional) direction of the property, in, out or inout
    *  @throw Exception::ExistsError if a property with the given name already exists
    *  @throw std::invalid_argument  if the name argument is empty
    */
@@ -116,6 +117,13 @@ protected:
     declareProperty(p);
   }
 
+   /** Add a property of the template type to the list of managed properties
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param direction The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   template <typename T>
   void declareProperty(const std::string &name, T value, const unsigned int direction)
   {
@@ -128,7 +136,13 @@ protected:
   virtual void declareProperty(const std::string &name, const char* value,
       IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="", const unsigned int direction = Direction::Input);
 
-  // Specialised version of above function
+   /** Add a property of the char* type to the list of managed properties
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param direction The direction of the property, in, out or inout
+   *  @throw Exception::ExistsError if a property with the given name already exists
+   *  @throw std::invalid_argument  if the name argument is empty
+   */
   virtual void declareProperty(const std::string &name, const char* value, const unsigned int direction)
   {
       declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
