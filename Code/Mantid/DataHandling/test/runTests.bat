@@ -1,7 +1,7 @@
 @echo off
 
 IF "%VCINSTALLDIR%"=="" CALL "C:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
-IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;%PATH%
+IF "%MANTIDTESTSETUP%"=="" SET PATH=%CD%\..\..\..\Third_Party\lib\win32;%CD%\..\..\Debug;C:\WINDOWS\system32;%PATH%
 IF "%MANTIDTESTSETUP%"=="" SET MANTIDTESTSETUP=1
 REM Simple script to build and run the tests.
 REM Have kept separate from the makefile since that's automatically generated
@@ -25,7 +25,7 @@ GOTO COMPILE
 echo "Compiling the test executable..."
 cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\.." /I "..\inc"  /I "../../Kernel/inc" /I "../../API/inc" /I "../../Geometry/inc" /I "../../DataObjects/inc" /D_CRT_SECURE_NO_DEPRECATE /wd4275 /EHsc /MDd /W3 /nologo /c /ZI /TP 
 
-link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib runner.obj
+link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib Mantiddataobjects.lib Mantiddatahandling.lib Mantidgeometry.lib MantidAPI.lib ws2_32.lib runner.obj 
   
 echo "Copying in properties files..."
 copy /Y ..\..\Build\Tests\*properties

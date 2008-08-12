@@ -12,6 +12,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -35,6 +39,11 @@ public:
 
   void testExec()
   {
+
+#ifdef _WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2,2), &wsaData);
+#endif
 
     if ( !m_loader.isInitialized() ) m_loader.initialize();
 
