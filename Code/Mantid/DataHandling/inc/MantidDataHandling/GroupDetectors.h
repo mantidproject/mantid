@@ -24,7 +24,7 @@ namespace DataHandling
     Optional Properties (Only one of these should be set. Priority to highest listed below if more than one is set.):
     <UL>
     <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
-    <LI> DetectorList - An ArrayProperty containing a list of detector ID's to combine
+    <LI> DetectorList - An ArrayProperty containing a list of detector ID's to combine </LI>
     <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
     </UL>
 

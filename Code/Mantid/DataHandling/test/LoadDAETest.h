@@ -55,7 +55,7 @@ public:
     m_loader.setPropertyValue("spectrum_min", "1");
     m_loader.setPropertyValue("spectrum_max", "2");
 
-    m_outputSpace = "outer";
+    m_outputSpace = "DAEouter";
     m_loader.setPropertyValue("OutputWorkspace", m_outputSpace);
 
     std::string result;

@@ -167,6 +167,7 @@ Axis* const Workspace::getAxis(const int axisIndex) const
 {
   if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
   {
+    g_log.error() << "Argument to getAxis (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
     throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
   }
 
@@ -186,8 +187,8 @@ bool& Workspace::isDistribution(bool newValue)
   return m_isDistribution;
 }
 
-long int Workspace::getMemorySize() const 
-{ 
+long int Workspace::getMemorySize() const
+{
     return 3*size()*sizeof(double)/1024;
 }
 

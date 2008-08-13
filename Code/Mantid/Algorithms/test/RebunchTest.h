@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/Workspace2D.h" 
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebunch.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -19,9 +19,9 @@ class RebunchTest : public CxxTest::TestSuite
 {
 public:
   void testworkspace1D_pnt_flush()
-  {    
+  {
     Workspace1D_sptr test_in1D = Create1DWorkspacePnt(50);
-    AnalysisDataService::Instance().add("test_in1D", test_in1D);    
+    AnalysisDataService::Instance().add("test_in1D", test_in1D);
 
     Rebunch rebunch;
     rebunch.initialize();
@@ -45,7 +45,7 @@ public:
     TS_ASSERT_DELTA(outE[9],sqrt(240.0)/5.0  ,0.000001);
 
     AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out");    
+    AnalysisDataService::Instance().remove("test_out");
   }
 
   void testworkspace1D_nondist()
@@ -78,7 +78,7 @@ public:
     TS_ASSERT(!dist);
 
     AnalysisDataService::Instance().remove("test_in1D");
-    AnalysisDataService::Instance().remove("test_out"); 
+    AnalysisDataService::Instance().remove("test_out");
   }
 
   void testworkspace2D_dist()
@@ -108,7 +108,7 @@ public:
     TS_ASSERT_DELTA(outX[9],34.25  ,0.000001);
     TS_ASSERT_DELTA(outY[9],47.5,0.000001);
     TS_ASSERT_DELTA(outE[9],sqrt(106.875)/3.0   ,0.000001);
-    
+
 	TS_ASSERT(rebunchdata->isDistribution());
 
     AnalysisDataService::Instance().remove("test_in2D");
@@ -150,14 +150,15 @@ private:
   {
     std::vector<double> x1(size,0.0),y1(size-1,0.0),e1(size-1,0.0),e2(size-1,0);
     Workspace1D_sptr retVal(new Workspace1D);
+    retVal->initialize(1,size,size-1);
     double j=1.0;
-    for (int i=0; i<size; i++)    
+    for (int i=0; i<size; i++)
     {
       x1[i]=j*0.5;
       j+=1.5;
     }
     j=1.0;
-    for (int i=0; i<size-1; i++)    
+    for (int i=0; i<size-1; i++)
     {
       y1[i]=j;
 	  e1[i]=sqrt(j);
@@ -172,8 +173,9 @@ private:
   {
     std::vector<double> x1(size,0.0),y1(size,0.0),e1(size,0.0),e2(size,0);
     Workspace1D_sptr retVal(new Workspace1D);
+    retVal->initialize(1,size,size);
     double j=1.0;
-    for (int i=0; i<size; i++)    
+    for (int i=0; i<size; i++)
     {
       x1[i]=j*0.5;
 	  y1[i]=j;
@@ -193,13 +195,13 @@ private:
     retVal->initialize(ylen,xlen,xlen-1);
     double j=1.0;
 
-    for (int i=0; i<xlen; i++)    
+    for (int i=0; i<xlen; i++)
     {
       x1[i]=j*0.5;
       j+=1.5;
     }
     j=1.0;
-    for (int i=0; i<xlen-1; i++)    
+    for (int i=0; i<xlen-1; i++)
     {
       y1[i]=j;
 	  e1[i]=sqrt(j);
@@ -208,7 +210,7 @@ private:
 
     for (int i=0; i< ylen; i++)
     {
-      retVal->setX(i,x1);     
+      retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
 
     }
@@ -223,7 +225,7 @@ private:
     retVal->initialize(ylen,xlen,xlen);
     double j=1.0;
 
-    for (int i=0; i<xlen; i++)    
+    for (int i=0; i<xlen; i++)
     {
       x1[i]=j*0.5;
 	  y1[i]=j;
@@ -233,7 +235,7 @@ private:
 
     for (int i=0; i< ylen; i++)
     {
-      retVal->setX(i,x1);     
+      retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
 
     }

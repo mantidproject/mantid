@@ -106,14 +106,14 @@ namespace Mantid
               childAlg->execute();
               // get the index of the combined spectrum
               int ri = childAlg->getProperty("ResultIndex");
-              if (ri >= 0) 
+              if (ri >= 0)
               {
                   resultIndeces.push_back(ri);
               }
           }
           catch(...)
           {
-              g_log.error()<<"Unable to successfully run GroupDetectors sub-algorithm";
+              g_log.error("Unable to successfully run GroupDetectors sub-algorithm");
               throw std::runtime_error("Unable to successfully run GroupDetectors sub-algorithm");
           }
       }
@@ -126,7 +126,7 @@ namespace Mantid
       //Combine left-over spectra into one
       std::vector<int> indexList;
       for(int i=0;i<oldHistNumber;i++)
-          if ( spectraAxis->spectraNo(i) >= 0 && 
+          if ( spectraAxis->spectraNo(i) >= 0 &&
               find(resultIndeces.begin(),resultIndeces.end(),i) == resultIndeces.end())
           {
               indexList.push_back(i);
@@ -135,7 +135,7 @@ namespace Mantid
       if (indexList.size() > 0)
       {
           g_log.warning()<<"Remaining "+boost::lexical_cast<std::string>(indexList.size())+
-              " spectra are grouped into one";
+              " spectra are grouped into one" << std::endl;
           API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
           childAlg->setPropertyValue("Workspace", "Anonymous");
           DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
@@ -150,7 +150,7 @@ namespace Mantid
           }
           catch(...)
           {
-              g_log.error()<<"Unable to successfully run GroupDetectors sub-algorithm";
+              g_log.error("Unable to successfully run GroupDetectors sub-algorithm");
               throw std::runtime_error("Unable to successfully run GroupDetectors sub-algorithm");
           }
       }//*/
@@ -233,7 +233,7 @@ namespace Mantid
         throw;
       }
 
-      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");      
+      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
       return childAlg->getProperty("OutputWorkspace");
     }
@@ -252,7 +252,7 @@ namespace Mantid
       paramArray.push_back(-step);
       paramArray.push_back(max);
 
-      g_log.information() << "Rebinning from "<< min << 
+      g_log.information() << "Rebinning from "<< min <<
         " to " << max <<
         " in "<< step <<" logaritmic steps.\n";
 
@@ -273,7 +273,7 @@ namespace Mantid
         throw;
       }
 
-      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");  
+      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
       else
       {
            workspace = childAlg->getProperty("OutputWorkspace");
@@ -283,7 +283,7 @@ namespace Mantid
 
     void DiffractionFocussing::calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step)
     {
-      
+
       min=999999999;
       //for min and max we need to iterate over the data block and investigate each one
       int length = workspace->getNumberHistograms();
@@ -293,7 +293,7 @@ namespace Mantid
         const double& localMin = xVec[0];
         const double& localMax = xVec[xVec.size()-1];
         if (localMin != std::numeric_limits<double>::infinity() &&
-            localMax != std::numeric_limits<double>::infinity()) 
+            localMax != std::numeric_limits<double>::infinity())
         {
             if (localMin < min) min = localMin;
             if (localMax > max) max = localMax;
@@ -306,13 +306,13 @@ namespace Mantid
       int n = workspace->blocksize();
       step = ( log(max) - log(min) )/n;
     }
-    
+
     bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups)
     {
         std::ifstream grFile(groupingFileName.c_str());
         if (!grFile)
         {
-            g_log.error()<<"Unable to open grouping file "<<groupingFileName;
+            g_log.error() << "Unable to open grouping file " << groupingFileName << std::endl;
             return false;
         }
 

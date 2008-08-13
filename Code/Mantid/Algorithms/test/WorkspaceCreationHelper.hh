@@ -26,18 +26,19 @@ public:
 
     FibSeries() : x1(1),x2(1) {}
     T operator()() { const T out(x1+x2); x1=x2; x2=out;  return out; }
-  }; 
-  
+  };
+
   static Workspace1D_sptr Create1DWorkspaceRand(int size)
   {
     std::vector<double> x1(size,1),y1,e1;
     //   x1.resize(size);
-    //   std::generate(x1.begin(),x1.end(),rand);	
+    //   std::generate(x1.begin(),x1.end(),rand);
     y1.resize(size);
     std::generate(y1.begin(),y1.end(),rand);
     e1.resize(size);
     std::generate(e1.begin(),e1.end(),rand);
     Workspace1D_sptr retVal(new Workspace1D);
+    retVal->initialize(1,size,size);
     retVal->setX(x1);
     retVal->setData(y1,e1);
     return retVal;
@@ -47,11 +48,12 @@ public:
   {
     std::vector<double> x1(size,1),y1,e1;
     //   x1.resize(size);
-    //   std::generate(x1.begin(),x1.end(),rand);	
+    //   std::generate(x1.begin(),x1.end(),rand);
     y1.resize(size);
     std::generate(y1.begin(),y1.end(),FibSeries<double>());
     e1.resize(size);
     Workspace1D_sptr retVal(new Workspace1D);
+    retVal->initialize(1,size,size);
     retVal->setX(x1);
     retVal->setData(y1,e1);
     return retVal;
@@ -68,7 +70,7 @@ public:
     retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
     {
-      retVal->setX(i,x1);     
+      retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
     }
 
@@ -82,12 +84,12 @@ public:
     retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
     {
-      retVal->setX(i,x1);     
+      retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
     }
 
     return retVal;
-  }  
+  }
 
   static WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {

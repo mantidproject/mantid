@@ -8,7 +8,7 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 
@@ -66,14 +66,12 @@ public:
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
-    Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in5));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in6));
-    TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in7));
   }
 
   void testcheckSizeCompatability2D1D()
@@ -85,17 +83,15 @@ public:
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
-    Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
     BinaryOpHelper helper;
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in3));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in5));
     TS_ASSERT(helper.checkSizeCompatability(work_in1,work_in6));
-    TS_ASSERT(!helper.checkSizeCompatability(work_in1,work_in7));
   }
 
-  
+
   void testcheckSizeCompatability2D2D()
   {
     // Register the workspace in the data service
@@ -122,16 +118,14 @@ public:
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
-    Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
     BinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in5),work_in1,work_in5);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in6),work_in1,work_in6);
-    checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in7),work_in1,work_in7);
   }
-  
+
   void testcreateOutputWorkspace2D1D()
   {
     // Register the workspace in the data service
@@ -141,17 +135,15 @@ public:
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
-    Workspace1D_sptr work_in7 = WorkspaceCreationHelper::Create1DWorkspaceFib(0);
     BinaryOpHelper helper;
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in2),work_in1,work_in2);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in3),work_in1,work_in3);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in4),work_in1,work_in4);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in5),work_in1,work_in5);
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in6),work_in1,work_in6);
-    checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in7),work_in1,work_in7);
   }
 
- 
+
   void testcreateOutputWorkspace2D2D()
   {
     // Register the workspace in the data service
@@ -211,7 +203,7 @@ public:
       )
     }
   }
-  
+
 };
 
 #endif /*BINARYOPERATIONTEST_H_*/

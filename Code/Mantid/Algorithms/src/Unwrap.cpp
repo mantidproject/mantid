@@ -270,6 +270,24 @@ const std::vector<int> Unwrap::unwrapX(const API::Workspace_sptr& tempWS, const 
 void Unwrap::handleFrameOverlapped()
 {
   g_log.warning("Exclusion of frame-overlapped bins is not yet implemented");
+  //      // Calculate the interval to exclude
+  //      const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef/Ld) );
+  //      // This gives us new minimum & maximum tof values
+  //      const double minT = m_Tmin + Dt;
+  //      const double maxT = m_Tmax - Dt;
+  //      for (unsigned int j = 0; j < m_XSize; ++j)
+  //      {
+  //        const double T = xdata[j];
+  //        if ( T < minT )
+  //        {
+  //          minX_L = j+1;
+  //          tempX_L.erase(tempX_L.begin());
+  //        }
+  //        else if ( T > maxT )
+  //        {
+  //          maxX_U = j;
+  //        }
+  //      }
 }
 
 /** Unwraps the Y & E vectors of a spectrum according to the ranges found in unwrapX.

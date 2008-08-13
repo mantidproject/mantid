@@ -64,6 +64,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
   ws->setInstrument(parent->getInstrument());
   ws->setSpectraMap(parent->getSpectraMap());
   ws->setSample(parent->getSample());
+  ws->isDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given
   if ( !differentSize )
@@ -74,6 +75,19 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
       delete ws->m_axes[i];
       // Now set to a copy of the parent workspace's axis
       ws->m_axes[i] = parent->m_axes[i]->clone(ws.get());
+    }
+  }
+  else
+  {
+    // Just copy the unit and title
+    for (unsigned int i = 0; i < ws->m_axes.size(); ++i)
+    {
+      Axis* c = ws->getAxis(i);
+      Axis* p = parent->getAxis(i);
+//      ws->m_axes[i]->unit() = parent->m_axes[i]->unit();
+//      ws->m_axes[i]->title() = parent->m_axes[i]->title();
+      ws->getAxis(i)->unit() = parent->getAxis(i)->unit();
+      ws->getAxis(i)->title() = parent->getAxis(i)->title();
     }
   }
 

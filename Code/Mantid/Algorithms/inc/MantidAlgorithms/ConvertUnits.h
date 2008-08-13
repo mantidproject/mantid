@@ -46,7 +46,7 @@ namespace Algorithms
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ConvertUnits : public API::Algorithm
@@ -62,17 +62,20 @@ public:
   virtual const int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Units";}
-	
+
 private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  
+
   /// Convert the workspace units according to a simple output = a * (input^b) relationship
   void convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power);
   /// Convert the workspace units using TOF as an intermediate step in the conversion
-  void convertViaTOF(const int& numberOfSpectra, API::Workspace_sptr inputWS, API::Workspace_sptr outputWS);
-  
+  void convertViaTOF(const int& numberOfSpectra, API::Workspace_const_sptr inputWS, API::Workspace_sptr outputWS);
+
+  // Just copies over the workspace data if the units are already correct
+  void copyDataUnchanged(const API::Workspace_const_sptr inputWS, const API::Workspace_sptr outputWS);
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };

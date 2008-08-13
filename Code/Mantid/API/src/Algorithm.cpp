@@ -84,6 +84,9 @@ bool Algorithm::execute()
     throw std::runtime_error("Algorithm is not initialised:" + this->name());
   }
 
+  // no logging of input if a child algorithm
+  if (!m_isChildAlgorithm) algorithm_info();
+
   // Check all properties for validity
   if ( !validateProperties() )
   {
@@ -97,8 +100,6 @@ bool Algorithm::execute()
     {
       time(&start_time);
       start = clock();
-      // no logging of input if a child algorithm
-      if (!m_isChildAlgorithm) algorithm_info();
       // Call the concrete algorithm's exec method
       this->exec();
       end = clock();
@@ -291,7 +292,7 @@ void Algorithm::algorithm_info() const
 {
   // Make use of the AlgorithmHistory class, which holds all the info we want here
   AlgorithmHistory AH(this);
-  g_log.information() << AH << std::endl;
+  g_log.information() << AH;
 }
 
 /** Stores any output workspaces into the AnalysisDataService
