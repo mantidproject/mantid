@@ -6,6 +6,9 @@
 #include <QPrinter>
 #include <QMessageBox>
 #include <QAction>
+#include <QVector>
+#include <QThread>
+#include <QMap>
 
 #include "MantidAPI/Workspace.h"
 #include "../UserFunction.h"
@@ -16,6 +19,7 @@
 #include <qwt_color_map.h>
 
 #include <math.h>
+#include <string>
 
 class QLabel;
 class QStackedWidget;
@@ -26,6 +30,7 @@ class ApplicationWindow;
 class Graph3D;
 class MultiLayer;
 class QTabWidget;
+class UpdateDAEThread;
 
 class MantidMatrixFunction: public UserHelperFunction
 {
@@ -65,7 +70,7 @@ public:
     ApplicationWindow *appWindow(){return m_appWindow;}
     Graph3D *plotGraph3D(int style);
     MultiLayer* plotGraph2D(Graph::CurveType type);
-    void setGraph1D(Graph* g);
+    void setGraph1D(MultiLayer* ml, Table* t=0);
     void removeWindow();
     void getSelectedRows(int& i0,int& i1);
 
@@ -74,8 +79,32 @@ public:
     QTableView *activeView(){return yShown()? m_table_view : m_table_viewX;}
     MantidMatrixModel *activeModel(){return yShown()? m_model : m_modelX;}
 
+    bool isHistogram(){return m_histogram;}
+
+    std::string DAEname(){return m_DAEname;}
+    void DAEname(QString qDAEname){if (m_DAEname.empty()) m_DAEname = qDAEname.toStdString();}
+    int spectrumMin(){return m_spectrum_min;}
+    void spectrumMin(int spMin){if (m_spectrum_min < 0) m_spectrum_min = spMin;}
+    int spectrumMax(){return m_spectrum_max;}
+    void spectrumMax(int spMax){if (m_spectrum_max < 0) m_spectrum_max = spMax;}
+    QVector<int>& spectrumList(){return m_spectrum_list;}
+    void spectrumList(QString sl)
+    {
+        if (!m_spectrum_list.empty()) return;
+        QStringList strList = sl.split(",");
+        for(int i=0;i<strList.size();i++)
+            m_spectrum_list<<strList[i].toInt();
+    }
+    bool canUpdateDAE(){return m_canUpdateDAE;}
+    void canUpdateDAE(bool yes, int freq=0);
+    void updateDAE();
+
+signals:
+    void needsUpdating();
 
 public slots:
+
+    void tst();
 
 	//! Return the width of all columns
 	int columnsWidth(){return m_column_width;};
@@ -124,7 +153,14 @@ public slots:
 
     void showX();
 
+    void dependantClosed(MdiSubWindow* w);
+    void repaintAll();
+
 protected:
+
+    void paintEvent(QPaintEvent *e);
+    void clean();
+    //double dblSqrt(double in);
 
     ApplicationWindow *m_appWindow;
     Mantid::API::Workspace_sptr m_workspace;
@@ -146,6 +182,20 @@ protected:
     int m_endRow;
     bool m_filter;
     double m_maxv;
+    bool m_histogram;
+
+    // If workspace comes from DAE store DAE name and spectra numbers
+    std::string m_DAEname;
+    int m_spectrum_min;
+    int m_spectrum_max;
+    QVector<int> m_spectrum_list;
+    bool m_canUpdateDAE;
+    int m_updateFrequency;
+    UpdateDAEThread *m_updateDAEThread;
+    int* m_spectrum_buff;
+    bool m_needDAERepaint;
+    QVector<MultiLayer*> m_plots2D;
+    QMap< MultiLayer*,Table* > m_plots1D;
 
 	//! Column width in pixels;
 	int m_column_width;
@@ -218,6 +268,8 @@ public:
     bool showX(){return m_showX;}
     void showX(bool on){m_showX = on;}
 
+public slots:
+    void resetData(){reset();}
 private:
     Mantid::API::Workspace_sptr m_workspace;
     int m_startRow; // starting workspace index to display
@@ -229,6 +281,25 @@ private:
     int m_colNumCorr;// = 1 for histograms and = 0 for point data
     QLocale m_locale;
     Type m_type;
+};
+
+class UpdateDAEThread:public QThread
+{
+    Q_OBJECT
+public:
+    UpdateDAEThread(MantidMatrix *m,unsigned long secs ):QThread(),m_matrix(m),m_secs(secs){}
+protected:
+    void run()
+    {
+        if (!m_matrix->canUpdateDAE()) return;
+        for(;;)
+        {
+            sleep(m_secs);
+            m_matrix->updateDAE();
+        }
+    }
+    MantidMatrix *m_matrix;
+    unsigned long m_secs;
 };
 
 #endif

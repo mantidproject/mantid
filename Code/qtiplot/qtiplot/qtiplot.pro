@@ -307,6 +307,7 @@ HEADERS  += src/ApplicationWindow.h \
             src/MatrixCommand.h  \
             src/UserFunction.h  \
 	    src/Mantid/LoadRawDlg.h \
+	    src/Mantid/LoadDAEDlg.h \
 	    src/Mantid/WorkspaceMgr.h \
 	    src/Mantid/ExecuteAlgorithm.h \
 	    src/Mantid/ImportWorkspaceDlg.h \
@@ -442,6 +443,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/MatrixCommand.cpp \
             src/UserFunction.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
+	    src/Mantid/LoadDAEDlg.cpp \
 	    src/Mantid/WorkspaceMgr.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
 	    src/Mantid/ImportWorkspaceDlg.cpp \

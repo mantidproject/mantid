@@ -3,6 +3,7 @@
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
 #include "../Spectrogram.h"
+#include "../../../../Mantid/DataHandling/src/LoadDAE/idc.h"
 
 #include <QtGlobal>
 #include <QTextStream>
@@ -32,6 +33,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
 MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end, bool filter, double maxv)
 : MdiSubWindow(label, parent, name, 0),m_workspace(ws),m_funct(this)
@@ -52,6 +54,16 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
 	m_cols = ws->blocksize(); 
     m_filter = filter;
     m_maxv = maxv;
+    m_histogram = false;
+    if ( m_workspace->blocksize() || m_workspace->dataX(0).size() != m_workspace->dataY(0).size() ) m_histogram = true;
+    m_DAEname = "";
+    m_spectrum_min = -1;
+    m_spectrum_max = -1;
+    m_canUpdateDAE = false;
+    m_updateDAEThread = 0;
+    m_needDAERepaint = false;
+    m_updateFrequency = 0;
+    connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
     x_start = ws->dataX(0)[0];
     x_end = ws->dataX(0)[ws->blocksize()];
@@ -314,7 +326,7 @@ void MantidMatrix::goToColumn(int col)
 
 double MantidMatrix::dataX(int row, int col) const
 {
-    if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
+    if (!m_workspace || row >= numRows() || col >= m_workspace->dataX(row + m_startRow).size()) return 0.;
     double res = m_workspace->dataX(row + m_startRow)[col];
     return res;
 
@@ -416,7 +428,8 @@ QwtDoubleRect MantidMatrix::boundingRect()
 
 MantidMatrix::~MantidMatrix()
 {
-	delete m_model;
+    clean();
+    delete m_model;
     delete m_modelX;
     delete m_modelE;
 }
@@ -513,6 +526,8 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 
     ApplicationWindow *a = applicationWindow();
 	MultiLayer* g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
+    m_plots2D<<g;
+    connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
     a->connectMultilayerPlot(g);
     Graph* plot = g->activeGraph();
 	a->setPreferences(plot);
@@ -545,8 +560,9 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	return g;
 }
 
-void MantidMatrix::setGraph1D(Graph* g)
+void MantidMatrix::setGraph1D(MultiLayer *ml, Table* t)
 {
+    Graph* g = ml->activeGraph();
     g->setTitle(tr("Workspace ")+name());
     Mantid::API::Axis* ax;
     ax = m_workspace->getAxis(0);
@@ -556,6 +572,14 @@ void MantidMatrix::setGraph1D(Graph* g)
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
     g->setYAxisTitle(tr("Counts")); 
+    connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+    if (t) 
+    {
+        m_plots1D[ml] = t;
+        connect(t, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+    }
+    else
+        m_plots2D<<ml;
 }
 
 // Remove all references to the MantidMatrix
@@ -606,3 +630,181 @@ void MantidMatrix::showX()
     repaint();
 }
 
+void MantidMatrix::canUpdateDAE(bool yes, int freq)
+{
+    if (!m_DAEname.empty()) m_canUpdateDAE = yes;
+    if (yes)
+    {
+        if (freq > 0) m_updateFrequency = freq;
+        if (m_updateFrequency == 0)
+        {
+            clean();
+            return;
+        }
+        if (!m_updateDAEThread) m_updateDAEThread = new UpdateDAEThread(this,m_updateFrequency);
+        m_updateDAEThread->start();
+        m_spectrum_buff = new int[m_workspace->blocksize()+1];
+    }
+    else
+    {
+        clean();
+    }
+}
+
+void MantidMatrix::clean()
+{
+    if (m_updateDAEThread)
+    {
+        m_updateDAEThread->terminate();
+        m_updateDAEThread->wait();
+        delete m_updateDAEThread;
+        m_updateDAEThread = 0;
+        delete[] m_spectrum_buff;
+        m_spectrum_buff = 0;
+    }
+}
+
+static double dblSqrt(double in)
+{
+  return sqrt(in);
+}
+
+void MantidMatrix::updateDAE()
+{
+    struct idc_info
+    {
+	    SOCKET s;
+    };
+
+    int ndims, dims_array[1];
+    ndims = 1;
+    int length = m_workspace->blocksize() + 1;
+    dims_array[0] = length;
+
+    idc_handle_t dae_handle;
+      
+    if (IDCopen(m_DAEname.c_str(), 0, 0, &dae_handle) != 0)
+    {
+        canUpdateDAE(false);
+        QMessageBox::critical(0,"DAE error","Unable to open DAE " + QString::fromStdString(m_DAEname));
+        return;
+    }
+
+    int hist = 0;
+    int ispec = m_spectrum_min;
+
+    if (m_spectrum_min > 0 && m_spectrum_max > 0)
+    for(ispec = m_spectrum_min;ispec<=m_spectrum_max;ispec++)
+    {
+        // Read in spectrum number ispec from DAE
+        IDCgetdat(dae_handle, ispec, 1, m_spectrum_buff, dims_array, &ndims);
+        // Put it into a vector, discarding the 1st entry, which is rubbish
+        // But note that the last (overflow) bin is kept
+        std::vector<double> v(m_spectrum_buff + 1, m_spectrum_buff + length);
+        // Create and fill another vector for the errors, containing sqrt(count)
+        std::vector<double> e(length-1);
+        std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
+        // Populate the workspace. Loop starts from 1, hence i-1
+        //DataObjects::Workspace2D_sptr localWorkspace = 
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(m_workspace)->setData(hist, v, e);
+        hist++;
+    }
+
+    for(size_t i=0;i<m_spectrum_list.size();i++)
+    {
+        ispec = m_spectrum_list[i];
+        // Read in spectrum number ispec from DAE
+        IDCgetdat(dae_handle, ispec, 1, m_spectrum_buff, dims_array, &ndims);
+        // Put it into a vector, discarding the 1st entry, which is rubbish
+        // But note that the last (overflow) bin is kept
+        std::vector<double> v(m_spectrum_buff + 1, m_spectrum_buff + length);
+        // Create and fill another vector for the errors, containing sqrt(count)
+        std::vector<double> e(length-1);
+        std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
+        // Populate the workspace. Loop starts from 1, hence i-1
+        //DataObjects::Workspace2D_sptr localWorkspace = 
+        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(m_workspace)->setData(hist, v, e);
+        hist++;
+    }
+
+    if (IDCclose(&dae_handle) != 0)
+    {
+        QMessageBox::critical(0,"DAE error","Problems with connection, updates will stop.");
+        canUpdateDAE(false);
+    }
+    m_needDAERepaint = true;
+    emit needsUpdating();
+}
+
+void MantidMatrix::tst()
+{
+    std::cerr<<"2D plots: "<<m_plots2D.size()<<'\n';
+    std::cerr<<"1D plots: "<<m_plots1D.size()<<'\n';
+}
+
+void MantidMatrix::paintEvent(QPaintEvent *e)
+{
+    if ( m_needDAERepaint )
+    {
+        ((MantidMatrixModel*)m_table_view->model())->resetData();  
+        ((MantidMatrixModel*)m_table_viewX->model())->resetData();  
+        ((MantidMatrixModel*)m_table_viewE->model())->resetData();  
+        m_needDAERepaint = false;
+    }
+    MdiSubWindow::paintEvent(e);
+}
+
+void MantidMatrix::dependantClosed(MdiSubWindow* w)
+{
+    if (w->isA("MultiLayer")) 
+    {
+        int i = m_plots2D.indexOf((MultiLayer*)w);
+        if (i >= 0) m_plots2D.remove(i);
+        else
+        {
+            QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
+            if (i != m_plots1D.end())
+            {
+                if (i.value() != 0) 
+                {
+                    i.value()->askOnCloseEvent(false);
+                    i.value()->close();
+                }
+                m_plots1D.erase(i);
+            }
+        }
+    }
+}
+
+void MantidMatrix::repaintAll()
+{
+    repaint();
+    for(int i=0;i<m_plots2D.size();i++)
+    {
+        Graph *g = m_plots2D[i]->activeGraph();
+        g->replot();
+    }
+    for(QMap<MultiLayer*,Table*>::iterator it = m_plots1D.begin();it!=m_plots1D.end();it++)
+    {
+        Table* t = it.value();
+        if (!t) continue;
+        int charsToRemove = t->name().size() + 1;
+        for(int col=1;col<t->numCols();col++)
+        {
+            QString name = t->colName(col).remove(0,charsToRemove);
+            if (name.isEmpty()) break;
+            QChar c = name[0];
+            name.remove(0,1);
+            int i = name.toInt();
+            if (i < 0 || i >= numRows()) break;
+            if (c == 'Y')
+                for(int j=0;j<numCols();j++)
+                {
+                    t->setCell(j,col, dataY(i,j));
+                }
+        }
+        t->notifyChanges();
+        Graph *g = it.key()->activeGraph();
+        if (g) g->setAutoScale();
+    }
+}

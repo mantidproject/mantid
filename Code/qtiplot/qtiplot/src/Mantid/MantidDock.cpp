@@ -9,6 +9,8 @@
 #include <QListWidget>
 #include <QApplication>
 #include <QMap>
+#include <QMenu>
+#include <QAction>
 
 #include <map>
 #include <iostream>
@@ -46,7 +48,16 @@ QDockWidget(w)
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
     //
-    connect(m_loadButton,SIGNAL(clicked()),m_mantidUI,SLOT(loadWorkspace()));
+
+    QMenu *loadMenu = new QMenu(this);
+    QAction *loadRawAction = new QAction("Load RAW file",this);
+    connect(loadRawAction,SIGNAL(activated()),m_mantidUI,SLOT(loadWorkspace()));
+    QAction *loadDAEAction = new QAction("Load from DAE",this);
+    connect(loadDAEAction,SIGNAL(activated()),m_mantidUI,SLOT(loadDAEWorkspace()));
+    loadMenu->addAction(loadRawAction);
+    loadMenu->addAction(loadDAEAction);
+    m_loadButton->setMenu(loadMenu);
+
     connect(m_deleteButton,SIGNAL(clicked()),m_mantidUI,SLOT(deleteWorkspace()));
     connect(tstButton,SIGNAL(clicked()),m_mantidUI,SLOT(importWorkspace()));
     connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
@@ -64,6 +75,8 @@ void MantidDockWidget::update()
         wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
+        bool isHistogram = ( ws->blocksize() && ws->dataX(0).size() > ws->dataY(0).size() )?true:false;
+        wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
         Mantid::API::Axis* ax;
         ax = ws->getAxis(0);
         std::string s = "X axis: ";
@@ -139,8 +152,8 @@ QDockWidget(w)
     layout->addWidget(m_tree);
     //
     connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
-    connect(refreshButton,SIGNAL(clicked()),this,SLOT(update()));
-    //connect(refreshButton,SIGNAL(clicked()),this,SLOT(tst()));
+    //connect(refreshButton,SIGNAL(clicked()),this,SLOT(update()));
+    connect(refreshButton,SIGNAL(clicked()),m_mantidUI,SLOT(tst()));
 
     setWidget(f);
     update();

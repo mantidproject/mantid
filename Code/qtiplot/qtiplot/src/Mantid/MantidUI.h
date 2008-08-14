@@ -20,6 +20,8 @@ class MantidMatrix;
 class MantidDockWidget;
 class AlgorithmDockWidget;
 
+using namespace Mantid::API;
+
 class MantidUI:public QObject
 {
 
@@ -27,6 +29,7 @@ class MantidUI:public QObject
 
 public:
     MantidUI(ApplicationWindow *aw);
+    ~MantidUI();
     void init();
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
@@ -62,7 +65,7 @@ public:
     void showContextMenu(QMenu& cm, MdiSubWindow* w);
     // Copies selected rows from m to Y and errY columns of a new Table. If vis == true the table is visible,
     // if errs == true errors are copied
-    Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
+    Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true, bool forPlotting = false);
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     Table* createTableDetectors(MantidMatrix *m);
 
@@ -72,10 +75,13 @@ public:
 public slots:
 
     void tst();
+    void tst(MdiSubWindow* w);
     // Updates Mantid user interfase
     void update();
     void loadWorkspace();
+    void loadDAEWorkspace();
     void deleteWorkspace();
+    MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true);
     void importWorkspace();
     void copyRowToTable();
     void copyRowToGraph();

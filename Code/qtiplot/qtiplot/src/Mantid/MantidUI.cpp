@@ -4,6 +4,7 @@
 #include "MantidDock.h"
 #include "WorkspaceMatrix.h"
 #include "LoadRawDlg.h"
+#include "LoadDAEDlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "ExecuteAlgorithm.h"
 #include "../Spectrogram.h"
@@ -22,8 +23,6 @@
 
 #include <iostream>
 using namespace std;
-
-using namespace Mantid::API;
 
 void ApplicationWindow::initMantid()
 {
@@ -84,6 +83,12 @@ void MantidUI::init()
 
     //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060");
     update();
+
+}
+
+MantidUI::~MantidUI()
+{
+    cerr<<"MantidUI finished\n";
 }
 
 QStringList MantidUI::getWorkspaceNames()
@@ -168,6 +173,72 @@ void MantidUI::loadWorkspace()
 	}
 
     //executeAlgorithm("LoadRaw",1);
+}
+
+void MantidUI::loadDAEWorkspace()
+{
+    
+	loadDAEDlg* dlg = new loadDAEDlg(m_appWindow);
+	dlg->setModal(true);	
+	dlg->exec();
+	 
+	if (!dlg->getHostName().isEmpty())
+	{	
+	    //Check workspace does not exist
+	    if (!AnalysisDataService::Instance().doesExist(dlg->getWorkspaceName().toStdString()))
+	    {
+		    IAlgorithm* alg = CreateAlgorithm("LoadDAE");
+		    alg->setPropertyValue("DAEname", dlg->getHostName().toStdString());
+		    alg->setPropertyValue("OutputWorkspace", dlg->getWorkspaceName().toStdString());
+            if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
+            {
+		        alg->setPropertyValue("spectrum_min", dlg->getSpectrumMin().toStdString());
+		        alg->setPropertyValue("spectrum_max", dlg->getSpectrumMax().toStdString());
+            }
+            if ( !dlg->getSpectrumList().isEmpty() )
+            {
+		        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
+            }
+
+		    alg->execute();
+
+		    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(dlg->getWorkspaceName().toStdString());
+
+		    if (ws.use_count() == 0)
+		    {
+			    QMessageBox::warning(m_appWindow, tr("Mantid"),
+                   		    tr("A workspace with this name already exists.\n")
+                    		    , QMessageBox::Ok, QMessageBox::Ok);
+			    return;
+		    }
+
+            MantidMatrix *m = importWorkspace(dlg->getWorkspaceName(),false);
+            m->DAEname(dlg->getHostName());
+            bool allAvailableSpectraLoaded = true;
+            if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
+            {
+                m->spectrumMin(dlg->getSpectrumMin().toInt());
+                m->spectrumMax(dlg->getSpectrumMax().toInt());
+                allAvailableSpectraLoaded = false;
+            }
+            if ( !dlg->getSpectrumList().isEmpty() )
+            {
+                m->spectrumList(dlg->getSpectrumList());
+                allAvailableSpectraLoaded = false;
+            }
+
+            if (allAvailableSpectraLoaded)
+            {
+                m->spectrumMin(1);
+                m->spectrumMax(ws->getNumberHistograms());
+            }
+
+            if (dlg->updateInterval() > 0) m->canUpdateDAE(true,dlg->updateInterval());
+
+    		
+		    update();
+	    }
+	}
 }
 
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
@@ -271,32 +342,48 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 
 }
 
-void MantidUI::tst()
+MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg)
 {
-    cerr<<"\n\n\ntst\n\n\n";
+    Workspace_sptr ws;
+  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+	{
+		ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+	}
+
+    if (!ws.get()) return 0;
+
+    MantidMatrix* w = 0;
+    if (showDlg)
+    {
+	    ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
+	    dlg->setModal(true);	
+	    if (dlg->exec() == QDialog::Accepted)
+	    {
+		    int start = dlg->getLowerLimit();
+		    int end = dlg->getUpperLimit();
+    		
+	        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end,dlg->isFiltered(),dlg->getMaxValue() );
+	    }
+    }
+    else
+    {
+        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, -1, -1,false,0 );
+    }
+    if (!w) return 0;
+
+    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+
+    d_workspace->addSubWindow(w);
+    w->showNormal(); 
+    return w;
 }
 
 void MantidUI::importWorkspace()
 {
-    Workspace_sptr ws = getSelectedWorkspace();
-    if (!ws.get()) return;
-
-	ImportWorkspaceDlg* dlg = new ImportWorkspaceDlg(appWindow(), ws->getNumberHistograms());
-	dlg->setModal(true);	
-	if (dlg->exec() == QDialog::Accepted)
-	{
-		int start = dlg->getLowerLimit();
-		int end = dlg->getUpperLimit();
-		
-	    MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",getSelectedWorkspaceName(), start, end,dlg->isFiltered(),dlg->getMaxValue() );
-   	    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-	    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-	    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
-
-        d_workspace->addSubWindow(w);
-	    w->showNormal(); 
-	}
-
+    QString wsName = getSelectedWorkspaceName();
+    importWorkspace(wsName);
 }
 
 void MantidUI::removeWindowFromLists(MdiSubWindow* m)
@@ -353,15 +440,27 @@ void MantidUI::copyDetectorsToTable()
     createTableDetectors(m);
 }
 
-Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
+/*  Creates a Qtiplot Table from selected spectra of MantidMatrix m. 
+    The columns are: 1st column is x-values from the first selected spectrum,
+    2nd column is y-values of the first spectrum. Depending on value of errs
+    the 3rd column contains either first spectrum errors (errs == true) or 
+    y-values of the second spectrum (errs == false). Consecutive columns have
+    y-values and errors (if errs is true) of the following spectra. If visible == true
+    the table is made visible in Qtiplot.
+
+
+*/
+Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool errs, bool forPlotting)
 {
      int i0,i1; 
      m->getSelectedRows(i0,i1);
      if (i0 < 0 || i1 < 0) return 0;
 
      int c = errs?2:1;
+     int numRows = m->numCols();
+     if (m->isHistogram() && !forPlotting) numRows++;
 
-	 Table* t = new Table(aw_scriptEnv, m->numCols(), c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+	 Table* t = new Table(aw_scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
      if (visible) t->showNormal();
     
@@ -374,13 +473,25 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
          {
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"Err"+QString::number(i));
+             t->setColName(kErr,"E"+QString::number(i));
          }
          for(int j=0;j<m->numCols();j++)
          {
-             if (i == i0) t->setCell(j,0,m->dataX(i,j));
+             if (i == i0) 
+             {
+                 if (m->isHistogram() && forPlotting) t->setCell(j,0,( m->dataX(i,j) + m->dataX(i,j+1) )/2);
+                 else
+                     t->setCell(j,0,m->dataX(i,j));
+             }
              t->setCell(j,kY,m->dataY(i,j)); 
              if (errs) t->setCell(j,kErr,m->dataE(i,j));
+         }
+         if (m->isHistogram() && !forPlotting)
+         {
+             int iRow = numRows - 1;
+             if (i == i0) t->setCell(iRow,0,m->dataX(i,iRow));
+             t->setCell(iRow,kY,0); 
+             if (errs) t->setCell(iRow,kErr,0);
          }
      }
      return t;
@@ -388,20 +499,21 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
 
 void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
 {
-    Table *t = createTableFromSelectedRows(m,visible,errs);
+    Table *t = createTableFromSelectedRows(m,visible,errs,true);
     if (!t) return;
 
     QStringList cn;
     cn<<t->colName(1);
     if (errs) cn<<t->colName(2);
-    Graph *g = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line)->activeGraph();
+    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    Graph *g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
-    m->setGraph1D(g);
+    m->setGraph1D(ml,t);
 }
 
 Table* MantidUI::createTableDetectors(MantidMatrix *m)
 {
-	 Table* t = new Table(aw_scriptEnv, m->numRows(), 3, "", appWindow(), 0);
+	 Table* t = new Table(aw_scriptEnv, m->numRows(), 6, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-Detectors-"));
      t->showNormal();
     
@@ -413,25 +525,35 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          
          int ws_index = m->workspaceIndex(i);
          int currentSpec = spectraAxis->spectraNo(ws_index);
-         
+         Mantid::Geometry::V3D pos;
          int detID = 0;
          try
          {
              boost::shared_ptr<Mantid::Geometry::IDetector> det = spectraMap->getDetector(currentSpec);
              detID = det->getID();
+             pos = det->getPos();
          }
          catch(...)
          {
              detID = 0;
          }
          t->setCell(i,0,ws_index); 
-         t->setColName(0,"Index");
+         if (i == 0) t->setColName(0,"Index");
 
          t->setCell(i,1,currentSpec); 
-         t->setColName(1,"Spectra");
+         if (i == 0) t->setColName(1,"Spectra");
 
          t->setCell(i,2,detID); 
-         t->setColName(2,"Detectors");
+         if (i == 0) t->setColName(2,"Detectors");
+
+         t->setCell(i,3,pos.X()); 
+         if (i == 0) t->setColName(3,"X");
+
+         t->setCell(i,4,pos.Y()); 
+         if (i == 0) t->setColName(4,"Y");
+
+         t->setCell(i,5,pos.Z()); 
+         if (i == 0) t->setColName(5,"Z");
      }
      return t;
  }
@@ -493,4 +615,19 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 		
 		update();
 	}
+}
+
+void MantidUI::tst()
+{
+//    cerr<<"\n\n\n";
+    QWidget* m = (QWidget*)appWindow()->activeWindow();
+    if (!m) return;
+    if (m->isA("MantidMatrix"))
+        ((MantidMatrix*)m)->tst(); 
+
+}
+
+void MantidUI::tst(MdiSubWindow* w)
+{
+    cerr<<"OK closed\n";
 }
