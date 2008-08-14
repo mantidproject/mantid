@@ -50,7 +50,7 @@ class MuonNexusReader
 		std::vector<bool> logType;  ///< true if i'th log is numeric
 		std::vector<std::string> logNames;  ///< stores name read from file
 		int readMuonLogData(NXhandle fileID);  ///< method to read the fields of open NXlog section
-		std::vector<std::vector<float>> logValues, logTimes;
+		std::vector< std::vector<float> > logValues, logTimes;
 		std::string startTime;
 		std::time_t to_time_t(boost::posix_time::ptime t) // convert posix time to time_t
         {
