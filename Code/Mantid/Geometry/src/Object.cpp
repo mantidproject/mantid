@@ -1006,17 +1006,17 @@ namespace Mantid
 		xmin=AABBxMin;	ymin=AABByMin;	zmin=AABBzMin;
 	}
 
-	/**
+	/*!
 	 * Takes input axis aligned bounding box max and min points and stores these as the
 	 * bounding box for the object. Can be used when getBoundingBox fails and bounds are
 	 * known.
 	 *
-	 * @param xmax :: Maximum value for the bounding box in x direction
-	 * @param ymax :: Maximum value for the bounding box in y direction
-	 * @param zmax :: Maximum value for the bounding box in z direction
-	 * @param xmin :: Minimum value for the bounding box in x direction
-	 * @param ymin :: Minimum value for the bounding box in y direction
-	 * @param zmin :: Minimum value for the bounding box in z direction
+	 * @param xMax :: Maximum value for the bounding box in x direction
+	 * @param yMax :: Maximum value for the bounding box in y direction
+	 * @param zMax :: Maximum value for the bounding box in z direction
+	 * @param xMin :: Minimum value for the bounding box in x direction
+	 * @param yMin :: Minimum value for the bounding box in y direction
+	 * @param zMin :: Minimum value for the bounding box in z direction
 	 */
 	void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax, const double &xMin, const double &yMin, const double &zMin)
 	{

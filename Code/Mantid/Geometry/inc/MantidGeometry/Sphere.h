@@ -73,9 +73,9 @@ namespace Mantid
       double distance(const Geometry::V3D&) const;
 	  ///Setter for centre of sphere
       void setCentre(const Geometry::V3D&);              
-	  ///< Get Centre
+	  /// Get Centre
       Geometry::V3D getCentre() const { return Centre; } 
-	  ///< Get Radius
+	  /// Get Radius
       double getRadius() const { return Radius; }      
 	  /// Set Radius
       void setRadius(const double& r) { Radius=r; }   

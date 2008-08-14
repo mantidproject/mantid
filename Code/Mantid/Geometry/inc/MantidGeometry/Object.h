@@ -60,8 +60,13 @@ class DLLExport Object
   int procPair(std::string& Ln,std::map<int,Rule*>& Rlist,int& compUnit) const;
   CompGrp* procComp(Rule*) const;
   int checkSurfaceValid(const Geometry::V3D&,const Geometry::V3D&) const;
-  mutable double AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin; ///< Axis Aligned Bounding Box Cache
-  mutable bool  boolBounded;
+  mutable double AABBxMax, ///< xmax of Asis aligned bounding box cache
+	             AABByMax, ///< ymax of Asis aligned bounding box cache
+				 AABBzMax, ///< zmax of Asis aligned bounding box cache
+				 AABBxMin, ///< xmin of Asis aligned bounding box cache
+				 AABByMin, ///< xmin of Asis aligned bounding box cache
+				 AABBzMin; ///< zmin of Axis Aligned Bounding Box Cache
+  mutable bool  boolBounded; ///< flag true if a bounding box exists, either by getBoundingBox or defineBoundingBox
   int searchForObject(Geometry::V3D&) const;
   int inBoundingBox(const Geometry::V3D&,
 	                const double&, const double&, const double&,

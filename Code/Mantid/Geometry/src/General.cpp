@@ -146,7 +146,18 @@ General::setBaseEqn()
 
 void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	//TODO: Bounding box
+	/*!
+	  General bounding box
+	  Intended to improve bounding box for a general quadratic surface
+	  Using the surface calculate improved limits on the bounding box, if possible.
+	  \param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+	  \param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+	  \param ymax :: as for xmax
+	  \param ymin :: as for xmin
+	  \param zmax :: as for xmax
+	  \param zmin :: as for xmin
+      //TODO: Implement bounding box for General
+	*/
 }
 
 }  // NAMESPACE MonteCarlo

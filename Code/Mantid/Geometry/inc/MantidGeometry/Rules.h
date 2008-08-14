@@ -99,8 +99,8 @@ class DLLExport Rule
   virtual std::string display() const=0;
   /// Abstract Display Address
   virtual std::string displayAddress() const=0;
-
-  virtual void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin) =0; ///bounding box 
+  /// Abstract getBoundingBox
+  virtual void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin) =0; 
 };
 
   /*!
@@ -388,6 +388,7 @@ class DLLExport BoolValue : public Rule
 
   int type() const { return 0; }   //effective name
 
+  ///< write val into status, if in valid range
   void setStatus(int val){ if(val==0||val==1||val==-1)status=val;}
   int isValid(const Geometry::V3D&) const;
   int isValid(const std::map<int,int>&) const;  ///< isValue :: Based on a surface status map

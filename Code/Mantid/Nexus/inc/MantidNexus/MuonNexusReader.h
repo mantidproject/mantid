@@ -50,16 +50,23 @@ class MuonNexusReader
 		std::vector<bool> logType;  ///< true if i'th log is numeric
 		std::vector<std::string> logNames;  ///< stores name read from file
 		int readMuonLogData(NXhandle fileID);  ///< method to read the fields of open NXlog section
-		std::vector< std::vector<float> > logValues, logTimes;
-		std::string startTime;
-		std::time_t to_time_t(boost::posix_time::ptime t) // convert posix time to time_t
+		std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
+			                              logTimes;  ///< arrys of times for i'th NXlog section
+		std::string startTime; ///< string startTime which must be read from Nexus file to base all NXlog times on
+		std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
         {
+			/*!
+			Take the input Posix time, subtract the unix epoch, and return the seconds
+			as a std::time_t value.
+			@param t :: time of interest as ptime
+			@return :: time_t value of t
+			*/
 			if( t == boost::posix_time::neg_infin )
              return 0;
 			else if( t == boost::posix_time::pos_infin )
              return LONG_MAX;
 			boost::posix_time::ptime start(boost::gregorian::date(1970,1,1));
-          return (t-start).total_seconds();
+            return (t-start).total_seconds();
         } 
 
 	public:

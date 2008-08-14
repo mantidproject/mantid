@@ -393,9 +393,17 @@ Cylinder::print() const
 
 void Cylinder::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
-	//Cylinder bounding box
-	//find the intersection points of the axis of cylinder with the input bounding box.
-	//using the end points calculate the bounding box
+	/*!
+	  Cylinder bounding box
+	  find the intersection points of the axis of cylinder with the input bounding box.
+	  Using the end points calculate improved limits on the bounding box, if possible.
+	  \param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+	  \param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+	  \param ymax :: as for xmax
+	  \param ymin :: as for xmin
+	  \param zmax :: as for xmax
+	  \param zmin :: as for xmin
+	*/
 	std::vector<V3D> listOfPoints;
 	double txmax,tymax,tzmax,txmin,tymin,tzmin;
 	txmax=xmax;tymax=ymax;tzmax=zmax;txmin=xmin;tymin=ymin;tzmin=zmin;
