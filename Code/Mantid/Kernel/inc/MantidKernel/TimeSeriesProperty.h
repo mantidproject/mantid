@@ -106,6 +106,17 @@ public:
                createTime_t_FromString(time), value) ).second;
 	}
 
+	/** Add a value to the map
+	 *  @param time The time as a time_t value
+	 *  @param value The associated value
+	 *  @return True if insertion successful (i.e. identical time not already in map
+	 */
+	bool addValue( const std::time_t &time, const TYPE value )
+	{
+    return m_propertySeries.insert( typename std::map<dateAndTime, TYPE>::value_type( 
+               time, value) ).second;
+	}
+
 	
 private:
   /// Holds the time series data 

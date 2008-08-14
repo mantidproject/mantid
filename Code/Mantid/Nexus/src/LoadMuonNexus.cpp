@@ -150,7 +150,7 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
 //-          runLoadMappingTable(localWorkspace );
-//-          runLoadLog(localWorkspace );
+		  runLoadLog(localWorkspace );
 //-          // Cache these for copying to workspaces for later periods
 //-          instrument = localWorkspace->getInstrument();
 //-          specMap = localWorkspace->getSpectraMap();
@@ -338,28 +338,28 @@ namespace Mantid
 //-      
 //-      if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
 //-    }
-//-
-//-    /// Run the LoadLog sub-algorithm
-//-    void LoadMuonNexus::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
-//-    {
-//-      Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
-//-      // Pass through the same input filename
-//-      loadLog->setPropertyValue("Filename",m_filename);
-//-      // Set the workspace property to be the same one filled above
-//-      loadLog->setProperty<Workspace_sptr>("Workspace",localWorkspace);
-//-
-//-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-//-      try
-//-      {
-//-        loadLog->execute();
-//-      }
-//-      catch (std::runtime_error& err)
-//-      {
-//-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
-//-      }
-//-
-//-      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
-//-    }
+
+    /// Run the LoadLog sub-algorithm
+    void LoadMuonNexus::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      Algorithm_sptr loadLog = createSubAlgorithm("LoadMuonLog");
+      // Pass through the same input filename
+      loadLog->setPropertyValue("Filename",m_filename);
+      // Set the workspace property to be the same one filled above
+      loadLog->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadLog->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+      }
+
+      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+	}
 
     double LoadMuonNexus::dblSqrt(double in)
     {

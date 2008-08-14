@@ -82,7 +82,7 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
 
-    /*  - other tests from LoadRawTest
+    /*  - other tests from LoadRawTest - These test data not in current Nexus files
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
@@ -101,16 +101,17 @@ public:
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
-
+    */
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     boost::shared_ptr<Sample> sample = output->getSample();
-    Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HET15869_TEMP1.txt") );
+    Property *l_property = sample->getLogData( std::string("beamlog_current") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
     
+	/*
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------

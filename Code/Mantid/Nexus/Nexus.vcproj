@@ -165,6 +165,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadMuonLog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadMuonNexus.cpp"
 				>
 			</File>
@@ -192,6 +196,10 @@
 			>
 			<File
 				RelativePath=".\inc\MantidNexus\LoadInstrumentFromNexus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\LoadMuonLog.h"
 				>
 			</File>
 			<File

@@ -5,10 +5,12 @@
 
 
 
+/// Default constructor
 MuonNexusReader::MuonNexusReader() : counts(0), nexus_instrument_name()
 {
 }
 
+/// Destructor deletes temp storage
 MuonNexusReader::~MuonNexusReader()
 {
    delete[] corrected_times;
@@ -32,8 +34,26 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    NXaccess mode= NXACC_READ;
    NXstatus stat=NXopen(filename.c_str(), mode, &fileID);
    if(stat==NX_ERROR) return(1);
+   char *nxname,*nxclass;
+   int nxdatatype;
+   nxname= new char[NX_MAXNAMELEN];
+   nxclass = new char[NX_MAXNAMELEN];
+   stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype);
+   if(stat==NX_ERROR) return(1);
+   stat=NXopengroup(fileID,nxname,nxclass);
+   if(stat==NX_ERROR) return(1);
    //
-   stat=NXopengroup(fileID,"run","NXentry");
+   std::vector<std::string> nxnamelist,nxclasslist;
+   nxnamelist.push_back(nxname);
+   nxclasslist.push_back(nxclass);
+   //
+   // read nexus fields at this level
+   while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   {
+      nxnamelist.push_back(nxname);
+      nxclasslist.push_back(nxclass);
+   }
+   //
    if(stat==NX_ERROR) return(1);
    // read histogram data
    stat=NXopengroup(fileID,"histogram_data_1","NXdata");
@@ -50,10 +70,6 @@ int MuonNexusReader::readFromFile(const std::string& filename)
      counts = new int[dims[0]*dims[1]];
      stat=NXgetdata(fileID,counts);
      if(stat==NX_ERROR) return(1);
-     // temp check on data vaues
-     //int i,j,sum=0;
-     //for (i=0;i<dims[0]*dims[1];i++)
-     //  sum+=counts[i];
      //
     stat=NXclosedata(fileID);
     if(stat==NX_ERROR) return(1);
@@ -92,6 +108,8 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    if(stat==NX_ERROR) return(1);
    stat=NXclose (&fileID);
 
+   delete[] nxname;
+   delete[] nxclass;
    return(0);
 }
 
@@ -100,7 +118,7 @@ int MuonNexusReader::readFromFile(const std::string& filename)
 // times and that bin boundary values are wanted, as ISISRAW.
 // @param  timebnds  float pointer for time values to be stored
 // @param  ndnbs     int count of expected points
-int MuonNexusReader::getTimeChannels(float* timebnds, int nbnds)
+int MuonNexusReader::getTimeChannels(float* timebnds, const int& nbnds) const
 {
    int i;
    // assume constant time bin width given by difference of first two values
@@ -116,10 +134,157 @@ std::string MuonNexusReader::getInstrumentName()
 	return(nexus_instrument_name);
 }
 
+// NeXus Muon file reader for NXlog data.
+// Read the given Nexus file into temp storage.
+//
+// Expected content of Nexus file is:
+//     NXentry: "run" (or any name, ignored at present)
+//            Zero or more NXlog entries which are of the form: <time>,<value>
+//            <time> is 32bit float time wrt start_time and <value> either 32bit float
+//            or sting.
+//
+// @param filename  name of existing NeXus Muon file to read
+int MuonNexusReader::readLogData(const std::string& filename)
+{
+   NXhandle fileID;
+   NXaccess mode= NXACC_READ;
+   NXstatus stat=NXopen(filename.c_str(), mode, &fileID);
+   if(stat==NX_ERROR) return(1);
+   // find name and class of first entry
+   char *nxname,*nxclass;
+   int nxdatatype;
+   nxname= new char[NX_MAXNAMELEN];
+   nxclass = new char[NX_MAXNAMELEN];
+   stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype);
+   if(stat==NX_ERROR) return(1);
+   // assume this is the requied NXentry
+   stat=NXopengroup(fileID,nxname,nxclass);
+   if(stat==NX_ERROR) return(1);
+   //
+   // read nexus fields at this level looking for NXlog and loading these into
+   // memory
+   // Also get the start_time string needed to change these times into ISO times
+   std::vector<std::string> nxnamelist,nxclasslist;
+   int count=0;
+   char start_time[]="start_time";
+   nexusLogCount=0;
+   while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   {
+      nxnamelist.push_back(nxname);
+      nxclasslist.push_back(nxclass);
+      if(nxclasslist[count]=="NXlog")
+      {
+         stat=NXopengroup(fileID,nxname,nxclass);
+	     if(stat==NX_ERROR) return(1);
+		 if(readMuonLogData(fileID)==0)
+		 {
+		    nexusLogCount++;
+		 }
+		 stat=NXclosegroup(fileID);
+	     if(stat==NX_ERROR) return(1);
+      }
+	  if(nxnamelist[count]==start_time)
+	  {
+		  int rank,dims[4],type;
+	      stat=NXopendata(fileID,start_time); if(stat==NX_ERROR) return(1);
+          stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
+          char* sTime=new char[dims[0]+1];
+          stat=NXgetdata(fileID,sTime); if(stat==NX_ERROR) return(1);
+	      sTime[dims[0]]='\0'; // null terminate
+	      stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
+		  startTime=sTime;
+		  if( (startTime.find('T')) >0 )
+			  startTime.replace(startTime.find('T'),1," ");
+	  }
+	  count++;
+   }
+   //
+   if(stat==NX_ERROR) return(1);
+   return(0);
+}
 
 
+int MuonNexusReader::readMuonLogData(NXhandle fileID)
+{
+	// read the name/values/times data of the currently opened NXlog section of a Nexus Muon file
+	// given by fileID
+	// The values are stored so they can be saved into the workspace.
+	int stat,rank,dims[4],type;
+	char name[]="name",values[]="values",time[]="time"; // section names used in example files
+	// read name of Log data
+	stat=NXopendata(fileID,name); if(stat==NX_ERROR) return(1);
+    stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
+    char* dataName=new char[dims[0]+1];
+    stat=NXgetdata(fileID,dataName); if(stat==NX_ERROR) return(1);
+	dataName[dims[0]]='\0'; // null terminate
+	stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
+	logNames.push_back(dataName);
+	//
+	// read data values
+	stat=NXopendata(fileID,values); if(stat==NX_ERROR) return(1);
+    stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
+	float* dataVals= new float[dims[0]];
+	if(type==NX_FLOAT32 && rank==1)
+	{
+	   stat=NXgetdata(fileID,dataVals);
+	   logType.push_back(true);
+	}
+	else
+	{
+		logType.push_back(false);
+		return(1);
+	}
+    std::vector<float> tmpf(dataVals,dataVals+dims[0]);
+	logValues.push_back(tmpf);
+    stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
+	//
+	// read time values
+	stat=NXopendata(fileID,time); if(stat==NX_ERROR) return(1);
+    stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
+	float* timeVals= new float[dims[0]];
+	if(type==NX_FLOAT32 && rank==1)
+	{
+	   stat=NXgetdata(fileID,timeVals);
+	}
+	else
+		return(1);
+    std::vector<float> tmp(timeVals,timeVals+dims[0]);
+	logTimes.push_back(tmp);
+    stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
+	return(0);
+}
+void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,
+								   std::time_t& logTime, double& value)
+{
+	// for the given log find the logTime and value at given sequence in log
+	double time=logTimes[logNumber][logSequence];
+    boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
+	std::time_t atime=to_time_t(pt);
+	atime+=time;
+	logTime=atime;
+	//dateAndTime="2008-08-12T09:00:01"; //test
+	value=logValues[logNumber][logSequence];
+}
+int MuonNexusReader::numberOfLogs() const
+{
+	return(nexusLogCount);
+}
 
+int MuonNexusReader::getLogLength(const int i) const
+{
+	return(logTimes[i].size());
+}
 
+bool MuonNexusReader::logTypeNumeric(const int i) const
+{
+	return(logType[i]);
+}
+
+/// return log name of i'th NXlog section
+std::string MuonNexusReader::getLogName(const int i) const
+{
+	return(logNames[i]);
+}
 
 
 

@@ -87,7 +87,7 @@ namespace Mantid
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
  //     void runLoadMappingTable(DataObjects::Workspace2D_sptr);
- //     void runLoadLog(DataObjects::Workspace2D_sptr);
+      void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
