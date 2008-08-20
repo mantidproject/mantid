@@ -155,7 +155,9 @@ namespace Mantid
         else
         {
           //        delta is the overlap of the bins on the x axis
-          delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
+          //delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
+          delta = xo_high<xn_high?xo_high:xn_high;
+          delta -= xo_low>xn_low?xo_low:xn_low;
           width = xo_high - xo_low;
           if ( (delta <= 0.0) || (width <= 0.0) )
           {

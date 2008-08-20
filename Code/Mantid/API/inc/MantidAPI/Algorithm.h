@@ -36,6 +36,9 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/shared_ptr.hpp>
+#include <Poco/ActiveMethod.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Notification.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -94,6 +97,56 @@ class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManager
 {
 public:
 
+    class StartedNotification: public Poco::Notification
+    {
+    public:
+        virtual std::string name() const{return "StartedNotification";}
+    };
+
+    class FinishedNotification: public Poco::Notification
+    {
+    public:
+        FinishedNotification(bool res):Poco::Notification(),success(res){}
+        virtual std::string name() const{return "FinishedNotification";}
+        bool success;
+    };
+
+    class ProgressNotification: public Poco::Notification
+    {
+    public:
+        ProgressNotification(double p):Poco::Notification(),progress(p){}
+        virtual std::string name() const{return "ProgressNotification";}
+        double progress;
+    };
+
+    class ErrorNotification: public Poco::Notification
+    {
+    public:
+        ErrorNotification(const std::string& str):Poco::Notification(),what(str){}
+        virtual std::string name() const{return "ProgressNotification";}
+        std::string what;
+    };
+
+    class CancelException : public std::exception
+    {
+     public:
+         CancelException():outMessage("Algorithm terminated"){}
+         CancelException(const CancelException& A):outMessage(A.outMessage){}
+         /// Assignment operator
+         CancelException& operator=(const CancelException& A);
+         /// Destructor
+         ~CancelException() throw() {}
+
+      const char* what() const throw()
+      {
+          return outMessage.c_str();
+      }
+    private:
+        /// The message returned by what()
+        std::string outMessage;
+
+    };
+
   Algorithm();
   virtual ~Algorithm();
   /// function to return a name of the algorithm, must be overridden in all algorithms
@@ -118,6 +171,11 @@ public:
   bool isChild() const;
   void setChild(const bool isChild);
 
+  /// Asynchronous execution.
+  /// Usage: Poco::ActiveResult<bool> res = alg->executeAsync();
+  Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
+  Poco::NotificationCenter notificationCenter;
+  void cancel(){m_cancel = true;}
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -135,8 +193,13 @@ protected:
   // Make PropertyManager's declareProperty methods protected in Algorithm
   using Kernel::PropertyManager::declareProperty;
 
+  /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
+  void progress(double p);
+  void interruption_point();
+
 private:
 
+  Poco::ActiveMethod<bool, int, Algorithm> _executeAsync;
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
@@ -155,6 +218,9 @@ private:
   bool m_isExecuted; ///< Algorithm is executed flag
 
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
+
+  bool executeAsyncImpl(const int&);
+  bool m_cancel;
 };
 
 ///Typedef for a shared pointer to an Algorithm

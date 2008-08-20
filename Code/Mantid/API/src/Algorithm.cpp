@@ -16,7 +16,8 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManager(), m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false)
+  PropertyManager(), m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
+      _executeAsync(this,&Algorithm::executeAsyncImpl),m_cancel(false)
 {}
 
 /// Virtual destructor
@@ -128,6 +129,11 @@ bool Algorithm::execute()
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm) throw;
     }
+  }
+  catch(CancelException& ex)
+  {
+      g_log.error("Execution terminated by user.");
+      throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (...)
@@ -333,6 +339,32 @@ bool Algorithm::isChild() const
 void Algorithm::setChild(const bool isChild)
 {
   m_isChildAlgorithm = isChild;
+}
+
+bool Algorithm::executeAsyncImpl(const int&)
+{
+    try
+    {
+        notificationCenter.postNotification(new StartedNotification());
+        bool res = execute();
+        notificationCenter.postNotification(new FinishedNotification(res));
+        return res;
+    }
+    catch(std::exception& e)
+    {
+        notificationCenter.postNotification(new ErrorNotification(e.what()));
+    }
+    return false;
+}
+
+void Algorithm::progress(double p)
+{
+    notificationCenter.postNotification(new ProgressNotification(p));
+}
+
+void Algorithm::interruption_point()
+{
+    if (m_cancel) throw CancelException();
 }
 
 } // namespace API
