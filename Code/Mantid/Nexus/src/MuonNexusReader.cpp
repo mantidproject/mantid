@@ -6,7 +6,7 @@
 
 
 /// Default constructor
-MuonNexusReader::MuonNexusReader() : counts(0), nexus_instrument_name()
+MuonNexusReader::MuonNexusReader() : counts(0), nexus_instrument_name(), corrected_times(0)
 {
 }
 
@@ -22,9 +22,9 @@ MuonNexusReader::~MuonNexusReader()
 // which does not use namespace.
 //
 // Expected content of Nexus file is:
-//     Group: "run"
-//       Group: "histogram_data_1"
-//         Data: "counts"  (2D integer array"
+//     Entry: "run" (first entry opened, whatever name is)
+//       Group: "histogram_data_1" (first NXdata section read, whatever name is)
+//         Data: "counts"  (2D integer array)
 //         Data: "corrected time" (1D float array)
 //
 // @param filename  name of existing NeXus Muon file to read
@@ -46,18 +46,23 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    std::vector<std::string> nxnamelist,nxclasslist;
    nxnamelist.push_back(nxname);
    nxclasslist.push_back(nxclass);
+   std::vector<std::string> nxdataname;
    //
    // read nexus fields at this level
    while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
    {
       nxnamelist.push_back(nxname);
       nxclasslist.push_back(nxclass);
+	  // record NXdata section name(s)
+	  if(nxclasslist.back()=="NXdata")
+         nxdataname.push_back(nxnamelist.back());
    }
    //
    if(stat==NX_ERROR) return(1);
-   // read histogram data
-   stat=NXopengroup(fileID,"histogram_data_1","NXdata");
+   // open NXdata section
+   stat=NXopengroup(fileID,nxdataname.front().c_str(),"NXdata");
    if(stat==NX_ERROR) return(1);
+   //
     stat=NXopendata(fileID,"counts");
      int rank,type,dims[4];
      stat=NXgetinfo(fileID,&rank,dims,&type);
@@ -88,7 +93,8 @@ int MuonNexusReader::readFromFile(const std::string& filename)
     stat=NXclosedata (fileID);
    stat=NXclosegroup (fileID);
    if(stat==NX_ERROR) return(1);
-    // get instrument name
+   //
+   // get instrument name
     stat=NXopengroup(fileID,"instrument","NXinstrument");
     if(stat==NX_ERROR) return(1);
      stat=NXopendata(fileID,"name");
@@ -100,10 +106,24 @@ int MuonNexusReader::readFromFile(const std::string& filename)
      nexus_instrument_name=instrument;
      delete[] instrument;
     stat=NXclosedata(fileID);
-   // close file
    if(stat==NX_ERROR) return(1);
    stat=NXclosegroup (fileID);
-   if(stat==NX_ERROR) return(1);
+   //
+   // Get number of switching states if available. Take this as number of periods
+   // If not available set as one period.
+    stat=NXopendata(fileID,"switching_states");
+    if(stat!=NX_ERROR)
+	{
+		//stat=NXgetinfo(fileID,&rank,dims,&type);
+		int ssPeriods;
+		stat=NXgetdata(fileID,&ssPeriods);
+		t_nper=ssPeriods;
+		t_nsp1/=t_nper; // assume that number of spectra in multiperiod file should be divided by periods
+	}
+	else
+		t_nper=1;
+   //
+   // close file
    stat=NXclosegroup (fileID);
    if(stat==NX_ERROR) return(1);
    stat=NXclose (&fileID);
@@ -195,9 +215,12 @@ int MuonNexusReader::readLogData(const std::string& filename)
 		  startTime=sTime;
 		  if( (startTime.find('T')) >0 )
 			  startTime.replace(startTime.find('T'),1," ");
+          boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
+          startTime_time_t=to_time_t(pt);
 	  }
 	  count++;
    }
+
    //
    if(stat==NX_ERROR) return(1);
    return(0);
@@ -258,10 +281,10 @@ void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,
 {
 	// for the given log find the logTime and value at given sequence in log
 	double time=logTimes[logNumber][logSequence];
-    boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
-	std::time_t atime=to_time_t(pt);
-	atime+=time;
-	logTime=atime;
+    //boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
+	//std::time_t atime=to_time_t(pt);
+	//atime+=time;
+	logTime=time+startTime_time_t;
 	//dateAndTime="2008-08-12T09:00:01"; //test
 	value=logValues[logNumber][logSequence];
 }

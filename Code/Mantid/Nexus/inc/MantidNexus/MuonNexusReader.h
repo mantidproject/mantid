@@ -53,6 +53,7 @@ class MuonNexusReader
 		std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
 			                              logTimes;  ///< arrys of times for i'th NXlog section
 		std::string startTime; ///< string startTime which must be read from Nexus file to base all NXlog times on
+		std::time_t startTime_time_t; ///< startTime in time_t format
 		std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
         {
 			/*!

@@ -63,7 +63,7 @@ void LoadInstrumentFromNexus::exec()
   instrument->setName(nxload.getInstrumentName());
 
   // Add dummy source and samplepos to instrument
-  // The L2 and 2-theta values from Raw file assumed to be relative to sample position
+  // The L2 and 2-theta values from nexus file assumed to be relative to sample position
 
   Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Unknown",instrument.get());
   instrument->add(samplepos);
@@ -79,7 +79,7 @@ void LoadInstrumentFromNexus::exec()
   {
     // Otherwise try and get it from the nexus file - but not there at present!
     // l1 = nxload.ivpb.i_l1;
-    // Default to 10 if the raw file doesn't have it set
+    // Default to 10 if the file doesn't have it set
     if (l1 == 0)  l1 = 10.0;
   }
   source->setPos(0.0,-1.0*l1,0.0);
@@ -117,10 +117,10 @@ void LoadInstrumentFromNexus::exec()
     g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }
 
-  // Information to the user about what info is extracted from raw file
+  // Information to the user about what info is extracted from nexus file
   g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
     << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
-    << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
+    << "L2 and two-theta values were read from nexus file and used to set the r and theta spherical coordinates; \n"
     << "the remaining spherical coordinate phi was set to zero.\n"
     << "Source component added with position set to (0,-" << l1 << ",0). In standard configuration, with \n"
     << "the beam along y-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"

@@ -75,8 +75,8 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-//-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
-//-      boost::shared_ptr<Instrument> instrument;
+      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
+      boost::shared_ptr<Instrument> instrument;
 //-      boost::shared_ptr<SpectraDetectorMap> specMap;
 //-      boost::shared_ptr<Sample> sample;
 //-      
@@ -109,8 +109,7 @@ namespace Mantid
       else
       {
         total_specs = m_numberOfSpectra;
-        // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
-        //  - IS THIS TRUE for NeXus??
+        // for nexus return all spectra
         m_spec_min = 0; // changed to 0 for NeXus, was 1 for Raw
         m_spec_max = m_numberOfSpectra;  // was +1?
       }
@@ -151,24 +150,24 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
 //-          runLoadMappingTable(localWorkspace );
 		  runLoadLog(localWorkspace );
-//-          // Cache these for copying to workspaces for later periods
-//-          instrument = localWorkspace->getInstrument();
+          // Cache these for copying to workspaces for later periods
+          instrument = localWorkspace->getInstrument();
 //-          specMap = localWorkspace->getSpectraMap();
 //-          sample = localWorkspace->getSample();
-//-        }
-//-        else   // We are working on a higher period of a multiperiod raw file
-//-        {
-//-          // Create a WorkspaceProperty for the new workspace of a higher period
-//-          // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
-//-          //                (for all but the first period, which has no suffix)
-//-          std::stringstream suffix;
-//-          suffix << (period+1);
-//-          outputWorkspace += suffix.str();
-//-          std::string WSName = localWSName + "_" + suffix.str();
-//-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-//-          g_log.information() << "Workspace " << WSName << " created. \n";
-//-          // Copy the shared instrument, sample & spectramap onto the workspace for this period
-//-          localWorkspace->setInstrument(instrument);
+        }
+        else   // We are working on a higher period of a multiperiod raw file
+        {
+          // Create a WorkspaceProperty for the new workspace of a higher period
+          // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
+          //                (for all but the first period, which has no suffix)
+          std::stringstream suffix;
+          suffix << (period+1);
+          outputWorkspace += suffix.str();
+          std::string WSName = localWSName + "_" + suffix.str();
+          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
+          g_log.information() << "Workspace " << WSName << " created. \n";
+          // Copy the shared instrument, sample & spectramap onto the workspace for this period
+          localWorkspace->setInstrument(instrument);
 //-          localWorkspace->setSpectraMap(specMap);
 //-          localWorkspace->setSample(sample);
         }
@@ -299,7 +298,7 @@ namespace Mantid
     void LoadMuonNexus::runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr localWorkspace)
     {
       g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-        << "the instrument from raw data file.\n";
+        << "the instrument from nexus data file.\n";
 
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
       loadInst->setPropertyValue("Filename", m_filename);
