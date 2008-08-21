@@ -23,7 +23,7 @@
 
 #include <iostream>
 using namespace std;
-
+ 
 void ApplicationWindow::initMantid()
 {
 
@@ -42,8 +42,13 @@ void ApplicationWindow::initMantid()
 }
 
 
-MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
+MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
+m_finishedObserver(*this, &MantidUI::handleAlgorithmFinishedNotification),
+m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
+m_progressObserver(*this, &MantidUI::handleAlgorithmProgressNotification)
 {
+    m_progressDialog = 0;
+    m_algAsync = 0;
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
@@ -62,6 +67,11 @@ MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw)
     actionCopyDetectorsToTable = new QAction(tr("Copy Detectors to Table"), this);
 	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
+
+    connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
+    connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
+    connect(this,SIGNAL(needToUpdateProgressDialog(int)),this,SLOT(updateProgressDialog(int)));
+    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix()),this,SLOT(createLoadDAEMantidMatrix()));
 
 }
 
@@ -187,7 +197,7 @@ void MantidUI::loadDAEWorkspace()
 	    //Check workspace does not exist
 	    if (!AnalysisDataService::Instance().doesExist(dlg->getWorkspaceName().toStdString()))
 	    {
-		    IAlgorithm* alg = CreateAlgorithm("LoadDAE");
+            Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>(CreateAlgorithm("LoadDAE"));
 		    alg->setPropertyValue("DAEname", dlg->getHostName().toStdString());
 		    alg->setPropertyValue("OutputWorkspace", dlg->getWorkspaceName().toStdString());
             if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
@@ -200,43 +210,16 @@ void MantidUI::loadDAEWorkspace()
 		        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
             }
 
-		    alg->execute();
+            m_DAE_WorkspaceName = dlg->getWorkspaceName();
+            m_DAE_HostName = dlg->getHostName();
+            m_DAE_SpectrumMin = dlg->getSpectrumMin();
+            m_DAE_SpectrumMax = dlg->getSpectrumMax();
+            m_DAE_SpectrumList = dlg->getSpectrumList();
+            m_DAE_UpdateInterval = dlg->updateInterval();
+		    
+            alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
+            executeAlgorithmAsync(alg);
 
-		    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(dlg->getWorkspaceName().toStdString());
-
-		    if (ws.use_count() == 0)
-		    {
-			    QMessageBox::warning(m_appWindow, tr("Mantid"),
-                   		    tr("A workspace with this name already exists.\n")
-                    		    , QMessageBox::Ok, QMessageBox::Ok);
-			    return;
-		    }
-
-            MantidMatrix *m = importWorkspace(dlg->getWorkspaceName(),false);
-            m->DAEname(dlg->getHostName());
-            bool allAvailableSpectraLoaded = true;
-            if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
-            {
-                m->spectrumMin(dlg->getSpectrumMin().toInt());
-                m->spectrumMax(dlg->getSpectrumMax().toInt());
-                allAvailableSpectraLoaded = false;
-            }
-            if ( !dlg->getSpectrumList().isEmpty() )
-            {
-                m->spectrumList(dlg->getSpectrumList());
-                allAvailableSpectraLoaded = false;
-            }
-
-            if (allAvailableSpectraLoaded)
-            {
-                m->spectrumMin(1);
-                m->spectrumMax(ws->getNumberHistograms());
-            }
-
-            if (dlg->updateInterval() > 0) m->canUpdateDAE(true,dlg->updateInterval());
-
-    		
-		    update();
 	    }
 	}
 }
@@ -613,8 +596,27 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 	
 		dlg->exec();	
 		
-		update();
+        executeAlgorithmAsync(alg);
+        //alg->execute();
 	}
+}
+
+Poco::ActiveResult<bool> MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg)
+{
+    m_progressDialog = new QProgressDialog("Algorithm Execution","Cancel",0,100,appWindow());
+    m_progressDialog->setWindowModality(Qt::WindowModal);
+    connect(m_progressDialog,SIGNAL(canceled()),this,SLOT(cancelAsyncAlgorithm()));
+    alg->notificationCenter.addObserver(m_finishedObserver);
+    alg->notificationCenter.addObserver(m_progressObserver);
+    m_algAsync = alg;
+    return alg->executeAsync();
+}
+
+void MantidUI::cancelAsyncAlgorithm()
+{
+    closeProgressDialog();
+    if (m_algAsync) m_algAsync->cancel();
+    m_algAsync = 0;
 }
 
 void MantidUI::tst()
@@ -630,4 +632,83 @@ void MantidUI::tst()
 void MantidUI::tst(MdiSubWindow* w)
 {
     cerr<<"OK closed\n";
+}
+
+void MantidUI::updateProgressDialog(int ip)
+{
+    if (m_progressDialog) m_progressDialog->setValue( ip );
+}
+
+void MantidUI::closeProgressDialog()
+{
+    if (m_progressDialog) 
+    {
+        m_progressDialog->close();
+        //delete m_progressDialog;
+        m_progressDialog = 0;
+    }
+}
+
+void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
+{
+    m_algAsync = 0;
+    emit needToUpdateProgressDialog(100);
+    emit needToCloseProgressDialog();
+    //m_progressDialog->close();
+    emit needsUpdating();
+}
+
+void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
+{
+    emit needToCreateLoadDAEMantidMatrix();
+}
+
+void MantidUI::createLoadDAEMantidMatrix()
+{
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_DAE_WorkspaceName.toStdString());
+
+    if (ws.use_count() == 0)
+    {
+	    QMessageBox::warning(m_appWindow, tr("Mantid"),
+           		    tr("A workspace with this name already exists.\n")
+            		    , QMessageBox::Ok, QMessageBox::Ok);
+	    return;
+    }
+
+    MantidMatrix *m = importWorkspace(m_DAE_WorkspaceName,false);
+    m->DAEname(m_DAE_HostName);
+    bool allAvailableSpectraLoaded = true;
+    if ( !m_DAE_SpectrumMin.isEmpty() && !m_DAE_SpectrumMax.isEmpty() )
+    {
+        m->spectrumMin(m_DAE_SpectrumMin.toInt());
+        m->spectrumMax(m_DAE_SpectrumMax.toInt());
+        allAvailableSpectraLoaded = false;
+    }
+    if ( !m_DAE_SpectrumList.isEmpty() )
+    {
+        m->spectrumList(m_DAE_SpectrumList);
+        allAvailableSpectraLoaded = false;
+    }
+
+    if (allAvailableSpectraLoaded)
+    {
+        m->spectrumMin(1);
+        m->spectrumMax(ws->getNumberHistograms());
+    }
+
+    if (m_DAE_UpdateInterval > 0) m->canUpdateDAE(true,m_DAE_UpdateInterval);
+
+    //update();
+
+    m_DAE_WorkspaceName = "";
+    m_DAE_HostName = "";
+    m_DAE_SpectrumMin = "";
+    m_DAE_SpectrumMax = "";
+    m_DAE_SpectrumList = "";
+    m_DAE_UpdateInterval = 0;
+}
+
+void MantidUI::handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
+{
+    emit needToUpdateProgressDialog( int(pNf->progress*100) );
 }

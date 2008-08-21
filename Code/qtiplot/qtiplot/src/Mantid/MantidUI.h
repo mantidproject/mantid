@@ -11,8 +11,11 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadRaw.h"
 
+#include <Poco/NObserver.h>
+
 #include <QDockWidget>
 #include <QTreeWidget>
+#include <QProgressDialog>
 
 class Graph3D;
 class ScriptingEnv;
@@ -72,6 +75,13 @@ public:
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
 
+signals:
+
+    void needsUpdating();
+    void needToCloseProgressDialog();
+    void needToUpdateProgressDialog(int ip);
+    void needToCreateLoadDAEMantidMatrix();
+
 public slots:
 
     void tst();
@@ -89,7 +99,22 @@ public slots:
     void executeAlgorithm();
     void executeAlgorithm(QString algName, int version);
     void copyDetectorsToTable();
+    void closeProgressDialog();
+    void updateProgressDialog(int ip);
+    void cancelAsyncAlgorithm();
+    void createLoadDAEMantidMatrix();
 public:
+    Poco::ActiveResult<bool> executeAlgorithmAsync(Mantid::API::Algorithm* alg);
+
+    void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
+    Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
+
+    void handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
+    Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedLoadDAEObserver;
+
+    void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
+    Poco::NObserver<MantidUI, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+
     ApplicationWindow *m_appWindow;
     QMdiArea *d_workspace;// ApplicationWindow's private member
     QMenuBar *aw_menuBar;
@@ -108,6 +133,19 @@ public:
     QAction *actionToggleMantid;
     QAction *actionToggleAlgorithms;
     QAction *actionCopyDetectorsToTable;
+
+    QProgressDialog *m_progressDialog;   //< Progress of algorithm run asynchronously
+    Mantid::API::Algorithm* m_algAsync;  //< asynchronously running algorithm. Zero if no algorithm is running
+
+    // Variables to hold DAE parameters while LoadDAE is running asynchronously
+    QString m_DAE_WorkspaceName;
+    QString m_DAE_HostName;
+    QString m_DAE_SpectrumMin;
+    QString m_DAE_SpectrumMax;
+    QString m_DAE_SpectrumList;
+    int m_DAE_UpdateInterval;
+
+
 };
 
 static const char * mantid_matrix_xpm[] = { 

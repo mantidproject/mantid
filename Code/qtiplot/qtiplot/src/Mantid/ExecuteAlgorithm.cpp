@@ -25,7 +25,7 @@ ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent)
 
 ExecuteAlgorithm::~ExecuteAlgorithm()
 {
-	
+ 	
 }
 
 void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
@@ -320,7 +320,8 @@ bool ExecuteAlgorithm::execute()
 		return false;
 	}
 				
-	if (!m_alg->execute() == true)
+	/* The algorithm will be run asynchronously outside the dialog
+    if (!m_alg->execute() == true)
 	{
 		//Algorithm did not execute properly
 		QMessageBox::warning(this, tr("Mantid Algorithm"),
@@ -329,7 +330,7 @@ bool ExecuteAlgorithm::execute()
 			QMessageBox::Ok);
 		
 		return false;
-	}
+	}*/
 	
 	return true;
 }
