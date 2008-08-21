@@ -220,7 +220,8 @@ private:
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
   bool executeAsyncImpl(const int&);
-  bool m_cancel;
+  bool m_cancel; ///< set to true to stop execution
+  bool m_runningAsync; ///< Algorithm is running asynchronously
 };
 
 ///Typedef for a shared pointer to an Algorithm

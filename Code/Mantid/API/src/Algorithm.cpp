@@ -17,7 +17,7 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManager(), m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
-      _executeAsync(this,&Algorithm::executeAsyncImpl),m_cancel(false)
+      _executeAsync(this,&Algorithm::executeAsyncImpl),m_cancel(false),m_runningAsync(false)
 {}
 
 /// Virtual destructor
@@ -121,13 +121,13 @@ bool Algorithm::execute()
     {
       g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
-      if (m_isChildAlgorithm) throw;
+      if (m_isChildAlgorithm || m_runningAsync) throw;
     }
     catch(std::logic_error& ex)
     {
       g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
-      if (m_isChildAlgorithm) throw;
+      if (m_isChildAlgorithm || m_runningAsync) throw;
     }
   }
   catch(CancelException& ex)
@@ -345,9 +345,11 @@ bool Algorithm::executeAsyncImpl(const int&)
 {
     try
     {
+        m_runningAsync = true;
         notificationCenter.postNotification(new StartedNotification());
         bool res = execute();
         notificationCenter.postNotification(new FinishedNotification(res));
+        m_runningAsync = false;
         return res;
     }
     catch(std::exception& e)
