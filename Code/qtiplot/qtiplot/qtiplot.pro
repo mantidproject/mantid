@@ -15,6 +15,7 @@ DEFINES         += SCRIPTING_CONSOLE
 DEFINES         += SCRIPTING_DIALOG
 #DEFINES         += QTIPLOT_DEMO
 DEFINES         += GSL_DLL
+win32:DEFINES   += _WIN32_WINNT=0x0400
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
 #RESTRICTED_MODULES += EMF
