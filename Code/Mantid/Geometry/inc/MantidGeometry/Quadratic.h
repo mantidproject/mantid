@@ -29,7 +29,6 @@ namespace Mantid
 
       static Kernel::Logger& PLog;           ///< The official logger
 
-      double eqnValue(const Geometry::V3D&) const;
       void matrixForm(Geometry::Matrix<double>&,
         Geometry::V3D&,double&) const;          
 
@@ -59,6 +58,7 @@ namespace Mantid
       virtual int side(const Geometry::V3D&) const; 
 
       virtual void setBaseEqn() =0;      ///< Abstract set baseEqn 
+      double eqnValue(const Geometry::V3D&) const;
 
       virtual int onSurface(const Geometry::V3D&) const;          ///< is point valid on surface 
       virtual double distance(const Geometry::V3D&) const;        ///< distance between point and surface (approx)

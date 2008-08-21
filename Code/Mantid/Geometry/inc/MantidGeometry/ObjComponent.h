@@ -17,6 +17,7 @@ namespace Geometry
 // Forward Declaration
 //----------------------------------------------------------------------
 class Object;
+class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes of the component
     to the positioning and geometry tree.
@@ -68,6 +69,10 @@ public:
   double solidAngle(const V3D& observer) const;
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   int getPointInObject(V3D& point) const;
+  //Rendering member functions
+  void draw() const;
+  void drawObject() const;
+  void initDraw() const;
 
 protected:
   ObjComponent(const ObjComponent&);
@@ -83,6 +88,11 @@ private:
   // Made a const pointer to a const object. Since this is a shared object we shouldn't be
   // exposing non-const methods of Object through this class.
   const boost::shared_ptr<const Object> shape;
+
+  /// Geometry Handle for rendering
+  GeometryHandler* handle;
+  void setGeometryHandler(GeometryHandler *h);
+  friend class GeometryHandler;
 };
 
 } // namespace Geometry

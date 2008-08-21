@@ -44,6 +44,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+	class GeometryHandler;
 class DLLExport Object
 {
  private:
@@ -77,13 +78,15 @@ class DLLExport Object
   double bbAngularWidth(const Geometry::V3D&,
 	                         const double&, const double&, const double&,
 	                         const double&, const double&, const double& ) const;
+  /// Geometry Handle for rendering
+  GeometryHandler* handle;
+  void setGeometryHandler(GeometryHandler *h);
+  friend class GeometryHandler;
 
  protected:
 
   std::vector<const Surface*> SurList;  ///< Full surfaces (make a map including complementary object ?)
 
-  /// Return the top rule
-  const Rule* topRule() const { return TopRule; }
 
  public:
 
@@ -91,6 +94,9 @@ class DLLExport Object
   Object(const Object&);
   Object& operator=(const Object&);
   virtual ~Object();
+
+  /// Return the top rule
+  const Rule* topRule() const { return TopRule; }
 
   void setName(const int nx) { ObjName=nx; }           ///< Set Name
   void setTemp(const double A) { Tmp=A; }              ///< Set temperature [Kelvin]
@@ -152,6 +158,10 @@ class DLLExport Object
   // find internal point to object
   int getPointInObject(Geometry::V3D& point) const;
 
+  //Rendering member functions
+  void draw() const;
+  //Initialize Drawing
+  void initDraw() const;
 
 };
 

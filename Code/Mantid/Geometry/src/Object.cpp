@@ -26,6 +26,7 @@
 #include "MantidGeometry/LineIntersectVisit.h"
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/Rules.h"
+#include "MantidGeometry/GeometryHandler.h"
 
 namespace Mantid
 {
@@ -41,7 +42,7 @@ namespace Mantid
 
     Object::Object() :
       ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
-      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
+      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),handle(0)
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
@@ -56,7 +57,7 @@ namespace Mantid
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
       AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),
-      SurList(A.SurList)
+      SurList(A.SurList),handle(0)
       /*!
       Copy constructor
       \param A :: Object to copy
@@ -87,6 +88,7 @@ namespace Mantid
         AABByMin=A.AABByMin;
         AABBzMin=A.AABBzMin;
         boolBounded=A.boolBounded;
+		handle=A.handle;
       }
       return *this;
     }
@@ -97,6 +99,11 @@ namespace Mantid
       */
     {
       delete TopRule;
+	  if(handle!=NULL){
+		  delete handle;
+	  }
+	  //for(int i=0;i<SurList.size();i++)
+		 // delete SurList[i];
     }
 
     int
@@ -1248,6 +1255,40 @@ namespace Mantid
 		}
 		return thetaMax;
 	}
+
+
+	/**
+	* Set the geometry handler for Object
+	* @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
+	*/
+	void Object::setGeometryHandler(GeometryHandler *h)
+	{
+		if(h==NULL)return;
+		handle=h;
+	}
+
+	/**
+	* Draws the Object using geometry handler, If the handler is not set then this function does nothing.
+	*/
+	void Object::draw() const
+	{
+		if(handle==NULL)return;
+		//Render the Object
+		handle->Render();
+	}
+
+	/**
+	* Initializes/prepares the object to be rendered, this will generate geometry for object, 
+	* If the handler is not set then this function does nothing.
+	*/
+	void Object::initDraw() const
+	{
+		if(handle==NULL)return;
+		//Render the Object
+		handle->Initialize();
+	}
+
+	//Initialize Draw Object
   }  // NAMESPACE MonteCarlo
 
 }  // NAMESPACE Mantid

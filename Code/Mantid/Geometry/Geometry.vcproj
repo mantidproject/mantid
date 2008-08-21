@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts/;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib glib-2.0.lib opengl32.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -204,6 +204,22 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GeometryHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GtsGeometryGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GtsGeometryHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GtsGeometryRenderer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Line.cpp"
 				>
 			</File>
@@ -251,6 +267,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Object.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ObjectSurfaceEvaluator.cpp"
 				>
 			</File>
 			<File
@@ -434,6 +454,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidGeometry\GeometryHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\GtsGeometryGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\GtsGeometryHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\GtsGeometryHandlerTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\GtsGeometryRenderer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\IDetector.h"
 				>
 			</File>
@@ -470,11 +510,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
@@ -495,6 +535,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\Object.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ObjectSurfaceEvaluator.h"
 				>
 			</File>
 			<File
@@ -546,11 +590,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File
@@ -575,6 +619,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\Surface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\SurfaceEvaluator.h"
 				>
 			</File>
 			<File

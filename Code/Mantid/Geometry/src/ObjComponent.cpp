@@ -4,6 +4,7 @@
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Object.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/GeometryHandler.h"
 #include <cfloat>
 
 namespace Mantid
@@ -16,7 +17,7 @@ namespace Geometry
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, Component* parent) :
-  Component(name,parent), shape()
+  Component(name,parent), shape(),handle(0)
 {
 }
 
@@ -26,19 +27,21 @@ ObjComponent::ObjComponent(const std::string& name, Component* parent) :
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-  Component(name,parent), shape(shape)
+  Component(name,parent), shape(shape),handle(0)
 {
 }
 
 /// Copy constructor
 ObjComponent::ObjComponent(const ObjComponent& rhs) :
-  Component(rhs), shape(rhs.shape)
+  Component(rhs), shape(rhs.shape),handle(0)
 {
 }
 
 /// Destructor
 ObjComponent::~ObjComponent()
 {
+	if(handle!=NULL)
+		delete handle;
 }
 
 /// Does the point given lie within this object component?
@@ -204,6 +207,45 @@ const V3D ObjComponent::takeOutRotation(V3D point) const
   unRotate.rotate(point);
 
   return point;
+}
+
+/**
+ * Set the geometry handler for ObjComponent
+ * @param[in] handle is pointer to the geometry handler. don't delete this pointer in the calling function.
+ */
+void ObjComponent::setGeometryHandler(GeometryHandler* handle)
+{
+	if(handle==NULL)return;
+	this->handle=handle;
+}
+
+/**
+ * Draws the objcomponent, If the handler is not set then this function does nothing.
+ */
+void ObjComponent::draw() const
+{
+	if(handle==NULL)return;
+	//Render the ObjComponent and then render the object
+	handle->Render();
+}
+
+/**
+ * Draws the Object
+ */
+void ObjComponent::drawObject() const
+{
+	shape->draw();
+}
+
+/**
+ * Initializes the ObjComponent for rendering, this function should be called before rendering.
+ */
+void ObjComponent::initDraw() const
+{
+	if(handle==NULL)return;
+	//Render the ObjComponent and then render the object
+	shape->initDraw();
+	handle->Initialize();
 }
 
 } // namespace Geometry
