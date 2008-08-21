@@ -95,10 +95,10 @@ public:
         alg.notificationCenter.addObserver(m_progressObserver);
         Poco::ActiveResult<bool> result = alg.executeAsync();
         TS_ASSERT( !result.available() )
-        TS_ASSERT( startedNotificationReseived )
         result.wait();
         TS_ASSERT( result.available() )
         TS_ASSERT( alg.isExecuted() )
+        TS_ASSERT( startedNotificationReseived )
         TS_ASSERT( finishedNotificationReseived )
         TS_ASSERT_EQUALS( count, NofLoops )
         TS_ASSERT_EQUALS( alg.result, NofLoops-1 )
