@@ -4,12 +4,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
-
 #include "MantidGeometry/Detector.h"
-#include "MantidGeometry/CompAssembly.h"
-#include "MantidGeometry/Component.h"
-
-#include <fstream>
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -19,7 +14,6 @@
 #include "Poco/DOM/NodeFilter.h"
 
 using Poco::XML::DOMParser;
-using Poco::XML::XMLReader;
 using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::Node;
@@ -41,7 +35,7 @@ using namespace API;
 Logger& LoadInstrument::g_log = Logger::get("LoadInstrument");
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument()
+LoadInstrument::LoadInstrument() : Algorithm(), m_deltaOffsets(false)
 {}
 
 /// Initialisation method.
@@ -66,9 +60,7 @@ void LoadInstrument::exec()
   // Get the input workspace
   const Workspace_sptr localWorkspace = getProperty("Workspace");
 
-
   // Set up the DOM parser and parse xml file
-
   DOMParser pParser;
   Document* pDoc;
   try
@@ -81,9 +73,7 @@ void LoadInstrument::exec()
     throw Kernel::Exception::FileError("Unable to XML parse File:" , m_filename);
   }
 
-
   // Get pointer to root element
-
   Element* pRootElem = pDoc->documentElement();
 
   if ( !pRootElem->hasChildNodes() )
@@ -92,9 +82,13 @@ void LoadInstrument::exec()
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
   }
 
+  // Check whether spherical coordinates should be treated as offsets to parents position
+  std::string offsets;
+  Element* offsetElement = pRootElem->getChildElement("defaults")->getChildElement("offsets");
+  if (offsetElement) offsets = offsetElement->getAttribute("spherical");
+  if ( offsets == "delta" ) m_deltaOffsets = true;
 
-  // create maps: isTypeAssemply and mapTypeNameToShape
-
+  // create maps: isTypeAssembly and mapTypeNameToShape
   ShapeFactory shapeCreator;
 
   NodeList* pNL_type = pRootElem->getElementsByTagName("type");
@@ -117,28 +111,24 @@ void LoadInstrument::exec()
     NodeList* pNL_local = pTypeElem->getElementsByTagName("component");
     if (pNL_local->length() == 0)
     {
-      isTypeAssemply[typeName] = false;
+      isTypeAssembly[typeName] = false;
 
       // for now try to create a geometry shape associated with every type
       // that is does not contain any component elements
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     }
     else
-      isTypeAssemply[typeName] = true;
+      isTypeAssembly[typeName] = true;
     pNL_local->release();
   }
   pNL_type->release();
 
 
   // Get reference to Instrument and set its name
-
-  instrument = (localWorkspace->getInstrument());
-  if ( pRootElem->hasAttribute("name") )
-    instrument->setName( pRootElem->getAttribute("name") );
-
+  m_instrument = (localWorkspace->getInstrument());
+  if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
 
   // do analysis for each top level compoment element
-
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
   unsigned int pNL_comp_length = pNL_comp->length();
   for (unsigned int i = 0; i < pNL_comp_length; i++)
@@ -166,7 +156,7 @@ void LoadInstrument::exec()
           " even it is just an empty location element of the form <location />", m_filename);
       }
 
-      if ( isAssemply(pElem->getAttribute("type")) )
+      if ( isAssembly(pElem->getAttribute("type")) )
       {
         // read detertor IDs into idlist if required
 
@@ -180,7 +170,7 @@ void LoadInstrument::exec()
 
         for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
-          appendAssembly(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+          appendAssembly(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
 
 
@@ -201,7 +191,7 @@ void LoadInstrument::exec()
       {
         for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
-          appendLeaf(instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+          appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
         }
       }
       pNL_location->release();
@@ -216,7 +206,7 @@ void LoadInstrument::exec()
 
 /** Assumes second argument is a XML location element and its parent is a component element
  *  which is assigned to be an assemble. This method appends the parent component element of
- %  the location element to the CompAssemply passed as the 1st arg. Note this method may call
+ %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
  %  itself, i.e. it may act recursively.
  *
  *  @param parent CompAssembly to append new component to
@@ -269,7 +259,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
 
       std::string typeName = (getParentComponent(pElem))->getAttribute("type");
 
-      if ( isAssemply(typeName) )
+      if ( isAssembly(typeName) )
         appendAssembly(ass, pElem, idList);
       else
         appendLeaf(ass, pElem, idList);
@@ -332,19 +322,19 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
     Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
 
-    // set location for this comp
-    setLocation(detector, pLocElem);
-
     // set detector ID and increment it. Finally add the detector to the parent
     detector->setID(idList.vec[idList.counted]);
     idList.counted++;
     parent->add(detector);
+    // set location for this comp
+    setLocation(detector, pLocElem);
+
     try
-    { 
+    {
       if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
-        instrument->markAsMonitor(detector);
+        m_instrument->markAsMonitor(detector);
       else
-        instrument->markAsDetector(detector);
+        m_instrument->markAsDetector(detector);
     }
     catch(Kernel::Exception::ExistsError&)
     {
@@ -374,11 +364,11 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     // check if special Source or SamplePos Component
     if ( category.compare("Source") == 0 )
     {
-      instrument->markAsSource(comp);
+      m_instrument->markAsSource(comp);
     }
     if ( category.compare("SamplePos") == 0 )
     {
-      instrument->markAsSamplePos(comp);
+      m_instrument->markAsSamplePos(comp);
     }
 
     // set location for this comp
@@ -409,37 +399,55 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
   }
 
-
-  if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
+  // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
+  if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
+       pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
   {
     double R=0.0, theta=0.0, phi=0.0;
+
+    if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
+    if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
+    if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
 
     if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
     if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
     if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
 
-    Geometry::V3D pos;
-    pos.spherical(R,theta,phi);
-    comp->setPos(pos);
-  }
-  else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
-    pElem->hasAttribute("p") )
-  // This is alternative way a user may specify sphecical coordinates
-  // which may be preferred in the long run to the more verbose of
-  // using R, theta and phi.
-  {
-    double R=0.0, theta=0.0, phi=0.0;
+    if ( m_deltaOffsets )
+    {
+      // In this vase, locations given are radial offsets to the (radial) position of the parent,
+      // so need to do some extra calculation before they're stored internally as x,y,z offsets.
 
-    if ( pElem->hasAttribute("r") )
-      R = atof((pElem->getAttribute("r")).c_str());
-    if ( pElem->hasAttribute("t") )
-      theta = atof((pElem->getAttribute("t")).c_str());
-    if ( pElem->hasAttribute("p") )
-      phi = atof((pElem->getAttribute("p")).c_str());
+      double parent_r=0.0, parent_t=0.0, parent_p=0.0;
+      // Get the parent's absolute position (if the component has a parent)
+      Geometry::V3D parentPos;
+      if ( comp->getParent() )
+      {
+        parentPos = comp->getParent()->getPos();
+        // and get it in terms of spherical coordinates
+        parentPos.getSpherical(parent_r, parent_t, parent_p);
+      }
+      // Add the offsets to the parent's position and create a V3D for the child's absolute position
+      R += parent_r;
+      theta += parent_t;
+      phi += parent_p;
 
-    Geometry::V3D pos;
-    pos.spherical(R,theta,phi);
-    comp->setPos(pos);
+      Geometry::V3D absPos;
+      absPos.spherical(R,theta,phi);
+
+      // Subtract the two V3D's to get what we want (child's relative position in x,y,z)
+      Geometry::V3D relPos;
+      relPos = absPos - parentPos;
+      comp->setPos(relPos);
+    }
+    else
+    {
+      // In this case, the value given represents a vector from the parent to the child
+      Geometry::V3D pos;
+      pos.spherical(R,theta,phi);
+      comp->setPos(pos);
+    }
+
   }
   else
   {
@@ -584,18 +592,18 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
  *
  *  @throw InstrumentDefinitionError Thrown if type not defined in XML definition
  */
-bool LoadInstrument::isAssemply(std::string type)
+bool LoadInstrument::isAssembly(std::string type)
 {
   std::map<std::string,bool>::iterator it;
-  it = isTypeAssemply.find(type);
+  it = isTypeAssembly.find(type);
 
-  if ( it == isTypeAssemply.end() )
+  if ( it == isTypeAssembly.end() )
   {
     throw Kernel::Exception::InstrumentDefinitionError("type with name = " + type +
       " not defined.", m_filename);
   }
 
-  return isTypeAssemply[type];
+  return isTypeAssembly[type];
 }
 
 } // namespace DataHandling

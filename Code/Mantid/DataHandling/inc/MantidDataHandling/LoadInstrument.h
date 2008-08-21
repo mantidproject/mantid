@@ -19,7 +19,7 @@ namespace XML {
 
 namespace Mantid
 {
-	
+
 namespace Geometry
 {
 	class CompAssembly;
@@ -30,15 +30,15 @@ namespace API
 {
 	class Instrument;
 }
-	
+
   namespace DataHandling
   {
     /** @class LoadInstrument LoadInstrument.h DataHandling/LoadInstrument.h
 
-    Loads instrument data from a XML instrument description file and adds it 
-    to a workspace. 
+    Loads instrument data from a XML instrument description file and adds it
+    to a workspace.
 
-    LoadInstrument is intended to be used as a child algorithm of 
+    LoadInstrument is intended to be used as a child algorithm of
     other Loadxxx algorithms, rather than being used directly.
     LoadInstrument is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
@@ -55,7 +55,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 7/3/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -72,7 +72,7 @@ namespace API
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
     class DLLExport LoadInstrument : public API::Algorithm
     {
@@ -90,11 +90,7 @@ namespace API
       virtual const std::string category() const { return "DataHandling\\Instrument";}
 
     private:
-
-      /// Overwrites Algorithm method. Does nothing at present
       void init();
-
-      /// Overwrites Algorithm method
       void exec();
 
       /// Structure for holding detector IDs
@@ -128,28 +124,28 @@ namespace API
       /// Get parent component element of location element
       Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
 
-      /// map which holds names of types and whether or not they are catagorised as being 
+      /// map which holds names of types and whether or not they are catagorised as being
       /// assembles, which means whether the type element contains component elements
-      std::map<std::string,bool> isTypeAssemply;
+      std::map<std::string,bool> isTypeAssembly;
 
       /// map which maps the type name to a shared pointer to a geometric shape
       std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
 
-      /// Return true if assemply, false if not assemply and throws exception if string not in assemply
-      bool isAssemply(std::string);
+      /// Return true if assembly, false if not assembly and throws exception if string not in assembly
+      bool isAssembly(std::string);
 
       /// map which holds names of types and pointers to these type for fast retrievel in code
       std::map<std::string,Poco::XML::Element*> getTypeElement;
-
       /// The name and path of the input file
       std::string m_filename;
+      /// For convenience added pointer to instrument here
+      boost::shared_ptr<API::Instrument> m_instrument;
+      /// Flag to indicate whether offsets given in spherical coordinates are to be added to the current
+      /// position (true) or are a vector from the current position (false, default)
+      bool m_deltaOffsets;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-
-      /// For convenience added pointer to instrument here
-      boost::shared_ptr<API::Instrument> instrument;
-
     };
 
   } // namespace DataHandling

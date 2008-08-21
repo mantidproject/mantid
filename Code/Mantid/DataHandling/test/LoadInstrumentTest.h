@@ -23,20 +23,20 @@ using namespace Mantid::DataObjects;
 
 class LoadInstrumentTest : public CxxTest::TestSuite
 {
-public: 
-  
+public:
+
   LoadInstrumentTest()
-  {	
+  {
 	//initialise framework manager to allow logging
 	//Mantid::API::FrameworkManager::Instance().initialize();
   }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());    
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
   }
-  
+
   void testExecHET()
   {
     if ( !loader.isInitialized() ) loader.initialize();
@@ -53,12 +53,12 @@ public:
       std::vector<double> timeChannelsVec(timechannels);
       std::vector<double> v(timechannels);
       // Create and fill another vector for the errors
-      std::vector<double> e(timechannels);    
+      std::vector<double> e(timechannels);
       //timechannels
       for (int j = 0; j < timechannels; j++)
       {
         timeChannelsVec[j] = j*100;
-        v[j] = (i+j)%256;   
+        v[j] = (i+j)%256;
         e[j] = (i+j)%78;
       }
       // Populate the workspace.
@@ -67,29 +67,29 @@ public:
     }
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Instrument/HET_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
 
     loader.setPropertyValue("Workspace", wsName);
-    
+
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
     TS_ASSERT_THROWS_NOTHING( result = loader.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(wsName));
- 
+
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    TS_ASSERT( loader.isExecuted() );    
+    TS_ASSERT( loader.isExecuted() );
 
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
-    
+
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -105,9 +105,9 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,3.3158,0.0001);
+    TS_ASSERT_DELTA(d,2.512,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,3.3158,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
 
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
@@ -124,7 +124,7 @@ public:
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
-    // Should be 2584 
+    // Should be 2584
     TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
   }
 
@@ -132,7 +132,7 @@ public:
   {
     LoadInstrument loaderGEM;
 
-    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize()); 
+    TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
 
     //create a workspace with some sample data
     wsName = "LoadInstrumentTestGEM";
@@ -140,7 +140,7 @@ public:
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Instrument/GEM_Definition.xml";
@@ -154,33 +154,34 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( result = loaderGEM.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare(wsName));
- 
+
     TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
 
-    TS_ASSERT( loaderGEM.isExecuted() );    
+    TS_ASSERT( loaderGEM.isExecuted() );
 
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
-    
+
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Y(), -17.0,0.01);
 
     Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 17.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
     Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
     TS_ASSERT_EQUALS( ptrDet->getName(), "Det16");
-    TS_ASSERT_DELTA( ptrDet->getPos().X(), 0.0,0.01);
-    TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0,0.01);
+    TS_ASSERT_DELTA( ptrDet->getPos().X(),  0.2607, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Y(), -0.1505, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Z(),  2.3461, 0.0001);
     double d = ptrDet->getPos().distance(samplepos->getPos());
-    TS_ASSERT_DELTA(d,17.0,0.0001);
+    TS_ASSERT_DELTA(d,2.3653,0.0001);
     double cmpDistance = ptrDet->getDistance(*samplepos);
-    TS_ASSERT_DELTA(cmpDistance,17.0,0.0001);
+    TS_ASSERT_DELTA(cmpDistance,2.3653,0.0001);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
 
     // test if detector with det_id=621 has been marked as a monitor
@@ -190,8 +191,8 @@ public:
     // test if shape on for 1st monitor
     Detector *ptrMonitorShape = dynamic_cast<Detector*>(i->getDetector(611));
     TS_ASSERT( ptrMonitorShape->isMonitor() );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(4.1,2.1,8.1)) );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(-4.1,-2.1,-8.1)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(4.1,2.1,18.88)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(-4.1,-2.1,2.68)) );
 
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0)) );
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0.01)) );
@@ -199,13 +200,13 @@ public:
     TS_ASSERT( ptrMonitorShape->isValid(V3D(-200.0,-200.0,-200.1)) );
 
   }
- 
-  
+
+
 private:
   LoadInstrument loader;
   std::string inputFile;
   std::string wsName;
-  
+
 };
-  
+
 #endif /*LOADINSTRUMENTTEST_H_*/

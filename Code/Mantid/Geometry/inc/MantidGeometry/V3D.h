@@ -61,18 +61,18 @@ namespace Mantid
       // Inner division
       V3D operator/(const V3D& v) const;
       V3D& operator/=(const V3D& v);
-      // Scale 
+      // Scale
       V3D operator*(const double D) const;
-      V3D& operator*=(const double D);		
+      V3D& operator*=(const double D);
       V3D operator/(const double D) const;
-      V3D& operator/=(const double D);		
+      V3D& operator/=(const double D);
       // Simple Comparison
       bool operator==(const V3D&) const;
       bool operator<(const V3D&) const;
       // Access
       // Setting x, y and z values
       void operator()(const double xx, const double yy, const double zz);
-      void spherical(double R, double theta, double phi);
+      void spherical(const double& R, const double& theta, const double& phi);
 
       const double& X() const { return x; } ///< Get x
       const double& Y() const { return y; } ///< Get y
@@ -81,16 +81,18 @@ namespace Mantid
       const double& operator[](const int Index) const;
       double& operator[](const int Index);
 
+      void getSpherical(double& R, double& theta, double& phi) const;
+
       //      void rotate(const V3D&,const V3D&,const double);
-      void rotate(const Matrix<double>&); 
+      void rotate(const Matrix<double>&);
 
       /// Make a normalized vector (return norm value)
       double normalize();            // Vec3D::makeUnit
-      double norm() const;    
-      double norm2() const; 
+      double norm() const;
+      double norm2() const;
       // Scalar product
       double scalar_prod(const V3D&) const;
-      // Cross product 
+      // Cross product
       V3D cross_prod(const V3D&) const;
       // Distance (R) between two points defined as vectors
       double distance(const V3D&) const;
@@ -99,7 +101,7 @@ namespace Mantid
       // Send to a stream
       void printSelf(std::ostream&) const;
       void read(std::istream&);
-	  void write(std::ostream&) const;
+      void write(std::ostream&) const;
 
       double volume() const { return fabs(x*y*z); }      ///< Calculate the volmue of a cube X*Y*Z
 

@@ -19,14 +19,14 @@ using namespace Mantid::DataObjects;
 class ConvertUnitsTest : public CxxTest::TestSuite
 {
 public:
-  
+
   ConvertUnitsTest()
-  {   
+  {
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",256,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(11);
-    for (int i = 0; i < 11; ++i) 
+    for (int i = 0; i < 11; ++i)
     {
       x[i]=i*1000;
     }
@@ -45,7 +45,7 @@ public:
       space2D->getAxis(1)->spectraNo(j) = j;
       forSpecDetMap[j] = j;
     }
-    
+
     // Register the workspace in the data service
     inputSpace = "testWorkspace";
     AnalysisDataService::Instance().add(inputSpace, space);
@@ -58,25 +58,25 @@ public:
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", inputSpace);
     loader.execute();
-    
+
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
     space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256, space->getInstrument().get() );
-    
+
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
-  
+
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());    
-    TS_ASSERT( alg.isInitialized() );    
-    
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
     // Set the properties
     alg.setPropertyValue("InputWorkspace",inputSpace);
     outputSpace = "outWorkspace";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
     alg.setPropertyValue("Target","Wavelength");
   }
-  
+
   void testExec()
   {
     if ( !alg.isInitialized() ) alg.initialize();
@@ -88,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(inputSpace));
-    
+
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Test that y & e data is unchanged
@@ -118,17 +118,17 @@ public:
     TS_ASSERT_EQUALS( y[3], 44.0);
     yIn = input2D->dataY(111);
     TS_ASSERT_EQUALS( yIn[3], 3.0);
-    
+
     // Check that a couple of x bin boundaries have been correctly converted
     x = output2D->dataX(103);
-    TS_ASSERT_DELTA( x[5], 1.4854, 0.001 );
-    TS_ASSERT_DELTA( x[10], 2.9709, 0.001 );
+    TS_ASSERT_DELTA( x[5], 1.5808, 0.0001 );
+    TS_ASSERT_DELTA( x[10], 3.1617, 0.0001 );
     // Just check that an input bin boundary is unchanged
     std::vector<double> xIn = input2D->dataX(66);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
   }
-  
-  
+
+
 private:
   ConvertUnits alg;
   std::string inputSpace;

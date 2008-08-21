@@ -6,7 +6,7 @@
 #include <ostream>
 #include <vector>
 
-#include "MantidGeometry/V3D.h" 
+#include "MantidGeometry/V3D.h"
 
 class V3DTest : public CxxTest::TestSuite
 {
@@ -140,7 +140,7 @@ public:
 		b=a * -2.0;
 		TS_ASSERT_EQUALS(b.X(),-2.0);
 		TS_ASSERT_EQUALS(b.Y(),-4.0);
-		TS_ASSERT_EQUALS(b.Z(),-6.0);		
+		TS_ASSERT_EQUALS(b.Z(),-6.0);
 	}
 	void testScaleMultipliesEqual()
 	{
@@ -148,7 +148,7 @@ public:
 		a*=2.0;
 		TS_ASSERT_EQUALS(a.X(),2.0);
 		TS_ASSERT_EQUALS(a.Y(),4.0);
-		TS_ASSERT_EQUALS(a.Z(),6.0);		
+		TS_ASSERT_EQUALS(a.Z(),6.0);
 	}
 	void testScaleDivides()
 	{
@@ -156,7 +156,7 @@ public:
 		b=a/2.0;
 		TS_ASSERT_EQUALS(b.X(),0.5);
 		TS_ASSERT_EQUALS(b.Y(),1.0);
-		TS_ASSERT_EQUALS(b.Z(),1.5);		
+		TS_ASSERT_EQUALS(b.Z(),1.5);
 	}
 	void testScaleDividesEqual()
 	{
@@ -164,7 +164,7 @@ public:
 		a/=2.0;
 		TS_ASSERT_EQUALS(a.X(),0.5);
 		TS_ASSERT_EQUALS(a.Y(),1.0);
-		TS_ASSERT_EQUALS(a.Z(),1.5);	
+		TS_ASSERT_EQUALS(a.Z(),1.5);
 	}
 	void testEqualEqualOperator()
 	{
@@ -274,7 +274,7 @@ public:
 		double d=a.distance(b);
 		TS_ASSERT_EQUALS(d,2.0*sqrt(3.0));
 	}
-	
+
 	void testZenith()
 	{
 	  b(0.0,0.0,0.0);
@@ -302,8 +302,13 @@ public:
 		TS_ASSERT_DELTA(b.X(), 1.5, 0.0001 )
     TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001 )
     TS_ASSERT_DELTA(b.Z(), 3.0/sqrt(2.0), 0.0001 )
+    // Test getSpherical returns the original values
+    TS_ASSERT_THROWS_NOTHING( b.getSpherical(r,theta,phi) )
+    TS_ASSERT_EQUALS( r,     3.0 )
+    TS_ASSERT_EQUALS( theta, 45.0 )
+    TS_ASSERT_EQUALS( phi,   45.0 )
   }
-	
+
 };
 
 #endif

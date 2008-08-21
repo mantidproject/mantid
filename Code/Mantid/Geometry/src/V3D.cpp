@@ -1,9 +1,10 @@
 #include <ostream>
-#include <stdexcept>
-#include <cmath> 
+//#include <stdexcept>
+#include <cmath>
 #include <vector>
 
 #include "MantidGeometry/V3D.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -11,7 +12,7 @@ namespace Geometry
 {
 
   /// The default precision 1e-7
-const double Tolerance(1e-7);   
+const double Tolerance(1e-7);
 
 /// Constructor [Null]
 V3D::V3D():x(0),y(0),z(0)
@@ -19,7 +20,7 @@ V3D::V3D():x(0),y(0),z(0)
 
 /// Value constructor
 V3D::V3D(const double xx, const double yy, const double zz) :
-  x(xx),y(yy),z(zz) 
+  x(xx),y(yy),z(zz)
 {}
 
 /// Copy constructor
@@ -32,7 +33,7 @@ V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
     \param theta :: The theta value (in degrees)
     \param phi :: The phi value (in degrees)
   */
-void V3D::spherical(double R, double theta, double phi)
+void V3D::spherical(const double& R, const double& theta, const double& phi)
 {
 	double deg2rad=M_PI/180.0;
 	z=R*cos(theta*deg2rad);
@@ -43,10 +44,10 @@ void V3D::spherical(double R, double theta, double phi)
 
   /**
     Assignment operator
-    \param A :: V3D to copy 
+    \param A :: V3D to copy
     \return *this
   */
-V3D& 
+V3D&
 V3D::operator=(const V3D& A)
 {
   if (this!=&A)
@@ -63,7 +64,7 @@ V3D::operator=(const V3D& A)
   requires that the point is assigned after this has
   been allocated since vPtr[x] may throw.
 */
-V3D::V3D(const double* vPtr)  
+V3D::V3D(const double* vPtr)
 
 {
   if (vPtr)
@@ -83,7 +84,7 @@ V3D::~V3D()
      \param v :: Vector to add
      \return *this+v;
   */
-V3D 
+V3D
 V3D::operator+(const V3D& v) const
 {
   V3D out(*this);
@@ -96,7 +97,7 @@ V3D::operator+(const V3D& v) const
     \param v :: Vector to sub.
     \return *this-v;
   */
-V3D 
+V3D
 V3D::operator-(const V3D& v) const
 {
   V3D out(*this);
@@ -109,7 +110,7 @@ V3D::operator-(const V3D& v) const
     \param v :: Vector to sub.
     \return *this * v;
   */
-V3D 
+V3D
 V3D::operator*(const V3D& v) const
 {
   V3D out(*this);
@@ -122,7 +123,7 @@ V3D::operator*(const V3D& v) const
     \param v :: Vector to divide
     \return *this * v;
   */
-V3D 
+V3D
 V3D::operator/(const V3D& v) const
 {
   V3D out(*this);
@@ -135,8 +136,8 @@ V3D::operator/(const V3D& v) const
     \param v :: Vector to add.
     \return *this+=v;
   */
-V3D& 
-V3D::operator+=(const V3D& v) 
+V3D&
+V3D::operator+=(const V3D& v)
 {
   x+=v.x;
   y+=v.y;
@@ -149,8 +150,8 @@ V3D::operator+=(const V3D& v)
     \param v :: Vector to sub.
     \return *this-v;
   */
-V3D& 
-V3D::operator-=(const V3D& v) 
+V3D&
+V3D::operator-=(const V3D& v)
 {
   x-=v.x;
   y-=v.y;
@@ -163,8 +164,8 @@ V3D::operator-=(const V3D& v)
     \param v :: Vector to multiply
     \return *this*=v;
   */
-V3D& 
-V3D::operator*=(const V3D& v) 
+V3D&
+V3D::operator*=(const V3D& v)
 {
   x*=v.x;
   y*=v.y;
@@ -177,8 +178,8 @@ V3D::operator*=(const V3D& v)
     \param v :: Vector to divide
     \return *this*=v;
   */
-V3D& 
-V3D::operator/=(const V3D& v) 
+V3D&
+V3D::operator/=(const V3D& v)
 {
   x/=v.x;
   y/=v.y;
@@ -191,7 +192,7 @@ V3D::operator/=(const V3D& v)
     \param D :: value to scale
     \return this * D
    */
-V3D 
+V3D
 V3D::operator*(const double D) const
 {
   V3D out(*this);
@@ -204,7 +205,7 @@ V3D::operator*(const double D) const
     \param D :: value to scale
     \return this / D
   */
-V3D 
+V3D
 V3D::operator/(const double D) const
 {
   V3D out(*this);
@@ -217,7 +218,7 @@ V3D::operator/(const double D) const
     \param D :: value to scale
     \return this *= D
   */
-V3D& 
+V3D&
 V3D::operator*=(const double D)
 {
   x*=D;
@@ -232,8 +233,8 @@ V3D::operator*=(const double D)
     \return this /= D
     \todo ADD TOLERANCE
   */
-V3D& 
-V3D::operator/=(const double D) 
+V3D&
+V3D::operator/=(const double D)
 {
   if (D!=0.0)
     {
@@ -248,7 +249,7 @@ V3D::operator/=(const double D)
     Equals operator with tolerance factor
     \param v :: V3D for comparison
   */
-bool 
+bool
 V3D::operator==(const V3D& v) const
 {
   return (fabs(x-v.x)>Tolerance ||
@@ -260,7 +261,7 @@ V3D::operator==(const V3D& v) const
   /**
     \todo ADD PRCESSION
    */
-bool 
+bool
 V3D::operator<(const V3D& V) const
 {
   if (x!=V.x)
@@ -276,7 +277,7 @@ V3D::operator<(const V3D& V) const
     \param yy The Y coordinate
     \param zz The Z coordinate
   */
-void 
+void
 V3D::operator()(const double xx, const double yy, const double zz)
 {
   x=xx;
@@ -299,7 +300,7 @@ V3D::operator[](const int Index) const
     case 1: return y;
     case 2: return z;
     default:
-      throw std::runtime_error("V3D::operator[] range error");
+      throw Kernel::Exception::IndexError(Index,2,"V3D::operator[] range error");
     }
 }
 
@@ -317,15 +318,26 @@ V3D::operator[](const int Index)
     case 1: return y;
     case 2: return z;
     default:
-      throw std::runtime_error("V3D::operator[] range error");
+      throw Kernel::Exception::IndexError(Index,2,"V3D::operator[] range error");
     }
+}
+
+/// Return the vector's position in spherical coordinates
+void V3D::getSpherical(double& R, double& theta, double& phi) const
+{
+  const double rad2deg = 180.0/M_PI;
+  R = norm();
+  theta = 0.0;
+  if ( R ) theta = acos(z/R) * rad2deg;
+  phi = atan2(y,x) * rad2deg;
+  return;
 }
 
   /**
     Vector length
     \return vec.length()
   */
-double 
+double
 V3D::norm() const
 {
   return sqrt(x*x+y*y+z*z);
@@ -335,14 +347,14 @@ V3D::norm() const
     Vector length without the sqrt
     \return vec.length()
   */
-double 
+double
 V3D::norm2() const
 {
 	return (x*x+y*y+z*z);
 }
 
   /**
-    Normalises the vector and 
+    Normalises the vector and
     then returns the scalar value of the vector
     \return Norm
   */
@@ -359,7 +371,7 @@ V3D::normalize()
     \param V The second vector to include in the calculation
     \return The scalar product of the two vectors
   */
-double 
+double
 V3D::scalar_prod(const V3D& V) const
 {
   return (x*V.x+y*V.y+z*V.z);
@@ -370,7 +382,7 @@ V3D::scalar_prod(const V3D& V) const
     \param v The second vector to include in the calculation
     \return The cross product of the two vectors
   */
-V3D 
+V3D
 V3D::cross_prod(const V3D& v) const
 {
   V3D out;
@@ -385,7 +397,7 @@ V3D::cross_prod(const V3D& v) const
     \param v The second vector to include in the calculation
     \return The distance between the two vectors
   */
-double 
+double
 V3D::distance(const V3D& v) const
 {
   V3D dif(*this);
@@ -412,8 +424,8 @@ double V3D::zenith(const V3D& v) const
 }
 
 int
-V3D::reBase(const V3D& A,const V3D&B,const V3D& C) 
-  /*! 
+V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
+  /*!
      Re-express this point components of A,B,C.
      Assuming that A,B,C are form an basis set (which
      does not have to be othonormal.
@@ -441,8 +453,8 @@ V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
 void
 V3D::rotate(const Geometry::Matrix<double>& A)
   /*!
-    Rotate a point by a matrix 
-    \param A :: Rotation matrix (needs to be >3x3) 
+    Rotate a point by a matrix
+    \param A :: Rotation matrix (needs to be >3x3)
   */
 {
   Matrix<double> Pv(3,1);
@@ -470,22 +482,22 @@ V3D::coLinear(const V3D& Bv,const V3D& Cv) const
   return (Tmp.norm()>Tolerance) ? 0 : 1;
 }
 
-int 
+int
 V3D::nullVector(const double Tol) const
-  /*! 
+  /*!
     Checks the size of the vector
     \param Tol :: size of the biggest zero vector allowed.
     \retval 1 : the vector squared components
-    magnitude are less than Tol 
+    magnitude are less than Tol
     \retval 0 :: Vector bigger than Tol
   */
 {
   return ((x*x+y*y+z*z)>Tol) ? 0 :1;
 }
 
-int 
+int
 V3D::masterDir(const double Tol) const
-  /*! 
+  /*!
      Calculates the index of the primary direction (if there is one)
      \param Tol :: Tolerance accepted
      \retval range -3,-2,-1 1,2,3  if the vector
@@ -495,7 +507,7 @@ V3D::masterDir(const double Tol) const
   */
 {
   // Calc max dist
-  double max=x*x; 
+  double max=x*x;
   double other=max;
   double u2=y*y;
   int idx=(x>0) ? 1 : -1;
@@ -522,7 +534,7 @@ V3D::masterDir(const double Tol) const
 
 /*!
   Read data from a stream.
-  \todo Check Error handling 
+  \todo Check Error handling
   \param IX :: Input Stream
 */
 void
@@ -547,7 +559,7 @@ V3D::write(std::ostream& OX) const
     Prints a text representation of itself
     \param os the Stream to output to
   */
-void 
+void
 V3D::printSelf(std::ostream& os) const
 {
   os << "[" << x << "," << y << "," << z << "]";
@@ -560,14 +572,14 @@ V3D::printSelf(std::ostream& os) const
     \param v the vector to output
     \returns the output stream
     */
-std::ostream& 
+std::ostream&
 operator<<(std::ostream& os, const V3D& v)
 {
   v.printSelf(os);
   return os;
 }
 
-std::istream& 
+std::istream&
 operator>>(std::istream& IX,V3D& A)
   /*!
     Calls Vec3D method write to output class
