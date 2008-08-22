@@ -5,7 +5,9 @@ import xml
 import xml.dom.minidom
 import msilib
 
-QTDIR = 'C:/qt/bin'
+import string
+
+QTDIR = 'toget/qt'
 #QTDIR = 'C:/Qt/4_4_0'
 
 globalFileCount = 0
@@ -54,15 +56,19 @@ def addDlls(location,name,parent):
     sdlls = os.listdir(location);
     i = 0
     for fil in sdlls:
-        fn = fil.split('.')
-        if len(fn) == 2 and fn[1] == 'dll':
-            fn0 = fn[0].replace('-','_')
-            if not ((fil.find('-gd-') >= 0) or
-                    (fil.find('d.dll')>=0 and fil.replace('d.dll','.dll') in sdlls) or
-                    (fil.find('d4.dll')>=0 and fil.replace('d4.dll','4.dll') in sdlls)):
-                print fn[0]+'.'+fn[1]
-                addFileV(fn0+fn[1],name+str(i),fil,location+'/'+fil,parent)
-            i += 1
+        lst = fil.split('.')
+        l = len(lst)
+        if l < 2 or lst[l-1] != 'dll':
+            continue
+        del lst[l-1]
+        fn0 = string.join(lst,'_')
+        fn = fn0.replace('-','_')
+        if not ((fil.find('-gd-') >= 0) or
+                (fil.find('d.dll')>=0 and fil.replace('d.dll','.dll') in sdlls) or
+                (fil.find('d4.dll')>=0 and fil.replace('d4.dll','4.dll') in sdlls)):
+            print fil
+            addFileV(fn+'DLL',name+str(i),fil,location+'/'+fil,parent)
+        i += 1
 
 def addAllFiles(location,name,parent):
     print 'Include files from',os.path.abspath(location);
@@ -232,13 +238,13 @@ addDlls('../Third_Party/lib/win32','3dDll',MantidDlls)
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
-addDlls(QTDIR+'/bin','qt',QTIPlot)
-QTIPlotEXE = addFileV('QTIPlotEXE','qtiplot.exe','qtiplot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
-startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'QTIPlot','WorkingDirectory':'binDir'})
-desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'QTIPlot','WorkingDirectory':'binir'})
+addDlls(QTDIR,'qt',QTIPlot)
+QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
+startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'binDir'})
+desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'binir'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
-if (QTDIR == 'C:/Qt/4_4_0'):
-    manifestFile = addFileV('qtiplot_manifest','qtiexe.man','qtiplot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
+if (QTDIR == 'C:/Qt/4_4_0/bin'):
+    manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 
@@ -403,7 +409,7 @@ addCRefs(sconsList,MantidExec)
 addCRefs(boostList,MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 
-QTIPlotExec = addFeature('QTIPlotExec','QtiPlot','QtiPlot','1',MantidExec)
+QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
 PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',MantidExec)
