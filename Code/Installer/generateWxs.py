@@ -8,7 +8,7 @@ import msilib
 import string
 
 QTDIR = 'toget/qt'
-#QTDIR = 'C:/Qt/4_4_0'
+#QTDIR = 'C:/Qt/4_4_0/bin'
 
 globalFileCount = 0
 
@@ -299,6 +299,7 @@ IncludeMantidServices = addComponent('IncludeMantidServices','{7EC9AF3A-3907-42b
 addAllFiles('../Mantid/includes/MantidServices','serv',IncludeMantidServices)
 
 boostList = addCompList('boost','../Third_Party/include/boost','boost',includeDir)
+pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)
 #-------------------  end of Includes ---------------------------------------
 
 sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)
@@ -360,6 +361,7 @@ addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib','../Mantid/API/lib/MantidAPI
 addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib','../Mantid/DataObjects/lib/MantidDataObjects.lib',UserAlgorithms)
 addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib','../Mantid/Geometry/lib/MantidGeometry.lib',UserAlgorithms)
 addFileV('boost_filsystem_lib','boost_fs.lib','libboost_filesystem-vc80-mt-1_34_1.lib','../Third_Party/lib/win32/libboost_filesystem-vc80-mt-1_34_1.lib',UserAlgorithms)
+addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party/lib/win32/PocoFoundation.lib',UserAlgorithms)
 
 #--------------- Python ------------------------------------------------
 
@@ -407,6 +409,7 @@ addCRef('Data',MantidExec)
 
 addCRefs(sconsList,MantidExec)
 addCRefs(boostList,MantidExec)
+addCRefs(pocoList,MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)

@@ -510,11 +510,14 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          int currentSpec = spectraAxis->spectraNo(ws_index);
          Mantid::Geometry::V3D pos;
          int detID = 0;
+         double R = 0.;
+         double Theta = 0.;
+         double Phi = 0.;
          try
          {
              boost::shared_ptr<Mantid::Geometry::IDetector> det = spectraMap->getDetector(currentSpec);
              detID = det->getID();
-             pos = det->getPos();
+             det->getPos().getSpherical(R,Theta,Phi);
          }
          catch(...)
          {
@@ -529,14 +532,14 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          t->setCell(i,2,detID); 
          if (i == 0) t->setColName(2,"Detectors");
 
-         t->setCell(i,3,pos.X()); 
-         if (i == 0) t->setColName(3,"X");
+         t->setCell(i,3,R); 
+         if (i == 0) t->setColName(3,"R");
 
-         t->setCell(i,4,pos.Y()); 
-         if (i == 0) t->setColName(4,"Y");
+         t->setCell(i,4,Theta); 
+         if (i == 0) t->setColName(4,"Theta");
 
-         t->setCell(i,5,pos.Z()); 
-         if (i == 0) t->setColName(5,"Z");
+         t->setCell(i,5,Phi); 
+         if (i == 0) t->setColName(5,"Phi");
      }
      return t;
  }

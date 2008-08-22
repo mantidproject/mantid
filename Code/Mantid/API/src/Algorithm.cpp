@@ -182,6 +182,8 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
   //set as a child
   alg->setChild(true);
 
+  m_children.push_back(alg);
+
   // Initialise the sub-algorithm
   try
   {
@@ -357,6 +359,13 @@ bool Algorithm::executeAsyncImpl(const int&)
         notificationCenter.postNotification(new ErrorNotification(e.what()));
     }
     return false;
+}
+
+void Algorithm::cancel()
+{
+    m_cancel = true;
+    for(std::vector<Algorithm_sptr>::iterator c=m_children.begin();c!=m_children.end();c++)
+        (**c).cancel();
 }
 
 void Algorithm::progress(double p)

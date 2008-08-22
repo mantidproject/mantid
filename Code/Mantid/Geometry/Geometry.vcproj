@@ -110,7 +110,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
@@ -125,7 +125,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib opengl32.lib glu32.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 			/>
@@ -510,11 +510,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -590,11 +590,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File

@@ -123,7 +123,7 @@ public:
     {
     public:
         ErrorNotification(const std::string& str):Poco::Notification(),what(str){}
-        virtual std::string name() const{return "ProgressNotification";}
+        virtual std::string name() const{return "ErrorNotification";}
         std::string what;
     };
 
@@ -175,7 +175,7 @@ public:
   /// Usage: Poco::ActiveResult<bool> res = alg->executeAsync();
   Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
   Poco::NotificationCenter notificationCenter;
-  void cancel(){m_cancel = true;}
+  void cancel();
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -222,6 +222,8 @@ private:
   bool executeAsyncImpl(const int&);
   bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
+  /// Pointers to child algorithms used in this algorithm.
+  std::vector< boost::shared_ptr<Algorithm> > m_children;
 };
 
 ///Typedef for a shared pointer to an Algorithm
