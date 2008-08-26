@@ -1,0 +1,44 @@
+***************
+superclass:: living_being
+*****************
+scope:: specific
+name:: integral
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: maximum
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: minimum
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: work
+type:: object
+rank:: 0
+****************
+scope:: specific
+name:: tof
+type:: pointer
+rank:: 0
+****************
+scope:: specific
+name:: spectrum
+type:: long
+rank:: 0
+****************
+scope:: specific
+name:: group
+type:: integer
+rank:: 0
+****************
+scope:: specific
+name:: solid_angle
+type:: real
+rank:: 0
+
+

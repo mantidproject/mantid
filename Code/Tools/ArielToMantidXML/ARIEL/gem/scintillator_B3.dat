@@ -1,0 +1,30 @@
+***************
+superclass:: scintillator
+***************
+scope:: generic
+name:: width
+type:: real
+rank:: 0
+value:: .005
+***************
+scope:: generic
+name:: height
+type:: real
+rank:: 0
+value:: .20
+***************
+scope:: generic
+name:: coord_system
+type:: string
+rank:: 0
+value:: cartesian
+***************
+scope:: generic
+name:: box
+type:: real
+rank:: 2
+dimensions:: 2 4
+values:: -0.115 -0.0025
+         -0.115  0.0025
+          0.115  0.0025
+          0.115 -0.0025

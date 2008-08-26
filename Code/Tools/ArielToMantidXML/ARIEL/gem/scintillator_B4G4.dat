@@ -1,0 +1,25 @@
+***************
+superclass:: scintillator
+***************
+scope:: generic
+name:: width
+type:: real
+rank:: 0
+value:: .005
+***************
+scope:: generic
+name:: arc
+type:: real
+rank:: 0
+value:: 12.80
+***************
+scope:: generic
+name:: box
+type:: real
+rank:: 2
+dimensions:: 2 4
+values:: -6.400 -0.10978
+         -6.400 0.10978
+          6.400 0.10978
+          6.400 -0.10978
+
