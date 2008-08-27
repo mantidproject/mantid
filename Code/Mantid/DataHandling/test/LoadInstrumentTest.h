@@ -166,7 +166,7 @@ public:
     boost::shared_ptr<Instrument> i = output->getInstrument();
     Component* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Y(), -17.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
     Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");

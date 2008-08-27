@@ -1,4 +1,4 @@
-#include <ostream>
+#include <iostream>
 //#include <stdexcept>
 #include <cmath>
 #include <vector>
@@ -41,11 +41,10 @@ void V3D::spherical(const double& R, const double& theta, const double& phi)
 	x=R*ct*cos(phi*deg2rad);
 	y=R*ct*sin(phi*deg2rad);
 
-	// Setting this way can lead to very small values of z,y,z that should really be zero.
+	// Setting this way can lead to very small values of x & y that should really be zero.
 	// This can cause confusion for the atan2 function used in getSpherical.
-	if (x < Tolerance) x = 0.0;
-  if (y < Tolerance) y = 0.0;
-  if (z < Tolerance) z = 0.0;
+	if (std::abs(x) < Tolerance) x = 0.0;
+  if (std::abs(y) < Tolerance) y = 0.0;
 }
 
   /**
