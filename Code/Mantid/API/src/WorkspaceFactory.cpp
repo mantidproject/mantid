@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace Mantid
@@ -110,21 +111,39 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
                                             const int& XLength, const int& YLength) const
 {
   // check potential size to create and determine trigger
-  int triggerSize;
-  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", triggerSize) )
+  int availPercent;
+  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", availPercent) )
   {
     // Default to 25M elements if missing
-    triggerSize = 25000000;
+    availPercent = 50;
   }
-  int wsSize = NVectors * YLength;
+  MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
+  int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
+
+  int wsSize = NVectors * YLength / 1024 * 3;// times 3 for X,Y, and E
   Workspace_sptr ws;
 
   // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
   // Otherwise calls the vanilla create method.
   if ( (wsSize > triggerSize) && !(className.find("2D") == std::string::npos) )
   {
-    ws = this->create("ManagedWorkspace2D");
-    g_log.information("Created a ManagedWorkspace2D");
+      // check if there is enough memory for 100 data blocks
+      int blockMemory;
+      if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.DataBlockSize", blockMemory)
+          || blockMemory <= 0 )
+      {
+        // default to 1MB if property not found
+        blockMemory = 1024*1024;
+      }
+
+      if ( blockMemory*100/1024 > mi.availMemory )
+      {
+          g_log.error("There is not enough memory to allocate the workspace");
+          throw std::runtime_error("There is not enough memory to allocate the workspace");
+      }
+
+      ws = this->create("ManagedWorkspace2D");
+      g_log.information("Created a ManagedWorkspace2D");
   }
   else
   {

@@ -112,6 +112,8 @@ namespace Mantid
         m_spec_max = m_numberOfSpectra + 1;
       }
 
+      int histTotal = total_specs * m_numberOfPeriods;
+      int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
         
@@ -128,6 +130,8 @@ namespace Mantid
           int histToRead = i + period*total_specs;
           loadData(timeChannelsVec,counter,histToRead,iraw,lengthIn,spectrum,localWorkspace );
           counter++;
+          if (++histCurrent % 100 == 0) progress(double(histCurrent)/histTotal);
+          interruption_point();
         }
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
@@ -136,6 +140,8 @@ namespace Mantid
           {
             loadData(timeChannelsVec,counter,m_spec_list[i],iraw,lengthIn,spectrum, localWorkspace );
             counter++;
+            if (++histCurrent % 100 == 0) progress(double(histCurrent)/histTotal);
+            interruption_point();
           }
         }
         // Just a sanity check

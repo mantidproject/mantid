@@ -3,11 +3,13 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
+#include <iostream>
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidAPI/MemoryManager.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -155,14 +157,16 @@ public:
     TS_ASSERT_EQUALS( space.size[1], 2 )
     TS_ASSERT_EQUALS( space.size[2], 3 )
 
-    // ManagedWorkspace.MinSize should be set to 99 in MantidTest.properties file
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",10,10,10) )
+    // ManagedWorkspace.MinSize should be set to 1 in MantidTest.properties file
+    MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
+    int nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
     TS_ASSERT( ! ws->id().compare("ManagedWorkspace2D") )
     
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",1,1,1) )
     TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
     
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",10,10,10) )
+    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",nHist,100,100) )
     TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
     
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error )
