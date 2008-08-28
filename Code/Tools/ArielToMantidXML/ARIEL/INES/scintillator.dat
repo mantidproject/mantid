@@ -1,0 +1,23 @@
+***************
+superclass:: detector
+*****************
+scope:: specific
+name:: calculated_resolution
+type:: real
+rank:: 0
+*****************
+scope:: specific
+name:: measured_resolution
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: geometrical_conversion
+type:: real
+rank:: 0
+****************
+scope:: specific
+name:: offset
+type:: real
+rank:: 0
+

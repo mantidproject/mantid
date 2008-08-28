@@ -1,0 +1,38 @@
+********************
+superclass::  instrument
+********************
+scope::  generic
+name::   pearl
+type::  assembly_list
+***************
+scope:: generic
+name:: primary_fpath
+type:: real
+rank:: 0
+value:: 12.6
+***************
+scope:: generic
+name:: maximum_fpath
+type:: real
+rank:: 0
+value:: 13.2
+****************
+scope:: specific
+name:: sample
+type:: pointer
+rank:: 0
+****************
+scope:: specific
+name:: vanadium
+type:: pointer
+rank:: 0
+****************
+scope:: specific
+name:: abs_poly
+type:: pointer
+rank:: 0
+****************
+scope:: specific
+name:: beam
+type:: pointer
+rank:: 0

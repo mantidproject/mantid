@@ -110,7 +110,8 @@ void XMLWriter::writeDetectors()
       {
         Component* current = compsByType.find(*iter)->second;
         std::string property2 = "name";
-        if ( current->type() == current->name() ) property2 = "idlist";
+        // Want to print out "idlist" instead of name for first layer (to link to udets)
+        if ( ! current->parent()->parent() ) property2 = "idlist";
         m_outputFile << "<component type=\"" << current->type() << "\" " << property2 << "=\"" << current->name() << "\">" << std::endl;
         m_outputFile << "  <location " << current->printPos() << " />" << std::endl;
         m_outputFile << "</component>" << std::endl;
