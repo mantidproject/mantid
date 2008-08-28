@@ -427,11 +427,18 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
         // and get it in terms of spherical coordinates
         parentPos.getSpherical(parent_r, parent_t, parent_p);
       }
-      // Add the offsets to the parent's position and create a V3D for the child's absolute position
+      // Add the offsets to the parent's position to get absolute values for the child
       R += parent_r;
       theta += parent_t;
       phi += parent_p;
 
+      // Heinous workaround for situation when a parent object has a phi value but a theta of zero
+      //       Sets theta to a very small number
+      //       (without this the phi is lost in the internal conversion to cartesian coordinates)
+      /// @todo Find a more satisfactory way of solving this problem
+      if ( theta == 0.0 && phi != 0.0 ) theta = 0.0001;
+
+      // Create a V3D and set its position to be the child's absolute position
       Geometry::V3D absPos;
       absPos.spherical(R,theta,phi);
 
