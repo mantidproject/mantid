@@ -18,17 +18,16 @@ namespace Mantid
     Loads the mapping table between spectra and IDetector
     from a raw file. It returns a SpectraDetectorTable which maintain a multimap.
     The key of the multimap is the spectra number and the value
-    is the pointer to IDetector. The association is one to many, i.e. a spectrum can have one or many 
-    detectors contributing to it. Alternatively the same spectrum can contributes to different spectra 
-    (for example in DAE2 (Data Aquisition Electronic) when a spectra containing electronically focussed data is created simultaneously 
-    with indivudual spectra). LoadMappingTable is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec() methods.
+    is the pointer to IDetector. The association is one to many, i.e. a spectrum can have one or many
+    detectors contributing to it. Alternatively the same spectrum can contribute to different spectra
+    (for example in DAE2 (Data Aquisition Electronic) when a spectra containing electronically focussed data is created simultaneously
+    with individual spectra). LoadMappingTable is an algorithm and as such inherits
+    from the Algorithm class and overrides the init() & exec() methods.
 
     Required Properties:
     <UL>
     <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+    <LI> Workspace - The name of the workspace in which to store the imported data </LI>
     </UL>
 
     @author Laurent Chapon, ISIS Rutherford Appleton Laboratory
@@ -51,7 +50,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport LoadMappingTable : public API::Algorithm
@@ -76,8 +75,8 @@ namespace Mantid
       void init();
 
       /// Overwrites Algorithm method
-      void exec();  
-      
+      void exec();
+
       ///static reference to the logger class
       static Kernel::Logger& g_log;
     };

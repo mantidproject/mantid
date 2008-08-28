@@ -5,12 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
-/** An algorithm to mark a detector, or range of detectors, as dead.
+/** An algorithm to mark a detector, or set of detectors, as dead.
     The workspace spectra associated with those detectors are zeroed.
 
     Required Properties:
@@ -20,8 +21,9 @@ namespace DataHandling
 
     Optional Properties (One or the other should be set. SpectraList is used if both are set.):
     <UL>
-    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
-    <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
+    <LI> SpectraList - An ArrayProperty containing a list of spectra to mark dead </LI>
+    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to mark dead </LI>
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to mark dead </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -44,15 +46,15 @@ namespace DataHandling
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-  class DLLExport MarkDeadDetectors : public API::Algorithm
+class DLLExport MarkDeadDetectors : public API::Algorithm
 {
 public:
   MarkDeadDetectors();
   virtual ~MarkDeadDetectors();
-	
+
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "MarkDeadDetectors";};
   /// Algorithm's version for identification overriding a virtual method
@@ -64,7 +66,9 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  
+  void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
+                                const DataObjects::Workspace2D_sptr WS);
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };

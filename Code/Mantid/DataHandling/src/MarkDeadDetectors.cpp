@@ -32,8 +32,9 @@ MarkDeadDetectors::~MarkDeadDetectors() {}
 void MarkDeadDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty(new ArrayProperty<int>("SpectraList"));
+  declareProperty(new ArrayProperty<int>("DetectorList"));
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
 }
 
 void MarkDeadDetectors::exec()
@@ -47,38 +48,42 @@ void MarkDeadDetectors::exec()
 
   Property *wil = getProperty("WorkspaceIndexList");
   Property *sl = getProperty("SpectraList");
+  Property *dl = getProperty("DetectorList");
+
   // Could create a Validator to replace the below
-  if ( wil->isDefault() && sl->isDefault() )
+  if ( wil->isDefault() && sl->isDefault() && dl->isDefault() )
   {
-    g_log.error("WorkspaceIndexList & SpectraList properties are both empty");
-    throw std::invalid_argument("WorkspaceIndexList & SpectraList properties are both empty");
+    g_log.error("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
+    throw std::invalid_argument("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
   }
-  
+
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
   // appropriate spectra number and adding the indices they are linked to the list to be processed
   if ( ! sl->isDefault() )
   {
-    const std::vector<int> spectraList = getProperty("SpectraList");
-    // Convert the vector of properties into a set for easy searching
-    std::set<int> spectraSet(spectraList.begin(),spectraList.end());
-    // Next line means that anything in WorkspaceIndexList is ignored if SpectraList isn't empty
-    indexList.clear();
-    
-    for (int i = 0; i < WS->getNumberHistograms(); ++i)
-    {
-      int currentSpec = spectraAxis->spectraNo(i);
-      if ( spectraSet.find(currentSpec) != spectraSet.end() )
-      {
-        indexList.push_back(i);
-      }
-    }  
+    std::vector<int> spectraList = getProperty("SpectraList");
+    fillIndexListFromSpectra(indexList,spectraList,WS);
+  }// End dealing with spectraList
+  else if ( ! dl->isDefault() )
+  {// Dealing with DetectorList
+    const std::vector<int> detectorList = getProperty("DetectorList");
+    //convert from detectors to spectra numbers
+    boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
+    std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
+    //then from spectra numbers to indices
+    fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
-  // End dealing with spectraList
+
+  if ( indexList.size() == 0 )
+  {
+      g_log.warning("Nothing to do");
+      return;
+  }
 
   std::vector<int>::const_iterator it;
-  for (it = indexList.begin(); it != indexList.end(); ++it) 
+  for (it = indexList.begin(); it != indexList.end(); ++it)
   {
     // Mark associated detector as dead
     WS->getSpectraMap()->getDetector(spectraAxis->spectraNo(*it))->markDead();
@@ -87,7 +92,28 @@ void MarkDeadDetectors::exec()
     WS->dataY(*it).assign(vectorSize,0.0);
     WS->dataE(*it).assign(vectorSize,0.0);
   }
-  
+
+}
+
+/// Convert a list of spectra numbers into the corresponding workspace indices
+void MarkDeadDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
+                                              const DataObjects::Workspace2D_sptr WS)
+{
+  // Convert the vector of properties into a set for easy searching
+  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+  // Next line means that anything in Clear the index list first
+  indexList.clear();
+  //get the spectra axis
+  Axis *spectraAxis = WS->getAxis(1);
+
+  for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  {
+    int currentSpec = spectraAxis->spectraNo(i);
+    if ( spectraSet.find(currentSpec) != spectraSet.end() )
+    {
+      indexList.push_back(i);
+    }
+  }
 }
 
 } // namespace DataHandling

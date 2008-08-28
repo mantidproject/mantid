@@ -32,9 +32,9 @@ GroupDetectors::~GroupDetectors() {}
 void GroupDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty(new ArrayProperty<int>("SpectraList"));
   declareProperty(new ArrayProperty<int>("DetectorList"));
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
   declareProperty("ResultIndex",-1, Direction::Output);
 }
 

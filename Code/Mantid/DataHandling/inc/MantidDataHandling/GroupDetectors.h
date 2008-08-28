@@ -13,8 +13,7 @@ namespace DataHandling
 {
 /** An algorithm for grouping detectors and the spectra associated with them
     into a single DetectorGroup and spectrum.
-    The algorithm can currently only be used with a workspace that has units of time-of-flight
-    and with the data stored as raw counts.
+    This algorithm can only be used on a workspace that has common X bins.
 
     Required Properties:
     <UL>
@@ -24,8 +23,13 @@ namespace DataHandling
     Optional Properties (Only one of these should be set. Priority to highest listed below if more than one is set.):
     <UL>
     <LI> SpectraList - An ArrayProperty containing a list of spectra to combine </LI>
-    <LI> DetectorList - An ArrayProperty containing a list of detector ID's to combine </LI>
+    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to combine </LI>
     <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to combine </LI>
+    </UL>
+
+    Output Properties:
+    <UL>
+    <LI> ResultIndex - The workspace index containing the grouped spectra </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -54,8 +58,8 @@ namespace DataHandling
 class DLLExport GroupDetectors : public API::Algorithm
 {
 public:
-	GroupDetectors();
-	virtual ~GroupDetectors();
+  GroupDetectors();
+  virtual ~GroupDetectors();
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GroupDetectors";};

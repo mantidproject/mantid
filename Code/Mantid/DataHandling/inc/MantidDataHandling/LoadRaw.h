@@ -18,15 +18,14 @@ namespace Mantid
   {
     /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
 
-    Loads an file in ISIS RAW format and stores it in a 2D workspace 
+    Loads an file in ISIS RAW format and stores it in a 2D workspace
     (Workspace2D class). LoadRaw is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec() methods.
+    from the Algorithm class and overrides the init() & exec() methods.
 
     Required Properties:
     <UL>
     <LI> Filename - The name of and path to the input RAW file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
+    <LI> OutputWorkspace - The name of the workspace in which to store the imported data
          (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
     </UL>
 
@@ -57,7 +56,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport LoadRaw : public API::Algorithm
@@ -89,7 +88,7 @@ namespace Mantid
 
       /// The name and path of the input file
       std::string m_filename;
-     
+
       /// The number of spectra in the raw file
       int m_numberOfSpectra;
       /// The number of periods in the raw file
@@ -104,7 +103,7 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
-      
+
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 

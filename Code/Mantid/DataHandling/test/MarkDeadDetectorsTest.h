@@ -79,19 +79,23 @@ public:
     TS_ASSERT( mdd.isInitialized() );
 
     std::vector<Property*> props = mdd.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 3 )
+    TS_ASSERT_EQUALS( props.size(), 4 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
     TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace2D>* >(props[0]) )
 
-    TS_ASSERT_EQUALS( props[1]->name(), "WorkspaceIndexList" )
+    TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" )
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
 
-    TS_ASSERT_EQUALS( props[2]->name(), "SpectraList" )
+    TS_ASSERT_EQUALS( props[2]->name(), "DetectorList" )
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
+
+    TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" )
+    TS_ASSERT( props[3]->isDefault() )
+    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) )
   }
 
   void testExec()
