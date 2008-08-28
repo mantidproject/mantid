@@ -40,9 +40,7 @@ public:
   }
 
   ~SimpleIntegrationTest()
-  {
-
-  }
+  {}
 
   void testInit()
   {
@@ -54,10 +52,10 @@ public:
     outputSpace = "IntegrationOuter";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
 
-    alg.setPropertyValue("StartX","1");
-    alg.setPropertyValue("EndX","3");
-    alg.setPropertyValue("StartY","2");
-    alg.setPropertyValue("EndY","4");
+    alg.setPropertyValue("StartBin","1");
+    alg.setPropertyValue("EndBin","3");
+    alg.setPropertyValue("StartSpectrum","2");
+    alg.setPropertyValue("EndSpectrum","4");
 
     TS_ASSERT_THROWS_NOTHING( alg2.initialize());
     TS_ASSERT( alg.isInitialized() );
@@ -65,7 +63,6 @@ public:
     // Set the properties
     alg2.setPropertyValue("InputWorkspace","testSpace");
     alg2.setPropertyValue("OutputWorkspace","out2");
-
   }
 
   void testExec()
@@ -100,7 +97,7 @@ public:
     if ( !alg2.isInitialized() ) alg2.initialize();
 
     // Check setting of invalid property value causes failure
-    TS_ASSERT_THROWS( alg2.setPropertyValue("StartY","-1"), std::invalid_argument) ;
+    TS_ASSERT_THROWS( alg2.setPropertyValue("StartSpectrum","-1"), std::invalid_argument) ;
 
     TS_ASSERT_THROWS_NOTHING( alg2.execute());
     TS_ASSERT( alg2.isExecuted() );

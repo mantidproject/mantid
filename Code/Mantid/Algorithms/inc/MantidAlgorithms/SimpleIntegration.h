@@ -10,7 +10,7 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /** 
+    /**
     Takes a 2D workspace as input and sums each Histogram1D contained within
     it, storing the result as a Workspace2D of Historgram1Ds of dimension 1x1.
 
@@ -22,10 +22,10 @@ namespace Mantid
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> StartX - X bin number to integrate from (default 0)</LI>
-    <LI> EndX - X bin number to integrate to (default max)</LI>
-    <LI> StartY - Y bin number to integrate from (default 0)</LI>
-    <LI> EndY - Y bin number to integrate to (default max)</LI>
+    <LI> StartSpectrum - Workspace index number to integrate from (default 0)</LI>
+    <LI> EndSpectrum - Workspace index number to integrate to (default max)</LI>
+    <LI> StartBin - Bin number to integrate from (default 0)</LI>
+    <LI> EndBin - Bin number to integrate to (default max)</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -48,7 +48,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport SimpleIntegration : public API::Algorithm
@@ -64,20 +64,20 @@ namespace Mantid
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "General";}
-  
+
     private:
       // Overridden Algorithm methods
       void init();
       void exec();
 
       /// The X bin to start the integration from
-      int m_MinX;
+      int m_MinBin;
       /// The X bin to finish the integration at
-      int m_MaxX;
-      /// The Y bin to start the integration from
-      int m_MinY;
-      /// The Y bin to finish the integration at
-      int m_MaxY;
+      int m_MaxBin;
+      /// The spectrum to start the integration from
+      int m_MinSpec;
+      /// The spectrum to finish the integration at
+      int m_MaxSpec;
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
