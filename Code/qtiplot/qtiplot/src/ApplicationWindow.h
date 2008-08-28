@@ -327,8 +327,6 @@ public slots:
 	Matrix* newMatrix(int rows = 32, int columns = 32);
 	//! To be used when opening a project file only!
 	Matrix* newMatrix(const QString& caption, int r, int c);
-    //Mantid
-	Matrix* newWMatrix(const QString& caption, Mantid::API::Workspace_sptr ws,int start=-1,int end=-1, bool filter=false, double maxv=0.);
 	Matrix* matrix(const QString& name);
 	Matrix* convertTableToMatrix();
 	Matrix* tableToMatrix(Table* t);
@@ -965,12 +963,8 @@ public slots:
 
 	void showToolBarsMenu();
 
-    // Mantid WorkspaceMatrix
-    void copyRowToTable();
-    void copyRowToGraph();
-    void copyRowToGraphErr();
-
 signals:
+
 	void modified();
 
 private:
@@ -1279,10 +1273,6 @@ private:
     QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
     QList<QAction *> d_user_actions;
     QUndoView *d_undo_view;
-    // Mantid WorkspaceMatrix
-    QAction *actionCopyRowToTable;
-    QAction *actionCopyRowToGraph;
-    QAction *actionCopyRowToGraphErr;
 public:
     MantidUI *mantidUI;
     void initMantid();

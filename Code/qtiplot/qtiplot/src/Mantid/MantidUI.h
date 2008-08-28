@@ -41,7 +41,7 @@ public:
     QStringList getWorkspaceNames();
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
-    Mantid::API::Workspace_sptr LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max);
+    void LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max);
     Mantid::API::IAlgorithm* CreateAlgorithm(const QString& algName);
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
@@ -114,6 +114,9 @@ public:
 
     void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
+
+    void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
+    Poco::NObserver<MantidUI, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
     ApplicationWindow *m_appWindow;
     QMdiArea *d_workspace;// ApplicationWindow's private member

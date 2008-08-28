@@ -309,11 +309,8 @@ HEADERS  += src/ApplicationWindow.h \
             src/UserFunction.h  \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/LoadDAEDlg.h \
-	    src/Mantid/WorkspaceMgr.h \
 	    src/Mantid/ExecuteAlgorithm.h \
 	    src/Mantid/ImportWorkspaceDlg.h \
-	    src/Mantid/WorkspaceMatrix.h \
-	    src/Mantid/WorkspaceMatrixModel.h \
 	    src/Mantid/AbstractMantidLog.h \
 	    src/Mantid/MantidLog.h \
 	    src/Mantid/MantidUI.h \
@@ -322,7 +319,7 @@ HEADERS  += src/ApplicationWindow.h \
 
 ###################### FORMS ##############################################
 
-FORMS += src/Mantid/WorkspaceMgr.ui
+#FORMS += src/Mantid/WorkspaceMgr.ui
 
 ###################### SOURCES ##############################################
 
@@ -445,11 +442,8 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/UserFunction.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/LoadDAEDlg.cpp \
-	    src/Mantid/WorkspaceMgr.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
 	    src/Mantid/ImportWorkspaceDlg.cpp \
-	    src/Mantid/WorkspaceMatrix.cpp \
-	    src/Mantid/WorkspaceMatrixModel.cpp \
 	    src/Mantid/AbstractMantidLog.cpp \
 	    src/Mantid/MantidLog.cpp \
 	    src/Mantid/MantidUI.cpp \

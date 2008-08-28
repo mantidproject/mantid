@@ -2,7 +2,6 @@
 #include "MantidLog.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
-#include "WorkspaceMatrix.h"
 #include "LoadRawDlg.h"
 #include "LoadDAEDlg.h"
 #include "ImportWorkspaceDlg.h"
@@ -45,7 +44,8 @@ void ApplicationWindow::initMantid()
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
 m_finishedObserver(*this, &MantidUI::handleAlgorithmFinishedNotification),
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
-m_progressObserver(*this, &MantidUI::handleAlgorithmProgressNotification)
+m_progressObserver(*this, &MantidUI::handleAlgorithmProgressNotification),
+m_errorObserver(*this, &MantidUI::handleAlgorithmErrorNotification)
 {
     m_progressDialog = 0;
     m_algAsync = 0;
@@ -130,12 +130,12 @@ IAlgorithm* MantidUI::CreateAlgorithm(const QString& algName)
 	return alg;
 }
 
-Workspace_sptr MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max)
+void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max)
 {
 	//Check workspace does not exist
 	if (!AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
 	{
-		IAlgorithm* alg = CreateAlgorithm("LoadRaw");
+		Algorithm* alg = static_cast<Algorithm*>(CreateAlgorithm("LoadRaw"));
 		alg->setPropertyValue("Filename", fileName.toStdString());
 		alg->setPropertyValue("OutputWorkspace", workspaceName.toStdString());
         if ( !spectrum_min.isEmpty() && !spectrum_max.isEmpty() )
@@ -144,16 +144,9 @@ Workspace_sptr MantidUI::LoadIsisRawFile(const QString& fileName,const QString& 
 		    alg->setPropertyValue("spectrum_max", spectrum_max.toStdString());
         }
 
-		alg->execute();
+        executeAlgorithmAsync(alg);
 
-		Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
-
-		return output;
 	}
-	
-	Workspace_sptr empty;
-	
-	return empty;
 }
 
 void MantidUI::loadWorkspace()
@@ -166,23 +159,11 @@ void MantidUI::loadWorkspace()
 	if (!dlg->getFilename().isEmpty())
 	{	
 		
-		Mantid::API::Workspace_sptr ws = LoadIsisRawFile(dlg->getFilename(), 
-                                                         dlg->getWorkspaceName(),
-                                                         dlg->getSpectrumMin(),
-                                                         dlg->getSpectrumMax());
-		if (ws.use_count() == 0)
-		{
-			QMessageBox::warning(m_appWindow, tr("Mantid"),
-                   		tr("A workspace with this name already exists.\n")
-                    		, QMessageBox::Ok, QMessageBox::Ok);
-			return;
-		}
-		
-		update();
-
+		LoadIsisRawFile(dlg->getFilename(), 
+                        dlg->getWorkspaceName(),
+                        dlg->getSpectrumMin(),
+                        dlg->getSpectrumMax());
 	}
-
-    //executeAlgorithm("LoadRaw",1);
 }
 
 void MantidUI::loadDAEWorkspace()
@@ -657,7 +638,13 @@ void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::A
     m_algAsync = 0;
     emit needToUpdateProgressDialog(100);
     emit needToCloseProgressDialog();
-    //m_progressDialog->close();
+    emit needsUpdating();
+}
+
+void MantidUI::handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf)
+{
+    m_algAsync = 0;
+    emit needToCloseProgressDialog();
     emit needsUpdating();
 }
 
