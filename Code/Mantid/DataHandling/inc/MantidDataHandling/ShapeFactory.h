@@ -69,13 +69,13 @@ namespace Mantid
     private:
 
       /// Parse XML 'sphere' element
-      Geometry::Sphere* parseSphere(Poco::XML::Element* pElem);
+      std::string parseSphere(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
       /// Parse XML 'infinite-plane' element
-      Geometry::Plane* parseInfinitePlane(Poco::XML::Element* pElem);
+      std::string parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
       /// Parse XML 'infinite-cylinder' element
-      Geometry::Cylinder* parseInfiniteCylinder(Poco::XML::Element* pElem);
+      std::string parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);

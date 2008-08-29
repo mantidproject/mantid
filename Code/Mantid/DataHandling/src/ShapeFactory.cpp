@@ -71,7 +71,10 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     return retVal;
   Element* pElemAlgebra = static_cast<Element*>(pNL_algebra->item(0)); 
   pNL_algebra->release();
-  std::string algebra = pElemAlgebra->getAttribute("val");
+  std::string algebraFromUser = pElemAlgebra->getAttribute("val");
+
+  std::map<std::string,std::string> idMatching; // match id given to a shape by the user to 
+                                                // id understandable by Mantid code 
 
   // loop over all the sub-elements of pElem
 
@@ -79,6 +82,8 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   unsigned int pNL_length = pNL->length();
   int numPrimitives = 0; // used for counting number of primitives in this 'type' XML element
   std::map<int, Surface*> primitives; // stores the primitives that will be used to build final shape
+  int l_id = 1; // used to build up unique id's for each shape added. Must start from int > zero.
+
   for (unsigned int i = 0; i < pNL_length; i++)
   {
     if ( (pNL->item(i))->nodeType() == Node::ELEMENT_NODE )
@@ -88,26 +93,49 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
       // assume for now that if sub-element has attribute id then it is a shape element
       if ( pE->hasAttribute("id") )  
       {
-        int l_id = atoi( (pE->getAttribute("id")).c_str() ); // get id
+        std::string idFromUser = pE->getAttribute("id"); // get id
 
         std::string primitiveName = pE->tagName();  // get name of primitive
 
         if ( !primitiveName.compare("sphere"))
         {
-          primitives[l_id] = parseSphere(pE);  
+          idMatching[idFromUser] = parseSphere(pE, primitives, l_id);  
           numPrimitives++;
         }
         else if ( !primitiveName.compare("infinite-plane"))
         {
-          primitives[l_id] = parseInfinitePlane(pE);  
+          idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);  
           numPrimitives++;
         }
         else if ( !primitiveName.compare("infinite-cylinder"))
         {
-          primitives[l_id] = parseInfiniteCylinder(pE);  
+          idMatching[idFromUser] = parseInfiniteCylinder(pE, primitives, l_id);  
           numPrimitives++;
         }
       }
+    }
+  }
+
+  // Translate algebra string defined by the user into something Mantid can
+  // understand
+
+  std::string algebra;  // to hold algebra in a way Mantid can understand
+  std::map<std::string,std::string>::iterator iter;
+  size_t found;  // point to location in string
+  bool howFoundOne = false;
+  for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
+  {
+    found = algebraFromUser.find(iter->first);
+
+    if (found==std::string::npos)
+      continue;
+
+    if (howFoundOne)
+      algebra += " : " + iter->second;  // for now simply assume all shapes are 'added' as unions
+    else
+    {
+      algebra += iter->second;
+      howFoundOne = true;
     }
   }
 
@@ -131,11 +159,13 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 /** Parse XML 'sphere' element
  *
  *  @param pElem XML 'sphere' element from instrument def. file
- *  @return A pointer to the sphere object allocated in this method 
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-Sphere* ShapeFactory::parseSphere(Poco::XML::Element* pElem)
+std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   // check for centre element
   NodeList* pNL_centre = pElem->getElementsByTagName("centre");
@@ -158,22 +188,28 @@ Sphere* ShapeFactory::parseSphere(Poco::XML::Element* pElem)
   pNL_radius->release();
 
   // create sphere
-  Sphere* retVal = new Sphere;
-  retVal->setCentre(parsePosition(pElemCentre)); 
-  retVal->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  Sphere* pSphere = new Sphere;
+  pSphere->setCentre(parsePosition(pElemCentre)); 
+  pSphere->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  prim[l_id] = pSphere;
 
-  return retVal;
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << ")";
+  l_id++;
+  return retAlgebraMatch.str();
 }
 
 
 /** Parse XML 'infinite-plane' element
  *
  *  @param pElem XML 'infinite-plane' element from instrument def. file
- *  @return A pointer to the infinite-plane object allocated in this method 
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-Plane* ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem)
+std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   // check for point-in-plane element
   NodeList* pNL_pip = pElem->getElementsByTagName("point-in-plane");
@@ -196,21 +232,27 @@ Plane* ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem)
   pNL_normal->release();
 
   // create infinite-plane
-  Plane* retVal = new Plane();
-  retVal->setPlane(parsePosition(pElemPip), parsePosition(pElemNormal)); 
+  Plane* pPlane = new Plane();
+  pPlane->setPlane(parsePosition(pElemPip), parsePosition(pElemNormal)); 
+  prim[l_id] = pPlane;
 
-  return retVal;
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << ")";
+  l_id++;
+  return retAlgebraMatch.str();
 }
 
 
 /** Parse XML 'infinite-cylinder' element
  *
  *  @param pElem XML 'infinite-cylinder' element from instrument def. file
- *  @return A pointer to the infinite-cylinder object allocated in this method 
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-Cylinder* ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem)
+std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   // check for centre element
   NodeList* pNL_centre = pElem->getElementsByTagName("centre");
@@ -243,12 +285,16 @@ Cylinder* ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem)
   pNL_radius->release();
 
   // create infinite-cylinder
-  Cylinder* retVal = new Cylinder();
-  retVal->setCentre(parsePosition(pElemCentre));              
-  retVal->setNorm(parsePosition(pElemAxis));  
-  retVal->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  Cylinder* pCylinder = new Cylinder();
+  pCylinder->setCentre(parsePosition(pElemCentre));              
+  pCylinder->setNorm(parsePosition(pElemAxis));  
+  pCylinder->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  prim[l_id] = pCylinder;
 
-  return retVal;
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << ")";
+  l_id++;
+  return retAlgebraMatch.str();
 }
 
 
