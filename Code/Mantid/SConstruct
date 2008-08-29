@@ -125,6 +125,8 @@ else:
 	cppPaths.append(poco_path + 'include')
 	cppPaths.append(poco_path +'Util')
 	cppPaths.append(boost_path)
+	cppPaths.append('/usr/include/glib-2.0/')
+	cppPaths.append('/usr/lib/glib-2.0/include/')
 
 	print "CPPPATHS: ",cppPaths
 
@@ -136,9 +138,12 @@ else:
 	libList.append('boost_filesystem'+boost_append)
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
+	libList.append('boost_datetime'+boost_append)
 	libList.append('NeXus')
 	libList.append('GL')
 	libList.append('GLU')
+	libList.append('gsl')
+	libList.append('gslcblas')
 	
 
 	if os.path.isdir('/usr/local/poco-1.3.1/'+ '/lib/Linux/i686') :
