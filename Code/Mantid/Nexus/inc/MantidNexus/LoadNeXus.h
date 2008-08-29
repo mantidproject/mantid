@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Property.h"
 
 namespace Mantid
 {
@@ -20,14 +21,19 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input RAW file </LI>
+    <LI> Filename - The name of and path to the input Nexus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
+	</UL>
+	Optional Properties:
+	<UL>
+	<LI> spectrum_list - integer list of spectra numbers to load</LI>
+	<LI> spectrum_min, spectrum_max - range of spectra to load</LI>
     </UL>
 
-    @author Freddie Akeroyd, STFC ISIS Facility, GB
-    @date 24/01/2008
+    @author Ronald Fowler, based on version by Freddie Akeroyd
+    @date 29/08/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -73,11 +79,20 @@ namespace Mantid
       /// The name and path of the input file
       std::string m_filename;
 
+	  /// The name of the output workspace
+	  std::string m_workspace;
+
       /// Pointer to the local workspace
       DataObjects::Workspace2D_sptr m_localWorkspace;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
+
+	  /// run LoadMuonNexus
+	  void runLoadMuonNexus();
+
+	  /// run LoadIsisNexus
+	  void runLoadIsisNexus();
 
     };
 
