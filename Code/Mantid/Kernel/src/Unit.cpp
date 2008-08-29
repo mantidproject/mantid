@@ -5,6 +5,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -12,8 +13,8 @@ namespace Kernel
 {
 
 /** Is conversion by constant multiplication possible?
- * 
- *  Look to see if conversion from the unit upon which this method is called requires 
+ *
+ *  Look to see if conversion from the unit upon which this method is called requires
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.
  *  @param destination The unit to which conversion is sought
@@ -28,8 +29,8 @@ bool Unit::quickConversion(const Unit& destination, double& factor, double& powe
 }
 
 /** Is conversion by constant multiplication possible?
- * 
- *  Look to see if conversion from the unit upon which this method is called requires 
+ *
+ *  Look to see if conversion from the unit upon which this method is called requires
  *  only multiplication by a constant and not detector information (i.e. distance & angle),
  *  in which case doing the conversion via time-of-flight is not necessary.
  *  @param destUnitName The class name of the unit to which conversion is sought
@@ -43,13 +44,13 @@ bool Unit::quickConversion(std::string destUnitName, double& factor, double& pow
   ConversionsMap::const_iterator it = s_conversionFactors.find(unitID());
   // Return false if there are no conversions entered for this unit
   if ( it == s_conversionFactors.end() ) return false;
-  
+
   // See if there's a conversion listed for the requested destination unit
   std::transform(destUnitName.begin(),destUnitName.end(),destUnitName.begin(),toupper);
   UnitConversions::const_iterator iter = it->second.find(destUnitName);
   // If not, return false
   if ( iter == it->second.end() ) return false;
-  
+
   // Conversion found - set the conversion factors
   factor = iter->second.first;
   power = iter->second.second;
@@ -87,7 +88,7 @@ void TOF::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const do
   return;
 }
 
-void TOF::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void TOF::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // Nothing to do
@@ -96,7 +97,7 @@ void TOF::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const 
 
 /* WAVELENGTH
  * ==========
- * 
+ *
  * This class makes use of the de Broglie relationship: lambda = h/p = h/mv, where v is (l1+l2)/tof.
  */
 DECLARE_UNIT(Wavelength)
@@ -104,7 +105,7 @@ DECLARE_UNIT(Wavelength)
 Wavelength::Wavelength() : Unit()
 {
   const double AngstromsSquared = 1e20;
-  const double factor = ( AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h ) 
+  const double factor = ( AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h )
                                  / ( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV );
   addConversion("Energy",factor,-2.0);
 }
@@ -122,27 +123,31 @@ void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, c
   factor *= TOFisinMicroseconds / toAngstroms;
 
   // Now apply the factor to the input data vector
-  std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );  
+  std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 
-void Wavelength::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void Wavelength::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
+  double ltot = l1 + l2;
+  // Protect against divide by zero
+  if ( ltot == 0.0 ) ltot = DBL_MIN;
+
   // First the crux of the conversion
-  double factor = PhysicalConstants::h / ( PhysicalConstants::NeutronMass * ( l1 + l2 ) );
+  double factor = PhysicalConstants::h / ( PhysicalConstants::NeutronMass * ( ltot ) );
 
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factor *= toAngstroms / TOFisinMicroseconds;
-  
+
   // Now apply the factor to the input data vector
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 
 /* ENERGY
  * ======
- * 
+ *
  * Conversion uses E = 1/2 mv^2, where v is (l1+l2)/tof.
  */
 DECLARE_UNIT(Energy)
@@ -151,7 +156,7 @@ DECLARE_UNIT(Energy)
 Energy::Energy() : Unit()
 {
   const double toAngstroms = 1e10;
-  const double factor = toAngstroms * PhysicalConstants::h 
+  const double factor = toAngstroms * PhysicalConstants::h
                                 / sqrt( 2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV);
   addConversion("Wavelength",factor,-0.5);
 }
@@ -160,36 +165,38 @@ void Energy::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   const double TOFinMicroseconds = 1e6;
-  
+
   const double factor = sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) )
                                      * ( l1 + l2 ) * TOFinMicroseconds;
-  
+
   std::vector<double>::iterator it;
-  for (it = xdata.begin(); it != xdata.end(); ++it) 
+  for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / sqrt(*it);
   }
 }
 
-void Energy::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void Energy::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   const double TOFisinMicroseconds = 1e-12;  // The input tof number gets squared so this is (10E-6)^2
 
   const double ltot = l1 + l2;
-  const double factor = ( (PhysicalConstants::NeutronMass / 2.0) * ( ltot * ltot ) ) 
+  const double factor = ( (PhysicalConstants::NeutronMass / 2.0) * ( ltot * ltot ) )
                                        / (PhysicalConstants::meV * TOFisinMicroseconds);
 
   std::vector<double>::iterator it;
-  for (it = xdata.begin(); it != xdata.end(); ++it) 
+  for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / ( (*it)*(*it) );
   }
 }
 
 /* D-SPACING
  * =========
- * 
+ *
  * Conversion uses Bragg's Law: 2d sin(theta) = n * lambda
  */
 DECLARE_UNIT(dSpacing)
@@ -205,35 +212,36 @@ void dSpacing::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) ) 
+  double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) )
                             / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factor *= TOFisinMicroseconds / toAngstroms;
-  
+
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 
-void dSpacing::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void dSpacing::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion. Note that the input data is DIVIDED by this factor below.
-  double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) ) 
+  double factor = ( 2.0 * PhysicalConstants::NeutronMass * sin(twoTheta/2.0) * ( l1 + l2 ) )
                             / PhysicalConstants::h;
 
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factor *= TOFisinMicroseconds / toAngstroms;
-  
-  std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::divides<double>(), factor) );  
+  if (factor == 0.0) factor = DBL_MIN; // Protect against divide by zero
+
+  std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::divides<double>(), factor) );
 }
 
 /* MOMENTUM TRANSFER
  * =================
- * 
+ *
  * The relationship is Q = 2k sin (theta). where k is 2*pi/wavelength
  */
 DECLARE_UNIT(MomentumTransfer)
@@ -249,22 +257,23 @@ void MomentumTransfer::toTOF(std::vector<double>& xdata, std::vector<double>& yd
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) 
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
                                * sin(twoTheta/2.0) ) / PhysicalConstants::h;
-  
+
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factor *= TOFisinMicroseconds/ toAngstroms;
-  
+
   std::vector<double>::iterator it;
-  for (it = xdata.begin(); it != xdata.end(); ++it) 
+  for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / (*it);
   }
 }
 
-void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
@@ -279,6 +288,7 @@ void MomentumTransfer::fromTOF(std::vector<double>& xdata, std::vector<double>& 
   std::vector<double>::iterator it;
   for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / (*it);
   }
 }
@@ -310,27 +320,29 @@ void QSquared::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
   std::vector<double>::iterator it;
   for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / sqrt(*it);
   }
 }
 
-void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void QSquared::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
   // First the crux of the conversion
-  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2) 
+  double factor = ( 4.0 * M_PI * PhysicalConstants::NeutronMass * (l1 + l2)
                                * sin(twoTheta/2.0) ) / PhysicalConstants::h;
-  
+
   // Now adjustments for the scale of units used
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
   factor *= TOFisinMicroseconds/ toAngstroms;
-  
+
   factor = factor * factor;
-  
+
   std::vector<double>::iterator it;
-  for (it = xdata.begin(); it != xdata.end(); ++it) 
+  for (it = xdata.begin(); it != xdata.end(); ++it)
   {
+    if (*it == 0.0) *it = DBL_MIN; // Protect against divide by zero
     *it = factor / ( (*it)*(*it) );
   }
 }
@@ -343,6 +355,8 @@ DECLARE_UNIT(DeltaE)
 void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
 
   const double TOFinMicroseconds = 1e6;
   double factor = sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFinMicroseconds;
@@ -351,9 +365,9 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
   {
     const double t1 = ( factor * l1 ) / sqrt( efixed );
     factor *= l2;
-    
+
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = efixed - *it;
       const double t2 = factor / sqrt(e2);
@@ -364,9 +378,9 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
   {
     const double t2 = ( factor * l2 ) / sqrt( efixed );
     factor *= l1;
-    
+
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = efixed + *it;
       const double t1 = factor / sqrt(e1);
@@ -379,9 +393,11 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
   }
 }
 
-void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
 
   const double TOFinMicroseconds = 1e6;
   double factor = sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFinMicroseconds;
@@ -392,7 +408,7 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     factor = factor * factor * l2 * l2;
 
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t2 = *it - t1;
       const double e2 = factor / (t2 * t2);
@@ -405,7 +421,7 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     factor = factor * factor * l1 * l1;
 
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t1 = *it - t2;
       const double e1 = factor / (t1 * t1);
@@ -420,7 +436,7 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
 
 /* Energy Transfer in units of wavenumber
  * ======================================
- * 
+ *
  * This is identical to the above (Energy Transfer in meV) with one division by meVtoWavenumber.
  */
 DECLARE_UNIT(DeltaE_inWavenumber)
@@ -428,6 +444,8 @@ DECLARE_UNIT(DeltaE_inWavenumber)
 void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
 
   const double TOFinMicroseconds = 1e6;
   double factor = sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFinMicroseconds;
@@ -436,9 +454,9 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
   {
     const double t1 = ( factor * l1 ) / sqrt( efixed );
     factor *= l2;
-    
+
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = (efixed - *it) / PhysicalConstants::meVtoWavenumber;
       const double t2 = factor / sqrt(e2);
@@ -449,9 +467,9 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
   {
     const double t2 = ( factor * l2 ) / sqrt( efixed );
     factor *= l1;
-    
+
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = (efixed + *it) / PhysicalConstants::meVtoWavenumber;
       const double t1 = factor / sqrt(e1);
@@ -464,9 +482,11 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
   }
 }
 
-void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
     const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
 {
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for energy transfer calculation");
 
   const double TOFinMicroseconds = 1e6;
   double factor = sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFinMicroseconds;
@@ -477,7 +497,7 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
     factor = factor * factor * l2 * l2;
 
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t2 = *it - t1;
       const double e2 = factor / (t2 * t2);
@@ -490,7 +510,7 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
     factor = factor * factor * l1 * l1;
 
     std::vector<double>::iterator it;
-    for (it = xdata.begin(); it != xdata.end(); ++it) 
+    for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t1 = *it - t2;
       const double e1 = factor / (t1 * t1);

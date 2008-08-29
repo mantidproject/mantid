@@ -12,7 +12,7 @@ namespace Algorithms
 {
 
 // Register with the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,ConvertUnits)
+DECLARE_ALGORITHM(ConvertUnits)
 
 using namespace Kernel;
 using namespace API;
@@ -38,8 +38,10 @@ void ConvertUnits::init()
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
   declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()) );
-  declareProperty("Emode",0);
-  declareProperty("Efixed",0.0);
+  declareProperty("Emode",0,new BoundedValidator<int>(0,2));
+  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  mustBePositive->setLower(0.0);
+  declareProperty("Efixed",0.0,mustBePositive);
 }
 
 /** Executes the algorithm
