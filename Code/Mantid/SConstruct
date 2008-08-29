@@ -130,6 +130,7 @@ else:
 
 	print "CPPPATHS: ",cppPaths
 
+	libDirList.append('/usr/local/lib/')
 	libList.append('python' + sys.version[0:3])
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
@@ -138,7 +139,7 @@ else:
 	libList.append('boost_filesystem'+boost_append)
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
-	libList.append('boost_datetime'+boost_append)
+	libList.append('boost_date_time'+boost_append)
 	libList.append('NeXus')
 	libList.append('GL')
 	libList.append('GLU')

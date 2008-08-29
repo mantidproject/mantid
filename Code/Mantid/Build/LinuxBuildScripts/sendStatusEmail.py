@@ -76,15 +76,19 @@ for line in f.readlines():
 f.close()
 
 #Get python tests result
-f = open('../logs/PythonResults.log','r')
+try:
+	f = open('../logs/PythonResults.log','r')
 
-for line in f.readlines():
-	if line.endswith('FAILED'):
-		#A test failed
-		pythonPass = False
-	mssgPythonResults = mssgPythonResults + line
+	for line in f.readlines():
+		if line.endswith('FAILED'):
+			#A test failed
+			pythonPass = False
+		mssgPythonResults = mssgPythonResults + line
      
-f.close()
+	f.close()
+
+except:
+	pythonPass = False
 
 #Read svn log
 mssgSvn = open('../logs/svn.log','r').read()
