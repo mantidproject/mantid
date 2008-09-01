@@ -64,7 +64,7 @@ private:
   const double getPrimaryFlightpath() const;
   const double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
   const std::vector<int> unwrapX(const API::Workspace_sptr& tempWS, const int& spectrum, const double& Ld);
-  void handleFrameOverlapped();
+  std::pair<int,int> handleFrameOverlapped(const std::vector<double>& xdata, const double& Ld, std::vector<double>& tempX);
   void unwrapYandE(const API::Workspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds);
   API::Workspace_sptr rebin(const API::Workspace_sptr& workspace, const double& min, const double& max, const int& numBins);
 

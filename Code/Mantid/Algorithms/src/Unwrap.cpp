@@ -45,7 +45,7 @@ void Unwrap::init()
 
 /** Executes the algorithm
  *  @throw std::runtime_error if the workspace is invalid or a child algorithm fails
- *  @throw Kernel::Exception::InstrumentDefinitionError if detector, source of sample positions cannot be calculated
+ *  @throw Kernel::Exception::InstrumentDefinitionError if detector, source or sample positions cannot be calculated
  *
  */
 void Unwrap::exec()
@@ -87,6 +87,7 @@ void Unwrap::exec()
     const std::vector<int> rangeBounds = this->unwrapX(tempWS, i, Ld);
     // Unwrap the y & e data according to the ranges found above
     this->unwrapYandE(tempWS, i, rangeBounds);
+    assert( tempWS->dataX(i).size() == tempWS->dataY(i).size()+1 );
 
     // Get the maximum number of bins (excluding monitors) for the rebinning below
     if ( !isMonitor )
@@ -204,13 +205,13 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
  *  @param tempWS   A pointer to the temporary workspace in which the results are being stored
  *  @param spectrum The workspace index
  *  @param Ld       The flightpath for the detector related to this spectrum
- *  @return A 4-element vector containing the bins at which the upper and lower ranges start & end
+ *  @return A 3-element vector containing the bins at which the upper and lower ranges start & end
  */
 const std::vector<int> Unwrap::unwrapX(const API::Workspace_sptr& tempWS, const int& spectrum, const double& Ld)
 {
   // Create and initalise the vector that will store the bin ranges, and will be returned
-  // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range start, 3 - Upper range end
-  std::vector<int> binRange(4,-1);
+  // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range start
+  std::vector<int> binRange(3,-1);
 
   // Calculate cut-off times
   const double T1 = m_Tmax - ( m_Tmin*( 1 - (Ld/m_LRef) ) );
@@ -251,12 +252,16 @@ const std::vector<int> Unwrap::unwrapX(const API::Workspace_sptr& tempWS, const 
       if ( tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5 ) tempX_U.pop_back();
       // Record the bins that fall in this range for copying over the data & errors
       if (binRange[2] == -1) binRange[2] = bin;
-//        maxX_U = bin;
     }
   } // loop over X values
 
   // Deal with the (rare) case that a detector (e.g. downstream monitor) is at a longer flightpath than m_LRef
-  if (Ld > m_LRef) this->handleFrameOverlapped();
+  if (Ld > m_LRef)
+  {
+    std::pair<int,int> binLimits = this->handleFrameOverlapped(xdata, Ld, tempX_L);
+    binRange[0] = binLimits.first;
+    binRange[1] = binLimits.second;
+  }
 
   // Append first vector to back of second
   tempX_U.insert(tempX_U.end(),tempX_L.begin(),tempX_L.end());
@@ -265,29 +270,32 @@ const std::vector<int> Unwrap::unwrapX(const API::Workspace_sptr& tempWS, const 
 }
 
 /** Deals with the (rare) case where the flightpath is longer than the reference
- *  Not implemented yet, so just prints a warning
+ *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-void Unwrap::handleFrameOverlapped()
+std::pair<int,int> Unwrap::handleFrameOverlapped(const std::vector<double>& xdata, const double& Ld, std::vector<double>& tempX)
 {
-  g_log.warning("Exclusion of frame-overlapped bins is not yet implemented");
-  //      // Calculate the interval to exclude
-  //      const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef/Ld) );
-  //      // This gives us new minimum & maximum tof values
-  //      const double minT = m_Tmin + Dt;
-  //      const double maxT = m_Tmax - Dt;
-  //      for (unsigned int j = 0; j < m_XSize; ++j)
-  //      {
-  //        const double T = xdata[j];
-  //        if ( T < minT )
-  //        {
-  //          minX_L = j+1;
-  //          tempX_L.erase(tempX_L.begin());
-  //        }
-  //        else if ( T > maxT )
-  //        {
-  //          maxX_U = j;
-  //        }
-  //      }
+  // Calculate the interval to exclude
+  const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef/Ld) );
+  // This gives us new minimum & maximum tof values
+  const double minT = m_Tmin + Dt;
+  const double maxT = m_Tmax - Dt;
+  int min = 0, max = xdata.size();
+  for (unsigned int j = 0; j < m_XSize; ++j)
+  {
+    const double T = xdata[j];
+    if ( T < minT )
+    {
+      min = j+1;
+      tempX.erase(tempX.begin());
+    }
+    else if ( T > maxT )
+    {
+      tempX.erase(tempX.end()-max+j, tempX.end());
+      max = j-1;
+      break;
+    }
+  }
+  return std::make_pair(min,max);
 }
 
 /** Unwraps the Y & E vectors of a spectrum according to the ranges found in unwrapX.
