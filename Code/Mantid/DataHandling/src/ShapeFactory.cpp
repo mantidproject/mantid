@@ -165,7 +165,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
   // check for centre element
   NodeList* pNL_centre = pElem->getElementsByTagName("centre");
@@ -209,7 +209,7 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
   // check for point-in-plane element
   NodeList* pNL_pip = pElem->getElementsByTagName("point-in-plane");
@@ -252,7 +252,7 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
   // check for centre element
   NodeList* pNL_centre = pElem->getElementsByTagName("centre");

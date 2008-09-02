@@ -32,11 +32,16 @@ Logger& GaussLeastSquaresFit::g_log = Logger::get("GaussLeastSquaresFit");
 
 /// Structure to contain least squares data
 struct FitData {
-  size_t n; // number of points to be fitted (size of X, Y and sigma arrays)
-  size_t p; // number of fit parameters
-  double * X; // the data to be fitted (abscissae) 
-  double * Y; // the data to be fitted (ordinates)
-  double * sigma; // the weighting data
+  /// number of points to be fitted (size of X, Y and sigma arrays)
+  size_t n; 
+  /// number of fit parameters
+  size_t p; 
+  /// the data to be fitted (abscissae)
+  double * X;  
+  /// the data to be fitted (ordinates)
+  double * Y; 
+  /// the weighting data
+  double * sigma; 
 };
 
 
