@@ -164,6 +164,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\AlignDetectors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.cpp"
 				>
 			</File>
@@ -233,6 +237,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\inc\MantidDataHandling\AlignDetectors.h"
+				>
+			</File>
 			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
 				>
