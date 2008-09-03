@@ -112,6 +112,11 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           idMatching[idFromUser] = parseInfiniteCylinder(pE, primitives, l_id);  
           numPrimitives++;
         }
+        else if ( !primitiveName.compare("cylinder"))
+        {
+          idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
+          numPrimitives++;
+        }
       }
     }
   }
@@ -294,6 +299,93 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
   std::stringstream retAlgebraMatch;
   retAlgebraMatch << "(-" << l_id << ")";
   l_id++;
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'cylinder' element
+ *
+ *  @param pElem XML 'cylinder' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for centre element
+  NodeList* pNL_centre = pElem->getElementsByTagName("centre-of-bottom-base");
+  if ( pNL_centre->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cylinder> element with missing <centre-of-bottom-base> element");
+  }
+  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
+  pNL_centre->release();
+
+  // check for axis element
+  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
+  if ( pNL_axis->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cylinder> element with missing <axis> element");
+  }
+  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
+  pNL_axis->release();
+
+  // check for radius element
+  NodeList* pNL_radius = pElem->getElementsByTagName("radius");
+  if ( pNL_radius->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cylinder> element with missing <radius> element");
+  }
+  Element* pElemRadius = static_cast<Element*>(pNL_radius->item(0)); 
+  pNL_radius->release();
+
+  // check for height element
+  NodeList* pNL_height = pElem->getElementsByTagName("height");
+  if ( pNL_height->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cylinder> element with missing <height> element");
+  }
+  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
+  pNL_height->release();
+
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+
+  // add infinite cylinder
+  Cylinder* pCylinder = new Cylinder();
+  pCylinder->setCentre(parsePosition(pElemCentre));              
+  pCylinder->setNorm(normVec);  
+  pCylinder->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  prim[l_id] = pCylinder;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add top plane
+  Plane* pPlaneTop = new Plane();
+  V3D pointInPlane = parsePosition(pElemCentre);
+  double height = atof( (pElemHeight->getAttribute("val")).c_str() );
+  pointInPlane += (normVec * height); // to get point in top plane
+  pPlaneTop->setPlane(pointInPlane, normVec); 
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom plane
+  Plane* pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(parsePosition(pElemCentre), normVec); 
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
   return retAlgebraMatch.str();
 }
 

@@ -198,6 +198,12 @@ public:
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0.01)) );
     TS_ASSERT( ptrMonitorShape->isValid(V3D(100,100,100)) );
     TS_ASSERT( ptrMonitorShape->isValid(V3D(-200.0,-200.0,-200.1)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(-400.0,-400.0,-400.1)) );
+
+    // test of shape for some detector
+    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(101001));
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,11.1)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,9.1)+ptrDetShape->getPos()) );
 
   }
 
