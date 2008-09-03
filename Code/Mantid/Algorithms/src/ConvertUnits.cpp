@@ -219,8 +219,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
       // Get the sample-detector distance for this detector (in metres)
       const double l2 = detPos.distance(samplePos);
       // The scattering angle for this detector (in radians).
-      //     - this assumes the incident beam comes in along the z axis
-      const double twoTheta = detPos.zenith(samplePos);
+      const double twoTheta = instrument->detectorTwoTheta(specMap->getDetector(spec).get());
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;

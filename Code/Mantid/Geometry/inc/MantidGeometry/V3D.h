@@ -98,6 +98,8 @@ namespace Mantid
       double distance(const V3D&) const;
       // Zenith (theta) angle between this and another vector
       double zenith(const V3D&) const;
+      // Angle between this and another vector
+      double angle(const V3D&) const;
       // Send to a stream
       void printSelf(std::ostream&) const;
       void read(std::istream&);

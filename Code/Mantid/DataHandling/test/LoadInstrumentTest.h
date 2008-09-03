@@ -97,13 +97,13 @@ public:
 
     Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Z(), 10.0,0.01);
 
     Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 12.4470,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d,2.512,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);

@@ -16,6 +16,9 @@ class InstrumentTest : public CxxTest::TestSuite
 public:
   InstrumentTest()
   {
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(0.0,0.0,-10.0);
+    instrument.markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument.markAsSamplePos(sample);
     det = new Detector("det",0);
@@ -91,6 +94,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
     TS_ASSERT_EQUALS( instrument.getDetector(2), d )
     delete d;
+  }
+
+  void testDetectorTwoTheta()
+  {
+    TS_ASSERT_EQUALS( instrument.detectorTwoTheta(det), M_PI/2.0 )
   }
 
   void testCasts()

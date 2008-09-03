@@ -9,7 +9,7 @@
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Detector.h"
 #include <string>
-#include <ostream> 
+#include <ostream>
 
 namespace Mantid
 {
@@ -25,9 +25,9 @@ namespace API
     @date 1/4/2008
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
- 	
+
     This file is part of Mantid.
- 	
+
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
@@ -40,7 +40,7 @@ namespace API
 
     You should have received a copy of the GNU General Public License
  	  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 	
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -58,6 +58,7 @@ public:
   Geometry::ObjComponent* getSource() const;
   Geometry::ObjComponent* getSample() const;
   Geometry::IDetector* getDetector(const int &detector_id) const;
+  const double detectorTwoTheta(const Geometry::IDetector* const) const;
 
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -88,7 +89,7 @@ private:
 
   Geometry::Component* getChild(const std::string& name) const;
 
-  /// Map which holds detector-IDs and pointers to detector components 
+  /// Map which holds detector-IDs and pointers to detector components
   std::map<int, Geometry::IDetector*> _detectorCache;
 
   /// Purpose to hold copy of source component. For now assumed to

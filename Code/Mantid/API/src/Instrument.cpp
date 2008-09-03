@@ -42,6 +42,9 @@ Geometry::ObjComponent* Instrument::getSample() const
 }
 
 /**	Gets a pointer to the detector from its ID
+ *  Note that for getting the detector associated with a spectrum, the SpectraDetectorMap::getDetector
+ *  method should be used rather than this one because it takes account of the possibility of more
+ *  than one detector contibuting to a single spectrum
  *  @param   detector_id The requested detector ID
  *  @returns A pointer to the detector object
  *  @throw   NotFoundError If no detector is found for the detector ID given
@@ -59,6 +62,18 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
   }
 
   return it->second;
+}
+
+/** Returns the 2Theta scattering angle for a detector
+ *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
+ *  @return The scattering angle (0 < theta < pi)
+ */
+const double Instrument::detectorTwoTheta(const Geometry::IDetector* const det) const
+{
+  const Geometry::V3D samplePos = this->getSample()->getPos();
+  const Geometry::V3D beamLine = samplePos - this->getSource()->getPos();
+  const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
+  return sampleDetVec.angle(beamLine);
 }
 
 /**	Gets a pointer to the requested child component

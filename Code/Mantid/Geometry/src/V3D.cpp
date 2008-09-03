@@ -428,6 +428,15 @@ double V3D::zenith(const V3D& v) const
   }
 }
 
+/** Calculates the angle between this and another vector
+ *  \param v The other vector
+ *  \return The angle between the vectors in radians (0 < theta < pi)
+ */
+double V3D::angle(const V3D& v) const
+{
+  return acos( this->scalar_prod(v) / (this->norm() * v.norm()) );
+}
+
 int
 V3D::reBase(const V3D& A,const V3D&B,const V3D& C)
   /*!

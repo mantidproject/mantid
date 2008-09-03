@@ -12,7 +12,7 @@ class V3DTest : public CxxTest::TestSuite
 {
 private:
 
-  Mantid::Geometry::V3D a,b,c;
+  Mantid::Geometry::V3D a,b,c,d;
 
 public:
 	void testEmptyConstructor()
@@ -289,6 +289,18 @@ public:
     TS_ASSERT_DELTA( a.zenith(b), M_PI/4.0, 0.0001 )
     a(1.0,0.0,-1.0);
     TS_ASSERT_DELTA( a.zenith(b), 3.0*M_PI/4.0, 0.0001 )
+	}
+
+	void testAngle()
+	{
+	  a(2.0,0.0,0.0);
+	  b(0.0,1.0,0.0);
+	  c(1.0,1.0,0.0);
+	  d(-1.0,0.0,0.0);
+	  TS_ASSERT_DELTA( a.angle(a), 0.0, 0.0001 )
+	  TS_ASSERT_DELTA( a.angle(b), M_PI/2.0, 0.0001 )
+    TS_ASSERT_DELTA( a.angle(c), M_PI/4.0, 0.0001 )
+    TS_ASSERT_DELTA( a.angle(d), M_PI, 0.0001 )
 	}
 
   void testSpherical()
