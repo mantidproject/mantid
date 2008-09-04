@@ -15,7 +15,7 @@ namespace Mantid
   {
     /** 
     Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a 
-    function: y0+A*sqrt(2/PI)/w*exp(-2*((x-xc)/w)^2).
+    function: y0+A*sqrt(2/PI)/w*exp(-0.5*((x-xc)/w)^2).
 
     Required Properties:
     <UL>

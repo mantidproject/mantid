@@ -109,7 +109,15 @@ void BackToBackExponentialPeakFit::exec()
   const std::vector<double>& YValues = localworkspace->dataY(histNumber);
   const std::vector<double>& YErrors = localworkspace->dataE(histNumber);
 
-  const int numberOfXBins = XValues.size();
+  const int numberOfXBins = YValues.size(); // not cannot ask for size of XValues here 
+                                            // since for histogram it is one bigger than number of data
+  const int sizeX = XValues.size();
+
+  // check if histogram data in which case the midt points of X values will be used further below
+  bool isHistogram = false;
+  if (sizeX == numberOfXBins + 1 )
+    isHistogram = true;
+
   if ( (m_minX < 0) || (m_minX >= numberOfXBins))
   {
     g_log.information("StartX out of range! Set to 0");
@@ -131,7 +139,8 @@ void BackToBackExponentialPeakFit::exec()
 
   FitData l_data;
 
-  l_data.n = m_maxX - m_minX; 
+  l_data.n = m_maxX - m_minX + 1; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19. 
+                                  // The data includes both of these array elements hence the reason for the +1
   l_data.p = 6; // number of gaussian parameters to fit 
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
@@ -139,7 +148,11 @@ void BackToBackExponentialPeakFit::exec()
 
   for (unsigned int i = 0; i < l_data.n; i++)
   {
-    l_data.X[i] = XValues[m_minX+i];
+    if (isHistogram)
+      l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take midt point if histogram data
+    else
+      l_data.X[i] = XValues[m_minX+i];
+
     l_data.Y[i] = YValues[m_minX+i];
     l_data.sigma[i] = YErrors[m_minX+i];
   }

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <numeric>
 #include <math.h>
+#include <iomanip>
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -106,7 +107,16 @@ void GaussLeastSquaresFit::exec()
   const std::vector<double>& YValues = localworkspace->dataY(histNumber);
   const std::vector<double>& YErrors = localworkspace->dataE(histNumber);
 
-  const int numberOfXBins = XValues.size();
+  const int numberOfXBins = YValues.size(); // not cannot ask for size of XValues here 
+                                            // since for histogram it is one bigger than number of data
+  const int sizeX = XValues.size();
+
+  // check if histogram data in which case the midt points of X values will be used further below
+  bool isHistogram = false;
+  if (sizeX == numberOfXBins + 1 )
+    isHistogram = true;
+
+
   if ( (m_minX < 0) || (m_minX >= numberOfXBins))
   {
     g_log.information("StartX out of range! Set to 0");
@@ -115,7 +125,7 @@ void GaussLeastSquaresFit::exec()
 
   if ( m_maxX == 0 ) // if zero assumed that no value has been specified......
   {
-    m_maxX = numberOfXBins - 1;  // -1 since we are counting from 0
+    m_maxX = numberOfXBins - 1;  // -1 since we are counting from 0. Think of m_maxX as an array marker
   }
 
   if ( m_maxX >= numberOfXBins || m_maxX < m_minX)
@@ -128,18 +138,25 @@ void GaussLeastSquaresFit::exec()
 
   FitData l_data;
 
-  l_data.n = m_maxX - m_minX; 
+  l_data.n = m_maxX - m_minX + 1; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19. 
+                                  // The data includes both of these array elements hence the reason for the +1
   l_data.p = 4; // number of gaussian parameters to fit 
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
   l_data.sigma = new double[l_data.n];
 
+
   for (unsigned int i = 0; i < l_data.n; i++)
   {
-    l_data.X[i] = XValues[m_minX+i];
+    if (isHistogram)
+      l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take midt point if histogram data
+    else
+      l_data.X[i] = XValues[m_minX+i];
+
     l_data.Y[i] = YValues[m_minX+i];
     l_data.sigma[i] = YErrors[m_minX+i];
   }
+
 
   // set-up initial guess for fit parameters
 
@@ -188,21 +205,25 @@ void GaussLeastSquaresFit::exec()
   }
   while (status == GSL_CONTINUE && iter < maxInterations);
 
-  //gsl_multifit_covar(s->J, 0.0, covar);
+  gsl_matrix *covar = gsl_matrix_alloc(l_data.p, l_data.p);
+  gsl_multifit_covar(s->J, 0.0, covar);
 
   // Output summary to log file
   
   double chi = gsl_blas_dnrm2(s->f);
+
   double dof = l_data.n - l_data.p;
 
   std::string fisse = gsl_strerror(status);
 
-  g_log.information() << "Attempt to fit: y0+A*sqrt(2/PI)/w*exp(-2*((x-xc)/w)^2)\n" <<
+  g_log.information() << "Attempt to fit: y0+A*sqrt(2/PI)/w*exp(-0.5*((x-xc)/w)^2)\n" <<
     "Iteration = " << iter << "\n" <<
     "Status = " << gsl_strerror(status) << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
-    "y0 = " << gsl_vector_get(s->x,0) << "; A = " << gsl_vector_get(s->x,1) <<
-    "; xc = " << gsl_vector_get(s->x,2) << "; w = " << gsl_vector_get(s->x,3) << "\n";
+    "y0 = " << std::setprecision(10) << gsl_vector_get(s->x,0) << 
+    "; A = " << std::setprecision(10) << gsl_vector_get(s->x,1) <<
+    "; xc = " << std::setprecision(10) << gsl_vector_get(s->x,2) << 
+    "; w = " << std::setprecision(10) << gsl_vector_get(s->x,3) << "\n";
 
 
   // also output summary to properties...

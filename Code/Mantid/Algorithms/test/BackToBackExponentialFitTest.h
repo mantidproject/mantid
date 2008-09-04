@@ -63,9 +63,9 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 11.11,0.1);
+    TS_ASSERT_DELTA( dummy, 20.9,0.1);
     dummy = alg.getProperty("Output I");
-    TS_ASSERT_DELTA( dummy, 294.67 ,0.1);
+    TS_ASSERT_DELTA( dummy, 295.22 ,0.1);
     dummy = alg.getProperty("Output a");
     TS_ASSERT_DELTA( dummy, 2.477 ,0.1);
     dummy = alg.getProperty("Output b");
