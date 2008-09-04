@@ -3,7 +3,7 @@
 #include <QtGui>
 #include <qfiledialog.h>
 
-#include "loadDAEDlg.h"
+#include "LoadDAEDlg.h"
 
 loadDAEDlg::loadDAEDlg(QWidget *parent) : QDialog(parent), m_hostName(""), m_workspaceName(""),m_spectrum_min(""),m_spectrum_max(""),m_spectrum_list(""),
 m_updateInterval(0)
