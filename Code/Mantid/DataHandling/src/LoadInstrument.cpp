@@ -200,6 +200,8 @@ void LoadInstrument::exec()
 
   pNL_comp->release();
   pDoc->release();
+  // Don't need this anymore (if it was even used) so empty it out to save memory
+  m_tempPosHolder.clear();
 
   return;
 }
@@ -415,28 +417,28 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
     if ( m_deltaOffsets )
     {
-      // In this vase, locations given are radial offsets to the (radial) position of the parent,
+      // In this case, locations given are radial offsets to the (radial) position of the parent,
       // so need to do some extra calculation before they're stored internally as x,y,z offsets.
 
-      double parent_r=0.0, parent_t=0.0, parent_p=0.0;
-      // Get the parent's absolute position (if the component has a parent)
+      // Temporary vector to hold the parent's absolute position (will be 0,0,0 if no parent)
       Geometry::V3D parentPos;
+      // Get the parent's absolute position (if the component has a parent)
       if ( comp->getParent() )
       {
-        parentPos = comp->getParent()->getPos();
-        // and get it in terms of spherical coordinates
-        parentPos.getSpherical(parent_r, parent_t, parent_p);
+        SphVec parent = m_tempPosHolder[comp->getParent()];
+        // Add to the current component to get its absolute position
+        R     += parent.r;
+        theta += parent.theta;
+        phi   += parent.phi;
+        // Set the temporary V3D with the parent's absolute position
+        parentPos.spherical(parent.r,parent.theta,parent.phi);
       }
-      // Add the offsets to the parent's position to get absolute values for the child
-      R += parent_r;
-      theta += parent_t;
-      phi += parent_p;
 
-      // Heinous workaround for situation when a parent object has a phi value but a theta of zero
-      //       Sets theta to a very small number
-      //       (without this the phi is lost in the internal conversion to cartesian coordinates)
-      /// @todo Find a more satisfactory way of solving this problem
-      if ( theta == 0.0 && phi != 0.0 ) theta = 0.0001;
+      // Create a temporary vector that holds the absolute r,theta,phi position
+      // Needed to make things work in situation when a parent object has a phi value but a theta of zero
+      SphVec tmp(R,theta,phi);
+      // Add it to the map with the pointer to the Component object as key
+      m_tempPosHolder[comp] = tmp;
 
       // Create a V3D and set its position to be the child's absolute position
       Geometry::V3D absPos;

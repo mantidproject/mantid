@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <set>
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -13,7 +12,7 @@
 /// @cond Exclude from doxygen documentation
 namespace Poco {
 namespace XML {
-	class Element;
+  class Element;
 }}
 /// @endcond
 
@@ -22,13 +21,13 @@ namespace Mantid
 
 namespace Geometry
 {
-	class CompAssembly;
-	class Component;
+  class CompAssembly;
+  class Component;
   class Object;
 }
 namespace API
 {
-	class Instrument;
+  class Instrument;
 }
 
   namespace DataHandling
@@ -41,8 +40,7 @@ namespace API
     LoadInstrument is intended to be used as a child algorithm of
     other Loadxxx algorithms, rather than being used directly.
     LoadInstrument is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec()  methods.
+    from the Algorithm class and overrides the init() & exec()  methods.
 
     Required Properties:
     <UL>
@@ -143,6 +141,21 @@ namespace API
       /// Flag to indicate whether offsets given in spherical coordinates are to be added to the current
       /// position (true) or are a vector from the current position (false, default)
       bool m_deltaOffsets;
+
+      /** Stripped down vector that holds position in terms of spherical coordinates,
+       *  Needed when processing instrument definition files that use the 'Ariel format'
+       */
+      struct SphVec
+      {
+        ///@cond Exclude from doxygen documentation
+        double r,theta,phi;
+        SphVec() : r(0.0), theta(0.0), phi(0.0) {}
+        SphVec(const double& r, const double& theta, const double& phi) : r(r), theta(theta), phi(phi) {}
+        ///@endcond
+      };
+
+      /// Map to store positions of parent components in spherical coordinates
+      std::map<const Geometry::Component*,SphVec> m_tempPosHolder;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
