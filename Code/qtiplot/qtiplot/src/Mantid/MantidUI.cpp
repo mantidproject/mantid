@@ -6,6 +6,7 @@
 #include "LoadDAEDlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "ExecuteAlgorithm.h"
+#include "AlgMonitor.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 
@@ -71,14 +72,17 @@ m_errorObserver(*this, &MantidUI::handleAlgorithmErrorNotification)
     connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
     connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
     connect(this,SIGNAL(needToUpdateProgressDialog(int)),this,SLOT(updateProgressDialog(int)));
-    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix()),this,SLOT(createLoadDAEMantidMatrix()));
+    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::Algorithm*)));
+    connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
+
+    m_algMonitor = new AlgorithmMonitor(this);
+    connect(m_algMonitor,SIGNAL(countChanged(int)),m_exploreAlgorithms,SLOT(countChanged(int)));
 
 }
 
 void MantidUI::init()
 {
     FrameworkManager::Instance();
-//    MantidLog::connect(appWindow());
     MantidLog::connect(aw_results);
 
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
@@ -98,7 +102,7 @@ void MantidUI::init()
 
 MantidUI::~MantidUI()
 {
-    cerr<<"MantidUI finished\n";
+    //delete m_algMonitor;
 }
 
 QStringList MantidUI::getWorkspaceNames()
@@ -191,12 +195,14 @@ void MantidUI::loadDAEWorkspace()
 		        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
             }
 
-            m_DAE_WorkspaceName = dlg->getWorkspaceName();
-            m_DAE_HostName = dlg->getHostName();
-            m_DAE_SpectrumMin = dlg->getSpectrumMin();
-            m_DAE_SpectrumMax = dlg->getSpectrumMax();
-            m_DAE_SpectrumList = dlg->getSpectrumList();
-            m_DAE_UpdateInterval = dlg->updateInterval();
+            DAEstruct dae;
+            dae.m_WorkspaceName = dlg->getWorkspaceName();
+            dae.m_HostName = dlg->getHostName();
+            dae.m_SpectrumMin = dlg->getSpectrumMin();
+            dae.m_SpectrumMax = dlg->getSpectrumMax();
+            dae.m_SpectrumList = dlg->getSpectrumList();
+            dae.m_UpdateInterval = dlg->updateInterval();
+            m_DAE_map[alg] = dae;
 		    
             alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
             executeAlgorithmAsync(alg);
@@ -541,8 +547,18 @@ void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
     QList<QTreeWidgetItem*> items = m_exploreAlgorithms->m_tree->selectedItems();
     if (items.size() == 0 || items[0]->parent() == 0) 
     {
-        algName = "";
-        version = 0;
+        int i = m_exploreAlgorithms->m_findAlg->currentIndex();
+        QString itemText = m_exploreAlgorithms->m_findAlg->itemText(i);
+        if (i < 0 || itemText != m_exploreAlgorithms->m_findAlg->currentText())
+        {
+            algName = "";
+            version = 0;
+        }
+        else
+        {
+            algName = itemText;
+            version = -1;
+        }
     }
     else
     {
@@ -578,34 +594,51 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 		dlg->CreateLayout(alg);
 		dlg->setModal(true);
 	
-		dlg->exec();	
-		
-        executeAlgorithmAsync(alg);
-        //alg->execute();
+		if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
 	}
 }
 
-Poco::ActiveResult<bool> MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg)
+void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg)
 {
-    m_progressDialog = new QProgressDialog("Algorithm Execution","Cancel",0,100,appWindow());
-    m_progressDialog->setWindowModality(Qt::WindowModal);
+    m_progressDialog = new ProgressDlg(appWindow());
+    //m_progressDialog->setWindowModality(Qt::WindowModal);
     connect(m_progressDialog,SIGNAL(canceled()),this,SLOT(cancelAsyncAlgorithm()));
+    connect(m_progressDialog,SIGNAL(toBackground()),this,SLOT(backgroundAsyncAlgorithm()));
+    connect(m_progressDialog,SIGNAL(rejected()),this,SLOT(backgroundAsyncAlgorithm()));
     alg->notificationCenter.addObserver(m_finishedObserver);
     alg->notificationCenter.addObserver(m_progressObserver);
+    alg->notificationCenter.addObserver(m_errorObserver);
     m_algAsync = alg;
-    return alg->executeAsync();
+    m_algMonitor->add(alg);
+    try
+    {
+        alg->executeAsync();
+        m_progressDialog->exec();
+    }
+    catch(...)
+    {
+        QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
+    }
 }
 
 void MantidUI::cancelAsyncAlgorithm()
 {
+    if (m_algAsync)
+    {
+        m_algAsync->cancel();
+    }
+    m_algAsync = 0;
     closeProgressDialog();
-    if (m_algAsync) m_algAsync->cancel();
+}
+
+void MantidUI::backgroundAsyncAlgorithm()
+{
+    closeProgressDialog();
     m_algAsync = 0;
 }
 
 void MantidUI::tst()
 {
-//    cerr<<"\n\n\n";
     QWidget* m = (QWidget*)appWindow()->activeWindow();
     if (!m) return;
     if (m->isA("MantidMatrix"))
@@ -628,14 +661,13 @@ void MantidUI::closeProgressDialog()
     if (m_progressDialog) 
     {
         m_progressDialog->close();
-        //delete m_progressDialog;
         m_progressDialog = 0;
     }
 }
 
 void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
-    m_algAsync = 0;
+    if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
     emit needToUpdateProgressDialog(100);
     emit needToCloseProgressDialog();
     emit needsUpdating();
@@ -643,19 +675,24 @@ void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::A
 
 void MantidUI::handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf)
 {
-    m_algAsync = 0;
+    if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
     emit needToCloseProgressDialog();
     emit needsUpdating();
+    if (pNf->what != "Algorithm terminated")
+        emit needToShowCritical("Error in algorithm: "+QString::fromStdString(pNf->what));
 }
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
-    emit needToCreateLoadDAEMantidMatrix();
+    emit needToCreateLoadDAEMantidMatrix(pNf->algorithm());
 }
 
-void MantidUI::createLoadDAEMantidMatrix()
+void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::Algorithm* alg)
 {
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(m_DAE_WorkspaceName.toStdString());
+    QMap<const Mantid::API::Algorithm*,DAEstruct>::iterator dae = m_DAE_map.find(alg);
+    if (dae == m_DAE_map.end()) return;
+
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(dae->m_WorkspaceName.toStdString());
 
     if (ws.use_count() == 0)
     {
@@ -665,18 +702,18 @@ void MantidUI::createLoadDAEMantidMatrix()
 	    return;
     }
 
-    MantidMatrix *m = importWorkspace(m_DAE_WorkspaceName,false);
-    m->DAEname(m_DAE_HostName);
+    MantidMatrix *m = importWorkspace(dae->m_WorkspaceName,false);
+    m->DAEname(dae->m_HostName);
     bool allAvailableSpectraLoaded = true;
-    if ( !m_DAE_SpectrumMin.isEmpty() && !m_DAE_SpectrumMax.isEmpty() )
+    if ( !dae->m_SpectrumMin.isEmpty() && !dae->m_SpectrumMax.isEmpty() )
     {
-        m->spectrumMin(m_DAE_SpectrumMin.toInt());
-        m->spectrumMax(m_DAE_SpectrumMax.toInt());
+        m->spectrumMin(dae->m_SpectrumMin.toInt());
+        m->spectrumMax(dae->m_SpectrumMax.toInt());
         allAvailableSpectraLoaded = false;
     }
-    if ( !m_DAE_SpectrumList.isEmpty() )
+    if ( !dae->m_SpectrumList.isEmpty() )
     {
-        m->spectrumList(m_DAE_SpectrumList);
+        m->spectrumList(dae->m_SpectrumList);
         allAvailableSpectraLoaded = false;
     }
 
@@ -686,19 +723,23 @@ void MantidUI::createLoadDAEMantidMatrix()
         m->spectrumMax(ws->getNumberHistograms());
     }
 
-    if (m_DAE_UpdateInterval > 0) m->canUpdateDAE(true,m_DAE_UpdateInterval);
+    if (dae->m_UpdateInterval > 0) m->canUpdateDAE(true,dae->m_UpdateInterval);
 
-    //update();
-
-    m_DAE_WorkspaceName = "";
-    m_DAE_HostName = "";
-    m_DAE_SpectrumMin = "";
-    m_DAE_SpectrumMax = "";
-    m_DAE_SpectrumList = "";
-    m_DAE_UpdateInterval = 0;
+    m_DAE_map.erase(dae);
 }
 
 void MantidUI::handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
 {
-    emit needToUpdateProgressDialog( int(pNf->progress*100) );
+    if (m_algAsync == pNf->algorithm())
+        emit needToUpdateProgressDialog( int(pNf->progress*100) );
+}
+
+void MantidUI::showCritical(const QString& text)
+{
+    QMessageBox::critical(appWindow(),"Mantid - Error",text);
+}
+
+void MantidUI::showAlgMonitor()
+{
+    m_algMonitor->showDialog();
 }

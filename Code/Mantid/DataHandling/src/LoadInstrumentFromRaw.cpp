@@ -52,12 +52,11 @@ void LoadInstrumentFromRaw::exec()
 
   // open raw file
   ISISRAW iraw(NULL);
-  if (iraw.readFromFile(m_filename.c_str()) != 0)
+  if (iraw.readFromFile(m_filename.c_str(),false) != 0)
   {
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
-
   // Get reference to Instrument and set its name
   boost::shared_ptr<API::Instrument> instrument = (localWorkspace->getInstrument());
   instrument->setName(iraw.i_inst);

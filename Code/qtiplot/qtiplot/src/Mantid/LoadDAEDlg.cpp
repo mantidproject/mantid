@@ -55,6 +55,7 @@ m_updateInterval(0)
     updateLayout->addWidget(label);
     paramsLayout->addLayout(updateLayout,5,1);
     connect(updateCheck,SIGNAL(stateChanged(int)),this,SLOT(changeUpdateState(int)));
+    connect(updateLineEdit,SIGNAL(textEdited(const QString & )),this,SLOT(updateIntervalEntered(const QString &)));
 
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -89,7 +90,13 @@ void loadDAEDlg::load()
 
 void loadDAEDlg::changeUpdateState(int state)
 {
-    if (state == Qt::Checked) updateLineEdit->setReadOnly(false);
+    if (state == Qt::Checked && updateLineEdit->text().isEmpty()) updateLineEdit->setText("10");
+}
+
+void loadDAEDlg::updateIntervalEntered(const QString & text )
+{
+    if (!text.isEmpty())
+        updateCheck->setCheckState(Qt::Checked);
     else
-        updateLineEdit->setReadOnly(true);
+        updateCheck->setCheckState(Qt::Unchecked);
 }

@@ -3,6 +3,7 @@
 
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
+#include "ProgressDlg.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -16,12 +17,14 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QProgressDialog>
+#include <QMap>
 
 class Graph3D;
 class ScriptingEnv;
 class MantidMatrix;
 class MantidDockWidget;
 class AlgorithmDockWidget;
+class AlgorithmMonitor;
 
 using namespace Mantid::API;
 
@@ -80,7 +83,8 @@ signals:
     void needsUpdating();
     void needToCloseProgressDialog();
     void needToUpdateProgressDialog(int ip);
-    void needToCreateLoadDAEMantidMatrix();
+    void needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
+    void needToShowCritical(const QString&);
 
 public slots:
 
@@ -102,9 +106,12 @@ public slots:
     void closeProgressDialog();
     void updateProgressDialog(int ip);
     void cancelAsyncAlgorithm();
-    void createLoadDAEMantidMatrix();
+    void backgroundAsyncAlgorithm();
+    void createLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
+    void showCritical(const QString&);
+    void showAlgMonitor();
 public:
-    Poco::ActiveResult<bool> executeAlgorithmAsync(Mantid::API::Algorithm* alg);
+    void executeAlgorithmAsync(Mantid::API::Algorithm* alg);
 
     void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
@@ -119,7 +126,8 @@ public:
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
     ApplicationWindow *m_appWindow;
-    QMdiArea *d_workspace;// ApplicationWindow's private member
+    // ApplicationWindow's private members
+    QMdiArea *d_workspace;
     QMenuBar *aw_menuBar;
     QMenu *aw_plot2DMenu, *aw_plot3DMenu;
     QToolBar *aw_plotMatrixBar;
@@ -137,16 +145,22 @@ public:
     QAction *actionToggleAlgorithms;
     QAction *actionCopyDetectorsToTable;
 
-    QProgressDialog *m_progressDialog;   //< Progress of algorithm run asynchronously
-    Mantid::API::Algorithm* m_algAsync;  //< asynchronously running algorithm. Zero if no algorithm is running
+    AlgorithmMonitor *m_algMonitor;
+
+    ProgressDlg *m_progressDialog;   //< Progress of algorithm running asynchronously
+    Mantid::API::Algorithm* m_algAsync;  //< asynchronously running algorithm. Zero if there are no running algorithms
 
     // Variables to hold DAE parameters while LoadDAE is running asynchronously
-    QString m_DAE_WorkspaceName;
-    QString m_DAE_HostName;
-    QString m_DAE_SpectrumMin;
-    QString m_DAE_SpectrumMax;
-    QString m_DAE_SpectrumList;
-    int m_DAE_UpdateInterval;
+    struct DAEstruct
+    {
+        QString m_WorkspaceName;
+        QString m_HostName;
+        QString m_SpectrumMin;
+        QString m_SpectrumMax;
+        QString m_SpectrumList;
+        int m_UpdateInterval;
+    };
+    QMap<const Mantid::API::Algorithm*,DAEstruct> m_DAE_map;
 
 
 };

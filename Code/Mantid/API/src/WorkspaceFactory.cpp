@@ -144,6 +144,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
 
       ws = this->create("ManagedWorkspace2D");
       g_log.information("Created a ManagedWorkspace2D");
+      g_log.information()<<"Full size of the workspace is "<<wsSize*sizeof(double)<<" KB\n";
   }
   else
   {

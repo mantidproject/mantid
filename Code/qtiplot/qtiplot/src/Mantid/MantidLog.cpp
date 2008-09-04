@@ -4,6 +4,7 @@
 /// Posts message text to QtiPlot Result Log
 void MantidLog::log(const Poco::Message& msg)
 {
+    s_mutex.lock();
     QString str = msg.getText().c_str();
     if (s_appWin)
         s_appWin->updateLog(str+"\n");
@@ -18,8 +19,10 @@ void MantidLog::log(const Poco::Message& msg)
         cur.movePosition(QTextCursor::End);
         s_logEdit->setTextCursor(cur);
     }
+    s_mutex.unlock();
 }
 
 boost::shared_ptr<MantidLog> MantidLog::s_Instance;
 ApplicationWindow* MantidLog::s_appWin = 0; 
 QTextEdit* MantidLog::s_logEdit = 0; 
+QMutex MantidLog::s_mutex;

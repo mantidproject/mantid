@@ -143,7 +143,7 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	
 	setLayout(mainLay);
 	
-	setWindowTitle(tr("Enter properties"));
+    setWindowTitle(tr("Enter properties - "+QString::fromStdString(alg->name())));
 	setFixedHeight(sizeHint().height());
 	
 	setPropertiesAndValidate();

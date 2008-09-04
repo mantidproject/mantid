@@ -11,6 +11,7 @@
 #include <QMap>
 #include <QMenu>
 #include <QAction>
+#include <QLineEdit>
 
 #include <map>
 #include <iostream>
@@ -123,6 +124,16 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
 
 //-------------------- AlgorithmDockWidget ----------------------//
 
+void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Return)
+    {
+        if (currentIndex() >= 0) emit enterPressed();
+        return;
+    }
+    QComboBox::keyPressEvent(e);
+}
+
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w)
 {
@@ -137,23 +148,37 @@ QDockWidget(w)
 
     m_tree = new AlgorithmTreeWidget(f,mui);
     m_tree->setHeaderLabel("Algorithms");
+    connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 
     QHBoxLayout * buttonLayout = new QHBoxLayout();
     QPushButton *execButton = new QPushButton("Execute");
-    QPushButton *refreshButton = new QPushButton("Refresh");
+    m_findAlg = new FindAlgComboBox;
+    m_findAlg->setEditable(true);
+    connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),this,SLOT(findAlgTextChanged(const QString&)));
+    connect(m_findAlg,SIGNAL(enterPressed()),m_mantidUI,SLOT(executeAlgorithm()));
+    connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
 
     buttonLayout->addWidget(execButton);
-    buttonLayout->addWidget(refreshButton);
+    buttonLayout->addWidget(m_findAlg);
     buttonLayout->addStretch();
+
+    QHBoxLayout * runningLayout = new QHBoxLayout();
+    m_runningAlgsLabel = new QLabel("Running 0");
+    QPushButton *runningButton = new QPushButton("Details");
+    runningLayout->addWidget(m_runningAlgsLabel);
+    runningLayout->addStretch();
+    runningLayout->addWidget(runningButton);
+    connect(runningButton,SIGNAL(clicked()),m_mantidUI,SLOT(showAlgMonitor()));
     //
     QVBoxLayout * layout = new QVBoxLayout();
     f->setLayout(layout);
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
+    layout->addLayout(runningLayout);
     //
-    connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
-    //connect(refreshButton,SIGNAL(clicked()),this,SLOT(update()));
-    connect(refreshButton,SIGNAL(clicked()),m_mantidUI,SLOT(tst()));
+
+    m_treeChanged = false;
+    m_findAlgChanged = false;
 
     setWidget(f);
     update();
@@ -169,6 +194,11 @@ bool Algorithm_descriptor_less(const Algorithm_descriptor& d1,const Algorithm_de
     return false;
 }
 
+bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
+{
+    return d1.name < d2.name;
+}
+
 void AlgorithmDockWidget::update()
 {
     m_tree->clear();
@@ -180,6 +210,15 @@ void AlgorithmDockWidget::update()
     Algorithm_descriptor desc1 = {"Divide","General",7};
     names.push_back(desc);
     names.push_back(desc1);*/
+
+    sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
+
+    m_findAlg->clear();
+    for(AlgNamesType::const_iterator i=names.begin();i!=names.end();i++)
+    {
+        m_findAlg->addItem(QString::fromStdString(i->name));
+    }
+    m_findAlg->setCurrentIndex(-1);
 
     sort(names.begin(),names.end(),Algorithm_descriptor_less);
 
@@ -210,10 +249,48 @@ void AlgorithmDockWidget::update()
     }
 }
 
+void AlgorithmDockWidget::findAlgTextChanged(const QString& text)
+{
+    int i = m_findAlg->findText(text,Qt::MatchFixedString);
+    if (i >= 0) m_findAlg->setCurrentIndex(i);
+    if (!m_treeChanged) 
+    {
+        m_findAlgChanged = true;
+        selectionChanged(text);
+    }
+}
+
+void AlgorithmDockWidget::treeSelectionChanged()
+{
+    QString algName;
+    int version;
+    m_mantidUI->getSelectedAlgorithm(algName,version);
+    if (!m_findAlgChanged)
+    {
+        m_treeChanged = true;
+        selectionChanged(algName);
+    }
+}
+
+void AlgorithmDockWidget::selectionChanged(const QString& algName)
+{
+    if (m_treeChanged) m_findAlg->setCurrentIndex(m_findAlg->findText(algName,Qt::MatchFixedString));
+    if (m_findAlgChanged) m_tree->setCurrentIndex(QModelIndex());
+    m_treeChanged = false;
+    m_findAlgChanged = false;
+}
+
+void AlgorithmDockWidget::countChanged(int n)
+{
+    m_runningAlgsLabel->setText("Running "+QString::number(n));
+    repaint();
+}
+
 void AlgorithmDockWidget::tst()
 {
     MemoryManager::Instance().getMemoryInfo();
 }
+
 //-------------------- AlgorithmTreeWidget ----------------------//
 
 void AlgorithmTreeWidget::mousePressEvent (QMouseEvent *e)

@@ -97,32 +97,42 @@ class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManager
 {
 public:
 
-    class StartedNotification: public Poco::Notification
+    class AlgorithmNotification: public Poco::Notification
     {
     public:
+        AlgorithmNotification(Algorithm* alg):Poco::Notification(),m_algorithm(alg){}
+        const Algorithm *algorithm()const{return m_algorithm;}
+    private:
+        Algorithm *m_algorithm;
+    };
+
+    class StartedNotification: public AlgorithmNotification
+    {
+    public:
+        StartedNotification(Algorithm* alg):AlgorithmNotification(alg){}
         virtual std::string name() const{return "StartedNotification";}
     };
 
-    class FinishedNotification: public Poco::Notification
+    class FinishedNotification: public AlgorithmNotification
     {
     public:
-        FinishedNotification(bool res):Poco::Notification(),success(res){}
+        FinishedNotification(Algorithm* alg, bool res):AlgorithmNotification(alg),success(res){}
         virtual std::string name() const{return "FinishedNotification";}
         bool success;
     };
 
-    class ProgressNotification: public Poco::Notification
+    class ProgressNotification: public AlgorithmNotification
     {
     public:
-        ProgressNotification(double p):Poco::Notification(),progress(p){}
+        ProgressNotification(Algorithm* alg, double p):AlgorithmNotification(alg),progress(p){}
         virtual std::string name() const{return "ProgressNotification";}
         double progress;
     };
 
-    class ErrorNotification: public Poco::Notification
+    class ErrorNotification: public AlgorithmNotification
     {
     public:
-        ErrorNotification(const std::string& str):Poco::Notification(),what(str){}
+        ErrorNotification(Algorithm* alg, const std::string& str):AlgorithmNotification(alg),what(str){}
         virtual std::string name() const{return "ErrorNotification";}
         std::string what;
     };

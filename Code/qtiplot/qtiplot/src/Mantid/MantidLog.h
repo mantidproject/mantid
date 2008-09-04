@@ -4,6 +4,8 @@
 #include "AbstractMantidLog.h"
 #include <boost/shared_ptr.hpp>
 
+#include <QMutex>
+
 class ApplicationWindow;
 class QTextEdit;
 
@@ -49,6 +51,7 @@ private:
     static boost::shared_ptr<MantidLog> s_Instance;
     static ApplicationWindow* s_appWin;
     static QTextEdit* s_logEdit;
+    static QMutex s_mutex;
 
 };
 

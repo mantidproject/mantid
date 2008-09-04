@@ -4,9 +4,11 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QPushButton>
+#include <QComboBox>
 
 class MantidUI;
 class ApplicationWindow;
+class QLabel;
 
 class MantidDockWidget: public QDockWidget
 {
@@ -38,6 +40,15 @@ private:
     QPoint m_dragStartPosition;
 };
 
+class FindAlgComboBox:public QComboBox
+{
+    Q_OBJECT
+signals:
+    void enterPressed();
+protected:
+    void keyPressEvent(QKeyEvent *e);
+};
+
 class AlgorithmDockWidget: public QDockWidget
 {
     Q_OBJECT
@@ -45,9 +56,17 @@ public:
     AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w);
 public slots:
     void update();
+    void findAlgTextChanged(const QString& text);
+    void treeSelectionChanged();
+    void selectionChanged(const QString& algName);
+    void countChanged(int n);
     void tst();
 protected:
     QTreeWidget *m_tree;
+    FindAlgComboBox* m_findAlg;
+    QLabel *m_runningAlgsLabel;
+    bool m_treeChanged;
+    bool m_findAlgChanged;
     friend class MantidUI;
 private:
     MantidUI *m_mantidUI;

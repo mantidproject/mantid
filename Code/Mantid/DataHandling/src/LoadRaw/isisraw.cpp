@@ -472,6 +472,14 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 		{
 		    ndes = ndata = 0;
 		    dat1 = NULL;
+            // seek to position right after the data if we want to read the log
+            if (from_file)
+            {
+                ndes = t_nper * (t_nsp1+1);
+                ioRAW(file, &ddes, ndes, from_file);
+                for(i=0; i<ndes; i++)
+                    fseek(file,4*ddes[i].nwords,SEEK_CUR);
+            }
 		}
 		else if (dhdr.d_comp == 0)
 		{

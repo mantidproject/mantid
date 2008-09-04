@@ -31,6 +31,7 @@ protected:
 private slots:
 	void load();
     void changeUpdateState(int);
+    void updateIntervalEntered(const QString & text );
 
 private:
 	QString m_hostName;

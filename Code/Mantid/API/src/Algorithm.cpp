@@ -116,15 +116,18 @@ bool Algorithm::execute()
       setExecuted(true);
       if (!m_isChildAlgorithm) g_log.information() << "Algorithm successful, Duration "
                                      << double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
+      m_children.clear();
     }
     catch(std::runtime_error& ex)
     {
+      m_children.clear();
       g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
     }
     catch(std::logic_error& ex)
     {
+      m_children.clear();
       g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
@@ -348,15 +351,15 @@ bool Algorithm::executeAsyncImpl(const int&)
     try
     {
         m_runningAsync = true;
-        notificationCenter.postNotification(new StartedNotification());
+        notificationCenter.postNotification(new StartedNotification(this));
         bool res = execute();
-        notificationCenter.postNotification(new FinishedNotification(res));
+        notificationCenter.postNotification(new FinishedNotification(this,res));
         m_runningAsync = false;
         return res;
     }
     catch(std::exception& e)
     {
-        notificationCenter.postNotification(new ErrorNotification(e.what()));
+        notificationCenter.postNotification(new ErrorNotification(this,e.what()));
     }
     return false;
 }
@@ -370,7 +373,7 @@ void Algorithm::cancel()
 
 void Algorithm::progress(double p)
 {
-    notificationCenter.postNotification(new ProgressNotification(p));
+    notificationCenter.postNotification(new ProgressNotification(this,p));
 }
 
 void Algorithm::interruption_point()

@@ -315,7 +315,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidLog.h \
 	    src/Mantid/MantidUI.h \
 	    src/Mantid/MantidMatrix.h \
-	    src/Mantid/MantidDock.h 
+	    src/Mantid/MantidDock.h \
+	    src/Mantid/AlgMonitor.h \
+	    src/Mantid/ProgressDlg.h 
 
 ###################### FORMS ##############################################
 
@@ -448,7 +450,10 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/MantidLog.cpp \
 	    src/Mantid/MantidUI.cpp \
 	    src/Mantid/MantidMatrix.cpp \
-	    src/Mantid/MantidDock.cpp 
+	    src/Mantid/MantidDock.cpp \
+	    src/Mantid/AlgMonitor.cpp \
+	    src/Mantid/ProgressDlg.cpp 
+
 
 ###############################################################
 ##################### Compression (zlib123) ###################
