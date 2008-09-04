@@ -117,6 +117,11 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
           numPrimitives++;
         }
+        else if ( !primitiveName.compare("cuboid"))
+        {
+          idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);  
+          numPrimitives++;
+        }
       }
     }
   }
@@ -384,6 +389,122 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   pPlaneBottom->setPlane(parsePosition(pElemCentre), normVec); 
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'cuboid' element
+ *
+ *  @param pElem XML 'cuboid' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for left-front-bottom-point element
+  NodeList* pNL_lfb = pElem->getElementsByTagName("left-front-bottom-point");
+  if ( pNL_lfb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cuboid> element with missing <left-front-bottom-point> element");
+  }
+  Element* pElem_lfb = static_cast<Element*>(pNL_lfb->item(0)); 
+  pNL_lfb->release();
+
+  // check for left-front-top-point element
+  NodeList* pNL_lft = pElem->getElementsByTagName("left-front-top-point");
+  if ( pNL_lft->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cuboid> element with missing <left-front-top-point> element");
+  }
+  Element* pElem_lft = static_cast<Element*>(pNL_lft->item(0)); 
+  pNL_lft->release();
+
+  // check for left-back-bottom-point element
+  NodeList* pNL_lbb = pElem->getElementsByTagName("left-back-bottom-point");
+  if ( pNL_lbb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cuboid> element with missing <left-back-bottom-point> element");
+  }
+  Element* pElem_lbb = static_cast<Element*>(pNL_lbb->item(0)); 
+  pNL_lbb->release();
+
+  // check for right-front-bottom-point element
+  NodeList* pNL_rfb = pElem->getElementsByTagName("right-front-bottom-point");
+  if ( pNL_rfb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cuboid> element with missing <right-front-bottom-point> element");
+  }
+  Element* pElem_rfb = static_cast<Element*>(pNL_rfb->item(0)); 
+  pNL_rfb->release();
+
+
+  V3D lfb = parsePosition(pElem_lfb);  // left front bottom
+  V3D lft = parsePosition(pElem_lft);  // left front top
+  V3D lbb = parsePosition(pElem_lbb);  // left back bottom
+  V3D rfb = parsePosition(pElem_rfb);  // right front bottom
+
+  V3D pointTowardBack = lbb-lfb;
+  pointTowardBack.normalize();
+
+  // add front plane cutoff
+  Plane* pPlaneFrontCutoff = new Plane();
+  pPlaneFrontCutoff->setPlane(lfb, pointTowardBack); 
+  prim[l_id] = pPlaneFrontCutoff;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << " ";
+  l_id++;
+
+  // add back plane cutoff
+  Plane* pPlaneBackCutoff = new Plane();
+  pPlaneBackCutoff->setPlane(lbb, pointTowardBack); 
+  prim[l_id] = pPlaneBackCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+
+  V3D pointTowardRight = rfb-lfb;
+  pointTowardRight.normalize();
+
+  // add left plane cutoff
+  Plane* pPlaneLeftCutoff = new Plane();
+  pPlaneLeftCutoff->setPlane(lfb, pointTowardRight); 
+  prim[l_id] = pPlaneLeftCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add right plane cutoff
+  Plane* pPlaneRightCutoff = new Plane();
+  pPlaneRightCutoff->setPlane(rfb, pointTowardRight); 
+  prim[l_id] = pPlaneRightCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+
+  V3D pointTowardTop = lft-lfb;
+  pointTowardTop.normalize();
+
+  // add bottom plane cutoff
+  Plane* pPlaneBottomCutoff = new Plane();
+  pPlaneBottomCutoff->setPlane(lfb, pointTowardTop); 
+  prim[l_id] = pPlaneBottomCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add top plane cutoff
+  Plane* pPlaneTopCutoff = new Plane();
+  pPlaneTopCutoff->setPlane(lft, pointTowardTop); 
+  prim[l_id] = pPlaneTopCutoff;
+  retAlgebraMatch << "-" << l_id << ")";
   l_id++;
 
   return retAlgebraMatch.str();

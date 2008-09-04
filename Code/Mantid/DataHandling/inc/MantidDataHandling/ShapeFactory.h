@@ -80,6 +80,9 @@ namespace Mantid
       /// Parse XML 'cylinder' element
       std::string parseCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
+      /// Parse XML 'cuboid' element
+      std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);
 

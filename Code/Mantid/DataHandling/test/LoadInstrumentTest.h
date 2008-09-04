@@ -191,20 +191,20 @@ public:
     // test if shape on for 1st monitor
     Detector *ptrMonitorShape = dynamic_cast<Detector*>(i->getDetector(611));
     TS_ASSERT( ptrMonitorShape->isMonitor() );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(4.1,2.1,18.88)) );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(-4.1,-2.1,2.68)) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(2.0,2.1,2.1)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(-2.1,-2.01,-2.01)+ptrMonitorShape->getPos()) );
 
-    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0)) );
-    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0.01)) );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(100,100,100)) );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(-200.0,-200.0,-200.1)) );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(-400.0,-400.0,-400.1)) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0,0,0.01)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(100,100,100)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(-200.0,-200.0,-2000.1)+ptrMonitorShape->getPos()) );
 
     // test of shape for some detector
     Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(101001));
-    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,11.1)+ptrDetShape->getPos()) );
-    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,9.1)+ptrDetShape->getPos()) );
-
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,1.1)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,3.1)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.1,0.1,0.1)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.1,0.1,0.1)+ptrDetShape->getPos()) );
   }
 
 
