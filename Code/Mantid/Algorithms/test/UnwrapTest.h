@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Unwrap.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::API;
@@ -52,29 +52,30 @@ public:
 
 	void testExec()
 	{
-    IAlgorithm* loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
+    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
+    loader->initialize();
     loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
 
     std::string outputSpace = "toUnwrap";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
-    loader->execute();
+    TS_ASSERT_THROWS_NOTHING( loader->execute() )
     TS_ASSERT( loader->isExecuted() )
 
     unwrap.setPropertyValue("InputWorkspace", outputSpace);
     unwrap.setPropertyValue("OutputWorkspace", "unwrappedWS" );
     unwrap.setPropertyValue("LRef","36.0");
 
-	  unwrap.execute();
+	  TS_ASSERT_THROWS_NOTHING( unwrap.execute() )
 	  TS_ASSERT( unwrap.isExecuted() )
 
 	  // Test the frame overlapping part
 	  Unwrap unwrap2;
-	  unwrap2.initialize();
+	  TS_ASSERT_THROWS_NOTHING( unwrap2.initialize() )
     unwrap2.setPropertyValue("InputWorkspace", outputSpace);
     unwrap2.setPropertyValue("OutputWorkspace", "unwrappedWS2" );
     unwrap2.setPropertyValue("LRef","40.0");
 
-    unwrap2.execute();
+    TS_ASSERT_THROWS_NOTHING( unwrap2.execute() )
     TS_ASSERT( unwrap2.isExecuted() )
 	}
 
