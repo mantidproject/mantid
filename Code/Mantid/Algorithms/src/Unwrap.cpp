@@ -290,7 +290,7 @@ std::pair<int,int> Unwrap::handleFrameOverlapped(const std::vector<double>& xdat
     }
     else if ( T > maxT )
     {
-      tempX.erase(tempX.end()-max+j, tempX.end());
+      tempX.erase(tempX.end()-(max-j), tempX.end());
       max = j-1;
       break;
     }
