@@ -48,10 +48,11 @@ namespace Mantid
       declareProperty("GroupingFileName","",new FileValidator(exts));
     }
 
-    /** Executes the rebin algorithm
-    *
-    *  @throw runtime_error Thrown if
-    */
+    /** Executes the algorithm
+     *
+     *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
+     *  @throw runtime_error If unable to run one of the sub-algorithms successfully
+     */
     void DiffractionFocussing::exec()
     {
       // retrieve the properties
@@ -67,7 +68,7 @@ namespace Mantid
       std::multimap<int,int> detectorGroups;// <group, UDET>
       if (!readGroupingFile(groupingFileName, detectorGroups))
       {
-          return;
+          throw Exception::FileError("Error reading .cal file",groupingFileName);
       }
 
       //Convert to d-spacing units
@@ -75,9 +76,6 @@ namespace Mantid
 
        //Rebin to a common set of bins
       RebinWorkspace(tmpW);
-
-      //setProperty("OutputWorkspace",tmpW);
-      //return;
 
       std::set<int> groupNumbers;
       for(std::multimap<int,int>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
@@ -167,7 +165,7 @@ namespace Mantid
 
       API::Axis *spectraAxisNew = outputW->getAxis(1);
 
-      for(int hist=0;hist<resultIndeces.size();hist++)
+      for(int hist=0; hist<static_cast<int>(resultIndeces.size()); hist++)
       {
           int i = resultIndeces[hist];
           int spNo = spectraAxis->spectraNo(i);
