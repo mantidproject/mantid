@@ -89,7 +89,8 @@ int getNexusDataValue(const std::string& fileName, const std::string& dataName, 
    // assume this is the requied NXentry
    stat=NXopengroup(fileID,nxname,nxclass);
    std::string tmp1=nxclass,tmp2=nxname; // test
-   delete[] nxname,nxclass;
+   delete[] nxname;
+   delete[] nxclass;
    if(stat==NX_ERROR) return(-2);
    //
    // Try and open named data and read the string value associated with it
@@ -123,3 +124,4 @@ int writeNexusTextField( const NXhandle& h, const std::string& name, const std::
     status=NXclosedata(h);
 	return(0);
 }
+

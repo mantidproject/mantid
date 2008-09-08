@@ -128,7 +128,7 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
     TS_ASSERT( algToBeTested.isExecuted() );    
 
-    //remove(outputFile.c_str());
+    remove(outputFile.c_str());
    
   }
 
