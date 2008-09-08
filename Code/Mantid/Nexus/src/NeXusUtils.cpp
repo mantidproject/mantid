@@ -18,15 +18,16 @@ static void write_data(NXhandle h, const char* name, const std::vector<double>& 
 {
     int dims_array[1] = { v.size() };
     NXmakedata(h, name, NX_FLOAT64, 1, dims_array);
-    NXopendata(h, "x");
+    NXopendata(h, name);
     NXputdata(h, (void*)&(v[0]));
     NXclosedata(h);
 }
 
-void writeEntry1D(const std::string& filename, const std::string& entryname, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& e)
+int writeEntry1D(const std::string& filename, const std::string& entryName, const std::string& dataName, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& e)
 {
     NXhandle h;
     NXaccess mode;
+	int status;
     if (access(filename.c_str(), F_OK) == 0)
     {
         mode = NXACC_RDWR;
@@ -35,17 +36,38 @@ void writeEntry1D(const std::string& filename, const std::string& entryname, con
     {
         mode = NXACC_CREATE5;
     }
-    NXopen(filename.c_str(), mode, &h);
-    NXmakegroup(h, "entry1", "NXentry");
-    NXopengroup(h, "entry1", "NXentry");
-    NXmakegroup(h, entryname.c_str(), "NXdata");
-    NXopengroup(h, entryname.c_str(), "NXdata");
+    status=NXopen(filename.c_str(), mode, &h);
+	if(status==NX_ERROR)
+		return(1);
+	if (mode==NXACC_CREATE5)
+	{
+       status=NXmakegroup(h, entryName.c_str(), "NXentry");
+	   if(status==NX_ERROR)
+	      return(2);
+       status=NXopengroup(h, entryName.c_str(), "NXentry");
+	}
+	else
+	{
+        status=NXopengroup(h,entryName.c_str(),"NXentry");
+        if(status==NX_ERROR)
+		{
+           status=NXmakegroup(h, entryName.c_str(), "NXentry");
+	       if(status==NX_ERROR)
+	          return(2);
+           status=NXopengroup(h, entryName.c_str(), "NXentry");
+		}
+	}
+    status=NXmakegroup(h, dataName.c_str(), "NXdata");
+    status=NXopengroup(h, dataName.c_str(), "NXdata");
     write_data(h, "x", x);
     write_data(h, "y", y);
     write_data(h, "e", e);
-    NXclosegroup(h);
-    NXclosegroup(h);
-    NXclose(&h);
+    status=NXclosegroup(h);
+    status=NXclosegroup(h);
+    status=NXclose(&h);
+	if(status==NX_ERROR)
+		return(3);
+	return(0);
 }
 
 int getNexusDataValue(const std::string& fileName, const std::string& dataName, std::string& value )
@@ -89,4 +111,15 @@ int getNexusDataValue(const std::string& fileName, const std::string& dataName, 
    delete[] cValue;
    stat=NXclosedata(fileID);
    return(0);
+}
+
+int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value)
+{
+	int status;
+    int dims_array[1] = { value.size() };
+    status=NXmakedata(h, name.c_str(), NX_CHAR, 1, dims_array);
+    status=NXopendata(h, name.c_str());
+    status=NXputdata(h, (void*)&(value[0]));
+    status=NXclosedata(h);
+	return(0);
 }

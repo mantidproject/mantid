@@ -38,7 +38,10 @@ namespace NeXus
   void LoadNeXus::init()
   {
     // Declare required input parameters for all sub algorithms
-    declareProperty("Filename","",new MandatoryValidator<std::string>);
+    std::vector<std::string> exts;
+    exts.push_back("NXS");
+    exts.push_back("nxs");
+    declareProperty("Filename","",new FileValidator(exts));
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
 
 	// Declare optional input parameters

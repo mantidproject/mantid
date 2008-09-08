@@ -37,6 +37,7 @@ namespace NeXus
   {
     declareProperty("FileName","",new MandatoryValidator<std::string>);
     declareProperty("EntryName","",new MandatoryValidator<std::string>);
+    declareProperty("DataName","",new MandatoryValidator<std::string>);
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
   }
 
@@ -50,6 +51,7 @@ namespace NeXus
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("FileName");
     m_entryname = getPropertyValue("EntryName");
+	m_dataname = getPropertyValue("DataName");
     m_inputWorkspace = getProperty("InputWorkspace");
 
     const std::string workspaceID = m_inputWorkspace->id();
@@ -60,21 +62,21 @@ namespace NeXus
         const std::vector<double>& xValue = localworkspace->dataX();
         const std::vector<double>& yValue = localworkspace->dataY();
         const std::vector<double>& eValue = localworkspace->dataE();
-	writeEntry1D(m_filename, m_entryname, xValue, yValue, eValue);
+	    writeEntry1D(m_filename, m_entryname, m_dataname, xValue, yValue, eValue);
     }
     else if (workspaceID == "Workspace2D")
     {
         const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
         const int numberOfHist = localworkspace->getNumberHistograms();
-	for(int i=0; i<numberOfHist; i++)
-	{
+	    for(int i=0; i<numberOfHist; i++)
+	    {
             std::ostringstream oss;
-	    oss << m_entryname << "_" << i << std::ends;
+	        oss << m_dataname << "_" << i << std::ends;
             const std::vector<double>& xValue = localworkspace->dataX(i);
             const std::vector<double>& yValue = localworkspace->dataY(i);
             const std::vector<double>& eValue = localworkspace->dataE(i);
-	    writeEntry1D(m_filename, oss.str(), xValue, yValue, eValue);
-	}
+	        writeEntry1D(m_filename, m_entryname, oss.str(), xValue, yValue, eValue);
+	    }
     }
     else
     {

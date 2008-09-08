@@ -73,7 +73,8 @@ namespace Mantid
       std::string m_filename;
       /// The name and path of the input file
       std::string m_entryname;
-
+	  /// The prefix to be used to name spectra (_n added for nth spectra)
+      std::string m_dataname;
       /// Pointer to the local workspace
       API::Workspace_sptr m_inputWorkspace;
 

@@ -4,11 +4,18 @@
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
+// These includes seem to make the difference between initialization of the
+// workspace names (workspace2D/1D etc), instrument classes and not for this test case.
+#include "MantidDataObjects/WorkspaceSingleValue.h" 
+#include "MantidDataHandling/LoadInstrument.h" 
+//
+
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidNexus/SaveNeXus.h"
+#include "MantidNexus/LoadMuonNexus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -60,8 +67,10 @@ public:
     // specify name of file to save 1D-workspace to
     outputFile = "testOfSaveNeXus.nxs";
     entryName = "test";
+	dataName = "spectra";
     algToBeTested.setPropertyValue("FileName", outputFile);
     algToBeTested.setPropertyValue("EntryName", entryName);
+    algToBeTested.setPropertyValue("DataName", dataName);
     remove(outputFile.c_str());
     
     std::string result;
@@ -76,12 +85,59 @@ public:
     remove(outputFile.c_str());
    
   }
+void testExecOnMuon()
+  {
+    LoadMuonNexus nxLoad;
+	std::string outputSpace,inputFile;
+    nxLoad.initialize();
+    // Now set required filename and output workspace name
+    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+    outputSpace="outer";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+    //
+    // get workspace
+    //
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+	//
+    if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
+  
+    algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
+    // specify name of file to save 1D-workspace to
+    outputFile = "testOfSaveNeXusMuon.nxs";
+    entryName = "entry4";
+	dataName = "spectra";
+    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("EntryName", entryName);
+    algToBeTested.setPropertyValue("DataName", dataName);
+    remove(outputFile.c_str());
+    
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(outputFile)); 
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
+    TS_ASSERT( ! result.compare(entryName)); 
+    
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
+    TS_ASSERT( algToBeTested.isExecuted() );    
+
+    //remove(outputFile.c_str());
+   
+  }
 
   
 private:
   SaveNeXus algToBeTested;
   std::string outputFile;
   std::string entryName;
+  std::string dataName;
   
 };
   
