@@ -41,7 +41,7 @@ namespace Mantid
     {
     private:
 
-      static Kernel::Logger& PLog;           ///< The official logger  
+      static Kernel::Logger& PLog;           ///< The official logger
 	  unsigned int           iDisplaylistId; ///< OpenGL display list id
 	  bool                   boolDisplaylistCreated; ///< flag to store whether display list is created or not
 

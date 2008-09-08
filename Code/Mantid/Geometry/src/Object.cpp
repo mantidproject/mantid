@@ -57,7 +57,7 @@ namespace Mantid
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
       AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),
-      SurList(A.SurList),handle(0)
+      handle(0),SurList(A.SurList)
       /*!
       Copy constructor
       \param A :: Object to copy
@@ -88,7 +88,7 @@ namespace Mantid
         AABByMin=A.AABByMin;
         AABBzMin=A.AABBzMin;
         boolBounded=A.boolBounded;
-		handle=A.handle;
+        handle=A.handle;
       }
       return *this;
     }
@@ -1278,7 +1278,7 @@ namespace Mantid
 	}
 
 	/**
-	* Initializes/prepares the object to be rendered, this will generate geometry for object, 
+	* Initializes/prepares the object to be rendered, this will generate geometry for object,
 	* If the handler is not set then this function does nothing.
 	*/
 	void Object::initDraw() const

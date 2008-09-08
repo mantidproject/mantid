@@ -45,15 +45,15 @@ namespace Mantid
 		class DLLExport GeometryHandler
 		{
 		private:
-			static Kernel::Logger& PLog;           ///< The official logger 
+			static Kernel::Logger& PLog;           ///< The official logger
 
 		protected:
 			ObjComponent	*ObjComp;              ///< ObjComponent that uses this geometry handler
 			Object          *Obj;                  ///< Object that uses this geometry handler
 			bool			boolTriangulated;      ///< state of the geometry triangulation
-			bool			boolIsInitialized;     ///< state of the geometry initialization for rendering 
+			bool			boolIsInitialized;     ///< state of the geometry initialization for rendering
 		public:
-			GeometryHandler(ObjComponent *comp);   ///< Constructor 
+			GeometryHandler(ObjComponent *comp);   ///< Constructor
 			GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
 			virtual ~GeometryHandler();
 			virtual GeometryHandler* createInstance(ObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent

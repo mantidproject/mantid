@@ -43,7 +43,7 @@ namespace Mantid
 			double left=evaluate(rule->leaf(0),point);
 			double right=evaluate(rule->leaf(1),point);
 			if(left<right)return left;
-			else return right;		
+			else return right;
 		}
 
 		/**
@@ -91,11 +91,11 @@ namespace Mantid
 		 * @param point point at which rule needs to be evaluated
 		 */
 		double ObjectSurfaceEvaluator::evaluate(CompGrp* rule,V3D point)
-		{			
+		{
 			double val=evaluate(rule->leaf(0),point);
 			val*=-1;
 			return val;
-		}		
+		}
 
 		/**
 		 * Evaluate the CompObj rule, boolean value, R-Functions there is nothing equivalent
@@ -105,14 +105,14 @@ namespace Mantid
 		double ObjectSurfaceEvaluator::evaluate(BoolValue* rule,V3D point)
 		{
 			return 0;
-		}	
+		}
 
 		/**
 		 * Evaluate the rule
 		 * @param point point at which rule needs to be evaluated
 		 */
 		double ObjectSurfaceEvaluator::evaluate(V3D point)
-		{	
+		{
 			return evaluate((Rule*)surf->topRule(),point);
 		}
 	}

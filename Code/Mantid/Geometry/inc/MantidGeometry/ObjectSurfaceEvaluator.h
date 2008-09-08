@@ -57,7 +57,7 @@ namespace Mantid
 			double evaluate(Union* rule,V3D point);
 			double evaluate(CompObj* rule,V3D point);
 			double evaluate(CompGrp* rule,V3D point);
-			double evaluate(BoolValue* rule,V3D point);			
+			double evaluate(BoolValue* rule,V3D point);
 			double evaluate(SurfPoint* rule,V3D point);
 		public:
 			ObjectSurfaceEvaluator(const Object* quad){surf=quad;} ///< Constructor

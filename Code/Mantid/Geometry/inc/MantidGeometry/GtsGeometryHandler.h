@@ -46,7 +46,7 @@ namespace Mantid
 		{
 		private:
 			static Kernel::Logger& PLog;           ///< The official logger
-			GtsGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent 
+			GtsGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
 			GtsGeometryGenerator* Triangulator;    ///< Geometry generator to triangulate Object
 		public:
 			GtsGeometryHandler(ObjComponent* obj); ///< Constructor
