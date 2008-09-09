@@ -42,8 +42,8 @@ public:
 
     std::string outputSpace = "tofocus";
     loader->setPropertyValue("OutputWorkspace", outputSpace);
-    //loader->setPropertyValue("spectrum_min","50");
-    //loader->setPropertyValue("spectrum_max","100");
+    loader->setPropertyValue("spectrum_min","50");
+    loader->setPropertyValue("spectrum_max","100");
     TS_ASSERT_THROWS_NOTHING( loader->execute() )
     TS_ASSERT( loader->isExecuted() )
 

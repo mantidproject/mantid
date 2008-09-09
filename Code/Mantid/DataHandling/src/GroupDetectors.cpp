@@ -127,10 +127,12 @@ void GroupDetectors::exec()
 bool GroupDetectors::hasSameBoundaries(const DataObjects::Workspace2D_sptr WS)
 {
   if (!WS->blocksize()) return true;
-  double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
-  for (int i = 1; i < WS->getNumberHistograms(); ++i)
+  const double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
+  const int numHist = WS->getNumberHistograms();
+  for (int i = 1; i < numHist; ++i)
   {
-    if ( commonSum != std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) ) return false;
+    const double sum = std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.);
+    if ( std::abs(commonSum-sum) > 1.0E-9 ) return false;
   }
   return true;
 }
