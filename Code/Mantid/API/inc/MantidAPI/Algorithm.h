@@ -7,13 +7,6 @@
 * subscribe method.
 */
 
-#define DECLARE_NAMESPACED_ALGORITHM(ns, classname) \
-	namespace { \
-	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-	((Mantid::API::AlgorithmFactory::Instance().subscribe<ns::classname>()) \
-	, 0)); \
-  }
-
 #define DECLARE_ALGORITHM(classname) \
 	namespace { \
 	Mantid::Kernel::RegistrationHelper register_alg_##classname( \

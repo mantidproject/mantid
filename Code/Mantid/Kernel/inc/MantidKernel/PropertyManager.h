@@ -136,7 +136,7 @@ protected:
   virtual void declareProperty(const std::string &name, const char* value,
       IValidator<std::string> *validator = new NullValidator<std::string>, const std::string &doc="", const unsigned int direction = Direction::Input);
 
-   /** Add a property of the char* type to the list of managed properties
+   /** Add a property of string type to the list of managed properties
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property
    *  @param direction The direction of the property, in, out or inout

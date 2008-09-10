@@ -3,10 +3,8 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/Divide.h"
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h"
 
-// Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Divide)
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -14,6 +12,9 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    // Register the class into the algorithm factory
+    DECLARE_ALGORITHM(Divide)
+
     // Get a reference to the logger
     Logger& Divide::g_log = Logger::get("Divide");
 
@@ -35,12 +36,12 @@ namespace Mantid
     * @returns A LocatedData ref of the result with Gausian errors
     */
     LocatedDataValue&
-      Divide::Divide_fn::operator() (const ILocatedData& a,const ILocatedData& b) 
-    {  
+      Divide::Divide_fn::operator() (const ILocatedData& a,const ILocatedData& b)
+    {
       //copy the values from lhs
       result = a;
       //use the error helper to correct the changed values in result
-      a.ErrorHelper()->divide(a,b,result);      
+      a.ErrorHelper()->divide(a,b,result);
       return result;
     }
   }

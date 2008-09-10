@@ -1,6 +1,4 @@
 #include "ModifyData.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
@@ -9,12 +7,10 @@ namespace Algorithms
 {
 
 // Algorithm must be declared
-DECLARE_ALGORITHM(ModifyData);
+DECLARE_ALGORITHM(ModifyData)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace1D_sptr;
-using DataObjects::Workspace1D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
@@ -24,16 +20,16 @@ using DataObjects::Workspace2D;
 Logger& ModifyData::g_log = Logger::get("ModifyData");
 
 /**  Initialization code
- *     
+ *
  *   Properties have to be declared here before they can be used
 */
 void ModifyData::init()
 {
-    
-    // Declare a 2D input workspace property. 
+
+    // Declare a 2D input workspace property.
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
 
-    // Declare a 2D output workspace property. 
+    // Declare a 2D output workspace property.
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
 
     // Switches between two ways of accessing the data in the input workspace
@@ -43,16 +39,16 @@ void ModifyData::init()
 
 /** Executes the algorithm
  */
-void ModifyData::exec() 
-{ 
-    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl; 
+void ModifyData::exec()
+{
+    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
     Workspace2D_sptr inputW = getProperty("InputWorkspace");
 
     // make output Workspace the same type and size as the input one
     Workspace2D_sptr outputW = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(inputW));
-    
+
     // Create vectors to hold result
     std::vector<double> newX;
     std::vector<double> newY;
@@ -60,15 +56,15 @@ void ModifyData::exec()
 
     bool useVectors = getProperty("UseVectors");
 
-    if ( useVectors ) 
+    if ( useVectors )
     {
-        g_log.information() << "Option 1. Original values:" << std::endl; 
+        g_log.information() << "Option 1. Original values:" << std::endl;
         // Get the count of histograms in the input workspace
         int histogramCount = inputW->getNumberHistograms();
         // Loop over spectra
-        for (int i = 0; i < histogramCount; ++i) 
+        for (int i = 0; i < histogramCount; ++i)
         {
-        
+
             // Retrieve the data into a vector
             const std::vector<double>& XValues = inputW->dataX(i);
             const std::vector<double>& YValues = inputW->dataY(i);
@@ -77,7 +73,7 @@ void ModifyData::exec()
             newX.clear();
             newY.clear();
             newE.clear();
-            
+
             // Iterate over i-th spectrum and modify the data
             for(int j=0;j<inputW->blocksize();j++)
             {
@@ -95,7 +91,7 @@ void ModifyData::exec()
     }
     else
     {
-        g_log.information() << "Option 2. Original values:" << std::endl; 
+        g_log.information() << "Option 2. Original values:" << std::endl;
         // Iterate over the workspace and modify the data
         int count = 0;
         for(Workspace2D::const_iterator ti(*inputW); ti != ti.end(); ++ti)
@@ -126,15 +122,15 @@ void ModifyData::exec()
 
    }
 
-  
+
     // Assign it to the output workspace property
     setProperty("OutputWorkspace",outputW);
-    
+
     // Get the newly set workspace
     Workspace2D_sptr newW = getProperty("OutputWorkspace");
-   
+
     // Check the new workspace
-    g_log.information() << "New values:" << std::endl; 
+    g_log.information() << "New values:" << std::endl;
     int count = 0;
     for(Workspace2D::const_iterator ti(*newW); ti != ti.end(); ++ti)
     {

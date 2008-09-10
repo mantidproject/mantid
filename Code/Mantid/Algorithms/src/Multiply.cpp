@@ -3,10 +3,8 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include "MantidAlgorithms/Multiply.h"
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h"
 
-// Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Multiply)
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -14,6 +12,9 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    // Register the class into the algorithm factory
+    DECLARE_ALGORITHM(Multiply)
+
     // Get a reference to the logger
     Logger& Multiply::g_log = Logger::get("Multiply");
 
@@ -34,13 +35,13 @@ namespace Mantid
     * @returns A LocatedData ref of the result with Gausian errors
     */
     LocatedDataValue&
-      Multiply::Multiply_fn::operator() (const ILocatedData& a,const ILocatedData& b) 
-    {           
+      Multiply::Multiply_fn::operator() (const ILocatedData& a,const ILocatedData& b)
+    {
       //copy the values from lhs
       result = a;
       //use the error helper to correct the changed values in result
-      a.ErrorHelper()->multiply(a,b,result);     
-      return result;          
+      a.ErrorHelper()->multiply(a,b,result);
+      return result;
     }
   }
 }

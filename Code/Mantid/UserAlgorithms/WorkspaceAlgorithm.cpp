@@ -1,5 +1,4 @@
 #include "WorkspaceAlgorithm.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -9,7 +8,7 @@ namespace Algorithms
 {
 
 // Algorithm must be declared
-DECLARE_ALGORITHM(WorkspaceAlgorithm);
+DECLARE_ALGORITHM(WorkspaceAlgorithm)
 
 using namespace Kernel;
 using namespace API;
@@ -24,27 +23,27 @@ using DataObjects::Workspace2D;
 Logger& WorkspaceAlgorithm::g_log = Logger::get("WorkspaceAlgorithm");
 
 /**  Initialization code
- *    
+ *
  *   Properties have to be declared here before they can be used
 */
 void WorkspaceAlgorithm::init()
 {
-    
-    // Declare a 1D workspace property. 
+
+    // Declare a 1D workspace property.
     declareProperty(new WorkspaceProperty<Workspace1D>("Workspace","",Direction::Input));
 
 }
 
 /** Executes the algorithm
  */
-void WorkspaceAlgorithm::exec() 
-{ 
-    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl; 
+void WorkspaceAlgorithm::exec()
+{
+    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
     Workspace1D_sptr workspace = getProperty("Workspace");
 
-    // Number of single indexable items in the workspace 
+    // Number of single indexable items in the workspace
     g_log.information() << "Number of items = " << workspace->size() << std::endl;
 
     int count = 0;

@@ -1,5 +1,4 @@
 #include "PropertyAlgorithm.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -7,8 +6,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-//DECLARE_ALGORITHM(PropertyAlgorithm);
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,PropertyAlgorithm)
+DECLARE_ALGORITHM(PropertyAlgorithm)
 
 using namespace Kernel;
 
@@ -17,7 +15,7 @@ using namespace Kernel;
 Mantid::Kernel::Logger& PropertyAlgorithm::g_log = Mantid::Kernel::Logger::get("PropertyAlgorithm");
 
 /**  Initialization code
- *    
+ *
  *   Properties have to be declared here before they can be used
 */
 void PropertyAlgorithm::init()
@@ -29,7 +27,7 @@ void PropertyAlgorithm::init()
     declareProperty("DoubleValue",0.01);
     declareProperty("BoolValue",false);
     declareProperty("StringValue","Empty");
-    
+
     // Property names must be unique. Multiple declarations will cause a run time error
     //declareProperty("IntValue",1);
 
@@ -51,9 +49,9 @@ void PropertyAlgorithm::init()
 
 /** Executes the algorithm
  */
-void PropertyAlgorithm::exec() 
-{ 
-    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl; 
+void PropertyAlgorithm::exec()
+{
+    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Retrieve properties values
 
@@ -61,18 +59,18 @@ void PropertyAlgorithm::exec()
     int intValue = getProperty("IntValue");
     double doubleValue = getProperty("DoubleValue");
     bool boolValue = getProperty("BoolValue");
-    std::string stringValue = getProperty("StringValue"); 
+    std::string stringValue = getProperty("StringValue");
 
     // getPropertyValue returns string representation of the property value
     std::string doubleValueString = getPropertyValue("DoubleValue");
 
-    g_log.information() << "IntValue    = " << intValue << std::endl; 
-    g_log.information() << "DoubleValue = " << doubleValue << ' ' << doubleValueString << std::endl; 
-    g_log.information() << "BoolValue   = " << boolValue << std::endl; 
-    g_log.information() << "StringValue = " << stringValue << std::endl; 
+    g_log.information() << "IntValue    = " << intValue << std::endl;
+    g_log.information() << "DoubleValue = " << doubleValue << ' ' << doubleValueString << std::endl;
+    g_log.information() << "BoolValue   = " << boolValue << std::endl;
+    g_log.information() << "StringValue = " << stringValue << std::endl;
 
     int positiveIntValue = getProperty("PositiveIntValue");
-    g_log.information() << "PositiveIntValue    = " << positiveIntValue << std::endl; 
+    g_log.information() << "PositiveIntValue    = " << positiveIntValue << std::endl;
 
     std::vector<int> intArray = getProperty("IntArray");
     g_log.information() << "Size of IntArray    = " << intArray.size() << std::endl;

@@ -4,10 +4,8 @@
 
 #include <cmath>
 #include "MantidAlgorithms/Plus.h"
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h"
 
-// Register the class into the algorithm factory
-DECLARE_NAMESPACED_ALGORITHM(Mantid::Algorithms,Plus)
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -15,6 +13,9 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    // Register the class into the algorithm factory
+    DECLARE_ALGORITHM(Plus)
+
     // Get a reference to the logger
     Logger& Plus::g_log = Logger::get("Plus");
 
@@ -35,12 +36,12 @@ namespace Mantid
     * @returns A LocatedData ref of the result with Gaussian errors
     */
     LocatedDataValue&
-      Plus::Plus_fn::operator() (const ILocatedData& a,const ILocatedData& b) 
-    {   
+      Plus::Plus_fn::operator() (const ILocatedData& a,const ILocatedData& b)
+    {
       //copy the values from lhs
       result = a;
       //use the error helper to correct the changed values in result
-      a.ErrorHelper()->plus(a,b,result);      
+      a.ErrorHelper()->plus(a,b,result);
       return result;
     }
   }
