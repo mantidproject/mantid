@@ -227,29 +227,54 @@ InstallDir = addDirectory('INSTALLDIR','MInstall','MantidInstall',TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 
 MantidDlls = addComponent('MantidDLLs','{FABC0481-C18D-415e-A0B1-CCB76C35FBE8}',binDir)
-addFileV('MantidProperties','Mantid.pro','Mantid.properties','../Mantid/release/Mantid.properties',MantidDlls)
+# Modify Mantid.properties to set directories right
+prop_file = open('../Mantid/release/Mantid.properties','r')
+prop_file_ins = open('Mantid.properties','w')
+for line in prop_file:
+    if line.find('ManagedWorkspace.MinSize') >= 0:
+        prop_file_ins.write('ManagedWorkspace.MinSize = 50\n')
+    elif line.find('plugins.directory') >= 0:
+        prop_file_ins.write('plugins.directory = ../plugins\n')
+#        prop_file_ins.write('plugins.directory = .\n')
+    elif line.find('instrumentDefinition.directory') >= 0:
+        prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
+    else:
+        prop_file_ins.write(line)
+addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/PythonAPI/MantidScript.bat',MantidDlls)
-addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'binDir'})
+addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
 addFileV('MantidStartup','MStart.py','MantidStartup.py','../Mantid/PythonAPI/MantidStartup.py',MantidDlls)
-addFileV('MantidPythonAPI','MPAPI.pyd','MantidPythonAPI.pyd','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
-addDlls('../Mantid/Bin/Shared','SDll',MantidDlls)
-addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
+addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
+#addDlls('../Mantid/Bin/Shared','SDll',MantidDlls)
+addFileV('MantidAPI','MAPI.dll','MantidAPI.dll','../Mantid/Bin/Shared/MantidAPI.dll',MantidDlls)
+addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll','../Mantid/Bin/Shared/MantidGeometry.dll',MantidDlls)
+addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/Bin/Shared/MantidKernel.dll',MantidDlls)
+addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
+#  these two should go to plugins
+addFileV('MantidDataHandling_tmp','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
+addFileV('MantidDataObjects_tmp','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
+#addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
 addDlls('../Third_Party/lib/win32','3dDll',MantidDlls)
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
 addDlls(QTDIR,'qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
-startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'binDir'})
-desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'binir'})
+startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
+desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
 if (QTDIR == 'C:/Qt/4_4_0/bin'):
     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 
+#plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
 Plugins = addComponent('Plugins','{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}',pluginsDir)
+addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/Bin/Shared/MantidAlgorithms.dll',Plugins)
+addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Plugins)
+addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
+addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
 addTo(Plugins,'CreateFolder',{})
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
@@ -303,6 +328,8 @@ pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)
 #-------------------  end of Includes ---------------------------------------
 
 sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)
+
+instrument = addCompList('instrument','../../Test/Instrument','instrument',InstallDir)
 
 tempDir = addDirectory('TempDir','temp','temp',InstallDir)
 Temp = addComponent('Temp','{02D25B60-A114-4f2a-A211-DE88CF648C61}',tempDir)
@@ -411,6 +438,7 @@ addCRefs(sconsList,MantidExec)
 addCRefs(boostList,MantidExec)
 addCRefs(pocoList,MantidExec)
 addCRef('UserAlgorithms',MantidExec)
+addCRefs(instrument,MantidExec)
 
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)

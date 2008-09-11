@@ -7,10 +7,11 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/LoadRaw.h"
+//#include "MantidDataHandling/LoadRaw.h"
 
 #include <Poco/NObserver.h>
 

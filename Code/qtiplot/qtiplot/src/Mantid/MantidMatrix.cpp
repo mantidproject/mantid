@@ -4,6 +4,7 @@
 #include "../ApplicationWindow.h"
 #include "../Spectrogram.h"
 #include "../../../../Mantid/DataHandling/src/LoadDAE/idc.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <QtGlobal>
 #include <QTextStream>
