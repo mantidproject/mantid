@@ -8,7 +8,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-//#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidPythonAPI/PythonInterface.h"
