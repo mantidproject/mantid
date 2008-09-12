@@ -11,6 +11,7 @@
 #include "../pixmaps.h"
 
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidPlotReleaseDate.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -105,6 +106,11 @@ MantidUI::~MantidUI()
     //delete m_algMonitor;
 }
 
+QString MantidUI::releaseDate()
+{
+    return MANTIDPLOT_RELEASE_DATE;
+}
+
 QStringList MantidUI::getWorkspaceNames()
 {
     QStringList sl;
@@ -139,7 +145,9 @@ void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceN
 	//Check workspace does not exist
 	if (!AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
 	{
-		Algorithm* alg = static_cast<Algorithm*>(CreateAlgorithm("LoadRaw"));
+        QStringList ALGS = getAlgorithmNames();
+        QString loader = ALGS.contains("LoadRaw2|1")?"LoadRaw2":"LoadRaw";
+		Algorithm* alg = static_cast<Algorithm*>(CreateAlgorithm(loader));
 		alg->setPropertyValue("Filename", fileName.toStdString());
 		alg->setPropertyValue("OutputWorkspace", workspaceName.toStdString());
         if ( !spectrum_min.isEmpty() && !spectrum_max.isEmpty() )

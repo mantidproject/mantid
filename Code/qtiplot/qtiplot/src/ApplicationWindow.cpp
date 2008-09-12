@@ -162,6 +162,7 @@
 
 //Mantid
 #include "Mantid/MantidUI.h"
+#include "Mantid/MantidPlotReleaseDate.h"
 
 using namespace Qwt3D;
 
@@ -7823,6 +7824,8 @@ void ApplicationWindow::about()
 QString text = "<h2>"+ versionString() + "</h2>";
 text +=	"<h3>" + QString(copyright_string).replace("\n", "<br>") + "</h3>";
 text += "<h3>" + tr("Released") + ": " + QString(release_date) + "</h3>";
+
+text += "<h3> MantidPlot released: " + QString(MANTIDPLOT_RELEASE_DATE) + QString("</h3>");//Mantid
 
 QMessageBox *mb = new QMessageBox();
 mb->setWindowTitle (tr("About QtiPlot"));

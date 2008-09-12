@@ -317,7 +317,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidMatrix.h \
 	    src/Mantid/MantidDock.h \
 	    src/Mantid/AlgMonitor.h \
-	    src/Mantid/ProgressDlg.h 
+	    src/Mantid/ProgressDlg.h \
+	    src/Mantid/MantidPlotReleaseDate.h 
 
 ###################### FORMS ##############################################
 

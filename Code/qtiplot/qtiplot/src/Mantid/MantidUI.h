@@ -40,6 +40,7 @@ public:
     void init();
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
+    QString releaseDate();
 
     // Returns a list of open workspaces
     QStringList getWorkspaceNames();
