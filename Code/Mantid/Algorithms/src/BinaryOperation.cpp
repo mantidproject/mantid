@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <cmath>
+#include <sstream>
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceIterator.h" 
@@ -39,7 +40,9 @@ namespace Mantid
 
       if (!checkSizeCompatability(in_work1,in_work2))
       {
-        throw std::invalid_argument("The size of the two workspaces are not compatible for algorithm plus"  );
+          std::ostringstream ostr;
+          ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
+          throw std::invalid_argument( ostr.str() );
       }
 
       Workspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
