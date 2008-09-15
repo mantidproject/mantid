@@ -37,10 +37,10 @@ namespace Kernel
 	    Logger ls(someLogger);
 	    ls.error("Some informational message");
 	    ls.error() << "Some error message" << std::endl;
-    
+
     @author Nicholas Draper, Tessella Support Services plc
     @date 12/10/2007
-    
+
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
@@ -61,17 +61,17 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	class DLLExport Logger 
+	class DLLExport Logger
 	{
-	public:	
+	public:
 		/// An emuration of the priority levels of a log message.
 		enum Priority
 		{
-			PRIO_FATAL = 1,		  /// A fatal error. The application will most likely terminate. This is the highest priority.
-			PRIO_ERROR = 3,       /// An error. An operation did not complete successfully, but the application as a whole is not affected.
-			PRIO_WARNING = 4,     /// A warning. An operation completed with an unexpected result.
-			PRIO_INFORMATION = 6, /// An informational message, usually denoting the successful completion of an operation.
-			PRIO_DEBUG = 7        /// A debugging message.This is the lowest priority.
+			PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.
+			PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
+			PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
+			PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
+			PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
 		};
 
 		void fatal(const std::string& msg);
@@ -88,25 +88,25 @@ namespace Kernel
 
 		/// Logs the given message at debug level, followed by the data in buffer.
 		void dump(const std::string& msg, const void* buffer, std::size_t length);
-			
+
 		/// Returns true if at least the given log level is set.
 		bool is(int level) const;
 
 		/// Returns a reference to the Logger with the given name.
 		static Logger& get(const std::string& name);
 
-		/// Shuts down the logging framework and releases all Loggers.	
+		/// Shuts down the logging framework and releases all Loggers.
 		static void shutdown();
-		
+
 		~Logger();
 
 	protected:
 		/// Protected constructor called by static get method
 		Logger(const std::string& name);
-		
-		
+
+
 	private:
-		
+
 		Logger();
 
 		/// Overload of = operator
@@ -116,7 +116,7 @@ namespace Kernel
 		Poco::Logger& _log;
 		///This pointer is owned by this class, initialized in the constructor and deleted in the destructor
 		Poco::LogStream* _logStream;
-		
+
 		/// Name of this logging object
 		std::string _name;
 };
