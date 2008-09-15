@@ -125,10 +125,10 @@ else:
 	cppPaths.append(poco_path + 'include')
 	cppPaths.append(poco_path +'Util')
 	cppPaths.append(boost_path)
-	cppPaths.append('/usr/include/glib-2.0/')
-	cppPaths.append('/usr/lib/glib-2.0/include/')
+# now picked up by gts-config
+#	cppPaths.append('/usr/include/glib-2.0/')
+#	cppPaths.append('/usr/lib/glib-2.0/include/')
 
-	print "CPPPATHS: ",cppPaths
 
 	libDirList.append('/usr/local/lib/')
 	libList.append('python' + sys.version[0:3])
@@ -161,7 +161,7 @@ else:
 	f=os.popen('gsl-config --cflags')
 	flags=re.sub('\n','',f.readline())
 	if (len(flags)>1):
-		cflags.append([flags])
+		cflags.append(re.split("\s+",flags))
 	f.close()
 	f=os.popen('gsl-config --libs')
 	flags=re.sub('\n','',f.readline())
@@ -171,12 +171,15 @@ else:
 	f=os.popen('gts-config --cflags')
 	flags=re.sub('\n','',f.readline())
 	if (len(flags)>1):
-		cflags.append([flags])
+		cflags.append(re.split("\s+",flags))
 	f.close()
 	f=os.popen('gts-config --libs')
 	flags=re.sub('\n','',f.readline())
 	lpts=re.split("\s+",flags)
 	lpts.append('-g')
+
+print "CPPPATHS: ",cppPaths
+print "CLFAGS: ",cflags
 #check existence of Header files
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
@@ -237,6 +240,7 @@ subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
 subProjs.append('PythonAPI')
+#subProjs.append('MatlabAPI')
 #subProjs.append('Services')
 
 # we want to link libraries in the reverse order we build them
