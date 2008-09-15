@@ -208,18 +208,12 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
-Prop = doc.createElement('Property')
-Prop.setAttribute('Id','PYTHON_25_DIR_EXISTS')
-Product.appendChild(Prop)
-DS = doc.createElement('DirectorySearch')
-DS.setAttribute('Id','CheckPyDir')
-DS.setAttribute('Path','C:\\Python25')
-DS.setAttribute('Depth','0')
-Prop.appendChild(DS)
+PyProp = addTo(Product,'Property',{'Id':'PYTHON25DIR'})
+addTo(PyProp,'RegistrySearch',{'Id':'Python25Registry','Type':'raw','Root':'HKLM','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath'})
 
 Cond = doc.createElement('Condition')
 Cond.setAttribute('Message','Mantid requires Python 2.5 to be installed on your machine. It can be downloaded and installed from http://www.python.org/download/')
-Cond.appendChild(doc.createTextNode('PYTHON_25_DIR_EXISTS'))
+Cond.appendChild(doc.createTextNode('PYTHON25DIR'))
 Product.appendChild(Cond)
 
 TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
@@ -240,6 +234,8 @@ for line in prop_file:
         prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
     else:
         prop_file_ins.write(line)
+prop_file_ins.close()
+prop_file.close()
 addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/PythonAPI/MantidScript.bat',MantidDlls)
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
@@ -393,7 +389,8 @@ addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party
 
 #--------------- Python ------------------------------------------------
 
-Python25Dir = addDirectory('Python25Dir','Python25','Python25',TargetDir)
+#Python25Dir = addDirectory('Python25Dir','Python25','Python25',TargetDir)
+Python25Dir = addTo(TargetDir,'Directory',{'Id':'PYTHON25DIR'})
 LibDir = addDirectory('LibDir','Lib','Lib',Python25Dir)
 SitePackagesDir = addDirectory('SitePackagesDir','sitepack','site-packages',LibDir)
 PyQtDir = addDirectory('PyQtDir','PyQt4','PyQt4',SitePackagesDir)
