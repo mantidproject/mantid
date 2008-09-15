@@ -93,7 +93,8 @@ namespace NeXus
       // Pass through the same input filename
       loadMuonNexus->setPropertyValue("Filename",m_filename);
       // Set the workspace property
-      loadMuonNexus->setPropertyValue("OutputWorkspace",m_workspace);
+	  std::string outputWorkspace="OutputWorkspace";
+      loadMuonNexus->setPropertyValue(outputWorkspace,m_workspace);
 	  //
       Property *specList = getProperty("spectrum_list");
       if( !(specList->isDefault()) )
@@ -116,9 +117,34 @@ namespace NeXus
         g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       }
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
-	  // Get pointer to the workspace created
-	  m_localWorkspace=loadMuonNexus->getProperty("OutputWorkspace"); 
-      setProperty<Workspace2D_sptr>("OutputWorkspace",m_localWorkspace);
+      // Get pointer to the workspace created
+      m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
+      setProperty<Workspace2D_sptr>(outputWorkspace,m_localWorkspace);
+	  //
+	  // copy pointers to any new output workspaces created by alg LoadMuonNexus to alg LoadNexus
+	  // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
+	  // until name not found
+	  //
+	  int period=0;
+	  bool noError=true;
+	  while(noError)
+	  {
+          std::stringstream suffix;
+		  period++;
+          suffix << (period+1);
+		  std::string opWS = outputWorkspace + suffix.str();
+          std::string WSName = m_workspace + "_" + suffix.str();
+		  try
+		  {
+              m_localWorkspace=loadMuonNexus->getProperty(opWS); 
+              declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
+              setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+		  }
+		  catch (Exception::NotFoundError)
+		  {
+			  noError=false;
+		  }
+	  }
   }
 
   void LoadNeXus::runLoadIsisNexus()
