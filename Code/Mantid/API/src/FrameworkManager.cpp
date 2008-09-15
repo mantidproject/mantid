@@ -15,6 +15,10 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
+
 using namespace std;
 
 namespace Mantid
@@ -24,6 +28,11 @@ namespace API
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
 {
+#ifdef _WIN32
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2,2), &wsaData);
+#endif
+
   std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
