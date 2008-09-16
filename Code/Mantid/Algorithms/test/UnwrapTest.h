@@ -14,25 +14,25 @@ using namespace Mantid::Algorithms;
 class UnwrapTest : public CxxTest::TestSuite
 {
 public:
-	void testName()
-	{
-		TS_ASSERT_EQUALS( unwrap.name(), "Unwrap" )
-	}
+  void testName()
+  {
+    TS_ASSERT_EQUALS( unwrap.name(), "Unwrap" )
+  }
 
-	void testVersion()
-	{
-	  TS_ASSERT_EQUALS( unwrap.version(), 1 )
-	}
+  void testVersion()
+  {
+    TS_ASSERT_EQUALS( unwrap.version(), 1 )
+  }
 
-	void testCategory()
-	{
+  void testCategory()
+  {
     TS_ASSERT_EQUALS( unwrap.category(), "Units" )
-	}
+  }
 
-	void testInit()
-	{
-	  unwrap.initialize();
-	  TS_ASSERT( unwrap.isInitialized() )
+  void testInit()
+  {
+    unwrap.initialize();
+    TS_ASSERT( unwrap.isInitialized() )
 
     const std::vector<Property*> props = unwrap.getProperties();
     TS_ASSERT_EQUALS( props.size(), 3 )
@@ -48,10 +48,10 @@ public:
     TS_ASSERT_EQUALS( props[2]->name(), "LRef" )
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[2]) )
-	}
+  }
 
-	void testExec()
-	{
+  void testExec()
+  {
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
     loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
@@ -65,19 +65,33 @@ public:
     unwrap.setPropertyValue("OutputWorkspace", "unwrappedWS" );
     unwrap.setPropertyValue("LRef","36.0");
 
-	  TS_ASSERT_THROWS_NOTHING( unwrap.execute() )
-	  TS_ASSERT( unwrap.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( unwrap.execute() )
+    TS_ASSERT( unwrap.isExecuted() )
 
-	  // Test the frame overlapping part
-	  Unwrap unwrap2;
-	  TS_ASSERT_THROWS_NOTHING( unwrap2.initialize() )
+    boost::shared_ptr<Workspace> inWS = AnalysisDataService::Instance().retrieve(outputSpace);
+    boost::shared_ptr<Workspace> outWS = AnalysisDataService::Instance().retrieve("unwrappedWS");
+
+    TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
+    TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )
+    TS_ASSERT_EQUALS( outWS->getSpectraMap(), inWS->getSpectraMap() )
+    TS_ASSERT_DIFFERS( outWS->size(), inWS->size() )
+    TS_ASSERT_DIFFERS( outWS->blocksize(), inWS->blocksize() )
+    TS_ASSERT_EQUALS( outWS->blocksize(), 712 )
+
+    TS_ASSERT_DELTA( outWS->dataX(0)[0], 12.956, 0.0001 )
+    TS_ASSERT_DELTA( outWS->dataX(0)[350], 15.1168, 0.0001 )
+    TS_ASSERT_DELTA( outWS->dataX(0)[712], 17.3516, 0.0001 )
+
+    // Test the frame overlapping part
+    Unwrap unwrap2;
+    TS_ASSERT_THROWS_NOTHING( unwrap2.initialize() )
     unwrap2.setPropertyValue("InputWorkspace", outputSpace);
     unwrap2.setPropertyValue("OutputWorkspace", "unwrappedWS2" );
     unwrap2.setPropertyValue("LRef","40.0");
 
     TS_ASSERT_THROWS_NOTHING( unwrap2.execute() )
     TS_ASSERT( unwrap2.isExecuted() )
-	}
+  }
 
 private:
   Unwrap unwrap;
