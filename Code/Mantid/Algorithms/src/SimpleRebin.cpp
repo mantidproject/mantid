@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <sstream>
@@ -18,10 +19,7 @@ namespace Mantid
     DECLARE_ALGORITHM(SimpleRebin)
 
     using namespace Kernel;
-    using API::WorkspaceProperty;
-    using API::Workspace_sptr;
-    using API::Workspace;
-
+    using namespace API;
     // Get a reference to the logger
     Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
 
@@ -30,7 +28,7 @@ namespace Mantid
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new HistogramValidator));
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
       declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
@@ -46,7 +44,7 @@ namespace Mantid
       std::vector<double> rb_params=getProperty("params");
 
       // Get the input workspace
-      Workspace_sptr inputW = getProperty("InputWorkspace");
+      Workspace_const_sptr inputW = getProperty("InputWorkspace");
 
       bool dist = inputW->isDistribution();
 
@@ -130,14 +128,7 @@ namespace Mantid
       double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
       int size_yold=yold.size();
       int size_ynew=ynew.size();
-      int size_x=xold.size();
 
-      // put in g_log stuff later about histogram data
-      if(size_yold != size_x-1)
-      {
-        g_log.error("SimpleRebin: rebinning not possible on point data ");
-        throw std::invalid_argument("SimpleRebin: rebinning not possible on point data");
-      }
       while((inew < size_ynew) && (iold < size_yold))
       {
         xo_low = xold[iold];

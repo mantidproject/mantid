@@ -18,7 +18,7 @@ namespace Kernel
 
     @author Matt Clarke, ISIS.
     @date 25/06/2008
- 
+
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
@@ -45,18 +45,18 @@ public:
   /// Default constructor.
   FileValidator() : IValidator<std::string>(), m_extensions()
   {}
-	  
-   /** Constructor
-   *  \param extension :: The required file extensions (i.e. .RAW) 
+
+  /** Constructor
+   *  @param extensions The required file extensions (e.g. .RAW)
    */
-  explicit FileValidator(const std::vector<std::string> extensions) : 
+  explicit FileValidator(const std::vector<std::string> extensions) :
     IValidator<std::string>(),
     m_extensions(extensions)
   {}
- 
+
   /// Destructor
   virtual ~FileValidator() {}
-	
+
   /** Checks whether the value provided is a valid filepath.
    *  @param value The value to test
    *  @return True if the value is valid, false otherwise
@@ -68,14 +68,14 @@ public:
 		//Find extension of value
 		std::size_t found=value.find_last_of(".");
 		std::string ext = value.substr(found+1);
-		
+
 		std::vector<std::string>::const_iterator itr;
-		
+
 		itr = std::find(m_extensions.begin(), m_extensions.end(), ext);
-		
+
 		if (itr == m_extensions.end()) return false;
 	}
-	  
+
 	if ( boost::filesystem::exists(value) )
 	{
 		return true;
@@ -85,24 +85,25 @@ public:
 		return false;
 	}
   }
-  
+
    ///Return the type of the validator
   const std::string getType() const
   {
 	  return "file";
   }
-  
+
   /// Returns the set of valid values
   const std::vector<std::string>& allowedValues() const
   {
     return m_extensions;
   }
-  
+
   IValidator<std::string>* clone() { return new FileValidator(*this); }
-  
+
 private:
+  /// The list of permitted extensions
 	std::vector<std::string> m_extensions;
- 
+
 };
 
 } // namespace Kernel

@@ -9,6 +9,7 @@ namespace Kernel
 /** Constructor
  *  @param name The name of the property
  *  @param type The type of the property
+ *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
  */
 Property::Property( const std::string &name, const std::type_info &type, const unsigned int direction ) :
   m_isDefault( true ),

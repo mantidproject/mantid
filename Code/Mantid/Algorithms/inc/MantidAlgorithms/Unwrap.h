@@ -60,7 +60,6 @@ private:
   void init();
   void exec();
 
-  void checkInputWorkspace() const;
   const double getPrimaryFlightpath() const;
   const double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
   const std::vector<int> unwrapX(const API::Workspace_sptr& tempWS, const int& spectrum, const double& Ld);

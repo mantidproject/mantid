@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Unwrap.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -30,7 +31,11 @@ Unwrap::~Unwrap()
 /// Initialisation method
 void Unwrap::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+  CompositeValidator *wsValidator = new CompositeValidator;
+  wsValidator->add(new WorkspaceUnitValidator("TOF"));
+  wsValidator->add(new HistogramValidator);
+  wsValidator->add(new RawCountValidator);
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<double> *validator = new BoundedValidator<double>;
@@ -52,9 +57,6 @@ void Unwrap::exec()
 {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  // Check the workspace is valid for this algorithm
-  this->checkInputWorkspace();
-
   // Need a new workspace. Will just be used temporarily until the data is rebinned.
   Workspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS);
 
@@ -108,31 +110,6 @@ void Unwrap::exec()
   // Set the correct X unit on the output workspace
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   setProperty("OutputWorkspace",outputWS);
-}
-
-/** Verifies that the input workspace is compatible with this algorithm
- *  @throw std::runtime_error if the workspace is invalid
- */
-void Unwrap::checkInputWorkspace() const
-{
-  // Check its unit is TOF
-  if ( m_inputWS->getAxis(0)->unit()->unitID() != "TOF" )
-  {
-    g_log.error("Input workspace must have units of TOF");
-    throw std::runtime_error("Input workspace must have units of TOF");
-  }
-  // Check its histogram data
-  if ( m_inputWS->dataX(0).size() != m_inputWS->dataY(0).size()+1 )
-  {
-    g_log.error("Input workspace must contain histogram data");
-    throw std::runtime_error("Input workspace must contain histogram data");
-  }
-  // Workspace data must not be dimensioned
-  if ( m_inputWS->isDistribution() )
-  {
-    g_log.error("Input workspace Y data must be raw counts");
-    throw std::runtime_error("Input workspace Y data must be raw counts");
-  }
 }
 
 /** Gets the primary flightpath (L1)

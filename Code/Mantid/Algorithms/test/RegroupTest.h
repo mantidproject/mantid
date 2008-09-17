@@ -34,33 +34,16 @@ public:
     // Check it fails if "params" property not set
     TS_ASSERT_THROWS( regroup.execute(), std::runtime_error )
     TS_ASSERT( ! regroup.isExecuted() )
-    // set the property with an error
-    regroup.setPropertyValue("params", "1.5,2.0,20,-0.1,15,1.0,35");
-    std::vector<double> params = regroup.getProperty("params");
-    std::vector<double> &xold = test_in1D->dataX(0);
-    std::vector<double> xnew;
-    //std::cout<<'\n';
-    //for(size_t i=0;i<xold.size();i++)
-    //    std::cout<<xold[i]<<' ';
-    //std::cout<<'\n';
-
-    //TS_ASSERT( ! regroup.areParamsValid(params) )
-    TS_ASSERT_THROWS(regroup.execute(),std::invalid_argument);
-
+    // Trying to set the property with an error fails
+    TS_ASSERT_THROWS(regroup.setPropertyValue("params", "1.5,2.0,20,-0.1,15,1.0,35"), std::invalid_argument)
     // Now set the property
-    regroup.setPropertyValue("params", "1.5,1,19,-0.1,30,1,35");
-    params = regroup.getProperty("params");
+    TS_ASSERT_THROWS_NOTHING( regroup.setPropertyValue("params", "1.5,1,19,-0.1,30,1,35") )
 
     TS_ASSERT(regroup.execute())
     TS_ASSERT( regroup.isExecuted())
 
     Workspace_sptr rebindata = regroup.getProperty("OutputWorkspace");
     const std::vector<double> outX=rebindata->dataX(0);
-
-    //std::cout<<'\n';
-    //for(size_t i=0;i<outX.size();i++)
-    //    std::cout<<outX[i]<<' ';
-    //std::cout<<'\n';
 
     TS_ASSERT_DELTA(outX[7],12.5  ,0.000001);
     TS_ASSERT_DELTA(outX[12],20.75  ,0.000001);

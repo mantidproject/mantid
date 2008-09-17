@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_WORKSPACEPROPERTY_H_
-#define MANTID_KERNEL_WORKSPACEPROPERTY_H_
+#ifndef MANTID_API_WORKSPACEPROPERTY_H_
+#define MANTID_API_WORKSPACEPROPERTY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,9 +15,7 @@ namespace Mantid
 {
 namespace API
 {
-/** @class WorkspaceProperty WorkspaceProperty.h Kernel/WorkspaceProperty.h
-
-    A property class for workspaces. Inherits from PropertyWithValue, with the value being
+/** A property class for workspaces. Inherits from PropertyWithValue, with the value being
     a pointer to the workspace type given to the WorkspaceProperty constructor. This kind
     of property also holds the name of the workspace (as used by the AnalysisDataService)
     and an indication of whether it is an input or output to an algorithm (or both).
@@ -61,10 +59,12 @@ public:
    *  @param name The name to assign to the property
    *  @param wsName The name of the workspace
    *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+   *  @param validator The (optional) validator to use for this property
    *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
    */
-  WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction ) :
-    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), direction ),
+  WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
+                     Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
     m_workspaceName( wsName )
   {
   }
@@ -116,7 +116,8 @@ public:
   }
 
   /** Checks whether the property is valid.
-   *  To be valid, a property must not have an empty name and must exist in the AnalysisDataService
+   *  To be valid, in addition to satisfying the conditions of any validators,
+   *  a property must not have an empty name and must exist in the AnalysisDataService
    *  if it is an input workspace (Direction::Input or Direction::InOut).
    *  This method also fetches the pointer to an output workspace, if it exists in the ADS.
    *  @returns True if the property is valid, otherwise false.
@@ -133,19 +134,20 @@ public:
         if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
     } catch (Kernel::Exception::NotFoundError&) {
         // Only concerned with failing to find workspace in ADS if it's an input type
-        if ( !this->operator()() && 
-             (( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) || 
+        if ( !this->operator()() &&
+             (( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) ||
               ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 )) )
         {
           return false;
         }
         else
         {
-          return true;
+          // Fall through
         }
     }
 
-    return true;
+    // Call superclass method to access any attached validators
+    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
   }
 
   /** Returns the current contents of the AnalysisDataService for input workspaces.
@@ -153,7 +155,7 @@ public:
    */
   virtual const std::vector<std::string> allowedValues() const
   {
-    if ( ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) || 
+    if ( ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) ||
          ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 ) )
     {
       // If an input workspace, get the list of workspaces currently in the ADS
@@ -212,4 +214,4 @@ private:
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_WORKSPACEPROPERTY_H_*/
+#endif /*MANTID_API_WORKSPACEPROPERTY_H_*/

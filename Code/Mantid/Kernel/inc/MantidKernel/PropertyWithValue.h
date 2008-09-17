@@ -168,6 +168,11 @@ public:
   {
   }
 
+  /** Constructor
+   *  @param name The name to assign to the property
+   *  @param value The initial value to assign to the property
+   *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
+   */
   PropertyWithValue( const std::string &name, const TYPE& value, const unsigned int direction) :
     Property( name, typeid( TYPE ), direction ),
     m_value( value ),

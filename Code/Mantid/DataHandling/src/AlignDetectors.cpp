@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -30,7 +31,10 @@ AlignDetectors::~AlignDetectors()
 
 void AlignDetectors::init()
 {
-  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
+  CompositeValidator *wsValidator = new CompositeValidator;
+  wsValidator->add(new WorkspaceUnitValidator("TOF"));
+  wsValidator->add(new RawCountValidator);
+  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
   declareProperty("CalibrationFile","",new FileValidator(std::vector<std::string>(1,"cal")));
 }
@@ -44,19 +48,6 @@ void AlignDetectors::exec()
 {
   // Get the input workspace
   const Workspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-  // Check its unit is TOF
-  if ( inputWS->getAxis(0)->unit()->unitID() != "TOF" )
-  {
-    g_log.error("The X axis must have units of time-of-flight");
-    throw Exception::NotImplementedError("Only implemented for input unit of TOF");
-  }
-  // Check it's not distribution data
-  if ( inputWS->isDistribution() )
-  {
-    g_log.error("Not implemented for distribution data");
-    throw Exception::NotImplementedError("Not implemented for distribution data");
-  }
 
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");

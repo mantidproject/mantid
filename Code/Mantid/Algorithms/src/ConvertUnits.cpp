@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
@@ -33,7 +34,10 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
+  CompositeValidator *wsValidator = new CompositeValidator;
+  wsValidator->add(new WorkspaceUnitValidator);
+  wsValidator->add(new HistogramValidator);
+  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
@@ -51,24 +55,8 @@ void ConvertUnits::init()
  */
 void ConvertUnits::exec()
 {
-  // Get the workspace
+  // Get the workspaces
   API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-  // Check that the workspace is histogram data
-  if (inputWS->dataX(0).size() == inputWS->dataY(0).size())
-  {
-    g_log.error("Conversion of units for point data is not yet implemented");
-    throw Exception::NotImplementedError("Conversion of units for point data is not yet implemented");
-  }
-
-  // Check that the input workspace has had its unit set
-  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
-  if ( ! inputUnit )
-  {
-    g_log.error("Input workspace has not had its unit set");
-    throw std::runtime_error("Input workspace has not had its unit set");
-  }
-
   API::Workspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for the output
   if (outputWS != inputWS )
@@ -78,6 +66,7 @@ void ConvertUnits::exec()
   }
 
   // Check that the input workspace doesn't already have the desired unit. If it does, just copy data.
+  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
   if ( inputUnit->unitID() == targetUnit )
   {

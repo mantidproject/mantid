@@ -9,11 +9,9 @@
 
 namespace Mantid
 {
-  namespace Algorithms
-  {
-    /** 
-
-    Takes a 1D workspace as input and regroups the data according to the input regroup parameters.
+namespace Algorithms
+{
+/** Takes a 2D workspace as input and regroups the data according to the input regroup parameters.
 
     Required Properties:
     <UL>
@@ -22,15 +20,10 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     </UL>
 
-    Optional Properties (assume that you count from zero):
-    <UL>
-    <LI>   -  (default max)</LI>
-    </UL>
-
     @author Roman Tolchenov
     @date 16/07/2008
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -47,43 +40,40 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport Regroup : public API::Algorithm
-    {
-    public:
-      /// Default constructor
-      Regroup() : API::Algorithm() {};
-      /// Destructor
-      virtual ~Regroup() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Regroup";}
-      /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1;}
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "General";}
-    
-      bool areParamsValid(const std::vector<double>& params);
-      int newAxis(const std::vector<double>& params, 
-                        std::vector<double>& xold, 
+ */
+class DLLExport Regroup : public API::Algorithm
+{
+public:
+  /// Default constructor
+  Regroup() : API::Algorithm() {};
+  /// Destructor
+  virtual ~Regroup() {};
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "Regroup";}
+  /// Algorithm's version for identification overriding a virtual method
+  virtual const int version() const { return 1;}
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "General";}
+
+  int newAxis(const std::vector<double>& params,
+              const std::vector<double>& xold,
                         std::vector<double>& xnew,
                         std::vector<int> &xoldIndex);
-    private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-      bool hasSameBoundaries(const API::Workspace_sptr WS);
+private:
+  // Overridden Algorithm methods
+  void init();
+  void exec();
+  bool hasSameBoundaries(const API::Workspace_const_sptr WS);
 
-      void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
-          const std::vector<int>& , std::vector<double>&, std::vector<double>&, bool);
-        /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
-    };
+  void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
+             const std::vector<int>& , std::vector<double>&, std::vector<double>&, bool);
+  /// Static reference to the logger class
+  static Mantid::Kernel::Logger& g_log;
+};
 
-
-
-  } // namespace Algorithm
+} // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/
