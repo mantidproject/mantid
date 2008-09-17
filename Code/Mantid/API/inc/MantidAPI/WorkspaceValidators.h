@@ -40,7 +40,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CompositeValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport CompositeValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
 {
 public:
   CompositeValidator();
@@ -68,7 +68,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class WorkspaceUnitValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport WorkspaceUnitValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
 {
 public:
   explicit WorkspaceUnitValidator(const std::string& unitID = "");
@@ -90,7 +90,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class HistogramValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport HistogramValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
 {
 public:
   explicit HistogramValidator(const bool& mustBeHistogram = true);
@@ -110,7 +110,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class RawCountValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport RawCountValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
 {
 public:
   RawCountValidator() {}
