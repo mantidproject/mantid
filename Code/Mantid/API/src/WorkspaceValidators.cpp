@@ -16,7 +16,7 @@ CompositeValidator::CompositeValidator() {}
 
 CompositeValidator::~CompositeValidator()
 {
-  std::vector<Kernel::IValidator<boost::shared_ptr<Workspace> >*>::iterator it;
+  std::vector<Kernel::IValidator<Workspace_sptr>*>::iterator it;
   for (it = m_children.begin(); it != m_children.end(); ++it)
   {
     delete *it;
@@ -27,9 +27,9 @@ CompositeValidator::~CompositeValidator()
 /** Checks the value of all child validators. Fails if any one of them does.
  *  @param value The workspace to test
  */
-const bool CompositeValidator::isValid( const boost::shared_ptr<Workspace> &value ) const
+const bool CompositeValidator::isValid( const Workspace_sptr& value ) const
 {
-  std::vector<Kernel::IValidator<boost::shared_ptr<Workspace> >*>::const_iterator it;
+  std::vector<Kernel::IValidator<Workspace_sptr>*>::const_iterator it;
   for (it = m_children.begin(); it != m_children.end(); ++it)
   {
     // Return false if any one child validator fails
@@ -39,10 +39,10 @@ const bool CompositeValidator::isValid( const boost::shared_ptr<Workspace> &valu
   return true;
 }
 
-Kernel::IValidator<boost::shared_ptr<Workspace> >* CompositeValidator::clone()
+Kernel::IValidator<Workspace_sptr>* CompositeValidator::clone()
 {
   CompositeValidator* copy = new CompositeValidator();
-  std::vector<Kernel::IValidator<boost::shared_ptr<Workspace> >*>::const_iterator it;
+  std::vector<Kernel::IValidator<Workspace_sptr>*>::const_iterator it;
   for (it = m_children.begin(); it != m_children.end(); ++it)
   {
     copy->add( (*it)->clone() );
@@ -53,7 +53,7 @@ Kernel::IValidator<boost::shared_ptr<Workspace> >* CompositeValidator::clone()
 /** Adds a validator to the group of validators to check
  *  @param child A pointer to the validator to add
  */
-void CompositeValidator::add(Kernel::IValidator<boost::shared_ptr<Workspace> >* child)
+void CompositeValidator::add(Kernel::IValidator<Workspace_sptr>* child)
 {
   m_children.push_back(child);
 }
@@ -71,7 +71,7 @@ WorkspaceUnitValidator::WorkspaceUnitValidator(const std::string& unitID) : m_un
 /** Checks the workspace based on the validator's rules
  *  @param value The workspace to test
  */
-const bool WorkspaceUnitValidator::isValid( const boost::shared_ptr<Workspace> &value ) const
+const bool WorkspaceUnitValidator::isValid( const Workspace_sptr& value ) const
 {
   boost::shared_ptr<Kernel::Unit> unit = value->getAxis(0)->unit();
   // If no unit has been given to the validator, just check that the workspace has a unit...
@@ -82,6 +82,7 @@ const bool WorkspaceUnitValidator::isValid( const boost::shared_ptr<Workspace> &
   // ... otherwise check that the unit is the correct one
   else
   {
+    if (!unit) return false;
     return !( unit->unitID().compare(m_unitID) );
   }
 }
@@ -100,7 +101,7 @@ HistogramValidator::HistogramValidator(const bool& mustBeHistogram) :
 /** Checks the workspace based on the validator's rules
  *  @param value The workspace to test
  */
-const bool HistogramValidator::isValid( const boost::shared_ptr<Workspace> &value ) const
+const bool HistogramValidator::isValid( const Workspace_sptr& value ) const
 {
   if ( value->dataX(0).size() == value->dataY(0).size() )
   {
@@ -118,7 +119,7 @@ const bool HistogramValidator::isValid( const boost::shared_ptr<Workspace> &valu
 /** Checks the workspace based on the validator's rules
  *  @param value The workspace to test
  */
-const bool RawCountValidator::isValid( const boost::shared_ptr<Workspace> &value ) const
+const bool RawCountValidator::isValid( const Workspace_sptr& value ) const
 {
   return !( value->isDistribution() );
 }

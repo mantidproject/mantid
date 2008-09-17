@@ -40,7 +40,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompositeValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport CompositeValidator: public Kernel::IValidator<Workspace_sptr>
 {
 public:
   CompositeValidator();
@@ -48,17 +48,17 @@ public:
 
   // IValidator methods
   const std::string getType() const { return "composite"; }
-  const bool isValid( const boost::shared_ptr<Workspace> &value ) const;
-  Kernel::IValidator<boost::shared_ptr<Workspace> >* clone();
+  const bool isValid( const Workspace_sptr&value ) const;
+  Kernel::IValidator<Workspace_sptr>* clone();
 
-  void add(Kernel::IValidator<boost::shared_ptr<Workspace> >* child);
+  void add(Kernel::IValidator<Workspace_sptr>* child);
 
 private:
   /// Private Copy constructor: NO DIRECT COPY ALLOWED
   CompositeValidator(const CompositeValidator&);
 
   /// A container for the child validators
-  std::vector<Kernel::IValidator<boost::shared_ptr<Workspace> >*> m_children;
+  std::vector<Kernel::IValidator<Workspace_sptr>*> m_children;
 };
 
 
@@ -68,15 +68,15 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport WorkspaceUnitValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport WorkspaceUnitValidator: public Kernel::IValidator<Workspace_sptr>
 {
 public:
   explicit WorkspaceUnitValidator(const std::string& unitID = "");
   virtual ~WorkspaceUnitValidator() {}
 
   const std::string getType() const { return "workspaceunit"; }
-  const bool isValid( const boost::shared_ptr<Workspace> &value ) const;
-  Kernel::IValidator<boost::shared_ptr<Workspace> >* clone() { return new WorkspaceUnitValidator(*this); }
+  const bool isValid( const Workspace_sptr&value ) const;
+  Kernel::IValidator<Workspace_sptr>* clone() { return new WorkspaceUnitValidator(*this); }
 
 private:
   /// The name of the required unit
@@ -90,15 +90,15 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport HistogramValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport HistogramValidator: public Kernel::IValidator<Workspace_sptr>
 {
 public:
   explicit HistogramValidator(const bool& mustBeHistogram = true);
   virtual ~HistogramValidator() {}
 
   const std::string getType() const { return "histogram"; }
-  const bool isValid( const boost::shared_ptr<Workspace> &value ) const;
-  Kernel::IValidator<boost::shared_ptr<Workspace> >* clone() { return new HistogramValidator(*this); }
+  const bool isValid( const Workspace_sptr&value ) const;
+  Kernel::IValidator<Workspace_sptr>* clone() { return new HistogramValidator(*this); }
 
 private:
   /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
@@ -110,15 +110,15 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport RawCountValidator: public Kernel::IValidator<boost::shared_ptr<Workspace> >
+class DLLExport RawCountValidator: public Kernel::IValidator<Workspace_sptr>
 {
 public:
   RawCountValidator() {}
   virtual ~RawCountValidator() {}
 
   const std::string getType() const { return "rawcount"; }
-  const bool isValid( const boost::shared_ptr<Workspace> &value ) const;
-  Kernel::IValidator<boost::shared_ptr<Workspace> >* clone() { return new RawCountValidator(*this); }
+  const bool isValid( const Workspace_sptr&value ) const;
+  Kernel::IValidator<Workspace_sptr>* clone() { return new RawCountValidator(*this); }
 };
 
 } // namespace API
