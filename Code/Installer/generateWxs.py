@@ -51,11 +51,13 @@ def addComponent(Id,guid,parent):
 # adds all dlls from location to parent.
 # rules are applied to exclude debug libraries
 # name is a short name to which a number will be added
-def addDlls(location,name,parent):
+def addDlls(location,name,parent, exclud = []):
     print 'Include dlls from',os.path.abspath(location);
     sdlls = os.listdir(location);
     i = 0
     for fil in sdlls:
+        if fil in exclud:
+            continue
         lst = fil.split('.')
         l = len(lst)
         if l < 2 or lst[l-1] != 'dll':
@@ -216,7 +218,8 @@ Cond.setAttribute('Message','Mantid requires Python 2.5 to be installed on your 
 Cond.appendChild(doc.createTextNode('PYTHON25DIR'))
 Product.appendChild(Cond)
 
-TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
+#TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
+TargetDir = addDirectory('TARGETDIR','WVolume','WindowsVolume',Product)
 InstallDir = addDirectory('INSTALLDIR','MInstall','MantidInstall',TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 
@@ -250,7 +253,7 @@ addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shar
 addFileV('MantidDataHandling_tmp','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
 addFileV('MantidDataObjects_tmp','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
 #addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
-addDlls('../Third_Party/lib/win32','3dDll',MantidDlls)
+addDlls('../Third_Party/lib/win32','3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
@@ -268,10 +271,15 @@ addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.lo
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
 Plugins = addComponent('Plugins','{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}',pluginsDir)
 addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/Bin/Shared/MantidAlgorithms.dll',Plugins)
-addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Plugins)
 addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',Plugins)
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',Plugins)
-addTo(Plugins,'CreateFolder',{})
+nexusDir = addDirectory('NexusDir','Nexus','Nexus',pluginsDir)
+Nexus = addComponent('Nexus',msilib.gen_uuid(),nexusDir)
+addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Nexus)
+addFileV('hd421mdll','hd421m.dll','hd421m.dll','../Third_Party/lib/win32/hd421m.dll',Nexus)
+addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win32/hdf5dll.dll',Nexus)
+addFileV('hm421mdll','hm421m.dll','hm421m.dll','../Third_Party/lib/win32/hm421m.dll',Nexus)
+addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win32/libNeXus-0.dll',Nexus)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents','{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}',documentsDir)
@@ -417,6 +425,7 @@ Complete = addRootFeature('Complete','Mantid','The complete package','1',Product
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
 addCRef('Plugins',MantidExec)
+addCRef('Nexus',MantidExec)
 addCRef('Documents',MantidExec)
 addCRef('Logs',MantidExec)
 addCRef('Scripts',MantidExec)
@@ -441,9 +450,10 @@ addCRefs(instrument,MantidExec)
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
-PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',MantidExec)
-addCRef('Sip',PyQtF)
-addCRef('PyQt',PyQtF)
+# Dont see why it must be a separate feature
+#PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',MantidExec)
+addCRef('Sip',QTIPlotExec)
+addCRef('PyQt',QTIPlotExec)
 
 SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
 addCRef('SourceMantidAlgorithms',SourceFiles)
@@ -455,7 +465,8 @@ addCRef('SourceMantidKernel',SourceFiles)
 addCRef('SourceMantidNexus',SourceFiles)
 addCRef('SourceMantidPythonAPI',SourceFiles)
 
-addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
+#addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
+addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
 addTo(Product,'UIRef',{'Id':'WixUI_ErrorProgressText'})
 
 f = open('tmp.wxs','w')
