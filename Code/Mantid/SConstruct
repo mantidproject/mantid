@@ -101,7 +101,7 @@ if os.name == 'nt':
 
 else:
 
-	if rpmBuild:
+	if not rpmBuild:
 		print "* COMMENCING LINUX BUILD *"
 		f=open('Build/Scons_Linux.conf', 'r')
 		for ln in f:
