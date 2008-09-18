@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -27,8 +27,10 @@ public:
     histVal = new HistogramValidator();
     rawVal = new RawCountValidator();
 
-    ws1 = WorkspaceFactory::Instance().create("Workspace2D",1,10,9);
-    ws2 = WorkspaceFactory::Instance().create("Workspace2D",1,10,10);
+    ws1 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
+    ws1->initialize(1,10,9);
+    ws2 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
+    ws2->initialize(1,10,10);
     ws2->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     ws2->isDistribution(true);
   }
@@ -47,7 +49,7 @@ public:
 
   void testWorkspaceUnitValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator val() )
+    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator val; )
   }
 
   void testWorkspaceUnitValidator_getType()
