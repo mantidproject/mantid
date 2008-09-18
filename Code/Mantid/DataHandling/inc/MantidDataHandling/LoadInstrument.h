@@ -24,6 +24,7 @@ namespace Geometry
   class CompAssembly;
   class Component;
   class Object;
+  class ObjComponent;
 }
 namespace API
 {
@@ -128,6 +129,13 @@ namespace API
 
       /// map which maps the type name to a shared pointer to a geometric shape
       std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
+
+      /// Container to hold all detectors and monitors added to the instrument. Used for
+      /// 'facing' these to component specified under <defaults>
+      std::vector< Geometry::ObjComponent* > m_facingComponent;
+
+      /// Make all the shapes defined in 1st argument face the component in the second argument
+      void makeXYplaneFaceComponent(std::vector< Geometry::ObjComponent* > &in, const Geometry::ObjComponent* facing);
 
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string);

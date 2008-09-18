@@ -164,11 +164,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
     boost::shared_ptr<Instrument> i = output->getInstrument();
-    Component* source = i->getSource();
+    ObjComponent* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
-    Component* samplepos = i->getSample();
+    ObjComponent* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
@@ -200,8 +200,123 @@ public:
     Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
     TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,3.1)+ptrDetShape->getPos()) );
-    TS_ASSERT( ptrDetShape->isValid(V3D(0.001,0.05,0.001)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.001,0.05,0.001)+ptrDetShape->getPos()) );
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.1,0.1,0.1)+ptrDetShape->getPos()) );
+
+    // test of sample shape
+    TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
+    TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+
+    // test of source shape
+    TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
+    TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
+  }
+
+  void testExecIDF_for_unit_testing() // IDF stands for Instrument Definition File
+  {
+    LoadInstrument loaderIDF;
+
+    TS_ASSERT_THROWS_NOTHING(loaderIDF.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestIDF";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Instrument/IDF_for_unit_testing.xml";
+    loaderIDF.setPropertyValue("Filename", inputFile);
+
+    loaderIDF.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderIDF.execute());
+
+    TS_ASSERT( loaderIDF.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    ObjComponent* source = i->getSource();
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
+
+    ObjComponent* samplepos = i->getSample();
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
+
+    Detector *ptrDet1 = dynamic_cast<Detector*>(i->getDetector(1));
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(),  0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 10.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(),  0.0, 0.0001);
+    double d = ptrDet1->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,10.0,0.0001);
+    double cmpDistance = ptrDet1->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,10.0,0.0001);
+    TS_ASSERT_EQUALS( ptrDet1->type(), "DetectorComponent");
+
+    Detector *ptrDet2 = dynamic_cast<Detector*>(i->getDetector(2));
+    TS_ASSERT_EQUALS( ptrDet2->getID(), 2);
+    TS_ASSERT_DELTA( ptrDet2->getPos().X(),  0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet2->getPos().Y(), -10.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet2->getPos().Z(),  0.0, 0.0001);
+    d = ptrDet2->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,10.0,0.0001);
+    cmpDistance = ptrDet2->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,10.0,0.0001);
+    TS_ASSERT_EQUALS( ptrDet2->type(), "DetectorComponent");
+
+
+    // test if detectors face sample
+    TS_ASSERT( !ptrDet1->isValid(V3D(0.02,0.0,0.0)+ptrDet1->getPos()) );
+    TS_ASSERT( !ptrDet1->isValid(V3D(-0.02,0.0,0.0)+ptrDet1->getPos()) );
+    TS_ASSERT( ptrDet1->isValid(V3D(0.0,0.02,0.0)+ptrDet1->getPos()) );
+    TS_ASSERT( !ptrDet1->isValid(V3D(0.0,-0.02,0.0)+ptrDet1->getPos()) );
+    TS_ASSERT( !ptrDet1->isValid(V3D(0.0,0.0,0.02)+ptrDet1->getPos()) );
+    TS_ASSERT( !ptrDet1->isValid(V3D(0.0,0.0,-0.02)+ptrDet1->getPos()) );
+
+    TS_ASSERT( !ptrDet2->isValid(V3D(0.02,0.0,0.0)+ptrDet2->getPos()) );
+    TS_ASSERT( !ptrDet2->isValid(V3D(-0.02,0.0,0.0)+ptrDet2->getPos()) );
+    TS_ASSERT( !ptrDet2->isValid(V3D(0.0,0.02,0.0)+ptrDet2->getPos()) );
+    TS_ASSERT( ptrDet2->isValid(V3D(0.0,-0.02,0.0)+ptrDet2->getPos()) );
+    TS_ASSERT( !ptrDet2->isValid(V3D(0.0,0.0,0.02)+ptrDet2->getPos()) );
+    TS_ASSERT( !ptrDet2->isValid(V3D(0.0,0.0,-0.02)+ptrDet2->getPos()) );
+
+    Detector *ptrDet3 = dynamic_cast<Detector*>(i->getDetector(3));
+    TS_ASSERT( !ptrDet3->isValid(V3D(0.02,0.0,0.0)+ptrDet3->getPos()) );
+    TS_ASSERT( !ptrDet3->isValid(V3D(-0.02,0.0,0.0)+ptrDet3->getPos()) );
+    TS_ASSERT( !ptrDet3->isValid(V3D(0.0,0.02,0.0)+ptrDet3->getPos()) );
+    TS_ASSERT( !ptrDet3->isValid(V3D(0.0,-0.02,0.0)+ptrDet3->getPos()) );
+    TS_ASSERT( ptrDet3->isValid(V3D(0.0,0.0,0.02)+ptrDet3->getPos()) );
+    TS_ASSERT( !ptrDet3->isValid(V3D(0.0,0.0,-0.02)+ptrDet3->getPos()) );
+
+    Detector *ptrDet4 = dynamic_cast<Detector*>(i->getDetector(4));
+    TS_ASSERT( !ptrDet4->isValid(V3D(0.02,0.0,0.0)+ptrDet4->getPos()) );
+    TS_ASSERT( !ptrDet4->isValid(V3D(-0.02,0.0,0.0)+ptrDet4->getPos()) );
+    TS_ASSERT( !ptrDet4->isValid(V3D(0.0,0.02,0.0)+ptrDet4->getPos()) );
+    TS_ASSERT( !ptrDet4->isValid(V3D(0.0,-0.02,0.0)+ptrDet4->getPos()) );
+    TS_ASSERT( !ptrDet4->isValid(V3D(0.0,0.0,0.02)+ptrDet4->getPos()) );
+    TS_ASSERT( ptrDet4->isValid(V3D(0.0,0.0,-0.02)+ptrDet4->getPos()) );
+
+    // test of sample shape
+    TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
+    TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+
+    // test of source shape
+    TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
+    TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
   }
 
 

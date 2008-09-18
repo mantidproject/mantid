@@ -5,6 +5,7 @@
 #include "MantidDataHandling/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidGeometry/Detector.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -114,7 +115,7 @@ void LoadInstrument::exec()
       isTypeAssembly[typeName] = false;
 
       // for now try to create a geometry shape associated with every type
-      // that is does not contain any component elements
+      // that does not contain any component elements
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
     }
     else
@@ -156,18 +157,19 @@ void LoadInstrument::exec()
           " even it is just an empty location element of the form <location />", m_filename);
       }
 
+
+      // read detertor IDs into idlist if required
+
+      if ( pElem->hasAttribute("idlist") )
+      {
+        std::string idlist = pElem->getAttribute("idlist");
+        Element* pFound = pDoc->getElementById(idlist, "idname");
+        populateIdList(pFound, idList);
+      }
+
+
       if ( isAssembly(pElem->getAttribute("type")) )
       {
-        // read detertor IDs into idlist if required
-
-        if ( pElem->hasAttribute("idlist") )
-        {
-          std::string idlist = pElem->getAttribute("idlist");
-          Element* pFound = pDoc->getElementById(idlist, "idname");
-          populateIdList(pFound, idList);
-        }
-
-
         for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
           appendAssembly(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
@@ -199,9 +201,33 @@ void LoadInstrument::exec()
   }
 
   pNL_comp->release();
-  pDoc->release();
   // Don't need this anymore (if it was even used) so empty it out to save memory
   m_tempPosHolder.clear();
+
+
+  // If "facing" element(s) present in instrument defintion file then
+
+  Element* facingElement = pRootElem->getChildElement("defaults")->getChildElement("detectors-and-monitors-are-facing");
+  if (facingElement)
+  {
+    std::string facingCompStr = offsetElement->getAttribute("component");
+
+    Geometry::ObjComponent* facingComp;
+    if ( facingCompStr.compare("SamplePos") == 0 )
+      facingComp = m_instrument->getSample();
+    else if ( facingCompStr.compare("Source") == 0 )
+      facingComp = m_instrument->getSource();
+    else
+    {
+      g_log.warning() << "component attribute of <detectors-and-monitors-are-facing> element in "
+        << "instrument definition file not recognized. Therefore it has been defaulted to SamplePos.";
+      facingComp = m_instrument->getSample();
+    }
+
+    makeXYplaneFaceComponent(m_facingComponent, facingComp);
+  }
+
+  pDoc->release();
 
   return;
 }
@@ -345,6 +371,11 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
       throw Kernel::Exception::InstrumentDefinitionError("Detector with ID = " + convert.str() +
         " present more then once in XML instrument file", m_filename);
     }
+
+    // Add all monitors and detectors to 'facing component' container. This is only used if the
+    // "facing" elements are defined in the instrument definition file
+
+    m_facingComponent.push_back(detector);
   }
   else
   {
@@ -614,6 +645,50 @@ bool LoadInstrument::isAssembly(std::string type)
 
   return isTypeAssembly[type];
 }
+
+
+/** Make all the shapes defined in 1st argument face the component in the second argument,
+ *  by rotating the z-axis of each component passed to this method in 1st argument such that it point in
+ *  direction: from the component of the 2nd argument to the relavant component of the 1st argument.  
+ *
+ *  @param in  Object to be rotated
+ *  @param facing Object to face
+ */
+void LoadInstrument::makeXYplaneFaceComponent(std::vector< Geometry::ObjComponent* > &in, const Geometry::ObjComponent* facing)
+{
+  const Geometry::V3D facingPoint = facing->getPos();
+
+  int numToRotate = in.size();
+
+  for (int i = 0; i < numToRotate; i++)
+  {
+    Geometry::V3D pos = in[i]->getPos();
+
+    // vector from facing object to component we want to rotate
+
+    Geometry::V3D facingDirection = pos - facingPoint;
+
+    if ( facingDirection.norm() == 0.0 ) continue;  
+
+
+    // now aim to rotate shape such that the z-axis of of the object we want to rotate
+    // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
+
+    Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
+    double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
+
+    if ( normal.norm() > 0.0 )  
+      in[i]->rotate(Geometry::Quat(-theta, normal));
+    else
+    {
+      // To take into account the case where the facing direction is in the (0,0,1)
+      // or (0,0,-1) direction. 
+      in[i]->rotate(Geometry::Quat(-theta, Geometry::V3D(0,1,0)));
+    }
+  }
+}
+
+
 
 } // namespace DataHandling
 } // namespace Mantid
