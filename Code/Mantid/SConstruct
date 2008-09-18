@@ -8,6 +8,12 @@ import string
 from socket import gethostname
 
 import MantidBuild
+
+rpmBuild = False
+USRLOCALINCLUDE = '/usr/local/include'
+USRLOCALLIB = '/usr/local/lib'
+USRINCLUDE = '/usr/include'
+USRLIB = '/usr/lib'
   
 opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
@@ -94,17 +100,25 @@ if os.name == 'nt':
 	env['SHLINKCOM'] = [env['SHLINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;2']
 
 else:
-	print "* COMMENCING LINUX BUILD *"
-	f=open('Build/Scons_Linux.conf', 'r')
-	for ln in f:
-		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
-		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
-	#		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
-		fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
-		third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
-	f.close()
-	python_path = '/usr/local/python2.5'
 
+	if rpmBuild:
+		print "* COMMENCING LINUX BUILD *"
+		f=open('Build/Scons_Linux.conf', 'r')
+		for ln in f:
+			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
+			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
+			fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
+			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
+		f.close()
+		python_path = '/usr/local/python2.5'
+	else:
+		boost_path=''
+		poco_path=''
+		fortran_type=''
+		third_party=''
+		python_path = ''
+		boost_append = ''
+	
 print "POCO_ROOT: ",poco_path
 print "BOOST_ROOT: ",boost_path
 print "BOOST_APPEND: ",boost_append
@@ -121,20 +135,32 @@ if os.name == 'nt':
 		else :
 			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275']
 else:
-	cppPaths.append('/usr/include/python' + sys.version[0:3])
-	cppPaths.append(poco_path + 'include')
-	cppPaths.append(poco_path +'Util')
-	cppPaths.append(boost_path)
-# now picked up by gts-config
-#	cppPaths.append('/usr/include/glib-2.0/')
-#	cppPaths.append('/usr/lib/glib-2.0/include/')
-
-
-	libDirList.append('/usr/local/lib/')
+	
+	if not rpmBuild:
+		cppPaths.append(poco_path + 'include')
+		cppPaths.append(poco_path +'Util')
+		cppPaths.append(boost_path)
+		libDirList.append(USRLOCALLIB)
+		if os.path.isdir('/usr/local/poco-1.3.1/'+ '/lib/Linux/i686') :
+			libDirList.append('/usr/local/poco-1.3.1/' +'/lib/Linux/i686')
+		else :
+			libDirList.append(poco_path+'/lib')
+	else:
+		cppPaths.append(USRLOCALINCLUDE + '/Poco/')
+		cppPaths.append(USRLOCALINCLUDE+'/Poco/Util')
+		
+	cppPaths.append(USRINCLUDE)
+	cppPaths.append(USRLOCALINCLUDE)
+	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
+	#cppPaths.append(USRINCLUDE + '/glib-2.0/')
+	#cppPaths.append(USRLIB + '/glib-2.0/include/')
+	
+	libDirList.append(USRLIB)
 	libList.append('python' + sys.version[0:3])
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
+	libList.append('PocoNet')
 	libList.append('boost_python'+boost_append)
 	libList.append('boost_filesystem'+boost_append)
 	libList.append('boost_regex'+boost_append)
@@ -143,43 +169,35 @@ else:
 	libList.append('NeXus')
 	libList.append('GL')
 	libList.append('GLU')
-	libList.append('gsl')
-	libList.append('gslcblas')
-	
-
-	if os.path.isdir('/usr/local/poco-1.3.1/'+ '/lib/Linux/i686') :
-		libDirList.append('/usr/local/poco-1.3.1/' +'/lib/Linux/i686')
-	else :
-		libDirList.append(poco_path+'/lib')
 
 	if int(debug) :
 	    cflags.append(['-g','-O0','-Wall'])
 	else :
 	    cflags.append(['-g','-O3','-Wall'])
 
-	env.Append(LINKFLAGS=['-g'])
-	f=os.popen('gsl-config --cflags')
-	flags=re.sub('\n','',f.readline())
-	if (len(flags)>1):
-		cflags.append(re.split("\s+",flags))
-	f.close()
-	f=os.popen('gsl-config --libs')
-	flags=re.sub('\n','',f.readline())
-	lpts=re.split("\s+",flags)
-	lpts.append('-g')
-	#check for GTS library
-	f=os.popen('gts-config --cflags')
-	flags=re.sub('\n','',f.readline())
-	if (len(flags)>1):
-		cflags.append(re.split("\s+",flags))
-	f.close()
-	f=os.popen('gts-config --libs')
-	flags=re.sub('\n','',f.readline())
-	lpts=re.split("\s+",flags)
-	lpts.append('-g')
-
-print "CPPPATHS: ",cppPaths
-print "CLFAGS: ",cflags
+	if not rpmBuild:
+		env.Append(LINKFLAGS=['-g'])
+		f=os.popen('gsl-config --cflags')
+		flags=re.sub('\n','',f.readline())
+		if (len(flags)>1):
+			cflags.append(re.split("\s+",flags))
+		f.close()
+		f=os.popen('gsl-config --libs')
+		flags=re.sub('\n','',f.readline())
+		lpts=re.split("\s+",flags)
+		lpts.append('-g')
+		#check for GTS library
+		f=os.popen('gts-config --cflags')
+		flags=re.sub('\n','',f.readline())
+		if (len(flags)>1):
+			cflags.append(re.split("\s+",flags))
+		f.close()
+		f=os.popen('gts-config --libs')
+		flags=re.sub('\n','',f.readline())
+		temp=re.split("\s+",flags)
+		for l in temp:
+			lpts.append(l)
+			
 #check existence of Header files
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
@@ -211,13 +229,8 @@ if os.name != 'nt':
    ##
    ## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
    ## 
-	newLibList=[]
-	for libitem in libDirList:
-		if (os.path.isdir(libitem)):
-			newLibList.append('-Wl,-rpath,'+libitem)
-	lpts.insert(0,newLibList)
-	print "LibList ",newLibList
-	print "LPTS == ",lpts
+	lpts.append('-Wl,-rpath, ./Bin/Shared')
+	print lpts
 	env.Append(LINKFLAGS=lpts)
 	
 #Export for SConscripts
@@ -240,7 +253,6 @@ subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
 subProjs.append('PythonAPI')
-#subProjs.append('MatlabAPI')
 #subProjs.append('Services')
 
 # we want to link libraries in the reverse order we build them
@@ -250,16 +262,20 @@ shared_objects = []
 lib_list = []
 orig_libs = env['MYLIBLIST']
 
+f=open('libs.txt', 'w')
 
 for subproj in subProjs:
 	ret = SConscript([subproj+'/SConscript'])
 	env.Install('Bin/Shared', ret['shared'])
 	#env.Install('Bin/Static', ret['static'])
+	f.write(str( ret['shared'][0]) + '\n')
 	shared_libraries.insert(0,ret['shared'])
 	static_libraries.insert(0,ret['static'])
 	shared_objects = shared_objects + ret['sharedobjs']
 	lib_list.insert(0,ret['libs'])
-	env.Replace(MYLIBLIST=lib_list + orig_libs)
+	env.Replace(MYLIBLIST=orig_libs + lib_list)
+
+f.close()
 
 env.Replace(SHARED_LIST=shared_libraries)
 #env.Replace(STATIC_LIST=static_libraries)
@@ -276,27 +292,29 @@ for i in range(len(shared_objects)) :
 if int(bigshared) :
     big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
-    
-#User Algs
-ret = SConscript(['UserAlgorithms/SConscript'])
-env.Install('Bin/Plugins', ret['shared'])
-    
-# main program
-ret = SConscript(['Main/SConscript'])
-env.Install('Bin/Shared', ret['shared'])
 
-skiptest=ARGUMENTS.get('skiptest',0)
-if not int(skiptest):
-	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
-	# tests
-	if os.name == 'nt':
-		ret = SConscript(['Build/Tests/SConscript'])
-	else:
-		cxxtestgen = env.WhereIs('cxxtestgen.py')
-		if cxxtestgen != None :
+if not rpmBuild:
+
+	#User Algs
+	ret = SConscript(['UserAlgorithms/SConscript'])
+	env.Install('Bin/Plugins', ret['shared'])
+    
+	# main program
+	ret = SConscript(['Main/SConscript'])
+	env.Install('Bin/Shared', ret['shared'])
+
+	skiptest=ARGUMENTS.get('skiptest',0)
+	if not int(skiptest):
+		print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
+		# tests
+		if os.name == 'nt':
 			ret = SConscript(['Build/Tests/SConscript'])
-		else :
-			print 'CXXTESTGEN is not installed - tests will not be built'
-else:
-	print "Not Building Tests."
+		else:
+			cxxtestgen = env.WhereIs('cxxtestgen.py')
+			if cxxtestgen != None :
+				ret = SConscript(['Build/Tests/SConscript'])
+			else :
+				print 'CXXTESTGEN is not installed - tests will not be built'
+	else:
+		print "Not Building Tests."
 
