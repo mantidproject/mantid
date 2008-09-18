@@ -31,10 +31,10 @@ Unwrap::~Unwrap()
 /// Initialisation method
 void Unwrap::init()
 {
-  CompositeValidator *wsValidator = new CompositeValidator;
-  wsValidator->add(new WorkspaceUnitValidator("TOF"));
-  wsValidator->add(new HistogramValidator);
-  wsValidator->add(new RawCountValidator);
+  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
+  wsValidator->add(new HistogramValidator<>);
+  wsValidator->add(new RawCountValidator<>);
   declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -31,7 +32,8 @@ GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
+  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,
+                  new CommonBinsValidator<Workspace2D_sptr>));
   declareProperty(new ArrayProperty<int>("SpectraList"));
   declareProperty(new ArrayProperty<int>("DetectorList"));
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));

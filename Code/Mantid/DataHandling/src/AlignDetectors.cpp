@@ -31,9 +31,9 @@ AlignDetectors::~AlignDetectors()
 
 void AlignDetectors::init()
 {
-  CompositeValidator *wsValidator = new CompositeValidator;
-  wsValidator->add(new WorkspaceUnitValidator("TOF"));
-  wsValidator->add(new RawCountValidator);
+  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
+  wsValidator->add(new RawCountValidator<>);
   declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
   declareProperty("CalibrationFile","",new FileValidator(std::vector<std::string>(1,"cal")));

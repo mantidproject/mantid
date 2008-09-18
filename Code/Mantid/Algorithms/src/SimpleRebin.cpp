@@ -28,7 +28,7 @@ namespace Mantid
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new HistogramValidator));
+      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
       declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));

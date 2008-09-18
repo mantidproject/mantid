@@ -58,7 +58,10 @@ Logger& Regroup::g_log = Logger::get("Regroup");
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input, new API::HistogramValidator));
+  API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
+  wsVal->add(new API::HistogramValidator<>);
+  wsVal->add(new API::CommonBinsValidator<>);
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input, wsVal));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
   declareProperty(new ArrayProperty<double>("params", new RegroupParamsValidator));

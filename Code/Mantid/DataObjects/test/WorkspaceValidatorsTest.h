@@ -12,10 +12,10 @@ using namespace Mantid::API;
 class WorkspaceValidatorsTest : public CxxTest::TestSuite
 {
 private:
-  WorkspaceUnitValidator* unitVal;
-  HistogramValidator* histVal;
-  RawCountValidator* rawVal;
-  CompositeValidator compVal;
+  WorkspaceUnitValidator<>* unitVal;
+  HistogramValidator<>* histVal;
+  RawCountValidator<>* rawVal;
+  CompositeValidator<> compVal;
 
   Workspace_sptr ws1;
   Workspace_sptr ws2;
@@ -23,9 +23,9 @@ private:
 public:
   WorkspaceValidatorsTest()
   {
-    unitVal = new WorkspaceUnitValidator("Wavelength");
-    histVal = new HistogramValidator();
-    rawVal = new RawCountValidator();
+    unitVal = new WorkspaceUnitValidator<>("Wavelength");
+    histVal = new HistogramValidator<>();
+    rawVal = new RawCountValidator<>();
 
     ws1 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
     ws1->initialize(1,10,9);
@@ -49,7 +49,7 @@ public:
 
   void testWorkspaceUnitValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator val; )
+    TS_ASSERT_THROWS_NOTHING( WorkspaceUnitValidator<> val; )
   }
 
   void testWorkspaceUnitValidator_getType()
@@ -67,13 +67,13 @@ public:
   {
     IValidator<Workspace_sptr> *v = unitVal->clone();
     TS_ASSERT_DIFFERS( v, unitVal )
-    TS_ASSERT( dynamic_cast<WorkspaceUnitValidator*>(v) )
+    TS_ASSERT( dynamic_cast<WorkspaceUnitValidator<>*>(v) )
     delete v;
   }
 
   void testHistogramValidator()
   {
-    TS_ASSERT_THROWS_NOTHING( HistogramValidator val(false) )
+    TS_ASSERT_THROWS_NOTHING( HistogramValidator<> val(false) )
   }
 
   void testHistogramValidator_getType()
@@ -85,7 +85,7 @@ public:
   {
     TS_ASSERT( histVal->isValid(ws1) )
     TS_ASSERT( ! histVal->isValid(ws2) )
-    HistogramValidator reverse(false);
+    HistogramValidator<> reverse(false);
     TS_ASSERT( ! reverse.isValid(ws1) )
     TS_ASSERT( reverse.isValid(ws2) )
   }
@@ -94,7 +94,7 @@ public:
   {
     IValidator<Workspace_sptr> *v = histVal->clone();
     TS_ASSERT_DIFFERS( v, histVal )
-    TS_ASSERT( dynamic_cast<HistogramValidator*>(v) )
+    TS_ASSERT( dynamic_cast<HistogramValidator<>*>(v) )
     delete v;
   }
 
@@ -113,7 +113,7 @@ public:
   {
     IValidator<Workspace_sptr> *v = rawVal->clone();
     TS_ASSERT_DIFFERS( v, rawVal )
-    TS_ASSERT( dynamic_cast<RawCountValidator*>(v) )
+    TS_ASSERT( dynamic_cast<RawCountValidator<>*>(v) )
     delete v;
   }
 
@@ -126,7 +126,7 @@ public:
   {
     IValidator<Workspace_sptr> *v = compVal.clone();
     TS_ASSERT_DIFFERS( v, &compVal )
-    TS_ASSERT( dynamic_cast<CompositeValidator*>(v) )
+    TS_ASSERT( dynamic_cast<CompositeValidator<>*>(v) )
   }
 
   void testCompositeValidator_isValidandAdd()
@@ -137,7 +137,7 @@ public:
     compVal.add(unitVal->clone());
     TS_ASSERT( ! compVal.isValid(ws1) )
     TS_ASSERT( compVal.isValid(ws2) )
-    CompositeValidator compVal2;
+    CompositeValidator<> compVal2;
     compVal2.add(histVal->clone());
     TS_ASSERT( compVal2.isValid(ws1) )
     TS_ASSERT( ! compVal2.isValid(ws2) )

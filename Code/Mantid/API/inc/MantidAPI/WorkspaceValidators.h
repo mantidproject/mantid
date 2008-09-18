@@ -8,13 +8,14 @@
 #include "MantidAPI/Workspace.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <numeric>
 
 namespace Mantid
 {
 namespace API
 {
 
-/** A validator for workspaces which can contain a number individual validators,
+/** A validator for workspaces which can contain a number of individual validators,
     all of which must pass for the overall validator to do so.
 
     @author Russell Taylor, Tessella Support Services plc
@@ -40,25 +41,62 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompositeValidator: public Kernel::IValidator<Workspace_sptr>
+template <typename TYPE = Workspace_sptr>
+class DLLExport CompositeValidator : public Kernel::IValidator<TYPE>
 {
 public:
-  CompositeValidator();
-  virtual ~CompositeValidator();
+  CompositeValidator() {}
+
+  virtual ~CompositeValidator()
+  {
+    for (unsigned int i=0; i < m_children.size(); ++i)
+    {
+      delete m_children[i];
+    }
+    m_children.clear();
+  }
 
   // IValidator methods
   const std::string getType() const { return "composite"; }
-  const bool isValid( const Workspace_sptr&value ) const;
-  Kernel::IValidator<Workspace_sptr>* clone();
 
-  void add(Kernel::IValidator<Workspace_sptr>* child);
+  /** Checks the value of all child validators. Fails if any one of them does.
+   *  @param value The workspace to test
+   */
+  const bool isValid( const TYPE& value ) const
+  {
+    for (unsigned int i=0; i < m_children.size(); ++i)
+    {
+      // Return false if any one child validator fails
+      if (! m_children[i]->isValid(value) ) return false;
+    }
+    // All are OK if we get to here
+    return true;
+  }
+
+  Kernel::IValidator<TYPE>* clone()
+  {
+    CompositeValidator<TYPE>* copy = new CompositeValidator<TYPE>();
+    for (unsigned int i=0; i < m_children.size(); ++i)
+    {
+      copy->add( m_children[i]->clone() );
+    }
+    return copy;
+  }
+
+  /** Adds a validator to the group of validators to check
+   *  @param child A pointer to the validator to add
+   */
+  void add(Kernel::IValidator<TYPE>* child)
+  {
+    m_children.push_back(child);
+  }
 
 private:
   /// Private Copy constructor: NO DIRECT COPY ALLOWED
   CompositeValidator(const CompositeValidator&);
 
   /// A container for the child validators
-  std::vector<Kernel::IValidator<Workspace_sptr>*> m_children;
+  std::vector<Kernel::IValidator<TYPE>*> m_children;
 };
 
 
@@ -68,15 +106,40 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport WorkspaceUnitValidator: public Kernel::IValidator<Workspace_sptr>
+template <typename TYPE = Workspace_sptr>
+class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<TYPE>
 {
 public:
-  explicit WorkspaceUnitValidator(const std::string& unitID = "");
+  /** Constructor
+   *  @param unitID The name of the unit that the workspace must have. If left empty,
+   *                the validator will simply check that the workspace is not unitless.
+   */
+  explicit WorkspaceUnitValidator(const std::string& unitID = "") : m_unitID(unitID) {}
+
   virtual ~WorkspaceUnitValidator() {}
 
   const std::string getType() const { return "workspaceunit"; }
-  const bool isValid( const Workspace_sptr&value ) const;
-  Kernel::IValidator<Workspace_sptr>* clone() { return new WorkspaceUnitValidator(*this); }
+
+  /** Checks the workspace based on the validator's rules
+   *  @param value The workspace to test
+   */
+  const bool isValid( const TYPE& value ) const
+  {
+    boost::shared_ptr<Kernel::Unit> unit = value->getAxis(0)->unit();
+    // If no unit has been given to the validator, just check that the workspace has a unit...
+    if ( m_unitID.empty() )
+    {
+      return ( unit ? true : false );
+    }
+    // ... otherwise check that the unit is the correct one
+    else
+    {
+      if (!unit) return false;
+      return !( unit->unitID().compare(m_unitID) );
+    }
+  }
+
+  Kernel::IValidator<TYPE>* clone() { return new WorkspaceUnitValidator(*this); }
 
 private:
   /// The name of the required unit
@@ -90,15 +153,37 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport HistogramValidator: public Kernel::IValidator<Workspace_sptr>
+template <typename TYPE = Workspace_sptr>
+class DLLExport HistogramValidator : public Kernel::IValidator<TYPE>
 {
 public:
-  explicit HistogramValidator(const bool& mustBeHistogram = true);
+  /** Constructor
+   *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
+   *                         contain workspace data (true, default) or shouldn't (false).
+   */
+  explicit HistogramValidator(const bool& mustBeHistogram = true) :
+    m_mustBeHistogram(mustBeHistogram) {}
+
   virtual ~HistogramValidator() {}
 
   const std::string getType() const { return "histogram"; }
-  const bool isValid( const Workspace_sptr&value ) const;
-  Kernel::IValidator<Workspace_sptr>* clone() { return new HistogramValidator(*this); }
+
+  /** Checks the workspace based on the validator's rules
+   *  @param value The workspace to test
+   */
+  const bool isValid( const TYPE& value ) const
+  {
+    if ( value->dataX(0).size() == value->dataY(0).size() )
+    {
+      return ( m_mustBeHistogram ? false : true );
+    }
+    else
+    {
+      return ( m_mustBeHistogram ? true : false );
+    }
+  }
+
+  Kernel::IValidator<TYPE>* clone() { return new HistogramValidator(*this); }
 
 private:
   /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
@@ -110,15 +195,60 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-class DLLExport RawCountValidator: public Kernel::IValidator<Workspace_sptr>
+template <typename TYPE = Workspace_sptr>
+class DLLExport RawCountValidator : public Kernel::IValidator<TYPE>
 {
 public:
   RawCountValidator() {}
+
   virtual ~RawCountValidator() {}
 
   const std::string getType() const { return "rawcount"; }
-  const bool isValid( const Workspace_sptr&value ) const;
-  Kernel::IValidator<Workspace_sptr>* clone() { return new RawCountValidator(*this); }
+
+  /** Checks the workspace based on the validator's rules
+   *  @param value The workspace to test
+   */
+  const bool isValid( const TYPE& value ) const
+  {
+    return !( value->isDistribution() );
+  }
+
+  Kernel::IValidator<TYPE>* clone() { return new RawCountValidator(*this); }
+};
+
+/** A validator which provides a <I>TENTATIVE</I> check that a workspace contains
+ *  common bins in each spectrum.
+ *  For efficiency reasons, it only checks that the first and last spectra have
+ *  common bins, so it is important to carry out a full check within the algorithm
+ *  itself.
+ *
+ *  @author Russell Taylor, Tessella Support Services plc
+ *  @date 18/09/2008
+ */
+template <typename TYPE = Workspace_sptr>
+class DLLExport CommonBinsValidator : public Kernel::IValidator<TYPE>
+{
+public:
+  CommonBinsValidator() {}
+
+  virtual ~CommonBinsValidator() {}
+
+  const std::string getType() const { return "commonbins"; }
+
+  /** Checks the workspace based on the validator's rules
+   *  @param value The workspace to test
+   */
+  const bool isValid( const TYPE& value ) const
+  {
+    if ( !value->blocksize() ) return true;
+    const double first = std::accumulate(value->dataX(0).begin(),value->dataX(0).end(),0.);
+    const int lastSpec = value->getNumberHistograms() - 1;
+    const double last = std::accumulate(value->dataX(lastSpec).begin(),value->dataX(lastSpec).end(),0.);
+    if ( std::abs(first-last) > 1.0E-9 ) return false;
+    return true;
+  }
+
+  Kernel::IValidator<TYPE>* clone() { return new CommonBinsValidator(*this); }
 };
 
 } // namespace API

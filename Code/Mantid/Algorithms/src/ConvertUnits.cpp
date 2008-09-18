@@ -34,9 +34,9 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  CompositeValidator *wsValidator = new CompositeValidator;
-  wsValidator->add(new WorkspaceUnitValidator);
-  wsValidator->add(new HistogramValidator);
+  CompositeValidator<> *wsValidator = new CompositeValidator<>;
+  wsValidator->add(new WorkspaceUnitValidator<>);
+  wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
 
