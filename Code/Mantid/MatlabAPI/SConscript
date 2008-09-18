@@ -1,0 +1,24 @@
+#For MantidMatlab
+
+import os
+import MantidBuild
+
+#GET LIST OF CPPS
+codeFolder = os.path.abspath('./src')
+listCpps = MantidBuild.getCPPFiles(codeFolder)
+
+#Import environment
+Import('env')
+myenv = env.Clone()
+myenv.Append(CPPDEFINES=[('IN_MANTID_MATLAB',1)])
+myenv.Append(CPPPATH=['/usr/local/matlab_2007a/extern/include'])
+myenv.Append(MYLIBLIST=['mex'])
+myenv.Append(MYLIBDIRLIST=['/usr/local/matlab_2007a/bin/glnxa64'])
+
+listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
+
+#BUILD CODE
+shared = myenv.SharedLibrary('lib/MantidMatlabAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidMatlabAPI.pdb')
+static = myenv.StaticLibrary('libstatic/MantidMatlabAPI', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidMatlabAPI.pdb')
+retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidMatlabAPI' ] }
+Return('retval')

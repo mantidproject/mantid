@@ -19,6 +19,7 @@ opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
 opts.Add('msvc','Set to 1 to use Microsoft Visual Studio Compiler on Windows', 1)
 opts.Add('debug','Set to 1 to build debug', 0)
+opts.Add('matlab','Set to 1 to build matlab API', 0)
 
 base_env = Environment(ENV=os.environ, options = opts)
 mingw_env = Environment(ENV=os.environ, options = opts, tools = [ 'mingw' ])
@@ -27,6 +28,7 @@ mingw = ARGUMENTS.get('mingw', 0)
 msvc = ARGUMENTS.get('msvc', 1)
 debug = ARGUMENTS.get('debug', 0)
 bigshared = ARGUMENTS.get('bigshared', 0)
+matlab = ARGUMENTS.get('matlab', 0)
 if int(msvc) :
 	env = base_env
 if int(mingw) :
@@ -198,6 +200,8 @@ else:
 		for l in temp:
 			lpts.append(l)
 			
+print "CPPPATHS: ",cppPaths
+print "CFLAGS: ",cflags
 #check existence of Header files
 conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
@@ -299,6 +303,11 @@ if not rpmBuild:
 	ret = SConscript(['UserAlgorithms/SConscript'])
 	env.Install('Bin/Plugins', ret['shared'])
     
+	# matlab interface
+	if int(matlab) :
+    	    ret = SConscript(['MatlabAPI/SConscript'])
+    	    env.Install('Bin/Shared', ret['shared'])
+
 	# main program
 	ret = SConscript(['Main/SConscript'])
 	env.Install('Bin/Shared', ret['shared'])
