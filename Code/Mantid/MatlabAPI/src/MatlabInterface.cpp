@@ -78,7 +78,13 @@ static mexfunc_s_t mex_functions[] = {
 #define BUFFER_LEN	64
 #define MAX_ARGS	100
 
-#define compare_nocase strcasecmp
+#ifdef _WIN32
+#    define compare_nocase stricmp
+#    define mwSize int
+#    define uint64_t unsigned long
+#else 
+#    define compare_nocase strcasecmp
+#endif
 
 using namespace Mantid::API;
 
