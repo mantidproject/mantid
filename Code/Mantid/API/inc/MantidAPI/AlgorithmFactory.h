@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <vector>
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -90,6 +91,10 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	  }
     
     const std::vector<Algorithm_descriptor> getDescriptors() const;
+	  
+    void addPyAlgorithm(Algorithm* pyAlg);
+    void executePythonAlg(std::string algName);
+    int numPythonAlgs() const { return pythonAlgs.size();}
 
   private:
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
@@ -116,6 +121,9 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	 typedef std::map<std::string, int> versionMap;
 	 /// The map holding the registered class names and their highest versions
 	 versionMap _vmap;
+	 
+	 ///Pointers to Python algorithms - the algorithms are owned by Python so must not be deleted in Mantid code. 
+	 std::vector<Algorithm*> pythonAlgs;     
 
   };
   

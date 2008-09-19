@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/python.hpp>
 
 #include "MantidKernel/System.h"
 
@@ -13,6 +14,7 @@ namespace Mantid
 namespace API
 {
 class IAlgorithm;
+class Algorithm;
 class Workspace;
 }
 
@@ -74,7 +76,9 @@ public:
 
 	/// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
-
+	
+	int addPythonAlgorithm(PyObject* pyAlg);
+	void executePythonAlgorithm(std::string algName);
 
 private:
 

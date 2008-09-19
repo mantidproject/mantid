@@ -8,6 +8,7 @@
 // Includes ====================================================================
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidPythonAPI/FrameworkManager.h"
+#include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
@@ -337,6 +338,38 @@ struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
     PyObject* py_self;
 };
 
+struct Mantid_PythonAPI_PyAlgorithm_Wrapper: Mantid::PythonAPI::PyAlgorithm
+{
+    Mantid_PythonAPI_PyAlgorithm_Wrapper(PyObject* py_self_, std::string p0):
+        Mantid::PythonAPI::PyAlgorithm(p0), py_self(py_self_) {}
+
+    const std::string name() const {
+        return call_method< const std::string >(py_self, "name");
+    }
+
+    const std::string default_name() const {
+        return Mantid::PythonAPI::PyAlgorithm::name();
+    }
+
+    void PyInit() {
+        call_method< void >(py_self, "PyInit");
+    }
+
+    void default_PyInit() {
+        Mantid::PythonAPI::PyAlgorithm::PyInit();
+    }
+
+    void PyExec() {
+        call_method< void >(py_self, "PyExec");
+    }
+
+    void default_PyExec() {
+        Mantid::PythonAPI::PyAlgorithm::PyExec();
+    }
+
+    PyObject* py_self;
+};
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1, createAlgorithm, 1, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2, createAlgorithm, 2, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_3, createAlgorithm, 2, 2)
@@ -456,6 +489,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
         .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< reference_existing_object >())
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
+	.def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
+	.def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
 	;
 
 	//Property Class
@@ -515,6 +550,13 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("getSpectra", &Mantid::API::SpectraDetectorMap::getSpectra)
         .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
         ;
+	
+	//PyAlgorithm Class
+	class_< Mantid::PythonAPI::PyAlgorithm, boost::noncopyable, Mantid_PythonAPI_PyAlgorithm_Wrapper >("PyAlgorithm", init< std::string >())
+        .def("name", &Mantid::PythonAPI::PyAlgorithm::name, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_name)
+        .def("PyInit", &Mantid::PythonAPI::PyAlgorithm::PyInit, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_PyInit)
+        .def("PyExec", &Mantid::PythonAPI::PyAlgorithm::PyExec, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_PyExec)
+	;
 
 }
 

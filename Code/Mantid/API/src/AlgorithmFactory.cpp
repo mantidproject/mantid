@@ -127,6 +127,32 @@ namespace Mantid
 
         return res;
     }
+    
+    /** Adds a pointer to a Python algorithm to the vector.
+    * \param pyAlg :: The Python Algorithm to add
+    */
+    void AlgorithmFactoryImpl::addPyAlgorithm(Algorithm* pyAlg)
+    {
+	    pythonAlgs.push_back(pyAlg);
+    }
+    
+    /** Executes the named Python algorithm that Mantid holds a pointer to.
+    * \param algName :: The name of the algorithm to execute
+    */
+    void AlgorithmFactoryImpl::executePythonAlg(std::string algName)
+    {
+	    std::vector<Algorithm*>::iterator iter = pythonAlgs.begin();
+	    
+	    for (; iter != pythonAlgs.end(); ++iter)
+	    {
+		    if ((*iter)->name() == algName)
+		    {
+			    (*iter)->initialize();
+			    (*iter)->execute();
+			    break;
+		    }
+	    }
+    }
 
 	} // namespace API
 } // namespace Mantid

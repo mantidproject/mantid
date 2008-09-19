@@ -177,28 +177,27 @@ else:
 	else :
 	    cflags.append(['-g','-O3','-Wall'])
 
-	if not rpmBuild:
-		env.Append(LINKFLAGS=['-g'])
-		f=os.popen('gsl-config --cflags')
-		flags=re.sub('\n','',f.readline())
-		if (len(flags)>1):
-			cflags.append(re.split("\s+",flags))
-		f.close()
-		f=os.popen('gsl-config --libs')
-		flags=re.sub('\n','',f.readline())
-		lpts=re.split("\s+",flags)
-		lpts.append('-g')
-		#check for GTS library
-		f=os.popen('gts-config --cflags')
-		flags=re.sub('\n','',f.readline())
-		if (len(flags)>1):
-			cflags.append(re.split("\s+",flags))
-		f.close()
-		f=os.popen('gts-config --libs')
-		flags=re.sub('\n','',f.readline())
-		temp=re.split("\s+",flags)
-		for l in temp:
-			lpts.append(l)
+	env.Append(LINKFLAGS=['-g'])
+	f=os.popen('gsl-config --cflags')
+	flags=re.sub('\n','',f.readline())
+	if (len(flags)>1):
+		cflags.append(re.split("\s+",flags))
+	f.close()
+	f=os.popen('gsl-config --libs')
+	flags=re.sub('\n','',f.readline())
+	lpts=re.split("\s+",flags)
+	lpts.append('-g')
+	#check for GTS library
+	f=os.popen('gts-config --cflags')
+	flags=re.sub('\n','',f.readline())
+	if (len(flags)>1):
+		cflags.append(re.split("\s+",flags))
+	f.close()
+	f=os.popen('gts-config --libs')
+	flags=re.sub('\n','',f.readline())
+	temp=re.split("\s+",flags)
+	for l in temp:
+		lpts.append(l)
 			
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags
