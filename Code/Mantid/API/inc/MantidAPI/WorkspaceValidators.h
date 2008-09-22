@@ -173,7 +173,7 @@ public:
    */
   const bool isValid( const TYPE& value ) const
   {
-    if ( value->dataX(0).size() == value->dataY(0).size() )
+    if ( value->readX(0).size() == value->readY(0).size() )
     {
       return ( m_mustBeHistogram ? false : true );
     }
@@ -240,10 +240,13 @@ public:
    */
   const bool isValid( const TYPE& value ) const
   {
-    if ( !value->blocksize() ) return true;
-    const double first = std::accumulate(value->dataX(0).begin(),value->dataX(0).end(),0.);
+    if ( !value->blocksize() || value->getNumberHistograms() < 2) return true;
     const int lastSpec = value->getNumberHistograms() - 1;
-    const double last = std::accumulate(value->dataX(lastSpec).begin(),value->dataX(lastSpec).end(),0.);
+    // Quickest check is to see if they are actually the same vector
+    if ( &(value->readX(0)[0]) == &(value->readX(lastSpec)[0]) ) return true;
+    // Now check numerically
+    const double first = std::accumulate(value->readX(0).begin(),value->readX(0).end(),0.);
+    const double last = std::accumulate(value->readX(lastSpec).begin(),value->readX(lastSpec).end(),0.);
     if ( std::abs(first-last) > 1.0E-9 ) return false;
     return true;
   }

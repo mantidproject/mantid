@@ -15,6 +15,7 @@ private:
   WorkspaceUnitValidator<>* unitVal;
   HistogramValidator<>* histVal;
   RawCountValidator<>* rawVal;
+  CommonBinsValidator<>* binVal;
   CompositeValidator<> compVal;
 
   Workspace_sptr ws1;
@@ -26,18 +27,19 @@ public:
     unitVal = new WorkspaceUnitValidator<>("Wavelength");
     histVal = new HistogramValidator<>();
     rawVal = new RawCountValidator<>();
+    binVal = new CommonBinsValidator<>();
 
     ws1 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
-    ws1->initialize(1,10,9);
+    ws1->initialize(2,10,9);
     ws2 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
-    ws2->initialize(1,10,10);
+    ws2->initialize(2,10,10);
     ws2->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     ws2->isDistribution(true);
   }
 
   ~WorkspaceValidatorsTest()
   {
-    delete unitVal, histVal, rawVal;
+    delete unitVal, histVal, rawVal, binVal;
   }
 
   void testCast()
@@ -45,6 +47,7 @@ public:
     TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(unitVal) )
     TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(histVal) )
     TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(rawVal) )
+    TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(binVal) )
   }
 
   void testWorkspaceUnitValidator()
@@ -114,6 +117,29 @@ public:
     IValidator<Workspace_sptr> *v = rawVal->clone();
     TS_ASSERT_DIFFERS( v, rawVal )
     TS_ASSERT( dynamic_cast<RawCountValidator<>*>(v) )
+    delete v;
+  }
+
+  void testCommonBinsValidator_getType()
+  {
+    TS_ASSERT_EQUALS( binVal->getType(), "commonbins" )
+  }
+
+  void testCommonBinsValidator_isValid()
+  {
+    TS_ASSERT( binVal->isValid(ws1) )
+    TS_ASSERT( binVal->isValid(ws2) )
+    ws1->dataX(0)[5] = 0.0;
+    TS_ASSERT( binVal->isValid(ws1) )
+    ws1->dataX(0)[5] = 1.1;
+    TS_ASSERT( ! binVal->isValid(ws1) )
+  }
+
+  void testCommonBinsValidator_clone()
+  {
+    IValidator<Workspace_sptr> *v = binVal->clone();
+    TS_ASSERT_DIFFERS( v, binVal )
+    TS_ASSERT( dynamic_cast<CommonBinsValidator<>*>(v) )
     delete v;
   }
 
