@@ -167,6 +167,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PyAlgorithm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PythonInterface.cpp"
 				>
 			</File>
@@ -182,6 +186,10 @@
 			>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\FrameworkManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\PyAlgorithm.h"
 				>
 			</File>
 			<File
