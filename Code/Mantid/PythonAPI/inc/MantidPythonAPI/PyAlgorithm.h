@@ -67,7 +67,7 @@ private:
 	///Copy constructor is private	
 	//PyAlgorithm(const PyAlgorithm&) {};
 	///Assignment operator private
-	PyAlgorithm& operator = (const PyAlgorithm&) {};
+	PyAlgorithm& operator = (const PyAlgorithm&) { return *this; }
 	
 	///init redirects to PyInit
 	virtual void init() { PyInit();}
