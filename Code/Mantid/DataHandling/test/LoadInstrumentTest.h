@@ -313,10 +313,13 @@ public:
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
     TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+        TS_ASSERT( samplepos->isValid(V3D(10.0,0.0,0.005)+samplepos->getPos()) );
+    TS_ASSERT( !samplepos->isValid(V3D(10.0,0.0,0.05)+samplepos->getPos()) );
 
     // test of source shape
     TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
+    TS_ASSERT( !source->isValid(V3D(0.0,0.0,0.02)+source->getPos()) );
   }
 
 

@@ -133,20 +133,27 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   std::map<std::string,std::string>::iterator iter;
   size_t found;  // point to location in string
   bool howFoundOne = false;
+  size_t previousFound = 0;
   for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
   {
-    found = algebraFromUser.find(iter->first);
+    found = algebraFromUser.find(iter->first, previousFound);
 
     if (found==std::string::npos)
       continue;
-
-    if (howFoundOne)
-      algebra += " : " + iter->second;  // for now simply assume all shapes are 'added' as unions
     else
     {
-      algebra += iter->second;
-      howFoundOne = true;
+      previousFound = found;
+
+      algebraFromUser.replace(found, (iter->first).size(), iter->second);
     }
+
+    //if (howFoundOne)
+    //  algebra += " : " + iter->second;  // for now simply assume all shapes are 'added' as unions
+    //else
+    //{
+    //  algebra += iter->second;
+    //  howFoundOne = true;
+    //}
   }
 
 
@@ -158,7 +165,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     return retVal;
   else
   {
-    retVal->setObject(21, algebra);
+    retVal->setObject(21, algebraFromUser);
     retVal->populate(primitives);
 
     return retVal;
