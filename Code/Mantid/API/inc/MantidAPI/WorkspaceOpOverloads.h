@@ -51,7 +51,7 @@ Workspace_sptr createWorkspaceSingleValue(const double rhsValue);
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-struct WorkspaceHelpers
+struct DLLExport WorkspaceHelpers
 {
   // Checks whether a workspace has common X bins/values
   static bool commonBoundaries(const Workspace_const_sptr WS);
