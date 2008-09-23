@@ -39,7 +39,7 @@ namespace PythonAPI
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 class DLLExport PyAlgorithm : public API::Algorithm
 {
@@ -47,33 +47,33 @@ public:
 	///Constructor - takes the name of the algorithm
 	PyAlgorithm(std::string name) : API::Algorithm(), algName(name) {};
 	virtual ~PyAlgorithm() {};
-		
-	///Returns the algorithm name	
+
+	///Returns the algorithm name
 	virtual const std::string name() const {return algName;}
 
 	///init redirects to PyInit
 	virtual bool initialise();
 	///exec redirects to PyExec
 	virtual bool execute();
-	
+
 	///PyInit is effectively a renaming of init
 	virtual void PyInit() {};
 	///PyExec is effectively a renaming of exec as that is a Python keyword
 	virtual void PyExec() {};
-	
+
 private:
 	///Default constructor is private
 	PyAlgorithm() {};
-	///Copy constructor is private	
+	///Copy constructor is private
 	//PyAlgorithm(const PyAlgorithm&) {};
 	///Assignment operator private
 	PyAlgorithm& operator = (const PyAlgorithm&) { return *this; }
-	
+
 	///init redirects to PyInit
 	virtual void init() { PyInit();}
 	///exec redirects to PyExec
 	virtual void exec() { PyExec();}
-	
+
 	///The name of the algorithm
 	std::string algName;
 

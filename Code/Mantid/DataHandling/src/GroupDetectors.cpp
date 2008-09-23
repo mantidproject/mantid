@@ -57,7 +57,7 @@ void GroupDetectors::exec()
   }
 
   // Bin boundaries need to be the same, so check if they actually are
-  if ( !hasSameBoundaries(WS) )
+  if (!API::WorkspaceHelpers::commonBoundaries(WS))
   {
     g_log.error("Can only group if the histograms have common bin boundaries");
     throw std::runtime_error("Can only group if the histograms have common bin boundaries");
@@ -123,20 +123,6 @@ void GroupDetectors::exec()
     spectraAxis->spectraNo(currentIndex) = -1;
   }
 
-}
-
-/// Checks if all histograms have the same boundaries by comparing their sums
-bool GroupDetectors::hasSameBoundaries(const DataObjects::Workspace2D_sptr WS)
-{
-  if (!WS->blocksize()) return true;
-  const double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
-  const int numHist = WS->getNumberHistograms();
-  for (int i = 1; i < numHist; ++i)
-  {
-    const double sum = std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.);
-    if ( std::abs(commonSum-sum) > 1.0E-9 ) return false;
-  }
-  return true;
 }
 
 /// Convert a list of spectra numbers into the corresponding workspace indices

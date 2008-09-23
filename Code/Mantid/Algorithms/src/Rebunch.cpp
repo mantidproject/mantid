@@ -18,7 +18,7 @@ namespace Mantid
 
 		using namespace Kernel;
 		using API::WorkspaceProperty;
-		using API::Workspace_sptr;
+		using API::Workspace_const_sptr;
 		using API::Workspace;
 
 		// Get a reference to the logger
@@ -48,7 +48,7 @@ namespace Mantid
 			int n_bunch=getProperty("n_bunch");
 
 			// Get the input workspace
-			Workspace_sptr inputW = getProperty("InputWorkspace");
+			Workspace_const_sptr inputW = getProperty("InputWorkspace");
 
 			bool dist = inputW->isDistribution();
 

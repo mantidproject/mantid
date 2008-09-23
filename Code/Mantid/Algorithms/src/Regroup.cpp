@@ -5,6 +5,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 #include <numeric>
@@ -80,7 +81,7 @@ void Regroup::exec()
   Workspace_const_sptr inputW = getProperty("InputWorkspace");
 
   // can work only if all histograms have the same boundaries
-  if (!hasSameBoundaries(inputW))
+  if (!API::WorkspaceHelpers::commonBoundaries(inputW))
   {
     g_log.error("Histograms with different boundaries");
     throw std::runtime_error("Histograms with different boundaries");
@@ -89,14 +90,16 @@ void Regroup::exec()
   bool dist = inputW->isDistribution();
 
   int histnumber = inputW->getNumberHistograms();
-  std::vector<double> XValues_new;
+  DataObjects::Histogram1D::RCtype XValues_new;
   const std::vector<double> &XValues_old = inputW->dataX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old
   // create new output X axis
-  int ntcnew = newAxis(rb_params,XValues_old,XValues_new,xoldIndex);
+  int ntcnew = newAxis(rb_params,XValues_old,XValues_new.access(),xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of signal array
   API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+  // Try to cast it to a Workspace2D for use later
+  DataObjects::Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputW);
 
   for (int hist=0; hist <  histnumber;hist++)
   {
@@ -120,7 +123,14 @@ void Regroup::exec()
     rebin(XValues,YValues,YErrors,xoldIndex,YValues_new,YErrors_new, dist);
 
     // Populate the output workspace X values
-    outputW->dataX(hist)=XValues_new;
+    if (outputW_2D)
+    {
+      outputW_2D->setX(hist,XValues_new);
+    }
+    else
+    {
+      outputW->dataX(hist)=XValues_new.access();
+    }
   }
 
   outputW->isDistribution(dist);
@@ -265,18 +275,6 @@ int Regroup::newAxis(const std::vector<double>& params,
   //returns length of new x array or -1 if failure
   return inew;
   //return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
-}
-
-/// Checks if all histograms have the same boundaries by comparing their sums
-bool Regroup::hasSameBoundaries(const API::Workspace_const_sptr WS)
-{
-  if ( !WS->blocksize() || WS->getNumberHistograms() < 2) return true;
-  double commonSum = std::accumulate(WS->dataX(0).begin(),WS->dataX(0).end(),0.);
-  for (int i = 1; i < WS->getNumberHistograms(); ++i)
-    //? Can the error be relative?
-    if ( fabs( commonSum - std::accumulate(WS->dataX(i).begin(),WS->dataX(i).end(),0.) ) > 1e-7 )
-      return false;
-  return true;
 }
 
 } // namespace Algorithm

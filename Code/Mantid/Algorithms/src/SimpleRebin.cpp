@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SimpleRebin.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <sstream>
@@ -20,6 +21,9 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using DataObjects::Workspace2D;
+    using DataObjects::Workspace2D_sptr;
+
     // Get a reference to the logger
     Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
 
@@ -50,14 +54,16 @@ namespace Mantid
 
       // workspace independent determination of length
       int histnumber = inputW->size()/inputW->blocksize();
-      std::vector<double> XValues_new;
+      DataObjects::Histogram1D::RCtype XValues_new;
       // create new output X axis
-      int ntcnew = newAxis(rb_params,XValues_new);
+      int ntcnew = newAxis(rb_params,XValues_new.access());
 
       // make output Workspace the same type is the input, but with new length of signal array
       API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+      // Try to cast it to a Workspace2D for use later
+      Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
 
-      for (int hist=0; hist <  histnumber;hist++)
+      for (int hist=0; hist <  histnumber;++hist)
       {
         const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
         if(dynamic_cast<const API::GaussianErrorHelper*>(e_ptr) ==0)
@@ -79,7 +85,14 @@ namespace Mantid
         // output data arrays are implicitly filled by function
         rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, dist);
         // Populate the output workspace X values
-        outputW->dataX(hist)=XValues_new;
+        if (outputW_2D)
+        {
+          outputW_2D->setX(hist,XValues_new);
+        }
+        else
+        {
+          outputW->dataX(hist)=XValues_new.access();
+        }
         //copy oer the spectrum No and ErrorHelper
         try {
           outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
@@ -121,7 +134,7 @@ namespace Mantid
     * @throw invalid_argument Thrown if input to function is incorrect
     **/
     void SimpleRebin::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
+      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
 
     {
       int i,iold = 0,inew = 0;
@@ -133,8 +146,8 @@ namespace Mantid
       {
         xo_low = xold[iold];
         xo_high = xold[iold+1];
-        xn_low = xnew[inew];
-        xn_high = xnew[inew+1];
+        xn_low = (*xnew)[inew];
+        xn_high = (*xnew)[inew+1];
         if ( xn_high <= xo_low )
         {
           inew++;		/* old and new bins do not overlap */
@@ -195,7 +208,7 @@ namespace Mantid
         for(i=0; i<size_ynew; i++)
         {
           {
-            width = xnew[i+1]-xnew[i];
+            width = (*xnew)[i+1]-(*xnew)[i];
             if (width != 0.0)
             {
               ynew[i] /= width;

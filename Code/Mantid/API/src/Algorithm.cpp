@@ -16,8 +16,8 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManager(), m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
-      _executeAsync(this,&Algorithm::executeAsyncImpl),m_cancel(false),m_runningAsync(false)
+  PropertyManager(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false)
 {}
 
 /// Virtual destructor

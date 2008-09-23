@@ -5,12 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
-    /** 
+    /**
 
     Takes a 1D workspace as input and rebins the data according to the input rebin parameters.
 
@@ -49,7 +50,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport SimpleRebin : public API::Algorithm
@@ -65,14 +66,14 @@ namespace Mantid
       virtual const int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "General";}
-    
+
     private:
       // Overridden Algorithm methods
       void init();
       void exec();
-      void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& , 
-          const std::vector<double>& , std::vector<double>&, std::vector<double>&, bool);
-      int newAxis(const std::vector<double>& , std::vector<double>& );       
+      void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
+          const DataObjects::Histogram1D::RCtype& , std::vector<double>&, std::vector<double>&, bool);
+      int newAxis(const std::vector<double>& , std::vector<double>& );
         /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };

@@ -2,6 +2,7 @@
 #define CONVERTUNITSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "WorkspaceCreationHelper.hh"
 
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidKernel/UnitFactory.h"
@@ -91,6 +92,8 @@ public:
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
+    // Check that the output unit is correct
+    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "Wavelength")
     // Test that y & e data is unchanged
     std::vector<double> y = output2D->dataY(101);
     std::vector<double> e = output2D->dataE(101);
@@ -128,6 +131,46 @@ public:
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
   }
 
+  void testConvertQuickly()
+  {
+    ConvertUnits quickly;
+    quickly.initialize();
+    TS_ASSERT( quickly.isInitialized() )
+    quickly.setPropertyValue("InputWorkspace",outputSpace);
+    quickly.setPropertyValue("OutputWorkspace","quickOut2");
+    quickly.setPropertyValue("Target","Energy");
+    TS_ASSERT_THROWS_NOTHING( quickly.execute() )
+    TS_ASSERT( quickly.isExecuted() )
+
+    Workspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("quickOut2") )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy")
+    TS_ASSERT_DELTA( output->dataX(1)[1], 818.29, 0.01 )
+  }
+
+  void testConvertQuicklyCommonBins()
+  {
+    Workspace2D_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    input->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+    AnalysisDataService::Instance().add("quickIn", input);
+    ConvertUnits quickly;
+    quickly.initialize();
+    TS_ASSERT( quickly.isInitialized() )
+    quickly.setPropertyValue("InputWorkspace","quickIn");
+    quickly.setPropertyValue("OutputWorkspace","quickOut");
+    quickly.setPropertyValue("Target","dSpacing");
+    TS_ASSERT_THROWS_NOTHING( quickly.execute() )
+    TS_ASSERT( quickly.isExecuted() )
+
+    Workspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("quickOut") )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing")
+    TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) )
+    for (Workspace::const_iterator it(*output); it != it.end(); ++it)
+    {
+      TS_ASSERT_EQUALS( it->X(), 2.0*M_PI )
+    }
+  }
 
 private:
   ConvertUnits alg;

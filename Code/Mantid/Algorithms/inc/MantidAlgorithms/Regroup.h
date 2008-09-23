@@ -65,7 +65,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  bool hasSameBoundaries(const API::Workspace_const_sptr WS);
 
   void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
              const std::vector<int>& , std::vector<double>&, std::vector<double>&, bool);

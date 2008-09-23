@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -17,6 +18,7 @@ DECLARE_ALGORITHM(ConvertUnits)
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 // Get a reference to the logger
 Logger& ConvertUnits::g_log = Logger::get("ConvertUnits");
@@ -144,14 +146,44 @@ void ConvertUnits::exec()
 */
 void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power)
 {
+  // See if the workspace has common bins - if so the X vector can be common
+  // First a quick check using the validator
+  CommonBinsValidator<> sameBins;
+  if ( sameBins.isValid(outputWS) )
+  {
+    // Only do the full check if the quick one passes
+    if ( WorkspaceHelpers::commonBoundaries(outputWS) )
+    {
+      // Calculate the new (common) X values
+      std::vector<double>::iterator iter;
+      for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end(); ++iter)
+      {
+        *iter = factor * std::pow(*iter,power);
+      }
+      // If this is a Workspace2D then loop over the other spectra passing in the pointer
+      Workspace2D_sptr WS2D = boost::dynamic_pointer_cast<Workspace2D>(outputWS);
+      if (WS2D)
+      {
+        Histogram1D::RCtype xVals;
+        xVals.access() = outputWS->dataX(0);
+        for (int j = 1; j < numberOfSpectra; ++j)
+        {
+          WS2D->setX(j,xVals);
+        }
+      }
+      return;
+    }
+  }
+  // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
-  for (int i = 0; i < numberOfSpectra; ++i) {
+  for (int k = 0; k < numberOfSpectra; ++k) {
     std::vector<double>::iterator it;
-    for (it = outputWS->dataX(i).begin(); it != outputWS->dataX(i).end(); ++it)
+    for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
     {
       *it = factor * std::pow(*it,power);
     }
   }
+  return;
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
