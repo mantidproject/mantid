@@ -126,6 +126,16 @@ public:
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
+
+    // Check running algorithm for same XML file leads to same instrument object being attached
+    output->setInstrument(boost::shared_ptr<Instrument>());
+    TS_ASSERT_EQUALS( output->getInstrument(), boost::shared_ptr<Instrument>() )
+    LoadInstrument loadAgain;
+    TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() )
+    loadAgain.setPropertyValue("Filename", inputFile);
+    loadAgain.setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING( loadAgain.execute() )
+    TS_ASSERT_EQUALS( output->getInstrument(), i )
   }
 
   void testExecGEM()

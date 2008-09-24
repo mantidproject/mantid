@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
+#include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -60,6 +61,17 @@ void LoadInstrument::exec()
 
   // Get the input workspace
   const Workspace_sptr localWorkspace = getProperty("Workspace");
+
+  // Remove the path from the filename for use with the InstrumentDataService
+  const int stripPath = m_filename.find_last_of("\\/");
+  std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());  // get the 1st 3 letters of filename part
+  // Check whether the instrument is already in the InstrumentDataService
+  if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
+  {
+    // If it does, just use the one from the one stored there
+    localWorkspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
+    return;
+  }
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -228,6 +240,9 @@ void LoadInstrument::exec()
   }
 
   pDoc->release();
+
+  // Add the instrument to the InstrumentDataService
+  InstrumentDataService::Instance().add(instrumentFile,m_instrument);
 
   return;
 }
@@ -649,7 +664,7 @@ bool LoadInstrument::isAssembly(std::string type)
 
 /** Make all the shapes defined in 1st argument face the component in the second argument,
  *  by rotating the z-axis of each component passed to this method in 1st argument such that it point in
- *  direction: from the component of the 2nd argument to the relavant component of the 1st argument.  
+ *  direction: from the component of the 2nd argument to the relavant component of the 1st argument.
  *
  *  @param in  Object to be rotated
  *  @param facing Object to face
@@ -668,7 +683,7 @@ void LoadInstrument::makeXYplaneFaceComponent(std::vector< Geometry::ObjComponen
 
     Geometry::V3D facingDirection = pos - facingPoint;
 
-    if ( facingDirection.norm() == 0.0 ) continue;  
+    if ( facingDirection.norm() == 0.0 ) continue;
 
 
     // now aim to rotate shape such that the z-axis of of the object we want to rotate
@@ -677,12 +692,12 @@ void LoadInstrument::makeXYplaneFaceComponent(std::vector< Geometry::ObjComponen
     Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
     double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
 
-    if ( normal.norm() > 0.0 )  
+    if ( normal.norm() > 0.0 )
       in[i]->rotate(Geometry::Quat(-theta, normal));
     else
     {
       // To take into account the case where the facing direction is in the (0,0,1)
-      // or (0,0,-1) direction. 
+      // or (0,0,-1) direction.
       in[i]->rotate(Geometry::Quat(-theta, Geometry::V3D(0,1,0)));
     }
   }
