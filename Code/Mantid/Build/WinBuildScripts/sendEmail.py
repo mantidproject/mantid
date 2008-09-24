@@ -6,17 +6,20 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = 'http://130.246.49.183/'
-#localServerName = 'file://c|/Program Files/CruiseControl/'
 
-#RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+#RECIPIENTS = ['nick.draper@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 #,'mantid-developers@mantidproject.org'
 SENDER = 'BuildServer1@mantidproject.org'
+
+localServerName = 'http://' 
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
+     localServerName = localServerName + os.getenv('COMPUTERNAME') + '/'
+
 else:
      SENDER = 'Linux' + SENDER
+     localServerName = localServerName + os.getenv('HOSTNAME') + '/'
 
 #Set up email content 
 buildSuccess = False
