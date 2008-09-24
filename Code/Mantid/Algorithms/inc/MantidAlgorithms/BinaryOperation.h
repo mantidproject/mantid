@@ -10,12 +10,12 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/LocatedDataRef.h" 
-#include "MantidAPI/LocatedDataValue.h" 
+#include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/LocatedDataValue.h"
 
 namespace Mantid
 {
-	
+
   namespace Algorithms
   {
     /** @class BinaryOperation BinaryOperation.h Algorithms/BinaryOperation.h
@@ -52,7 +52,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
 
     class DLLExport BinaryOperation : public API::Algorithm
@@ -69,7 +69,7 @@ namespace Mantid
     protected:
       // Overridden Algorithm methods
       void init();
-      void exec();  
+      void exec();
 
       /** Abstract method to perform the binary operation in the inheriting class.
       * @param it_in1 The const iterator to the lhs data item
@@ -80,25 +80,25 @@ namespace Mantid
         API::Workspace::iterator it_out) =0;
 
       /// Checks the overall size compatability of two workspaces
-      virtual const bool checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const;
+      virtual const bool checkSizeCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
       /// Checks the compatability the X arrays of two workspaces
-      virtual const bool checkXarrayCompatability(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      virtual const bool checkXarrayCompatability(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
       /// Returns the number of times lhs will have to loop to match the size of rhs
-      virtual const int getRelativeLoopCount(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      virtual const int getRelativeLoopCount(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
       /// Creates a suitable output workspace for two input workspaces
-      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
       /// Creates a const iterator with appropriate looping settings.
-      API::Workspace::const_iterator createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
+      API::Workspace::const_iterator createConstIterator(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const;
       /// Gets the looping orientation for a looping iterator
-      unsigned int getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const;
-    
-      
+      unsigned int getLoopDirection(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const;
+
+
       /// Abstract internal class providing the binary function
       class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
       {
       public:
         /// Virtual destructor
-        virtual ~BinaryOperation_fn() 
+        virtual ~BinaryOperation_fn()
         { }
 
         /** Abstract function that performs each element of the binary function

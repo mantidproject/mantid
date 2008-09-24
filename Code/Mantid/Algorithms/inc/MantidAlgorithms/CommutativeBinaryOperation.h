@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidAPI/LocatedDataRef.h" 
+#include "MantidAPI/LocatedDataRef.h"
 
 #include <algorithm>
 #include <functional>
@@ -43,7 +43,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
 
     class DLLExport CommutativeBinaryOperation : public BinaryOperation
@@ -57,10 +57,10 @@ namespace Mantid
     protected:
       // Overridden BinaryOperation methods
       /// Checks the overall size compatability of two workspaces
-      virtual const bool checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const;
+      virtual const bool checkSizeCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
 
       /// Creates a suitable output workspace for two input workspaces
-      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const;
+      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
 
     private:
       /// Static reference to the logger class

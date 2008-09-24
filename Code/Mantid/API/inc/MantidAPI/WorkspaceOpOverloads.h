@@ -54,7 +54,11 @@ Workspace_sptr createWorkspaceSingleValue(const double rhsValue);
 struct DLLExport WorkspaceHelpers
 {
   // Checks whether a workspace has common X bins/values
-  static bool commonBoundaries(const Workspace_const_sptr WS);
+  static const bool commonBoundaries(const Workspace_const_sptr WS);
+  // Checks whether the binning is the same in two histograms
+  static const bool matchingBins(const Workspace_const_sptr ws1, const Workspace_const_sptr ws2);
+  // Checks whether a the X vectors in a workspace are actually the same vector
+  static const bool sharedXData(const Workspace_const_sptr WS);
 };
 
 } // namespace API

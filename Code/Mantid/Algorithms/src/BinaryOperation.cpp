@@ -5,7 +5,7 @@
 #include <sstream>
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidAPI/WorkspaceIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -17,19 +17,19 @@ namespace Mantid
     // Get a reference to the logger
     Logger& BinaryOperation::g_log = Logger::get("BinaryOperation");
 
-    /** Initialisation method. 
+    /** Initialisation method.
     * Defines input and output workspaces
-    * 
+    *
     */
     void BinaryOperation::init()
     {
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));    
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
     }
 
     /** Executes the algorithm
-    * 
+    *
     *  @throw runtime_error Thrown if algorithm cannot execute
     */
     void BinaryOperation::exec()
@@ -47,7 +47,7 @@ namespace Mantid
 
       Workspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
       Workspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
-      
+
       Workspace_sptr out_work = createOutputWorkspace(in_work1,in_work2);
       Workspace::iterator ti_out(*out_work);
 
@@ -61,17 +61,17 @@ namespace Mantid
     }
 
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
-    * In order to be size compatible then the larger workspace 
+    * In order to be size compatible then the larger workspace
     * must divide be the size of the smaller workspace leaving no remainder
     * @param lhs the first workspace to compare
     * @param rhs the second workspace to compare
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkSizeCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const
+    const bool BinaryOperation::checkSizeCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
-      //in order to be size compatible then the larger workspace 
-      //must divide be the size of the smaller workspace leaving no remainder
+      //in order to be size compatible then the larger workspace
+      //must divide by the size of the smaller workspace leaving no remainder
       if (rhs->size() ==0) return false;
       return ((lhs->size() % rhs->size()) == 0);
     }
@@ -83,13 +83,16 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkXarrayCompatability(const API::Workspace_sptr lhs,const API::Workspace_sptr rhs) const
+    const bool BinaryOperation::checkXarrayCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
+      // Not using the WorkspaceHelpers::matching bins method because that requires the workspaces to be
+      // the same size, which isn't a requirement of BinaryOperation
+
       // single values are compatible with anything
       if ((rhs->size() ==1) || (lhs->size() ==1)) return true;
 
-      const std::vector<double>& w1x = lhs->dataX(0);
-      const std::vector<double>& w2x = rhs->dataX(0);
+      const std::vector<double>& w1x = lhs->readX(0);
+      const std::vector<double>& w2x = rhs->readX(0);
 
       double sum;
       sum=0.0;
@@ -105,14 +108,14 @@ namespace Mantid
     * @param rhs the second workspace to compare
     * @returns Integer division of rhs.size()/lhs.size() with a minimum of 1
     */
-    const int BinaryOperation::getRelativeLoopCount(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const
+    const int BinaryOperation::getRelativeLoopCount(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const
     {
       int lhsSize = lhs->size();
       if (lhsSize == 0) return 1;
       int retVal = rhs->size()/lhsSize;
       return (retVal == 0)?1:retVal;
     }
-  
+
 
 
     /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces
@@ -120,10 +123,10 @@ namespace Mantid
     * @param rhs the second workspace to compare
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
-    API::Workspace_sptr BinaryOperation::createOutputWorkspace(const API::Workspace_sptr lhs, const API::Workspace_sptr rhs) const
-    {       
+    API::Workspace_sptr BinaryOperation::createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const
+    {
       //get the largest workspace
-      const API::Workspace_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
+      const API::Workspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
       //create a new workspace
       API::Workspace_sptr retVal = API::WorkspaceFactory::Instance().create(wsLarger);
 
@@ -135,7 +138,7 @@ namespace Mantid
     * @param wsComparison The workspace to be used for axes comparisons
     * @returns a const iterator to wsMain, with loop count and orientation set appropriately
     */
-    Workspace::const_iterator BinaryOperation::createConstIterator(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const
+    Workspace::const_iterator BinaryOperation::createConstIterator(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const
     {
      //get loop count
       unsigned int loopDirection = LoopOrientation::Vertical;
@@ -163,10 +166,10 @@ namespace Mantid
     * @retval 0 Horizontal - The number and contents of the X axis bins match
     * @retval 1 Vertical - The number of detector elements match
     */
-    unsigned int BinaryOperation::getLoopDirection(const API::Workspace_sptr wsMain, const API::Workspace_sptr wsComparison) const
+    unsigned int BinaryOperation::getLoopDirection(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const
     {
       unsigned int retVal = LoopOrientation::Horizontal;
-      
+
       //check if the vertical sizes match
       int wsMainArraySize = wsMain->size(); //this must be a 1D array for this to work
       int wsComparisonArraySize = wsComparison->size()/wsComparison->blocksize();
@@ -187,7 +190,7 @@ namespace Mantid
             throw std::invalid_argument("The x arrays of the workspaces are not identical");
           }
         }
-        else 
+        else
         {
           //all is good in the world
           retVal = LoopOrientation::Horizontal;
@@ -196,6 +199,6 @@ namespace Mantid
 
       return retVal;
     }
-    
+
   }
 }
