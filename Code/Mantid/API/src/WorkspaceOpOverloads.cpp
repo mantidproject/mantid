@@ -174,7 +174,7 @@ const bool WorkspaceHelpers::commonBoundaries(const Workspace_const_sptr WS)
   for (int j = 1; j < numHist; ++j)
   {
     const double sum = std::accumulate(WS->readX(j).begin(),WS->readX(j).end(),0.);
-    if ( std::abs(commonSum-sum)/std::max(commonSum,sum) > 1.0E-7 ) return false;
+    if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
   }
   return true;
 }
@@ -188,7 +188,7 @@ const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1, const 
   // Now check the first spectrum
   const double firstWS = std::accumulate(ws1->readX(0).begin(),ws1->readX(0).end(),0.);
   const double secondWS = std::accumulate(ws2->readX(0).begin(),ws2->readX(0).end(),0.);
-  if ( std::abs(firstWS-secondWS)/std::max(firstWS,secondWS) > 1.0E-7 ) return false;
+  if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
 
   // If that passes then check whether all the X vectors are shared
   if ( sharedXData(ws1) && sharedXData(ws2) ) return true;
@@ -204,7 +204,7 @@ const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1, const 
   {
     const double firstWS = std::accumulate(ws1->readX(i).begin(),ws1->readX(i).end(),0.);
     const double secondWS = std::accumulate(ws2->readX(i).begin(),ws2->readX(i).end(),0.);
-    if ( std::abs(firstWS-secondWS)/std::max(firstWS,secondWS) > 1.0E-7 ) return false;
+    if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
   }
 
   return true;
