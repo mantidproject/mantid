@@ -74,6 +74,8 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
 
+    // Check the proton charge has been set correctly
+    TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_SAMPLE_H_
-#define MANTID_DATAOBJECTS_SAMPLE_H_
+#ifndef MANTID_API_SAMPLE_H_
+#define MANTID_API_SAMPLE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,18 +10,14 @@ namespace Mantid
 {
 namespace API
 {
-
-using Kernel::Property;
-
-/** @class Sample Sample.h DataObjects/Sample.h
-
-    This class stores information about the sample used in a particular experimental run.
+/** This class stores information about the sample used in a particular experimental run,
+    and some of the run parameters.
     This is mainly garnered from logfiles.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 26/11/2007
-    
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -37,36 +33,41 @@ using Kernel::Property;
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport Sample
 {
 public:
-	Sample();
-	virtual ~Sample();
-	
-	void setName( const std::string &name );
-	const std::string& getName() const;
-	
-	void addLogData( Property *p );
-	Property* getLogData( const std::string &name ) const;
-	const std::vector< Property* >& getLogData() const;
-	
+  Sample();
+  virtual ~Sample();
+
+  void setName( const std::string &name );
+  const std::string& getName() const;
+
+  void addLogData( Kernel::Property *p );
+  Kernel::Property* getLogData( const std::string &name ) const;
+  const std::vector< Kernel::Property* >& getLogData() const;
+
+  void setProtonCharge( const double &charge);
+  const double& getProtonCharge() const;
+
 private:
   /// Private copy constructor. NO COPY ALLOWED!
   Sample(const Sample&);
   /// Private copy assignment operator. NO COPY ASSIGNMENT ALLOWED!
   Sample& operator=(const Sample&);
-  
+
   /// The name for the sample
   std::string m_name;
   /// Stores the information read in from the logfiles.
   Kernel::PropertyManager m_manager;
+  /// The good proton charge for this run in uA.hour
+  double m_protonCharge;
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_DATAOBJECTS_SAMPLE_H_*/
+#endif /*MANTID_API_SAMPLE_H_*/

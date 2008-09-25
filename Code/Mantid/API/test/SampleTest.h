@@ -22,32 +22,39 @@ public:
 class SampleTest : public CxxTest::TestSuite
 {
 public:
-	void testSetGetName()
-	{
-		sample.setName("test");
-		TS_ASSERT( ! sample.getName().compare("test") )
-	}
+  void testSetGetName()
+  {
+    TS_ASSERT( ! sample.getName().compare("") )
+    sample.setName("test");
+    TS_ASSERT( ! sample.getName().compare("test") )
+  }
 
-	void testAddGetLogData()
-	{
-		Property *p = new ConcreteProperty();
-		TS_ASSERT_THROWS_NOTHING( sample.addLogData(p) )
-		
-		Property *pp;
-		TS_ASSERT_THROWS_NOTHING( pp = sample.getLogData("Test") )
-		TS_ASSERT_EQUALS( p, pp )
-		TS_ASSERT( ! pp->name().compare("Test") )
-		TS_ASSERT( dynamic_cast<ConcreteProperty*>(pp) )
-		TS_ASSERT_THROWS( sample.getLogData("NotThere"), Exception::NotFoundError )
-		
-		std::vector< Property* > props = sample.getLogData();
-		TS_ASSERT( ! props.empty() )
-		TS_ASSERT_EQUALS( props.size(), 1 )
-		TS_ASSERT( ! props[0]->name().compare("Test") )
-		TS_ASSERT( dynamic_cast<ConcreteProperty*>(props[0]) )
-	}
+  void testAddGetLogData()
+  {
+    Property *p = new ConcreteProperty();
+    TS_ASSERT_THROWS_NOTHING( sample.addLogData(p) )
 
-	
+    Property *pp;
+    TS_ASSERT_THROWS_NOTHING( pp = sample.getLogData("Test") )
+    TS_ASSERT_EQUALS( p, pp )
+    TS_ASSERT( ! pp->name().compare("Test") )
+    TS_ASSERT( dynamic_cast<ConcreteProperty*>(pp) )
+    TS_ASSERT_THROWS( sample.getLogData("NotThere"), Exception::NotFoundError )
+
+    std::vector< Property* > props = sample.getLogData();
+    TS_ASSERT( ! props.empty() )
+    TS_ASSERT_EQUALS( props.size(), 1 )
+    TS_ASSERT( ! props[0]->name().compare("Test") )
+    TS_ASSERT( dynamic_cast<ConcreteProperty*>(props[0]) )
+  }
+
+  void testGetSetCharge()
+  {
+    TS_ASSERT_EQUALS( sample.getProtonCharge(), 0.0 )
+    TS_ASSERT_THROWS_NOTHING( sample.setProtonCharge(10.0) )
+    TS_ASSERT_EQUALS( sample.getProtonCharge(), 10.0 )
+  }
+
 private:
   Sample sample;
 };

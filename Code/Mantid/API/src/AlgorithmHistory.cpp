@@ -9,6 +9,8 @@ namespace Mantid
 namespace API
 {
 
+using Kernel::Property;
+
 /** Constructor
  *  @param alg      A pointer to the algorithm for which the history should be constructed
  *  @param start    The start time of the algorithm execution (optional)

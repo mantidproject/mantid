@@ -10,7 +10,7 @@ namespace API
 
 /// Constructor
 Sample::Sample() :
-  m_manager()
+  m_name(), m_manager(), m_protonCharge(0.0)
 {
 }
 
@@ -39,7 +39,7 @@ const std::string& Sample::getName() const
  *  Note that the sample takes over ownership of the data, so the user should not delete it.
  *  @param p A pointer to the property (typically a TimeSeriesProperty) containing the data.
  */
-void Sample::addLogData( Property *p )
+void Sample::addLogData( Kernel::Property *p )
 {
   m_manager.declareProperty(p);
 }
@@ -48,7 +48,7 @@ void Sample::addLogData( Property *p )
  *  @param name The name of the dataset (as contained in the original property object)
  *  @return A pointer to the property containing the dataset
  */
-Property* Sample::getLogData( const std::string &name ) const
+Kernel::Property* Sample::getLogData( const std::string &name ) const
 {
   return m_manager.getProperty(name);
 }
@@ -56,9 +56,25 @@ Property* Sample::getLogData( const std::string &name ) const
 /** Retrieve the full set of log properties
  *  @return A vector of pointers to the property objects
  */
-const std::vector<Property*>& Sample::getLogData() const
+const std::vector<Kernel::Property*>& Sample::getLogData() const
 {
   return m_manager.getProperties();
+}
+
+/** Set the good proton charge total for this run
+ *  @param charge The proton charge in uA.hour
+ */
+void Sample::setProtonCharge( const double &charge)
+{
+  m_protonCharge = charge;
+}
+
+/** Retrieve the total good proton charge delivered in this run
+ *  @return The proton charge in uA.hour
+ */
+const double& Sample::getProtonCharge() const
+{
+  return m_protonCharge;
 }
 
 } // namespace API

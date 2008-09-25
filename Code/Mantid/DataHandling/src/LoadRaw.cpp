@@ -26,7 +26,7 @@ namespace Mantid
     Logger& LoadRaw::g_log = Logger::get("LoadRaw");
 
     /// Empty default constructor
-    LoadRaw::LoadRaw() : 
+    LoadRaw::LoadRaw() :
       Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
       m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
     {}
@@ -36,21 +36,21 @@ namespace Mantid
     {
       std::vector<std::string> exts;
       exts.push_back("RAW");
-      exts.push_back("raw");		
+      exts.push_back("raw");
       declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
-      
+
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
       declareProperty("spectrum_min",0, mustBePositive);
       declareProperty("spectrum_max",0, mustBePositive->clone());
-      
+
       declareProperty(new ArrayProperty<int>("spectrum_list"));
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
-     * 
+     *
      *  @throw Exception::FileError If the RAW file cannot be found/opened
      *  @throw std::invalid_argument If the optional properties are set to invalid values
      */
@@ -63,7 +63,7 @@ namespace Mantid
       if (iraw.readFromFile(m_filename.c_str()) != 0)
       {
         g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);	  
+        throw Exception::FileError("Unable to open File:" , m_filename);
       }
 
       // Read in the number of spectra in the RAW file
@@ -77,14 +77,14 @@ namespace Mantid
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
-      
+
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
-            
-      // Read the number of time channels (i.e. bins) from the RAW file 
+
+      // Read the number of time channels (i.e. bins) from the RAW file
       const int channelsPerSpectrum = iraw.t_ntc1;
-      // Read in the time bin boundaries 
-      const int lengthIn = channelsPerSpectrum + 1;    
+      // Read in the time bin boundaries
+      const int lengthIn = channelsPerSpectrum + 1;
       float* timeChannels = new float[lengthIn];
       iraw.getTimeChannels(timeChannels, lengthIn);
       // Put the read in array into a vector (inside a shared pointer)
@@ -116,13 +116,13 @@ namespace Mantid
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
-        
+
         // Create the 2D workspace for the output
         DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                  (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
         // Set the unit on the workspace to TOF
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-             
+
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
@@ -146,7 +146,7 @@ namespace Mantid
         }
         // Just a sanity check
         assert(counter == total_specs);
-      
+
         std::string outputWorkspace = "OutputWorkspace";
         if (period == 0)
         {
@@ -158,6 +158,9 @@ namespace Mantid
           instrument = localWorkspace->getInstrument();
           specMap = localWorkspace->getSpectraMap();
           sample = localWorkspace->getSample();
+          // Set the total proton charge for this run
+          // (not sure how this works for multi_period files)
+          sample->setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -175,12 +178,12 @@ namespace Mantid
           localWorkspace->setSpectraMap(specMap);
           localWorkspace->setSample(sample);
         }
-        
+
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
-        
+
       } // loop over periods
-      
+
       // Clean up
       delete[] timeChannels;
       delete[] spectrum;
@@ -193,7 +196,7 @@ namespace Mantid
       m_list = !(specList->isDefault());
       Property *specMax = getProperty("spectrum_max");
       m_interval = !(specMax->isDefault());
-      
+
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
       {
@@ -215,10 +218,10 @@ namespace Mantid
         if ( maxlist > m_numberOfSpectra || minlist == 0)
         {
           g_log.error("Invalid list of spectra");
-          throw std::invalid_argument("Inconsistent properties defined"); 
-        } 
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
       }
-           
+
       // Check validity of spectra range, if set
       if ( m_interval )
       {
@@ -228,11 +231,11 @@ namespace Mantid
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");
-          throw std::invalid_argument("Inconsistent properties defined"); 
+          throw std::invalid_argument("Inconsistent properties defined");
         }
       }
     }
-    
+
     /** Read in a single spectrum from the raw file
      *  @param tcbs     The vector containing the time bin boundaries
      *  @param hist     The workspace index
@@ -257,7 +260,7 @@ namespace Mantid
       localWorkspace->setX(hist, tcbs);
       localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
-      // NOTE: Raw numbers go straight into the workspace 
+      // NOTE: Raw numbers go straight into the workspace
       //     - no account taken of bin widths/units etc.
     }
 
@@ -265,7 +268,7 @@ namespace Mantid
     void LoadRaw::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
       if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
 
       const int stripPath = m_filename.find_last_of("\\/");
@@ -273,7 +276,7 @@ namespace Mantid
       // force ID to upper case
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
-      
+
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
@@ -294,7 +297,7 @@ namespace Mantid
         runLoadInstrumentFromRaw(localWorkspace);
       }
     }
-    
+
     /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
     void LoadRaw::runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr localWorkspace)
     {
@@ -316,26 +319,26 @@ namespace Mantid
         g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
       }
 
-      if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");      
+      if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");
     }
-    
+
     /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
     void LoadRaw::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
-      // There is a small penalty in re-opening the raw file but nothing major. 
+      // There is a small penalty in re-opening the raw file but nothing major.
       Algorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
       loadmap->setPropertyValue("Filename", m_filename);
       loadmap->setProperty<Workspace_sptr>("Workspace",localWorkspace);
       try
       {
-        loadmap->execute();  
+        loadmap->execute();
       }
       catch (std::runtime_error& err)
       {
     	  g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
       }
-      
+
       if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
     }
 
