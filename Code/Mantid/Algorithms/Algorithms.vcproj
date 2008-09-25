@@ -194,11 +194,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MergeRuns.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Minus.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\Multiply.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NormaliseByCurrent.cpp"
 				>
 			</File>
 			<File
@@ -288,6 +296,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\MergeRuns.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Minus.h"
 				>
 			</File>
@@ -301,6 +313,10 @@
 			</File>
 			<File
 				RelativePath=".\test\MultiplyTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\NormaliseByCurrent.h"
 				>
 			</File>
 			<File
