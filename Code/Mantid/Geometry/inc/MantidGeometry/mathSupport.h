@@ -11,7 +11,7 @@ namespace Mantid
 #define fabs(x) std::fabs((x)*1.0)
 
 /// Create an index of the vector in sorted order.
-template<typename T> 
+template<typename T>
 DLLExport void indexSort(const std::vector<T>&,std::vector<int>&);
 
 /// Solve a Quadratic equation
@@ -25,21 +25,19 @@ DLLExport int solveCubic(InputIter,std::complex<double>&,
 	       std::complex<double>&,std::complex<double>&);
 
 /*!
-  \namespace mathSupport
   \brief Holds functors to do numerical operations
   \version 1.0
   \author S. Ansell
   \date August 2005
-  
-  Holds all the numberical operations for comparison
+
+  Holds all the numerical operations for comparison
   and checking needed for containers of objects.
 */
-
 namespace mathSupport
 {
 
 /*!
-  \class PIndex 
+  \class PIndex
   \author S. Ansell
   \date Aug 2005
   \version 1.0
@@ -64,11 +62,11 @@ public:
 };
 
 /*!
-  \class PSep 
+  \class PSep
   \author S. Ansell
   \date Aug 2005
   \version 1.0
-  \brief Class to access the second object in index pair. 
+  \brief Class to access the second object in index pair.
 */
 template<typename T>
 class PSep

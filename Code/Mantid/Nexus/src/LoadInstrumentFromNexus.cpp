@@ -15,7 +15,7 @@
 
 namespace Mantid
 {
-namespace Nexus
+namespace NeXus
 {
 
 DECLARE_ALGORITHM(LoadInstrumentFromNexus)
@@ -131,5 +131,5 @@ void LoadInstrumentFromNexus::exec()
 }
 
 
-} // namespace Nexus
+} // namespace NeXus
 } // namespace Mantid

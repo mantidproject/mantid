@@ -14,7 +14,6 @@
 #include "MantidKernel/Logger.h"
 
 #include "MantidKernel/Support.h"
-#include "MantidGeometry/RefCon.h"
 #include "MantidGeometry/Material.h"
 
 
@@ -25,7 +24,7 @@ namespace Geometry
 {
 Kernel::Logger& Material::PLog(Kernel::Logger::get("Material"));
 
-Material::Material() : 
+Material::Material() :
   density(0),scoh(0.0),
   sinc(0.0),sabs(0.0)
   /*!
@@ -34,7 +33,7 @@ Material::Material() :
 {}
 
 Material::Material(const std::string& N,const double D,const double S,
-		   const double I,const double A) : 
+		   const double I,const double A) :
   Name(N),density(D),scoh(S),
   sinc(I),sabs(A)
   /*!
@@ -48,7 +47,7 @@ Material::Material(const std::string& N,const double D,const double S,
 {}
 
 Material::Material(const double D,const double S,
-		   const double I,const double A) : 
+		   const double I,const double A) :
   density(D),scoh(S),
   sinc(I),sabs(A)
   /*!
@@ -60,7 +59,7 @@ Material::Material(const double D,const double S,
   */
 {}
 
-Material::Material(const Material& A) : 
+Material::Material(const Material& A) :
   Name(A.Name),density(A.density),scoh(A.scoh),
   sinc(A.sinc),sabs(A.sabs)
   /*!
@@ -70,9 +69,9 @@ Material::Material(const Material& A) :
 {}
 
 Material&
-Material::operator=(const Material& A) 
+Material::operator=(const Material& A)
   /*!
-    Assignment operator 
+    Assignment operator
     \param A :: Material to copy
     return *this
   */
@@ -99,14 +98,14 @@ Material::clone() const
 }
 
 
-Material::~Material() 
+Material::~Material()
   /*!
     Destructor
    */
 {}
 
-void 
-Material::setDensity(const double D) 
+void
+Material::setDensity(const double D)
   /*!
     Sets the density
     \param D :: Density [Atom/Angstrom^3]
@@ -130,11 +129,11 @@ Material::setScat(const double S,const double I,const double A)
   sabs=A;
   return;
 }
-  
+
 double
 Material::getAtten(const double Wave) const
   /*!
-    Given Wavelength get the attenuation 
+    Given Wavelength get the attenuation
     coefficient.
     \param Wave :: Wavelength [Angstrom]
     \return Attenuation (including density)
@@ -160,7 +159,7 @@ Material::calcAtten(const double Wave,const double Length) const
 double
 Material::getAttenAbs(const double Wave) const
   /*!
-    Given Wavelength get the attenuation 
+    Given Wavelength get the attenuation
     coefficient.
     \param Wave :: wavelength
     \return Attenution coefficient

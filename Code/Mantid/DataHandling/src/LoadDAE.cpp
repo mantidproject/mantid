@@ -27,21 +27,21 @@ namespace Mantid
     Logger& LoadDAE::g_log = Logger::get("LoadDAE");
 
     /// Empty default constructor
-    LoadDAE::LoadDAE() : 
+    LoadDAE::LoadDAE() :
       Algorithm(), m_daename(""), m_numberOfSpectra(0), m_numberOfPeriods(0),
       m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
     {}
 
 
     /// load data from the DAE
-    static void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn, 
+    static void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
     		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {
     	int ndims, dims_array[1];
         ndims = 1;
 	dims_array[0] = lengthIn;
 
-      // Read in spectrum number ispec from DAE     
+      // Read in spectrum number ispec from DAE
       IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims);
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
@@ -54,7 +54,7 @@ namespace Mantid
       localWorkspace->setX(hist, tcbs);
       localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
       localWorkspace->getAxis(1)->spectraNo(hist)= ispec;
-      // NOTE: Raw numbers go straight into the workspace 
+      // NOTE: Raw numbers go straight into the workspace
       //     - no account taken of bin widths/units etc.
     }
 
@@ -63,23 +63,23 @@ namespace Mantid
     {
       declareProperty("DAEname","");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
-      
+
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
       declareProperty("spectrum_min",0, mustBePositive);
       declareProperty("spectrum_max",0, mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("spectrum_list"));
     }
-    
+
     /// Function called by IDC routines to report an error
     void LoadDAE::IDCReporter(int status, int code, const char* message)
     {
-	g_log.error(message);    
+	g_log.error(message);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
-     * 
+     *
      *  @throw Exception::FileError If the DAE cannot be found/opened
      *  @throw std::invalid_argument If the optional properties are set to invalid values
      */
@@ -89,21 +89,21 @@ namespace Mantid
       int dims_array[2];
       // Retrieve the filename from the properties
       m_daename = getPropertyValue("DAEname");
-      
+
       idc_handle_t dae_handle;
-      
+
       // set IDC reporter function for errors
       IDCsetreportfunc(&LoadDAE::IDCReporter);
-      
+
       if (IDCopen(m_daename.c_str(), 0, 0, &dae_handle) != 0)
       {
         g_log.error("Unable to open DAE " + m_daename);
-        throw Exception::FileError("Unable to open DAE:" , m_daename);	  
+        throw Exception::FileError("Unable to open DAE:" , m_daename);
       }
 
       // Read in the number of spectra in the DAE
       IDCgetpari(dae_handle, "NSP1", &m_numberOfSpectra, sv_dims_array, &sv_ndims);
-      // Read the number of periods 
+      // Read the number of periods
       IDCgetpari(dae_handle, "NPER", &m_numberOfPeriods, sv_dims_array, &sv_ndims);
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
@@ -112,27 +112,27 @@ namespace Mantid
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
-      
+
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
-            
-      // Read the number of time channels (i.e. bins) from the RAW file 
+
+      // Read the number of time channels (i.e. bins) from the RAW file
       int channelsPerSpectrum;
       if (IDCgetpari(dae_handle, "NTC1", &channelsPerSpectrum, sv_dims_array, &sv_ndims) != 0)
       {
         g_log.error("Unable to read NTC1 from DAE " + m_daename);
-        throw Exception::FileError("Unable to read NTC1 from DAE " , m_daename);	  
+        throw Exception::FileError("Unable to read NTC1 from DAE " , m_daename);
       }
- 
-      // Read in the time bin boundaries 
-      const int lengthIn = channelsPerSpectrum + 1;    
+
+      // Read in the time bin boundaries
+      const int lengthIn = channelsPerSpectrum + 1;
       float* timeChannels = new float[lengthIn];
-      
+
       dims_array[0] = lengthIn;
       if (IDCgetparr(dae_handle, "RTCB1", timeChannels, dims_array, &sv_ndims) != 0)
       {
         g_log.error("Unable to read RTCB1 from DAE " + m_daename);
-        throw Exception::FileError("Unable to read RTCB1 from DAE " , m_daename);	        
+        throw Exception::FileError("Unable to read RTCB1 from DAE " , m_daename);
       }
       // Put the read in array into a vector (inside a shared pointer)
       boost::shared_ptr<std::vector<double> > timeChannelsVec
@@ -163,13 +163,13 @@ namespace Mantid
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
-        
+
         // Create the 2D workspace for the output
         DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                  (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
         // Set the unit on the workspace to TOF
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-             
+
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
@@ -193,7 +193,7 @@ namespace Mantid
         }
         // Just a sanity check
         assert(counter == total_specs);
-      
+
         std::string outputWorkspace = "OutputWorkspace";
         if (period != 0)
         {
@@ -207,16 +207,16 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
         }
-        
+
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
-        
+
       } // loop over periods
-      
+
       if (IDCclose(&dae_handle) != 0)
       {
         g_log.error("Unable to close DAE " + m_daename);
-        throw Exception::FileError("Unable to close DAE:" , m_daename);	  
+        throw Exception::FileError("Unable to close DAE:" , m_daename);
       }
       // Clean up
       delete[] timeChannels;
@@ -230,7 +230,7 @@ namespace Mantid
       m_list = !(specList->isDefault());
       Property *specMax = getProperty("spectrum_max");
       m_interval = !(specMax->isDefault());
-      
+
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
       {
@@ -252,10 +252,10 @@ namespace Mantid
         if ( maxlist > m_numberOfSpectra || minlist == 0)
         {
           g_log.error("Invalid list of spectra");
-          throw std::invalid_argument("Inconsistent properties defined"); 
-        } 
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
       }
-           
+
       // Check validity of spectra range, if set
       if ( m_interval )
       {
@@ -265,20 +265,10 @@ namespace Mantid
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");
-          throw std::invalid_argument("Inconsistent properties defined"); 
+          throw std::invalid_argument("Inconsistent properties defined");
         }
       }
     }
-    
-    /** Read in a single spectrum from the raw file
-     *  @param tcbs     The vector containing the time bin boundaries
-     *  @param hist     The workspace index
-     *  @param i        The spectrum number
-     *  @param iraw     A reference to the ISISRAW object
-     *  @param lengthIn The number of elements in a spectrum
-     *  @param spectrum Pointer to the array into which the spectrum will be read
-     *  @param localWorkspace A pointer to the workspace in which the data will be stored
-     */
 
 
     double LoadDAE::dblSqrt(double in)

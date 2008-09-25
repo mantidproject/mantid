@@ -2,8 +2,8 @@
 #define LOADMUONLOGTEST_H_
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h" 
-#include "MantidDataHandling/LoadInstrument.h" 
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidDataHandling/LoadInstrument.h"
 //
 
 #include <cxxtest/TestSuite.h>
@@ -23,25 +23,25 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::Nexus;
+using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class LoadMuonLogTest : public CxxTest::TestSuite
 {
-public: 
-  
+public:
+
   LoadMuonLogTest()
-  {	
+  {
 	  //initialise framework manager to allow logging
 	//Mantid::API::FrameworkManager::Instance().initialize();
   }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
-    TS_ASSERT_THROWS_NOTHING(loader.initialize());    
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
   }
-  
+
 
   void testExecWithNexusDatafile()
   {
@@ -59,7 +59,7 @@ public:
     // Create an empty workspace and put it in the AnalysisDataService
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D");
 
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
 	  std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderNexusFile.getPropertyValue("Filename") )
@@ -69,15 +69,15 @@ public:
     TS_ASSERT( ! result.compare(outputSpace));
 
 
-    TS_ASSERT_THROWS_NOTHING(loaderNexusFile.execute());    
+    TS_ASSERT_THROWS_NOTHING(loaderNexusFile.execute());
 
-    TS_ASSERT( loaderNexusFile.isExecuted() );    
-    
+    TS_ASSERT( loaderNexusFile.isExecuted() );
+
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
-   
-    boost::shared_ptr<Sample> sample = output->getSample(); 
+
+    boost::shared_ptr<Sample> sample = output->getSample();
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
@@ -92,13 +92,13 @@ public:
 	TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2006-Nov-21 07:03:08  50" );
 
   }
-  
+
 private:
   LoadMuonLog loader;
   std::string inputFile;
   std::string outputSpace;
   std::string inputSpace;
-  
+
 };
-  
+
 #endif /*LOADMUONLOGTEST_H_*/

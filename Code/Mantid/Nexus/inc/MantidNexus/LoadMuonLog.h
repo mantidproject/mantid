@@ -8,8 +8,8 @@
 
 namespace Mantid
 {
-	
-  namespace Nexus
+
+  namespace NeXus
   {
     /** @class LoadMuonLog LoadMuonLog.h Nexus/LoadMuonLog.h
 
@@ -20,9 +20,9 @@ namespace Mantid
     Nexus file the algorithm will attempt to read in all the log data (NXlog)
     within the first run section of that file.
 
-    LoadMuonLog is an algorithm and as such inherits from the Algorithm class, 
+    LoadMuonLog is an algorithm and as such inherits from the Algorithm class,
     via Nexus, and overrides the init() & exec() methods.
-    LoadMuonLog is intended to be used as a child algorithm of 
+    LoadMuonLog is intended to be used as a child algorithm of
     other Loadxxx algorithms, rather than being used directly.
 
     Required Properties:
@@ -51,7 +51,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport LoadMuonLog : public API::Algorithm
@@ -79,7 +79,7 @@ namespace Mantid
 
 
       /// The name and path of an input file. This may be the filename of a
-      /// raw datafile or the name of a specific log file. 
+      /// raw datafile or the name of a specific log file.
       std::string m_filename;
 
       /// convert string to lower case
@@ -92,7 +92,7 @@ namespace Mantid
       static Kernel::Logger& g_log;
     };
 
-  } // namespace Nexus
+  } // namespace NeXus
 } // namespace Mantid
 
 #endif /*MANTID_NEXUS_LOADMUONLOG_H_*/

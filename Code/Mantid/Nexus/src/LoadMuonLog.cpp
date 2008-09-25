@@ -13,7 +13,7 @@
 
 namespace Mantid
 {
-namespace Nexus
+namespace NeXus
 {
 
 // Register the algorithm into the algorithm factory
@@ -41,7 +41,7 @@ void LoadMuonLog::init()
 }
 
 /** Executes the algorithm. Reading in Log entries from the Nexus file
- * 
+ *
  *  @throw Mantid::Kernel::Exception::FileError  Thrown if file is not recognised to be a Nexus datafile
  *  @throw std::runtime_error Thrown with Workspace problems
  */
@@ -59,7 +59,7 @@ void LoadMuonLog::exec()
   }
 
   // Get the input workspace and retrieve sample from workspace.
-  // the log data will be loaded into the Sample container of the workspace 
+  // the log data will be loaded into the Sample container of the workspace
 
   const Workspace_sptr localWorkspace = getProperty("Workspace");
   boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
@@ -74,7 +74,7 @@ void LoadMuonLog::exec()
     TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(logName);
     TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(logName);
     std::vector<double> logTimes;
- 
+
     // Read log file into Property which is then stored in Sample object
     if(!nxload.logTypeNumeric(i))
     {
@@ -146,5 +146,5 @@ bool LoadMuonLog::isDateTimeString(const std::string& str)
   return false;
 }
 
-} // namespace Nexus
+} // namespace NeXus
 } // namespace Mantid

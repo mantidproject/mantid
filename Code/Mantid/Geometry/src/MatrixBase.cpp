@@ -19,10 +19,10 @@ namespace Mantid
 {
 
 template<typename T>
-std::ostream& 
+std::ostream&
 Geometry::operator<<(std::ostream& OX,const Geometry::MatrixBase<T>& A)
   /*!
-    External outputs point to a stream 
+    External outputs point to a stream
     \param A :: MatrixBase to write out
     \param OX :: output stream
     \returns The output stream (of)
@@ -34,11 +34,11 @@ Geometry::operator<<(std::ostream& OX,const Geometry::MatrixBase<T>& A)
 }
 
 template<int index>
-std::ostream& 
+std::ostream&
 Geometry::operator<<(std::ostream& OX,
      const Geometry::MatrixBase<mathLevel::PolyVar<index> >& A)
   /*!
-    External outputs point to a stream 
+    External outputs point to a stream
     \param A :: MatrixBase to write out
     \param OX :: output stream
     \returns The output stream (OX)
@@ -70,7 +70,7 @@ template<typename T>
 MatrixBase<T>::MatrixBase(const std::vector<T>& A,const std::vector<T>& B)
   : nx(0),ny(0),V(0)
   /*!
-    Constructor to take two vectors and multiply them to 
+    Constructor to take two vectors and multiply them to
     construct a matrix. (assuming that we have columns x row
     vector.)
     \param A :: Column vector to multiply
@@ -81,7 +81,7 @@ MatrixBase<T>::MatrixBase(const std::vector<T>& A,const std::vector<T>& B)
   setMem(A.size(),B.size());
   for(int i=0;i<nx;i++)
     for(int j=0;j<ny;j++)
-      V[i][j]=A[i]*B[j];  
+      V[i][j]=A[i]*B[j];
 }
 
 template<typename T>
@@ -124,7 +124,7 @@ MatrixBase<T>::MatrixBase(const MatrixBase<T>& A,const int nrow,const int ncol)
 template<typename T>
 MatrixBase<T>::MatrixBase(const MatrixBase<T>& A)
   : nx(0),ny(0),V(0)
-  /*! 
+  /*!
     Simple copy constructor
     \param A :: Object to copy
   */
@@ -143,8 +143,8 @@ MatrixBase<T>::MatrixBase(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::operator=(const MatrixBase<T>& A)
-  /*! 
-    Simple assignment operator 
+  /*!
+    Simple assignment operator
     \param A :: Object to copy
   */
 {
@@ -162,7 +162,7 @@ MatrixBase<T>::operator=(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>::~MatrixBase()
   /*!
-    Delete operator :: removes memory for 
+    Delete operator :: removes memory for
     matrix
   */
 {
@@ -173,8 +173,8 @@ MatrixBase<T>::~MatrixBase()
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::operator+=(const MatrixBase<T>& A)
-   /*! 
-     MatrixBase addition THIS + A  
+   /*!
+     MatrixBase addition THIS + A
      If the size is different then 0 is added where appropiate
      MatrixBase A is not expanded.
      \param A :: MatrixBase to add
@@ -193,8 +193,8 @@ MatrixBase<T>::operator+=(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::operator-=(const MatrixBase<T>& A)
-   /*! 
-     MatrixBase subtractoin THIS - A  
+   /*!
+     MatrixBase subtractoin THIS - A
      If the size is different then 0 is added where appropiate
      MatrixBase A is not expanded.
      \param A :: MatrixBase to add
@@ -213,8 +213,8 @@ MatrixBase<T>::operator-=(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>
 MatrixBase<T>::operator+(const MatrixBase<T>& A)
-   /*! 
-     MatrixBase addition THIS + A  
+   /*!
+     MatrixBase addition THIS + A
      If the size is different then 0 is added where appropiate
      MatrixBase A is not expanded.
      \param A :: MatrixBase to add
@@ -228,10 +228,10 @@ MatrixBase<T>::operator+(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>
 MatrixBase<T>::operator-(const MatrixBase<T>& A)
-   /*! 
-     MatrixBase subtraction THIS - A  
-     If the size is different then 0 is subtracted where 
-     appropiate. This matrix determines the size 
+   /*!
+     MatrixBase subtraction THIS - A
+     If the size is different then 0 is subtracted where
+     appropiate. This matrix determines the size
      \param A :: MatrixBase to add
      \returns MatrixBase(this + A)
    */
@@ -243,11 +243,11 @@ MatrixBase<T>::operator-(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>
 MatrixBase<T>::operator*(const MatrixBase<T>& A) const
-  /*! 
-    MatrixBase multiplication THIS * A  
+  /*!
+    MatrixBase multiplication THIS * A
     \param A :: MatrixBase to multiply by  (this->row must == A->columns)
     \throw MisMatch<int> if there is a size mismatch.
-    \return MatrixBase(This * A) 
+    \return MatrixBase(This * A)
  */
 {
   if (ny!=A.nx)
@@ -263,8 +263,8 @@ MatrixBase<T>::operator*(const MatrixBase<T>& A) const
 template<typename T>
 std::vector<T>
 MatrixBase<T>::operator*(const std::vector<T>& Vec) const
-  /*! 
-    MatrixBase multiplication THIS * Vec to produce a vec  
+  /*!
+    MatrixBase multiplication THIS * Vec to produce a vec
     \param Vec :: size of vector > this->nrows
     \throw MisMatch<int> if there is a size mismatch.
     \return MatrixBase(This * Vec)
@@ -287,8 +287,8 @@ MatrixBase<T>::operator*(const std::vector<T>& Vec) const
 template<typename T>
 MatrixBase<T>
 MatrixBase<T>::operator*(const T& Value) const
-   /*! 
-     MatrixBase multiplication THIS * Value  
+   /*!
+     MatrixBase multiplication THIS * Value
      \param Value :: Scalar to multiply by
      \return V * (this)
    */
@@ -303,12 +303,12 @@ MatrixBase<T>::operator*(const T& Value) const
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::operator*=(const MatrixBase<T>& A)
-   /*! 
-     MatrixBase multiplication THIS *= A  
+   /*!
+     MatrixBase multiplication THIS *= A
      Note that we call operator* to avoid the problem
      of changing matrix size.
     \param A :: MatrixBase to multiply by  (this->row must == A->columns)
-    \return This *= A 
+    \return This *= A
    */
 {
   if (ny!=A.nx)
@@ -321,8 +321,8 @@ MatrixBase<T>::operator*=(const MatrixBase<T>& A)
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::operator*=(const T& Value)
-   /*! 
-     MatrixBase multiplication THIS * Value  
+   /*!
+     MatrixBase multiplication THIS * Value
      \param Value :: Scalar to multiply matrix by
      \return *this
    */
@@ -349,14 +349,14 @@ MatrixBase<T>::operator!=(const MatrixBase<T>& A) const
 template<typename T>
 int
 MatrixBase<T>::operator==(const MatrixBase<T>& A) const
-  /*! 
+  /*!
     Element by element comparison within tolerance.
     Tolerance means that the value must be > tolerance
-    and less than (diff/max)>tolerance 
+    and less than (diff/max)>tolerance
 
     Always returns 0 if the MatrixBase have different sizes
     \param A :: matrix to check.
-    \return 1 on success 
+    \return 1 on success
   */
 {
   if (&A!=this)       // this == A == always true
@@ -379,7 +379,7 @@ template<typename T>
 void
 MatrixBase<T>::deleteMem()
   /*!
-    Deletes the memory held in matrix 
+    Deletes the memory held in matrix
   */
 {
   if (V)
@@ -396,13 +396,13 @@ MatrixBase<T>::deleteMem()
 template<typename T>
 void
 MatrixBase<T>::setMem(const int a,const int b)
-  /*! 
-    Sets the memory held in matrix 
+  /*!
+    Sets the memory held in matrix
     \param a :: number of rows
     \param b :: number of columns
   */
 {
-  if (a==nx && b==ny) 
+  if (a==nx && b==ny)
     return;
 
   deleteMem();
@@ -410,7 +410,7 @@ MatrixBase<T>::setMem(const int a,const int b)
     return;
 
   nx=a;
-  ny=b;  
+  ny=b;
   if (nx*ny)
     {
       T* tmpX=new T[nx*ny];
@@ -419,15 +419,15 @@ MatrixBase<T>::setMem(const int a,const int b)
 	V[i]=tmpX + (i*ny);
     }
   return;
-}  
+}
 
 
-template<typename T> 
+template<typename T>
 std::vector<T>
 MatrixBase<T>::Row(const int RowI) const
   /*!
     Returns a specific row
-    \param RowI :: Row index 
+    \param RowI :: Row index
     \return Vector of row
    */
 {
@@ -437,12 +437,12 @@ MatrixBase<T>::Row(const int RowI) const
   return Out;
 }
 
-template<typename T> 
+template<typename T>
 std::vector<T>
 MatrixBase<T>::Column(const int ColI) const
   /*!
     Returns a specific column
-    \param ColI :: Column index 
+    \param ColI :: Column index
     \return Vector of Column
    */
 {
@@ -454,17 +454,17 @@ MatrixBase<T>::Column(const int ColI) const
   return Out;
 }
 
-template<typename T> 
+template<typename T>
 void
 MatrixBase<T>::swapRows(const int RowI,const int RowJ)
-  /*! 
+  /*!
     Swap rows I and J
     \param RowI :: row I to swap
     \param RowJ :: row J to swap
   */
 {
   if (nx*ny && RowI<nx && RowJ<nx &&
-      RowI!=RowJ) 
+      RowI!=RowJ)
     {
       for(int k=0;k<ny;k++)
         {
@@ -476,17 +476,17 @@ MatrixBase<T>::swapRows(const int RowI,const int RowJ)
   return;
 }
 
-template<typename T> 
+template<typename T>
 void
 MatrixBase<T>::swapCols(const int colI,const int colJ)
-  /*! 
-    Swap columns I and J 
+  /*!
+    Swap columns I and J
     \param colI :: col I to swap
     \param colJ :: col J to swap
   */
 {
   if (nx*ny && colI<ny && colJ<ny &&
-      colI!=colJ) 
+      colI!=colJ)
     {
       for(int k=0;k<nx;k++)
         {
@@ -498,11 +498,11 @@ MatrixBase<T>::swapCols(const int colI,const int colJ)
   return;
 }
 
-template<typename T> 
+template<typename T>
 void
 MatrixBase<T>::zeroMatrix()
-  /*! 
-    Zeros all elements of the matrix 
+  /*!
+    Zeros all elements of the matrix
   */
 {
   if (nx*ny)
@@ -518,14 +518,14 @@ MatrixBase<T>::laplaceDeterminate() const
   /*!
     This function calculates the determinate of a matrix.
     It uses the Cauche method of Det.
-    There are some careful constructs to avoid that 
+    There are some careful constructs to avoid that
     problem of matrix template object T not having a well
     defined 1.0 and an well defined 0.0.
 
-    \return Determinate 
+    \return Determinate
   */
 {
-  if (nx*ny<=0 || nx!=ny) 
+  if (nx*ny<=0 || nx!=ny)
     return T(0);
   if (nx==1)
     return V[0][0];
@@ -543,14 +543,14 @@ MatrixBase<T>::laplaceDeterminate() const
       MatrixBase<T> MX(*this,0,j);
       if (j % 2)
 	Sum+=V[0][j]*MX.laplaceDeterminate();
-      else 
+      else
 	Sum-=V[0][j]*MX.laplaceDeterminate();
     }
   return Sum;
 }
 
 
-template<typename T> 
+template<typename T>
 void
 MatrixBase<T>::identityMatrix()
   /*!
@@ -569,8 +569,8 @@ template<typename T>
 MatrixBase<T>
 MatrixBase<T>::fDiagonal(const std::vector<T>& Dvec) const
   /*!
-    Construct a matrix based on 
-    A * This, where A is made into a diagonal 
+    Construct a matrix based on
+    A * This, where A is made into a diagonal
     matrix.
     \param Dvec :: diagonal matrix (just centre points)
     \returns a matrix multiplication
@@ -594,8 +594,8 @@ template<typename T>
 MatrixBase<T>
 MatrixBase<T>::bDiagonal(const std::vector<T>& Dvec) const
   /*!
-    Construct a matrix based on 
-    This * A, where A is made into a diagonal 
+    Construct a matrix based on
+    This * A, where A is made into a diagonal
     matrix.
     \param Dvec :: diagonal matrix (just centre points)
   */
@@ -619,8 +619,8 @@ MatrixBase<T>::bDiagonal(const std::vector<T>& Dvec) const
 template<typename T>
 MatrixBase<T>
 MatrixBase<T>::Tprime() const
-  /*! 
-    Transpose the matrix : 
+  /*!
+    Transpose the matrix :
     Has transpose for a square matrix case.
     \return M^T
   */
@@ -647,8 +647,8 @@ MatrixBase<T>::Tprime() const
 template<typename T>
 MatrixBase<T>&
 MatrixBase<T>::Transpose()
-  /*! 
-    Transpose the matrix : 
+  /*!
+    Transpose the matrix :
     Has a inplace transpose for a square matrix case.
     \return this
   */
@@ -672,7 +672,7 @@ MatrixBase<T>::Transpose()
   T** Vt=new T*[ny];
   for (int i=0;i<ny;i++)
     Vt[i]=tmpX + (i*nx);
-  
+
   for(int i=0;i<nx;i++)
     for(int j=0;j<ny;j++)
       Vt[j][i]=V[i][j];
@@ -703,7 +703,7 @@ MatrixBase<T>::compSum() const
   return sum;
 }
 
-template<typename T> 
+template<typename T>
 std::vector<T>
 MatrixBase<T>::Diagonal() const
   /*!
@@ -718,12 +718,12 @@ MatrixBase<T>::Diagonal() const
   return Diag;
 }
 
-template<typename T> 
+template<typename T>
 T
 MatrixBase<T>::Trace() const
   /*!
     Calculates the trace of the matrix
-    \returns Trace of matrix 
+    \returns Trace of matrix
   */
 {
   const int Msize=(ny>nx) ? nx : ny;
@@ -737,8 +737,8 @@ MatrixBase<T>::Trace() const
 template<typename T>
 void
 MatrixBase<T>::print() const
-  /*! 
-    Simple print out routine 
+  /*!
+    Simple print out routine
    */
 {
   write(std::cout,10);
@@ -749,7 +749,7 @@ template<typename T>
 void
 MatrixBase<T>::write(std::ostream& Fh,const int blockCnt) const
   /*!
-    Write out function for blocks of 10 Columns 
+    Write out function for blocks of 10 Columns
     \param Fh :: file stream for output
     \param blockCnt :: number of columns per line (0 == full)
   */
@@ -757,7 +757,7 @@ MatrixBase<T>::write(std::ostream& Fh,const int blockCnt) const
 
   std::ios::fmtflags oldFlags=Fh.flags();
   Fh.setf(std::ios::floatfield,std::ios::scientific);
-  const int blockNumber((blockCnt>0) ? blockCnt : ny);  
+  const int blockNumber((blockCnt>0) ? blockCnt : ny);
   int BCnt(0);
 
   do
@@ -793,10 +793,10 @@ MatrixBase<T>::writeGrid(std::ostream& FX) const
   // need a list of longest strings [for each column]:
   std::vector<int> LStr(ny);
   fill(LStr.begin(),LStr.end(),0);
-  
+
   // a matrix of strings:
   boost::multi_array<std::string,2> MStr(boost::extents[nx][ny]);
-  
+
   for(int i=0;i<nx;i++)
     for(int j=0;j<ny;j++)
       {
@@ -807,7 +807,7 @@ MatrixBase<T>::writeGrid(std::ostream& FX) const
 	  LStr[j]=len;
 	MStr[i][j]=cx.str();
       }
-  
+
   // WRITE PART:
   for(int i=0;i<nx;i++)
     {
@@ -827,7 +827,7 @@ template<typename T>
 std::string
 MatrixBase<T>::str(const int spx) const
   /*!
-    Convert the matrix into a simple linear string expression 
+    Convert the matrix into a simple linear string expression
     \param spx The precision to use in std::setprecision
     \returns String value of output
   */
@@ -844,6 +844,7 @@ MatrixBase<T>::str(const int spx) const
   return cx.str();
 }
 
+///@cond
 template class MatrixBase<double>;
 template class MatrixBase<int>;
 template class MatrixBase<mathLevel::PolyVar<1> >;
@@ -858,6 +859,7 @@ template std::ostream& operator<<(std::ostream&,
 				  const MatrixBase<mathLevel::PolyVar<2> >&);
 template std::ostream& operator<<(std::ostream&,
 				  const MatrixBase<mathLevel::PolyVar<3> >&);
+///@endcond
 
 }  // NAMESPACE Geometry
 
