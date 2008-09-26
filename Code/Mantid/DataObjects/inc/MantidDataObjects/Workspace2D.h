@@ -124,8 +124,10 @@ private:
   static Kernel::Logger &g_log;
 };
 
-///shared pointer to the Workspace2D class 
+///shared pointer to the Workspace2D class
 typedef boost::shared_ptr<Workspace2D> Workspace2D_sptr;
+///shared pointer to a const Workspace2D
+typedef boost::shared_ptr<const Workspace2D> Workspace2D_const_sptr;
 
 } // namespace DataObjects
 } // Namespace Mantid

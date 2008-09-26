@@ -318,7 +318,7 @@ namespace Mantid
   namespace Kernel
   {
     template<> DLLExport
-      Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
+    Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
@@ -331,14 +331,15 @@ namespace Mantid
         throw std::runtime_error("Attempt to assign property of incorrect type");
       }
     }
+
     template<> DLLExport
-      boost::shared_ptr<const Mantid::DataObjects::Workspace2D> PropertyManager::getValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >(const std::string &name) const
+    Mantid::DataObjects::Workspace2D_const_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const std::string &name) const
     {
-      PropertyWithValue<boost::shared_ptr<const  Mantid::DataObjects::Workspace2D> >* prop =
-        dynamic_cast<PropertyWithValue<boost::shared_ptr<const Mantid::DataObjects::Workspace2D> >*>(getPointerToProperty(name));
+      PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
       if (prop)
       {
-        return *prop;
+        return prop->operator()();
       }
       else
       {
