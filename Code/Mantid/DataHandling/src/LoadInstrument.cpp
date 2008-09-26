@@ -37,7 +37,7 @@ using namespace API;
 Logger& LoadInstrument::g_log = Logger::get("LoadInstrument");
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm(), m_deltaOffsets(false)
+LoadInstrument::LoadInstrument() : Algorithm(), m_deltaOffsets(false), m_haveDefaultFacing(false)
 {}
 
 /// Initialisation method.
@@ -82,8 +82,8 @@ void LoadInstrument::exec()
   }
   catch(...)
   {
-    g_log.error("Unable to XML parse file " + m_filename);
-    throw Kernel::Exception::FileError("Unable to XML parse File:" , m_filename);
+    g_log.error("Unable to parse file " + m_filename);
+    throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
   }
 
   // Get pointer to root element
@@ -100,6 +100,14 @@ void LoadInstrument::exec()
   Element* offsetElement = pRootElem->getChildElement("defaults")->getChildElement("offsets");
   if (offsetElement) offsets = offsetElement->getAttribute("spherical");
   if ( offsets == "delta" ) m_deltaOffsets = true;
+
+  // Check whether default facing is set
+  Element* defaultFacingElement = pRootElem->getChildElement("defaults")->getChildElement("components-are-facing");
+  if (defaultFacingElement) 
+  {
+    m_haveDefaultFacing = true;
+    m_defaultFacing = parseStringToV3D( defaultFacingElement->getAttribute("xyz") );
+  }
 
   // create maps: isTypeAssembly and mapTypeNameToShape
   ShapeFactory shapeCreator;
@@ -218,7 +226,7 @@ void LoadInstrument::exec()
 
 
   // If "facing" element(s) present in instrument defintion file then
-
+/*
   Element* facingElement = pRootElem->getChildElement("defaults")->getChildElement("detectors-and-monitors-are-facing");
   if (facingElement)
   {
@@ -237,7 +245,7 @@ void LoadInstrument::exec()
     }
 
     makeXYplaneFaceComponent(m_facingComponent, facingComp);
-  }
+  }*/
 
   pDoc->release();
 
@@ -430,6 +438,7 @@ void LoadInstrument::appendLeaf(boost::shared_ptr<Geometry::CompAssembly> parent
 	appendLeaf(parent.get(), pLocElem, idList);
 }
 
+
 /** Set location (position) of comp as specified in XML location element.
  *
  *  @param comp To set position/location off
@@ -514,7 +523,21 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
     comp->setPos(Geometry::V3D(x,y,z));
   }
+
+  // Possibly rotate component
+
+  if (pElem->hasAttribute("facing-xyz"))
+  {
+    std::string facing_xyz = pElem->getAttribute("facing-xyz");
+    if ( facing_xyz.compare("none") != 0 )   // if facing-xyz="none" face nothing
+      makeXYplaneFaceComponent(comp, parseStringToV3D(facing_xyz));
+  }
+  else if (m_haveDefaultFacing)
+  {
+    makeXYplaneFaceComponent(comp, m_defaultFacing);
+  }
 }
+
 
 /** Get parent component element of location element.
  *
@@ -662,45 +685,79 @@ bool LoadInstrument::isAssembly(std::string type)
 }
 
 
-/** Make all the shapes defined in 1st argument face the component in the second argument,
- *  by rotating the z-axis of each component passed to this method in 1st argument such that it point in
- *  direction: from the component of the 2nd argument to the relavant component of the 1st argument.
+/** Make the shape defined in 1st argument face the component in the second argument,
+ *  by rotating the z-axis of the component passed in 1st argument so that it points in the
+ *  direction: from the component as specified 2nd argument to the component as specified in 1st argument.
  *
- *  @param in  Object to be rotated
+ *  @param in  Component to be rotated
  *  @param facing Object to face
  */
-void LoadInstrument::makeXYplaneFaceComponent(std::vector< Geometry::ObjComponent* > &in, const Geometry::ObjComponent* facing)
+void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing)
 {
   const Geometry::V3D facingPoint = facing->getPos();
+  
+  makeXYplaneFaceComponent(in, facingPoint);
+}
 
-  int numToRotate = in.size();
 
-  for (int i = 0; i < numToRotate; i++)
+/** Make the shape defined in 1st argument face the position in the second argument,
+ *  by rotating the z-axis of the component passed in 1st argument so that it points in the
+ *  direction: from the position (as specified 2nd argument) to the component (1st argument).
+ *
+ *  @param in  Component to be rotated
+ *  @param position to face
+ */
+void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint)
+{
+  Geometry::V3D pos = in->getPos();
+
+  // vector from facing object to component we want to rotate
+
+  Geometry::V3D facingDirection = pos - facingPoint;
+
+  if ( facingDirection.norm() == 0.0 ) return;
+
+
+  // now aim to rotate shape such that the z-axis of of the object we want to rotate
+  // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
+
+  Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
+  double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
+
+  if ( normal.norm() > 0.0 )
+    in->rotate(Geometry::Quat(-theta, normal));
+  else
   {
-    Geometry::V3D pos = in[i]->getPos();
-
-    // vector from facing object to component we want to rotate
-
-    Geometry::V3D facingDirection = pos - facingPoint;
-
-    if ( facingDirection.norm() == 0.0 ) continue;
-
-
-    // now aim to rotate shape such that the z-axis of of the object we want to rotate
-    // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
-
-    Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
-    double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
-
-    if ( normal.norm() > 0.0 )
-      in[i]->rotate(Geometry::Quat(-theta, normal));
-    else
-    {
-      // To take into account the case where the facing direction is in the (0,0,1)
-      // or (0,0,-1) direction.
-      in[i]->rotate(Geometry::Quat(-theta, Geometry::V3D(0,1,0)));
-    }
+    // To take into account the case where the facing direction is in the (0,0,1)
+    // or (0,0,-1) direction.
+    in->rotate(Geometry::Quat(-theta, Geometry::V3D(0,1,0)));
   }
+}
+
+/** Converting a string into V3D vector. It is assumed that the string represent
+ *  a position in the form: "1.2 3.2 9.1", where here this translate to x=1.2, 
+ *  y=3.2 and z=9.1
+ *
+ *  @param str  String to be parsed
+ *  @return V3D position as represended in string
+ */
+Geometry::V3D LoadInstrument::parseStringToV3D(std::string str)
+{
+  std::istringstream toParse(str);
+  double x, y, z;
+  Geometry::V3D retV3D;
+
+  try {
+    toParse >> x >> y >> z;   
+    retV3D(x,y,z);
+  }
+  catch(...) {
+    g_log.error("Unable to parse file " + m_filename + " . Error when converting "
+      + "string representing xyz coordinates");
+    throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
+  }
+
+  return retV3D;
 }
 
 

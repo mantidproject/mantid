@@ -25,6 +25,7 @@ namespace Geometry
   class Component;
   class Object;
   class ObjComponent;
+  class V3D;
 }
 namespace API
 {
@@ -134,8 +135,17 @@ namespace API
       /// 'facing' these to component specified under <defaults>
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
-      /// Make all the shapes defined in 1st argument face the component in the second argument
-      void makeXYplaneFaceComponent(std::vector< Geometry::ObjComponent* > &in, const Geometry::ObjComponent* facing);
+      ///
+      Geometry::V3D parseStringToV3D(std::string str);
+
+      bool m_haveDefaultFacing;
+
+      Geometry::V3D m_defaultFacing;
+
+      /// Make the shape defined in 1st argument face the component in the second argument
+      void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing);
+      /// Make the shape defined in 1st argument face the position in the second argument
+      void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint);
 
       /// Return true if assembly, false if not assembly and throws exception if string not in assembly
       bool isAssembly(std::string);
