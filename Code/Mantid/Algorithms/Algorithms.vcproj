@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConjoinWorkspaces.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConvertUnits.cpp"
 				>
 			</File>
@@ -265,6 +269,10 @@
 			</File>
 			<File
 				RelativePath=".\test\CommutativeBinaryOperationTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ConjoinWorkspaces.h"
 				>
 			</File>
 			<File
