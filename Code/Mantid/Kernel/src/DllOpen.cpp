@@ -10,6 +10,7 @@
  Shared library name is of the form lib*.so.
 */
 #if _WIN32
+#define _WIN32_WINNT 0x0510
 #include <windows.h>
 //#include <strsafe.h>
 #else
@@ -110,6 +111,11 @@ const std::string DllOpen::ConvertToLibName(const std::string& fileName)
 	return retVal;
 }
 
+void DllOpen::addSearchDirectory(const std::string& dir)
+{
+    addSearchDirectoryImpl(dir);
+}
+
 #if _WIN32
 const std::string DllOpen::LIB_PREFIX = "";
 const std::string DllOpen::LIB_POSTFIX = ".dll";
@@ -174,6 +180,12 @@ void DllOpen::CloseDllImpl(void* libName)
 {
 	FreeLibrary((HINSTANCE)libName);
 }
+
+void DllOpen::addSearchDirectoryImpl(const std::string& dir)
+{
+    SetDllDirectory(dir.c_str());
+}
+
 #else
 const std::string DllOpen::LIB_PREFIX = "lib";
 const std::string DllOpen::LIB_POSTFIX = ".so";
@@ -210,6 +222,10 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
 void DllOpen::CloseDllImpl(void* libName)
 {
 	dlclose(libName);
+}
+
+void DllOpen::addSearchDirectoryImpl(const std::string& dir)
+{
 }
 
 #endif /* _WIN32 */

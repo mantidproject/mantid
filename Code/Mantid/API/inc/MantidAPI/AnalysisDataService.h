@@ -9,6 +9,8 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Workspace.h"
 
+#include <Poco/AutoPtr.h>
+
 namespace Mantid
 {
 namespace API
@@ -65,6 +67,15 @@ private:
   template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
 #endif /* _WIN32 */
   typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl> AnalysisDataService;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification WorkspaceAddNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification>& WorkspaceAddNotification_ptr;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification WorkspaceReplaceNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification>& WorkspaceReplaceNotification_ptr;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification WorkspaceDeleteNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& WorkspaceDeleteNotification_ptr;
 
 } // Namespace API
 } // Namespace Mantid

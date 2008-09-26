@@ -90,6 +90,7 @@ class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManager
 {
 public:
 
+    /// Base class for algorithm notifications
     class AlgorithmNotification: public Poco::Notification
     {
     public:
@@ -99,6 +100,7 @@ public:
         Algorithm *m_algorithm;
     };
 
+    /// StartedNotification is sent when the algorithm begins execution.
     class StartedNotification: public AlgorithmNotification
     {
     public:
@@ -106,6 +108,7 @@ public:
         virtual std::string name() const{return "StartedNotification";}
     };
 
+    /// FinishedNotification is sent after the algorithm finishes its execution
     class FinishedNotification: public AlgorithmNotification
     {
     public:
@@ -114,6 +117,8 @@ public:
         bool success;
     };
 
+    /// An algorithm can report its progress by sending ProgressNotification. Use 
+    /// Algorithm::progress(double) function to send a preogress notification.
     class ProgressNotification: public AlgorithmNotification
     {
     public:
@@ -122,6 +127,7 @@ public:
         double progress;
     };
 
+    /// ErrorNotification is sent when an exception is caught during execution of the algorithm.
     class ErrorNotification: public AlgorithmNotification
     {
     public:
@@ -130,6 +136,10 @@ public:
         std::string what;
     };
 
+    /// CancelException is thrown to cancel execution of the algorithm. Use Algorithm::cancel() to
+    /// terminate an algorithm. The execution will only be stopped if Algorithm::exec() method calls
+    /// periodically Algorithm::interuption_point() which checks if Algorithm::cancel() has been called
+    /// and throws CancelException if needed.
     class CancelException : public std::exception
     {
      public:
@@ -177,6 +187,8 @@ public:
   /// Asynchronous execution.
   /// Usage: Poco::ActiveResult<bool> res = alg->executeAsync();
   Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...);
   Poco::NotificationCenter notificationCenter;
   void cancel();
 protected:
@@ -198,6 +210,8 @@ protected:
 
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
   void progress(double p);
+  /// Interrupts algorithm execution if Algorithm::cancel() has been called. 
+  /// Does nothing otherwise.
   void interruption_point();
 
 private:

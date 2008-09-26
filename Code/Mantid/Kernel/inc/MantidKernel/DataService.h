@@ -8,6 +8,8 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Notification.h>
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -54,6 +56,57 @@ template <typename T>
 class DLLExport DataService
 {
 public:
+
+    /// Base class for DataService notifications
+    class DataServiceNotification: public Poco::Notification
+    {
+    public:
+        DataServiceNotification(const std::string& name, const boost::shared_ptr<T> obj):Poco::Notification(),m_name(name),m_object(obj){}
+        /// Returns the const pointer to the object concerned or 0 if it is a general notification
+        const boost::shared_ptr<T> object()const{return m_object;}
+        std::string object_name()const{return m_name;}
+    private:
+        std::string m_name;
+        boost::shared_ptr<T> m_object;
+    };
+
+    /// AddNotification is sent after an new object is added to the data service.
+    /// name() and object() return name and pointer to the new object.
+    class AddNotification: public DataServiceNotification
+    {
+    public:
+        AddNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+    };
+
+
+    /// ReplaceNotification is sent after an object is replaced with addOrReplace() function.
+    class ReplaceNotification: public DataServiceNotification
+    {
+    public:
+        /** Constructor. 
+
+            @param name The name of the replaced object
+            @param obj  The pointer to the old object
+            @param new_obj The pointer to the new object
+
+            Both old and new objects are quaranteed to exist when an observer receives the notification.
+        */
+        ReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> new_obj):DataServiceNotification(name,obj),m_new_object(new_obj){}
+        const boost::shared_ptr<T> new_object()const{return m_new_object;}///< Returns the pointer to the new object.
+    private:
+        boost::shared_ptr<T> m_new_object;
+    };
+
+    /// DeleteNotification is sent after an object is deleted from the data service.
+    /// name() and object() return name and pointer to the object being deleted.
+    /// The object still exists when the notification is received by an observer.
+    class DeleteNotification: public DataServiceNotification
+    {
+    public:
+        DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+    };
+
+
   /// Add an object to the service
   void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
@@ -79,6 +132,7 @@ public:
     {
     	std::string information=" add Data Object '"+name+"' successful";
     	g_log.information(information);
+        notificationCenter.postNotification(new AddNotification(name,Tobject));
     }
     return;
   }
@@ -91,6 +145,7 @@ public:
     if (it!=datamap.end())
     {
       g_log.warning("Data Object '"+ name +"' replaced in data service.");
+      notificationCenter.postNotification(new ReplaceNotification(name,it->second,Tobject));
       datamap[name] = Tobject;
     }
     else
@@ -110,6 +165,7 @@ public:
       return;
     }
 
+    notificationCenter.postNotification(new DeleteNotification(name,it->second));
     datamap.erase(it);
     return;
   }
@@ -164,6 +220,10 @@ public:
     }
     return names;
   }
+
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...)
+  Poco::NotificationCenter notificationCenter;
 
 protected:
   /// Protected constructor (singleton)

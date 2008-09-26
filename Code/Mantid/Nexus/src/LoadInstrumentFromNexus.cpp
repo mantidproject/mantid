@@ -34,7 +34,11 @@ void LoadInstrumentFromNexus::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("Filename","",new MandatoryValidator<std::string>);
+//  declareProperty("Filename","",new MandatoryValidator<std::string>);
+      std::vector<std::string> exts;
+      exts.push_back("nxs");
+      exts.push_back("NXS");		
+      declareProperty("Filename","",new FileValidator(exts));
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

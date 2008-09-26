@@ -43,6 +43,8 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 	//validate inputs
 	if (fs::exists(filePath) )
 	{
+
+        DllOpen::addSearchDirectory(filePath);
 	
 		//iteratate over the available files
 		fs::directory_iterator end_itr; // default construction yields past-the-end

@@ -1,28 +1,23 @@
-#include "../ApplicationWindow.h"
 #include "MantidLog.h"
+#include "MantidUI.h"
+#include <iostream>
+using namespace std;
+
+void MantidLog::connect(MantidUI* mui)
+{
+    if (!s_Instance)
+    {
+        qRegisterMetaType<Poco::Message>();
+        s_Instance.reset(new MantidLog);
+        QObject::connect(s_Instance.get(),SIGNAL(messageReceived(const Poco::Message&)),mui,SLOT(logMessage(const Poco::Message&)));
+        s_Instance->AbstractMantidLog::connect();
+    }
+}
 
 /// Posts message text to QtiPlot Result Log
 void MantidLog::log(const Poco::Message& msg)
 {
-    s_mutex.lock();
-    QString str = msg.getText().c_str();
-    if (s_appWin)
-        s_appWin->updateLog(str+"\n");
-    if (s_logEdit)
-    {
-        if (msg.getPriority() < Poco::Message::PRIO_WARNING)
-            s_logEdit->setTextColor(Qt::red);
-        else
-            s_logEdit->setTextColor(Qt::black);
-        s_logEdit->insertPlainText(str+"\n");
-        QTextCursor cur = s_logEdit->textCursor();
-        cur.movePosition(QTextCursor::End);
-        s_logEdit->setTextCursor(cur);
-    }
-    s_mutex.unlock();
+    emit messageReceived(msg);
 }
 
 boost::shared_ptr<MantidLog> MantidLog::s_Instance;
-ApplicationWindow* MantidLog::s_appWin = 0; 
-QTextEdit* MantidLog::s_logEdit = 0; 
-QMutex MantidLog::s_mutex;

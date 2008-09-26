@@ -10,7 +10,10 @@
 #include <QThread>
 #include <QMap>
 
+#include <Poco/NObserver.h>
+
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "../UserFunction.h"
 #include "../MdiSubWindow.h"
 #include "../Graph.h"
@@ -32,6 +35,8 @@ class MultiLayer;
 class QTabWidget;
 class UpdateDAEThread;
 
+using namespace Mantid::API;
+
 class MantidMatrixFunction: public UserHelperFunction
 {
 public:
@@ -42,7 +47,32 @@ private:
     MantidMatrix* m_matrix;
     double m_dx,m_dy;
 };
+/** MantidMatrix is the class that represents a Qtiplot window for displaying workspaces.
+    It has separate tabs for displaying spectrum values, bin boundaries, and errors.
 
+    @author Roman Tolchenov, Tessella Support Services plc
+
+    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+*/
 class MantidMatrix: public MdiSubWindow
 {
     Q_OBJECT
@@ -53,8 +83,15 @@ public:
 	MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1, bool filter=false, double maxv=0);
     ~MantidMatrix();
 
-	MantidMatrixModel * model(){return m_model;};
-	QItemSelectionModel * selectionModel(){return m_table_view->selectionModel();};
+    void connectTableView(QTableView*,MantidMatrixModel*);
+	MantidMatrixModel * model(){return m_modelY;};
+	MantidMatrixModel * modelY(){return m_modelY;};
+	MantidMatrixModel * modelX(){return m_modelX;};
+	MantidMatrixModel * modelE(){return m_modelE;};
+	QItemSelectionModel * selectionModel(){return m_table_viewY->selectionModel();};
+	QItemSelectionModel * selectionModelY(){return m_table_viewY->selectionModel();};
+	QItemSelectionModel * selectionModelX(){return m_table_viewX->selectionModel();};
+	QItemSelectionModel * selectionModelE(){return m_table_viewE->selectionModel();};
 
     int numRows()const{return m_rows;}
     int numCols()const{return m_cols;}
@@ -76,34 +113,20 @@ public:
 
     int workspaceIndex(int row){return row + m_startRow;}
     bool yShown(){return m_tabs->currentIndex() == 0;}
-    QTableView *activeView(){return yShown()? m_table_view : m_table_viewX;}
-    MantidMatrixModel *activeModel(){return yShown()? m_model : m_modelX;}
+    QTableView *activeView(){return m_table_viewY;}//  unfinished!!!
+    MantidMatrixModel *activeModel(){return m_modelY;}//  unfinished!!!
 
     bool isHistogram(){return m_histogram;}
 
-    std::string DAEname(){return m_DAEname;}
-    void DAEname(QString qDAEname){if (m_DAEname.empty()) m_DAEname = qDAEname.toStdString();}
-    int spectrumMin(){return m_spectrum_min;}
-    void spectrumMin(int spMin){if (m_spectrum_min < 0) m_spectrum_min = spMin;}
-    int spectrumMax(){return m_spectrum_max;}
-    void spectrumMax(int spMax){if (m_spectrum_max < 0) m_spectrum_max = spMax;}
-    QVector<int>& spectrumList(){return m_spectrum_list;}
-    void spectrumList(QString sl)
-    {
-        if (!m_spectrum_list.empty()) return;
-        QStringList strList = sl.split(",");
-        for(int i=0;i<strList.size();i++)
-            m_spectrum_list<<strList[i].toInt();
-    }
-    bool canUpdateDAE(){return m_canUpdateDAE;}
-    void canUpdateDAE(bool yes, int freq=0);
-    void updateDAE();
-
 signals:
     void needsUpdating();
+    void needChangeWorkspace(Mantid::API::Workspace_sptr ws);
+    void needDeleteWorkspace();
 
 public slots:
 
+    void changeWorkspace(Mantid::API::Workspace_sptr ws);
+    void deleteWorkspace();
     void tst();
 
 	//! Return the width of all columns
@@ -149,26 +172,30 @@ public slots:
 	//! Free memory used for a matrix buffer
 	static void freeMatrixData(double **data, int rows);
 
-	int verticalHeaderWidth(){return m_table_view->verticalHeader()->width();}
-
-    void showX();
+	int verticalHeaderWidth(){return m_table_viewY->verticalHeader()->width();}
 
     void dependantClosed(MdiSubWindow* w);
+    void selfClosed(MdiSubWindow* w);
     void repaintAll();
+    void closeDependants();
 
 protected:
 
-    void paintEvent(QPaintEvent *e);
-    void clean();
-    //double dblSqrt(double in);
+    void setup(Mantid::API::Workspace_sptr ws, int start=-1, int end=-1, bool filter=false, double maxv=0);
+
+    void handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, WorkspaceReplaceNotification> m_replaceObserver;
+
+    void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, WorkspaceDeleteNotification> m_deleteObserver;
 
     ApplicationWindow *m_appWindow;
     Mantid::API::Workspace_sptr m_workspace;
     QTabWidget *m_tabs;
-    QTableView *m_table_view;
+    QTableView *m_table_viewY;
     QTableView *m_table_viewX;
     QTableView *m_table_viewE;
-    MantidMatrixModel *m_model;
+    MantidMatrixModel *m_modelY;
     MantidMatrixModel *m_modelX;
     MantidMatrixModel *m_modelE;
     QColor m_bk_color;
@@ -184,16 +211,7 @@ protected:
     double m_maxv;
     bool m_histogram;
 
-    // If workspace comes from DAE store DAE name and spectra numbers
-    std::string m_DAEname;
-    int m_spectrum_min;
-    int m_spectrum_max;
-    QVector<int> m_spectrum_list;
-    bool m_canUpdateDAE;
-    int m_updateFrequency;
-    UpdateDAEThread *m_updateDAEThread;
-    int* m_spectrum_buff;
-    bool m_needDAERepaint;
+    // MDI windows created by this MantidMatrix
     QVector<MultiLayer*> m_plots2D;
     QMap< MultiLayer*,Table* > m_plots1D;
 
@@ -204,6 +222,12 @@ protected:
     QAction *m_actionShowX;
 };
 
+/**
+    MantidMatrixModel is an implementation of QAbstractTableModel which is an 
+    interface between the data (workspace) and the widget displaying it (QTableView).
+    It presents spectrum data (Type Y), bin boundaries (Type X), and errors (Type E) 
+    as a table.
+*/
 class MantidMatrixModel:public QAbstractTableModel
 {
     Q_OBJECT
@@ -214,21 +238,41 @@ public:
                       int rows,
                       int cols,
                       int start, 
-                      int end, 
                       bool filter, 
                       double maxv,
                       Type type):
-      QAbstractTableModel(parent),m_workspace(ws),m_filter(filter),m_maxv(maxv),m_rows(rows),m_cols(cols),m_type(type)
+      QAbstractTableModel(parent),m_type(type)
       {
-          m_startRow = start >= 0? start : 0;
-          m_endRow = end >= m_startRow? end : m_workspace->getNumberHistograms();
-          if (ws->blocksize() != 0)
-              m_colNumCorr = ws->dataX(0).size() != ws->dataY(0).size() ? 1 : 0;
-          else
-              m_colNumCorr = 0;
+          setup(ws,rows,cols,start,filter,maxv);
       }
+
+    /// Call this function if the workspace has changed
+    void setup(Mantid::API::Workspace_sptr ws, 
+                      int rows,
+                      int cols,
+                      int start, 
+                      bool filter, 
+                      double maxv)
+    {
+        m_workspace = ws;
+        m_filter = filter;
+        m_maxv = maxv;
+        m_rows = rows;
+        m_cols = cols;
+        m_startRow = start >= 0? start : 0;
+        if (ws->blocksize() != 0)
+            m_colNumCorr = ws->dataX(0).size() != ws->dataY(0).size() ? 1 : 0;
+        else
+            m_colNumCorr = 0;
+    }
+
+    /// Implementation of QAbstractTableModel::rowCount() -- number of rows (spectra) that can be shown
     int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
+
+    /// Implementation of QAbstractTableModel::columnCount() -- number of columns. If type is X it is
+    /// the numner of bin boundaries. If type is Y or E it is the number of data values.
     int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_type == X? m_cols + m_colNumCorr : m_cols;}
+
     double data(int row, int col) const
     {
         double val;
@@ -239,7 +283,11 @@ public:
         else if (m_type == Y)
         {
             val = m_workspace->dataY(row + m_startRow)[col];
-            if (m_filter && val > m_maxv) val = m_maxv;
+            if (m_filter)
+            {
+                if (val > m_maxv) val = m_maxv;
+                if (val < 0) val = 0.;
+            }
         }
         else
         {
@@ -247,9 +295,12 @@ public:
         }
         return val;
     }
+
+    /// Implementation of QAbstractTableModel::data(...). QTableView uses this function
+    /// to retrieve data for displaying.
     QVariant data(const QModelIndex &index, int role) const
     {
-        if (role != Qt::DisplayRole) return QVariant();
+        if (role != Qt::DisplayRole) return QVariant();// this line is important
         double val;
         
         if (m_type == X)  val = m_workspace->dataX(index.row() + m_startRow)[index.column()];
@@ -265,41 +316,23 @@ public:
 	    else
             return Qt::ItemIsEnabled;
     }
-    bool showX(){return m_showX;}
-    void showX(bool on){m_showX = on;}
 
 public slots:
+    /// Signals QTableView that the data have changed.
     void resetData(){reset();}
 private:
     Mantid::API::Workspace_sptr m_workspace;
-    int m_startRow; // starting workspace index to display
-    int m_endRow;
-    bool m_filter;
+    int m_startRow; ///< starting workspace index to display
+    int m_endRow;   ///< ending workspace index to display
+    bool m_filter;  ///< if true data(int,int) return values between 0 and m_maxv
     double m_maxv;
-    int m_rows,m_cols;
-    bool m_showX;// if true display bin boundaries indstead of Y values
-    int m_colNumCorr;// = 1 for histograms and = 0 for point data
+    int m_rows,m_cols; ///< numbers of rows and columns
+    int m_colNumCorr;  ///< == 1 for histograms and == 0 for point data
     QLocale m_locale;
-    Type m_type;
+    Type m_type;///< The type: X for bin boundaries, Y for the spectrum data, E for errors
 };
 
-class UpdateDAEThread:public QThread
-{
-    Q_OBJECT
-public:
-    UpdateDAEThread(MantidMatrix *m,unsigned long secs ):QThread(),m_matrix(m),m_secs(secs){}
-protected:
-    void run()
-    {
-        if (!m_matrix->canUpdateDAE()) return;
-        for(;;)
-        {
-            sleep(m_secs);
-            m_matrix->updateDAE();
-        }
-    }
-    MantidMatrix *m_matrix;
-    unsigned long m_secs;
-};
+/// Required by Qt to us Mantid::API::Workspace_sptr as a parameter type in signals
+Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
 
 #endif

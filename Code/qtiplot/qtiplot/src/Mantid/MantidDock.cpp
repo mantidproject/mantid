@@ -206,34 +206,71 @@ void AlgorithmDockWidget::update()
     typedef std::vector<Algorithm_descriptor> AlgNamesType;
     AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
 
-    /*Algorithm_descriptor desc = {"Divide","General",3};
-    Algorithm_descriptor desc1 = {"Divide","General",7};
+    /*Algorithm_descriptor desc = {"LoadLog","DataHandling\\Logs",3};
+    Algorithm_descriptor desc1 = {"LoadLog","DataHandling\\Logs",7};
     names.push_back(desc);
-    names.push_back(desc1);*/
+    names.push_back(desc1);//*/
 
+    // sort by algorithm names only to fill m_findAlg combobox
     sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
 
     m_findAlg->clear();
+    std::string prevName = "";
     for(AlgNamesType::const_iterator i=names.begin();i!=names.end();i++)
     {
-        m_findAlg->addItem(QString::fromStdString(i->name));
+        if (i->name != prevName)
+            m_findAlg->addItem(QString::fromStdString(i->name));
+        prevName = i->name;
     }
     m_findAlg->setCurrentIndex(-1);
 
+    // sort by category/name/version to fill QTreeWidget m_tree
     sort(names.begin(),names.end(),Algorithm_descriptor_less);
 
-    QMap<QString,QTreeWidgetItem*> categories;
-    QMap<QString,QTreeWidgetItem*> algorithms;
+    QMap<QString,QTreeWidgetItem*> categories;// keeps track of categories added to the tree
+    QMap<QString,QTreeWidgetItem*> algorithms;// keeps track of algorithms added to the tree (needed in case there are different versions of an algorithm)
 
     for(AlgNamesType::const_iterator i=names.begin();i!=names.end();i++)
     {
         QString algName = QString::fromStdString(i->name);
         QString catName = QString::fromStdString(i->category);
+        QStringList subCats = catName.split('\\');
         if (!categories.contains(catName))
         {
-            QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList(catName));
-            categories.insert(catName,catItem);
-            m_tree->addTopLevelItem(catItem);
+            if (subCats.size() == 1)
+            {
+                QTreeWidgetItem *catItem = new QTreeWidgetItem(QStringList(catName));
+                categories.insert(catName,catItem);
+                m_tree->addTopLevelItem(catItem);
+            }
+            else
+            {
+                QString cn = subCats[0];
+                QTreeWidgetItem *catItem = 0;
+                int n = subCats.size();
+                for(int j=0;j<n;j++)
+                {
+                    if (categories.contains(cn)) 
+                    {
+                        catItem = categories[cn];
+                    }
+                    else
+                    {
+                        QTreeWidgetItem *newCatItem = new QTreeWidgetItem(QStringList(subCats[j]));
+                        categories.insert(cn,newCatItem);                  
+                        if (!catItem)
+                        {
+                            m_tree->addTopLevelItem(newCatItem);
+                        }
+                        else
+                        {
+                            catItem->addChild(newCatItem);
+                        }
+                        catItem = newCatItem;
+                    } 
+                    if (j != n-1) cn += "\\" + subCats[j+1];
+                }
+            }
         }
 
         QTreeWidgetItem *algItem = new QTreeWidgetItem(QStringList(algName+" v."+QString::number(i->version)));
@@ -326,8 +363,9 @@ void AlgorithmTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
     if ( ! algName.isEmpty() )
     {
         m_mantidUI->executeAlgorithm(algName, version);
+        return;
     }
 
-    return QTreeWidget::mouseDoubleClickEvent(e);
+    QTreeWidget::mouseDoubleClickEvent(e);
 }
 

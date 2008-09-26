@@ -56,6 +56,9 @@ public:
 	/// Static method for converting a filename to a libName (without lib___.so or ___.dll)
 	static const std::string ConvertToLibName(const std::string&);
 
+    /// Adds a directiry to the dll search path.
+    static void addSearchDirectory(const std::string&);
+
 private:
 	/// Constructor private as not needed
 	DllOpen()
@@ -76,6 +79,9 @@ private:
 
 	/// Implementation specifc static method for closing a shared library
 	static void CloseDllImpl(void*);
+
+    /// Implementation specifc static method for adding a directiry to the dll search path.
+    static void addSearchDirectoryImpl(const std::string&);
 
 	/// Static reference to the logger class
 	static Mantid::Kernel::Logger& log;

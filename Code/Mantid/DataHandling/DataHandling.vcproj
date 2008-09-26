@@ -228,6 +228,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\UpdateDAE.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\vms_convert.cpp"
 				>
 			</File>
@@ -327,6 +331,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\ShapeFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\UpdateDAE.h"
 				>
 			</File>
 			<File

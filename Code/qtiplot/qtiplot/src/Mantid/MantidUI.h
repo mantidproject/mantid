@@ -4,6 +4,7 @@
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include "ProgressDlg.h"
+#include "MantidLog.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -11,7 +12,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
-//#include "MantidDataHandling/LoadRaw.h"
 
 #include <Poco/NObserver.h>
 
@@ -90,6 +90,7 @@ signals:
 
 public slots:
 
+    void logMessage(const Poco::Message& msg);
     void tst();
     void tst(MdiSubWindow* w);
     // Updates Mantid user interfase
@@ -113,7 +114,7 @@ public slots:
     void showCritical(const QString&);
     void showAlgMonitor();
 public:
-    void executeAlgorithmAsync(Mantid::API::Algorithm* alg);
+    void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
 
     void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
@@ -124,8 +125,17 @@ public:
     void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
 
+    void handleAddWorkspace(WorkspaceAddNotification_ptr pNf);
+    Poco::NObserver<MantidUI, WorkspaceAddNotification> m_addObserver;
+
     void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
+
+    void handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidUI, WorkspaceReplaceNotification> m_replaceObserver;
+
+    void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
+    Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;
 
     ApplicationWindow *m_appWindow;
     // ApplicationWindow's private members

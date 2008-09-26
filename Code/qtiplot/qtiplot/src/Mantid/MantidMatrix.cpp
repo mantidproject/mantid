@@ -3,7 +3,6 @@
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
 #include "../Spectrogram.h"
-#include "../../../../Mantid/DataHandling/src/LoadDAE/idc.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <QtGlobal>
@@ -37,9 +36,62 @@
 #include <algorithm>
 
 MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end, bool filter, double maxv)
-: MdiSubWindow(label, parent, name, 0),m_workspace(ws),m_funct(this)
+: MdiSubWindow(label, parent, name, 0),m_funct(this),
+m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
+m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
 {
-    if (!m_workspace)
+    m_appWindow = parent;
+    setup(ws,start,end,filter,maxv);
+	setWindowTitle(name);
+	setName(name); 
+	setIcon( QPixmap(matrixIcon()) );
+
+    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::Y);
+    m_table_viewY = new QTableView();
+    connectTableView(m_table_viewY,m_modelY);
+
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::X);
+    m_table_viewX = new QTableView();
+    connectTableView(m_table_viewX,m_modelX);
+
+    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::E);
+    m_table_viewE = new QTableView();
+    connectTableView(m_table_viewE,m_modelE);
+
+    m_tabs = new QTabWidget(this);
+    m_tabs->insertTab(0,m_table_viewY,"Y values");
+    m_tabs->insertTab(1,m_table_viewX,"X values");
+    m_tabs->insertTab(2,m_table_viewE,"Errors");
+    setWidget(m_tabs);
+
+    setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
+                (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
+ 
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+    static bool Workspace_sptr_qRegistered = false;
+    if (!Workspace_sptr_qRegistered)
+    {
+        Workspace_sptr_qRegistered = true;
+        qRegisterMetaType<Mantid::API::Workspace_sptr>();
+    }
+    connect(this,SIGNAL(needChangeWorkspace(Mantid::API::Workspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::Workspace_sptr)));
+    connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
+    connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
+}
+
+MantidMatrix::~MantidMatrix()
+{
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+    delete m_modelY;
+    delete m_modelX;
+    delete m_modelE;
+}
+
+void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end, bool filter, double maxv)
+{
+    if (!ws.get())
     {
         QMessageBox::critical(0,"WorkspaceMatrixModel error","2D workspace expected.");
         m_rows = 0;
@@ -48,7 +100,7 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
         m_endRow = 0;
         return;
     }
-
+    m_workspace = ws;
     m_startRow = (start<0 || start>=ws->getNumberHistograms())?0:start;
     m_endRow   = (end<0 || end>=ws->getNumberHistograms() || end < start)?ws->getNumberHistograms()-1:end;
     m_rows = m_endRow - m_startRow + 1;
@@ -57,13 +109,6 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
     m_maxv = maxv;
     m_histogram = false;
     if ( m_workspace->blocksize() || m_workspace->dataX(0).size() != m_workspace->dataY(0).size() ) m_histogram = true;
-    m_DAEname = "";
-    m_spectrum_min = -1;
-    m_spectrum_max = -1;
-    m_canUpdateDAE = false;
-    m_updateDAEThread = 0;
-    m_needDAERepaint = false;
-    m_updateFrequency = 0;
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
     x_start = ws->dataX(0)[0];
@@ -75,119 +120,43 @@ MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* pa
     m_bk_color = QColor(128, 255, 255);
     m_matrix_icon = mantid_matrix_xpm;
     m_column_width = 100;
-    m_model = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::Y);
 
-    m_table_view = new QTableView();
-    m_table_view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
-    m_table_view->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
-    m_table_view->setModel(m_model);
-    m_table_view->setEditTriggers(QAbstractItemView::DoubleClicked);
-    m_table_view->setFocusPolicy(Qt::StrongFocus);
-    m_table_view->setFocus();
+    m_funct.init();
 
-    QPalette pal = m_table_view->palette();
+}
+
+void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
+{
+    view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+    view->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
+    view->setModel(model);
+    view->setEditTriggers(QAbstractItemView::DoubleClicked);
+    view->setFocusPolicy(Qt::StrongFocus);
+    //view->setFocus();
+
+    QPalette pal = view->palette();
 	pal.setColor(QColorGroup::Base, m_bk_color);
-	m_table_view->setPalette(pal);
+	view->setPalette(pal);
 
 	// set header properties
-	QHeaderView* hHeader = (QHeaderView*)m_table_view->horizontalHeader();
+	QHeaderView* hHeader = (QHeaderView*)view->horizontalHeader();
 	hHeader->setMovable(false);
 	hHeader->setResizeMode(QHeaderView::Fixed);
 	hHeader->setDefaultSectionSize(m_column_width);
 
     int cols = numCols();
 	for(int i=0; i<cols; i++)
-		m_table_view->setColumnWidth(i, m_column_width);
+		view->setColumnWidth(i, m_column_width);
 
-	QHeaderView* vHeader = (QHeaderView*)m_table_view->verticalHeader();
+	QHeaderView* vHeader = (QHeaderView*)view->verticalHeader();
 	vHeader->setMovable(false);
 	vHeader->setResizeMode(QHeaderView::ResizeToContents);
 
-//-------------------------- X Values View
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::X);
-
-    m_table_viewX = new QTableView();
-    m_table_viewX->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
-    m_table_viewX->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
-    m_table_viewX->setModel(m_modelX);
-    m_table_viewX->setEditTriggers(QAbstractItemView::DoubleClicked);
-    m_table_viewX->setFocusPolicy(Qt::StrongFocus);
-    //m_table_viewX->setFocus();
-
-	// set header properties
-	hHeader = (QHeaderView*)m_table_viewX->horizontalHeader();
-	hHeader->setMovable(false);
-	hHeader->setResizeMode(QHeaderView::Fixed);
-	hHeader->setDefaultSectionSize(m_column_width);
-
-    cols = numCols();
-	for(int i=0; i<cols; i++)
-		m_table_viewX->setColumnWidth(i, m_column_width);
-
-	vHeader = (QHeaderView*)m_table_viewX->verticalHeader();
-	vHeader->setMovable(false);
-	vHeader->setResizeMode(QHeaderView::ResizeToContents);
-
-    pal = m_table_viewX->palette();
-	pal.setColor(QColorGroup::Base, m_bk_color);
-	m_table_viewX->setPalette(pal);
-
-//-------------------------- E Values View
-    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_endRow,filter,maxv,MantidMatrixModel::E);
-
-    m_table_viewE = new QTableView();
-    m_table_viewE->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
-    m_table_viewE->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
-    m_table_viewE->setModel(m_modelE);
-    m_table_viewE->setEditTriggers(QAbstractItemView::DoubleClicked);
-    m_table_viewE->setFocusPolicy(Qt::StrongFocus);
-    //m_table_viewE->setFocus();
-
-	// set header properties
-	hHeader = (QHeaderView*)m_table_viewE->horizontalHeader();
-	hHeader->setMovable(false);
-	hHeader->setResizeMode(QHeaderView::Fixed);
-	hHeader->setDefaultSectionSize(m_column_width);
-
-    cols = numCols();
-	for(int i=0; i<cols; i++)
-		m_table_viewE->setColumnWidth(i, m_column_width);
-
-	vHeader = (QHeaderView*)m_table_viewE->verticalHeader();
-	vHeader->setMovable(false);
-	vHeader->setResizeMode(QHeaderView::ResizeToContents);
-
-    pal = m_table_viewE->palette();
-	pal.setColor(QColorGroup::Base, m_bk_color);
-	m_table_viewE->setPalette(pal);
-
-    m_tabs = new QTabWidget(this);
-    m_tabs->insertTab(0,m_table_view,"Y values");
-    m_tabs->insertTab(1,m_table_viewX,"X values");
-    m_tabs->insertTab(2,m_table_viewE,"Errors");
-    setWidget(m_tabs);
-
-//--------------------------
-
-    //setWidget(m_table_view);
-
-    // recreate keyboard shortcut
-	//d_select_all_shortcut = new QShortcut(QKeySequence(tr("Ctrl+A", "Matrix: select all")), this);
-	//connect(d_select_all_shortcut, SIGNAL(activated()), d_table_view, SLOT(selectAll()));
-
-    setGeometry(50, 50, QMIN(5, numCols())*m_table_view->horizontalHeader()->sectionSize(0) + 55,
-                (QMIN(10,numRows())+1)*m_table_view->verticalHeader()->sectionSize(0)+100);
-
-	setWindowTitle(name);
-	setName(name);
-	setIcon( QPixmap(matrixIcon()) );
-
-    m_funct.init();
 }
 
 double MantidMatrix::cell(int row, int col)
 {
-	return m_model->data(row, col);
+	return m_modelY->data(row, col);
 }
 
 QString MantidMatrix::text(int row, int col)
@@ -201,14 +170,16 @@ void MantidMatrix::setColumnsWidth(int width)
 		return;
 
     m_column_width = width;
-    m_table_view->horizontalHeader()->setDefaultSectionSize(m_column_width);
+    m_table_viewY->horizontalHeader()->setDefaultSectionSize(m_column_width);
     m_table_viewX->horizontalHeader()->setDefaultSectionSize(m_column_width);
+    m_table_viewE->horizontalHeader()->setDefaultSectionSize(m_column_width);
 
     int cols = numCols();
     for(int i=0; i<cols; i++)
     {
-        m_table_view->setColumnWidth(i, width);
+        m_table_viewY->setColumnWidth(i, width);
         m_table_viewX->setColumnWidth(i, width);
+        m_table_viewE->setColumnWidth(i, width);
     }
 
 	emit modifiedWindow(this);
@@ -427,14 +398,6 @@ QwtDoubleRect MantidMatrix::boundingRect()
 						 fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
 }
 
-MantidMatrix::~MantidMatrix()
-{
-    clean();
-    delete m_model;
-    delete m_modelX;
-    delete m_modelE;
-}
-
 //----------------------------------------------------------------------------
 void MantidMatrixFunction::init()
 {
@@ -624,135 +587,10 @@ void MantidMatrix::getSelectedRows(int& i0,int& i1)
 	}
 }
 
-void MantidMatrix::showX()
-{
-    m_model->showX( !m_model->showX() );
-    //m_table_view->repaint();
-    repaint();
-}
-
-void MantidMatrix::canUpdateDAE(bool yes, int freq)
-{
-    if (!m_DAEname.empty()) m_canUpdateDAE = yes;
-    if (yes)
-    {
-        if (freq > 0) m_updateFrequency = freq;
-        if (m_updateFrequency == 0)
-        {
-            clean();
-            return;
-        }
-        if (!m_updateDAEThread) m_updateDAEThread = new UpdateDAEThread(this,m_updateFrequency);
-        m_updateDAEThread->start();
-        m_spectrum_buff = new int[m_workspace->blocksize()+1];
-    }
-    else
-    {
-        clean();
-    }
-}
-
-void MantidMatrix::clean()
-{
-    if (m_updateDAEThread)
-    {
-        m_updateDAEThread->terminate();
-        m_updateDAEThread->wait();
-        delete m_updateDAEThread;
-        m_updateDAEThread = 0;
-        delete[] m_spectrum_buff;
-        m_spectrum_buff = 0;
-    }
-}
-
-static double dblSqrt(double in)
-{
-  return sqrt(in);
-}
-
-void MantidMatrix::updateDAE()
-{
-    struct idc_info
-    {
-	    SOCKET s;
-    };
-
-    int ndims, dims_array[1];
-    ndims = 1;
-    int length = m_workspace->blocksize() + 1;
-    dims_array[0] = length;
-
-    idc_handle_t dae_handle;
-      
-    if (IDCopen(m_DAEname.c_str(), 0, 0, &dae_handle) != 0)
-    {
-        canUpdateDAE(false);
-        QMessageBox::critical(0,"DAE error","Unable to open DAE " + QString::fromStdString(m_DAEname));
-        return;
-    }
-
-    int hist = 0;
-    int ispec = m_spectrum_min;
-
-    if (m_spectrum_min > 0 && m_spectrum_max > 0)
-    for(ispec = m_spectrum_min;ispec<=m_spectrum_max;ispec++)
-    {
-        // Read in spectrum number ispec from DAE
-        IDCgetdat(dae_handle, ispec, 1, m_spectrum_buff, dims_array, &ndims);
-        // Put it into a vector, discarding the 1st entry, which is rubbish
-        // But note that the last (overflow) bin is kept
-        std::vector<double> v(m_spectrum_buff + 1, m_spectrum_buff + length);
-        // Create and fill another vector for the errors, containing sqrt(count)
-        std::vector<double> e(length-1);
-        std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
-        // Populate the workspace. Loop starts from 1, hence i-1
-        //DataObjects::Workspace2D_sptr localWorkspace = 
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(m_workspace)->setData(hist, v, e);
-        hist++;
-    }
-
-    for(size_t i=0;i<m_spectrum_list.size();i++)
-    {
-        ispec = m_spectrum_list[i];
-        // Read in spectrum number ispec from DAE
-        IDCgetdat(dae_handle, ispec, 1, m_spectrum_buff, dims_array, &ndims);
-        // Put it into a vector, discarding the 1st entry, which is rubbish
-        // But note that the last (overflow) bin is kept
-        std::vector<double> v(m_spectrum_buff + 1, m_spectrum_buff + length);
-        // Create and fill another vector for the errors, containing sqrt(count)
-        std::vector<double> e(length-1);
-        std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
-        // Populate the workspace. Loop starts from 1, hence i-1
-        //DataObjects::Workspace2D_sptr localWorkspace = 
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(m_workspace)->setData(hist, v, e);
-        hist++;
-    }
-
-    if (IDCclose(&dae_handle) != 0)
-    {
-        QMessageBox::critical(0,"DAE error","Problems with connection, updates will stop.");
-        canUpdateDAE(false);
-    }
-    m_needDAERepaint = true;
-    emit needsUpdating();
-}
-
 void MantidMatrix::tst()
 {
     std::cerr<<"2D plots: "<<m_plots2D.size()<<'\n';
     std::cerr<<"1D plots: "<<m_plots1D.size()<<'\n';
-}
-
-void MantidMatrix::paintEvent(QPaintEvent *e)
-{
-    if ( m_needDAERepaint )
-    {
-        ((MantidMatrixModel*)m_table_view->model())->resetData();  
-        ((MantidMatrixModel*)m_table_viewX->model())->resetData();  
-        ((MantidMatrixModel*)m_table_viewE->model())->resetData();  
-        m_needDAERepaint = false;
-    }
-    MdiSubWindow::paintEvent(e);
 }
 
 void MantidMatrix::dependantClosed(MdiSubWindow* w)
@@ -794,6 +632,7 @@ void MantidMatrix::repaintAll()
         {
             QString name = t->colName(col).remove(0,charsToRemove);
             if (name.isEmpty()) break;
+            // Retrieve row number from the column name
             QChar c = name[0];
             name.remove(0,1);
             int i = name.toInt();
@@ -808,4 +647,71 @@ void MantidMatrix::repaintAll()
         Graph *g = it.key()->activeGraph();
         if (g) g->setAutoScale();
     }
+}
+
+void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification>& pNf)
+{
+    if (pNf->object() == m_workspace)
+    {
+        emit needChangeWorkspace(pNf->new_object());
+    }
+}
+
+void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
+{
+
+    if (m_workspace->blocksize() != ws->blocksize() ||
+        m_workspace->getNumberHistograms() != ws->getNumberHistograms()) closeDependants();
+
+    setup(ws,m_startRow,m_endRow,m_filter,m_maxv);
+    
+    delete m_modelY;
+    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::Y);
+    connectTableView(m_table_viewY,m_modelY);
+
+    delete m_modelX;
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::X);
+    connectTableView(m_table_viewX,m_modelX);
+
+    delete m_modelE;
+    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::E);
+    connectTableView(m_table_viewE,m_modelE);
+
+    repaintAll();
+
+} 
+
+void MantidMatrix::closeDependants()
+{
+    for(int i=0;i<m_plots2D.size();i++)
+    {
+        m_plots2D[i]->askOnCloseEvent(false);
+        m_plots2D[i]->close();
+    }
+    for(QMap<MultiLayer*,Table*>::iterator it = m_plots1D.begin();it!=m_plots1D.end();it++)
+    {
+        it.key()->askOnCloseEvent(false);
+        it.key()->close();
+    }
+    m_plots2D.clear();
+    m_plots1D.clear();
+}
+
+void MantidMatrix::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
+{
+    if (pNf->object() == m_workspace)
+    {
+        emit needDeleteWorkspace();
+    }
+}
+
+void MantidMatrix::deleteWorkspace()
+{
+    askOnCloseEvent(false);
+    close();
+}
+
+void MantidMatrix::selfClosed(MdiSubWindow* w)
+{
+    closeDependants();
 }
