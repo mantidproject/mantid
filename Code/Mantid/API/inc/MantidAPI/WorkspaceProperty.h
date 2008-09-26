@@ -128,7 +128,7 @@ public:
     if ( m_workspaceName.empty() ) return false;
 
     try {
-        Workspace_sptr ws = m_value;
+        Workspace_sptr ws = Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value;
         if (ws.get() == NULL)
         {
             ws = AnalysisDataService::Instance().retrieve(m_workspaceName);
