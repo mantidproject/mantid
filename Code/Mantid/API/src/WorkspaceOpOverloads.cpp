@@ -179,17 +179,29 @@ const bool WorkspaceHelpers::commonBoundaries(const Workspace_const_sptr WS)
   return true;
 }
 
-/// Checks whether the bins (X values) of two workspace are the same
-const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1, const Workspace_const_sptr ws2)
+/** Checks whether the bins (X values) of two workspace are the same
+ *  @param ws1 The first workspace
+ *  @param ws2 The second workspace
+ *  @param firstOnly If true, only the first spectrum is checked. If false (the default), all spectra
+ *                   are checked and the two workspaces must have the same number of spectra
+ *  @return True if the test passes
+ */
+const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1,
+                                          const Workspace_const_sptr ws2, const bool firstOnly)
 {
-  // First of all, they must be the same size
-  if ( ws1->size() != ws2->size() || ws1->blocksize() != ws2->blocksize() ) return false;
+  // First of all, the first vector must be the same size
+  if ( ws1->readX(0).size() != ws2->readX(0).size() ) return false;
 
   // Now check the first spectrum
   const double firstWS = std::accumulate(ws1->readX(0).begin(),ws1->readX(0).end(),0.);
   const double secondWS = std::accumulate(ws2->readX(0).begin(),ws2->readX(0).end(),0.);
   if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
 
+  // If we were only asked to check the first spectrum, return now
+  if (firstOnly) return true;
+
+  // Check that total size of workspace is the same
+  if ( ws1->size() != ws2->size() ) return false;
   // If that passes then check whether all the X vectors are shared
   if ( sharedXData(ws1) && sharedXData(ws2) ) return true;
 

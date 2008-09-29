@@ -129,10 +129,10 @@ public:
 
     try {
         Workspace_sptr ws = Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value;
-        if (ws.get() == NULL)
-        {
+        //if (ws.get() == NULL)
+        //{
             ws = AnalysisDataService::Instance().retrieve(m_workspaceName);
-        }
+        //}
         // Check retrieved workspace is the type that it should be
         Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
         if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;

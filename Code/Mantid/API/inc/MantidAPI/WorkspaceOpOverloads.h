@@ -56,7 +56,8 @@ struct DLLExport WorkspaceHelpers
   // Checks whether a workspace has common X bins/values
   static const bool commonBoundaries(const Workspace_const_sptr WS);
   // Checks whether the binning is the same in two histograms
-  static const bool matchingBins(const Workspace_const_sptr ws1, const Workspace_const_sptr ws2);
+  static const bool matchingBins(const Workspace_const_sptr ws1,
+                                 const Workspace_const_sptr ws2, const bool firstOnly = false);
   // Checks whether a the X vectors in a workspace are actually the same vector
   static const bool sharedXData(const Workspace_const_sptr WS);
 };

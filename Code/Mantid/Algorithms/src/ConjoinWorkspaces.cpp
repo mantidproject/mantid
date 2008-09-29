@@ -108,7 +108,7 @@ void ConjoinWorkspaces::validateInputs(API::Workspace_const_sptr ws1, API::Works
   if ( ws1->getInstrument()->getName() != ws2->getInstrument()->getName()
        || ws1->getAxis(0)->unit() != ws2->getAxis(0)->unit()
        || ws1->isDistribution()   != ws2->isDistribution()
-       || !WorkspaceHelpers::matchingBins(ws1,ws2)  )
+       || !WorkspaceHelpers::matchingBins(ws1,ws2,true)  )
   // Would be good to also check the spectra-detector maps are the same
   {
     g_log.error("The input workspaces are not compatible");

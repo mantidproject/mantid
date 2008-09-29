@@ -30,7 +30,7 @@ public:
     loader2->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
     loader2->setPropertyValue("OutputWorkspace", "bottom");
     loader2->setPropertyValue("spectrum_min","11");
-    loader2->setPropertyValue("spectrum_max","20");
+    loader2->setPropertyValue("spectrum_max","25");
     TS_ASSERT_THROWS_NOTHING( loader2->execute() )
     TS_ASSERT( loader2->isExecuted() )
     delete loader2;
@@ -82,7 +82,7 @@ public:
 
     Workspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("top") )
-    TS_ASSERT_EQUALS( output->getNumberHistograms(), 20 )
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 25 )
     // Check a few values
     TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] )
     TS_ASSERT_EQUALS( output->readX(15)[444], in2->readX(5)[444] )
