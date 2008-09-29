@@ -179,7 +179,7 @@ doc.appendChild(wix)
 
 Product = doc.createElement('Product')
 Product.setAttribute('Name','Mantid')
-Product.setAttribute('Id','{CA88C1C7-AEB8-4bd6-A62C-9C436FA31211}')
+Product.setAttribute('Id',msilib.gen_uuid())
 Product.setAttribute('Language','1033')
 Product.setAttribute('Codepage','1252')
 Product.setAttribute('Version','1.0.0')
