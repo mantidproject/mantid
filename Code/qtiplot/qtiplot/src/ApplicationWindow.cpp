@@ -163,6 +163,7 @@
 //Mantid
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
+#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 
 using namespace Qwt3D;
 
@@ -15203,6 +15204,28 @@ QString ApplicationWindow::endOfLine()
 //Mantid
 void ApplicationWindow::manageMantidWorkspaces()
 {
+	QMessageBox::warning(this,tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
+}
+
+//Mantid 
+void ApplicationWindow::showMantidInstrument()
+{
+	QStringList wsNames=mantidUI->getWorkspaceNames();
+	bool ok;
+	QString selectedName = QInputDialog::getItem(this,tr("Select Workspace"), tr("Please select your workspace"), wsNames, 0, false,&ok);
+	if(ok)
+	{
+		InstrumentWindow *insWin=new InstrumentWindow(QString("Instrument"),this);
+		connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
+		connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
+		connect (insWin,SIGNAL(showContextMenu()), this,SLOT(showWindowContextMenu()));
+		d_workspace->addSubWindow(insWin);
+		insWin->setNormal();
+		insWin->setName(selectedName);
+		insWin->resize(400,400);
+		insWin->show();
+		insWin->setWorkspaceName(std::string(selectedName.ascii()));
+	}	
 }
 
 //Mantid
@@ -15211,5 +15234,6 @@ void ApplicationWindow::mantidMenuAboutToShow()
 	mantidMenu->clear();
 	
 	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
+	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
 }
 

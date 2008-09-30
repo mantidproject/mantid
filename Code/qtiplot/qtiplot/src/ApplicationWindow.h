@@ -1023,6 +1023,7 @@ private slots:
 	//Mantid
 	void mantidMenuAboutToShow();
 	void manageMantidWorkspaces();
+	void showMantidInstrument();
 
 // TODO: a lot of this stuff should be private
 public:

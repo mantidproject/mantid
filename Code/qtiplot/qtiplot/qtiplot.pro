@@ -318,7 +318,19 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidDock.h \
 	    src/Mantid/AlgMonitor.h \
 	    src/Mantid/ProgressDlg.h \
-	    src/Mantid/MantidPlotReleaseDate.h 
+	    src/Mantid/MantidPlotReleaseDate.h \
+	    src/Mantid/InstrumentWidget/GLColor.h \
+	    src/Mantid/InstrumentWidget/GLColorMap.h \
+	    src/Mantid/InstrumentWidget/GLObject.h \
+	    src/Mantid/InstrumentWidget/GLPicker.h \
+	    src/Mantid/InstrumentWidget/GLTrackball.h \
+	    src/Mantid/InstrumentWidget/GLViewport.h \
+	    src/Mantid/InstrumentWidget/Instrument3DWidget.h \
+	    src/Mantid/InstrumentWidget/GL3DWidget.h \
+	    src/Mantid/InstrumentWidget/GLActor.h \
+	    src/Mantid/InstrumentWidget/GLActorCollection.h \
+	    src/Mantid/InstrumentWidget/MantidObject.h \
+	    src/Mantid/InstrumentWidget/InstrumentWindow.h
 
 ###################### FORMS ##############################################
 
@@ -453,7 +465,19 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/MantidMatrix.cpp \
 	    src/Mantid/MantidDock.cpp \
 	    src/Mantid/AlgMonitor.cpp \
-	    src/Mantid/ProgressDlg.cpp 
+	    src/Mantid/ProgressDlg.cpp \
+	    src/Mantid/InstrumentWidget/GLColor.cpp \
+	    src/Mantid/InstrumentWidget/GLColorMap.cpp \
+	    src/Mantid/InstrumentWidget/GLObject.cpp \
+	    src/Mantid/InstrumentWidget/GLPicker.cpp \
+	    src/Mantid/InstrumentWidget/GLTrackball.cpp \
+	    src/Mantid/InstrumentWidget/GLViewport.cpp \
+	    src/Mantid/InstrumentWidget/Instrument3DWidget.cpp \
+	    src/Mantid/InstrumentWidget/GL3DWidget.cpp \
+	    src/Mantid/InstrumentWidget/GLActor.cpp \
+	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
+	    src/Mantid/InstrumentWidget/MantidObject.cpp \
+	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp	    
 
 
 ###############################################################
