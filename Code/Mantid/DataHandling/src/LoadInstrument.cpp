@@ -37,7 +37,7 @@ using namespace API;
 Logger& LoadInstrument::g_log = Logger::get("LoadInstrument");
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm(), m_deltaOffsets(false), m_haveDefaultFacing(false)
+LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_deltaOffsets(false)
 {}
 
 /// Initialisation method.
@@ -103,7 +103,7 @@ void LoadInstrument::exec()
 
   // Check whether default facing is set
   Element* defaultFacingElement = pRootElem->getChildElement("defaults")->getChildElement("components-are-facing");
-  if (defaultFacingElement) 
+  if (defaultFacingElement)
   {
     m_haveDefaultFacing = true;
     m_defaultFacing = parseFacingElementToV3D(defaultFacingElement);
@@ -662,7 +662,7 @@ bool LoadInstrument::isAssembly(std::string type)
 void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing)
 {
   const Geometry::V3D facingPoint = facing->getPos();
-  
+
   makeXYplaneFaceComponent(in, facingPoint);
 }
 
@@ -725,7 +725,7 @@ Geometry::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
     if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
     if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
     if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
-  
+
     retV3D.spherical(R,theta,phi);
   }
   else
@@ -764,10 +764,10 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
   if (facingElem)
   {
     // For now assume that if has val attribute it means facing = none. This option only has an
-    // effect when a default facing setting is set. In which case this then means "ignore the 
+    // effect when a default facing setting is set. In which case this then means "ignore the
     // default facing setting" for this component
 
-    if ( facingElem->hasAttribute("val") ) 
+    if ( facingElem->hasAttribute("val") )
       return;
 
     // Face the component to the x,y,z or r,t,p coordinates of the facing component

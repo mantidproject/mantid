@@ -100,54 +100,47 @@ public:
     return m_workspaceName;
   }
 
-  /** Set the name of the workspace
+  /** Set the name of the workspace.
+   *  Also tries to retrieve it from the AnalysisDataService.
    *  @param value The new name for the workspace
    */
   virtual bool setValue( const std::string& value )
   {
-    if ( ! value.empty() )
-    {
-      m_workspaceName = value;
-      Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::m_isDefault = false;
-      return true;
+    m_workspaceName = value;
+    Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::m_isDefault = false;
+    // Try and get the workspace from the ADS, but don't worry if we can't
+    try {
+      Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
+        boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
     }
-    // Setting an empty workspace name is not allowed
-    return false;
+    catch (Kernel::Exception::NotFoundError)
+    {
+      // Set to null property if not found
+      this->clear();
+    }
+    return true;
   }
 
   /** Checks whether the property is valid.
    *  To be valid, in addition to satisfying the conditions of any validators,
-   *  a property must not have an empty name and must exist in the AnalysisDataService
-   *  if it is an input workspace (Direction::Input or Direction::InOut).
-   *  This method also fetches the pointer to an output workspace, if it exists in the ADS.
+   *  an output property must not have an empty name and an input one must point to
+   *  a workspace of the correct type.
    *  @returns True if the property is valid, otherwise false.
    */
   virtual const bool isValid() const
   {
-    // Assume that any declared WorkspaceProperty must have a name set (i.e. is not an optional property)
-    if ( m_workspaceName.empty() ) return false;
+    // If an output workspace it must have a name set.
+    if ( this->direction() == Kernel::Direction::Output && this->value().empty()) return false;
 
-    try {
-        Workspace_sptr ws = Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value;
-        //if (ws.get() == NULL)
-        //{
-            ws = AnalysisDataService::Instance().retrieve(m_workspaceName);
-        //}
-        // Check retrieved workspace is the type that it should be
-        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::dynamic_pointer_cast<TYPE>(ws);
-        if ( ! Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
-    } catch (Kernel::Exception::NotFoundError&) {
-        // Only concerned with failing to find workspace in ADS if it's an input type
-        if ( !this->operator()() &&
-             (( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) ||
-              ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 )) )
-        {
-          return false;
-        }
-        else
-        {
-          // Fall through
-        }
+    // If an input (or inout) workspace, must point to something
+    if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
+    {
+      if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
+      // Check the workspace is of the correct type
+      if (!boost::dynamic_pointer_cast<TYPE>(Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value))
+      {
+        return false;
+      }
     }
 
     // Call superclass method to access any attached validators
@@ -159,8 +152,7 @@ public:
    */
   virtual const std::vector<std::string> allowedValues() const
   {
-    if ( ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 0 ) ||
-         ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() == 2 ) )
+    if ( this->direction() == 0 || this->direction() == 2 )
     {
       // If an input workspace, get the list of workspaces currently in the ADS
       return AnalysisDataService::Instance().getObjectNames();
@@ -185,7 +177,7 @@ public:
   {
     bool result = false;
 
-    if ( Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction() )
+    if ( this->direction() == Kernel::Direction::Output )
     {
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");

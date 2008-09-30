@@ -6,7 +6,7 @@
 
 
 /// Default constructor
-MuonNexusReader::MuonNexusReader() : counts(0), nexus_instrument_name(), corrected_times(0)
+MuonNexusReader::MuonNexusReader() : nexus_instrument_name(), corrected_times(0), counts(0)
 {
 }
 

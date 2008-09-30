@@ -320,7 +320,7 @@ public:
 
 protected:
   /// The value of the property
-  mutable TYPE m_value;  // mutable so that it can be set in WorkspaceProperty::isValid() method
+  TYPE m_value;
 
 private:
   /// Visitor validator class

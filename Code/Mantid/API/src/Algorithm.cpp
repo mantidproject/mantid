@@ -91,7 +91,19 @@ bool Algorithm::execute()
   // Check all properties for validity
   if ( !validateProperties() )
   {
-    throw std::runtime_error("Some invalid Properties found");
+    // Reset name on input workspaces to trigger attempt at collection from ADS
+    const std::vector< Property*> &props = getProperties();
+    for (unsigned int i = 0; i < props.size(); ++i)
+    {
+      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
+      if (wsProp && !(wsProp->getWorkspace()))
+      {
+        // Setting it's name to the same one it alreasy had
+        props[i]->setValue(props[i]->value());
+      }
+    }
+    // Try the validation again
+    if ( !validateProperties() ) throw std::runtime_error("Some invalid Properties found");
   }
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
@@ -196,6 +208,17 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
   {
     g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
   }
+
+  // If output workspaces are nameless, give them a temporary name to satisfy validator
+  const std::vector< Property*> &props = getProperties();
+  for (unsigned int i = 0; i < props.size(); ++i)
+  {
+    if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )
+    {
+      if ( props[i]->value().empty() ) props[i]->setValue("ChildAlgOutput");
+    }
+  }
+
 
   return alg;
 }

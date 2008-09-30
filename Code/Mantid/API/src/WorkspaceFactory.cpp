@@ -83,10 +83,6 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
     // Just copy the unit and title
     for (unsigned int i = 0; i < ws->m_axes.size(); ++i)
     {
-      Axis* c = ws->getAxis(i);
-      Axis* p = parent->getAxis(i);
-//      ws->m_axes[i]->unit() = parent->m_axes[i]->unit();
-//      ws->m_axes[i]->title() = parent->m_axes[i]->title();
       ws->getAxis(i)->unit() = parent->getAxis(i)->unit();
       ws->getAxis(i)->title() = parent->getAxis(i)->title();
     }
