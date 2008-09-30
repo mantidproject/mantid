@@ -106,7 +106,7 @@ void LoadInstrument::exec()
   if (defaultFacingElement) 
   {
     m_haveDefaultFacing = true;
-    m_defaultFacing = parseStringToV3D( defaultFacingElement->getAttribute("xyz") );
+    m_defaultFacing = parseFacingElementToV3D(defaultFacingElement);
   }
 
   // create maps: isTypeAssembly and mapTypeNameToShape
@@ -224,29 +224,6 @@ void LoadInstrument::exec()
   // Don't need this anymore (if it was even used) so empty it out to save memory
   m_tempPosHolder.clear();
 
-
-  // If "facing" element(s) present in instrument defintion file then
-/*
-  Element* facingElement = pRootElem->getChildElement("defaults")->getChildElement("detectors-and-monitors-are-facing");
-  if (facingElement)
-  {
-    std::string facingCompStr = offsetElement->getAttribute("component");
-
-    Geometry::ObjComponent* facingComp;
-    if ( facingCompStr.compare("SamplePos") == 0 )
-      facingComp = m_instrument->getSample();
-    else if ( facingCompStr.compare("Source") == 0 )
-      facingComp = m_instrument->getSource();
-    else
-    {
-      g_log.warning() << "component attribute of <detectors-and-monitors-are-facing> element in "
-        << "instrument definition file not recognized. Therefore it has been defaulted to SamplePos.";
-      facingComp = m_instrument->getSample();
-    }
-
-    makeXYplaneFaceComponent(m_facingComponent, facingComp);
-  }*/
-
   pDoc->release();
 
   // Add the instrument to the InstrumentDataService
@@ -289,9 +266,10 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     ass->setName(pCompElem->getAttribute("type"));
   }
 
-  // set location for this newly added comp.
+  // set location for this newly added comp and set facing if specified in instrument def. file
 
   setLocation(ass, pLocElem);
+  setFacing(ass, pLocElem);
 
 
   // The newly added component is required to have a type. Find out what this
@@ -377,8 +355,9 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     detector->setID(idList.vec[idList.counted]);
     idList.counted++;
     parent->add(detector);
-    // set location for this comp
+    // set location for this comp and set facing if specified in instrument def. file
     setLocation(detector, pLocElem);
+    setFacing(detector, pLocElem);
 
     try
     {
@@ -427,9 +406,10 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
       m_instrument->markAsSamplePos(comp);
     }
 
-    // set location for this comp
+    // set location for this comp and set facing if specified in instrument def. file
 
     setLocation(comp, pLocElem);
+    setFacing(comp, pLocElem);
   }
 }
 
@@ -522,19 +502,6 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
     comp->setPos(Geometry::V3D(x,y,z));
-  }
-
-  // Possibly rotate component
-
-  if (pElem->hasAttribute("facing-xyz"))
-  {
-    std::string facing_xyz = pElem->getAttribute("facing-xyz");
-    if ( facing_xyz.compare("none") != 0 )   // if facing-xyz="none" face nothing
-      makeXYplaneFaceComponent(comp, parseStringToV3D(facing_xyz));
-  }
-  else if (m_haveDefaultFacing)
-  {
-    makeXYplaneFaceComponent(comp, m_defaultFacing);
   }
 }
 
@@ -734,33 +701,84 @@ void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Ge
   }
 }
 
-/** Converting a string into V3D vector. It is assumed that the string represent
- *  a position in the form: "1.2 3.2 9.1", where here this translate to x=1.2, 
- *  y=3.2 and z=9.1
+
+/** Parse position of facing element to V3D
  *
- *  @param str  String to be parsed
- *  @return V3D position as represended in string
+ *  @param pElem  Facing type element to parse
+ *  @return Return parsed position as a V3D
  */
-Geometry::V3D LoadInstrument::parseStringToV3D(std::string str)
+Geometry::V3D LoadInstrument::parseFacingElementToV3D(Poco::XML::Element* pElem)
 {
-  std::istringstream toParse(str);
-  double x, y, z;
+
   Geometry::V3D retV3D;
 
-  try {
-    toParse >> x >> y >> z;   
-    retV3D(x,y,z);
+  // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
+  if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
+       pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
+  {
+    double R=0.0, theta=0.0, phi=0.0;
+
+    if ( pElem->hasAttribute("r") ) R = atof((pElem->getAttribute("r")).c_str());
+    if ( pElem->hasAttribute("t") ) theta = atof((pElem->getAttribute("t")).c_str());
+    if ( pElem->hasAttribute("p") ) phi = atof((pElem->getAttribute("p")).c_str());
+
+    if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
+    if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
+    if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
+  
+    retV3D.spherical(R,theta,phi);
   }
-  catch(...) {
-    g_log.error("Unable to parse file " + m_filename + " . Error when converting "
-      + "string representing xyz coordinates");
-    throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
+  else
+  {
+    double x=0.0, y=0.0, z=0.0;
+
+    if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
+    if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
+    if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
+
+    retV3D(x,y,z);
   }
 
   return retV3D;
 }
 
 
+/** Set facing of comp as specified in XML facing element (which must be sub-element of a location element).
+ *
+ *  @param comp To set facing of
+ *  @param pElem  Poco::XML element that points a location element in the XML doc
+ *
+ *  @throw logic_error Thrown if second argument is not a pointer to a 'location' XML element
+ */
+void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pElem)
+{
+  // Require that pElem points to an element with tag name 'location'
+
+  if ( (pElem->tagName()).compare("location") )
+  {
+    g_log.error("Second argument to function setLocation must be a pointer to an XML element with tag name location.");
+    throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
+  }
+
+  Element* facingElem = pElem->getChildElement("facing");
+  if (facingElem)
+  {
+    // For now assume that if has val attribute it means facing = none. This option only has an
+    // effect when a default facing setting is set. In which case this then means "ignore the 
+    // default facing setting" for this component
+
+    if ( facingElem->hasAttribute("val") ) 
+      return;
+
+    // Face the component to the x,y,z or r,t,p coordinates of the facing component
+
+    makeXYplaneFaceComponent(comp, parseFacingElementToV3D(facingElem));
+
+  }
+  else // so if no facing element associated with location element apply default facing if set
+    if (m_haveDefaultFacing)
+      makeXYplaneFaceComponent(comp, m_defaultFacing);
+}
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -10,6 +10,7 @@
 #include "MantidGeometry/Sphere.h"
 #include "MantidGeometry/Plane.h"
 #include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Cone.h"
 #include "MantidGeometry/Object.h"
 
 //----------------------------------------------------------------------
@@ -82,6 +83,12 @@ namespace Mantid
 
       /// Parse XML 'cuboid' element
       std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+
+      /// Parse XML 'infinite-cone' element
+      std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+
+      /// Parse XML 'cone' element
+      std::string parseCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);

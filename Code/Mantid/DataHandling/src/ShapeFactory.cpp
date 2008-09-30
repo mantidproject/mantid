@@ -122,6 +122,16 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);  
           numPrimitives++;
         }
+        else if ( !primitiveName.compare("infinite-cone"))
+        {
+          idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);  
+          numPrimitives++;
+        }
+        else if ( !primitiveName.compare("cone"))
+        {
+          idMatching[idFromUser] = parseCone(pE, primitives, l_id);  
+          numPrimitives++;
+        }
       }
     }
   }
@@ -511,6 +521,171 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, G
   Plane* pPlaneTopCutoff = new Plane();
   pPlaneTopCutoff->setPlane(lft, pointTowardTop); 
   prim[l_id] = pPlaneTopCutoff;
+  retAlgebraMatch << "-" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'infinite-cone' element
+ *
+ *  @param pElem XML 'infinite-cone' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for tip-point element
+  NodeList* pNL_tipPoint = pElem->getElementsByTagName("tip-point");
+  if ( pNL_tipPoint->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <infinite-cone> element with missing <tip-point> element");
+  }
+  Element* pElemTipPoint = static_cast<Element*>(pNL_tipPoint->item(0)); 
+  pNL_tipPoint->release();
+
+  // check for axis element
+  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
+  if ( pNL_axis->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <infinite-cone> element with missing <axis> element");
+  }
+  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
+  pNL_axis->release();
+
+  // check for angle element
+  NodeList* pNL_angle = pElem->getElementsByTagName("angle");
+  if ( pNL_angle->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <infinite-cone> element with missing <angle> element");
+  }
+  Element* pElemAngle = static_cast<Element*>(pNL_angle->item(0)); 
+  pNL_angle->release();
+
+  // check for height element
+/*  NodeList* pNL_height = pElem->getElementsByTagName("height");
+  if ( pNL_height->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <infinite-cone> element with missing <height> element");
+  }
+  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
+  pNL_height->release();
+*/
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+
+  // add infinite double cone
+  Cone* pCone = new Cone();
+  pCone->setCentre(parsePosition(pElemTipPoint));              
+  pCone->setNorm(normVec);  
+  pCone->setAngle(atof( (pElemAngle->getAttribute("val")).c_str() ));
+  prim[l_id] = pCone;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << " ";
+  l_id++;
+
+
+  // plane top cut of top part of double cone  
+  Plane* pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec); 
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "-" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'cone' element
+ *
+ *  @param pElem XML 'cone' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for tip-point element
+  NodeList* pNL_tipPoint = pElem->getElementsByTagName("tip-point");
+  if ( pNL_tipPoint->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cone> element with missing <tip-point> element");
+  }
+  Element* pElemTipPoint = static_cast<Element*>(pNL_tipPoint->item(0)); 
+  pNL_tipPoint->release();
+
+  // check for axis element
+  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
+  if ( pNL_axis->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cone> element with missing <axis> element");
+  }
+  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
+  pNL_axis->release();
+
+  // check for angle element
+  NodeList* pNL_angle = pElem->getElementsByTagName("angle");
+  if ( pNL_angle->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cone> element with missing <angle> element");
+  }
+  Element* pElemAngle = static_cast<Element*>(pNL_angle->item(0)); 
+  pNL_angle->release();
+
+  // check for height element
+  NodeList* pNL_height = pElem->getElementsByTagName("height");
+  if ( pNL_height->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <cone> element with missing <height> element");
+  }
+  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
+  pNL_height->release();
+
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+
+  // add infinite double cone
+  Cone* pCone = new Cone();
+  pCone->setCentre(parsePosition(pElemTipPoint));              
+  pCone->setNorm(normVec);  
+  pCone->setAngle(atof( (pElemAngle->getAttribute("val")).c_str() ));
+  prim[l_id] = pCone;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << " ";
+  l_id++;
+
+  // Plane to cut off cone from below
+  Plane* pPlaneTop = new Plane();
+  V3D pointInPlane = parsePosition(pElemTipPoint);
+  double height = atof( (pElemHeight->getAttribute("val")).c_str() );
+  pointInPlane -= (normVec * height);
+  pPlaneTop->setPlane(pointInPlane, normVec); 
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++; 
+
+  // plane top cut of top part of double cone 
+  Plane* pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec); 
+  prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
   l_id++;
 

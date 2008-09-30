@@ -135,15 +135,21 @@ namespace API
       /// 'facing' these to component specified under <defaults>
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
-      ///
-      Geometry::V3D parseStringToV3D(std::string str);
+      /// Parse position of facing element to V3D
+      Geometry::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);
 
+      /// Set facing of comp as specified in XML facing element
+      void setFacing(Geometry::Component* comp, Poco::XML::Element* pElem);
+
+      /// True if defaults->components-are-facing is set in instrument def. file
       bool m_haveDefaultFacing;
 
+      /// Hold default facing position
       Geometry::V3D m_defaultFacing;
 
       /// Make the shape defined in 1st argument face the component in the second argument
       void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::ObjComponent* facing);
+
       /// Make the shape defined in 1st argument face the position in the second argument
       void makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint);
 
