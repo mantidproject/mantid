@@ -27,6 +27,7 @@
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/GeometryHandler.h"
+#include "MantidGeometry/GtsGeometryHandler.h"
 
 namespace Mantid
 {
@@ -42,11 +43,13 @@ namespace Mantid
 
     Object::Object() :
       ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
-      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),handle(0)
+      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
-    {}
+    {
+		handle = new GtsGeometryHandler(this);
+	}
 
     Object::Object(const Object& A) :
       ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
@@ -62,7 +65,9 @@ namespace Mantid
       Copy constructor
       \param A :: Object to copy
       */
-    {}
+    {
+		handle = new GtsGeometryHandler(this);
+	}
 
     Object&
       Object::operator=(const Object& A)

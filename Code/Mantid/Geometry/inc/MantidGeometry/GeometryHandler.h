@@ -55,6 +55,7 @@ namespace Mantid
 		public:
 			GeometryHandler(ObjComponent *comp);   ///< Constructor
 			GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
+			GeometryHandler(Object *obj); ///<Constructor
 			virtual ~GeometryHandler();
 			virtual GeometryHandler* createInstance(ObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent
 			virtual GeometryHandler* createInstance(boost::shared_ptr<Object> )=0; ///< Create an instance of concrete geometry handler for Object

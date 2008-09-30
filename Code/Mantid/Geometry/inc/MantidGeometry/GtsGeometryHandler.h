@@ -51,6 +51,7 @@ namespace Mantid
 		public:
 			GtsGeometryHandler(ObjComponent* obj); ///< Constructor
 			GtsGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
+			GtsGeometryHandler(Object* obj); ///< Constructor
 			~GtsGeometryHandler(); ///< Destructor
 			GeometryHandler* createInstance(ObjComponent *comp);
 			GeometryHandler* createInstance(boost::shared_ptr<Object> obj);

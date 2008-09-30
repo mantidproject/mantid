@@ -34,7 +34,7 @@ namespace Mantid
 		*/
 		GtsGeometryRenderer::GtsGeometryRenderer()
 		{
-			iDisplaylistId= glGenLists(1);
+			//iDisplaylistId= glGenLists(1);
 			boolDisplaylistCreated=false;
 		}
 
@@ -44,7 +44,7 @@ namespace Mantid
 		*/
 		GtsGeometryRenderer::~GtsGeometryRenderer()
 		{
-			glDeleteLists(iDisplaylistId,1);
+			//glDeleteLists(iDisplaylistId,1);
 		}
 
 		/**
@@ -53,15 +53,15 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Render(GtsSurface *ObjSurf)
 		{
-			if(!boolDisplaylistCreated){
+			//if(!boolDisplaylistCreated){
 				GtsFace * first = NULL;
 				glBegin(GL_TRIANGLES);
 				gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
 				glEnd();
 				//gts_surface_write_vtk_file(ObjSurf,"C:\\ObjSurf.vtk");
-			}else{
-				glCallList(iDisplaylistId);
-			}
+			//}else{
+			//	glCallList(iDisplaylistId);
+			//}
 		}
 
 		/**
@@ -70,7 +70,7 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Render(ObjComponent *ObjComp)
 		{
-			if(!boolDisplaylistCreated){
+//			if(!boolDisplaylistCreated){
 				glPushMatrix();
 				V3D pos  =ObjComp->getPos();
 				Quat rot =ObjComp->getRotation();
@@ -80,9 +80,9 @@ namespace Mantid
 				glTranslated(pos[0],pos[1],pos[2]);
 				ObjComp->drawObject();
 				glPopMatrix();
-			}else{
-				glCallList(iDisplaylistId);
-			}
+//			}else{
+//				glCallList(iDisplaylistId);
+//			}
 		}
 
 		/**
@@ -91,16 +91,16 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Initialize(GtsSurface *ObjSurf)
 		{
-			if(!boolDisplaylistCreated){
+//			if(!boolDisplaylistCreated){
 				GtsFace * first = NULL;
-				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation    
+//				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation    
 				glBegin(GL_TRIANGLES);
 				gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
 				glEnd();
-				glEndList();
+//				glEndList();
 				boolDisplaylistCreated=true;
 				//gts_surface_write_vtk_file(ObjSurf,"C:\\ObjSurf.vtk");
-			}
+//			}
 		}
 
 		/**
@@ -109,8 +109,8 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Initialize(ObjComponent *ObjComp)
 		{
-			if(!boolDisplaylistCreated){
-				glNewList(iDisplaylistId,GL_COMPILE);
+//			if(!boolDisplaylistCreated){
+//				glNewList(iDisplaylistId,GL_COMPILE);
 				glPushMatrix();
 				V3D pos  =ObjComp->getPos();
 				Quat rot =ObjComp->getRotation();
@@ -120,9 +120,9 @@ namespace Mantid
 				glTranslated(pos[0],pos[1],pos[2]);
 				ObjComp->drawObject();
 				glPopMatrix();
-				glEndList();
+//				glEndList();
 				boolDisplaylistCreated=true;
-			}
+//			}
 		}
 	}
 }

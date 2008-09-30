@@ -5,6 +5,7 @@
 #include "MantidGeometry/Object.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/GeometryHandler.h"
+#include "MantidGeometry/GtsGeometryHandler.h"
 #include <cfloat>
 
 namespace Mantid
@@ -17,8 +18,9 @@ namespace Geometry
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, Component* parent) :
-  Component(name,parent), shape(),handle(0)
+  Component(name,parent), shape()
 {
+	handle=new GtsGeometryHandler(this);
 }
 
 /** Constructor
@@ -27,14 +29,16 @@ ObjComponent::ObjComponent(const std::string& name, Component* parent) :
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-  Component(name,parent), shape(shape),handle(0)
+  Component(name,parent), shape(shape)
 {
+		handle=new GtsGeometryHandler(this);
 }
 
 /// Copy constructor
 ObjComponent::ObjComponent(const ObjComponent& rhs) :
   Component(rhs), shape(rhs.shape),handle(0)
 {
+		handle=new GtsGeometryHandler(this);
 }
 
 /// Destructor

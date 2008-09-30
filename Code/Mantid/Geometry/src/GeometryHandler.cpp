@@ -29,6 +29,18 @@ namespace Mantid
 			boolIsInitialized=false;
 		}
 
+		/** Constructor  
+		*  @param[in] obj 
+		*  This geometry handler will be Object's geometry handler
+		*/
+		GeometryHandler::GeometryHandler(Object* obj):Obj(obj)
+		{
+			ObjComp=NULL;
+			Obj->setGeometryHandler(this);
+			boolTriangulated=false;
+			boolIsInitialized=false;
+		}
+
 		/// Destructor
 		GeometryHandler::~GeometryHandler()
 		{

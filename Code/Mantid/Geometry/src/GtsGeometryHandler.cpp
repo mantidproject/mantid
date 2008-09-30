@@ -22,6 +22,12 @@ namespace Mantid
 			Renderer    =new GtsGeometryRenderer();
 		}
 
+		GtsGeometryHandler::GtsGeometryHandler(Object* obj):GeometryHandler(obj)
+		{
+			Triangulator=new GtsGeometryGenerator(obj);
+			Renderer    =new GtsGeometryRenderer();
+		}
+
 		GtsGeometryHandler::~GtsGeometryHandler()
 		{
 			if(Triangulator!=NULL) delete Triangulator;
