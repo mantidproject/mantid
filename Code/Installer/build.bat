@@ -1,5 +1,5 @@
 @echo off
-svn update
+svn update > build_number.txt
 python generateWxs.py
 if errorlevel 1 goto failed
 candle tmp.wxs  

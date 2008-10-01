@@ -4,11 +4,23 @@ import os.path
 import xml
 import xml.dom.minidom
 import msilib
+import md5
 
 import string
 
 QTDIR = 'toget/qt'
 #QTDIR = 'C:/Qt/4_4_0/bin'
+
+vfile = open('build_number.txt','r')
+vstr = vfile.read()
+vlen = len(vstr)
+MantidVersion = '1.0.' + vstr[12:vlen-2]
+vfile.close()
+
+product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'  #msilib.gen_uuid()
+pfile = open('product_uuid.txt','w')
+pfile.write(product_uuid)
+pfile.close()
 
 globalFileCount = 0
 
@@ -52,7 +64,7 @@ def addComponent(Id,guid,parent):
 # rules are applied to exclude debug libraries
 # name is a short name to which a number will be added
 def addDlls(location,name,parent, exclud = []):
-    print 'Include dlls from',os.path.abspath(location);
+    #print 'Include dlls from',os.path.abspath(location);
     sdlls = os.listdir(location);
     i = 0
     for fil in sdlls:
@@ -68,16 +80,16 @@ def addDlls(location,name,parent, exclud = []):
         if not ((fil.find('-gd-') >= 0) or
                 (fil.find('d.dll')>=0 and fil.replace('d.dll','.dll') in sdlls) or
                 (fil.find('d4.dll')>=0 and fil.replace('d4.dll','4.dll') in sdlls)):
-            print fil
+            #print fil
             addFileV(fn+'DLL',name+str(i),fil,location+'/'+fil,parent)
         i += 1
 
 def addAllFiles(location,name,parent):
-    print 'Include files from',os.path.abspath(location);
+    #print 'Include files from',os.path.abspath(location);
     sfiles = os.listdir(location);
     i = 0
     for fil in sfiles:
-        print fil
+        #print fil
         fn = fil.replace('-','_')
         fn = fn.replace('+','_')
         if (fil.find('.svn') < 0 and os.path.isfile(location+'/'+fil)):
@@ -85,14 +97,14 @@ def addAllFiles(location,name,parent):
             i += 1
 
 def addAllFilesExt(location,name,ext,parent):
-    print 'Include files from',os.path.abspath(location);
+    #print 'Include files from',os.path.abspath(location);
     sfiles = os.listdir(location);
     i = 0
     for fil in sfiles:
         fn = fil.replace('-','_')
         fn = fn.replace('+','_')
         if (fil.find('.svn') < 0 and fil.endswith('.'+ext) > 0):
-            print fil
+            #print fil
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
 
@@ -147,7 +159,10 @@ def addCompList(Id,location,name,parent):
     lst = []
     idir = 0
 #    ifil = 0
-    comp = addComponent(Id,msilib.gen_uuid(),directory)
+    m = md5.new(location)
+    u = m.hexdigest()
+    uuid = '{'+u[0:8]+'-'+u[8:12]+'-'+u[12:16]+'-'+u[16:20]+'-'+u[20:]+'}'
+    comp = addComponent(Id,uuid,directory)
     lst.append(Id)
     files = os.listdir(location)
     for fil in files:
@@ -178,11 +193,13 @@ wix.setAttribute('xmlns','http://schemas.microsoft.com/wix/2003/01/wi')
 doc.appendChild(wix)
 
 Product = doc.createElement('Product')
-Product.setAttribute('Name','Mantid')
-Product.setAttribute('Id',msilib.gen_uuid())
+Product.setAttribute('Name','Mantid '+ MantidVersion)
+#Product.setAttribute('Id','{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}')
+Product.setAttribute('Id',product_uuid)
 Product.setAttribute('Language','1033')
 Product.setAttribute('Codepage','1252')
-Product.setAttribute('Version','1.0.0')
+Product.setAttribute('UpgradeCode','{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}')
+Product.setAttribute('Version',MantidVersion)
 Product.setAttribute('Manufacturer','STFC Rutherford Appleton Laboratories')
 wix.appendChild(Product)
 
@@ -198,12 +215,19 @@ Package.setAttribute('Compressed','yes')
 Package.setAttribute('SummaryCodepage','1252')
 Product.appendChild(Package)
 
+Upgrade = addTo(Product,'Upgrade',{'Id':'{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}'})
+addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'PATCHFOUND','Minimum':MantidVersion,'IncludeMinimum':'yes','Maximum':MantidVersion,'IncludeMaximum':'yes'})
+addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'NEWERFOUND','Minimum':MantidVersion,'IncludeMinimum':'no'})
+
 Media = doc.createElement('Media')
 Media.setAttribute('Id','1')
 Media.setAttribute('Cabinet','Mantid.cab')
 Media.setAttribute('EmbedCab','yes')
 Media.setAttribute('DiskPrompt','CD-ROM #1')
 Product.appendChild(Media)
+
+addTo(Product,'CustomAction',{'Id':'AlreadyUpdated','Error':'[ProductName] is already installed.'})
+addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
 
 Prop = doc.createElement('Property')
 Prop.setAttribute('Id','DiskPrompt')
@@ -232,7 +256,6 @@ for line in prop_file:
         prop_file_ins.write('ManagedWorkspace.MinSize = 50\n')
     elif line.find('plugins.directory') >= 0:
         prop_file_ins.write('plugins.directory = ../plugins\n')
-#        prop_file_ins.write('plugins.directory = .\n')
     elif line.find('instrumentDefinition.directory') >= 0:
         prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
     else:
@@ -274,7 +297,7 @@ addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/Bin/Sha
 addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',Plugins)
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',Plugins)
 #nexusDir = addDirectory('NexusDir','Nexus','Nexus',pluginsDir)
-#Nexus = addComponent('Nexus',msilib.gen_uuid(),nexusDir)
+#Nexus = addComponent('Nexus','{A67F6FC8-7BBC-4aa5-A38F-1A522287D236}',nexusDir)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Plugins)
 addFileV('hd421mdll','hd421m.dll','hd421m.dll','../Third_Party/lib/win32/hd421m.dll',Plugins)
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win32/hdf5dll.dll',Plugins)
@@ -382,7 +405,7 @@ addAllFilesExt('../Mantid/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
 
 #----------------- User Algorithms -------------------------------------
 UserAlgorithmsDir = addDirectory('UserAlgorithmsDir','UAlgs','UserAlgorithms',InstallDir)
-UserAlgorithms = addComponent('UserAlgorithms',msilib.gen_uuid(),UserAlgorithmsDir)
+UserAlgorithms = addComponent('UserAlgorithms','{A82B4540-3CDB-45fa-A7B3-42F392378D3F}',UserAlgorithmsDir)
 addAllFilesExt('../Mantid/UserAlgorithms','ualg','cpp',UserAlgorithms)
 addAllFilesExt('../Mantid/UserAlgorithms','ualg','h',UserAlgorithms)
 #addFileV('Sconstruct','Sconstr','Sconstruct','toget/UserAlgorithms/Sconstruct',UserAlgorithms)
@@ -408,7 +431,7 @@ PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
 #-------------------------- Scripts ------------------------------------
 ScriptsDir = addDirectory('ScriptsDir','scripts','scripts',InstallDir)
-Scripts = addComponent('Scripts',msilib.gen_uuid(),ScriptsDir)
+Scripts = addComponent('Scripts','{E21432EE-368D-4670-A778-23F5C8DC8F2F}',ScriptsDir)
 addAllFiles('../Mantid/PythonAPI/scripts','scr',Scripts)
 #-----------------------------------------------------------------------
 
@@ -425,27 +448,27 @@ Complete = addRootFeature('Complete','Mantid','The complete package','1',Product
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
 addCRef('Plugins',MantidExec)
-#addCRef('Nexus',MantidExec)
+addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)
 addCRef('Logs',MantidExec)
 addCRef('Scripts',MantidExec)
-addCRef('IncludeMantidAlgorithms',MantidExec)
-addCRef('IncludeMantidAPI',MantidExec)
-addCRef('IncludeMantidDataHandling',MantidExec)
-addCRef('IncludeMantidDataObjects',MantidExec)
-addCRef('IncludeMantidGeometry',MantidExec)
-addCRef('IncludeMantidKernel',MantidExec)
-addCRef('IncludeMantidNexus',MantidExec)
-addCRef('IncludeMantidPythonAPI',MantidExec)
-addCRef('IncludeMantidServices',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
-
-addCRefs(sconsList,MantidExec)
-addCRefs(boostList,MantidExec)
-addCRefs(pocoList,MantidExec)
-addCRef('UserAlgorithms',MantidExec)
 addCRefs(instrument,MantidExec)
+addCRefs(sconsList,MantidExec)
+
+Includes = addFeature('Includes','Includes','Mantid and third patry header files.','1',Complete)
+addCRef('IncludeMantidAlgorithms',Includes)
+addCRef('IncludeMantidAPI',Includes)
+addCRef('IncludeMantidDataHandling',Includes)
+addCRef('IncludeMantidDataObjects',Includes)
+addCRef('IncludeMantidGeometry',Includes)
+addCRef('IncludeMantidKernel',Includes)
+addCRef('IncludeMantidNexus',Includes)
+addCRef('IncludeMantidPythonAPI',Includes)
+addCRef('IncludeMantidServices',Includes)
+addCRefs(boostList,Includes)
+addCRefs(pocoList,Includes)
 
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
@@ -468,6 +491,13 @@ addCRef('SourceMantidPythonAPI',SourceFiles)
 #addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
 addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
 addTo(Product,'UIRef',{'Id':'WixUI_ErrorProgressText'})
+
+exeSec = addTo(Product,'InstallExecuteSequence',{})
+AlreadyUpdated = addTo(exeSec,'Custom',{'Action':'AlreadyUpdated','After':'FindRelatedProducts'})
+addText('PATCHFOUND',AlreadyUpdated)
+NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
+addText('NEWERFOUND',NoDowngrade)
+addTo(exeSec,'RemoveExistingProducts',{'After':'InstallFinalize'})
 
 f = open('tmp.wxs','w')
 doc.writexml(f)
