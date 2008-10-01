@@ -37,6 +37,7 @@ public:
     void unlock(){s_mutex.unlock();}
 signals:
     void countChanged(int);
+    void needUpdateProgress(const Algorithm* alg,int p);
 protected:
     void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<AlgorithmMonitor, Algorithm::FinishedNotification> m_finishedObserver;
@@ -66,9 +67,9 @@ class MonitorDlg: public QDialog
 public:
     MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor);
     ~MonitorDlg();
-    void updateProgress(const Algorithm* alg,int p);
 public slots:
     void update(int n);
+    void updateProgress(const Algorithm* alg,int p);
 private:
     QVector<const Algorithm*> m_algorithms;
     AlgorithmMonitor *m_algMonitor;

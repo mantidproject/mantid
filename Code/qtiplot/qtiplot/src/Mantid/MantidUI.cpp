@@ -101,7 +101,7 @@ void MantidUI::init()
 	actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
     aw_view->addAction(actionToggleAlgorithms);
 
-    //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060");
+    //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060","0","10");
     update();
 
 }
