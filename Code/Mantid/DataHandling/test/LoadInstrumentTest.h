@@ -198,20 +198,37 @@ public:
     Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(621));
     TS_ASSERT( ptrMonitor->isMonitor() );
 
-    // test if shape on for 1st monitor
+    // test if shape on for 1st monitor which is located at (0,0,-10.78)
     Detector *ptrMonitorShape = dynamic_cast<Detector*>(i->getDetector(611));
     TS_ASSERT( ptrMonitorShape->isMonitor() );
-    TS_ASSERT( ptrMonitorShape->isValid(V3D(0.0,0.0,0.001)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0.0,0.0,0.001)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( ptrMonitorShape->isValid(V3D(0.0,0.0,-0.01)+ptrMonitorShape->getPos()) );
+    TS_ASSERT( !ptrMonitorShape->isValid(V3D(0.0,0.0,-0.04)+ptrMonitorShape->getPos()) );
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(-2.1,-2.01,-2.01)+ptrMonitorShape->getPos()) );
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(100,100,100)+ptrMonitorShape->getPos()) );
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(-200.0,-200.0,-2000.1)+ptrMonitorShape->getPos()) );
 
-    // test of shape for some detector
+    // test of shape for some detector which is located at position (0.260669, -0.150497, 2.34612)
+    // and the z-axis of this is rotated such that it points in this direction.
+    // This correspond to rotating about the axis (-0.499962090822939, -0.866047289551763, 0)
+    // by about 7 degrees. Hence e.g. instance the point (-0.002,0.05,-0.000001) now belongs
+    // to the rotated shape but not (-0.002,0.05,-0.000001). 
     Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(101001));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,3.1)+ptrDetShape->getPos()) );
-    TS_ASSERT( !ptrDetShape->isValid(V3D(0.001,0.05,0.001)+ptrDetShape->getPos()) );
-    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.1,0.1,0.1)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.01)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.002,0.09,0.01)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0025,0.1,0.02)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0025,-0.1,0.02)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0025,0.1,0.02)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0025,-0.1,0.02)+ptrDetShape->getPos()) ); 
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0025,0.1,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0025,-0.1,0.0)+ptrDetShape->getPos()) ); 
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0025,0.1,0.0)+ptrDetShape->getPos()) ); 
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0025,-0.1,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.002,-0.05,-0.000001)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.002,0.05,-0.000001)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,0.03)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.02)+ptrDetShape->getPos()) );
 
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
@@ -348,6 +365,16 @@ public:
     TS_ASSERT( !ptrDet7->isValid(V3D(0.0,0.0,0.02)+ptrDet7->getPos()) );
     TS_ASSERT( ptrDet7->isValid(V3D(0.0,0.0,-0.02)+ptrDet7->getPos()) );
     TS_ASSERT( !ptrDet7->isValid(V3D(0.0,0.0,-1.02)+ptrDet7->getPos()) );
+
+    // test of hexahedron. 
+    Detector *ptrDet8 = dynamic_cast<Detector*>(i->getDetector(8));
+    TS_ASSERT( ptrDet8->isValid(V3D(0.4,0.4,0.0)+ptrDet8->getPos()) );
+    TS_ASSERT( ptrDet8->isValid(V3D(0.8,0.8,0.0)+ptrDet8->getPos()) );
+    TS_ASSERT( ptrDet8->isValid(V3D(0.4,0.4,2.0)+ptrDet8->getPos()) );
+    TS_ASSERT( !ptrDet8->isValid(V3D(0.8,0.8,2.0)+ptrDet8->getPos()) );
+    TS_ASSERT( !ptrDet8->isValid(V3D(0.0,0.0,-0.02)+ptrDet8->getPos()) );
+    TS_ASSERT( !ptrDet8->isValid(V3D(0.0,0.0,2.02)+ptrDet8->getPos()) );
+    TS_ASSERT( ptrDet8->isValid(V3D(0.5,0.5,0.1)+ptrDet8->getPos()) );
 
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
