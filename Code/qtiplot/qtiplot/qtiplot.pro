@@ -319,6 +319,7 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/AlgMonitor.h \
 	    src/Mantid/ProgressDlg.h \
 	    src/Mantid/MantidPlotReleaseDate.h \
+	    src/Mantid/MantidAbout.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLColorMap.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
@@ -466,6 +467,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/MantidDock.cpp \
 	    src/Mantid/AlgMonitor.cpp \
 	    src/Mantid/ProgressDlg.cpp \
+	    src/Mantid/MantidAbout.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLColorMap.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \

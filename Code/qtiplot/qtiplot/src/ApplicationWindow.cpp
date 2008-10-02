@@ -164,6 +164,7 @@
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "Mantid/MantidAbout.h"
 
 using namespace Qwt3D;
 
@@ -7822,6 +7823,7 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
 
 void ApplicationWindow::about()
 {
+    /*
 QString text = "<h2>"+ versionString() + "</h2>";
 text +=	"<h3>" + QString(copyright_string).replace("\n", "<br>") + "</h3>";
 text += "<h3>" + tr("Released") + ": " + QString(release_date) + "</h3>";
@@ -7834,6 +7836,10 @@ mb->setWindowIcon (QPixmap(logo_xpm));
 mb->setIconPixmap(QPixmap(logo_xpm));
 mb->setText(text);
 mb->exec();
+    */
+//Mantid
+    MantidAbout *ma = new MantidAbout();
+    ma->exec();
 }
 
 void ApplicationWindow::analysisMenuAboutToShow()
@@ -11346,7 +11352,7 @@ void ApplicationWindow::createActions()
     actionDeleteRows = new QAction(tr("&Delete Rows Interval..."), this);
 	connect(actionDeleteRows, SIGNAL(activated()), this, SLOT(showDeleteRowsDialog()));
 
-	actionAbout = new QAction(tr("&About QtiPlot"), this);
+	actionAbout = new QAction(tr("&About MantidPlot"), this);//Mantid
 	actionAbout->setShortcut( tr("F1") );
 	connect(actionAbout, SIGNAL(activated()), this, SLOT(about()));
 
@@ -12053,7 +12059,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionShowRowsDialog->setMenuText(tr("&Rows..."));
 	actionDeleteRows->setMenuText(tr("&Delete Rows Interval..."));
 
-	actionAbout->setMenuText(tr("&About QtiPlot"));
+	actionAbout->setMenuText(tr("&About MantidPlot"));//Mantid
 	actionAbout->setShortcut(tr("F1"));
 
 	actionShowHelp->setMenuText(tr("&Help"));

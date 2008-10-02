@@ -26,8 +26,15 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#include <iostream>
 #include <QApplication>
+#include <QSplashScreen>
+#include <QMessageBox>
+#include <QDir>
+#include <QThread>
+
 #include "ApplicationWindow.h"
+#include "Mantid/MantidPlotReleaseDate.h"
 
 // The following stuff is for the doxygen title page
 /*!  \mainpage QtiPlot - Data analysis and scientific plotting - API documentation
@@ -118,21 +125,18 @@ If you want to contribute code, please read the notes on \ref style "coding styl
   - For indentations, tabs are preferred because they allow everyone to choose the indentation depth for him/herself.
 */
 
-#include <QDir>
+class WaitThread:public QThread
+{
+public:
+    void run()
+    {
+        sleep(1);
+    }
+};
 
 int main( int argc, char ** argv )
 {
     QApplication app( argc, argv );
-
-    QString path = argv[0];
-    int i = path.lastIndexOf('/');
-    if (i < 0) i = path.lastIndexOf('\\');
-    if (i>=0) 
-    {
-        path.remove(i,1000);
-        QDir::setCurrent(path);
-    }
-
 	QStringList args = app.arguments();
 	args.removeFirst(); // remove application name
 
@@ -142,6 +146,25 @@ int main( int argc, char ** argv )
 		ApplicationWindow::about();
 		exit(0);
 	} else {
+
+        WaitThread t;
+        t.start();
+        QPixmap pixmap;
+        pixmap.load("MantidSplashScreen.png");
+        QSplashScreen splash(pixmap);
+        splash.show();
+        app.processEvents();
+        splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
+        
+        QString path = argv[0];
+        int i = path.lastIndexOf('/');
+        if (i < 0) i = path.lastIndexOf('\\');
+        if (i>=0) 
+        {
+            path.remove(i,1000);
+            QDir::setCurrent(path);
+        }
+
 		bool factorySettings = false;
 		if (args.contains("-d") || args.contains("--default-settings"))
 			factorySettings = true;
@@ -154,6 +177,8 @@ int main( int argc, char ** argv )
 			mw->searchForUpdates();
 		}
 		mw->parseCommandLineArguments(args);
+        t.wait();
+        splash.finish(mw);
 	}
 	app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
 	return app.exec();

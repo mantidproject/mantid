@@ -111,6 +111,8 @@ const std::string DllOpen::ConvertToLibName(const std::string& fileName)
 	return retVal;
 }
 
+/* Adds a directory to the dll cearch path
+ **/
 void DllOpen::addSearchDirectory(const std::string& dir)
 {
     addSearchDirectoryImpl(dir);
@@ -181,6 +183,8 @@ void DllOpen::CloseDllImpl(void* libName)
 	FreeLibrary((HINSTANCE)libName);
 }
 
+/* Adds a directory to the dll cearch path
+ **/
 void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 {
     SetDllDirectory(dir.c_str());
@@ -224,6 +228,8 @@ void DllOpen::CloseDllImpl(void* libName)
 	dlclose(libName);
 }
 
+/* Adds a directory to the dll cearch path
+ **/
 void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 {
 }
