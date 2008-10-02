@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FindDeadDetectors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GaussLeastSquaresFit.cpp"
 				>
 			</File>
@@ -293,6 +297,14 @@
 			</File>
 			<File
 				RelativePath=".\test\DivideTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FindDeadDetectors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FindDeadDetectorsTest.h"
 				>
 			</File>
 			<File

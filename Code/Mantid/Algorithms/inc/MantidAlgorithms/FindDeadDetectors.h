@@ -1,0 +1,87 @@
+#ifndef MANTID_ALGORITHM_FINDDEADDETECTORS_H_
+#define MANTID_ALGORITHM_FINDDEADDETECTORS_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
+
+namespace Mantid
+{
+  namespace Algorithms
+  {
+    /**
+    Takes a workspace as input and identifies all of the spectra that have a 
+    value across all time bins less or equal to than the threshold 'dead' value.
+    This is then used to mark all 'dead' detectors with a 'dead' marker value, 
+    while all spectra from live detectors are given a value of 'live' marker value.
+
+    This is primarily used to ease identification using the instrument visualization tools.
+
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    </UL>
+
+    Optional Properties:
+    <UL>
+    <LI> DeadThreshold - Workspace index number to integrate from (default 0)</LI>
+    <LI> LiveValue - Workspace index number to integrate to (default 0)</LI>
+    <LI> DeadValue - Bin number to integrate from (default 100)</LI>
+    </UL>
+
+    @author Russell Taylor, Tessella Support Services plc
+    @date 05/10/2007
+
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
+    class DLLExport FindDeadDetectors : public API::Algorithm
+    {
+    public:
+      /// Default constructor
+      FindDeadDetectors() : API::Algorithm() {};
+      /// Destructor
+      virtual ~FindDeadDetectors() {};
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "FindDeadDetectors";}
+      /// Algorithm's version for identification overriding a virtual method
+      virtual const int version() const { return (1);}
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "Diagnostics";}
+
+    private:
+      // Overridden Algorithm methods
+      void init();
+      void exec();
+
+      API::Workspace_sptr integrateWorkspace(std::string outputWorkspaceName);
+
+      /// Static reference to the logger class
+      static Mantid::Kernel::Logger& g_log;
+    };
+
+
+
+  } // namespace Algorithm
+} // namespace Mantid
+
+#endif /*MANTID_ALGORITHM_FINDDEADDETECTORS_H_*/
