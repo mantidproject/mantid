@@ -82,14 +82,16 @@ public:
 
 	void testSetProperties()
 	{
-	  TS_ASSERT_THROWS( manager.setProperties(""), Exception::NotImplementedError )
+	  TS_ASSERT_THROWS_NOTHING( manager.setProperties("APROP1=15;APROP2=20") )
+	  TS_ASSERT( ! manager.getPropertyValue("APROP1").compare("15") )
+	  TS_ASSERT( ! manager.getPropertyValue("APROP2").compare("20") )
 	}
 
 	void testSetPropertyValue()
 	{
 		manager.setPropertyValue("APROP","10");
 		TS_ASSERT( ! manager.getPropertyValue("aProp").compare("10") )
-    manager.setPropertyValue("aProp","1");
+		manager.setPropertyValue("aProp","1");
 		TS_ASSERT_THROWS( manager.setPropertyValue("fhfjsdf","0"), Exception::NotFoundError )
 	}
 
