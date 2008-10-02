@@ -62,7 +62,7 @@ public:
   virtual void declareProperty(Property *p);
 
   // Sets all the declared properties from
-  virtual void setProperties(const std::string &values);
+  virtual void setProperties(const std::string &propertiesArray);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
 

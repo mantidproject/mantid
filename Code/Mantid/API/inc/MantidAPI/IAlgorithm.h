@@ -76,6 +76,11 @@ public:
    */
   virtual void setPropertyValue(const std::string& name, const std::string& value) = 0;
 
+  /** Set the value of an algorithm properties by string
+   *  @param propertiesArray A separated string containing the properties and their values.
+   */
+  virtual void setProperties(const std::string& propertiesArray) = 0;
+
   /** Set the value of an algorithm property by index
    *  @param index The index of the property to set
    *  @param value The value to assign to the property

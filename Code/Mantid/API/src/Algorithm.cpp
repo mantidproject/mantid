@@ -230,6 +230,12 @@ void Algorithm::setPropertyValue(const std::string &name, const std::string &val
 }
 
 // IAlgorithm property methods. Pull in PropertyManager implementation.
+void Algorithm::setProperties(const std::string& propertiesArray)
+{
+  PropertyManager::setProperties(propertiesArray);
+}
+
+// IAlgorithm property methods. Pull in PropertyManager implementation.
 void Algorithm::setPropertyOrdinal(const int &index, const std::string &value)
 {
   PropertyManager::setPropertyOrdinal(index, value);

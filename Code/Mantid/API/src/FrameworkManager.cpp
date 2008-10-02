@@ -87,35 +87,7 @@ IAlgorithm* FrameworkManagerImpl::createAlgorithm(const std::string& algName,con
 {
   // Use the previous method to create the algorithm
   IAlgorithm *alg = AlgorithmManager::Instance().create(algName,version).get();//createAlgorithm(algName);
-  // Split up comma-separated properties
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	
-  boost::char_separator<char> sep(";");
-  tokenizer propPairs(propertiesArray, sep);
-  int index=0;
-  // Iterate over the properties
-  for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
-  {
-    boost::char_separator<char> sep2("=");
-    tokenizer properties(*it,sep2);
-    vector<string> property(properties.begin(), properties.end());
-    // Call the appropriate setProperty method on the algorithm
-    if ( property.size() == 2)
-    {
-      alg->setPropertyValue(property[0],property[1]);
-    }
-    else if ( property.size() == 1)
-    {
-      // This is for a property with no value. Not clear that we will want such a thing.
-      alg->setPropertyOrdinal(index,property[0]);
-    }
-    // Throw if there's a problem with the string
-    else
-    {
-      throw std::invalid_argument("Misformed properties string");
-    }
-	index++;
-  }  
+  alg->setProperties(propertiesArray);
   return alg;
 }
 

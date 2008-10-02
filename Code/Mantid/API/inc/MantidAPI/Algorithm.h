@@ -176,6 +176,7 @@ public:
   virtual bool isExecuted() const;
   virtual void setPropertyOrdinal(const int &index, const std::string &value);
   virtual void setPropertyValue(const std::string &name, const std::string &value);
+  virtual void setProperties(const std::string& propertiesArray);
   virtual std::string getPropertyValue(const std::string &name) const;
   // End of IAlgorithm methods
   using Kernel::PropertyManager::getProperty;
