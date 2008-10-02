@@ -10,7 +10,7 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 #Import environment
 Import('env')
 myenv = env.Clone()
-myenv.Append(CPPDEFINES=[('IN_MANTID_MATLAB_API',1)])
+myenv.Append(CPPDEFINES=[('IN_MANTID_MATLAB_API',1),('MATLAB_MEX_FILE',1)])
 if os.name == 'nt' :
     myenv.Append(CPPPATH=['C:/MATLAB/R2006a/extern/include'])
     myenv.Append(MYLIBDIRLIST=['C:/MATLAB/R2006a/extern/lib/win32/microsoft'])
@@ -23,7 +23,9 @@ else:
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
-shared = myenv.SharedLibrary('lib/MantidMatlabAPI', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidMatlabAPI.pdb')
+shared_sources=listCpps[:]
+shared_sources.append('linkoptions.def')
+shared = myenv.SharedLibrary('lib/MantidMatlabAPI', shared_sources, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidMatlabAPI.pdb')
 static = myenv.StaticLibrary('libstatic/MantidMatlabAPI', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='libstatic/MantidMatlabAPI.pdb')
 retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidMatlabAPI' ] }
 Return('retval')

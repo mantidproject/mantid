@@ -22,14 +22,14 @@ switch s(1).type
         r(s(1).subs{:}) = subsasgn(r(s(1).subs{:}), s(2:end), b);
     else
         r(s(1).subs{:}) = b;
-        res = libisisexc(class(r), 'check', r);
+%        res = libisisexc(class(r), 'check', r);
     end
   case '{}'  % self{} syntax - sould i really be using {} here rather than ()?
     if (length(s) > 1)
         r(s(1).subs{:}) = subsasgn(r(s(1).subs{:}), s(2:end), b);
     else
         r(s(1).subs{:}) = b;
-        res = libisisexc(class(r), 'check', r);
+%        res = libisisexc(class(r), 'check', r);
     end
   otherwise
     error('invalid subsasgn syntax')       

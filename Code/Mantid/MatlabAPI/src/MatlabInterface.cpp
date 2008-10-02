@@ -14,6 +14,8 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#define ARGCHECK   // Also need mwdebug.c for this
+
 #include "mex.h"
 /**     @file MatlabInterface.cpp
 	MATLAB access to the mantid API
@@ -58,14 +60,20 @@ typedef struct
 
 extern int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
-extern int LoadRawRun(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 
 static mexfunc_s_t mex_functions[] = {
     { "FrameworkManager_Create", CreateFrameworkManager },
     { "Algorithm_Create", CreateAlgorithm },
-    { "LoadRaw_Run", LoadRawRun },
+    { "Algorithm_Run", RunAlgorithm },
+    { "Algorithm_RunPV", RunAlgorithmPV },
     { "Workspace_GetField", WorkspaceGetField },
+    { "Workspace_GetAllFields", WorkspaceGetAllFields },
+    { "Workspace_SetField", WorkspaceSetField },
     { NULL, NULL }
 };
 
@@ -81,12 +89,28 @@ static mexfunc_s_t mex_functions[] = {
 #ifdef _WIN32
 #    define compare_nocase stricmp
 #    define mwSize int
-#    define uint64_t unsigned long
+#    define uint64_t UINT64
 #else 
 #    define compare_nocase strcasecmp
 #endif
 
 using namespace Mantid::API;
+
+static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
+{
+	int j;
+	if (mxIsCell(prhs))
+	{
+		for(j=0; j < mxGetNumberOfElements(prhs); j++)
+		{
+			unrollCell(mxGetCell(prhs, j), new_prhs, new_nrhs);
+		}
+	}
+	else
+	{
+		new_prhs[new_nrhs++] = prhs;
+	}
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
@@ -138,25 +162,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 		n = 0;
 		for(i=0; i<nrhs; i++)
 		{
-			if (mxIsCell(prhs[i]))
-			{
-				for(j=0; j < mxGetNumberOfElements(prhs[i]); j++)
-				{
-					new_prhs[n++] = mxGetCell(prhs[i], j);
-					if (n >= MAX_ARGS)
-					{
-						mexErrMsgTxt("LIBISISEXC: too many varargin arguments");
-					}
-				}
-			}
-			else
-			{
-				new_prhs[n++] = prhs[i];
-				if (n >= MAX_ARGS)
-				{
-					mexErrMsgTxt("LIBISISEXC: too many varargin arguments");
-				}
-			}
+			unrollCell(prhs[i], new_prhs, n);
 		}
 		nrhs_2 = n - 2;
 	}
@@ -239,57 +245,118 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
     mwSize dims[2] = { 1, 1 };
-    mexPrintf("Created FrameworkManager\n");
-    FrameworkManager::Instance();
-    plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
-    uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
-    data[0] = (uint64_t)5;
-    return 0;
+//    mexPrintf("Created FrameworkManager\n");
+	try 
+	{
+        FrameworkManager::Instance();
+        plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
+        uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
+        data[0] = (uint64_t)0;   // dummy pointer to instance
+        return 0;
+	}
+	catch(std::exception& e)
+	{
+		return 1;
+	}
 }
 
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	mwSize dims[2] = { 1, 1 };
-        char algName[128];
-	mxGetString(prhs[0], algName, sizeof(algName));
-	IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName);
-	plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
-	uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
-	data[0] = (uint64_t)alg;
+    char algName[128];
+	try
+	{
+	    mxGetString(prhs[0], algName, sizeof(algName));
+	    IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName);
+	    plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
+	    uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
+	    data[0] = (uint64_t)alg;
+		return 0;
+	}
+	catch(std::exception& e)
+	{
+		return 1;
+	}
+}
+
+int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+	char buffer[256];
+	try
+	{
+	    uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
+	    IAlgorithm* alg = (IAlgorithm*)data[0];
+		mxGetString(prhs[1], buffer, sizeof(buffer));
+		alg->setProperties(buffer);
+	    alg->execute();
+	    plhs[0] = mxCreateString("");
+	    return 0;
+	}
+	catch(std::exception& e)
+	{
+		return 1;
+	}
+
+}
+
+int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+	char buffer[256];
+	const char* tmp;
+	mxArray* marray;
+	std::string property_name;
+	try
+	{
+	    uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
+	    IAlgorithm* alg = (IAlgorithm*)data[0];
+	    int i=1;
+	    while(i<nrhs)
+	    {
+		    if (mxGetClassID(prhs[i]) != mxCHAR_CLASS)
+		    {
+			    mexErrMsgTxt("Algorithm property name must be a string");
+		    }
+		    mxGetString(prhs[i], buffer, sizeof(buffer));
+		    property_name = buffer;
+		    i++;
+			strcpy(buffer, mxGetClassName(prhs[i]));
+			if (!strcmp(buffer, "char"))
+			{
+				mxGetString(prhs[i], buffer, sizeof(buffer));
+				alg->setPropertyValue(property_name, buffer);
+			}
+			else if (!strcmp(buffer, "MantidWorkspace"))
+			{
+				marray = mxGetField(prhs[i],0,"name");
+				mxGetString(marray, buffer, sizeof(buffer));
+				alg->setPropertyValue(property_name, buffer);
+			}
+			else
+			{
+				mexErrMsgTxt("Algorithm property value must be a string");
+			}
+		    i++;
+	    }
+	    alg->execute();
+	    plhs[0] = mxCreateString("");
+	    return 0;
+	}
+	catch(std::exception& e)
+	{
+		return 1;
+	}
+}
+
+
+int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
 	return 0;
 }
 
-/**
- * Loads a standard ISIS raw file into Mantid, using the LoadRaw algorithm.
- **/
-int LoadRawRun(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+static mxArray* WorkspaceGetFieldHelper(Workspace_sptr wksptr, const char* field_name)
 {
-        char fileName[128], work_name[128];
-	mxGetString(prhs[0], fileName, sizeof(fileName));
-	mxGetString(prhs[1], work_name, sizeof(work_name));
-	//Check workspace does not exist
-	if (!AnalysisDataService::Instance().doesExist(work_name))
-	{
-		IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("LoadRaw");
-		alg->setPropertyValue("Filename", fileName);
-		alg->setPropertyValue("OutputWorkspace", work_name);
-		alg->execute();
-	}
-	else
-	{
-    		mexPrintf("Workspace already exists\n");
-	}
-	return 0;
-}
-
-int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
-{
+	mxArray* mptr;
 	std::vector<double>* data = NULL;
-        char field_name[128], work_name[128];
-	mxGetString(prhs[0], work_name, sizeof(work_name));
-	mxGetString(prhs[1], field_name, sizeof(field_name));
-
-	Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
 	switch(field_name[0])
 	{
 	    case 'x':
@@ -305,12 +372,43 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 		break;
 
 	    default:
+		return NULL;
 		break;
 
 	}
 	mwSize dims[2] = { 1, data->size() };
-	plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-	memcpy(mxGetPr(plhs[0]), &(data->front()), data->size() * sizeof(double));
+	mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+	memcpy(mxGetPr(mptr), &(data->front()), data->size() * sizeof(double));
+	return mptr;
+}
+
+
+int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+    char work_name[128];
+	mxGetString(prhs[0], work_name, sizeof(work_name));
+	mwSize dims_array[2] = { 1, 1 };
+    int nfields = 3;
+	const char* fieldnames[] = { "x", "y", "e" };
+	plhs[0] = mxCreateStructArray(2, dims_array, nfields, fieldnames);
+	Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
+	mxArray* mptr;
+	mptr = WorkspaceGetFieldHelper(wksptr, "x");
+	mxSetField(plhs[0], 0, "x", mptr);
+	mptr = WorkspaceGetFieldHelper(wksptr, "y");
+	mxSetField(plhs[0], 0, "y", mptr);
+	mptr = WorkspaceGetFieldHelper(wksptr, "e");
+	mxSetField(plhs[0], 0, "e", mptr);
+	return 0;
+}
+
+int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+    char field_name[128], work_name[128];
+	mxGetString(prhs[0], work_name, sizeof(work_name));
+	mxGetString(prhs[1], field_name, sizeof(field_name));
+	Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
+	plhs[0] = WorkspaceGetFieldHelper(wksptr, field_name);
 	return 0;
 }
 
