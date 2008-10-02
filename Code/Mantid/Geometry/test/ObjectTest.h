@@ -21,82 +21,17 @@ using namespace Geometry;
 
 class testObject: public CxxTest::TestSuite
 {
-  private:
+private:
 
 
 public:
 
 
-  void testSetObject1()
+  void testCreateUnitCube()
   {
-    Object A;
-    std::string Ostr="18 45 #(45 (57 : 56))";
-    A.setObject(5,Ostr);
-    TS_ASSERT_EQUALS(A.cellStr(MObj),"#( (57 : 56) 45 ) 45 18");
-  }
+    Object A = createUnitCube();
 
-  void testSetObject2() 
-    /*!
-    Test the porcessing of a line
-    \retval -1 :: Unable to process line
-    \retval 0 :: success
-    */
-  {
-    Object A;
-    std::string Ostr="-5  8  60  -61  62  -63 #3";
-    A.setObject(4,Ostr);
-    TS_ASSERT_EQUALS(A.hasComplement(),1);
-    //id=4 material=-1 density=0
-    TS_ASSERT_EQUALS(A.str(),"4 -1 0 #3 -63 62 -61 60 8 -5");
-  }
-
-  void testCellStr()
-    /*!
-    Test the CellSTr method including the 
-    complementary of both #(XXX) and #Cell.
-    */
-  {
-    populateMObj();
-    Object A;
-    std::string Ostr="-5  8  60  (-61 :  62)  -63 #3";
-    A.setObject(4,Ostr);
-    TS_ASSERT_EQUALS(A.cellStr(MObj),"#(-60006 60005 -60004 60003 -60002 60001)  -63 (-61 : 62) 60 8 -5");
-  }
-
-  void testComplement() 
-    /*!
-    Test the removal of a complement
-    \retval -1 :: Unable to process line
-    \retval 0 :: success
-    */
-  {
-    populateMObj();
-
-    Object A;
-    std::string Ostr="1 -2 3 -4 5 -6  #10";
-    A.setObject(4, Ostr);
-    TS_ASSERT_EQUALS(A.hasComplement(),1);
-
-    Algebra AX;
-    AX.setFunctionObjStr(A.cellStr(MObj));
-
-    if (!A.procString(AX.writeMCNPX()))
-    {
-      TS_FAIL("Failed Complement ");
-    }
-    TS_ASSERT_EQUALS(A.str(),"4 -1 0 (-80001 : -80005 : 80006 : ((-80003 : 80002) 80004)) 1 3 5 -6 -4 -2");
-  }
-
-  void testMakeComplement()
-    /*!
-    Test the making of a given object complementary
-    */
-  {
-    populateMObj();
-
-    TS_ASSERT_EQUALS(MObj[2].str(),"2 -1 0 -63 62 -61 60 5 -4");
-    MObj[2].makeComplement();
-    TS_ASSERT_EQUALS(MObj[2].str(),"2 -1 0 #( -63 62 -61 60 5 -4 )");
+    TS_ASSERT_EQUALS(A.str(),"68 -1 0 -6 5 -4 3 -2 1");
   }
 
   void testIsOnSideCappedCylinder()
@@ -275,10 +210,10 @@ public:
     Track track(V3D(-1,1.5,1),V3D(1,0,0));
 
     // format = startPoint, endPoint, total distance so far, objectID
-	// forward only intercepts means that start point should be track origin
+    // forward only intercepts means that start point should be track origin
     //expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
     expectedResults.push_back(TUnit(V3D(-1,1.5,1),
-				    V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,A.getName()));
+      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,A.getName()));
 
     checkTrackIntercept(A,track,expectedResults);
   }
@@ -327,7 +262,7 @@ public:
 
     checkTrackIntercept(A,track,expectedResults);
   }
-  
+
   void testInterceptSurfaceCappedCylinderMiss()
   {
     std::vector<TUnit> expectedResults; //left empty as there are no expected results
@@ -353,237 +288,242 @@ public:
   }
 
   void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
-    {
-      int unitCount = obj.interceptSurface(track);
-      TS_ASSERT_EQUALS(unitCount,expectedResults.size())
+  {
+    int unitCount = obj.interceptSurface(track);
+    TS_ASSERT_EQUALS(unitCount,expectedResults.size())
       checkTrackIntercept(track,expectedResults);
-    }
+  }
 
-void testTrackTwoIsolatedCubes()
-  /*!
+  void xtestTrackTwoIsolatedCubes()
+    /*!
     Test a track going through an object
-   */
-{
-  std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
-  std::string ObjB="80001 -80002 60003 -60004 60005 -60006";
-  MObj.erase(MObj.begin(),MObj.end());
-  MObj[3]=Object();
-  MObj[3].setObject(3,ObjA);
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
+    std::string ObjB="80001 -80002 60003 -60004 60005 -60006";
+    
+    createSurfaces();
+    Object object1=Object();
+    object1.setObject(3,ObjA);
+    object1.populate(SMap);
 
-  MObj[4]=Object();
-  MObj[4].setObject(4,ObjB);
+    Object object2=Object();
+    object2.setObject(4,ObjB);
+    object2.populate(SMap);
 
-  createSurfaces();
-  
-  Track TL(Geometry::V3D(-5,0,0),
-	   Geometry::V3D(1,0,0));
+    Track TL(Geometry::V3D(-5,0,0),
+      Geometry::V3D(1,0,0));
 
-  // CARE: This CANNOT be called twice
-  TS_ASSERT(MObj[3].interceptSurface(TL)!=0)
-  TS_ASSERT(MObj[4].interceptSurface(TL)!=0)
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1.interceptSurface(TL)!=0)
+      TS_ASSERT(object2.interceptSurface(TL)!=0)
 
-  std::vector<TUnit> expectedResults;
-  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
-  expectedResults.push_back(TUnit(V3D(4.5,0,0),V3D(6.5,0,0),11.5,4));
-  checkTrackIntercept(TL,expectedResults);
+      std::vector<TUnit> expectedResults;
+    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
+    expectedResults.push_back(TUnit(V3D(4.5,0,0),V3D(6.5,0,0),11.5,4));
+    checkTrackIntercept(TL,expectedResults);
 
-}
+  }
 
-void testTrackTwoTouchingCubes()
-  /*!
+  void testTrackTwoTouchingCubes()
+    /*!
     Test a track going through an object
-   */
-{
-  std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
-  std::string ObjB="60002 -80002 60003 -60004 60005 -60006";
-  MObj.erase(MObj.begin(),MObj.end());
-  MObj[3]=Object();
-  MObj[3].setObject(3,ObjA);
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
+    std::string ObjB="60002 -80002 60003 -60004 60005 -60006";
 
-  MObj[4]=Object();
-  MObj[4].setObject(4,ObjB);
+    createSurfaces();
+    Object object1=Object();
+    object1.setObject(3,ObjA);
+    object1.populate(SMap);
 
-  createSurfaces();
-  
-  Track TL(Geometry::V3D(-5,0,0),
-	   Geometry::V3D(1,0,0));
+    Object object2=Object();
+    object2.setObject(4,ObjB);
+    object2.populate(SMap);
 
-  // CARE: This CANNOT be called twice
-  TS_ASSERT(MObj[3].interceptSurface(TL)!=0)
-  TS_ASSERT(MObj[4].interceptSurface(TL)!=0)
+    Track TL(Geometry::V3D(-5,0,0),
+      Geometry::V3D(1,0,0));
 
-  std::vector<TUnit> expectedResults;
-  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
-  expectedResults.push_back(TUnit(V3D(1,0,0),V3D(6.5,0,0),11.5,4));
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1.interceptSurface(TL)!=0)
+      TS_ASSERT(object2.interceptSurface(TL)!=0)
 
-  checkTrackIntercept(TL,expectedResults);
-}
+      std::vector<TUnit> expectedResults;
+    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(1,0,0),6,3));
+    expectedResults.push_back(TUnit(V3D(1,0,0),V3D(6.5,0,0),11.5,4));
 
-void testTrackCubeWithInternalSphere()
-  /*!
+    checkTrackIntercept(TL,expectedResults);
+
+  }
+
+  void testTrackCubeWithInternalSphere()
+    /*!
     Test a track going through an object
-  */
-{
-  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 71";
-  std::string ObjB="-71";
-  MObj.erase(MObj.begin(),MObj.end());
-  MObj[3]=Object();
-  MObj[3].setObject(3,ObjA);
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006 71";
+    std::string ObjB="-71";
 
-  MObj[4]=Object();
-  MObj[4].setObject(4,ObjB);
+    createSurfaces();
+    Object object1=Object();
+    object1.setObject(3,ObjA);
+    object1.populate(SMap);
 
-  createSurfaces();
-  
-  Track TL(Geometry::V3D(-5,0,0),
-	   Geometry::V3D(1,0,0));
+    Object object2=Object();
+    object2.setObject(4,ObjB);
+    object2.populate(SMap);
 
-  // CARE: This CANNOT be called twice
-  TS_ASSERT(MObj[3].interceptSurface(TL)!=0);
-  TS_ASSERT(MObj[4].interceptSurface(TL)!=0);
+    Track TL(Geometry::V3D(-5,0,0),
+      Geometry::V3D(1,0,0));
 
-  std::vector<TUnit> expectedResults;
-  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.8,0,0),4.2,3));
-  expectedResults.push_back(TUnit(V3D(-0.8,0,0),V3D(0.8,0,0),5.8,4));
-  expectedResults.push_back(TUnit(V3D(0.8,0,0),V3D(1,0,0),6,3));
-  checkTrackIntercept(TL,expectedResults);
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1.interceptSurface(TL)!=0);
+    TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-}
+    std::vector<TUnit> expectedResults;
+    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.8,0,0),4.2,3));
+    expectedResults.push_back(TUnit(V3D(-0.8,0,0),V3D(0.8,0,0),5.8,4));
+    expectedResults.push_back(TUnit(V3D(0.8,0,0),V3D(1,0,0),6,3));
+    checkTrackIntercept(TL,expectedResults);
+  }
 
-void testTrack_CubePlusInternalEdgeTouchSpheres()
-  /*!
+  void testTrack_CubePlusInternalEdgeTouchSpheres()
+    /*!
     Test a track going through an object
-  */
-{
-  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
-  std::string ObjB="(-72 : -73)";
-  MObj.erase(MObj.begin(),MObj.end());
-  MObj[3]=Object();
-  MObj[3].setObject(3,ObjA);
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
+    std::string ObjB="(-72 : -73)";
+   
+    createSurfaces();
+    Object object1=Object();
+    object1.setObject(3,ObjA);
+    object1.populate(SMap);
 
-  MObj[4]=Object();
-  MObj[4].setObject(4,ObjB);
+    Object object2=Object();
+    object2.setObject(4,ObjB);
+    object2.populate(SMap);
 
-  createSurfaces();
-  
-  Track TL(Geometry::V3D(-5,0,0),
-	   Geometry::V3D(1,0,0));
+    Track TL(Geometry::V3D(-5,0,0),
+      Geometry::V3D(1,0,0));
 
 
-  // CARE: This CANNOT be called twice
-  TS_ASSERT(MObj[3].interceptSurface(TL)!=0);
-  TS_ASSERT(MObj[4].interceptSurface(TL)!=0);
+    // CARE: This CANNOT be called twice
+    TS_ASSERT(object1.interceptSurface(TL)!=0);
+    TS_ASSERT(object2.interceptSurface(TL)!=0);
 
-  std::vector<TUnit> expectedResults;
-  expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.4,0,0),4.6,4));
-  expectedResults.push_back(TUnit(V3D(-0.4,0,0),V3D(0.2,0,0),5.2,3));
-  expectedResults.push_back(TUnit(V3D(0.2,0,0),V3D(1,0,0),6,4));
-  checkTrackIntercept(TL,expectedResults);
-}
+    std::vector<TUnit> expectedResults;
+    expectedResults.push_back(TUnit(V3D(-1,0,0),V3D(-0.4,0,0),4.6,4));
+    expectedResults.push_back(TUnit(V3D(-0.4,0,0),V3D(0.2,0,0),5.2,3));
+    expectedResults.push_back(TUnit(V3D(0.2,0,0),V3D(1,0,0),6,4));
+    checkTrackIntercept(TL,expectedResults);
+  }
 
-void testTrack_CubePlusInternalEdgeTouchSpheresMiss()
-  /*!
+  void testTrack_CubePlusInternalEdgeTouchSpheresMiss()
+    /*!
     Test a track missing an object
-  */
-{
-  std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
-  std::string ObjB="(-72 : -73)";
-  MObj.erase(MObj.begin(),MObj.end());
-  MObj[3]=Object();
-  MObj[3].setObject(3,ObjA);
+    */
+  {
+    std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
+    std::string ObjB="(-72 : -73)";
+    
+    createSurfaces();
+    Object object1=Object();
+    object1.setObject(3,ObjA);
+    object1.populate(SMap);
 
-  MObj[4]=Object();
-  MObj[4].setObject(4,ObjB);
+    Object object2=Object();
+    object2.setObject(4,ObjB);
+    object2.populate(SMap);
 
-  createSurfaces();
-  
-  Track TL(Geometry::V3D(-5,0,0),
-	   Geometry::V3D(0,1,0));
+    Track TL(Geometry::V3D(-5,0,0),
+      Geometry::V3D(0,1,0));
 
 
-  // CARE: This CANNOT be called twice
-  TS_ASSERT_EQUALS(MObj[3].interceptSurface(TL),0);
-  TS_ASSERT_EQUALS(MObj[4].interceptSurface(TL),0);
+    // CARE: This CANNOT be called twice
+    TS_ASSERT_EQUALS(object1.interceptSurface(TL),0);
+    TS_ASSERT_EQUALS(object2.interceptSurface(TL),0);
 
-  std::vector<TUnit> expectedResults; //left empty as this should miss
-  checkTrackIntercept(TL,expectedResults);
-}
+    std::vector<TUnit> expectedResults; //left empty as this should miss
+    checkTrackIntercept(TL,expectedResults);
+  }
 
-void testFindPointInCube()
-  /*!
+  void testFindPointInCube()
+    /*!
     Test find point in cube
-  */
-{
+    */
+  {
     Object A = createUnitCube();
     // initial guess in object
-	Geometry::V3D pt;
-	TS_ASSERT_EQUALS(A.getPointInObject(pt),1);
+    Geometry::V3D pt;
+    TS_ASSERT_EQUALS(A.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,0,0));
-	// initial guess not in object, but on x-axis
-	std::vector<std::string> planes;
-	planes.push_back("px 10"); planes.push_back("px 11");
-	planes.push_back("py -0.5"); planes.push_back("py 0.5");
+    // initial guess not in object, but on x-axis
+    std::vector<std::string> planes;
+    planes.push_back("px 10"); planes.push_back("px 11");
+    planes.push_back("py -0.5"); planes.push_back("py 0.5");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-	Object B =createCuboid(planes);
+    Object B =createCuboid(planes);
     TS_ASSERT_EQUALS(B.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(10,0,0));
-	// on y axis
-	planes.clear();
-	planes.push_back("px -0.5"); planes.push_back("px 0.5");
-	planes.push_back("py -22"); planes.push_back("py -21");
+    // on y axis
+    planes.clear();
+    planes.push_back("px -0.5"); planes.push_back("px 0.5");
+    planes.push_back("py -22"); planes.push_back("py -21");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-	Object C =createCuboid(planes);
+    Object C =createCuboid(planes);
     TS_ASSERT_EQUALS(C.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,-21,0));
-	// not on principle axis, now works using getBoundingBox
-	planes.clear();
-	planes.push_back("px 0.5"); planes.push_back("px 1.5");
-	planes.push_back("py -22"); planes.push_back("py -21");
+    // not on principle axis, now works using getBoundingBox
+    planes.clear();
+    planes.push_back("px 0.5"); planes.push_back("px 1.5");
+    planes.push_back("py -22"); planes.push_back("py -21");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-	Object D =createCuboid(planes);
+    Object D =createCuboid(planes);
     TS_ASSERT_EQUALS(D.getPointInObject(pt),1);
     TS_ASSERT_DELTA(pt.X(),1.0,1e-6);
     TS_ASSERT_DELTA(pt.Y(),-21.5,1e-6);
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
-	planes.clear();
-	// Test non axis aligned (AA) case - getPointInObject works because the object is on a principle axis
-	// However, if not on a principle axis then the getBoundingBox fails to find correct minima (maxima are OK)
-	// This is related to use of the complement for -ve surfaces and might be avoided by only using +ve surfaces
-	// for defining non-AA objects. However, BoundingBox is poor for non-AA and needs improvement if these are
-	// common
-	planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
-	planes.push_back("p 0 .70710678118 .70710678118 -1.1"); planes.push_back("p 0 .70710678118 .70710678118 -0.1");
+    planes.clear();
+    // Test non axis aligned (AA) case - getPointInObject works because the object is on a principle axis
+    // However, if not on a principle axis then the getBoundingBox fails to find correct minima (maxima are OK)
+    // This is related to use of the complement for -ve surfaces and might be avoided by only using +ve surfaces
+    // for defining non-AA objects. However, BoundingBox is poor for non-AA and needs improvement if these are
+    // common
+    planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
+    planes.push_back("p 0 .70710678118 .70710678118 -1.1"); planes.push_back("p 0 .70710678118 .70710678118 -0.1");
     planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
-	Object E =createCuboid(planes);
+    Object E =createCuboid(planes);
     TS_ASSERT_EQUALS(E.getPointInObject(pt),1);
     TS_ASSERT_DELTA(pt.X(),0.0,1e-6);
     TS_ASSERT_DELTA(pt.Y(),-0.1414213562373,1e-6);
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
-	planes.clear();
-	// This test fails to find a point in object, as object not on a principle axis
-	// and getBoundingBox does not give a useful result in this case.
-	// Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and rotated 45deg
-	// to these two axes
-	planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
-	planes.push_back("p 0  .70710678118 .70710678118 -2"); planes.push_back("p 0  .70710678118 .70710678118 -1");
+    planes.clear();
+    // This test fails to find a point in object, as object not on a principle axis
+    // and getBoundingBox does not give a useful result in this case.
+    // Object is unit cube located at +-0.5 in x but centred on z=y=-1.606.. and rotated 45deg
+    // to these two axes
+    planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
+    planes.push_back("p 0  .70710678118 .70710678118 -2"); planes.push_back("p 0  .70710678118 .70710678118 -1");
     planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
-	Object F =createCuboid(planes);
+    Object F =createCuboid(planes);
     TS_ASSERT_EQUALS(F.getPointInObject(pt),0);
-	// Test use of defineBoundingBox to explictly set the bounding box, when the automatic method fails
-	F.defineBoundingBox(0.5,-1/(2.0*sqrt(2.0)),-1.0/(2.0*sqrt(2.0)),
-		               -0.5,-sqrt(2.0)-1.0/(2.0*sqrt(2.0)),-sqrt(2.0)-1.0/(2.0*sqrt(2.0)));
+    // Test use of defineBoundingBox to explictly set the bounding box, when the automatic method fails
+    F.defineBoundingBox(0.5,-1/(2.0*sqrt(2.0)),-1.0/(2.0*sqrt(2.0)),
+      -0.5,-sqrt(2.0)-1.0/(2.0*sqrt(2.0)),-sqrt(2.0)-1.0/(2.0*sqrt(2.0)));
     TS_ASSERT_EQUALS(F.getPointInObject(pt),1);
     Object S = createSphere();
     TS_ASSERT_EQUALS(S.getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
-}
+  }
 
 
-void testSolidAngleSphere()
-  /*!
+  void testSolidAngleSphere()
+    /*!
     Test solid angle calculation for a sphere
-  */
-{
+    */
+  {
     Object A = createSphere();
     double satol=2e-2; // tolerance for solid angle
 
@@ -603,13 +543,13 @@ void testSolidAngleSphere()
     TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.133442,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.0013204,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),1.32025e-5,satol);
-}
+  }
 
-void testSolidAngleCappedCylinder()
-  /*!
+  void testSolidAngleCappedCylinder()
+    /*!
     Test solid angle calculation for a capped cylinder
-  */
-{
+    */
+  {
     Object A = createCappedCylinder();
     double satol=2e-2; // tolerance for solid angle
 
@@ -633,13 +573,13 @@ void testSolidAngleCappedCylinder()
     TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.07850147,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.000715295,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),7.08131e-6,satol);
-}
+  }
 
-void testSolidAngleCube()
-  /*!
+  void testSolidAngleCube()
+    /*!
     Test solid angle calculation for a cube
-  */
-{
+    */
+  {
     Object A = createUnitCube();
     double satol=2e-2; // tolerance for solid angle
 
@@ -653,78 +593,55 @@ void testSolidAngleCube()
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
-}
+  }
 
-void testGetBoundingBox()
-/*!
-  Test bounding box for a object capped cylinder
-*/
-{
+  void testGetBoundingBox()
+    /*!
+    Test bounding box for a object capped cylinder
+    */
+  {
     Object A = createCappedCylinder();
-	double xmax,ymax,zmax,xmin,ymin,zmin;
-	xmax=ymax=zmax=100;
-	xmin=ymin=zmin=-100;
-	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	TS_ASSERT_DELTA(xmax,1.2,0.0001);
-	TS_ASSERT_DELTA(ymax,3.0,0.0001);
-	TS_ASSERT_DELTA(zmax,3.0,0.0001);
-	TS_ASSERT_DELTA(xmin,-3.2,0.0001);
-	TS_ASSERT_DELTA(ymin,-3.0,0.0001);
-	TS_ASSERT_DELTA(zmin,-3.0,0.0001);
-}
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=ymax=zmax=100;
+    xmin=ymin=zmin=-100;
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    TS_ASSERT_DELTA(xmax,1.2,0.0001);
+    TS_ASSERT_DELTA(ymax,3.0,0.0001);
+    TS_ASSERT_DELTA(zmax,3.0,0.0001);
+    TS_ASSERT_DELTA(xmin,-3.2,0.0001);
+    TS_ASSERT_DELTA(ymin,-3.0,0.0001);
+    TS_ASSERT_DELTA(zmin,-3.0,0.0001);
+  }
 
-void defineBoundingBox()
-/*!
-  Test use of defineBoundingBox
-*/
-{
+  void defineBoundingBox()
+    /*!
+    Test use of defineBoundingBox
+    */
+  {
     Object A = createCappedCylinder();
-	double xmax,ymax,zmax,xmin,ymin,zmin;
-	xmax=1.2;ymax=3.0;zmax=3.0;
-	xmin=-3.2;ymin=-3.0;zmin=-3.0;
-	A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	TS_ASSERT_EQUALS(xmax,1.2);
-	TS_ASSERT_EQUALS(ymax,3.0);
-	TS_ASSERT_EQUALS(zmax,3.0);
-	TS_ASSERT_EQUALS(xmin,-3.2);
-	TS_ASSERT_EQUALS(ymin,-3.0);
-	TS_ASSERT_EQUALS(zmin,-3.0);
-	xmax=1.2;xmin=3.0;
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=1.2;ymax=3.0;zmax=3.0;
+    xmin=-3.2;ymin=-3.0;zmin=-3.0;
+    A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    TS_ASSERT_EQUALS(xmax,1.2);
+    TS_ASSERT_EQUALS(ymax,3.0);
+    TS_ASSERT_EQUALS(zmax,3.0);
+    TS_ASSERT_EQUALS(xmin,-3.2);
+    TS_ASSERT_EQUALS(ymin,-3.0);
+    TS_ASSERT_EQUALS(zmin,-3.0);
+    xmax=1.2;xmin=3.0;
     TS_ASSERT_THROWS(A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
 
-}
+  }
 private:
- 
+
   /// Surface type
   typedef std::map<int,Surface*> STYPE ; 
   /// Object type
-  typedef std::map<int,Object> MTYPE;  
+ // typedef std::map<int,Object> MTYPE;  
 
   STYPE SMap;   ///< Surface Map
-  MTYPE MObj;   ///< Master object lis
-
-  void populateMObj()
-    /*!
-      Populate with simple object
-      the MLis component
-    */
-  {
-    std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
-    std::string ObjB="-4  5  60  -61  62  -63";
-    std::string ObjC="-12 13 60  -61  62  -63";
-    std::string ObjD="80001 ((-80002 80003) : -80004 ) 80005 -80006";
-
-    MObj.erase(MObj.begin(),MObj.end());
-    MObj[3]=Object();
-    MObj[2]=Object();
-    MObj[8]=Object();
-    MObj[10]=Object();
-    MObj[3].setObject(3,ObjA);
-    MObj[2].setObject(2,ObjB);
-    MObj[8].setObject(8,ObjC);
-    MObj[10].setObject(10,ObjD);
-  }
 
   Object createCappedCylinder()
   {
@@ -777,71 +694,62 @@ private:
   }
 
   void clearSurfMap()
-  /*!
+    /*!
     Clears the surface map for a new test
     or destruction.
-   */
-{
-  STYPE::iterator mc;
-  for(mc=SMap.begin();mc!=SMap.end();mc++)
-    delete mc->second;
-  SMap.erase(SMap.begin(),SMap.end());
-  return;
-}
+    */
+  {
+    STYPE::iterator mc;
+    for(mc=SMap.begin();mc!=SMap.end();mc++)
+      delete mc->second;
+    SMap.erase(SMap.begin(),SMap.end());
+    return;
+  }
 
   void createSurfaces()
     /*!
-      Creates a list of surfaces for used in the objects
-      and populates the MObj layers.
+    Creates a list of surfaces for used in the objects
+    and populates the MObj layers.
     */
-   {
-      clearSurfMap();
-  
-      // PLANE SURFACES:
-      
-      typedef std::pair<int,std::string> SCompT;
-      std::vector<SCompT> SurfLine;
-      SurfLine.push_back(SCompT(60001,"px -1"));
-      SurfLine.push_back(SCompT(60002,"px 1"));
-      SurfLine.push_back(SCompT(60003,"py -2"));
-      SurfLine.push_back(SCompT(60004,"py 2"));
-      SurfLine.push_back(SCompT(60005,"pz -3"));
-      SurfLine.push_back(SCompT(60006,"pz 3"));
-      
-      SurfLine.push_back(SCompT(80001,"px 4.5"));
-      SurfLine.push_back(SCompT(80002,"px 6.5"));
-      
-      SurfLine.push_back(SCompT(71,"so 0.8"));
-      SurfLine.push_back(SCompT(72,"s -0.7 0 0 0.3"));
-      SurfLine.push_back(SCompT(73,"s 0.6 0 0 0.4"));
+  {
+    clearSurfMap();
 
-      std::vector<SCompT>::const_iterator vc;
+    // PLANE SURFACES:
 
-      // Note that the testObject now manages the "new Plane"
-      Geometry::Surface* A;
-      for(vc=SurfLine.begin();vc!=SurfLine.end();vc++)
-	{  
-	  A=Geometry::SurfaceFactory::Instance()->processLine(vc->second);
-	  if (!A)
-	    {
-	      std::cerr<<"Failed to process line "<<vc->second<<std::endl;
-	      exit(1);
-	    }
-	  A->setName(vc->first);
-	  SMap.insert(STYPE::value_type(vc->first,A));
-	}
+    typedef std::pair<int,std::string> SCompT;
+    std::vector<SCompT> SurfLine;
+    SurfLine.push_back(SCompT(60001,"px -1"));
+    SurfLine.push_back(SCompT(60002,"px 1"));
+    SurfLine.push_back(SCompT(60003,"py -2"));
+    SurfLine.push_back(SCompT(60004,"py 2"));
+    SurfLine.push_back(SCompT(60005,"pz -3"));
+    SurfLine.push_back(SCompT(60006,"pz 3"));
 
-      //   Now populate all the objects with the corresponding surface
-      MTYPE::iterator mc;
-      for(mc=MObj.begin();mc!=MObj.end();mc++)
-	{
-	  mc->second.populate(SMap);
-	  //	  mc->second.write(std::cout);
-	}
+    SurfLine.push_back(SCompT(80001,"px 4.5"));
+    SurfLine.push_back(SCompT(80002,"px 6.5"));
 
-      return;
-  
-}
+    SurfLine.push_back(SCompT(71,"so 0.8"));
+    SurfLine.push_back(SCompT(72,"s -0.7 0 0 0.3"));
+    SurfLine.push_back(SCompT(73,"s 0.6 0 0 0.4"));
+
+    std::vector<SCompT>::const_iterator vc;
+
+    // Note that the testObject now manages the "new Plane"
+    Geometry::Surface* A;
+    for(vc=SurfLine.begin();vc!=SurfLine.end();vc++)
+    {  
+      A=Geometry::SurfaceFactory::Instance()->processLine(vc->second);
+      if (!A)
+      {
+        std::cerr<<"Failed to process line "<<vc->second<<std::endl;
+        exit(1);
+      }
+      A->setName(vc->first);
+      SMap.insert(STYPE::value_type(vc->first,A));
+    }
+
+    return;
+  }
 
 
   Object createUnitCube()
