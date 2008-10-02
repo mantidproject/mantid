@@ -365,6 +365,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
         m_instrument->markAsMonitor(detector);
       else
         m_instrument->markAsDetector(detector);
+
     }
     catch(Kernel::Exception::ExistsError&)
     {
@@ -681,6 +682,7 @@ void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Ge
   // vector from facing object to component we want to rotate
 
   Geometry::V3D facingDirection = pos - facingPoint;
+  facingDirection.normalize();
 
   if ( facingDirection.norm() == 0.0 ) return;
 
@@ -689,6 +691,7 @@ void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Ge
   // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
 
   Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
+  normal.normalize();
   double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
 
   if ( normal.norm() > 0.0 )

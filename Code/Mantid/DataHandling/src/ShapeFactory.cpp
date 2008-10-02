@@ -132,6 +132,16 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           idMatching[idFromUser] = parseCone(pE, primitives, l_id);  
           numPrimitives++;
         }
+        else if ( !primitiveName.compare("hexahedron"))
+        {
+          idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);  
+          numPrimitives++;
+        }
+        else if ( !primitiveName.compare("torus"))
+        {
+          idMatching[idFromUser] = parseTorus(pE, primitives, l_id);  
+          numPrimitives++;
+        }
       }
     }
   }
@@ -569,17 +579,6 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
   Element* pElemAngle = static_cast<Element*>(pNL_angle->item(0)); 
   pNL_angle->release();
 
-  // check for height element
-/*  NodeList* pNL_height = pElem->getElementsByTagName("height");
-  if ( pNL_height->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cone> element with missing <height> element");
-  }
-  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
-  pNL_height->release();
-*/
-
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
 
@@ -687,6 +686,235 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geo
   pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec); 
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "-" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'hexahedron' element
+ *
+ *  @param pElem XML 'hexahedron' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for left-front-bottom-point element
+  NodeList* pNL_lfb = pElem->getElementsByTagName("left-front-bottom-point");
+  if ( pNL_lfb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <left-front-bottom-point> element");
+  }
+  Element* pElem_lfb = static_cast<Element*>(pNL_lfb->item(0)); 
+  pNL_lfb->release();
+
+  // check for left-front-top-point element
+  NodeList* pNL_lft = pElem->getElementsByTagName("left-front-top-point");
+  if ( pNL_lft->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <left-front-top-point> element");
+  }
+  Element* pElem_lft = static_cast<Element*>(pNL_lft->item(0)); 
+  pNL_lft->release();
+
+  // check for left-back-bottom-point element
+  NodeList* pNL_lbb = pElem->getElementsByTagName("left-back-bottom-point");
+  if ( pNL_lbb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <left-back-bottom-point> element");
+  }
+  Element* pElem_lbb = static_cast<Element*>(pNL_lbb->item(0)); 
+  pNL_lbb->release();
+
+  // check for left-back-top-point element
+  NodeList* pNL_lbt = pElem->getElementsByTagName("left-back-top-point");
+  if ( pNL_lbt->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <left-back-top-point> element");
+  }
+  Element* pElem_lbt = static_cast<Element*>(pNL_lbt->item(0)); 
+  pNL_lbt->release();
+
+  // check for right-front-bottom-point element
+  NodeList* pNL_rfb = pElem->getElementsByTagName("right-front-bottom-point");
+  if ( pNL_rfb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <right-front-bottom-point> element");
+  }
+  Element* pElem_rfb = static_cast<Element*>(pNL_rfb->item(0)); 
+  pNL_rfb->release();
+
+  // check for right-front-top-point element
+  NodeList* pNL_rft = pElem->getElementsByTagName("right-front-top-point");
+  if ( pNL_rft->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <right-front-top-point> element");
+  }
+  Element* pElem_rft = static_cast<Element*>(pNL_rft->item(0)); 
+  pNL_rft->release();
+
+  // check for right-back-bottom-point element
+  NodeList* pNL_rbb = pElem->getElementsByTagName("right-back-bottom-point");
+  if ( pNL_rbb->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <right-back-bottom-point> element");
+  }
+  Element* pElem_rbb = static_cast<Element*>(pNL_rbb->item(0)); 
+  pNL_rbb->release();
+
+  // check for right-back-top-point element
+  NodeList* pNL_rbt = pElem->getElementsByTagName("right-back-top-point");
+  if ( pNL_rbt->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <hexahedron> element with missing <right-back-top-point> element");
+  }
+  Element* pElem_rbt = static_cast<Element*>(pNL_rbt->item(0)); 
+  pNL_rbt->release();
+
+
+  V3D lfb = parsePosition(pElem_lfb);  // left front bottom
+  V3D lft = parsePosition(pElem_lft);  // left front top
+  V3D lbb = parsePosition(pElem_lbb);  // left back bottom
+  V3D lbt = parsePosition(pElem_lbt);  // left back top
+  V3D rfb = parsePosition(pElem_rfb);  // right front bottom
+  V3D rft = parsePosition(pElem_rft);  // right front top
+  V3D rbb = parsePosition(pElem_rbb);  // right back bottom
+  V3D rbt = parsePosition(pElem_rbt);  // right back top
+
+  V3D pointTowardBack = lbb-lfb;
+  pointTowardBack.normalize();
+
+  V3D normal;
+
+  // add front face
+  Plane* pPlaneFrontCutoff = new Plane();
+  normal = (rfb-lfb).cross_prod(lft-lfb);
+  pPlaneFrontCutoff->setPlane(lfb, normal); 
+  prim[l_id] = pPlaneFrontCutoff;
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << " ";
+  l_id++;
+
+  // add back face
+  Plane* pPlaneBackCutoff = new Plane();
+  normal = (rbb-lbb).cross_prod(lbt-lbb);
+  pPlaneBackCutoff->setPlane(lbb, normal); 
+  prim[l_id] = pPlaneBackCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add left face
+  Plane* pPlaneLeftCutoff = new Plane();
+  normal = (lbb-lfb).cross_prod(lft-lfb);
+  pPlaneLeftCutoff->setPlane(lfb, normal); 
+  prim[l_id] = pPlaneLeftCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add right face
+  Plane* pPlaneRightCutoff = new Plane();
+  normal = (rbb-rfb).cross_prod(rft-rfb);
+  pPlaneRightCutoff->setPlane(rfb, normal); 
+  prim[l_id] = pPlaneRightCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add top face
+  Plane* pPlaneTopCutoff = new Plane();
+  normal = (rft-lft).cross_prod(lbt-lft);
+  pPlaneTopCutoff->setPlane(lft, normal); 
+  prim[l_id] = pPlaneTopCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom face
+  Plane* pPlaneBottomCutoff = new Plane();
+  normal = (rfb-lfb).cross_prod(lbb-lfb);
+  pPlaneBottomCutoff->setPlane(lfb, normal); 
+  prim[l_id] = pPlaneBottomCutoff;
+  retAlgebraMatch << "" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'torus' element
+ *
+ *  @param pElem XML 'torus' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for centre element
+  NodeList* pNL_centre = pElem->getElementsByTagName("centre");
+  if ( pNL_centre->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <torus> element with missing <centre> element");
+  }
+  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
+  pNL_centre->release();
+
+  // check for axis element
+  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
+  if ( pNL_axis->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <torus> element with missing <axis> element");
+  }
+  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
+  pNL_axis->release();
+
+  // check for radius-from-centre-to-tube element
+  NodeList* pNL_radiusFromCentre = pElem->getElementsByTagName("radius-from-centre-to-tube");
+  if ( pNL_radiusFromCentre->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <torus> element with missing <radius-from-centre-to-tube> element");
+  }
+  Element* pElemRadiusFromCentre = static_cast<Element*>(pNL_radiusFromCentre->item(0)); 
+  pNL_radiusFromCentre->release();
+
+  // check for radius-tube element
+  NodeList* pNL_radiusTube = pElem->getElementsByTagName("radius-tube");
+  if ( pNL_radiusTube->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <torus> element with missing <radius-from-centre-to-tube> element");
+  }
+  Element* pElemRadiusTube = static_cast<Element*>(pNL_radiusTube->item(0)); 
+  pNL_radiusTube->release();
+
+  V3D normVec = parsePosition(pElemAxis);
+  normVec.normalize();
+
+  // add torus
+  Torus* pTorus = new Torus();
+  pTorus->setCentre(parsePosition(pElemCentre));              
+  pTorus->setNorm(normVec);  
+  pTorus->setDistanceFromCentreToTube(atof( (pElemRadiusFromCentre->getAttribute("val")).c_str() ));
+  pTorus->setTubeRadius(atof( (pElemRadiusTube->getAttribute("val")).c_str() ));
+  prim[l_id] = pTorus;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(-" << l_id << ")";
   l_id++;
 
   return retAlgebraMatch.str();

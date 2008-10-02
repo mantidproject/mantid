@@ -89,6 +89,14 @@ class DLLExport Torus : public Surface
   void setCentre(const Geometry::V3D&);              
   void setNorm(const Geometry::V3D&);
 
+  /// Suppose to set the distance from centre of the torus to the centre of tube. 
+  ///TODO:
+  void setDistanceFromCentreToTube(double dist);
+
+  /// Suppose to set the radius of the tube which makes up the torus
+  ///TODO:
+  void setTubeRadius(double dist);
+
   void write(std::ostream&) const;
   void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 };

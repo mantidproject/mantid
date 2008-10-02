@@ -299,6 +299,18 @@ void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,d
 	///TODO:
 }
 
+/// Suppose to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)
+void Torus::setDistanceFromCentreToTube(double dist)
+{
+	Iradius = dist;
+}
+
+/// Suppose to set the radius of the tube which makes up the torus
+void Torus::setTubeRadius(double dist)
+{
+	Dradius = dist;
+}
+
 }  // NAMESPACE MonteCarlo
 
 }  // NAMESPACE Mantid
