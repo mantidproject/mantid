@@ -210,7 +210,7 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
   }
 
   // If output workspaces are nameless, give them a temporary name to satisfy validator
-  const std::vector< Property*> &props = getProperties();
+  const std::vector< Property*> &props = alg->getProperties();
   for (unsigned int i = 0; i < props.size(); ++i)
   {
     if (props[i]->direction() == 1 && dynamic_cast<IWorkspaceProperty*>(props[i]) )

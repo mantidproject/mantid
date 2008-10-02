@@ -1,16 +1,16 @@
 #ifndef TRIPLEITERATORTEST_
 #define TRIPLEITERATORTEST_
 
-#include <algorithm> 
+#include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataObjects/Workspace1D.h" 
-#include "MantidDataObjects/Workspace2D.h" 
-#include "MantidDataObjects/WorkspaceSingleValue.h" 
-#include "MantidAPI/LocatedDataRef.h" 
-#include "MantidAPI/WorkspaceIterator.h" 
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/LocatedDataRef.h"
+#include "MantidAPI/WorkspaceIterator.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -31,7 +31,7 @@ public:
 
 class tripleIteratorTest : public CxxTest::TestSuite
 {
-private: 
+private:
 
   typedef boost::shared_ptr<std::vector<double> > parray;
   typedef boost::shared_ptr<Workspace1D> W1D;
@@ -73,7 +73,7 @@ public:
   {
     std::vector<double> x1,y1,e1;
     x1.resize(size);
-    std::generate(x1.begin(),x1.end(),rand);	
+    std::generate(x1.begin(),x1.end(),rand);
     y1.resize(size);
     std::generate(y1.begin(),y1.end(),FibSeries<double>());
     e1.resize(size);
@@ -113,7 +113,7 @@ public:
     std::vector<double> e1 = workspace->dataE();
 
     Workspace1D::const_iterator ti(*workspace);
-    for (int i = 0; i < size; i++) 
+    for (int i = 0; i < size; i++)
     {
       //move the iterator on one
       LocatedDataRef tr = *ti;
@@ -191,7 +191,7 @@ public:
     const std::vector<double>& e2 = workB->dataE();
 
 
-    for (int i = 0; i < size; i++) 
+    for (int i = 0; i < size; i++)
     {
       TS_ASSERT_EQUALS(x1[i],x2[i]);
       TS_ASSERT_EQUALS(y1[i],y2[i]);
@@ -215,7 +215,7 @@ public:
     const std::vector<double>& e1 = workA->dataE();
 
 
-    for (int i = 0; i < size; i++) 
+    for (int i = 0; i < size; i++)
     {
       std::cerr<<x1[i]<<std::endl;
     }
@@ -233,7 +233,7 @@ public:
     loopCountArray[3] = 5;
     loopCountArray[4] = 11;
     loopCountArray[5] = 0;
-    
+
     Wbase workspace = Create1DWorkspace(size);
 
     for (int i = 0; i < loopCountArrayLength; i++)
@@ -267,7 +267,7 @@ public:
     loopCountArray[1] = 2;
     loopCountArray[2] = 3;
     loopCountArray[3] = 0;
-    
+
     for (int i = 0; i < loopCountArrayLength; i++)
     {
       int loopCount = loopCountArray[i];
@@ -301,7 +301,7 @@ public:
     loopCountArray[3] = 5;
     loopCountArray[4] = 11;
     loopCountArray[5] = 0;
-    
+
     Wbase workspace = Create1DWorkspace(size);
 
     for (int i = 0; i < loopCountArrayLength; i++)
@@ -323,7 +323,7 @@ public:
     }
   }
 
-   
+
   void testVerticalLoopIteratorWorkspace2D()
   {
     int size = 50;
@@ -336,7 +336,7 @@ public:
     loopCountArray[1] = 2;
     loopCountArray[2] = 3;
     loopCountArray[3] = 0;
-    
+
     for (int i = 0; i < loopCountArrayLength; i++)
     {
       int loopCount = loopCountArray[i];
@@ -360,7 +360,7 @@ public:
 
   void testIteratorWorkspaceSingleValueLength()
   {
-    Wbase workspace = WSV(new WorkspaceSingleValue(1.1,2.2,3.3));
+    Wbase workspace = WSV(new WorkspaceSingleValue(1.1,2.2));
 
     int count = 0;
     for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
@@ -381,7 +381,7 @@ public:
   {
     int size = 1;
     int histogramCount = 1;
-    Wbase workspace = WSV(new WorkspaceSingleValue(1.4,2.4,3.4));
+    Wbase workspace = WSV(new WorkspaceSingleValue(1.4,2.4));
 
     const int loopCountArrayLength = 4;
     int loopCountArray[loopCountArrayLength];
@@ -389,7 +389,7 @@ public:
     loopCountArray[1] = 50;
     loopCountArray[2] = 200;
     loopCountArray[3] = 0;
-    
+
     for (int i = 0; i < loopCountArrayLength; i++)
     {
       int loopCount = loopCountArray[i];
@@ -413,7 +413,7 @@ public:
   }
 
 
-  
+
 
 
 };

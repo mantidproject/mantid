@@ -58,7 +58,7 @@ public:
   */
   virtual const std::string id() const {return "WorkspaceSingleValue";}
 
-  WorkspaceSingleValue(double value=0.0,double error1=0.0,double error2=0.0);
+  WorkspaceSingleValue(double value=0.0,double error=0.0);
 
   virtual ~WorkspaceSingleValue();
 

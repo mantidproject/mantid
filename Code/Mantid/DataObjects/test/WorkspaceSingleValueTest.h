@@ -1,13 +1,13 @@
 #ifndef TESTWORKSPACESINGLEVALUE_
 #define TESTWORKSPACESINGLEVALUE_
 
-#include <vector> 
-#include <algorithm> 
+#include <vector>
+#include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/GaussianErrorHelper.h" 
-#include "MantidDataObjects/WorkspaceSingleValue.h" 
+#include "MantidAPI/GaussianErrorHelper.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 
 using Mantid::DataObjects::WorkspaceSingleValue;
 
@@ -24,7 +24,7 @@ public:
   }
   void testConstructor()
   {
-    WorkspaceSingleValue ws(1,2,3);
+    WorkspaceSingleValue ws(1,2);
     TS_ASSERT_DELTA(0.0,ws.dataX()[0],1e-6);
     TS_ASSERT_DELTA(1,ws.dataY()[0],1e-6);
     TS_ASSERT_DELTA(2,ws.dataE()[0],1e-6);
@@ -43,16 +43,16 @@ public:
     std::vector<double> v1(1,1.1);
     ws.dataY() = v1;
     TS_ASSERT_EQUALS(v1,ws.dataY());
-  }  
-  
+  }
+
   void testsetgetEvector()
   {
     WorkspaceSingleValue ws;
     std::vector<double> v1(1,1.1);
     ws.dataE() = v1;
     TS_ASSERT_EQUALS(v1,ws.dataE());
-  } 
-  
+  }
+
   void testErrorHelper()
   {
     WorkspaceSingleValue ws;

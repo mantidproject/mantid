@@ -38,7 +38,7 @@ namespace Mantid
     {
       // Get the name of the property and don't permit empty names
       std::string key = p->name();
-      if (key.empty()) 
+      if (key.empty())
       {
         //    delete p;
         throw std::invalid_argument("An empty property name is not permitted");
@@ -146,7 +146,7 @@ namespace Mantid
     */
     bool PropertyManager::existsProperty( const std::string& name ) const
     {
-      try 
+      try
       {
         getPointerToProperty(name);
         return true;
@@ -171,7 +171,7 @@ namespace Mantid
           allValid=false;
         }
       }
-      return allValid; 
+      return allValid;
     }
 
     /** Get the value of a property as a string
@@ -242,7 +242,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -256,7 +257,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -270,7 +272,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -284,7 +287,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -298,7 +302,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -312,7 +317,8 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 
@@ -323,7 +329,7 @@ namespace Mantid
     }
 
     // This template implementation has been left in because although you can't assign to an existing string
-    // via the getProperty() method, you can construct a local variable by saying, 
+    // via the getProperty() method, you can construct a local variable by saying,
     // e.g.: std::string s = getProperty("myProperty")
     template <> DLLExport
       std::string PropertyManager::getValue<std::string>(const std::string &name) const
@@ -347,12 +353,12 @@ namespace Mantid
 
     /** Get the value of a property. Allows you to assign directly to a variable of the property's type
     *  (if a supported type).
-    *  
+    *
     *  *** This method does NOT work for assigning to an existing std::string.
     *      In this case you have to use getPropertyValue() instead.
     *      Note that you can, though, construct a local string variable by writing,
     *      e.g. std::string s = getProperty("myProperty"). ***
-    *  
+    *
     *  @param name The name of the property
     *  @return The value of the property. Will be cast to the desired type (if a supported type).
     *  @throw std::runtime_error If an attempt is made to assign a property to a different type

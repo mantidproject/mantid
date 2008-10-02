@@ -173,13 +173,13 @@ public:
    */
   const bool isValid( const TYPE& value ) const
   {
-    if ( value->readX(0).size() == value->readY(0).size() )
+    if ( value->isHistogramData() )
     {
-      return ( m_mustBeHistogram ? false : true );
+      return ( m_mustBeHistogram ? true : false );
     }
     else
     {
-      return ( m_mustBeHistogram ? true : false );
+      return ( m_mustBeHistogram ? false : true );
     }
   }
 

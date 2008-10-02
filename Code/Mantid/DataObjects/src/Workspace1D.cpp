@@ -92,7 +92,8 @@ namespace Kernel
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
       }
     }
 

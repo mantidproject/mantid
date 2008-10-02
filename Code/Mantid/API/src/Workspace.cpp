@@ -174,6 +174,12 @@ Axis* const Workspace::getAxis(const int axisIndex) const
   return m_axes[axisIndex];
 }
 
+/// Returns true if the workspace contains data in histogram form, false if it's point-like
+const bool Workspace::isHistogramData() const
+{
+  return ( readX(0).size()==readY(0).size() ? false : true );
+}
+
 /// Are the Y-values in this workspace dimensioned?
 const bool& Workspace::isDistribution() const
 {
@@ -218,7 +224,8 @@ Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_spt
   }
   else
   {
-    throw std::runtime_error("Attempt to assign property of incorrect type");
+    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    throw std::runtime_error(message);
   }
 }
 
@@ -233,7 +240,8 @@ Mantid::API::Workspace_const_sptr PropertyManager::getValue<Mantid::API::Workspa
   }
   else
   {
-    throw std::runtime_error("Attempt to assign property of incorrect type");
+    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    throw std::runtime_error(message);
   }
 }
 } // namespace Kernel

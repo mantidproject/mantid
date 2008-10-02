@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/IErrorHelper.h"
@@ -29,11 +30,6 @@ namespace Kernel
 
 namespace API
 {
-//----------------------------------------------------------------------
-// Forward Declarations
-//----------------------------------------------------------------------
-class SpectraDetectorMap;
-
 /** Base Workspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL
@@ -137,6 +133,9 @@ public:
   const WorkspaceHistory& getHistory() const { return m_history; }
 
   Axis* const getAxis(const int axisIndex) const;
+
+  /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
+  const bool isHistogramData() const;
 
   /// Are the Y-values dimensioned?
   const bool& isDistribution() const;
