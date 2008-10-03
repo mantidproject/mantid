@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include "boost/shared_ptr.hpp"
+#include <QApplication>
 #include <iostream>
 
 GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(parent)
@@ -125,7 +126,9 @@ void GL3DWidget::paintGL()
 		}
 		else
 		{
+			QApplication::setOverrideCursor(Qt::WaitCursor);
 			scene->draw();
+			QApplication::restoreOverrideCursor();
 		}
 		glPopMatrix();
 	}
