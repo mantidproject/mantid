@@ -82,9 +82,12 @@ public:
 
 	void testSetProperties()
 	{
-	  TS_ASSERT_THROWS_NOTHING( manager.setProperties("APROP1=15;APROP2=20") )
-	  TS_ASSERT( ! manager.getPropertyValue("APROP1").compare("15") )
-	  TS_ASSERT( ! manager.getPropertyValue("APROP2").compare("20") )
+          PropertyManagerHelper mgr;
+          mgr.declareProperty("APROP", 1);
+          mgr.declareProperty("anotherProp", 1.0);
+	  TS_ASSERT_THROWS_NOTHING( mgr.setProperties("APROP=15;anotherProp=1.3") )
+	  TS_ASSERT( ! mgr.getPropertyValue("APROP").compare("15") )
+	  TS_ASSERT( ! mgr.getPropertyValue("anotherProp").compare("1.3") )
 	}
 
 	void testSetPropertyValue()
