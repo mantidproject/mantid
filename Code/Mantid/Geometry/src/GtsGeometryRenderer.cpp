@@ -34,7 +34,6 @@ namespace Mantid
 		*/
 		GtsGeometryRenderer::GtsGeometryRenderer()
 		{
-			//iDisplaylistId= glGenLists(1);
 			boolDisplaylistCreated=false;
 		}
 
@@ -44,7 +43,6 @@ namespace Mantid
 		*/
 		GtsGeometryRenderer::~GtsGeometryRenderer()
 		{
-			//glDeleteLists(iDisplaylistId,1);
 		}
 
 		/**
@@ -53,15 +51,10 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Render(GtsSurface *ObjSurf)
 		{
-			//if(!boolDisplaylistCreated){
-				GtsFace * first = NULL;
-				glBegin(GL_TRIANGLES);
-				gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
-				glEnd();
-				//gts_surface_write_vtk_file(ObjSurf,"C:\\ObjSurf.vtk");
-			//}else{
-			//	glCallList(iDisplaylistId);
-			//}
+			GtsFace * first = NULL;
+			glBegin(GL_TRIANGLES);
+			gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
+			glEnd();
 		}
 
 		/**
@@ -70,59 +63,47 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Render(ObjComponent *ObjComp)
 		{
-//			if(!boolDisplaylistCreated){
-				glPushMatrix();
-				V3D pos  =ObjComp->getPos();
-				Quat rot =ObjComp->getRotation();
-				double rotGL[16];
-				rot.GLMatrix(rotGL);
-				glMultMatrixd(rotGL);
-				glTranslated(pos[0],pos[1],pos[2]);
-				ObjComp->drawObject();
-				glPopMatrix();
-//			}else{
-//				glCallList(iDisplaylistId);
-//			}
+			glPushMatrix();
+			V3D pos  =ObjComp->getPos();
+			Quat rot =ObjComp->getRotation();
+			double rotGL[16];
+			rot.GLMatrix(rotGL);
+			glTranslated(pos[0],pos[1],pos[2]);
+			glMultMatrixd(rotGL);
+			ObjComp->drawObject();
+			glPopMatrix();
 		}
 
 		/**
-		* Initialze the object surface for rendering, this will create the display list helps in faster rendering
+		* Initialze the object surface for rendering
 		* @param ObjSurf input to create display list
 		*/
 		void GtsGeometryRenderer::Initialize(GtsSurface *ObjSurf)
 		{
-//			if(!boolDisplaylistCreated){
-				GtsFace * first = NULL;
-//				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation    
-				glBegin(GL_TRIANGLES);
-				gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
-				glEnd();
-//				glEndList();
-				boolDisplaylistCreated=true;
-				//gts_surface_write_vtk_file(ObjSurf,"C:\\ObjSurf.vtk");
-//			}
+			GtsFace * first = NULL;
+			glBegin(GL_TRIANGLES);
+			gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
+			glEnd();
+			boolDisplaylistCreated=true;
 		}
 
 		/**
 		* Initializes creates a display for the input ObjComponent
-		* @param ObjComp input object component for creating display list
+		* @param ObjComp input object component for creating display
 		*/
 		void GtsGeometryRenderer::Initialize(ObjComponent *ObjComp)
 		{
-//			if(!boolDisplaylistCreated){
-//				glNewList(iDisplaylistId,GL_COMPILE);
-				glPushMatrix();
-				V3D pos  =ObjComp->getPos();
-				Quat rot =ObjComp->getRotation();
-				double rotGL[16];
-				rot.GLMatrix(rotGL);
-				glMultMatrixd(rotGL);
-				glTranslated(pos[0],pos[1],pos[2]);
-				ObjComp->drawObject();
-				glPopMatrix();
-//				glEndList();
-				boolDisplaylistCreated=true;
-//			}
+			glPushMatrix();
+			V3D pos  =ObjComp->getPos();
+			Quat rot =ObjComp->getRotation();
+			double rotGL[16];
+			rot.GLMatrix(rotGL);
+			glTranslated(pos[0],pos[1],pos[2]);
+			glMultMatrixd(rotGL);
+			ObjComp->drawObject();
+			glPopMatrix();
+			boolDisplaylistCreated=true;
+
 		}
 	}
 }
