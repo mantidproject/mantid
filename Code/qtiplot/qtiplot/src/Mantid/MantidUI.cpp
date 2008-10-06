@@ -56,7 +56,7 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
-  	actionCopyRowToTable = new QAction(tr("Copy to Table"), this);
+  	actionCopyRowToTable = new QAction(tr("Copy spectra to Table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
@@ -71,6 +71,10 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
     actionCopyDetectorsToTable = new QAction(tr("Copy Detectors to Table"), this);
 	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
+
+  	actionCopyValues = new QAction(tr("Copy"), this);
+	actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
+	connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
     connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
     connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
@@ -389,11 +393,17 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
     if (w->isA("MantidMatrix")) 
     {
-        //cm.insertItem(QPixmap(copy_xpm),tr("&Copy"), t, SLOT(copySelection()));
-        cm.addAction(actionCopyRowToTable);
+        int i0,i1; 
+        static_cast<MantidMatrix*>(w)->getSelectedRows(i0,i1);
+        bool areSpectraSelected = (i0 < 0 || i1 < 0)?false:true;
+        cm.addAction(actionCopyValues);
+        if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
         cm.addAction(actionCopyDetectorsToTable);
-        cm.addAction(actionCopyRowToGraph);
-        cm.addAction(actionCopyRowToGraphErr);
+        if (areSpectraSelected)
+        {
+            cm.addAction(actionCopyRowToGraph);
+            cm.addAction(actionCopyRowToGraphErr);
+        }
     }
 }
 
@@ -425,6 +435,13 @@ void MantidUI::copyDetectorsToTable()
     MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
     if (!m || !m->isA("MantidMatrix")) return;
     createTableDetectors(m);
+}
+
+void MantidUI::copyValues()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    m->copySelection();
 }
 
 /*  Creates a Qtiplot Table from selected spectra of MantidMatrix m. 

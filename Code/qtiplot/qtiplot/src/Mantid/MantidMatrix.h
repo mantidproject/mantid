@@ -114,8 +114,8 @@ public:
 
     int workspaceIndex(int row){return row + m_startRow;}
     bool yShown(){return m_tabs->currentIndex() == 0;}
-    QTableView *activeView(){return m_table_viewY;}//  unfinished!!!
-    MantidMatrixModel *activeModel(){return m_modelY;}//  unfinished!!!
+    QTableView *activeView();
+    MantidMatrixModel *activeModel();
 
     bool isHistogram(){return m_histogram;}
 

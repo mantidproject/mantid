@@ -106,6 +106,7 @@ public slots:
     void executeAlgorithm();
     void executeAlgorithm(QString algName, int version);
     void copyDetectorsToTable();
+    void copyValues();
     void closeProgressDialog();
     void updateProgressDialog(int ip);
     void cancelAsyncAlgorithm();
@@ -156,6 +157,7 @@ public:
     QAction *actionToggleMantid;
     QAction *actionToggleAlgorithms;
     QAction *actionCopyDetectorsToTable;
+    QAction *actionCopyValues;
 
     AlgorithmMonitor *m_algMonitor;
 

@@ -187,6 +187,28 @@ void MantidMatrix::setColumnsWidth(int width)
 	emit modifiedWindow(this);
 }
 
+QTableView *MantidMatrix::activeView()
+{
+    switch (m_tabs->currentIndex())
+    {
+    case 0: return m_table_viewY;
+    case 1: return m_table_viewX;
+    case 2: return m_table_viewE;
+    }
+    return m_table_viewY;
+}
+
+MantidMatrixModel *MantidMatrix::activeModel()
+{
+    switch (m_tabs->currentIndex())
+    {
+    case 0: return m_modelY;
+    case 1: return m_modelX;
+    case 2: return m_modelE;
+    }
+    return m_modelY;
+}
+
 void MantidMatrix::copySelection()
 {
     QItemSelectionModel *selModel = activeView()->selectionModel();
