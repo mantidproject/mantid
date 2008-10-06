@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidNexus/SaveNeXus.h"
 #include "MantidNexus/LoadMuonNexus.h"
-#include "MantidNexus/LoadNexus.h"
+#include "MantidNexus/LoadNeXus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
