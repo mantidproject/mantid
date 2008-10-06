@@ -11,9 +11,9 @@ namespace Mantid
   namespace Algorithms
   {
     /**
-    Takes a workspace as input and identifies all of the spectra that have a 
+    Takes a workspace as input and identifies all of the spectra that have a
     value across all time bins less or equal to than the threshold 'dead' value.
-    This is then used to mark all 'dead' detectors with a 'dead' marker value, 
+    This is then used to mark all 'dead' detectors with a 'dead' marker value,
     while all spectra from live detectors are given a value of 'live' marker value.
 
     This is primarily used to ease identification using the instrument visualization tools.
@@ -26,13 +26,13 @@ namespace Mantid
 
     Optional Properties:
     <UL>
-    <LI> DeadThreshold - Workspace index number to integrate from (default 0)</LI>
-    <LI> LiveValue - Workspace index number to integrate to (default 0)</LI>
-    <LI> DeadValue - Bin number to integrate from (default 100)</LI>
+    <LI> DeadThreshold - The threshold against which to judge if a spectrum belongs to a dead detector (default 0.0)</LI>
+    <LI> LiveValue - The value to assign to an integrated spectrum flagged as 'live' (default 0.0)</LI>
+    <LI> DeadValue - The value to assign to an integrated spectrum flagged as 'dead' (default 100.0)</LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 05/10/2007
+    @author Nick Draper, Tessella Support Services plc
+    @date 02/10/2008
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 

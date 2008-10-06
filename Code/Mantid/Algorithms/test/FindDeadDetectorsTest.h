@@ -56,7 +56,7 @@ public:
         work_in->setData(i,yDead,yDead);
       }
     }
-    
+
     FindDeadDetectors alg;
 
     AnalysisDataService::Instance().add("testdead_in", work_in);
@@ -64,8 +64,8 @@ public:
     alg.setPropertyValue("InputWorkspace","testdead_in");
     alg.setPropertyValue("OutputWorkspace","testdead_out");
     alg.setPropertyValue("DeadThreshold","0");
-    alg.setPropertyValue("LiveValue","0");
-    alg.setPropertyValue("DeadValue","1");
+    alg.setPropertyValue("LiveValue","1");
+    alg.setPropertyValue("DeadValue","2");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     Workspace_sptr work_out;
@@ -74,10 +74,10 @@ public:
     for (int i=0; i< sizey; i++)
     {
       const double val = work_out->readY(i)[0];
-      double valExpected = 0;
+      double valExpected = 1;
       if (i%2==0)
       {
-          valExpected = 1;
+          valExpected = 2;
       }
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }

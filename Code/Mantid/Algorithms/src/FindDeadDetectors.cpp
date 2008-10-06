@@ -35,13 +35,13 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
-      declareProperty("DeadThreshold",0, mustBePositive);
+      declareProperty("DeadThreshold",0.0, mustBePositive);
       // As the property takes ownership of the validator pointer, have to take care to pass in a unique
       // pointer to each property.
-      declareProperty("LiveValue",0, mustBePositive->clone());
-      declareProperty("DeadValue",100, mustBePositive->clone());
+      declareProperty("LiveValue",0.0, mustBePositive->clone());
+      declareProperty("DeadValue",100.0, mustBePositive->clone());
     }
 
     /** Executes the algorithm
@@ -51,11 +51,11 @@ namespace Mantid
     void FindDeadDetectors::exec()
     {
       // Try and retrieve the optional properties
-      int deadThreshold = getProperty("DeadThreshold");
-      int liveValue = getProperty("LiveValue");
-      int deadValue = getProperty("DeadValue");
+      double deadThreshold = getProperty("DeadThreshold");
+      double liveValue = getProperty("LiveValue");
+      double deadValue = getProperty("DeadValue");
 
-      // Get the integrated input workspace 
+      // Get the integrated input workspace
       Workspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
       // iterate over the data values setting the live and dead values
@@ -63,7 +63,7 @@ namespace Mantid
       for(Workspace::iterator wi(*integratedWorkspace); wi != wi.end(); ++wi)
       {
           LocatedDataRef tr = *wi;
-          tr.Y() = (tr.Y() > liveValue)?liveValue:deadValue;
+          tr.Y() = (tr.Y() > deadThreshold)?liveValue:deadValue;
       }
 
       // Assign it to the output workspace property
