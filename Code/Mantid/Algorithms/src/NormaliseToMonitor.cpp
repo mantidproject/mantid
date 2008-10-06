@@ -81,6 +81,7 @@ void NormaliseToMonitor::exec()
 
 /** Makes sure that the input properties are set correctly
  *  @return True if the optional properties have been set
+ *  @throw std::runtime_error If a property is invalid
  */
 const bool NormaliseToMonitor::checkProperties()
 {
@@ -130,6 +131,7 @@ const bool NormaliseToMonitor::checkProperties()
   return false;
 }
 
+/// Finds the workspace index of the monitor from the spectrum number
 void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspace)
 {
   const int monitorIndex = getProperty("MonitorSpectrum");
@@ -148,6 +150,7 @@ void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspa
   throw std::runtime_error("Monitor spectrum not found in input workspace");
 }
 
+/// Carries out a normalisation based on the integrated count of the monitor over a range
 API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace)
 {
   bool fixInput = false;

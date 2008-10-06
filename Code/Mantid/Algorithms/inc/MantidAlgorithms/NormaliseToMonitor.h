@@ -77,8 +77,11 @@ private:
   API::Workspace_sptr normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace);
   void doUndoDistribution(API::Workspace_sptr workspace, const bool forwards = true);
 
+  /// The index of the monitor to which to normalise
   int m_monitorIndex;
+  /// The lower bound of the integration range
   double m_integrationMin;
+  /// The upper bound of the integration range
   double m_integrationMax;
 
   /// Static reference to the logger class

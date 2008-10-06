@@ -28,7 +28,7 @@ public:
   LoadDAETest()
   {
     // Hostname of computer with DAE to connect to
-    m_inputDAE = "NDW161.isis.cclrc.ac.uk";
+    m_inputDAE = "NDW714.isis.cclrc.ac.uk";
   }
 
   void testInit()
