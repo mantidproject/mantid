@@ -49,6 +49,7 @@ class DLLExport SignalChannel: public Channel
 {
 public:
 
+    /// Signal type
     typedef boost::signal<void (const Message& msg)> signal_t;
 
     /// Creates the SignalChannel.
@@ -60,11 +61,12 @@ public:
     /// Sends the given Message. 
 	  void log(const Message& msg);
 
+    /// Reference to the signal
     signal_t& sig(){return _sig;}
 
 private:
 	//mutable FastMutex _mutex;
-    signal_t _sig;
+    signal_t _sig;///< boost::signal used to send the message
 };
 
 

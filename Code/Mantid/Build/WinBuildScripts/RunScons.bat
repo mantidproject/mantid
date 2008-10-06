@@ -6,6 +6,7 @@ svn up
 svn log -v -rBASE > ..\..\..\..\logs\Mantid\svn.log
 svn up ../Third_Party
 svn up ../../Test
+svn up ../../Images
 cd Build
 doxygen Mantid.doxyfile 2> ..\..\..\..\..\logs\Mantid\doxy.log
 cd ..

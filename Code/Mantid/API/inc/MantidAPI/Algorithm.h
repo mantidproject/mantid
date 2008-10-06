@@ -94,27 +94,27 @@ public:
     class AlgorithmNotification: public Poco::Notification
     {
     public:
-        AlgorithmNotification(Algorithm* alg):Poco::Notification(),m_algorithm(alg){}
-        const Algorithm *algorithm()const{return m_algorithm;}
+        AlgorithmNotification(Algorithm* alg):Poco::Notification(),m_algorithm(alg){}///< Constructor
+        const Algorithm *algorithm()const{return m_algorithm;}                       ///< The algorithm
     private:
-        Algorithm *m_algorithm;
+        Algorithm *m_algorithm;///< The algorithm
     };
 
     /// StartedNotification is sent when the algorithm begins execution.
     class StartedNotification: public AlgorithmNotification
     {
     public:
-        StartedNotification(Algorithm* alg):AlgorithmNotification(alg){}
-        virtual std::string name() const{return "StartedNotification";}
+        StartedNotification(Algorithm* alg):AlgorithmNotification(alg){}///< Constructor
+        virtual std::string name() const{return "StartedNotification";}///< class name
     };
 
     /// FinishedNotification is sent after the algorithm finishes its execution
     class FinishedNotification: public AlgorithmNotification
     {
     public:
-        FinishedNotification(Algorithm* alg, bool res):AlgorithmNotification(alg),success(res){}
-        virtual std::string name() const{return "FinishedNotification";}
-        bool success;
+        FinishedNotification(Algorithm* alg, bool res):AlgorithmNotification(alg),success(res){}///< Constructor
+        virtual std::string name() const{return "FinishedNotification";}///< class name
+        bool success;///< true if the finished algorithm was successful or false if it failed.
     };
 
     /// An algorithm can report its progress by sending ProgressNotification. Use 
@@ -122,18 +122,19 @@ public:
     class ProgressNotification: public AlgorithmNotification
     {
     public:
-        ProgressNotification(Algorithm* alg, double p):AlgorithmNotification(alg),progress(p){}
-        virtual std::string name() const{return "ProgressNotification";}
-        double progress;
+        ProgressNotification(Algorithm* alg, double p):AlgorithmNotification(alg),progress(p){}///< Constructor
+        virtual std::string name() const{return "ProgressNotification";}///< class name
+        double progress;///< Current progress. Value must be between 0 and 1.
     };
 
     /// ErrorNotification is sent when an exception is caught during execution of the algorithm.
     class ErrorNotification: public AlgorithmNotification
     {
     public:
+        /// Constructor
         ErrorNotification(Algorithm* alg, const std::string& str):AlgorithmNotification(alg),what(str){}
-        virtual std::string name() const{return "ErrorNotification";}
-        std::string what;
+        virtual std::string name() const{return "ErrorNotification";}///< class name
+        std::string what;///< message string
     };
 
     /// CancelException is thrown to cancel execution of the algorithm. Use Algorithm::cancel() to
@@ -144,16 +145,17 @@ public:
     {
      public:
          CancelException():outMessage("Algorithm terminated"){}
-         CancelException(const CancelException& A):outMessage(A.outMessage){}
+         CancelException(const CancelException& A):outMessage(A.outMessage){}///< Copy constructor
          /// Assignment operator
          CancelException& operator=(const CancelException& A);
          /// Destructor
          ~CancelException() throw() {}
 
-      const char* what() const throw()
-      {
-          return outMessage.c_str();
-      }
+         /// Returns the message string.
+         const char* what() const throw()
+         {
+             return outMessage.c_str();
+         }
     private:
         /// The message returned by what()
         std::string outMessage;
@@ -191,6 +193,8 @@ public:
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
   Poco::NotificationCenter notificationCenter;
+  /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
+  /// and if true terminates the algorithm.
   void cancel();
 protected:
 
@@ -217,6 +221,7 @@ protected:
 
 private:
 
+  /// Poco::ActiveMethod is used to implement asynchronous execution.
   Poco::ActiveMethod<bool, int, Algorithm> _executeAsync;
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -237,7 +242,7 @@ private:
 
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
-  bool executeAsyncImpl(const int&);
+  bool executeAsyncImpl(const int&);///< executeAsync implementation.
   bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
   /// Pointers to child algorithms used in this algorithm.

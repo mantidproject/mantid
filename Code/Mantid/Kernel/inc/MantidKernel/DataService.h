@@ -61,13 +61,15 @@ public:
     class DataServiceNotification: public Poco::Notification
     {
     public:
+        /// Constructor
         DataServiceNotification(const std::string& name, const boost::shared_ptr<T> obj):Poco::Notification(),m_name(name),m_object(obj){}
         /// Returns the const pointer to the object concerned or 0 if it is a general notification
         const boost::shared_ptr<T> object()const{return m_object;}
+        /// Returns the name of the object
         std::string object_name()const{return m_name;}
     private:
-        std::string m_name;
-        boost::shared_ptr<T> m_object;
+        std::string m_name;///< object's name
+        boost::shared_ptr<T> m_object;///< shared pointer to the object
     };
 
     /// AddNotification is sent after an new object is added to the data service.
@@ -75,7 +77,7 @@ public:
     class AddNotification: public DataServiceNotification
     {
     public:
-        AddNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+        AddNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}///< Constructor
     };
 
 
@@ -94,7 +96,7 @@ public:
         ReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> new_obj):DataServiceNotification(name,obj),m_new_object(new_obj){}
         const boost::shared_ptr<T> new_object()const{return m_new_object;}///< Returns the pointer to the new object.
     private:
-        boost::shared_ptr<T> m_new_object;
+        boost::shared_ptr<T> m_new_object;///< shared pointer to the object
     };
 
     /// DeleteNotification is sent after an object is deleted from the data service.
@@ -103,6 +105,7 @@ public:
     class DeleteNotification: public DataServiceNotification
     {
     public:
+        /// Constructor
         DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
     };
 

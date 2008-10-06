@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include <string>
+#include <iostream>
 
 class QLabel;
 class QStackedWidget;

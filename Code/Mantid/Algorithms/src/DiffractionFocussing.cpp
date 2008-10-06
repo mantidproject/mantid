@@ -279,6 +279,10 @@ namespace Mantid
 
     }
 
+
+    /** Calculates rebin parameters: the min and max bin boundaries and the logarithmic step. The aim is to have approx.
+        the same number of bins as in the input workspace.
+      */
     void DiffractionFocussing::calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step)
     {
 
@@ -305,6 +309,7 @@ namespace Mantid
       step = ( log(max) - log(min) )/n;
     }
 
+    /// Reads in the file with the grouping information
     bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups)
     {
         std::ifstream grFile(groupingFileName.c_str());

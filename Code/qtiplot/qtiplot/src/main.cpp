@@ -150,7 +150,7 @@ int main( int argc, char ** argv )
         WaitThread t;
         t.start();
         QPixmap pixmap;
-        pixmap.load("MantidSplashScreen.png");
+        if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
         QSplashScreen splash(pixmap);
         splash.show();
         app.processEvents();

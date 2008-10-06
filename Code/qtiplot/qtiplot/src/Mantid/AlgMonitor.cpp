@@ -1,6 +1,7 @@
 #include "AlgMonitor.h"
 #include "MantidUI.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/PropertyManager.h"
 
 #include <QtGui>
 
@@ -124,7 +125,8 @@ void MonitorDlg::update(int n)
     m_algMonitor->lock();
     for(int i=0;i<m_algMonitor->count();i++)
     {
-        m_algorithms << m_algMonitor->algorithms()[i];
+        const Algorithm* alg = m_algMonitor->algorithms()[i];
+        m_algorithms << alg;
         QStringList iList;
         iList<<QString::fromStdString(m_algMonitor->algorithms()[i]->name());
         QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
@@ -133,7 +135,15 @@ void MonitorDlg::update(int n)
         AlgButton *cancelButton = new AlgButton("Cancel",m_algMonitor->algorithms()[i]);
         m_tree->setItemWidget(algItem,2,algProgress);
         m_tree->setItemWidget(algItem,1,cancelButton);
-        algItem->addChild(new QTreeWidgetItem(QStringList("Properties:")));
+        const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
+        for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
+        {
+            QStringList lstr;
+            lstr  << QString::fromStdString((**prop).name()) + ": " << QString::fromStdString((**prop).value());
+            if ((**prop).isDefault()) lstr << " Default";
+            algItem->addChild(new QTreeWidgetItem(lstr));
+        }
+
         connect(cancelButton,SIGNAL(clicked(Algorithm *)),m_algMonitor,SLOT(cancel(Algorithm *)));
     }
     m_algMonitor->unlock();

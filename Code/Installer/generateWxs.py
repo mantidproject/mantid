@@ -289,10 +289,6 @@ desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':
 addAllFiles('toget/pyc','pyc',QTIPlot)
 if (QTDIR == 'C:/Qt/4_4_0/bin'):
     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
-addFileV('MantidSplashScreen','MSplash.png','MantidSplashScreen.png','../../Images/MantidSplashScreen.png',QTIPlot)
-addFileV('MantidLogo','MLogo.png','Mantid Logo.png','../../Images/Mantid Logo.png',QTIPlot)
-addFileV('ISISLogo','ILogo.gif','ISIS Logo.gif','../../Images/ISIS Logo.gif',QTIPlot)
-addFileV('TessellaLogo','TLogo.gif','Tessella_logo_intranet.gif','../../Images/Tessella_logo_intranet.gif',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 

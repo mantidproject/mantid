@@ -60,7 +60,7 @@ m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
 
     m_tabs = new QTabWidget(this);
     m_tabs->insertTab(0,m_table_viewY,"Y values");
-    m_tabs->insertTab(1,m_table_viewX,"X values");
+    m_tabs->insertTab(1,m_table_viewX,"X values"); 
     m_tabs->insertTab(2,m_table_viewE,"Errors");
     setWidget(m_tabs);
 
@@ -112,7 +112,9 @@ void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end, boo
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
     x_start = ws->dataX(0)[0];
-    x_end = ws->dataX(0)[ws->blocksize()];
+    if (ws->dataX(0).size() != ws->dataY(0).size()) x_end = ws->dataX(0)[ws->blocksize()];
+    else
+        x_end = ws->dataX(0)[ws->blocksize()-1];
     // What if y is not a spectrum number?
     y_start = double(m_startRow);
     y_end = double(m_endRow);

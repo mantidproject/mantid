@@ -20,11 +20,12 @@ namespace Kernel
 namespace API
 {
 
+/// Structure uniquely describing an algorithm with its name, category and version.
 struct Algorithm_descriptor
 {
-  std::string name;
-  std::string category;
-  int version;
+  std::string name;///< name
+  std::string category;///< category
+  int version;///< version
 };
 
 //----------------------------------------------------------------------
@@ -89,7 +90,8 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 			  Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
 		  }
 	  }
-    
+
+    /// Returns algorithm descriptors.
     const std::vector<Algorithm_descriptor> getDescriptors() const;
 	  
     void addPyAlgorithm(Algorithm* pyAlg);

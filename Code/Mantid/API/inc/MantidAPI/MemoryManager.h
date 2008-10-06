@@ -16,11 +16,12 @@ namespace Mantid
 	namespace API
 	{
 
+        /// Information about the memory 
         struct MemoryInfo
         {
-            int totalMemory;// total physical memory in KB
-            int availMemory;// available physical memory in KB
-            int freeRatio;// percentage of the available memory ( 0 - 100 )
+            int totalMemory;  ///< total physical memory in KB
+            int availMemory;  ///< available physical memory in KB
+            int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
         };
 
 		/** @class MemoryManagerImpl MemoryManager.h API/MemoryManager.h

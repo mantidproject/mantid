@@ -28,7 +28,7 @@ MantidAbout::MantidAbout(QWidget *parent):QDialog(parent)
     buttonLayout->addStretch();
 
     QLabel *mantidLogoLabel = new QLabel();
-    QPixmap *mantidLogoPixmap = new QPixmap("Mantid Logo.png");
+    QPixmap *mantidLogoPixmap = new QPixmap(":/Mantid Logo.png");
     mantidLogoLabel->setPixmap(*mantidLogoPixmap);
     QHBoxLayout *mantidLayout = new QHBoxLayout;
     mantidLayout->addStretch();
@@ -48,8 +48,8 @@ MantidAbout::MantidAbout(QWidget *parent):QDialog(parent)
 
     QLabel *isisLogoLabel = new QLabel;
     QLabel *tessellaLogoLabel = new QLabel;
-    QPixmap *isisLogoPixmap = new QPixmap("ISIS Logo.gif");
-    QPixmap *tessellaLogoPixmap = new QPixmap("Tessella_logo_intranet.gif");
+    QPixmap *isisLogoPixmap = new QPixmap(":/ISIS Logo.gif");
+    QPixmap *tessellaLogoPixmap = new QPixmap(":/Tessella_logo_intranet.gif");
     isisLogoLabel->setPixmap(*isisLogoPixmap);
     tessellaLogoLabel->setPixmap(*tessellaLogoPixmap);
     QHBoxLayout *logosLayout = new QHBoxLayout;
