@@ -20,7 +20,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool CommutativeBinaryOperation::checkSizeCompatability(const API::Workspace_const_sptr rhs,const API::Workspace_const_sptr lhs) const
+    const bool CommutativeBinaryOperation::checkSizeCompatibility(const API::Workspace_const_sptr rhs,const API::Workspace_const_sptr lhs) const
     {
       //get the largest workspace
       API::Workspace_const_sptr wsLarger;
@@ -36,7 +36,7 @@ namespace Mantid
         wsSmaller = rhs;
       }
       //call the base routine
-      return BinaryOperation::checkSizeCompatability(wsLarger,wsSmaller);
+      return BinaryOperation::checkSizeCompatibility(wsLarger,wsSmaller);
     }
 
     /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces

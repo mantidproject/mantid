@@ -26,7 +26,7 @@ namespace Mantid
     @author Nick Draper
     @date 23/01/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -57,7 +57,7 @@ namespace Mantid
     protected:
       // Overridden BinaryOperation methods
       /// Checks the overall size compatability of two workspaces
-      virtual const bool checkSizeCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
+      virtual const bool checkSizeCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
 
       /// Creates a suitable output workspace for two input workspaces
       virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;

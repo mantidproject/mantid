@@ -38,10 +38,12 @@ namespace Mantid
       Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
       Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
-      if (!checkSizeCompatability(in_work1,in_work2))
+      // Check that the input workspace are compatible
+      if (!checkCompatibility(in_work1,in_work2))
       {
           std::ostringstream ostr;
-          ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
+          ostr << "The two workspaces are not compatible for algorithm " << this->name();
+          g_log.error() << ostr << std::endl;
           throw std::invalid_argument( ostr.str() );
       }
 
@@ -60,6 +62,39 @@ namespace Mantid
       return;
     }
 
+
+    const bool BinaryOperation::checkCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    {
+      boost::shared_ptr<Unit> lhs_unit, rhs_unit;
+      try {
+        lhs_unit = lhs->getAxis(0)->unit();
+        rhs_unit = rhs->getAxis(0)->unit();
+      }
+      catch(Exception::IndexError)
+      {
+        // Not a problem, this must be a WorkspaceSingleValue
+        lhs_unit = boost::shared_ptr<Unit>();
+        rhs_unit = boost::shared_ptr<Unit>();
+      }
+
+      // Check the workspaces have the same units and distribution flag
+      if ( lhs_unit != rhs_unit || lhs->isDistribution() != rhs->isDistribution() )
+      {
+        return false;
+      }
+
+      // Check the size compatibility
+      if (!checkSizeCompatibility(lhs,rhs))
+      {
+          std::ostringstream ostr;
+          ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
+          g_log.error() << ostr << std::endl;
+          throw std::invalid_argument( ostr.str() );
+      }
+
+      return true;
+    }
+
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
     * In order to be size compatible then the larger workspace
     * must divide be the size of the smaller workspace leaving no remainder
@@ -68,7 +103,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkSizeCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    const bool BinaryOperation::checkSizeCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
       //in order to be size compatible then the larger workspace
       //must divide by the size of the smaller workspace leaving no remainder
@@ -83,7 +118,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkXarrayCompatability(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    const bool BinaryOperation::checkXarrayCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
       // Not using the WorkspaceHelpers::matching bins method because that requires the workspaces to be
       // the same size, which isn't a requirement of BinaryOperation
@@ -149,7 +184,7 @@ namespace Mantid
       }
       else
       {
-        if (!checkXarrayCompatability(wsMain,wsComparison))
+        if (!checkXarrayCompatibility(wsMain,wsComparison))
         {
           g_log.error("The x arrays of the workspaces are not identical");
           throw std::invalid_argument("The x arrays of the workspaces are not identical");
@@ -181,7 +216,7 @@ namespace Mantid
       if (wsMain->blocksize() == wsComparison->blocksize())
       {
         //it does, now check if the X arrays are compatible
-        if (!checkXarrayCompatability(wsMain,wsComparison))
+        if (!checkXarrayCompatibility(wsMain,wsComparison))
         {
           if(retVal == LoopOrientation::Horizontal)
           {
