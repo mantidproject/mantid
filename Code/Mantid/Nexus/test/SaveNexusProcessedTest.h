@@ -1,5 +1,5 @@
-#ifndef SAVENEXUSTEST_H_
-#define SAVENEXUSTEST_H_
+#ifndef SAVENEXUSPROCESSEDTEST_H_
+#define SAVENEXUSPROCESSEDTEST_H_
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidNexus/SaveNeXus.h"
+#include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNexus.h"
 
@@ -23,11 +23,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
-class SaveNeXusTest : public CxxTest::TestSuite
+class SaveNexusProcessedTest : public CxxTest::TestSuite
 {
 public: 
   
-  SaveNeXusTest()
+  SaveNexusProcessedTest()
   {
     // create dummy 1D-workspace
     
@@ -42,7 +42,7 @@ public:
     localWorkspace1D->setX(lVecX);
     localWorkspace1D->setData(lVecY, lVecE);
 
-    AnalysisDataService::Instance().add("SAVENEXUSTEST-testSpace", localWorkspace);
+    AnalysisDataService::Instance().add("testSpace", localWorkspace);
 }
   
   
@@ -58,24 +58,24 @@ public:
     
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
-    algToBeTested.setPropertyValue("InputWorkspace", "SAVENEXUSTEST-testSpace");     
-    
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
         
     
     // Now set it...
     // specify name of file to save 1D-workspace to
-    outputFile = "testOfSaveNeXus.nxs";
+    algToBeTested.setPropertyValue("InputWorkspace", "testSpace");     
+    outputFile = "testOfSaveNexusProcessed.nxs";
     entryName = "test";
-	dataName = "spectra";
-    algToBeTested.setPropertyValue("FileName", outputFile);
+    dataName = "spectra";
+    title = "A simple 1D workspace saved in Processed Nexus format";
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", outputFile));
     algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("DataName", dataName);
+    algToBeTested.setPropertyValue("Title", title);
     remove(outputFile.c_str());
     
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
     TS_ASSERT( ! result.compare(outputFile)); 
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
     TS_ASSERT( ! result.compare(entryName)); 
@@ -107,18 +107,20 @@ void testExecOnMuon()
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    output2D->dataX(22)[3]=0.55;
 	//
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save 1D-workspace to
-    outputFile = "testOfSaveNeXusMuon.nxs";
+    outputFile = "testOfSaveNexusProcessed2.nxs";
+    remove(outputFile.c_str());
     entryName = "entry4";
-	dataName = "spectra";
+    dataName = "spectra";
+    title = "A save of a 2D workspace from Muon file";
     algToBeTested.setPropertyValue("FileName", outputFile);
     algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("DataName", dataName);
-    remove(outputFile.c_str());
+    algToBeTested.setPropertyValue("Title", title);
     
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
@@ -129,23 +131,18 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
     TS_ASSERT( algToBeTested.isExecuted() );  
 
-    //remove(outputFile.c_str());
-	// test writing two entries into one nexus file with different names.
-	entryName="entry5";
-    algToBeTested.setPropertyValue("EntryName", entryName);
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
-    TS_ASSERT( algToBeTested.isExecuted() );
     remove(outputFile.c_str());
    
   }
 
   
 private:
-  SaveNeXus algToBeTested;
+  SaveNexusProcessed algToBeTested;
   std::string outputFile;
   std::string entryName;
   std::string dataName;
+  std::string title;
   
 };
   
-#endif /*SAVENEXUSTEST_H_*/
+#endif /*SAVENEXUSPROCESSEDTEST_H_*/

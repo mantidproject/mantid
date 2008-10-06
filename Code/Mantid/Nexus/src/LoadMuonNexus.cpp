@@ -78,8 +78,8 @@ namespace Mantid
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
       boost::shared_ptr<Instrument> instrument;
 //-      boost::shared_ptr<SpectraDetectorMap> specMap;
-//-      boost::shared_ptr<Sample> sample;
-//-      
+      boost::shared_ptr<Sample> sample;
+      
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
            
@@ -153,7 +153,7 @@ namespace Mantid
           // Cache these for copying to workspaces for later periods
           instrument = localWorkspace->getInstrument();
 //-          specMap = localWorkspace->getSpectraMap();
-//-          sample = localWorkspace->getSample();
+		  sample = localWorkspace->getSample();
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -169,7 +169,7 @@ namespace Mantid
           // Copy the shared instrument, sample & spectramap onto the workspace for this period
           localWorkspace->setInstrument(instrument);
 //-          localWorkspace->setSpectraMap(specMap);
-//-          localWorkspace->setSample(sample);
+		  localWorkspace->setSample(sample);
         }
         
         // Assign the result to the output workspace property

@@ -110,6 +110,8 @@ public:
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
+    //check that sample name has been set correctly
+    TS_ASSERT_EQUALS(sample->getName(), "Cr2.7Co0.3Si")
     
 	/*
     //----------------------------------------------------------------------
@@ -203,6 +205,14 @@ public:
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
+
+    //check that sample name has been set correctly
+    boost::shared_ptr<Sample> sample,sample2;
+    sample = output->getSample();
+    sample2 = output2->getSample();
+    TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
+    TS_ASSERT_EQUALS(sample, sample2)
+    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
 
   }
 

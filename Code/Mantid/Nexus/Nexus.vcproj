@@ -188,6 +188,10 @@
 				RelativePath=".\src\SaveNeXus.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\SaveNexusProcessed.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -224,6 +228,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidNexus\SaveNeXus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\SaveNexusProcessed.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SaveNexusProcessedTest.h"
 				>
 			</File>
 			<File

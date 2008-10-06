@@ -46,6 +46,7 @@ class MuonNexusReader
     */
 	private:
 		std::string nexus_instrument_name; ///< name read from nexus file
+		std::string nexus_samplename; ///< sample name read from Nexus
         int nexusLogCount;  ///< number of NXlog sections read from file
 		std::vector<bool> logType;  ///< true if i'th log is numeric
 		std::vector<std::string> logNames;  ///< stores name read from file
@@ -79,6 +80,7 @@ class MuonNexusReader
 		int readFromFile(const std::string& filename); ///< read histogram data
 		int readLogData(const std::string& filename);  ///< read log data
 		int getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
+		std::string getSampleName() const {return nexus_samplename; }; ///< return sample name
 		int numberOfLogs() const;  ///< Number of NXlog sections read from file
 		int getLogLength(const int i) const;  ///< Lenght of i'th log
 		std::string getLogName(const int i) const;  ///< Name of i'th log

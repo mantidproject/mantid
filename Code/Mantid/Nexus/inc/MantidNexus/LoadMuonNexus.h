@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/Sample.h"
 #include "MantidNexus/MuonNexusReader.h"
 
 //----------------------------------------------------------------------
@@ -93,6 +93,8 @@ namespace Mantid
       std::string m_filename;
       /// The instrument name from Nexus
       std::string m_instrument_name;
+	  /// The sample name read from Nexus
+	  std::string m_samplename;
      
       /// The number of spectra in the raw file
       int m_numberOfSpectra;

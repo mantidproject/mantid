@@ -186,8 +186,10 @@ int MuonNexusReader::readLogData(const std::string& filename)
    // Also get the start_time string needed to change these times into ISO times
    std::vector<std::string> nxnamelist,nxclasslist;
    int count=0;
+   int rank,dims[4],type;
    char start_time[]="start_time";
    nexusLogCount=0;
+   int nexusSampleCount=0; //debug
    while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
    {
       nxnamelist.push_back(nxname);
@@ -203,9 +205,26 @@ int MuonNexusReader::readLogData(const std::string& filename)
 		 stat=NXclosegroup(fileID);
 	     if(stat==NX_ERROR) return(1);
       }
+	  if(nxclasslist[count]=="NXSample" || nxclasslist[count]=="NXsample") // NXSample should be NXsample 
+	  {
+		  nexusSampleCount++; //debug
+          stat=NXopengroup(fileID,nxnamelist[count].c_str(),nxclasslist[count].c_str());
+	      if(stat==NX_ERROR) return(1);
+          stat=NXopendata(fileID,"name");
+          if(stat==NX_ERROR) return(1);
+          stat=NXgetinfo(fileID,&rank,dims,&type);
+          char* sampleName=new char[dims[0]+1];
+          stat=NXgetdata(fileID,sampleName);
+	      sampleName[dims[0]]='\0'; // null terminate for copy
+          nexus_samplename=sampleName;
+          delete[] sampleName;
+          stat=NXclosedata(fileID);
+          if(stat==NX_ERROR) return(1);
+          stat=NXclosegroup (fileID);
+	  }
 	  if(nxnamelist[count]==start_time)
 	  {
-		  int rank,dims[4],type;
+
 	      stat=NXopendata(fileID,start_time); if(stat==NX_ERROR) return(1);
           stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
           char* sTime=new char[dims[0]+1];

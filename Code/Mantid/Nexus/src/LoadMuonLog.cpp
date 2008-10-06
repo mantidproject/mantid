@@ -60,9 +60,11 @@ void LoadMuonLog::exec()
 
   // Get the input workspace and retrieve sample from workspace.
   // the log data will be loaded into the Sample container of the workspace
+  // Also set the sample name at this point, as part of the sample related log data.
 
   const Workspace_sptr localWorkspace = getProperty("Workspace");
   boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
+  sample->setName(nxload.getSampleName());
 
   // Attempt to load the content of each NXlog section into the Sample object
   // Assumes that MuonNexusReader has read all log data
