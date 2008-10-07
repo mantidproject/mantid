@@ -46,7 +46,7 @@ public:
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    Workspace2D_sptr work_in = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    Workspace2D_sptr work_in = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey,1);
     //set some dead detectors
     std::vector<double> yDead(sizex,0);
     for (int i=0; i< sizey; i++)

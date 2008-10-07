@@ -159,7 +159,7 @@ class DLLExport HistogramValidator : public Kernel::IValidator<TYPE>
 public:
   /** Constructor
    *  @param mustBeHistogram Flag indicating whether the check is that a workspace should
-   *                         contain workspace data (true, default) or shouldn't (false).
+   *                         contain histogram data (true, default) or shouldn't (false).
    */
   explicit HistogramValidator(const bool& mustBeHistogram = true) :
     m_mustBeHistogram(mustBeHistogram) {}

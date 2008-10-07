@@ -20,7 +20,7 @@ public:
   SimpleIntegrationTest()
   {
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,25,25);
+    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     double *a = new double[25];
     double *e = new double[25];
@@ -30,10 +30,12 @@ public:
       e[i]=sqrt(double(i));
     }
     for (int j = 0; j < 5; ++j) {
+      for (int k = 0; k < 6; ++k) {
+        space2D->dataX(j)[k] = k;
+      }
       space2D->setData(j, *(new std::vector<double>(a+(5*j), a+(5*j)+5)),
           *(new std::vector<double>(e+(5*j), e+(5*j)+5)));
     }
-
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
 
@@ -52,8 +54,8 @@ public:
     outputSpace = "IntegrationOuter";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
 
-    alg.setPropertyValue("StartBin","1");
-    alg.setPropertyValue("EndBin","3");
+    alg.setPropertyValue("Range_lower","0.1");
+    alg.setPropertyValue("Range_upper","4.0");
     alg.setPropertyValue("StartSpectrum","2");
     alg.setPropertyValue("EndSpectrum","4");
 
@@ -85,11 +87,12 @@ public:
       std::vector<double> &y = output2D->dataY(i);
       std::vector<double> &e = output2D->dataE(i);
 
-      TS_ASSERT_EQUALS( x.size(), 1 )
+      TS_ASSERT_EQUALS( x.size(), 2 )
       TS_ASSERT_EQUALS( y.size(), 1 );
       TS_ASSERT_EQUALS( e.size(), 1 );
 
-      TS_ASSERT_EQUALS( x[0], 0.0 );
+      TS_ASSERT_EQUALS( x[0], 1.0 );
+      TS_ASSERT_EQUALS( x[1], 4.0 );
       TS_ASSERT_EQUALS( y[0], yy[i] );
       TS_ASSERT_DELTA( e[0], sqrt(yy[i]), 0.001 );
     }
@@ -107,6 +110,8 @@ public:
 
     output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5)
+    TS_ASSERT_EQUALS( output2D->dataX(0)[0], 0 );
+    TS_ASSERT_EQUALS( output2D->dataX(0)[1], 5 );
     TS_ASSERT_EQUALS( output2D->dataY(0)[0], 10 );
     TS_ASSERT_EQUALS( output2D->dataY(4)[0], 110 );
     TS_ASSERT_DELTA ( output2D->dataE(2)[0], 7.746, 0.001 );

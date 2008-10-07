@@ -3,9 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <sstream>
-#include <numeric>
-#include <math.h>
+#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
 {
@@ -16,7 +14,8 @@ namespace Algorithms
 DECLARE_ALGORITHM(SimpleIntegration)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
+using namespace API;
+using DataObjects::Workspace2D_const_sptr;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
@@ -28,7 +27,7 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
  */
 void SimpleIntegration::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new HistogramValidator<Workspace2D_sptr>));
   declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -37,8 +36,8 @@ void SimpleIntegration::init()
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   declareProperty("EndSpectrum",0, mustBePositive->clone());
-  declareProperty("StartBin",0, mustBePositive->clone());
-  declareProperty("EndBin",0, mustBePositive->clone());
+  declareProperty("Range_lower",0.0);
+  declareProperty("Range_upper",0.0);
 }
 
 /** Executes the algorithm
@@ -48,77 +47,70 @@ void SimpleIntegration::init()
 void SimpleIntegration::exec()
 {
   // Try and retrieve the optional properties
-  m_MinBin = getProperty("StartBin");
-  m_MaxBin = getProperty("EndBin");
+  m_MinRange = getProperty("Range_lower");
+  m_MaxRange = getProperty("Range_upper");
   m_MinSpec = getProperty("StartSpectrum");
   m_MaxSpec = getProperty("EndSpectrum");
 
   // Get the input workspace
-  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
+  const int YLength = localworkspace->blocksize();
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
-  if ( (0 > m_MinSpec) || (m_MinSpec > numberOfSpectra))
+  if ( m_MinSpec > numberOfSpectra )
   {
-    g_log.information("StartSpectrum out of range! Set to 0.");
+    g_log.warning("StartSpectrum out of range! Set to 0.");
     m_MinSpec = 0;
   }
   if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
   if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
   {
-    g_log.information("EndSpectrum out of range! Set to max detector number");
+    g_log.warning("EndSpectrum out of range! Set to max detector number");
     m_MaxSpec = numberOfSpectra;
+  }
+  if ( m_MinRange > m_MaxRange )
+  {
+    g_log.warning("Range_upper is less than Range_lower. Will integrate up to frame maximum.");
+    m_MaxRange = 0.0;
   }
 
   // Create the 1D workspace for the output
-  Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,1,1));
-  // The first axis should be unit-less
-  outputWorkspace->getAxis(0)->unit() = boost::shared_ptr<Unit>();
+  Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1));
 
   // Create vectors to hold result
-  const std::vector<double> XValue(1,0.0);
-  std::vector<double> YSum(1);
-  std::vector<double> YError(1);
+  std::vector<double> XValue(2);
   // Loop over spectra
   for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j)
   {
     // Retrieve the spectrum into a vector
-    const std::vector<double>& YValues = localworkspace->dataY(i);
-    const std::vector<double>& YErrors = localworkspace->dataE(i);
+    const std::vector<double>& XValues = localworkspace->readX(i);
+    const std::vector<double>& YValues = localworkspace->readY(i);
+    const std::vector<double>& YErrors = localworkspace->readE(i);
 
-    // First time through the loop, do some checking on StartBin & EndBin
-    if ( i == m_MinSpec )
+    double maxX = m_MaxRange;
+    if (!m_MaxRange) maxX = XValues.back();
+
+    int startBin = -1;
+    int endBin = YLength;
+    double YSum = 0.0;
+    double YError = 0.0;
+    for (int k = 0; k < YLength; ++k)
     {
-      const int numberOfXBins = YValues.size();
-      if ( (0 > m_MinBin) || (m_MinBin > numberOfXBins))
+      if (XValues[k] >= m_MinRange && XValues[k+1] <= maxX )
       {
-        g_log.information("StartBin out of range! Set to 0");
-        m_MinBin = 0;
-      }
-      if ( !m_MaxBin )
-      {
-        m_MaxBin = numberOfXBins;
-      }
-      else
-      {
-        ++m_MaxBin;
-      }
-      if ( m_MaxBin > numberOfXBins || m_MaxBin < m_MinBin)
-      {
-        g_log.information("EndBin out of range! Set to max number");
-        m_MaxBin = numberOfXBins;
+        if (startBin == -1) startBin = k;
+        endBin = k+1;
+        YSum += YValues[k];
+        YError += YErrors[k]*YErrors[k];
       }
     }
 
-    // Sum up the required elements of the vector
-    YSum[0] = std::accumulate(YValues.begin()+m_MinBin,YValues.begin()+m_MaxBin,0.0);
-    // Error propagation - sqrt(sum of squared elements)
-    YError[0] = sqrt(std::inner_product(YErrors.begin()+m_MinBin,YErrors.begin()+m_MaxBin,
-                                        YErrors.begin()+m_MinBin,0.0));
-
+    XValue[0] = XValues[startBin];
+    XValue[1] = XValues[endBin];
     outputWorkspace->dataX(j) = XValue;
-    outputWorkspace->dataY(j) = YSum;
-    outputWorkspace->dataE(j) = YError;
+    outputWorkspace->dataY(j)[0] = YSum;
+    outputWorkspace->dataE(j)[0] = sqrt(YError);
     outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
   }
 

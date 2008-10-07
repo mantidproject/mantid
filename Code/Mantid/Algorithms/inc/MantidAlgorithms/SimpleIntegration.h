@@ -70,10 +70,10 @@ namespace Mantid
       void init();
       void exec();
 
-      /// The X bin to start the integration from
-      int m_MinBin;
-      /// The X bin to finish the integration at
-      int m_MaxBin;
+      /// The value in X to start the integration from
+      double m_MinRange;
+      /// The value in X to finish the integration at
+      double m_MaxRange;
       /// The spectrum to start the integration from
       int m_MinSpec;
       /// The spectrum to finish the integration at
