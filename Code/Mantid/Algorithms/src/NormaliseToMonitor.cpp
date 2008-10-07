@@ -69,6 +69,8 @@ void NormaliseToMonitor::exec()
     monitor->dataX(0) = inputWS->readX(m_monitorIndex);
     monitor->dataY(0) = inputWS->readY(m_monitorIndex);
     monitor->dataE(0) = inputWS->readE(m_monitorIndex);
+    monitor->isDistribution(inputWS->isDistribution());
+    monitor->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
 
     outputWS = inputWS / monitor;
     // Divide the data by bin width (will have been lost in division above, if previously present).

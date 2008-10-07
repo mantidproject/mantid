@@ -214,7 +214,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MuonAsymmetryCalc.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\NormaliseByCurrent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NormaliseToMonitor.cpp"
 				>
 			</File>
 			<File
@@ -336,7 +344,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\MuonAsymmetryCalc.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\NormaliseByCurrent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\NormaliseToMonitor.h"
 				>
 			</File>
 			<File

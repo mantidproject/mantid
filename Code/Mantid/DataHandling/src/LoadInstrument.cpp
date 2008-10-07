@@ -574,7 +574,9 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
     else
       endID = startID;
 
-    for (int i = startID; i <= endID; i++)
+    int increment = 1;
+    if ( pE->hasAttribute("step") ) increment = atoi( (pE->getAttribute("step")).c_str() );
+    for (int i = startID; i != endID+increment; i += increment)
       idList.vec.push_back(i);
   }
   else
@@ -616,7 +618,9 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
           else
             endID = startID;
 
-          for (int i = startID; i <= endID; i++)
+          int increment = 1;
+          if ( pIDElem->hasAttribute("step") ) increment = atoi( (pIDElem->getAttribute("step")).c_str() );
+          for (int i = startID; i != endID+increment; i += increment)
             idList.vec.push_back(i);
         }
         else
