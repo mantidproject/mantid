@@ -163,7 +163,6 @@
 //Mantid
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
-#include "Mantid/InstrumentWidget/InstrumentWindow.h"
 #include "Mantid/MantidAbout.h"
 
 using namespace Qwt3D;
@@ -177,6 +176,7 @@ void file_uncompress(char  *file);
 ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
 {
+    mantidUI = new MantidUI(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 	init(factorySettings);
 }
@@ -354,7 +354,7 @@ void ApplicationWindow::init(bool factorySettings)
     loadCustomActions();
 
     //Mantid
-    initMantid();
+    mantidUI->init();
 }
 
 void ApplicationWindow::initWindow()
@@ -1047,11 +1047,6 @@ void ApplicationWindow::initMainMenu()
 	foldersMenu = new QMenu(this);
 	foldersMenu->setCheckable(true);
 	
-	//Mantid
-	mantidMenu = new QMenu(this);
-	mantidMenu->setObjectName("mantidMenu");
-	connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
-
 	help = new QMenu(this);
 	help->setObjectName("helpMenu");
 	help->addAction(actionShowHelp);
@@ -1200,16 +1195,14 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	menuBar()->insertItem(tr("&View"), view);
 	menuBar()->insertItem(tr("Scripting"), scriptingMenu);
 	
-	//Mantid
-	menuBar()->insertItem(tr("Mantid"), mantidMenu);
-	mantidMenuAboutToShow();
-
 	scriptingMenu->clear();
 #ifdef SCRIPTING_DIALOG
 	scriptingMenu->addAction(actionScriptingLang);
 #endif
 	scriptingMenu->addAction(actionRestartScripting);
     scriptingMenu->addAction(actionCustomActionDialog);
+
+    mantidUI->insertMenu();//Mantid
 
 	// these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
 	actionNoteEvaluate->setEnabled(false);
@@ -7309,6 +7302,8 @@ void ApplicationWindow::copySelection()
 	}
 	else if (m->isA("Note"))
 		((Note*)m)->textWidget()->copy();
+    else
+        mantidUI->copyValues();//Mantid
 }
 
 void ApplicationWindow::cutSelection()
@@ -15206,40 +15201,3 @@ QString ApplicationWindow::endOfLine()
 	}
 	return "\n";
 }
-
-//Mantid
-void ApplicationWindow::manageMantidWorkspaces()
-{
-	QMessageBox::warning(this,tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
-}
-
-//Mantid 
-void ApplicationWindow::showMantidInstrument()
-{
-	QStringList wsNames=mantidUI->getWorkspaceNames();
-	bool ok;
-	QString selectedName = QInputDialog::getItem(this,tr("Select Workspace"), tr("Please select your workspace"), wsNames, 0, false,&ok);
-	if(ok)
-	{
-		InstrumentWindow *insWin=new InstrumentWindow(QString("Instrument"),this);
-		connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeWindow(MdiSubWindow*)));
-		connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), this, SLOT(hideWindow(MdiSubWindow*)));
-		connect (insWin,SIGNAL(showContextMenu()), this,SLOT(showWindowContextMenu()));
-		d_workspace->addSubWindow(insWin);
-		insWin->setNormal();
-		insWin->setName(selectedName);
-		insWin->resize(400,400);
-		insWin->show();
-		insWin->setWorkspaceName(std::string(selectedName.ascii()));
-	}	
-}
-
-//Mantid
-void ApplicationWindow::mantidMenuAboutToShow()
-{
-	mantidMenu->clear();
-	
-	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
-	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
-}
-

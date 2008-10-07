@@ -687,6 +687,11 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
     if (m_workspace->blocksize() != ws->blocksize() ||
         m_workspace->getNumberHistograms() != ws->getNumberHistograms()) closeDependants();
 
+    // Save selection
+    QItemSelectionModel *oldSelModel = activeView()->selectionModel();
+    QModelIndexList indexList = oldSelModel->selectedIndexes();
+    QModelIndex curIndex = activeView()->currentIndex();
+
     setup(ws,m_startRow,m_endRow,m_filter,m_maxv);
     
     delete m_modelY;
@@ -700,6 +705,15 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
     delete m_modelE;
     m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::E);
     connectTableView(m_table_viewE,m_modelE);
+
+    // Restore selection
+    activeView()->setCurrentIndex(curIndex);
+    if (indexList.size())
+    {
+        QItemSelection sel(indexList.first(),indexList.last());
+        QItemSelectionModel *selModel = activeView()->selectionModel();
+        selModel->select(sel,QItemSelectionModel::Select);
+    }
 
     repaintAll();
 

@@ -114,6 +114,12 @@ public slots:
     void createLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
     void showCritical(const QString&);
     void showAlgMonitor();
+
+	void mantidMenuAboutToShow();
+	void manageMantidWorkspaces();
+	void showMantidInstrument();
+    void insertMenu();
+
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
 
@@ -139,16 +145,6 @@ public:
     Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;
 
     ApplicationWindow *m_appWindow;
-    // ApplicationWindow's private members
-    QMdiArea *d_workspace;
-    QMenuBar *aw_menuBar;
-    QMenu *aw_plot2DMenu, *aw_plot3DMenu;
-    QToolBar *aw_plotMatrixBar;
-    ScriptingEnv *aw_scriptEnv;
-    QMenu *aw_view;
-    QAction *aw_actionShowUndoStack;
-    QTextEdit *aw_results;
-
     MantidDockWidget *m_exploreMantid;
     AlgorithmDockWidget *m_exploreAlgorithms;
     QAction *actionCopyRowToTable;
@@ -159,6 +155,8 @@ public:
     QAction *actionCopyDetectorsToTable;
     QAction *actionCopyValues;
 
+	//Mantid
+	QMenu *mantidMenu;
     AlgorithmMonitor *m_algMonitor;
 
     ProgressDlg *m_progressDialog;   //< Progress of algorithm running asynchronously

@@ -45,8 +45,6 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
-#include "MantidAPI/Workspace.h"
-
 class QPixmap;
 class QCloseEvent;
 class QDropEvent;
@@ -1020,11 +1018,6 @@ private slots:
 	void hideSelectedColumns();
 	void showAllColumns();
 	
-	//Mantid
-	void mantidMenuAboutToShow();
-	void manageMantidWorkspaces();
-	void showMantidInstrument();
-
 // TODO: a lot of this stuff should be private
 public:
 	//! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.
@@ -1191,9 +1184,6 @@ private:
 	QWidgetList *hiddenWindows;
 	QLineEdit *info;
 
-	//Mantid
-	QMenu *mantidMenu;
-	
 	QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
 	QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu;
 	QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
@@ -1274,8 +1264,9 @@ private:
     QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
     QList<QAction *> d_user_actions;
     QUndoView *d_undo_view;
+
+    friend class MantidUI;
 public:
     MantidUI *mantidUI;
-    void initMantid();
 };
 #endif

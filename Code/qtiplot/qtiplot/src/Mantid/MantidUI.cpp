@@ -11,6 +11,7 @@
 
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidPlotReleaseDate.h"
+#include "InstrumentWidget/InstrumentWindow.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -20,28 +21,11 @@
 #include <QApplication>
 #include <QToolBar>
 #include <QMenu>
+#include <QInputDialog>
 
 #include <iostream>
 using namespace std;
  
-void ApplicationWindow::initMantid()
-{
-
-    mantidUI = new MantidUI(this);
-    mantidUI->d_workspace = d_workspace;
-    mantidUI->aw_menuBar = menuBar();
-    mantidUI->aw_plot2DMenu = plot2DMenu;
-    mantidUI->aw_plot3DMenu = plot3DMenu;
-    mantidUI->aw_plotMatrixBar = plotMatrixBar;
-    mantidUI->aw_scriptEnv = scriptEnv;
-    mantidUI->aw_view = view;
-    mantidUI->aw_actionShowUndoStack = actionShowUndoStack;
-    mantidUI->aw_results = results;
-
-    mantidUI->init();
-}
-
-
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
 m_finishedObserver(*this, &MantidUI::handleAlgorithmFinishedNotification),
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -88,6 +72,11 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+
+	mantidMenu = new QMenu(m_appWindow);
+	mantidMenu->setObjectName("mantidMenu");
+	connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
+
 }
 
 void MantidUI::init()
@@ -98,12 +87,12 @@ void MantidUI::init()
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
 	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
 	actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
-    aw_view->addAction(actionToggleMantid);
+    appWindow()->view->addAction(actionToggleMantid);
 
 	actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
 	//actionToggleAlgorithms->setIcon(QPixmap(mantid_matrix_xpm));
 	actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
-    aw_view->addAction(actionToggleAlgorithms);
+    appWindow()->view->addAction(actionToggleAlgorithms);
 
     //LoadIsisRawFile("C:/Mantid/Test/Data/MAR11060.RAW","MAR11060","0","10");
     update();
@@ -304,11 +293,15 @@ int MantidUI::getBinNumber(const QString& workspaceName)
 
 bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 {
-    if (w->isA("MantidMatrix"))
-    {
-        aw_menuBar->insertItem(tr("3D &Plot"), aw_plot3DMenu);
 
-        aw_plotMatrixBar->setEnabled (true);
+    if (w && w->isA("MantidMatrix"))
+    {
+        appWindow()->menuBar()->insertItem(tr("3D &Plot"), appWindow()->plot3DMenu);
+        appWindow()->actionCopySelection->setEnabled(true);
+		appWindow()->actionPasteSelection->setEnabled(false);
+		appWindow()->actionClearSelection->setEnabled(false);
+        appWindow()->plotMatrixBar->setEnabled (true);
+        return true;
     }
 
     return false;
@@ -366,7 +359,7 @@ MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg)
     connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
     connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
 
-    d_workspace->addSubWindow(w);
+    appWindow()->d_workspace->addSubWindow(w);
     w->showNormal(); 
     return w;
 }
@@ -466,7 +459,7 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
      int numRows = m->numCols();
      if (m->isHistogram() && !forPlotting) numRows++;
 
-	 Table* t = new Table(aw_scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
      if (visible) t->showNormal();
     
@@ -519,7 +512,7 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
 
 Table* MantidUI::createTableDetectors(MantidMatrix *m)
 {
-	 Table* t = new Table(aw_scriptEnv, m->numRows(), 6, "", appWindow(), 0);
+	 Table* t = new Table(appWindow()->scriptEnv, m->numRows(), 6, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-Detectors-"));
      t->showNormal();
     
@@ -802,16 +795,57 @@ void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
 
 void MantidUI::logMessage(const Poco::Message& msg)
 {
-    if (!aw_results) return;
+    if (!appWindow()->results) return;
     QString str = msg.getText().c_str();
     //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
     if (msg.getPriority() < Poco::Message::PRIO_WARNING)
-        aw_results->setTextColor(Qt::red);
+        appWindow()->results->setTextColor(Qt::red);
     else
-        aw_results->setTextColor(Qt::black);
-    aw_results->insertPlainText(str+"\n");
-    //cerr<<":"<<aw_results->document()->blockCount()<<'\n';
-    QTextCursor cur = aw_results->textCursor();
+        appWindow()->results->setTextColor(Qt::black);
+    appWindow()->results->insertPlainText(str+"\n");
+    //cerr<<":"<<appWindow()->results->document()->blockCount()<<'\n';
+    QTextCursor cur = appWindow()->results->textCursor();
     cur.movePosition(QTextCursor::End);
-    aw_results->setTextCursor(cur);
+    appWindow()->results->setTextCursor(cur);
+}
+
+
+//Mantid
+void MantidUI::manageMantidWorkspaces()
+{
+	QMessageBox::warning(appWindow(),tr("Mantid Workspace"),tr("Clicked on Managed Workspace"),tr("Ok"),tr("Cancel"),QString(),0,1);
+}
+
+//Mantid 
+void MantidUI::showMantidInstrument()
+{
+	QStringList wsNames=getWorkspaceNames();
+	bool ok;
+	QString selectedName = QInputDialog::getItem(appWindow(),tr("Select Workspace"), tr("Please select your workspace"), wsNames, 0, false,&ok);
+	if(ok)
+	{
+		InstrumentWindow *insWin=new InstrumentWindow(QString("Instrument"),appWindow());
+		connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+		connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+		connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
+		appWindow()->d_workspace->addSubWindow(insWin);
+		insWin->setNormal();
+		insWin->setName(selectedName);
+		insWin->resize(400,400);
+		insWin->show();
+		insWin->setWorkspaceName(std::string(selectedName.ascii()));
+	}	
+}
+
+void MantidUI::mantidMenuAboutToShow()
+{
+	mantidMenu->clear();
+	
+	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
+	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
+}
+
+void MantidUI::insertMenu()
+{
+	appWindow()->menuBar()->insertItem(tr("Mantid"), mantidMenu);
 }
