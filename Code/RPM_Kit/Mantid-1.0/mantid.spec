@@ -6,15 +6,13 @@ URL:		http://www.mantidproject.org/
 License:	GPLv2+
 Group:	Applications/Publishing
 Source0:  %{name}-%{version}.tar.gz
+Prefix: /tmp
 
-BuildRequires:  python >= 2.5
-BuildRequires:  scons >= 0.98.0
+BuildRequires:  python >= 2.3
+BuildRequires:  scons >= 0.97
 BuildRequires:  boost >= 1.34.1
-BuildRequires:  poco >= 1.3.0
-BuildRequires:  poco-devel >= 1.3.0
 BuildRequires:  glibc-devel
 BuildRequires:  gsl-devel
-BuildRequires:  gts-devel
 
 %description
 Mantid
@@ -35,13 +33,13 @@ sed -i "s!rpmBuild = True!rpmBuild = False!" SConstruct
 
 %install
 python Mantid/src/Build/LinuxBuildScripts/cleanup.py
-cp -rf Mantid/ /usr/local/.
+cp -rf Mantid/ /tmp/.
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-/usr/local/Mantid/*
+/tmp/Mantid/*
 
 
