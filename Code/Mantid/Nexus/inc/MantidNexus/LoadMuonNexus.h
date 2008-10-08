@@ -75,7 +75,7 @@ namespace Mantid
       virtual const int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
-
+      
     private:
       /// Overwrites Algorithm method.
       void init();
@@ -110,7 +110,9 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
-      
+      /// The group which each detector belongs to in order
+      std::vector<int> m_groupings;
+
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 

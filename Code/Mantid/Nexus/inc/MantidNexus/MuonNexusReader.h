@@ -94,6 +94,8 @@ class MuonNexusReader
 		// for nexus histogram data
 		float* corrected_times; ///< temp store for corrected times
 		int* counts;         ///< temp store of histogram data
+		int* detectorGroupings;
+		int numDetectors;
 		std::string getInstrumentName(); ///< return instrument name
 };
 

@@ -78,6 +78,19 @@ int MuonNexusReader::readFromFile(const std::string& filename)
      //
     stat=NXclosedata(fileID);
     if(stat==NX_ERROR) return(1);
+    //Get groupings
+    stat=NXopendata(fileID,"grouping");
+     stat=NXgetinfo(fileID,&rank,dims,&type);
+     if(stat==NX_ERROR) return(1);
+     // allocate temp space for grouping data
+     numDetectors = dims[0];
+     detectorGroupings = new int[dims[0]];
+     stat=NXgetdata(fileID,detectorGroupings);
+     if(stat==NX_ERROR) return(1);
+     //
+    stat=NXclosedata(fileID);
+    if(stat==NX_ERROR) return(1); 
+    	    
     // read corrected time
     stat=NXopendata(fileID,"corrected_time");
      if(stat==NX_ERROR) return(1);
@@ -106,7 +119,7 @@ int MuonNexusReader::readFromFile(const std::string& filename)
      nexus_instrument_name=instrument;
      delete[] instrument;
     stat=NXclosedata(fileID);
-   if(stat==NX_ERROR) return(1);
+   if (stat==NX_ERROR) return(1);  
    stat=NXclosegroup (fileID);
    //
    // Get number of switching states if available. Take this as number of periods

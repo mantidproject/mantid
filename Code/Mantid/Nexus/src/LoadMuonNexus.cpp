@@ -177,6 +177,13 @@ namespace Mantid
         
       } // loop over periods
       
+      //Get the groupings
+      for (int i =0; i < nxload.numDetectors; ++i)
+      {
+	      m_groupings.push_back(nxload.detectorGroupings[i]);
+	      std::cerr << nxload.detectorGroupings[i];
+      }
+      
       // Clean up
       delete[] timeChannels;
       delete[] spectrum;
