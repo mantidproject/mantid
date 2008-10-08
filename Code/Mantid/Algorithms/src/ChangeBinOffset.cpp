@@ -61,6 +61,7 @@ namespace Mantid
 		    
 		    for (int j=0; j < XValues.size(); ++j)
 		    {
+			    //Change bin value by offset
 			    XValues_new[j] = XValues[j] + offset;
 		    }
 	    }

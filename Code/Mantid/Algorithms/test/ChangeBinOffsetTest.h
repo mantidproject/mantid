@@ -7,6 +7,7 @@
 #include <sstream>
 #include <string>
 
+#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
@@ -19,16 +20,44 @@ class ChangeBinOffsetTest : public CxxTest::TestSuite
 {
 public:
 	
-	//~ void testName2D()
-	//~ {
-		//~ TS_ASSERT_EQUALS( alg2D.name(), "ChangeBinOffset" )
-	//~ }
+	void testExec1D()
+	{
+		double offset = 2.0;
+		
+		std::ostringstream offsetStr;
+		offsetStr << offset;
+				
+		Workspace1D_sptr input = makeDummyWorkspace1D();
+		input->isDistribution(true);
+		AnalysisDataService::Instance().add("input1D", input);
+		
+		ChangeBinOffset alg1D;
+		TS_ASSERT_THROWS_NOTHING(alg1D.initialize());
+		TS_ASSERT( alg1D.isInitialized() )
+		
+		alg1D.setPropertyValue("InputWorkspace", "input1D");
+		alg1D.setPropertyValue("OutputWorkspace", "output1D");
+		alg1D.setPropertyValue("Offset", offsetStr.str());
 
-	//~ void testCategory2D()
-	//~ {
-	//~ TS_ASSERT_EQUALS( alg2D.category(), "General" )
-	//~ }
-	
+		TS_ASSERT_THROWS_NOTHING(alg1D.execute());
+		TS_ASSERT( alg1D.isExecuted() )
+		
+		Workspace_sptr output = AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace"));
+		
+		std::vector<double>& Xold = input->dataX(0);
+		std::vector<double>& Xnew = output->dataX(0);
+		
+		for (int i=0; i < Xnew.size(); ++i)
+		{
+		    std::cout << "old value: " << Xold[i] << std::endl;
+		    std::cout << "new value: " << Xnew[i] << std::endl;
+		}
+		
+		TS_ASSERT(Xold[0] + offset == Xnew[0]);
+		TS_ASSERT(Xold[1] + offset == Xnew[1]);
+		
+	}
+
 	void testExec2D()
 	{
 		double offset = 1.0;
@@ -67,6 +96,28 @@ public:
 		
 	}
 	
+	Workspace1D_sptr makeDummyWorkspace1D()
+	{
+		Workspace1D_sptr testWorkspace(new Workspace1D);
+		
+		testWorkspace->setTitle("input1D");
+		testWorkspace->initialize(1,2,2);
+		
+		std::vector<double> X;
+		std::vector<double> Y;
+		
+		for (int i =0; i < 2; ++i)
+		{
+			X.push_back(1.0*i);
+			Y.push_back(2.0*i);
+		}
+		
+		testWorkspace->setX(X);
+		testWorkspace->setData(Y);
+		
+		return testWorkspace;
+	}
+	
 	Workspace2D_sptr makeDummyWorkspace2D()
 	{
 		Workspace2D_sptr testWorkspace(new Workspace2D);
@@ -92,8 +143,7 @@ public:
 	}
 
 private:
-	
-	ChangeBinOffset alg1D;
+
 
 };
 
