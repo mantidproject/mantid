@@ -190,6 +190,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   monitor->dataX(0) = inputWorkspace->readX(m_monitorIndex);
   monitor->dataY(0) = inputWorkspace->readY(m_monitorIndex);
   monitor->dataE(0) = inputWorkspace->readE(m_monitorIndex);
+  monitor->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
   monitor->isDistribution(true);
 
   // Add up all the bins so it's just effectively a single value with an error
