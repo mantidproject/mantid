@@ -777,6 +777,14 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
     if ( facingElem->hasAttribute("val") )
       return;
 
+    // check if rotate about z-axis before doing the facing
+
+    if ( facingElem->hasAttribute("rot") )
+    {
+      double rotAngle = atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+      comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
+    }
+
     // Face the component to the x,y,z or r,t,p coordinates of the facing component
 
     makeXYplaneFaceComponent(comp, parseFacingElementToV3D(facingElem));
