@@ -93,7 +93,7 @@ void LoadLog::exec()
     potentialLogFiles.push_back(m_filename);
   }
   else if ( ( stringToLower(l_filenamePart).find(".raw") != std::string::npos ||
-              stringToLower(l_filenamePart).find(".s") != std::string::npos ) && l_filenamePart.size() >= 12 )
+              stringToLower(l_filenamePart).find(".s") != std::string::npos ) && l_filenamePart.size() >= 10 )
   {
     // then we will assume that m_filename is an ISIS raw file
 

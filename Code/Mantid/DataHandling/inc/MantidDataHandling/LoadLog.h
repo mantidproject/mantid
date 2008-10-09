@@ -14,12 +14,12 @@ namespace Mantid
     /** @class LoadLog LoadLog.h DataHandling/LoadLog.h
 
     Load ISIS log file(s). Assumes that a log file originates from a 
-    PC (not VMS) environment, i.e. the log file to be loaded is assumed
+    PC (not VMS) environment, i.e. the log files to be loaded are assumed
     to have the extension .txt. Its filename is assumed to starts with the raw data 
-    file identifier followed by the character '_', and the .txt itself is assumed to 
-    contain two columns, where the first column consists of data-time strings of the 
-    form ISO 8601 and the second column consists either of numbers or strings that may 
-    contain spaces (e.g. "CHANGE RUNTABLE").
+    file identifier followed by the character '_', and a log file is assumed to have a 
+    format of two columns, where the first column consists of data-time strings of the 
+    ISO 8601 form and the second column consists of either numbers or strings that may 
+    contain spaces.
 
     The algoritm requires an input filename. If this filename is the name of a
     raw datafile the algorithm will attempt to read in all the log files associated
@@ -33,8 +33,11 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The full name of and path of the input ISIS log file </LI>
-    <LI> Workspace - The workspace to which to append the log data </LI>
+    <LI> Filename - The filename (including its full or relative path) of either an ISIS log file 
+    or an ISIS raw file. If a raw file is specified all log files associated with that raw file 
+    are loaded into the specified workspace. The file extension must either be .raw or .s when 
+    specifying a raw file, and at least 10 characters long. </LI>
+    <LI> Workspace - The workspace to which the log data is appended </LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
