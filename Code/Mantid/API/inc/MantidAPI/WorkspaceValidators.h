@@ -41,8 +41,8 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE = Workspace_sptr>
-class DLLExport CompositeValidator : public Kernel::IValidator<TYPE>
+template <typename TYPE = Workspace>
+class DLLExport CompositeValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   CompositeValidator() {}
@@ -62,7 +62,7 @@ public:
   /** Checks the value of all child validators. Fails if any one of them does.
    *  @param value The workspace to test
    */
-  const bool isValid( const TYPE& value ) const
+  const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
     for (unsigned int i=0; i < m_children.size(); ++i)
     {
@@ -73,7 +73,7 @@ public:
     return true;
   }
 
-  Kernel::IValidator<TYPE>* clone()
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone()
   {
     CompositeValidator<TYPE>* copy = new CompositeValidator<TYPE>();
     for (unsigned int i=0; i < m_children.size(); ++i)
@@ -86,7 +86,7 @@ public:
   /** Adds a validator to the group of validators to check
    *  @param child A pointer to the validator to add
    */
-  void add(Kernel::IValidator<TYPE>* child)
+  void add(Kernel::IValidator<boost::shared_ptr<TYPE> >* child)
   {
     m_children.push_back(child);
   }
@@ -96,7 +96,7 @@ private:
   CompositeValidator(const CompositeValidator&);
 
   /// A container for the child validators
-  std::vector<Kernel::IValidator<TYPE>*> m_children;
+  std::vector<Kernel::IValidator<boost::shared_ptr<TYPE> >*> m_children;
 };
 
 
@@ -106,8 +106,8 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace_sptr>
-class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<TYPE>
+template <typename TYPE = Workspace>
+class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -123,7 +123,7 @@ public:
   /** Checks the workspace based on the validator's rules
    *  @param value The workspace to test
    */
-  const bool isValid( const TYPE& value ) const
+  const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
     boost::shared_ptr<Kernel::Unit> unit = value->getAxis(0)->unit();
     // If no unit has been given to the validator, just check that the workspace has a unit...
@@ -139,7 +139,7 @@ public:
     }
   }
 
-  Kernel::IValidator<TYPE>* clone() { return new WorkspaceUnitValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new WorkspaceUnitValidator(*this); }
 
 private:
   /// The name of the required unit
@@ -153,8 +153,8 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace_sptr>
-class DLLExport HistogramValidator : public Kernel::IValidator<TYPE>
+template <typename TYPE = Workspace>
+class DLLExport HistogramValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   /** Constructor
@@ -171,7 +171,7 @@ public:
   /** Checks the workspace based on the validator's rules
    *  @param value The workspace to test
    */
-  const bool isValid( const TYPE& value ) const
+  const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
     if ( value->isHistogramData() )
     {
@@ -183,7 +183,7 @@ public:
     }
   }
 
-  Kernel::IValidator<TYPE>* clone() { return new HistogramValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
 
 private:
   /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
@@ -195,8 +195,8 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace_sptr>
-class DLLExport RawCountValidator : public Kernel::IValidator<TYPE>
+template <typename TYPE = Workspace>
+class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   RawCountValidator() {}
@@ -208,12 +208,12 @@ public:
   /** Checks the workspace based on the validator's rules
    *  @param value The workspace to test
    */
-  const bool isValid( const TYPE& value ) const
+  const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
     return !( value->isDistribution() );
   }
 
-  Kernel::IValidator<TYPE>* clone() { return new RawCountValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
 };
 
 /** A validator which provides a <I>TENTATIVE</I> check that a workspace contains
@@ -225,8 +225,8 @@ public:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 18/09/2008
  */
-template <typename TYPE = Workspace_sptr>
-class DLLExport CommonBinsValidator : public Kernel::IValidator<TYPE>
+template <typename TYPE = Workspace>
+class DLLExport CommonBinsValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
   CommonBinsValidator() {}
@@ -238,7 +238,7 @@ public:
   /** Checks the workspace based on the validator's rules
    *  @param value The workspace to test
    */
-  const bool isValid( const TYPE& value ) const
+  const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
     if ( !value->blocksize() || value->getNumberHistograms() < 2) return true;
     const int lastSpec = value->getNumberHistograms() - 1;
@@ -251,7 +251,7 @@ public:
     return true;
   }
 
-  Kernel::IValidator<TYPE>* clone() { return new CommonBinsValidator(*this); }
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new CommonBinsValidator(*this); }
 };
 
 } // namespace API

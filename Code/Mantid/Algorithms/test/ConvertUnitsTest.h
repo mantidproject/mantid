@@ -5,6 +5,7 @@
 #include "WorkspaceCreationHelper.hh"
 
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"

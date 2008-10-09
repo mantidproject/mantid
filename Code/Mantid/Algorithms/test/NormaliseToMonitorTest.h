@@ -132,8 +132,8 @@ public:
       for (int j = 0; j < output->blocksize(); ++j)
       {
         TS_ASSERT_EQUALS( output->readX(i)[j], j+5 )
-        TS_ASSERT_EQUALS( output->readY(i)[j], 0.2 )
-        TS_ASSERT_DELTA( output->readE(i)[j], 0.3011, 0.0001 )
+        TS_ASSERT_EQUALS( output->readY(i)[j], 0.04 )
+        TS_ASSERT_DELTA( output->readE(i)[j], 0.0602, 0.0001 )
       }
     }
 
@@ -141,8 +141,8 @@ public:
     for (int k = 0; k < output->blocksize(); ++k)
     {
       TS_ASSERT_EQUALS( output->readX(0)[k], k+5 )
-      TS_ASSERT_EQUALS( output->readY(0)[k], 1.0 )
-      TS_ASSERT_DELTA( output->readE(0)[k], 0.3286, 0.0001 )
+      TS_ASSERT_EQUALS( output->readY(0)[k], 0.2 )
+      TS_ASSERT_DELTA( output->readE(0)[k], 0.0657, 0.0001 )
     }
   }
 

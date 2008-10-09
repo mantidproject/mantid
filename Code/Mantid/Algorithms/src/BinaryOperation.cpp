@@ -65,17 +65,10 @@ namespace Mantid
 
     const bool BinaryOperation::checkCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
-      boost::shared_ptr<Unit> lhs_unit, rhs_unit;
-      try {
-        lhs_unit = lhs->getAxis(0)->unit();
-        rhs_unit = rhs->getAxis(0)->unit();
-      }
-      catch(Exception::IndexError)
-      {
-        // Not a problem, this must be a WorkspaceSingleValue
-        lhs_unit = boost::shared_ptr<Unit>();
-        rhs_unit = boost::shared_ptr<Unit>();
-      }
+      boost::shared_ptr<Unit> lhs_unit = boost::shared_ptr<Unit>();
+      boost::shared_ptr<Unit> rhs_unit = boost::shared_ptr<Unit>();
+      if (lhs->axes()) lhs_unit = lhs->getAxis(0)->unit();
+      if (rhs->axes()) rhs_unit = rhs->getAxis(0)->unit();
 
       // Check the workspaces have the same units and distribution flag
       if ( lhs_unit != rhs_unit || lhs->isDistribution() != rhs->isDistribution() )

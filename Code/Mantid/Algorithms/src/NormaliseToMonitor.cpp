@@ -32,9 +32,9 @@ NormaliseToMonitor::~NormaliseToMonitor() {}
 
 void NormaliseToMonitor::init()
 {
-  CompositeValidator<Workspace2D_sptr> *val = new CompositeValidator<Workspace2D_sptr>;
-  val->add(new HistogramValidator<Workspace2D_sptr>);
-  val->add(new CommonBinsValidator<Workspace2D_sptr>);
+  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
+  val->add(new HistogramValidator<Workspace2D>);
+  val->add(new CommonBinsValidator<Workspace2D>);
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
@@ -75,8 +75,8 @@ void NormaliseToMonitor::exec()
     outputWS = inputWS / monitor;
     // Divide the data by bin width (will have been lost in division above, if previously present).
     outputWS->isDistribution(false);
-    this->doUndoDistribution(outputWS);
   }
+  this->doUndoDistribution(outputWS);
 
   setProperty("OutputWorkspace",outputWS);
 }
@@ -156,6 +156,12 @@ void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspa
 API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace)
 {
   bool fixInput = false;
+  // Need to remove division by bin width if it's present
+  if ( !inputWorkspace->isDistribution() )
+  {
+    this->doUndoDistribution(inputWorkspace,false);
+    fixInput = true;
+  }
   // Don't run regroup algorithm if integrating over full workspace range
   if ( m_integrationMin != inputWorkspace->readX(0).front() || m_integrationMax != inputWorkspace->readX(0).back() )
   {
@@ -177,13 +183,11 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
     // Get back the result
     inputWorkspace = regroup->getProperty("OutputWorkspace");
   }
-  else
-  {
-    // Indicates that I'll have to later take out the bin width division that I'm about to put in
-    if ( !inputWorkspace->isDistribution() ) fixInput = true;
-  }
-  // Need to divide by bin with if it isn't already done
-  if ( !inputWorkspace->isDistribution() ) this->doUndoDistribution(inputWorkspace);
+//  else
+//  {
+//    // Indicates that I'll have to later take out the bin width division that I'm about to put in
+//    if ( !inputWorkspace->isDistribution() ) fixInput = true;
+//  }
 
   // Now create a Workspace1D with the monitor spectrum
   Workspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWorkspace->blocksize()+1,inputWorkspace->blocksize());
@@ -191,24 +195,24 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   monitor->dataY(0) = inputWorkspace->readY(m_monitorIndex);
   monitor->dataE(0) = inputWorkspace->readE(m_monitorIndex);
   monitor->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
-  monitor->isDistribution(true);
+//  monitor->isDistribution(true);
 
   // Add up all the bins so it's just effectively a single value with an error
-  Algorithm_sptr rebunch = createSubAlgorithm("Rebunch");
-  rebunch->setProperty<Workspace_sptr>("InputWorkspace", monitor);
-  rebunch->setProperty<int>("n_bunch",monitor->blocksize());
+  Algorithm_sptr integrate = createSubAlgorithm("Integration");
+  integrate->setProperty<Workspace_sptr>("InputWorkspace", monitor);
+  //rebunch->setProperty<int>("n_bunch",monitor->blocksize());
   try {
-    rebunch->execute();
+    integrate->execute();
   } catch (std::runtime_error& err) {
-    g_log.error("Unable to successfully run Rebunch sub-algorithm");
+    g_log.error("Unable to successfully run Integration sub-algorithm");
     throw;
   }
   // Get back the result
-  monitor = rebunch->getProperty("OutputWorkspace");
+  monitor = integrate->getProperty("OutputWorkspace");
 
   Workspace_sptr outputWS = inputWorkspace / monitor;
-  this->doUndoDistribution(outputWS);
-  if (fixInput) this->doUndoDistribution(inputWorkspace,false);
+//  this->doUndoDistribution(outputWS);
+  if (fixInput) this->doUndoDistribution(inputWorkspace);
   return outputWS;
 }
 

@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleIntegration.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
@@ -15,9 +14,6 @@ DECLARE_ALGORITHM(SimpleIntegration)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D_const_sptr;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D;
 
 // Get a reference to the logger
 Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
@@ -27,17 +23,17 @@ Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
  */
 void SimpleIntegration::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new HistogramValidator<Workspace2D_sptr>));
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
+  declareProperty("Range_lower",0.0);
+  declareProperty("Range_upper",0.0);
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartSpectrum",0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   declareProperty("EndSpectrum",0, mustBePositive->clone());
-  declareProperty("Range_lower",0.0);
-  declareProperty("Range_upper",0.0);
 }
 
 /** Executes the algorithm
@@ -53,7 +49,7 @@ void SimpleIntegration::exec()
   m_MaxSpec = getProperty("EndSpectrum");
 
   // Get the input workspace
-  Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
   const int YLength = localworkspace->blocksize();
@@ -76,7 +72,7 @@ void SimpleIntegration::exec()
   }
 
   // Create the 1D workspace for the output
-  Workspace2D_sptr outputWorkspace = boost::dynamic_pointer_cast<Workspace2D>(API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1));
+  Workspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
   // Create vectors to hold result
   std::vector<double> XValue(2);
@@ -111,7 +107,10 @@ void SimpleIntegration::exec()
     outputWorkspace->dataX(j) = XValue;
     outputWorkspace->dataY(j)[0] = YSum;
     outputWorkspace->dataE(j)[0] = sqrt(YError);
-    outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
+    if (localworkspace->axes() > 1)
+    {
+      outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
+    }
   }
 
   // Assign it to the output workspace property
@@ -120,5 +119,5 @@ void SimpleIntegration::exec()
   return;
 }
 
-} // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid

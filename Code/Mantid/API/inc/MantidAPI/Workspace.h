@@ -132,6 +132,7 @@ public:
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory& getHistory() const { return m_history; }
 
+  const int axes() const;
   Axis* const getAxis(const int axisIndex) const;
 
   /// Returns true if the workspace contains data in histogram form (as opposed to point-like)

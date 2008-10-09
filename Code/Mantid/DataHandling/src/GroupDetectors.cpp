@@ -33,7 +33,7 @@ GroupDetectors::~GroupDetectors() {}
 void GroupDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,
-                  new CommonBinsValidator<Workspace2D_sptr>));
+                  new CommonBinsValidator<Workspace2D>));
   declareProperty(new ArrayProperty<int>("SpectraList"));
   declareProperty(new ArrayProperty<int>("DetectorList"));
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));

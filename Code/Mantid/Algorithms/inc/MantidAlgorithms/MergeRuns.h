@@ -17,12 +17,12 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The names of the input workspace as a comma separated list. </LI>
+    <LI> InputWorkspaces  - The names of the input workspace as a comma separated list. </LI>
     <LI> OutputWorkspace - The name of the output workspace which will contain the combined inputs. </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
-    @date 22/08/2008
+    @date 22/09/2008
 
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 

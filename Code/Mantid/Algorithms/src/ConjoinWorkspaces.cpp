@@ -32,9 +32,9 @@ ConjoinWorkspaces::~ConjoinWorkspaces() {}
 void ConjoinWorkspaces::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace1","",Direction::Input,
-                                                       new CommonBinsValidator<Workspace2D_sptr>));
+                                                       new CommonBinsValidator<Workspace2D>));
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace2","",Direction::Input,
-                                                       new CommonBinsValidator<Workspace2D_sptr>));
+                                                       new CommonBinsValidator<Workspace2D>));
 }
 
 /** Executes the algorithm

@@ -159,6 +159,12 @@ boost::shared_ptr<Sample> Workspace::getSample() const
   return sptr_sample;
 }
 
+/// The number of axes which this workspace has
+const int Workspace::axes() const
+{
+  return static_cast<int>(m_axes.size());
+}
+
 /** Get a pointer to a workspace axis
  *  @param axisIndex The index of the axis required
  *  @throw IndexError If the argument given is outside the range of axes held by this workspace

@@ -94,9 +94,9 @@ namespace Mantid
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Integration sub-algorithm");
 
-      Workspace2D_sptr retVal = childAlg->getProperty("OutputWorkspace");
+      Workspace_sptr retVal = childAlg->getProperty("OutputWorkspace");
 
-      return boost::dynamic_pointer_cast<Workspace>(retVal);
+      return retVal;
     }
 
   } // namespace Algorithm
