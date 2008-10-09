@@ -53,6 +53,9 @@ public slots:
 	void detectorInformation(int value);
 	void spectraInfoDialog();
 	void changeColormap();
+    void sendPlotSpectraSignal();
+signals:
+    void plotSpectra(const QString&,int);
 private:
     QMenu*       mPopupContext; ///< Popup menu for detector picking
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal

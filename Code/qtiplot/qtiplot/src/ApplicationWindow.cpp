@@ -462,7 +462,6 @@ void ApplicationWindow::initGlobalConstants()
 	plot3DTitleFont = QFont(family, pointSize + 2, QFont::Bold,false);
 
 	autoSearchUpdates = false;
-	askForSupport = false;
 	appLanguage = QLocale::system().name().section('_',0,0);
 	show_windows_policy = ApplicationWindow::ActiveFolder;
 
@@ -4250,12 +4249,6 @@ void ApplicationWindow::readSettings()
 	settings.endGroup();
 
 	autoSearchUpdates = settings.value("/AutoSearchUpdates", false).toBool();
-#ifdef QTIPLOT_DEMO
-	// don't overdo it.. ;)
-	askForSupport = settings.value("/Support", false).toBool();
-#else
-	askForSupport = settings.value("/Support", true).toBool();
-#endif
 	appLanguage = settings.value("/Language", QLocale::system().name().section('_',0,0)).toString();
 	show_windows_policy = (ShowWindowsPolicy)settings.value("/ShowWindowsPolicy", ApplicationWindow::ActiveFolder).toInt();
 
@@ -4574,7 +4567,6 @@ void ApplicationWindow::saveSettings()
 	settings.endGroup();
 
 	settings.setValue("/AutoSearchUpdates", autoSearchUpdates);
-	settings.setValue("/Support", askForSupport);
 	settings.setValue("/Language", appLanguage);
 	settings.setValue("/ShowWindowsPolicy", show_windows_policy);
 	settings.setValue("/RecentProjects", recentProjects);
@@ -12816,31 +12808,6 @@ void ApplicationWindow::showForums()
 void ApplicationWindow::showBugTracker()
 {
 	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/bugs/?group_id=6626"));
-}
-
-void ApplicationWindow::showDonationDialog()
-{
-	if (askForSupport)
-	{
-		QString s= tr("<font size=+2, color = darkBlue><b>QtiPlot is open-source software and its development required hundreds of hours of work.<br><br>\
-				If you like it, you're using it in your work and you would like to see it \
-				constantly improved,<br> please support its authors by making a donation.<br><br> \
-				Would you like to make a donation for QtiPlot now?</b></font>");
-		switch( QMessageBox::information(this, tr("Please support QtiPlot!"), s,
-					tr("Yes, I'd love to!"), tr("Ask me again later!"), tr("No, stop bothering me!"), 0, 1 ) )
-		{
-			case 0:
-				showDonationsPage();
-				break;
-
-			case 1:
-				break;
-
-			case 2:
-				askForSupport = false;
-				break;
-		}
-	}
 }
 
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)

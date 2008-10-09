@@ -255,7 +255,7 @@ bool PythonScripting::initialize()
 
 	bool initialized = loadInitFile(d_parent->d_python_config_folder + "/qtiplotrc");
 	if(!initialized)
-		initialized = loadInitFile(d_parent->d_python_config_folder + "/.qtiplotrc");
+		initialized = loadInitFile("./qtiplotrc");//Mantid
 	return initialized;
 
 //	PyEval_ReleaseLock();

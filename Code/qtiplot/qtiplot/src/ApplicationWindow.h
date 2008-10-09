@@ -783,7 +783,6 @@ public slots:
 	//!  called when the user presses the actionCheckUpdates
 	void searchForUpdates();
 
-	void showDonationDialog();
 	//! Open support page in external browser
 	void showSupportPage();
 	//! Open donation page in external browser

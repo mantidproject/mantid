@@ -478,6 +478,7 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
          {
              if (i == i0) 
              {
+                 // in histograms the point is to be drawn in the centre of the bin.
                  if (m->isHistogram() && forPlotting) t->setCell(j,0,( m->dataX(i,j) + m->dataX(i,j+1) )/2);
                  else
                      t->setCell(j,0,m->dataX(i,j));
@@ -501,9 +502,6 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
     Table *t = createTableFromSelectedRows(m,visible,errs,true);
     if (!t) return;
 
-    QStringList cn;
-    cn<<t->colName(1);
-    if (errs) cn<<t->colName(2);
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
     Graph *g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
@@ -834,6 +832,7 @@ void MantidUI::showMantidInstrument()
 		insWin->resize(400,400);
 		insWin->show();
 		insWin->setWorkspaceName(std::string(selectedName.ascii()));
+        connect(insWin,SIGNAL(plotSpectra(const QString&,int)),this,SLOT(plotInstrumentSpectrum(const QString&,int)));
 	}	
 }
 
@@ -849,3 +848,79 @@ void MantidUI::insertMenu()
 {
 	appWindow()->menuBar()->insertItem(tr("Mantid"), mantidMenu);
 }
+
+/// Catches the signal from InstrumentWindow to plot a spectrum.
+void MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
+{
+//    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
+    Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
+    if (!t) return;
+
+    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    Graph *g = ml->activeGraph();
+    appWindow()->polishGraph(g,Graph::Line);
+    g->setTitle(tr("Workspace ")+name());
+    Mantid::API::Axis* ax;
+    ax = workspace->getAxis(0);
+    std::string s;
+    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    else
+        s = "X axis";
+    g->setXAxisTitle(tr(s.c_str()));
+    g->setYAxisTitle(tr("Counts")); 
+}
+
+
+Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs, bool forPlotting)
+{
+     if (i0 < 0 || i1 < 0) return 0;
+     int nspec = workspace->getNumberHistograms();
+     if (i0 > nspec || i1 > nspec) return 0;
+
+     int c = errs?2:1;
+     int numRows = workspace->blocksize() - 1;
+     bool isHistogram = workspace->isHistogramData();
+     if (isHistogram && !forPlotting) numRows++;
+
+	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+
+     int kY,kErr;
+     for(int i=i0;i<=i1;i++)
+     {
+         const std::vector<double>& dataX = workspace->dataX(i);
+         const std::vector<double>& dataY = workspace->dataY(i);
+         const std::vector<double>& dataE = workspace->dataE(i);
+    
+         kY = c*(i-i0)+1;
+         t->setColName(kY,"Y"+QString::number(i));
+         if (errs)
+         {
+             kErr = 2*(i - i0) + 2;
+             t->setColPlotDesignation(kErr,Table::yErr);
+             t->setColName(kErr,"E"+QString::number(i));
+         }
+         for(int j=0;j<numRows;j++)
+         {
+             if (i == i0) 
+             {
+                 // in histograms the point is to be drawn in the centre of the bin.
+                 if (isHistogram && forPlotting) t->setCell(j,0,( dataX[j] + dataX[j+1] )/2);
+                 else
+                     t->setCell(j,0,dataX[j]);
+             }
+             t->setCell(j,kY,dataY[j]); 
+             if (errs) t->setCell(j,kErr,dataE[j]);
+         }
+         if (isHistogram && !forPlotting)
+         {
+             int iRow = numRows - 1;
+             if (i == i0) t->setCell(iRow,0,dataX[iRow]);
+             t->setCell(iRow,kY,0); 
+             if (errs) t->setCell(iRow,kErr,0);
+         }
+     }
+     return t;
+ }
+

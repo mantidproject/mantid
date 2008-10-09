@@ -28,7 +28,7 @@ using namespace std;
 bool read_command(SOCKET s);
 int peakFun(int i,float x, int t, float dc);
 
-ofstream ofil("C:\\Mantid\\Code\\DAEserv\\release\\tmp.txt");
+//ofstream ofil("C:\\Mantid\\Code\\DAEserv\\release\\tmp.txt");
 
 struct Workspace
 {
@@ -185,7 +185,7 @@ DWORD WINAPI startService(LPVOID p)
         // No longer need server socket
         closesocket(ListenSocket);
 
-        ofil<<"Number of running threads "<<thData.size()<<'\n';
+        //ofil<<"Number of running threads "<<thData.size()<<'\n';
         ThreadData *td = new ThreadData;
         td->s = ClientSocket;
         td->done = false;
@@ -201,7 +201,7 @@ DWORD WINAPI startService(LPVOID p)
                 t = thData.erase(t);
             }
             double diff = difftime(curr_time,(**t).start_time);
-            ofil<<(**t).ID<<" diff="<<diff<<endl;
+            //ofil<<(**t).ID<<" diff="<<diff<<endl;
             // thread unfinished after 60 seconds is treated as failed and terminated
             if(diff > 60. && !(**t).done)
             {

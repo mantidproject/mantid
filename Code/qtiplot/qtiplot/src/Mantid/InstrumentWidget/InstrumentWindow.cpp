@@ -61,6 +61,10 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
     mPopupContext->addAction(infoAction);
 
+	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
+	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
+    mPopupContext->addAction(plotAction);
+
     mAnimationTimer = new QTimer(this);
 	connect(mAnimationTimer, SIGNAL(timeout()), this, SLOT(updateTimeBin()));
 }
@@ -121,6 +125,13 @@ void InstrumentWindow::spectraInfoDialog()
 	info+=" \n The Detector Id: ";
 	info+= QString::number(mDetectorIDSelected);
 	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
+}
+/**
+ *   Sends a signal to plot the selected spectrum.
+ */
+void InstrumentWindow::sendPlotSpectraSignal()
+{
+    emit plotSpectra( QString::fromStdString(mInstrumentDisplay->getWorkspaceName()), mSpectraIDSelected );
 }
 
 /**

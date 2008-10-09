@@ -64,6 +64,7 @@ namespace DAEserv {
             // serviceInstaller1
             // 
             this->serviceInstaller1->ServiceName = L"DAEservWinService";
+            this->serviceInstaller1->StartType = System::ServiceProcess::ServiceStartMode::Automatic;
             this->serviceInstaller1->AfterInstall += gcnew System::Configuration::Install::InstallEventHandler(this, &ProjectInstaller::serviceInstaller1_AfterInstall);
             // 
             // ProjectInstaller

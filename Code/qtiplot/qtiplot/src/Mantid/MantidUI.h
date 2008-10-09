@@ -77,6 +77,8 @@ public:
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     Table* createTableDetectors(MantidMatrix *m);
 
+    Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
+
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
 
@@ -119,6 +121,8 @@ public slots:
 	void manageMantidWorkspaces();
 	void showMantidInstrument();
     void insertMenu();
+
+    void plotInstrumentSpectrum(const QString&,int);
 
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);

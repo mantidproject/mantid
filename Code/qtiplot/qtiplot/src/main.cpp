@@ -171,11 +171,10 @@ int main( int argc, char ** argv )
 
 		ApplicationWindow *mw = new ApplicationWindow(factorySettings);
 		mw->restoreApplicationGeometry();
-		mw->showDonationDialog();
-		if (mw->autoSearchUpdates){
+		/*if (mw->autoSearchUpdates){
 			mw->autoSearchUpdatesRequest = true;
 			mw->searchForUpdates();
-		}
+		}*/
 		mw->parseCommandLineArguments(args);
         t.wait();
         splash.finish(mw);
