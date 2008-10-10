@@ -84,6 +84,15 @@ void Unwrap::exec()
     // Flag indicating whether the current detector is a monitor, Set in calculateFlightpath below.
     bool isMonitor;
     const double Ld = this->calculateFlightpath(i, L1, isMonitor);
+    if (Ld < 0.0)
+    {
+      // If the detector flightpath is missing, zero the data
+      g_log.debug() << "Detector information for workspace index " << i << " is not available." << std::endl;
+      tempWS->dataX(i).assign(tempWS->dataX(i).size(),0.0);
+      tempWS->dataY(i).assign(tempWS->dataY(i).size(),0.0);
+      tempWS->dataE(i).assign(tempWS->dataE(i).size(),0.0);
+      continue;
+    }
 
     // Unwrap the x data. Returns the bin ranges that end up being used
     const std::vector<int> rangeBounds = this->unwrapX(tempWS, i, Ld);
@@ -146,15 +155,15 @@ const double Unwrap::getPrimaryFlightpath() const
  */
 const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const
 {
-  // Get the spectrum number for this histogram
-  const int spec = m_inputWS->getAxis(1)->spectraNo(spectrum);
-  // Get the detector object for this histogram
-  boost::shared_ptr<Geometry::IDetector> det = m_inputWS->getSpectraMap()->getDetector(spec);
-  // Get the sample-detector distance for this detector (or source-detector if a monitor)
-  // This is the total flightpath
-  double Ld;
+  double Ld = -1.0;
   try
   {
+    // Get the spectrum number for this histogram
+    const int spec = m_inputWS->getAxis(1)->spectraNo(spectrum);
+    // Get the detector object for this histogram
+    boost::shared_ptr<Geometry::IDetector> det = m_inputWS->getSpectraMap()->getDetector(spec);
+    // Get the sample-detector distance for this detector (or source-detector if a monitor)
+    // This is the total flightpath
     isMonitor = det->isMonitor();
     // Get the L2 distance if this detector is not a monitor
     if ( !isMonitor )
@@ -170,9 +179,7 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
   }
   catch (Exception::NotFoundError)
   {
-    // Going to be harsh and throw if the detector position is not found.
-    g_log.error() << "Detector " << det->getID() << " position not available" << std::endl;
-    throw Exception::InstrumentDefinitionError("Detector position not available", m_inputWS->getTitle());
+    // If the detector information is missing, return a negative number
   }
 
   return Ld;

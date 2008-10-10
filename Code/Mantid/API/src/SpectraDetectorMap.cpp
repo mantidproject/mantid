@@ -43,6 +43,7 @@ namespace Mantid
         throw std::invalid_argument("Populate : number of entries should be >0");
       }
       IDetector* current;
+      bool warn = true;
       for (int i=0; i<nentries; ++i)
       {
         try
@@ -52,6 +53,11 @@ namespace Mantid
         catch(Kernel::Exception::NotFoundError& error) // No spectra association possible, continue loop
 
         {
+          if (warn)
+          {
+            g_log.warning("Some detectors not found in instrument definition");
+            warn = false;  // Just print this warning once.
+          }
           ++_spectable;
           ++_udettable;
           continue;
@@ -127,7 +133,7 @@ namespace Mantid
       int ndets=ndet(spectrum_number);
       if ( ndets == 0 )
       {
-        g_log.error() << "Spectrum number " << spectrum_number << " not found" << std::endl;
+        g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;
         throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
       }
       else if ( ndets == 1) 

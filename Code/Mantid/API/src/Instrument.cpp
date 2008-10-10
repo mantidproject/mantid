@@ -57,7 +57,7 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
 
   if ( it == _detectorCache.end() )
   {
-    g_log.information() << "Detector with ID " << detector_id << " not found." << std::endl;
+    g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
     throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
   }
 
