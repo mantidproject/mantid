@@ -39,11 +39,17 @@ namespace Mantid
         MEMORYSTATUSEX memStatus;
         memStatus.dwLength = sizeof(MEMORYSTATUSEX);
         GlobalMemoryStatusEx( &memStatus );
-        mi.availMemory = memStatus.ullAvailPhys/1024;
-        mi.totalMemory = memStatus.ullTotalPhys/1024;
+        if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
+        {
+            mi.availMemory = memStatus.ullAvailPhys/1024;
+            mi.totalMemory = memStatus.ullTotalPhys/1024;
+        }
+        else// All virtual memory will be physical, but a process cannot have more than TotalVirtual.
+        {
+            mi.availMemory = memStatus.ullAvailVirtual/1024;
+            mi.totalMemory = memStatus.ullTotalVirtual/1024;
+        }
         mi.freeRatio = int(100*double(mi.availMemory)/mi.totalMemory);
-        //std::cerr<<"Virtual: "<<memStatus.ullTotalVirtual/1024<<' '<<memStatus.ullAvailVirtual/1024<<"\n";
-        //std::cerr<<"Physical: "<<memStatus.ullTotalPhys/1024<<' '<<memStatus.ullAvailPhys/1024<<"\n";
 #else
         long int totPages = sysconf(_SC_PHYS_PAGES);
         long int avPages = sysconf(_SC_AVPHYS_PAGES);

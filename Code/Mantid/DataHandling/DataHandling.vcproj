@@ -188,6 +188,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadRaw\isisraw2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\item_struct.cpp"
 				>
 			</File>
@@ -213,6 +217,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRaw2.cpp"
 				>
 			</File>
 			<File
@@ -266,6 +274,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadRaw\isisraw2.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\item_struct.h"
 				>
 			</File>
@@ -303,6 +315,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadRaw2.h"
 				>
 			</File>
 			<File

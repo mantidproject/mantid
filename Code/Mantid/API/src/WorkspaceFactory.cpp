@@ -44,7 +44,6 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
 Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
                                             int NVectors, int XLength, int YLength) const
 {
-  Workspace_sptr ws = this->create(parent->id());
 
   // Flag to indicate whether this workspace is the same size as the parent
   bool differentSize = true;
@@ -59,7 +58,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
     NVectors = parent->size() / YLength;
   }
 
-  ws->initialize(NVectors,XLength,YLength);
+  Workspace_sptr ws = create(parent->id(),NVectors,XLength,YLength);
 
   // Copy over certain parent data members
   ws->setInstrument(parent->getInstrument());
@@ -110,8 +109,8 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
   int availPercent;
   if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", availPercent) )
   {
-    // Default to 25M elements if missing
-    availPercent = 50;
+    // Default to 40% if missing
+    availPercent = 40;
   }
   MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
   int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
