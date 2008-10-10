@@ -638,9 +638,7 @@ private:
 
   /// Surface type
   typedef std::map<int,Surface*> STYPE ; 
-  /// Object type
- // typedef std::map<int,Object> MTYPE;  
-
+  
   STYPE SMap;   ///< Surface Map
 
   Object createCappedCylinder()
