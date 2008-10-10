@@ -84,7 +84,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     std::vector<int> size;
   };
 
-  class ManagedWorkspace2DTest: public WorkspaceTest
+  class ManagedWorkspace2DTest: public Workspace2DTest
   {
   public:
     const std::string id() const {return "ManagedWorkspace2D";}
@@ -133,7 +133,7 @@ public:
 
     Workspace_sptr ws2D(new Workspace2DTest);
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) )
-    TS_ASSERT( ! child->id().compare("Workspace2DTest") )
+        TS_ASSERT( child->id().find("2D") != std::string::npos )
     Workspace2DTest& space = dynamic_cast<Workspace2DTest&>(*child);
     TS_ASSERT_EQUALS( space.size[0], 100 )
     TS_ASSERT_EQUALS( space.size[1], 1 )
