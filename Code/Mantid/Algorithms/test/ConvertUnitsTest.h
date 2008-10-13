@@ -104,9 +104,9 @@ public:
     TS_ASSERT_EQUALS( e.size(), ten );
     std::vector<double> yIn = input2D->dataY(101);
     std::vector<double> eIn = input2D->dataE(101);
-    TS_ASSERT_EQUALS( y[0], yIn[0] );
-    TS_ASSERT_EQUALS( y[4], yIn[4] );
-    TS_ASSERT_EQUALS( e[1], eIn[1] );
+    TS_ASSERT_DELTA( y[0], yIn[0], 1e-6 );
+    TS_ASSERT_DELTA( y[4], yIn[4], 1e-6 );
+    TS_ASSERT_DELTA( e[1], eIn[1], 1e-6 );
     // Test that spectra that should have been zeroed have been
     std::vector<double> x = output2D->dataX(0);
     y = output2D->dataY(0);
