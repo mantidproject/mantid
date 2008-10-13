@@ -4,9 +4,9 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <cfloat>
 
 namespace Mantid
 {
@@ -48,6 +48,8 @@ void ConvertUnits::init()
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
   declareProperty("Efixed",0.0,mustBePositive);
+
+  declareProperty("AlignBins",false);
 }
 
 /** Executes the algorithm
@@ -75,6 +77,7 @@ void ConvertUnits::exec()
     g_log.information() << "Input workspace already has target unit " << targetUnit
                         << ", so just copying the data unchanged." << std::endl;
     this->copyDataUnchanged(inputWS, outputWS);
+    return;
   }
 
   // Set the final unit that our output workspace will have
@@ -122,6 +125,14 @@ void ConvertUnits::exec()
     convertViaTOF(numberOfSpectra,inputWS,outputWS);
   }
 
+  // Rebin the data to common bins if requested, and if necessary
+  bool alignBins = getProperty("AlignBins");
+  if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS))
+  {
+    outputWS = this->alignBins(outputWS);
+    setProperty("OutputWorkspace",outputWS);
+  }
+
   // If appropriate, put back the bin width division into Y/E.
   if (distribution)
   {
@@ -139,11 +150,11 @@ void ConvertUnits::exec()
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b) relationship
-* @param numberOfSpectra The number of Spectra
-* @param outputWS the output workspace
-* @param factor the conversion factor a to apply
-* @param power the Power b to apply to the conversion
-*/
+ * @param numberOfSpectra The number of Spectra
+ * @param outputWS the output workspace
+ * @param factor the conversion factor a to apply
+ * @param power the Power b to apply to the conversion
+ */
 void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power)
 {
   // See if the workspace has common bins - if so the X vector can be common
@@ -187,10 +198,10 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
-* @param numberOfSpectra The number of Spectra
-* @param inputWS the input workspace
-* @param outputWS the output workspace
-*/
+ * @param numberOfSpectra The number of Spectra
+ * @param inputWS the input workspace
+ * @param outputWS the output workspace
+ */
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_const_sptr inputWS, API::Workspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
@@ -236,11 +247,22 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
       // Get the spectrum number for this histogram
       const int spec = inputWS->getAxis(1)->spectraNo(i);
       // Now get the detector to which this relates
-      Geometry::V3D detPos = specMap->getDetector(spec)->getPos();
+      boost::shared_ptr<Geometry::IDetector> det = specMap->getDetector(spec);
+      Geometry::V3D detPos = det->getPos();
       // Get the sample-detector distance for this detector (in metres)
-      const double l2 = detPos.distance(samplePos);
-      // The scattering angle for this detector (in radians).
-      const double twoTheta = instrument->detectorTwoTheta(specMap->getDetector(spec).get());
+      double l2, twoTheta;
+      if ( ! det->isMonitor() )
+      {
+        l2 = detPos.distance(samplePos);
+        // The scattering angle for this detector (in radians).
+        twoTheta = instrument->detectorTwoTheta(det.get());
+      }
+      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+      {
+        l2 = detPos.distance(instrument->getSource()->getPos());
+        l2 = l2 - l1;
+        twoTheta = 0.0;
+      }
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
@@ -270,6 +292,66 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
     g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << numberOfSpectra-1 << "] distance. Zeroing spectrum." << std::endl;
   }
 
+}
+
+/// Calls Rebin as a sub-algorithm to align the bins
+API::Workspace_sptr ConvertUnits::alignBins(API::Workspace_sptr workspace)
+{
+  // Create a Rebin child algorithm
+  Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
+  childAlg->setProperty<std::vector<double> >("params",this->calculateRebinParams(workspace));
+
+  // Now execute the sub-algorithm. Catch and log any error
+  try
+  {
+    childAlg->execute();
+  }
+  catch (std::runtime_error& err)
+  {
+    g_log.error("Unable to successfully run Rebinning sub-algorithm");
+    throw;
+  }
+
+  if ( ! childAlg->isExecuted() )
+  {
+    g_log.error("Unable to successfully run Rebinning sub-algorithm");
+    throw std::runtime_error("Unable to successfully run Rebinning sub-algorithm");
+  }
+  else
+  {
+    return childAlg->getProperty("OutputWorkspace");
+  }
+}
+
+/// The Rebin parameters should cover the full range of the converted unit, with the same number of bins
+const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspace_const_sptr workspace) const
+{
+  // Need to loop round and find the full range
+  double XMin = DBL_MAX, XMax = DBL_MIN;
+  boost::shared_ptr<SpectraDetectorMap> specMap = workspace->getSpectraMap();
+  Axis* specAxis = workspace->getAxis(1);
+  const int numSpec = workspace->getNumberHistograms();
+  for (int i = 0; i < numSpec; ++i)
+  {
+    try {
+      boost::shared_ptr<Geometry::IDetector> det = specMap->getDetector(specAxis->spectraNo(i));
+      if ( !det->isMonitor() && !det->isDead() )
+      {
+        const std::vector<double> XData = workspace->readX(i);
+        if ( XData.front() < XMin ) XMin = XData.front();
+        if ( XData.back() > XMax )  XMax = XData.back();
+      }
+    } catch (Exception::NotFoundError) {} //Do nothing
+  }
+  const double step = ( XMax - XMin ) / workspace->blocksize();
+
+  std::vector<double> retval;
+  retval.push_back(XMin);
+  retval.push_back(step);
+  retval.push_back(XMax);
+
+  return retval;
 }
 
 /// Copies over the workspace data from the input to the output workspace

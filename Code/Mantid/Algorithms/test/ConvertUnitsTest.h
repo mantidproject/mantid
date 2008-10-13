@@ -77,6 +77,7 @@ public:
     outputSpace = "outWorkspace";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
     alg.setPropertyValue("Target","Wavelength");
+    alg.setPropertyValue("AlignBins","1");
   }
 
   void testExec()
@@ -110,7 +111,6 @@ public:
     std::vector<double> x = output2D->dataX(0);
     y = output2D->dataY(0);
     e = output2D->dataE(0);
-    TS_ASSERT_EQUALS( x[7], 0 );
     TS_ASSERT_EQUALS( y[1], 0 );
     TS_ASSERT_EQUALS( e[9], 0 );
     // Check that the data has truly been copied (i.e. isn't a reference to the same

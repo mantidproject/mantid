@@ -12,6 +12,8 @@ namespace Algorithms
 {
 /** Converts the units in which a workspace is represented.
     Only implemented for histogram data, so far.
+    Note that if you are converting to or from units which are not meaningful for monitor detectors,
+    then you should not expect the resulting spectrum to hold meaningful values.
 
     Required Properties:
     <UL>
@@ -22,8 +24,10 @@ namespace Algorithms
 
     Optional properties required for certain units (DeltaE & DeltaE_inWavenumber):
     <UL>
-    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)</LI>
+    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry) </LI>
     <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
+    <LI> AlignBins - If true (default is false), rebins if necessary to ensure that all spectra in
+                     the output workspace have identical bins (with linear binning) </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
@@ -75,6 +79,9 @@ private:
 
   // Just copies over the workspace data if the units are already correct
   void copyDataUnchanged(const API::Workspace_const_sptr inputWS, const API::Workspace_sptr outputWS);
+  // Calls Rebin as a sub-algorithm to align the bins of the output workspace
+  API::Workspace_sptr alignBins(const API::Workspace_sptr workspace);
+  const std::vector<double> calculateRebinParams(const API::Workspace_const_sptr workspace) const;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
