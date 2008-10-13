@@ -239,6 +239,74 @@ public:
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
   }
 
+  void testExecSLS()
+  {
+    LoadInstrument loaderSLS;
+
+    TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestSLS";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    inputFile = "../../../../Test/Instrument/SLS_Definition.xml";
+    loaderSLS.setPropertyValue("Filename", inputFile);
+
+    loaderSLS.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
+
+    TS_ASSERT( loaderSLS.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    ObjComponent* source = i->getSource();
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Z(), 0.0,0.01);
+
+    ObjComponent* samplepos = i->getSample();
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
+
+    Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101));
+    TS_ASSERT_EQUALS( ptrDet->getID(), 101);
+    //TS_ASSERT_DELTA( ptrDet->getPos().X(),  0.2607, 0.0001);
+    //TS_ASSERT_DELTA( ptrDet->getPos().Y(), -0.1505, 0.0001);
+    //TS_ASSERT_DELTA( ptrDet->getPos().Z(),  2.3461, 0.0001);
+    //double d = ptrDet->getPos().distance(samplepos->getPos());
+    //TS_ASSERT_DELTA(d,2.3653,0.0001);
+    //double cmpDistance = ptrDet->getDistance(*samplepos);
+    //TS_ASSERT_DELTA(cmpDistance,2.3653,0.0001);
+    TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
+
+    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(1));
+    TS_ASSERT( ptrMonitor->isMonitor() );
+
+    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(102));
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.01)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.005,0.1,0.02)+ptrDetShape->getPos()) );
+
+
+    // test of sample shape
+    TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
+    TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+  }
+
   void testExecIDF_for_unit_testing() // IDF stands for Instrument Definition File
   {
     LoadInstrument loaderIDF;
