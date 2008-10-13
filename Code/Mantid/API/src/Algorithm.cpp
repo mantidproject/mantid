@@ -246,6 +246,11 @@ std::string Algorithm::getPropertyValue(const std::string &name) const
   return PropertyManager::getPropertyValue(name);
 }
 
+const std::vector< Mantid::Kernel::Property* >& Algorithm::getProperties() const
+{
+  return PropertyManager::getProperties();
+}
+
 //----------------------------------------------------------------------
 // Protected Member Functions
 //----------------------------------------------------------------------

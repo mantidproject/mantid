@@ -30,6 +30,7 @@ typedef std::vector< double > double_vec;
 typedef std::vector< int > int_vec;
 typedef std::vector< Mantid::API::AlgorithmHistory > algorithmHistory_vec;
 typedef std::vector< Mantid::Kernel::PropertyHistory > PropertyHistory_vec;
+typedef std::vector< Mantid::Kernel::Property* > property_vec;
 
 struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
 {
@@ -61,6 +62,10 @@ struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
 
     bool getPropertyValue(int p0) const {
         return call_method< bool >(py_self, "getPropertyValue", p0);
+    }
+        
+    const std::vector<Mantid::Kernel::Property*,std::allocator<Mantid::Kernel::Property*> >& getProperties() const {
+        return call_method< const std::vector<Mantid::Kernel::Property*,std::allocator<Mantid::Kernel::Property*> >& >(py_self, "getProperties");
     }
 
     PyObject* py_self;
@@ -408,16 +413,21 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	class_< PropertyHistory_vec >( "AlgParVec" )
 	.def( vector_indexing_suite< PropertyHistory_vec >() )
 	;
-
+  
+  class_< property_vec >( "PropertyVec" )
+  .def( vector_indexing_suite< property_vec >() )
+  ;
+  
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >();
 
 	//Namespace Functions
-        def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
+  def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
 	def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
 	def("getWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
-
+  def("createPythonSimpleAPI", &Mantid::PythonAPI::createPythonSimpleAPI);
+  
 	//IAlgorithm Class
 	class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
         .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
@@ -426,7 +436,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("isExecuted", pure_virtual(&Mantid::API::IAlgorithm::isExecuted))
         .def("setPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::setPropertyValue))
         .def("getPropertyValue", pure_virtual(&Mantid::API::IAlgorithm::getPropertyValue))
-	;
+        .def("getProperties", pure_virtual(&Mantid::API::IAlgorithm::getProperties), return_value_policy< copy_const_reference >())
+        ;
 
 	//PropertyManager Class
 	class_< Mantid::Kernel::PropertyManager, boost::noncopyable, Mantid_Kernel_PropertyManager_Wrapper >("PropertyManager", no_init)

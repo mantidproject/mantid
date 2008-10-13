@@ -22,6 +22,7 @@ namespace PythonAPI
 	DLLExport boost::shared_ptr<API::Workspace> LoadIsisRawFile(const std::string&, const std::string&);
 	DLLExport std::vector<std::string> GetAlgorithmNames();
 	DLLExport std::vector<std::string> GetWorkspaceNames();
+  DLLExport void createPythonSimpleAPI();
 
 }
 }

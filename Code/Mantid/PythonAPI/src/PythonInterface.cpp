@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidPythonAPI/PythonInterface.h"
+#include "MantidPythonAPI/SimplePythonAPI.h"
 
 using namespace Mantid::API;
 
@@ -64,6 +65,15 @@ std::vector<std::string> GetWorkspaceNames()
 std::vector<std::string> GetAlgorithmNames()
 {
 	return AlgorithmFactory::Instance().getKeys();
+}
+
+/**
+* Create the simple Python API module
+**/
+void createPythonSimpleAPI()
+{
+  //Redirect to static helper class
+  Mantid::PythonAPI::SimplePythonAPI::createModule();
 }
 	
 }

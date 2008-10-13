@@ -180,6 +180,7 @@ public:
   virtual void setPropertyValue(const std::string &name, const std::string &value);
   virtual void setProperties(const std::string& propertiesArray);
   virtual std::string getPropertyValue(const std::string &name) const;
+  virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const;
   // End of IAlgorithm methods
   using Kernel::PropertyManager::getProperty;
 

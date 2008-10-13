@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include "MantidKernel/INamedInterface.h"
+#include "MantidKernel/Property.h"
 
 namespace Mantid
 {
@@ -94,6 +95,8 @@ public:
    */
   virtual std::string getPropertyValue( const std::string &name ) const = 0;
 
+  /// Get the list of propeties associated with an Algorithm 
+  virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const = 0;
 };
 
 } // namespace API
