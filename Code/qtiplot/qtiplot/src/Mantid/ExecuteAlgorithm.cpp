@@ -17,6 +17,8 @@
 #include "ImportWorkspaceDlg.h"
 #include "MantidKernel/Property.h"
 
+using Mantid::Kernel::PropertyWithValue;
+
 ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent) 
 	: QDialog(parent)
 {
@@ -39,11 +41,20 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	{
 		for (int i = 0; i < m_props.size(); ++i)
 		{
-            if ( m_props[i]->direction() == Mantid::Kernel::Direction::Output &&
-                !dynamic_cast<Mantid::API::IWorkspaceProperty*>(m_props[i])) continue;
+		  // If this is an output property (other than a workspace) then skip
+      if ( m_props[i]->direction() == Mantid::Kernel::Direction::Output &&
+           !dynamic_cast<Mantid::API::IWorkspaceProperty*>(m_props[i])) continue;
+           
+		  QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
+			//Add validator
+			QLabel *validLbl = new QLabel("*");
+			QPalette pal = validLbl->palette();
+			pal.setColor(QPalette::WindowText, Qt::darkRed);
+			validLbl->setPalette(pal);
+			validators[m_props[i]->name()] = validLbl;
+		
 			if (m_props[i]->getValidatorType() == "file")
 			{
-				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
 				QLineEdit *tempEdit = new QLineEdit;
 				QPushButton *tempBtn = new QPushButton(tr("Browse"));
 			
@@ -52,13 +63,6 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			
 				tempLbl->setBuddy(tempEdit);
 				
-				//Add validator
-				QLabel *validLbl = new QLabel("*");
-				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::darkRed);
-				validLbl->setPalette(pal);
-				validators[m_props[i]->name()] = validLbl;
-		
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempEdit, i, 1, 0);
 				grid->addWidget(validLbl, i, 2, 0);
@@ -70,7 +74,6 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			else if (m_props[i]->allowedValues().size() > 0)
 			{		
 				//If the property has allowed values then use a combo box.			
-				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
 				QComboBox *tempCombo = new QComboBox;
 				tempLbl->setBuddy(tempCombo);
 			
@@ -86,13 +89,22 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 				
 				tempCombo->addItems(list);
 				
-				//Add validator
-				QLabel *validLbl = new QLabel("*");
-				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::darkRed);
-				validLbl->setPalette(pal);
-				validators[m_props[i]->name()] = validLbl;
+				grid->addWidget(tempLbl, i, 0, 0);
+				grid->addWidget(tempCombo, i, 1, 0);
+				grid->addWidget(validLbl, i, 2, 0);
 			
+				combos[tempCombo] = m_props[i]->name();
+			}
+			else if (PropertyWithValue<bool> *p = dynamic_cast<PropertyWithValue<bool>* >(m_props[i]))
+			{
+			  // Add a true/false
+				QComboBox *tempCombo = new QComboBox;
+				tempLbl->setBuddy(tempCombo);
+				tempCombo->addItem("No");
+				tempCombo->addItem("Yes");
+				// Set to show default value
+				tempCombo->setCurrentIndex(*p);
+
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempCombo, i, 1, 0);
 				grid->addWidget(validLbl, i, 2, 0);
@@ -101,16 +113,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			}
 			else
 			{
-				QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
 				QLineEdit *tempEdit = new QLineEdit;
 				tempLbl->setBuddy(tempEdit);
-				
-				//Add validator
-				QLabel *validLbl = new QLabel("*");
-				QPalette pal = validLbl->palette();
-				pal.setColor(QPalette::WindowText, Qt::darkRed);
-				validLbl->setPalette(pal);
-				validators[m_props[i]->name()] = validLbl;
 				
 				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 		
@@ -234,6 +238,9 @@ bool ExecuteAlgorithm::setPropertiesAndValidate()
 	for (; comboItr != combos.end(); ++comboItr)
 	{	
 		std::string value = comboItr->first->currentText().trimmed().toStdString();
+		// Ugly way of turning boolean yes/no into the 1/0 required
+		if ( value == "Yes" ) value = "1";
+		if ( value == "No" ) value = "0";
 		
 		//Only set a property if it is not nothing
 		if (value != "")
