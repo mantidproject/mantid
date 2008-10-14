@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <cfloat>
 
 namespace Mantid
 {
@@ -35,6 +36,7 @@ void NormaliseToMonitor::init()
   CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
   val->add(new HistogramValidator<Workspace2D>);
   val->add(new CommonBinsValidator<Workspace2D>);
+  val->add(new RawCountValidator<Workspace2D>);
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
@@ -61,22 +63,34 @@ void NormaliseToMonitor::exec()
   if ( integrate )
   {
     outputWS = this->normaliseByIntegratedCount(inputWS);
+    this->doUndoDistribution(outputWS);
   }
   else
   {
     // Create a Workspace1D with the monitor spectrum in it.
     Workspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWS->blocksize()+1,inputWS->blocksize());
-    monitor->dataX(0) = inputWS->readX(m_monitorIndex);
-    monitor->dataY(0) = inputWS->readY(m_monitorIndex);
+    const std::vector<double> &monX = monitor->dataX(0) = inputWS->readX(m_monitorIndex);
+    const std::vector<double> &monY = monitor->dataY(0) = inputWS->readY(m_monitorIndex);
     monitor->dataE(0) = inputWS->readE(m_monitorIndex);
-    monitor->isDistribution(inputWS->isDistribution());
     monitor->getAxis(0)->unit() = inputWS->getAxis(0)->unit();
 
+    const double monitorSum = std::accumulate(monY.begin(), monY.end(), 0.0);
+    const double range = monX.back() - monX.front();
+    for(Workspace::iterator wi(*monitor); wi != wi.end(); ++wi)
+    {
+        LocatedDataRef tr = *wi;
+        const double factor = (tr.X2()-tr.X()) * monitorSum / range;
+        tr.Y() = tr.Y() / factor;
+        tr.E() = tr.E() / factor;
+        // If monitor count is zero, set to a very large number so we get zero out of normalisation
+        // division below, instead of infinities & nan
+        if (tr.Y() == 0) tr.Y() = DBL_MAX;
+        if (tr.E() == 0) tr.E() = DBL_MAX;
+    }
+
     outputWS = inputWS / monitor;
-    // Divide the data by bin width (will have been lost in division above, if previously present).
     outputWS->isDistribution(false);
   }
-  this->doUndoDistribution(outputWS);
 
   setProperty("OutputWorkspace",outputWS);
 }

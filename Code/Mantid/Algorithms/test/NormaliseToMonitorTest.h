@@ -88,7 +88,6 @@ public:
 
     Workspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("normMon2") )
-    TS_ASSERT( output->isDistribution() )
 
     // Check the non-monitor spectra
     for (int i = 1; i < output->getNumberHistograms(); ++i)
@@ -96,8 +95,8 @@ public:
       for (int j = 0; j < output->blocksize(); ++j)
       {
         TS_ASSERT_EQUALS( output->readX(i)[j], j )
-        TS_ASSERT_EQUALS( output->readY(i)[j], 0.2 )
-        TS_ASSERT_DELTA( output->readE(i)[j], 0.305941, 0.000001 )
+        TS_ASSERT_DELTA( output->readY(i)[j], 2, 0.00001 )
+        TS_ASSERT_DELTA( output->readE(i)[j], 3.05941, 0.00001 )
       }
     }
 
@@ -105,8 +104,8 @@ public:
     for (int k = 0; k < output->blocksize(); ++k)
     {
       TS_ASSERT_EQUALS( output->readX(0)[k], k )
-      TS_ASSERT_EQUALS( output->readY(0)[k], 1.0 )
-      TS_ASSERT_DELTA( output->readE(0)[k], 0.424264, 0.000001 )
+      TS_ASSERT_DELTA( output->readY(0)[k], 10, 0.00001 )
+      TS_ASSERT_DELTA( output->readE(0)[k], 4.24264, 0.00001 )
     }
   }
 
