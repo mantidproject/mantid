@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "WorkspaceCreationHelper.hh"
+#include <fstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,15 +32,6 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
-
-    // Set the properties
-    alg.setPropertyValue("InputWorkspace","testSpace");
-    std::string outputSpace = "IntegrationOuter";
-    alg.setPropertyValue("OutputWorkspace",outputSpace);
-
-    alg.setPropertyValue("DeadThreshold","1");
-    alg.setPropertyValue("LiveValue","3");
-    alg.setPropertyValue("DeadValue","2");
   }
 
   void testExec()
@@ -47,6 +39,7 @@ public:
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
     Workspace2D_sptr work_in = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey,1);
+    int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
     //set some dead detectors
     std::vector<double> yDead(sizex,0);
     for (int i=0; i< sizey; i++)
@@ -55,7 +48,13 @@ public:
       {
         work_in->setData(i,yDead,yDead);
       }
+      work_in->getAxis(1)->spectraNo(i) = i;
+      Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("",NULL);
+      det->setID(i);
+      work_in->getInstrument()->add(det);
+      work_in->getInstrument()->markAsDetector(det);
     }
+    work_in->getSpectraMap()->populate(forSpecDetMap,forSpecDetMap,20,work_in->getInstrument().get());
 
     FindDeadDetectors alg;
 
@@ -66,8 +65,17 @@ public:
     alg.setPropertyValue("DeadThreshold","0");
     alg.setPropertyValue("LiveValue","1");
     alg.setPropertyValue("DeadValue","2");
+    std::string filename = "testFile.txt";
+    alg.setPropertyValue("OutputFile",filename);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
+
+    // Get back the output property
+    std::vector<int> deadDets;
+    TS_ASSERT_THROWS_NOTHING( deadDets = alg.getProperty("FoundDead") )
+    TS_ASSERT_EQUALS( deadDets.size(), 10 )
+
+    // Get back the output workspace
     Workspace_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieve("testdead_out"));
 
@@ -78,9 +86,15 @@ public:
       if (i%2==0)
       {
           valExpected = 2;
+          TS_ASSERT_EQUALS( deadDets[i/2], i )
       }
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
+
+    std::fstream outFile(filename.c_str());
+    TS_ASSERT( outFile )
+    outFile.close();
+    remove(filename.c_str());
 
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");

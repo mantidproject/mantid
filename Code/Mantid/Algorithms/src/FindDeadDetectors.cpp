@@ -3,10 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include <boost/shared_ptr.hpp>
-#include <sstream>
-#include <numeric>
-#include <math.h>
+#include <fstream>
 
 namespace Mantid
 {
@@ -17,19 +14,14 @@ namespace Mantid
     DECLARE_ALGORITHM(FindDeadDetectors)
 
     using namespace Kernel;
-    using API::WorkspaceProperty;
+    using namespace API;
     using DataObjects::Workspace2D;
-    using DataObjects::Workspace2D_sptr;
-    using API::Workspace;
-    using API::Workspace_sptr;
-    using API::LocatedDataRef;
+//    using DataObjects::Workspace2D_sptr;
 
     // Get a reference to the logger
     Logger& FindDeadDetectors::g_log = Logger::get("FindDeadDetectors");
 
-    /** Initialisation method.
-    *
-    */
+    /// Initialisation method.
     void FindDeadDetectors::init()
     {
       declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
@@ -42,12 +34,16 @@ namespace Mantid
       // pointer to each property.
       declareProperty("LiveValue",0.0, mustBePositive->clone());
       declareProperty("DeadValue",100.0, mustBePositive->clone());
+
+      declareProperty("OutputFile","");
+      // This output property will contain the list of UDETs for the dead detectors
+      declareProperty("FoundDead",std::vector<int>(),Direction::Output);
     }
 
     /** Executes the algorithm
-    *
-    *  @throw runtime_error Thrown if algorithm cannot execute
-    */
+     *
+     *  @throw runtime_error Thrown if algorithm cannot execute
+     */
     void FindDeadDetectors::exec()
     {
       // Try and retrieve the optional properties
@@ -55,20 +51,62 @@ namespace Mantid
       double liveValue = getProperty("LiveValue");
       double deadValue = getProperty("DeadValue");
 
+      // Try and open the output file, if specified, and write a header
+      std::ofstream file(getPropertyValue("OutputFile").c_str());
+      file << "Index Spectrum UDET(S)" << std::endl;
+
       // Get the integrated input workspace
       Workspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
+      // Get
+      boost::shared_ptr<SpectraDetectorMap> specMap = integratedWorkspace->getSpectraMap();
+      Axis* specAxis = integratedWorkspace->getAxis(1);
+
+      std::vector<int> deadDets;
+      int countSpec = 0, countDets = 0;
+
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
-      for(Workspace::iterator wi(*integratedWorkspace); wi != wi.end(); ++wi)
+      const int numSpec = integratedWorkspace->getNumberHistograms();
+      for (int i = 0; i < numSpec; ++i)
       {
-          LocatedDataRef tr = *wi;
-          tr.Y() = (tr.Y() > deadThreshold)?liveValue:deadValue;
+        double &y = integratedWorkspace->dataY(i)[0];
+        if ( y > deadThreshold )
+        {
+          y = liveValue;
+        }
+        else
+        {
+          ++countSpec;
+          y = deadValue;
+          const int specNo = specAxis->spectraNo(i);
+          // Write the spectrum number to file
+          file << i << " " << specNo;
+          // Get the list of detectors for this spectrum and iterate over
+          const std::vector<Geometry::IDetector*> dets = specMap->getDetectors(specNo);
+          std::vector<Geometry::IDetector*>::const_iterator it;
+          for (it = dets.begin(); it != dets.end(); ++it)
+          {
+            const int detID = (*it)->getID();
+            // Write the detector ID to file, log & the FoundDead output property
+            file << " " << detID;
+            g_log.debug() << "Dead detector: " << detID << std::endl;
+            deadDets.push_back(detID);
+            ++countDets;
+          }
+          file << std::endl;
+        }
       }
+
+      g_log.information() << "Found a total of " << countDets << " 'dead' detectors within "
+                          << countSpec << " 'dead' spectra." << std::endl;
 
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",integratedWorkspace);
+      setProperty("FoundDead",deadDets);
 
+      // Close the output file
+      file.close();
       return;
     }
 

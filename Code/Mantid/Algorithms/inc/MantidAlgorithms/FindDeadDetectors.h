@@ -29,6 +29,7 @@ namespace Mantid
     <LI> DeadThreshold - The threshold against which to judge if a spectrum belongs to a dead detector (default 0.0)</LI>
     <LI> LiveValue - The value to assign to an integrated spectrum flagged as 'live' (default 0.0)</LI>
     <LI> DeadValue - The value to assign to an integrated spectrum flagged as 'dead' (default 100.0)</LI>
+    <LI> OutputFile - (Optional) A filename to which to write the list of dead detector UDETs </LI>
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
