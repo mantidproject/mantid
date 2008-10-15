@@ -60,6 +60,8 @@ struct DLLExport WorkspaceHelpers
                                  const Workspace_const_sptr ws2, const bool firstOnly = false);
   // Checks whether a the X vectors in a workspace are actually the same vector
   static const bool sharedXData(const Workspace_const_sptr WS);
+  // Divides the data in a workspace by the bin width to make it a distribution (or the reverse)
+  static void makeDistribution(Workspace_sptr workspace, const bool forwards = true);
 };
 
 } // namespace API

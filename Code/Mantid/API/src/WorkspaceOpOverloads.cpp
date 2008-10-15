@@ -234,5 +234,29 @@ const bool WorkspaceHelpers::sharedXData(const Workspace_const_sptr WS)
   return true;
 }
 
+/** Divides the data in a workspace by the bin width to make it a distribution.
+ *  Can also reverse this operation (i.e. multiply by the bin width).
+ *  Sets the isDistribution() flag accordingly.
+ */
+void WorkspaceHelpers::makeDistribution(Workspace_sptr workspace, const bool forwards)
+{
+  // Check workspace isn't already in the correct state - do nothing if it is
+  if ( workspace->isDistribution() == forwards ) return;
+
+  const int numberOfSpectra = workspace->getNumberHistograms();
+  for (int i = 0; i < numberOfSpectra; ++i)
+  {
+    const int size = workspace->blocksize();
+    for (int j = 0; j < size; ++j)
+    {
+      double width = std::abs( workspace->readX(i)[j+1] - workspace->readX(i)[j] );
+      if (!forwards) width = 1.0/width;
+      workspace->dataY(i)[j] /= width;
+      workspace->dataE(i)[j] /= width;
+    }
+  }
+  workspace->isDistribution(forwards);
+}
+
 } // namespace API
 } // namespace Mantid

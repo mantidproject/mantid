@@ -10,17 +10,23 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Normalises a 2D workspace by a specified monitor spectrum. The output workspace will
-    have its data divided by the bin width, whether or not the input one does.
+/** Normalises a 2D workspace by a specified monitor spectrum. By default ,the
+    normalisation is done bin-by-bin following this formula:
+    Norm(s_i)=(s_i/m_i)*Dlam_i*Sum(m_i)/Sum(Dlam_i)
+    where s_i is the signal in bin i, m_i the count in the corresponding monitor bin,
+    Dlam_i the width of the bin, Sum(m_i) is the integrated monitor count and
+    Sum(Dlam_i) the sum of all bin widths (the full range).
+
     Optionally, can instead normalise by the integrated monitor count over a specified
     range in X. In this case, the range of the output workspace will have its limits
     at the closest bins within the range values given (i.e. bins may be removed with
     respect to the start and end of the input workspace, but the bin boundaries will
-    remain the same).
+    remain the same). No bin width correction takes place in this case.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The name of the input Workspace2D. </LI>
+    <LI> InputWorkspace  - The name of the input Workspace2D. Must be a histogram with
+              common bins and not a distribution.</LI>
     <LI> OutputWorkspace - The name of the output Workspace2D. </LI>
     <LI> MonitorSpectrum - The spectrum number for the monitor to normalise with </LI>
     </UL>
@@ -75,7 +81,6 @@ private:
   const bool checkProperties();
   void findMonitorIndex(API::Workspace_const_sptr inputWorkspace);
   API::Workspace_sptr normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace);
-  void doUndoDistribution(API::Workspace_sptr workspace, const bool forwards = true);
 
   /// The index of the monitor to which to normalise
   int m_monitorIndex;

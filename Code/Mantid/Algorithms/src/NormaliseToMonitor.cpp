@@ -37,6 +37,7 @@ void NormaliseToMonitor::init()
   val->add(new HistogramValidator<Workspace2D>);
   val->add(new CommonBinsValidator<Workspace2D>);
   val->add(new RawCountValidator<Workspace2D>);
+  // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val));
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
@@ -63,7 +64,6 @@ void NormaliseToMonitor::exec()
   if ( integrate )
   {
     outputWS = this->normaliseByIntegratedCount(inputWS);
-    this->doUndoDistribution(outputWS);
   }
   else
   {
@@ -83,7 +83,7 @@ void NormaliseToMonitor::exec()
         tr.Y() = tr.Y() / factor;
         tr.E() = tr.E() / factor;
         // If monitor count is zero, set to a very large number so we get zero out of normalisation
-        // division below, instead of infinities & nan
+        // division below, instead of infinities or nan
         if (tr.Y() == 0) tr.Y() = DBL_MAX;
         if (tr.E() == 0) tr.E() = DBL_MAX;
     }
@@ -169,13 +169,6 @@ void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspa
 /// Carries out a normalisation based on the integrated count of the monitor over a range
 API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace)
 {
-  bool fixInput = false;
-  // Need to remove division by bin width if it's present
-  if ( !inputWorkspace->isDistribution() )
-  {
-    this->doUndoDistribution(inputWorkspace,false);
-    fixInput = true;
-  }
   // Don't run regroup algorithm if integrating over full workspace range
   if ( m_integrationMin != inputWorkspace->readX(0).front() || m_integrationMax != inputWorkspace->readX(0).back() )
   {
@@ -191,17 +184,12 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
     try {
       regroup->execute();
     } catch (std::runtime_error& err) {
-      g_log.error("Unable to successfully run Rebunch sub-algorithm");
+      g_log.error("Unable to successfully run Regroup sub-algorithm");
       throw;
     }
     // Get back the result
     inputWorkspace = regroup->getProperty("OutputWorkspace");
   }
-//  else
-//  {
-//    // Indicates that I'll have to later take out the bin width division that I'm about to put in
-//    if ( !inputWorkspace->isDistribution() ) fixInput = true;
-//  }
 
   // Now create a Workspace1D with the monitor spectrum
   Workspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWorkspace->blocksize()+1,inputWorkspace->blocksize());
@@ -209,12 +197,10 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   monitor->dataY(0) = inputWorkspace->readY(m_monitorIndex);
   monitor->dataE(0) = inputWorkspace->readE(m_monitorIndex);
   monitor->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
-//  monitor->isDistribution(true);
 
   // Add up all the bins so it's just effectively a single value with an error
   Algorithm_sptr integrate = createSubAlgorithm("Integration");
   integrate->setProperty<Workspace_sptr>("InputWorkspace", monitor);
-  //rebunch->setProperty<int>("n_bunch",monitor->blocksize());
   try {
     integrate->execute();
   } catch (std::runtime_error& err) {
@@ -225,30 +211,8 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   monitor = integrate->getProperty("OutputWorkspace");
 
   Workspace_sptr outputWS = inputWorkspace / monitor;
-//  this->doUndoDistribution(outputWS);
-  if (fixInput) this->doUndoDistribution(inputWorkspace);
+//  WorkspaceHelpers::makeDistribution(outputWS);
   return outputWS;
-}
-
-/// Divides a workspace's data (and errors) by the bin width
-void NormaliseToMonitor::doUndoDistribution(API::Workspace_sptr workspace, const bool forwards)
-{
-  // Check workspace isn't already in the correct state - do nothing if it is
-  if ( workspace->isDistribution() == forwards ) return;
-
-  const int numberOfSpectra = workspace->getNumberHistograms();
-  for (int i = 0; i < numberOfSpectra; ++i)
-  {
-    const int size = workspace->blocksize();
-    for (int j = 0; j < size; ++j)
-    {
-      double width = std::abs( workspace->readX(i)[j+1] - workspace->readX(i)[j] );
-      if (!forwards) width = 1.0/width;
-      workspace->dataY(i)[j] /= width;
-      workspace->dataE(i)[j] /= width;
-    }
-  }
-  workspace->isDistribution(forwards);
 }
 
 } // namespace Algorithm
