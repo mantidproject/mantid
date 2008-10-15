@@ -16,21 +16,35 @@ namespace Mantid
   {
   
     /// Static filename variable
-    std::string SimplePythonAPI::m_strFilename = "MantidPythonSimpleAPI.py";
+    std::string SimplePythonAPI::m_strFilename = "mntd.py";
   
     //------------------------------
     //Public methods
     //------------------------------
     /**
-          * Create the python module with function definitions in the 
-          * file whose name is stored in "m_strFilename"
-          */
+     * Return the name of the Python module to be created
+     * @returns A string containing the name of the module file
+     */
+    const std::string & SimplePythonAPI::getModuleName()
+    {
+      return m_strFilename;
+    }
+
+    /**
+     * Create the python module with function definitions in the 
+     * file whose name is stored in "m_strFilename"
+     */
     void SimplePythonAPI::createModule()
     {
       //open file
       std::ofstream module(m_strFilename.c_str());
+      
       // Need to import defintions from main Python API 
+#ifdef _WIN32
       module << "from MantidPythonAPI import FrameworkManager\n\n";
+#else
+      module << "from libMantidPythonAPI import FrameworkManager\n\n";
+#endif
       
       //Algorithm names
       StringSet algmNames = getAlgorithmNames();
@@ -46,7 +60,11 @@ namespace Mantid
       //close file stream
       module.close();
     }
-    
+
+    /**
+     * Get a list of unique algorithm names
+     * @returns A set of strings denoting the loaded algorithms 
+     */
     SimplePythonAPI::StringSet SimplePythonAPI::getAlgorithmNames()
     {
       StringVector algKeys = Mantid::API::AlgorithmFactory::Instance().getKeys();
@@ -60,10 +78,10 @@ namespace Mantid
     }
     
     /**
-          * Strip the version information from the algorithm keys
-          * @param name The algorithm key
-          * @returns The name of the algorithm
-          */
+     * Strip the version information from the algorithm keys
+     * @param name The algorithm key
+     * @returns The name of the algorithm
+     */
     std::string SimplePythonAPI::extractAlgName(const std::string & name)
     {
       std::string::size_type idx = name.find('|');
@@ -72,11 +90,11 @@ namespace Mantid
     }
      
     /**
-          * Write a Python function defintion
-          * @param os The stream to use to write the definition
-          * @param algm The name of the algorithm
-          * @param propertiesThe list of properties
-          */
+     * Write a Python function defintion
+     * @param os The stream to use to write the definition
+     * @param algm The name of the algorithm
+     * @param propertiesThe list of properties
+     */
     void SimplePythonAPI::writeFunctionDef(std::ostream & os, std::string algm, 
     const PropertyVector & properties)
     {
@@ -106,10 +124,10 @@ namespace Mantid
     }
     
     /**
-          * Write a global help command
-          @param os The stream to use to write the command
-          @param algms The names of the available algorithms
-          */
+     * Write a global help command
+     * @param os The stream to use to write the command
+     * @param algms The names of the available algorithms
+     */
     void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const StringSet & algNames)
     {
       os << "# The help command with no parameters\n";

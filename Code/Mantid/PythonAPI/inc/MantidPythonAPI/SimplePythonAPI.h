@@ -14,7 +14,7 @@ namespace Mantid
 namespace PythonAPI
 {
 
-/** @class SimplePythonAPI SimplePythonAPI.h.h PythonAPI/SimplePythonAPI.h
+/** @class SimplePythonAPI SimplePythonAPI.h PythonAPI/SimplePythonAPI.h
 
     SimplePythonAPI is a static class designed to write out a Python module containing
     function definitions for all loaded algorithms. A particular function, when called, will
@@ -53,7 +53,8 @@ class DLLExport SimplePythonAPI
   typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
 
   ///Public methods
-  static void createModule(); 
+  static void createModule();
+  static const std::string & getModuleName(); 
   
   private:
   ///private constructor

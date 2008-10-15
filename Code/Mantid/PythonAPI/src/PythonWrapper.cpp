@@ -384,7 +384,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_WorkspaceHistory_printSelf_overloads_1_2, printSelf, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_PropertyHistory_printSelf_overloads_1_2, printSelf, 1, 2)
 
-#if _WIN32
+#ifdef _WIN32
 BOOST_PYTHON_MODULE(MantidPythonAPI)
 #else
 BOOST_PYTHON_MODULE(libMantidPythonAPI)
@@ -414,9 +414,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	.def( vector_indexing_suite< PropertyHistory_vec >() )
 	;
   
-  class_< property_vec >( "PropertyVec" )
-  .def( vector_indexing_suite< property_vec >() )
-  ;
+	class_< property_vec >( "PropertyVec" )
+	  .def( vector_indexing_suite< property_vec >() )
+	  ;
   
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
