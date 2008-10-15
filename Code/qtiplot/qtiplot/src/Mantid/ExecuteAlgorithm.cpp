@@ -16,6 +16,7 @@
 #include "LoadRawDlg.h"
 #include "ImportWorkspaceDlg.h"
 #include "MantidKernel/Property.h"
+#include "InputHistory.h"
 
 using Mantid::Kernel::PropertyWithValue;
 
@@ -23,6 +24,7 @@ ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent)
 	: QDialog(parent)
 {
 	m_parent = parent;
+    m_directory = "";
 }
 
 ExecuteAlgorithm::~ExecuteAlgorithm()
@@ -39,6 +41,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 
 	if (m_props.size() > 0)
 	{
+        QMap< QString, QString > savedProps = InputHistory::Instance().algorithmProperties(QString::fromStdString(alg->name()));
+        QString lastValue;
 		for (int i = 0; i < m_props.size(); ++i)
 		{
 		  // If this is an output property (other than a workspace) then skip
@@ -57,6 +61,12 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			{
 				QLineEdit *tempEdit = new QLineEdit;
 				QPushButton *tempBtn = new QPushButton(tr("Browse"));
+                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
+                if (!lastValue.isEmpty())
+                {
+                    tempEdit->setText(lastValue);
+                    m_directory = InputHistory::Instance().getDirectoryFromFilePath(lastValue);
+                }
 			
 				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 				connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
@@ -88,6 +98,12 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 				}
 				
 				tempCombo->addItems(list);
+                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
+                if (!lastValue.isEmpty()) 
+                {
+                    int i = list.indexOf(lastValue);
+                    if (i >= 0) tempCombo->setCurrentIndex(i);
+                }
 				
 				grid->addWidget(tempLbl, i, 0, 0);
 				grid->addWidget(tempCombo, i, 1, 0);
@@ -115,6 +131,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 			{
 				QLineEdit *tempEdit = new QLineEdit;
 				tempLbl->setBuddy(tempEdit);
+                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
+                if (!lastValue.isEmpty()) tempEdit->setText(lastValue);
 				
 				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 		
@@ -155,8 +173,6 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 
 void ExecuteAlgorithm::browseClicked()
 {
-	static QString curDir = "";
-	
 	//Get the line edit associated with the button
 	QLineEdit *temp = buttonsToEdits[qobject_cast<QPushButton*>(sender())];
 	
@@ -198,7 +214,7 @@ void ExecuteAlgorithm::browseClicked()
 		allowed = "All Files (*.*)";
 	}
 
-	QString s( QFileDialog::getOpenFileName(this, tr("Select File"), curDir, allowed));
+	QString s( QFileDialog::getOpenFileName(this, tr("Select File"), m_directory, allowed));
 	if ( s.isEmpty() )  return;
 		
 	temp->setText(s);

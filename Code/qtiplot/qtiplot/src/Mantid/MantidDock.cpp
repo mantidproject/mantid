@@ -12,6 +12,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QLineEdit>
+#include <QPushButton>
 
 #include <map>
 #include <iostream>
@@ -38,10 +39,8 @@ QDockWidget(w)
     QHBoxLayout * buttonLayout = new QHBoxLayout();
     m_loadButton = new QPushButton("Load");
     m_deleteButton = new QPushButton("Delete");
-    QPushButton *tstButton = new QPushButton("Import");
     buttonLayout->addWidget(m_loadButton);
     buttonLayout->addWidget(m_deleteButton);
-    buttonLayout->addWidget(tstButton);
     buttonLayout->addStretch();
     //
     QVBoxLayout * layout = new QVBoxLayout();
@@ -60,8 +59,8 @@ QDockWidget(w)
     m_loadButton->setMenu(loadMenu);
 
     connect(m_deleteButton,SIGNAL(clicked()),m_mantidUI,SLOT(deleteWorkspace()));
-    connect(tstButton,SIGNAL(clicked()),m_mantidUI,SLOT(importWorkspace()));
     connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
+    connect(m_tree,SIGNAL(popupMenu()),this,SLOT(popupMenu()));
 }
 
 void MantidDockWidget::update()
@@ -95,12 +94,44 @@ void MantidDockWidget::clickedWorkspace(QTreeWidgetItem*, int)
 {
 }
 
+void MantidDockWidget::popupMenu()
+{
+        QString selectedWsName = m_mantidUI->getSelectedWorkspaceName();
+        QMenu *menu = new QMenu(this);
+
+        QAction *action = new QAction("Load RAW file",this);
+        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
+        menu->addAction(action);
+
+        action = new QAction("Load form DAE",this);
+        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
+        menu->addAction(action);
+
+        action = new QAction("Delete workspace",this);
+        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
+        if (selectedWsName.isEmpty()) action->setEnabled(false);
+        menu->addAction(action);
+
+        action = new QAction("Show instrument",this);
+        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
+        if (selectedWsName.isEmpty()) action->setEnabled(false);
+        menu->addAction(action);
+
+        menu->popup(QCursor::pos());
+}
+
 //------------ MantidTreeWidget -----------------------//
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton)
          m_dragStartPosition = e->pos();
+
+    if (e->button() == Qt::RightButton)
+    {
+        emit popupMenu();
+        return;
+    }
 
     QTreeWidget::mousePressEvent(e);
 }

@@ -49,6 +49,8 @@ private:
 	QPushButton *loadButton;
 	QPushButton *cancelButton;
 
+    QString directory;
+
 };
 
 #endif /* LOADRAWDLG_H */

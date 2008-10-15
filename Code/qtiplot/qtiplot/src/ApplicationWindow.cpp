@@ -176,6 +176,8 @@ void file_uncompress(char  *file);
 ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
 {
+    QCoreApplication::setOrganizationName("ISIS");
+    QCoreApplication::setApplicationName("MantidPlot");
     mantidUI = new MantidUI(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 	init(factorySettings);
@@ -4236,9 +4238,9 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
 void ApplicationWindow::readSettings()
 {
 #ifdef Q_OS_MAC // Mac
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
 #else
-	QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings;
 #endif
 
 	/* ---------------- group General --------------- */
@@ -4271,7 +4273,7 @@ void ApplicationWindow::readSettings()
 	autoSave = settings.value("/AutoSave",true).toBool();
 	autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
     d_backup_files = settings.value("/BackupProjects", true).toBool();
-	d_init_window_type = (WindowType)settings.value("/InitWindow", TableWindow).toInt();
+	d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
 	defaultScriptingLang = settings.value("/ScriptingLang","muParser").toString();
 	d_thousands_sep = settings.value("/ThousandsSeparator", true).toBool();
 	d_locale = QLocale(settings.value("/Locale", QLocale::system().name()).toString());
@@ -4547,9 +4549,9 @@ void ApplicationWindow::saveSettings()
 {
 
 #ifdef Q_OS_MAC // Mac
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
 #else
-	QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings;//(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
 #endif
 
 	/* ---------------- group General --------------- */
@@ -8807,9 +8809,9 @@ void ApplicationWindow::chooseHelpFolder()
 void ApplicationWindow::showStandAloneHelp()
 {
 #ifdef Q_OS_MAC // Mac
-	QSettings settings(QSettings::IniFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
 #else
-	QSettings settings(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings;//(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
 #endif
 
 	settings.beginGroup("/General");

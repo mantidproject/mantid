@@ -61,6 +61,8 @@ private:
 	bool validateProperty(const std::string& name);
 	void showValidator(const std::string& propName);
 	void hideValidator(const std::string& propName);
+
+    QString m_directory;
 };
 
 #endif /* EXECUTEALGORITHM_H */

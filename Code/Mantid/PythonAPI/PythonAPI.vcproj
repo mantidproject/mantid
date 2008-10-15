@@ -178,6 +178,10 @@
 				RelativePath=".\src\PythonWrapper.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\SimplePythonAPI.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -194,6 +198,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\PythonInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\SimplePythonAPI.h"
 				>
 			</File>
 		</Filter>

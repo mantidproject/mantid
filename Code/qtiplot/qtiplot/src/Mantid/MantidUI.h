@@ -67,7 +67,7 @@ public:
     Graph3D *plot3DMatrix(int style);
     // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
     MultiLayer *plotSpectrogram(Graph::CurveType type);
-    // Removes referances to MantidMatrix w in QtiPlot
+    // Removes references to MantidMatrix w in QtiPlot
     void removeWindowFromLists(MdiSubWindow* w);
     // Prepares the contex menu for MantidMatrix
     void showContextMenu(QMenu& cm, MdiSubWindow* w);
@@ -81,6 +81,10 @@ public:
 
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
+#ifdef _WIN32
+    // Shows 2D plot of current memory usage.
+    void memoryImage();
+#endif
 
 signals:
 
@@ -120,6 +124,8 @@ public slots:
 	void mantidMenuAboutToShow();
 	void manageMantidWorkspaces();
 	void showMantidInstrument();
+	void showMantidInstrumentSelected();
+	void showMantidInstrument(const QString&);
     void insertMenu();
 
     void plotInstrumentSpectrum(const QString&,int);

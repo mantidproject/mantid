@@ -3,12 +3,13 @@
 
 #include <QDockWidget>
 #include <QTreeWidget>
-#include <QPushButton>
 #include <QComboBox>
 
 class MantidUI;
 class ApplicationWindow;
 class QLabel;
+class QMenu;
+class QPushButton;
 
 class MantidDockWidget: public QDockWidget
 {
@@ -19,6 +20,8 @@ public:
     void update();
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
+protected slots:
+    void popupMenu();
 protected:
     QTreeWidget *m_tree;
     friend class MantidUI;
@@ -36,6 +39,8 @@ public:
     MantidTreeWidget(QWidget *w):QTreeWidget(w){}
     void mousePressEvent (QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
+signals:
+    void popupMenu();
 private:
     QPoint m_dragStartPosition;
 };

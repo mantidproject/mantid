@@ -20,6 +20,8 @@ MantidVersion = '1.0.' + vstr[12:vlen-2]
 
 product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'
 
+MantidInstallDir = 'MantidInstall'
+
 pfile = open('product_uuid.txt','w')
 pfile.write(product_uuid)
 pfile.close()
@@ -236,6 +238,7 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
+# PYTHON25DIR is the path to Python 2.5 
 PyProp = addTo(Product,'Property',{'Id':'PYTHON25DIR'})
 addTo(PyProp,'RegistrySearch',{'Id':'Python25Registry','Type':'raw','Root':'HKLM','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath'})
 
@@ -246,7 +249,7 @@ Product.appendChild(Cond)
 
 #TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
 TargetDir = addDirectory('TARGETDIR','WVolume','WindowsVolume',Product)
-InstallDir = addDirectory('INSTALLDIR','MInstall','MantidInstall',TargetDir)
+InstallDir = addDirectory('INSTALLDIR','MInstall',MantidInstallDir,TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 
 MantidDlls = addComponent('MantidDLLs','{FABC0481-C18D-415e-A0B1-CCB76C35FBE8}',binDir)
@@ -443,8 +446,8 @@ ProgramMenuDir = addDirectory('ProgramMenuDir','Mantid','Mantid',ProgramMenuFold
 DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 
 #-----------------------------------------------------------------------
-Py25Exists = addTo(Product,'Property',{'Id':'DIREXISTS'})
-addTo(Py25Exists,'DirectorySearch',{'Id':'CheckDir','Path':'C:\Python25\Lib\site-packages\PyQt4','Depth':'0'})
+PyQtExists = addTo(Product,'Property',{'Id':'PYQTDIREXISTS'})
+addTo(PyQtExists,'DirectorySearch',{'Id':'CheckDir','Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
 
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
@@ -475,10 +478,12 @@ addCRefs(pocoList,Includes)
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
-# Dont see why it must be a separate feature
-#PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',MantidExec)
-addCRef('Sip',QTIPlotExec)
-addCRef('PyQt',QTIPlotExec)
+# Prevent overwriting existing PyQt installation.
+PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',QTIPlotExec)
+addCRef('Sip',PyQtF)
+addCRef('PyQt',PyQtF)
+addText('NOT PYQTDIREXISTS',
+        addTo(PyQtF,'Condition',{'Level':'0'}))
 
 SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
 addCRef('SourceMantidAlgorithms',SourceFiles)

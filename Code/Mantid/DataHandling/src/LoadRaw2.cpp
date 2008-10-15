@@ -183,6 +183,9 @@ namespace Mantid
           instrument = localWorkspace->getInstrument();
           specMap = localWorkspace->getSpectraMap();
           sample = localWorkspace->getSample();
+          // Set the total proton charge for this run
+          // (not sure how this works for multi_period files)
+          sample->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {

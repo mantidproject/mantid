@@ -78,6 +78,8 @@ m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
     connect(this,SIGNAL(needChangeWorkspace(Mantid::API::Workspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::Workspace_sptr)));
     connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
     connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
+
+    askOnCloseEvent(false);
 }
 
 MantidMatrix::~MantidMatrix()
@@ -503,6 +505,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     plot->setZAxisLabel(tr("Counts")); 
 
     a->initPlot3D(plot);
+    plot->askOnCloseEvent(false);
 	QApplication::restoreOverrideCursor();
 
     return plot;
@@ -543,6 +546,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
 
     plot->setAutoScale();
+    g->askOnCloseEvent(false);
 
 	QApplication::restoreOverrideCursor();
 	return g;

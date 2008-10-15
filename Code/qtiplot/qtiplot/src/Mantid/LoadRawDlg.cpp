@@ -3,6 +3,7 @@
 #include <qfiledialog.h>
 
 #include "LoadRawDlg.h"
+#include "InputHistory.h"
 
 loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspaceName("")
 {
@@ -10,10 +11,22 @@ loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspa
 	lineFile = new QLineEdit;
 	lineFile->setReadOnly(true);
 	label->setBuddy(lineFile);
+    QString propValue = InputHistory::Instance().algorithmProperty("LoadRaw","Filename");
+    if (!propValue.isEmpty())
+    {
+        directory = InputHistory::Instance().getDirectoryFromFilePath(propValue);
+        lineFile->setText(propValue);
+        lineFile->setSelection(0,propValue.length());
+    }
 	
 	label2 = new QLabel(tr("Enter Name for Workspace:"));
 	lineName = new QLineEdit;
 	label2->setBuddy(lineName);
+    propValue = InputHistory::Instance().algorithmProperty("LoadRaw","OutputWorkspace");
+    if (!propValue.isEmpty())
+    {
+        lineName->setText(propValue);
+    }
 	
 	browseButton = new QPushButton(tr("Browse"));
 	loadButton = new QPushButton(tr("Load"));
@@ -41,10 +54,21 @@ loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspa
 	QGridLayout *paramsLayout = new QGridLayout;
     QLabel *minSpLabel = new QLabel("Starting spectrum");
     minSpLineEdit = new QLineEdit;
+    propValue = InputHistory::Instance().algorithmProperty("LoadRaw","spectrum_min");
+    if (!propValue.isEmpty())
+    {
+        minSpLineEdit->setText(propValue);
+    }
     paramsLayout->addWidget(minSpLabel,0,0);
     paramsLayout->addWidget(minSpLineEdit,0,1);
+
     QLabel *maxSpLabel = new QLabel("Ending spectrum");
     maxSpLineEdit = new QLineEdit;
+    propValue = InputHistory::Instance().algorithmProperty("LoadRaw","spectrum_max");
+    if (!propValue.isEmpty())
+    {
+        maxSpLineEdit->setText(propValue);
+    }
     paramsLayout->addWidget(maxSpLabel,1,0);
     paramsLayout->addWidget(maxSpLineEdit,1,1);
 
@@ -66,9 +90,7 @@ loadRawDlg::~loadRawDlg()
 
 void loadRawDlg::browseClicked()
 {
-	static QString curDir = "";
-
-	QString s( QFileDialog::getOpenFileName(this, tr("Select Raw File"), curDir, tr("Raw File (*.RAW)") ) );
+	QString s( QFileDialog::getOpenFileName(this, tr("Select Raw File"), directory, tr("Raw File (*.RAW)") ) );
 	if ( s.isEmpty() )  return;
 	lineFile->setText(s);
 
@@ -81,7 +103,7 @@ void loadRawDlg::browseClicked()
 	lineName->setText(s.mid(i+1,j - i - 1));
 	lineName->setSelection(0,lineName->text().length());
 	lineName->setFocus(Qt::OtherFocusReason);
-	curDir = s.remove(i,s.length()-i);
+	directory = s.remove(i,s.length()-i);
 }
 
 void loadRawDlg::loadClicked()
