@@ -29,7 +29,7 @@ CropWorkspace::~CropWorkspace() {}
 void CropWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new CommonBinsValidator<Workspace2D>));
-  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("XMin",0.0);
   declareProperty("XMax",0.0);
@@ -59,7 +59,7 @@ void CropWorkspace::exec()
   DataObjects::Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo later
-  Axis *specAxis = NULL, *outAxis;
+  Axis *specAxis = NULL, *outAxis = NULL;
   if (m_inputWorkspace->axes() > 1)
   {
     specAxis = m_inputWorkspace->getAxis(1);
@@ -83,7 +83,7 @@ void CropWorkspace::exec()
     if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(i);
   }
 
-  setProperty("OutputWorkspace", output2D);
+  setProperty("OutputWorkspace", outputWorkspace);
 }
 
 /** Retrieves the optional input properties and checks that they have valid values.

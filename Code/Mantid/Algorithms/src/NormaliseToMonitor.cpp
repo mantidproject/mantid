@@ -169,26 +169,22 @@ void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspa
 /// Carries out a normalisation based on the integrated count of the monitor over a range
 API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace)
 {
-  // Don't run regroup algorithm if integrating over full workspace range
+  // Don't run CropWorkspace algorithm if integrating over full workspace range
   if ( m_integrationMin != inputWorkspace->readX(0).front() || m_integrationMax != inputWorkspace->readX(0).back() )
   {
-    // (This just lops bins off the beginning and end - should write an algorithm that just does this)
-    Algorithm_sptr regroup = createSubAlgorithm("Regroup");
-    regroup->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
-    std::vector<double> p(3);
-    p[0] = m_integrationMin;
-    // Need a more efficient way than this of ensuring we get the same bins out as went in
-    p[1] = 1e-7;
-    p[2] = m_integrationMax;
-    regroup->setProperty<std::vector<double> >("params",p);
+    Algorithm_sptr crop = createSubAlgorithm("CropWorkspace");
+    DataObjects::Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
+    crop->setProperty("InputWorkspace", input2D);
+    crop->setProperty("XMin",m_integrationMin);
+    crop->setProperty("Xmax",m_integrationMax);
     try {
-      regroup->execute();
+      crop->execute();
     } catch (std::runtime_error& err) {
-      g_log.error("Unable to successfully run Regroup sub-algorithm");
+      g_log.error("Unable to successfully run CropWorkspace sub-algorithm");
       throw;
     }
     // Get back the result
-    inputWorkspace = regroup->getProperty("OutputWorkspace");
+    inputWorkspace = crop->getProperty("OutputWorkspace");
   }
 
   // Now create a Workspace1D with the monitor spectrum
