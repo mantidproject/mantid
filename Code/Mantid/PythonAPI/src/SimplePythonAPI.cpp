@@ -16,7 +16,7 @@ namespace Mantid
   {
   
     /// Static filename variable
-    std::string SimplePythonAPI::m_strFilename = "mntd.py";
+    std::string SimplePythonAPI::m_strFilename = "mantidsimple.py";
   
     //------------------------------
     //Public methods
@@ -39,7 +39,7 @@ namespace Mantid
       //open file
       std::ofstream module(m_strFilename.c_str());
       
-      // Need to import defintions from main Python API 
+      // Need to import definitions from main Python API 
 #ifdef _WIN32
       module << "from MantidPythonAPI import FrameworkManager\n\n";
 #else
@@ -124,14 +124,14 @@ namespace Mantid
     }
     
     /**
-     * Write a global help command
+     * Write a global help command called mtdHelp, which takes no arguments
      * @param os The stream to use to write the command
      * @param algms The names of the available algorithms
      */
     void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const StringSet & algNames)
     {
       os << "# The help command with no parameters\n";
-      os << "def help():\n";
+      os << "def mtdHelp():\n";
       os << "\tprint \"The algorithms available are:\"\n";
       StringSet::const_iterator sIter = algNames.begin();
       for( ; sIter != algNames.end(); ++sIter )

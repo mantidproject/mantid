@@ -47,7 +47,7 @@ public:
       {
       }
     
-    modline = "def help():";
+    modline = "def mtdHelp():";
     getline(is, line);
     TS_ASSERT_EQUALS(line, modline);
 

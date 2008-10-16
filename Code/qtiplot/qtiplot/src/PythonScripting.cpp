@@ -253,10 +253,17 @@ bool PythonScripting::initialize()
 	setQObject(this, "stdout", sys);
 	setQObject(this, "stderr", sys);
 
-	bool initialized = loadInitFile(d_parent->d_python_config_folder + "/qtiplotrc");
-	if(!initialized)
-		initialized = loadInitFile("./qtiplotrc");//Mantid
-	return initialized;
+	// Changed initialization to include a script which also loads the 
+	// MantidPythonAPI - M. Gigg
+	bool initglob = loadInitFile(d_parent->d_python_config_folder + "/qtiplotrc");
+	if(!initglob)
+		initglob = loadInitFile("./qtiplotrc");
+
+	bool initmtd = loadInitFile(d_parent->d_python_config_folder + "/mantidplotrc");
+	if(!initmtd)
+	  initmtd = loadInitFile("./mantidplotrc");
+
+	return (initglob && initmtd);
 
 //	PyEval_ReleaseLock();
 }
