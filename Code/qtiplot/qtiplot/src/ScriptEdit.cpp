@@ -174,8 +174,9 @@ void ScriptEdit::insertErrorMsg(const QString &message)
 
 void ScriptEdit::scriptPrint(const QString &text)
 {
-	if(lineNumber(printCursor.position()) == lineNumber(textCursor().selectionEnd()))
-		printCursor.insertText("\n");
+// 	if(lineNumber(printCursor.position()) == lineNumber(textCursor().selectionEnd()))
+// 		printCursor.insertText("\n");  //Mantid
+  
 	printCursor.insertText(text);
 }
 
@@ -231,6 +232,7 @@ void ScriptEdit::execute()
 	myScript->setCode(codeCursor.selectedText().replace(QChar::ParagraphSeparator,"\n"));
 	printCursor.setPosition(codeCursor.selectionEnd(), QTextCursor::MoveAnchor);
 	printCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+	printCursor.insertText("\n");
 	myScript->exec();
 	
 	d_changing_fmt = true;
@@ -267,6 +269,7 @@ void ScriptEdit::evaluate()
 	myScript->setCode(codeCursor.selectedText().replace(QChar::ParagraphSeparator,"\n"));
 	printCursor.setPosition(codeCursor.selectionEnd(), QTextCursor::MoveAnchor);
 	printCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+	printCursor.insertText("\n");
 	QVariant res = myScript->eval();
 	
 	d_changing_fmt = true;
