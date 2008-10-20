@@ -4,7 +4,7 @@
 //------------------------------------------
 // Includes
 //------------------------------------------
-#include <set>
+#include <map>
 #include "MantidKernel/System.h"
 #include "MantidKernel/Property.h"
 
@@ -49,8 +49,8 @@ class DLLExport SimplePythonAPI
   
   /// Typedef a vector of strings
   typedef std::vector<std::string> StringVector;
-  typedef std::set<std::string> StringSet;
   typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
+  typedef std::map<std::string, int> VersionMap;
 
   ///Public methods
   static void createModule();
@@ -61,10 +61,22 @@ class DLLExport SimplePythonAPI
   SimplePythonAPI();
   
   ///Private methods
-  static StringSet getAlgorithmNames();
+  static void createVersionMap(VersionMap &, const StringVector &);
   static std::string extractAlgName(const std::string &);
+  static std::string extractAlgVersion(const std::string &);
   static void writeFunctionDef(std::ostream &, std::string, const PropertyVector &);
-  static void writeGlobalHelp(std::ostream &, const StringSet &);
+  static void writeGlobalHelp(std::ostream &, const VersionMap &);
+
+  struct PropertyOrdering
+  {
+    
+    bool operator()(const Mantid::Kernel::Property * p1, 
+		    const Mantid::Kernel::Property * p2) const
+    {
+      return p1->isValid() < p2->isValid();
+    }
+    
+  };
   
   /// The name of the module file
   static std::string m_strFilename;   
