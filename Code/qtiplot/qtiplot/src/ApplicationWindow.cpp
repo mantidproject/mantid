@@ -415,7 +415,7 @@ void ApplicationWindow::initGlobalConstants()
 	autoSearchUpdatesRequest = false;
 
 	show_windows_policy = ActiveFolder;
-	d_script_win_on_top = true;
+	d_script_win_on_top = false;  //M. Gigg, Mantid
 	d_script_win_rect = QRect(0, 0, 500, 300);
 	d_init_window_type = NoWindow;
 
@@ -4527,7 +4527,7 @@ void ApplicationWindow::readSettings()
 	settings.endGroup(); // ExportImage
 
 	settings.beginGroup("/ScriptWindow");
-	d_script_win_on_top = settings.value("/AlwaysOnTop", true).toBool();
+	d_script_win_on_top = settings.value("/AlwaysOnTop", false).toBool();  //M. Gigg, Mantid
 	d_script_win_rect = QRect(settings.value("/x", 0).toInt(), settings.value("/y", 0).toInt(),
 							settings.value("/width", 500).toInt(), settings.value("/height", 300).toInt());
 	settings.endGroup();
@@ -14372,6 +14372,7 @@ void ApplicationWindow::showScriptWindow()
 {
 	if (!scriptWindow){
 		scriptWindow = new ScriptWindow(scriptEnv, this);
+		scriptWindow->setWindowTitle(tr("MantidPlot - Script Window")); //M. Gigg, Mantid
 		scriptWindow->resize(d_script_win_rect.size());
 		scriptWindow->move(d_script_win_rect.topLeft());
 		connect(scriptWindow, SIGNAL(visibilityChanged(bool)), actionShowScriptWindow, SLOT(setOn(bool)));

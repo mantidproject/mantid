@@ -15,7 +15,7 @@ if os.name == 'nt':
 else:
     from libMantidPythonAPI import *
 
-# Now create simple API (makes mtdsimple.py file in cwd)
+# Now create simple API (makes mantidsimple.py file in cwd)
 createPythonSimpleAPI()
 # Import definitions
 from mantidsimple import *
