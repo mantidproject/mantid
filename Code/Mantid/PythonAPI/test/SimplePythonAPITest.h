@@ -47,7 +47,7 @@ public:
       {
       }
     
-    modline = "def mtdHelp():";
+    modline = "def mtdGlobalHelp():";
     getline(is, line);
     TS_ASSERT_EQUALS(line, modline);
 

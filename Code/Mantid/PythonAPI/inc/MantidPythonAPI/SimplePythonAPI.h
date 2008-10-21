@@ -51,6 +51,7 @@ class DLLExport SimplePythonAPI
   typedef std::vector<std::string> StringVector;
   typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
   typedef std::map<std::string, int> VersionMap;
+  typedef std::vector<std::pair<std::string, std::string> > IndexVector;
 
   ///Public methods
   static void createModule();
@@ -64,9 +65,13 @@ class DLLExport SimplePythonAPI
   static void createVersionMap(VersionMap &, const StringVector &);
   static std::string extractAlgName(const std::string &);
   static std::string extractAlgVersion(const std::string &);
-  static void writeFunctionDef(std::ostream &, std::string, const PropertyVector &);
+  static void writeFunctionDef(std::ostream &, const std::string &, const PropertyVector &);
   static void writeGlobalHelp(std::ostream &, const VersionMap &);
+  static std::string createHelpString(const std::string & algm, const PropertyVector & properties);
+  static void writeFunctionHelp(std::ostream &);
 
+  ///Functor for use with std::sort to put the properties that do not
+  ///have valid values first
   struct PropertyOrdering
   {
     
@@ -79,7 +84,8 @@ class DLLExport SimplePythonAPI
   };
   
   /// The name of the module file
-  static std::string m_strFilename;   
+  static std::string m_strFilename;
+  static IndexVector m_HelpStrings;
 };
 
 }

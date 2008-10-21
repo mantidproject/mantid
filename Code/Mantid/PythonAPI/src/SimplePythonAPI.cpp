@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <cassert>
+#include <sstream>
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -18,6 +18,7 @@ namespace Mantid
 
     /// Static filename variable
     std::string SimplePythonAPI::m_strFilename = "mantidsimple.py";
+    SimplePythonAPI::IndexVector SimplePythonAPI::m_HelpStrings;
 
     //------------------------------
     //Public methods
@@ -52,14 +53,22 @@ namespace Mantid
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
       writeGlobalHelp(module, vMap);
-
+      
       //Function definitions for each algorithm
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
           ++vIter)
           {
             Mantid::API::IAlgorithm* algm = Mantid::API::FrameworkManager::Instance().createAlgorithm(vIter->first);
-            writeFunctionDef(module, vIter->first, algm->getProperties());
+	    PropertyVector orderedProperties(algm->getProperties());
+	    std::sort(orderedProperties.begin(), orderedProperties.end(),
+		      SimplePythonAPI::PropertyOrdering());
+	    std::string name(vIter->first);
+            writeFunctionDef(module, name , orderedProperties);
+	    m_HelpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
           }
+      writeFunctionHelp(module);
+      //clear the map as it is not needed anymore
+      m_HelpStrings.clear();
       //close file stream
       module.close();
     }
@@ -99,9 +108,9 @@ namespace Mantid
      * Write a Python function defintion
      * @param os The stream to use to write the definition
      * @param algm The name of the algorithm
-     * @param propertiesThe list of properties
+     * @param properties The list of properties
      */
-    void SimplePythonAPI::writeFunctionDef(std::ostream & os, std::string algm,
+    void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
     const PropertyVector & properties)
     {
       os << "# Definition of \"" << algm << "\" function.\n";
@@ -109,11 +118,8 @@ namespace Mantid
       os << "def " << algm << "(";
       //parameter listing - ensuring the ones that are required are
       //first
-      PropertyVector orderedProperties(properties);
-      std::sort(orderedProperties.begin(), orderedProperties.end(),
-		SimplePythonAPI::PropertyOrdering());
-      PropertyVector::const_iterator pIter = orderedProperties.begin();
-      PropertyVector::const_iterator pEnd = orderedProperties.end();
+      PropertyVector::const_iterator pIter = properties.begin();
+      PropertyVector::const_iterator pEnd = properties.end();
       int cParam(97), iMand(0);
       for( ; pIter != pEnd; ++cParam )
       {
@@ -129,7 +135,7 @@ namespace Mantid
       //end of function parameters
       os << "):\n";
       os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
-      pIter = orderedProperties.begin();
+      pIter = properties.begin();
       for( cParam = 97; pIter != pEnd; ++pIter, ++cParam )
       {
 	if( cParam < 97 + iMand )
@@ -153,7 +159,7 @@ namespace Mantid
     void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const VersionMap & vMap)
     {
       os << "# The help command with no parameters\n";
-      os << "def mtdHelp():\n";
+      os << "def mtdGlobalHelp():\n";
       os << "\tprint \"The algorithms available are:\"\n";
       VersionMap::const_iterator vIter = vMap.begin();
       for( ; vIter != vMap.end(); ++vIter )
@@ -171,6 +177,53 @@ namespace Mantid
 	}
       }
       os << "\n";
+    }
+
+    /**
+     * Construct a  help command for a specific algorithm
+     * @param algm The name of the algorithm
+     * @param properties The list of properties
+     */
+    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties)
+    {
+      std::ostringstream os;
+      os << "\t\tprint \"" << algm << " has " << properties.size() << " arguments:\"\n";
+      PropertyVector::const_iterator pIter = properties.begin();
+      PropertyVector::const_iterator pEnd = properties.end();
+      for( ; pIter != pEnd ; ++pIter )
+      {
+	os << "\t\tprint \"\\t" << (*pIter)->name() << " - ";
+	if( !(*pIter)->isValid() )
+	  os << "Mandatory\"\n";
+	else
+	  os << "Optional\"\n";
+      }
+      return os.str();
+    }
+
+    /**
+     * Write the help function that takes a command as an argument
+     * @param os The stream to use for the output
+     */
+    void SimplePythonAPI::writeFunctionHelp(std::ostream & os)
+    {
+      os << "def mtdHelp(cmd = -1):\n";
+      
+      os << "\tif cmd == -1:\n"
+	 << "\t\tmtdGlobalHelp()\n"
+	 << "\t\treturn\n";
+      //Functons help
+      SimplePythonAPI::IndexVector::const_iterator mIter = m_HelpStrings.begin();
+      SimplePythonAPI::IndexVector::const_iterator mEnd = m_HelpStrings.end();
+      os << "\tif cmd == \"" << (*mIter).first << "\":\n" 
+	 << (*mIter).second;
+      while( ++mIter != mEnd )
+      {
+	os << "\telif cmd == \"" << (*mIter).first << "\":\n" 
+	   << (*mIter).second;
+      }
+      os << "\telse:\n"
+	 << "\t\tprint \"mtdHelp() - '\" + cmd + \"' not found in help list\"\n\n";
     }
 
   }
