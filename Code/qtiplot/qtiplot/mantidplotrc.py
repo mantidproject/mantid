@@ -15,6 +15,8 @@ if os.name == 'nt':
 else:
     from libMantidPythonAPI import *
 
+# Ensure all algorithm libraries are loaded
+FrameworkManager()
 # Now create simple API (makes mantidsimple.py file in cwd)
 createPythonSimpleAPI()
 # Import definitions
