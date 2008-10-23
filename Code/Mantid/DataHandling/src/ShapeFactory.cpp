@@ -7,6 +7,7 @@
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/Component.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <fstream>
 
@@ -142,6 +143,11 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
           idMatching[idFromUser] = parseTorus(pE, primitives, l_id);  
           numPrimitives++;
         }
+        else if ( !primitiveName.compare("slice-of-cylinder-ring"))
+        {
+          idMatching[idFromUser] = parseSliceOfCylinderRing(pE, primitives, l_id);  
+          numPrimitives++;
+        }
       }
     }
   }
@@ -166,14 +172,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
       algebraFromUser.replace(found, (iter->first).size(), iter->second);
     }
-
-    //if (howFoundOne)
-    //  algebra += " : " + iter->second;  // for now simply assume all shapes are 'added' as unions
-    //else
-    //{
-    //  algebra += iter->second;
-    //  howFoundOne = true;
-    //}
   }
 
 
@@ -323,8 +321,13 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
 
   // create infinite-cylinder
   Cylinder* pCylinder = new Cylinder();
-  pCylinder->setCentre(parsePosition(pElemCentre));              
-  pCylinder->setNorm(parsePosition(pElemAxis));  
+  pCylinder->setCentre(parsePosition(pElemCentre));      
+
+  V3D dummy1 = pCylinder->getCentre();
+
+  pCylinder->setNorm(parsePosition(pElemAxis));
+  V3D dummy2 = pCylinder->getNormal();
+
   pCylinder->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
   prim[l_id] = pCylinder;
 
@@ -915,6 +918,116 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Ge
 
   std::stringstream retAlgebraMatch;
   retAlgebraMatch << "(-" << l_id << ")";
+  l_id++;
+
+  return retAlgebraMatch.str();
+}
+
+
+/** Parse XML 'slice-of-cylinder-ring' element
+ *
+ *  @param pElem XML 'slice-of-cylinder-ring' element from instrument def. file
+ *  @param prim To add shapes to
+ *  @param l_id When shapes added to the map prim l_id is the continuous incremented index 
+ *  @return A Mantid algebra string for this shape
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for arc element
+  NodeList* pNL_arc = pElem->getElementsByTagName("arc");
+  if ( pNL_arc->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <arc> element");
+  }
+  Element* pElemArc = static_cast<Element*>(pNL_arc->item(0)); 
+  pNL_arc->release();
+
+  // check for inner-radius element
+  NodeList* pNL_inner_radius = pElem->getElementsByTagName("inner-radius");
+  if ( pNL_inner_radius->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <inner-radius> element");
+  }
+  Element* pElemInnerRadius = static_cast<Element*>(pNL_inner_radius->item(0)); 
+  pNL_inner_radius->release();
+
+  // check for outer-radius element
+  NodeList* pNL_outer_radius = pElem->getElementsByTagName("outer-radius");
+  if ( pNL_outer_radius->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <outer-radius> element");
+  }
+  Element* pElemOuterRadius = static_cast<Element*>(pNL_outer_radius->item(0)); 
+  pNL_outer_radius->release();
+
+  // check for depth element
+  NodeList* pNL_depth = pElem->getElementsByTagName("depth");
+  if ( pNL_depth->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <depth> element");
+  }
+  Element* pElemDepth = static_cast<Element*>(pNL_depth->item(0)); 
+  pNL_depth->release();
+
+
+  V3D normVec(0,0,1);
+  V3D centrePoint(0,0,0);
+
+  // add inner infinite cylinder 
+  Cylinder* pCylinder1 = new Cylinder();
+  pCylinder1->setCentre(centrePoint);              
+  pCylinder1->setNorm(normVec);  
+  double radius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
+  pCylinder1->setRadius(atof( (pElemInnerRadius->getAttribute("val")).c_str() ));
+  prim[l_id] = pCylinder1;
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << " ";
+  l_id++;
+
+  // add outer infinite cylinder 
+  Cylinder* pCylinder2 = new Cylinder();
+  pCylinder2->setCentre(V3D(0,0,0));              
+  pCylinder2->setNorm(normVec);  
+  pCylinder2->setRadius(atof( (pElemOuterRadius->getAttribute("val")).c_str() ));
+  prim[l_id] = pCylinder2;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add top plane
+  Plane* pPlaneTop = new Plane();
+  double depth = atof( (pElemDepth->getAttribute("val")).c_str() );
+  pPlaneTop->setPlane(V3D(0,0,depth), normVec); 
+  prim[l_id] = pPlaneTop;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  // add bottom plane (which is assumed to phase the sample)
+  Plane* pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(V3D(0,0,0), normVec); 
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // the two planes that are going to cut a slice of the cylinder ring
+
+  double arc = (M_PI/180.0) * atof( (pElemArc->getAttribute("val")).c_str() );
+
+  Plane* pPlaneSlice1 = new Plane();
+  pPlaneSlice1->setPlane(V3D(0,0,0), V3D(cos(arc/2.0+M_PI/2.0),sin(arc/2.0+M_PI/2.0),0)); 
+  prim[l_id] = pPlaneSlice1;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+  Plane* pPlaneSlice2 = new Plane();
+  pPlaneSlice2->setPlane(V3D(0,0,0), V3D(cos(-arc/2.0+M_PI/2.0),sin(-arc/2.0+M_PI/2.0),0)); 
+  prim[l_id] = pPlaneSlice2;
+  retAlgebraMatch << "" << l_id << ")";
   l_id++;
 
   return retAlgebraMatch.str();

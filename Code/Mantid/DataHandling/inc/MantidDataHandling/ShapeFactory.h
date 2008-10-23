@@ -97,6 +97,9 @@ namespace Mantid
       /// Parse XML 'torus' element
       std::string parseTorus(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
 
+      /// Parse XML 'slice-of-cylinder-ring' element
+      std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);
 

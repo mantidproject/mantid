@@ -337,17 +337,28 @@ public:
     boost::shared_ptr<Instrument> i = output->getInstrument();
 
     Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(1100));
-    //TS_ASSERT_EQUALS( ptrDetShape->getName(), "DetFisse");
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.25,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(25,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0,0.0,25.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0, 25,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.001, 0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, 0.001,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, -0.001,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(-0.001, 0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, 0.0,0.001)+ptrDetShape->getPos()) );
+    TS_ASSERT_EQUALS( ptrDetShape->getName(), "Det0");
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.251,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,0.1021,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,-0.1021,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.2327,0.0940,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.2327,-0.0940,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.2508,0.0088,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.2256,0.11,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.251,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.251,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,-0.251,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.251,0.0,0.005)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.251,0.0,0.05)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(25,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0,0.0,25.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0, 25,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.001, 0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, 0.001,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, -0.001,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.001, 0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, 0.0,0.001)+ptrDetShape->getPos()) );
 
   }
 
