@@ -269,6 +269,7 @@ Cylinder::setNorm(const Geometry::V3D& A)
   Normal=A;
   Normal.normalize();
   setBaseEqn();
+  setNvec();
   return;
 }
 

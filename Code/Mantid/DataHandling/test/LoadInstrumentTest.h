@@ -284,13 +284,6 @@ public:
 
     Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101);
-    //TS_ASSERT_DELTA( ptrDet->getPos().X(),  0.2607, 0.0001);
-    //TS_ASSERT_DELTA( ptrDet->getPos().Y(), -0.1505, 0.0001);
-    //TS_ASSERT_DELTA( ptrDet->getPos().Z(),  2.3461, 0.0001);
-    //double d = ptrDet->getPos().distance(samplepos->getPos());
-    //TS_ASSERT_DELTA(d,2.3653,0.0001);
-    //double cmpDistance = ptrDet->getDistance(*samplepos);
-    //TS_ASSERT_DELTA(cmpDistance,2.3653,0.0001);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
 
     Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(1));
@@ -305,6 +298,57 @@ public:
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
     TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+  }
+
+  void testExecHRP()
+  {
+    LoadInstrument loaderHRP;
+
+    TS_ASSERT_THROWS_NOTHING(loaderHRP.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestHRP";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    inputFile = "../../../../Test/Instrument/HRP_Definition.xml";
+    loaderHRP.setPropertyValue("Filename", inputFile);
+
+    loaderHRP.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderHRP.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
+
+    TS_ASSERT( loaderHRP.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+
+    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(1100));
+    //TS_ASSERT_EQUALS( ptrDetShape->getName(), "DetFisse");
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.25,0.0,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(25,0.0,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0,0.0,25.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0, 25,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.001, 0.0,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, 0.001,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, -0.001,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(-0.001, 0.0,0.0)+ptrDetShape->getPos()) );
+    //TS_ASSERT( ptrDetShape->isValid(V3D(0.0, 0.0,0.001)+ptrDetShape->getPos()) );
+
   }
 
   void testExecIDF_for_unit_testing() // IDF stands for Instrument Definition File
@@ -464,6 +508,27 @@ public:
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,0.05)+ptrDet11->getPos()) );
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,-0.05)+ptrDet11->getPos()) );
 
+    // test for "infinite-cylinder-test". 
+    Detector *ptrDet12 = dynamic_cast<Detector*>(i->getDetector(12));
+    TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,0.1)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,-0.1)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.1,0.0)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(0.0,-0.1,0.0)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(0.1,0.0,0.0)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(-0.1,0.0,0.0)+ptrDet12->getPos()) );
+    TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,0.0)+ptrDet12->getPos()) );
+    TS_ASSERT( !ptrDet12->isValid(V3D(2.0,0.0,0.0)+ptrDet12->getPos()) );
+
+    // test for "finite-cylinder-test". 
+    Detector *ptrDet13 = dynamic_cast<Detector*>(i->getDetector(13));
+    TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.0,0.1)+ptrDet13->getPos()) );
+    TS_ASSERT( !ptrDet13->isValid(V3D(0.0,0.0,-0.1)+ptrDet13->getPos()) );
+    TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.1,0.0)+ptrDet13->getPos()) );
+    TS_ASSERT( ptrDet13->isValid(V3D(0.0,-0.1,0.0)+ptrDet13->getPos()) );
+    TS_ASSERT( ptrDet13->isValid(V3D(0.1,0.0,0.0)+ptrDet13->getPos()) );
+    TS_ASSERT( ptrDet13->isValid(V3D(-0.1,0.0,0.0)+ptrDet13->getPos()) );
+    TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.0,0.0)+ptrDet13->getPos()) );
+    TS_ASSERT( !ptrDet13->isValid(V3D(2.0,0.0,0.0)+ptrDet13->getPos()) );
 
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
