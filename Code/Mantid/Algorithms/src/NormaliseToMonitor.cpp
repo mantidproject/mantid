@@ -179,7 +179,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
     crop->setProperty("Xmax",m_integrationMax);
     try {
       crop->execute();
-    } catch (std::runtime_error& err) {
+    } catch (std::runtime_error) {
       g_log.error("Unable to successfully run CropWorkspace sub-algorithm");
       throw;
     }
@@ -199,7 +199,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   integrate->setProperty<Workspace_sptr>("InputWorkspace", monitor);
   try {
     integrate->execute();
-  } catch (std::runtime_error& err) {
+  } catch (std::runtime_error) {
     g_log.error("Unable to successfully run Integration sub-algorithm");
     throw;
   }

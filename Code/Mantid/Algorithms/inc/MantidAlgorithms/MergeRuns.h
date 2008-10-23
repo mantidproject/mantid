@@ -11,9 +11,13 @@ namespace Mantid
 namespace Algorithms
 {
 /** Combines the data contained in an arbitrary number of input workspaces.
-    The input workspaces must have common binning, the same units and instrument name in
-    order for the algorithm to succeed. Other than this it is currently left to the user
-    to ensure that the combination of the workspaces is a valid operation.
+    If the input workspaces do not have common binning, the bins in the output workspace
+    will cover the entire range of the all the input workspaces, with the largest bin widths
+    used in areas of overlap.
+    The input workspaces must contain histogram data with the same number of spectra,
+    the units and instrument name in order for the algorithm to succeed.
+    Other than this it is currently left to the user to ensure that the combination of the
+    workspaces is a valid operation.
 
     Required Properties:
     <UL>
@@ -61,7 +65,13 @@ private:
   void init();
   void exec();
 
-  std::vector<API::Workspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
+  // Methods called by exec()
+  std::list<API::Workspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
+  void calculateRebinParams(const API::Workspace_const_sptr& ws1, const API::Workspace_const_sptr& ws2, std::vector<double>& params) const;
+  void noOverlapParams(const std::vector<double>& X1, const std::vector<double>& X2, std::vector<double>& params) const;
+  void intersectionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
+  void inclusionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
+  API::Workspace_sptr rebinInput(const API::Workspace_sptr& workspace, const std::vector<double>& params);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

@@ -237,6 +237,8 @@ const bool WorkspaceHelpers::sharedXData(const Workspace_const_sptr WS)
 /** Divides the data in a workspace by the bin width to make it a distribution.
  *  Can also reverse this operation (i.e. multiply by the bin width).
  *  Sets the isDistribution() flag accordingly.
+ *  @param workspace The workspace on which to carry out the operation
+ *  @param forwards If true (the default) divides by bin width, if false multiplies
  */
 void WorkspaceHelpers::makeDistribution(Workspace_sptr workspace, const bool forwards)
 {

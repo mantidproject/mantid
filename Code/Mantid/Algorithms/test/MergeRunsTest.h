@@ -15,9 +15,9 @@ class MergeRunsTest : public CxxTest::TestSuite
 public:
   MergeRunsTest()
   {
-    AnalysisDataService::Instance().add("in1",WorkspaceCreationHelper::Create2DWorkspace123(10,3,1));
-    AnalysisDataService::Instance().add("in2",WorkspaceCreationHelper::Create2DWorkspace123(10,3,1));
-    AnalysisDataService::Instance().add("in3",WorkspaceCreationHelper::Create2DWorkspace123(10,3,1));
+    AnalysisDataService::Instance().add("in1",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
+    AnalysisDataService::Instance().add("in2",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
+    AnalysisDataService::Instance().add("in3",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
   }
 
 	void testName()
@@ -59,7 +59,7 @@ public:
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_EQUALS( it->Y(), 6.0 )
-      TS_ASSERT_DELTA( it->E(), sqrt(27.0), 0.00001 )
+      TS_ASSERT_DELTA( it->E(), sqrt(6.0), 0.00001 )
     }
 	}
 

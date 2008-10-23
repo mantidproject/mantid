@@ -91,6 +91,24 @@ public:
     return retVal;
   }
 
+  static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0, double deltax = 1.0)
+  {
+    std::vector<double> x(nbins+1),y(nbins,2),e(nbins,sqrt(2.0));
+    for (unsigned int i =0; i < x.size(); ++i)
+    {
+      x[i] = x0+i*deltax;
+    }
+    Workspace2D_sptr retVal(new Workspace2D);
+    retVal->initialize(nhist,nbins+1,nbins);
+    for (int i=0; i< nhist; i++)
+    {
+      retVal->setX(i,x);
+      retVal->setData(i,y,e);
+    }
+
+    return retVal;
+  }
+
   static WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {
     WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value,sqrt(value)));

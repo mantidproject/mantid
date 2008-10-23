@@ -11,8 +11,8 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Extracts a 'block' from a workspace and places it in a new workspace,
-    (or, to look at it another way, lops bins or spectra off a workspace).
+/** Extracts a 'block' from a workspace and places it in a new workspace.
+    (Or, to look at it another way, lops bins or spectra off a workspace).
 
     Required Properties:
     <UL>

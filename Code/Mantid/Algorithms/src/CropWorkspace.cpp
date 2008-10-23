@@ -10,7 +10,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CropWorkspace);
+DECLARE_ALGORITHM(CropWorkspace)
 
 using namespace Kernel;
 using namespace API;
@@ -73,8 +73,6 @@ void CropWorkspace::exec()
   // Loop over the required spectra, copying in the desired bins
   for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
   {
-//    const std::vector<double> &oldX = m_inputWorkspace->readX(i);
-//    outputWorkspace->dataX(j).assign(oldX.begin()+m_minX,oldX.begin()+m_maxX);
     output2D->setX(j,newX);
     const std::vector<double> &oldY = m_inputWorkspace->readY(i);
     outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+m_maxX-histogram);
@@ -84,6 +82,8 @@ void CropWorkspace::exec()
   }
 
   setProperty("OutputWorkspace", outputWorkspace);
+  // Reset the input workspace member variable
+  m_inputWorkspace = DataObjects::Workspace2D_const_sptr();
 }
 
 /** Retrieves the optional input properties and checks that they have valid values.
