@@ -988,6 +988,7 @@ private slots:
 
 	void analysisMenuAboutToShow();
 	void fileMenuAboutToShow();
+	void editMenuAboutToShow();
 	void matrixMenuAboutToShow();
 	void plotMenuAboutToShow();
 	void plotDataMenuAboutToShow();

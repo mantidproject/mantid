@@ -56,7 +56,7 @@ public slots:
 	QString saveToString(const QString &info, bool = false);
 	void restore(const QStringList&);
 
-	QTextEdit* textWidget(){return (QTextEdit*)te;};
+        ScriptEdit* editor(){return te;};
 	bool autoexec() const { return autoExec; }
 	void setAutoexec(bool);
 	void modifiedNote();

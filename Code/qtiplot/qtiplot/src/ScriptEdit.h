@@ -94,8 +94,6 @@ class ScriptEdit: public QTextEdit, public scripted
 	QTextBlockFormat d_fmt_failure;
 	//! True if we are inside evaluate(), execute() or executeAll() there were errors.
 	bool d_error;
-	//! True if the text is programmatically changed and handleContentsChange() should do nothing.
-	bool d_changing_fmt;
 
   private slots:
 	  //! Insert an error message from the scripting system at printCursor.
@@ -103,9 +101,8 @@ class ScriptEdit: public QTextEdit, public scripted
 		* After insertion, the text cursor will have the error message selected, allowing the user to
 		* delete it and fix the error.
 		*/
-    void insertErrorMsg(const QString &message);
-  	//! Called whenever the contents of the text document changes.
-	void handleContentsChange(int position, int chars_removed, int chars_added);
+  void insertErrorMsg(const QString &message);
+
 };
 
 #endif
