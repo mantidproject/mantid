@@ -18,6 +18,9 @@ public:
     AnalysisDataService::Instance().add("in1",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
     AnalysisDataService::Instance().add("in2",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
     AnalysisDataService::Instance().add("in3",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,1));
+    AnalysisDataService::Instance().add("in4",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,20));
+    AnalysisDataService::Instance().add("in5",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,5,3.5,2));
+    AnalysisDataService::Instance().add("in6",WorkspaceCreationHelper::Create2DWorkspaceBinned(3,3,2,2));
   }
 
 	void testName()
@@ -61,6 +64,8 @@ public:
       TS_ASSERT_EQUALS( it->Y(), 6.0 )
       TS_ASSERT_DELTA( it->E(), sqrt(6.0), 0.00001 )
     }
+
+    AnalysisDataService::Instance().remove("outWS");
 	}
 
 	void testInvalidInputs()
@@ -77,6 +82,91 @@ public:
     TS_ASSERT_THROWS( merge2.execute(), std::runtime_error )
     TS_ASSERT( ! merge2.isExecuted() )
 	}
+
+	void testNonOverlapping()
+	{
+	  MergeRuns alg;
+	  alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces","in1,in4") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","outer") )
+    TS_ASSERT_THROWS_NOTHING( alg.execute() )
+    TS_ASSERT( alg.isExecuted() )
+
+    Workspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+
+    const std::vector<double> &X = output->readX(0);
+    TS_ASSERT_EQUALS( X.size(), 17 )
+    int i;
+    for (i = 0; i < 11; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], i+1 )
+    }
+    for (; i < 17; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], i+9 )
+    }
+
+    AnalysisDataService::Instance().remove("outer");
+	}
+
+	void testIntersection()
+	{
+    MergeRuns alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces","in1,in5") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","outer") )
+    TS_ASSERT_THROWS_NOTHING( alg.execute() )
+    TS_ASSERT( alg.isExecuted() )
+
+    Workspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+
+    const std::vector<double> &X = output->readX(0);
+    TS_ASSERT_EQUALS( X.size(), 8 )
+    int i;
+    for (i = 0; i < 3; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], i+1 )
+    }
+    for (; i < 8; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], 2*i-0.5 )
+    }
+
+    AnalysisDataService::Instance().remove("outer");
+	}
+
+  void testInclusion()
+  {
+    MergeRuns alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces","in6,in1") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","outer") )
+    TS_ASSERT_THROWS_NOTHING( alg.execute() )
+    TS_ASSERT( alg.isExecuted() )
+
+    Workspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+
+    const std::vector<double> &X = output->readX(0);
+    TS_ASSERT_EQUALS( X.size(), 8 )
+    int i;
+    for (i = 0; i < 2; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], i+1 )
+    }
+    for (; i < 5; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], 2*i )
+    }
+    for (; i < 8; ++i)
+    {
+      TS_ASSERT_EQUALS( X[i], i+4 )
+    }
+
+    AnalysisDataService::Instance().remove("outer");
+  }
 
 private:
   MergeRuns merge;
