@@ -7,6 +7,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 
 #include "LoadRaw/isisraw2.h"
 
@@ -79,6 +81,27 @@ namespace Mantid
       m_numberOfSpectra = isisRaw->t_nsp1;
       // Read the number of periods in this file
       m_numberOfPeriods = isisRaw->t_nper;
+      // Read the number of time channels (i.e. bins) from the RAW file 
+      const int channelsPerSpectrum = isisRaw->t_ntc1;
+      // Read in the time bin boundaries 
+      const int lengthIn = channelsPerSpectrum + 1;
+
+      // If there is not enough memory use ManagedRawFileWorkspace2D.
+      if (MemoryManager::Instance().goForManagedWorkspace(m_numberOfSpectra,lengthIn,channelsPerSpectrum))
+      {
+//          DataObjects::Workspace2D_sptr localWorkspace( boost::dynamic_pointer_cast<DataObjects::Workspace2D>(new ManagedRawFileWorkspace2D));
+          ManagedRawFileWorkspace2D_sptr localWorkspace( new ManagedRawFileWorkspace2D);
+          localWorkspace->setRawFile(m_filename);
+          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+          return;
+      }
+
+      float* timeChannels = new float[lengthIn];
+      isisRaw->getTimeChannels(timeChannels, lengthIn);
+      // Put the read in array into a vector (inside a shared pointer)
+      boost::shared_ptr<std::vector<double> > timeChannelsVec
+                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
+
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
@@ -90,17 +113,6 @@ namespace Mantid
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
             
-      // Read the number of time channels (i.e. bins) from the RAW file 
-      const int channelsPerSpectrum = isisRaw->t_ntc1;
-      // Read in the time bin boundaries 
-      const int lengthIn = channelsPerSpectrum + 1;    
-      float* timeChannels = new float[lengthIn];
-      isisRaw->getTimeChannels(timeChannels, lengthIn);
-      // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
-      // Create an array to hold the read-in data
-      //int* spectrum = new int[lengthIn];
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;

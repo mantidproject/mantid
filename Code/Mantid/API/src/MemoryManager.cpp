@@ -11,6 +11,7 @@
 
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 
 using namespace Mantid::Kernel;
 
@@ -59,6 +60,24 @@ namespace Mantid
         mi.freeRatio = int(100*double(mi.availMemory)/mi.totalMemory);
 #endif
         return mi;
+    }
+
+    /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
+        and workspace parameters NVectors, XLength,and YLength.
+    */
+    bool MemoryManagerImpl::goForManagedWorkspace(int NVectors,int XLength,int YLength)
+    {
+        // check potential size to create and determine trigger  
+        int availPercent;
+        if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", availPercent) )
+        {
+            // Default to 40% if missing
+            availPercent = 40;
+        }
+        MemoryInfo mi = getMemoryInfo();
+        int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
+        int wsSize = NVectors * (YLength * 2 + XLength) / 1024;
+        return wsSize > triggerSize;
     }
 
 

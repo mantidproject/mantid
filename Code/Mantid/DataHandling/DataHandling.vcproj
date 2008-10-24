@@ -224,6 +224,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ManagedRawFileWorkspace2D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MarkDeadDetectors.cpp"
 				>
 			</File>
@@ -323,6 +327,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadRawTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\ManagedRawFileWorkspace2D.h"
 				>
 			</File>
 			<File

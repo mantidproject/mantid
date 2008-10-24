@@ -913,9 +913,9 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      int kY,kErr;
      for(int i=i0;i<=i1;i++)
      {
-         const std::vector<double>& dataX = workspace->dataX(i);
-         const std::vector<double>& dataY = workspace->dataY(i);
-         const std::vector<double>& dataE = workspace->dataE(i);
+         const std::vector<double>& dataX = workspace->readX(i);
+         const std::vector<double>& dataY = workspace->readY(i);
+         const std::vector<double>& dataE = workspace->readE(i);
     
          kY = c*(i-i0)+1;
          t->setColName(kY,"Y"+QString::number(i));

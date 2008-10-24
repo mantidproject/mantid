@@ -105,22 +105,11 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
 Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors,
                                             const int& XLength, const int& YLength) const
 {
-  // check potential size to create and determine trigger
-  int availPercent;
-  if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", availPercent) )
-  {
-    // Default to 40% if missing
-    availPercent = 40;
-  }
-  MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
-  int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
-
-  int wsSize = NVectors * YLength / 1024 * 3;// times 3 for X,Y, and E
   Workspace_sptr ws;
 
   // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
   // Otherwise calls the vanilla create method.
-  if ( (wsSize > triggerSize) && !(className.find("2D") == std::string::npos) )
+  if ( MemoryManager::Instance().goForManagedWorkspace(NVectors,XLength,YLength) && !(className.find("2D") == std::string::npos) )
   {
       // check if there is enough memory for 100 data blocks
       int blockMemory;
@@ -131,6 +120,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
         blockMemory = 1024*1024;
       }
 
+      MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
       if ( blockMemory*100/1024 > mi.availMemory )
       {
           g_log.error("There is not enough memory to allocate the workspace");
@@ -139,7 +129,6 @@ Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const 
 
       ws = this->create("ManagedWorkspace2D");
       g_log.information("Created a ManagedWorkspace2D");
-      g_log.information()<<"Full size of the workspace is "<<wsSize*sizeof(double)<<" KB\n";
   }
   else
   {

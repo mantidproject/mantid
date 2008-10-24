@@ -262,7 +262,7 @@ public:
         m_cols = cols;
         m_startRow = start >= 0? start : 0;
         if (ws->blocksize() != 0)
-            m_colNumCorr = ws->dataX(0).size() != ws->dataY(0).size() ? 1 : 0;
+            m_colNumCorr = ws->isHistogramData() ? 1 : 0;
         else
             m_colNumCorr = 0;
     }
@@ -279,11 +279,11 @@ public:
         double val;
         if (m_type == X)
         {
-            val = m_workspace->dataX(row + m_startRow)[col];
+            val = m_workspace->readX(row + m_startRow)[col];
         }
         else if (m_type == Y)
         {
-            val = m_workspace->dataY(row + m_startRow)[col];
+            val = m_workspace->readY(row + m_startRow)[col];
             if (m_filter)
             {
                 if (val > m_maxv) val = m_maxv;
@@ -292,24 +292,15 @@ public:
         }
         else
         {
-            val = m_workspace->dataE(row + m_startRow)[col];
+            val = m_workspace->readE(row + m_startRow)[col];
         }
         return val;
     }
 
     /// Implementation of QAbstractTableModel::data(...). QTableView uses this function
     /// to retrieve data for displaying.
-    QVariant data(const QModelIndex &index, int role) const
-    {
-        if (role != Qt::DisplayRole) return QVariant();// this line is important
-        double val;
-        
-        if (m_type == X)  val = m_workspace->dataX(index.row() + m_startRow)[index.column()];
-        else if (m_type == Y) val = m_workspace->dataY(index.row() + m_startRow)[index.column()];
-        else  val = m_workspace->dataE(index.row() + m_startRow)[index.column()];
+    QVariant data(const QModelIndex &index, int role) const;
 
-        return QVariant(m_locale.toString(val,'f',6));
-    }
     Qt::ItemFlags flags(const QModelIndex & index ) const
     {
 	    if (index.isValid())

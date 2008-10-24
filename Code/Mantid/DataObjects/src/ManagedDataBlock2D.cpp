@@ -58,6 +58,15 @@ bool ManagedDataBlock2D::hasChanges() const
   return m_hasChanges;
 }
 
+/** Gives the possibility to drop the flag. Used in ManagedRawFileWorkspace2D atfer
+ *  reading in from a raw file.
+ *  @param has True if the data has been changed.
+ */
+void ManagedDataBlock2D::hasChanges(bool has)
+{
+  m_hasChanges = has;
+}
+
 /**
  Set the x values
  @param index Index to the histogram to set

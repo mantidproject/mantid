@@ -75,7 +75,7 @@ void MantidDockWidget::update()
         wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
-        bool isHistogram = ( ws->blocksize() && ws->dataX(0).size() > ws->dataY(0).size() )?true:false;
+        bool isHistogram = ws->blocksize() && ws->isHistogramData();
         wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
         Mantid::API::Axis* ax;
         ax = ws->getAxis(0);

@@ -58,6 +58,8 @@ namespace Mantid
 
             ///Returns available physical memory in the system in KB.
             MemoryInfo getMemoryInfo();
+            /// Returns true if there is not sufficient memory for a full Workspace2D.
+            bool goForManagedWorkspace(int NVectors,int XLength,int YLength);
 
 		private:
             friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;

@@ -411,6 +411,17 @@ ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
   // If not found, need to load block into memory and mru list
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(startIndex, m_vectorsPerBlock, m_XLength, m_YLength);
   // Check whether datablock has previously been saved. If so, read it in.
+  readDataBlock(newBlock,startIndex);
+  m_bufferedData.insert(newBlock);
+  return newBlock;
+}
+
+/**  This funcction decides if ManagedDataBlock2D with given startIndex needs to 
+     be loaded from storage and loads it.
+*/
+void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
+{
+  // Check whether datablock has previously been saved. If so, read it in.
   if (startIndex <= m_indexWrittenTo)
   {
     long long seekPoint = startIndex * m_vectorSize;
@@ -426,8 +437,51 @@ ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
     *m_datafile[fileIndex] >> *newBlock;
   }
 
-  m_bufferedData.insert(newBlock);
-  return newBlock;
+}
+
+void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
+{
+      int fileIndex = 0;
+      // Check whether we need to pad file with zeroes before writing data
+      if ( toWrite->minIndex() > m_indexWrittenTo+m_vectorsPerBlock && m_indexWrittenTo >= 0 )
+      {
+        fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
+
+        m_datafile[fileIndex]->seekp(0, std::ios::end);
+        const int speczero = 0;
+        const std::vector<double> xzeroes(m_XLength);
+        const std::vector<double> yzeroes(m_YLength);
+        for (int i = 0; i < (toWrite->minIndex() - m_indexWrittenTo); ++i)
+        {
+          if ( (m_indexWrittenTo + i) / (m_blocksPerFile * m_vectorsPerBlock) )
+          {
+            ++fileIndex;
+            m_datafile[fileIndex]->seekp(0, std::ios::beg);
+          }
+
+          m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
+          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+          m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+          m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
+        }
+      }
+      else
+      // If no padding needed, go to correct place in file
+      {
+        long long seekPoint = toWrite->minIndex() * m_vectorSize;
+
+        while (seekPoint > std::numeric_limits<int>::max())
+        {
+          seekPoint -= m_vectorSize * m_vectorsPerBlock * m_blocksPerFile;
+          ++fileIndex;
+        }
+
+          m_datafile[fileIndex]->seekp(seekPoint, std::ios::beg);
+      }
+
+      *m_datafile[fileIndex] << *toWrite;
+      m_indexWrittenTo = std::max(m_indexWrittenTo, toWrite->minIndex());
 }
 
 //----------------------------------------------------------------------
@@ -462,47 +516,7 @@ void ManagedWorkspace2D::mru_list::insert(ManagedDataBlock2D* item)
     ManagedDataBlock2D *toWrite = il.back();
     if ( toWrite->hasChanges() )
     {
-      int fileIndex = 0;
-      // Check whether we need to pad file with zeroes before writing data
-      if ( toWrite->minIndex() > outer.m_indexWrittenTo+outer.m_vectorsPerBlock && outer.m_indexWrittenTo >= 0 )
-      {
-        fileIndex = outer.m_indexWrittenTo / (outer.m_vectorsPerBlock * outer.m_blocksPerFile);
-
-        outer.m_datafile[fileIndex]->seekp(0, std::ios::end);
-        const int speczero = 0;
-        const std::vector<double> xzeroes(outer.m_XLength);
-        const std::vector<double> yzeroes(outer.m_YLength);
-        for (int i = 0; i < (toWrite->minIndex() - outer.m_indexWrittenTo); ++i)
-        {
-          if ( (outer.m_indexWrittenTo + i) / (outer.m_blocksPerFile * outer.m_vectorsPerBlock) )
-          {
-            ++fileIndex;
-            outer.m_datafile[fileIndex]->seekp(0, std::ios::beg);
-          }
-
-          outer.m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), outer.m_XLength * sizeof(double));
-          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
-          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
-          outer.m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), outer.m_YLength * sizeof(double));
-          outer.m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
-        }
-      }
-      else
-      // If no padding needed, go to correct place in file
-      {
-        long long seekPoint = toWrite->minIndex() * outer.m_vectorSize;
-
-        while (seekPoint > std::numeric_limits<int>::max())
-        {
-          seekPoint -= outer.m_vectorSize * outer.m_vectorsPerBlock * outer.m_blocksPerFile;
-          ++fileIndex;
-        }
-
-          outer.m_datafile[fileIndex]->seekp(seekPoint, std::ios::beg);
-      }
-
-      *outer.m_datafile[fileIndex] << *toWrite;
-      outer.m_indexWrittenTo = std::max(outer.m_indexWrittenTo, toWrite->minIndex());
+      outer.writeDataBlock(toWrite);
     }
     il.pop_back();
     delete toWrite;

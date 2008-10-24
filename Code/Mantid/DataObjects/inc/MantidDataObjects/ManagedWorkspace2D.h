@@ -140,6 +140,15 @@ public:
 
   long int getMemorySize() const;
 
+protected:
+
+    /// Reads in a data block.
+    virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
+    /// Saves the dropped data block to disk.
+    virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
+  /// The number of vectors in each data block
+  int m_vectorsPerBlock;
+
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
   /// Private copy constructor
@@ -159,8 +168,6 @@ private:
   int m_YLength;
   /// The size in bytes of each vector
   long long m_vectorSize;
-  /// The number of vectors in each data block
-  int m_vectorsPerBlock;
   /// The number of blocks per temporary file
   int m_blocksPerFile;
 

@@ -62,6 +62,7 @@ public:
 
   int minIndex() const;
   bool hasChanges() const;
+  void hasChanges(bool has);
 
   // Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
   void setX(const int histnumber, const std::vector<double>&);

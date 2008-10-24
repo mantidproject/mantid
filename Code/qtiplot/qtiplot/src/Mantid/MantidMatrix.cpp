@@ -110,13 +110,13 @@ void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end, boo
     m_filter = filter;
     m_maxv = maxv;
     m_histogram = false;
-    if ( m_workspace->blocksize() || m_workspace->dataX(0).size() != m_workspace->dataY(0).size() ) m_histogram = true;
+    if ( m_workspace->blocksize() || m_workspace->readX(0).size() != m_workspace->readY(0).size() ) m_histogram = true;
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
-    x_start = ws->dataX(0)[0];
-    if (ws->dataX(0).size() != ws->dataY(0).size()) x_end = ws->dataX(0)[ws->blocksize()];
+    x_start = ws->readX(0)[0];
+    if (ws->readX(0).size() != ws->readY(0).size()) x_end = ws->readX(0)[ws->blocksize()];
     else
-        x_end = ws->dataX(0)[ws->blocksize()-1];
+        x_end = ws->readX(0)[ws->blocksize()-1];
     // What if y is not a spectrum number?
     y_start = double(m_startRow);
     y_end = double(m_endRow);
@@ -242,6 +242,9 @@ void MantidMatrix::copySelection()
 
 void MantidMatrix::range(double *min, double *max)
 {
+    *min = 0.;
+    *max = 10.;
+    return;
 	double d_min = cell(0, 0);
 	double d_max = d_min;
 	int rows = numRows();
@@ -324,8 +327,8 @@ void MantidMatrix::goToColumn(int col)
 
 double MantidMatrix::dataX(int row, int col) const
 {
-    if (!m_workspace || row >= numRows() || col >= m_workspace->dataX(row + m_startRow).size()) return 0.;
-    double res = m_workspace->dataX(row + m_startRow)[col];
+    if (!m_workspace || row >= numRows() || col >= m_workspace->readX(row + m_startRow).size()) return 0.;
+    double res = m_workspace->readX(row + m_startRow)[col];
     return res;
 
 }
@@ -333,7 +336,7 @@ double MantidMatrix::dataX(int row, int col) const
 double MantidMatrix::dataY(int row, int col) const
 {
     if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
-    double res = m_workspace->dataY(row + m_startRow)[col];
+    double res = m_workspace->readY(row + m_startRow)[col];
     return res;
 
 }
@@ -341,7 +344,7 @@ double MantidMatrix::dataY(int row, int col) const
 double MantidMatrix::dataE(int row, int col) const
 {
     if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
-    double res = m_workspace->dataE(row + m_startRow)[col];
+    double res = m_workspace->readE(row + m_startRow)[col];
     if (res == 0.) res = 1.;//  quick fix of the fitting problem
     return res;
 
@@ -351,14 +354,14 @@ int MantidMatrix::indexX(double s)const
 {
     int n = m_workspace->blocksize();
 
-    if (n == 0 || s < m_workspace->dataX(0)[0] || s > m_workspace->dataX(0)[n-1]) return -1;
+    if (n == 0 || s < m_workspace->readX(0)[0] || s > m_workspace->readX(0)[n-1]) return -1;
 
     int i = 0, j = n-1, k = n/2;
     double ss;
     int it;
     for(it=0;it<n;it++)
     {
-        ss = m_workspace->dataX(0)[k];
+        ss = m_workspace->readX(0)[k];
         if (ss == s || abs(i - j) <2) break;
         if (s > ss) i = k;
         else
@@ -756,4 +759,16 @@ void MantidMatrix::deleteWorkspace()
 void MantidMatrix::selfClosed(MdiSubWindow* w)
 {
     closeDependants();
+}
+
+
+QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
+{
+    if (role != Qt::DisplayRole) return QVariant();// this line is important
+    double val;
+    if (m_type == X)  val = m_workspace->readX(index.row() + m_startRow)[index.column()];
+    else if (m_type == Y) val = m_workspace->readY(index.row() + m_startRow)[index.column()];
+    else  val = m_workspace->readE(index.row() + m_startRow)[index.column()];
+
+    return QVariant(m_locale.toString(val,'f',6));
 }
