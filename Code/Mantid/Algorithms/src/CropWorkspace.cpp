@@ -17,7 +17,7 @@ using namespace API;
 using DataObjects::Workspace2D;
 
 // Get a reference to the logger.
-Mantid::Kernel::Logger& CropWorkspace::g_log = Mantid::Kernel::Logger::get("CropWorkspace");
+Logger& CropWorkspace::g_log = Logger::get("CropWorkspace");
 
 /// Default constructor
 CropWorkspace::CropWorkspace() : Algorithm(), m_minX(0), m_maxX(0), m_minSpec(0), m_maxSpec(0)
