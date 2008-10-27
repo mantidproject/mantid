@@ -85,7 +85,7 @@ public:
     class ReplaceNotification: public DataServiceNotification
     {
     public:
-        /** Constructor. 
+        /** Constructor.
 
             @param name The name of the replaced object
             @param obj  The pointer to the old object
@@ -168,8 +168,9 @@ public:
       return;
     }
 
-    notificationCenter.postNotification(new DeleteNotification(name,it->second));
     datamap.erase(it);
+    notificationCenter.postNotification(new DeleteNotification(name,boost::shared_ptr<T>()));
+
     return;
   }
 
