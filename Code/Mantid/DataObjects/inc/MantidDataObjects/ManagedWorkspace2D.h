@@ -12,39 +12,37 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
 
-using namespace boost::multi_index;
-
 namespace Mantid
 {
 namespace DataObjects
 {
 /** The ManagedWorkspace2D allows the framework to handle 2D datasets that are too
-    large to fit in the available system memory by making use of a temporary file. 
+    large to fit in the available system memory by making use of a temporary file.
     It is a specialisation of Workspace2D.
-    
+
     The optional configuration property ManagedWorkspace.DataBlockSize sets the size
     (in bytes) of the blocks used to internally buffer data. The default is 1MB.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2008
-    
+
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
-  
+
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
-  
+
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-  
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -59,31 +57,31 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
    *  Boost.MultiIndex documentation (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
    */
   class mru_list
-  {    
+  {
   public:
     mru_list(const std::size_t &max_num_items_, ManagedWorkspace2D &out);
 
     void insert(ManagedDataBlock2D* item);
     void clear();
-    size_t size()const{return il.size();}
+    size_t size() const {return il.size();}
 
   private:
     /// typedef for the container holding the list
-    typedef multi_index_container<
+    typedef boost::multi_index::multi_index_container<
       ManagedDataBlock2D*,
-      indexed_by<
-        sequenced<>,
-        hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
+      boost::multi_index::indexed_by<
+        boost::multi_index::sequenced<>,
+        boost::multi_index::hashed_unique<BOOST_MULTI_INDEX_CONST_MEM_FUN(ManagedDataBlock2D,int,minIndex)>
       >
     > item_list;
-    
+
     /// The most recently used list
     item_list il;
     /// The length of the list
     const std::size_t max_num_items;
     /// Reference to the containing class
     ManagedWorkspace2D &outer;
-    
+
   public:
     /// Import the multi index container iterator
     typedef item_list::nth_index<1>::type::const_iterator const_iterator;
@@ -107,13 +105,13 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
   };
 
   friend class mru_list;
-  
+
 public:
   ManagedWorkspace2D();
   virtual ~ManagedWorkspace2D();
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
-	
+
   virtual void setX(const int histnumber, const std::vector<double>&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
@@ -142,10 +140,10 @@ public:
 
 protected:
 
-    /// Reads in a data block.
-    virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
-    /// Saves the dropped data block to disk.
-    virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
+  /// Reads in a data block.
+  virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
+  /// Saves the dropped data block to disk.
+  virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
   /// The number of vectors in each data block
   int m_vectorsPerBlock;
 
@@ -155,16 +153,16 @@ private:
   ManagedWorkspace2D(const ManagedWorkspace2D&);
   /// Private copy assignment operator
   ManagedWorkspace2D& operator=(const ManagedWorkspace2D&);
-    
+
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   virtual const int getHistogramNumberHelper() const;
 
   ManagedDataBlock2D* getDataBlock(const int index) const;
-  
-  /// The length of the X vector in each Histogram1D. Must all be the same. 
+
+  /// The length of the X vector in each Histogram1D. Must all be the same.
   int m_XLength;
-  /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
+  /// The length of the Y & E vectors in each Histogram1D. Must all be the same.
   int m_YLength;
   /// The size in bytes of each vector
   long long m_vectorSize;
@@ -183,7 +181,7 @@ private:
 
   /// Static instance count. Used to ensure temporary filenames are distinct.
   static int g_uniqueID;
-  
+
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };
