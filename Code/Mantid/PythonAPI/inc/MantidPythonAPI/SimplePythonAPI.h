@@ -62,13 +62,13 @@ class DLLExport SimplePythonAPI
   SimplePythonAPI();
   
   ///Private methods
-  static void createVersionMap(VersionMap &, const StringVector &);
-  static std::string extractAlgName(const std::string &);
-  static std::string extractAlgVersion(const std::string &);
-  static void writeFunctionDef(std::ostream &, const std::string &, const PropertyVector &);
-  static void writeGlobalHelp(std::ostream &, const VersionMap &);
+  static void createVersionMap(VersionMap & versionMap, const StringVector & algorithmKeys);
+  static std::string extractAlgName(const std::string & algKey);
+  static std::string extractAlgVersion(const std::string & algKey);
+  static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties);
+  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties);
-  static void writeFunctionHelp(std::ostream &);
+  static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
 
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first
@@ -84,8 +84,7 @@ class DLLExport SimplePythonAPI
   };
   
   /// The name of the module file
-  static std::string m_strFilename;
-  static IndexVector m_HelpStrings;
+  static std::string g_strFilename;
 };
 
 }

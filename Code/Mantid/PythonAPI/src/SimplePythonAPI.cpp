@@ -17,8 +17,7 @@ namespace Mantid
   {
 
     /// Static filename variable
-    std::string SimplePythonAPI::m_strFilename = "mantidsimple.py";
-    SimplePythonAPI::IndexVector SimplePythonAPI::m_HelpStrings;
+    std::string SimplePythonAPI::g_strFilename = "mantidsimple.py";
 
     //------------------------------
     //Public methods
@@ -29,17 +28,17 @@ namespace Mantid
      */
     const std::string & SimplePythonAPI::getModuleName()
     {
-      return m_strFilename;
+      return g_strFilename;
     }
 
     /**
      * Create the python module with function definitions in the
-     * file whose name is stored in "m_strFilename"
+     * file whose name is returned by getModule()
      */
     void SimplePythonAPI::createModule()
     {
       //open file
-      std::ofstream module(m_strFilename.c_str());
+      std::ofstream module(getModuleName().c_str());
 
       // Need to import definitions from main Python API
 #ifdef _WIN32
@@ -49,27 +48,26 @@ namespace Mantid
 #endif
 
       //Algorithm keys
-      StringVector algKeys = Mantid::API::AlgorithmFactory::Instance().getKeys();
+      using namespace Mantid::API;
+      StringVector algKeys = AlgorithmFactory::Instance().getKeys();
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
       writeGlobalHelp(module, vMap);
-      
+
       //Function definitions for each algorithm
+      IndexVector helpStrings;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
           ++vIter)
           {
-            Mantid::API::IAlgorithm* algm = Mantid::API::FrameworkManager::Instance().createAlgorithm(vIter->first);
+            IAlgorithm* algm = FrameworkManager::Instance().createAlgorithm(vIter->first);
 	    PropertyVector orderedProperties(algm->getProperties());
 	    std::sort(orderedProperties.begin(), orderedProperties.end(),
 		      SimplePythonAPI::PropertyOrdering());
 	    std::string name(vIter->first);
             writeFunctionDef(module, name , orderedProperties);
-	    m_HelpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
+	    helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
           }
-      writeFunctionHelp(module);
-      //clear the map as it is not needed anymore
-      m_HelpStrings.clear();
-      //close file stream
+      writeFunctionHelp(module, helpStrings);
       module.close();
     }
     
@@ -85,10 +83,8 @@ namespace Mantid
 	{
 	  std::string name = extractAlgName(*sIter); 
 	  VersionMap::iterator vIter = vMap.find(name);
-	  if( vIter == vMap.end() )
-	    vMap.insert(make_pair(name, 1));
-	  else
-	    ++(vIter->second);
+	  if( vIter == vMap.end() ) vMap.insert(make_pair(name, 1));
+	  else ++(vIter->second);
 	}
     }
 
@@ -204,8 +200,9 @@ namespace Mantid
     /**
      * Write the help function that takes a command as an argument
      * @param os The stream to use for the output
+     * @param helpStrings A map of function names to help strings
      */
-    void SimplePythonAPI::writeFunctionHelp(std::ostream & os)
+    void SimplePythonAPI::writeFunctionHelp(std::ostream & os, const IndexVector & helpStrings)
     {
       os << "def mtdHelp(cmd = -1):\n";
       
@@ -213,8 +210,8 @@ namespace Mantid
 	 << "\t\tmtdGlobalHelp()\n"
 	 << "\t\treturn\n";
       //Functons help
-      SimplePythonAPI::IndexVector::const_iterator mIter = m_HelpStrings.begin();
-      SimplePythonAPI::IndexVector::const_iterator mEnd = m_HelpStrings.end();
+      SimplePythonAPI::IndexVector::const_iterator mIter = helpStrings.begin();
+      SimplePythonAPI::IndexVector::const_iterator mEnd = helpStrings.end();
       os << "\tif cmd == \"" << (*mIter).first << "\":\n" 
 	 << (*mIter).second;
       while( ++mIter != mEnd )
