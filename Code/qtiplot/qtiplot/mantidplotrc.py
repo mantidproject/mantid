@@ -16,7 +16,7 @@ else:
     from libMantidPythonAPI import *
 
 # Ensure all algorithm libraries are loaded and get the FrameworkManager object
-mantid = FrameworkManager()
+mtd = FrameworkManager()
 # Now create simple API (makes mantidsimple.py file in cwd)
 createPythonSimpleAPI()
 # Import definitions
