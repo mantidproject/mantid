@@ -5,11 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
-#include "MantidDataObjects/Histogram1D.h"
 
 class ISISRAW2;
-
-using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -57,16 +54,11 @@ namespace DataHandling
 class DLLExport ManagedRawFileWorkspace2D : public DataObjects::ManagedWorkspace2D
 {
 public:
-  /// Typedef for the workspace_iterator to use with a ManagedRawFileWorkspace2D
-  typedef API::workspace_iterator<API::LocatedDataRef, ManagedRawFileWorkspace2D> iterator;
-  /// Typedef for the const workspace_iterator to use with a ManagedRawFileWorkspace2D
-  typedef API::workspace_iterator<const API::LocatedDataRef, const ManagedRawFileWorkspace2D> const_iterator;
-
   /**
   Gets the name of the workspace type
   \return Standard string name
    */
-  virtual const std::string id() const {return "ManagedRawFileWorkspace2D";}
+  virtual const std::string id() const {return "Workspace2D";}
 
   ManagedRawFileWorkspace2D();
   virtual ~ManagedRawFileWorkspace2D();
@@ -76,9 +68,9 @@ public:
 
 protected:
     /// Reads in a data block.
-    virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
+    virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const;
     /// Saves the dropped data block to disk.
-    virtual void writeDataBlock(ManagedDataBlock2D *toWrite);
+    virtual void writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite);
 private:
     /// Private copy constructor. NO COPY ALLOWED
     ManagedRawFileWorkspace2D(const ManagedRawFileWorkspace2D&);
@@ -111,11 +103,6 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };
-
-///shared pointer to the ManagedRawFileWorkspace2D class
-typedef boost::shared_ptr<ManagedRawFileWorkspace2D> ManagedRawFileWorkspace2D_sptr;
-///shared pointer to a const ManagedRawFileWorkspace2D
-typedef boost::shared_ptr<const ManagedRawFileWorkspace2D> ManagedRawFileWorkspace2D_const_sptr;
 
 } // namespace DataHandling
 } // Namespace Mantid

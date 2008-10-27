@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include "LoadRaw/isisraw2.h"
 
@@ -20,11 +21,9 @@ namespace Mantid
     Kernel::Logger& ManagedRawFileWorkspace2D::g_log = Kernel::Logger::get("ManagedRawFileWorkspace2D");
 
     /// Constructor
-    ManagedRawFileWorkspace2D::ManagedRawFileWorkspace2D()
+    ManagedRawFileWorkspace2D::ManagedRawFileWorkspace2D():
+    isisRaw(new ISISRAW2),m_fileRaw(NULL),m_readIndex(0)
     {
-        isisRaw = new ISISRAW2;
-        m_fileRaw = NULL;
-        m_readIndex = 0;
     }
 
     ///Destructor
@@ -62,6 +61,7 @@ namespace Mantid
         
         m_timeChannels.reset(new std::vector<double>(timeChannels, timeChannels + m_numberOfBinBoundaries));
         m_fileRaw = fileRaw;
+        getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     }
 
 
@@ -73,7 +73,7 @@ namespace Mantid
     // readData(int) should be changed to readNextSpectrum() returning the spectrum index
     // and skipData to skipNextSpectrum()
     //void ManagedRawFileWorkspace2D::readSpectrum(int index)const
-    void ManagedRawFileWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
+    void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const
     {
         if (!m_fileRaw)
         {
@@ -112,19 +112,19 @@ namespace Mantid
         }
         int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
         if (endIndex >= m_noVectors) endIndex = m_noVectors;
-        for(;m_readIndex<endIndex;m_readIndex++)
+        for(int index = startIndex;index<endIndex;index++,m_readIndex++)
         {
             isisRaw->readData(m_readIndex+1);
             std::vector<double> y(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);       
             std::vector<double> e(m_numberOfBinBoundaries-1);
             std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
-            newBlock->setX(m_readIndex,m_timeChannels);
-            newBlock->setData(m_readIndex,y,e);
+            newBlock->setX(index,m_timeChannels);
+            newBlock->setData(index,y,e);
         }
         newBlock->hasChanges(false);
     }
 
-    void ManagedRawFileWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
+    void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite)
     {
         ManagedWorkspace2D::writeDataBlock(toWrite);
         int blockIndex = toWrite->minIndex() / m_vectorsPerBlock;
@@ -135,53 +135,5 @@ namespace Mantid
   } // namespace DataHandling
 } //NamespaceMantid
 
-
-
-
-
-
-///\cond TEMPLATE
-template DLLExport class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef, Mantid::DataHandling::ManagedRawFileWorkspace2D>;
-template DLLExport class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::DataHandling::ManagedRawFileWorkspace2D>;
-
-template DLLExport class Mantid::API::WorkspaceProperty<Mantid::DataHandling::ManagedRawFileWorkspace2D>;
-
-namespace Mantid
-{
-  namespace Kernel
-  {
-    template<> DLLExport
-    Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr PropertyManager::getValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr>(const std::string &name) const
-    {
-      PropertyWithValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr>* prop =
-        dynamic_cast<PropertyWithValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr>*>(getPointerToProperty(name));
-      if (prop)
-      {
-        return *prop;
-      }
-      else
-      {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
-        throw std::runtime_error(message);
-      }
-    }
-
-    template<> DLLExport
-    Mantid::DataHandling::ManagedRawFileWorkspace2D_const_sptr PropertyManager::getValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_const_sptr>(const std::string &name) const
-    {
-      PropertyWithValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr>* prop =
-        dynamic_cast<PropertyWithValue<Mantid::DataHandling::ManagedRawFileWorkspace2D_sptr>*>(getPointerToProperty(name));
-      if (prop)
-      {
-        return prop->operator()();
-      }
-      else
-      {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
-        throw std::runtime_error(message);
-      }
-    }
-  } // namespace Kernel
-} // namespace Mantid
 
 ///\endcond TEMPLATE

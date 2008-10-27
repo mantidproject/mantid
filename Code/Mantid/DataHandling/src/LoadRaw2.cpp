@@ -89,10 +89,16 @@ namespace Mantid
       // If there is not enough memory use ManagedRawFileWorkspace2D.
       if (MemoryManager::Instance().goForManagedWorkspace(m_numberOfSpectra,lengthIn,channelsPerSpectrum))
       {
-//          DataObjects::Workspace2D_sptr localWorkspace( boost::dynamic_pointer_cast<DataObjects::Workspace2D>(new ManagedRawFileWorkspace2D));
-          ManagedRawFileWorkspace2D_sptr localWorkspace( new ManagedRawFileWorkspace2D);
-          localWorkspace->setRawFile(m_filename);
-          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+          ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;
+          DataObjects::Workspace2D_sptr localWorkspace( dynamic_cast<DataObjects::Workspace2D*>(localWorkspace_ptr) );
+          localWorkspace_ptr->setRawFile(m_filename);
+          runLoadInstrument(localWorkspace );
+          runLoadMappingTable(localWorkspace );
+          runLoadLog(localWorkspace );
+          localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+          for (int i = 0; i < m_numberOfSpectra; ++i)
+              localWorkspace->getAxis(1)->spectraNo(i)= i+1;
+          setProperty("OutputWorkspace",localWorkspace);
           return;
       }
 

@@ -326,11 +326,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadRaw2Test.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\LoadRawTest.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\ManagedRawFileWorkspace2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ManagedRawFileWorkspace2DTest.h"
 				>
 			</File>
 			<File
