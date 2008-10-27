@@ -137,7 +137,7 @@ public:
 
     Workspace_sptr mws2D(new ManagedWorkspace2DTest);
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) )
-    TS_ASSERT( ! child->id().compare("ManagedWorkspace2D") )
+    TS_ASSERT_EQUALS( child->id(), "ManagedWorkspace2D")
 
     Workspace_sptr nif(new NotInFactory);
     TS_ASSERT_THROWS( child = WorkspaceFactory::Instance().create(nif), std::runtime_error )
@@ -157,7 +157,7 @@ public:
     MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
     int nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
-    TS_ASSERT( ! ws->id().compare("ManagedWorkspace2D") )
+    TS_ASSERT_EQUALS( ws->id(), "ManagedWorkspace2D")
 
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",1,1,1) )
     TS_ASSERT( ! ws->id().compare("Workspace1DTest") )
