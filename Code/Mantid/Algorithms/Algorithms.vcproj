@@ -190,6 +190,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CropWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DiffractionFocussing.cpp"
 				>
 			</File>
@@ -301,6 +305,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ConvertUnitsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CropWorkspace.h"
 				>
 			</File>
 			<File
