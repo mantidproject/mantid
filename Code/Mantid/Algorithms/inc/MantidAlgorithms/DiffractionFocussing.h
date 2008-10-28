@@ -77,9 +77,9 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      API::Workspace_sptr convertUnitsToDSpacing(API::Workspace_sptr workspace, std::string outputWorkspaceName);
+      API::Workspace_sptr convertUnitsToDSpacing(const API::Workspace_sptr& workspace);
       void RebinWorkspace(API::Workspace_sptr& workspace);
-      void calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step);
+      void calculateRebinParams(const API::Workspace_const_sptr& workspace,double& min,double& max,double& step);
       bool readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups);
 
       /// Captures childs progress notifications.

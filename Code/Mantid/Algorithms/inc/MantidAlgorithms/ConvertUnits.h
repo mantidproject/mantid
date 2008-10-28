@@ -77,8 +77,6 @@ private:
   /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(const int& numberOfSpectra, API::Workspace_const_sptr inputWS, API::Workspace_sptr outputWS);
 
-  // Just copies over the workspace data if the units are already correct
-  void copyDataUnchanged(const API::Workspace_const_sptr inputWS, const API::Workspace_sptr outputWS);
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace
   API::Workspace_sptr alignBins(const API::Workspace_sptr workspace);
   const std::vector<double> calculateRebinParams(const API::Workspace_const_sptr workspace) const;

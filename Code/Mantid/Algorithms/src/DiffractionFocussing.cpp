@@ -43,9 +43,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      //valid extensions, we will allow all, so just an empty array
-      std::vector<std::string> exts;
-      declareProperty("GroupingFileName","",new FileValidator(exts));
+      declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
     }
 
     /** Executes the algorithm
@@ -60,7 +58,6 @@ namespace Mantid
 
       // Get the input workspace
       Workspace_sptr inputW = getProperty("InputWorkspace");
-      std::string outputWorkspaceName=getProperty("OutputWorkspace");
 
       bool dist = inputW->isDistribution();
 
@@ -72,7 +69,7 @@ namespace Mantid
       }
 
       //Convert to d-spacing units
-      API::Workspace_sptr tmpW = convertUnitsToDSpacing(inputW,"tmp");
+      API::Workspace_sptr tmpW = convertUnitsToDSpacing(inputW);
 
        //Rebin to a common set of bins
       RebinWorkspace(tmpW);
@@ -103,7 +100,6 @@ namespace Mantid
           for(std::multimap<int,int>::const_iterator d = from;d!=to;d++)
               detectorList.push_back(d->second);
           API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
-          childAlg->setPropertyValue("Workspace", "Anonymous");
           DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
           childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
           childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
@@ -143,7 +139,6 @@ namespace Mantid
           g_log.warning()<<"Remaining "+boost::lexical_cast<std::string>(indexList.size())+
               " spectra are grouped into one" << std::endl;
           API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
-          childAlg->setPropertyValue("Workspace", "Anonymous");
           DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
           childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
           childAlg->setProperty< std::vector<int> >("WorkspaceIndexList",indexList);
@@ -159,7 +154,7 @@ namespace Mantid
               g_log.error("Unable to successfully run GroupDetectors sub-algorithm");
               throw std::runtime_error("Unable to successfully run GroupDetectors sub-algorithm");
           }
-      }//*/
+      }
 
       for(int i=0;i<oldHistNumber;i++)
       {
@@ -216,7 +211,7 @@ namespace Mantid
     }
 
     /// Run ConvertUnits as a sub-algorithm to convert to dSpacing
-    Workspace_sptr DiffractionFocussing::convertUnitsToDSpacing(API::Workspace_sptr workspace, std::string outputWorkspaceName)
+    Workspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Workspace_sptr& workspace)
     {
       const std::string CONVERSION_UNIT = "dSpacing";
 
@@ -225,8 +220,7 @@ namespace Mantid
       g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 
       API::Algorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
-      childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
-      childAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
+      childAlg->setProperty("InputWorkspace", workspace);
       childAlg->setPropertyValue("Target",CONVERSION_UNIT);
       childAlg->notificationCenter.addObserver(m_childProgressObserver);
       std::cerr<<childAlg->name()<<'\n';
@@ -244,7 +238,16 @@ namespace Mantid
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
-      return childAlg->getProperty("OutputWorkspace");
+      // Get the output workspace out of its property and then clear the property
+      // so that this intermediate workspace will be deleted once its been
+      // used as the input workspace for the Rebin subalgorithm
+      Property *p = childAlg->getProperty("OutputWorkspace");
+      API::IWorkspaceProperty *pp = dynamic_cast<API::IWorkspaceProperty*>(p);
+      Workspace_sptr ppp = pp->getWorkspace();
+      pp->clear();
+      return ppp;
+  
+      //return childAlg->getProperty("OutputWorkspace");
     }
 
     /// Run Rebin as a sub-algorithm to harmionise the bin boundaries
@@ -266,9 +269,7 @@ namespace Mantid
         " in "<< step <<" logaritmic steps.\n";
 
       API::Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
-      childAlg->setPropertyValue("InputWorkspace", "Anonymous");
       childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
-      childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
       childAlg->setProperty<std::vector<double> >("params",paramArray);
       childAlg->notificationCenter.addObserver(m_childProgressObserver);
 
@@ -287,7 +288,11 @@ namespace Mantid
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
       else
       {
-           workspace = childAlg->getProperty("OutputWorkspace");
+         workspace = childAlg->getProperty("OutputWorkspace");
+         // Clear the pointer to the input workspace held by its property
+         // This will lead to the intermediate workspace being deleted
+         Property *p = childAlg->getProperty("InputWorkspace");
+         dynamic_cast<API::IWorkspaceProperty*>(p)->clear();
       }
 
     }
@@ -296,7 +301,7 @@ namespace Mantid
     /** Calculates rebin parameters: the min and max bin boundaries and the logarithmic step. The aim is to have approx.
         the same number of bins as in the input workspace.
       */
-    void DiffractionFocussing::calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step)
+    void DiffractionFocussing::calculateRebinParams(const API::Workspace_const_sptr& workspace,double& min,double& max,double& step)
     {
 
       min=999999999;

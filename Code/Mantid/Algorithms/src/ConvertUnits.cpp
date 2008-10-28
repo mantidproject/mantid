@@ -63,22 +63,24 @@ void ConvertUnits::exec()
   // Get the workspaces
   API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
   API::Workspace_sptr outputWS = getProperty("OutputWorkspace");
+
+  // Check that the input workspace doesn't already have the desired unit.
+  // If it does, just set the output workspace to point to the input one.
+  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
+  const std::string targetUnit = getPropertyValue("Target");
+  if ( inputUnit->unitID() == targetUnit )
+  {
+    g_log.information() << "Input workspace already has target unit (" << targetUnit
+                        << "), so just pointing the output workspace property to the input workspace." << std::endl;
+    setProperty("OutputWorkspace",boost::const_pointer_cast<Workspace>(inputWS));
+    return;
+  }
+
   // If input and output workspaces are not the same, create a new workspace for the output
   if (outputWS != inputWS )
   {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
     setProperty("OutputWorkspace",outputWS);
-  }
-
-  // Check that the input workspace doesn't already have the desired unit. If it does, just copy data.
-  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
-  const std::string targetUnit = getPropertyValue("Target");
-  if ( inputUnit->unitID() == targetUnit )
-  {
-    g_log.information() << "Input workspace already has target unit " << targetUnit
-                        << ", so just copying the data unchanged." << std::endl;
-    this->copyDataUnchanged(inputWS, outputWS);
-    return;
   }
 
   // Set the final unit that our output workspace will have
@@ -369,19 +371,6 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspac
 
   return retval;
 }
-
-/// Copies over the workspace data from the input to the output workspace
-void ConvertUnits::copyDataUnchanged(const API::Workspace_const_sptr inputWS, const API::Workspace_sptr outputWS)
-{
-  const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
-  for (int i = 0; i < numberOfSpectra; ++i)
-  {
-    outputWS->dataX(i) = inputWS->dataX(i);
-    outputWS->dataY(i) = inputWS->dataY(i);
-    outputWS->dataE(i) = inputWS->dataE(i);
-  }
-}
-
 
 } // namespace Algorithm
 } // namespace Mantid

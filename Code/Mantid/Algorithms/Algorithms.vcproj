@@ -254,6 +254,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SmoothData.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Unwrap.cpp"
 				>
 			</File>
@@ -409,6 +413,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SimpleRebinTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SmoothData.h"
 				>
 			</File>
 			<File
