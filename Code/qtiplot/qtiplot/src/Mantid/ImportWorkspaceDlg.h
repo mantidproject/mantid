@@ -21,6 +21,7 @@ public:
 	int getLowerLimit() { return lowerLimit; }
 	int getUpperLimit() { return upperLimit; }
     bool isFiltered(){ return filtered; }
+    double getMinValue(){ return minValue; }
     double getMaxValue(){ return maxValue; }
 
 protected:
@@ -34,6 +35,7 @@ private:
 	int lowerLimit;
 	int upperLimit;
     bool filtered;
+    double minValue;
     double maxValue;
 
 	QLabel *label;
@@ -44,8 +46,9 @@ private:
 	QLineEdit *lineHigh;
 
     QCheckBox *checkFilter;
-	QLabel *labelFilterMaximum;
-	QLineEdit *lineFilterMaximum;
+	//QLabel *labelFilterMaximum;
+	QLineEdit *lineMinimum;
+	QLineEdit *lineMaximum;
 
 	QPushButton *okButton;
 	QPushButton *cancelButton;

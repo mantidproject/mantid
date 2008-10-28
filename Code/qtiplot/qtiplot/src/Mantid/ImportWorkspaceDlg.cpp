@@ -4,7 +4,7 @@
 
 #include "ImportWorkspaceDlg.h"
 
-ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(parent), numHists(num)
+ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(parent), numHists(num),minValue(0),maxValue(100.)
 {
 	label = new QLabel(tr("Set Histogram Range to Load (Max Number = " + QString::number(numHists) + "):"));
 	
@@ -18,12 +18,25 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	lineHigh->setText(QString::number(numHists));
 	labelHigh->setBuddy(lineHigh);
 
-        checkFilter = new QCheckBox(tr("Replace large abs. values with a constant"));
-	labelFilterMaximum = new QLabel(tr("Maximum value"));
-	lineFilterMaximum = new QLineEdit;   
-        lineFilterMaximum->setText("10000.");
-	labelFilterMaximum->setBuddy(lineFilterMaximum);
-        enableFilter(QCheckBox::Off);
+    checkFilter = new QCheckBox(tr("Set range for 2D plots"));
+
+	QLabel *labelMinimum = new QLabel(tr("Minimum value"));
+	lineMinimum = new QLineEdit;   
+
+	QLabel *labelMaximum = new QLabel(tr("Maximum value"));
+	lineMaximum = new QLineEdit;   
+
+    QVBoxLayout *filterLayout = new QVBoxLayout;
+	filterLayout->addWidget(checkFilter);
+
+    QGridLayout *grid1 = new QGridLayout;
+	grid1->addWidget(labelMinimum,0,0);
+	grid1->addWidget(lineMinimum,0,1);
+	grid1->addWidget(labelMaximum,1,0);
+	grid1->addWidget(lineMaximum,1,1);
+    filterLayout->addLayout(grid1);
+	
+    enableFilter(QCheckBox::Off);
 	
 	okButton = new QPushButton(tr("OK"));
 	okButton->setDefault(true);
@@ -43,11 +56,6 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	middleRowLayout->addWidget(labelHigh);
 	middleRowLayout->addWidget(lineHigh);
 
-        QVBoxLayout *filterLayout = new QVBoxLayout;
-	filterLayout->addWidget(checkFilter);
-	filterLayout->addWidget(labelFilterMaximum);
-	filterLayout->addWidget(lineFilterMaximum);
-	
 	QHBoxLayout *bottomRowLayout = new QHBoxLayout;
 	bottomRowLayout->addStretch();
 	bottomRowLayout->addWidget(cancelButton);
@@ -109,7 +117,8 @@ void ImportWorkspaceDlg::okClicked()
         if (checkFilter->checkState() == Qt::Checked)
         {
             filtered = true;
-            maxValue = lineFilterMaximum->text().toDouble(&ok); 
+            minValue = lineMinimum->text().toDouble(&ok); 
+            maxValue = lineMaximum->text().toDouble(&ok); 
 		    if (!ok || maxValue < 0)
 		    {
 		    	QMessageBox::warning(this, tr("Mantid"),
@@ -130,7 +139,19 @@ void ImportWorkspaceDlg::okClicked()
 
 void ImportWorkspaceDlg::enableFilter(int state)
 {
-    if (state == QCheckBox::Off) lineFilterMaximum->setReadOnly(true);
-    if (state == QCheckBox::On ) lineFilterMaximum->setReadOnly(false);
+    if (state == QCheckBox::Off) 
+    {
+        lineMaximum->setReadOnly(true);
+        lineMinimum->setReadOnly(true);
+        lineMinimum->setText("");
+        lineMaximum->setText("");
+    }
+    if (state == QCheckBox::On )
+    {
+        lineMinimum->setReadOnly(false);
+        lineMaximum->setReadOnly(false);
+        lineMinimum->setText(QString::number(minValue));
+        lineMaximum->setText(QString::number(maxValue));
+    }
 }
 

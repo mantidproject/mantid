@@ -35,26 +35,26 @@
 #include <iostream>
 #include <algorithm>
 
-MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end, bool filter, double maxv)
-: MdiSubWindow(label, parent, name, 0),m_funct(this),
+MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
+: MdiSubWindow(label, parent, name, 0),m_funct(this),m_min(0),m_max(0),m_are_min_max_set(false),
 m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
 {
     m_appWindow = parent;
-    setup(ws,start,end,filter,maxv);
+    setup(ws,start,end);
 	setWindowTitle(name);
 	setName(name); 
 	setIcon( QPixmap(matrixIcon()) );
 
-    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::Y);
+    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     m_table_viewY = new QTableView();
     connectTableView(m_table_viewY,m_modelY);
 
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::X);
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     m_table_viewX = new QTableView();
     connectTableView(m_table_viewX,m_modelX);
 
-    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,filter,maxv,MantidMatrixModel::E);
+    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     m_table_viewE = new QTableView();
     connectTableView(m_table_viewE,m_modelE);
 
@@ -91,7 +91,7 @@ MantidMatrix::~MantidMatrix()
     delete m_modelE;
 }
 
-void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end, bool filter, double maxv)
+void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end)
 {
     if (!ws.get())
     {
@@ -107,8 +107,6 @@ void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end, boo
     m_endRow   = (end<0 || end>=ws->getNumberHistograms() || end < start)?ws->getNumberHistograms()-1:end;
     m_rows = m_endRow - m_startRow + 1;
 	m_cols = ws->blocksize(); 
-    m_filter = filter;
-    m_maxv = maxv;
     m_histogram = false;
     if ( m_workspace->blocksize() || m_workspace->readX(0).size() != m_workspace->readY(0).size() ) m_histogram = true;
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
@@ -152,9 +150,9 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
 	for(int i=0; i<cols; i++)
 		view->setColumnWidth(i, m_column_width);
 
-	QHeaderView* vHeader = (QHeaderView*)view->verticalHeader();
-	vHeader->setMovable(false);
-	vHeader->setResizeMode(QHeaderView::ResizeToContents);
+	//QHeaderView* vHeader = (QHeaderView*)view->verticalHeader();
+	//vHeader->setMovable(false);
+	//vHeader->setResizeMode(QHeaderView::ResizeToContents);// Lengthy operation
 
 }
 
@@ -242,27 +240,35 @@ void MantidMatrix::copySelection()
 
 void MantidMatrix::range(double *min, double *max)
 {
-    *min = 0.;
-    *max = 10.;
-    return;
-	double d_min = cell(0, 0);
-	double d_max = d_min;
-	int rows = numRows();
-	int cols = numCols();
+    if (!m_are_min_max_set)
+    {
+	    m_min = cell(0, 0);
+	    m_max = m_min;
+	    int rows = numRows();
+	    int cols = numCols();
 
-	for(int i=0; i<rows; i++){
-		for(int j=0; j<cols; j++){
-			double aux = cell(i, j);
-			if (aux <= d_min)
-				d_min = aux;
+	    for(int i=0; i<rows; i++){
+		    for(int j=0; j<cols; j++){
+			    double aux = cell(i, j);
+			    if (aux <= m_min)
+				    m_min = aux;
 
-			if (aux >= d_max)
-				d_max = aux;
-		}
-	}
+			    if (aux >= m_max)
+				    m_max = aux;
+		    }
+	    }
+        m_are_min_max_set = true;
+    }
 
-	*min = d_min;
-	*max = d_max;
+    *min = m_min;
+    *max = m_max;
+}
+
+void MantidMatrix::setRange(double min, double max)
+{
+    m_min = min;
+    m_max = max;
+    m_are_min_max_set = true;
 }
 
 double** MantidMatrix::allocateMatrixData(int rows, int columns)
@@ -699,18 +705,18 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
     QModelIndexList indexList = oldSelModel->selectedIndexes();
     QModelIndex curIndex = activeView()->currentIndex();
 
-    setup(ws,m_startRow,m_endRow,m_filter,m_maxv);
+    setup(ws,m_startRow,m_endRow);
     
     delete m_modelY;
-    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::Y);
+    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     connectTableView(m_table_viewY,m_modelY);
 
     delete m_modelX;
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::X);
+    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     connectTableView(m_table_viewX,m_modelX);
 
     delete m_modelE;
-    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,m_filter,m_maxv,MantidMatrixModel::E);
+    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     connectTableView(m_table_viewE,m_modelE);
 
     // Restore selection
@@ -764,11 +770,7 @@ void MantidMatrix::selfClosed(MdiSubWindow* w)
 
 QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 {
-    if (role != Qt::DisplayRole) return QVariant();// this line is important
-    double val;
-    if (m_type == X)  val = m_workspace->readX(index.row() + m_startRow)[index.column()];
-    else if (m_type == Y) val = m_workspace->readY(index.row() + m_startRow)[index.column()];
-    else  val = m_workspace->readE(index.row() + m_startRow)[index.column()];
-
+    if (role != Qt::DisplayRole) return QVariant();
+    double val = data(index.row(),index.column());
     return QVariant(m_locale.toString(val,'f',6));
 }

@@ -81,7 +81,7 @@ class MantidMatrix: public MdiSubWindow
 
 public:
 
-	MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1, bool filter=false, double maxv=0);
+	MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
     ~MantidMatrix();
 
     void connectTableView(QTableView*,MantidMatrixModel*);
@@ -160,6 +160,8 @@ public slots:
 
 	 //! Min and max values of the matrix.
   	void range(double *min, double *max);
+	 //! Set min and max values of the matrix.
+  	void setRange(double min, double max);
 
     void goTo(int row,int col);
     //! Scroll to row (row starts with 1)
@@ -182,7 +184,7 @@ public slots:
 
 protected:
 
-    void setup(Mantid::API::Workspace_sptr ws, int start=-1, int end=-1, bool filter=false, double maxv=0);
+    void setup(Mantid::API::Workspace_sptr ws, int start=-1, int end=-1);
 
     void handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf);
     Poco::NObserver<MantidMatrix, WorkspaceReplaceNotification> m_replaceObserver;
@@ -208,9 +210,10 @@ protected:
     int m_rows,m_cols;
     int m_startRow;
     int m_endRow;
-    bool m_filter;
-    double m_maxv;
     bool m_histogram;
+    double m_min;           // Saved minimum Y-value
+    double m_max;           // Saved maximum Y-value
+    bool m_are_min_max_set; // If true ::range does not iterate over WS to find min and max but uses m_min and m_max instead
 
     // MDI windows created by this MantidMatrix
     QVector<MultiLayer*> m_plots2D;
@@ -239,25 +242,19 @@ public:
                       int rows,
                       int cols,
                       int start, 
-                      bool filter, 
-                      double maxv,
                       Type type):
       QAbstractTableModel(parent),m_type(type)
       {
-          setup(ws,rows,cols,start,filter,maxv);
+          setup(ws,rows,cols,start);
       }
 
     /// Call this function if the workspace has changed
     void setup(Mantid::API::Workspace_sptr ws, 
                       int rows,
                       int cols,
-                      int start, 
-                      bool filter, 
-                      double maxv)
+                      int start)
     {
         m_workspace = ws;
-        m_filter = filter;
-        m_maxv = maxv;
         m_rows = rows;
         m_cols = cols;
         m_startRow = start >= 0? start : 0;
@@ -284,11 +281,6 @@ public:
         else if (m_type == Y)
         {
             val = m_workspace->readY(row + m_startRow)[col];
-            if (m_filter)
-            {
-                if (val > m_maxv) val = m_maxv;
-                if (val < 0) val = 0.;
-            }
         }
         else
         {
@@ -300,6 +292,11 @@ public:
     /// Implementation of QAbstractTableModel::data(...). QTableView uses this function
     /// to retrieve data for displaying.
     QVariant data(const QModelIndex &index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const   
+    {
+        if (role != Qt::DisplayRole) return QVariant();
+        return section;
+    }
 
     Qt::ItemFlags flags(const QModelIndex & index ) const
     {
@@ -316,8 +313,6 @@ private:
     Mantid::API::Workspace_sptr m_workspace;
     int m_startRow; ///< starting workspace index to display
     int m_endRow;   ///< ending workspace index to display
-    bool m_filter;  ///< if true data(int,int) return values between 0 and m_maxv
-    double m_maxv;
     int m_rows,m_cols; ///< numbers of rows and columns
     int m_colNumCorr;  ///< == 1 for histograms and == 0 for point data
     QLocale m_locale;

@@ -354,12 +354,14 @@ MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg)
 		    int start = dlg->getLowerLimit();
 		    int end = dlg->getUpperLimit();
     		
-	        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end,dlg->isFiltered(),dlg->getMaxValue() );
+	        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
+            if (dlg->isFiltered())
+                w->setRange(0,dlg->getMaxValue());
 	    }
     }
     else
     {
-        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, -1, -1,false,0 );
+        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, -1, -1 );
     }
     if (!w) return 0;
 
