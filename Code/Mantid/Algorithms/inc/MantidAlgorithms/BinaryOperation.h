@@ -95,10 +95,17 @@ namespace Mantid
       unsigned int getLoopDirection(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const;
 
 
+      friend class BinaryOperation_fn;
       /// Abstract internal class providing the binary function
       class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
       {
       public:
+        /// Default Constructor
+        BinaryOperation_fn():m_count(0),m_progress(0),m_progress_step(0)
+        { }
+        /// Constructor
+        BinaryOperation_fn(BinaryOperation* op,int count):m_count(count),m_progress(0),m_progress_step(count/100),m_op(op)
+        { }
         /// Virtual destructor
         virtual ~BinaryOperation_fn()
         { }
@@ -114,9 +121,19 @@ namespace Mantid
         This save creating a new object for each iteration and removes lifetime issues.
         */
         API::LocatedDataValue result;
-
+        int m_count;         // Total number of individual operations.
+        int m_progress;      // Number of performed operations;
+        int m_progress_step; // Call progerss(...) every m_progress_step operations.
+        BinaryOperation *m_op; // BinaryOperation
+        /// Reports algorithm progress from operator()
+        void report_progress(){m_op->report_progress(double(m_progress)/m_count);}
       };
-
+      /// Gives access to Algorithm's protected methods
+      void report_progress(double p)
+      {
+          progress(p);
+          interruption_point();
+      }
     private:
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

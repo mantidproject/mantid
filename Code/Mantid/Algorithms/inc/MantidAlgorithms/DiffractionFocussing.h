@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <Poco/NObserver.h>
 
 namespace Mantid
 {
@@ -62,7 +63,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      DiffractionFocussing() : API::Algorithm() {};
+      DiffractionFocussing() : API::Algorithm(),m_childProgressObserver(*this, &DiffractionFocussing::handleChildProgressNotification) {};
       /// Destructor
       virtual ~DiffractionFocussing() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -80,6 +81,10 @@ namespace Mantid
       void RebinWorkspace(API::Workspace_sptr& workspace);
       void calculateRebinParams(API::Workspace_sptr workspace,double& min,double& max,double& step);
       bool readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups);
+
+      /// Captures childs progress notifications.
+      Poco::NObserver<DiffractionFocussing, ProgressNotification> m_childProgressObserver;
+      void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
     
       
 	  /// Static reference to the logger class

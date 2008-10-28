@@ -111,6 +111,11 @@ void SimpleIntegration::exec()
     {
       outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
     }
+    if (j % 100 == 0)
+    {
+        interruption_point();
+        progress( double(j)/(m_MaxSpec-m_MinSpec+1) );
+    }
   }
 
   // Assign it to the output workspace property

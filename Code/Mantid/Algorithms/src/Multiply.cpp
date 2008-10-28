@@ -26,7 +26,7 @@ namespace Mantid
     void Multiply::performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
         Workspace::iterator it_out)
     {
-      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Multiply_fn());
+      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Multiply_fn(this,it_in1.end() - it_in1.begin()));
     }
 
     /** Performs the addition with Gausian errors within the transform function
@@ -41,6 +41,7 @@ namespace Mantid
       result = a;
       //use the error helper to correct the changed values in result
       a.ErrorHelper()->multiply(a,b,result);
+      if (m_progress++ % m_progress_step == 0) report_progress();
       return result;
     }
   }

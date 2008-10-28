@@ -26,7 +26,7 @@ namespace Mantid
     void Minus::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
         API::Workspace::iterator it_out)
     {
-      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Minus_fn());
+      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Minus_fn(this,it_in1.end() - it_in1.begin()));
     }
 
 
@@ -42,6 +42,7 @@ namespace Mantid
       result = a;
       //use the error helper to correct the changed values in result
       a.ErrorHelper()->minus(a,b,result);
+      if (m_progress++ % m_progress_step == 0) report_progress();
       return result;
     }
   }

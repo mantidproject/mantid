@@ -79,6 +79,7 @@ namespace Mantid
 			// make output Workspace the same type is the input, but with new length of signal array
 			API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
 
+            int progress_step = histnumber / 100;
 			for (int hist=0; hist <  histnumber;hist++)
 			{
 				const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
@@ -113,6 +114,11 @@ namespace Mantid
 				//copy oer the spectrum No and ErrorHelper
 				//        outputW->getAxis()->spectraNo(hist)=inputW->getAxis()->spectraNo(hist);
 				outputW->setErrorHelper(hist,inputW->errorHelper(hist));
+                if (hist % progress_step == 0)
+                {
+                    progress(double(hist)/histnumber);
+                    interruption_point();
+                }
 			}
 			outputW->isDistribution(dist);
 

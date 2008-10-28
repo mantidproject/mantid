@@ -7,6 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <cfloat>
+#include <iostream>
 
 namespace Mantid
 {
@@ -110,6 +111,11 @@ void ConvertUnits::exec()
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
     outputWS->dataX(i) = inputWS->dataX(i);
+    if ( i % 100 == 0)
+    {
+        progress( double(i)/numberOfSpectra/2 );
+        interruption_point();
+    }
 
   }
 
@@ -180,6 +186,11 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
         for (int j = 1; j < numberOfSpectra; ++j)
         {
           WS2D->setX(j,xVals);
+          if ( j % 100 == 0)
+          {
+              progress( 0.5 + double(j)/numberOfSpectra/2 );
+              interruption_point();
+          }
         }
       }
       return;
@@ -285,6 +296,11 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
 
+    if ( i % 100 == 0)
+    {
+        progress( 0.5 + double(i)/numberOfSpectra/2 );
+        interruption_point();
+    }
   } // loop over spectra
 
   if (failedDetectorIndex != notFailed)

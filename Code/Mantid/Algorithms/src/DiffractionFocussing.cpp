@@ -86,9 +86,17 @@ namespace Mantid
           }
       }
 
+      int iprogress = 0;
+      int iprogress_count = groupNumbers.size();
+      int iprogress_step = iprogress_count / 100;
+      if (iprogress_step == 0) iprogress_step = 1;
       std::vector<int> resultIndeces;
       for(std::set<int>::const_iterator g = groupNumbers.begin();g!=groupNumbers.end();g++)
       {
+          if (iprogress++ % iprogress_step == 0)
+          {
+              progress(0.68 + double(iprogress)/iprogress_count/3);
+          }
           std::multimap<int,int>::const_iterator from = detectorGroups.lower_bound(*g);
           std::multimap<int,int>::const_iterator to =   detectorGroups.upper_bound(*g);
           std::vector<int> detectorList;
@@ -197,6 +205,7 @@ namespace Mantid
               hist++;
           }
       }
+      progress(1.);
 
       outputW->isDistribution(dist);
 
@@ -219,7 +228,8 @@ namespace Mantid
       childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
       childAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
       childAlg->setPropertyValue("Target",CONVERSION_UNIT);
-
+      childAlg->notificationCenter.addObserver(m_childProgressObserver);
+      std::cerr<<childAlg->name()<<'\n';
       // Now execute the sub-algorithm. Catch and log any error
       try
       {
@@ -230,6 +240,7 @@ namespace Mantid
         g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
         throw;
       }
+      childAlg->notificationCenter.removeObserver(m_childProgressObserver);
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
@@ -259,6 +270,7 @@ namespace Mantid
       childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
       childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
       childAlg->setProperty<std::vector<double> >("params",paramArray);
+      childAlg->notificationCenter.addObserver(m_childProgressObserver);
 
       // Now execute the sub-algorithm. Catch and log any error
       try
@@ -270,6 +282,7 @@ namespace Mantid
         g_log.error("Unable to successfully run Rebinning sub-algorithm");
         throw;
       }
+      childAlg->notificationCenter.removeObserver(m_childProgressObserver);
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
       else
@@ -335,6 +348,12 @@ namespace Mantid
         return true;
     }
 
+    /// Captures progress notifications from child algorithms and sends the overall progress.
+    void DiffractionFocussing::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
+    {
+        if (pNf->algorithm()->name() == "ConvertUnits") progress(pNf->progress/3);
+        else if (pNf->algorithm()->name() == "Rebin") progress(0.34+pNf->progress/3);
+    }
   } // namespace Algorithm
 } // namespace Mantid
 

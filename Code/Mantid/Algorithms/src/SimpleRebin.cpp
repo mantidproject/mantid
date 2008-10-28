@@ -63,6 +63,7 @@ namespace Mantid
       // Try to cast it to a Workspace2D for use later
       Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
 
+      int progress_step = histnumber / 100;
       for (int hist=0; hist <  histnumber;++hist)
       {
         const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
@@ -100,6 +101,11 @@ namespace Mantid
           // OK, so this isn't a Workspace2D
         }
         outputW->setErrorHelper(hist,inputW->errorHelper(hist));
+        if (hist % progress_step == 0)
+        {
+            progress(double(hist)/histnumber);
+            interruption_point();
+        }
       }
       outputW->isDistribution(dist);
 
