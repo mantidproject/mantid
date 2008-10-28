@@ -70,7 +70,7 @@ private:
 	GLColorMap mColorMap;
 	void AssignColors();
 	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument>);
-	std::vector<int> Instrument3DWidget::getDetectorIDList();
+	std::vector<int> getDetectorIDList();
 	std::vector<int> getSpectraIndexList(std::vector<int> idDecVec);
 	void setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colMap);
 	void CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);

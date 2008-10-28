@@ -35,15 +35,19 @@ CONFIG          += release
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
 
-INCLUDEPATH       += ../../Third_Party/include/muparser
-INCLUDEPATH       += ../3rdparty/liborigin
-INCLUDEPATH       += ../../Third_Party/include
-INCLUDEPATH       += ../../Third_Party/include/zlib123
-INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
-INCLUDEPATH       += ../3rdparty/qwt/src
-
 INCLUDEPATH       += ../../Mantid/includes/
+INCLUDEPATH       += ../3rdparty/liborigin
 INCLUDEPATH       += ../../Third_Party/include/
+
+win32:INCLUDEPATH       += ../../Third_Party/include/muparser
+win32:INCLUDEPATH       += ../../Third_Party/include
+win32:INCLUDEPATH       += ../../Third_Party/include/zlib123
+win32:INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
+win32:INCLUDEPATH       += ../3rdparty/qwt/src
+
+unix:INCLUDEPATH       += /usr/include/
+unix:INCLUDEPATH       += /usr/include/qwt/
+unix:INCLUDEPATH       += /usr/include/qwtplot3d/
 
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -61,7 +65,7 @@ INCLUDEPATH       += ../../Third_Party/include/
 # dynamically link against dependencies if they are installed system-wide
 unix:LIBS         += -lmuparser
 unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
-unix:LIBS         += -L/usr/local/qwt-0-svn/lib -lqwt
+unix:LIBS         += -L/usr/lib -lqwt
 unix:LIBS         += -lgsl -lgslcblas
 
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
@@ -72,9 +76,9 @@ unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
 
-unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoUtil
-unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoXML
-unix:LIBS		+= -L/usr/local/poco-1.3.1/lib/Linux/i686/ -lPocoFoundation
+unix:LIBS		+= -L/usr/lib/ -lPocoUtil
+unix:LIBS		+= -L/usr/lib/ -lPocoXML
+unix:LIBS		+= -L/usr/lib/ -lPocoFoundation
 
 ##################### Windows ###############################################
 

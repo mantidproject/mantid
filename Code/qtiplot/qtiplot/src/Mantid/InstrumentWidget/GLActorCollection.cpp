@@ -62,8 +62,8 @@ void GLActorCollection::removeActor(GLActor* a)
     if (!a) return;
 	Mantid::Geometry::V3D tmin,tmax;
 	a->getBoundingBox(tmin,tmax);
-	bool bRecalculate=FALSE;
-	if(_bbmin[0]==tmin[0]||_bbmin[1]==tmin[1]||_bbmin[2]==tmin[2]||_bbmax[0]==tmax[0]||_bbmax[1]==tmax[1]||_bbmax[2]==tmax[2]) bRecalculate=TRUE;
+	bool bRecalculate=false;
+	if(_bbmin[0]==tmin[0]||_bbmin[1]==tmin[1]||_bbmin[2]==tmin[2]||_bbmax[0]==tmax[0]||_bbmax[1]==tmax[1]||_bbmax[2]==tmax[2]) bRecalculate=true;
     std::vector<GLActor*>::iterator i;
     i=find(_actors.begin(),_actors.end(),a);
     if (i!=_actors.end()) _actors.erase(i);
