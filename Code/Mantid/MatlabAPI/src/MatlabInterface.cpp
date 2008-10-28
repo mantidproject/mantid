@@ -1,18 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <iostream>
-
-#include "boost/algorithm/string.hpp"
-#include "boost/pointer_cast.hpp"
+#include "boost/filesystem.hpp"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #define ARGCHECK   // Also need mwdebug.c for this
 
@@ -65,6 +56,9 @@ extern int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* pr
 extern int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int CreateSimpleAPI(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern void CreateSimpleAPIHelper(const std::string& algName, const std::string& path);
+
 
 static mexfunc_s_t mex_functions[] = {
     { "FrameworkManager_Create", CreateFrameworkManager },
@@ -74,12 +68,13 @@ static mexfunc_s_t mex_functions[] = {
     { "Workspace_GetField", WorkspaceGetField },
     { "Workspace_GetAllFields", WorkspaceGetAllFields },
     { "Workspace_SetField", WorkspaceSetField },
+	  { "SimpleAPI_Create", CreateSimpleAPI },
     { NULL, NULL }
 };
 
 /*
- * the mex function is called with the class name followed by the operation name
- * as the first two matlab arguments e.g. libisisexc("ixtestclass", "plus")
+ *The mex function is called with the class name followed by the operation name
+ * as the first two matlab arguments e.g. MantidMatlabAPI("ixtestclass", "plus")
  * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with 
  * the rest of the parameters
  */
@@ -114,7 +109,7 @@ static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	int i, j, n, nrhs_2, func_called = 0, errcode = 0;
+	int i, n, nrhs_2, func_called = 0, errcode = 0;
 	static int first_call = 0;
 	static int call_depth = 0;
 	char error_buffer[256];
@@ -127,19 +122,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 	if (nrhs < 2)
 	{
-		mexErrMsgTxt("LIBISISEXC: At least two arguments (\"class\", \"class operation\") are required");
+		mexErrMsgTxt("MANTIDEXC: At least two arguments (\"class\", \"class operation\") are required");
 	}
 	if (nrhs >= MAX_ARGS)
 	{
-		mexErrMsgTxt("LIBISISEXC: too many varargin arguments");
+		mexErrMsgTxt("MANTIDEXC: too many varargin arguments");
 	}
     if (mxGetString(prhs[0], classname, BUFFER_LEN) != 0)
 	{
-		mexErrMsgTxt("LIBISISEXC: cannot read argument 1 (class name)");
+		mexErrMsgTxt("MANTIDEXC: cannot read argument 1 (class name)");
 	}
     if (mxGetString(prhs[1], classop, BUFFER_LEN) != 0)
 	{
-		mexErrMsgTxt("LIBISISEXC: cannot read argument 2 (class operation name)");
+		mexErrMsgTxt("MANTIDEXC: cannot read argument 2 (class operation name)");
 	}
 /*
  * NULLify out PLHS as we use this as a test to create them
@@ -178,9 +173,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	if (call_depth > 1)
 	{
 		call_depth = 0;	/* need to reset */
-/*		mexErrMsgTxt("LIBISISEXC: NOT re-entrant"); */
-		mexWarnMsgTxt("LIBISISEXC: Possible attempt to make re-entrant call");
-		mexWarnMsgTxt("LIBISISEXC: This is often caused by a matlab class constructor not checking for nargin > 0");
+/*		mexErrMsgTxt("MANTIDEXC: NOT re-entrant"); */
+		mexWarnMsgTxt("MANTIDEXC: Possible attempt to make re-entrant call");
+		mexWarnMsgTxt("MANTIDEXC: This is often caused by a matlab class constructor not checking for nargin > 0");
 	}
 	for(i=0; i< (sizeof(mex_functions) / sizeof(mexfunc_s_t)) && !func_called; i++)
 	{
@@ -191,7 +186,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 /*			(*(mex_functions[i].func))(&nlhs, plhs, &nrhs_2, prhs+2); */
 			if (errcode != 0)
 			{
-			    sprintf(error_buffer, "LIBISISEXC: error returned from function \"%s\"", funcname);
+			    sprintf(error_buffer, "MANTIDEXC: error returned from function \"%s\"", funcname);
 /*
 				matlab will now stop after all errors coming from fortran DLL and not continue
 				to reveres this change comments with the next line
@@ -204,7 +199,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	--call_depth;
     if (!func_called)
 	{
-		sprintf(error_buffer, "LIBISISEXC: cannot find external function \"%s\"", funcname);
+		sprintf(error_buffer, "MANTIDEXC: cannot find external function \"%s\"", funcname);
 		mexErrMsgTxt(error_buffer);
 	}
 }
@@ -245,7 +240,6 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
     mwSize dims[2] = { 1, 1 };
-//    mexPrintf("Created FrameworkManager\n");
 	try 
 	{
         FrameworkManager::Instance();
@@ -256,6 +250,7 @@ int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* p
 	}
 	catch(std::exception& e)
 	{
+    mexErrMsgTxt(e.what());
 		return 1;
 	}
 }
@@ -275,6 +270,7 @@ int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 	catch(std::exception& e)
 	{
+    mexErrMsgTxt(e.what());
 		return 1;
 	}
 }
@@ -294,6 +290,7 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 	catch(std::exception& e)
 	{
+    mexErrMsgTxt(e.what());
 		return 1;
 	}
 
@@ -302,7 +299,6 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	char buffer[256];
-	const char* tmp;
 	mxArray* marray;
 	std::string property_name;
 	try
@@ -343,6 +339,7 @@ int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 	catch(std::exception& e)
 	{
+    mexErrMsgTxt(e.what());
 		return 1;
 	}
 }
@@ -412,3 +409,123 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 	return 0;
 }
 
+int CreateSimpleAPI(int, mxArray **, int, const mxArray**)
+{
+	//Ensure all libraries are loaded
+	FrameworkManager::Instance();
+
+	//Create directory to store mfiles
+	using namespace boost::filesystem;
+	std::string mpath = "MantidSimpleAPI/";
+	remove_all(mpath);
+	create_directory(mpath);
+
+	std::vector<std::string> algKeys = AlgorithmFactory::Instance().getKeys();
+	std::vector<std::string>::const_iterator sIter = algKeys.begin();
+	typedef std::map<std::string, unsigned int> VersionMap;
+	VersionMap vMap;
+	for( ; sIter != algKeys.end(); ++sIter )
+	{
+	  std::string key = (*sIter); 
+	  std::string name = key.substr(0, key.find("|"));
+	  VersionMap::iterator vIter = vMap.find(name);
+    if( vIter == vMap.end() ) vMap.insert(make_pair(name,1));
+    else ++(vIter->second);
+	}
+
+  std::string contents_path = mpath + "Contents.m";
+  std::ofstream contents(contents_path.c_str());
+  contents << "%A simpler API for Mantid\n%\n%The algorithms available are:\n";
+  VersionMap::const_iterator vIter = vMap.begin();
+  for( ; vIter != vMap.end(); ++vIter )
+  {
+    contents << "% " << vIter->first << "\n";
+    CreateSimpleAPIHelper(vIter->first, mpath);
+  }
+  contents << "% For help with an individual command type \"help algorithm_name\"\n";
+  contents.close();
+  return 0;
+}
+
+namespace
+{
+  struct PropertyOrdering
+  {
+    bool operator()(const Mantid::Kernel::Property * p1, const Mantid::Kernel::Property * p2) const
+    {
+      return p1->isValid() < p2->isValid();
+    }
+  };
+}
+
+void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
+{
+  IAlgorithm* alg;
+  try {
+    alg = FrameworkManager::Instance().createAlgorithm(algName);
+  }
+  catch(std::exception&)
+  {
+    std::string err = "An error occurred while writing the ";
+    err += algName + " function definition.\n";
+    mexErrMsgTxt(err.c_str());
+    return;
+  }
+  std::string fullpath(path + algName + ".m");
+  std::ofstream mfile(fullpath.c_str());
+
+  typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
+  //parameter list
+  mfile << "function res = " << algName << "(varargin)\n";
+  //help string
+  std::ostringstream os;
+  PropertyVector orderedProperties(alg->getProperties());
+  std::sort(orderedProperties.begin(), orderedProperties.end(), PropertyOrdering());
+  PropertyVector::const_iterator pIter = orderedProperties.begin();
+  PropertyVector::const_iterator pEnd = orderedProperties.end();
+  mfile << "%\t" << algName << "(";
+  unsigned int iOpt(0);
+  for( ; pIter != pEnd; )
+  {
+    mfile << (*pIter)->name();
+    if( (*pIter)->isValid() ) 
+    {
+      os << std::string("%\t\t") + (*pIter)->name() + "\n"; 
+      ++iOpt;
+    }
+    if( ++pIter !=  pEnd ) mfile << ", ";
+  }
+  mfile << ")\n";
+
+  //Last part of help definition
+  if( !os.str().empty() )
+  {
+    mfile << "%\tThe following arguments are optional:\n" << os.str(); 
+  }
+  else
+  {
+    mfile << "%\tAll arguments are mandatory\n";
+  }
+  mfile << "\n";
+
+  //The function definition
+  os.str("");
+  os << (orderedProperties.size() - iOpt);
+  mfile << "if nargin < " << os.str() << "\n"
+        << "\tfprintf('All mandatory arguments have not been supplied, type \"help " << algName << "\" for more information\\n');\n"
+        << "\treturn\n"
+        << "end\n";
+  
+  mfile << "alg = MantidAlgorithm('" << algName << "');\n"
+        << "argstring = '';\n";
+  //Build arguments list
+  mfile << "for i = 1:nargin\n"
+        << "\targstring = strcat(argstring,varargin{i});\n"
+        << "\tif i < nargin\n"
+        << "\t\targstring = strcat(argstring, ';');\n"
+        << "\tend\n"
+        << "end\n";
+  //Run the algorithm
+  mfile << "res = run(alg, argstring);\n";
+  mfile.close();
+} 
