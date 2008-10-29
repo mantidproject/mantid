@@ -7,6 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -61,7 +62,7 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      declareProperty("DAEname","");
+      declareProperty("DAEname","", new MandatoryValidator<std::string>());
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
