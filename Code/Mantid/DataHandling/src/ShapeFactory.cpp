@@ -976,6 +976,136 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   pNL_depth->release();
 
 
+  // the code below is temporarily added to allow for visualisation while none box
+  // shaped don't show up
+
+  double innerRadius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
+  double outerRadius = atof( (pElemOuterRadius->getAttribute("val")).c_str() );
+  double middleRadius = (outerRadius + innerRadius) / 2.0;
+  double depth = atof( (pElemDepth->getAttribute("val")).c_str() );  // in z-direction
+  double arc = atof( (pElemArc->getAttribute("val")).c_str() );
+
+  double width = outerRadius - innerRadius;
+
+  double halfHeight = sin((arc/2)*M_PI/180.0)*middleRadius;
+
+  V3D lfb(width/2.0, -halfHeight, 0.0);  // left front bottom
+  V3D lft(width/2.0, -halfHeight, depth);  // left front top
+  V3D lbb(-width/2.0, -halfHeight, 0.0);  // left back bottom
+  V3D rfb(width/2.0, halfHeight, 0.0);  // right front bottom
+
+  V3D pointTowardBack = lbb-lfb;
+  pointTowardBack.normalize();
+
+  // add front plane cutoff
+  Plane* pPlaneFrontCutoff = new Plane();
+  pPlaneFrontCutoff->setPlane(lfb, pointTowardBack); 
+  prim[l_id] = pPlaneFrontCutoff;
+
+  std::stringstream retAlgebraMatch;
+  retAlgebraMatch << "(" << l_id << " ";
+  l_id++;
+
+  // add back plane cutoff
+  Plane* pPlaneBackCutoff = new Plane();
+  pPlaneBackCutoff->setPlane(lbb, pointTowardBack); 
+  prim[l_id] = pPlaneBackCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+
+  V3D pointTowardRight = rfb-lfb;
+  pointTowardRight.normalize();
+
+  // add left plane cutoff
+  Plane* pPlaneLeftCutoff = new Plane();
+  pPlaneLeftCutoff->setPlane(lfb, pointTowardRight); 
+  prim[l_id] = pPlaneLeftCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add right plane cutoff
+  Plane* pPlaneRightCutoff = new Plane();
+  pPlaneRightCutoff->setPlane(rfb, pointTowardRight); 
+  prim[l_id] = pPlaneRightCutoff;
+  retAlgebraMatch << "-" << l_id << " ";
+  l_id++;
+
+
+  V3D pointTowardTop = lft-lfb;
+  pointTowardTop.normalize();
+
+  // add bottom plane cutoff
+  Plane* pPlaneBottomCutoff = new Plane();
+  pPlaneBottomCutoff->setPlane(lfb, pointTowardTop); 
+  prim[l_id] = pPlaneBottomCutoff;
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // add top plane cutoff
+  Plane* pPlaneTopCutoff = new Plane();
+  pPlaneTopCutoff->setPlane(lft, pointTowardTop); 
+  prim[l_id] = pPlaneTopCutoff;
+  retAlgebraMatch << "-" << l_id << ")";
+  l_id++;
+
+
+
+
+  return retAlgebraMatch.str();
+}
+
+
+
+/* This is the correct code for this method. The code above is a hack until visualisation of none box shaped fixed
+std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+{
+  // check for arc element
+  NodeList* pNL_arc = pElem->getElementsByTagName("arc");
+  if ( pNL_arc->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <arc> element");
+  }
+  Element* pElemArc = static_cast<Element*>(pNL_arc->item(0)); 
+  pNL_arc->release();
+
+  // check for inner-radius element
+  NodeList* pNL_inner_radius = pElem->getElementsByTagName("inner-radius");
+  if ( pNL_inner_radius->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <inner-radius> element");
+  }
+  Element* pElemInnerRadius = static_cast<Element*>(pNL_inner_radius->item(0)); 
+  pNL_inner_radius->release();
+
+  // check for outer-radius element
+  NodeList* pNL_outer_radius = pElem->getElementsByTagName("outer-radius");
+  if ( pNL_outer_radius->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <outer-radius> element");
+  }
+  Element* pElemOuterRadius = static_cast<Element*>(pNL_outer_radius->item(0)); 
+  pNL_outer_radius->release();
+
+  // check for depth element
+  NodeList* pNL_depth = pElem->getElementsByTagName("depth");
+  if ( pNL_depth->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
+      " contains <slice-of-cylinder-ring> element with missing <depth> element");
+  }
+  Element* pElemDepth = static_cast<Element*>(pNL_depth->item(0)); 
+  pNL_depth->release();
+
+
+  ///////////////////////////////////////////////////////
+  // Remember I need to translate the sliced cylinder ring to origin
+  // doto when visualisation of none box shapes fixed
+  ///////////////////////////////////////////////////////
+
   V3D normVec(0,0,1);
   V3D centrePoint(0,0,0);
 
@@ -1032,6 +1162,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   return retAlgebraMatch.str();
 }
+*/
 
 
 /** Get position coordinates from XML element
