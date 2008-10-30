@@ -88,13 +88,13 @@ public:
 
     Mantid::Geometry::Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Z(), 10.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
     Mantid::Geometry::Detector *ptrDet103 = dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 12.4470,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
 
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
@@ -111,7 +111,7 @@ public:
     map= output->getSpectraMap();
 
     // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map->nElements(),24964);
+    TS_ASSERT_EQUALS(map->nElements(),12124);
 
     // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS(map->ndet(6),1);
