@@ -80,6 +80,7 @@ namespace Mantid
 			API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
 
             int progress_step = histnumber / 100;
+            if (progress_step == 0) progress_step = 1;
 			for (int hist=0; hist <  histnumber;hist++)
 			{
 				const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);

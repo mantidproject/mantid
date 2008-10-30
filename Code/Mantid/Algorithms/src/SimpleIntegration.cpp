@@ -74,6 +74,8 @@ void SimpleIntegration::exec()
   // Create the 1D workspace for the output
   Workspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
+  int progress_step = (m_MaxSpec-m_MinSpec+1) / 100;
+  if (progress_step == 0) progress_step = 1;
   // Create vectors to hold result
   std::vector<double> XValue(2);
   // Loop over spectra
@@ -111,7 +113,7 @@ void SimpleIntegration::exec()
     {
       outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
     }
-    if (j % 100 == 0)
+    if (j % progress_step == 0)
     {
         interruption_point();
         progress( double(j)/(m_MaxSpec-m_MinSpec+1) );

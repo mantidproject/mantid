@@ -92,6 +92,8 @@ void ConvertUnits::exec()
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / size;
 
+  int iprogress_step = numberOfSpectra / 100;
+  if (iprogress_step == 0) iprogress_step = 1;
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
 
@@ -113,7 +115,7 @@ void ConvertUnits::exec()
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
     outputWS->dataX(i) = inputWS->dataX(i);
-    if ( i % 100 == 0)
+    if ( i % iprogress_step == 0)
     {
         progress( double(i)/numberOfSpectra/2 );
         interruption_point();

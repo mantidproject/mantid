@@ -105,7 +105,7 @@ namespace Mantid
         { }
         /// Constructor
         BinaryOperation_fn(BinaryOperation* op,int count):m_count(count),m_progress(0),m_progress_step(count/100),m_op(op)
-        { }
+        { if (m_progress_step == 0) m_progress_step = 1; }
         /// Virtual destructor
         virtual ~BinaryOperation_fn()
         { }

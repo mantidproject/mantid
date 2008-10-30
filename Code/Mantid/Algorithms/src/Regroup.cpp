@@ -102,6 +102,7 @@ void Regroup::exec()
   DataObjects::Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputW);
 
   int progress_step = histnumber / 100;
+  if (progress_step == 0) progress_step = 1;
   for (int hist=0; hist <  histnumber;hist++)
   {
     const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
