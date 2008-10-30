@@ -97,13 +97,13 @@ public:
 
     Component* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
-    TS_ASSERT_DELTA( samplepos->getPos().Z(), 10.0,0.01);
+    TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
     Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
-    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 12.4470,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     double d = ptrDet103->getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d,2.512,0.0001);
     double cmpDistance = ptrDet103->getDistance(*samplepos);
@@ -117,10 +117,10 @@ public:
 
 
     // also a few tests on the last detector and a test for the one beyond the last
-    Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(718048));
-    TS_ASSERT_EQUALS( ptrDetLast->getID(), 718048);
+    Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(413256));
+    TS_ASSERT_EQUALS( ptrDetLast->getID(), 413256);
     TS_ASSERT_EQUALS( ptrDetLast->getName(), "pixel");
-    TS_ASSERT_THROWS(i->getDetector(718049), Exception::NotFoundError);
+    TS_ASSERT_THROWS(i->getDetector(413257), Exception::NotFoundError);
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst = boost::dynamic_pointer_cast<Workspace2D>(output);
@@ -276,7 +276,7 @@ public:
     boost::shared_ptr<Instrument> i = output->getInstrument();
     ObjComponent* source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
-    TS_ASSERT_DELTA( source->getPos().Z(), 0.0,0.01);
+    TS_ASSERT_DELTA( source->getPos().Z(), -11.016,0.01);
 
     ObjComponent* samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
