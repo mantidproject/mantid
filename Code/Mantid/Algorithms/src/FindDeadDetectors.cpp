@@ -68,6 +68,7 @@ namespace Mantid
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
       const int numSpec = integratedWorkspace->getNumberHistograms();
+      int iprogress_step = numSpec / 100;
       for (int i = 0; i < numSpec; ++i)
       {
         double &y = integratedWorkspace->dataY(i)[0];
@@ -95,6 +96,11 @@ namespace Mantid
             ++countDets;
           }
           file << std::endl;
+        }
+        if (i % iprogress_step == 0)
+        {
+            progress(double(i)/numSpec);
+            interruption_point();
         }
       }
 

@@ -117,8 +117,12 @@ void MonitorDlg::update(int n)
         m_tree->setColumnCount(3);
         m_tree->setSelectionMode(QAbstractItemView::NoSelection);
         QStringList hList;
-        hList<<"Algorithm"<<""<<"Progress";
+        hList<<"Algorithm"<<"Progress"<<"";
         m_tree->setHeaderLabels(hList);
+        QHeaderView* hHeader = (QHeaderView*)m_tree->header();
+        hHeader->setResizeMode(1,QHeaderView::Stretch);
+        hHeader->setResizeMode(2,QHeaderView::Fixed);
+        hHeader->setStretchLastSection(false);
     }
     else
         m_tree->clear();
@@ -133,8 +137,8 @@ void MonitorDlg::update(int n)
         m_tree->addTopLevelItem(algItem);
         QProgressBar *algProgress = new QProgressBar;
         AlgButton *cancelButton = new AlgButton("Cancel",m_algMonitor->algorithms()[i]);
-        m_tree->setItemWidget(algItem,2,algProgress);
-        m_tree->setItemWidget(algItem,1,cancelButton);
+        m_tree->setItemWidget(algItem,1,algProgress);
+        m_tree->setItemWidget(algItem,2,cancelButton);
         const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
         for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
         {
@@ -157,7 +161,7 @@ void MonitorDlg::updateProgress(const Algorithm* alg,int p)
         QTreeWidgetItem *item = m_tree->topLevelItem(i);
         if (item)
         {
-            QProgressBar *algProgress = static_cast<QProgressBar*>(m_tree->itemWidget(item,2));
+            QProgressBar *algProgress = static_cast<QProgressBar*>(m_tree->itemWidget(item,1));
             algProgress->setValue(p);
         }
     }

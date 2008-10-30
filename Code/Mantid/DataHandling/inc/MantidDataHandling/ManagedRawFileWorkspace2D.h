@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
+#include "Poco/Mutex.h"
 
 class ISISRAW2;
 
@@ -93,6 +94,8 @@ private:
     int m_numberOfBinBoundaries; //< The number of time bin boundaries == m_numberOfTimeChannels + 1
     int m_numberOfSpectra;       //< The number of spectra in the raw file
     int m_numberOfPeriods;       //< The number of periods in the raw file
+
+    mutable Poco::FastMutex m_mutex;  //< The mutex
 
     //bool m_list;           //< Has the spectrum_list property been set?
     //bool m_interval;       //< Have the spectrum_min/max properties been set?

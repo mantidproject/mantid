@@ -75,6 +75,7 @@ namespace Mantid
     //void ManagedRawFileWorkspace2D::readSpectrum(int index)const
     void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const
     {
+        Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
         if (!m_fileRaw)
         {
             g_log.error("Raw file was not open.");
@@ -126,6 +127,7 @@ namespace Mantid
 
     void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite)
     {
+        Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
         ManagedWorkspace2D::writeDataBlock(toWrite);
         int blockIndex = toWrite->minIndex() / m_vectorsPerBlock;
         m_changedBlock[blockIndex] = toWrite->hasChanges();

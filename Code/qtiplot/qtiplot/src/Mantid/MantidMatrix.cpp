@@ -132,9 +132,7 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
     view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
     view->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
     view->setModel(model);
-    view->setEditTriggers(QAbstractItemView::DoubleClicked);
     view->setFocusPolicy(Qt::StrongFocus);
-    //view->setFocus();
 
     QPalette pal = view->palette();
 	pal.setColor(QColorGroup::Base, m_bk_color);
@@ -146,13 +144,13 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
 	hHeader->setResizeMode(QHeaderView::Fixed);
 	hHeader->setDefaultSectionSize(m_column_width);
 
-    int cols = numCols();
-	for(int i=0; i<cols; i++)
-		view->setColumnWidth(i, m_column_width);
+    view->resizeRowToContents(0);
+    int row_height = view->rowHeight(0);
 
-	//QHeaderView* vHeader = (QHeaderView*)view->verticalHeader();
-	//vHeader->setMovable(false);
-	//vHeader->setResizeMode(QHeaderView::ResizeToContents);// Lengthy operation
+	QHeaderView* vHeader = (QHeaderView*)view->verticalHeader();
+    vHeader->setDefaultSectionSize(row_height);
+    vHeader->setResizeMode(QHeaderView::Fixed);
+    vHeader->setMovable(false);
 
 }
 
