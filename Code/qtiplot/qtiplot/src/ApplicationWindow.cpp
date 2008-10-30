@@ -4307,10 +4307,10 @@ void ApplicationWindow::readSettings()
 	settings.endGroup(); // Dialogs
 
 	settings.beginGroup("/Colors");
-	workspaceColor = settings.value("/Workspace","darkGray").value<QColor>();
+	workspaceColor = QColor(settings.value("/Workspace","darkGray").value<QColor>());
 	// see http://doc.trolltech.com/4.2/qvariant.html for instructions on qcolor <-> qvariant conversion
-	panelsColor = settings.value("/Panels","#ffffff").value<QColor>();
-	panelsTextColor = settings.value("/PanelsText","#000000").value<QColor>();
+	panelsColor = QColor(settings.value("/Panels","#ffffff").value<QColor>());
+	panelsTextColor = QColor(settings.value("/PanelsText","#000000").value<QColor>());
 	settings.endGroup(); // Colors
 
 	settings.beginGroup("/Paths");
@@ -4376,9 +4376,9 @@ void ApplicationWindow::readSettings()
 	}
 
 	settings.beginGroup("/Colors");
-	tableBkgdColor = settings.value("/Background","#ffffff").value<QColor>();
-	tableTextColor = settings.value("/Text","#000000").value<QColor>();
-	tableHeaderColor = settings.value("/Header","#000000").value<QColor>();
+	tableBkgdColor = QColor(settings.value("/Background","#ffffff").value<QColor>());
+	tableTextColor = QColor(settings.value("/Text","#000000").value<QColor>());
+	tableHeaderColor = QColor(settings.value("/Header","#000000").value<QColor>());
 	settings.endGroup(); // Colors
 	settings.endGroup();
 	/* --------------- end group Tables ------------------------ */
@@ -4424,14 +4424,14 @@ void ApplicationWindow::readSettings()
 
 	settings.beginGroup("/Legend");
 	legendFrameStyle = settings.value("/FrameStyle", LegendWidget::Line).toInt();
-	legendTextColor = settings.value("/TextColor", "#000000").value<QColor>(); //default color Qt::black
-	legendBackground = settings.value("/BackgroundColor", "#ffffff").value<QColor>(); //default color Qt::white
+	legendTextColor = QColor(settings.value("/TextColor", "#000000").value<QColor>()); //default color Qt::black
+	legendBackground = QColor(settings.value("/BackgroundColor", "#ffffff").value<QColor>()); //default color Qt::white
 	legendBackground.setAlpha(settings.value("/Transparency", 0).toInt()); // transparent by default;
 	settings.endGroup(); // Legend
 
 	settings.beginGroup("/Arrows");
 	defaultArrowLineWidth = settings.value("/Width", 1).toDouble();
-	defaultArrowColor = settings.value("/Color", "#000000").value<QColor>();//default color Qt::black
+	defaultArrowColor = QColor(settings.value("/Color", "#000000").value<QColor>());//default color Qt::black
 	defaultArrowHeadLength = settings.value("/HeadLength", 4).toInt();
 	defaultArrowHeadAngle = settings.value("/HeadAngle", 45).toInt();
 	defaultArrowHeadFill = settings.value("/HeadFill", true).toBool();
@@ -4601,9 +4601,9 @@ void ApplicationWindow::saveSettings()
 	settings.endGroup(); // Dialogs
 
 	settings.beginGroup("/Colors");
-	settings.setValue("/Workspace", workspaceColor);
-	settings.setValue("/Panels", panelsColor);
-	settings.setValue("/PanelsText", panelsTextColor);
+	settings.setValue("/Workspace", workspaceColor.name());
+	settings.setValue("/Panels", panelsColor.name());
+	settings.setValue("/PanelsText", panelsTextColor.name());
 	settings.endGroup(); // Colors
 
 	settings.beginGroup("/Paths");
@@ -4657,9 +4657,9 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/Fonts", tableFonts);
 
 	settings.beginGroup("/Colors");
-	settings.setValue("/Background", tableBkgdColor);
-	settings.setValue("/Text", tableTextColor);
-	settings.setValue("/Header", tableHeaderColor);
+	settings.setValue("/Background", tableBkgdColor.name());
+	settings.setValue("/Text", tableTextColor.name());
+	settings.setValue("/Header", tableHeaderColor.name());
 	settings.endGroup(); // Colors
 	settings.endGroup();
 	/* ----------------- end group Tables ---------- */
@@ -4718,8 +4718,8 @@ void ApplicationWindow::saveSettings()
 
 	settings.beginGroup("/Legend");
 	settings.setValue("/FrameStyle", legendFrameStyle);
-	settings.setValue("/TextColor", legendTextColor);
-	settings.setValue("/BackgroundColor", legendBackground);
+	settings.setValue("/TextColor", legendTextColor.name());
+	settings.setValue("/BackgroundColor", legendBackground.name());
 	settings.setValue("/Transparency", legendBackground.alpha());
 	settings.endGroup(); // Legend
 
