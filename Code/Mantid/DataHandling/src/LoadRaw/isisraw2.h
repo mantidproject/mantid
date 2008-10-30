@@ -8,7 +8,8 @@
  */
 
 struct ISISCRPT_STRUCT;
-
+#include <stdlib.h>
+#include <string.h>
 #include "item_struct.h"
 #ifdef _WIN32
 typedef unsigned uint32_t;
@@ -17,7 +18,7 @@ typedef unsigned uint32_t;
 
 
 /// Run header (80 bytes)
-struct HDR_STRUCT 
+struct HDR_STRUCT
 {
 		char inst_abrv[3];	///< instrument abbreviated name
 		char hd_run[5];		///< run  number
@@ -29,7 +30,7 @@ struct HDR_STRUCT
 	/// constructor
 		HDR_STRUCT() { memset(this, ' ', sizeof(HDR_STRUCT)); }
 };
-	
+
 /// address offsets to various sections (9*4 bytes)
 struct ADD_STRUCT
 {
@@ -39,15 +40,15 @@ struct ADD_STRUCT
 	int ad_dae;		///<		ad_se + 66 + nse*32
 	int ad_tcb;		///<		ad_dae + 65 + 5*ndet
 	int ad_user;	///<		ad_tcb + 288 + (ntc1 + 1)
-	int ad_data;	///<		ad_user + 2 + ulen 
-	int ad_log;		///<		ad_data + 33 + 
+	int ad_data;	///<		ad_user + 2 + ulen
+	int ad_log;		///<		ad_data + 33 +
 	int ad_end;		///<		1+end of file
 	/// constructor
 	ADD_STRUCT() { memset(this, 0, sizeof(ADD_STRUCT)); }
 };
 
 	/// user information (8*20 bytes)
-	struct USER_STRUCT 
+	struct USER_STRUCT
 	{
 		char r_user[20];		///< name
 		char r_daytel[20];	///< daytime phone
@@ -60,7 +61,7 @@ struct ADD_STRUCT
 	};
 
 	/// Run parameter block (32*4 bytes)
-	struct RPB_STRUCT 
+	struct RPB_STRUCT
 	{
 		int r_dur;	///< actual run duration
 		int r_durunits;	///< scaler for above (1=seconds)
@@ -87,7 +88,7 @@ struct ADD_STRUCT
 	};
 
 	/// instrument parameter block (64*4 bytes)
-	struct IVPB_STRUCT 
+	struct IVPB_STRUCT
 	{
 		float i_chfreq;		///< frequency chopper 1 (Hz)
 		float freq_c2;		///< frequency chopper 2 (Hz)
@@ -158,7 +159,7 @@ struct ADD_STRUCT
 	/// constructor
 		SPB_STRUCT() { memset(this, 0, sizeof(SPB_STRUCT)); }
 	};
-	
+
 	/// sample environment block (32*4 bytes)
 	struct SE_STRUCT
 	{
@@ -189,7 +190,7 @@ struct ADD_STRUCT
 	/// DAE parameters block (64*4 bytes)
 	struct DAEP_STRUCT
 	{
-		int a_pars;		///<          Word length in bulk store memory  
+		int a_pars;		///<          Word length in bulk store memory
 		int mem_size;		///<          Length of bulk store memory (bytes)**A
 		int a_minppp;		///<          PPP minimum value                  ***B
 		int ppp_good_high;	///<          good PPP total (high 32 bits)   ***B
@@ -209,7 +210,7 @@ struct ADD_STRUCT
 		int mon2_detector;	///<          detector for MON 2  (12 bits)   ***B
 		int mon2_module;	///<          module   for MON 2  ( 4 bits)   ***B
 		int mon2_crate;		///<          crate    for MON 2  ( 4 bits)   ***B
-		int mon2_mask;		///<          mask     for MON 2  (c4:m4:d12) ***B		
+		int mon2_mask;		///<          mask     for MON 2  (c4:m4:d12) ***B
 		int events_good_high;		///<  total GOOD EVENTS (high 32 bits)***B
 		int events_good_low;	    ///<  total GOOD EVENTS (low  32 bits)***B
 		int a_delay;		///<  frame synch delay (4�s steps) ***B
@@ -252,7 +253,7 @@ struct DDES_STRUCT
 /// log line entry
 struct LOG_LINE
 {
-	int len;	///< real length of data		
+	int len;	///< real length of data
 	char* data;	///< padded to multiple of 4 bytes
 	/// constructor
 	LOG_LINE() : len(0), data(0) {}
