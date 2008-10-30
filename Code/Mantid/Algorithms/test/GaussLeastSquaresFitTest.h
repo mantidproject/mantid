@@ -47,10 +47,10 @@ public:
     // Set which spectrum to fit against and initial starting values
     alg.setPropertyValue("InputWorkspace",outputSpace);
     alg.setPropertyValue("SpectrumNumber","3");
-    alg.setPropertyValue("Output y0", "-2000.0");
-    alg.setPropertyValue("Output A", "8000.0");
-    alg.setPropertyValue("Output xc", "10000.0");
-    alg.setPropertyValue("Output w", "6000.0");
+    alg.setPropertyValue("y0", "-2000.0");
+    alg.setPropertyValue("A", "8000.0");
+    alg.setPropertyValue("xc", "10000.0");
+    alg.setPropertyValue("w", "6000.0");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -59,13 +59,13 @@ public:
     // test the output from fit is what you expect
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 100.98,0.1);
-    dummy = alg.getProperty("Output y0");
+    dummy = alg.getProperty("y0");
     TS_ASSERT_DELTA( dummy, -2511.4 ,0.2);
-    dummy = alg.getProperty("Output A");
+    dummy = alg.getProperty("A");
     TS_ASSERT_DELTA( dummy, 8620.3 ,0.2);
-    dummy = alg.getProperty("Output xc");
+    dummy = alg.getProperty("xc");
     TS_ASSERT_DELTA( dummy, 10090.7 ,0.2);
-    dummy = alg.getProperty("Output w");
+    dummy = alg.getProperty("w");
     TS_ASSERT_DELTA( dummy, 6357.8 ,0.2);
   }
 
@@ -135,10 +135,10 @@ public:
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
     alg2.setPropertyValue("SpectrumNumber","1");
-    alg2.setPropertyValue("Output y0", "3.0");
-    alg2.setPropertyValue("Output A", "100.7");
-    alg2.setPropertyValue("Output xc", "11.2");
-    alg2.setPropertyValue("Output w", "1.1");
+    alg2.setPropertyValue("y0", "3.0");
+    alg2.setPropertyValue("A", "100.7");
+    alg2.setPropertyValue("xc", "11.2");
+    alg2.setPropertyValue("w", "1.1");
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING( alg2.execute());
@@ -147,13 +147,13 @@ public:
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
-    dummy = alg2.getProperty("Output y0");
+    dummy = alg2.getProperty("y0");
     TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
-    dummy = alg2.getProperty("Output A");
+    dummy = alg2.getProperty("A");
     TS_ASSERT_DELTA( dummy, 97.804 ,0.001);
-    dummy = alg2.getProperty("Output xc");
+    dummy = alg2.getProperty("xc");
     TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
-    dummy = alg2.getProperty("Output w");
+    dummy = alg2.getProperty("w");
     TS_ASSERT_DELTA( dummy, 1.1142 ,0.0001);
 
   }

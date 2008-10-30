@@ -24,8 +24,8 @@ DECLARE_ALGORITHM(BackToBackExponentialPeakFit)
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::Axis;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D;
+using API::Workspace_const_sptr;
+using API::Workspace;
 
 // Get a reference to the logger
 Logger& BackToBackExponentialPeakFit::g_log = Logger::get("BackToBackExponentialPeakFit");
@@ -49,7 +49,7 @@ struct FitData {
 /// Initialisation method
 void BackToBackExponentialPeakFit::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
   //declareProperty(new WorkspaceProperty<Work-space2D>("OutputWorkspace","",Direction::Output));
   
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -59,15 +59,15 @@ void BackToBackExponentialPeakFit::init()
   // pointer to each property.
   declareProperty("StartX",0, mustBePositive->clone());
   declareProperty("EndX",0, mustBePositive->clone());  
+  declareProperty("I",0.0, Direction::InOut);
+  declareProperty("a",0.0, Direction::InOut);
+  declareProperty("b",0.0, Direction::InOut);
+  declareProperty("c",0.0, Direction::InOut);
+  declareProperty("s",0.0, Direction::InOut);
+  declareProperty("bk",0.0, Direction::InOut);
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
   declareProperty("Output Status","", Direction::Output); 
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
-  declareProperty("Output I",0.0, Direction::Output);
-  declareProperty("Output a",0.0, Direction::Output);
-  declareProperty("Output b",0.0, Direction::Output);
-  declareProperty("Output c",0.0, Direction::Output);
-  declareProperty("Output s",0.0, Direction::Output);
-  declareProperty("Output bk",0.0, Direction::Output);
 }
 
 /** Executes the algorithm
@@ -84,7 +84,7 @@ void BackToBackExponentialPeakFit::exec()
 
 
   // Get the input workspace
-  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
   
   // number of histogram is equal to the number of spectra
   const int numberOfSpectra = localworkspace->getNumberHistograms(); 
@@ -162,12 +162,12 @@ void BackToBackExponentialPeakFit::exec()
   gsl_vector *initFuncArg; 
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-	gsl_vector_set(initFuncArg, 0, getProperty("Output I"));
-	gsl_vector_set(initFuncArg, 1, getProperty("Output a"));
-	gsl_vector_set(initFuncArg, 2, getProperty("Output b"));
-	gsl_vector_set(initFuncArg, 3, getProperty("Output c"));
-	gsl_vector_set(initFuncArg, 4, getProperty("Output s"));
-	gsl_vector_set(initFuncArg, 5, getProperty("Output bk"));
+	gsl_vector_set(initFuncArg, 0, getProperty("I"));
+	gsl_vector_set(initFuncArg, 1, getProperty("a"));
+	gsl_vector_set(initFuncArg, 2, getProperty("b"));
+	gsl_vector_set(initFuncArg, 3, getProperty("c"));
+	gsl_vector_set(initFuncArg, 4, getProperty("s"));
+	gsl_vector_set(initFuncArg, 5, getProperty("bk"));
 
 
   // set-up GSL least squares container
@@ -225,12 +225,12 @@ void BackToBackExponentialPeakFit::exec()
 
   setProperty("Output Status", fisse);
   setProperty("Output Chi^2/DoF", chi*chi / dof);
-  setProperty("Output I", gsl_vector_get(s->x,0));
-  setProperty("Output a", gsl_vector_get(s->x,1));
-  setProperty("Output b", gsl_vector_get(s->x,2));
-  setProperty("Output c", gsl_vector_get(s->x,3));
-  setProperty("Output s", gsl_vector_get(s->x,4));
-  setProperty("Output bk", gsl_vector_get(s->x,5));
+  setProperty("I", gsl_vector_get(s->x,0));
+  setProperty("a", gsl_vector_get(s->x,1));
+  setProperty("b", gsl_vector_get(s->x,2));
+  setProperty("c", gsl_vector_get(s->x,3));
+  setProperty("s", gsl_vector_get(s->x,4));
+  setProperty("bk", gsl_vector_get(s->x,5));
 
   // clean up dynamically allocated gsl stuff
 

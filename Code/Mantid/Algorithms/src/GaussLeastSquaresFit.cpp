@@ -24,8 +24,8 @@ DECLARE_ALGORITHM(GaussLeastSquaresFit)
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::Axis;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D;
+using API::Workspace_const_sptr;
+using API::Workspace;
 
 // Get a reference to the logger
 Logger& GaussLeastSquaresFit::g_log = Logger::get("GaussLeastSquaresFit");
@@ -49,7 +49,7 @@ struct FitData {
 /// Initialisation method
 void GaussLeastSquaresFit::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
   //declareProperty(new WorkspaceProperty<Work-space2D>("OutputWorkspace","",Direction::Output));
   
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -59,13 +59,13 @@ void GaussLeastSquaresFit::init()
   // pointer to each property.
   declareProperty("StartX",0, mustBePositive->clone());
   declareProperty("EndX",0, mustBePositive->clone());  
+  declareProperty("y0",0.0, Direction::InOut);
+  declareProperty("A",0.0, Direction::InOut);
+  declareProperty("xc",0.0, Direction::InOut);
+  declareProperty("w",0.0, Direction::InOut);
   declareProperty("MaxIterations",500, mustBePositive->clone()); 
   declareProperty("Output Status","", Direction::Output); 
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
-  declareProperty("Output y0",0.0, Direction::Output);
-  declareProperty("Output A",0.0, Direction::Output);
-  declareProperty("Output xc",0.0, Direction::Output);
-  declareProperty("Output w",0.0, Direction::Output);
 }
 
 /** Executes the algorithm
@@ -82,7 +82,7 @@ void GaussLeastSquaresFit::exec()
 
 
   // Get the input workspace
-  Workspace2D_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
   
   // number of histogram is equal to the number of spectra
   const int numberOfSpectra = localworkspace->getNumberHistograms(); 
@@ -163,10 +163,10 @@ void GaussLeastSquaresFit::exec()
   gsl_vector *initFuncArg; 
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-  gsl_vector_set(initFuncArg, 0, getProperty("Output y0"));
-	gsl_vector_set(initFuncArg, 1, getProperty("Output A"));
-	gsl_vector_set(initFuncArg, 2, getProperty("Output xc"));
-	gsl_vector_set(initFuncArg, 3, getProperty("Output w"));
+  gsl_vector_set(initFuncArg, 0, getProperty("y0"));
+	gsl_vector_set(initFuncArg, 1, getProperty("A"));
+	gsl_vector_set(initFuncArg, 2, getProperty("xc"));
+	gsl_vector_set(initFuncArg, 3, getProperty("w"));
 
 
 
@@ -230,10 +230,10 @@ void GaussLeastSquaresFit::exec()
 
   setProperty("Output Status", fisse);
   setProperty("Output Chi^2/DoF", chi*chi / dof);
-  setProperty("Output y0", gsl_vector_get(s->x,0));
-  setProperty("Output A", gsl_vector_get(s->x,1));
-  setProperty("Output xc", gsl_vector_get(s->x,2));
-  setProperty("Output w", gsl_vector_get(s->x,3));
+  setProperty("y0", gsl_vector_get(s->x,0));
+  setProperty("A", gsl_vector_get(s->x,1));
+  setProperty("xc", gsl_vector_get(s->x,2));
+  setProperty("w", gsl_vector_get(s->x,3));
 
 
 

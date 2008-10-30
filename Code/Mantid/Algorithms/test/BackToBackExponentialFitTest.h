@@ -48,12 +48,12 @@ public:
     alg.setPropertyValue("StartX","20712"); // correspond to about 79250 ms
     alg.setPropertyValue("EndX","20755");   // correspond to about 79615 ms
 
-    alg.setPropertyValue("Output I", "297.0");
-    alg.setPropertyValue("Output a", "2.0");
-    alg.setPropertyValue("Output b", "0.03");
-    alg.setPropertyValue("Output c", "79400.0");
-    alg.setPropertyValue("Output s", "8.0");
-    alg.setPropertyValue("Output bk", "8.0");
+    alg.setPropertyValue("I", "297.0");
+    alg.setPropertyValue("a", "2.0");
+    alg.setPropertyValue("b", "0.03");
+    alg.setPropertyValue("c", "79400.0");
+    alg.setPropertyValue("s", "8.0");
+    alg.setPropertyValue("bk", "8.0");
   }
 
   void testExec()
@@ -64,17 +64,17 @@ public:
 
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 20.9,0.1);
-    dummy = alg.getProperty("Output I");
+    dummy = alg.getProperty("I");
     TS_ASSERT_DELTA( dummy, 295.22 ,0.1);
-    dummy = alg.getProperty("Output a");
+    dummy = alg.getProperty("a");
     TS_ASSERT_DELTA( dummy, 2.477 ,0.1);
-    dummy = alg.getProperty("Output b");
+    dummy = alg.getProperty("b");
     TS_ASSERT_DELTA( dummy, 0.03 ,0.1);
-    dummy = alg.getProperty("Output c");
+    dummy = alg.getProperty("c");
     TS_ASSERT_DELTA( dummy, 79400.02 ,0.1);
-    dummy = alg.getProperty("Output s");
+    dummy = alg.getProperty("s");
     TS_ASSERT_DELTA( dummy, 7.98 ,0.1);
-    dummy = alg.getProperty("Output bk");
+    dummy = alg.getProperty("bk");
     TS_ASSERT_DELTA( dummy, 7.88 ,0.1);
   }
 
