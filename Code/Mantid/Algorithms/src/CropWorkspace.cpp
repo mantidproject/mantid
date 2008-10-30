@@ -75,9 +75,9 @@ void CropWorkspace::exec()
   {
     output2D->setX(j,newX);
     const std::vector<double> &oldY = m_inputWorkspace->readY(i);
-    outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+m_maxX-histogram);
+    outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+(m_maxX-histogram));
     const std::vector<double> &oldE = m_inputWorkspace->readE(i);
-    outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+m_maxX-histogram);
+    outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+(m_maxX-histogram));
     if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(i);
   }
 
