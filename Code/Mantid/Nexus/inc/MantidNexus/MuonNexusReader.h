@@ -80,7 +80,8 @@ class MuonNexusReader
 		int readFromFile(const std::string& filename); ///< read histogram data
 		int readLogData(const std::string& filename);  ///< read log data
 		int getTimeChannels(float* timechannels, const int& len) const; ///< get time bin boundaries
-		std::string getSampleName() const {return nexus_samplename; }; ///< return sample name
+        /// return sample name
+		std::string getSampleName() const {return nexus_samplename; };
 		int numberOfLogs() const;  ///< Number of NXlog sections read from file
 		int getLogLength(const int i) const;  ///< Lenght of i'th log
 		std::string getLogName(const int i) const;  ///< Name of i'th log
@@ -94,8 +95,8 @@ class MuonNexusReader
 		// for nexus histogram data
 		float* corrected_times; ///< temp store for corrected times
 		int* counts;         ///< temp store of histogram data
-		int* detectorGroupings;
-		int numDetectors;
+		int* detectorGroupings; ///< detector grouping info
+		int numDetectors; ///< detector count
 		std::string getInstrumentName(); ///< return instrument name
 };
 

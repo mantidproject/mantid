@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\NexusFileWriter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\NeXusUtils.cpp"
 				>
 			</File>
@@ -220,6 +224,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidNexus\MuonNexusReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\NexusFileWriter.h"
 				>
 			</File>
 			<File

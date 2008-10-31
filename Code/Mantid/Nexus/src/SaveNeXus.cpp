@@ -55,14 +55,14 @@ namespace NeXus
     m_inputWorkspace = getProperty("InputWorkspace");
 
     const std::string workspaceID = m_inputWorkspace->id();
-
+    NeXusUtils *nexusFile= new NeXusUtils();
     if (workspaceID == "Workspace1D")
     {
         const Workspace1D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace1D>(m_inputWorkspace);
         const std::vector<double>& xValue = localworkspace->dataX();
         const std::vector<double>& yValue = localworkspace->dataY();
         const std::vector<double>& eValue = localworkspace->dataE();
-	    writeEntry1D(m_filename, m_entryname, m_dataname, xValue, yValue, eValue);
+	    nexusFile->writeEntry1D(m_filename, m_entryname, m_dataname, xValue, yValue, eValue);
     }
     else if (workspaceID == "Workspace2D")
     {
@@ -75,7 +75,7 @@ namespace NeXus
             const std::vector<double>& xValue = localworkspace->dataX(i);
             const std::vector<double>& yValue = localworkspace->dataY(i);
             const std::vector<double>& eValue = localworkspace->dataE(i);
-	        writeEntry1D(m_filename, m_entryname, oss.str(), xValue, yValue, eValue);
+	        nexusFile->writeEntry1D(m_filename, m_entryname, oss.str(), xValue, yValue, eValue);
 	    }
     }
     else

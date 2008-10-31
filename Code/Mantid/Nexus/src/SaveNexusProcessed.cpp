@@ -6,7 +6,10 @@
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NeXusUtils.h"
+#include "MantidNexus/NexusFileWriter.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -46,6 +49,13 @@ namespace NeXus
     declareProperty("EntryName","",new MandatoryValidator<std::string>);
     declareProperty("Title","",new MandatoryValidator<std::string>);
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+    // declare optional parameters
+    // Declare optional input parameters
+    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    mustBePositive->setLower(0);
+    declareProperty("spectrum_min",0, mustBePositive);
+    declareProperty("spectrum_max",0, mustBePositive->clone());
+    declareProperty(new ArrayProperty<int>("spectrum_list"));
   }
 
   /** Executes the algorithm. Reading in the file and creating and populating
@@ -61,56 +71,79 @@ namespace NeXus
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
 
-    if( writeNexusProcessedHeader( m_filename, m_entryname, m_title ) != 0 )
+    Property *specList = getProperty("spectrum_list");
+    m_list = !(specList->isDefault());
+    Property *specMax = getProperty("spectrum_max");
+    m_interval = !(specMax->isDefault());
+    const std::string workspaceID = m_inputWorkspace->id();
+    if (workspaceID != "Workspace2D")
+        throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
+
+    NexusFileWriter *nexusFile= new NexusFileWriter();
+    if( nexusFile->openNexusWrite( m_filename, m_entryname ) != 0 )
+    {
+       g_log.error("Failed to open file");
+       throw Exception::FileError("Failed to open file", m_filename);
+    }
+
+    if( nexusFile->writeNexusProcessedHeader( m_entryname, m_title ) != 0 )
     {
        g_log.error("Failed to write file");
        throw Exception::FileError("Failed to write to file", m_filename);
     }
 
-    boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
-    if( writeNexusProcessedSample( m_filename, m_entryname, sample->getName(), sample) != 0 )
+    // write instrument data, if present and writer enabled
+    boost::shared_ptr<Instrument> instrument = m_inputWorkspace->getInstrument();
+    nexusFile->writeNexusInstrument(instrument);
 
+    // write XML source file name, if it exists - otherwise write "NoNameAvailable"
+    std::string instrumentName=instrument->getName();
+    if(instrumentName != "")
+    {
+       std::string inst3Char = instrumentName.substr(0,3);  // get the first 3 letters of the name
+       // force ID to upper case
+       std::transform(inst3Char.begin(), inst3Char.end(), inst3Char.begin(), toupper);
+       std::string instrumentXml(inst3Char+"_definition.xml");
+       // Determine the search directory for XML instrument definition files (IDFs)
+       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
+       if ( directoryName.empty() ) directoryName = "../Instrument";
+       boost::filesystem::path file(directoryName+"/"+instrumentXml);
+       if(!boost::filesystem::exists(file))
+           instrumentXml="NoXmlFileFound";
+       std::string version("1"); // these should be read from xml file
+       std::string date("20081031");
+       nexusFile->writeNexusInstrumentXmlName(instrumentXml,date,version);
+    }
+    else
+       nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
+
+
+    boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
+    if( nexusFile->writeNexusProcessedSample( m_entryname, sample->getName(), sample) != 0 )
     {
        g_log.error("Failed to write NXsample");
        throw Exception::FileError("Failed to write NXsample", m_filename);
     }
 
-
-    const std::string workspaceID = m_inputWorkspace->id();
-
-    if (workspaceID == "Workspace1D")
+    const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
+    const int numberOfHist = localworkspace->getNumberHistograms();
+    // check if all X() are in fact the same array
+    bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(localworkspace);
+	m_spec_min=0;
+    m_spec_max=numberOfHist-1;
+	if( m_interval )
     {
-        const Workspace1D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace1D>(m_inputWorkspace);
-        const std::vector<double>& xValue = localworkspace->dataX();
-        const std::vector<double>& yValue = localworkspace->dataY();
-        const std::vector<double>& eValue = localworkspace->dataE();
-//        writeEntry1D(m_filename, m_entryname, m_dataname, xValue, yValue, eValue);
-    }
-    else if (workspaceID == "Workspace2D")
-    {
-        const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
-        const int numberOfHist = localworkspace->getNumberHistograms();
-		// check if all X() are in fact the same array
-		bool uniformSpectra=true;
-        for(int i=1; i<numberOfHist; i++)
+        m_spec_min = getProperty("spectrum_min");
+        m_spec_max = getProperty("spectrum_max");
+        if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
         {
-			if( localworkspace->dataX(i) != localworkspace->dataX(1) )
-			{
-				uniformSpectra=false;
-				break;
-			}
+            g_log.error("Invalid Spectrum min/max properties");
+            throw std::invalid_argument("Inconsistent properties defined"); 
         }
-		writeNexusProcessedData(m_filename,m_entryname,localworkspace,uniformSpectra);
-            //std::ostringstream oss;
-            //oss << m_dataname << "_" << i << std::ends;
-            //const std::vector<double>& yValue = localworkspace->dataY(i);
-            //const std::vector<double>& eValue = localworkspace->dataE(i);
-            //writeEntry1D(m_filename, m_entryname, oss.str(), xValue, yValue, eValue);
     }
-    else
-    {
-        throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
-    }
+    nexusFile->writeNexusProcessedData(m_entryname,localworkspace,uniformSpectra,m_spec_min,m_spec_max);
+    nexusFile->writeNexusProcessedProcess(localworkspace);
+	nexusFile->closeNexusFile();
 
     return;
   }

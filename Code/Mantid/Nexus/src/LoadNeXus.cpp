@@ -70,7 +70,8 @@ namespace NeXus
 	// Otherwise try LoadIsisNexus.
 	std::string dataName="analysis", muonTd="muonTD";
 	std::string value;
-	int status=getNexusDataValue(m_filename,dataName,value );
+    NeXusUtils *nexusFile= new NeXusUtils();
+	int status=nexusFile->getNexusDataValue(m_filename,dataName,value );
 	if( status==0 && value==muonTd )
 	{
 		runLoadMuonNexus();
