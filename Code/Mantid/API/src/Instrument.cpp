@@ -21,6 +21,15 @@ Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
                            _detectorCache(),_sourceCache(0),_sampleCache(0)
 {}
 
+  
+/**	return reference to detector cache 
+* @returns a reference to the detector cache hold by the instrument
+*/
+const std::map<int, Geometry::IDetector*>& Instrument::getDetectorCache() 
+{ 
+  return _detectorCache;
+}
+
 /**	Gets a pointer to the source
 * @returns a pointer to the source
 */

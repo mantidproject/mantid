@@ -200,6 +200,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadEmptyInstrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadInstrument.cpp"
 				>
 			</File>
@@ -287,6 +291,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadDAE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadEmptyInstrument.h"
 				>
 			</File>
 			<File

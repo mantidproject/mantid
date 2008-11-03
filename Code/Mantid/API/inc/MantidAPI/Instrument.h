@@ -78,6 +78,9 @@ public:
   /// to be a monitor and also add it to _detectorCache for possible later retrieval
   void markAsMonitor(Geometry::IDetector*);
 
+  /// return reference to detector cache 
+  const std::map<int, Geometry::IDetector*>& getDetectorCache();
+
 private:
   /// Private copy assignment operator
   Instrument& operator=(const Instrument&);
