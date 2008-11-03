@@ -40,9 +40,13 @@ cd ../MantidPlot/
 python release_date.py
 cd qtiplot/
 sed -i "s!../../../Images/images.qrc!../../images/images.qrc!" qtiplot.pro
+sed -i "s!INCLUDEPATH       += ../../Mantid/includes/!INCLUDEPATH       += ../../../Mantid/include/!" qtiplot.pro
+sed -i "s!-L../../Mantid/Bin/Shared!-L../../bin!" qtiplot.pro
 qmake-qt4
 make
 sed -i "s!../../images/images.qrc!../../../Images/images.qrc!" qtiplot.pro
+sed -i "s!INCLUDEPATH       += ../../../Mantid/include/!INCLUDEPATH       += ../../Mantid/includes/!" qtiplot.pro
+sed -i "s!-L../../bin!-L../../Mantid/Bin/Shared!" qtiplot.pro
 
 %install
 python Mantid/src/Build/LinuxBuildScripts/cleanup.py
