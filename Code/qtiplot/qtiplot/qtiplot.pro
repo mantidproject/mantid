@@ -37,8 +37,8 @@ CONFIG          += release
 
 INCLUDEPATH       += ../../Mantid/includes/
 INCLUDEPATH       += ../3rdparty/liborigin
-INCLUDEPATH       += ../../Third_Party/include/
 
+win32:INCLUDEPATH       += ../../Third_Party/include/
 win32:INCLUDEPATH       += ../../Third_Party/include/muparser
 win32:INCLUDEPATH       += ../../Third_Party/include
 win32:INCLUDEPATH       += ../../Third_Party/include/zlib123
@@ -65,7 +65,7 @@ unix:INCLUDEPATH       += /usr/include/qwtplot3d/
 # dynamically link against dependencies if they are installed system-wide
 unix:LIBS         += -lmuparser
 unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
-unix:LIBS         += -L/usr/lib -lqwt
+unix:LIBS         += -L/usr/lib/ -lqwt
 unix:LIBS         += -lgsl -lgslcblas
 
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
@@ -520,17 +520,17 @@ SOURCES += ../3rdparty/liborigin/OPJFile.cpp
 ################# Restricted Module: EmfEngine ################
 ###############################################################
 
-contains(RESTRICTED_MODULES, EMF) {
-	DEFINES += EMF_OUTPUT
+#contains(RESTRICTED_MODULES, EMF) {
+#	DEFINES += EMF_OUTPUT
 
-    INCLUDEPATH += ../3rdparty/libEMF/include
-	unix:LIBS += -L../3rdparty/libEMF/lib
-	win32:LIBS += -lgdi32
+   # INCLUDEPATH += ../3rdparty/libEMF/include
+	#unix:LIBS += -L../3rdparty/libEMF/lib
+#	win32:LIBS += -lgdi32
 
-	INCLUDEPATH += ../3rdparty/EmfEngine
-    HEADERS += ../3rdparty/EmfEngine/EmfEngine.h
-    SOURCES += ../3rdparty/EmfEngine/EmfEngine.cpp
-}
+#	INCLUDEPATH += ../3rdparty/EmfEngine
+  #  HEADERS += ../3rdparty/EmfEngine/EmfEngine.h
+   # SOURCES += ../3rdparty/EmfEngine/EmfEngine.cpp
+#}
 
 ###############################################################
 ##################### SCRIPTING LANGUAGES SECTION #############
