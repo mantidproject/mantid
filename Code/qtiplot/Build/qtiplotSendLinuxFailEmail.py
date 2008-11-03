@@ -14,7 +14,7 @@ buildSuccess = True
 errLog = ''
 
 #Get tests result
-f = open('../../logs/qtiplotErr.log','r')
+f = open('../../../../logs/qtiplotErr.log','r')
 
 #if err log ends with something like:
 #make: *** [../tmp/qtiplot/ApplicationWindow.o] Error 1

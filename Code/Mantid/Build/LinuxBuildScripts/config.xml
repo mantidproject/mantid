@@ -1,0 +1,17 @@
+<cruisecontrol>
+  <project name="MANTIDPROJECT" buildafterfailed="false">
+    <bootstrapper>
+	<currentbuildstatusbootstrapper file="logs/currentbuildstatus.txt" />
+    </bootstrapper>
+    <modificationset quietperiod="60">
+	<svn localworkingcopy="checkout/Mantid" />
+    </modificationset>
+    <schedule interval="60" />
+	<ant buildfile="mantid-build.xml" target="build" />
+	<ant buildfile="mantidplot-build.xml" target="build" />
+    </schedule>
+    <log dir="logs/">
+	<merge dir="checkout/test-results" />
+    </log>
+  </project>
+</cruisecontrol>
