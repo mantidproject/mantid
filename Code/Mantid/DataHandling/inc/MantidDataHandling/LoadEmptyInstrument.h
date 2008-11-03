@@ -28,8 +28,8 @@ namespace Mantid
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
     <UL>
-    <LI> detector_histogram_value  - The value specified may affect the colour of the detector shapes when visualising the instrument</LI>
-    <LI> monitor_histrogram_value  - The value specified may affect the colour of the monitor shapes when visualising the instrument</LI>
+    <LI> detector_value  - This value may affect the colour of the detector shapes when visualising the instrument</LI>
+    <LI> monitor_value  - This value may affect the colour of the monitor shapes when visualising the instrument</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

@@ -42,12 +42,10 @@ namespace Mantid
       declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
       
-      //BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      //mustBePositive->setLower(0);
-      //declareProperty("spectrum_min",0, mustBePositive);
-      //declareProperty("spectrum_max",0, mustBePositive->clone());
-      
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
+      BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+      mustBePositive->setLower(0.0);
+      declareProperty("detector_value",1.0, mustBePositive);
+      declareProperty("monitor_value",2.0, mustBePositive->clone());
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -61,6 +59,9 @@ namespace Mantid
       // Retrieve the filename from the properties
       m_filename = getPropertyValue("Filename");
 
+      // Get other properties
+      double detector_value = getProperty("detector_value");
+      double monitor_value = getProperty("monitor_value");
 
       // create the workspace that is going to hold the instrument 
       DataObjects::Workspace2D_sptr localWorkspace 
@@ -100,18 +101,21 @@ namespace Mantid
 
       counter = 0;
       std::vector<double> x; x.push_back(1.0); x.push_back(2.0);
-      std::vector<double> v(1.0,1);
-      std::vector<double> e(1.0,1);
-      for (int i = 1; i <= number_spectra; ++i)
+      std::vector<double> v(detector_value, 1);
+      std::vector<double> v_monitor(monitor_value, 1);
+      std::vector<double> e(detector_value, 1);
+
+      for ( it = detCache.begin(); it != detCache.end(); ++it )
       {
-        localWorkspace->setData(counter, v, e);
+        if ( (it->second)->isMonitor() )
+          localWorkspace->setData(counter, v_monitor, e);
+        else
+          localWorkspace->setData(counter, v, e);
         localWorkspace->setX(counter, x);
         localWorkspace->setErrorHelper(counter,GaussianErrorHelper::Instance());
-        localWorkspace->getAxis(1)->spectraNo(counter)= i;  // Not entirely sure if this 100% ok
+        localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
         ++counter;
       }
-
-
 
       setProperty("OutputWorkspace",localWorkspace);
         
@@ -130,13 +134,21 @@ namespace Mantid
       if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
 
       const int stripPath = m_filename.find_last_of("\\/");
-      std::string instrumentID = m_filename.substr(stripPath+1);  // get the 1st 3 letters of filename part
-      // force ID to upper case
-      //std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID;
+
+      std::string fullPathIDF;
+      if (stripPath != std::string::npos)
+      {
+        fullPathIDF = m_filename;   // since if path already provided don't modify m_filename
+      }
+      else
+      {
+        //std::string instrumentID = m_filename.substr(stripPath+1);
+        fullPathIDF = directoryName + "/" + m_filename;
+      }
+
       
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      loadInst->setPropertyValue("Filename", m_filename);
+      loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
