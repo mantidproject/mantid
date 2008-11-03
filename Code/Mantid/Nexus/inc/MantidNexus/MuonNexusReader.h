@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <napi.h>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <limits.h>
 
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple

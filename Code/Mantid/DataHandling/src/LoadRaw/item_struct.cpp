@@ -1,4 +1,5 @@
 #include "item_struct.h"
+#include <stdlib.h>
 
 #define FAILURE 1
 #define SUCCESS 0

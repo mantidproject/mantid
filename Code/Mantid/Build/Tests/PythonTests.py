@@ -151,7 +151,7 @@ results.append(TestCreateLoadRawAlgorithm())
 results.append(TestExecuteLoadRawAlgorithm())
 
 
-f=open('../../../logs/PythonResults.log', 'w')
+f=open('../../../../../../logs/PythonResults.log', 'w')
 for res in results:
 	f.write(res + '\n')
 	

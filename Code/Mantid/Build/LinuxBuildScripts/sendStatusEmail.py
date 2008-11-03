@@ -27,7 +27,7 @@ mssgSvn  = ''
 mssgDoxy = ''
 
 #Get scons result and errors
-f = open('../logs/scons.log','r')
+f = open('../../../../logs/scons.log','r')
 
 for line in f.readlines():
      sconsResult = line
@@ -38,10 +38,10 @@ f.close()
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
 	
-mssgSconsErr = open('../logs/sconsErr.log','r').read()
+mssgSconsErr = open('../../../../logs/sconsErr.log','r').read()
 
 #Get tests scons result and errors
-f = open('../logs/testsBuild.log','r')
+f = open('../../../../logs/testsBuild.log','r')
 
 for line in f.readlines():
      testsResult = line
@@ -52,9 +52,9 @@ f.close()
 if testsResult.startswith('scons: done building targets.'):
 	testsBuildSuccess = True	
 	
-mssgTestsErr = open('../logs/testsBuildErr.log','r').read()
+mssgTestsErr = open('../../../../logs/testsBuildErr.log','r').read()
 
-f = open('../logs/testsRunErr.log','r')
+f = open('../../../../logs/testsRunErr.log','r')
 
 for line in f.readlines():
 	temp = line
@@ -65,7 +65,7 @@ for line in f.readlines():
 f.close()
 
 #Get tests result
-f = open('../logs/testResults.log','r')
+f = open('../../../../logs/testResults.log','r')
 
 for line in f.readlines():
 	if line.startswith('Failed ')  != -1 and line.endswith(' tests\n'):
@@ -77,7 +77,7 @@ f.close()
 
 #Get python tests result
 try:
-	f = open('../logs/PythonResults.log','r')
+	f = open('../../../../logs/PythonResults.log','r')
 
 	for line in f.readlines():
 		if line.endswith('FAILED'):
@@ -91,10 +91,10 @@ except:
 	pythonPass = False
 
 #Read svn log
-mssgSvn = open('../logs/svn.log','r').read()
+mssgSvn = open('../../../../logs/svn.log','r').read()
 
 #Read doxygen log
-mssgDoxy = open('../logs/doxy.log','r').read()
+mssgDoxy = open('../../../../logs/doxy.log','r').read()
 
 #Construct Message
 

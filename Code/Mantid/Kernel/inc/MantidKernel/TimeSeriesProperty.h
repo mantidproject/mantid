@@ -11,6 +11,7 @@
 #include <ctime>
 #include <sstream>
 #include "MantidKernel/System.h"
+#include <stdlib.h>
 
 namespace Mantid
 {

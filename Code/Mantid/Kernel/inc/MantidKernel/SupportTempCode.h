@@ -1,6 +1,8 @@
 #ifndef StrFunc_SupportTempCode_h
 #define StrFunc_SupportTempCode_h
 
+#include <string.h>
+
 namespace Mantid
 {
 namespace  StrFunc
