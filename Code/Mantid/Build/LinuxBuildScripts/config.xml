@@ -1,8 +1,5 @@
 <cruisecontrol>
   <project name="MANTIDPROJECT" buildafterfailed="false">
-    <bootstrapper>
-	<currentbuildstatusbootstrapper file="logs/currentbuildstatus.txt" />
-    </bootstrapper>
     <modificationset quietperiod="60">
 	<svn localworkingcopy="checkout/Mantid" />
     </modificationset>
