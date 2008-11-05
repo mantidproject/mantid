@@ -38,7 +38,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../CurveFitting/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_DEBUG;IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -108,7 +108,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				AdditionalIncludeDirectories="C:\mantid\Code\Third_Party\lib\win32;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="../CurveFitting/inc;../API/inc;../Kernel/inc;../Algorithms/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include"
 				PreprocessorDefinitions="IN_MANTID_MAIN=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
