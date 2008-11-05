@@ -3,8 +3,6 @@
 #include "Benchmark.h"
 #include "UserAlgorithmTest.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAlgorithms/BackToBackExponentialPeakFit.h"
-#include "MantidAlgorithms/GaussLeastSquaresFit.h"
 //#include "MantidAPI/Workspace.h"
 //#include "MantidDataObjects/Workspace1D.h" 
 //#include "MantidDataObjects/Workspace2D.h" 
