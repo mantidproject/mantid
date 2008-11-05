@@ -212,13 +212,15 @@ dirpath=os.listdir(uppath)
 while(len(dirpath)):
 	try:
 		item=dirpath.pop(0)
-		for file in os.listdir("../"+item):
-			fullPath="../"+item+"/"+file
-			if (file=="inc"):
-				cppPaths.insert(0,os.path.abspath(fullPath))
-			elif (os.path.isdir(fullPath) and (not file.endswith('svn'))
-			and (not file.endswith('test'))):
-				dirpath.append(fullPath[3:])
+		print item
+		if not item.startswith("RPM_Kit"):
+			for file in os.listdir("../"+item):
+				fullPath="../"+item+"/"+file
+				if (file=="inc"):
+					cppPaths.insert(0,os.path.abspath(fullPath))
+				elif (os.path.isdir(fullPath) and (not file.endswith('svn') )
+				and (not file.endswith('test'))):
+					dirpath.append(fullPath[3:])
 	except:
 		pass
 
