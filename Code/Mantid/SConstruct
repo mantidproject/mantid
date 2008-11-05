@@ -212,7 +212,6 @@ dirpath=os.listdir(uppath)
 while(len(dirpath)):
 	try:
 		item=dirpath.pop(0)
-		print item
 		if not item.startswith("RPM_Kit"):
 			for file in os.listdir("../"+item):
 				fullPath="../"+item+"/"+file
