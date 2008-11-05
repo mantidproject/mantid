@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_GAUSSLEASTSQUARESFIT_H_
-#define MANTID_CURVEFITTING_GAUSSLEASTSQUARESFIT_H_
+#ifndef MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
+#define MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -14,8 +14,10 @@ namespace Mantid
   namespace CurveFitting
   {
     /** 
-    Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a 
-    function: y0+A*sqrt(2/PI)/w*exp(-0.5*((x-xc)/w)^2).
+    Takes a histogram in a 2D workspace and fit it to a back-to-back exponential
+    peak function, that is the function: 
+    
+      I*(exp(a/2*(a*s^2+2*(x-c)))*erfc((a*s^2+(x-c))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-c)))*erfc((b*s^2-(x-c))/sqrt(s*s^2)))+bk.
 
     Required Properties:
     <UL>
@@ -31,7 +33,7 @@ namespace Mantid
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 04/7/2008
+    @date 22/7/2008
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -53,15 +55,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport GaussLeastSquaresFit : public API::Algorithm
+    class DLLExport BackToBackExponential : public API::Algorithm
     {
     public:
       /// Default constructor
-      GaussLeastSquaresFit() : API::Algorithm() {};
+      BackToBackExponential() : API::Algorithm() {};
       /// Destructor
-      virtual ~GaussLeastSquaresFit() {};
+      virtual ~BackToBackExponential() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "GaussLeastSquaresFit";}
+      virtual const std::string name() const { return "BackToBackExponential";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
@@ -79,22 +81,18 @@ namespace Mantid
       /// The X bin to finish the fitting at
       int m_maxX;
 
-      // function which guesses initial parameter values
-      // This method need further work done to it. 
-      //void guessInitialValues(const FitData& data, gsl_vector* param_init);
-
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
 
     /// Gaussian function and derivative function in GSL format
     // defined as friend do get access to function pointers
-    int gauss_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
-    int gauss_df (const gsl_vector * x, void *params, gsl_matrix * J);
-    int gauss_f (const gsl_vector * x, void *params,gsl_vector * f);
+    int bTbExpo_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
+    int bTbExpo_df (const gsl_vector * x, void *params, gsl_matrix * J);
+    int bTbExpo_f (const gsl_vector * x, void *params,gsl_vector * f);
  
 
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GAUSSLEASTSQUARESFIT_H_*/
+#endif /*MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_*/

@@ -188,11 +188,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\BackToBackExponentialPeakFit.cpp"
+				RelativePath=".\src\BackToBackExponential.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GaussLeastSquaresFit.cpp"
+				RelativePath=".\src\Gaussian.cpp"
 				>
 			</File>
 		</Filter>
@@ -202,19 +202,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\test\BackToBackExponentialFitTest.h"
+				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\BackToBackExponentialPeakFit.h"
+				RelativePath=".\test\BackToBackExponentialTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\GaussLeastSquaresFit.h"
+				RelativePath=".\inc\MantidCurveFitting\Gaussian.h"
 				>
 			</File>
 			<File
-				RelativePath=".\test\GaussLeastSquaresFitTest.h"
+				RelativePath=".\test\GaussianTest.h"
 				>
 			</File>
 		</Filter>

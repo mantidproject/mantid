@@ -1,9 +1,9 @@
-#ifndef GAUSSLEASTSQUARESFITTEST_H_
-#define GAUSSLEASTSQUARESFITTEST_H_
+#ifndef GAUSSIANTEST_H_
+#define GAUSSIANTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/GaussLeastSquaresFit.h"
+#include "MantidCurveFitting/Gaussian.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -14,15 +14,15 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::GaussLeastSquaresFit;
+using Mantid::CurveFitting::Gaussian;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
-class GaussLeastSquaresFitTest : public CxxTest::TestSuite
+class GaussianTest : public CxxTest::TestSuite
 {
 public:
 
-  //GaussLeastSquaresFitTest()
+  //GaussianTest()
   //{
   //}
 
@@ -72,7 +72,7 @@ public:
 
   void testAgainstMockData()
   {
-    GaussLeastSquaresFit alg2;
+    Gaussian alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -161,7 +161,7 @@ public:
 
 
 private:
-  GaussLeastSquaresFit alg;
+  Gaussian alg;
 };
 
-#endif /*GAUSSLEASTSQUARESFITTEST_H_*/
+#endif /*GAUSSIANTEST_H_*/

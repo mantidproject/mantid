@@ -1,9 +1,9 @@
-#ifndef BACKTOBACKEXPONENTIALFITTEST_H_
-#define BACKTOBACKEXPONENTIALFITTEST_H_
+#ifndef BACKTOBACKEXPONENTIALTEST_H_
+#define BACKTOBACKEXPONENTIALTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/BackToBackExponentialPeakFit.h"
+#include "MantidCurveFitting/BackToBackExponential.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,15 +13,15 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::BackToBackExponentialPeakFit;
+using Mantid::CurveFitting::BackToBackExponential;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
-class BackToBackExponentialPeakFitTest : public CxxTest::TestSuite
+class BackToBackExponentialTest : public CxxTest::TestSuite
 {
 public:
 
-  BackToBackExponentialPeakFitTest()
+  BackToBackExponentialTest()
   {
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
 
@@ -80,9 +80,9 @@ public:
 
 
 private:
-  BackToBackExponentialPeakFit alg;
+  BackToBackExponential alg;
   std::string inputSpace;
   std::string outputSpace;
 };
 
-#endif /*BACKTOBACKEXPONENTIALFITTEST_H_*/
+#endif /*BACKTOBACKEXPONENTIALTEST_H_*/
