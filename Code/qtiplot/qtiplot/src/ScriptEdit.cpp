@@ -39,7 +39,7 @@
 #include <QApplication>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QTextEdit(parent, name), scripted(env), d_error(false)
+  : QTextEdit(parent, name), scripted(env), d_error(false),exThread(0)//Mantid
 {
 	myScript = scriptEnv->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
@@ -82,6 +82,15 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	functionsMenu = new QMenu(this);
 	Q_CHECK_PTR(functionsMenu);
 	connect(functionsMenu, SIGNAL(triggered(QAction *)), this, SLOT(insertFunction(QAction *)));
+}
+
+ScriptEdit::~ScriptEdit()
+{
+    if (exThread)
+    {
+        exThread->stop();
+        delete exThread;
+    }
 }
 
 void ScriptEdit::customEvent(QEvent *e)
@@ -208,6 +217,46 @@ int ScriptEdit::lineNumber(int pos) const
 	return n;
 }
 
+//Mantid
+void ScriptEdit::executeAsync()
+{
+    if (exThread)
+    {
+        if (exThread->isRunning())
+        {
+            int answer = QMessageBox::question(this,"Mantid - Python Script",
+                "Python is currently running a script. Do you want to stop it?",
+                QMessageBox::Yes,QMessageBox::No);
+            if (answer != QMessageBox::Yes) return;
+        }
+        exThread->stop();
+        delete exThread;
+    }
+
+    exThread = new ExecuteThread(this);
+    exThread->start(QThread::LowestPriority);
+}
+
+//Mantid
+void ScriptEdit::executeAllAsync()
+{
+    if (exThread)
+    {
+        if (exThread->isRunning())
+        {
+            int answer = QMessageBox::question(this,"Mantid - Python Script",
+                "Python is currently running a script. Do you want to stop it?",
+                QMessageBox::Yes,QMessageBox::No);
+            if (answer != QMessageBox::Yes) return;
+        }
+        exThread->stop();
+        delete exThread;
+    }
+
+    exThread = new ExecuteThread(this,true);
+    exThread->start();
+}
+
 void ScriptEdit::execute()
 {
 	QString fname = "<%1:%2>";
@@ -225,13 +274,12 @@ void ScriptEdit::execute()
 	printCursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
 	printCursor.insertText("\n");
 	myScript->exec();
-	
-	if (d_error)
-		codeCursor.mergeBlockFormat(d_fmt_failure);
-	else
-		codeCursor.mergeBlockFormat(d_fmt_success);
 
-	d_error = false;
+    if (d_error)
+	    codeCursor.mergeBlockFormat(d_fmt_failure);
+    else
+	    codeCursor.mergeBlockFormat(d_fmt_success);
+    d_error = false;
 }
 
 void ScriptEdit::executeAll()
@@ -397,4 +445,23 @@ void ScriptEdit::setDirPath(const QString& path)
 		return;
 	
 	scriptsDirPath = path;
+}
+
+#include <iostream>
+//Mantid
+void ExecuteThread::run()
+{
+    if (all) edit->executeAll();
+    else
+        edit->execute();
+}
+
+//Mantid
+void ExecuteThread::stop()
+{
+    if (isRunning())
+    {
+        terminate();
+        wait();
+    }
 }

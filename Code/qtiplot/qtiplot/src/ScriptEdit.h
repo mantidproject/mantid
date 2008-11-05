@@ -34,9 +34,13 @@
 
 #include <QMenu>
 #include <QTextEdit>
+#include <QThread>
 
 class QAction;
 class QMenu;
+
+//Mantid
+class ExecuteThread;
 
 /*!\brief Editor widget with support for evaluating expressions and executing code.
  *
@@ -50,12 +54,15 @@ class ScriptEdit: public QTextEdit, public scripted
 
   public:
     ScriptEdit(ScriptingEnv *env, QWidget *parent=0, const char *name=0);
+    ~ScriptEdit();
 	//! Handle changing of scripting environment.
     void customEvent(QEvent*);
   	//! Map cursor positions to line numbers.
     int lineNumber(int pos) const;
 
   public slots:
+    void executeAsync();
+    void executeAllAsync();
     void execute();
     void executeAll();
     void evaluate();
@@ -78,6 +85,7 @@ class ScriptEdit: public QTextEdit, public scripted
     virtual void keyPressEvent(QKeyEvent *e);
 
   private:
+    ExecuteThread *exThread;
     Script *myScript;
     QAction *actionExecute, *actionExecuteAll, *actionEval, *actionPrint, *actionImport, *actionExport;
     //! Submenu of context menu with mathematical functions.
@@ -103,6 +111,18 @@ class ScriptEdit: public QTextEdit, public scripted
 		*/
   void insertErrorMsg(const QString &message);
 
+};
+
+//Mantid
+/// Thread to execute the script asynchronously.
+class ExecuteThread:public QThread
+{
+    ScriptEdit *edit;
+    bool all;
+public:
+    ExecuteThread(ScriptEdit *sedit,bool yes=false):edit(sedit),all(yes){}
+    void run();
+    void stop();
 };
 
 #endif
