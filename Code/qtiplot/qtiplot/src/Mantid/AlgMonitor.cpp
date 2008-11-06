@@ -4,18 +4,26 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include <QtGui>
+#include <QThread>
 
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
 QMutex AlgorithmMonitor::s_mutex;
 
-AlgorithmMonitor::AlgorithmMonitor(MantidUI *m):m_mantidUI(m),m_nRunning(0),
+AlgorithmMonitor::AlgorithmMonitor(MantidUI *m):m_mantidUI(m),m_nRunning(0),m_running(false),
 m_finishedObserver(*this, &AlgorithmMonitor::handleAlgorithmFinishedNotification),
 m_progressObserver(*this, &AlgorithmMonitor::handleAlgorithmProgressNotification),
 m_errorObserver(*this, &AlgorithmMonitor::handleAlgorithmErrorNotification)
-{}
+{
+}
+
+AlgorithmMonitor::~AlgorithmMonitor()
+{
+    stop();
+}
 
 void AlgorithmMonitor::add(Algorithm *alg)
 {
@@ -30,23 +38,40 @@ void AlgorithmMonitor::add(Algorithm *alg)
 
 void AlgorithmMonitor::remove(const Algorithm *alg)
 {
-    int i = -1;//m_algorithms.indexOf(alg);
     lock();
-    for(int j=0;j<m_algorithms.size();j++)
-        if (m_algorithms[j] == alg)
-        {
-            i = j;
-            break;
-        }
-    if (i < 0) return;
-    m_algorithms.remove(i);
+    QVector<Algorithm*>::iterator i = find(m_algorithms.begin(),m_algorithms.end(),alg);
+    if (i != m_algorithms.end()) m_algorithms.erase(i);
     unlock();
     emit countChanged(count());
 }
 
 void AlgorithmMonitor::run()
 {
-    //exec();
+        m_running = true;
+        while(m_running)
+        {
+            sleep(1);
+            const std::vector<Algorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
+            lock();
+            for(std::vector<Algorithm_sptr>::const_iterator a=algs.begin();a!=algs.end();a++)
+            {
+                if ((*a)->isRunning() && find(m_algorithms.begin(),m_algorithms.end(),a->get()) == m_algorithms.end())
+                {
+                    unlock();
+                    add(a->get());
+                    lock();
+                }
+            }
+            unlock();
+        }
+}
+
+Algorithm_sptr AlgorithmMonitor::getShared(const Algorithm *alg)
+{
+    const std::vector<Algorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
+    for(std::vector<Algorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();a++)
+        if (a->get() == alg) return *a;
+    return Algorithm_sptr();
 }
 
 void AlgorithmMonitor::update()
@@ -61,7 +86,6 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
     if (m_monitorDlg) emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100));
-        //m_monitorDlg->updateProgress(pNf->algorithm(),int(pNf->progress*100));
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
@@ -78,8 +102,9 @@ void AlgorithmMonitor::showDialog()
 
 void AlgorithmMonitor::cancel(Algorithm *alg)
 {
-    int i = m_algorithms.indexOf(alg);
-    if (i >= 0) alg->cancel();
+    Algorithm_sptr a = getShared(alg);
+    if (!a.get()) return;
+    a->cancel();
 }
 
 //-----------------------------------------------------------------------------------------------//

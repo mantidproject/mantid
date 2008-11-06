@@ -197,6 +197,10 @@ public:
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
   void cancel();
+  /// True if the algorithm is running asynchronously.
+  bool isRunningAsync(){return m_runningAsync;}// && !m_cancel;}
+  /// True if the algorithm is running.
+  bool isRunning(){return m_running;}// && !m_cancel;}
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -246,6 +250,7 @@ private:
   bool executeAsyncImpl(const int&);///< executeAsync implementation.
   bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
+  bool m_running; ///< Algorithm is running
   /// Pointers to child algorithms used in this algorithm.
   std::vector< boost::shared_ptr<Algorithm> > m_children;
 };

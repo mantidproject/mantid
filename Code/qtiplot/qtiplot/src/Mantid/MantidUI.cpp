@@ -74,6 +74,7 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
 
     m_algMonitor = new AlgorithmMonitor(this);
     connect(m_algMonitor,SIGNAL(countChanged(int)),m_exploreAlgorithms,SLOT(countChanged(int)));
+    m_algMonitor->start();
 
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);

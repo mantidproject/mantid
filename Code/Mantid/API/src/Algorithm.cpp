@@ -4,6 +4,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+#include <iostream>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid
@@ -17,7 +19,7 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManager(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false)
+  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false)
 {}
 
 /// Virtual destructor
@@ -76,6 +78,7 @@ void Algorithm::initialize()
  */
 bool Algorithm::execute()
 {
+  notificationCenter.postNotification(new StartedNotification(this));
   clock_t start,end;
   time_t start_time;
   // Return a failure if the algorithm hasn't been initialized
@@ -111,6 +114,7 @@ bool Algorithm::execute()
   {
     try
     {
+      if (!m_isChildAlgorithm) m_running = true; 
       time(&start_time);
       start = clock();
       // Call the concrete algorithm's exec method
@@ -129,6 +133,7 @@ bool Algorithm::execute()
       if (!m_isChildAlgorithm) g_log.information() << "Algorithm successful, Duration "
                                      << double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
       m_children.clear();
+      m_running = false; 
     }
     catch(std::runtime_error& ex)
     {
@@ -136,6 +141,7 @@ bool Algorithm::execute()
       g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      m_running = false; 
     }
     catch(std::logic_error& ex)
     {
@@ -143,11 +149,15 @@ bool Algorithm::execute()
       g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      m_running = false; 
     }
   }
   catch(CancelException& ex)
   {
+      m_runningAsync = false;
+      m_running = false; 
       g_log.error("Execution terminated by user.");
+      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
@@ -157,7 +167,10 @@ bool Algorithm::execute()
     // This allows it to move to the next command or it just loops indefinitely.
     // we will set it to false (see Nick Draper) 6/12/07
     setExecuted(false);
+    m_runningAsync = false;
+    m_running = false; 
 
+    notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
     g_log.error("UNKNOWN Exception is caught ");
     throw;
     // Gaudi calls exception service 'handle' method here
@@ -167,6 +180,7 @@ bool Algorithm::execute()
   // and then converts to success if less than the maximum. This is clearly related to
   // having an event loop, and thus we shouldn't want it. This is the only place it's used.
 
+  notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   // Only gets to here if algorithm ended normally
   return isExecuted();
 }
@@ -251,6 +265,13 @@ const std::vector< Mantid::Kernel::Property* >& Algorithm::getProperties() const
   return PropertyManager::getProperties();
 }
 
+void Algorithm::cancel()
+{
+    m_cancel = true;
+    for(std::vector<Algorithm_sptr>::iterator c=m_children.begin();c!=m_children.end();c++)
+        (**c).cancel();
+}
+
 //----------------------------------------------------------------------
 // Protected Member Functions
 //----------------------------------------------------------------------
@@ -267,6 +288,16 @@ void Algorithm::setInitialized()
 void Algorithm::setExecuted(bool state)
 {
   m_isExecuted = state;
+}
+
+void Algorithm::progress(double p)
+{
+    notificationCenter.postNotification(new ProgressNotification(this,p));
+}
+
+void Algorithm::interruption_point()
+{
+    if (m_cancel) throw CancelException();
 }
 
 //----------------------------------------------------------------------
@@ -382,37 +413,10 @@ void Algorithm::setChild(const bool isChild)
 
 bool Algorithm::executeAsyncImpl(const int&)
 {
-    try
-    {
-        m_runningAsync = true;
-        notificationCenter.postNotification(new StartedNotification(this));
-        bool res = execute();
-        notificationCenter.postNotification(new FinishedNotification(this,res));
-        m_runningAsync = false;
-        return res;
-    }
-    catch(std::exception& e)
-    {
-        notificationCenter.postNotification(new ErrorNotification(this,e.what()));
-    }
-    return false;
-}
-
-void Algorithm::cancel()
-{
-    m_cancel = true;
-    for(std::vector<Algorithm_sptr>::iterator c=m_children.begin();c!=m_children.end();c++)
-        (**c).cancel();
-}
-
-void Algorithm::progress(double p)
-{
-    notificationCenter.postNotification(new ProgressNotification(this,p));
-}
-
-void Algorithm::interruption_point()
-{
-    if (m_cancel) throw CancelException();
+    m_runningAsync = true;
+    bool res = execute();
+    m_runningAsync = false;
+    return res;
 }
 
 } // namespace API

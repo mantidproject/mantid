@@ -10,6 +10,7 @@
 #include <QDialog>
 #include <QPushButton>
 #include <QMutex>
+#include <QThread>
 
 using namespace Mantid::API;
 
@@ -18,13 +19,15 @@ class QTreeWidget;
 class MantidUI;
 class MonitorDlg;
 
-class AlgorithmMonitor: public QObject
+class AlgorithmMonitor: public QThread
 {
 	Q_OBJECT
 
 public:
     /// Constructor
     AlgorithmMonitor(MantidUI *m);
+    /// Destructor
+    ~AlgorithmMonitor();
     /// Add algorithm to monitor
     void add(Algorithm *alg);
     /// Removes stopped algorithm
@@ -35,10 +38,13 @@ public:
     QVector<Algorithm*>& algorithms(){return m_algorithms;}
     void lock(){s_mutex.lock();}
     void unlock(){s_mutex.unlock();}
+    Algorithm_sptr getShared(const Algorithm *alg);
 signals:
     void countChanged(int);
     void needUpdateProgress(const Algorithm* alg,int p);
 protected:
+
+    /// Algorithm notifiv=cation handlers
     void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<AlgorithmMonitor, Algorithm::FinishedNotification> m_finishedObserver;
 
@@ -48,7 +54,10 @@ protected:
     void handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf);
     Poco::NObserver<AlgorithmMonitor, Algorithm::ErrorNotification> m_errorObserver;
 
+    /// Runs constantly and detects algorithms launched from outside MantidUI (e.g. from Python script).
     void run();
+    /// Stops run()
+    void stop(){m_running = false;wait();}
 public slots:
     void update();
     void showDialog();
@@ -59,6 +68,8 @@ private:
     QVector<Algorithm*> m_algorithms; // pointers to running algorithms
     MonitorDlg* m_monitorDlg;
     static QMutex s_mutex;
+    /// Method run() is running
+    bool m_running;
 };
 
 class MonitorDlg: public QDialog
