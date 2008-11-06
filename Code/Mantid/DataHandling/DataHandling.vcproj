@@ -298,6 +298,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadEmptyInstrumentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadInstrument.h"
 				>
 			</File>
