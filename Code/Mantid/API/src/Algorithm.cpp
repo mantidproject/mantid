@@ -141,6 +141,7 @@ bool Algorithm::execute()
       g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false; 
     }
     catch(std::logic_error& ex)
@@ -149,6 +150,7 @@ bool Algorithm::execute()
       g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
       g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false; 
     }
   }
@@ -161,6 +163,17 @@ bool Algorithm::execute()
       throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
+  catch (std::exception& ex)
+  {
+    setExecuted(false);
+    m_runningAsync = false;
+    m_running = false; 
+
+    notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+    g_log.error(ex.what());
+    throw;
+  }
+
   catch (...)
   {
     // Gaudi sets the executed flag to true here despite the exception
