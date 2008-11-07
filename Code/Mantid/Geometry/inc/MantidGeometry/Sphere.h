@@ -78,7 +78,7 @@ namespace Mantid
 	  /// Get Radius
       double getRadius() const { return Radius; }      
 	  /// Set Radius
-      void setRadius(const double& r) { Radius=r; }   
+      void setRadius(const double& r) { Radius=r; setBaseEqn();}   
 	  ///Generates the quadratic equation.
       void setBaseEqn();
 	  ///Writes the sphere equatation in MCNP format

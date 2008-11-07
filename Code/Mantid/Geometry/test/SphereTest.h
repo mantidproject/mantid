@@ -311,6 +311,13 @@ public:
 	TS_ASSERT_DELTA(zmin,-1.0,0.00001);
   }
 
+  void testEvalValue()
+  {
+	Sphere A;
+	A.setCentre(V3D(0.0,0.0,0.0));
+	A.setRadius(1.0);
+	TS_ASSERT_DELTA(A.eqnValue(V3D(0.0,0.0,0.0)),-1.0,0.0001);
+  }
 private:
 
 std::string extractString(const Surface& pv)

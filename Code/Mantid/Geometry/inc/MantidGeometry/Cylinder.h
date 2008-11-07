@@ -85,7 +85,7 @@ class DLLExport Cylinder : public Quadratic
   Geometry::V3D getNormal() const { return Normal; }   ///< Return Central line
   double getRadius() const { return Radius; }  ///< Get Radius  
   /// Set Radius
-  void setRadius(const double& r) { Radius=r; }  
+  void setRadius(const double& r) { Radius=r; setBaseEqn();}  
   void setBaseEqn();
 
 

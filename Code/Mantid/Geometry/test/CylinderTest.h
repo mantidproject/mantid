@@ -296,6 +296,16 @@ public:
 	TS_ASSERT_DELTA(ymin, -5,0.0001);
 	TS_ASSERT_DELTA(zmin, -5,0.0001);
   }
+
+  void testEvalValue()
+  {
+	Cylinder A;
+	A.setCentre(V3D(0.0,0.0,0.0));
+	A.setNorm(V3D(1.0,0.0,0.0));
+	A.setRadius(1.0);
+	TS_ASSERT_DELTA(A.eqnValue(V3D(0.0,0.0,0.0)),-1.0,0.0001);
+  }
+
 private:
 
   std::string extractString(Surface& pv)

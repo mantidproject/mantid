@@ -45,13 +45,13 @@ private:
 			ocyl.setRot(Quat(90.0,V3D(0,0,1)));
 			GtsGeometryHandler* compHandler=new GtsGeometryHandler(&ocyl);	
 			ocyl.initDraw();
-			ocyl.draw();
+			//ocyl.draw(); //This wiil crash because an opengl render window is not initialized.
 	}
 
   boost::shared_ptr<Object> createCappedTwoSpheres()
   {
-   const std::string C31="so 3.0";         // outer sphere with 3 radius
-   const std::string C32="so 1.0";         // inner sphere with 1 radius
+   const std::string C31="so 0.03";         // outer sphere with 3 radius
+   const std::string C32="so 0.01";         // inner sphere with 1 radius
    const std::string C33="px 0.0";         // plane parallel to yz plane with x=0
 
  //   // First create some surfaces
@@ -69,7 +69,7 @@ private:
 
  //   // Capped cylinder (id 21) 
  //   // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
-    std::string ObjCapCylinder="-31 32 33";// 32";
+    std::string ObjCapCylinder="31 ";//32 33";// 32";
 
     boost::shared_ptr<Object> retVal(new Object);
     retVal->setObject(21,ObjCapCylinder);
