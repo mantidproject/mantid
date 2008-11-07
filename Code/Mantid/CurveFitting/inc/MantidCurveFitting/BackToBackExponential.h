@@ -13,10 +13,10 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-    /** 
+    /**
     Takes a histogram in a 2D workspace and fit it to a back-to-back exponential
-    peak function, that is the function: 
-    
+    peak function, that is the function:
+
       I*(exp(a/2*(a*s^2+2*(x-c)))*erfc((a*s^2+(x-c))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-c)))*erfc((b*s^2-(x-c))/sqrt(s*s^2)))+bk.
 
     Required Properties:
@@ -52,7 +52,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport BackToBackExponential : public API::Algorithm
@@ -67,15 +67,13 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "General";}
-  
+      virtual const std::string category() const { return "CurveFitting";}
+
     private:
       // Overridden Algorithm methods
       void init();
       void exec();
 
-      /// The spectrum to fit
-      int m_spectrumNumber;
       /// The X bin to start the fitting from
       int m_minX;
       /// The X bin to finish the fitting at
@@ -90,7 +88,7 @@ namespace Mantid
     int bTbExpo_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
     int bTbExpo_df (const gsl_vector * x, void *params, gsl_matrix * J);
     int bTbExpo_f (const gsl_vector * x, void *params,gsl_vector * f);
- 
+
 
   } // namespace Algorithm
 } // namespace Mantid

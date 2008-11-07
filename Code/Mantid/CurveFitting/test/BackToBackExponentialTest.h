@@ -44,9 +44,9 @@ public:
 
     // Set the properties
     alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("SpectrumNumber","3");
-    alg.setPropertyValue("StartX","20712"); // correspond to about 79250 ms
-    alg.setPropertyValue("EndX","20755");   // correspond to about 79615 ms
+    alg.setPropertyValue("SpectrumIndex","2");
+    alg.setPropertyValue("StartX","79280"); // correspond to about 79250 ms
+    alg.setPropertyValue("EndX","79615");   // correspond to about 79615 ms
 
     alg.setPropertyValue("I", "297.0");
     alg.setPropertyValue("a", "2.0");

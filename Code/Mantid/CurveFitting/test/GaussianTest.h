@@ -47,7 +47,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("SpectrumNumber","3");
+    alg.setPropertyValue("SpectrumIndex","2");
     alg.setPropertyValue("y0", "-2000.0");
     alg.setPropertyValue("A", "8000.0");
     alg.setPropertyValue("xc", "10000.0");
@@ -135,7 +135,9 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("SpectrumNumber","1");
+    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
     alg2.setPropertyValue("y0", "3.0");
     alg2.setPropertyValue("A", "100.7");
     alg2.setPropertyValue("xc", "11.2");

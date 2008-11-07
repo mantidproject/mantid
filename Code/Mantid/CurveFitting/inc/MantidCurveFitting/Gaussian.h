@@ -13,8 +13,8 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-    /** 
-    Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a 
+    /**
+    Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a
     function: y0+A*sqrt(2/PI)/w*exp(-0.5*((x-xc)/w)^2).
 
     Required Properties:
@@ -50,7 +50,7 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
     class DLLExport Gaussian : public API::Algorithm
@@ -65,22 +65,20 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "General";}
-  
+      virtual const std::string category() const { return "CurveFitting";}
+
     private:
       // Overridden Algorithm methods
       void init();
       void exec();
 
-      /// The spectrum to fit
-      int m_spectrumNumber;
       /// The X bin to start the fitting from
       int m_minX;
       /// The X bin to finish the fitting at
       int m_maxX;
 
       // function which guesses initial parameter values
-      // This method need further work done to it. 
+      // This method need further work done to it.
       //void guessInitialValues(const FitData& data, gsl_vector* param_init);
 
       /// Static reference to the logger class
@@ -92,7 +90,7 @@ namespace Mantid
     int gauss_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
     int gauss_df (const gsl_vector * x, void *params, gsl_matrix * J);
     int gauss_f (const gsl_vector * x, void *params,gsl_vector * f);
- 
+
 
   } // namespace Algorithm
 } // namespace Mantid

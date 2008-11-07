@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BackToBackExponential.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <sstream>
 #include <numeric>
 #include <math.h>
@@ -22,7 +21,6 @@ DECLARE_ALGORITHM(BackToBackExponential)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Axis;
 using API::Workspace_const_sptr;
 using API::Workspace;
 
@@ -34,119 +32,127 @@ Logger& BackToBackExponential::g_log = Logger::get("BackToBackExponential");
 /// Structure to contain least squares data
 struct FitData {
   /// number of points to be fitted (size of X, Y and sigma arrays)
-  size_t n; 
+  size_t n;
   /// number of fit parameters
-  size_t p; 
-  /// the data to be fitted (abscissae) 
-  double * X; 
+  size_t p;
+  /// the data to be fitted (abscissae)
+  double * X;
   /// the data to be fitted (ordinates)
-  double * Y; 
+  double * Y;
   /// the weighting data
-  double * sigma; 
+  double * sigma;
 };
-    
+
 
 /// Initialisation method
 void BackToBackExponential::init()
 {
   declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-  //declareProperty(new WorkspaceProperty<Work-space2D>("OutputWorkspace","",Direction::Output));
-  
+
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumNumber",0, mustBePositive);
+  declareProperty("SpectrumIndex",0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("StartX",0, mustBePositive->clone());
-  declareProperty("EndX",0, mustBePositive->clone());  
+  declareProperty("StartX",0.0);
+  declareProperty("EndX",0.0);
   declareProperty("I",0.0, Direction::InOut);
   declareProperty("a",0.0, Direction::InOut);
   declareProperty("b",0.0, Direction::InOut);
   declareProperty("c",0.0, Direction::InOut);
   declareProperty("s",0.0, Direction::InOut);
   declareProperty("bk",0.0, Direction::InOut);
-  declareProperty("MaxIterations",500, mustBePositive->clone()); 
-  declareProperty("Output Status","", Direction::Output); 
+  declareProperty("MaxIterations",500, mustBePositive->clone());
+  declareProperty("Output Status","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
 }
 
 /** Executes the algorithm
- * 
+ *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void BackToBackExponential::exec()
 {
   // Try and retrieve the optional properties
-  m_spectrumNumber = getProperty("SpectrumNumber");
-  m_minX = getProperty("StartX");
-  m_maxX = getProperty("EndX");
-  int maxInterations = getProperty("MaxIterations");
-
+  int histNumber = getProperty("SpectrumIndex");
+//  m_minX = getProperty("StartX");
+//  m_maxX = getProperty("EndX");
+  const int maxInterations = getProperty("MaxIterations");
 
   // Get the input workspace
   Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
-  
+
   // number of histogram is equal to the number of spectra
-  const int numberOfSpectra = localworkspace->getNumberHistograms(); 
+  const int numberOfSpectra = localworkspace->getNumberHistograms();
 
-  // Get the histogram number corresponding to the user specified spectrum number
-
-  Axis *spectraAxis = localworkspace->getAxis(1); // Get axis that holds the spectrum numbers
-
-  int histNumber = -1; // set to -1 here to test after the loop below whether it has be set
-  for (int i = 0; i < numberOfSpectra; ++i)
+  if ( histNumber >= numberOfSpectra )
   {
-    if ( spectraAxis->spectraNo(i) == m_spectrumNumber )
-      histNumber = i;
-  }  
-
-  if ( histNumber == -1 )
+    g_log.warning("Invalid spectrum index given, using first spectrum");
     histNumber = 0;
+  }
 
- 
   // Retrieve the spectrum into a vector
   const std::vector<double>& XValues = localworkspace->dataX(histNumber);
   const std::vector<double>& YValues = localworkspace->dataY(histNumber);
   const std::vector<double>& YErrors = localworkspace->dataE(histNumber);
 
-  const int numberOfXBins = YValues.size(); // not cannot ask for size of XValues here 
-                                            // since for histogram it is one bigger than number of data
-  const int sizeX = XValues.size();
+//  const int numberOfXBins = YValues.size(); // not cannot ask for size of XValues here
+//                                            // since for histogram it is one bigger than number of data
+//  const int sizeX = XValues.size();
+//
+//  // check if histogram data in which case the midt points of X values will be used further below
+//  bool isHistogram = false;
+//  if (sizeX == numberOfXBins + 1 )
+//    isHistogram = true;
 
-  // check if histogram data in which case the midt points of X values will be used further below
-  bool isHistogram = false;
-  if (sizeX == numberOfXBins + 1 )
-    isHistogram = true;
+  // Now get the range properties
+  Property* start = getProperty("StartX");
+  double startX;
+  // If startX or endX has not been set, make it the fram limit
+  if ( ! start->isDefault() ) startX = getProperty("StartX");
+  else startX = XValues.front();
+  Property* end = getProperty("EndX");
+  double endX;
+  if ( ! end->isDefault() ) endX = getProperty("EndX");
+  else endX = XValues.back();
 
-  if ( (m_minX < 0) || (m_minX >= numberOfXBins))
+  // Check the validity of startX
+  if ( startX < XValues.front() )
   {
-    g_log.information("StartX out of range! Set to 0");
-    m_minX = 0;
+    g_log.warning("StartX out of range! Set to start of frame.");
+    startX = XValues.front();
+  }
+  // Now get the corresponding bin boundary that comes before (or coincides with) this value
+  for (m_minX = 0; XValues[m_minX+1] < startX; ++m_minX) {}
+
+  // Check the validity of endX and get the bin boundary that come after (or coincides with) it
+  if ( endX >= XValues.back() || endX < startX )
+  {
+    g_log.warning("EndX out of range! Set to end of frame");
+    endX = XValues.back();
+    m_maxX = YValues.size();
+  }
+  else
+  {
+    for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {}
   }
 
-  if ( m_maxX == 0 ) // if zero assumed that no value has been specified......
-  {
-    m_maxX = numberOfXBins - 1;  // -1 since we are counting from 0
-  }
 
-  if ( m_maxX >= numberOfXBins || m_maxX < m_minX)
-  {
-     g_log.information("EndX out of range! Set to max number");
-     m_maxX = numberOfXBins - 1; // -1 since we are counting from 0
-  }
-    
   // create and populate GSL data container
 
   FitData l_data;
 
-  l_data.n = m_maxX - m_minX + 1; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19. 
+  l_data.n = m_maxX - m_minX + 1; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
                                   // The data includes both of these array elements hence the reason for the +1
-  l_data.p = 6; // number of gaussian parameters to fit 
+  l_data.p = 6; // number of gaussian parameters to fit
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
   l_data.sigma = new double[l_data.n];
 
-  for (unsigned int i = 0; i < l_data.n; i++)
+  // check if histogram data in which case the mid points of X values will be used further below
+  const bool isHistogram = localworkspace->isHistogramData();
+
+  for (unsigned int i = 0; i < l_data.n; ++i)
   {
     if (isHistogram)
       l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take midt point if histogram data
@@ -159,7 +165,7 @@ void BackToBackExponential::exec()
 
   // set-up initial guess for fit parameters
 
-  gsl_vector *initFuncArg; 
+  gsl_vector *initFuncArg;
   initFuncArg = gsl_vector_alloc(l_data.p);
 
 	gsl_vector_set(initFuncArg, 0, getProperty("I"));
@@ -189,9 +195,9 @@ void BackToBackExponential::exec()
 
   // finally do the fitting
 
-  size_t iter = 0;
+  int iter = 0;
   int status;
-  do 
+  do
   {
     iter++;
     status = gsl_multifit_fdfsolver_iterate(s);
@@ -206,7 +212,7 @@ void BackToBackExponential::exec()
   //gsl_multifit_covar(s->J, 0.0, covar);
 
   // Output summary to log file
-  
+
   double chi = gsl_blas_dnrm2(s->f);
   double dof = l_data.n - l_data.p;
 
@@ -241,13 +247,13 @@ void BackToBackExponential::exec()
   gsl_vector_free(initFuncArg);
   gsl_multifit_fdfsolver_free(s);
 
-  
-  return;  
+
+  return;
 }
 
 
 /** Gaussian function in GSL format
-* @param x Input function arguments  
+* @param x Input function arguments
 * @param params Input data
 * @param f Output function value
 * @return A GSL status information
@@ -277,13 +283,13 @@ int bTbExpo_f (const gsl_vector * x, void *params, gsl_vector * f) {
 }
 
 /** Calculates Gaussian derivatives in GSL format
-* @param x Input function arguments  
+* @param x Input function arguments
 * @param params Input data
 * @param J Output derivatives
 * @return A GSL status information
 */
 int bTbExpo_df (const gsl_vector * x, void *params,
-              gsl_matrix * J) 
+              gsl_matrix * J)
 {
     size_t n = ((struct FitData *)params)->n;
     double *X = ((struct FitData *)params)->X;
@@ -311,7 +317,7 @@ int bTbExpo_df (const gsl_vector * x, void *params,
         double div_erfc_b = exp(-(b*s2-diff)*(b*s2-diff)/(s*s2)+0.5*b*(b*s2-2.0*diff))*2.0*sqrt(s)/M_SQRTPI;
 
 
-        gsl_matrix_set (J, i, 0, (e_a*erfc_a+e_b*erfc_b)/sigma[i]);    // deriv I 
+        gsl_matrix_set (J, i, 0, (e_a*erfc_a+e_b*erfc_b)/sigma[i]);    // deriv I
         gsl_matrix_set (J, i, 1,                                       // deriv a
           I*( - s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 2,                                       // deriv b
@@ -319,15 +325,15 @@ int bTbExpo_df (const gsl_vector * x, void *params,
         gsl_matrix_set (J, i, 3,                                                    // deriv c
           I*( (div_erfc_a-div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 4,                                                    // deriv s
-          I*( - div_erfc_b*(3*diff/s2-b)/s-div_erfc_a*(a-diff/s2) 
+          I*( - div_erfc_b*(3*diff/s2-b)/s-div_erfc_a*(a-diff/s2)
               + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 5, 1/sigma[i]);                                       // deriv bk
     }
     return GSL_SUCCESS;
-} 
+}
 
 /** Calculates Gaussian derivatives and function value in GSL format
-* @param x Input function arguments  
+* @param x Input function arguments
 * @param params Input data
 * @param f Output function value
 * @param J Output derivatives
@@ -338,7 +344,7 @@ int bTbExpo_fdf (const gsl_vector * x, void *params,
     bTbExpo_f (x, params, f);
     bTbExpo_df (x, params, J);
     return GSL_SUCCESS;
-} 
+}
 
 
 
