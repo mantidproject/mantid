@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -56,6 +57,7 @@ public:
     // Now set the charge
     Workspace_sptr input = AnalysisDataService::Instance().retrieve("normIn");
     input->getSample()->setProtonCharge(2.0);
+    input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )

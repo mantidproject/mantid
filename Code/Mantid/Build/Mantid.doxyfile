@@ -92,7 +92,13 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../Services/inc \
                          ../Services/src \
                          ../Geometry/inc/MantidGeometry \
-                         ../Geometry/src 
+                         ../Geometry/src \
+                         ../CurveFitting/inc/MantidCurveFitting \
+                         ../CurveFitting/src \
+                         ../PythonAPI/inc/MantidPythonAPI \
+                         ../PythonAPI/src \
+                         ../MatlabAPI/inc/MatlabAPI \
+                         ../MatlabAPI/src
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = NO
