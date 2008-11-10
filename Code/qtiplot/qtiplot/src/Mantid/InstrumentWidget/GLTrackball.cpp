@@ -10,7 +10,7 @@ GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
     _rotationmatrix[1]=_rotationmatrix[2]=_rotationmatrix[3]=_rotationmatrix[4]=0;
     _rotationmatrix[6]=_rotationmatrix[7]=_rotationmatrix[8]=_rotationmatrix[9]=0;
     _rotationmatrix[11]=_rotationmatrix[12]=_rotationmatrix[12]=_rotationmatrix[12]=0;
-    _rotationspeed=0.5;
+    _rotationspeed=2.0;
 	_translation=Mantid::Geometry::V3D(0,0,0);
 	_scaleFactor=1.0;
 }
@@ -42,12 +42,12 @@ void GLTrackball::initTranslateFrom(int a,int b)
 	double xmin,xmax,ymin,ymax,zmin,zmax;
     _viewport->getViewport(&_viewport_w,&_viewport_h);
 	_viewport->getProjection(xmin,xmax,ymin,ymax,zmin,zmax);
-	x=static_cast<double>(((xmin+(_viewport_w-a))/(xmax-xmin))*0.001);
-	y=static_cast<double>(((ymin+(b-_viewport_h))/(ymax-ymin))*0.001);
+	x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)_viewport_w))));
+	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
-	_lastpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1])/_scaleFactor;
-	_lastpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5])/_scaleFactor;
-	_lastpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9])/_scaleFactor;
+	_lastpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1]);
+	_lastpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5]);
+	_lastpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9]);
 }
 
 void GLTrackball::generateTranslationTo(int a, int b)
@@ -57,14 +57,14 @@ void GLTrackball::generateTranslationTo(int a, int b)
 	double xmin,xmax,ymin,ymax,zmin,zmax;
     _viewport->getViewport(&_viewport_w,&_viewport_h);
 	_viewport->getProjection(xmin,xmax,ymin,ymax,zmin,zmax);
-	x=static_cast<double>(((xmin+(_viewport_w-a))/(xmax-xmin))*0.001);
-	y=static_cast<double>(((ymin+(b-_viewport_h))/(ymax-ymin))*0.001);
+	x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)_viewport_w))));
+	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
 	Mantid::Geometry::V3D _newpoint= Mantid::Geometry::V3D(x,y,z);
-	_newpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1])/_scaleFactor;
-	_newpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5])/_scaleFactor;
-	_newpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9])/_scaleFactor;
-	Mantid::Geometry::V3D diff= _lastpoint -_newpoint ;
+	_newpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1]);
+	_newpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5]);
+	_newpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9]);
+	Mantid::Geometry::V3D diff= _newpoint - _lastpoint;
 	_translation += diff;
 }
 

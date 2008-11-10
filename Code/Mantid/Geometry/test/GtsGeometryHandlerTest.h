@@ -35,7 +35,7 @@ private:
  
 	void createComplexObject(){
 		boost::shared_ptr<Object> complexObject=createCappedTwoSpheres();
-		GtsGeometryHandler* handler = new GtsGeometryHandler(complexObject);
+		//GtsGeometryHandler* handler = new GtsGeometryHandler(complexObject);
 		createObj(complexObject);
 	}
 
@@ -43,8 +43,8 @@ private:
 			ObjComponent ocyl("ocyl", complexObject);
 			ocyl.setPos(10,0,0);
 			ocyl.setRot(Quat(90.0,V3D(0,0,1)));
-			GtsGeometryHandler* compHandler=new GtsGeometryHandler(&ocyl);	
-			ocyl.initDraw();
+			//GtsGeometryHandler* compHandler=new GtsGeometryHandler(&ocyl);	
+			//ocyl.initDraw();
 			//ocyl.draw(); //This wiil crash because an opengl render window is not initialized.
 	}
 
@@ -69,7 +69,7 @@ private:
 
  //   // Capped cylinder (id 21) 
  //   // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
-    std::string ObjCapCylinder="31 ";//32 33";// 32";
+    std::string ObjCapCylinder="31 32 33";// 32";
 
     boost::shared_ptr<Object> retVal(new Object);
     retVal->setObject(21,ObjCapCylinder);
