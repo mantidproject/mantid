@@ -201,11 +201,11 @@ namespace Mantid
 	os << "\t\tprint \"\\tName: " << prop->name() << ", Optional: ";  
 	if( prop->isValid() ) os << "Yes, Default value: " << santizePropertyValue(prop->value());
 	else os << "No";
-	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction()) << ", ";
+	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
 	StringVector allowed = prop->allowedValues();
 	if( !allowed.empty() )
 	{
-	  os << "Allowed values: ";
+	  os << ", Allowed values: ";
 	  StringVector::const_iterator sIter = allowed.begin();
 	  StringVector::const_iterator sEnd = allowed.end();
 	  for( ; sIter != sEnd ; )

@@ -93,10 +93,6 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
         return call_method< int >(py_self, "size");
     }
 
-    //~ boost::shared_ptr<Mantid::API::SpectraDetectorMap> getSpectraMap() const {
-        //~ return call_method< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >(py_self, "getSpectraMap");
-    //~ }
-
     const int getNumberHistograms() const {
         return call_method< const int >(py_self, "getNumberHistograms");
     }
@@ -423,8 +419,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >();
 
 	//Namespace Functions
-  def("loadIsisRawFile", &Mantid::PythonAPI::LoadIsisRawFile);
-	def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
+  def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
 	def("getWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
   def("createPythonSimpleAPI", &Mantid::PythonAPI::createPythonSimpleAPI);
   
@@ -441,7 +436,6 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
 	//PropertyManager Class
 	class_< Mantid::Kernel::PropertyManager, boost::noncopyable, Mantid_Kernel_PropertyManager_Wrapper >("PropertyManager", no_init)
-        //.def("declareProperty", &Mantid::Kernel::PropertyManager::declareProperty, &Mantid_Kernel_PropertyManager_Wrapper::default_declareProperty)
         .def("setProperties", &Mantid::Kernel::PropertyManager::setProperties, &Mantid_Kernel_PropertyManager_Wrapper::default_setProperties)
         .def("setPropertyValue", &Mantid::Kernel::PropertyManager::setPropertyValue, &Mantid_Kernel_PropertyManager_Wrapper::default_setPropertyValue)
         .def("setPropertyOrdinal", &Mantid::Kernel::PropertyManager::setPropertyOrdinal, &Mantid_Kernel_PropertyManager_Wrapper::default_setPropertyOrdinal)
@@ -475,33 +469,33 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         .def("initialize", &Mantid::API::Workspace::initialize)
         .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
         .def("size", pure_virtual(&Mantid::API::Workspace::size))
-	.def("getSpectraMap", &Mantid::API::Workspace::getSpectraMap)
+        .def("getSpectraMap", &Mantid::API::Workspace::getSpectraMap)
         .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
         .def("setTitle", &Mantid::API::Workspace::setTitle)
         .def("setComment", &Mantid::API::Workspace::setComment)
-	.def("getNumberHistograms", pure_virtual(&Mantid::API::Workspace::getNumberHistograms))
+        .def("getNumberHistograms", pure_virtual(&Mantid::API::Workspace::getNumberHistograms))
         .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
         .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
         .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
         .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readX), return_value_policy< reference_existing_object >())
         .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readY), return_value_policy< reference_existing_object >())
         .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readE), return_value_policy< reference_existing_object >())
-	.def("getHistory", &Mantid::API::Workspace::getHistory, return_value_policy< copy_const_reference >())
+        .def("getHistory", &Mantid::API::Workspace::getHistory, return_value_policy< copy_const_reference >())
 	;
 
 	//Framework Class
 	class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())
         .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
-	.def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1())
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1())
         .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2())
-	.def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_3())
+        .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_3())
         .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_4())
-	.def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
+        .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
         .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
         .def("getWorkspace", &Mantid::PythonAPI::FrameworkManager::getWorkspace, return_value_policy< reference_existing_object >())
         .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
-	.def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
-	.def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
+        .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
+        .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
 	;
 
 	//Property Class
@@ -520,29 +514,25 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         ;
 
 	//PropertyHistory Class
-        class_< Mantid::Kernel::PropertyHistory >("PropertyHistory", no_init)
+  class_< Mantid::Kernel::PropertyHistory >("PropertyHistory", no_init)
         .def("name", &Mantid::Kernel::PropertyHistory::name, return_value_policy< copy_const_reference >())
         .def("value", &Mantid::Kernel::PropertyHistory::value, return_value_policy< copy_const_reference >())
         .def("type", &Mantid::Kernel::PropertyHistory::type, return_value_policy< copy_const_reference >())
         .def("isDefault", &Mantid::Kernel::PropertyHistory::isDefault, return_value_policy< copy_const_reference >())
         .def("direction", &Mantid::Kernel::PropertyHistory::direction, return_value_policy< copy_const_reference >())
-        //.def("printSelf", &Mantid::API::PropertyHistory::printSelf, Mantid_API_PropertyHistory_printSelf_overloads_1_2())
-	;
+  ;
 
 	//AlgorithmHistory Class
-        class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", no_init)
-//	class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", init<  >())
-//        .def(init< const Mantid::API::AlgorithmHistory& >())
+  class_< Mantid::API::AlgorithmHistory >("AlgorithmHistory", no_init)
         .def("name", &Mantid::API::AlgorithmHistory::name, return_value_policy< copy_const_reference >())
         .def("version", &Mantid::API::AlgorithmHistory::version, return_value_policy< copy_const_reference >())
         .def("getProperties", &Mantid::API::AlgorithmHistory::getProperties, return_value_policy< copy_const_reference >())
 	;
 
 	//WorkspaceHistory Class
-        class_< Mantid::API::WorkspaceHistory >("WorkspaceHistory", no_init)
-        //.def("getAlgorithms", &Mantid::API::WorkspaceHistory::getAlgorithms, return_value_policy< copy_const_reference >())
-	.def("getAlgorithmHistories", (const std::vector<Mantid::API::AlgorithmHistory,std::allocator<Mantid::API::AlgorithmHistory> >& (Mantid::API::WorkspaceHistory::*)() const)&Mantid::API::WorkspaceHistory::getAlgorithmHistories, return_value_policy< copy_const_reference >())
-        //.def("printSelf", &Mantid::API::WorkspaceHistory::printSelf, Mantid_API_WorkspaceHistory_printSelf_overloads_1_2())
+  class_< Mantid::API::WorkspaceHistory >("WorkspaceHistory", no_init)
+        .def("getAlgorithmHistories", (const std::vector<Mantid::API::AlgorithmHistory,std::allocator<Mantid::API::AlgorithmHistory> >& (Mantid::API::WorkspaceHistory::*)() const)&Mantid::API::WorkspaceHistory::getAlgorithmHistories, return_value_policy< copy_const_reference >())
+    
 	;
 
 	//IDetector Class
