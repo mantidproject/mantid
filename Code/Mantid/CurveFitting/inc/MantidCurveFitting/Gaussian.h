@@ -15,7 +15,8 @@ namespace Mantid
   {
     /**
     Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a
-    function: y0+A*sqrt(2/PI)/w*exp(-0.5*((x-xc)/w)^2).
+    function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
+
 
     Required Properties:
     <UL>
@@ -24,10 +25,20 @@ namespace Mantid
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> StartX - X bin number to integrate from (default 0)</LI>
-    <LI> EndX - X bin number to integrate to (default max)</LI>
-    <LI> SpectrumNumber - The spectrum to fit (default first spectrum in dataset)</LI>
-    <LI> MaxIterations - The spectrum to fit (default 500)</LI>
+    <LI> SpectrumIndex - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
+
+    <LI> peakCentre - centre of peak (default 0.0)</LI>
+    <LI> sigma - standard deviation (default 1.0)</LI>
+    <LI> height - height of peak (default 0.0)</LI>
+    <LI> bg0 - constant background value (default 0.0)</LI>
+
+    <LI> StartX - X value to start fitting from (default to -4*sigma away from the peakCentre)</LI>
+    <LI> EndX - last X value to include in fitting range (default to +4*sigma away from the peakCentre)</LI>
+
+    <LI> MaxIterations - Max iterations (default 500)</LI>
+
+    <LI> Output Status - whether fit successful. Direction::Output</LI>
+    <LI> Output Chi^2/DoF - measure of how good the fit is (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
