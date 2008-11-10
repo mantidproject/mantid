@@ -23,6 +23,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(parent)
 	_picker->setActorCollection(scene.get());
 	mPickedActor=NULL;
 	mPickingDraw=false;
+	setFocusPolicy(Qt::StrongFocus);
 }
 GL3DWidget::~GL3DWidget()
 {
@@ -262,6 +263,137 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
 	setCursor(Qt::PointingHandCursor);
 }
 
+/**
+ * This method is to handle keyboard events to mimic the mouse operations of click and move
+ * @param event This is the event variable which has the status of the keyboard
+ */
+void GL3DWidget::keyPressEvent(QKeyEvent *event)
+{
+	grabKeyboard();
+	int width,height;
+	_viewport->getViewport(&width,&height);
+	int halfwidth=width/2;
+	int halfheight=height/2;
+	switch(event->key())
+	{
+		//-----------------------Translation-----------------
+	case Qt::Key_Left:
+		isKeyPressed=true;
+		setCursor(Qt::CrossCursor);
+		_trackball->initTranslateFrom(1,0);
+		_trackball->generateTranslationTo(0,0);
+		updateGL();
+		break;
+	case Qt::Key_Right:
+		isKeyPressed=true;
+		setCursor(Qt::CrossCursor);
+		_trackball->initTranslateFrom(0,0);
+		_trackball->generateTranslationTo(1,0);
+		updateGL();
+		break;
+	case Qt::Key_Up:
+		isKeyPressed=true;
+		setCursor(Qt::CrossCursor);
+		_trackball->initTranslateFrom(0,1);
+		_trackball->generateTranslationTo(0,0);
+		updateGL();
+		break;
+	case Qt::Key_Down:
+		isKeyPressed=true;
+		setCursor(Qt::CrossCursor);
+		_trackball->initTranslateFrom(0,0);
+		_trackball->generateTranslationTo(0,1);
+		updateGL();
+		break;
+		//--------------------End of Translation---------------
+		//--------------------Rotation-------------------------
+	case Qt::Key_1:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth-1,halfheight+1);
+		updateGL();
+		break;
+	case Qt::Key_2:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth,halfheight+1);
+		updateGL();
+		break;
+	case Qt::Key_3:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth+1,halfheight+1);
+		updateGL();
+		break;
+	case Qt::Key_4:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth-1,halfheight);
+		updateGL();
+		break;
+	case Qt::Key_6:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth+1,halfheight);
+		updateGL();
+		break;
+	case Qt::Key_7:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth-1,halfheight-1);
+		updateGL();
+		break;
+	case Qt::Key_8:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth,halfheight-1);
+		updateGL();
+		break;
+	case Qt::Key_9:
+		isKeyPressed=true;
+		setCursor(Qt::ClosedHandCursor);
+		_trackball->initRotationFrom(halfwidth,halfheight);
+		_trackball->generateRotationTo(halfwidth+1,halfheight-1);
+		updateGL();
+		break;
+		//---------------------------------End of Rotation--------------
+		//---------------------------------Zoom-------------------------
+	case Qt::Key_PageUp:
+		isKeyPressed=true;
+		setCursor(Qt::SizeVerCursor);
+		_trackball->initZoomFrom(halfwidth,halfheight);
+		_trackball->generateZoomTo(halfwidth,halfheight-1);
+		updateGL();
+		break;
+	case Qt::Key_PageDown:
+		isKeyPressed=true;
+		setCursor(Qt::SizeVerCursor);
+		_trackball->initZoomFrom(halfwidth,halfheight);
+		_trackball->generateZoomTo(halfwidth,halfheight+1);
+		updateGL();
+		break;
+	}
+}
+
+/**
+ * This method is to handle keyboard events to mimic the mouse operations of mouse button up. 
+ * @param event This is the event variable which has the status of the keyboard
+ */
+void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	releaseKeyboard();
+	setCursor(Qt::PointingHandCursor);
+	isKeyPressed=false;
+	if(!event->isAutoRepeat())
+		updateGL();
+}
 /**
  * This method sets the collection of actors that widget needs to display
  * @param col input collection of actors

@@ -59,6 +59,8 @@ protected:
 	void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
 	void wheelEvent(QWheelEvent *);
+	void keyPressEvent(QKeyEvent *);
+	void keyReleaseEvent(QKeyEvent *);
 	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
 private:
 	int iInteractionMode;
