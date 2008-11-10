@@ -69,6 +69,7 @@ class DLLExport SimplePythonAPI
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties);
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
+  static std::string santizePropertyValue(const std::string & value);
 
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first

@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -53,7 +54,6 @@ namespace Mantid
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
       writeGlobalHelp(module, vMap);
-
       //Function definitions for each algorithm
       IndexVector helpStrings;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
@@ -172,6 +172,7 @@ namespace Mantid
 	  os << "\"\n";
 	}
       }
+      os << "\tprint \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\"\n";
       os << "\n";
     }
 
@@ -183,17 +184,39 @@ namespace Mantid
     std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties)
     {
       std::ostringstream os;
-      os << "\t\tprint \"" << algm << " has " << properties.size() << " arguments:\"\n";
+      os << "\t\tprint \"Usage: " << algm << "(";
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
+      for( ; pIter != pEnd ; )
+      {
+	os << (*pIter)->name();
+	if( ++pIter != pEnd ) os << ", ";
+	else os << ")\"\n";
+      }
+      os << "\t\tprint \"Argument description:\"\n";
+      pIter = properties.begin();
       for( ; pIter != pEnd ; ++pIter )
       {
-	os << "\t\tprint \"\\t" << (*pIter)->name() << " - ";
-	if( !(*pIter)->isValid() )
-	  os << "Mandatory\"\n";
-	else
-	  os << "Optional\"\n";
+	Mantid::Kernel::Property* prop = *pIter;
+	os << "\t\tprint \"\\tName: " << prop->name() << ", Optional: ";  
+	if( prop->isValid() ) os << "Yes, Default value: " << santizePropertyValue(prop->value());
+	else os << "No";
+	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction()) << ", ";
+	StringVector allowed = prop->allowedValues();
+	if( !allowed.empty() )
+	{
+	  os << "Allowed values: ";
+	  StringVector::const_iterator sIter = allowed.begin();
+	  StringVector::const_iterator sEnd = allowed.end();
+	  for( ; sIter != sEnd ; )
+	  {
+	    os << (*sIter);
+	    if( ++sIter != sEnd ) os << ", ";
+	  }
+	}
+	os << "\"\n";	
       }
+      os << "\t\tprint \"Note: All arguments must be wrapped in string quotes \\\"\\\", regardless of their type.\"\n\n";
       return os.str();
     }
 
@@ -223,6 +246,22 @@ namespace Mantid
 	 << "\t\tprint \"mtdHelp() - '\" + cmd + \"' not found in help list\"\n\n";
     }
 
-  }
+    /**
+     * Take a property value as a string and if only special characters are present, i.e.
+     * \n or \n\r then replace them with their string represenations
+     * @param value The property value
+     * @returns A string containing the sanitized property value
+     */
+    std::string SimplePythonAPI::santizePropertyValue(const std::string & value)
+    {
+      if( value == "\n\r" )
+	return std::string("\\\\") + std::string("n") + std::string("\\\\") + std::string("r");
+      if( value == "\n" )
+	return std::string("\\\\") + std::string("n");
+      return value;
+    }
 
-}
+  } //namespace PythonAPI
+
+} //namespace Mantid
+
