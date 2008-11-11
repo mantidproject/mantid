@@ -163,7 +163,8 @@ void Gaussian::exec()
   gsl_vector_set(initFuncArg, 0, getProperty("bg0"));
 	gsl_vector_set(initFuncArg, 1, getProperty("height"));
 	gsl_vector_set(initFuncArg, 2, getProperty("peakCentre"));
-	gsl_vector_set(initFuncArg, 3, getProperty("sigma"));
+  double gaus_sigma = getProperty("sigma");
+	gsl_vector_set(initFuncArg, 3, 1/(gaus_sigma*gaus_sigma));
 
 
 
@@ -214,12 +215,12 @@ void Gaussian::exec()
 
   std::string reportOfFit = gsl_strerror(status);
 
-  // GSL may return that the fit is successful although sigma is negative
+  // GSL may return a successful fit with the weight = 1/sigma^2,
   // which is clearly not acceptable, hence handle this case separately
 
   if (status == GSL_SUCCESS && gsl_vector_get(s->x,3) <= 0.0)
   {
-    reportOfFit = "failure: sigma parameter fitted to a value <= 0.0";
+    reportOfFit = "failure: weight=1/sigma^2 fitted to a value <= 0.0";
   }
 
 
@@ -230,7 +231,7 @@ void Gaussian::exec()
     "bg0 = " << std::setprecision(10) << gsl_vector_get(s->x,0) <<
     "; height = " << std::setprecision(10) << gsl_vector_get(s->x,1) <<
     "; peakCentre = " << std::setprecision(10) << gsl_vector_get(s->x,2) <<
-    "; sigma = " << std::setprecision(10) << gsl_vector_get(s->x,3) << "\n";
+    "; sigma = " << std::setprecision(10) << sqrt(1/gsl_vector_get(s->x,3)) << "\n";
 
 
   // also output summary to properties...
@@ -240,7 +241,7 @@ void Gaussian::exec()
   setProperty("bg0", gsl_vector_get(s->x,0));
   setProperty("height", gsl_vector_get(s->x,1));
   setProperty("peakCentre", gsl_vector_get(s->x,2));
-  setProperty("sigma", gsl_vector_get(s->x,3));
+  setProperty("sigma", sqrt(1/gsl_vector_get(s->x,3)));
 
 
 
@@ -272,11 +273,11 @@ int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
     double bg0 = gsl_vector_get (x, 0);
     double height = gsl_vector_get (x, 1);
     double peakCentre = gsl_vector_get (x, 2);
-    double sigma = gsl_vector_get (x, 3);
+    double weight = gsl_vector_get (x, 3);
     size_t i;
     for (i = 0; i < n; i++) {
         double diff=X[i]-peakCentre;
-        double Yi = height*exp(-0.5*diff*diff/(sigma*sigma))+bg0;
+        double Yi = height*exp(-0.5*diff*diff*weight)+bg0;
         gsl_vector_set (f, i, (Yi - Y[i])/sigmaData[i]);
     }
     return GSL_SUCCESS;
@@ -296,16 +297,16 @@ int gauss_df (const gsl_vector * x, void *params,
     double *sigmaData = ((struct FitData *)params)->sigmaData;
     double height = gsl_vector_get (x, 1);
     double peakCentre = gsl_vector_get (x, 2);
-    double sigma = gsl_vector_get (x, 3);
+    double weight = gsl_vector_get (x, 3);
     size_t i;
     for (i = 0; i < n; i++) {
         double s = sigmaData[i];
         double diff = X[i]-peakCentre;
-        double e = exp(-0.5*diff*diff/(sigma*sigma))/s;
+        double e = exp(-0.5*diff*diff*weight)/s;
         gsl_matrix_set (J, i, 0, 1/s);
         gsl_matrix_set (J, i, 1, e);
-        gsl_matrix_set (J, i, 2, diff*height*e/(sigma*sigma));
-        gsl_matrix_set (J, i, 3, diff*diff*height*e/(sigma*sigma*sigma));
+        gsl_matrix_set (J, i, 2, diff*height*e*weight);
+        gsl_matrix_set (J, i, 3, -0.5*diff*diff*height*e);
     }
     return GSL_SUCCESS;
 }
