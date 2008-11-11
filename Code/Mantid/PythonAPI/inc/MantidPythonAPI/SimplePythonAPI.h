@@ -49,8 +49,11 @@ class DLLExport SimplePythonAPI
   
   /// Typedef a vector of strings
   typedef std::vector<std::string> StringVector;
+  /// Typedef a vector of Property pointers
   typedef std::vector<Mantid::Kernel::Property*> PropertyVector;
+  /// Typedef a map of a string to a integer for versioning
   typedef std::map<std::string, int> VersionMap;
+  /// Typedef a vector of a pair of strings for help commands
   typedef std::vector<std::pair<std::string, std::string> > IndexVector;
 
   ///Public methods
@@ -75,7 +78,7 @@ class DLLExport SimplePythonAPI
   ///have valid values first
   struct PropertyOrdering
   {
-    
+    ///Comparator operator for sort algorithm, places optional properties lower in the list
     bool operator()(const Mantid::Kernel::Property * p1, 
 		    const Mantid::Kernel::Property * p2) const
     {

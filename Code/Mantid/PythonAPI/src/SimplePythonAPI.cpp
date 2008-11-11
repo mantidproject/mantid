@@ -150,7 +150,7 @@ namespace Mantid
     /**
      * Write a global help command called mtdHelp, which takes no arguments
      * @param os The stream to use to write the command
-     * @param algms The names of the available algorithms
+     * @param vMap The map of algorithm names to highest version numbers
      */
     void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const VersionMap & vMap)
     {
@@ -191,8 +191,8 @@ namespace Mantid
       {
 	os << (*pIter)->name();
 	if( ++pIter != pEnd ) os << ", ";
-	else os << ")\"\n";
       }
+      os << ")\"\n";
       os << "\t\tprint \"Argument description:\"\n";
       pIter = properties.begin();
       for( ; pIter != pEnd ; ++pIter )
@@ -248,7 +248,7 @@ namespace Mantid
 
     /**
      * Take a property value as a string and if only special characters are present, i.e.
-     * \n or \n\r then replace them with their string represenations
+     * EOL characters then replace them with their string represenations
      * @param value The property value
      * @returns A string containing the sanitized property value
      */
