@@ -211,11 +211,21 @@ void Gaussian::exec()
 
   double dof = l_data.n - l_data.p;
 
-  std::string fisse = gsl_strerror(status);
+
+  std::string reportOfFit = gsl_strerror(status);
+
+  // GSL may return that the fit is successful although sigma is negative
+  // which is clearly not acceptable, hence handle this case separately
+
+  if (status == GSL_SUCCESS && gsl_vector_get(s->x,3) <= 0.0)
+  {
+    reportOfFit = "failure: sigma parameter fitted to a value <= 0.0";
+  }
+
 
   g_log.information() << "Attempt to fit: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2)\n" <<
     "Iteration = " << iter << "\n" <<
-    "Status = " << gsl_strerror(status) << "\n" <<
+    "Status = " << reportOfFit << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
     "bg0 = " << std::setprecision(10) << gsl_vector_get(s->x,0) <<
     "; height = " << std::setprecision(10) << gsl_vector_get(s->x,1) <<
@@ -225,7 +235,7 @@ void Gaussian::exec()
 
   // also output summary to properties...
 
-  setProperty("Output Status", fisse);
+  setProperty("Output Status", reportOfFit);
   setProperty("Output Chi^2/DoF", chi*chi / dof);
   setProperty("bg0", gsl_vector_get(s->x,0));
   setProperty("height", gsl_vector_get(s->x,1));
