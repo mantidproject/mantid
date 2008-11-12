@@ -6,42 +6,55 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidPythonAPI/PythonInterface.h"
+#include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "boost/filesystem.hpp"
 
 using namespace Mantid::PythonAPI;
+using namespace Mantid::API;
 
 class PythonAPITest : public CxxTest::TestSuite
 {
 
-private:
-
 public:
+  
+  PythonAPITest()
+  {
+  }
+  
+  void testGetWorkspaceNames()
+  {
+    std::vector<std::string> temp = GetWorkspaceNames();
+    TS_ASSERT(temp.empty());
+    
+    //Run an algorithm to create a workspace
+    IAlgorithm* loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
+    loader->setPropertyValue("Filename", "../../../../Test/Data/GEM38370.raw");
+    loader->setPropertyValue("OutputWorkspace", "outer");    
+    loader->execute();
 
-	PythonAPITest()
-	{
-	}
-
-	void testLoadIsisRaw()
-	{
-		Mantid::API::Workspace_sptr ws = LoadIsisRawFile(
-				"../../../../Test/Data/HET15869.RAW", "TestWorkspace1");
-
-		TS_ASSERT(ws.use_count() > 0);
-	}
+    temp = GetWorkspaceNames();
+    TS_ASSERT(!temp.empty());
+    FrameworkManager::Instance().deleteWorkspace("outer");
+    temp = GetWorkspaceNames();
+    TS_ASSERT(temp.empty());
+  }
 	
-	void testGetWorkspaceNames()
-	{
-		std::vector<std::string> temp = GetWorkspaceNames();
+  void testGetAlgorithmNames()
+  {
+    std::vector<std::string> temp = GetAlgorithmNames();
 
-		TS_ASSERT(!temp.empty());
-	}
-	
-	void testGetAlgorithmNames()
-	{
-		std::vector<std::string> temp = GetAlgorithmNames();
+    TS_ASSERT(!temp.empty());
+  }
 
-		TS_ASSERT(!temp.empty());
-	}
+  void testCreatePythonSimpleAPI()
+  {
+    createPythonSimpleAPI();
+    TS_ASSERT(boost::filesystem::exists(SimplePythonAPI::getModuleName()));
+    boost::filesystem::remove_all(SimplePythonAPI::getModuleName());
+  }
 
 };
 
