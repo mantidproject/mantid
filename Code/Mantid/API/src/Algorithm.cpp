@@ -138,18 +138,24 @@ bool Algorithm::execute()
     catch(std::runtime_error& ex)
     {
       m_children.clear();
-      g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
-      g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      else
+      {
+          g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<< ex.what()<<std::endl;
+      }
       notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false; 
     }
     catch(std::logic_error& ex)
     {
       m_children.clear();
-      g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
-      g_log.error()<< ex.what()<<std::endl;
       if (m_isChildAlgorithm || m_runningAsync) throw;
+      else
+      {
+          g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
+          g_log.error()<< ex.what()<<std::endl;
+      }
       notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false; 
     }
@@ -426,10 +432,16 @@ void Algorithm::setChild(const bool isChild)
 
 bool Algorithm::executeAsyncImpl(const int&)
 {
-    m_runningAsync = true;
-    bool res = execute();
-    m_runningAsync = false;
-    return res;
+    try
+    {
+        m_runningAsync = true;
+        bool res = execute();
+        m_runningAsync = false;
+        return res;
+    }
+    catch(...)
+    { }
+    return false;
 }
 
 } // namespace API
