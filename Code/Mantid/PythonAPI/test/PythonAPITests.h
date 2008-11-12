@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <cxxtest/TestSuite.h>
+#include "WorkspaceCreationHelper.hh"
 
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
@@ -20,23 +21,16 @@ class PythonAPITest : public CxxTest::TestSuite
 
 public:
   
-  PythonAPITest()
-  {
-  }
-  
   void testGetWorkspaceNames()
   {
     std::vector<std::string> temp = GetWorkspaceNames();
     TS_ASSERT(temp.empty());
     
-    //Run an algorithm to create a workspace
-    IAlgorithm* loader = FrameworkManager::Instance().createAlgorithm("LoadRaw");
-    loader->setPropertyValue("Filename", "../../../../Test/Data/GEM38370.raw");
-    loader->setPropertyValue("OutputWorkspace", "outer");    
-    loader->execute();
+    AnalysisDataService::Instance().add("outer",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
 
     temp = GetWorkspaceNames();
     TS_ASSERT(!temp.empty());
+    TS_ASSERT_EQUALS( temp[0], "outer" )
     FrameworkManager::Instance().deleteWorkspace("outer");
     temp = GetWorkspaceNames();
     TS_ASSERT(temp.empty());

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <cxxtest/TestSuite.h>
+#include "WorkspaceCreationHelper.hh"
 
 #include "MantidPythonAPI/FrameworkManager.h"
 #include "MantidAPI/Workspace.h"
@@ -38,49 +39,30 @@ public:
 		TS_ASSERT_THROWS_ANYTHING(mgr->createAlgorithm("Rubbish!"));
 	}
 
-	void testLoadIsisRaw()
+	void testGetDeleteWorkspace()
 	{
-		API::IAlgorithm* alg = mgr->createAlgorithm("LoadRaw");
-		TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Filename", "../../../../Test/Data/HET15869.RAW"));
-		TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "TestWorkspace1"));
-
-		TS_ASSERT_THROWS_NOTHING(alg->execute());
-	}
-	
-	void testGetWorkspace()
-	{
+    API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
 		API::Workspace* ws = mgr->getWorkspace("TestWorkspace1");
 
-		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
-	}
-	
-	void testDeleteWorkspace()
-	{
+		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 22);
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace1"));
 	}
 	
 	void testCreateAlgorithmMethod2()
 	{
-		API::IAlgorithm* alg = mgr->createAlgorithm("LoadRaw", "Filename=../../../../Test/Data/HET15869.RAW;OutputWorkspace=TestWorkspace2");
+		API::IAlgorithm* alg = mgr->createAlgorithm("PropertyAlgorithm", "10;9.99");
 
-		TS_ASSERT_THROWS_NOTHING(alg->execute());
-		
-		API::Workspace* ws = mgr->getWorkspace("TestWorkspace2");
-
-		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
-		
-		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace2"));
+    TS_ASSERT( alg->isInitialized() )
+    TS_ASSERT( !alg->isExecuted() )
+    TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "10" )
+    TS_ASSERT_EQUALS( alg->getPropertyValue("DoubleValue"), "9.99" )
 	}
 	
 	void testExecuteAlgorithmMethod()
 	{
-		API::IAlgorithm* alg = mgr->execute("LoadRaw", "Filename=../../../../Test/Data/HET15869.RAW;OutputWorkspace=TestWorkspace3");
-		
-		API::Workspace* ws = mgr->getWorkspace("TestWorkspace3");
-
-		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 2584);
-		
-		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace3"));
+		API::IAlgorithm* alg = mgr->execute("PropertyAlgorithm", "8;8.88");
+    TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "8" )
+    TS_ASSERT( alg->isExecuted() )
 	}
 
 };
