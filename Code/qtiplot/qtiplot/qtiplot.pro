@@ -593,6 +593,7 @@ contains(SCRIPTING_LANGS, Python) {
 #             $${SIP_DIR}/sipqtiMultiLayer.h\
 #             $${SIP_DIR}/sipqtiTable.h\
 #             $${SIP_DIR}/sipqtiMatrix.h\
+#             $${SIP_DIR}/sipqtiMantidMatrix.h\
 #             $${SIP_DIR}/sipqtiMdiSubWindow.h\
 #             $${SIP_DIR}/sipqtiScriptEdit.h\
 #             $${SIP_DIR}/sipqtiNote.h\
@@ -636,6 +637,7 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiMultiLayer.cpp\
              $${SIP_DIR}/sipqtiTable.cpp\
              $${SIP_DIR}/sipqtiMatrix.cpp\
+             $${SIP_DIR}/sipqtiMantidMatrix.cpp\
              $${SIP_DIR}/sipqtiMdiSubWindow.cpp\
              $${SIP_DIR}/sipqtiScriptEdit.cpp\
              $${SIP_DIR}/sipqtiNote.cpp\
