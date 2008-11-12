@@ -47,7 +47,7 @@ private:
 
 /** \class TableWorkspace
 
-    
+
 
 
     \author Roman Tolchenov
@@ -122,7 +122,7 @@ public:
     T& getRef(const std::string& name, int index)
     {
         boost::shared_ptr<Column> c = getColumn(name);
-        if (c->get_type_info() != typeid(T)) 
+        if (c->get_type_info() != typeid(T))
         {
             std::string str = "getRef: Type mismatch. ";
             g_log.error(str);
@@ -134,7 +134,7 @@ public:
     P getPointer(const std::string& name, int index)
     {
         boost::shared_ptr<Column> c = getColumn(name);
-        if (c->get_pointer_type_info() != typeid(P)) 
+        if (c->get_pointer_type_info() != typeid(P))
         {
             std::string str = "getPointer: Type mismatch. ";
             g_log.error(str);
@@ -146,42 +146,38 @@ public:
 
 
     //---------------- Tuples ---------------------------//
-    template<class Tuple>
+    template<typename Tuple>
     void set_Tuple(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
     {
-        t.get<0>() = getRef<Tuple::head_type>(names[i],j);
+        boost::tuples::get<0>(t) = getRef<typename Tuple::head_type>(names[i],j);
         if (i == int(names.size()-1)) return;
         if (typeid(t) != typeid(boost::tuples::null_type))
         set_Tuple(j,t.get_tail(),names,i+1);
     }
-    template<>
-    void set_Tuple(int j,boost::tuples::null_type& t,const std::vector<std::string>& names,int i)
+
+    void set_Tuple(int j,boost::tuples::null_type t,const std::vector<std::string>& names,int i)
     {}
 
-    template<class Tuple>
+    template<typename Tuple>
     Tuple make_TupleRef(int j,const std::vector<std::string>& names,int i=0)
     {
         Tuple t;
-        t.get<0>() = getPointer<Tuple::head_type>(names[i],j);
+        boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
         if (i < int(names.size()-1)&& typeid(t) != typeid(boost::tuples::null_type))
-            t.get_tail() = make_TupleRef<Tuple::tail_type>(j,names,i+1);
+            t.get_tail() = make_TupleRef<typename Tuple::tail_type>(j,names,i+1);
         return t;
     }
-    template<>
-    boost::tuples::null_type make_TupleRef<boost::tuples::null_type>(int j,const std::vector<std::string>& names,int i)
-    {return boost::tuples::null_type();}
 
-    template<class Tuple>
+    template<typename Tuple>
     void set_TupleRef(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
     {
-        t.get<0>() = getPointer<Tuple::head_type>(names[i],j);
+      boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
         if (i < int(names.size()-1)&& typeid(t) != typeid(boost::tuples::null_type))
             set_TupleRef(j,t.get_tail(),names,i+1);
     }
-    template<>
-    void set_TupleRef(int j,boost::tuples::null_type& t,const std::vector<std::string>& names,int i)
-    {}
 
+    void set_TupleRef(int j,boost::tuples::null_type t,const std::vector<std::string>& names,int i)
+    {}
 
 protected:
 
@@ -194,6 +190,11 @@ private:
     int m_rowCount;
 
 };
+
+template<>
+boost::tuples::null_type TableWorkspace::make_TupleRef<boost::tuples::null_type>(int j,const std::vector<std::string>& names,int i)
+{return boost::tuples::null_type();}
+
 
 template< class T>
 class ColumnVector
