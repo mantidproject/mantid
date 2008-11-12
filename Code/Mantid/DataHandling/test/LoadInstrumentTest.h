@@ -340,7 +340,7 @@ public:
     TS_ASSERT_EQUALS( ptrDetShape->getName(), "Det0");
 
     // temporarily commented out while bug in the visu of none box shapes
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
     //TS_ASSERT( ptrDetShape->isValid(V3D(0.251,0.0,0.0)+ptrDetShape->getPos()) );
     //TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,0.1021,0.0)+ptrDetShape->getPos()) );
     //TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,-0.1021,0.0)+ptrDetShape->getPos()) );

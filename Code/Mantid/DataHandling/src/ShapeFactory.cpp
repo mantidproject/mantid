@@ -933,6 +933,7 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Ge
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
+/*
 std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
   // check for arc element
@@ -1054,10 +1055,10 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   return retAlgebraMatch.str();
 }
+*/
 
 
-
-/* This is the correct code for this method. The code above is a hack until visualisation of none box shaped fixed
+/* This is the correct code for this method. The code above is a hack until visualisation of none box shaped fixed */
 std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
   // check for arc element
@@ -1106,15 +1107,18 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   // doto when visualisation of none box shapes fixed
   ///////////////////////////////////////////////////////
 
+  double innerRadius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
+  double outerRadius = atof( (pElemOuterRadius->getAttribute("val")).c_str() );
+  double middleRadius = (outerRadius + innerRadius)/2.0;
+
   V3D normVec(0,0,1);
-  V3D centrePoint(0,0,0);
+  V3D centrePoint(-middleRadius,0,0);
 
   // add inner infinite cylinder 
   Cylinder* pCylinder1 = new Cylinder();
   pCylinder1->setCentre(centrePoint);              
   pCylinder1->setNorm(normVec);  
-  double radius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
-  pCylinder1->setRadius(atof( (pElemInnerRadius->getAttribute("val")).c_str() ));
+  pCylinder1->setRadius(innerRadius);
   prim[l_id] = pCylinder1;
   std::stringstream retAlgebraMatch;
   retAlgebraMatch << "(" << l_id << " ";
@@ -1122,14 +1126,14 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   // add outer infinite cylinder 
   Cylinder* pCylinder2 = new Cylinder();
-  pCylinder2->setCentre(V3D(0,0,0));              
+  pCylinder2->setCentre(centrePoint);              
   pCylinder2->setNorm(normVec);  
-  pCylinder2->setRadius(atof( (pElemOuterRadius->getAttribute("val")).c_str() ));
+  pCylinder2->setRadius(outerRadius);
   prim[l_id] = pCylinder2;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
-  // add top plane
+  // add top cutoff plane of infinite cylinder ring
   Plane* pPlaneTop = new Plane();
   double depth = atof( (pElemDepth->getAttribute("val")).c_str() );
   pPlaneTop->setPlane(V3D(0,0,depth), normVec); 
@@ -1137,32 +1141,34 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
-  // add bottom plane (which is assumed to phase the sample)
+  // add bottom cutoff plane (which is assumed to fase the sample) 
+  // which at this point will result in a cylinder ring
   Plane* pPlaneBottom = new Plane();
   pPlaneBottom->setPlane(V3D(0,0,0), normVec); 
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << " ";
   l_id++;
 
+
   // the two planes that are going to cut a slice of the cylinder ring
 
   double arc = (M_PI/180.0) * atof( (pElemArc->getAttribute("val")).c_str() );
 
   Plane* pPlaneSlice1 = new Plane();
-  pPlaneSlice1->setPlane(V3D(0,0,0), V3D(cos(arc/2.0+M_PI/2.0),sin(arc/2.0+M_PI/2.0),0)); 
+  pPlaneSlice1->setPlane(V3D(-middleRadius,0,0), V3D(cos(arc/2.0+M_PI/2.0),sin(arc/2.0+M_PI/2.0),0)); 
   prim[l_id] = pPlaneSlice1;
   retAlgebraMatch << "-" << l_id << " ";
   l_id++;
 
   Plane* pPlaneSlice2 = new Plane();
-  pPlaneSlice2->setPlane(V3D(0,0,0), V3D(cos(-arc/2.0+M_PI/2.0),sin(-arc/2.0+M_PI/2.0),0)); 
+  pPlaneSlice2->setPlane(V3D(-middleRadius,0,0), V3D(cos(-arc/2.0+M_PI/2.0),sin(-arc/2.0+M_PI/2.0),0)); 
   prim[l_id] = pPlaneSlice2;
   retAlgebraMatch << "" << l_id << ")";
   l_id++;
 
   return retAlgebraMatch.str();
 }
-*/
+
 
 
 /** Get position coordinates from XML element
