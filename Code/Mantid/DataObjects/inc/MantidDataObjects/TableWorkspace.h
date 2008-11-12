@@ -39,6 +39,8 @@ class TableRow
 {
 public:
     TableRow(TableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
+    int row(){return m_row;}
+private:
     TableWorkspace* m_workspace;
     int m_row;
 };
@@ -98,6 +100,8 @@ public:
     int columnCount(){return m_columns.size();}
     /// Gets the shared pointer to a column.
     boost::shared_ptr<Column> getColumn(const std::string& name);
+    /// Returns a vector of all column names.
+    std::vector<std::string> getColumnNames();
     /// Number of rows in the workspace.
     int rowCount(){return m_rowCount;}
     /// Resizes the workspace.

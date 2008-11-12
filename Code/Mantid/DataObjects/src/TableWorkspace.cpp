@@ -128,6 +128,14 @@ namespace Mantid
         --m_rowCount;
     }
 
+    std::vector<std::string> TableWorkspace::getColumnNames()
+    {
+        std::vector<std::string> nameList;
+        for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
+            nameList.push_back(ci->first);
+        return nameList;
+    }
+
   } // namespace DataObjects
 } // namespace Mantid
 

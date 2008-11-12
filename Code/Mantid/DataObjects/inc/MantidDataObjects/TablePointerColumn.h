@@ -63,8 +63,8 @@ public:
     int size(){return int(m_data.size());}
     /// Reference to the data.
     Type& data(int i){return *m_data[i];}
-    const type_info& get_type_info(){return typeid(Type);}
-    const type_info& get_pointer_type_info(){return typeid(Type*);}
+    const std::type_info& get_type_info(){return typeid(Type);}
+    const std::type_info& get_pointer_type_info(){return typeid(Type*);}
 protected:
     /// Resize.
     void resize(int count)

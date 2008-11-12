@@ -72,8 +72,8 @@ protected:
     virtual void remove(int index) = 0;
     /// Pointer to a data element
     virtual void* void_pointer(int index) = 0;
-    virtual const type_info& get_type_info() = 0;
-    virtual const type_info& get_pointer_type_info() = 0;
+    virtual const std::type_info& get_type_info() = 0;
+    virtual const std::type_info& get_pointer_type_info() = 0;
 private:
     std::string m_name;///< name
     std::string m_type;///< type
