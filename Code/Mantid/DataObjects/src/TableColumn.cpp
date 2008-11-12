@@ -1,5 +1,5 @@
 #include "MantidDataObjects/TableColumn.h"
-#include "MAntidDataObjects/ColumnFactory.h"
+#include "MantidDataObjects/ColumnFactory.h"
 #include "MantidGeometry/V3D.h"
 
 namespace Mantid
@@ -17,5 +17,3 @@ DECLARE_TABLECOLUMN(Mantid::Geometry::V3D,V3D)
 } // namespace DataObjects
 } // namespace Mantid
 
-
-///\endcond TEMPLATE
