@@ -88,7 +88,7 @@ class AssociationsDialog;
 
 //Mantid
 class MantidUI;
-
+class MantidMatrix;
 /**
  * \brief QtiPlot's main window.
  *
@@ -162,6 +162,9 @@ public:
 	QString endOfLine();
 	bool autoUpdateTableValues(){return d_auto_update_table_values;};
 	void setAutoUpdateTableValues(bool on = true);
+
+	//! \name MantidMatrix
+	MantidMatrix* newMantidMatrix(const QString& name); //Mantid
 
 public slots:
 	//! \name Projects and Project Files

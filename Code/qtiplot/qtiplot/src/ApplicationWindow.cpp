@@ -164,6 +164,7 @@
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
+#include "Mantid/MantidMatrix.h"
 
 using namespace Qwt3D;
 
@@ -13235,6 +13236,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 void ApplicationWindow::showDemoVersionMessage()
 {
     saved = true;
+    /**
 	QMessageBox::critical(this, tr("MantidPlot - Demo Version"),//Mantid
 			tr("You are using the demonstration version of Qtiplot.\
 				It is identical with the full version, except that you can't save your work to project files and you can't use it for more than 10 minutes per session.\
@@ -13249,6 +13251,7 @@ void ApplicationWindow::showDemoVersionMessage()
 				Nevertheless, you are welcome to\
 				<a href=\"http://soft.proindependent.com/why_donate.html\">make a donation</a>\
 				in order to support the further development of QtiPlot."));
+    */
 }
 #endif
 
@@ -14349,6 +14352,11 @@ void ApplicationWindow::goToColumn()
 		else if (w->isA("Matrix"))
 			((Matrix *)w)->goToColumn(col);
 	}
+}
+
+MantidMatrix* ApplicationWindow::newMantidMatrix(const QString& wsName)
+{
+  return mantidUI->importWorkspace(wsName, false);
 }
 
 void ApplicationWindow::showScriptWindow()

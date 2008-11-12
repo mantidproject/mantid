@@ -48,7 +48,7 @@ private:
   ScriptEdit(ScriptEdit&);
 };
 
-class MdiSubWindow: QWidget /PyName=MDIWindow/
+class MdiSubWindow: QMdiSubWindow /PyName=MDIWindow/
 {
 %TypeHeaderCode
 #include "src/MdiSubWindow.h"
@@ -384,6 +384,22 @@ public:
 
 private:
   Matrix(const Matrix&);
+};
+
+class MantidMatrix: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/Mantid/MantidMatrix.h"
+%End
+public:
+  int numRows() const;
+  int numCols() const;
+  double dataX(int,int) const;
+  double dataY(int,int) const;
+  double dataE(int,int) const;
+  int indexX(double) const;
+private:
+  MantidMatrix(const MantidMatrix&);
 };
 
 class ArrowMarker // : QwtPlotMarker
@@ -804,7 +820,7 @@ sipTypeDef *t;
 
 public:
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
-
+  MantidMatrix* newMantidMatrix(const QString&);
   Table* table(const QString&);
 %MethodCode
   sipRes = sipCpp->current_folder->table(*a0, false);

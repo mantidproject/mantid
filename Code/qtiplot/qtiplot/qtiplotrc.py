@@ -230,7 +230,7 @@ from qti import *
 # import selected methods of ApplicationWindow into the global namespace
 appImports = (
 	"table", "newTable",
-	"matrix", "newMatrix",
+	"matrix", "newMatrix", "newMantidMatrix",
 	"graph", "newGraph",
 	"note", "newNote",
 	"newPlot3D",
