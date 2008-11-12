@@ -227,6 +227,8 @@ namespace Mantid
      */
     void SimplePythonAPI::writeFunctionHelp(std::ostream & os, const IndexVector & helpStrings)
     {
+      if ( helpStrings.empty() ) return;
+
       os << "def mtdHelp(cmd = -1):\n";
       
       os << "\tif cmd == -1:\n"

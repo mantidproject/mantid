@@ -240,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SaveVTK.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ShapeFactory.cpp"
 				>
 			</File>
@@ -371,6 +375,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveNeXusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveVTK.h"
 				>
 			</File>
 			<File

@@ -9,6 +9,7 @@
 #include "boost/filesystem.hpp"
 
 #include "MantidPythonAPI/SimplePythonAPI.h"
+#include "MantidAPI/FrameworkManager.h"
 
 class SimplePythonAPITest : public CxxTest::TestSuite
 {
@@ -16,6 +17,7 @@ public:
 
   SimplePythonAPITest()
   {
+    Mantid::API::FrameworkManager::Instance();
   }
 
   void testCreateModule()
