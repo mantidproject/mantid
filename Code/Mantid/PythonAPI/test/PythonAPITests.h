@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <cxxtest/TestSuite.h>
-#include "WorkspaceCreationHelper.hh"
+#include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
 #include "MantidPythonAPI/PythonInterface.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
