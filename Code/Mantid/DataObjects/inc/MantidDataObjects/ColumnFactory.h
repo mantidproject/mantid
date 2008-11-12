@@ -51,10 +51,16 @@ namespace DataObjects
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
+
+#ifdef _WIN32
 #ifdef IN_MANTID_DATA_OBJECTS
   #define ColumnFactory_DllExport __declspec( dllexport )
 #else
   #define ColumnFactory_DllExport __declspec( dllimport )
+#endif
+#else
+  #define ColumnFactory_DllExport
+  #define ColumnFactory_DllImport
 #endif
 
 class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<Column>

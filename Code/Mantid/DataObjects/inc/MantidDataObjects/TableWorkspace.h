@@ -71,10 +71,15 @@ public:
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#ifdef _WIN32
 #ifdef IN_MANTID_DATA_OBJECTS
   #define TableWorkspace_DllExport __declspec( dllexport )
 #else
   #define TableWorkspace_DllExport __declspec( dllimport )
+#endif
+#else
+  #define TableWorkspace_DllExport
+  #define TableWorkspace_DllImport
 #endif
 
 class TableWorkspace_DllExport TableWorkspace
