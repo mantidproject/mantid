@@ -114,7 +114,7 @@ bool Algorithm::execute()
   {
     try
     {
-      if (!m_isChildAlgorithm) m_running = true; 
+      if (!m_isChildAlgorithm) m_running = true;
       time(&start_time);
       start = clock();
       // Call the concrete algorithm's exec method
@@ -132,12 +132,10 @@ bool Algorithm::execute()
       setExecuted(true);
       if (!m_isChildAlgorithm) g_log.information() << "Algorithm successful, Duration "
                                      << double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
-      m_children.clear();
-      m_running = false; 
+      m_running = false;
     }
     catch(std::runtime_error& ex)
     {
-      m_children.clear();
       if (m_isChildAlgorithm || m_runningAsync) throw;
       else
       {
@@ -145,11 +143,10 @@ bool Algorithm::execute()
           g_log.error()<< ex.what()<<std::endl;
       }
       notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-      m_running = false; 
+      m_running = false;
     }
     catch(std::logic_error& ex)
     {
-      m_children.clear();
       if (m_isChildAlgorithm || m_runningAsync) throw;
       else
       {
@@ -157,13 +154,13 @@ bool Algorithm::execute()
           g_log.error()<< ex.what()<<std::endl;
       }
       notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
-      m_running = false; 
+      m_running = false;
     }
   }
   catch(CancelException& ex)
   {
       m_runningAsync = false;
-      m_running = false; 
+      m_running = false;
       g_log.error("Execution terminated by user.");
       notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       throw;
@@ -173,7 +170,7 @@ bool Algorithm::execute()
   {
     setExecuted(false);
     m_runningAsync = false;
-    m_running = false; 
+    m_running = false;
 
     notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
     g_log.error(ex.what());
@@ -187,7 +184,7 @@ bool Algorithm::execute()
     // we will set it to false (see Nick Draper) 6/12/07
     setExecuted(false);
     m_runningAsync = false;
-    m_running = false; 
+    m_running = false;
 
     notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
     g_log.error("UNKNOWN Exception is caught ");
@@ -229,8 +226,6 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
   Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
   //set as a child
   alg->setChild(true);
-
-  m_children.push_back(alg);
 
   // Initialise the sub-algorithm
   try
@@ -287,8 +282,6 @@ const std::vector< Mantid::Kernel::Property* >& Algorithm::getProperties() const
 void Algorithm::cancel()
 {
     m_cancel = true;
-    for(std::vector<Algorithm_sptr>::iterator c=m_children.begin();c!=m_children.end();c++)
-        (**c).cancel();
 }
 
 //----------------------------------------------------------------------

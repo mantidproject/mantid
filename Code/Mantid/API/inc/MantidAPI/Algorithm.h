@@ -117,7 +117,7 @@ public:
         bool success;///< true if the finished algorithm was successful or false if it failed.
     };
 
-    /// An algorithm can report its progress by sending ProgressNotification. Use 
+    /// An algorithm can report its progress by sending ProgressNotification. Use
     /// Algorithm::progress(double) function to send a preogress notification.
     class ProgressNotification: public AlgorithmNotification
     {
@@ -198,9 +198,10 @@ public:
   /// and if true terminates the algorithm.
   void cancel();
   /// True if the algorithm is running asynchronously.
-  bool isRunningAsync(){return m_runningAsync;}// && !m_cancel;}
+  bool isRunningAsync(){return m_runningAsync;}
   /// True if the algorithm is running.
-  bool isRunning(){return m_running;}// && !m_cancel;}
+  bool isRunning(){return m_running;}
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -220,7 +221,7 @@ protected:
 
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
   void progress(double p);
-  /// Interrupts algorithm execution if Algorithm::cancel() has been called. 
+  /// Interrupts algorithm execution if Algorithm::cancel() has been called.
   /// Does nothing otherwise.
   void interruption_point();
 
@@ -251,8 +252,6 @@ private:
   bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
-  /// Pointers to child algorithms used in this algorithm.
-  std::vector< boost::shared_ptr<Algorithm> > m_children;
 };
 
 ///Typedef for a shared pointer to an Algorithm

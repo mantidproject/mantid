@@ -223,7 +223,7 @@ namespace Mantid
       childAlg->setProperty("InputWorkspace", workspace);
       childAlg->setPropertyValue("Target",CONVERSION_UNIT);
       childAlg->notificationCenter.addObserver(m_childProgressObserver);
-      std::cerr<<childAlg->name()<<'\n';
+
       // Now execute the sub-algorithm. Catch and log any error
       try
       {
@@ -238,16 +238,7 @@ namespace Mantid
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
-      // Get the output workspace out of its property and then clear the property
-      // so that this intermediate workspace will be deleted once its been
-      // used as the input workspace for the Rebin subalgorithm
-      Property *p = childAlg->getProperty("OutputWorkspace");
-      API::IWorkspaceProperty *pp = dynamic_cast<API::IWorkspaceProperty*>(p);
-      Workspace_sptr ppp = pp->getWorkspace();
-      pp->clear();
-      return ppp;
-  
-      //return childAlg->getProperty("OutputWorkspace");
+      return childAlg->getProperty("OutputWorkspace");
     }
 
     /// Run Rebin as a sub-algorithm to harmionise the bin boundaries
@@ -289,10 +280,6 @@ namespace Mantid
       else
       {
          workspace = childAlg->getProperty("OutputWorkspace");
-         // Clear the pointer to the input workspace held by its property
-         // This will lead to the intermediate workspace being deleted
-         Property *p = childAlg->getProperty("InputWorkspace");
-         dynamic_cast<API::IWorkspaceProperty*>(p)->clear();
       }
 
     }
