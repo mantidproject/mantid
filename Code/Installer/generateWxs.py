@@ -96,6 +96,7 @@ def addAllFiles(location,name,parent):
         #print fil
         fn = fil.replace('-','_')
         fn = fn.replace('+','_')
+        fn = fn.replace(' ','_')
         if (fil.find('.svn') < 0 and os.path.isfile(location+'/'+fil)):
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
@@ -440,6 +441,12 @@ Scripts = addComponent('Scripts','{E21432EE-368D-4670-A778-23F5C8DC8F2F}',Script
 addAllFiles('../Mantid/PythonAPI/scripts','scr',Scripts)
 #-----------------------------------------------------------------------
 
+#-------------------------- Colormaps ------------------------------------
+ColormapsDir = addDirectory('ColormapsDir','colors','colormaps',InstallDir)
+Colormaps = addComponent('Colormaps','{902DBDE3-42AE-49d3-819D-1C83C18D280A}',ColormapsDir)
+addAllFiles('../qtiplot/colormaps','col',Colormaps)
+#-----------------------------------------------------------------------
+
 ProgramMenuFolder = addDirectory('ProgramMenuFolder','PMenu','Programs',TargetDir)
 ProgramMenuDir = addDirectory('ProgramMenuDir','Mantid','Mantid',ProgramMenuFolder)
 
@@ -457,6 +464,7 @@ addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)
 addCRef('Logs',MantidExec)
 addCRef('Scripts',MantidExec)
+addCRef('Colormaps',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
 addCRefs(instrument,MantidExec)
