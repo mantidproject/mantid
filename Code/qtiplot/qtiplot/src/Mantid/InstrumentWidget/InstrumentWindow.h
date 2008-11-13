@@ -5,9 +5,12 @@
 #include <QDialog>
 #include <QSlider>
 #include <QSpinBox>
+#include <QTabWidget>
+#include <QLineEdit>
 #include "Instrument3DWidget.h"
 #include "../../MdiSubWindow.h"
 #include <string>
+#include "qwt_scale_widget.h"
 
 /*!
   \class  InstrumentWindow
@@ -45,29 +48,28 @@ public:
 	~InstrumentWindow();
 	void setWorkspaceName(std::string wsName);
 public slots:
-	void startAnimation();
-	void stopAnimation();
-	void updateTimeBin();
 	void modeSelectButtonClicked();
 	void spectraInformation(int);
 	void detectorInformation(int value);
 	void spectraInfoDialog();
 	void changeColormap();
     void sendPlotSpectraSignal();
+	void minValueChanged();
+	void maxValueChanged();
 signals:
     void plotSpectra(const QString&,int);
 private:
+	void updateColorMapWidget();
+	QTabWidget*  mControlsTab;
     QMenu*       mPopupContext; ///< Popup menu for detector picking
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal
-	QPushButton* mPlayButton;   ///< Play animation
-	QPushButton* mPauseButton;  ///< Pause animation
 	QPushButton* mSelectColormap; ///< Select colormap button
-	QSlider*     mTimeBinSlider; ///< Select the time bin slider.
-	QSpinBox*    mTimeBinSpinBox; ///< Spin box showing timebin
-	QTimer*      mAnimationTimer;  ///< Timer to do animation
 	Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
 	int          mSpectraIDSelected; ///< spectra index id
 	int          mDetectorIDSelected; ///< detector id
+	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
+	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
+	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

@@ -38,6 +38,7 @@ public:
     GLColor(const GLColor&);                          ///< Constructor
 	virtual ~GLColor();                               ///< Destructor
     void set(float,float,float,float);
+	void get(float&,float&,float&,float&);
     void paint(paintMethod);
 private:
     float _v[4];                                      ///< Color Component Values

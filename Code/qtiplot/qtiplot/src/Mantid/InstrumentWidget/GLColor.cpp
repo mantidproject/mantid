@@ -29,6 +29,18 @@ void GLColor::set(float R, float G, float B, float alpha)
 }
 
 /**
+ * This method sets the Red, Green, Blue, Alpha values of the color
+ * @param R Red component of color value between [0 - 1]
+ * @param G Green Componenent of color value between [0 - 1]
+ * @param B Blue Componenent of color value between [0 - 1]
+ * @param alpha Alpha componenet of color value between [0 - 1]
+ */
+void GLColor::get(float& R, float& G, float& B, float& alpha)
+{
+    R=_v[0];G=_v[1];B=_v[2];alpha=_v[3];
+}
+
+/**
  * This method executes opengl color commands based on the method provided.
  * @param method type of opengl color to be used
  */

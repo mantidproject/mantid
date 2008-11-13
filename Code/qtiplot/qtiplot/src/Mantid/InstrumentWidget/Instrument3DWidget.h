@@ -3,7 +3,7 @@
 
 #include <QGLWidget> 
 #include "GL3DWidget.h"
-#include "GLColorMap.h"
+#include "GLColorMapQwt.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
 /*!
@@ -49,10 +49,14 @@ public:
 	void setWorkspace(std::string name);
 	std::string getWorkspaceName();
 	void setColorMapName(std::string name);
-
+	GLColorMapQwt getColorMap()const;
+	double getDataMinValue();
+	double getDataMaxValue();
 public slots:
 	void fireDetectorPicked(GLActor* );
 	void setTimeBin(int value);
+	void setColorMapMinValue(double minValue);
+	void setColorMapMaxValue(double maxValue);
 	void pickedID(int id)
 	{
 		std::cout<<"ID of the detector selected "<<id<<std::endl;
@@ -67,7 +71,9 @@ signals:
 	void actionSpectraSelected(int);
 private:
 	int iTimeBin;
-	GLColorMap mColorMap;
+	GLColorMapQwt mColorMap;
+	double DataMinValue;
+	double DataMaxValue;
 	void AssignColors();
 	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument>);
 	std::vector<int> getDetectorIDList();

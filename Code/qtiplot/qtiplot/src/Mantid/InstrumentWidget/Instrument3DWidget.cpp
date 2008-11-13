@@ -30,6 +30,8 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 	iTimeBin=0;
 	strWorkspaceName="";
 	connect(this, SIGNAL(actorPicked(GLActor*)), this, SLOT(fireDetectorPicked(GLActor*)));
+	DataMinValue=-DBL_MAX;
+	DataMaxValue=DBL_MAX;
 }
 
 Instrument3DWidget::~Instrument3DWidget()
@@ -260,8 +262,12 @@ void Instrument3DWidget::AssignColors()
 	std::vector<double> values;	
 	double minval,maxval;
 	this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
+	if(DataMinValue==-DBL_MAX)
+		DataMinValue=minval;
+	if(DataMaxValue==DBL_MAX)
+		DataMaxValue=maxval;
 	std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
-	this->setColorForDetectors(minval,maxval,values,this->mColorMap);
+	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
 	scene->refresh();
 	updateGL();
 }
@@ -296,4 +302,46 @@ void Instrument3DWidget::setTimeBin(int value)
 std::string Instrument3DWidget::getWorkspaceName()
 {
 	return strWorkspaceName;
+}
+
+/**
+ * Returns Colormap
+ */
+GLColorMapQwt Instrument3DWidget::getColorMap()const
+{
+	return mColorMap;
+}
+
+/**
+ * This method takes the input name as the min value Colormap scale.
+ */
+void Instrument3DWidget::setColorMapMinValue(double minValue)
+{
+	this->DataMinValue=minValue;
+	AssignColors();
+}
+
+/**
+ * This method takes the input name as the min value Colormap scale.
+ */
+void Instrument3DWidget::setColorMapMaxValue(double maxValue)
+{
+	this->DataMaxValue=maxValue;
+	AssignColors();
+}
+
+/**
+ * This method returns min value. by default will be min value in the current timebin
+ */
+double Instrument3DWidget::getDataMinValue()
+{
+	return this->DataMinValue;
+}
+
+/**
+ * This method returns the max value. by default will be max value in the current timebin
+ */
+double Instrument3DWidget::getDataMaxValue()
+{
+	return this->DataMaxValue;
 }

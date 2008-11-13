@@ -7,7 +7,12 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QString>
-
+#include <QSplitter>
+#include <QDoubleValidator>
+#include "GLColorMapQwt.h"
+#include "qwt_scale_widget.h"
+#include "qwt_scale_div.h"
+#include "qwt_scale_engine.h"
 
 /**
  * Contructor, creates the mdi subwindow within mantidplot
@@ -17,45 +22,65 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
 	QFrame *frame= new QFrame();
-	QVBoxLayout* mainLayout = new QVBoxLayout(frame);
-	QHBoxLayout* controlPanelLayout = new QHBoxLayout;
-
-	mainLayout->addLayout(controlPanelLayout);
+	QVBoxLayout* mainLayout = new QVBoxLayout;
+	QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 	
-	mSelectButton = new QPushButton(tr("Pick"));
-	mTimeBinSlider = new QSlider(Qt::Horizontal);
-	mTimeBinSpinBox= new QSpinBox();
-	mPlayButton = new QPushButton(tr("Play"));
-	mPauseButton = new QPushButton(tr("Stop"));
-	mSelectColormap = new QPushButton(tr("Pick ColorMap"));
+	//Add Tab control panel and Render window
+	mControlsTab = new QTabWidget(0,0);
+	controlPanelLayout->addWidget(mControlsTab);
+	controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	QFrame* renderControls=new QFrame(mControlsTab);
+	QFrame* instrumentTree=new QFrame(mControlsTab);
+	mControlsTab->addTab( renderControls, QString("Render Controls"));
+	mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
 	mInstrumentDisplay = new Instrument3DWidget();	
+	controlPanelLayout->addWidget(mInstrumentDisplay);
+	mainLayout->addWidget(controlPanelLayout);
+	QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
+	QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
 
-	controlPanelLayout->addWidget(mSelectButton);
-	controlPanelLayout->addStretch();
-	controlPanelLayout->addWidget(mTimeBinSpinBox);
-	controlPanelLayout->addStretch();
-	controlPanelLayout->addWidget(mTimeBinSlider);
-	controlPanelLayout->addStretch();
-	controlPanelLayout->addWidget(mPlayButton);
-	controlPanelLayout->addStretch();
-	controlPanelLayout->addWidget(mPauseButton);
-	controlPanelLayout->addStretch();
-	controlPanelLayout->addWidget(mSelectColormap);
+	//Render Controls
+	mSelectButton = new QPushButton(tr("Pick"));
+	mSelectColormap = new QPushButton(tr("Select ColorMap"));
+	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
+	mMinValueBox    = new QLineEdit();
+	mMaxValueBox    = new QLineEdit();
+	mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
+	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
+	mMinValueBox->setMaximumWidth(40);
+	mMaxValueBox->setMaximumWidth(40);
+	QFrame* lColormapFrame=new QFrame();
+	QVBoxLayout* lColormapLayout=new QVBoxLayout(lColormapFrame);
+	lColormapLayout->addWidget(mMaxValueBox);
+	lColormapLayout->addWidget(mColorMapWidget);
+	lColormapLayout->addWidget(mMinValueBox);
+	mColorMapWidget->setColorMap(QwtDoubleInterval(0,1),mInstrumentDisplay->getColorMap());
+	mColorMapWidget->setColorBarEnabled(true);
+	mColorMapWidget->setColorBarWidth(20);
+	mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
+	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
+	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();	
+	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
+	renderControlsLayout->addWidget(mSelectButton);
+	renderControlsLayout->addWidget(mSelectColormap);
+	renderControlsLayout->addWidget(lColormapFrame);
 
-	mainLayout->addWidget(mInstrumentDisplay);
+	//Set the main frame to the window
+	frame->setLayout(mainLayout);
+	setWidget(frame);
+
+	//Set the mouse/keyboard operation info
+	QLabel* interactionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
+	interactionInfo->setMaximumHeight(30);
+	mainLayout->addWidget(interactionInfo);
+
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
-	connect(mPlayButton, SIGNAL(clicked()),   mInstrumentDisplay,   SLOT(startAnimation()));
-	connect(mPauseButton, SIGNAL(clicked()),   mInstrumentDisplay,   SLOT(stopAnimation()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
+	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
+	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelected(int)), this, SLOT(detectorInformation(int)));
 
-	connect(mTimeBinSpinBox,SIGNAL(valueChanged(int)),mInstrumentDisplay, SLOT(setTimeBin(int)));
-	connect(mTimeBinSlider,SIGNAL(valueChanged(int)),mInstrumentDisplay, SLOT(setTimeBin(int)));
-	connect(mTimeBinSpinBox,SIGNAL(valueChanged(int)),mTimeBinSlider, SLOT(setValue(int)));
-	connect(mTimeBinSlider,SIGNAL(valueChanged(int)),mTimeBinSpinBox, SLOT(setValue(int)));
-
-	setWidget(frame);
     mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
@@ -64,9 +89,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
     mPopupContext->addAction(plotAction);
-
-    mAnimationTimer = new QTimer(this);
-	connect(mAnimationTimer, SIGNAL(timeout()), this, SLOT(updateTimeBin()));
 }
 
 /**
@@ -94,7 +116,7 @@ void InstrumentWindow::changeColormap()
 {
 	QString file=QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), ".",tr("Colormaps (*.map *.MAP)"));
 	mInstrumentDisplay->setColorMapName(std::string(file.ascii()));
-
+	updateColorMapWidget();
 }
 
 /**
@@ -149,41 +171,43 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 {
 	mInstrumentDisplay->setWorkspace(wsName);
 	Workspace_sptr output = AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName());
-	int count=output->getNumberHistograms();
-	mTimeBinSpinBox->setRange(0,count);
-	mTimeBinSlider->setRange(0,count);
+	int count=output->blocksize();
+	double minValue=mInstrumentDisplay->getDataMinValue();
+	double maxValue=mInstrumentDisplay->getDataMaxValue();
+	QString text;
+	mMinValueBox->setText(text.setNum(minValue));
+	mMaxValueBox->setText(text.setNum(maxValue));
+	updateColorMapWidget();
 }
 
 /**
- * This method is to start the animation. Steping throught the timebins.
- * It uses QTimer to loop through the animation. the animation start from begining
- * when the last time bin is displayed.
- * WARNING: Currently the time speed is set to 1 sec.
+ *
  */
-void InstrumentWindow::startAnimation()
+void InstrumentWindow::minValueChanged()
 {
-	mAnimationTimer->start(1000);
+	QString value=mMinValueBox->displayText();
+	mInstrumentDisplay->setColorMapMinValue(value.toDouble());
+	updateColorMapWidget();
 }
 
 /**
- * This method is to stop the animation.
+ *
  */
-void InstrumentWindow::stopAnimation()
+void InstrumentWindow::maxValueChanged()
 {
-	mAnimationTimer->stop();
+	QString value=mMaxValueBox->displayText();
+	mInstrumentDisplay->setColorMapMaxValue(value.toDouble());
+	updateColorMapWidget();
 }
 
 /**
- * This method is slot method for the update of the time bin and increment to the next step. if reaches the last time bin
- * then restarts from first bin.
+ *
  */
-void InstrumentWindow::updateTimeBin()
+void InstrumentWindow::updateColorMapWidget()
 {
-    Workspace_sptr output = AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName());
-	int count=output->getNumberHistograms();
-	int iTimeBin=mTimeBinSpinBox->value();
-	if(iTimeBin>count)iTimeBin=0;
-	iTimeBin++;
-	mTimeBinSpinBox->setValue(iTimeBin);
-	mInstrumentDisplay->setTimeBin(iTimeBin);
+	QwtLinearScaleEngine lse;
+	double minValue=mMinValueBox->displayText().toDouble();
+	double maxValue=mMaxValueBox->displayText().toDouble();
+	mColorMapWidget->setScaleDiv(lse.transformation(),lse.divideScale(minValue,maxValue,20,5));
+	mColorMapWidget->setColorMap(QwtDoubleInterval(minValue,maxValue),mInstrumentDisplay->getColorMap());
 }

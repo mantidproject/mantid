@@ -6,6 +6,9 @@
 
 GLColorMap::GLColorMap()
 {
+	for(int i=0;i<256;i++){
+		color[i]=boost::shared_ptr<GLColor>(new GLColor());
+	}
 	defaultColormap();
 }
 
@@ -16,11 +19,13 @@ void GLColorMap::setColorMapFile(std::string name)
 	if (cmapfile.is_open())
 	{
 		int count=0;
+		double r,g,b;
 		while (! cmapfile.eof() )
 		{
 			std::getline (cmapfile,line);
 			std::stringstream sline(line);
-			sline>>color[count][0]>>color[count][1]>>color[count][2];
+			sline>>r>>g>>b;
+			color[count]->set(r/255.0,g/255.0,b/255.0,1.0);
 			count++;
 		}
 		cmapfile.close();
@@ -32,8 +37,7 @@ void GLColorMap::setColorMapFile(std::string name)
 
 boost::shared_ptr<GLColor> GLColorMap::getColor(int id)
 {
-	boost::shared_ptr<GLColor> col(new GLColor(color[id][0]/(float)256.0,color[id][1]/(float)256.0,color[id][2]/(float)256.0,1.0));
-	return col;
+	return color[id];
 }
 
 void GLColorMap::defaultColormap()
@@ -42,38 +46,26 @@ void GLColorMap::defaultColormap()
 	int i;
 	//First y coordinate
 	for(i=0;i<43;i++){
-		color[i][0]=256;
-		color[i][1]=6*i;
-		color[i][2]=0;
+		color[i]->set(1,6*i/256.0,0,1.0);
 	}
 	//Second decrment x
 	for(i=0;i<43;i++){
-		color[43+i][0]=254-6*i;
-		color[43+i][1]=256;
-		color[43+i][2]=0;
+		color[43+i]->set((254-6*i)/256.0,1,0,1.0);
 	}
 	//third increment z
 	for(i=0;i<43;i++){
-		color[86+i][0]=0;
-		color[86+i][1]=256;
-		color[86+i][2]=4+i*6;
+		color[86+i]->set(0.0,1.0,(4+i*6)/256.0,1.0);
 	}
 	//fourth decrement y
 	for(i=0;i<43;i++){
-		color[129+i][0]=0;
-		color[129+i][1]=250-6*i;
-		color[129+i][2]=256;
+		color[129+i]->set(0.0,(250-6*i)/256.0,1.0,1.0);
 	}
 	//fifth increment x
 	for(i=0;i<43;i++){
-		color[172+i][0]=2+6*i;
-		color[172+i][1]=0;
-		color[172+i][2]=256;
+		color[172+i]->set((2+6*i)/256.0,0.0,1.0,1.0);
 	}
 	//sixth decrement z
 	for(i=0;i<41;i++){
-		color[215+i][0]=256;
-		color[215+i][1]=0;
-		color[215+i][2]=252-6*i;
+		color[215+i]->set(1.0,0.0,(252-6*i)/256.0,1.0);
 	}
 }

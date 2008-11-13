@@ -1,15 +1,17 @@
-#ifndef GLCOLORMAP_H_
-#define GLCOLORMAP_H_
+#ifndef GLCOLORMAPQWT_H_
+#define GLCOLORMAPQWT_H_
 #include "boost/shared_ptr.hpp"
+#include "qwt_color_map.h"
+#include "GLColorMap.h"
 #include <string>
 /*!
-  \class  GLColorMap
-  \brief  class handling Colormaps
-  \author Chapon Laurent & Srikanth Nagella
-  \date   August 2008
+  \class  GLColorMapQwt
+  \brief  class handling GL Colormaps and Qwt Colormap
+  \author Srikanth Nagella
+  \date   November 2008
   \version 1.0
 
-  GLColorMap class handles the loading of colormap and returning color based on the index.
+  GLColorMapQwt class handles the colormap compatible with Qwt
 
   Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
@@ -30,16 +32,16 @@
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class GLColor;
-class GLColorMap
+
+class GLColorMapQwt:public GLColorMap, public QwtColorMap
 {
 public:
-	GLColorMap();  ///< Default constructor
-	void setColorMapFile(std::string name); ///< Load the color map from file
-	boost::shared_ptr<GLColor> getColor(int id); ///< get color corresponding to id
-private:
-    boost::shared_ptr<GLColor> color[256]; ///< Color map storage
-	void defaultColormap(); ///< Sets default color map
+	GLColorMapQwt();  ///< Default constructor
+	~GLColorMapQwt();
+	QwtColorMap* copy()const;
+	QRgb  rgb(const QwtDoubleInterval &interval,double value)const;
+	unsigned char colorIndex(const QwtDoubleInterval &interval,double value)const;
+	QVector<QRgb> colorTable(const QwtDoubleInterval &)const;
 };
 
 #endif /*GLCOLORMAP_H_*/

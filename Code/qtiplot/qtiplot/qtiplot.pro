@@ -337,7 +337,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/GLActor.h \
 	    src/Mantid/InstrumentWidget/GLActorCollection.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
-	    src/Mantid/InstrumentWidget/InstrumentWindow.h
+	    src/Mantid/InstrumentWidget/InstrumentWindow.h \
+		src/Mantid/InstrumentWidget/GLColorMapQwt.h
 
 ###################### FORMS ##############################################
 
@@ -486,7 +487,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/GLActor.cpp \
 	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
-	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp	    
+	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp \
+		src/Mantid/InstrumentWidget/GLColorMapQwt.cpp	    
 
 
 ###############################################################
