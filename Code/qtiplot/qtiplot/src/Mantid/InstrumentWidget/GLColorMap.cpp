@@ -24,6 +24,7 @@ void GLColorMap::setColorMapFile(std::string name)
 		{
 			std::getline (cmapfile,line);
 			std::stringstream sline(line);
+			if(count==256||line=="")break;
 			sline>>r>>g>>b;
 			color[count]->set(r/255.0,g/255.0,b/255.0,1.0);
 			count++;
