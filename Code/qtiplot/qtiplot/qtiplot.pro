@@ -595,7 +595,6 @@ contains(SCRIPTING_LANGS, Python) {
 #             $${SIP_DIR}/sipqtiMultiLayer.h\
 #             $${SIP_DIR}/sipqtiTable.h\
 #             $${SIP_DIR}/sipqtiMatrix.h\
-#             $${SIP_DIR}/sipqtiMantidMatrix.h\
 #             $${SIP_DIR}/sipqtiMdiSubWindow.h\
 #             $${SIP_DIR}/sipqtiScriptEdit.h\
 #             $${SIP_DIR}/sipqtiNote.h\
@@ -627,6 +626,9 @@ contains(SCRIPTING_LANGS, Python) {
 #			 $${SIP_DIR}/sipqtiCorrelation.h \
 #			 $${SIP_DIR}/sipqtiConvolution.h \
 #			 $${SIP_DIR}/sipqtiDeconvolution.h \
+#             $${SIP_DIR}/sipqtiMantidMatrix.h\
+#             $${SIP_DIR}/sipqtiMantidUI.h\
+
 
   SOURCES += $${SIP_DIR}/sipqticmodule.cpp\
              $${SIP_DIR}/sipqtiApplicationWindow.cpp\
@@ -671,6 +673,8 @@ contains(SCRIPTING_LANGS, Python) {
 			 $${SIP_DIR}/sipqtiCorrelation.cpp \
 			 $${SIP_DIR}/sipqtiConvolution.cpp \
 			 $${SIP_DIR}/sipqtiDeconvolution.cpp \
+             $${SIP_DIR}/sipqtiMantidMatrix.cpp\
+             $${SIP_DIR}/sipqtiMantidUI.cpp
 
 }
 ###############################################################

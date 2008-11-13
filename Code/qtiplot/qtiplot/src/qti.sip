@@ -386,22 +386,6 @@ private:
   Matrix(const Matrix&);
 };
 
-class MantidMatrix: MdiSubWindow
-{
-%TypeHeaderCode
-#include "src/Mantid/MantidMatrix.h"
-%End
-public:
-  int numRows() const;
-  int numCols() const;
-  double dataX(int,int) const;
-  double dataY(int,int) const;
-  double dataE(int,int) const;
-  int indexX(double) const;
-private:
-  MantidMatrix(const MantidMatrix&);
-};
-
 class ArrowMarker // : QwtPlotMarker
 {
 %TypeHeaderCode
@@ -528,6 +512,7 @@ public:
 %End
 
   bool insertCurve(Table*, const QString&, const QString&, int=1);
+  void insertCurve(Graph*, int);
   bool addCurves(Table*, SIP_PYTUPLE, int=0, double=1, int=3, int=0, int=-1);
 %MethodCode
   QStringList l;
@@ -820,7 +805,6 @@ sipTypeDef *t;
 
 public:
   enum MatrixToTableConversion{Direct, XYZ, YXZ};
-  MantidMatrix* newMantidMatrix(const QString&);
   Table* table(const QString&);
 %MethodCode
   sipRes = sipCpp->current_folder->table(*a0, false);
@@ -924,7 +908,7 @@ public:
 
   Matrix* tableToMatrix(Table* t);
   Table* matrixToTable(Matrix* m, MatrixToTableConversion = Direct);
-
+  MantidUI* mantidUI;
 private:
   ApplicationWindow(const ApplicationWindow&);
 };
@@ -1689,4 +1673,51 @@ public:
 
 private:
   Folder(const Folder&);
+};
+
+//-------------------
+// Mantid Extensions
+//-------------------
+
+class MantidMatrix: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/Mantid/MantidMatrix.h"
+%End
+public:
+  int numRows() const;
+  int numCols() const;
+  double dataX(int,int) const;
+  double dataY(int,int) const;
+  double dataE(int,int) const;
+  int indexX(double) const;
+private:
+  MantidMatrix(const MantidMatrix&);
+};
+
+class MantidUI: QObject
+{
+%TypeHeaderCode
+#include "src/Mantid/MantidUI.h"
+%End
+%ConvertToSubClassCode
+// we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
+sipClass=NULL;
+QString cN = sipCpp->className();
+sipTypeDef *t;
+  for (int i=0; i<sipModuleAPI_qti.em_nrtypes; i++)
+  if (((t=sipModuleAPI_qti.em_types[i]->type)->td_cname && cN == t->td_cname) ||
+      (!t->td_cname && cN == t->td_name+4))
+    sipClass = sipModuleAPI_qti.em_types[i];
+%End
+
+public:
+  MantidMatrix* newMantidMatrix(const QString&, int=-1, int=-1);
+%MethodCode
+  sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
+%End
+Graph* plotInstrumentSpectrum(const QString&, int);
+void closeGraph(Graph*);
+private:
+MantidUI(const MantidUI &);
 };

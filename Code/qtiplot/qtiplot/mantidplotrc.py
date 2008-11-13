@@ -7,6 +7,11 @@
 # Author Martyn Gigg, Tessella Support Services
 #
 #----------------------------------
+MantidUIImports = ['newMantidMatrix','plotInstrumentSpectrum','closeGraph']
+
+for name in MantidUIImports:
+    setattr(__main__,name,getattr(qti.app.mantidUI,name))
+
 import os
 
 ## Check OS

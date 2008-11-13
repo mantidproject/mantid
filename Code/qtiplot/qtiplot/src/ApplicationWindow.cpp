@@ -164,7 +164,6 @@
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
-#include "Mantid/MantidMatrix.h"
 
 using namespace Qwt3D;
 
@@ -14352,11 +14351,6 @@ void ApplicationWindow::goToColumn()
 		else if (w->isA("Matrix"))
 			((Matrix *)w)->goToColumn(col);
 	}
-}
-
-MantidMatrix* ApplicationWindow::newMantidMatrix(const QString& wsName)
-{
-  return mantidUI->importWorkspace(wsName, false);
 }
 
 void ApplicationWindow::showScriptWindow()

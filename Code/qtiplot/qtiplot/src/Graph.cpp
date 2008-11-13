@@ -2914,6 +2914,23 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 	return c;
 }
 
+void Graph::insertCurve(Graph* g, int i)
+{
+  if( g == this ) return;
+  
+  QwtPlotCurve* c = g->curve(i);
+  if( c ) {
+    insertPlotItem(c,Graph::Line);
+    CurveLayout cl = initCurveLayout();
+    int colour, symbol;
+    guessUniqueCurveLayout(colour, symbol);
+    c->setPen(QPen(ColorBox::color(colour)));
+    setAutoScale();
+  }
+
+}
+
+
 QwtHistogram* Graph::addHistogram(Matrix *m)
 {
 	if (!m)
@@ -3239,9 +3256,8 @@ void Graph::contextMenuEvent(QContextMenuEvent *e)
 
 void Graph::closeEvent(QCloseEvent *e)
 {
-	emit closedGraph();
-	e->accept();
-
+       emit closedGraph();
+       e->accept();
 }
 
 bool Graph::zoomOn()

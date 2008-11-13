@@ -877,15 +877,16 @@ void MantidUI::insertMenu()
 }
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
-void MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
+Graph* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
 //    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
-    if (!t) return;
+    Graph* g;
+    if (!t) return g;
 
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-    Graph *g = ml->activeGraph();
+    g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
     g->setTitle(tr("Workspace ")+name());
     Mantid::API::Axis* ax;
@@ -896,6 +897,7 @@ void MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
     g->setYAxisTitle(tr("Counts")); 
+    return g;
 }
 
 
@@ -950,6 +952,42 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      }
      return t;
  }
+
+MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
+{
+  Workspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+    {
+      ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    }
+  
+  if (!ws.get()) return 0;
+
+  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
+  if (!w) return 0;
+  
+  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+  
+  appWindow()->d_workspace->addSubWindow(w);
+  w->showNormal(); 
+  return w;
+}
+
+void MantidUI::closeGraph(Graph* g)
+{
+  if( !g ) return;
+  
+  MultiLayer* ml = g->multiLayer();
+  if( !ml ) return;
+
+  ml->askOnCloseEvent(false);
+  ml->setAttribute(Qt::WA_QuitOnClose);
+  ml->close();
+}
+
+
 
 //----------------------------------------------------------------------------------//
 #ifdef _WIN32

@@ -185,6 +185,8 @@ class Graph: public QWidget
 		PlotCurve* insertCurve(Table* w, const QString& xColName, const QString& yColName, int style, int startRow = 0, int endRow = -1);
 		void insertPlotItem(QwtPlotItem *i, int type);
 
+                void insertCurve(Graph* g, int i);
+
 		//! Shows/Hides a curve defined by its index.
 		void showCurve(int index, bool visible = true);
 		int visibleCurves();

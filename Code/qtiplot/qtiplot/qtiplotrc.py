@@ -227,10 +227,11 @@ from PyQt4 import QtCore
 # import QtiPlot's classes to the global namespace (particularly useful for fits)
 from qti import *
 
+
 # import selected methods of ApplicationWindow into the global namespace
 appImports = (
 	"table", "newTable",
-	"matrix", "newMatrix", "newMantidMatrix",
+	"matrix", "newMatrix",
 	"graph", "newGraph",
 	"note", "newNote",
 	"newPlot3D",

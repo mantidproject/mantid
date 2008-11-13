@@ -137,12 +137,12 @@ void ScriptWindow::initActions()
 
 	actionExecute = new QAction(tr("E&xecute"), this);
 	actionExecute->setShortcut( tr("CTRL+J") );
-	connect(actionExecute, SIGNAL(activated()), te, SLOT(executeAsync()));//Mantid
+	connect(actionExecute, SIGNAL(activated()), te, SLOT(execute()));//Mantid
 	run->addAction(actionExecute);
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
 	actionExecuteAll->setShortcut( tr("CTRL+SHIFT+J") );
-	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAllAsync()));//Mantid
+	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAll()));//Mantid
 	run->addAction(actionExecuteAll);
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
