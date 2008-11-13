@@ -70,9 +70,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	setWidget(frame);
 
 	//Set the mouse/keyboard operation info
-	QLabel* interactionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
-	interactionInfo->setMaximumHeight(30);
-	mainLayout->addWidget(interactionInfo);
+	mInteractionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
+	mInteractionInfo->setMaximumHeight(30);
+	mainLayout->addWidget(mInteractionInfo);
 
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
@@ -100,11 +100,13 @@ void InstrumentWindow::modeSelectButtonClicked()
 	{
 		mSelectButton->setText("Normal");
 		mInstrumentDisplay->setInteractionModePick();
+		mInteractionInfo->setText(tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode"));
 	}
 	else
 	{
 		mSelectButton->setText("Pick");
 		mInstrumentDisplay->setInteractionModeNormal();
+		mInteractionInfo->setText(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
 	}
 
 }

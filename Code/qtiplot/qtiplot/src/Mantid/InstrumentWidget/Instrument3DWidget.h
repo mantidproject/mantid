@@ -43,6 +43,8 @@ namespace Mantid{
 class Instrument3DWidget : public GL3DWidget
 {
 	Q_OBJECT
+	enum DataMappingType { SINGLE_BIN, INTEGRAL };
+
 public:
 	Instrument3DWidget(QWidget* parent=0); ///< Constructor
 	virtual ~Instrument3DWidget();         ///< Destructor
@@ -52,6 +54,7 @@ public:
 	GLColorMapQwt getColorMap()const;
 	double getDataMinValue();
 	double getDataMaxValue();
+	void setDataMappingType(DataMappingType);
 public slots:
 	void fireDetectorPicked(GLActor* );
 	void setTimeBin(int value);
@@ -71,6 +74,7 @@ signals:
 	void actionSpectraSelected(int);
 private:
 	int iTimeBin;
+	DataMappingType mDataMapping;
 	GLColorMapQwt mColorMap;
 	double DataMinValue;
 	double DataMaxValue;
@@ -80,6 +84,7 @@ private:
 	std::vector<int> getSpectraIndexList(std::vector<int> idDecVec);
 	void setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colMap);
 	void CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
+	void CollectIntegralValues(std::vector<int> historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);
 	std::string strWorkspaceName;
 
 };

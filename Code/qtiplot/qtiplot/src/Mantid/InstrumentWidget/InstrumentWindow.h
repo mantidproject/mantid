@@ -7,6 +7,7 @@
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QLineEdit>
+#include <QLabel>
 #include "Instrument3DWidget.h"
 #include "../../MdiSubWindow.h"
 #include <string>
@@ -60,6 +61,7 @@ signals:
     void plotSpectra(const QString&,int);
 private:
 	void updateColorMapWidget();
+	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
     QMenu*       mPopupContext; ///< Popup menu for detector picking
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal

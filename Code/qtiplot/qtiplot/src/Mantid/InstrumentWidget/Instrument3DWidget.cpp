@@ -32,6 +32,7 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 	connect(this, SIGNAL(actorPicked(GLActor*)), this, SLOT(fireDetectorPicked(GLActor*)));
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
+	mDataMapping=INTEGRAL;
 }
 
 Instrument3DWidget::~Instrument3DWidget()
@@ -251,6 +252,41 @@ void Instrument3DWidget::CollectTimebinValues(int timebin, std::vector<int> hist
 	}
 }
 
+/**
+ * This method collects the integral values of the spectra list and calculates min and max values and collection of values 
+ * with the spectra list.
+ * @param histogramIndexList input list of historgram index 
+ * @param startbin is the starting bin number to integrate
+ * @param endbin is the ending bin number to integrate
+ * @param minval output minimum value of the histogram time bin value
+ * @param maxval output maximum value of the histogram time bin value
+ * @param valuesList output list of histogram values corresponding to timebin value
+ */
+void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList)
+{
+	Workspace_sptr output;
+    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	//Get the spectra timebin out and find min and max
+	valuesList.clear();
+	minval=DBL_MAX;
+	maxval=-DBL_MAX;
+	for(int i=0;i<histogramIndexList.size();i++){
+		if(histogramIndexList[i]!=-1)
+		{
+			double value=0.0;
+			for(int timebin=startbin;timebin<endbin;timebin++){
+				value+=output->readY(histogramIndexList[i])[timebin];
+			}
+			valuesList.push_back(value);
+			if(value<minval)minval=value;
+			if(value>maxval)maxval=value;
+		}
+		else
+		{
+			valuesList.push_back(-DBL_MAX);
+		}
+	}
+}
 
 /**
  * This method assigns the colors to the detectors using the time bin values.
@@ -261,7 +297,17 @@ void Instrument3DWidget::AssignColors()
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
 	std::vector<double> values;	
 	double minval,maxval;
-	this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
+	Workspace_sptr output;
+    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	switch(mDataMapping)
+	{
+	case SINGLE_BIN:
+		this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
+		break;
+	case INTEGRAL:
+		this->CollectIntegralValues(histIndexList, 0, output->blocksize(),minval,maxval,values);
+		break;
+	}
 	if(DataMinValue==-DBL_MAX)
 		DataMinValue=minval;
 	if(DataMaxValue==DBL_MAX)
@@ -344,4 +390,13 @@ double Instrument3DWidget::getDataMinValue()
 double Instrument3DWidget::getDataMaxValue()
 {
 	return this->DataMaxValue;
+}
+
+/**
+ * This method sets the Data mapping type for the color mapping.
+ */
+void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
+{
+	mDataMapping=dmType;
+	AssignColors();
 }
