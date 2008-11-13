@@ -36,6 +36,7 @@ EXPORT_OPT_MANTID_KERNEL void AddSingleton(atexit_func_t func)
     if (cleanup_list == NULL)
     {
 	cleanup_list = new std::list<atexit_func_t>;
+    atexit(&CleanupSingletons);
     }
     cleanup_list->push_front(func);
 }

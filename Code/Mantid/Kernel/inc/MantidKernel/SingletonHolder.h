@@ -84,7 +84,7 @@ inline T& SingletonHolder<T>::Instance()
 //		std::cerr << "creating singleton " << typeid(T).name() << std::endl;
 		pInstance = CreateUsingNew<T>::Create();
 		AddSingleton(&DestroySingleton);
-		atexit(&CleanupSingletons);
+		//atexit(&CleanupSingletons);
 	}
 	return *pInstance;
 }
@@ -93,8 +93,8 @@ inline T& SingletonHolder<T>::Instance()
 template <typename T>
 void SingletonHolder<T>::DestroySingleton()
 {
+	//std::cerr << "destroying singleton " << typeid(T).name() << std::endl;
 	assert(!destroyed);
-//	std::cerr << "destroying singleton " << typeid(T).name() << std::endl;
 	CreateUsingNew<T>::Destroy(pInstance);
 	pInstance = 0;
 	destroyed = true;
