@@ -9,7 +9,6 @@
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TablePointerColumn.h"
 
-#include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -35,12 +34,10 @@ public:
     std::string m_name;
 };
 
-class TableRow
+class TableRowHelper
 {
 public:
-    TableRow(TableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
-    int row(){return m_row;}
-private:
+    TableRowHelper(TableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
     TableWorkspace* m_workspace;
     int m_row;
 };
@@ -87,7 +84,6 @@ private:
 class TableWorkspace_DllExport TableWorkspace
 {
 public:
-    typedef std::map<std::string, boost::shared_ptr<Column> >::iterator column_it;
     /// Constructor.
     TableWorkspace(int nrows=0);
     /// Virtual destructor.
@@ -110,6 +106,8 @@ public:
     int insertRow(int index);
     /// Delets a row if it exists.
     void removeRow(int index);
+    /// Appends a row.
+    TableRowHelper appendRow(){insertRow(rowCount());return getRow(rowCount()-1);}
     /// Gets the reference to the data vector.
     template <class T>
     std::vector<T>& getStdVector(const std::string& name)
@@ -142,7 +140,18 @@ public:
         }
         return static_cast<P>(c->void_pointer(index));
     }
-    TableRow getRow(int row){return TableRow(this,row);}
+    template<class T>
+    T& cell(int row,int col)
+    {
+        TableColumn_ptr<T> c = m_columns[col];
+        return c->data()[row];
+        //return boost::static_pointer_cast<TableColumn<T> >(m_columns[col])->data()[row];
+    }
+    int& Int(int row,int col){return cell<int>(row,col);}
+    double& Double(int row,int col){return cell<double>(row,col);}
+    std::string& String(int row,int col){return cell<std::string>(row,col);}
+    TableRowHelper getRow(int row){return TableRowHelper(this,row);}
+    TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
 
 
     //---------------- Tuples ---------------------------//
@@ -151,7 +160,7 @@ public:
     {
         boost::tuples::get<0>(t) = getRef<typename Tuple::head_type>(names[i],j);
         if (i == int(names.size()-1)) return;
-        if (typeid(t) != typeid(boost::tuples::null_type))
+        if (typeid(t.get_tail()) != typeid(boost::tuples::null_type))
         set_Tuple(j,t.get_tail(),names,i+1);
     }
 
@@ -163,7 +172,7 @@ public:
     {
         Tuple t;
         boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
-        if (i < int(names.size()-1)&& typeid(t) != typeid(boost::tuples::null_type))
+        if (i < int(names.size()-1)&& typeid(t.get_tail()) != typeid(boost::tuples::null_type))
             t.get_tail() = make_TupleRef<typename Tuple::tail_type>(j,names,i+1);
         return t;
     }
@@ -172,7 +181,7 @@ public:
     void set_TupleRef(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
     {
       boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
-        if (i < int(names.size()-1)&& typeid(t) != typeid(boost::tuples::null_type))
+        if (i < int(names.size()-1)&& typeid(t.get_tail()) != typeid(boost::tuples::null_type))
             set_TupleRef(j,t.get_tail(),names,i+1);
     }
 
@@ -182,10 +191,24 @@ public:
 protected:
 
 private:
+    /// Used in std::find_if algorithm to find a Column with name name.
+    class FindName
+    {
+        std::string m_name;
+    public:
+        FindName(const std::string& name):m_name(name){}
+        bool operator()(boost::shared_ptr<Column>& cp)
+        {
+            return cp->name() == m_name;
+        }
+    };
+    friend class TableRow;
+
+    typedef std::vector< boost::shared_ptr<Column> >::iterator column_it;
     /// Logger
     static Kernel::Logger& g_log;
     /// Shared pointers to the columns.
-    std::map<std::string, boost::shared_ptr<Column> > m_columns;
+    std::vector< boost::shared_ptr<Column> > m_columns;
     /// row count
     int m_rowCount;
 
@@ -218,6 +241,91 @@ private:
     TablePointerColumn_ptr<T> m_column;
 };
 
+
+class TableRow
+{
+public:
+    TableRow(const TableRowHelper& trh):m_columns(trh.m_workspace->m_columns),m_row(trh.m_row),m_col(0)
+    {
+        if (m_columns.size()) m_nrows = int(m_columns[0]->size());
+        else
+            m_nrows = 0;
+    }
+    int row(){return m_row;}
+    void row(int i)
+    {
+        if (i >= 0 && i < m_nrows)
+        {
+            m_row = i;
+            m_col = 0;
+        }
+    }
+    bool next()
+    {
+        if (m_row < m_nrows - 1)
+        {
+            ++m_row;
+            m_col = 0;
+            return true;
+        }
+        return false;
+    }
+    bool prev()
+    {
+        if (m_row > 0)
+        {
+            --m_row;
+            m_col = 0;
+            return true;
+        }
+        return false;
+    }
+    template<class T>
+    TableRow& set(const T& t)
+    {
+        TableColumn_ptr<T> c = m_columns[m_col];
+        c->data()[m_row] = t;
+        ++m_col;
+        return *this;
+    }
+    TableRow& set(const char* t)
+    {
+        return set<std::string>(std::string(t));
+    }
+    template<class T>
+    TableRow& operator<<(const T& t){return set(t);}
+
+    template<class T>
+    TableRow& get(T& t)
+    {
+        TableColumn_ptr<T> c = m_columns[m_col];
+        t = c->data()[m_row];
+        ++m_col;
+        return *this;
+    }
+    template<class T>
+    TableRow& operator>>(T& t){return get(t);}
+    template<class T>
+    T& cell(int col)
+    {
+        if (col < 0 || col >= int(m_columns.size()))
+        {
+            throw std::runtime_error("TableRow: column index outside range.");
+        }
+        m_col = col;
+        TableColumn_ptr<T> c = m_columns[m_col];
+        ++m_col; // Is it right?
+        return c->data()[m_row];
+    }
+    int& Int(int col){return cell<int>(col);}
+    double& Double(int col){return cell<double>(col);}
+    std::string& String(int col){return cell<std::string>(col);}
+private:
+    std::vector< boost::shared_ptr<Column> >& m_columns;
+    int m_row;
+    int m_col;
+    int m_nrows;
+};
 
 } // namespace DataObjects
 } // Namespace Mantid

@@ -39,7 +39,7 @@ namespace Mantid
             return false;
         }
         // Check that there is no column with the same name.
-        column_it ci = m_columns.find(name);
+        column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
         if (ci != m_columns.end())
             {
                 g_log.error()<<"Column with name "<<name<<" already exists.\n";
@@ -49,7 +49,7 @@ namespace Mantid
         try
         {
             boost::shared_ptr<Column> c = ColumnFactory::Instance().create(type);
-            m_columns[name] = c;
+            m_columns.push_back(c);
             c->setName(name);
             c->resize(rowCount());
         }
@@ -70,29 +70,29 @@ namespace Mantid
     {
         if (count == rowCount()) return;
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            ci->second->resize(count);
+            (*ci)->resize(count);
         m_rowCount = count;
     }
 
     /// Gets the shared pointer to a column.
     boost::shared_ptr<Column> TableWorkspace::getColumn(const std::string& name)
     {
-        column_it ci = m_columns.find(name);
+        column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
         if (ci == m_columns.end())
         {
             std::string str = "Column " + name + " does not exist.\n";
             g_log.error(str);
             throw std::runtime_error(str);
         }
-        return ci->second;
+        return *ci;
     }
 
     void TableWorkspace::removeColumn( const std::string& name)
     {
-        column_it ci = m_columns.find(name);
+        column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
         if (ci != m_columns.end()) 
         {
-            if ( !ci->second.unique() )
+            if ( !ci->unique() )
             {
                 std::cerr<<"Deleting column in use ("<<name<<").\n";
                 g_log.error()<<"Deleting column in use ("<<name<<").\n";
@@ -108,7 +108,7 @@ namespace Mantid
     {
         if (index >= rowCount()) index = rowCount();
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            ci->second->insert(index);
+            (*ci)->insert(index);
         ++m_rowCount;
         return index;
     }
@@ -124,7 +124,7 @@ namespace Mantid
             return;
         }
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            ci->second->remove(index);
+            (*ci)->remove(index);
         --m_rowCount;
     }
 
@@ -132,7 +132,7 @@ namespace Mantid
     {
         std::vector<std::string> nameList;
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            nameList.push_back(ci->first);
+            nameList.push_back((*ci)->name());
         return nameList;
     }
 
