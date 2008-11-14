@@ -302,6 +302,7 @@ Plugins = addComponent('Plugins','{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}',plugin
 addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/Bin/Shared/MantidAlgorithms.dll',Plugins)
 addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',Plugins)
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',Plugins)
+addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll','../Mantid/Bin/Shared/MantidCurveFitting.dll',Plugins)
 #nexusDir = addDirectory('NexusDir','Nexus','Nexus',pluginsDir)
 #Nexus = addComponent('Nexus','{A67F6FC8-7BBC-4aa5-A38F-1A522287D236}',nexusDir)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Plugins)
