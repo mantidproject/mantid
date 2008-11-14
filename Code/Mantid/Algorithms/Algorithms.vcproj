@@ -250,6 +250,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\StripPeaks.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Unwrap.cpp"
 				>
 			</File>
@@ -393,6 +397,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\SmoothData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\StripPeaks.h"
 				>
 			</File>
 			<File
