@@ -336,32 +336,18 @@ public:
 
     boost::shared_ptr<Instrument> i = output->getInstrument();
 
-    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(1100));
+    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(3100));
     TS_ASSERT_EQUALS( ptrDetShape->getName(), "Det0");
 
-    // temporarily commented out while bug in the visu of none box shapes
-    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.251,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,0.1021,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.2293,-0.1021,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.2327,0.0940,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.2327,-0.0940,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.2508,0.0088,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.2256,0.11,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(-0.251,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,0.251,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0,-0.251,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( ptrDetShape->isValid(V3D(0.251,0.0,0.005)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.251,0.0,0.05)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(25,0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0,0.0,25.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0, 25,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.001, 0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, 0.001,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, -0.001,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(-0.001, 0.0,0.0)+ptrDetShape->getPos()) );
-    //TS_ASSERT( !ptrDetShape->isValid(V3D(0.0, 0.0,0.001)+ptrDetShape->getPos()) );
-
+    // Test of backscattering detector
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.002,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.002,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.003,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.003,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0071,0.0227,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.009)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0069,0.0227,0.011)+ptrDetShape->getPos()) );
   }
 
   void testExecIDF_for_unit_testing() // IDF stands for Instrument Definition File
@@ -553,6 +539,59 @@ public:
     TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,0.02)+source->getPos()) );
+  }
+
+
+  void testExecIDF_for_unit_testing2() // IDF stands for Instrument Definition File
+  {
+    LoadInstrument loaderIDF2;
+
+    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestIDF2";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = "../../../../Test/Instrument/IDF_for_unit_testing2.xml";
+    loaderIDF2.setPropertyValue("Filename", inputFile);
+
+    loaderIDF2.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderIDF2.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
+
+    TS_ASSERT( loaderIDF2.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+
+    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(1100));
+    TS_ASSERT_EQUALS( ptrDetShape->getID(), 1100);
+    TS_ASSERT_EQUALS( ptrDetShape->type(), "DetectorComponent");
+
+    // test slice-of-cylinder-ring shape
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.002,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.002,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(0.003,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.003,0.0,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0071,0.0227,0.0)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.009)+ptrDetShape->getPos()) );
+    TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0069,0.0227,0.011)+ptrDetShape->getPos()) );
   }
 
 
