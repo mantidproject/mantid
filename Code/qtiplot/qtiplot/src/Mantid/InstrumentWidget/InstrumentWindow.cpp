@@ -9,6 +9,9 @@
 #include <QString>
 #include <QSplitter>
 #include <QDoubleValidator>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QGridLayout>
 #include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -42,6 +45,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	//Render Controls
 	mSelectButton = new QPushButton(tr("Pick"));
 	mSelectColormap = new QPushButton(tr("Select ColorMap"));
+	QPushButton* mSelectBin = new QPushButton(tr("Select Bin"));
+	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	mMinValueBox    = new QLineEdit();
 	mMaxValueBox    = new QLineEdit();
@@ -62,6 +67,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();	
 	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
 	renderControlsLayout->addWidget(mSelectButton);
+	renderControlsLayout->addWidget(mSelectBin);
 	renderControlsLayout->addWidget(mSelectColormap);
 	renderControlsLayout->addWidget(lColormapFrame);
 
@@ -80,6 +86,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelected(int)), this, SLOT(detectorInformation(int)));
+	connect(mSelectBin, SIGNAL(clicked()), mBinMapDialog,SLOT(exec()));
+	connect(mBinMapDialog,SIGNAL(SingleBinNumber(int)), mInstrumentDisplay, SLOT(setDataMappingSingleBin(int)));
+	connect(mBinMapDialog,SIGNAL(IntegralMinMax(int,int)), mInstrumentDisplay, SLOT(setDataMappingIntegral(int,int)));
 
     mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);

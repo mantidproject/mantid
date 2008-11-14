@@ -60,6 +60,8 @@ public slots:
 	void setTimeBin(int value);
 	void setColorMapMinValue(double minValue);
 	void setColorMapMaxValue(double maxValue);
+	void setDataMappingIntegral(int minValue,int maxValue);
+	void setDataMappingSingleBin(int binNumber);
 	void pickedID(int id)
 	{
 		std::cout<<"ID of the detector selected "<<id<<std::endl;

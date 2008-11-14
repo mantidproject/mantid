@@ -274,8 +274,10 @@ void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexLi
 		if(histogramIndexList[i]!=-1)
 		{
 			double value=0.0;
+			std::vector<double> outputdata=output->readY(histogramIndexList[i]);
 			for(int timebin=startbin;timebin<endbin;timebin++){
-				value+=output->readY(histogramIndexList[i])[timebin];
+				if(timebin<outputdata.size())
+					value+=outputdata[timebin];
 			}
 			valuesList.push_back(value);
 			if(value<minval)minval=value;
@@ -399,4 +401,17 @@ void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
 {
 	mDataMapping=dmType;
 	AssignColors();
+}
+
+void Instrument3DWidget::setDataMappingIntegral(int minValue,int maxValue)
+{
+	this->DataMinValue=minValue;
+	this->DataMaxValue=maxValue;
+	setDataMappingType(INTEGRAL);
+}
+
+void Instrument3DWidget::setDataMappingSingleBin(int binNumber)
+{
+	this->iTimeBin=binNumber;
+	setDataMappingType(SINGLE_BIN);
 }

@@ -10,6 +10,7 @@
 #include <QLabel>
 #include "Instrument3DWidget.h"
 #include "../../MdiSubWindow.h"
+#include "BinDialog.h"
 #include <string>
 #include "qwt_scale_widget.h"
 
@@ -72,6 +73,7 @@ private:
 	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
+	BinDialog*   mBinMapDialog;
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/
