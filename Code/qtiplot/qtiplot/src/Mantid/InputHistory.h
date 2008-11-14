@@ -37,6 +37,8 @@ public:
     QString algorithmProperty(const QString& algName,const QString& propName);
     /// Replaces the value of a recorded property.
     void updateAlgorithmProperty(const QString& algName,const QString& propName, const QString& propValue);
+    /// Saves the properties.
+    void save();
 
     /// Returns the directory name from a full file path.
     static QString getDirectoryFromFilePath(const QString& filePath);

@@ -49,6 +49,10 @@ InputHistoryImpl::InputHistoryImpl()
 /// Destructor
 InputHistoryImpl::~InputHistoryImpl()
 {
+}
+
+void InputHistoryImpl::save()
+{
 	std::cerr << "InputHistory destroyed." << std::endl;
     QSettings settings;
     settings.beginGroup("Mantid/Algorithms");

@@ -90,7 +90,7 @@ void MantidUI::init()
 {
     FrameworkManager::Instance();
     MantidLog::connect(this);
-
+ 
     InputHistory::Instance();
 
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
@@ -110,7 +110,7 @@ void MantidUI::init()
 
 MantidUI::~MantidUI()
 {
-    //delete m_algMonitor;
+    InputHistory::Instance().save();
 }
 
 QString MantidUI::releaseDate()
