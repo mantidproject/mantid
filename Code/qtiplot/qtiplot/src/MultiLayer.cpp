@@ -144,6 +144,14 @@ Graph *MultiLayer::layer(int num)
 	return (Graph*) graphsList.at(index);
 }
 
+void MultiLayer::insertCurve(MultiLayer* ml, int i)
+{
+  if( ml== this ) return;
+  if( !activeGraph() ) return;
+  
+  activeGraph()->insertCurve(ml->activeGraph(), i);
+}
+
 LayerButton* MultiLayer::addLayerButton()
 {
 	foreach(LayerButton *btn, buttonsList)

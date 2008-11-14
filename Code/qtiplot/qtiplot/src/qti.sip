@@ -658,7 +658,7 @@ public:
   void setLayersNumber(int n) /PyName=setNumLayers/;
   Graph* layer(int num);
   Graph* addLayer(int = 0, int = 0, int = 0, int = 0);
-
+  void insertCurve(MultiLayer* ml, int i); 
   void setCols(int);
   void setRows(int);
   void setSpacing (int, int);
@@ -1716,8 +1716,7 @@ public:
 %MethodCode
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
-Graph* plotInstrumentSpectrum(const QString&, int);
-void closeGraph(Graph*);
+MultiLayer* plotInstrumentSpectrum(const QString&, int);
 private:
 MantidUI(const MantidUI &);
 };

@@ -877,16 +877,18 @@ void MantidUI::insertMenu()
 }
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
-Graph* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
+MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
 //    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
-    Graph* g;
-    if (!t) return g;
+    MultiLayer* ml;
+    if (!t) return ml;
 
-    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-    g = ml->activeGraph();
+    ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    ml->askOnCloseEvent(false);
+    ml->setAttribute(Qt::WA_QuitOnClose);
+    Graph* g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
     g->setTitle(tr("Workspace ")+name());
     Mantid::API::Axis* ax;
@@ -897,7 +899,7 @@ Graph* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
     g->setYAxisTitle(tr("Counts")); 
-    return g;
+    return ml;
 }
 
 
@@ -974,20 +976,6 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
   w->showNormal(); 
   return w;
 }
-
-void MantidUI::closeGraph(Graph* g)
-{
-  if( !g ) return;
-  
-  MultiLayer* ml = g->multiLayer();
-  if( !ml ) return;
-
-  ml->askOnCloseEvent(false);
-  ml->setAttribute(Qt::WA_QuitOnClose);
-  ml->close();
-}
-
-
 
 //----------------------------------------------------------------------------------//
 #ifdef _WIN32

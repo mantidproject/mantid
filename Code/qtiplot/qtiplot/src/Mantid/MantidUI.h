@@ -81,7 +81,6 @@ public:
 
   // Command purely for python interaction
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  void closeGraph(Graph* g);
   
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
@@ -132,7 +131,7 @@ public slots:
 	void showMantidInstrument(const QString&);
     void insertMenu();
 
-    Graph* plotInstrumentSpectrum(const QString&,int);
+    MultiLayer* plotInstrumentSpectrum(const QString&,int);
 
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
