@@ -66,6 +66,18 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
 	actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
 	connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
+  	actionCopyColumnToTable = new QAction(tr("Copy time bin to Table"), this);
+	actionCopyColumnToTable->setIcon(QIcon(QPixmap(table_xpm)));
+	connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
+
+  	actionCopyColumnToGraph = new QAction(tr("Plot time bin (values only)"), this);
+	actionCopyColumnToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
+
+  	actionCopyColumnToGraphErr = new QAction(tr("Plot time bin (values + errors)"), this);
+	actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
+	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
+
     connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
     connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
     connect(this,SIGNAL(needToUpdateProgressDialog(int)),this,SLOT(updateProgressDialog(int)));
@@ -400,13 +412,23 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
         int i0,i1; 
         static_cast<MantidMatrix*>(w)->getSelectedRows(i0,i1);
         bool areSpectraSelected = (i0 < 0 || i1 < 0)?false:true;
+        static_cast<MantidMatrix*>(w)->getSelectedColumns(i0,i1);
+        bool areColumnsSelected = (i0 < 0 || i1 < 0)?false:true;
+
         cm.addAction(actionCopyValues);
         if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
+        if (areColumnsSelected) cm.addAction(actionCopyColumnToTable);
         cm.addAction(actionCopyDetectorsToTable);
+        cm.addSeparator();
         if (areSpectraSelected)
         {
             cm.addAction(actionCopyRowToGraph);
             cm.addAction(actionCopyRowToGraphErr);
+        }
+        if (areColumnsSelected)
+        {
+            cm.addAction(actionCopyColumnToGraph);
+            cm.addAction(actionCopyColumnToGraphErr);
         }
     }
 }
@@ -418,11 +440,34 @@ void MantidUI::copyRowToTable()
     createTableFromSelectedRows(m,true,true);
 }
 
+void MantidUI::copyColumnToTable()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createTableFromSelectedColumns(m,true,true);
+}
+
 void MantidUI::copyRowToGraph()
 {
     MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
     if (!m || !m->isA("MantidMatrix")) return;
     createGraphFromSelectedRows(m,false,false);
+  
+}
+
+void MantidUI::copyColumnToGraph()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createGraphFromSelectedColumns(m,false,false);
+  
+}
+
+void MantidUI::copyColumnToGraphErr()
+{
+    MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
+    if (!m || !m->isA("MantidMatrix")) return;
+    createGraphFromSelectedColumns(m,false);
   
 }
 
@@ -512,9 +557,63 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
      return t;
  }
 
+Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs)
+{
+     int i0,i1; 
+     m->getSelectedColumns(i0,i1);
+     if (i0 < 0 || i1 < 0) return 0;
+
+     int c = errs?2:1;
+     int numRows = m->numRows();
+
+	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
+     if (visible) 
+     {
+         t->showNormal();
+         t->askOnCloseEvent(false);
+     }
+    
+     int kY,kErr;
+     for(int i=i0;i<=i1;i++)
+     {
+         kY = c*(i-i0)+1;
+         t->setColName(kY,"Y"+QString::number(i));
+         if (errs)
+         {
+             kErr = 2*(i - i0) + 2;
+             t->setColPlotDesignation(kErr,Table::yErr);
+             t->setColName(kErr,"E"+QString::number(i));
+         }
+         for(int j=0;j<numRows;j++)
+         {
+             if (i == i0) 
+             {
+                 //t->setCell(j,0,m->dataX(j,i));//?
+                 t->setCell(j,0,j);
+             }
+             t->setCell(j,kY,m->dataY(j,i)); 
+             if (errs) t->setCell(j,kErr,m->dataE(j,i));
+         }
+     }
+     return t;
+ }
+
 void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool errs)
 {
     Table *t = createTableFromSelectedRows(m,visible,errs,true);
+    if (!t) return;
+
+    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    Graph *g = ml->activeGraph();
+    appWindow()->polishGraph(g,Graph::Line);
+    m->setGraph1D(ml,t);
+    ml->askOnCloseEvent(false);
+}
+
+void MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool visible, bool errs)
+{
+    Table *t = createTableFromSelectedColumns(m,visible,errs);
     if (!t) return;
 
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);

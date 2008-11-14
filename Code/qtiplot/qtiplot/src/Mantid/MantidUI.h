@@ -77,6 +77,9 @@ public:
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     Table* createTableDetectors(MantidMatrix *m);
 
+    Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs);
+    void createGraphFromSelectedColumns(MantidMatrix *m, bool vis = true, bool errs = true);
+
     Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
 
   // Command purely for python interaction
@@ -110,8 +113,11 @@ public slots:
     MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true);
     void importWorkspace();
     void copyRowToTable();
+    void copyColumnToTable();
     void copyRowToGraph();
+    void copyColumnToGraph();
     void copyRowToGraphErr();
+    void copyColumnToGraphErr();
     void executeAlgorithm();
     void executeAlgorithm(QString algName, int version);
     void copyDetectorsToTable();
@@ -163,6 +169,9 @@ public:
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;
     QAction *actionCopyRowToGraphErr;
+    QAction *actionCopyColumnToTable;
+    QAction *actionCopyColumnToGraph;
+    QAction *actionCopyColumnToGraphErr;
     QAction *actionToggleMantid;
     QAction *actionToggleAlgorithms;
     QAction *actionCopyDetectorsToTable;

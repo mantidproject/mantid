@@ -601,6 +601,9 @@ void MantidMatrix::removeWindow()
 	}
 }
 
+/*
+   Returns indices of the first and last selected rows in i0 and i1.
+*/
 void MantidMatrix::getSelectedRows(int& i0,int& i1)
 {
     i0 = i1 = -1;
@@ -613,6 +616,30 @@ void MantidMatrix::getSelectedRows(int& i0,int& i1)
     bool selectionStarted = false;
 	for (int i = 0; i<rows; i++){
 		if (selModel->isRowSelected (i, QModelIndex()))
+            if (!selectionStarted)
+            {
+                selectionStarted = true;
+                i0 = i1 = i;
+            }else
+                i1++;
+	}
+}
+
+/*
+   Returns indices of the first and last selected column in i0 and i1.
+*/
+void MantidMatrix::getSelectedColumns(int& i0,int& i1)
+{
+    i0 = i1 = -1;
+    QTableView *tv = activeView();
+	QItemSelectionModel *selModel = activeView()->selectionModel();
+	if (!selModel || !selModel->hasSelection())
+		return;
+
+	int cols = numCols();
+    bool selectionStarted = false;
+	for (int i = 0; i<cols; i++){
+		if (selModel->isColumnSelected (i, QModelIndex()))
             if (!selectionStarted)
             {
                 selectionStarted = true;

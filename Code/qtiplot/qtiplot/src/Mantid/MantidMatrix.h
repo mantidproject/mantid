@@ -111,6 +111,7 @@ public:
     void setGraph1D(MultiLayer* ml, Table* t=0);
     void removeWindow();
     void getSelectedRows(int& i0,int& i1);
+    void getSelectedColumns(int& i0,int& i1);
 
     int workspaceIndex(int row){return row + m_startRow;}
     bool yShown(){return m_tabs->currentIndex() == 0;}
