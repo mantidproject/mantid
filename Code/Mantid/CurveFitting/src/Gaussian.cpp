@@ -65,6 +65,9 @@ void Gaussian::init()
   declareProperty("MaxIterations",500, mustBePositive->clone());
   declareProperty("Output Status","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+
+  // Disable default gsl error handler (which is to call abort!)
+  gsl_set_error_handler_off();
 }
 
 /** Executes the algorithm
@@ -100,13 +103,13 @@ void Gaussian::exec()
   // Now get the range properties
   Property* start = getProperty("StartX");
   double startX;
-  // If startX or endX has not been set, make it 4*sigma away from the centre point initial guess
+  // If startX or endX has not been set, make it 6*sigma away from the centre point initial guess
   if ( ! start->isDefault() ) startX = getProperty("StartX");
-  else startX = peak_val-(4*sigma);
+  else startX = peak_val-(6*sigma);
   Property* end = getProperty("EndX");
   double endX;
   if ( ! end->isDefault() ) endX = getProperty("EndX");
-  else endX = peak_val+(4*sigma);
+  else endX = peak_val+(6*sigma);
 
   // Check the validity of startX
   if ( startX < XValues.front() )
@@ -140,6 +143,13 @@ void Gaussian::exec()
   l_data.Y = new double[l_data.n];
   l_data.sigmaData = new double[l_data.n];
 
+  // Check sufficient bins are going into the fit (will crash otherwise)
+  if ( l_data.n < l_data.p )
+  {
+    g_log.error() << "Insufficient bins (" << l_data.n << ") going into this fit" << std::endl;
+    throw std::runtime_error("Insufficient bins selected (must be at least 4)");
+  }
+
   // check if histogram data in which case the mid points of X values will be used further below
   const bool isHistogram = localworkspace->isHistogramData();
 
@@ -162,11 +172,8 @@ void Gaussian::exec()
 
   gsl_vector_set(initFuncArg, 0, getProperty("bg0"));
 	gsl_vector_set(initFuncArg, 1, getProperty("height"));
-	gsl_vector_set(initFuncArg, 2, getProperty("peakCentre"));
-  double gaus_sigma = getProperty("sigma");
-	gsl_vector_set(initFuncArg, 3, 1/(gaus_sigma*gaus_sigma));
-
-
+	gsl_vector_set(initFuncArg, 2, peak_val);
+	gsl_vector_set(initFuncArg, 3, 1/(sigma*sigma));
 
   //guessInitialValues(l_data, initFuncArg);
 

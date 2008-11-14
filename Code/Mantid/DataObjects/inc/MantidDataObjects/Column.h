@@ -55,6 +55,8 @@ namespace DataObjects
 class DLLExport Column
 {
 public:
+    /// Virtual destructor
+    virtual ~Column() {}
     /// Name (caption) of the column.
     const std::string& name()const{return m_name;}
     /// Type of the column data.

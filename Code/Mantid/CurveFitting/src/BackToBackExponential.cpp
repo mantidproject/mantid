@@ -65,6 +65,9 @@ void BackToBackExponential::init()
   declareProperty("MaxIterations",500, mustBePositive->clone());
   declareProperty("Output Status","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+
+  // Disable default gsl error handler (which is to call abort!)
+  gsl_set_error_handler_off();
 }
 
 /** Executes the algorithm

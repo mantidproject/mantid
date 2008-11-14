@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-  namespace DataObjects 
+  namespace DataObjects
   {
 
     // Get a reference to the logger
@@ -90,7 +90,7 @@ namespace Mantid
     void TableWorkspace::removeColumn( const std::string& name)
     {
         column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
-        if (ci != m_columns.end()) 
+        if (ci != m_columns.end())
         {
             if ( !ci->unique() )
             {
@@ -117,7 +117,7 @@ namespace Mantid
     */
     void TableWorkspace::removeRow(int index)
     {
-        if (index >= rowCount()) 
+        if (index >= rowCount())
         {
             g_log.error()<<"Attempt to delete a non-existing row ("<<index<<")\n";
             std::cerr<<"Attempt to delete a non-existing row ("<<index<<")\n";
@@ -135,6 +135,10 @@ namespace Mantid
             nameList.push_back((*ci)->name());
         return nameList;
     }
+
+//    template<>
+//    boost::tuples::null_type TableWorkspace::make_TupleRef< boost::tuples::null_type >(int j,const std::vector<std::string>& names,int i)
+//    {return boost::tuples::null_type();}
 
   } // namespace DataObjects
 } // namespace Mantid
