@@ -63,16 +63,23 @@ public:
     /// Virtual destructor.
     virtual ~TableColumn(){}
     /// Number of individual elements in the column.
-    int size(){return int(m_data.size());}
+    int size()const{return int(m_data.size());}
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}
-    const std::type_info& get_type_info(){return typeid(Type);}
-    const std::type_info& get_pointer_type_info(){return typeid(Type*);}
+    const std::type_info& get_type_info()const{return typeid(Type);}
+    const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
+    void print(std::ostream& s, int index)const{s << m_data[index];}
 protected:
     /// Resize.
     void resize(int count){m_data.resize(count);}
     /// Inserts default value at position index. 
-    void insert(int index){  m_data.insert(m_data.begin()+index,Type()); }
+    void insert(int index)
+    {
+        if (index < int(m_data.size()))
+            m_data.insert(m_data.begin()+index,Type()); 
+        else
+            m_data.push_back(Type());
+    }
     /// Removes an item.
     void remove(int index){m_data.erase(m_data.begin()+index);}
     void* void_pointer(int index){return &m_data[index];}
@@ -97,6 +104,16 @@ public:
         }
     }
 };
+
+struct Boolean
+{
+    Boolean():value(false){}
+    Boolean(bool b):value(b){}
+    operator bool(){return value;}
+    bool value;
+};
+
+DLLExport std::ostream& operator<<(std::ostream& s,const Boolean& b);
 
 } // namespace DataObjects
 } // Namespace Mantid

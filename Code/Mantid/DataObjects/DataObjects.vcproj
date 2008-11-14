@@ -184,6 +184,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\TableRow.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TableWorkspace.cpp"
 				>
 			</File>
@@ -243,6 +247,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\TablePointerColumn.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\TableRow.h"
 				>
 			</File>
 			<File

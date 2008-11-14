@@ -44,6 +44,7 @@ public:
 
 /** \class TableWorkspace
 
+     
 
 
 
@@ -149,12 +150,13 @@ public:
     }
     int& Int(int row,int col){return cell<int>(row,col);}
     double& Double(int row,int col){return cell<double>(row,col);}
+    Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
     std::string& String(int row,int col){return cell<std::string>(row,col);}
     TableRowHelper getRow(int row){return TableRowHelper(this,row);}
     TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
 
 
-    //---------------- Tuples ---------------------------//
+    /*/---------------- Tuples ---------------------------//
     template<typename Tuple>
     void set_Tuple(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
     {
@@ -177,6 +179,9 @@ public:
         return t;
     }
 
+    boost::tuples::null_type make_TupleRef(int j,const std::vector<std::string>& names,int i)
+    {return boost::tuples::null_type();}
+
     template<typename Tuple>
     void set_TupleRef(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
     {
@@ -186,7 +191,7 @@ public:
     }
 
     void set_TupleRef(int j,boost::tuples::null_type t,const std::vector<std::string>& names,int i)
-    {}
+    {}//*/
 
 protected:
 
@@ -214,10 +219,6 @@ private:
 
 };
 
-template<>
-boost::tuples::null_type TableWorkspace::make_TupleRef<boost::tuples::null_type>(int j,const std::vector<std::string>& names,int i)
-{return boost::tuples::null_type();}
-
 
 template< class T>
 class ColumnVector
@@ -242,90 +243,6 @@ private:
 };
 
 
-class TableRow
-{
-public:
-    TableRow(const TableRowHelper& trh):m_columns(trh.m_workspace->m_columns),m_row(trh.m_row),m_col(0)
-    {
-        if (m_columns.size()) m_nrows = int(m_columns[0]->size());
-        else
-            m_nrows = 0;
-    }
-    int row(){return m_row;}
-    void row(int i)
-    {
-        if (i >= 0 && i < m_nrows)
-        {
-            m_row = i;
-            m_col = 0;
-        }
-    }
-    bool next()
-    {
-        if (m_row < m_nrows - 1)
-        {
-            ++m_row;
-            m_col = 0;
-            return true;
-        }
-        return false;
-    }
-    bool prev()
-    {
-        if (m_row > 0)
-        {
-            --m_row;
-            m_col = 0;
-            return true;
-        }
-        return false;
-    }
-    template<class T>
-    TableRow& set(const T& t)
-    {
-        TableColumn_ptr<T> c = m_columns[m_col];
-        c->data()[m_row] = t;
-        ++m_col;
-        return *this;
-    }
-    TableRow& set(const char* t)
-    {
-        return set<std::string>(std::string(t));
-    }
-    template<class T>
-    TableRow& operator<<(const T& t){return set(t);}
-
-    template<class T>
-    TableRow& get(T& t)
-    {
-        TableColumn_ptr<T> c = m_columns[m_col];
-        t = c->data()[m_row];
-        ++m_col;
-        return *this;
-    }
-    template<class T>
-    TableRow& operator>>(T& t){return get(t);}
-    template<class T>
-    T& cell(int col)
-    {
-        if (col < 0 || col >= int(m_columns.size()))
-        {
-            throw std::runtime_error("TableRow: column index outside range.");
-        }
-        m_col = col;
-        TableColumn_ptr<T> c = m_columns[m_col];
-        ++m_col; // Is it right?
-        return c->data()[m_row];
-    }
-    int& Int(int col){return cell<int>(col);}
-    double& Double(int col){return cell<double>(col);}
-    std::string& String(int col){return cell<std::string>(col);}
-private:
-    std::vector< boost::shared_ptr<Column> >& m_columns;
-    int m_row;
-    int m_col;
-    int m_nrows;
-};
 
 } // namespace DataObjects
 } // Namespace Mantid

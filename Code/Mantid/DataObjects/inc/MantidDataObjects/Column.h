@@ -56,13 +56,16 @@ class DLLExport Column
 {
 public:
     /// Name (caption) of the column.
-    const std::string& name(){return m_name;}
+    const std::string& name()const{return m_name;}
     /// Type of the column data.
-    const std::string& type(){return m_type;}
+    const std::string& type()const{return m_type;}
     /// Renames the column.
     void setName(const std::string& str){m_name = str;}
     /// Number of individual elements in the column.
-    virtual int size() = 0;
+    virtual int size()const = 0;
+    virtual const std::type_info& get_type_info()const = 0;
+    virtual const std::type_info& get_pointer_type_info()const = 0;
+    virtual void print(std::ostream& s, int index) const = 0;
 protected:
     /// Sets the new column size.
     virtual void resize(int count) = 0;
@@ -72,8 +75,6 @@ protected:
     virtual void remove(int index) = 0;
     /// Pointer to a data element
     virtual void* void_pointer(int index) = 0;
-    virtual const std::type_info& get_type_info() = 0;
-    virtual const std::type_info& get_pointer_type_info() = 0;
 private:
     std::string m_name;///< name
     std::string m_type;///< type

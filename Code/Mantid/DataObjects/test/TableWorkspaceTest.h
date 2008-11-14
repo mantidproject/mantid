@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/TableWorkspace.h" 
+#include "MantidDataObjects/TableRow.h" 
 #include "MantidDataObjects/ColumnFactory.h" 
 
 class Class
@@ -77,7 +78,7 @@ public:
     names.push_back("Name");
     names.push_back("class");
 
-    boost::tuples::tuple<int,string,Class> tup1;
+    /*boost::tuples::tuple<int,string,Class> tup1;
     tw.set_Tuple(1,tup1,names);
 
     boost::tuples::tuple<int*,string*,Class*> tup2 =
@@ -96,10 +97,72 @@ public:
 
     TS_ASSERT_EQUALS(tup1.get<0>(),2)
     TS_ASSERT_EQUALS(tup1.get<1>(),"Second")
-    TS_ASSERT_EQUALS(tup1.get<2>().d,22)
+    TS_ASSERT_EQUALS(tup1.get<2>().d,22)*/
 
   }
 
+  void testRow()
+  {
+    TableWorkspace tw(2);
+    tw.createColumn("int","Number");
+    tw.createColumn("double","Ratio");
+    tw.createColumn("str","Name");
+    tw.createColumn("bool","OK");
+
+    TableRow row = tw.getFirstRow();
+
+    TS_ASSERT_EQUALS(row.row(),0)
+
+    row << 18 << 3.14 << "FIRST";
+
+    TS_ASSERT_EQUALS(tw.Int(0,0),18)
+    TS_ASSERT_EQUALS(tw.Double(0,1),3.14)
+    TS_ASSERT_EQUALS(tw.String(0,2),"FIRST")
+
+    if (row.next())
+    {
+        row << 36 << 6.28 << "SECOND";
+    }
+
+    int i;
+    double r;
+    std::string str;
+    row.row(1);
+    row>>i>>r>>str;
+
+    TS_ASSERT_EQUALS(i,36)
+    TS_ASSERT_EQUALS(r,6.28)
+    TS_ASSERT_EQUALS(str,"SECOND")
+
+    for(int i=0;i<5;i++)
+    {
+        TableRow row = tw.appendRow();
+        int j = row.row();
+        std::ostringstream ostr;
+        ostr<<"Number "<<j;
+        row << 18*j << 3.14*j << ostr.str() << (j%2 == 0);
+    }
+
+    TS_ASSERT_EQUALS(tw.rowCount(),7)
+
+    TableRow row1 = tw.getRow(2);
+    TS_ASSERT_EQUALS(row1.row(),2)
+
+    do
+    {
+        TS_ASSERT_EQUALS(row1.Int(0),row1.row()*18)
+        TS_ASSERT_EQUALS(row1.Double(1),row1.row()*3.14)
+        std::istringstream istr(row1.String(2));
+        std::string str;
+        int j;
+        istr>>str>>j;
+        TS_ASSERT_EQUALS(str,"Number")
+        TS_ASSERT_EQUALS(j,row1.row())
+        row1.Bool(3) = !tw.Bool(row1.row(),3);
+        TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), row1.row()%2 != 0)
+    }while(row1.next());
+
+  }
 
 
 };

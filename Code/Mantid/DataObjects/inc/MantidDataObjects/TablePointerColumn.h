@@ -60,11 +60,12 @@ public:
     /// Virtual destructor.
     virtual ~TablePointerColumn(){}
     /// Number of individual elements in the column.
-    int size(){return int(m_data.size());}
+    int size()const{return int(m_data.size());}
     /// Reference to the data.
     Type& data(int i){return *m_data[i];}
-    const std::type_info& get_type_info(){return typeid(Type);}
-    const std::type_info& get_pointer_type_info(){return typeid(Type*);}
+    const std::type_info& get_type_info()const{return typeid(Type);}
+    const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
+    void print(std::ostream& s, int index)const{s << name() << '_' << index;}
 protected:
     /// Resize.
     void resize(int count)
