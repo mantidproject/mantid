@@ -12,10 +12,10 @@ namespace Algorithms
 {
 /** Combines the data contained in an arbitrary number of input workspaces.
     If the input workspaces do not have common binning, the bins in the output workspace
-    will cover the entire range of the all the input workspaces, with the largest bin widths
+    will cover the entire range of all the input workspaces, with the largest bin widths
     used in areas of overlap.
     The input workspaces must contain histogram data with the same number of spectra,
-    the units and instrument name in order for the algorithm to succeed.
+    units and instrument name in order for the algorithm to succeed.
     Other than this it is currently left to the user to ensure that the combination of the
     workspaces is a valid operation.
 
