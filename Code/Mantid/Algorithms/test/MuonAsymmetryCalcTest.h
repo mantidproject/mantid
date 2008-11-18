@@ -63,6 +63,7 @@ public:
 		//Use a range as cxxtest seems to complain about the accuracy
 		TS_ASSERT(outputWS->dataY(0)[10] < -0.0578);
 		TS_ASSERT(outputWS->dataY(0)[10] > -0.0579);
+
 	}
 
 private:

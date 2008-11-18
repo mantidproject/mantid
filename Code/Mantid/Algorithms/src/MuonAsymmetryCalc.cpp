@@ -81,6 +81,7 @@ namespace Mantid
 		    {
 			    forwardWS->dataY(0)[j] = forwardWS->dataY(0)[j] + inputWS->dataY(i)[j];
 			    backwardWS->dataY(0)[j] = backwardWS->dataY(0)[j] + alpha * inputWS->dataY(i + backward)[j];
+			    //TODO: Need to sort out the errors!
 		    }
 	    }
 	    
@@ -90,6 +91,9 @@ namespace Mantid
 		    outputWS->dataY(0)[j] 
 			= (forwardWS->dataY(0)[j] - backwardWS->dataY(0)[j])/(forwardWS->dataY(0)[j] + backwardWS->dataY(0)[j]);    
 	    }
+	    
+	    //Copy the imput time bins on to the output
+	    outputWS->dataX(0) = inputWS->dataX(0);
 	    
 	    //std::cout << "F = " << forwardWS->dataY(0)[10] << std::endl;
 	    //std::cout << "aB = " << backwardWS->dataY(0)[10] << std::endl;
