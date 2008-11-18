@@ -174,8 +174,8 @@ void GLActorCollection::calculateBoundingBox()
         if(_bbmin[0]>tmin[0]) _bbmin[0]=tmin[0];
 		if(_bbmin[1]>tmin[1]) _bbmin[1]=tmin[1];
 		if(_bbmin[2]>tmin[2]) _bbmin[2]=tmin[2];
-		if(_bbmin[0]<tmax[0]) _bbmin[0]=tmax[0];
-		if(_bbmin[1]<tmax[1]) _bbmin[1]=tmax[1];
-		if(_bbmin[2]<tmax[2]) _bbmin[2]=tmax[2];
+		if(_bbmax[0]<tmax[0]) _bbmax[0]=tmax[0];
+		if(_bbmax[1]<tmax[1]) _bbmax[1]=tmax[1];
+		if(_bbmax[2]<tmax[2]) _bbmax[2]=tmax[2];
     }
 }

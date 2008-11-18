@@ -7,6 +7,7 @@
 
 GLViewport::GLViewport(int w, int h):_width(w),_height(h)
 {
+	projection=GLViewport::ORTHO;
 }
 
 GLViewport::~GLViewport()
@@ -80,6 +81,7 @@ void GLViewport::getProjection(double& xmin,double& xmax,double& ymin,double& ym
 void GLViewport::issueGL() const
 {
 	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	glViewport(0, 0, _width, _height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

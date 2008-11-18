@@ -165,8 +165,15 @@ void GL3DWidget::resizeGL(int width, int height)
 	maxValue=maxValue+(maxValue-minValue)/2;
 	minValue=temp;
 
+	int minScale,maxScale;
+	if(minValue<0)minScale=10;
+	else minScale=-10;
+	if(maxValue<0)maxScale=10;
+	else maxScale=10;
+
 	_viewport->resize(width,height);
-	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*minScale,maxValue*maxScale);
+	//_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
 	_viewport->issueGL();
 
 	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
