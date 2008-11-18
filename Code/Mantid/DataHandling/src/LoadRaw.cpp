@@ -257,7 +257,7 @@ namespace Mantid
       std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setData(hist, v, e);
-	    std::cout << "Hello!" << std::endl;
+
       localWorkspace->setX(hist, tcbs);
 	    	    
       localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
