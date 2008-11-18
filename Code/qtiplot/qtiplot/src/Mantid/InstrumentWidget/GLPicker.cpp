@@ -70,6 +70,26 @@ GLActor* GLPicker::pickPoint(int x, int y) // Picking object at coordinate of th
 }
 
 /**
+ * picking a actor at a input point from image
+ * @param x input x-dim value of the point
+ * @param y input y-dim value of the point
+ */
+GLActor* GLPicker::pickPoint(QImage img,int x, int y) // Picking object at coordinate of the mouse (x,y)
+{
+      GLActor* picked=NULL;
+      if (!_actors) return 0;
+      unsigned char pixel[6];
+      int vw, vh;
+      _viewport->getViewport(&vw,&vh);
+	  QRgb pixelRGB=img.pixel(x,y);
+	  pixel[0]=qRed(pixelRGB);
+	  pixel[1]=qGreen(pixelRGB);
+	  pixel[2]=qBlue(pixelRGB);
+      picked=_actors->findColorID(pixel);
+      //_actors->construct();
+      return picked;
+}
+/**
  * Sets the viewpoint
  * @param v input viewport
  */

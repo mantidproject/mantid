@@ -5,7 +5,7 @@
 #include "GLActor.h"
 
 unsigned char GLActor::_referencecolorID[3]={1,0,0};
-
+boost::shared_ptr<GLColor> redColor(new GLColor(1.0,0.5,0.0,1.0));
 GLActor::GLActor(char* name):_name(name), _picked(false)
 {
     _colorID[0]=_referencecolorID[0];
@@ -22,6 +22,7 @@ GLActor::GLActor(char* name):_name(name), _picked(false)
             _referencecolorID[2]++;
         }
     }
+	_color=redColor;
 	_pos=new Mantid::Geometry::V3D;
 }
 GLActor::~GLActor()

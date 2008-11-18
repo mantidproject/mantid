@@ -3,6 +3,7 @@
 #include "GLColor.h"
 #include "GLActorCollection.h"
 #include "GLViewport.h"
+#include <QImage>
 /*!
   \class  GLPicker
   \brief  class handling picking of GLObjects
@@ -41,10 +42,12 @@ public:
     void setPickerColor(const GLColor&);
     void setActorCollection(GLActorCollection*);
     GLActor* pickPoint(int,int);
+	GLActor* pickPoint(QImage img,int x, int y);
     void pickAreaStart(int,int);
     void pickAreaFinish(int,int);
     void drawArea(int,int);
     void setViewport(GLViewport*);
+	
 private:
     int _rectx1;                   ///< Rectangular box bottom left x value
 	int _recty1;                   ///< Rectangular box bottom left y value                       

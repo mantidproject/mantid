@@ -35,11 +35,18 @@ GL3DWidget::~GL3DWidget()
 void GL3DWidget::setInteractionModePick()
 {
 	iInteractionMode=1;// Pick mode
+	setMouseTracking(true);
+	mPickingDraw=true;
+	paintGL();
+	mPickingDraw=false;
+	glReadBuffer(GL_BACK);
+	buffer=grabFrameBuffer(false);
 }
 
 void GL3DWidget::setInteractionModeNormal()
 {
 	iInteractionMode=0;//Normal mode
+	setMouseTracking(false);
 }
 
 GLActor* GL3DWidget::getPickedActor()
@@ -161,6 +168,15 @@ void GL3DWidget::resizeGL(int width, int height)
 	_viewport->resize(width,height);
 	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
 	_viewport->issueGL();
+
+	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
+	{
+		mPickingDraw=true;
+		paintGL();
+		mPickingDraw=false;
+		glReadBuffer(GL_BACK);
+		buffer=grabFrameBuffer(false);
+	}
 }
 
 /**
@@ -176,11 +192,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 	if(iInteractionMode==1 && (event->buttons() & Qt::LeftButton)) // Pick Mode
 	{
 		setCursor(Qt::CrossCursor);
-		mPickingDraw=true;
-		paintGL();
-		mPickedActor=_picker->pickPoint(event->x(),event->y());
-		mPickingDraw=false;
-		updateGL();
+		mPickedActor=_picker->pickPoint(buffer,event->x(),event->y());
 		if(mPickedActor!=NULL)
 			emit actorPicked(mPickedActor);
 		return;
@@ -219,23 +231,28 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
  */
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if(iInteractionMode==1) return;
-	if (event->buttons() & Qt::LeftButton)
-	{
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->generateRotationTo(event->x(),event->y());
-		updateGL();
-		_trackball->initRotationFrom(event->x(),event->y());
-	}else if(event->buttons() & Qt::RightButton){ //Translate
+	if(iInteractionMode==1){
 		setCursor(Qt::CrossCursor);
-		_trackball->generateTranslationTo(event->x(),event->y());
-		updateGL();
-		_trackball->initTranslateFrom(event->x(),event->y());
-	}else if(event->buttons() & Qt::MidButton){ //Zoom
-		setCursor(Qt::SizeVerCursor);
-		_trackball->generateZoomTo(event->x(),event->y());
-		updateGL();
-		_trackball->initZoomFrom(event->x(),event->y());
+		GLActor* tmpActor=_picker->pickPoint(buffer,event->x(),event->y());
+		emit actorHighlighted(tmpActor);		
+	}else{
+		if (event->buttons() & Qt::LeftButton)
+		{
+			setCursor(Qt::ClosedHandCursor);
+			_trackball->generateRotationTo(event->x(),event->y());
+			updateGL();
+			_trackball->initRotationFrom(event->x(),event->y());
+		}else if(event->buttons() & Qt::RightButton){ //Translate
+			setCursor(Qt::CrossCursor);
+			_trackball->generateTranslationTo(event->x(),event->y());
+			updateGL();
+			_trackball->initTranslateFrom(event->x(),event->y());
+		}else if(event->buttons() & Qt::MidButton){ //Zoom
+			setCursor(Qt::SizeVerCursor);
+			_trackball->generateZoomTo(event->x(),event->y());
+			updateGL();
+			_trackball->initZoomFrom(event->x(),event->y());
+		}
 	}
 }
 
@@ -270,6 +287,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
 void GL3DWidget::keyPressEvent(QKeyEvent *event)
 {
 	grabKeyboard();
+	if(iInteractionMode==1) return; ///Ignore keyboard event when in pick mode
 	int width,height;
 	_viewport->getViewport(&width,&height);
 	int halfwidth=width/2;
@@ -414,4 +432,15 @@ void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
  */
 void GL3DWidget::MakeObject()
 {	
+}
+
+/**
+ * This saves the GL scene to PPM Image file, name of the file is given as input
+ */
+void GL3DWidget::saveToPPM(QString filename)
+{
+	paintGL();
+	glReadBuffer(GL_BACK);
+	QImage img=grabFrameBuffer(false);
+	img.save(filename,"PPM");
 }

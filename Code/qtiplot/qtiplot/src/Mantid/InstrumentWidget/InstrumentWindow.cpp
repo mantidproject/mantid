@@ -86,6 +86,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelected(int)), this, SLOT(detectorInformation(int)));
+	connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int)),this,SLOT(detectorHighlighted(int,int,int)));
 	connect(mSelectBin, SIGNAL(clicked()), mBinMapDialog,SLOT(exec()));
 	connect(mBinMapDialog,SIGNAL(SingleBinNumber(int)), mInstrumentDisplay, SLOT(setDataMappingSingleBin(int)));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(int,int)), mInstrumentDisplay, SLOT(setDataMappingIntegral(int,int)));
@@ -148,6 +149,24 @@ void InstrumentWindow::detectorInformation(int value)
 }
 
 /**
+ * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
+ */
+void InstrumentWindow::detectorHighlighted(int detectorId,int spectraId,int count)
+{
+	QString txt;
+	QString number;
+	txt+="Detector Id: ";
+	if(detectorId!=-1)
+		txt+=number.setNum(detectorId);
+	txt+="\nSpectra Id: ";
+	if(detectorId!=-1)
+		txt+=number.setNum(spectraId);
+	txt+="  Count: ";
+	if(detectorId!=-1)
+		txt+=number.setNum(count);
+	mInteractionInfo->setText(txt);
+}
+/**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
  */
 void InstrumentWindow::spectraInfoDialog()
@@ -155,7 +174,7 @@ void InstrumentWindow::spectraInfoDialog()
 	QString info;
 	info+=" The Spectra Index Id: ";
 	info+= QString::number(mSpectraIDSelected);
-	info+=" \n The Detector Id: ";
+	info+=" \nThe Detector Id: ";
 	info+= QString::number(mDetectorIDSelected);
 	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 }

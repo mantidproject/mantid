@@ -53,6 +53,7 @@ public slots:
 	void modeSelectButtonClicked();
 	void spectraInformation(int);
 	void detectorInformation(int value);
+	void detectorHighlighted(int detectorId,int spectraid,int count);
 	void spectraInfoDialog();
 	void changeColormap();
     void sendPlotSpectraSignal();

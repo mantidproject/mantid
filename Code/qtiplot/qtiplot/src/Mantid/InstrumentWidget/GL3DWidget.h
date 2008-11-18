@@ -2,6 +2,8 @@
 #define GL3DWIDGET_H_
 
 #include <QGLWidget> 
+#include <QString>
+#include <QImage>
 #include "GLViewport.h" 
 #include "GLTrackball.h" 
 #include "GLActorCollection.h" 
@@ -48,8 +50,10 @@ public:
 	void setInteractionModePick();
 	void setInteractionModeNormal();
 	GLActor* getPickedActor();
+	void saveToPPM(QString filename);
 signals:
         void actorPicked( GLActor* );
+		void actorHighlighted( GLActor* );
 protected:
 	void initializeGL();
     void MakeObject();
@@ -63,6 +67,7 @@ protected:
 	void keyReleaseEvent(QKeyEvent *);
 	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
 private:
+	QImage buffer;
 	int iInteractionMode;
 	bool mPickingDraw;
     GLTrackball* _trackball;       ///< Trackball for user interaction

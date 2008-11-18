@@ -30,6 +30,7 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 	iTimeBin=0;
 	strWorkspaceName="";
 	connect(this, SIGNAL(actorPicked(GLActor*)), this, SLOT(fireDetectorPicked(GLActor*)));
+	connect(this, SIGNAL(actorHighlighted(GLActor*)),this,SLOT(fireDetectorHighligted(GLActor*)));
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
 	mDataMapping=INTEGRAL;
@@ -71,6 +72,58 @@ void Instrument3DWidget::fireDetectorPicked(GLActor* pickedActor)
 }
 
 /**
+ * This method is the slot when the detector is highlighted using mouse move. This method emits
+ * signals the id of the detector and the spectra index(not spectra number). 
+ * @param pickedActor the input passed by the the signal.
+ */
+void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
+{
+	if(pickedActor==NULL)
+	{
+		emit actionDetectorHighlighted(-1,-1,-1);
+		return;
+	}
+	boost::shared_ptr<GLObject> tmpGLObject=pickedActor->getRepresentation();
+	if(tmpGLObject->type()=="MantidObject")
+	{
+		//type cast to the mantid object
+		MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
+		//get the component
+		ObjComponent* tmpObjComp=tmpMantidObject->getComponent();
+		//check the component type if its detector or not
+		if(tmpObjComp->type()=="PhysicalComponent" ||tmpObjComp->type()=="DetectorComponent")
+		{
+			Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(tmpObjComp));
+			//convert detector id to spectra index id
+			std::vector<int> idDecVec;
+			idDecVec.push_back(iDec->getID());
+			std::vector<int> indexList = getSpectraIndexList(idDecVec);
+			Workspace_sptr workspace;
+			workspace = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+			Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
+			int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
+			std::vector<double> outputdata=workspace->readY(indexList[0]);
+			std::vector<int> histIndexList;
+			std::vector<double> values;
+			histIndexList.push_back(indexList[0]);
+			double minval,maxval;
+			switch(mDataMapping)
+			{
+			case SINGLE_BIN:
+				this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
+				break;
+			case INTEGRAL:
+				this->CollectIntegralValues(histIndexList, 0, workspace->blocksize(),minval,maxval,values);
+				break;
+			}
+			//emit the detector id, spectrum number and count
+			emit actionDetectorHighlighted(iDec->getID(),spectrumNumber,values[0]);
+		}
+
+	}
+}
+
+/**
  * This method sets the workspace name input to the widget.
  * @param wsName input workspace name
  */
@@ -92,15 +145,15 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 	boost::shared_ptr<GLActorCollection> scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection);
 	std::queue<Component *> CompList;
 	CompList.push(ins.get());
+	boost::shared_ptr<GLColor> col(new GLColor(1.0,0.5,0.0,1.0));
 	while(!CompList.empty())
 	{
 		Component* tmp = CompList.front();
 		CompList.pop();
-		std::cout<<" Component: "<<tmp->getName()<<std::endl;
-		std::cout<<" Component Type:"<<tmp->type()<<std::endl;
+		//std::cout<<" Component: "<<tmp->getName()<<std::endl;
+		//std::cout<<" Component Type:"<<tmp->type()<<std::endl;
 		if(tmp->type()=="PhysicalComponent" ||tmp->type()=="DetectorComponent"){
 			boost::shared_ptr<MantidObject> obj(new MantidObject(dynamic_cast<ObjComponent*>(tmp)));
-			boost::shared_ptr<GLColor> col(new GLColor(1.0,0.5,0.0,1.0));
 			GLActor* actor1=new GLActor();
 			actor1->setRepresentation(obj);
 			actor1->setPos(0.0,0.0,0.0);
@@ -314,7 +367,7 @@ void Instrument3DWidget::AssignColors()
 		DataMinValue=minval;
 	if(DataMaxValue==DBL_MAX)
 		DataMaxValue=maxval;
-	std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
+	//std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
 	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
 	scene->refresh();
 	updateGL();
