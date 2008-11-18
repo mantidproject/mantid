@@ -173,14 +173,7 @@ public:
    */
   const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
-    if ( value->isHistogramData() )
-    {
-      return ( m_mustBeHistogram ? true : false );
-    }
-    else
-    {
-      return ( m_mustBeHistogram ? false : true );
-    }
+    return ( value->isHistogramData() == m_mustBeHistogram );
   }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
@@ -199,7 +192,8 @@ template <typename TYPE = Workspace>
 class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
-  RawCountValidator() {}
+  RawCountValidator(const bool& mustNotBeDistribution = true) :
+    m_mustNotBeDistribution(mustNotBeDistribution) {}
 
   virtual ~RawCountValidator() {}
 
@@ -210,10 +204,14 @@ public:
    */
   const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
-    return !( value->isDistribution() );
+    return ( value->isDistribution() != m_mustNotBeDistribution );
   }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
+
+private:
+  /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
+  const bool m_mustNotBeDistribution;
 };
 
 /** A validator which provides a <I>TENTATIVE</I> check that a workspace contains
