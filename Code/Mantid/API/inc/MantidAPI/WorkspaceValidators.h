@@ -192,6 +192,10 @@ template <typename TYPE = Workspace>
 class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
+  /** Constructor
+   *  @param mustNotBeDistribution Flag indicating whether the check is that a workspace should
+   *                               not be a distribution (true, default) or should be (false).
+   */
   RawCountValidator(const bool& mustNotBeDistribution = true) :
     m_mustNotBeDistribution(mustNotBeDistribution) {}
 
@@ -210,7 +214,7 @@ public:
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
 
 private:
-  /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
+  /// A flag indicating whether this validator requires that the workspace must be a distribution (false) or not (true, the default)
   const bool m_mustNotBeDistribution;
 };
 
