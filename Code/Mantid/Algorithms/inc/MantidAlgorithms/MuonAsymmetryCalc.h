@@ -10,7 +10,19 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /**
+    /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
+	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
+	  are stored in the output workspace.
+
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> ForwardSpectrum - The number of the detector that represents the start of the first group </LI>
+    <LI> BackwardSpectrum - The number of the detector that represents the start of the second group </LI>
+    <LI> Alpha - ?? </LI>
+    </UL>
+
 
     @author
     @date 11/07/2008

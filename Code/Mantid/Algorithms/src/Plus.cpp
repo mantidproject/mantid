@@ -42,7 +42,7 @@ namespace Mantid
       result = a;
       //use the error helper to correct the changed values in result
       a.ErrorHelper()->plus(a,b,result);
-      if (m_progress++ % m_progress_step == 0) report_progress();
+      //if (m_progress++ % m_progress_step == 0) report_progress();
       return result;
     }
   }

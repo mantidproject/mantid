@@ -58,10 +58,16 @@ namespace Mantid
     void
       Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
     {
+	    //std::cout << "Goodbye!" << std::endl;
+	    
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
+     // std::cout << "VecAddress = " << &Vec << std::endl;
+
       data[histnumber].dataX()=Vec;
+      
+      //std::cout << "Xaddress = " << &data[histnumber].dataX() << std::endl;
       return;
     }
 
@@ -73,10 +79,16 @@ namespace Mantid
     void
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype::ptr_type& Vec)
     {
+	    //std::cout << "Goodbye1!" << std::endl;
+	    
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
+     // std::cout << "Vec Address = " << &Vec << std::endl;
+      
       data[histnumber].setX(Vec);
+      
+     // std::cout << "X address = " << &data[histnumber].dataX() << std::endl;
       return;
     }
 
@@ -88,10 +100,14 @@ namespace Mantid
     void
       Workspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
     {
+	  //  std::cout << "Goodbye2!" << std::endl;
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
+      //std::cout << "Vec Address = " << &PA << std::endl;      
+      
       data[histnumber].setX(PA);
+    //  std::cout << "X address = " << &data[histnumber].dataX() << std::endl;
       return;
     }
 
