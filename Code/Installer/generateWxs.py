@@ -43,6 +43,7 @@ def addDirectory(Id,name,longName,parent):
 def addFile(Id,name,longName,source,vital,parent):
     e = doc.createElement('File')
     e.setAttribute('Id',Id)
+    #print longName
     e.setAttribute('Name',name)
     e.setAttribute('LongName',longName)
     e.setAttribute('DiskId','1')
@@ -113,12 +114,13 @@ def addAllFilesExt(location,name,ext,parent):
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
 
-def addFeature(Id,title,description,level,parent):
+def addFeature(Id,title,description,level,parent,absent='allow'):
     e = doc.createElement('Feature')
     e.setAttribute('Id',Id)
     e.setAttribute('Title',title)
     e.setAttribute('Description',description)
     e.setAttribute('Level',level)
+    e.setAttribute('Absent',absent);
     parent.appendChild(e)
     return e
 
@@ -291,7 +293,7 @@ QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtip
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
-if (QTDIR == 'C:/Qt/4_4_0/bin'):
+if (QTDIR == 'C:/qt-4.4.3/bin'):
     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
@@ -374,39 +376,39 @@ Data = addComponent('Data','{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}',dataDir)
 addTo(Data,'CreateFolder',{})
 
 #-------------------  Source  ------------------------------------------
-sourceDir = addDirectory('SourceDir','source','source',InstallDir)
+# sourceDir = addDirectory('SourceDir','source','source',InstallDir)
 
-sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
-SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC9}',sourceMantidAlgorithmsDir)
-addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
+# sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
+# SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC9}',sourceMantidAlgorithmsDir)
+# addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
 
-sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
-SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
-addAllFilesExt('../Mantid/API/src','api','cpp',SourceMantidAPI)
+# sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
+# SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
+# addAllFilesExt('../Mantid/API/src','api','cpp',SourceMantidAPI)
 
-sourceMantidDataHandlingDir = addDirectory('SourceMantidDataHandlingDir','Mdh','MantidDataHandling',sourceDir)
-SourceMantidDataHandling = addComponent('SourceMantidDataHandling','{3DE8C8E7-86F1-457f-8933-149AD79EA9D7}',sourceMantidDataHandlingDir)
-addAllFilesExt('../Mantid/DataHandling/src','dh','cpp',SourceMantidDataHandling)
+# sourceMantidDataHandlingDir = addDirectory('SourceMantidDataHandlingDir','Mdh','MantidDataHandling',sourceDir)
+# SourceMantidDataHandling = addComponent('SourceMantidDataHandling','{3DE8C8E7-86F1-457f-8933-149AD79EA9D7}',sourceMantidDataHandlingDir)
+# addAllFilesExt('../Mantid/DataHandling/src','dh','cpp',SourceMantidDataHandling)
 
-sourceMantidDataObjectsDir = addDirectory('SourceMantidDataObjectsDir','Mdo','MantidDataObjects',sourceDir)
-SourceMantidDataObjects = addComponent('SourceMantidDataObjects','{0C071065-8E0C-4e9c-996E-454692803E7F}',sourceMantidDataObjectsDir)
-addAllFilesExt('../Mantid/DataObjects/src','dh','cpp',SourceMantidDataObjects)
+# sourceMantidDataObjectsDir = addDirectory('SourceMantidDataObjectsDir','Mdo','MantidDataObjects',sourceDir)
+# SourceMantidDataObjects = addComponent('SourceMantidDataObjects','{0C071065-8E0C-4e9c-996E-454692803E7F}',sourceMantidDataObjectsDir)
+# addAllFilesExt('../Mantid/DataObjects/src','dh','cpp',SourceMantidDataObjects)
 
-sourceMantidGeometryDir = addDirectory('SourceMantidGeometryDir','MGeo','MantidGeometry',sourceDir)
-SourceMantidGeometry = addComponent('SourceMantidGeometry','{949C5B12-7D4B-4a8a-B132-718F6AEA9E69}',sourceMantidGeometryDir)
-addAllFilesExt('../Mantid/Geometry/src','geo','cpp',SourceMantidGeometry)
+# sourceMantidGeometryDir = addDirectory('SourceMantidGeometryDir','MGeo','MantidGeometry',sourceDir)
+# SourceMantidGeometry = addComponent('SourceMantidGeometry','{949C5B12-7D4B-4a8a-B132-718F6AEA9E69}',sourceMantidGeometryDir)
+# addAllFilesExt('../Mantid/Geometry/src','geo','cpp',SourceMantidGeometry)
 
-sourceMantidKernelDir = addDirectory('SourceMantidKernelDir','MKer','MantidKernel',sourceDir)
-SourceMantidKernel = addComponent('SourceMantidKernel','{B7126F68-544C-4e50-9438-E0D6F6155D82}',sourceMantidKernelDir)
-addAllFilesExt('../Mantid/Kernel/src','ker','cpp',SourceMantidKernel)
+# sourceMantidKernelDir = addDirectory('SourceMantidKernelDir','MKer','MantidKernel',sourceDir)
+# SourceMantidKernel = addComponent('SourceMantidKernel','{B7126F68-544C-4e50-9438-E0D6F6155D82}',sourceMantidKernelDir)
+# addAllFilesExt('../Mantid/Kernel/src','ker','cpp',SourceMantidKernel)
 
-sourceMantidNexusDir = addDirectory('SourceMantidNexusDir','MNex','MantidNexus',sourceDir)
-SourceMantidNexus = addComponent('SourceMantidNexus','{35AABB59-CDE3-49bf-9F96-7A1AFB72FD2F}',sourceMantidNexusDir)
-addAllFilesExt('../Mantid/Nexus/src','nex','cpp',SourceMantidNexus)
+# sourceMantidNexusDir = addDirectory('SourceMantidNexusDir','MNex','MantidNexus',sourceDir)
+# SourceMantidNexus = addComponent('SourceMantidNexus','{35AABB59-CDE3-49bf-9F96-7A1AFB72FD2F}',sourceMantidNexusDir)
+# addAllFilesExt('../Mantid/Nexus/src','nex','cpp',SourceMantidNexus)
 
-sourceMantidPythonAPIDir = addDirectory('SourceMantidPythonAPIDir','MPAPI','MantidPythonAPI',sourceDir)
-SourceMantidPythonAPI = addComponent('SourceMantidPythonAPI','{CACED707-92D7-47b9-8ABC-378275D99082}',sourceMantidPythonAPIDir)
-addAllFilesExt('../Mantid/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
+# sourceMantidPythonAPIDir = addDirectory('SourceMantidPythonAPIDir','MPAPI','MantidPythonAPI',sourceDir)
+# SourceMantidPythonAPI = addComponent('SourceMantidPythonAPI','{CACED707-92D7-47b9-8ABC-378275D99082}',sourceMantidPythonAPIDir)
+# addAllFilesExt('../Mantid/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
 
 #----------------- end of Source ---------------------------------------
 
@@ -471,7 +473,7 @@ addCRef('Data',MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
 
-Includes = addFeature('Includes','Includes','Mantid and third patry header files.','1',Complete)
+Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRef('IncludeMantidDataHandling',Includes)
@@ -488,21 +490,20 @@ QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
 # Prevent overwriting existing PyQt installation.
-PyQtF = addFeature('PyQtF','PyQt4','PyQt4','1',QTIPlotExec)
+PyQtF = addFeature('PyQtF','PyQt4','PyQt4','0',QTIPlotExec,'disallow')
 addCRef('Sip',PyQtF)
 addCRef('PyQt',PyQtF)
-addText('NOT PYQTDIREXISTS',
-        addTo(PyQtF,'Condition',{'Level':'0'}))
+addText('NOT PYQTDIREXISTS', addTo(PyQtF,'Condition',{'Level':'1'}))
 
-SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
-addCRef('SourceMantidAlgorithms',SourceFiles)
-addCRef('SourceMantidAPI',SourceFiles)
-addCRef('SourceMantidDataHandling',SourceFiles)
-addCRef('SourceMantidDataObjects',SourceFiles)
-addCRef('SourceMantidGeometry',SourceFiles)
-addCRef('SourceMantidKernel',SourceFiles)
-addCRef('SourceMantidNexus',SourceFiles)
-addCRef('SourceMantidPythonAPI',SourceFiles)
+# SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
+# addCRef('SourceMantidAlgorithms',SourceFiles)
+# addCRef('SourceMantidAPI',SourceFiles)
+# addCRef('SourceMantidDataHandling',SourceFiles)
+# addCRef('SourceMantidDataObjects',SourceFiles)
+# addCRef('SourceMantidGeometry',SourceFiles)
+# addCRef('SourceMantidKernel',SourceFiles)
+# addCRef('SourceMantidNexus',SourceFiles)
+# addCRef('SourceMantidPythonAPI',SourceFiles)
 
 #addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
 addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
@@ -516,5 +517,5 @@ addText('NEWERFOUND',NoDowngrade)
 addTo(exeSec,'RemoveExistingProducts',{'After':'InstallFinalize'})
 
 f = open('tmp.wxs','w')
-doc.writexml(f)
+doc.writexml(f,newl="\r\n")
 f.close()
