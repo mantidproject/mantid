@@ -43,7 +43,6 @@ def addDirectory(Id,name,longName,parent):
 def addFile(Id,name,longName,source,vital,parent):
     e = doc.createElement('File')
     e.setAttribute('Id',Id)
-    #print longName
     e.setAttribute('Name',name)
     e.setAttribute('LongName',longName)
     e.setAttribute('DiskId','1')
@@ -293,7 +292,7 @@ QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtip
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
-if (QTDIR == 'C:/qt-4.4.3/bin'):
+if (QTDIR == 'C:/Qt/4_4_0/bin'):
     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
