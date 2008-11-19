@@ -119,8 +119,8 @@ namespace Mantid
       // Not using the WorkspaceHelpers::matching bins method because that requires the workspaces to be
       // the same size, which isn't a requirement of BinaryOperation
 
-      // single values are compatible with anything
-      if ((rhs->size() ==1) || (lhs->size() ==1)) return true;
+      // single values, or workspaces with just a single bin/value in each spectrum, are compatible with anything
+      if ((rhs->blocksize() ==1) || (lhs->blocksize() ==1)) return true;
 
       const std::vector<double>& w1x = lhs->readX(0);
       const std::vector<double>& w2x = rhs->readX(0);
