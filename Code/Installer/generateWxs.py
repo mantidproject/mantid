@@ -9,7 +9,6 @@ import md5
 import string
 
 QTDIR = 'toget/qt'
-#QTDIR = 'C:/Qt/4_4_0/bin'
 
 vfile = open('build_number.txt','r')
 vstr = vfile.read()
@@ -113,13 +112,14 @@ def addAllFilesExt(location,name,ext,parent):
             addFileV(name+'_'+fn+'_file',name+str(i),fil,location+'/'+fil,parent)
             i += 1
 
-def addFeature(Id,title,description,level,parent,absent='allow'):
+def addFeature(Id,title,description,level,parent,absent='allow',allowAdvertise='yes'):
     e = doc.createElement('Feature')
     e.setAttribute('Id',Id)
     e.setAttribute('Title',title)
     e.setAttribute('Description',description)
     e.setAttribute('Level',level)
-    e.setAttribute('Absent',absent);
+    e.setAttribute('Absent',absent)
+    e.setAttribute('AllowAdvertise',allowAdvertise)
     parent.appendChild(e)
     return e
 
@@ -289,11 +289,10 @@ addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
 addDlls(QTDIR,'qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
+manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
-if (QTDIR == 'C:/Qt/4_4_0/bin'):
-    manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 
@@ -428,7 +427,6 @@ addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party
 
 #--------------- Python ------------------------------------------------
 
-#Python25Dir = addDirectory('Python25Dir','Python25','Python25',TargetDir)
 Python25Dir = addTo(TargetDir,'Directory',{'Id':'PYTHON25DIR'})
 LibDir = addDirectory('LibDir','Lib','Lib',Python25Dir)
 SitePackagesDir = addDirectory('SitePackagesDir','sitepack','site-packages',LibDir)
@@ -437,6 +435,7 @@ Sip = addComponent('Sip','{A051F48C-CA96-4cd5-B936-D446CBF67588}',SitePackagesDi
 addAllFiles('toget/sip','sip',Sip)
 PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
+
 #-------------------------- Scripts ------------------------------------
 ScriptsDir = addDirectory('ScriptsDir','scripts','scripts',InstallDir)
 Scripts = addComponent('Scripts','{E21432EE-368D-4670-A778-23F5C8DC8F2F}',ScriptsDir)
@@ -457,6 +456,37 @@ DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 #-----------------------------------------------------------------------
 PyQtExists = addTo(Product,'Property',{'Id':'PYQTDIREXISTS'})
 addTo(PyQtExists,'DirectorySearch',{'Id':'CheckDir','Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
+
+sfiles = os.listdir('toget/PyQt4');
+i=1;
+for file in sfiles:
+  if( file == '.svn' ):
+    continue;
+  decomp=file.partition('.')
+  id=decomp[0].upper()
+  id='PYQT'+id+'EXISTS'
+  PyQtFileExists = addTo(Product,'Property',{'Id':id})
+  DirSearch = addTo(PyQtFileExists, 'DirectorySearch',{'Id':'PyQtDir_' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
+  # pyc files treated differenty as they could just have the .py file that has not been compiled yet
+  if( decomp[2] == 'pyc' ):
+    file = decomp[0] + decomp[1] + 'py'
+  addTo(DirSearch,'FileSearch',{'Id':'PyQt_' + str(i),'LongName':file})
+  i += 1;
+  
+sfiles = os.listdir('toget/sip');
+for file in sfiles:
+  if( file == '.svn' ):
+    continue;
+  decomp=file.partition('.')
+  id=decomp[0].upper()
+  id='SIP'+id+'EXISTS'
+  SipFileExists = addTo(Product,'Property',{'Id':id})
+  DirSearch = addTo(SipFileExists, 'DirectorySearch',{'Id':'SipDir_' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages','Depth':'0'})
+  # pyc files treated differenty as they could just have the .py file that has not been compiled yet
+  if( decomp[2] == 'pyc' ):
+    file = decomp[0] + decomp[1] + 'py'
+  addTo(DirSearch,'FileSearch',{'Id':'Sip_' + str(i),'LongName':file})
+  i += 1;
 
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
@@ -489,11 +519,38 @@ QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
 # Prevent overwriting existing PyQt installation.
-PyQtF = addFeature('PyQtF','PyQt4','PyQt4','0',QTIPlotExec,'disallow')
-addCRef('Sip',PyQtF)
+PyQtF = addFeature('PyQtF','PyQt','PyQt4 v4.4.3','0',QTIPlotExec,'disallow','no')
 addCRef('PyQt',PyQtF)
-addText('NOT PYQTDIREXISTS', addTo(PyQtF,'Condition',{'Level':'1'}))
+sfiles = os.listdir('toget/PyQt4');
+PyQtTest='(NOT PYQTDIREXISTS)'
+for file in sfiles:
+  if( file == '.svn' ):
+    continue;
+  id=file.partition('.')[0].upper()
+  id='PYQT'+id+'EXISTS'
+  PyQtTest += ' OR (NOT ' + id + ')'
 
+addText(PyQtTest, addTo(PyQtF,'Condition',{'Level':'1'}))
+
+# Prevent overwriting exising sip files
+SipPyd = addFeature('SipPyd','Sip','Sip v4.7.7','0',QTIPlotExec,'disallow','no')
+addCRef('Sip',SipPyd)
+sfiles = os.listdir('toget/sip');
+SipTest=''
+i=0;
+for file in sfiles:
+  if( file == '.svn' ):
+    continue;
+  id=file.partition('.')[0].upper()
+  id='SIP'+id+'EXISTS'
+  if( i != 0 ):
+    SipTest += 'OR (NOT ' + id + ')'
+  else:
+    SipTest += '(NOT ' + id + ')'
+    
+addText(SipTest, addTo(SipPyd,'Condition',{'Level':'1'}))
+
+#------------- Source files ------------------------
 # SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
 # addCRef('SourceMantidAlgorithms',SourceFiles)
 # addCRef('SourceMantidAPI',SourceFiles)
