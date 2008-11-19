@@ -547,6 +547,7 @@ for file in sfiles:
     SipTest += 'OR (NOT ' + id + ')'
   else:
     SipTest += '(NOT ' + id + ')'
+  i+=1
     
 addText(SipTest, addTo(SipPyd,'Condition',{'Level':'1'}))
 
