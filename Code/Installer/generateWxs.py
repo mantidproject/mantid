@@ -456,9 +456,6 @@ ProgramMenuDir = addDirectory('ProgramMenuDir','Mantid','Mantid',ProgramMenuFold
 DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 
 #-----------------------------------------------------------------------
-PyQtExists = addTo(Product,'Property',{'Id':'PYQTDIREXISTS'})
-addTo(PyQtExists,'DirectorySearch',{'Id':'CheckDir','Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
-
 sfiles = os.listdir('toget/PyQt4');
 i=1;
 for file in sfiles:
@@ -466,7 +463,7 @@ for file in sfiles:
     continue;
   decomp=file.partition('.')
   id=decomp[0].upper()
-  id='PYQT'+id+'EXISTS'
+  id+='EXISTS'
   PyQtFileExists = addTo(Product,'Property',{'Id':id})
   DirSearch = addTo(PyQtFileExists, 'DirectorySearch',{'Id':'PyQtDir_' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
   # pyc files treated differenty as they could just have the .py file that has not been compiled yet
@@ -476,20 +473,21 @@ for file in sfiles:
   i += 1;
   
 sfiles = os.listdir('toget/sip');
+i=1
 for file in sfiles:
   if( file == '.svn' ):
     continue;
   decomp=file.partition('.')
   id=decomp[0].upper()
-  id='SIP'+id+'EXISTS'
+  id+='EXISTS'
   SipFileExists = addTo(Product,'Property',{'Id':id})
-  DirSearch = addTo(SipFileExists, 'DirectorySearch',{'Id':'SipDir_' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages','Depth':'0'})
+  DirSearch = addTo(SipFileExists, 'DirectorySearch',{'Id':'SipDirSearch' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages','Depth':'0'})
   # pyc files treated differenty as they could just have the .py file that has not been compiled yet
   if( decomp[2] == 'pyc' ):
     file = decomp[0] + decomp[1] + 'py'
-  addTo(DirSearch,'FileSearch',{'Id':'Sip_' + str(i),'LongName':file})
+  addTo(DirSearch,'FileSearch',{'Id':'SipFileSearch' + str(i),'LongName':file})
   i += 1;
-
+ 
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
@@ -504,7 +502,7 @@ addCRef('Data',MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
 
-Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
+Includes = addFeature('Includes','Includes','Mantid and third party header files.','1000',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRef('IncludeMantidDataHandling',Includes)
@@ -520,38 +518,33 @@ addCRefs(pocoList,Includes)
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
 
-# Prevent overwriting existing PyQt installation.
-PyQtF = addFeature('PyQtF','PyQt','PyQt4 v4.4.3','0',QTIPlotExec,'disallow','no')
+#Prevent overwriting existing PyQt installation.
+PyQtF = addFeature('PyQtF','PyQt','PyQt4 v4.4.3','1',QTIPlotExec,'disallow','no')
 addCRef('PyQt',PyQtF)
 sfiles = os.listdir('toget/PyQt4');
-PyQtTest='(NOT PYQTDIREXISTS)'
+PyQtTest='(UILevel <> 3)'
 for file in sfiles:
   if( file == '.svn' ):
     continue;
   id=file.partition('.')[0].upper()
-  id='PYQT'+id+'EXISTS'
-  PyQtTest += ' OR (NOT ' + id + ')'
+  id+='EXISTS'
+  PyQtTest += ' AND ' + id
 
-addText(PyQtTest, addTo(PyQtF,'Condition',{'Level':'1'}))
+addText(PyQtTest, addTo(PyQtF,'Condition',{'Level':'0'}))
 
 # Prevent overwriting exising sip files
-SipPyd = addFeature('SipPyd','Sip','Sip v4.7.7','0',QTIPlotExec,'disallow','no')
+SipPyd = addFeature('SipPyd','Sip','Sip v4.7.7','1',QTIPlotExec, 'disallow','no')
 addCRef('Sip',SipPyd)
 sfiles = os.listdir('toget/sip');
-SipTest=''
-i=0;
+SipTest='(UILevel <> 3)'
 for file in sfiles:
   if( file == '.svn' ):
     continue;
   id=file.partition('.')[0].upper()
-  id='SIP'+id+'EXISTS'
-  if( i != 0 ):
-    SipTest += 'OR (NOT ' + id + ')'
-  else:
-    SipTest += '(NOT ' + id + ')'
-  i+=1
-    
-addText(SipTest, addTo(SipPyd,'Condition',{'Level':'1'}))
+  id+='EXISTS'
+  SipTest += ' AND ' + id
+  
+addText(SipTest, addTo(SipPyd,'Condition',{'Level':'0'}))
 
 #------------- Source files ------------------------
 # SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
