@@ -502,7 +502,7 @@ addCRef('Data',MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
 
-Includes = addFeature('Includes','Includes','Mantid and third party header files.','1000',Complete)
+Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRef('IncludeMantidDataHandling',Includes)
