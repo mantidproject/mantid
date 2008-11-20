@@ -1,9 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/MuonAsymmetryCalc.h"
+#include <math.h>
+#include <vector>
+
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidAlgorithms/MuonAsymmetryCalc.h"
 
 namespace Mantid
 {
@@ -28,8 +32,8 @@ namespace Mantid
 	    
        BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
        zeroOrGreater->setLower(0);
-       declareProperty("ForwardSpectrum",0,zeroOrGreater );
-       declareProperty("BackwardSpectrum",0,zeroOrGreater->clone() );
+       declareProperty(new Kernel::ArrayProperty<int>("ForwardSpectra", new MandatoryValidator<std::vector<int> >));	    
+       declareProperty(new Kernel::ArrayProperty<int>("BackwardSpectra", new MandatoryValidator<std::vector<int> >));	    
        declareProperty("Alpha",1.0,Direction::Input);
     }
 
@@ -38,25 +42,17 @@ namespace Mantid
      */
     void MuonAsymmetryCalc::exec()
     {
-	    int forward = getProperty("ForwardSpectrum");		//Start of forward grouping
-	    int backward = getProperty("BackwardSpectrum");    //Start of backward grouping
+	    std::vector<int> forward = getProperty("ForwardSpectra");		
+	    std::vector<int> backward = getProperty("BackwardSpectra");   
 	    double alpha = getProperty("Alpha");
 	    
 	    //Get original workspace
 	    API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
 	    
-	    //Make sure backward is greater than forward
-	    if (forward > backward)
-	    {
-		 int temp = forward;
-		 forward = backward;
-		 backward = temp;
-	    }
-
-	    //should we do this check?
 	    int numSpectra = inputWS->size() / inputWS->blocksize();
 	    
-	    if (backward - forward !=  numSpectra - backward)
+	    //should we do this check?
+	    if (forward.size() != backward.size())
 	    {
 		g_log.error("Should number of detectors in the groups match?");
 		throw std::invalid_argument("Should number of detectors in the groups match?");
@@ -74,30 +70,55 @@ namespace Mantid
 		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create(forwardWS));
 	    
 	    //Compile the forward and backward spectra 
-	    for (int i = forward; i < backward; ++i)
+	    //This assumes that the backward group has the same number of detectors as the forward group
+	    for (int i = 0; i < forward.size(); ++i)
 	    {    
+		    //Check spectra numbers are valid
+		    if (forward[i] >= numSpectra || forward[i] < 0 || backward[i] >= numSpectra || backward[i] < 0)
+		    {
+			g_log.error("Invalid detector number entered in group.");
+			throw std::invalid_argument("Invalid detector number entered in group.");
+		    }
+		    
 		    //Sum up the groups of spectra
 		    for (int j = 0; j < inputWS->blocksize(); ++j)
 		    {
-			    forwardWS->dataY(0)[j] = forwardWS->dataY(0)[j] + inputWS->dataY(i)[j];
-			    backwardWS->dataY(0)[j] = backwardWS->dataY(0)[j] + alpha * inputWS->dataY(i + backward)[j];
-			    //TODO: Need to sort out the errors!
+			    forwardWS->dataY(0)[j] = forwardWS->dataY(0)[j] + inputWS->dataY(forward[i])[j];
+			    backwardWS->dataY(0)[j] = backwardWS->dataY(0)[j] + alpha * inputWS->dataY(backward[i])[j];
+			    
+			    //Add the errors in quadrature
+			    forwardWS->dataE(0)[j] 
+				= sqrt(pow(forwardWS->dataE(0)[j], 2) + pow(inputWS->dataE(forward[i])[j], 2));
+			    backwardWS->dataE(0)[j] 
+				= sqrt(pow(backwardWS->dataE(0)[j], 2) + pow(inputWS->dataE(backward[i])[j], 2));
 		    }
 	    }
 	    
 	    //Calculate asymmetry for each time bin
+	    //F-aB / F+aB
 	    for (int j = 0; j < inputWS->blocksize(); ++j)
 	    {
-		    outputWS->dataY(0)[j] 
-			= (forwardWS->dataY(0)[j] - backwardWS->dataY(0)[j])/(forwardWS->dataY(0)[j] + backwardWS->dataY(0)[j]);    
+		    double numerator = forwardWS->dataY(0)[j] - backwardWS->dataY(0)[j];
+		    double denominator = (forwardWS->dataY(0)[j] + backwardWS->dataY(0)[j]);
+		    
+		    outputWS->dataY(0)[j] = numerator/denominator;
+
+		    //Work out the errors	
+		    // Note: the error for F-aB = the error for F+aB
+		    double quadrature = sqrt( pow(forwardWS->dataE(0)[j], 2) + pow(backwardWS->dataE(0)[j], 2));
+		    
+		    double ratio = sqrt( pow(quadrature/numerator, 2) + pow(quadrature/denominator, 2));
+		    
+		    outputWS->dataE(0)[j] =  ratio * outputWS->dataY(0)[j];
 	    }
 	    
 	    //Copy the imput time bins on to the output
 	    outputWS->dataX(0) = inputWS->dataX(0);
 	    
-	    //std::cout << "F = " << forwardWS->dataY(0)[10] << std::endl;
-	    //std::cout << "aB = " << backwardWS->dataY(0)[10] << std::endl;
-	    //std::cout << "output = " << outputWS->dataY(0)[10] << std::endl;
+	    //std::cout << "F = " << forwardWS->dataY(0)[100] << std::endl;
+	    //std::cout << "aB = " << backwardWS->dataY(0)[100] << std::endl;
+	    //std::cout << "output = " << outputWS->dataY(0)[100] << std::endl;
+	    //std::cout << "error = " << outputWS->dataE(0)[100] << std::endl;
    
 	    setProperty("OutputWorkspace", outputWS);
     }

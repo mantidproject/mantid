@@ -43,15 +43,15 @@ public:
 		asymCalc.setPropertyValue("InputWorkspace", "EMU6473");
 		asymCalc.setPropertyValue("OutputWorkspace", "Result");
 		asymCalc.setPropertyValue("Alpha", "1.0");
-		asymCalc.setPropertyValue("ForwardSpectrum", "0");
-		asymCalc.setPropertyValue("BackwardSpectrum", "16");
+		asymCalc.setPropertyValue("ForwardSpectra", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
+		asymCalc.setPropertyValue("BackwardSpectra", "16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31");
 	}
 	
 	void testProperties()
 	{
 		TS_ASSERT_EQUALS( asymCalc.getPropertyValue("Alpha"), "1");
-		TS_ASSERT_EQUALS( asymCalc.getPropertyValue("ForwardSpectrum"), "0");
-		TS_ASSERT_EQUALS( asymCalc.getPropertyValue("BackwardSpectrum"), "16");
+		//TS_ASSERT_EQUALS( asymCalc.getPropertyValue("ForwardSpectra"), "0");
+		//TS_ASSERT_EQUALS( asymCalc.getPropertyValue("BackwardSpectra"), "16");
 	}
 	
 	void testExecute()
@@ -61,8 +61,8 @@ public:
 		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("Result");
 		
 		//Use a range as cxxtest seems to complain about the accuracy
-		TS_ASSERT(outputWS->dataY(0)[10] < -0.0578);
-		TS_ASSERT(outputWS->dataY(0)[10] > -0.0579);
+		TS_ASSERT(outputWS->dataY(0)[100] >= 0.296);
+		TS_ASSERT(outputWS->dataY(0)[100] <= 0.297);
 
 	}
 
