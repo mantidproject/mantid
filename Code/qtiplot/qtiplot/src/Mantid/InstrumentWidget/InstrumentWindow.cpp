@@ -12,6 +12,7 @@
 #include <QRadioButton>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QComboBox>
 #include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -54,6 +55,36 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
 	mMinValueBox->setMaximumWidth(40);
 	mMaxValueBox->setMaximumWidth(40);
+	//Axis view buttons
+	QFrame* axisViewFrame = new QFrame();
+	QHBoxLayout* axisViewLayout = new QHBoxLayout();
+	axisViewLayout->addWidget(new QLabel("Axis View:"));
+	QComboBox* axisCombo=new QComboBox();
+	axisCombo->addItem("Z+");
+	axisCombo->addItem("Z-");
+	axisCombo->addItem("X+");
+	axisCombo->addItem("X-");
+	axisCombo->addItem("Y+");
+	axisCombo->addItem("Y-");
+	axisViewLayout->addWidget(axisCombo);
+	axisViewFrame->setLayout(axisViewLayout);
+	//QFrame* axisViewFrame = new QFrame();
+	//QGridLayout* axisViewLayout =new QGridLayout;
+	//QPushButton* xPosView=new QPushButton(tr("X+"));
+	//QPushButton* xNegView=new QPushButton(tr("X-"));
+	//QPushButton* yPosView=new QPushButton(tr("Y+"));
+	//QPushButton* yNegView=new QPushButton(tr("Y-"));
+	//QPushButton* zPosView=new QPushButton(tr("Z+"));
+	//QPushButton* zNegView=new QPushButton(tr("Z-"));
+	//axisViewLayout->addWidget(xPosView,0,0);
+	//axisViewLayout->addWidget(xNegView,0,1);
+	//axisViewLayout->addWidget(yPosView,1,0);
+	//axisViewLayout->addWidget(yNegView,1,1);
+	//axisViewLayout->addWidget(zPosView,2,0);
+	//axisViewLayout->addWidget(zNegView,2,1);
+	//axisViewFrame->setLayout(axisViewLayout);
+
+	//Colormap Frame widget
 	QFrame* lColormapFrame=new QFrame();
 	QVBoxLayout* lColormapLayout=new QVBoxLayout(lColormapFrame);
 	lColormapLayout->addWidget(mMaxValueBox);
@@ -69,6 +100,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
 	renderControlsLayout->addWidget(mSelectColormap);
+	renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(lColormapFrame);
 
 	//Set the main frame to the window
@@ -90,7 +122,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mSelectBin, SIGNAL(clicked()), mBinMapDialog,SLOT(exec()));
 	connect(mBinMapDialog,SIGNAL(SingleBinNumber(int)), mInstrumentDisplay, SLOT(setDataMappingSingleBin(int)));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(int,int)), mInstrumentDisplay, SLOT(setDataMappingIntegral(int,int)));
-
+	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
     mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
@@ -240,4 +272,35 @@ void InstrumentWindow::updateColorMapWidget()
 	double maxValue=mMaxValueBox->displayText().toDouble();
 	mColorMapWidget->setScaleDiv(lse.transformation(),lse.divideScale(minValue,maxValue,20,5));
 	mColorMapWidget->setColorMap(QwtDoubleInterval(minValue,maxValue),mInstrumentDisplay->getColorMap());
+}
+
+/**
+ * This is the callback for the combo box that selects the view direction
+ */
+void InstrumentWindow::setViewDirection(const QString& input)
+{
+	if(input.compare("X+")==0)
+	{
+		mInstrumentDisplay->setViewDirectionXPositive();
+	}
+	else if(input.compare("X-")==0)
+	{
+		mInstrumentDisplay->setViewDirectionXNegative();
+	}
+	else if(input.compare("Y+")==0)
+	{
+		mInstrumentDisplay->setViewDirectionYPositive();
+	}
+	else if(input.compare("Y-")==0)
+	{
+		mInstrumentDisplay->setViewDirectionYNegative();
+	}
+	else if(input.compare("Z+")==0)
+	{
+		mInstrumentDisplay->setViewDirectionZPositive();
+	}
+	else if(input.compare("Z-")==0)
+	{
+		mInstrumentDisplay->setViewDirectionZNegative();
+	}
 }

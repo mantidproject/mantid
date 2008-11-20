@@ -59,6 +59,19 @@ public:
 	void initTranslateFrom(int,int);
 	//! Call when the mouse is moving during a translation
 	void generateTranslationTo(int,int);
+	//! Call to set the View to X+ direction
+	void setViewToXPositive();
+	//! Call to set the View to Y+ direction
+	void setViewToYPositive();
+	//! Call to set the View to Z+ direction
+	void setViewToZPositive();
+	//! Call to set the View to X- direction
+	void setViewToXNegative();
+	//! Call to set the View to Y- direction
+	void setViewToYNegative();
+	//! Call to set the View to Z- direction
+	void setViewToZNegative();
+
 	double		_scaleFactor;
 private:
     GLViewport*      _viewport;

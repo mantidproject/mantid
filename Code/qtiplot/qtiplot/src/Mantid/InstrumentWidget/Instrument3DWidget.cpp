@@ -133,6 +133,21 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
     // Get back the saved workspace
     Workspace_sptr output;
     output = AnalysisDataService::Instance().retrieve(wsName);
+	//Get the workspace min bin value and max bin value
+	BinMinValue=DBL_MAX;
+	BinMaxValue=-DBL_MAX;
+	for (int i = 0; i < output->getNumberHistograms(); ++i)
+	{
+		std::vector<double> values=output->readX(i);
+		if(BinMinValue>values[0])
+			BinMinValue=values[0];
+		else if(BinMaxValue<values[0])
+			BinMaxValue=values[0];
+		if(BinMinValue>*(values.end()-1))
+			BinMinValue=*(values.end()-1);
+		else if(BinMaxValue<*(values.end()-1))
+			BinMaxValue=*(values.end()-1);
+	}
 	boost::shared_ptr<Mantid::API::Instrument> ins = output->getInstrument();
 	this->ParseInstrumentGeometry(ins);
 }
@@ -328,9 +343,12 @@ void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexLi
 		{
 			double value=0.0;
 			std::vector<double> outputdata=output->readY(histogramIndexList[i]);
+			std::vector<double> binvalues=output->readX(histogramIndexList[i]);
 			for(int timebin=startbin;timebin<endbin;timebin++){
-				if(timebin<outputdata.size())
-					value+=outputdata[timebin];
+				if(BinMinValue<=binvalues[timebin]&&BinMaxValue>=binvalues[timebin]){
+					if(timebin<outputdata.size())
+						value+=outputdata[timebin];
+				}
 			}
 			valuesList.push_back(value);
 			if(value<minval)minval=value;
@@ -458,8 +476,8 @@ void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
 
 void Instrument3DWidget::setDataMappingIntegral(int minValue,int maxValue)
 {
-	this->DataMinValue=minValue;
-	this->DataMaxValue=maxValue;
+	this->BinMinValue=minValue;
+	this->BinMaxValue=maxValue;
 	setDataMappingType(INTEGRAL);
 }
 
@@ -468,3 +486,52 @@ void Instrument3DWidget::setDataMappingSingleBin(int binNumber)
 	this->iTimeBin=binNumber;
 	setDataMappingType(SINGLE_BIN);
 }
+
+/**
+ * Sets the default view to X direction positive
+ */
+void Instrument3DWidget::setViewDirectionXPositive()
+{
+	setViewDirection(XPOSITIVE);
+}
+
+/**
+ * Sets the default view to Y direction positive
+ */
+void Instrument3DWidget::setViewDirectionYPositive()
+{
+	setViewDirection(YPOSITIVE);
+}
+
+/**
+ * Sets the default view to Z direction positive
+ */
+void Instrument3DWidget::setViewDirectionZPositive()
+{
+	setViewDirection(ZPOSITIVE);
+}
+
+/**
+ * Sets the default view to X direction negative
+ */
+void Instrument3DWidget::setViewDirectionXNegative()
+{
+	setViewDirection(XNEGATIVE);
+}
+
+/**
+ * Sets the default view to Y direction negative
+ */
+void Instrument3DWidget::setViewDirectionYNegative()
+{
+	setViewDirection(YNEGATIVE);
+}
+
+/**
+ * Sets the default view to Z direction negative
+ */
+void Instrument3DWidget::setViewDirectionZNegative()
+{
+	setViewDirection(ZNEGATIVE);
+}
+

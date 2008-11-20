@@ -63,6 +63,12 @@ public slots:
 	void setColorMapMaxValue(double maxValue);
 	void setDataMappingIntegral(int minValue,int maxValue);
 	void setDataMappingSingleBin(int binNumber);
+	void setViewDirectionXPositive();
+	void setViewDirectionYPositive();
+	void setViewDirectionZPositive();
+	void setViewDirectionXNegative();
+	void setViewDirectionYNegative();
+	void setViewDirectionZNegative();
 	void pickedID(int id)
 	{
 		std::cout<<"ID of the detector selected "<<id<<std::endl;
@@ -82,6 +88,8 @@ private:
 	GLColorMapQwt mColorMap;
 	double DataMinValue;
 	double DataMaxValue;
+	double BinMinValue;
+	double BinMaxValue;
 	void AssignColors();
 	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument>);
 	std::vector<int> getDetectorIDList();

@@ -59,6 +59,7 @@ public slots:
     void sendPlotSpectraSignal();
 	void minValueChanged();
 	void maxValueChanged();
+	void setViewDirection(const QString&);
 signals:
     void plotSpectra(const QString&,int);
 private:

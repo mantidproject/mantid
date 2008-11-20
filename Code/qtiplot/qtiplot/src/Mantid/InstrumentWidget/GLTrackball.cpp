@@ -130,3 +130,52 @@ void GLTrackball::setViewport(GLViewport* v)
 {
     if (v) _viewport=v;
 }
+
+void GLTrackball::setViewToXPositive()
+{
+	Mantid::Geometry::Quat tempy(-90.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
+	Mantid::Geometry::Quat tempz(90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
+	tempy*=tempz;
+	_quaternion=tempy;
+	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::setViewToYPositive()
+{
+	Mantid::Geometry::Quat tempy(90.0,Mantid::Geometry::V3D(1.0,0.0,0.0));
+	Mantid::Geometry::Quat tempz(90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
+	tempy*=tempz;
+	_quaternion=tempy;
+	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::setViewToZPositive()
+{
+	_quaternion.init();
+	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::setViewToXNegative()
+{
+	Mantid::Geometry::Quat tempy(-90.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
+	Mantid::Geometry::Quat tempz(-90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
+	tempy*=tempz;
+	_quaternion=tempy;
+	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::setViewToYNegative()
+{
+	Mantid::Geometry::Quat tempy(90.0,Mantid::Geometry::V3D(1.0,0.0,0.0));
+	Mantid::Geometry::Quat tempz(-90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
+	tempy*=tempz;
+	_quaternion=tempy;
+	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::setViewToZNegative()
+{
+	Mantid::Geometry::Quat tempy(180.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
+	_quaternion=tempy;
+	_quaternion.GLMatrix(_rotationmatrix);
+}

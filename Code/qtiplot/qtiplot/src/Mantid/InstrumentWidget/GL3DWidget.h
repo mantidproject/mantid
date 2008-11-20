@@ -44,6 +44,7 @@ class GL3DWidget : public QGLWidget
 {
 	Q_OBJECT
 public:
+	enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
 	GL3DWidget(QWidget* parent=0); ///< Constructor
 	virtual ~GL3DWidget();         ///< Destructor
 	void setActorCollection(boost::shared_ptr<GLActorCollection>);
@@ -51,6 +52,7 @@ public:
 	void setInteractionModeNormal();
 	GLActor* getPickedActor();
 	void saveToPPM(QString filename);
+	void setViewDirection(AxisDirection);
 signals:
         void actorPicked( GLActor* );
 		void actorHighlighted( GLActor* );

@@ -451,3 +451,32 @@ void GL3DWidget::saveToPPM(QString filename)
 	QImage img=grabFrameBuffer(false);
 	img.save(filename,"PPM");
 }
+
+/**
+ * Sets the default view to input provided
+ */
+void GL3DWidget::setViewDirection(AxisDirection dir)
+{
+	switch(dir)
+	{
+	case XPOSITIVE:
+		_trackball->setViewToXPositive();
+		break;
+	case YPOSITIVE:
+		_trackball->setViewToYPositive();
+		break;
+	case ZPOSITIVE:
+		_trackball->setViewToZPositive();
+		break;
+	case XNEGATIVE:
+		_trackball->setViewToXNegative();
+		break;
+	case YNEGATIVE:
+		_trackball->setViewToYNegative();
+		break;
+	case ZNEGATIVE:
+		_trackball->setViewToZNegative();
+		break;
+	}
+	updateGL();
+}
