@@ -76,19 +76,19 @@ for line in f.readlines():
 f.close()
 
 #Get python tests result
-try:
-	f = open('../../../../logs/PythonResults.log','r')
+#~ try:
+	#~ f = open('../../../../logs/PythonResults.log','r')
 
-	for line in f.readlines():
-		if line.endswith('FAILED'):
-			#A test failed
-			pythonPass = False
-		mssgPythonResults = mssgPythonResults + line
+	#~ for line in f.readlines():
+		#~ if line.endswith('FAILED'):
+			#~ #A test failed
+			#~ pythonPass = False
+		#~ mssgPythonResults = mssgPythonResults + line
      
-	f.close()
+	#~ f.close()
 
-except:
-	pythonPass = False
+#~ except:
+	#~ pythonPass = False
 
 #Read svn log
 mssgSvn = open('../../../../logs/svn.log','r').read()
@@ -102,14 +102,14 @@ message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
-message += 'Python Tests Passed: ' + str(pythonPass) + "\n\n"
+#~ message += 'Python Tests Passed: ' + str(pythonPass) + "\n\n"
 message += mssgSvn + "\n"
 message += 'UNIT TESTS LOG\n\n'
 message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
-message += 'PYTHON TESTS LOG\n\n'
-message += mssgPythonResults + "\n"
-message += '------------------------------------------------------------------------\n'
+#~ message += 'PYTHON TESTS LOG\n\n'
+#~ message += mssgPythonResults + "\n"
+#~ message += '------------------------------------------------------------------------\n'
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += mssgScons + "\n\n"
 message += mssgSconsErr + "\n"
