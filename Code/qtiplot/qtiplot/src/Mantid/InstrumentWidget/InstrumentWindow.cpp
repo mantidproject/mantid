@@ -131,6 +131,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
     mPopupContext->addAction(plotAction);
+
+	askOnCloseEvent(false);
 }
 
 /**
