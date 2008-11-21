@@ -432,7 +432,7 @@ void Cylinder::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmi
 		//zmin plane
 		zminPoint=Centre+Normal*((zmin-Centre[2])/Normal[2]);
 		//zmax plane
-		zmaxPoint=Centre+Normal*((zmin-Centre[2])/Normal[2]);
+		zmaxPoint=Centre+Normal*((zmax-Centre[2])/Normal[2]);
 		listOfPoints.push_back(zminPoint);
 		listOfPoints.push_back(zmaxPoint);
 	}	
