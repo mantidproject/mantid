@@ -45,7 +45,7 @@ namespace Mantid
       /// search for the data item "dataName" at the top level of the named nexus file and retunr value
       int getNexusDataValue(const std::string& fileName, const std::string& dataName, std::string& value );
       /// search for "definition" in all NXentry's of fileName
-      int NeXusUtils::getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
+      int getNexusEntryTypes(const std::string& fileName, std::vector<std::string>& entryName,
           std::vector<std::string>& definition );
 
 	private:

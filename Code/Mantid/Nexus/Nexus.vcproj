@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadMuonLogTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidNexus\LoadMuonNexus.h"
 				>
 			</File>
@@ -235,7 +239,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadNexusProcessedRaw.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidNexus\MuonNexusReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\NexusFileIO.h"
 				>
 			</File>
 			<File

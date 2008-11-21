@@ -151,6 +151,7 @@ namespace NeXus
        throw Exception::FileError("File contains no mantid_workspace_ entries: " , fileName);
    }
    if( workspaceNumber>0 )
+   {
        if( workspaceNumber<=count )
        {
            count=workspaceNumber;
@@ -160,6 +161,7 @@ namespace NeXus
            g_log.error("File does not contains mantid_workspace_" + workspaceNumber + fileName);
            throw Exception::FileError("File does not contains mantid_workspace_" + workspaceNumber , fileName);
        }
+   }
    std::stringstream suffix;
    suffix << (count);
    mantidEntryName="mantid_workspace_"+suffix.str();
@@ -279,7 +281,6 @@ namespace NeXus
 	                           std::vector<std::string>& avalues)
   {
    NXstatus status;
-   int dimensions[1];
    status=NXopendata(fileID, name.c_str());
    if(status==NX_ERROR)
        return(false);
@@ -291,7 +292,6 @@ namespace NeXus
        if(type==NX_CHAR) // ignoring non char attributes
        {
            attributes.push_back(aname);
-           int len=NX_MAXNAMELEN;
            NXgetattr(fileID,aname,(void *)avalue,&length,&type);
            avalues.push_back(avalue);
        }
