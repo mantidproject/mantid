@@ -6,7 +6,7 @@
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusFileWriter.h"
+#include "MantidNexus/NexusFileIO.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
@@ -44,6 +44,8 @@ namespace NeXus
     exts.push_back("nxs");
     exts.push_back("nx5");
     exts.push_back("NX5");
+    exts.push_back("xml");
+    exts.push_back("XML");
     //declareProperty("FileName","",new FileValidator(exts));
     declareProperty("FileName","",new MandatoryValidator<std::string>);
     declareProperty("EntryName","",new MandatoryValidator<std::string>);
@@ -79,7 +81,7 @@ namespace NeXus
     if (workspaceID != "Workspace2D")
         throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
 
-    NexusFileWriter *nexusFile= new NexusFileWriter();
+    NexusFileIO *nexusFile= new NexusFileIO();
     if( nexusFile->openNexusWrite( m_filename, m_entryname ) != 0 )
     {
        g_log.error("Failed to open file");

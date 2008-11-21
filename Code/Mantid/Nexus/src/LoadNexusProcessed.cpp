@@ -1,0 +1,206 @@
+// LoadNexusProcessed
+// @author Ronald Fowler, based on SaveNexus
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidNexus/NexusFileIO.h"
+
+#include <cmath>
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid
+{
+namespace NeXus
+{
+
+  // Register the algorithm into the algorithm factory
+  DECLARE_ALGORITHM(LoadNexusProcessed)
+
+  using namespace Kernel;
+  using namespace API;
+  using namespace DataObjects;
+
+  // Initialise logger
+  Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
+
+  /// Empty default constructor
+  LoadNexusProcessed::LoadNexusProcessed() :
+    Algorithm(), m_filename(), m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0),
+    m_workspace_no(0)
+  {
+  }
+
+  /** Initialisation method.
+   *
+   */
+  void LoadNexusProcessed::init()
+  {
+    // Declare required input parameters for algorithm
+    std::vector<std::string> exts;
+    exts.push_back("NXS");
+    exts.push_back("nxs");
+    exts.push_back("nx5");
+    exts.push_back("NX5");
+    exts.push_back("xml");
+    exts.push_back("XML");
+    // required
+    declareProperty("FileName","",new MandatoryValidator<std::string>);
+    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+    // optional
+    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    mustBePositive->setLower(0);
+    declareProperty("spectrum_min",0, mustBePositive);
+    declareProperty("spectrum_max",0, mustBePositive->clone());
+    declareProperty("EntryNumber",0, mustBePositive->clone());
+    declareProperty(new ArrayProperty<int>("spectrum_list"));
+  }
+
+  /** Executes the algorithm. Reading in the file and creating and populating
+   *  the output workspace
+   *
+   *  @throw runtime_error Thrown if algorithm cannot execute
+   */
+  void LoadNexusProcessed::exec()
+  {
+    // Retrieve the filename from the properties
+    m_filename = getPropertyValue("FileName");
+    // Need to extract the user-defined output workspace name
+    Property *ws = getProperty("OutputWorkspace");
+    std::string localWSName = ws->value();
+    boost::shared_ptr<Sample> sample;
+    //
+    m_entrynumber = getProperty("EntryNumber");
+    NexusFileIO *nexusFile= new NexusFileIO();
+
+    if( nexusFile->openNexusRead( m_filename, m_workspace_no ) != 0 )
+    {
+       g_log.error("Failed to read file");
+       throw Exception::FileError("Failed to read to file", m_filename);
+    }
+    if( nexusFile->getWorkspaceSize( m_numberofspectra, m_numberofchannels, m_xpoints, m_uniformbounds, m_axes) != 0 )
+    {
+       g_log.error("Failed to read data size");
+       throw Exception::FileError("Failed to read data size", m_filename);
+    }
+
+    // validate the optional parameters, if set
+    checkOptionalProperties();
+    int total_specs,lengthIn=m_numberofchannels;
+
+    // Create the 2D workspace for the output
+    if( m_interval || m_list)
+    {
+        total_specs = m_spec_list.size();
+        if (m_interval)
+        {
+            total_specs += (m_spec_max-m_spec_min+1);
+            m_spec_max += 1;
+        }
+    }
+    else
+    {
+        total_specs = m_numberofspectra;
+        m_spec_min = 1;
+        m_spec_max = m_numberofspectra + 1;
+    }
+
+    // create output workspace of required size
+    DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                 (WorkspaceFactory::Instance().create("Workspace2D",total_specs,m_xpoints,m_numberofchannels));
+    // set first axis name
+    size_t colon=m_axes.find(":");
+    if(colon!=std::string::npos)
+        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0,colon));
+
+    std::vector<double> xValues;
+    if(m_uniformbounds)
+        nexusFile->getXValues(xValues,0);
+    int counter = 0;
+    for (int i = 1; i <= m_numberofspectra; ++i)
+    {
+        //int histToRead = i + period*(m_numberOfSpectra+1);
+        if ((i >= m_spec_min && i < m_spec_max) || 
+             (m_list && find(m_spec_list.begin(),m_spec_list.end(),i) != m_spec_list.end()))
+        {
+            std::vector<double> values,errors;
+            nexusFile->getSpectra(values,errors,i);
+            localWorkspace->setData(counter,values,errors);
+            if(!m_uniformbounds)
+                nexusFile->getXValues(xValues,i);
+            localWorkspace->setX(counter, xValues);
+            localWorkspace->setErrorHelper(counter,GaussianErrorHelper::Instance());
+            localWorkspace->getAxis(1)->spectraNo(counter)= i;
+            //
+            ++counter;
+            //if (++histCurrent % 100 == 0) progress(double(histCurrent)/total_specs); dont understand setting of histCurrent
+            interruption_point();
+        }
+    }
+
+    sample = localWorkspace->getSample();
+    nexusFile->readNexusProcessedSample(sample);
+    // Assign the result to the output workspace property
+    std::string outputWorkspace = "OutputWorkspace";
+    setProperty(outputWorkspace,localWorkspace);
+    nexusFile->closeNexusFile();
+
+    return;
+  }
+
+    /// Validates the optional 'spectra to read' properties, if they have been set
+    void LoadNexusProcessed::checkOptionalProperties()
+    {
+      // from Loadraw2
+      Property *specList = getProperty("spectrum_list");
+      m_list = !(specList->isDefault());
+      Property *specMax = getProperty("spectrum_max");
+      m_interval = !(specMax->isDefault());
+      
+      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
+      /*
+      if ( m_numberOfPeriods > 1)
+      {
+        if ( m_list || m_interval )
+        {
+          m_list = false;
+          m_interval = false;
+          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
+        }
+      }
+      */
+
+      // Check validity of spectra list property, if set
+      if ( m_list )
+      {
+        m_list = true;
+        m_spec_list = getProperty("spectrum_list");
+        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+        if ( maxlist > m_numberofspectra || minlist == 0)
+        {
+          g_log.error("Invalid list of spectra");
+          throw std::invalid_argument("Inconsistent properties defined"); 
+        } 
+      }
+           
+      // Check validity of spectra range, if set
+      if ( m_interval )
+      {
+        m_interval = true;
+        m_spec_min = getProperty("spectrum_min");
+        m_spec_max = getProperty("spectrum_max");
+        if ( m_spec_max < m_spec_min || m_spec_max > m_numberofspectra )
+        {
+          g_log.error("Invalid Spectrum min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined"); 
+        }
+      }
+    }
+} // namespace NeXus
+} // namespace Mantid

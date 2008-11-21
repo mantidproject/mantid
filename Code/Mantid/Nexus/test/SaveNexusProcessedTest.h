@@ -82,7 +82,7 @@ public:
 
 	// changed so that 1D workspaces are no longer written.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
-    TS_ASSERT( ! algToBeTested.isExecuted() );
+    TS_ASSERT( algToBeTested.isExecuted() );
 
     remove(outputFile.c_str());
 
@@ -109,7 +109,7 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // this would make all X's separate
-    output2D->dataX(22)[3]=0.55;
+    // output2D->dataX(22)[3]=0.55;
     //
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
 
@@ -137,6 +137,7 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
     remove(outputFile.c_str());
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
   }
 
@@ -183,8 +184,60 @@ void testExecOnLoadraw()
     TS_ASSERT( algToBeTested.isExecuted() );
 
     remove(outputFile.c_str());
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
 }
+
+void testExecOnMuonXml()
+  {
+    LoadNeXus nxLoad;
+    std::string outputSpace,inputFile;
+    nxLoad.initialize();
+    // Now set required filename and output workspace name
+    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+    outputSpace="outer";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());
+    TS_ASSERT( nxLoad.isExecuted() );
+    //
+    // get workspace
+    //
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
+
+    algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
+    // specify name of file to save workspace to
+    outputFile = "testOfSaveNexusProcessed2.xml";
+    remove(outputFile.c_str());
+    entryName = "entry4";
+    dataName = "spectra";
+    title = "A save of a 2D workspace from Muon file";
+    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("EntryName", entryName);
+    algToBeTested.setPropertyValue("Title", title);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
+    TS_ASSERT( ! result.compare(outputFile));
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
+    TS_ASSERT( ! result.compare(entryName));
+
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT( algToBeTested.isExecuted() );
+
+	// try writing data again
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT( algToBeTested.isExecuted() );
+    remove(outputFile.c_str());
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
+
+  }
 
 private:
   SaveNexusProcessed algToBeTested;

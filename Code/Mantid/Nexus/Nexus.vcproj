@@ -177,7 +177,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadNexusProcessed.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MuonNexusReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\NexusFileIO.cpp"
 				>
 			</File>
 			<File
@@ -220,6 +228,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidNexus\LoadNeXus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\LoadNexusProcessed.h"
 				>
 			</File>
 			<File

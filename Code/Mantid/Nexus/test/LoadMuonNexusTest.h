@@ -142,7 +142,6 @@ public:
     boost::shared_ptr<Mantid::Geometry::IDetector> test;
     TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
     */
-//    remove(inputFile.c_str());
    
   }
 //  void testWithManagedWorkspace()

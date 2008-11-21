@@ -71,14 +71,15 @@ namespace NeXus
 	std::string dataName="analysis", muonTd="muonTD";
 	std::string value;
     NeXusUtils *nexusFile= new NeXusUtils();
-	int status=nexusFile->getNexusDataValue(m_filename,dataName,value );
-	if( status==0 && value==muonTd )
+    std::vector<std::string> entryName,definition;
+    int count=nexusFile->getNexusEntryTypes(m_filename,entryName,definition);
+	if( definition[0]==muonTd )
 	{
 		runLoadMuonNexus();
 	}
-	else if( status != -1 )
+	else if( entryName[0]=="mantid_workspace_1" )
 	{
-		runLoadIsisNexus();
+		runLoadNexusProcessed();
 	}
 	else
 	{
@@ -148,7 +149,7 @@ namespace NeXus
 	  }
   }
 
-  void LoadNeXus::runLoadIsisNexus()
+  void LoadNeXus::runLoadNexusProcessed()
   {
   }
 

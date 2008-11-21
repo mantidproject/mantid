@@ -129,7 +129,7 @@ void testExecOnMuon()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
     TS_ASSERT( algToBeTested.isExecuted() );  
 
-    //remove(outputFile.c_str());
+    remove(outputFile.c_str());
 	// test writing two entries into one nexus file with different names.
 	entryName="entry5";
     algToBeTested.setPropertyValue("EntryName", entryName);

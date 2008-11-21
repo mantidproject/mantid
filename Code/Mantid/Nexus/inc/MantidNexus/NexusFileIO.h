@@ -1,12 +1,12 @@
-#ifndef NEXUSFILEWRITER_H
-#define NEXUSFILEWRITER_H
+#ifndef NEXUSFILEIO_H
+#define NEXUSFILEIO_H
 #include <napi.h>
 #include "MantidDataObjects/Workspace2D.h"
 namespace Mantid
 {
   namespace NeXus
   {
-    /** @class NexusFileWriter NexusFileWriter.h NeXus/NexusFileWriter.h
+    /** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
 
     Utility method for saving NeXus format of Mantid Workspace
 
@@ -30,31 +30,49 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport NexusFileWriter
+    class DLLExport NexusFileIO
     {
     public:
       /// Default constructor
-      NexusFileWriter();
+      NexusFileIO();
 
       /// Destructor
-      ~NexusFileWriter() {}
+      ~NexusFileIO() {}
 
-      /// open the nexus file
+      /// open the nexus file for writing
       int openNexusWrite(const std::string& fileName, const std::string& entryName);
+      /// open the nexus file for reading
+      int openNexusRead(const std::string& fileName, int& workspaceNumber);
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& entryName, const std::string& title);
       /// write sample related data
       int writeNexusProcessedSample( const std::string& entryName, const std::string& title,
-							  const boost::shared_ptr<Mantid::API::Sample> sample);
+							  const boost::shared_ptr<Mantid::API::Sample>& sample);
+      // read sample data
+      int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
       /// write the workspace data
       int writeNexusProcessedData( const std::string& entryName,
-							const boost::shared_ptr<Mantid::DataObjects::Workspace2D> localworkspace,
-							const bool uniformSpectra, const int fromY, const int toY);
+							const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+							const bool& uniformSpectra, const int& fromY, const int& toY);
+      /// find size of open entry data section
+      int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
+               bool& uniformBounds, std::string& axesNames );
+      /// read X values for one (or the generic if uniform) spectra
+      int getXValues(std::vector<double>& xValues, const int& spectra);
+      /// read values and erros for spectra
+      int getSpectra(std::vector<double>& values, std::vector<double>& errors, const int& spectra);
+
+      /// read the Nexus Processed Data
+      bool readNexusProcessedData( boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+							bool& uniformSpectra, int& m_spec_min, int& m_spec_max);
       /// write the algorithm and environment information
-      int writeNexusProcessedProcess(const boost::shared_ptr<Mantid::DataObjects::Workspace2D> localworkspace);
+      int writeNexusProcessedProcess(const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace);
       /// write the source XML file used, if it exists
       bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
                             const std::string& version);
+      /// read the source XML file used
+      bool readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
+                            std::string& version);
       /// write an instrument section - currently only the name
       bool writeNexusInstrument(const boost::shared_ptr<API::Instrument>& instrument);
       /// close the nexus file
@@ -68,14 +86,20 @@ namespace Mantid
       /// Nexus compression method
       int m_nexuscompression;
       /// write a text value plus possible attribute
-      bool writeNxText(NXhandle fileID, std::string name, std::string value, std::vector<std::string> attributes,
-				 std::vector<std::string> avalues);
+      bool writeNxText( const std::string& name, const std::string& value, const std::vector<std::string>& attributes,
+				 const std::vector<std::string>& avalues);
+      /// read a text value plus possible attribute
+      bool readNxText(const std::string& name, std::string& value, std::vector<std::string>& attributes,
+				 std::vector<std::string>& avalues);
       /// write an NXnote with standard fields (but NX_CHAR rather than NX_BINARY data)
       bool writeNxNote(const std::string& noteName, const std::string& author, const std::string& date,
                          const std::string& description, const std::string& pairValues);
       /// write a flost value plus possible attributes
-      bool writeNxFloat(const std::string name, const double& value, const std::vector<std::string> attributes,
-	                           const std::vector<std::string> avalues);
+      bool writeNxFloat(const std::string& name, const double& value, const std::vector<std::string>& attributes,
+	                           const std::vector<std::string>& avalues);
+      /// read a float value and possible attributes
+      bool readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
+	                           std::vector<std::string>& avalues);
       /// write test field
       int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value);
       /// search for exisiting MantidWorkpace_n entries in opened file
@@ -90,4 +114,4 @@ namespace Mantid
   } // namespace NeXus
 } // namespace Mantid
 
-#endif /* NEXUSFILEWRITER_H */
+#endif /* NEXUSFILEIO_H */

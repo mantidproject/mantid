@@ -1,37 +1,27 @@
-#ifndef MANTID_DATAHANDLING_LOADNEXUS_H_
-#define MANTID_DATAHANDLING_LOADNEXUS_H_
+#ifndef MANTID_NEXUS_LOADNEXUSPROCESSED_H_
+#define MANTID_NEXUS_LOADNEXUSPROCESSED_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Property.h"
 
 namespace Mantid
 {
   namespace NeXus
   {
-    /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h
+    /** @class LoadNexusProcessed LoadNexusProcessed.h NeXus/LoadNexusProcessed.h
 
-    Loads a file in NeXus format and stores it in a 2D workspace 
-    (Workspace2D class). LoadNeXus is an algorithm and as such inherits
+    Loads a workspace from a Nexus Processed entry in a Nexus file. 
+    LoadNexusProcessed is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
-	</UL>
-	Optional Properties:
-	<UL>
-	<LI> spectrum_list - integer list of spectra numbers to load</LI>
-	<LI> spectrum_min, spectrum_max - range of spectra to load</LI>
+    <LI> Filename - The name of the input Nexus file (must exist) </LI>
+    <LI> InputWorkspace - The name of the workspace to put the data </LI>
     </UL>
-
-    @author Ronald Fowler, based on version by Freddie Akeroyd
-    @date 29/08/2008
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -53,16 +43,16 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadNeXus : public API::Algorithm
+    class DLLExport LoadNexusProcessed : public API::Algorithm
     {
     public:
       /// Default constructor
-      LoadNeXus();
+      LoadNexusProcessed();
 
       /// Destructor
-      ~LoadNeXus() {}
+      ~LoadNexusProcessed() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadNexus";};
+      virtual const std::string name() const { return "LoadNexusProcessed";};
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
@@ -76,31 +66,45 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
+      /// check optional params
+      void checkOptionalProperties();
       /// The name and path of the input file
       std::string m_filename;
-
-	  /// The name of the output workspace
-	  std::string m_workspace;
-
+      /// The number of the input entry
+      int m_entrynumber;
+      /// The title of the processed data section
+      std::string m_title;
       /// Pointer to the local workspace
-      DataObjects::Workspace2D_sptr m_localWorkspace;
+      API::Workspace_sptr m_outputWorkspace;
+	  /// Flag set if list of spectra to save is specifed
+	  bool m_list;
+	  /// Flag set if interval of spectra to write is set
+	  bool m_interval;
+      /// The value of the spectrum_list property
+      std::vector<int> m_spec_list;
+      /// The value of the spectrum_min property
+      int m_spec_min;
+      /// The value of the spectrum_max property
+      int m_spec_max;
+      /// The value of the workspace number property
+      int m_workspace_no;
+      /// total number of spectra
+      int m_numberofspectra;
+      /// total channels
+      int m_numberofchannels;
+      /// total x points (m_numberofchannels or m_numberofchannels+1)
+      int m_xpoints;
+      /// flag if bounds are same for all spectra
+      bool m_uniformbounds;
+      /// axes names
+      std::string m_axes;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
-
-	  /// run LoadMuonNexus
-	  void runLoadMuonNexus();
-
-	  /// run LoadIsisNexus
-	  void runLoadIsisNexus();
-
-	  /// run LoadNexusProcessed
-	  void runLoadNexusProcessed();
-
 
     };
 
   } // namespace NeXus
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADNEXUS_H_*/
+#endif /*MANTID_NEXUS_LOADNEXUSPROCESSED_H_*/
