@@ -14,7 +14,7 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace to convert.</LI>
+    <LI> Workspace - The name of the Workspace to convert.</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc

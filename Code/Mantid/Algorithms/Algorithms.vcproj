@@ -182,6 +182,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConvertFromDistribution.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ConvertToDistribution.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConvertUnits.cpp"
 				>
 			</File>
@@ -289,6 +297,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\ConjoinWorkspaces.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ConvertFromDistribution.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ConvertToDistribution.h"
 				>
 			</File>
 			<File
