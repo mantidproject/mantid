@@ -193,6 +193,23 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     retVal->setObject(21, algebraFromUser);
     retVal->populate(primitives);
 
+
+    // get bounding box string
+    NodeList* pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
+    if ( pNL_boundingBox->length() != 1)  // should probably throw an error if more than 1 bounding box is defined...
+      return retVal;
+    Element* pElemBB = static_cast<Element*>(pNL_boundingBox->item(0)); 
+    pNL_boundingBox->release();
+
+    double xmin = atof( ((getShapeElement(pElem, "x-min"))->getAttribute("val")).c_str() );
+    double ymin = atof( ((getShapeElement(pElem, "y-min"))->getAttribute("val")).c_str() );
+    double zmin = atof( ((getShapeElement(pElem, "z-min"))->getAttribute("val")).c_str() );
+    double xmax = atof( ((getShapeElement(pElem, "x-max"))->getAttribute("val")).c_str() );
+    double ymax = atof( ((getShapeElement(pElem, "y-max"))->getAttribute("val")).c_str() );
+    double zmax = atof( ((getShapeElement(pElem, "z-max"))->getAttribute("val")).c_str() );
+
+    retVal->defineBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+
     return retVal;
   }
 }
@@ -209,25 +226,8 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
  */
 std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for centre element
-  NodeList* pNL_centre = pElem->getElementsByTagName("centre");
-  if ( pNL_centre->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <sphere> element with missing <centre> element");
-  }
-  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
-  pNL_centre->release();
-
-  // check for radius element
-  NodeList* pNL_radius = pElem->getElementsByTagName("radius");
-  if ( pNL_radius->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <sphere> element with missing <radius> element");
-  }
-  Element* pElemRadius = static_cast<Element*>(pNL_radius->item(0)); 
-  pNL_radius->release();
+  Element* pElemCentre = getShapeElement(pElem, "centre"); 
+  Element* pElemRadius = getShapeElement(pElem, "radius"); 
 
   // create sphere
   Sphere* pSphere = new Sphere;
@@ -253,25 +253,8 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, G
  */
 std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for point-in-plane element
-  NodeList* pNL_pip = pElem->getElementsByTagName("point-in-plane");
-  if ( pNL_pip->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-plane> element with missing <point-in-plane> element");
-  }
-  Element* pElemPip = static_cast<Element*>(pNL_pip->item(0)); 
-  pNL_pip->release();
-
-  // check for normal-to-plane element
-  NodeList* pNL_normal = pElem->getElementsByTagName("normal-to-plane");
-  if ( pNL_normal->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-plane> element with missing <normal-to-plane> element");
-  }
-  Element* pElemNormal = static_cast<Element*>(pNL_normal->item(0)); 
-  pNL_normal->release();
+  Element* pElemPip = getShapeElement(pElem, "point-in-plane"); 
+  Element* pElemNormal = getShapeElement(pElem, "normal-to-plane"); 
 
   // create infinite-plane
   Plane* pPlane = new Plane();
@@ -296,35 +279,9 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map
  */
 std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for centre element
-  NodeList* pNL_centre = pElem->getElementsByTagName("centre");
-  if ( pNL_centre->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cylinder> element with missing <centre> element");
-  }
-  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
-  pNL_centre->release();
-
-  // check for axis element
-  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
-  if ( pNL_axis->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cylinder> element with missing <axis> element");
-  }
-  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
-  pNL_axis->release();
-
-  // check for radius element
-  NodeList* pNL_radius = pElem->getElementsByTagName("radius");
-  if ( pNL_radius->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cylinder> element with missing <radius> element");
-  }
-  Element* pElemRadius = static_cast<Element*>(pNL_radius->item(0)); 
-  pNL_radius->release();
+  Element* pElemCentre = getShapeElement(pElem, "centre");  
+  Element* pElemAxis = getShapeElement(pElem, "axis");   
+  Element* pElemRadius = getShapeElement(pElem, "radius"); 
 
   // create infinite-cylinder
   Cylinder* pCylinder = new Cylinder();
@@ -356,46 +313,10 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
  */
 std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for centre element
-  NodeList* pNL_centre = pElem->getElementsByTagName("centre-of-bottom-base");
-  if ( pNL_centre->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cylinder> element with missing <centre-of-bottom-base> element");
-  }
-  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
-  pNL_centre->release();
-
-  // check for axis element
-  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
-  if ( pNL_axis->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cylinder> element with missing <axis> element");
-  }
-  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
-  pNL_axis->release();
-
-  // check for radius element
-  NodeList* pNL_radius = pElem->getElementsByTagName("radius");
-  if ( pNL_radius->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cylinder> element with missing <radius> element");
-  }
-  Element* pElemRadius = static_cast<Element*>(pNL_radius->item(0)); 
-  pNL_radius->release();
-
-  // check for height element
-  NodeList* pNL_height = pElem->getElementsByTagName("height");
-  if ( pNL_height->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cylinder> element with missing <height> element");
-  }
-  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
-  pNL_height->release();
-
+  Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base"); 
+  Element* pElemAxis = getShapeElement(pElem, "axis"); 
+  Element* pElemRadius = getShapeElement(pElem, "radius"); 
+  Element* pElemHeight = getShapeElement(pElem, "height"); 
 
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
@@ -443,46 +364,10 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
  */
 std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for left-front-bottom-point element
-  NodeList* pNL_lfb = pElem->getElementsByTagName("left-front-bottom-point");
-  if ( pNL_lfb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cuboid> element with missing <left-front-bottom-point> element");
-  }
-  Element* pElem_lfb = static_cast<Element*>(pNL_lfb->item(0)); 
-  pNL_lfb->release();
-
-  // check for left-front-top-point element
-  NodeList* pNL_lft = pElem->getElementsByTagName("left-front-top-point");
-  if ( pNL_lft->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cuboid> element with missing <left-front-top-point> element");
-  }
-  Element* pElem_lft = static_cast<Element*>(pNL_lft->item(0)); 
-  pNL_lft->release();
-
-  // check for left-back-bottom-point element
-  NodeList* pNL_lbb = pElem->getElementsByTagName("left-back-bottom-point");
-  if ( pNL_lbb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cuboid> element with missing <left-back-bottom-point> element");
-  }
-  Element* pElem_lbb = static_cast<Element*>(pNL_lbb->item(0)); 
-  pNL_lbb->release();
-
-  // check for right-front-bottom-point element
-  NodeList* pNL_rfb = pElem->getElementsByTagName("right-front-bottom-point");
-  if ( pNL_rfb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cuboid> element with missing <right-front-bottom-point> element");
-  }
-  Element* pElem_rfb = static_cast<Element*>(pNL_rfb->item(0)); 
-  pNL_rfb->release();
-
+  Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
+  Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
+  Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
+  Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point"); 
 
   V3D lfb = parsePosition(pElem_lfb);  // left front bottom
   V3D lft = parsePosition(pElem_lft);  // left front top
@@ -559,35 +444,9 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, G
  */
 std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for tip-point element
-  NodeList* pNL_tipPoint = pElem->getElementsByTagName("tip-point");
-  if ( pNL_tipPoint->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cone> element with missing <tip-point> element");
-  }
-  Element* pElemTipPoint = static_cast<Element*>(pNL_tipPoint->item(0)); 
-  pNL_tipPoint->release();
-
-  // check for axis element
-  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
-  if ( pNL_axis->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cone> element with missing <axis> element");
-  }
-  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
-  pNL_axis->release();
-
-  // check for angle element
-  NodeList* pNL_angle = pElem->getElementsByTagName("angle");
-  if ( pNL_angle->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <infinite-cone> element with missing <angle> element");
-  }
-  Element* pElemAngle = static_cast<Element*>(pNL_angle->item(0)); 
-  pNL_angle->release();
+  Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
+  Element* pElemAxis = getShapeElement(pElem, "axis"); 
+  Element* pElemAngle = getShapeElement(pElem, "angle");  
 
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
@@ -626,46 +485,10 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
  */
 std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for tip-point element
-  NodeList* pNL_tipPoint = pElem->getElementsByTagName("tip-point");
-  if ( pNL_tipPoint->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cone> element with missing <tip-point> element");
-  }
-  Element* pElemTipPoint = static_cast<Element*>(pNL_tipPoint->item(0)); 
-  pNL_tipPoint->release();
-
-  // check for axis element
-  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
-  if ( pNL_axis->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cone> element with missing <axis> element");
-  }
-  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
-  pNL_axis->release();
-
-  // check for angle element
-  NodeList* pNL_angle = pElem->getElementsByTagName("angle");
-  if ( pNL_angle->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cone> element with missing <angle> element");
-  }
-  Element* pElemAngle = static_cast<Element*>(pNL_angle->item(0)); 
-  pNL_angle->release();
-
-  // check for height element
-  NodeList* pNL_height = pElem->getElementsByTagName("height");
-  if ( pNL_height->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <cone> element with missing <height> element");
-  }
-  Element* pElemHeight = static_cast<Element*>(pNL_height->item(0)); 
-  pNL_height->release();
-
+  Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
+  Element* pElemAxis = getShapeElement(pElem, "axis");  
+  Element* pElemAngle = getShapeElement(pElem, "angle");  
+  Element* pElemHeight = getShapeElement(pElem, "height"); 
 
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
@@ -713,86 +536,14 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geo
  */
 std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for left-front-bottom-point element
-  NodeList* pNL_lfb = pElem->getElementsByTagName("left-front-bottom-point");
-  if ( pNL_lfb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <left-front-bottom-point> element");
-  }
-  Element* pElem_lfb = static_cast<Element*>(pNL_lfb->item(0)); 
-  pNL_lfb->release();
-
-  // check for left-front-top-point element
-  NodeList* pNL_lft = pElem->getElementsByTagName("left-front-top-point");
-  if ( pNL_lft->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <left-front-top-point> element");
-  }
-  Element* pElem_lft = static_cast<Element*>(pNL_lft->item(0)); 
-  pNL_lft->release();
-
-  // check for left-back-bottom-point element
-  NodeList* pNL_lbb = pElem->getElementsByTagName("left-back-bottom-point");
-  if ( pNL_lbb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <left-back-bottom-point> element");
-  }
-  Element* pElem_lbb = static_cast<Element*>(pNL_lbb->item(0)); 
-  pNL_lbb->release();
-
-  // check for left-back-top-point element
-  NodeList* pNL_lbt = pElem->getElementsByTagName("left-back-top-point");
-  if ( pNL_lbt->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <left-back-top-point> element");
-  }
-  Element* pElem_lbt = static_cast<Element*>(pNL_lbt->item(0)); 
-  pNL_lbt->release();
-
-  // check for right-front-bottom-point element
-  NodeList* pNL_rfb = pElem->getElementsByTagName("right-front-bottom-point");
-  if ( pNL_rfb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <right-front-bottom-point> element");
-  }
-  Element* pElem_rfb = static_cast<Element*>(pNL_rfb->item(0)); 
-  pNL_rfb->release();
-
-  // check for right-front-top-point element
-  NodeList* pNL_rft = pElem->getElementsByTagName("right-front-top-point");
-  if ( pNL_rft->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <right-front-top-point> element");
-  }
-  Element* pElem_rft = static_cast<Element*>(pNL_rft->item(0)); 
-  pNL_rft->release();
-
-  // check for right-back-bottom-point element
-  NodeList* pNL_rbb = pElem->getElementsByTagName("right-back-bottom-point");
-  if ( pNL_rbb->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <right-back-bottom-point> element");
-  }
-  Element* pElem_rbb = static_cast<Element*>(pNL_rbb->item(0)); 
-  pNL_rbb->release();
-
-  // check for right-back-top-point element
-  NodeList* pNL_rbt = pElem->getElementsByTagName("right-back-top-point");
-  if ( pNL_rbt->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <hexahedron> element with missing <right-back-top-point> element");
-  }
-  Element* pElem_rbt = static_cast<Element*>(pNL_rbt->item(0)); 
-  pNL_rbt->release();
-
+  Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
+  Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
+  Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
+  Element* pElem_lbt = getShapeElement(pElem, "left-back-top-point"); 
+  Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point");  
+  Element* pElem_rft = getShapeElement(pElem, "right-front-top-point");  
+  Element* pElem_rbb = getShapeElement(pElem, "right-back-bottom-point"); 
+  Element* pElem_rbt = getShapeElement(pElem, "right-back-top-point"); 
 
   V3D lfb = parsePosition(pElem_lfb);  // left front bottom
   V3D lft = parsePosition(pElem_lft);  // left front top
@@ -872,45 +623,10 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
  */
 std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for centre element
-  NodeList* pNL_centre = pElem->getElementsByTagName("centre");
-  if ( pNL_centre->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <torus> element with missing <centre> element");
-  }
-  Element* pElemCentre = static_cast<Element*>(pNL_centre->item(0)); 
-  pNL_centre->release();
-
-  // check for axis element
-  NodeList* pNL_axis = pElem->getElementsByTagName("axis");
-  if ( pNL_axis->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <torus> element with missing <axis> element");
-  }
-  Element* pElemAxis = static_cast<Element*>(pNL_axis->item(0)); 
-  pNL_axis->release();
-
-  // check for radius-from-centre-to-tube element
-  NodeList* pNL_radiusFromCentre = pElem->getElementsByTagName("radius-from-centre-to-tube");
-  if ( pNL_radiusFromCentre->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <torus> element with missing <radius-from-centre-to-tube> element");
-  }
-  Element* pElemRadiusFromCentre = static_cast<Element*>(pNL_radiusFromCentre->item(0)); 
-  pNL_radiusFromCentre->release();
-
-  // check for radius-tube element
-  NodeList* pNL_radiusTube = pElem->getElementsByTagName("radius-tube");
-  if ( pNL_radiusTube->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <torus> element with missing <radius-from-centre-to-tube> element");
-  }
-  Element* pElemRadiusTube = static_cast<Element*>(pNL_radiusTube->item(0)); 
-  pNL_radiusTube->release();
+  Element* pElemCentre = getShapeElement(pElem, "centre"); 
+  Element* pElemAxis = getShapeElement(pElem, "axis");  
+  Element* pElemRadiusFromCentre = getShapeElement(pElem, "radius-from-centre-to-tube");
+  Element* pElemRadiusTube = getShapeElement(pElem, "radius-tube");
 
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
@@ -942,46 +658,10 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Ge
  */
 std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
 {
-  // check for arc element
-  NodeList* pNL_arc = pElem->getElementsByTagName("arc");
-  if ( pNL_arc->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <slice-of-cylinder-ring> element with missing <arc> element");
-  }
-  Element* pElemArc = static_cast<Element*>(pNL_arc->item(0)); 
-  pNL_arc->release();
-
-  // check for inner-radius element
-  NodeList* pNL_inner_radius = pElem->getElementsByTagName("inner-radius");
-  if ( pNL_inner_radius->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <slice-of-cylinder-ring> element with missing <inner-radius> element");
-  }
-  Element* pElemInnerRadius = static_cast<Element*>(pNL_inner_radius->item(0)); 
-  pNL_inner_radius->release();
-
-  // check for outer-radius element
-  NodeList* pNL_outer_radius = pElem->getElementsByTagName("outer-radius");
-  if ( pNL_outer_radius->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <slice-of-cylinder-ring> element with missing <outer-radius> element");
-  }
-  Element* pElemOuterRadius = static_cast<Element*>(pNL_outer_radius->item(0)); 
-  pNL_outer_radius->release();
-
-  // check for depth element
-  NodeList* pNL_depth = pElem->getElementsByTagName("depth");
-  if ( pNL_depth->length() != 1)
-  {
-    throw Kernel::Exception::InstrumentDefinitionError("XML <type> element: " + pElem->tagName() +
-      " contains <slice-of-cylinder-ring> element with missing <depth> element");
-  }
-  Element* pElemDepth = static_cast<Element*>(pNL_depth->item(0)); 
-  pNL_depth->release();
-
+  Element* pElemArc = getShapeElement(pElem, "arc"); 
+  Element* pElemInnerRadius = getShapeElement(pElem, "inner-radius");  
+  Element* pElemOuterRadius = getShapeElement(pElem, "outer-radius");  
+  Element* pElemDepth = getShapeElement(pElem, "depth"); 
 
   double innerRadius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
   double outerRadius = atof( (pElemOuterRadius->getAttribute("val")).c_str() );
@@ -1045,6 +725,29 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   return retAlgebraMatch.str();
 }
 
+
+/** Return a subelement of an XML element, but also checks that there exist exactly one entry
+ *  of this subelement.
+ *
+ *  @param pElem XML from instrument def. file
+ *  @param name Name of subelement 
+ *  @return The subelement
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, const std::string& name)
+{
+  // check if this shape element contain an element with name specified by the 2nd function argument
+  NodeList* pNL = pElem->getElementsByTagName(name);
+  if ( pNL->length() != 1)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError("XML element: " + pElem->tagName() +
+      " must contain exactly subelement with name: " + name + ".");
+  }
+  Element* retVal = static_cast<Element*>(pNL->item(0)); 
+  pNL->release();
+  return retVal;
+}
 
 
 /** Get position coordinates from XML element
