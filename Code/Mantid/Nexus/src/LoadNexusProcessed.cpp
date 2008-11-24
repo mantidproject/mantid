@@ -92,7 +92,7 @@ namespace NeXus
 
     // validate the optional parameters, if set
     checkOptionalProperties();
-    int total_specs,lengthIn=m_numberofchannels;
+    int total_specs;
 
     // Create the 2D workspace for the output
     if( m_interval || m_list)
