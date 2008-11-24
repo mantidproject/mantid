@@ -997,7 +997,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
     else
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr("Counts")); 
+    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
     return ml;
 }
 

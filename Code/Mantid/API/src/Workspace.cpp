@@ -19,7 +19,8 @@ Workspace::Workspace() : m_axes(), m_isInitialized(false), m_title(), m_comment(
   m_history(), m_YUnit("Counts"), m_isDistribution(false)
 {}
 
-/// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
+/// Destructor
+// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
 Workspace::~Workspace()
 {
   for (unsigned int i = 0; i < m_axes.size(); ++i)
@@ -69,7 +70,8 @@ void Workspace::setTitle(const std::string& t)
 {
   m_title=t;
 }
-/** Set the comment field of the workspace
+
+/** Set the comment field of the workspace
  *
  *  @param c The comment
  */
@@ -193,7 +195,7 @@ std::string Workspace::YUnit() const
   // then append that unit to the string to be returned
   if ( this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
   {
-    retVal = retVal + " / " + this->getAxis(0)->unit()->label();
+    retVal = retVal + " per " + this->getAxis(0)->unit()->label();
   }
   return retVal;
 }

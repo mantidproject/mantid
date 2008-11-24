@@ -509,7 +509,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     else
         plot->setYAxisLabel(tr("Spectrum")); 
 
-    plot->setZAxisLabel(tr("Counts")); 
+    plot->setZAxisLabel(tr(m_workspace->YUnit().c_str())); 
 
     a->initPlot3D(plot);
     plot->askOnCloseEvent(false);
@@ -570,7 +570,7 @@ void MantidMatrix::setGraph1D(MultiLayer *ml, Table* t)
     else
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr("Counts")); 
+    g->setYAxisTitle(tr(m_workspace->YUnit().c_str()));
     connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
     if (t) 
     {

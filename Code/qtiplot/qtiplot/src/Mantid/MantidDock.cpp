@@ -84,6 +84,8 @@ void MantidDockWidget::update()
         else
             s += "Unknown";
         wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
+        s = "Y axis: " + ws->YUnit();
+        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));         
         wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(ws->id()))));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
         m_tree->addTopLevelItem(wsItem);
