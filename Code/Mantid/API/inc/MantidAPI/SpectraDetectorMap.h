@@ -12,8 +12,8 @@
 #include <vector>
 
 //Forward declaration of IDetector
-class Mantid::Geometry::IDetector;
-class Mantid::API::Instrument;
+//class Mantid::Geometry::IDetector;
+//class Mantid::API::Instrument;
 //
 
 namespace Mantid
@@ -21,32 +21,32 @@ namespace Mantid
 namespace API
 {
 /** @class SpectraDetectorMap SpectraDetectorMap.h
- 
+
  SpectraDetectorMap provides a multimap between Spectra number (int)
  and IDetector*. For efficiency, an unordered_multimaop is used. The TR1/unordered_map
- header is not included in MVSC++ Express Edition so an alternative with multimap is 
+ header is not included in MVSC++ Express Edition so an alternative with multimap is
  provided.
- 
+
  @author Laurent C Chapon, ISIS, RAL
  @date 29/04/2008
- 
+
  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
- 
+
  This file is part of Mantid.
- 
+
  Mantid is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version.
- 
+
  Mantid is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
+
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
@@ -68,7 +68,7 @@ public:
   SpectraDetectorMap();
   ///virtual destructor
   virtual ~SpectraDetectorMap();
-  /// populate the Map with _spec and _udet C array 
+  /// populate the Map with _spec and _udet C array
   void populate(int* _spec, int* _udet, int nentries, Instrument*);
   /// Move a detector from one spectrum to another
   void remap(const int oldSpectrum, const int newSpectrum);
@@ -80,7 +80,7 @@ public:
   boost::shared_ptr<Geometry::IDetector> getDetector(const int spectrum_number) const;
   /// Gets a list of spectra corresponding to a list of detector numbers
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
-  /// Return the size of the map 
+  /// Return the size of the map
   int nElements() const {return _s2dmap.size();}
   ///Copy Contructor
   SpectraDetectorMap(const SpectraDetectorMap& copy);
@@ -89,12 +89,12 @@ private:
   SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
   /// insternal spectra detector map instance
   smap _s2dmap;
-  
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
 
-} // Namespace API 
+} // Namespace API
 
 } // Namespace Mantid
 

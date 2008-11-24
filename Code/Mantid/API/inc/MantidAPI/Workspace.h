@@ -138,6 +138,9 @@ public:
   /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
   const bool isHistogramData() const;
 
+  std::string YUnit() const;
+  void setYUnit(const std::string& newUnit);
+
   /// Are the Y-values dimensioned?
   const bool& isDistribution() const;
   bool& isDistribution(bool newValue);
@@ -175,6 +178,8 @@ private:
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
 
+  /// The unit for the data values (e.g. Counts)
+  std::string m_YUnit;
   /// Flag indicating whether the Y-values are dimensioned. False by default
   bool m_isDistribution;
 

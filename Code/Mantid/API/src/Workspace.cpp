@@ -16,7 +16,7 @@ Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 /// Default constructor
 Workspace::Workspace() : m_axes(), m_isInitialized(false), m_title(), m_comment(),
   sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap), sptr_sample(new Sample),
-  m_history(), m_isDistribution(false)
+  m_history(), m_YUnit("Counts"), m_isDistribution(false)
 {}
 
 /// Destructor// RJT, 3/10/07: The Analysis Data Service needs to be able to delete workspaces, so I moved this from protected to public.
@@ -184,6 +184,23 @@ Axis* const Workspace::getAxis(const int axisIndex) const
 const bool Workspace::isHistogramData() const
 {
   return ( readX(0).size()==readY(0).size() ? false : true );
+}
+
+std::string Workspace::YUnit() const
+{
+  std::string retVal = m_YUnit;
+  // If this workspace a distribution & has at least one axis & this axis has its unit set
+  // then append that unit to the string to be returned
+  if ( this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
+  {
+    retVal = retVal + " / " + this->getAxis(0)->unit()->label();
+  }
+  return retVal;
+}
+
+void Workspace::setYUnit(const std::string& newUnit)
+{
+  m_YUnit = newUnit;
 }
 
 /// Are the Y-values in this workspace dimensioned?

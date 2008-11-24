@@ -74,7 +74,7 @@ namespace Mantid
       }
 
       // Check the workspaces have the same units and distribution flag
-      if ( lhs_unit != rhs_unit || lhs->isDistribution() != rhs->isDistribution() )
+      if ( lhs_unit != rhs_unit || lhs->YUnit() != rhs->YUnit() || lhs->isDistribution() != rhs->isDistribution() )
       {
         return false;
       }

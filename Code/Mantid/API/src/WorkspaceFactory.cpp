@@ -64,6 +64,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
   ws->setInstrument(parent->getInstrument());
   ws->setSpectraMap(parent->getSpectraMap());
   ws->setSample(parent->getSample());
+  ws->setYUnit(parent->m_YUnit);
   ws->isDistribution(parent->isDistribution());
 
   // Only copy the axes over if new sizes are not given

@@ -113,6 +113,13 @@ public:
     TS_ASSERT( ws.isDistribution() )
   }
 
+  void testGetSetYUnit()
+  {
+    TS_ASSERT_EQUALS( ws.YUnit(), "Counts" )
+    TS_ASSERT_THROWS_NOTHING( ws.setYUnit("something") )
+    TS_ASSERT_EQUALS( ws.YUnit(), "something" )
+  }
+
 private:
   WorkspaceTester ws;
 
