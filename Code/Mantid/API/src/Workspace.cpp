@@ -188,6 +188,7 @@ const bool Workspace::isHistogramData() const
   return ( readX(0).size()==readY(0).size() ? false : true );
 }
 
+/// Returns the units of the data in the workspace (default 'Counts')
 std::string Workspace::YUnit() const
 {
   std::string retVal = m_YUnit;
@@ -200,6 +201,7 @@ std::string Workspace::YUnit() const
   return retVal;
 }
 
+/// Sets a new unit for the data (Y axis) in the workspace
 void Workspace::setYUnit(const std::string& newUnit)
 {
   m_YUnit = newUnit;
