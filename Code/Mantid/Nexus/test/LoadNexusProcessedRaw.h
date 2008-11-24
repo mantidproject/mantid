@@ -19,10 +19,12 @@
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidGeometry/Component.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
+using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
 class LoadNexusProcessedTestRaw : public CxxTest::TestSuite
@@ -67,11 +69,11 @@ void testExecOnLoadraw()
     // specify name of file to save workspace to
     outputFile = "testSaveLoadrawHET.nxs";
     remove(outputFile.c_str());
-    std::string entryName = "junk"; // not used
+    //std::string entryName = "junk"; // not used
     std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw HET15869";
     saveNexusP.setPropertyValue("FileName", outputFile);
-    saveNexusP.setPropertyValue("EntryName", entryName);
+    //saveNexusP.setPropertyValue("EntryName", entryName);
     saveNexusP.setPropertyValue("Title", title);
 
     TS_ASSERT_THROWS_NOTHING(saveNexusP.execute());
@@ -130,6 +132,29 @@ void testExecOnLoadraw()
 
     // Check the proton charge has been set correctly
     TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
+
+    //
+    // check that the instrument data has been loaded, copied from LoadInstrumentTest
+    //
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    Component* source = i->getSource();
+    TS_ASSERT_EQUALS( source->getName(), "undulator");
+    TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+
+    Component* samplepos = i->getSample();
+    TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+    TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
+
+    Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
+    TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
+    TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
+    TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
+    TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
+    double d = ptrDet103->getPos().distance(samplepos->getPos());
+    TS_ASSERT_DELTA(d,2.512,0.0001);
+    double cmpDistance = ptrDet103->getDistance(*samplepos);
+    TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
+    //
 
     remove(outputFile.c_str());
 

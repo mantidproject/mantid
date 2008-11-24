@@ -30,6 +30,13 @@ public:
 
   SaveNexusProcessedTest()
   {
+
+    // clearfiles - make true for SVN as dont want to leave on build server
+    clearfiles=true;
+    //
+
+
+
     // create dummy 2D-workspace
 
     std::vector<double> lVecX; for(double d=0.0; d<0.95; d=d+0.1) lVecX.push_back(d);
@@ -66,25 +73,25 @@ public:
     // specify name of file to save workspace to
     algToBeTested.setPropertyValue("InputWorkspace", "testSpace");
     outputFile = "testOfSaveNexusProcessed.nxs";
-    entryName = "test";
+    //entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", outputFile));
-    algToBeTested.setPropertyValue("EntryName", entryName);
+    //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
     remove(outputFile.c_str());
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
-    TS_ASSERT( ! result.compare(entryName));
+    //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
+    //TS_ASSERT( ! result.compare(entryName));
 
 	// changed so that 1D workspaces are no longer written.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-    remove(outputFile.c_str());
+    if(clearfiles) remove(outputFile.c_str());
 
   }
 void testExecOnMuon()
@@ -117,18 +124,18 @@ void testExecOnMuon()
     // specify name of file to save workspace to
     outputFile = "testOfSaveNexusProcessed2.nxs";
     remove(outputFile.c_str());
-    entryName = "entry4";
+    //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
     algToBeTested.setPropertyValue("FileName", outputFile);
-    algToBeTested.setPropertyValue("EntryName", entryName);
+    //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
-    TS_ASSERT( ! result.compare(entryName));
+    //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
+    //TS_ASSERT( ! result.compare(entryName));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
@@ -136,7 +143,7 @@ void testExecOnMuon()
 	// try writing data again
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
-    remove(outputFile.c_str());
+    if(clearfiles) remove(outputFile.c_str());
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
   }
@@ -167,23 +174,23 @@ void testExecOnLoadraw()
     // specify name of file to save workspace to
     outputFile = "testSaveFromLoadraw.nxs";
     remove(outputFile.c_str());
-    entryName = "entry4";
+    //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a workspace from Loadraw file";
     algToBeTested.setPropertyValue("FileName", outputFile);
-    algToBeTested.setPropertyValue("EntryName", entryName);
+    //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
-    TS_ASSERT( ! result.compare(entryName));
+    //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
+    //TS_ASSERT( ! result.compare(entryName));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-    remove(outputFile.c_str());
+    if(clearfiles) remove(outputFile.c_str());
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
 }
@@ -215,18 +222,18 @@ void testExecOnMuonXml()
     // specify name of file to save workspace to
     outputFile = "testOfSaveNexusProcessed2.xml";
     remove(outputFile.c_str());
-    entryName = "entry4";
+    //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
     algToBeTested.setPropertyValue("FileName", outputFile);
-    algToBeTested.setPropertyValue("EntryName", entryName);
+    //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
-    TS_ASSERT( ! result.compare(entryName));
+    //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
+    //TS_ASSERT( ! result.compare(entryName));
 
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
@@ -234,7 +241,7 @@ void testExecOnMuonXml()
 	// try writing data again
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
-    remove(outputFile.c_str());
+    if(clearfiles) remove(outputFile.c_str());
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
   }
@@ -250,6 +257,7 @@ private:
   Mantid::DataHandling::LoadRaw loader;
   std::string inputFile;
   std::string outputSpace;
+  bool clearfiles;
 
 };
 

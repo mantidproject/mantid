@@ -71,7 +71,7 @@ namespace NeXus
 //   </NXprocess>
 // </NXentry>
 
-  int NexusFileIO::openNexusWrite(const std::string& fileName, const std::string& entryName)
+  int NexusFileIO::openNexusWrite(const std::string& fileName )
   {
    // open named file and entry - file may exist
    // @throw Exception::FileError if cannot open Nexus file for writing
@@ -79,7 +79,7 @@ namespace NeXus
    NXaccess mode;
    NXstatus status;
    std::string className="NXentry";
-   std::string mantidEntryName=entryName; // temp allow this for existing files
+   std::string mantidEntryName;
    boost::filesystem::path file(fileName);
    m_filename=fileName;
    if(boost::filesystem::exists(file))
@@ -176,8 +176,7 @@ namespace NeXus
    status=NXclose(&fileID);
    return(0);
   }
-  int NexusFileIO::writeNexusProcessedHeader( const std::string& entryName,
-	                                         const std::string& title)
+  int NexusFileIO::writeNexusProcessedHeader( const std::string& title)
   {
    // Write Nexus mantid workspace header fields for the NXentry/IXmantid/NXprocessed field.
    // The URLs are not correct
@@ -222,18 +221,20 @@ namespace NeXus
                     std::string& version)
   {
       std::vector<std::string> attributes,avalues;
-      if(date != "")
-      {
-          attributes.push_back("date");
-          avalues.push_back(date);
-      }
-      if(version != "")
-      {
-         attributes.push_back("Version");
-         avalues.push_back(version);
-      }
-      if( ! writeNxText( "instrument_source", instrumentXml, attributes, avalues) )
+      if( ! readNxText( "instrument_source", instrumentXml, attributes, avalues) )
           return(false);
+      for(unsigned int i=1;i<=attributes.size();i++)
+      {
+          if(attributes[i-1].compare("date") == 0)
+          {
+              date=avalues[i-1];
+          }
+          else if(attributes[i-1].compare("version") == 0)
+          {
+              version=avalues[i-1];
+          }
+      }
+
       return(true);
   }
   bool NexusFileIO::writeNexusInstrument(const boost::shared_ptr<API::Instrument>& instrument)
@@ -268,7 +269,7 @@ namespace NeXus
    status=NXmakedata(fileID, name.c_str(), NX_CHAR, 1, dimensions);
    if(status==NX_ERROR) return(false);
    status=NXopendata(fileID, name.c_str());
-   for(int it=0; it<attributes.size(); ++it)
+   for(unsigned int it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size(), NX_CHAR);
    status=NXputdata(fileID, (void*)value.c_str());
    status=NXclosedata(fileID);
@@ -302,6 +303,7 @@ namespace NeXus
    {
        char *dvalue=new char[dim[0]+1];
        status=NXgetdata(fileID, (void *)dvalue);
+       dvalue[dim[0]]='\0';
        value=dvalue;
    }
    status=NXclosedata(fileID);
@@ -319,7 +321,7 @@ namespace NeXus
    status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
    if(status==NX_ERROR) return(false);
    status=NXopendata(fileID, name.c_str());
-   for(int it=0; it<attributes.size(); ++it)
+   for(unsigned int it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
    status=NXputdata(fileID, (void*)&value);
    status=NXclosedata(fileID);
@@ -345,7 +347,6 @@ namespace NeXus
        if(type==NX_CHAR) // ignoring non char attributes
        {
            attributes.push_back(aname);
-           int len=NX_MAXNAMELEN;
            NXgetattr(fileID,aname,(void *)avalue,&length,&type);
            avalues.push_back(avalue);
        }
@@ -363,7 +364,6 @@ namespace NeXus
                          const std::string& description, const std::string& pairValues)
   {
    NXstatus status;
-   int dimensions[1];
    status=NXmakegroup(fileID,noteName.c_str(),"NXnote");
    if(status==NX_ERROR)
        return(false);
@@ -391,12 +391,12 @@ namespace NeXus
 // Write sample related information to the nexus file
 //}
 
-  int NexusFileIO::writeNexusProcessedSample( const std::string& entryName, const std::string& name,
+  int NexusFileIO::writeNexusProcessedSample( const std::string& name,
 							  const boost::shared_ptr<Mantid::API::Sample>& sample)
   {
    NXstatus status;
 
-   //write sample entry
+   // create sample section
    status=NXmakegroup(fileID,"sample","NXsample");
    if(status==NX_ERROR)
        return(2);
@@ -454,11 +454,9 @@ namespace NeXus
    return((status==NX_ERROR)?3:0);
   }
 
-  int NexusFileIO::writeNexusProcessedData( const std::string& entryName,
-							const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+  int NexusFileIO::writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
 							const bool& uniformSpectra, const int& m_spec_min, const int& m_spec_max)
   {
-   NXaccess mode;
    NXstatus status;
 
    //write data entry
@@ -701,7 +699,7 @@ namespace NeXus
    time(&now);
    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
    writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
-   for(int i=0;i<algHist.size();i++)
+   for(unsigned int i=0;i<algHist.size();i++)
    {
        std::stringstream algNumber,algData;
        algNumber << "MantidAlgorithm_" << i;

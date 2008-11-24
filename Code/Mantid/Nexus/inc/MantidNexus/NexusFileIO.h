@@ -40,19 +40,18 @@ namespace Mantid
       ~NexusFileIO() {}
 
       /// open the nexus file for writing
-      int openNexusWrite(const std::string& fileName, const std::string& entryName);
+      int openNexusWrite(const std::string& fileName);
       /// open the nexus file for reading
       int openNexusRead(const std::string& fileName, int& workspaceNumber);
       /// write the header ifon for the Mantid workspace format
-      int writeNexusProcessedHeader( const std::string& entryName, const std::string& title);
+      int writeNexusProcessedHeader( const std::string& title);
       /// write sample related data
-      int writeNexusProcessedSample( const std::string& entryName, const std::string& title,
+      int writeNexusProcessedSample( const std::string& title,
 							  const boost::shared_ptr<Mantid::API::Sample>& sample);
       // read sample data
       int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
       /// write the workspace data
-      int writeNexusProcessedData( const std::string& entryName,
-							const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+      int writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
 							const bool& uniformSpectra, const int& fromY, const int& toY);
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,

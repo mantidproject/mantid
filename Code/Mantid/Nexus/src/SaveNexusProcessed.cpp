@@ -48,14 +48,15 @@ namespace NeXus
     exts.push_back("XML");
     //declareProperty("FileName","",new FileValidator(exts));
     declareProperty("FileName","",new MandatoryValidator<std::string>);
-    declareProperty("EntryName","",new MandatoryValidator<std::string>);
+
     declareProperty("Title","",new MandatoryValidator<std::string>);
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
     // declare optional parameters
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min",0, mustBePositive);
+    declareProperty("EntryNumber",0,mustBePositive);
+    declareProperty("spectrum_min",0, mustBePositive->clone());
     declareProperty("spectrum_max",0, mustBePositive->clone());
     declareProperty(new ArrayProperty<int>("spectrum_list"));
   }
@@ -69,7 +70,7 @@ namespace NeXus
   {
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("FileName");
-    m_entryname = getPropertyValue("EntryName");
+    //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
 
@@ -82,13 +83,13 @@ namespace NeXus
         throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
 
     NexusFileIO *nexusFile= new NexusFileIO();
-    if( nexusFile->openNexusWrite( m_filename, m_entryname ) != 0 )
+    if( nexusFile->openNexusWrite( m_filename ) != 0 )
     {
        g_log.error("Failed to open file");
        throw Exception::FileError("Failed to open file", m_filename);
     }
 
-    if( nexusFile->writeNexusProcessedHeader( m_entryname, m_title ) != 0 )
+    if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
     {
        g_log.error("Failed to write file");
        throw Exception::FileError("Failed to write to file", m_filename);
@@ -121,7 +122,7 @@ namespace NeXus
 
 
     boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
-    if( nexusFile->writeNexusProcessedSample( m_entryname, sample->getName(), sample) != 0 )
+    if( nexusFile->writeNexusProcessedSample( sample->getName(), sample) != 0 )
     {
        g_log.error("Failed to write NXsample");
        throw Exception::FileError("Failed to write NXsample", m_filename);
@@ -143,7 +144,7 @@ namespace NeXus
             throw std::invalid_argument("Inconsistent properties defined"); 
         }
     }
-    nexusFile->writeNexusProcessedData(m_entryname,localworkspace,uniformSpectra,m_spec_min,m_spec_max);
+    nexusFile->writeNexusProcessedData(localworkspace,uniformSpectra,m_spec_min,m_spec_max);
     nexusFile->writeNexusProcessedProcess(localworkspace);
 	nexusFile->closeNexusFile();
 

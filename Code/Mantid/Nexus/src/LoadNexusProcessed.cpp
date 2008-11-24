@@ -9,6 +9,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidNexus/NexusFileIO.h"
 
 #include <cmath>
@@ -145,6 +146,9 @@ namespace NeXus
 
     sample = localWorkspace->getSample();
     nexusFile->readNexusProcessedSample(sample);
+    // Run the LoadIntsturment algorithm if name available
+    if(nexusFile->readNexusInstrumentXmlName(m_instrumentxml,m_instrumentdate, m_instrumentversion))
+        runLoadInstrument(localWorkspace );
     // Assign the result to the output workspace property
     std::string outputWorkspace = "OutputWorkspace";
     setProperty(outputWorkspace,localWorkspace);
@@ -202,5 +206,41 @@ namespace NeXus
         }
       }
     }
+
+    /// Run the sub-algorithm LoadInstrument (as for LoadRaw)
+    void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      // Determine the search directory for XML instrument definition files (IDFs)
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
+      if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
+
+      // For Nexus Mantid processed, Instrument XML file name is read from nexus 
+      std::string instrumentID = m_instrumentxml;
+      std::string fullPathIDF = directoryName + "/" + instrumentID;
+      
+      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      loadInst->setPropertyValue("Filename", fullPathIDF);
+      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadInst->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+      }
+
+      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
+	  // This does not work at present as the example files do not hold the necessary data
+	  // but is a place holder. Hopefully the new version of Nexus Muon files should be more
+	  // complete.
+      //if ( ! loadInst->isExecuted() )
+      //{
+        //runLoadInstrumentFromNexus(localWorkspace);
+      //}
+    }
+    
 } // namespace NeXus
 } // namespace Mantid

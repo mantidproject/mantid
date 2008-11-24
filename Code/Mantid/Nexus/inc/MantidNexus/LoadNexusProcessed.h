@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
+
 
 namespace Mantid
 {
@@ -98,7 +100,14 @@ namespace Mantid
       bool m_uniformbounds;
       /// axes names
       std::string m_axes;
-
+      /// The instrument XML file name read from the Nexus file
+      std::string m_instrumentxml;
+      /// Instrument xml file date
+      std::string m_instrumentdate;
+      /// Instrument xml file version
+      std::string m_instrumentversion;
+      /// Function to try and load instrument data from XML
+      void runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace);
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 
