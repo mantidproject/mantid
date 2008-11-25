@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -50,6 +51,7 @@ typedef struct
 } mexfunc_s_t;
 
 extern int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
@@ -57,11 +59,13 @@ extern int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray*
 extern int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 extern int CreateSimpleAPI(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
-extern void CreateSimpleAPIHelper(const std::string& algName, const std::string& path);
-
+extern int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+extern int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 
 static mexfunc_s_t mex_functions[] = {
     { "FrameworkManager_Create", CreateFrameworkManager },
+    { "FrameworkManager_GetWorkspace", GetWorkspace },
+    { "FrameworkManager_DeleteWorkspace", DeleteWorkspace },
     { "Algorithm_Create", CreateAlgorithm },
     { "Algorithm_Run", RunAlgorithm },
     { "Algorithm_RunPV", RunAlgorithmPV },
@@ -69,6 +73,7 @@ static mexfunc_s_t mex_functions[] = {
     { "Workspace_GetAllFields", WorkspaceGetAllFields },
     { "Workspace_SetField", WorkspaceSetField },
 	  { "SimpleAPI_Create", CreateSimpleAPI },
+    { "AnalysisDataService_ListWorkspaces", ListWorkspaces },
     { NULL, NULL }
 };
 
@@ -90,6 +95,7 @@ static mexfunc_s_t mex_functions[] = {
 #endif
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
 {
@@ -239,13 +245,13 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
 
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-    mwSize dims[2] = { 1, 1 };
+  mwSize dims[2] = {1, 1};
 	try 
 	{
-        FrameworkManager::Instance();
+        FrameworkManagerImpl& fmgr = FrameworkManager::Instance();
         plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
         uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
-        data[0] = (uint64_t)0;   // dummy pointer to instance
+        data[0] = (uint64_t)(&fmgr);   // dummy pointer to instance
         return 0;
 	}
 	catch(std::exception& e)
@@ -253,6 +259,46 @@ int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* p
     mexErrMsgTxt(e.what());
 		return 1;
 	}
+}
+
+int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+  try
+  {
+    char buffer[256];
+    mxGetString(prhs[0], buffer, sizeof(buffer));
+    std::string wsName(buffer);
+    Workspace* wksptr = FrameworkManager::Instance().getWorkspace(wsName);
+    mwSize ndims[2] = {1, 1};
+    plhs[0]=mxCreateNumericArray(2, ndims, mxUINT64_CLASS, mxREAL);
+    uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
+    data[0] = (uint64_t)wksptr;
+    return 0;
+  }
+  catch(std::exception& e)
+  {
+    mexErrMsgTxt(e.what());
+		return 1;
+  }
+}
+
+int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+  std::string wsName("");
+  try
+  {
+    char buffer[256];
+    mxGetString(prhs[0], buffer, sizeof(buffer));
+    wsName = buffer;
+    FrameworkManager::Instance().deleteWorkspace(wsName);
+    return 0;
+  }
+  catch (Exception::NotFoundError&)
+  {
+    mexPrintf("A workspace with the name %s could not be found.\n", wsName.c_str());
+		return 1;
+  }
+  
 }
 
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -282,8 +328,8 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	{
 	    uint64_t* data = (uint64_t*)mxGetData(prhs[0]);
 	    IAlgorithm* alg = (IAlgorithm*)data[0];
-		mxGetString(prhs[1], buffer, sizeof(buffer));
-		alg->setProperties(buffer);
+      mxGetString(prhs[1], buffer, sizeof(buffer));
+      alg->setProperties(buffer);
 	    alg->execute();
 	    plhs[0] = mxCreateString("");
 	    return 0;
@@ -350,25 +396,25 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 	return 0;
 }
 
-static mxArray* WorkspaceGetFieldHelper(Workspace_sptr wksptr, const char* field_name)
+static mxArray* WorkspaceGetFieldHelper(Workspace_sptr wksptr, char field, int ispec)
 {
 	mxArray* mptr;
-	std::vector<double>* data = NULL;
-	switch(field_name[0])
+  std::vector<double>* data = NULL;
+	switch(field)
 	{
-	    case 'x':
-		data = &(wksptr->dataX(0));
+	  case 'x':
+    data = &(wksptr->dataX(ispec));
+    break;
+
+	  case 'y':
+		data = &(wksptr->dataY(ispec));
 		break;
 
-	    case 'y':
-		data = &(wksptr->dataY(0));
+	  case 'e':
+		data = &(wksptr->dataE(ispec));
 		break;
 
-	    case 'e':
-		data = &(wksptr->dataE(0));
-		break;
-
-	    default:
+	  default:
 		return NULL;
 		break;
 
@@ -382,69 +428,50 @@ static mxArray* WorkspaceGetFieldHelper(Workspace_sptr wksptr, const char* field
 
 int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-    char work_name[128];
-	mxGetString(prhs[0], work_name, sizeof(work_name));
-	mwSize dims_array[2] = { 1, 1 };
-    int nfields = 3;
-	const char* fieldnames[] = { "x", "y", "e" };
-	plhs[0] = mxCreateStructArray(2, dims_array, nfields, fieldnames);
-	Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
-	mxArray* mptr;
-	mptr = WorkspaceGetFieldHelper(wksptr, "x");
-	mxSetField(plhs[0], 0, "x", mptr);
-	mptr = WorkspaceGetFieldHelper(wksptr, "y");
-	mxSetField(plhs[0], 0, "y", mptr);
-	mptr = WorkspaceGetFieldHelper(wksptr, "e");
-	mxSetField(plhs[0], 0, "e", mptr);
-	return 0;
+  // char work_name[128];
+	// mxGetString(prhs[0], work_name, sizeof(work_name));
+	// mwSize dims_array[2] = { 1, 1 };
+  // int nfields = 3;
+	// char fieldnames[3] = { 'x', 'y', 'e' };
+	// plhs[0] = mxCreateStructArray(2, dims_array, nfields, fieldnames);
+	// Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
+	// mxArray* mptr;
+	// mptr = WorkspaceGetFieldHelper(wksptr, 'x', 0);
+	// mxSetField(plhs[0], 0, "x", mptr);
+	// mptr = WorkspaceGetFieldHelper(wksptr, 'y', 0);
+	// mxSetField(plhs[0], 0, "y", mptr);
+	// mptr = WorkspaceGetFieldHelper(wksptr, 'e', 0);
+	// mxSetField(plhs[0], 0, "e", mptr);
+  mexErrMsgTxt("Error: This function has not been implemented yet");
+	return 1;
 }
 
 int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-    char field_name[128], work_name[128];
-	mxGetString(prhs[0], work_name, sizeof(work_name));
-	mxGetString(prhs[1], field_name, sizeof(field_name));
-	Workspace_sptr wksptr = AnalysisDataService::Instance().retrieve(work_name);
-	plhs[0] = WorkspaceGetFieldHelper(wksptr, field_name);
-	return 0;
-}
-
-int CreateSimpleAPI(int, mxArray **, int, const mxArray**)
-{
-	//Ensure all libraries are loaded
-	FrameworkManager::Instance();
-
-	//Create directory to store mfiles
-	using namespace boost::filesystem;
-	std::string mpath = "MantidSimpleAPI/";
-	remove_all(mpath);
-	create_directory(mpath);
-
-	std::vector<std::string> algKeys = AlgorithmFactory::Instance().getKeys();
-	std::vector<std::string>::const_iterator sIter = algKeys.begin();
-	typedef std::map<std::string, unsigned int> VersionMap;
-	VersionMap vMap;
-	for( ; sIter != algKeys.end(); ++sIter )
-	{
-	  std::string key = (*sIter); 
-	  std::string name = key.substr(0, key.find("|"));
-	  VersionMap::iterator vIter = vMap.find(name);
-    if( vIter == vMap.end() ) vMap.insert(make_pair(name,1));
-    else ++(vIter->second);
-	}
-
-  std::string contents_path = mpath + "Contents.m";
-  std::ofstream contents(contents_path.c_str());
-  contents << "%A simpler API for Mantid\n%\n%The algorithms available are:\n";
-  VersionMap::const_iterator vIter = vMap.begin();
-  for( ; vIter != vMap.end(); ++vIter )
+  char buffer[256];
+  mxGetString(prhs[0], buffer, sizeof(buffer));
+  std::string wsName(buffer);
+	mxGetString(prhs[1], buffer, sizeof(buffer));
+  std::string field(buffer);
+  if( field.size() != 1 || (field[0] != 'x' && field[0] != 'y' && field[0] != 'e' ) )
   {
-    contents << "% " << vIter->first << "\n";
-    CreateSimpleAPIHelper(vIter->first, mpath);
+    mexErrMsgTxt("Error with field argument, must be either x, y or e");
   }
-  contents << "% For help with an individual command type \"help algorithm_name\"\n";
-  contents.close();
-  return 0;
+  double ispec(0);
+  if( nrhs == 3 ) ispec = mxGetScalar(prhs[2]);
+  Workspace_sptr wksptr;
+  try {
+    wksptr = AnalysisDataService::Instance().retrieve(wsName);
+  }
+  catch (Exception::NotFoundError&)
+  {
+    mexErrMsgTxt("The named workspace could not be found.");
+	}
+  
+  mexPrintf("WorkspaceGetField %s %c %f \n", wsName.c_str(), field[0], ispec); 
+  
+  plhs[0] = WorkspaceGetFieldHelper(wksptr, field[0], (int)ispec);
+	return 0;
 }
 
 namespace
@@ -457,6 +484,21 @@ namespace
     }
   };
 }
+
+  /**
+     * Take a property value as a string and if only special characters are present, i.e.
+     * EOL characters then replace them with their string represenations
+     * @param value The property value
+     * @returns A string containing the sanitized property value
+     */
+  std::string santizePropertyValue(const std::string & value)
+  {
+    if( value == "\n\r" )
+      return std::string("\\") + std::string("n") + std::string("\\") + std::string("r");
+    if( value == "\n" )
+      return std::string("\\") + std::string("n");
+    return value;
+  }
 
 void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
 {
@@ -478,40 +520,49 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
   //parameter list
   mfile << "function res = " << algName << "(varargin)\n";
   //help string
-  std::ostringstream os;
   PropertyVector orderedProperties(alg->getProperties());
   std::sort(orderedProperties.begin(), orderedProperties.end(), PropertyOrdering());
   PropertyVector::const_iterator pIter = orderedProperties.begin();
   PropertyVector::const_iterator pEnd = orderedProperties.end();
   mfile << "%\t" << algName << "(";
-  unsigned int iOpt(0);
-  for( ; pIter != pEnd; )
+  for( ; pIter != pEnd ; )
   {
     mfile << (*pIter)->name();
-    if( (*pIter)->isValid() ) 
-    {
-      os << std::string("%\t\t") + (*pIter)->name() + "\n"; 
-      ++iOpt;
-    }
-    if( ++pIter !=  pEnd ) mfile << ", ";
+    if( ++pIter != pEnd ) mfile << ", ";
   }
   mfile << ")\n";
-
-  //Last part of help definition
-  if( !os.str().empty() )
+  mfile << "%\t\tArgument description:\n";
+  pIter = orderedProperties.begin();
+  unsigned int iOpt(0);
+  for( ; pIter != pEnd ; ++pIter )
   {
-    mfile << "%\tThe following arguments are optional:\n" << os.str(); 
-  }
-  else
-  {
-    mfile << "%\tAll arguments are mandatory\n";
-  }
-  mfile << "\n";
+    Mantid::Kernel::Property* prop = *pIter;
+    mfile << "%\t\tName: " << prop->name() << ", Optional: ";  
+    if( prop->isValid() )
+    {
+      ++iOpt;
+      mfile << "Yes, Default value: " << santizePropertyValue(prop->value());
+    }
+    else mfile << "No";
+    mfile << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
+    std::vector<std::string> allowed = prop->allowedValues();
+    if( !allowed.empty() )
+    {
+      mfile << ", Allowed values: ";
+      std::vector<std::string>::const_iterator sIter = allowed.begin();
+      std::vector<std::string>::const_iterator sEnd = allowed.end();
+      for( ; sIter != sEnd ; )
+      {
+        mfile << (*sIter);
+        if( ++sIter != sEnd ) mfile << ", ";
+      }
+    }
+    mfile << "\n";	
+  }  
+  mfile << "%\n%\tNote: All string arguments must be wrapped in single quotes ''.\n";
 
   //The function definition
-  os.str("");
-  os << (orderedProperties.size() - iOpt);
-  mfile << "if nargin < " << os.str() << "\n"
+  mfile << "if nargin < " << (orderedProperties.size() - iOpt) << "\n"
         << "\tfprintf('All mandatory arguments have not been supplied, type \"help " << algName << "\" for more information\\n');\n"
         << "\treturn\n"
         << "end\n";
@@ -529,3 +580,81 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
   mfile << "res = run(alg, argstring);\n";
   mfile.close();
 } 
+
+int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
+{
+
+  //Ensure all libraries are loaded
+	FrameworkManager::Instance();
+
+	//Create directory to store mfiles
+	std::string mpath("");
+  if( nrhs == 0 )
+  {
+    mpath = "MantidSimpleAPI";
+  }
+  else if( nrhs == 1 )
+  {
+    char buffer[256];
+    mxGetString(prhs[0], buffer, sizeof(buffer));
+    mpath = std::string(buffer) + "/MantidSimpleAPI";
+  }
+  else
+  {
+    mexErrMsgTxt("SimpleAPI_Create takes either 0 or 1 arguments.");
+  }
+  
+  boost::filesystem::path simpleAPI( mpath );
+  if(  boost::filesystem::exists(simpleAPI) )
+  {
+    boost::filesystem::remove_all(simpleAPI);
+  }
+  try
+  {
+    boost::filesystem::create_directory(mpath);
+  }
+  catch( std::exception&)
+  {
+    mexErrMsgTxt("An error occurred while creating the directory for the simple API.");
+  }
+
+  std::vector<std::string> algKeys = AlgorithmFactory::Instance().getKeys();
+	std::vector<std::string>::const_iterator sIter = algKeys.begin();
+	typedef std::map<std::string, unsigned int> VersionMap;
+	VersionMap vMap;
+	for( ; sIter != algKeys.end(); ++sIter )
+	{
+	  std::string key = (*sIter); 
+	  std::string name = key.substr(0, key.find("|"));
+	  VersionMap::iterator vIter = vMap.find(name);
+    if( vIter == vMap.end() ) vMap.insert(make_pair(name,1));
+    else ++(vIter->second);
+	}
+
+  std::string contents_path = simpleAPI.directory_string() + "/Contents.m";
+  std::ofstream contents(contents_path.c_str());
+  contents << "%A simpler API for Mantid\n%\n%The algorithms available are:\n";
+  VersionMap::const_iterator vIter = vMap.begin();
+  for( ; vIter != vMap.end(); ++vIter )
+  {
+    contents << "% " << vIter->first << "\n";
+    CreateSimpleAPIHelper(vIter->first, mpath + std::string("/"));
+  }
+  contents << "% For help with an individual command type \"help algorithm_name\"\n";
+  contents.close();
+  return 0;
+}
+
+int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
+{
+  std::vector<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();
+  std::vector<std::string>::const_iterator sEnd = wkspNames.end();
+  //print the list of names using mexPrintf
+  for( std::vector<std::string>::const_iterator sIter = wkspNames.begin(); sIter != sEnd;
+      ++sIter )
+  {
+    mexPrintf((*sIter).c_str());
+    mexPrintf("\n");
+  }    
+  return 0;
+}
