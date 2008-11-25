@@ -197,7 +197,7 @@ namespace Mantid
       Property *specMax = getProperty("spectrum_max");
       m_interval = !(specMax->isDefault());
 
-      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
+      /*/ If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
       {
         if ( m_list || m_interval )
@@ -206,7 +206,7 @@ namespace Mantid
           m_interval = false;
           g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
         }
-      }
+      }*/
 
       // Check validity of spectra list property, if set
       if ( m_list )

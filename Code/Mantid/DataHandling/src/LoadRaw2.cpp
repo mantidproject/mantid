@@ -14,6 +14,7 @@
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <iostream>
 
 namespace Mantid
 {
@@ -139,7 +140,7 @@ namespace Mantid
         m_spec_max = m_numberOfSpectra + 1;
       }
 
-      //g_log.error()<<m_numberOfSpectra<<' '<<total_specs<<' '<<m_spec_min<<'-'<<m_spec_max<<'\n';
+      std::cerr<<m_numberOfSpectra<<' '<<total_specs<<' '<<m_spec_min<<'-'<<m_spec_max<<'\n';
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
@@ -241,7 +242,7 @@ namespace Mantid
       Property *specMax = getProperty("spectrum_max");
       m_interval = !(specMax->isDefault());
       
-      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
+      /*/ If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
       {
         if ( m_list || m_interval )
@@ -250,7 +251,7 @@ namespace Mantid
           m_interval = false;
           g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
         }
-      }
+      }//*/
 
       // Check validity of spectra list property, if set
       if ( m_list )
