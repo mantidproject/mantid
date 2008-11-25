@@ -140,7 +140,6 @@ namespace Mantid
         m_spec_max = m_numberOfSpectra + 1;
       }
 
-      std::cerr<<m_numberOfSpectra<<' '<<total_specs<<' '<<m_spec_min<<'-'<<m_spec_max<<'\n';
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;

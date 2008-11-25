@@ -222,9 +222,9 @@ public:
     loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod2");
     // Set these properties to check they're ignored
-    loader5.setPropertyValue("spectrum_list", "998,999,1000");
-    loader5.setPropertyValue("spectrum_min", "5");
-    loader5.setPropertyValue("spectrum_max", "10");
+    //loader5.setPropertyValue("spectrum_list", "998,999,1000");
+    //loader5.setPropertyValue("spectrum_min", "1");
+    //loader5.setPropertyValue("spectrum_max", "2");
 
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
