@@ -192,7 +192,7 @@ def addCRefs(lstId,parent):
         e = doc.createElement('ComponentRef')
         e.setAttribute('Id',Id)
         parent.appendChild(e)
-
+ 
 doc = xml.dom.minidom.Document()
 #doc.encoding('Windows-1252')
 wix = doc.createElement('Wix')
@@ -275,17 +275,33 @@ MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
 addFileV('MantidStartup','MStart.py','MantidStartup.py','../Mantid/PythonAPI/MantidStartup.py',MantidDlls)
 addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
-#addDlls('../Mantid/Bin/Shared','SDll',MantidDlls)
 addFileV('MantidAPI','MAPI.dll','MantidAPI.dll','../Mantid/Bin/Shared/MantidAPI.dll',MantidDlls)
 addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll','../Mantid/Bin/Shared/MantidGeometry.dll',MantidDlls)
 addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/Bin/Shared/MantidKernel.dll',MantidDlls)
 addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
-#  these two should go to plugins
-addFileV('MantidDataHandling_tmp','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
-addFileV('MantidDataObjects_tmp','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
-#addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
-addDlls('../Third_Party/lib/win32','3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
+
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
+
+# ---------------------- Matlab bindings -------------------------
+addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/Bin/Shared/MantidMatlabAPI.dll',MantidDlls)
+Matlab=addCompList('MatlabMFiles','toget/Matlab','Matlab',binDir)
+
+#Add mantid_setup file
+setupfile = open('mantid_setup.m','w')
+setupfile.write('mantid=\'./\';\n')
+setupfile.write('addpath(strcat(mantid,\'Matlab\'),strcat(mantid,\'Matlab/MantidGlobal\'));\n')
+setupfile.write('MantidMatlabAPI(\'SimpleAPI\',\'Create\',\'Matlab\');\n')
+setupfile.write('addpath(strcat(mantid,\'Matlab/MantidSimpleAPI\'));\n')
+setupfile.close()
+
+addFileV('Matlabsetup','mtd_set','mantid_setup.m','mantid_setup.m',MantidDlls)
+#---------------------------------------------------------------
+
+#  these two should go to plugins  -- M. Gigg, commented so that they are only in plugins 
+#addFileV('MantidDataHandling_tmp','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
+#addFileV('MantidDataObjects_tmp','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
+#addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
+#addDlls('../Third_Party/lib/win32','3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
 addDlls(QTDIR,'qt',QTIPlot)
@@ -499,6 +515,7 @@ addCRef('Scripts',MantidExec)
 addCRef('Colormaps',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
+addCRefs(Matlab,MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
 
