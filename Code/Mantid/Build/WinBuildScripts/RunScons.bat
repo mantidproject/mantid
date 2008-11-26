@@ -10,4 +10,4 @@ svn up ../../Images
 cd Build
 doxygen Mantid.doxyfile 2> ..\..\..\..\..\logs\Mantid\doxy.log
 cd ..
-build.bat "skiptest=1" 1> ..\..\..\..\logs\Mantid\scons.log 2> ..\..\..\..\logs\Mantid\sconsErr.log
+build.bat "matlab=1" "skiptest=1" 1> ..\..\..\..\logs\Mantid\scons.log 2> ..\..\..\..\logs\Mantid\sconsErr.log
