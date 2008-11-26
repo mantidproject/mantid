@@ -146,6 +146,8 @@ namespace NeXus
     }
     nexusFile->writeNexusProcessedData(localworkspace,uniformSpectra,m_spec_min,m_spec_max);
     nexusFile->writeNexusProcessedProcess(localworkspace);
+    boost::shared_ptr<SpectraDetectorMap> spectraMap=localworkspace->getSpectraMap();
+    nexusFile->writeNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
 	nexusFile->closeNexusFile();
 
     return;

@@ -16,6 +16,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -734,6 +735,113 @@ namespace NeXus
    delete[] nxname;
    delete[] nxclass;
    return count;
+  }
+
+  bool NexusFileIO::writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+                    const int& m_spec_min, const int& m_spec_max)
+  {
+   /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
+       Muon data, but using only one NXdetector section for the whole instrument.
+       Also do not place other data the Muon NXdetector would hold.
+       NXdetector section to be placed in existing NXinstrument.
+       return should leave Nexus at entry level.
+       @param spectraMap pointer to the SpectraDetectorMap
+       @param m_spec_min starting spectrum to write
+       @param m_spec_max last spectrum to write
+       @return true for OK, false for error
+       TODO check on how to make min/max spectra work
+   */
+
+   int nDetectors=spectraMap->nElements();
+   if(nDetectors<1)
+   {
+       // No data in spectraMap to write
+       g_log.warning("No spectramap data to write");
+       return(false);
+   }
+   NXstatus status;
+   status=NXopengroup(fileID,"instrument","NXinstrument");
+   if(status==NX_ERROR)
+   {
+       return(false);
+   }
+   //
+   status=NXmakegroup(fileID,"detector","NXdetector");
+   if(status==NX_ERROR)
+   {
+       NXclosegroup(fileID);
+       return(false);
+   }
+   status=NXopengroup(fileID,"detector","NXdetector");
+   //
+   int numberSpec=m_spec_max-m_spec_min+1;
+   // allocate space for the Nexus Muon format of spctra-detector mapping
+   int *detector_index=new int[numberSpec+1];  // allow for writing one more than required
+   int *detector_count=new int[numberSpec];
+   int *detector_list=new int[nDetectors];
+   detector_index[0]=0;
+   int id=0;
+   // get data from map into Nexus Muon format
+   for(int si=1;si<=numberSpec;si++)
+   {
+       int ndet=spectraMap->ndet(si);
+       detector_index[si]=detector_index[si-1]+ndet;
+       detector_count[si-1]=ndet;
+
+       std::vector<Mantid::Geometry::IDetector*> detectorgroup;
+       detectorgroup=spectraMap->getDetectors(si);
+       std::vector<Mantid::Geometry::IDetector*>::iterator it;
+       for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
+            detector_list[id++]=(*it)->getID();
+   }
+   // write data as Nexus sections detector{index,count,list}
+   int dims[1] = { numberSpec };
+   status=NXcompmakedata(fileID, "detector_index", NX_INT32, 1, dims,m_nexuscompression,dims);
+   status=NXopendata(fileID, "detector_index");
+   status=NXputdata(fileID, (void*)detector_index);
+   status=NXclosedata(fileID);
+   //
+   status=NXcompmakedata(fileID, "detector_count", NX_INT32, 1, dims,m_nexuscompression,dims);
+   status=NXopendata(fileID, "detector_count");
+   status=NXputdata(fileID, (void*)detector_count);
+   status=NXclosedata(fileID);
+   //
+   dims[1]=nDetectors;
+   status=NXcompmakedata(fileID, "detector_list", NX_INT32, 1, dims, m_nexuscompression,dims);
+   status=NXopendata(fileID, "detector_list");
+   status=NXputdata(fileID, (void*)detector_list);
+   status=NXclosedata(fileID);
+   // tidy up
+   delete[] detector_list;
+   delete[] detector_index;
+   delete[] detector_count;
+   //
+   status=NXclosegroup(fileID); // close detector group
+   status=NXclosegroup(fileID); // close instrument group
+   return(true);
+  }
+  bool NexusFileIO::readNexusProcessedSpectraMap()
+  {
+   /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
+       Muon data.
+       @return true for OK, false for error
+   */
+
+   NXstatus status;
+   status=NXopengroup(fileID,"instrument","NXinstrument");
+   if(status==NX_ERROR)
+       return(false);
+   //
+   status=NXopengroup(fileID,"detector","NXdetector");
+   if(status==NX_ERROR)
+   {
+       NXclosegroup(fileID);
+       return(false);
+   }
+   //
+   status=NXclosegroup(fileID); // close detector group
+   status=NXclosegroup(fileID); // close instrument group
+   return(true);
   }
 } // namespace NeXus
 } // namespace Mantid

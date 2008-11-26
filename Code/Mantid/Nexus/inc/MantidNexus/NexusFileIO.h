@@ -48,7 +48,7 @@ namespace Mantid
       /// write sample related data
       int writeNexusProcessedSample( const std::string& title,
 							  const boost::shared_ptr<Mantid::API::Sample>& sample);
-      // read sample data
+      /// read sample data
       int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
       /// write the workspace data
       int writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
@@ -74,6 +74,11 @@ namespace Mantid
                             std::string& version);
       /// write an instrument section - currently only the name
       bool writeNexusInstrument(const boost::shared_ptr<API::Instrument>& instrument);
+      /// write any spectra map information to Nexus file
+      bool writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+                            const int& m_spec_min, const int& m_spec_max);
+      /// read spectra map information
+      bool readNexusProcessedSpectraMap();
       /// close the nexus file
       int closeNexusFile();
 

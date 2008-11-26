@@ -210,7 +210,8 @@ namespace NeXus
     /// Run the sub-algorithm LoadInstrument (as for LoadRaw)
     void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Determine the search directory for XML instrument definition files (IDFs)
+      /// Determine the search directory for XML instrument definition files (IDFs)
+      /// @param localWorkspace - pointer to the 2D workspace to put the instrument data into
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
       if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
 
