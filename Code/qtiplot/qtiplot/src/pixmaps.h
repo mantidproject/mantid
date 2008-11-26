@@ -3341,7 +3341,7 @@ static const char * next_xpm[] = {
 "       ..       ",
 "       .        "};
 
-static char *stacked_xpm[] = {
+static const char *stacked_xpm[] = {
 "    16    16      256            2",
 /* colors */
 "`` c #ffffff",
@@ -3620,7 +3620,7 @@ static char *stacked_xpm[] = {
 };
 
 
-static char *panel_v2_xpm[] = {
+static const char *panel_v2_xpm[] = {
 /* width height num_colors chars_per_pixel */
 "    16    16      256            2",
 /* colors */

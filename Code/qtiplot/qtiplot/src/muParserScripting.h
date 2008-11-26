@@ -65,20 +65,21 @@ class muParserScripting: public ScriptingEnv
 
     struct mathFunction
     {
-      char *name;
+      const char *name;
       int numargs;
       double (*fun1)(double);
       double (*fun2)(double,double);
       double (*fun3)(double,double,double);
-      char *description;
+      const char *description;
     };
     static const mathFunction math_functions[];
 
   private:
-    static double ceil(double x)
-      { return ceil(x); }
-    static double floor(double x)
-      { return floor(x); }
+  //Mantid M. Gigg - These will cause an infinite recursive loop!
+//     static double ceil(double x)
+//       { return ceil(x); }
+//     static double floor(double x)
+//       { return floor(x); }
     static double mod(double x, double y)
       { return fmod(x,y); }
     static double mypow(double x, double y)

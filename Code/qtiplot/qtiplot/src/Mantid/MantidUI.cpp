@@ -1001,6 +1001,30 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
     return ml;
 }
 
+MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin)
+{
+     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+     Table *t = createTableFromSelectedColumns(wsName,workspace,bin,bin,false,false);
+    MultiLayer* ml;
+    if (!t) return ml;
+
+    ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    ml->askOnCloseEvent(false);
+    ml->setAttribute(Qt::WA_QuitOnClose);
+    Graph* g = ml->activeGraph();
+    appWindow()->polishGraph(g,Graph::Line);
+    g->setTitle(tr("Workspace ")+ wsName);
+    Mantid::API::Axis* ax;
+    ax = workspace->getAxis(0);
+    std::string s;
+    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    else
+        s = "X axis";
+    g->setXAxisTitle(tr(s.c_str()));
+    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
+    return ml;
+ 
+}
 
 Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs, bool forPlotting)
 {
@@ -1053,6 +1077,44 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      }
      return t;
  }
+
+Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::API::Workspace_sptr workspace, int c0, int c1, bool errs, bool forPlotting)
+{
+  if (c0 < 0 || c1 < 0) return NULL;
+
+  int c = errs?2:1;
+  int numRows = workspace->getNumberHistograms();
+
+  Table* t = new Table(appWindow()->scriptEnv, numRows, c*(c1 - c0 + 1) + 1, "", appWindow(), 0);
+  appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
+  
+  int kY,kErr;
+  for(int i = c0; i <= c1; i++)
+  {
+    kY = c*(i-c0)+1;
+    t->setColName(kY,"Y"+QString::number(i));
+    if (errs)
+    {
+      kErr = 2*(i - c0) + 2;
+      t->setColPlotDesignation(kErr,Table::yErr);
+      t->setColName(kErr,"E"+QString::number(i));
+    }
+    for(int j = 0; j < numRows; j++)
+      {
+	const std::vector<double>& dataY = workspace->readY(j);
+	const std::vector<double>& dataE = workspace->readE(j);
+
+	if (i == c0) 
+	{
+	    t->setCell(j,0,j);
+	}
+	t->setCell(j,kY,dataY[i]); 
+	if (errs) t->setCell(j,kErr,dataE[i]);
+      }
+  }
+  return t;
+}
+
 
 MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
 {

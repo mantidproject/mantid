@@ -1717,6 +1717,7 @@ public:
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
 MultiLayer* plotInstrumentSpectrum(const QString&, int);
+MultiLayer* plotTimeBin(const QString&, int);
 private:
 MantidUI(const MantidUI &);
 };

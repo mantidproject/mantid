@@ -77,14 +77,18 @@ public:
     void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
     Table* createTableDetectors(MantidMatrix *m);
 
-    Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs);
+    Table* createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs);
     void createGraphFromSelectedColumns(MantidMatrix *m, bool vis = true, bool errs = true);
 
     Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
 
+    Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::Workspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
+
+
   // Command purely for python interaction
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  
+  MultiLayer* plotTimeBin(const QString& wsName, int bin);
+
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
 #ifdef _WIN32
