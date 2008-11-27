@@ -78,7 +78,8 @@ namespace Mantid
       bool writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
                             const int& m_spec_min, const int& m_spec_max);
       /// read spectra map information
-      bool readNexusProcessedSpectraMap();
+      bool readNexusProcessedSpectraMap(boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+          const boost::shared_ptr<Mantid::API::Instrument> instrument, const int& m_spec_min, const int& m_spec_max);
       /// close the nexus file
       int closeNexusFile();
 

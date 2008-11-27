@@ -18,6 +18,7 @@
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
+#include <boost/filesystem/operations.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,8 +32,11 @@ public:
   SaveNexusProcessedTest()
   {
 
-    // clearfiles - make true for SVN as dont want to leave on build server
-    clearfiles=true;
+    // clearfiles - make true for SVN as dont want to leave on build server.
+    // Unless the file "KEEP_NXS_FILES" exists, then clear up nxs files
+    boost::filesystem::path file("KEEP_NXS_FILES");
+    clearfiles= !boost::filesystem::exists(file);
+    //clearfiles=true;
     //
 
 

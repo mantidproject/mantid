@@ -149,6 +149,10 @@ namespace NeXus
     // Run the LoadIntsturment algorithm if name available
     if(nexusFile->readNexusInstrumentXmlName(m_instrumentxml,m_instrumentdate, m_instrumentversion))
         runLoadInstrument(localWorkspace );
+    // get any spectraMap info
+    boost::shared_ptr<Instrument> localInstrument=localWorkspace->getInstrument();
+    boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap= localWorkspace->getSpectraMap();
+    nexusFile->readNexusProcessedSpectraMap( spectraMap, localInstrument, m_spec_min, m_spec_max);
     // Assign the result to the output workspace property
     std::string outputWorkspace = "OutputWorkspace";
     setProperty(outputWorkspace,localWorkspace);

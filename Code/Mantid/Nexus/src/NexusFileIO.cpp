@@ -10,6 +10,7 @@
 #ifdef _WIN32
 #include <io.h>
 #endif /* _WIN32 */
+#include "MantidAPI/Instrument.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -428,6 +429,10 @@ namespace NeXus
 
   int NexusFileIO::readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample)
   {
+  /*!
+     Read Nexus Sample section
+     @param sample pointer to the workspace sample data
+  */
    NXstatus status;
 
    //open sample entry
@@ -447,8 +452,8 @@ namespace NeXus
    {
        sample->setProtonCharge(totalProtonCharge);
        if(attributes.size()==1) // check units if present
-           if(attributes[0].compare("units")==0 && avalues[0].compare("microsAmps*hour")!=0)
-               g_log.error("Unexpected units of Proton charge ignored: " + avalues[0]);
+           if(attributes[0].compare("units")==0 && avalues[0].compare("microAmps*hour")!=0)
+               g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
    }
 
    status=NXclosegroup(fileID);
@@ -806,7 +811,7 @@ namespace NeXus
    status=NXputdata(fileID, (void*)detector_count);
    status=NXclosedata(fileID);
    //
-   dims[1]=nDetectors;
+   dims[0]=nDetectors;
    status=NXcompmakedata(fileID, "detector_list", NX_INT32, 1, dims, m_nexuscompression,dims);
    status=NXopendata(fileID, "detector_list");
    status=NXputdata(fileID, (void*)detector_list);
@@ -820,10 +825,14 @@ namespace NeXus
    status=NXclosegroup(fileID); // close instrument group
    return(true);
   }
-  bool NexusFileIO::readNexusProcessedSpectraMap()
+  bool NexusFileIO::readNexusProcessedSpectraMap(boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+                    const boost::shared_ptr<Instrument> instrument, const int& m_spec_min, const int& m_spec_max)
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
-       Muon data.
+       Muon data. Use this to build spectraMap
+       @param spectraMap pointer to the SpectraDetectorMap
+       @param m_spec_min starting spectrum to write
+       @param m_spec_max last spectrum to write
        @return true for OK, false for error
    */
 
@@ -838,6 +847,49 @@ namespace NeXus
        NXclosegroup(fileID);
        return(false);
    }
+   //
+   // read data from Nexus sections detector_{index,count,list}
+   int dim[1],rank,type;
+   status=NXopendata(fileID, "detector_index");
+   status=NXgetinfo(fileID, &rank, dim, &type);
+   if(status==NX_ERROR || rank!=1 || type!=NX_INT32)
+   {
+       status=NXclosedata(fileID);
+       status=NXclosegroup(fileID);
+       return(false);
+   }
+   int nSpectra=dim[0];
+   int *detector_index=new int[nSpectra];
+   int *detector_count=new int[nSpectra];
+   status=NXgetdata(fileID, (void*)detector_index);
+   status=NXclosedata(fileID);
+   //
+   status=NXopendata(fileID, "detector_count");
+   status=NXgetdata(fileID, (void*)detector_count);
+   status=NXclosedata(fileID);
+   //
+   status=NXopendata(fileID, "detector_list");
+   status=NXgetinfo(fileID, &rank, dim, &type);
+   int nDet=dim[0];
+   int *detector_list=new int[nDet];
+   int *spectra_list=new int[nDet];
+   status=NXgetdata(fileID, (void*)detector_list);
+   // build spectra_list for populate method
+   for(int i=0;i<nSpectra;i++)
+   {
+       int offset=detector_index[i];
+       for(int j=0;j<detector_count[i];j++)
+       {
+           spectra_list[offset+j]=i+1;
+       }
+   }
+   spectraMap->populate(spectra_list,detector_list,nDet,instrument.get()); //Populate the Spectra Map with parameters
+   status=NXclosedata(fileID);
+   // tidy up
+   delete[] detector_list;
+   delete[] detector_index;
+   delete[] detector_count;
+   delete[] spectra_list;
    //
    status=NXclosegroup(fileID); // close detector group
    status=NXclosegroup(fileID); // close instrument group
