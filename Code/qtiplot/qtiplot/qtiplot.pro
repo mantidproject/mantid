@@ -643,7 +643,6 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiMultiLayer.cpp\
              $${SIP_DIR}/sipqtiTable.cpp\
              $${SIP_DIR}/sipqtiMatrix.cpp\
-             $${SIP_DIR}/sipqtiMantidMatrix.cpp\
              $${SIP_DIR}/sipqtiMdiSubWindow.cpp\
              $${SIP_DIR}/sipqtiScriptEdit.cpp\
              $${SIP_DIR}/sipqtiNote.cpp\
