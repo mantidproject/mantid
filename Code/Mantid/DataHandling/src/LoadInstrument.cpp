@@ -770,6 +770,15 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
   Element* facingElem = pElem->getChildElement("facing");
   if (facingElem)
   {
+    // check if user want to rotate about z-axis before potentially applying facing
+
+    if ( facingElem->hasAttribute("rot") )
+    {
+      double rotAngle = atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+      comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
+    }
+
+
     // For now assume that if has val attribute it means facing = none. This option only has an
     // effect when a default facing setting is set. In which case this then means "ignore the
     // default facing setting" for this component
@@ -777,13 +786,6 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
     if ( facingElem->hasAttribute("val") )
       return;
 
-    // check if rotate about z-axis before doing the facing
-
-    if ( facingElem->hasAttribute("rot") )
-    {
-      double rotAngle = atof( (facingElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
-      comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(0,0,1)));
-    }
 
     // Face the component to the x,y,z or r,t,p coordinates of the facing component
 
