@@ -119,6 +119,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelected(int)), this, SLOT(detectorInformation(int)));
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int)),this,SLOT(detectorHighlighted(int,int,int)));
+	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelectedList(std::vector<int>)), this, SLOT(spectraListInformation(std::vector<int>)));
+	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelectedList(std::vector<int>)), this, SLOT(detectorListInformation(std::vector<int>)));
 	connect(mSelectBin, SIGNAL(clicked()), mBinMapDialog,SLOT(exec()));
 	connect(mBinMapDialog,SIGNAL(SingleBinNumber(int)), mInstrumentDisplay, SLOT(setDataMappingSingleBin(int)));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(int,int)), mInstrumentDisplay, SLOT(setDataMappingIntegral(int,int)));
@@ -131,6 +133,14 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
     mPopupContext->addAction(plotAction);
+
+	mDetectorGroupPopupContext = new QMenu(mInstrumentDisplay);
+	QAction* infoGroupAction = new QAction(tr("&Info"), this);
+	connect(infoGroupAction,SIGNAL(triggered()),this,SLOT(spectraGroupInfoDialog()));
+    mDetectorGroupPopupContext->addAction(infoGroupAction);	
+	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
+	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
+    mDetectorGroupPopupContext->addAction(plotGroupAction);
 
 	askOnCloseEvent(false);
 }
@@ -181,6 +191,22 @@ void InstrumentWindow::detectorInformation(int value)
 {
 	mDetectorIDSelected=value;
 }
+/**
+ * This method is a slot for the collection of the spectra index list that was selected
+ */
+void InstrumentWindow::spectraListInformation(std::vector<int> result)
+{
+	mDetectorGroupPopupContext->popup(QCursor::pos());
+	mSpectraIDSelectedList=result;
+}
+/**
+ * This method is a slot for the collection of the detector list that was selected
+ */
+void InstrumentWindow::detectorListInformation(std::vector<int> result)
+{
+	mDetectorGroupPopupContext->popup(QCursor::pos());
+	mDetectorIDSelectedList=result;
+}
 
 /**
  * This is the detector information slot executed when a detector is highlighted by moving mouse in graphics widget.
@@ -212,6 +238,21 @@ void InstrumentWindow::spectraInfoDialog()
 	info+= QString::number(mDetectorIDSelected);
 	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 }
+
+/**
+ * Shows dialog with group of detectors information
+ */
+void InstrumentWindow::spectraGroupInfoDialog()
+{
+	QString info;
+	info+=" The Spectra Index Number: ";
+	info+= QString::number(mSpectraIDSelectedList.size());
+	info+=" \nThe Detector Id Numbers: ";
+	info+= QString::number(mDetectorIDSelectedList.size());
+	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
+
+}
+
 /**
  *   Sends a signal to plot the selected spectrum.
  */
@@ -220,6 +261,13 @@ void InstrumentWindow::sendPlotSpectraSignal()
     emit plotSpectra( QString::fromStdString(mInstrumentDisplay->getWorkspaceName()), mSpectraIDSelected );
 }
 
+/**
+ *   Sends a signal to plot the selected spectrum.
+ */
+void InstrumentWindow::sendPlotSpectraGroupSignal()
+{
+    emit plotSpectraList( QString::fromStdString(mInstrumentDisplay->getWorkspaceName()), mSpectraIDSelectedList );
+}
 /**
  * Destructor
  */

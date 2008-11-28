@@ -56,7 +56,7 @@ public:
 	double getDataMaxValue();
 	void setDataMappingType(DataMappingType);
 public slots:
-	void fireDetectorPicked(GLActor* );
+	void fireDetectorsPicked(std::vector<GLActor*> );
 	void fireDetectorHighligted(GLActor* pickedActor);
 	void setTimeBin(int value);
 	void setColorMapMinValue(double minValue);
@@ -82,6 +82,8 @@ signals:
 	void actionDetectorSelected(int);
 	void actionSpectraSelected(int);
 	void actionDetectorHighlighted(int,int,int);
+	void actionDetectorSelectedList(std::vector<int>);
+	void actionSpectraSelectedList(std::vector<int>);
 private:
 	int iTimeBin;
 	DataMappingType mDataMapping;

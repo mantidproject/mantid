@@ -11,23 +11,26 @@
 #include "boost/shared_ptr.hpp"
 #include <QApplication>
 #include <iostream>
+#ifndef GL_MULTISAMPLE
+#define GL_MULTISAMPLE  0x809D
+#endif
 
-GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(parent)
+
+GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(QGLFormat(QGL::SampleBuffers),parent)
 {
 	_viewport=new GLViewport;
 	_trackball=new GLTrackball(_viewport);
-	_picker=new GLPicker;
-	_picker->setViewport(_viewport);
 	isKeyPressed=false;
 	scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection());
-	_picker->setActorCollection(scene.get());
 	mPickedActor=NULL;
 	mPickingDraw=false;
+	iInteractionMode=0;
+	mPickBox=new GLGroupPickBox(scene.get());
 	setFocusPolicy(Qt::StrongFocus);
+    setAutoFillBackground(false);
 }
 GL3DWidget::~GL3DWidget()
 {
-	delete _picker;
 	delete _viewport;
 	delete _trackball;
 }
@@ -36,17 +39,15 @@ void GL3DWidget::setInteractionModePick()
 {
 	iInteractionMode=1;// Pick mode
 	setMouseTracking(true);
-	mPickingDraw=true;
-	paintGL();
-	mPickingDraw=false;
-	glReadBuffer(GL_BACK);
-	buffer=grabFrameBuffer(false);
+	switchToPickingMode();
 }
 
 void GL3DWidget::setInteractionModeNormal()
 {
 	iInteractionMode=0;//Normal mode
 	setMouseTracking(false);
+	setCursor(Qt::PointingHandCursor);
+	update();
 }
 
 GLActor* GL3DWidget::getPickedActor()
@@ -85,60 +86,100 @@ void GL3DWidget::initializeGL()
 }
 
 /**
+ * This method draws the scene onto the graphics context
+ */
+void GL3DWidget::drawDisplayScene()
+{
+	glEnable(GL_DEPTH_TEST);            // Enable Depth test
+	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
+	glShadeModel(GL_SMOOTH);            // Shade model is smooth
+	glEnable(GL_LIGHTING);              
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glEnable(GL_NORMALIZE);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(0.0,0.0,0.0,1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Issue the rotation, translation and zooming of the trackball to the object
+	_trackball->IssueRotation();
+
+	glPushMatrix();
+	if(isKeyPressed){
+		glDisable(GL_LIGHTING);
+		scene->drawBoundingBox();
+	}
+	else
+	{
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+		scene->draw();
+		QApplication::restoreOverrideCursor();
+	}
+	glPopMatrix();
+}
+
+/**
+ * This method draws the scenc when in pick mode i.e with reference colors to actors
+ */
+void GL3DWidget::drawPickingScene()
+{
+	glEnable(GL_DEPTH_TEST);            // Enable Depth test
+	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
+	glShadeModel(GL_FLAT);            // Shade model is flat
+	glDisable(GL_LIGHTING);              
+	glDisable(GL_LIGHT0);
+	glDisable(GL_LINE_SMOOTH);
+	glDisable(GL_BLEND);
+	glDisable(GL_NORMALIZE);
+	glClearColor(0.0,0.0,0.0,1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Issue the rotation, translation and zooming of the trackball to the object
+	_trackball->IssueRotation();
+	glPushMatrix();
+	scene->drawColorID();
+	glPopMatrix();
+}
+
+/**
+ * Switches to picking mode does all the operations to create and set the images to GLGroupPickBox
+ */
+void GL3DWidget::switchToPickingMode()
+{
+	drawDisplayScene();
+	glReadBuffer(GL_BACK);
+	mPickBox->setDisplayImage(grabFrameBuffer(false));
+    glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
+	drawPickingScene();
+	mPickBox->setPickImage(grabFrameBuffer(false));
+    glEnable(GL_MULTISAMPLE);   //enable antialiasing
+	mPickingDraw=false;
+}
+
+/**
  * This is overridden function which is called by Qt when the widget needs to be repainted.
  */
-void GL3DWidget::paintGL()
+void GL3DWidget::paintEvent(QPaintEvent *event)
 {
-	if(mPickingDraw){
-		glEnable(GL_DEPTH_TEST);            // Enable Depth test
-		glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
-		glShadeModel(GL_FLAT);            // Shade model is smooth
-		glDisable(GL_LIGHTING);              
-		glDisable(GL_LIGHT0);
-		glDisable(GL_LINE_SMOOTH);
-		glDisable(GL_BLEND);
-		glDisable(GL_NORMALIZE);
-		glClearColor(0.0,0.0,0.0,1.0);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
+	makeCurrent();
+	if(iInteractionMode){
+		if(mPickingDraw==true)
+			switchToPickingMode();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		// Issue the rotation, translation and zooming of the trackball to the object
-		_trackball->IssueRotation();
-		glPushMatrix();
-		scene->drawColorID();
-		glPopMatrix();
+		QPainter painter(this);
+		painter.setRenderHint(QPainter::Antialiasing);
+		mPickBox->draw(&painter);
+		painter.end();
 	} 
 	else
 	{
-		glEnable(GL_DEPTH_TEST);            // Enable Depth test
-		glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
-		glShadeModel(GL_SMOOTH);            // Shade model is smooth
-		glEnable(GL_LIGHTING);              
-		glEnable(GL_LIGHT0);
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_BLEND);
-		glEnable(GL_NORMALIZE);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glClearColor(0.0,0.0,0.0,1.0);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		// Issue the rotation, translation and zooming of the trackball to the object
-		_trackball->IssueRotation();
-
-		glPushMatrix();
-		if(isKeyPressed){
-			glDisable(GL_LIGHTING);
-			scene->drawBoundingBox();
-		}
-		else
-		{
-			QApplication::setOverrideCursor(Qt::WaitCursor);
-			scene->draw();
-			QApplication::restoreOverrideCursor();
-		}
-		glPopMatrix();
+		drawDisplayScene();
+		QPainter painter(this);
+		painter.end();
 	}
 }
 
@@ -175,14 +216,10 @@ void GL3DWidget::resizeGL(int width, int height)
 	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*minScale,maxValue*maxScale);
 	//_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
 	_viewport->issueGL();
-
+	
 	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
 	{
 		mPickingDraw=true;
-		paintGL();
-		mPickingDraw=false;
-		glReadBuffer(GL_BACK);
-		buffer=grabFrameBuffer(false);
 	}
 }
 
@@ -199,9 +236,10 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 	if(iInteractionMode==1 && (event->buttons() & Qt::LeftButton)) // Pick Mode
 	{
 		setCursor(Qt::CrossCursor);
-		mPickedActor=_picker->pickPoint(buffer,event->x(),event->y());
-		if(mPickedActor!=NULL)
-			emit actorPicked(mPickedActor);
+		//mPickedActor=_picker->pickPoint(buffer,event->x(),event->y());
+		//if(mPickedActor!=NULL)
+		//	emit actorPicked(mPickedActor);
+		mPickBox->mousePressEvent(event);
 		return;
 	} //end of pick mode and start of normal mode
 	if (event->buttons() & Qt::MidButton)
@@ -240,24 +278,26 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	if(iInteractionMode==1){
 		setCursor(Qt::CrossCursor);
-		GLActor* tmpActor=_picker->pickPoint(buffer,event->x(),event->y());
-		emit actorHighlighted(tmpActor);		
+		GLActor* tmpActor=mPickBox->pickPoint(event->x(),event->y());
+		emit actorHighlighted(tmpActor);
+		mPickBox->mouseMoveEvent(event);
+		update();
 	}else{
 		if (event->buttons() & Qt::LeftButton)
 		{
 			setCursor(Qt::ClosedHandCursor);
 			_trackball->generateRotationTo(event->x(),event->y());
-			updateGL();
+			update();
 			_trackball->initRotationFrom(event->x(),event->y());
 		}else if(event->buttons() & Qt::RightButton){ //Translate
 			setCursor(Qt::CrossCursor);
 			_trackball->generateTranslationTo(event->x(),event->y());
-			updateGL();
+			update();
 			_trackball->initTranslateFrom(event->x(),event->y());
 		}else if(event->buttons() & Qt::MidButton){ //Zoom
 			setCursor(Qt::SizeVerCursor);
 			_trackball->generateZoomTo(event->x(),event->y());
-			updateGL();
+			update();
 			_trackball->initZoomFrom(event->x(),event->y());
 		}
 	}
@@ -271,7 +311,14 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
 	setCursor(Qt::PointingHandCursor);
 	isKeyPressed=false;
-	updateGL();
+	if(iInteractionMode==1)
+	{
+		mPickBox->mouseReleaseEvent(event);
+		std::vector<GLActor*> result=mPickBox->getListOfActorsPicked();
+		if(result.size()!=0)
+			emit actorsPicked(result);
+	}
+	update();
 }
 
 /**
@@ -283,7 +330,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
 	setCursor(Qt::SizeVerCursor);
 	_trackball->initZoomFrom(event->x(),event->y());
 	_trackball->generateZoomTo(event->x(),event->y()+event->delta());
-	updateGL();	
+	update();	
 	setCursor(Qt::PointingHandCursor);
 }
 
@@ -307,28 +354,28 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
 		setCursor(Qt::CrossCursor);
 		_trackball->initTranslateFrom(1,0);
 		_trackball->generateTranslationTo(0,0);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_Right:
 		isKeyPressed=true;
 		setCursor(Qt::CrossCursor);
 		_trackball->initTranslateFrom(0,0);
 		_trackball->generateTranslationTo(1,0);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_Up:
 		isKeyPressed=true;
 		setCursor(Qt::CrossCursor);
 		_trackball->initTranslateFrom(0,1);
 		_trackball->generateTranslationTo(0,0);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_Down:
 		isKeyPressed=true;
 		setCursor(Qt::CrossCursor);
 		_trackball->initTranslateFrom(0,0);
 		_trackball->generateTranslationTo(0,1);
-		updateGL();
+		update();
 		break;
 		//--------------------End of Translation---------------
 		//--------------------Rotation-------------------------
@@ -337,56 +384,56 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth-1,halfheight+1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_2:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth,halfheight+1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_3:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth+1,halfheight+1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_4:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth-1,halfheight);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_6:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth+1,halfheight);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_7:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth-1,halfheight-1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_8:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth,halfheight-1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_9:
 		isKeyPressed=true;
 		setCursor(Qt::ClosedHandCursor);
 		_trackball->initRotationFrom(halfwidth,halfheight);
 		_trackball->generateRotationTo(halfwidth+1,halfheight-1);
-		updateGL();
+		update();
 		break;
 		//---------------------------------End of Rotation--------------
 		//---------------------------------Zoom-------------------------
@@ -395,14 +442,14 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
 		setCursor(Qt::SizeVerCursor);
 		_trackball->initZoomFrom(halfwidth,halfheight);
 		_trackball->generateZoomTo(halfwidth,halfheight-1);
-		updateGL();
+		update();
 		break;
 	case Qt::Key_PageDown:
 		isKeyPressed=true;
 		setCursor(Qt::SizeVerCursor);
 		_trackball->initZoomFrom(halfwidth,halfheight);
 		_trackball->generateZoomTo(halfwidth,halfheight+1);
-		updateGL();
+		update();
 		break;
 	}
 }
@@ -417,7 +464,7 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 	setCursor(Qt::PointingHandCursor);
 	isKeyPressed=false;
 	if(!event->isAutoRepeat())
-		updateGL();
+		update();
 }
 /**
  * This method sets the collection of actors that widget needs to display
@@ -426,11 +473,11 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
 {
 	scene=col;
-	_picker->setActorCollection(scene.get());
+	mPickBox->setActorCollection(scene.get());
 	int width,height;
 	_viewport->getViewport(&width,&height);
 	resizeGL(width,height);
-	updateGL();
+	update();
 }
 
 /**
@@ -478,5 +525,5 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
 		_trackball->setViewToZNegative();
 		break;
 	}
-	updateGL();
+	update();
 }

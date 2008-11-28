@@ -81,6 +81,7 @@ public:
     void createGraphFromSelectedColumns(MantidMatrix *m, bool vis = true, bool errs = true);
 
     Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
+	Table* createTableFromSelectedRowsList(const QString& wsName, Mantid::API::Workspace_sptr workspace, std::vector<int> index, bool errs=true, bool forPlotting=false);
 
     Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::Workspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
 
@@ -142,6 +143,7 @@ public slots:
     void insertMenu();
 
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
+	MultiLayer* plotInstrumentSpectrumList(const QString&,std::vector<int>);
 
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);

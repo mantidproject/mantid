@@ -12,6 +12,7 @@
 #include "../../MdiSubWindow.h"
 #include "BinDialog.h"
 #include <string>
+#include <vector>
 #include "qwt_scale_widget.h"
 
 /*!
@@ -54,24 +55,32 @@ public slots:
 	void spectraInformation(int);
 	void detectorInformation(int value);
 	void detectorHighlighted(int detectorId,int spectraid,int count);
+	void spectraListInformation(std::vector<int>);
+	void detectorListInformation(std::vector<int>);
 	void spectraInfoDialog();
+	void spectraGroupInfoDialog();
 	void changeColormap();
     void sendPlotSpectraSignal();
+	void sendPlotSpectraGroupSignal();
 	void minValueChanged();
 	void maxValueChanged();
 	void setViewDirection(const QString&);
 signals:
     void plotSpectra(const QString&,int);
+	void plotSpectraList(const QString&,std::vector<int>);
 private:
 	void updateColorMapWidget();
 	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
     QMenu*       mPopupContext; ///< Popup menu for detector picking
+	QMenu*       mDetectorGroupPopupContext; ///< Popup menu for detector picking
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal
 	QPushButton* mSelectColormap; ///< Select colormap button
 	Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
 	int          mSpectraIDSelected; ///< spectra index id
 	int          mDetectorIDSelected; ///< detector id
+	std::vector<int> mSpectraIDSelectedList;
+	std::vector<int> mDetectorIDSelectedList;
 	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap

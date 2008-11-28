@@ -21,6 +21,8 @@
 #include <map>
 #include <math.h>
 #include <float.h>
+#include <QMessageBox>
+#include <QString>
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -29,7 +31,7 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 {
 	iTimeBin=0;
 	strWorkspaceName="";
-	connect(this, SIGNAL(actorPicked(GLActor*)), this, SLOT(fireDetectorPicked(GLActor*)));
+	connect(this, SIGNAL(actorsPicked(std::vector<GLActor*>)), this, SLOT(fireDetectorsPicked(std::vector<GLActor*>)));
 	connect(this, SIGNAL(actorHighlighted(GLActor*)),this,SLOT(fireDetectorHighligted(GLActor*)));
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
@@ -41,31 +43,50 @@ Instrument3DWidget::~Instrument3DWidget()
 }
 
 /**
- * This method is the slot when the detector is picked using mouse. This method emits
- * signals the id of the detector and the spectra index(not spectra number). 
+ * This method is the slot when the detectors are picked using mouse. This method emits
+ * signals the ids of the detector and the spectra index(not spectra number). 
  * @param pickedActor the input passed by the the signal.
  */
-void Instrument3DWidget::fireDetectorPicked(GLActor* pickedActor)
+void Instrument3DWidget::fireDetectorsPicked(std::vector<GLActor*> pickedActor)
 {
-	boost::shared_ptr<GLObject> tmpGLObject=pickedActor->getRepresentation();
-	if(tmpGLObject->type()=="MantidObject")
+	std::vector<int> detectorIds;
+
+	for(std::vector<GLActor*>::iterator it=pickedActor.begin();it!=pickedActor.end();it++)
 	{
-		//type cast to the mantid object
-		MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
-		//get the component
-		ObjComponent* tmpObjComp=tmpMantidObject->getComponent();
-		//check the component type if its detector or not
-		if(tmpObjComp->type()=="PhysicalComponent" ||tmpObjComp->type()=="DetectorComponent")
+		boost::shared_ptr<GLObject> tmpGLObject=(*it)->getRepresentation();
+		if(tmpGLObject->type()=="MantidObject")
 		{
-			Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(tmpObjComp));
+			//type cast to the mantid object
+			MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
+			//get the component
+			ObjComponent* tmpObjComp=tmpMantidObject->getComponent();
+			//check the component type if its detector or not
+			if(tmpObjComp->type()=="PhysicalComponent" ||tmpObjComp->type()=="DetectorComponent")
+			{
+				Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(tmpObjComp));
+				detectorIds.push_back(iDec->getID());
+			}
+
+		}
+	}
+	//convert detector ids to spectra index ids
+	std::vector<int> spectraIndices = getSpectraIndexList(detectorIds);
+	if(detectorIds.size()!=0)
+	{
+		if(detectorIds.size()==1)
+		{
 			//emit the detector id
-			emit actionDetectorSelected(iDec->getID());
-			//convert detector id to spectra index id
-			std::vector<int> idDecVec;
-			idDecVec.push_back(iDec->getID());
-			std::vector<int> indexList = getSpectraIndexList(idDecVec);
+			emit actionDetectorSelected(detectorIds.at(0));
 			//emit the spectra id
-			emit actionSpectraSelected(indexList[0]);
+			emit actionSpectraSelected(spectraIndices.at(0));
+		}
+		else // If more than one detector selected
+		{
+			//emit the detector ids
+			emit actionDetectorSelectedList(detectorIds);
+			//emit the spectra ids
+			emit actionSpectraSelectedList(spectraIndices);
+
 		}
 
 	}

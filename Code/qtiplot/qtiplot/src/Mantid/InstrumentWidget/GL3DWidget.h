@@ -7,7 +7,7 @@
 #include "GLViewport.h" 
 #include "GLTrackball.h" 
 #include "GLActorCollection.h" 
-#include "GLPicker.h" 
+#include "GLGroupPickBox.h"
 #include "boost/shared_ptr.hpp"
 
 /*!
@@ -54,12 +54,12 @@ public:
 	void saveToPPM(QString filename);
 	void setViewDirection(AxisDirection);
 signals:
-        void actorPicked( GLActor* );
+	void actorsPicked( std::vector<GLActor*> );
 		void actorHighlighted( GLActor* );
 protected:
 	void initializeGL();
     void MakeObject();
-	void paintGL();
+	void paintEvent(QPaintEvent *event);
 	void resizeGL(int,int);
 	void mousePressEvent(QMouseEvent*);
 	void mouseMoveEvent(QMouseEvent*);
@@ -69,12 +69,15 @@ protected:
 	void keyReleaseEvent(QKeyEvent *);
 	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
 private:
+	void drawDisplayScene();
+	void drawPickingScene();
+	void switchToPickingMode();
 	QImage buffer;
 	int iInteractionMode;
 	bool mPickingDraw;
     GLTrackball* _trackball;       ///< Trackball for user interaction
     GLViewport* _viewport;         ///< Opengl View port [World -> Window]
-    GLPicker* _picker;             ///< Picker used for user selecting a object in window
+	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
 	GLActor* mPickedActor;
 	bool isKeyPressed;
 };

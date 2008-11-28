@@ -946,6 +946,7 @@ void MantidUI::showMantidInstrument(const QString& wsName)
 	insWin->show();
 	insWin->setWorkspaceName(std::string(wsName.ascii()));
     connect(insWin,SIGNAL(plotSpectra(const QString&,int)),this,SLOT(plotInstrumentSpectrum(const QString&,int)));
+	connect(insWin,SIGNAL(plotSpectraList(const QString&,std::vector<int>)),this,SLOT(plotInstrumentSpectrumList(const QString&,std::vector<int>)));
 }
 
 void MantidUI::showMantidInstrument()
@@ -1000,6 +1001,88 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
     g->setYAxisTitle(tr(workspace->YUnit().c_str()));
     return ml;
 }
+
+/// Catches the signal from InstrumentWindow to plot a spectrum.
+MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::vector<int> spec)
+{
+//    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
+    Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    Table *t = createTableFromSelectedRowsList(wsName,workspace,spec,false,false);
+    MultiLayer* ml=NULL;
+    if (!t) return ml;
+
+    ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+    ml->askOnCloseEvent(false);
+    ml->setAttribute(Qt::WA_QuitOnClose);
+    Graph* g = ml->activeGraph();
+    appWindow()->polishGraph(g,Graph::Line);
+    g->setTitle(tr("Workspace ")+name());
+    Mantid::API::Axis* ax;
+    ax = workspace->getAxis(0);
+    std::string s;
+    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    else
+        s = "X axis";
+    g->setXAxisTitle(tr(s.c_str()));
+    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
+    return ml;
+}
+
+Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::API::Workspace_sptr workspace, std::vector<int> index, bool errs, bool forPlotting)
+{
+     int nspec = workspace->getNumberHistograms();
+	 //Loop through the list of index and remove all the indexes that are out of range
+	 for(std::vector<int>::iterator it=index.begin();it!=index.end();it++)
+	 {
+		if ((*it) > nspec || (*it) < 0) index.erase(it);
+	 }
+     if (index.size()==0) return 0;
+
+     int c = errs?2:1;
+     int numRows = workspace->blocksize() - 1;
+     bool isHistogram = workspace->isHistogramData();
+     if (isHistogram && !forPlotting) numRows++;
+
+	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*index.size() + 1, "", appWindow(), 0);
+	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+
+     int kY,kErr;
+     for(int i=0;i<index.size();i++)
+     {
+         const std::vector<double>& dataX = workspace->readX(index[i]);
+		 const std::vector<double>& dataY = workspace->readY(index[i]);
+         const std::vector<double>& dataE = workspace->readE(index[i]);
+    
+         kY = c*i+1;
+         t->setColName(kY,"Y"+QString::number(index[i]));
+         if (errs)
+         {
+             kErr = 2*i + 2;
+             t->setColPlotDesignation(kErr,Table::yErr);
+             t->setColName(kErr,"E"+QString::number(index[i]));
+         }
+         for(int j=0;j<numRows;j++)
+         {
+             if (i == 0) 
+             {
+                 // in histograms the point is to be drawn in the centre of the bin.
+                 if (isHistogram && forPlotting) t->setCell(j,0,( dataX[j] + dataX[j+1] )/2);
+                 else
+                     t->setCell(j,0,dataX[j]);
+             }
+             t->setCell(j,kY,dataY[j]); 
+             if (errs) t->setCell(j,kErr,dataE[j]);
+         }
+         if (isHistogram && !forPlotting)
+         {
+             int iRow = numRows - 1;
+             if (i == 0) t->setCell(iRow,0,dataX[iRow]);
+             t->setCell(iRow,kY,0); 
+             if (errs) t->setCell(iRow,kErr,0);
+         }
+     }
+     return t;
+ }
 
 MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin)
 {
