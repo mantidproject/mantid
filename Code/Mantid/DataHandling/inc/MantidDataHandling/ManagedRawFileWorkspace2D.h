@@ -65,7 +65,7 @@ public:
   virtual ~ManagedRawFileWorkspace2D();
 
   /// Sets the RAW file for this workspace.
-  void setRawFile(const std::string& fileName);
+  void setRawFile(const std::string& fileName,int opt=0);
 
 protected:
     /// Reads in a data block.
@@ -78,6 +78,10 @@ private:
     /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
     ManagedRawFileWorkspace2D& operator=(const ManagedRawFileWorkspace2D&);
 
+    bool needCache(int opt);
+    void openTempFile();
+    void removeTempFile()const;
+
     ISISRAW2 *isisRaw;
     std::string m_filenameRaw;//< RAW file name.
     FILE* m_fileRaw;          //< RAW file pointer.
@@ -89,6 +93,8 @@ private:
         The block's index = startIndex / m_vectorsPerBlock.
     */
     std::vector<bool> m_changedBlock;
+    static int g_uniqueID;
+    std::string m_tempfile;
     
     int m_numberOfTimeChannels;  //< The number of time channels (i.e. bins) from the RAW file 
     int m_numberOfBinBoundaries; //< The number of time bin boundaries == m_numberOfTimeChannels + 1

@@ -72,6 +72,33 @@ loadRawDlg::loadRawDlg(QWidget *parent) : QDialog(parent), fileName(""), workspa
     paramsLayout->addWidget(maxSpLabel,1,0);
     paramsLayout->addWidget(maxSpLineEdit,1,1);
 
+    QLabel *listSpLabel = new QLabel("Spectrum list");
+    listSpLineEdit = new QLineEdit;
+    propValue = InputHistory::Instance().algorithmProperty("LoadRaw","spectrum_list");
+    if (!propValue.isEmpty())
+    {
+        listSpLineEdit->setText(propValue);
+    }
+    paramsLayout->addWidget(listSpLabel,2,0);
+    paramsLayout->addWidget(listSpLineEdit,2,1);
+
+    QLabel *cacheLabel = new QLabel("Cache on local drive");
+    cacheCBox = new QComboBox;
+    cacheCBox->insertItem(0,"Never");
+    cacheCBox->insertItem(0,"Always");
+    cacheCBox->insertItem(0,"If slow");
+    cacheCBox->setCurrentIndex(0);
+    propValue = InputHistory::Instance().algorithmProperty("LoadRaw","Cache");
+    if (!propValue.isEmpty())
+    {
+        int i = cacheCBox->findText(propValue);
+        if (i >= 0)
+            cacheCBox->setCurrentIndex(i);
+    }
+    paramsLayout->addWidget(cacheLabel,3,0);
+    paramsLayout->addWidget(cacheCBox,3,1);
+
+
     mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(topRowLayout);
 	mainLayout->addLayout(middleRowLayout);
@@ -114,6 +141,8 @@ void loadRawDlg::loadClicked()
 		workspaceName = lineName->text();
         spectrum_min = minSpLineEdit->text();
         spectrum_max = maxSpLineEdit->text();
+        spectrum_list = listSpLineEdit->text();
+        cache_option = cacheCBox->currentText();
 		close();
 	}
 }

@@ -80,7 +80,7 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
 
     connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
     connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
-    connect(this,SIGNAL(needToUpdateProgressDialog(int)),this,SLOT(updateProgressDialog(int)));
+    connect(this,SIGNAL(needToUpdateProgressDialog(int,const QString&)),this,SLOT(updateProgressDialog(int,const QString&)));
     connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::Algorithm*)));
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
@@ -159,7 +159,8 @@ IAlgorithm* MantidUI::CreateAlgorithm(const QString& algName)
 	return alg;
 }
 
-void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max)
+void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max
+                               ,const QString& spectrum_list,const QString& cache)
 {
 	//Check workspace does not exist
 	if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
@@ -177,6 +178,10 @@ void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceN
 	    alg->setPropertyValue("spectrum_min", spectrum_min.toStdString());
 	    alg->setPropertyValue("spectrum_max", spectrum_max.toStdString());
     }
+    if ( !spectrum_list.isEmpty() )
+	    alg->setPropertyValue("spectrum_list", spectrum_list.toStdString());
+    if ( !cache.isEmpty() )
+	    alg->setPropertyValue("Cache", cache.toStdString());
 
     executeAlgorithmAsync(alg);
 }
@@ -194,7 +199,9 @@ void MantidUI::loadWorkspace()
 		LoadIsisRawFile(dlg->getFilename(), 
                         dlg->getWorkspaceName(),
                         dlg->getSpectrumMin(),
-                        dlg->getSpectrumMax());
+                        dlg->getSpectrumMax(),
+                        dlg->getSpectrumList(),
+                        dlg->getCacheOption());
 	}
 }
 
@@ -812,9 +819,9 @@ void MantidUI::tst(MdiSubWindow* w)
     cerr<<"OK closed\n";
 }
 
-void MantidUI::updateProgressDialog(int ip)
+void MantidUI::updateProgressDialog(int ip,const QString& msg)
 {
-    if (m_progressDialog) m_progressDialog->setValue( ip );
+    if (m_progressDialog) m_progressDialog->setValue( ip , msg );
 }
 
 void MantidUI::closeProgressDialog()
@@ -829,7 +836,7 @@ void MantidUI::closeProgressDialog()
 void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
     if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
-    emit needToUpdateProgressDialog(100);
+    emit needToUpdateProgressDialog(100,"Algorithm finished.");
     emit needToCloseProgressDialog();
     emit needsUpdating();
 }
@@ -880,7 +887,9 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::Algorithm* alg)
 void MantidUI::handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
 {
     if (m_algAsync == pNf->algorithm())
-        emit needToUpdateProgressDialog( int(pNf->progress*100) );
+    {
+        emit needToUpdateProgressDialog( int(pNf->progress*100) ,QString::fromStdString(pNf->message));
+    }
 }
 
 void MantidUI::showCritical(const QString& text)
@@ -1120,26 +1129,31 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      bool isHistogram = workspace->isHistogramData();
      if (isHistogram && !forPlotting) numRows++;
 
+//	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*index.size() + 1, "", appWindow(), 0);
 	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
 
      int kY,kErr;
+//     for(int i=0;i<=index.size();i++)
      for(int i=i0;i<=i1;i++)
      {
-         const std::vector<double>& dataX = workspace->readX(i);
+         const std::vector<double>& dataX = workspace->readX(i);//index(i)
          const std::vector<double>& dataY = workspace->readY(i);
          const std::vector<double>& dataE = workspace->readE(i);
     
+//         kY = c*i+1;
          kY = c*(i-i0)+1;
-         t->setColName(kY,"Y"+QString::number(i));
+         t->setColName(kY,"Y"+QString::number(i));//index(i)
          if (errs)
          {
+//             kErr = 2*i + 2;
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"E"+QString::number(i));
+             t->setColName(kErr,"E"+QString::number(i));//index(i)
          }
          for(int j=0;j<numRows;j++)
          {
+//             if (i == 0) 
              if (i == i0) 
              {
                  // in histograms the point is to be drawn in the centre of the bin.
@@ -1153,6 +1167,7 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
          if (isHistogram && !forPlotting)
          {
              int iRow = numRows - 1;
+//             if (i == 0) t->setCell(iRow,0,dataX[iRow]);
              if (i == i0) t->setCell(iRow,0,dataX[iRow]);
              t->setCell(iRow,kY,0); 
              if (errs) t->setCell(iRow,kErr,0);

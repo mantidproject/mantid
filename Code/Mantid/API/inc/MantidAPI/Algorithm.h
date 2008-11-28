@@ -122,9 +122,10 @@ public:
     class ProgressNotification: public AlgorithmNotification
     {
     public:
-        ProgressNotification(Algorithm* alg, double p):AlgorithmNotification(alg),progress(p){}///< Constructor
+        ProgressNotification(Algorithm* alg, double p,const std::string& msg):AlgorithmNotification(alg),progress(p),message(msg){}///< Constructor
         virtual std::string name() const{return "ProgressNotification";}///< class name
         double progress;///< Current progress. Value must be between 0 and 1.
+        std::string message;///< Message sent with notification
     };
 
     /// ErrorNotification is sent when an exception is caught during execution of the algorithm.
@@ -220,7 +221,7 @@ protected:
   using Kernel::PropertyManager::declareProperty;
 
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
-  void progress(double p);
+  void progress(double p, const std::string& msg = "");
   /// Interrupts algorithm execution if Algorithm::cancel() has been called.
   /// Does nothing otherwise.
   void interruption_point();

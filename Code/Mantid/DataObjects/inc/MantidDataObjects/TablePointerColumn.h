@@ -26,7 +26,9 @@ namespace DataObjects
 
 /** \class TablePointerColumn
 
-    
+    Class TablePointerColumn is an implementation of Column for non-copyable types.
+    Types must be declared with DECLARE_TABLEPOINTERCOLUMN before they can be used 
+    with TablePointerColumn.
 
 
     \author Roman Tolchenov

@@ -7,8 +7,11 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "LoadRaw/isisraw2.h"
+#include <boost/timer.hpp>
+#include <boost/filesystem.hpp>
 
 //DECLARE_WORKSPACE(ManagedRawFileWorkspace2D)
 
@@ -20,6 +23,9 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& ManagedRawFileWorkspace2D::g_log = Kernel::Logger::get("ManagedRawFileWorkspace2D");
 
+    // Initialise the instance count
+    int ManagedRawFileWorkspace2D::g_uniqueID = 1;    
+    
     /// Constructor
     ManagedRawFileWorkspace2D::ManagedRawFileWorkspace2D():
     isisRaw(new ISISRAW2),m_fileRaw(NULL),m_readIndex(0)
@@ -31,21 +37,30 @@ namespace Mantid
     {
         delete isisRaw;
         if (m_fileRaw) fclose(m_fileRaw);
+        removeTempFile();
     }
 
      /** Sets the RAW file for this workspace.
      \param fileName The path to the RAW file.
+     \param opt Caching option.  0 - cache on local drive if raw file is very slow to read.
+            1 - cache anyway, 2 - never cache.
      */
-    void ManagedRawFileWorkspace2D::setRawFile(const std::string& fileName)
+    void ManagedRawFileWorkspace2D::setRawFile(const std::string& fileName,int opt)
     {
         m_filenameRaw = fileName;
-        FILE *fileRaw = fopen(m_filenameRaw.c_str(),"rb");
-        if (fileRaw == NULL)
+        m_fileRaw = fopen(m_filenameRaw.c_str(),"rb");
+        if (m_fileRaw == NULL)
         {
             g_log.error("Unable to open file " + m_filenameRaw);
             throw Kernel::Exception::FileError("Unable to open File:" , m_filenameRaw);
         }
-        isisRaw->ioRAW(fileRaw, true);
+
+        if ( needCache(opt) )
+        {
+            openTempFile();
+        }
+
+        isisRaw->ioRAW(m_fileRaw, true);
 
         m_numberOfBinBoundaries = isisRaw->t_ntc1 + 1;    
         m_numberOfPeriods = isisRaw->t_nper;
@@ -57,10 +72,9 @@ namespace Mantid
         float* timeChannels = new float[m_numberOfBinBoundaries];
         isisRaw->getTimeChannels(timeChannels, m_numberOfBinBoundaries);
         isisRaw->skipData(0);
-        fgetpos(fileRaw, &m_data_pos); //< Save the data start position.
+        fgetpos(m_fileRaw, &m_data_pos); //< Save the data start position.
         
         m_timeChannels.reset(new std::vector<double>(timeChannels, timeChannels + m_numberOfBinBoundaries));
-        m_fileRaw = fileRaw;
         getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     }
 
@@ -107,6 +121,8 @@ namespace Mantid
             }
             if (fseek(m_fileRaw,-nwords,SEEK_CUR) != 0)
             {
+                fclose(m_fileRaw);
+                removeTempFile();
                 g_log.error("Error reading RAW file.");
                 throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
             }
@@ -131,7 +147,67 @@ namespace Mantid
         ManagedWorkspace2D::writeDataBlock(toWrite);
         int blockIndex = toWrite->minIndex() / m_vectorsPerBlock;
         m_changedBlock[blockIndex] = toWrite->hasChanges();
-        //std::cerr<<"Writing! "<<toWrite->minIndex()<<' '<<toWrite->hasChanges()<<'\n';
+    }
+
+    /**
+        Decides if the raw file must be copied to a cache file on the local drive to improve reading time.
+    */
+    bool ManagedRawFileWorkspace2D::needCache(int opt)
+    {
+        if (opt == 1) return true;
+        if (opt == 2) return false;
+
+        FILE * ff = fopen(m_filenameRaw.c_str(),"rb");
+        if (ff)
+        {
+            size_t n = 100000;
+            char *buf = new char[n];
+            boost::timer tim;
+            size_t i = fread(buf,sizeof(char),n,ff);
+            double elapsed = tim.elapsed();
+            fclose(ff);
+            delete[] buf;
+            if (i > 0)
+            {
+                return elapsed > 0.01;
+            }
+        }
+        return false;
+    }
+
+    void ManagedRawFileWorkspace2D::openTempFile()
+    {
+        // Look for the (optional) path from the configuration file
+        std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
+        if ( !path.empty() )
+        {
+            if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
+            {
+                path.push_back('/');
+            }
+        }
+
+        boost::filesystem::path source(m_filenameRaw);
+        std::stringstream filename;
+        filename << "WS2D_" <<boost::filesystem::basename(source)<<'_'<< ManagedRawFileWorkspace2D::g_uniqueID<<".raw";
+        // Increment the instance count
+        ++ManagedRawFileWorkspace2D::g_uniqueID;
+        m_tempfile = path + filename.str();
+        boost::filesystem::path dest(m_tempfile);
+        boost::filesystem::copy_file(source,dest);
+
+        FILE *fileRaw = fopen(m_tempfile.c_str(),"rb");
+        if (fileRaw)
+        {
+            fclose(m_fileRaw);
+            m_fileRaw = fileRaw;
+        }
+
+    }
+
+    void ManagedRawFileWorkspace2D::removeTempFile()const
+    {
+        if (!m_tempfile.empty()) remove(m_tempfile.c_str());
     }
 
   } // namespace DataHandling

@@ -41,7 +41,7 @@ public:
     Algorithm_sptr getShared(const Algorithm *alg);
 signals:
     void countChanged(int);
-    void needUpdateProgress(const Algorithm* alg,int p);
+    void needUpdateProgress(const Algorithm* alg,int p, const QString& msg);
 protected:
 
     /// Algorithm notifiv=cation handlers
@@ -80,7 +80,7 @@ public:
     ~MonitorDlg();
 public slots:
     void update(int n);
-    void updateProgress(const Algorithm* alg,int p);
+    void updateProgress(const Algorithm* alg,int p, const QString& msg);
 private:
     QVector<const Algorithm*> m_algorithms;
     AlgorithmMonitor *m_algMonitor;

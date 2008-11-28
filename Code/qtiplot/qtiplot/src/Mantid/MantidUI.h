@@ -46,7 +46,8 @@ public:
     QStringList getWorkspaceNames();
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
-    void LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max);
+    void LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max
+                               ,const QString& spectrum_list,const QString& cache);
     Mantid::API::IAlgorithm* CreateAlgorithm(const QString& algName);
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
@@ -101,7 +102,7 @@ signals:
 
     void needsUpdating();
     void needToCloseProgressDialog();
-    void needToUpdateProgressDialog(int ip);
+    void needToUpdateProgressDialog(int ip,const QString& msg);
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
     void needToShowCritical(const QString&);
 
@@ -128,7 +129,7 @@ public slots:
     void copyDetectorsToTable();
     void copyValues();
     void closeProgressDialog();
-    void updateProgressDialog(int ip);
+    void updateProgressDialog(int ip,const QString& msg);
     void cancelAsyncAlgorithm();
     void backgroundAsyncAlgorithm();
     void createLoadDAEMantidMatrix(const Mantid::API::Algorithm*);

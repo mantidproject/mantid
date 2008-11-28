@@ -56,6 +56,11 @@ namespace Mantid
       declareProperty("spectrum_max",0, mustBePositive->clone());
       
       declareProperty(new ArrayProperty<int>("spectrum_list"));
+      m_cache_options.push_back("If slow");
+      m_cache_options.push_back("Always");
+      m_cache_options.push_back("Never");
+      declareProperty("Cache","If slow",new ListValidator(m_cache_options));
+
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -92,7 +97,10 @@ namespace Mantid
       {
           ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;
           DataObjects::Workspace2D_sptr localWorkspace( dynamic_cast<DataObjects::Workspace2D*>(localWorkspace_ptr) );
-          localWorkspace_ptr->setRawFile(m_filename);
+          const std::string cache_option = getPropertyValue("Cache");
+          int option = find(m_cache_options.begin(),m_cache_options.end(),cache_option) - m_cache_options.begin();
+          progress(0.,"Reading raw file...");
+          localWorkspace_ptr->setRawFile(m_filename,option);
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );

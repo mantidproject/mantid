@@ -106,6 +106,8 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
+      /// Allowed values for the cache property
+      std::vector<std::string> m_cache_options;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

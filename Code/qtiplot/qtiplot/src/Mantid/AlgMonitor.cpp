@@ -85,7 +85,7 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
-    if (m_monitorDlg) emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100));
+    if (m_monitorDlg) emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100),QString::fromStdString(pNf->message));
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
@@ -114,7 +114,7 @@ MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(par
     m_tree = 0;
     update(0);
     connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)));
-    connect(algMonitor,SIGNAL(needUpdateProgress(const Algorithm*,int)),SLOT(updateProgress(const Algorithm*,int)));
+    connect(algMonitor,SIGNAL(needUpdateProgress(const Algorithm*,int, const QString&)),SLOT(updateProgress(const Algorithm*,int, const QString&)));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     QPushButton *closeButton = new QPushButton("Close");
@@ -178,7 +178,7 @@ void MonitorDlg::update(int n)
     m_algMonitor->unlock();
 }
 
-void MonitorDlg::updateProgress(const Algorithm* alg,int p)
+void MonitorDlg::updateProgress(const Algorithm* alg,int p, const QString& msg)
 {
     int i = m_algorithms.indexOf(alg);
     if (i >= 0)

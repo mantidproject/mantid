@@ -5,6 +5,7 @@
 #include <QDialog>
 
 class QProgressBar;
+class QLabel;
 
 class ProgressDlg : public QDialog
 {
@@ -13,7 +14,7 @@ class ProgressDlg : public QDialog
 public:
 	ProgressDlg(QWidget *parent = 0);
 	//~ProgressDlg();
-    void setValue(int p);
+    void setValue(int p,const QString& msg);
 
 private slots:
 	void cancelClicked();
@@ -24,6 +25,7 @@ signals:
     void toBackground();
 private:
     QProgressBar *m_progressBar;
+    QLabel *m_message;
 };
 
 #endif /* PROGRESSDLG_H */

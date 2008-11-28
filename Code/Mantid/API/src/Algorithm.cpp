@@ -302,9 +302,9 @@ void Algorithm::setExecuted(bool state)
   m_isExecuted = state;
 }
 
-void Algorithm::progress(double p)
+void Algorithm::progress(double p, const std::string& msg )
 {
-    notificationCenter.postNotification(new ProgressNotification(this,p));
+    notificationCenter.postNotification(new ProgressNotification(this,p,msg));
 }
 
 void Algorithm::interruption_point()

@@ -9,6 +9,7 @@ class QLineEdit;
 class QPushButton;
 class QString;
 class QVBoxLayout;
+class QComboBox;
 
 class loadRawDlg : public QDialog
 {
@@ -22,6 +23,8 @@ public:
 	const QString& getWorkspaceName() { return workspaceName; }
 	const QString& getSpectrumMin() { return spectrum_min; }
 	const QString& getSpectrumMax() { return spectrum_max; }
+	const QString& getSpectrumList() { return spectrum_list; }
+	const QString& getCacheOption() { return cache_option; }
 
 protected:
 	
@@ -34,6 +37,8 @@ private:
 	QString workspaceName;
     QString spectrum_min;
     QString spectrum_max;
+    QString spectrum_list;
+    QString cache_option;
 
     QVBoxLayout *mainLayout;
 
@@ -44,6 +49,8 @@ private:
 	QLineEdit *lineName;
     QLineEdit *minSpLineEdit;
     QLineEdit *maxSpLineEdit;
+    QLineEdit *listSpLineEdit;
+    QComboBox *cacheCBox;
 
 	QPushButton *browseButton;
 	QPushButton *loadButton;
