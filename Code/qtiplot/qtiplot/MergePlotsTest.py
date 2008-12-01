@@ -17,10 +17,7 @@ g1.insertCurve(g2,0)
 
 # Rescale the x-axis to an interesting point
 # The axes are labeled Layer.Top, Layer.Bottom, Layer.Left, Layer.Right
-# At the moment the graph 2 must be closed manually
 g1.activeLayer().setScale(Layer.Bottom,5000,7500)
 
 # Close graph 2 
 g2.close()
-
-

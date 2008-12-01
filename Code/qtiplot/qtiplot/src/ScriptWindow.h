@@ -67,10 +67,10 @@ public slots:
 		void saveAs();
 		void languageChange();
 		virtual void setVisible(bool visible);
-  
+
 		void executeAll(){te->executeAll();};
 
-    void scriptMessage(const QString&);				    
+                void scriptMessage(const QString&);				    
 		void scriptError(const QString&);
 
 private slots:
@@ -98,10 +98,11 @@ private:
 		QMenu *file, *edit, *run, *windowMenu;
 		QAction *actionNew, *actionUndo, *actionRedo, *actionCut, *actionCopy, *actionPaste;
                 QAction *actionClearOutput, *actionClearInput;
-		QAction *actionExecute, *actionExecuteAll, *actionEval, *actionPrint, *actionOpen;
+		QAction *actionExecute, *actionExecuteAll, *actionEval, *actionOpen;
 		QAction *actionSave, *actionSaveAs;
 		QAction *actionAlwaysOnTop, *actionHide;
 		QAction *actionViewScriptOutput;
+                QAction *actionPrintInput, *actionPrintOutput;
 };
 
 //Mantid - This class is here so that the context menu handler can be overridden but it can't be nested in the private section of 
@@ -113,6 +114,10 @@ class OutputTextArea : public QTextEdit
     public:
 
     OutputTextArea(QWidget * parent = 0, const char * name = 0 );
+
+  public slots:
+    
+    void printOutput();
 
     protected:
     

@@ -4,7 +4,7 @@
 
 QMAKESPEC=win32-msvc2005 
 
-# building without muParser doesn't work yet
+# building without muParser doesnt work yet
 SCRIPTING_LANGS += muParser
 SCRIPTING_LANGS += Python
 
@@ -27,16 +27,13 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
-CONFIG          += release
-#CONFIG          += debug
+#CONFIG          += release
+CONFIG          += debug
 #win32: CONFIG   += console
 
 ##################### 3rd PARTY HEADER FILES SECTION ########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
-
-INCLUDEPATH       += ../../Mantid/includes/
-INCLUDEPATH       += ../3rdparty/liborigin
 
 win32:INCLUDEPATH       += ../../Third_Party/include/
 win32:INCLUDEPATH       += ../../Third_Party/include/muparser
@@ -45,9 +42,17 @@ win32:INCLUDEPATH       += ../../Third_Party/include/zlib123
 win32:INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
 win32:INCLUDEPATH       += ../3rdparty/qwt/src
 
-unix:INCLUDEPATH       += /usr/include/
-unix:INCLUDEPATH       += /usr/include/qwt/
-unix:INCLUDEPATH       += /usr/include/qwtplot3d/
+#unix:INCLUDEPATH       += /usr/include/
+#unix:INCLUDEPATH       += /usr/include/qwt/
+#unix:INCLUDEPATH       += /usr/include/qwtplot3d/
+
+unix:INCLUDEPATH        += /usr/local/Trolltech/Qt-4.4.3/include
+unix:INCLUDEPATH        += /usr/local/qwt-5.0.1/include
+unix:INCLUDEPATH        += /home/dmn58364/Documents/src_code/qwtplot3d/include
+unix:INCLUDEPATH        += /usr/include/muParser
+unix:INCLUDEPATH       += ../../Mantid/includes/
+unix:INCLUDEPATH       += ../3rdparty/liborigin
+
 
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -65,10 +70,11 @@ unix:INCLUDEPATH       += /usr/include/qwtplot3d/
 # dynamically link against dependencies if they are installed system-wide
 unix:LIBS         += -lqscintilla2
 unix:LIBS         += -lmuparser
-unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
-unix:LIBS         += -L/usr/lib/ -lqwt
+unix:LIBS         += -L/home/dmn58364/Documents/src_code/qwtplot3d/lib -lqwtplot3d
+unix:LIBS         += -L/usr/local/qwt-5.0.1/lib -lqwt
 unix:LIBS         += -lgsl -lgslcblas
 
+unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidNexus
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidDataHandling
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAlgorithms
@@ -77,9 +83,9 @@ unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
 
-unix:LIBS		+= -L/usr/lib/ -lPocoUtil
-unix:LIBS		+= -L/usr/lib/ -lPocoXML
-unix:LIBS		+= -L/usr/lib/ -lPocoFoundation
+unix:LIBS		+=  -lPocoUtil
+unix:LIBS		+=  -lPocoXML
+unix:LIBS		+=  -lPocoFoundation
 
 ##################### Windows ###############################################
 
@@ -339,9 +345,9 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/GLActorCollection.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.h \
-		src/Mantid/InstrumentWidget/GLColorMapQwt.h \
-		src/Mantid/InstrumentWidget/BinDialog.h	\
-		src/Mantid/InstrumentWidget/GLGroupPickBox.h
+            src/Mantid/InstrumentWidget/GLColorMapQwt.h \
+            src/Mantid/InstrumentWidget/BinDialog.h	\
+            src/Mantid/InstrumentWidget/GLGroupPickBox.h
 
 ###################### FORMS ##############################################
 
@@ -490,10 +496,9 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp \
-		src/Mantid/InstrumentWidget/GLColorMapQwt.cpp \
-		src/Mantid/InstrumentWidget/BinDialog.cpp  \
-		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp
-
+            src/Mantid/InstrumentWidget/GLColorMapQwt.cpp \
+            src/Mantid/InstrumentWidget/BinDialog.cpp  \
+            src/Mantid/InstrumentWidget/GLGroupPickBox.cpp
 
 ###############################################################
 ##################### Compression (zlib123) ###################
@@ -678,7 +683,6 @@ contains(SCRIPTING_LANGS, Python) {
 			 $${SIP_DIR}/sipqtiDeconvolution.cpp \
              $${SIP_DIR}/sipqtiMantidMatrix.cpp\
              $${SIP_DIR}/sipqtiMantidUI.cpp
-
 }
 ###############################################################
 

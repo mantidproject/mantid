@@ -33,6 +33,7 @@
   */ 
 #include "ScriptEdit.h"
 #include "Note.h"
+#include "pixmaps.h"
 
 #include <QAction>
 #include <QMenu>
@@ -45,6 +46,7 @@
 #include <Qsci/qscilexer.h>
 #include <Qsci/qsciprinter.h>
 #include "ScriptWindow.h"
+#include <QPrinterInfo>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
   : QsciScintilla(parent), scripted(env),exThread(0), d_error(false)//Mantid
@@ -75,9 +77,6 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
 	actionEval->setShortcut( tr("Ctrl+Return") );
 	connect(actionEval, SIGNAL(activated()), this, SLOT(evaluate()));
-
-// 	actionPrint = new QAction(tr("&Print"), this);
-// 	connect(actionPrint, SIGNAL(activated()), this, SLOT(print()));
 
 	actionImport = new QAction(tr("&Open..."), this);
 	actionImport->setShortcut(tr("Ctrl+O"));
@@ -128,6 +127,13 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
   
   menu.addAction(actionImport);
   menu.addAction(actionExport);
+  
+  if( !text().isEmpty() )
+  {
+    QAction* print = new QAction(QPixmap(fileprint_xpm), "Print", this);
+    connect(print, SIGNAL(activated()), this, SLOT(print()));
+    menu.addAction(print);
+  }
   
   menu.insertSeparator();
   
@@ -287,25 +293,30 @@ void ScriptEdit::evaluate()
     }
 }
 
-void ScriptEdit::exportPDF(const QString& fileName)
+void ScriptEdit::exportPDF(const QString&)
 {
-// 	QTextDocument *doc = document();
-// 	QPrinter printer;
-// 	printer.setColorMode(QPrinter::GrayScale);
-// 	printer.setCreator("QtiPlot");
-// 	printer.setOutputFormat(QPrinter::PdfFormat);
-// 	printer.setOutputFileName(fileName);
-// 	doc->print(&printer);
+//   QTextDocument* doc = new QTextDocument(text());
+//   QPrinter printer;
+//   printer.setColorMode(QPrinter::GrayScale);
+//   printer.setCreator("MantidPlot");
+//   printer.setOutputFormat(QPrinter::PdfFormat);
+//   printer.setOutputFileName(fileName);
+//   doc->print(&printer);
 }
 
 void ScriptEdit::print()
 {
-// 	QsciPrinter printer;
-// 	printer.setColorMode(QPrinter::GrayScale);
-// 	QPrintDialog printDialog(&printer);
-// 	// TODO: Write a dialog to use more features of Qt4's QPrinter class
-// 	if (printDialog.exec() == QDialog::Accepted)
-// 		doc->print(&printer);
+  QsciPrinter printer(QPrinter::HighResolution);
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setOutputFormat(QPrinter::PostScriptFormat);
+  QPrintDialog printDialog(&printer);
+  printDialog.setWindowTitle("MantidPlot - Print Script");
+  if (printDialog.exec() == QDialog::Accepted) 
+  {
+    QTextDocument* doc = new QTextDocument(text());
+    doc->print(&printer);
+    delete doc;
+  }
 }
 
 QString ScriptEdit::importASCII(const QString &filename)

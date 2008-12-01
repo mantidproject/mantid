@@ -50,6 +50,7 @@
 #include <QTextStream>
 #include <QDockWidget>
 #include <QTextEdit>
+#include <QPrintDialog>
 
 ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
   : QMainWindow(), d_env(env), d_app(app)
@@ -149,10 +150,14 @@ void ScriptWindow::initActions()
 	connect(actionSaveAs, SIGNAL(activated()), this, SLOT(saveAs()));
 	file->addAction(actionSaveAs);
 
-// 	actionPrint = new QAction(QPixmap(fileprint_xpm), tr("&Print"), this);
-// 	actionPrint->setShortcut( tr("Ctrl+P") );
-// 	connect(actionPrint, SIGNAL(activated()), te, SLOT(print()));
-// 	file->addAction(actionPrint);
+	actionPrintInput = new QAction(QPixmap(fileprint_xpm), tr("&Print Input ..."), this);
+	actionPrintInput->setShortcut( tr("Ctrl+P") );
+	connect(actionPrintInput, SIGNAL(activated()), te, SLOT(print()));
+	file->addAction(actionPrintInput);
+
+	actionPrintOutput = new QAction(QPixmap(fileprint_xpm), tr("&Print Output ..."), this);
+	connect(actionPrintOutput, SIGNAL(activated()), outputText, SLOT(printOutput()));
+	file->addAction(actionPrintOutput);
 
   //Edit Actions
 
@@ -230,6 +235,7 @@ void ScriptWindow::initActions()
 	connect(te, SIGNAL(copyAvailable(bool)), actionCopy, SLOT(setEnabled(bool)));
 	connect(te, SIGNAL(undoAvailable(bool)), actionUndo, SLOT(setEnabled(bool)));
 	connect(te, SIGNAL(redoAvailable(bool)), actionRedo, SLOT(setEnabled(bool)));
+
 }
 
 void ScriptWindow::languageChange()
@@ -257,9 +263,6 @@ void ScriptWindow::languageChange()
 	actionSave->setShortcut(tr("Ctrl+S"));
 
 	actionSaveAs->setText(tr("Save &As..."));
-
-// 	actionPrint->setText(tr("&Print"));
-// 	actionPrint->setShortcut(tr("Ctrl+P"));
 
 	actionUndo->setText(tr("&Undo"));
 	actionUndo->setShortcut(tr("Ctrl+Z"));
@@ -392,6 +395,27 @@ void OutputTextArea::contextMenuEvent(QContextMenuEvent *e)
   QAction* copy = new QAction(QPixmap(copy_xpm), "Copy", this);
   connect(copy, SIGNAL(activated()), this, SLOT(copy()));
   menu.addAction(copy);
+
+  if( !document()->isEmpty() )
+  {
+    QAction* print = new QAction(QPixmap(fileprint_xpm), "Print", this);
+    connect(print, SIGNAL(activated()), this, SLOT(printOutput()));
+    menu.addAction(print);
+  }
   
   menu.exec(e->globalPos());
+}
+
+void OutputTextArea::printOutput()
+{
+  QTextDocument* doc = document(); 
+  QPrinter printer;
+  printer.setColorMode(QPrinter::GrayScale);
+  printer.setCreator("MantidPlot");
+  QPrintDialog printDialog(&printer);
+  printDialog.setWindowTitle("MantidPlot - Print Script Output");
+  if (printDialog.exec() == QDialog::Accepted) 
+  {
+    doc->print(&printer);
+  }
 }
