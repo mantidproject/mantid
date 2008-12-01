@@ -86,7 +86,7 @@ void Note::restore(const QStringList& data)
 
   if (*line == "<content>") line++;
   while (line != data.end() && *line != "</content>")
-    te->insertPlainText((*line++)+"\n");
+    te->append((*line++)+"\n");  //Mantid - changes for QScintilla
 }
 
 void Note::setAutoexec(bool exec)

@@ -56,12 +56,21 @@ typedef struct _traceback {
 #include <QDateTime>
 #include <QCoreApplication>
 
+#include <Qsci/qscilexerpython.h> //Mantid
+
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "sipAPIqti.h"
 extern "C" void initqti();
 
 const char* PythonScripting::langName = "Python";
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) { return new PythonScripting(parent); }
+
+//Mantid - Creates the correct code lexer for syntax highlighting
+QsciLexer* PythonScripting::scriptCodeLexer() const
+{
+  QsciLexer* lexer = new QsciLexerPython;
+  return lexer;
+}
 
 QString PythonScripting::toString(PyObject *object, bool decref)
 {
@@ -130,7 +139,7 @@ QString PythonScripting::errorMsg()
 	PyErr_NormalizeException(&exception, &value, &traceback);
 	if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
 	{
-		QString text = toString(PyObject_GetAttrString(value, "text"), true);
+ 		QString text = toString(PyObject_GetAttrString(value, "text"), true);
 		msg.append(text + "\n");
 		PyObject *offset = PyObject_GetAttrString(value, "offset");
 		for (int i=0; i<(PyInt_AsLong(offset)-1); i++)

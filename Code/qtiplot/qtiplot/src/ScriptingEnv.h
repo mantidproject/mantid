@@ -43,12 +43,14 @@
 class ApplicationWindow;
 class Script;
 
+class QsciLexer; //Mantid - For QScintilla
+
 //! An interpreter for evaluating scripting code. Abstract.
-  /**
-   * ScriptingEnv objects represent a running interpreter, possibly with global
-   * variables, and are responsible for generating Script objects (which do
-   * the actual evaluation of code).
-   */
+/**
+ * ScriptingEnv objects represent a running interpreter, possibly with global
+ * variables, and are responsible for generating Script objects (which do
+ * the actual evaluation of code).
+ */
 class ScriptingEnv : public QObject
 {
   Q_OBJECT
@@ -77,7 +79,11 @@ class ScriptingEnv : public QObject
     //! Construct a filter expression from fileExtension(), suitable for QFileDialog.
     const QString fileFilter() const;
 
-//    virtual QSyntaxHighlighter syntaxHighlighter(QTextEdit *textEdit) const;
+    const QString scriptingLanguage() const;
+
+    // Mantid - For QScintilla. This is overridden in the concrete implementation to return the appropriate
+    // code lexer if one is required
+    virtual QsciLexer* scriptCodeLexer() const = 0;
 
   public slots:
     // global variables
@@ -112,6 +118,10 @@ class ScriptingEnv : public QObject
   private:
     //! the reference counter
     int d_refcount;
+  
+  //Mantid - Store the language name of the concrete implementation so that
+  // the script window title can be set appropriately
+  const char * languageName;
 };
 
 #endif

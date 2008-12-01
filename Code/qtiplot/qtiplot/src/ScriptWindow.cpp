@@ -28,6 +28,13 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+
+ 
+/**
+  * Mantid - This class has been modified from the qtiplot class so that
+  * the output goes into a seperate window.
+  */
+ 
 #include "ScriptWindow.h"
 #include "ApplicationWindow.h"
 #include "ScriptEdit.h"
@@ -41,27 +48,68 @@
 #include <QPixmap>
 #include <QCloseEvent>
 #include <QTextStream>
+#include <QDockWidget>
+#include <QTextEdit>
 
 ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
-: QMainWindow(),
-d_app(app)
+  : QMainWindow(), d_env(env), d_app(app)
 {	
-	initMenu();
+  //---------- Mantid ---------------
+	outputWindow = new QDockWidget(this);
+	outputWindow->setObjectName(tr("outputWindow"));
+	outputWindow->setWindowTitle(tr("Script Output"));
+	outputWindow->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
 	
-	fileName = QString::null;
+	addDockWidget( Qt::BottomDockWidgetArea, outputWindow );
+	
+	outputText = new OutputTextArea(outputWindow);
+	outputWindow->setWidget(outputText);
+	outputText->setMinimumHeight(25);
+	outputWindow->setMinimumHeight(25);
+  //---------------------------------
+	
+  fileName = QString::null;
 
 	te = new ScriptEdit(env, this, name());
 	te->setContext(this);
 	te->setDirPath(d_app->scriptsDirPath);
-	connect(te, SIGNAL(dirPathChanged(const QString& )), d_app, SLOT(scriptsDirPathChanged(const QString&)));
+	te->resize(600,300);
+	connect(te, SIGNAL(dirPathChanged(const QString&)), d_app, SLOT(scriptsDirPathChanged(const QString&)));
+	connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
+	connect(te, SIGNAL(outputError(const QString&)), this, SLOT(scriptError(const QString&)));
 	setCentralWidget(te);
 
+	initMenu();
+
+  //Mantid - Moved this to after output and scriptedit have been created
 	initActions();
+
 	setIcon(QPixmap(logo_xpm));
-	setWindowTitle(tr("QtiPlot - Script Window"));
+	setWindowTitle(tr("MantidPlot - " + env->scriptingLanguage() + " Script Window"));
 	setFocusProxy(te);
 	setFocusPolicy(Qt::StrongFocus);
-	resize(QSize(500, 300));
+}
+
+ScriptWindow::~ScriptWindow()
+{
+ // ------Mantid -------------
+  if( outputText ) 
+    delete outputText;
+  if( outputWindow ) 
+    delete outputWindow;
+  // -------------------------
+    if( te )
+    delete te;
+}
+
+void ScriptWindow::customEvent(QEvent *e)
+{
+  if (e->type() == SCRIPTING_CHANGE_EVENT)
+    {
+      outputText->clear();
+      ScriptingChangeEvent* event = (ScriptingChangeEvent*)e;
+      setWindowTitle(tr("MantidPlot - " + event->scriptingEnv()->scriptingLanguage() + " Script Window")); 
+    }
 }
 
 void ScriptWindow::initMenu()
@@ -81,6 +129,7 @@ void ScriptWindow::initMenu()
 
 void ScriptWindow::initActions()
 {
+  //File Actions
 	actionNew = new QAction(QPixmap(new_xpm), tr("&New"), this);
 	actionNew->setShortcut( tr("Ctrl+N") );
 	connect(actionNew, SIGNAL(activated()), this, SLOT(newScript()));
@@ -100,23 +149,26 @@ void ScriptWindow::initActions()
 	connect(actionSaveAs, SIGNAL(activated()), this, SLOT(saveAs()));
 	file->addAction(actionSaveAs);
 
-	actionPrint = new QAction(QPixmap(fileprint_xpm), tr("&Print"), this);
-	actionPrint->setShortcut( tr("Ctrl+P") );
-	connect(actionPrint, SIGNAL(activated()), te, SLOT(print()));
-	file->addAction(actionPrint);
+// 	actionPrint = new QAction(QPixmap(fileprint_xpm), tr("&Print"), this);
+// 	actionPrint->setShortcut( tr("Ctrl+P") );
+// 	connect(actionPrint, SIGNAL(activated()), te, SLOT(print()));
+// 	file->addAction(actionPrint);
+
+  //Edit Actions
 
 	actionUndo = new QAction(QPixmap(undo_xpm), tr("&Undo"), this);
 	actionUndo->setShortcut( tr("Ctrl+Z") );
 	connect(actionUndo, SIGNAL(activated()), te, SLOT(undo()));	
-	edit->addAction(actionUndo);
-	actionUndo->setEnabled(false);
+ 	edit->addAction(actionUndo);
+ 	actionUndo->setEnabled(false);
 
 	actionRedo = new QAction(QPixmap(redo_xpm), tr("&Redo"), this);
 	actionRedo->setShortcut( tr("Ctrl+Y") );
 	connect(actionRedo, SIGNAL(activated()), te, SLOT(redo()));	
-	edit->addAction(actionRedo);
-	actionRedo->setEnabled(false);
-	edit->insertSeparator();
+ 	edit->addAction(actionRedo);
+ 	actionRedo->setEnabled(false);
+
+ 	edit->insertSeparator();
 
 	actionCut = new QAction(QPixmap(cut_xpm), tr("&Cut"), this);
 	actionCut->setShortcut( tr("Ctrl+x") );
@@ -135,14 +187,21 @@ void ScriptWindow::initActions()
 	connect(actionPaste, SIGNAL(activated()), te, SLOT(paste()));	
 	edit->addAction(actionPaste);
 
+	edit->insertSeparator();
+	
+	actionClearOutput = new QAction(tr("&Clear Output"), this);
+	connect(actionClearOutput, SIGNAL(activated()), outputText, SLOT(clear()));
+	edit->addAction(actionClearOutput);
+	
+   // Run actions
 	actionExecute = new QAction(tr("E&xecute"), this);
 	actionExecute->setShortcut( tr("CTRL+J") );
-	connect(actionExecute, SIGNAL(activated()), te, SLOT(execute()));//Mantid
+	connect(actionExecute, SIGNAL(activated()), te, SLOT(execute()));
 	run->addAction(actionExecute);
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
 	actionExecuteAll->setShortcut( tr("CTRL+SHIFT+J") );
-	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAll()));//Mantid
+	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAll()));
 	run->addAction(actionExecuteAll);
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
@@ -150,6 +209,7 @@ void ScriptWindow::initActions()
 	connect(actionEval, SIGNAL(activated()), te, SLOT(evaluate()));
 	run->addAction(actionEval);
 
+  //Window actions
 	actionAlwaysOnTop = new QAction(tr("Always on &Top"), this);
 	actionAlwaysOnTop->setCheckable(true);
 	if (d_app)
@@ -160,6 +220,11 @@ void ScriptWindow::initActions()
 	actionHide = new QAction(tr("&Hide"), this);
 	connect(actionHide, SIGNAL(activated()), this, SLOT(close()));
 	windowMenu->addAction(actionHide);
+
+	actionViewScriptOutput = outputWindow->toggleViewAction();
+	actionViewScriptOutput->setText("&Show Script Window");
+	actionViewScriptOutput->setChecked(true);
+	windowMenu->addAction(actionViewScriptOutput);	
 	
 	connect(te, SIGNAL(copyAvailable(bool)), actionCut, SLOT(setEnabled(bool)));
 	connect(te, SIGNAL(copyAvailable(bool)), actionCopy, SLOT(setEnabled(bool)));
@@ -193,8 +258,8 @@ void ScriptWindow::languageChange()
 
 	actionSaveAs->setText(tr("Save &As..."));
 
-	actionPrint->setText(tr("&Print"));
-	actionPrint->setShortcut(tr("Ctrl+P"));
+// 	actionPrint->setText(tr("&Print"));
+// 	actionPrint->setShortcut(tr("Ctrl+P"));
 
 	actionUndo->setText(tr("&Undo"));
 	actionUndo->setShortcut(tr("Ctrl+Z"));
@@ -247,7 +312,7 @@ void ScriptWindow::save()
 	if (!fileName.isEmpty()){
 		QFile f(fileName);
 		if ( !f.open( QIODevice::WriteOnly ) ){
-			QMessageBox::critical(0, tr("QtiPlot - File Save Error"),
+			QMessageBox::critical(0, tr("MantidPlot - File Save Error"),
 					tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fileName));
 			return;
 		}
@@ -289,4 +354,44 @@ void ScriptWindow::resizeEvent( QResizeEvent* e )
 {
 	d_app->d_script_win_rect = QRect(geometry().topLeft(), size());
 	e->accept();
+}
+
+void ScriptWindow::scriptMessage(const QString& text)
+{
+  outputText->setTextColor(Qt::black);
+  outputText->textCursor().insertText(text);
+  outputText->ensureCursorVisible();
+}				    
+
+void ScriptWindow::scriptError(const QString& text)
+{
+  outputText->setTextColor(Qt::red);
+  outputText->textCursor().insertText(text);
+  outputText->ensureCursorVisible();
+}				    
+
+void ScriptWindow::viewScriptOutput(bool visible)
+{
+  outputWindow->setVisible(visible);
+}
+
+
+OutputTextArea::OutputTextArea(QWidget * parent, const char * name) : QTextEdit(parent, name)
+{
+  setReadOnly(true);
+}
+
+void OutputTextArea::contextMenuEvent(QContextMenuEvent *e)
+{
+  QMenu menu(this);
+  
+  QAction* clear = new QAction("Clear", this);
+  connect(clear, SIGNAL(activated()), this, SLOT(clear()));
+  menu.addAction(clear);
+
+  QAction* copy = new QAction(QPixmap(copy_xpm), "Copy", this);
+  connect(copy, SIGNAL(activated()), this, SLOT(copy()));
+  menu.addAction(copy);
+  
+  menu.exec(e->globalPos());
 }

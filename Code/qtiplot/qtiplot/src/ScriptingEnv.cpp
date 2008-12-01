@@ -40,11 +40,17 @@
 #include "PythonScripting.h"
 #endif
 
-	ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
-: QObject(0, langName), d_parent(parent)
+ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
+  : QObject(0, langName), d_parent(parent), languageName(langName)  //Mantid
 {
 	d_initialized=false;
 	d_refcount=0;
+}
+
+//Mantid
+const QString ScriptingEnv::scriptingLanguage() const
+{
+  return QString(languageName);
 }
 
 const QString ScriptingEnv::fileFilter() const

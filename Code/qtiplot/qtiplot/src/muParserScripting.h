@@ -39,6 +39,9 @@
 #include <gsl/gsl_sf.h>
 #include <q3asciidict.h>
 
+//Mantid - follows changes to ScriptingEnv
+class QsciLexer;
+
 //! TODO
 class muParserScripting: public ScriptingEnv
 {
@@ -54,6 +57,9 @@ class muParserScripting: public ScriptingEnv
     {
       return new muParserScript(this, code, context, name);
     }
+    
+    // Mantid - follows changes to ScriptingEnv for QScintilla
+    virtual QsciLexer* scriptCodeLexer() const { return NULL; }
 
     // we do not support global variables
     bool setQObject(QObject*, const char*) { return false; }

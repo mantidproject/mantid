@@ -29,26 +29,35 @@
 #ifndef SCRIPTEDIT_H
 #define SCRIPTEDIT_H
 
+// Mantid - This class has been rewritten to include QsciScintilla and modified so that
+// the text output no longer gets sent to the editor window. Most changes to qtiplot should
+// not be merged here - M. Gigg
+
 #include "ScriptingEnv.h"
 #include "Script.h"
 
+// Qt includes
 #include <QMenu>
-#include <QTextEdit>
 #include <QThread>
+
+// Scintilla needs an extra macro defining on windows
+#ifdef Q_WS_WIN
+#define QSCINTILLA_DLL
+#endif
+#include <Qsci/qsciscintilla.h>
 
 class QAction;
 class QMenu;
+class QsciLexer;
 
 //Mantid
 class ExecuteThread;
 
 /*!\brief Editor widget with support for evaluating expressions and executing code.
  *
- * \section future Future Plans
- * - Display line numbers.
- * - syntax highlighting, indentation, auto-completion etc. (maybe using QScintilla)
+ * Inherits from QsciScintilla, which supports syntax highlighting and line numbering
  */
-class ScriptEdit: public QTextEdit, public scripted
+class ScriptEdit: public QsciScintilla, public scripted
 {
   Q_OBJECT
 
@@ -58,9 +67,9 @@ class ScriptEdit: public QTextEdit, public scripted
 	//! Handle changing of scripting environment.
     void customEvent(QEvent*);
   	//! Map cursor positions to line numbers.
-    int lineNumber(int pos) const;
+  int lineNumber() const;
 
-  public slots:
+public slots:
     void executeAsync();
     void executeAllAsync();
     void execute();
@@ -74,15 +83,21 @@ class ScriptEdit: public QTextEdit, public scripted
     void insertFunction(QAction * action);
     void setContext(QObject *context) { myScript->setContext(context); }
     void scriptPrint(const QString&);
-    void updateIndentation();
 	void setDirPath(const QString& path);
 
+  void undoredoAvailable();
+
+
   signals:
-	void dirPathChanged(const QString& path);
-	
+  void outputMessage(const QString& text);
+  void outputError(const QString& text);
+  void dirPathChanged(const QString& path);
+
+  void undoAvailable(bool available);
+  void redoAvailable(bool available);
+
   protected:
-    virtual void contextMenuEvent(QContextMenuEvent *e);
-    virtual void keyPressEvent(QKeyEvent *e);
+  virtual void contextMenuEvent(QContextMenuEvent *e);
 
   private:
     ExecuteThread *exThread;
@@ -91,24 +106,19 @@ class ScriptEdit: public QTextEdit, public scripted
     //! Submenu of context menu with mathematical functions.
   	QMenu *functionsMenu;
   	//! Cursor used for output of evaluation results and error messages.  
-  	QTextCursor printCursor;
   	QString scriptsDirPath;
   
-   //! Format used for resetting success/failure markers.
-	QTextBlockFormat d_fmt_default;
-	//! Format used for marking code that was executed or evaluated successfully.
-	QTextBlockFormat d_fmt_success;
-	//! Format used for marking code that resulted in an error.
-	QTextBlockFormat d_fmt_failure;
-	//! True if we are inside evaluate(), execute() or executeAll() there were errors.
-	bool d_error;
+  QsciLexer* codeLexer;
+
+  //! True if we are inside evaluate(), execute() or executeAll() there were errors.
+  bool d_error;
 
   private slots:
-	  //! Insert an error message from the scripting system at printCursor.
-		/**
-		* After insertion, the text cursor will have the error message selected, allowing the user to
-		* delete it and fix the error.
-		*/
+  //! Insert an error message from the scripting system at printCursor.
+  /**
+   * After insertion, the text cursor will have the error message selected, allowing the user to
+   * delete it and fix the error.
+   */
   void insertErrorMsg(const QString &message);
 
 };

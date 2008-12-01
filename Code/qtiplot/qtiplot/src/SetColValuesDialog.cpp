@@ -195,9 +195,10 @@ void SetColValuesDialog::updateColumn(int sc)
 	colNameLabel->setText("col(\""+table->colLabel(sc)+"\")= ");
 
 	QStringList com = table->getCommands();
-	commands->setText(com[sc]);
-	QTextCursor cursor = commands->textCursor();
-	cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
+
+  //Mantid - Changes due to ScriptEdit changes
+ 	commands->setText(com[sc]);
+	commands->ensureCursorVisible();
 }
 
 QSize SetColValuesDialog::sizeHint() const
@@ -240,18 +241,20 @@ void SetColValuesDialog::insertExplain(int index)
 
 void SetColValuesDialog::insertFunction()
 {
-	commands->insertFunction(functions->currentText());
+  commands->insertFunction(functions->currentText());
 }
 
 void SetColValuesDialog::insertCol()
-{
-	commands->insert(boxColumn->currentText());
+{ 
+  //Mantid - Changes due to ScriptEdit changes
+  commands->append(boxColumn->currentText());
 }
 
 void SetColValuesDialog::insertCell()
 {
-	QString f=boxColumn->currentText().remove(")")+", i)";
-	commands->insert(f);
+  QString f=boxColumn->currentText().remove(")")+", i)";
+  //Mantid - Changes due to ScriptEdit changes
+  commands->append(f);
 }
 
 void SetColValuesDialog::setTable(Table* w)

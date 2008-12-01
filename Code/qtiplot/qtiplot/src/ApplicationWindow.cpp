@@ -4088,12 +4088,18 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang, bool force)
 	ScriptingChangeEvent *sce = new ScriptingChangeEvent(newEnv);
 	QApplication::sendEvent(this, sce);
 	delete sce;
-
+	
 	foreach(QObject *i, findChildren<QObject*>())
 		QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
+	
 	if (scriptWindow)
-		foreach(QObject *i, scriptWindow->findChildren<QObject*>())
-			QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
+	  {
+      //Mantid - This is so that the title of the script window reflects the current scripting language
+	    QApplication::postEvent(scriptWindow, new ScriptingChangeEvent(newEnv)); 
+	    
+	    foreach(QObject *i, scriptWindow->findChildren<QObject*>())
+	      QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
+	  }
 	
 	return true;
 }
@@ -8004,9 +8010,9 @@ void ApplicationWindow::editMenuAboutToShow()
 	}
 	
 	if (qobject_cast<Note *>(w)){
-		QTextDocument *doc = ((Note *)w)->editor()->document();
-		actionUndo->setEnabled(doc->isUndoAvailable());
-		actionRedo->setEnabled(doc->isRedoAvailable());
+	  ScriptEdit* doc = ((Note *)w)->editor();
+	  actionUndo->setEnabled(doc->isUndoAvailable());
+	  actionRedo->setEnabled(doc->isRedoAvailable());
 	} else if (qobject_cast<Matrix *>(w)){
 		QUndoStack *stack = ((Matrix *)w)->undoStack();
 		actionUndo->setEnabled(stack->canUndo());
@@ -14357,7 +14363,7 @@ void ApplicationWindow::showScriptWindow()
 {
 	if (!scriptWindow){
 		scriptWindow = new ScriptWindow(scriptEnv, this);
-		scriptWindow->setWindowTitle(tr("MantidPlot - Script Window")); //M. Gigg, Mantid
+    //scriptWindow->setWindowTitle(tr("MantidPlot - Script Window"));   Mantid - title is now set dynamically
 		scriptWindow->resize(d_script_win_rect.size());
 		scriptWindow->move(d_script_win_rect.topLeft());
 		connect(scriptWindow, SIGNAL(visibilityChanged(bool)), actionShowScriptWindow, SLOT(setOn(bool)));

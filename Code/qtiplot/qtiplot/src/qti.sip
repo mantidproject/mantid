@@ -32,8 +32,9 @@
 %Module qti 0
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
+%Import Qsci/qscimod4.sip
 
-class ScriptEdit: QTextEdit
+class ScriptEdit: QsciScintilla
 {
 %TypeHeaderCode
 #include "src/ScriptEdit.h"

@@ -31,14 +31,23 @@
 #ifndef SCRIPTWINDOW_H
 #define SCRIPTWINDOW_H
 
+/**
+  * Mantid - This class has been modified from the qtiplot class so that
+  * the output goes into a seperate window.
+  */
+
 #include "ScriptEdit.h"
 
 #include <QMainWindow>
 #include <QMenu>
 #include <QCloseEvent>
+#include <QTextEdit>
 class ScriptingEnv;
 class ApplicationWindow;
 class QAction;
+class QDockWidget;
+
+class OutputTextArea; //Mantid
 
 //! Python script window
 class ScriptWindow: public QMainWindow
@@ -47,7 +56,9 @@ class ScriptWindow: public QMainWindow
 
 public:
 		ScriptWindow(ScriptingEnv *env, ApplicationWindow *app);
-        ~ScriptWindow(){exit(0);};
+    virtual ~ScriptWindow();						       
+  
+    void customEvent(QEvent*);				       
 
 public slots:
 		void newScript();
@@ -56,11 +67,15 @@ public slots:
 		void saveAs();
 		void languageChange();
 		virtual void setVisible(bool visible);
-
+  
 		void executeAll(){te->executeAll();};
-		
+
+    void scriptMessage(const QString&);				    
+		void scriptError(const QString&);
+
 private slots:
 		void setAlwaysOnTop(bool on);
+		void viewScriptOutput(bool on);
 
 signals:
 		void visibilityChanged(bool visible);
@@ -72,15 +87,36 @@ private:
 		void initMenu();
 		void initActions();
 		ScriptEdit *te;
+                QDockWidget* outputWindow;
+                OutputTextArea* outputText;
+
+                ScriptingEnv* d_env;
 		ApplicationWindow *d_app;
 
 		QString fileName;
 
 		QMenu *file, *edit, *run, *windowMenu;
 		QAction *actionNew, *actionUndo, *actionRedo, *actionCut, *actionCopy, *actionPaste;
+                QAction *actionClearOutput, *actionClearInput;
 		QAction *actionExecute, *actionExecuteAll, *actionEval, *actionPrint, *actionOpen;
 		QAction *actionSave, *actionSaveAs;
 		QAction *actionAlwaysOnTop, *actionHide;
+		QAction *actionViewScriptOutput;
+};
+
+//Mantid - This class is here so that the context menu handler can be overridden but it can't be nested in the private section of 
+//ScriptWindow because the SIGNAL/SLOT mechanism won't work
+class OutputTextArea : public QTextEdit
+  {
+    Q_OBJECT
+
+    public:
+
+    OutputTextArea(QWidget * parent = 0, const char * name = 0 );
+
+    protected:
+    
+    virtual void contextMenuEvent(QContextMenuEvent *e);
 };
 
 #endif

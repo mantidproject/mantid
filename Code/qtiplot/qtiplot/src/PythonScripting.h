@@ -34,6 +34,7 @@
 
 class QObject;
 class QString;
+class QsciLexer; //Mantid
 
 typedef struct _object PyObject;
 
@@ -49,6 +50,9 @@ class PythonScripting: public ScriptingEnv
 		bool initialize();
 
 		void write(const QString &text) { emit print(text); }
+
+		//Mantid. To ensure the correct code lexer for Python 
+		virtual QsciLexer* scriptCodeLexer() const;
 
 		//! like str(object) in Python
 		/**

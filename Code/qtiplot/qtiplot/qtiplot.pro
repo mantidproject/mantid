@@ -63,6 +63,7 @@ unix:INCLUDEPATH       += /usr/include/qwtplot3d/
 #unix:LIBS         += ../3rdparty/gsl/lib/libgslcblas.a
 
 # dynamically link against dependencies if they are installed system-wide
+unix:LIBS         += -lqscintilla2
 unix:LIBS         += -lmuparser
 unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
 unix:LIBS         += -L/usr/lib/ -lqwt
@@ -82,6 +83,7 @@ unix:LIBS		+= -L/usr/lib/ -lPocoFoundation
 
 ##################### Windows ###############################################
 
+win32:LIBS        += -lqscintilla2
 win32:LIBS        += ../../Third_Party/lib/win32/muparser.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwtplot3d.lib
 win32:LIBS        += ../../Third_Party/lib/win32/qwt.lib
