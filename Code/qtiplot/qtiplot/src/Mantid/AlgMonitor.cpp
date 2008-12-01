@@ -161,6 +161,7 @@ void MonitorDlg::update(int n)
         QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
         m_tree->addTopLevelItem(algItem);
         QProgressBar *algProgress = new QProgressBar;
+        algProgress->setAlignment(Qt::AlignHCenter);
         AlgButton *cancelButton = new AlgButton("Cancel",m_algMonitor->algorithms()[i]);
         m_tree->setItemWidget(algItem,1,algProgress);
         m_tree->setItemWidget(algItem,2,cancelButton);
@@ -188,6 +189,7 @@ void MonitorDlg::updateProgress(const Algorithm* alg,int p, const QString& msg)
         {
             QProgressBar *algProgress = static_cast<QProgressBar*>(m_tree->itemWidget(item,1));
             algProgress->setValue(p);
+            algProgress->setFormat(msg + " %p%");
         }
     }
 }

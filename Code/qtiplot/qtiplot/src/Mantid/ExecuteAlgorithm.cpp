@@ -168,7 +168,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
     setWindowTitle(tr("Enter properties - "+QString::fromStdString(alg->name())));
 	setFixedHeight(sizeHint().height());
 	
-	setPropertiesAndValidate();
+	//setPropertiesAndValidate();
+	validateProperties();
 }
 
 void ExecuteAlgorithm::browseClicked()
@@ -219,13 +220,14 @@ void ExecuteAlgorithm::browseClicked()
 		
 	temp->setText(s);
 	
-	setPropertiesAndValidate();
+	validateProperties();
 }
 
 void ExecuteAlgorithm::textChanged()
 {
 	//okButton->setEnabled(validateEntries());
-	setPropertiesAndValidate();
+	//setPropertiesAndValidate();
+	validateProperties();
 }
 
 bool ExecuteAlgorithm::setPropertiesAndValidate()
@@ -262,6 +264,55 @@ bool ExecuteAlgorithm::setPropertiesAndValidate()
 		if (value != "")
 		{
 			if (!setPropertyValue(comboItr->second, value) || !validateProperty(comboItr->second))
+			{
+				//Highlight that value is invalid
+				showValidator(comboItr->second);	
+				propsOK = false;
+			}
+			else
+			{
+				hideValidator(comboItr->second);	
+			}
+		}
+	}
+	
+	return propsOK;
+}
+
+bool ExecuteAlgorithm::validateProperties()
+{
+	bool propsOK = true;
+	
+	std::map<QLineEdit*, std::string>::iterator editItr = edits.begin();
+	std::map<QComboBox*, std::string>::iterator comboItr = combos.begin();
+		
+	for (; editItr != edits.end(); ++editItr)
+	{	
+		std::string value = editItr->first->text().trimmed().toStdString();
+		
+		if (!validateProperty(editItr->second))
+		{
+			//Highlight that value is invalid
+			showValidator(editItr->second);	
+			propsOK = false;
+		}
+		else
+		{			
+			hideValidator(editItr->second);
+		}
+	}
+	
+	for (; comboItr != combos.end(); ++comboItr)
+	{	
+		std::string value = comboItr->first->currentText().trimmed().toStdString();
+		// Ugly way of turning boolean yes/no into the 1/0 required
+		if ( value == "Yes" ) value = "1";
+		if ( value == "No" ) value = "0";
+		
+		//Only set a property if it is not nothing
+		if (value != "")
+		{
+			if (!validateProperty(comboItr->second))
 			{
 				//Highlight that value is invalid
 				showValidator(comboItr->second);	

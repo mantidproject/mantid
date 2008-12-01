@@ -56,8 +56,9 @@ private:
 	std::map<std::string, QLabel*> validators;
 
 	bool execute();
-        bool setPropertiesAndValidate();
-        bool setPropertyValue(const std::string& name, const std::string& value);
+    bool setPropertiesAndValidate();
+    bool validateProperties();
+    bool setPropertyValue(const std::string& name, const std::string& value);
 	bool validateProperty(const std::string& name);
 	void showValidator(const std::string& propName);
 	void hideValidator(const std::string& propName);
