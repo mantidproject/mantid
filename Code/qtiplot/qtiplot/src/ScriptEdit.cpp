@@ -65,7 +65,7 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	setMarginWidth(1, 25);
 
 	scriptsDirPath = qApp->applicationDirPath();
-	
+
 	actionExecute = new QAction(tr("E&xecute"), this);
 	actionExecute->setShortcut( tr("Ctrl+J") );
 	connect(actionExecute, SIGNAL(activated()), this, SLOT(execute()));
@@ -136,9 +136,9 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
   }
   
   menu.insertSeparator();
-  
+
   menu.addAction(actionExecute);
-  menu.addAction(actionExecuteAll);
+  menu.addAction(actionExecuteAll);  
   menu.addAction(actionEval);
 
   if (parent()->isA("Note")){
@@ -259,6 +259,14 @@ void ScriptEdit::execute()
   {
     code = text(lineNumber()).replace(QChar::ParagraphSeparator,"\n");
     myScript->setName(code);
+    scriptEnv->setFirstLineNumber(lineNumber());
+  }
+  else
+  {
+    int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
+    //Qscintilla function
+    getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+    scriptEnv->setFirstLineNumber(lineFrom);
   }
   myScript->setCode(code);
   myScript->exec();
@@ -266,6 +274,7 @@ void ScriptEdit::execute()
 
 void ScriptEdit::executeAll()
 {
+  scriptEnv->setFirstLineNumber(0);
   myScript->setCode(text());
   myScript->exec();
 }
@@ -277,6 +286,14 @@ void ScriptEdit::evaluate()
   {
     code = text(lineNumber()).replace(QChar::ParagraphSeparator,"\n");
     myScript->setName(code);
+    scriptEnv->setFirstLineNumber(lineNumber());
+  }
+  else
+  {
+    int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
+    //Qscintilla function
+    getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+    scriptEnv->setFirstLineNumber(lineFrom);
   }
   myScript->setCode(code);
 

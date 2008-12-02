@@ -130,53 +130,43 @@ QString PythonScripting::errorMsg()
 {
 	PyObject *exception=0, *value=0, *traceback=0;
 	PyTracebackObject *excit=0;
-	PyFrameObject *frame;
-	char *fname;
+	//	PyFrameObject *frame; // Mantid
+	//char *fname; // Mantid
 	QString msg;
 	if (!PyErr_Occurred()) return "";
 
 	PyErr_Fetch(&exception, &value, &traceback);
 	PyErr_NormalizeException(&exception, &value, &traceback);
+
+	//----- Mantid - Altered error message formatting -----
+	int start = getFirstLineNumber();
+	msg.append("Error:");
 	if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
 	{
- 		QString text = toString(PyObject_GetAttrString(value, "text"), true);
-		msg.append(text + "\n");
-		PyObject *offset = PyObject_GetAttrString(value, "offset");
-		for (int i=0; i<(PyInt_AsLong(offset)-1); i++)
-			if (text[i] == '\t')
-				msg.append("\t");
-			else
-				msg.append(" ");
-		msg.append("^\n");
-		Py_DECREF(offset);
-		msg.append("SyntaxError: ");
-		msg.append(toString(PyObject_GetAttrString(value, "msg"), true) + "\n");
-		msg.append("at ").append(toString(PyObject_GetAttrString(value, "filename"), true));
-		msg.append(":").append(toString(PyObject_GetAttrString(value, "lineno"), true));
-		msg.append("\n");
-		Py_DECREF(exception);
-		Py_DECREF(value);
-	} else {
-		msg.append(toString(exception,true)).remove("exceptions.").append(": ");
-		msg.append(toString(value,true));
-		msg.append("\n");
-	}
+	  msg.append(" " + toString(PyObject_GetAttrString(value, "msg"), true));
+	  msg.append(" '").append(toString(PyObject_GetAttrString(value, "filename"), true).remove("\n"));
+	  msg.append("' on line ");
+	  int offset = toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+	  msg.append(QString::number(start+offset));
+	  Py_DECREF(exception);
+	  Py_DECREF(value);
+	} 
+ 	else {
+	  msg.append(" " + toString(exception,true)).remove("exceptions.").append(" - ");
+	  msg.append(toString(value,true));
+ 	}
 
 	if (traceback) {
-		excit = (PyTracebackObject*)traceback;
-		while (excit && (PyObject*)excit != Py_None)
-		{
-			frame = excit->tb_frame;
-			msg.append("at ").append(PyString_AsString(frame->f_code->co_filename));
-			msg.append(":").append(QString::number(excit->tb_lineno));
-			if (frame->f_code->co_name && *(fname = PyString_AsString(frame->f_code->co_name)) != '?')
-				msg.append(" in ").append(fname);
-			msg.append("\n");
-			excit = excit->tb_next;
-		}
-		Py_DECREF(traceback);
+	  excit = (PyTracebackObject*)traceback;
+	  if( excit )
+	  {
+	    msg.append(" on line ");
+	    msg.append(QString::number(start + excit->tb_lineno));
+	  }
+	  Py_DECREF(traceback);
 	}
-
+       	msg.append("\n");
+	//----------------------------------------------
 	return msg;
 }
 
