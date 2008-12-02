@@ -205,4 +205,6 @@ private:
 	QSize d_min_restore_size;
 };
 
+typedef QList<MdiSubWindow*> MDIWindowList;
+
 #endif
