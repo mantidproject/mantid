@@ -295,6 +295,7 @@ void ScriptEdit::evaluate()
     getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
     scriptEnv->setFirstLineNumber(lineFrom);
   }
+  if( code.isEmpty() ) return;
   myScript->setCode(code);
 
   QVariant res = myScript->eval();
