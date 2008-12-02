@@ -42,7 +42,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mainLayout->addWidget(controlPanelLayout);
 	QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
 	QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
-
+	//Tree Controls
+	mInstrumentTree = new InstrumentTreeWidget(0);
+	instrumentTreeLayout->addWidget(mInstrumentTree);
 	//Render Controls
 	mSelectButton = new QPushButton(tr("Pick"));
 	mSelectColormap = new QPushButton(tr("Select ColorMap"));
@@ -290,6 +292,7 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 	mMinValueBox->setText(text.setNum(minValue));
 	mMaxValueBox->setText(text.setNum(maxValue));
 	updateColorMapWidget();
+	mInstrumentTree->setInstrument(output->getInstrument().get());
 }
 
 /**
@@ -322,6 +325,7 @@ void InstrumentWindow::updateColorMapWidget()
 	double maxValue=mMaxValueBox->displayText().toDouble();
 	mColorMapWidget->setScaleDiv(lse.transformation(),lse.divideScale(minValue,maxValue,20,5));
 	mColorMapWidget->setColorMap(QwtDoubleInterval(minValue,maxValue),mInstrumentDisplay->getColorMap());
+	mInstrumentDisplay->update();
 }
 
 /**

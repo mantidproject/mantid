@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include "Instrument3DWidget.h"
+#include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
 #include "BinDialog.h"
 #include <string>
@@ -85,6 +86,7 @@ private:
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
 	BinDialog*   mBinMapDialog;
+	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

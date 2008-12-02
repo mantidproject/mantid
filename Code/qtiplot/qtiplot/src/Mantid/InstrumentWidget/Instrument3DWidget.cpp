@@ -179,6 +179,7 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument> ins)
 {
 	boost::shared_ptr<GLActorCollection> scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection);
+	makeCurrent();
 	std::queue<Component *> CompList;
 	CompList.push(ins.get());
 	boost::shared_ptr<GLColor> col(new GLColor(1.0,0.5,0.0,1.0));
