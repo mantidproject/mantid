@@ -200,17 +200,17 @@ void ScriptWindow::initActions()
 	
    // Run actions
 	actionExecute = new QAction(tr("E&xecute"), this);
-	actionExecute->setShortcut( tr("CTRL+J") );
+	actionExecute->setShortcut( tr("Ctrl+Return") );
 	connect(actionExecute, SIGNAL(activated()), te, SLOT(execute()));
 	run->addAction(actionExecute);
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
-	actionExecuteAll->setShortcut( tr("CTRL+SHIFT+J") );
+	actionExecuteAll->setShortcut( tr("Ctrl+Shift+Return") );
 	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAll()));
 	run->addAction(actionExecuteAll);
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
-	actionEval->setShortcut( tr("CTRL+Return") );
+	actionEval->setShortcut( tr("Ctrl+E") );
 	connect(actionEval, SIGNAL(activated()), te, SLOT(evaluate()));
 	run->addAction(actionEval);
 

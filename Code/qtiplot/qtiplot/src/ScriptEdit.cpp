@@ -67,15 +67,15 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	scriptsDirPath = qApp->applicationDirPath();
 
 	actionExecute = new QAction(tr("E&xecute"), this);
-	actionExecute->setShortcut( tr("Ctrl+J") );
+	actionExecute->setShortcut( tr("Ctrl+Return") );
 	connect(actionExecute, SIGNAL(activated()), this, SLOT(execute()));
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
-	actionExecuteAll->setShortcut( tr("Ctrl+Shift+J") );
+	actionExecuteAll->setShortcut( tr("Ctrl+Shift+Return") );
 	connect(actionExecuteAll, SIGNAL(activated()), this, SLOT(executeAll()));
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
-	actionEval->setShortcut( tr("Ctrl+Return") );
+	actionEval->setShortcut( tr("Ctrl+E") );
 	connect(actionEval, SIGNAL(activated()), this, SLOT(evaluate()));
 
 	actionImport = new QAction(tr("&Open..."), this);
@@ -257,9 +257,8 @@ void ScriptEdit::execute()
   QString code = selectedText().replace(QChar::ParagraphSeparator,"\n");
   if( code.isEmpty() )
   {
-    code = text(lineNumber()).replace(QChar::ParagraphSeparator,"\n");
-    myScript->setName(code);
-    scriptEnv->setFirstLineNumber(lineNumber());
+    executeAll();
+    return;
   }
   else
   {
@@ -267,15 +266,16 @@ void ScriptEdit::execute()
     //Qscintilla function
     getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
     scriptEnv->setFirstLineNumber(lineFrom);
+    myScript->setCode(code);
+    myScript->exec();
   }
-  myScript->setCode(code);
-  myScript->exec();
 }
 
 void ScriptEdit::executeAll()
 {
+  if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
-  myScript->setCode(text());
+  myScript->setCode(text().replace(QChar::ParagraphSeparator,"\n"));
   myScript->exec();
 }
 
