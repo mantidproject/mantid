@@ -1,6 +1,7 @@
 #include "gts.h"
 #include "MantidGeometry/GtsGeometryRenderer.h"
 #include "MantidGeometry/ObjComponent.h"
+#include <climits>
 #ifdef _WIN32
 #include "windows.h"
 #endif
@@ -35,6 +36,7 @@ namespace Mantid
 		GtsGeometryRenderer::GtsGeometryRenderer()
 		{
 			boolDisplaylistCreated=false;
+			iDisplaylistId=UINT_MAX;
 		}
 
 		/**
@@ -51,10 +53,11 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Render(GtsSurface *ObjSurf)
 		{
-			GtsFace * first = NULL;
-			glBegin(GL_TRIANGLES);
-			gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
-			glEnd();
+			glCallList(iDisplaylistId);
+			//GtsFace * first = NULL;
+			//glBegin(GL_TRIANGLES);
+			//gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
+			//glEnd();
 		}
 
 		/**
@@ -80,11 +83,17 @@ namespace Mantid
 		*/
 		void GtsGeometryRenderer::Initialize(GtsSurface *ObjSurf)
 		{
-			GtsFace * first = NULL;
-			glBegin(GL_TRIANGLES);
-			gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
-			glEnd();
-			boolDisplaylistCreated=true;
+			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
+			{
+				GtsFace * first = NULL;
+				iDisplaylistId=glGenLists(1);
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+				glBegin(GL_TRIANGLES);
+				gts_surface_foreach_face(ObjSurf,(GtsFunc)gts_surface_opengl_render,&first);
+				glEnd();
+				glEndList();
+				boolDisplaylistCreated=true;
+			}
 		}
 
 		/**
@@ -102,7 +111,7 @@ namespace Mantid
 			glMultMatrixd(rotGL);
 			ObjComp->drawObject();
 			glPopMatrix();
-			boolDisplaylistCreated=true;
+//			boolDisplaylistCreated=true;
 
 		}
 	}
