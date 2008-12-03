@@ -43,10 +43,13 @@ namespace Mantid
 
       // Need to import definitions from main Python API
 #ifdef _WIN32
-      module << "from MantidPythonAPI import FrameworkManager\n\n";
+      module << "from MantidPythonAPI import FrameworkManager\n";
 #else
-      module << "from libMantidPythonAPI import FrameworkManager\n\n";
+      module << "from libMantidPythonAPI import FrameworkManager\n";
 #endif
+      
+      //Also need string module for some text processing in help command
+      module << "import string\n\n";
 
       //Algorithm keys
       using namespace Mantid::API;
@@ -65,6 +68,7 @@ namespace Mantid
 		  SimplePythonAPI::PropertyOrdering());
 	std::string name(vIter->first);
 	writeFunctionDef(module, name , orderedProperties);
+	std::transform(name.begin(), name.end(), name.begin(), tolower);
 	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
       }
       writeFunctionHelp(module, helpStrings);
@@ -238,6 +242,7 @@ namespace Mantid
       os << "\tif cmd == -1:\n"
 	 << "\t\tmtdGlobalHelp()\n"
 	 << "\t\treturn\n";
+      os << "\n\tcmd = string.lower(cmd)\n";
       //Functons help
       SimplePythonAPI::IndexVector::const_iterator mIter = helpStrings.begin();
       SimplePythonAPI::IndexVector::const_iterator mEnd = helpStrings.end();

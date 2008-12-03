@@ -43,6 +43,10 @@ public:
     getline( is, line );
     TS_ASSERT_EQUALS(line, modline);
     
+    //next line should be string import
+    getline( is, line );
+    TS_ASSERT_EQUALS(line, std::string("import string"));
+
     //next non-blank line should be help()
     //eat blank lines
     while( getline(is, line) && line.empty() ) 
