@@ -81,6 +81,9 @@ private:
   API::Workspace_sptr alignBins(const API::Workspace_sptr workspace);
   const std::vector<double> calculateRebinParams(const API::Workspace_const_sptr workspace) const;
 
+  /// Reverses the workspace if X values are in descending order
+  void reverse(API::Workspace_sptr workspace);
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };

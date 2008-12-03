@@ -135,6 +135,8 @@ void ConvertUnits::exec()
     convertViaTOF(numberOfSpectra,inputWS,outputWS);
   }
 
+  reverse(outputWS);
+
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
   if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS))
@@ -151,8 +153,8 @@ void ConvertUnits::exec()
       for (unsigned int j = 0; j < size; ++j)
       {
         const double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
-        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]/width;
-        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]/width;
+        outputWS->dataY(i)[j] = outputWS->dataY(i)[j]/width;
+        outputWS->dataE(i)[j] = outputWS->dataE(i)[j]/width;
       }
     }
   }
@@ -372,6 +374,56 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspac
   retval.push_back(XMax);
 
   return retval;
+}
+
+void ConvertUnits::reverse(API::Workspace_sptr WS)
+{
+
+    // If there is nothing to do
+    if (!WS->dataX(0).size() || WS->dataX(0).front() < WS->dataX(0).back()) return;
+//    progress( "Setting X values ..." );
+    const int numberOfSpectra = WS->getNumberHistograms();
+
+  // First a quick check using the validator
+  CommonBinsValidator<> sameBins;
+  if ( sameBins.isValid(WS) )
+  {
+    // Only do the full check if the quick one passes
+    if ( WorkspaceHelpers::commonBoundaries(WS) )
+    {
+
+      std::reverse(WS->dataX(0).begin(),WS->dataX(0).end());
+
+      // If this is a Workspace2D then loop over the other spectra passing in the pointer
+      Workspace2D_sptr WS2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
+      if (WS2D)
+      {
+        Histogram1D::RCtype xVals;
+        xVals.access() = WS->dataX(0);
+        for (int j = 1; j < numberOfSpectra; ++j)
+        {
+          WS2D->setX(j,xVals);
+          std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
+          std::reverse(WS->dataE(j).begin(),WS->dataE(j).end());
+          if ( j % 100 == 0)
+          {
+              interruption_point();
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+      for (int j = 1; j < numberOfSpectra; ++j)
+      {
+          std::reverse(WS->dataX(j).begin(),WS->dataX(j).end());
+          std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
+          std::reverse(WS->dataE(j).begin(),WS->dataE(j).end());
+          if ( j % 100 == 0)
+              interruption_point();
+      }
+  }
 }
 
 } // namespace Algorithm
