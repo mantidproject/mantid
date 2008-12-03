@@ -57,16 +57,16 @@ namespace Mantid
       //Function definitions for each algorithm
       IndexVector helpStrings;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
-          ++vIter)
-          {
-            IAlgorithm* algm = FrameworkManager::Instance().createAlgorithm(vIter->first);
-	    PropertyVector orderedProperties(algm->getProperties());
-	    std::sort(orderedProperties.begin(), orderedProperties.end(),
-		      SimplePythonAPI::PropertyOrdering());
-	    std::string name(vIter->first);
-            writeFunctionDef(module, name , orderedProperties);
-	    helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
-          }
+	   ++vIter)
+      {
+	IAlgorithm* algm = FrameworkManager::Instance().createAlgorithm(vIter->first);
+	PropertyVector orderedProperties(algm->getProperties());
+	std::sort(orderedProperties.begin(), orderedProperties.end(),
+		  SimplePythonAPI::PropertyOrdering());
+	std::string name(vIter->first);
+	writeFunctionDef(module, name , orderedProperties);
+	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
+      }
       writeFunctionHelp(module, helpStrings);
       module.close();
     }
@@ -112,19 +112,22 @@ namespace Mantid
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
       os << "def " << algm << "(";
-      //parameter listing - ensuring the ones that are required are
-      //first
+      //Iterate through properties
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
-      int cParam(97), iMand(0);
-      for( ; pIter != pEnd; ++cParam )
+      StringVector sanitizedNames(properties.size());
+      unsigned int iMand(0);
+      for( unsigned int iarg = 0; pIter != pEnd; ++iarg)
       {
-	if( !(*pIter)->isValid() ) {
+	sanitizedNames[iarg] = sanitizePropertyName((*pIter)->name());
+	os << sanitizedNames[iarg];
+	if( !(*pIter)->isValid() ) 
+	{
 	  ++iMand;
-	  os << (char)cParam;
 	}
-	else {
-	  os << (char)cParam << " = -1";
+	else 
+	{
+	  os  << " = -1";
 	}
         if( ++pIter != pEnd ) os << ", ";
       }
@@ -132,13 +135,13 @@ namespace Mantid
       os << "):\n";
       os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
       pIter = properties.begin();
-      for( cParam = 97; pIter != pEnd; ++pIter, ++cParam )
+      for( unsigned int iarg = 0; pIter != pEnd; ++pIter, ++iarg )
       {
-	if( cParam < 97 + iMand )
-	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << (char)cParam << ")\n";
+	if( iarg < iMand )
+	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
 	else {
-	  os << "\tif " << (char)cParam << " != -1:\n"
-	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << (char)cParam << ")\n";
+	  os << "\tif " << sanitizedNames[iarg] << " != -1:\n"
+	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
 	}
       }
       os << "\talgm.execute()\n";
@@ -189,7 +192,7 @@ namespace Mantid
       PropertyVector::const_iterator pEnd = properties.end();
       for( ; pIter != pEnd ; )
       {
-	os << (*pIter)->name();
+	os << sanitizePropertyName((*pIter)->name());
 	if( ++pIter != pEnd ) os << ", ";
       }
       os << ")\"\n";
@@ -198,8 +201,8 @@ namespace Mantid
       for( ; pIter != pEnd ; ++pIter )
       {
 	Mantid::Kernel::Property* prop = *pIter;
-	os << "\t\tprint \"\\tName: " << prop->name() << ", Optional: ";  
-	if( prop->isValid() ) os << "Yes, Default value: " << santizePropertyValue(prop->value());
+	os << "\t\tprint \"\\tName: " << sanitizePropertyName((*pIter)->name()) << ", Optional: ";  
+	if( prop->isValid() ) os << "Yes, Default value: " << sanitizePropertyValue(prop->value());
 	else os << "No";
 	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
 	StringVector allowed = prop->allowedValues();
@@ -216,7 +219,8 @@ namespace Mantid
 	}
 	os << "\"\n";	
       }
-      os << "\t\tprint \"Note: All arguments must be wrapped in string quotes \\\"\\\", regardless of their type.\"\n\n";
+      os << "\t\tprint \"\\nNote 1: All arguments must be wrapped in string quotes  \\\"\\\", regardless of their type.\"\n";
+      os << "\t\tprint \"Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\\"value\\\".\"\n\n";
       return os.str();
     }
 
@@ -254,13 +258,36 @@ namespace Mantid
      * @param value The property value
      * @returns A string containing the sanitized property value
      */
-    std::string SimplePythonAPI::santizePropertyValue(const std::string & value)
+    std::string SimplePythonAPI::sanitizePropertyValue(const std::string & value)
     {
       if( value == "\n\r" )
 	return std::string("\\\\") + std::string("n") + std::string("\\\\") + std::string("r");
       if( value == "\n" )
 	return std::string("\\\\") + std::string("n");
       return value;
+    }
+    
+    /**
+     * Takes a list of properties and makes a list of names that can be used as parameters
+     * by removing special characters such as spaces etc
+     * @param name The full property name
+     * @returns The sanitized property names
+     */
+    std::string SimplePythonAPI::sanitizePropertyName(const std::string & name)
+    {
+      std::string arg;
+      std::string::const_iterator sIter = name.begin();
+      std::string::const_iterator sEnd = name.end();
+      for( ; sIter != sEnd; ++sIter )
+      {
+	int letter = (int)(*sIter);
+	if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
+	    (letter >= 65 && letter <= 90) )
+	{
+	  arg.push_back(*sIter);
+	}
+      }
+      return arg;
     }
 
   } //namespace PythonAPI
