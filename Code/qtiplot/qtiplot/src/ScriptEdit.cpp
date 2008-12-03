@@ -61,8 +61,8 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	codeLexer = env->scriptCodeLexer();
 	setLexer(codeLexer);
 	setAutoIndent(true);
-	setMarginLineNumbers(1,true);
-	setMarginWidth(1, 25);
+  setMarginLineNumbers(1,true);
+  setMarginWidth(1, 25);
 
 	scriptsDirPath = qApp->applicationDirPath();
 
@@ -113,8 +113,7 @@ void ScriptEdit::customEvent(QEvent *e)
       connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
       //Get new code lexer
-      if( codeLexer )
-	delete codeLexer;
+      if( codeLexer ) delete codeLexer;
       codeLexer = scriptEnv->scriptCodeLexer();
       setLexer(codeLexer);
       setAutoIndent(true);
@@ -254,7 +253,7 @@ void ScriptEdit::executeAllAsync()
 
 void ScriptEdit::execute()
 {
-  QString code = selectedText().replace(QChar::ParagraphSeparator,"\n");
+  QString code = selectedText().remove("\r");
   if( code.isEmpty() )
   {
     executeAll();
@@ -275,16 +274,16 @@ void ScriptEdit::executeAll()
 {
   if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
-  myScript->setCode(text().replace(QChar::ParagraphSeparator,"\n"));
+  myScript->setCode(text().remove("\r"));
   myScript->exec();
 }
 
 void ScriptEdit::evaluate()
 {
-  QString code = selectedText().replace(QChar::ParagraphSeparator,"\n");
+  QString code = selectedText().remove("\r");
   if( code.isEmpty() )
   {
-    code = text(lineNumber()).replace(QChar::ParagraphSeparator,"\n");
+    code = text(lineNumber()).remove("\r");
     myScript->setName(code);
     scriptEnv->setFirstLineNumber(lineNumber());
   }
@@ -386,13 +385,12 @@ QString ScriptEdit::importASCII(const QString &filename)
 		emit dirPathChanged(scriptsDirPath);
 	}
 	
-	clear();
-	QTextStream s(&file);
-	s.setEncoding(QTextStream::UnicodeUTF8);
-	while (!s.atEnd())
-	  append(s.readLine()+"\n");
-	file.close();
-	return f;
+  clear();
+	read(&file);
+  file.close();
+  //Set keyboard focus to edit window
+  setFocus();
+  return f;
 }
 
 QString ScriptEdit::exportASCII(const QString &filename)

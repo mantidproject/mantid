@@ -363,14 +363,14 @@ void ScriptWindow::scriptMessage(const QString& text)
 {
   outputText->setTextColor(Qt::black);
   outputText->textCursor().insertText(text);
-  outputText->ensureCursorVisible();
+  outputText->moveCursor(QTextCursor::End);
 }				    
 
 void ScriptWindow::scriptError(const QString& text)
 {
   outputText->setTextColor(Qt::red);
   outputText->textCursor().insertText(text);
-  outputText->ensureCursorVisible();
+  outputText->moveCursor(QTextCursor::End);
 }				    
 
 void ScriptWindow::viewScriptOutput(bool visible)
