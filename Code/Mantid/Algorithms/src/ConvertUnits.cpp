@@ -132,10 +132,14 @@ void ConvertUnits::exec()
   }
   else
   {
-    convertViaTOF(numberOfSpectra,inputWS,outputWS);
+    convertViaTOF(numberOfSpectra,inputUnit,outputWS);
   }
 
-  reverse(outputWS);
+  // If the units conversion has flipped the ascending direction of X, reverse all the vectors
+  if (outputWS->dataX(0).size() && outputWS->dataX(0).front() < outputWS->dataX(0).back())
+  {
+    this->reverse(outputWS);
+  }
 
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
@@ -216,18 +220,18 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
  * @param numberOfSpectra The number of Spectra
- * @param inputWS the input workspace
- * @param outputWS the output workspace
+ * @param fromUnit The unit of the input workspace
+ * @param outputWS The output workspace
  */
-void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_const_sptr inputWS, API::Workspace_sptr outputWS)
+void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<Kernel::Unit> fromUnit, API::Workspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
-  boost::shared_ptr<API::Instrument> instrument = inputWS->getInstrument();
+  boost::shared_ptr<API::Instrument> instrument = outputWS->getInstrument();
   // And one to the SpectraDetectorMap
-  boost::shared_ptr<API::SpectraDetectorMap> specMap = inputWS->getSpectraMap();
+  boost::shared_ptr<API::SpectraDetectorMap> specMap = outputWS->getSpectraMap();
 
   // Get the unit object for each workspace
-  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
+  //boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
   boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
@@ -241,7 +245,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
   catch (Exception::NotFoundError e)
   {
     g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
   }
   Geometry::V3D samplePos = sample->getPos();
 
@@ -262,7 +266,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
 
     try {
       // Get the spectrum number for this histogram
-      const int spec = inputWS->getAxis(1)->spectraNo(i);
+      const int spec = outputWS->getAxis(1)->spectraNo(i);
       // Now get the detector to which this relates
       boost::shared_ptr<Geometry::IDetector> det = specMap->getDetector(spec);
       Geometry::V3D detPos = det->getPos();
@@ -287,7 +291,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, API::Workspace_cons
       }
 
       // Convert the input unit to time-of-flight
-      inputUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+      fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
       outputUnit->fromTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
 
@@ -378,11 +382,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspac
 
 void ConvertUnits::reverse(API::Workspace_sptr WS)
 {
-
-    // If there is nothing to do
-    if (!WS->dataX(0).size() || WS->dataX(0).front() < WS->dataX(0).back()) return;
-//    progress( "Setting X values ..." );
-    const int numberOfSpectra = WS->getNumberHistograms();
+  const int numberOfSpectra = WS->getNumberHistograms();
 
   // First a quick check using the validator
   CommonBinsValidator<> sameBins;
@@ -393,6 +393,8 @@ void ConvertUnits::reverse(API::Workspace_sptr WS)
     {
 
       std::reverse(WS->dataX(0).begin(),WS->dataX(0).end());
+      std::reverse(WS->dataY(0).begin(),WS->dataY(0).end());
+      std::reverse(WS->dataE(0).begin(),WS->dataE(0).end());
 
       // If this is a Workspace2D then loop over the other spectra passing in the pointer
       Workspace2D_sptr WS2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
@@ -405,24 +407,20 @@ void ConvertUnits::reverse(API::Workspace_sptr WS)
           WS2D->setX(j,xVals);
           std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
           std::reverse(WS->dataE(j).begin(),WS->dataE(j).end());
-          if ( j % 100 == 0)
-          {
-              interruption_point();
-          }
+          if ( j % 100 == 0) interruption_point();
         }
       }
     }
   }
   else
   {
-      for (int j = 1; j < numberOfSpectra; ++j)
-      {
-          std::reverse(WS->dataX(j).begin(),WS->dataX(j).end());
-          std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
-          std::reverse(WS->dataE(j).begin(),WS->dataE(j).end());
-          if ( j % 100 == 0)
-              interruption_point();
-      }
+    for (int j = 0; j < numberOfSpectra; ++j)
+    {
+      std::reverse(WS->dataX(j).begin(),WS->dataX(j).end());
+      std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
+      std::reverse(WS->dataE(j).begin(),WS->dataE(j).end());
+      if ( j % 100 == 0) interruption_point();
+    }
   }
 }
 
