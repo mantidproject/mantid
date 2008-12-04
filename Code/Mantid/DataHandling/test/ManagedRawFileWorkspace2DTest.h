@@ -36,7 +36,7 @@ public:
   void testSetFile()
   {
     ManagedRawFileWorkspace2D ws;
-    ws.setRawFile("../../../../Test/Data/HET15869.RAW");
+    ws.setRawFile("../../../../Test/Data/HET15869.RAW",2);
 
     TS_ASSERT_EQUALS( ws.getNumberHistograms(), 2584 )
     TS_ASSERT_EQUALS( ws.blocksize(), 1675 )
