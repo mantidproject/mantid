@@ -384,13 +384,9 @@ void ConvertUnits::reverse(API::Workspace_sptr WS)
 {
   const int numberOfSpectra = WS->getNumberHistograms();
 
-  // First a quick check using the validator
-  CommonBinsValidator<> sameBins;
-  if ( sameBins.isValid(WS) )
+  // Only do the full check if the quick one passes
+  if ( WorkspaceHelpers::commonBoundaries(WS) )
   {
-    // Only do the full check if the quick one passes
-    if ( WorkspaceHelpers::commonBoundaries(WS) )
-    {
 
       std::reverse(WS->dataX(0).begin(),WS->dataX(0).end());
       std::reverse(WS->dataY(0).begin(),WS->dataY(0).end());
@@ -410,7 +406,6 @@ void ConvertUnits::reverse(API::Workspace_sptr WS)
           if ( j % 100 == 0) interruption_point();
         }
       }
-    }
   }
   else
   {
