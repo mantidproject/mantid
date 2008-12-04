@@ -36,7 +36,7 @@ public:
   void testUnit_quickConversion()
   {
     Units::Wavelength w;
-    
+
     UnitTester t;
     double factor;
     double power;
@@ -47,7 +47,7 @@ public:
     TS_ASSERT_EQUALS( factor, 2.2 )
     TS_ASSERT_EQUALS( power, 0.5 )
     TS_ASSERT( ! t.quickConversion("notThere",factor,power) )
-    
+
     // Test the quickConversion method that takes a Unit
     Units::TOF tof;
     TS_ASSERT( ! t.quickConversion(tof,factor,power) )
@@ -153,7 +153,7 @@ public:
     energy.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-10 )
   }
-  
+
   //----------------------------------------------------------------------
   // Energy tests
   //----------------------------------------------------------------------
@@ -170,7 +170,7 @@ public:
 
   void testEnergy_label()
   {
-    TS_ASSERT_EQUALS( energy.label(), "MeV" )
+    TS_ASSERT_EQUALS( energy.label(), "meV" )
   }
 
   void testEnergy_cast()
@@ -208,7 +208,7 @@ public:
     lambda.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
   }
-  
+
   //----------------------------------------------------------------------
   // d-Spacing tests
   //----------------------------------------------------------------------
@@ -263,7 +263,7 @@ public:
     d.toTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
     q.fromTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
-    
+
     // To QSquared
     TS_ASSERT( d.quickConversion(q2,factor,power) )
     input = 1.1;
@@ -328,7 +328,7 @@ public:
     q.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     q2.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-30 )
-    
+
     // To dSpacing
     TS_ASSERT( q.quickConversion(d,factor,power) )
     input = 1.1;
@@ -393,7 +393,7 @@ public:
     q2.toTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     q.fromTOF(x,x,99.0,99.0,99.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-30 )
-    
+
     // To dSpacing
     TS_ASSERT( q2.quickConversion(d,factor,power) )
     input = 1.1;
@@ -403,7 +403,7 @@ public:
     d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
     TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
   }
-  
+
   //----------------------------------------------------------------------
   // Energy transfer tests
   //----------------------------------------------------------------------

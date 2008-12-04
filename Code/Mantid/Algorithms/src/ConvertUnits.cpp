@@ -136,7 +136,8 @@ void ConvertUnits::exec()
   }
 
   // If the units conversion has flipped the ascending direction of X, reverse all the vectors
-  if (outputWS->dataX(0).size() && outputWS->dataX(0).front() > outputWS->dataX(0).back())
+  if (outputWS->dataX(0).size() && ( outputWS->dataX(0).front() > outputWS->dataX(0).back()
+        || outputWS->dataX(numberOfSpectra-1).front() > outputWS->dataX(numberOfSpectra-1).back() ) )
   {
     this->reverse(outputWS);
   }
