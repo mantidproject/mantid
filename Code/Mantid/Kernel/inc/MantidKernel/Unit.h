@@ -14,30 +14,30 @@ namespace Mantid
 namespace Kernel
 {
 /** The base units (abstract) class. All concrete units should inherit from
-    this class and provide implementations of the caption(), label(), 
+    this class and provide implementations of the caption(), label(),
     toTOF() and fromTOF() methods. They also need to declare (but NOT define)
     the unitID() method and register into the UnitFactory via the macro DECLARE_UNIT(classname).
 
     @author Russell Taylor, Tessella Support Services plc
     @date 25/02/2008
-    
+
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
-  
+
     Mantid is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 3 of the License, or
     (at your option) any later version.
-  
+
     Mantid is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-  
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
@@ -52,11 +52,11 @@ public:
   virtual const std::string caption() const = 0;
   /// A label for the unit to be printed on axes
   virtual const std::string label() const = 0;
-  
+
   // Check whether the unit can be converted to another via a simple factor
   bool quickConversion(const Unit& destination, double& factor, double& power) const;
   bool quickConversion(std::string destUnitName, double& factor, double& power) const;
-  
+
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xdata    The array of X data to be converted
    *  @param ydata    Not currently used (ConvertUnits passes an empty vector)
@@ -80,18 +80,18 @@ public:
    *  @param efixed   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
    *  @param delta    Not currently used
    */
-  virtual void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  virtual void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const = 0;
-  
+
   /// (Empty) Constructor
   Unit() {}
   /// Virtual destructor
   virtual ~Unit() {}
-	
+
 protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
-  
+
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input and the power to which to raise it
   typedef std::pair< double, double > ConstantAndPower;
@@ -120,12 +120,12 @@ public:
   const std::string unitID() const; ///< "TOF"
   const std::string caption() const { return "Time-of-flight"; }
   const std::string label() const {return "microsecond"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   TOF() : Unit() {}
   /// Destructor
@@ -139,12 +139,12 @@ public:
   const std::string unitID() const; ///< "Wavelength"
   const std::string caption() const { return "Wavelength"; }
   const std::string label() const {return "Angstrom"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   Wavelength();
   /// Destructor
@@ -157,13 +157,13 @@ class DLLExport Energy : public Unit
 public:
   const std::string unitID() const; ///< "Energy"
   const std::string caption() const { return "Energy"; }
-  const std::string label() const {return "MeV"; }
-  
+  const std::string label() const {return "meV"; }
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   Energy();
   /// Destructor
@@ -177,12 +177,12 @@ public:
   const std::string unitID() const; ///< "dSpacing"
   const std::string caption() const { return "d-Spacing"; }
   const std::string label() const {return "Angstrom"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   dSpacing();
   /// Destructor
@@ -196,12 +196,12 @@ public:
   const std::string unitID() const; ///< "MomentumTransfer"
   const std::string caption() const { return "q"; }
   const std::string label() const {return "1/Angstrom"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   MomentumTransfer();
   /// Destructor
@@ -215,12 +215,12 @@ public:
   const std::string unitID() const; ///< "QSquared"
   const std::string caption() const { return "Q2"; }
   const std::string label() const {return "Angstrom^-2"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   QSquared();
   /// Destructor
@@ -234,12 +234,12 @@ public:
   const std::string unitID() const; ///< "DeltaE"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "meV"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   DeltaE() : Unit() {}
   /// Destructor
@@ -253,12 +253,12 @@ public:
   const std::string unitID() const; ///< "DeltaE_inWavenumber"
   const std::string caption() const { return "Energy transfer"; }
   const std::string label() const {return "1/cm"; }
-  
+
   void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2, 
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const;
-  
+
   /// Constructor
   DeltaE_inWavenumber() : Unit() {}
   /// Destructor
