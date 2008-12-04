@@ -386,7 +386,13 @@ QString ScriptEdit::importASCII(const QString &filename)
 	}
 	
   clear();
-	read(&file);
+  //This doesn't work for older versions of Qt for some reason
+  //	read(&file);
+  QTextStream s(&file);
+  s.setEncoding(QTextStream::UnicodeUTF8);
+  while (!s.atEnd())
+    append(s.readLine()+"\n");
+
   file.close();
   //Set keyboard focus to edit window
   setFocus();
