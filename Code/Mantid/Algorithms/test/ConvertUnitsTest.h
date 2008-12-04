@@ -146,7 +146,7 @@ public:
     Workspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("quickOut2") )
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy")
-    TS_ASSERT_DELTA( output->dataX(1)[1], 818.29, 0.01 )
+    TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 )
   }
 
   void testConvertQuicklyCommonBins()
