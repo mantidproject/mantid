@@ -138,6 +138,7 @@ void testExecOnLoadraw()
     // check that the instrument data has been loaded, copied from LoadInstrumentTest
     //
     boost::shared_ptr<Instrument> i = output->getInstrument();
+    std::cerr << "Count = " << i.use_count();
     Component* source = i->getSource();
     TS_ASSERT( source != NULL);
     if(source != NULL )

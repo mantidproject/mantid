@@ -106,7 +106,7 @@ namespace NeXus
        std::string inst3Char = instrumentName.substr(0,3);  // get the first 3 letters of the name
        // force ID to upper case
        std::transform(inst3Char.begin(), inst3Char.end(), inst3Char.begin(), toupper);
-       std::string instrumentXml(inst3Char+"_definition.xml");
+       std::string instrumentXml(inst3Char+"_Definition.xml");
        // Determine the search directory for XML instrument definition files (IDFs)
        std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
        if ( directoryName.empty() ) directoryName = "../Instrument";

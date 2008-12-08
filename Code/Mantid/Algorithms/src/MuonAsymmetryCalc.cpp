@@ -28,7 +28,7 @@ namespace Mantid
     void MuonAsymmetryCalc::init()
     {
        declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
-       declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
 	    
        BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
        zeroOrGreater->setLower(0);
@@ -59,15 +59,15 @@ namespace Mantid
 	    }
 	    
 	    //Create a workspace with only one spectra for forward
-	    DataObjects::Workspace2D_sptr forwardWS 
-		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create(inputWS, 1, inputWS->dataX(0).size(), inputWS->blocksize()));
+	    API::Workspace_sptr forwardWS 
+		= API::WorkspaceFactory::Instance().create(inputWS, 1, inputWS->dataX(0).size(), inputWS->blocksize());
 	    
 	    //Create a workspace with only one spectra for backward
-	    DataObjects::Workspace2D_sptr backwardWS 
-		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create(forwardWS));
+	    API::Workspace_sptr backwardWS 
+		= API::WorkspaceFactory::Instance().create(forwardWS);
 	    
-	    DataObjects::Workspace2D_sptr outputWS 
-		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create(forwardWS));
+	    API::Workspace_sptr outputWS 
+		= API::WorkspaceFactory::Instance().create(forwardWS);
 	    
 	    //Compile the forward and backward spectra 
 	    //This assumes that the backward group has the same number of detectors as the forward group
