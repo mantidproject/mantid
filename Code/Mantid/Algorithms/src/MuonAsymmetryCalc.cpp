@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/MuonAsymmetryCalc.h"
 

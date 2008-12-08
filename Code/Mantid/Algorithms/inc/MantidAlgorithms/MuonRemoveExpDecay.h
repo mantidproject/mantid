@@ -1,26 +1,24 @@
-#ifndef MANTID_ALGORITHM_MUONASYMEMTRYCALC_H_
-#define MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
+#ifndef MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
+#define MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <vector>
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
-    /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
-	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
-	  are stored in the output workspace.
+    /**Takes a muon workspace as input and removes the exponential decay from a time channel.
+	 This is done by multipling the data by exp(t/tmuon). 
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    <LI> ForwardSpectrum - The number of the detector that represents the start of the first group </LI>
-    <LI> BackwardSpectrum - The number of the detector that represents the start of the second group </LI>
-    <LI> Alpha - ?? </LI>
+    <LI> Spectra - The spectra to be adjusted (by default all spectra are done)</LI>
     </UL>
 
 
@@ -47,15 +45,15 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MuonAsymmetryCalc : public API::Algorithm
+    class DLLExport MuonRemoveExpDecay : public API::Algorithm
     {
     public:
       /// Default constructor
-      MuonAsymmetryCalc() : API::Algorithm() {};
+     MuonRemoveExpDecay(): API::Algorithm() {};
       /// Destructor
-      virtual ~MuonAsymmetryCalc() {};
+      virtual ~MuonRemoveExpDecay() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AsymmetryCalc";}
+      virtual const std::string name() const { return "RemoveExpDecay";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -65,6 +63,7 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+      void removeDecay(const std::vector<double>& inX, const std::vector<double>& inY, std::vector<double>& outY);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
@@ -73,4 +72,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONASYMMETRYCALC_H_*/
+#endif /*MANTID_ALGORITHM_MUONREMOVEEXPDECAY_H_*/

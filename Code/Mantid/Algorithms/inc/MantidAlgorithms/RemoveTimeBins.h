@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_MUONASYMEMTRYCALC_H_
-#define MANTID_ALGORITHM_MUONASYMMETRYCALC_H_
+#ifndef MANTID_ALGORITHM_REMOVETIMEBINS_H_
+#define MANTID_ALGORITHM_REMOVETIMEBINS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,21 +10,9 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /**Takes a muon workspace as input and sums all the spectra into two spectra which represent
-	  the two detector groupings. The resultant spectra are used to calculate (F-aB) / (F+aB) the results of which
-	  are stored in the output workspace.
-
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    <LI> ForwardSpectrum - The number of the detector that represents the start of the first group </LI>
-    <LI> BackwardSpectrum - The number of the detector that represents the start of the second group </LI>
-    <LI> Alpha - ?? </LI>
-    </UL>
-
-
-    @author
+    /** 
+      
+    @author 
     @date 11/07/2008
 
     Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
@@ -44,28 +32,28 @@ namespace Mantid
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MuonAsymmetryCalc : public API::Algorithm
+    class DLLExport RemoveTimeBins : public API::Algorithm
     {
     public:
       /// Default constructor
-      MuonAsymmetryCalc() : API::Algorithm() {};
+      RemoveTimeBins() : API::Algorithm() {};
       /// Destructor
-      virtual ~MuonAsymmetryCalc() {};
+      virtual ~RemoveTimeBins() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AsymmetryCalc";}
+      virtual const std::string name() const { return "RemoveTimeBins";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Muon";}
+      virtual const std::string category() const { return "General";}
 
     private:
       // Overridden Algorithm methods
       void init();
       void exec();
-
+            
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
@@ -73,4 +61,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_MUONASYMMETRYCALC_H_*/
+#endif /*MANTID_ALGORITHM_RemoveTimeBins_H_*/

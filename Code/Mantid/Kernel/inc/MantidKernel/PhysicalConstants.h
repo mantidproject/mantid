@@ -46,6 +46,9 @@ namespace PhysicalConstants
   
   /// 1 meV in wavenumber (cm-1). Taken from <http://physics.nist.gov/cuu/Constants> on 02/04/2008.
   static const double meVtoWavenumber = 8.06554465;
+	
+  ///  Muon lifetime. Taken from MuLan experiment on 08/12/2008.
+  static const double MuonLifetime = 2.197019e-6;
   
 } // namespace PhysicalConstants
 } // namespace Mantid
