@@ -21,7 +21,7 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( asymCalc.name(), "MuonAsymmetryCalc" )
+    TS_ASSERT_EQUALS( asymCalc.name(), "AsymmetryCalc" )
   }
 
   void testCategory()

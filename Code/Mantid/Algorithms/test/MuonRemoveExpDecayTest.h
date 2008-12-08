@@ -19,7 +19,7 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( alg.name(), "MuonRemoveExpDecay" )
+    TS_ASSERT_EQUALS( alg.name(), "RemoveExpDecay" )
   }
 
   void testCategory()
