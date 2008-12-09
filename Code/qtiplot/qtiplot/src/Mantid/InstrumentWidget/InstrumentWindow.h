@@ -67,11 +67,13 @@ public slots:
 	void maxValueChanged();
 	void setViewDirection(const QString&);
 	void componentSelected();
+	void pickBackgroundColor();
 signals:
     void plotSpectra(const QString&,int);
 	void plotSpectraList(const QString&,std::vector<int>);
 private:
 	void updateColorMapWidget();
+	void loadSettings();
 	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
     QMenu*       mPopupContext; ///< Popup menu for detector picking

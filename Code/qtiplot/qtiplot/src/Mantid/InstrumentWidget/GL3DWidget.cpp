@@ -28,6 +28,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(QGLFormat(QGL::SampleBuffers),
 	mPickBox=new GLGroupPickBox(scene.get());
 	setFocusPolicy(Qt::StrongFocus);
     setAutoFillBackground(false);
+	bgColor=QColor(0,0,0,1);
 }
 GL3DWidget::~GL3DWidget()
 {
@@ -99,7 +100,7 @@ void GL3DWidget::drawDisplayScene()
 	glEnable(GL_BLEND);
 	glEnable(GL_NORMALIZE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(1.0,1.0,1.0,1.0);
+	glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -527,4 +528,12 @@ void GL3DWidget::defaultProjection()
 	else maxScale=10;
 	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);//minValue*minScale,maxValue*maxScale);
 	_viewport->issueGL();
+}
+
+/**
+ * This method set the background color.
+ */
+void GL3DWidget::setBackgroundColor(QColor input)
+{
+	bgColor=input;
 }

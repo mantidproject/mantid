@@ -53,6 +53,7 @@ public:
 	GLActor* getPickedActor();
 	void saveToPPM(QString filename);
 	void setViewDirection(AxisDirection);
+	void setBackgroundColor(QColor);
 signals:
 	void actorsPicked( std::vector<GLActor*> );
 		void actorHighlighted( GLActor* );
@@ -75,7 +76,7 @@ private:
 	void drawDisplayScene();
 	void drawPickingScene();
 	void switchToPickingMode();
-	QImage buffer;
+	QColor bgColor; ///< Background color
 	int iInteractionMode;
 	bool mPickingDraw;
 	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window

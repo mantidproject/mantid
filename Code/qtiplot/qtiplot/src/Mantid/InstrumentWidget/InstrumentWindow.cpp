@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QSettings>
 #include <QFileInfo>
+#include <QColorDialog>
 #include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -86,10 +87,15 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();	
 	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
+
+	//Pick background color
+	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
+
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
 	renderControlsLayout->addWidget(mSelectColormap);
 	renderControlsLayout->addWidget(axisViewFrame);
+	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
 
 	//Set the main frame to the window
@@ -114,6 +120,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mBinMapDialog,SIGNAL(SingleBinNumber(int)), mInstrumentDisplay, SLOT(setDataMappingSingleBin(int)));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(int,int)), mInstrumentDisplay, SLOT(setDataMappingIntegral(int,int)));
 	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
+	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
     mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
@@ -130,6 +137,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
     mDetectorGroupPopupContext->addAction(plotGroupAction);
+
+	//load settings
+	loadSettings();
 	askOnCloseEvent(false);
 }
 
@@ -360,4 +370,26 @@ void InstrumentWindow::componentSelected()
 	Mantid::Geometry::V3D pos;
 	pos=mInstrumentTree->getSamplePos();
 	mInstrumentDisplay->setView(pos,xmax,ymax,zmax,xmin,ymin,zmin);
+}
+
+/**
+ * This method picks the background color
+ */
+void InstrumentWindow::pickBackgroundColor()
+{
+	QColor color=QColorDialog::getColor(Qt::green,this);
+	mInstrumentDisplay->setBackgroundColor(color);
+	QSettings settings;
+	settings.setValue("Mantid/InstrumentWindow/BackgroundColor",color);
+}
+
+/**
+ * This method loads the setting from QSettings
+ */
+void InstrumentWindow::loadSettings()
+{
+	//Load Color
+	QSettings settings;
+	QColor color=settings.value("Mantid/InstrumentWindow/BackgroundColor",QColor(0,0,0,1.0)).value<QColor>();
+	mInstrumentDisplay->setBackgroundColor(color);
 }
