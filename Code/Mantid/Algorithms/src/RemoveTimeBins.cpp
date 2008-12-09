@@ -67,19 +67,16 @@ namespace Mantid
 	    API::Workspace_sptr outputWS 
 		= API::WorkspaceFactory::Instance().create(inputW, histnumber, inputW->dataX(0).size() - (end - start +1), inputW->blocksize());
 	    
-	    std::cout << "Output size should be " << inputW->dataX(0).size() - (end - start +1) << std::endl;
-	    std::cout << "but is " << outputWS->dataX(0).size() << std::endl;
-	    
 	    for (int i=0; i < histnumber; ++i)
 	    {        
 		    int count = 0;
 		    
 		    for (int j=0; j < inputW->dataX(i).size(); ++j)
 		    {
-			    if (j >= start and j <= end)
+			    if (j >= start && j <= end)
 			    {
 				    //Do nothing as these are discarded
-				    //May be in the future we will want to put them
+				    //Maybe in the future we will want to put them
 				    //in a separate workspace?
 			    }
 			    else
