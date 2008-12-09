@@ -48,26 +48,12 @@ namespace Mantid
 	    //Get original workspace
 	    API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
 	    
-	    //~ if (forward.size() == 0 && backward.size() ==0)
-	    //~ {
-		//~ //Use Nexus file groupings if values were no given
-		std::vector<int> groupings = getProperty("detector_groups");
+	    if (forward.size() == 0 && backward.size() ==0)
+	    {
+		//Use Nexus file groupings if values were no given
+
 	    
-		//~ for (int i= 0; i < groupings.size(); ++i)
-		//~ {
-		    //~ std::cout << groupings[i] << std::endl;
-		    //~ if (groupings[i] == "1")
-		    //~ {
-			    //~ forward.push_back(i);
-		    //~ }	
-		    //~ else if (groupings[i] == "2")
-		    //~ {
-			    //~ backward.push_back(i);
-		    //~ }	
-			
-		//~ }
-	    
-	    //~ }
+	    }
 	    
 	    int numSpectra = inputWS->size() / inputWS->blocksize();
 	    
