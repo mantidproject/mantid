@@ -37,8 +37,10 @@ public:
 	GLColorMap();  ///< Default constructor
 	void setColorMapFile(std::string name); ///< Load the color map from file
 	boost::shared_ptr<GLColor> getColor(int id); ///< get color corresponding to id
+	int getNumberOfColors(); ///< Returns the number of colors in the color map
 private:
     boost::shared_ptr<GLColor> color[256]; ///< Color map storage
+	int mNumberOfColors;
 	void defaultColormap(); ///< Sets default color map
 };
 

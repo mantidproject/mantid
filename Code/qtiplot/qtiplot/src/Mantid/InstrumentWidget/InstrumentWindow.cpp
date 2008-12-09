@@ -55,7 +55,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	mMinValueBox    = new QLineEdit();
+	mMinValueBox->setText("0");
 	mMaxValueBox    = new QLineEdit();
+	mMaxValueBox->setText("1");
 	mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
 	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
 	mMinValueBox->setMaximumWidth(40);
@@ -176,6 +178,7 @@ void InstrumentWindow::changeColormap()
 	QFileInfo retfile(file);
 	settings.setValue("Mantid/InstrumentWindow/ColormapFile",retfile.absoluteFilePath());
 	updateColorMapWidget();
+	mInstrumentDisplay->update();
 }
 
 /**
@@ -292,10 +295,8 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 	QString text;
 	mMinValueBox->setText(text.setNum(minValue));
 	mMaxValueBox->setText(text.setNum(maxValue));
-	QSettings settings;
-	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile","../colormap/_standard.map").value<QString>();
-	mInstrumentDisplay->setColorMapName(std::string(filename.ascii()));
 	updateColorMapWidget();
+	mInstrumentDisplay->update();
 	mInstrumentTree->setInstrument(output->getInstrument().get());
 }
 
@@ -307,6 +308,7 @@ void InstrumentWindow::minValueChanged()
 	QString value=mMinValueBox->displayText();
 	mInstrumentDisplay->setColorMapMinValue(value.toDouble());
 	updateColorMapWidget();
+	mInstrumentDisplay->update();
 }
 
 /**
@@ -317,6 +319,7 @@ void InstrumentWindow::maxValueChanged()
 	QString value=mMaxValueBox->displayText();
 	mInstrumentDisplay->setColorMapMaxValue(value.toDouble());
 	updateColorMapWidget();
+	mInstrumentDisplay->update();
 }
 
 /**
@@ -329,7 +332,6 @@ void InstrumentWindow::updateColorMapWidget()
 	double maxValue=mMaxValueBox->displayText().toDouble();
 	mColorMapWidget->setScaleDiv(lse.transformation(),lse.divideScale(minValue,maxValue,20,5));
 	mColorMapWidget->setColorMap(QwtDoubleInterval(minValue,maxValue),mInstrumentDisplay->getColorMap());
-	mInstrumentDisplay->update();
 }
 
 /**
@@ -392,4 +394,8 @@ void InstrumentWindow::loadSettings()
 	QSettings settings;
 	QColor color=settings.value("Mantid/InstrumentWindow/BackgroundColor",QColor(0,0,0,1.0)).value<QColor>();
 	mInstrumentDisplay->setBackgroundColor(color);
+	//Load Colormap
+	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile","../colormap/_standard.map").value<QString>();
+	mInstrumentDisplay->setColorMapName(std::string(filename.ascii()));
+	updateColorMapWidget();
 }

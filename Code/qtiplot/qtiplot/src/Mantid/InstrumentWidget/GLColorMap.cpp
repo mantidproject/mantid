@@ -30,6 +30,7 @@ void GLColorMap::setColorMapFile(std::string name)
 			count++;
 		}
 		cmapfile.close();
+		mNumberOfColors=count;
 	}else{ // restore to default colormap
 		defaultColormap();
 	}
@@ -69,4 +70,10 @@ void GLColorMap::defaultColormap()
 	for(i=0;i<41;i++){
 		color[215+i]->set(1.0,0.0,(252-6*i)/256.0,1.0);
 	}
+	mNumberOfColors=256;
+}
+
+int GLColorMap::getNumberOfColors()
+{
+	return mNumberOfColors;
 }

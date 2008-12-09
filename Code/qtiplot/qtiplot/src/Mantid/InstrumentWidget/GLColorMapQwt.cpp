@@ -20,10 +20,11 @@ QwtColorMap* GLColorMapQwt::copy()const
 
 QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 {
-	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/256.0);
+	int count=((GLColorMap*)this)->getNumberOfColors();
+	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
 	int index;
 	if(delta<0)index=0;
-	else if(delta>255)index=255;
+	else if(delta>(count-1))index=(count-1);
 	else index=int(delta);
 	boost::shared_ptr<GLColor> col=((GLColorMap*)this)->getColor(index);
 	float r,g,b,a;
@@ -33,24 +34,26 @@ QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 
 unsigned char GLColorMapQwt::colorIndex(const QwtDoubleInterval &interval,double value)const
 {
-	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/256.0);
+	int count=((GLColorMap*)this)->getNumberOfColors();
+	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
 	int index;
 	if(delta<0)index=0;
-	else if(delta>255)index=255;
+	else if(delta>(count-1))index=count-1;
 	else index=int(delta);
 	return index;
 }
 
 QVector<QRgb> GLColorMapQwt::colorTable(const QwtDoubleInterval &interval)const
 {
-     QVector<QRgb>  table(256);
- 
-     if ( interval.isValid() )
-     {
-         const double step = interval.width() / (table.size() - 1);
-         for ( int i = 0; i < (int) table.size(); i++ )
-             table[i] = rgb(interval, interval.minValue() + step * i);
-     }
- 
-     return table;
+	int count=((GLColorMap*)this)->getNumberOfColors();
+	QVector<QRgb>  table(count);
+
+	if ( interval.isValid() )
+	{
+		const double step = interval.width() / (table.size() - 1);
+		for ( int i = 0; i < (int) table.size(); i++ )
+			table[i] = rgb(interval, interval.minValue() + step * i);
+	}
+
+	return table;
 }

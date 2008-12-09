@@ -224,9 +224,10 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 std::vector<int> Instrument3DWidget::getDetectorIDList()
 {
 	std::vector<int> idDecVec;
+	int count=scene->getNumberOfActors();
+	if(count==0 || strWorkspaceName=="")return idDecVec;
     Workspace_sptr output;
     output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
-	int count=scene->getNumberOfActors();
 	/* Here we are only filtering the detectors to be passed in the detector list */
 	/* Skipping the monitors because they have high values of neutron count*/
 	for(int i=0;i<count;i++){
@@ -256,6 +257,7 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
  */
 std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecVec)
 {
+	if(strWorkspaceName=="")return std::vector<int>();
 	Workspace_sptr output;
     output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
 	boost::shared_ptr<SpectraDetectorMap> specMap=output->getSpectraMap(); 
@@ -294,18 +296,19 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecV
 void Instrument3DWidget::setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colorMap)
 {
 	int count=scene->getNumberOfActors();
+	int noOfColors=colorMap.getNumberOfColors();
 	if(count!=values.size())std::cout<<"Error: The detectors "<<count<<" are not equal to values "<<values.size()<<std::endl;
 	for(int i=0;i<count;i++)
 	{
 		GLActor* tmpActor=scene->getActor(i);
-		int cIndex=floor(((values[i]-minval)/(maxval-minval))*255);
+		int cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
 		if(cIndex<0)
 		{
 			cIndex=0;
 		}
-		else if(cIndex>255)
+		else if(cIndex>(noOfColors-1))
 		{
-			cIndex=255;
+			cIndex=(noOfColors-1);
 		}
 		tmpActor->setColor(colorMap.getColor(cIndex));
 	} // Looping through the dectors/Actors list
@@ -390,6 +393,7 @@ void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexLi
 void Instrument3DWidget::AssignColors()
 {
 	std::vector<int> detectorList = this->getDetectorIDList();
+	if(detectorList.size()==0)return; ///< to check whether any detectors are present
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
 	std::vector<double> values;	
 	double minval,maxval;
@@ -411,7 +415,7 @@ void Instrument3DWidget::AssignColors()
 	//std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
 	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
 	scene->refresh();
-	updateGL();
+//	updateGL();
 }
 
 /**
