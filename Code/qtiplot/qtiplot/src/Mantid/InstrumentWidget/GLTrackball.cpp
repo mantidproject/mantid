@@ -2,6 +2,7 @@
 #include <windows.h>
 #endif
 #include "GLTrackball.h"
+#include "GL/glu.h"
 #define _USE_MATH_DEFINES true
 #include <math.h>
 GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
@@ -100,9 +101,9 @@ void GLTrackball::generateZoomTo(int a, int b)
 void GLTrackball::IssueRotation()
 {	
 	if (_viewport){
+		glScaled(_scaleFactor,_scaleFactor,_scaleFactor);
 		glMultMatrixd(_rotationmatrix);
 		glTranslated(_translation[0],_translation[1],_translation[2]);
-		glScaled(_scaleFactor,_scaleFactor,_scaleFactor);
 	}
 }
 Mantid::Geometry::V3D GLTrackball::projectOnSphere(int a,int b)

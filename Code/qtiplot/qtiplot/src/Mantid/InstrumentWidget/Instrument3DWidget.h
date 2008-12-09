@@ -39,6 +39,11 @@ namespace Mantid{
 		class Instrument;
 	}
 }
+namespace Mantid{
+	namespace Geometry{
+		class V3D;
+	}
+}
 
 class Instrument3DWidget : public GL3DWidget
 {
@@ -55,6 +60,7 @@ public:
 	double getDataMinValue();
 	double getDataMaxValue();
 	void setDataMappingType(DataMappingType);
+	void setView(Mantid::Geometry::V3D,double,double,double,double,double,double);
 public slots:
 	void fireDetectorsPicked(std::vector<GLActor*> );
 	void fireDetectorHighligted(GLActor* pickedActor);

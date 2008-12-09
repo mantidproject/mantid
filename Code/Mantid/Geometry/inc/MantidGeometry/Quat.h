@@ -86,6 +86,8 @@ namespace Mantid
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
       void GLMatrix(double[16]);
+	  //! Convert GL Matrix into Quat
+	  void setQuat(double[16]);
       //! Rotate a vector
       void rotate(V3D&) const;
       //! Overload operators

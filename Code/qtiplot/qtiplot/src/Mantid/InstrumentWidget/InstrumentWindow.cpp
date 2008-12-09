@@ -13,6 +13,8 @@
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QComboBox>
+#include <QSettings>
+#include <QFileInfo>
 #include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -70,21 +72,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	axisCombo->addItem("Y-");
 	axisViewLayout->addWidget(axisCombo);
 	axisViewFrame->setLayout(axisViewLayout);
-	//QFrame* axisViewFrame = new QFrame();
-	//QGridLayout* axisViewLayout =new QGridLayout;
-	//QPushButton* xPosView=new QPushButton(tr("X+"));
-	//QPushButton* xNegView=new QPushButton(tr("X-"));
-	//QPushButton* yPosView=new QPushButton(tr("Y+"));
-	//QPushButton* yNegView=new QPushButton(tr("Y-"));
-	//QPushButton* zPosView=new QPushButton(tr("Z+"));
-	//QPushButton* zNegView=new QPushButton(tr("Z-"));
-	//axisViewLayout->addWidget(xPosView,0,0);
-	//axisViewLayout->addWidget(xNegView,0,1);
-	//axisViewLayout->addWidget(yPosView,1,0);
-	//axisViewLayout->addWidget(yNegView,1,1);
-	//axisViewLayout->addWidget(zPosView,2,0);
-	//axisViewLayout->addWidget(zNegView,2,1);
-	//axisViewFrame->setLayout(axisViewLayout);
 
 	//Colormap Frame widget
 	QFrame* lColormapFrame=new QFrame();
@@ -113,7 +100,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mInteractionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
 	mInteractionInfo->setMaximumHeight(30);
 	mainLayout->addWidget(mInteractionInfo);
-
+	connect(mInstrumentTree,SIGNAL(itemSelectionChanged()),this,SLOT(componentSelected()));
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
 	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
@@ -143,7 +130,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
     mDetectorGroupPopupContext->addAction(plotGroupAction);
-
 	askOnCloseEvent(false);
 }
 
@@ -172,8 +158,13 @@ void InstrumentWindow::modeSelectButtonClicked()
  */
 void InstrumentWindow::changeColormap()
 {
-	QString file=QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), ".",tr("Colormaps (*.map *.MAP)"));
+	QSettings settings;
+	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile","../colormap/_standard.map").value<QString>();
+	QFileInfo fileinfo(filename);
+	QString file=QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), fileinfo.filePath(),tr("Colormaps (*.map *.MAP)"));
 	mInstrumentDisplay->setColorMapName(std::string(file.ascii()));
+	QFileInfo retfile(file);
+	settings.setValue("Mantid/InstrumentWindow/ColormapFile",retfile.absoluteFilePath());
 	updateColorMapWidget();
 }
 
@@ -291,6 +282,9 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 	QString text;
 	mMinValueBox->setText(text.setNum(minValue));
 	mMaxValueBox->setText(text.setNum(maxValue));
+	QSettings settings;
+	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile","../colormap/_standard.map").value<QString>();
+	mInstrumentDisplay->setColorMapName(std::string(filename.ascii()));
 	updateColorMapWidget();
 	mInstrumentTree->setInstrument(output->getInstrument().get());
 }
@@ -357,4 +351,13 @@ void InstrumentWindow::setViewDirection(const QString& input)
 	{
 		mInstrumentDisplay->setViewDirectionZNegative();
 	}
+}
+
+void InstrumentWindow::componentSelected()
+{
+	double xmax,xmin,ymax,ymin,zmax,zmin;
+	mInstrumentTree->getSelectedBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	Mantid::Geometry::V3D pos;
+	pos=mInstrumentTree->getSamplePos();
+	mInstrumentDisplay->setView(pos,xmax,ymax,zmax,xmin,ymin,zmin);
 }

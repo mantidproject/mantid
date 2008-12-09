@@ -66,6 +66,7 @@ public slots:
 	void minValueChanged();
 	void maxValueChanged();
 	void setViewDirection(const QString&);
+	void componentSelected();
 signals:
     void plotSpectra(const QString&,int);
 	void plotSpectraList(const QString&,std::vector<int>);

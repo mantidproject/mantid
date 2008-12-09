@@ -327,7 +327,42 @@ void Quat::GLMatrix(double mat[16])
 	mat[15] = 1.0;
 	return;
 }
-  
+ 
+/*!
+ * Converts the GL Matrix into Quat
+ */
+void Quat::setQuat(double mat[16])
+{
+	double tr,s,q[4];
+	int i,j,k;
+	int nxt[3]={1,2,0};
+	tr=mat[0]+mat[5]+mat[10];
+	if(tr>0.0)
+	{
+		s=sqrt(tr+1.0);
+		w=s/2.0;
+		s=0.5/s;
+		a=(mat[6]-mat[9])*s;
+		b=(mat[8]-mat[2])*s;
+		c=(mat[1]-mat[4])*s;
+	}else{
+		i=0;
+		if(mat[5]>mat[0])i=1;
+		if(mat[10]>mat[i*5])i=2;
+		j=nxt[i];
+		k=nxt[j];
+		s=sqrt(mat[i*5]-(mat[j*5]+mat[k*5])+1.0);
+		q[i]=s*0.5;
+		if(s!=0.0)s=0.5/s;
+		q[3]=(mat[j*4+k]-mat[k*4+j])*s;
+		q[j]=(mat[i*4+j]+mat[j*4+i])*s;
+		q[k]=(mat[i*4+k]+mat[k*4+i])*s;
+		a=q[0];
+		b=q[1];
+		c=q[2];
+		w=q[3];
+	}
+}
 /** Bracket operator overload
  * returns the internal representation values based on an index
  * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c

@@ -99,7 +99,7 @@ void GL3DWidget::drawDisplayScene()
 	glEnable(GL_BLEND);
 	glEnable(GL_NORMALIZE);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(0.0,0.0,0.0,1.0);
+	glClearColor(1.0,1.0,1.0,1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,32 +189,8 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
  */
 void GL3DWidget::resizeGL(int width, int height)
 {
-	// Getting the bounding box of the scene and setting the orthagonal projection
-	// such that the orthogonal projection places the object completly in the screen
-	// Its a simplified version of placing the object completly in screen with same
-	// min and max values in all directions.
-	Mantid::Geometry::V3D minPoint,maxPoint;
-	scene->getBoundingBox(minPoint,maxPoint);
-	double minValue,maxValue;
-	minValue=minPoint[0];
-	if(minValue>minPoint[1])minValue=minPoint[1];
-	if(minValue>minPoint[2])minValue=minPoint[2];
-	maxValue=maxPoint[0];
-	if(maxValue<maxPoint[1])maxValue=maxPoint[1];
-	if(maxValue<maxPoint[2])maxValue=maxPoint[2];
-	double temp=minValue-(maxValue-minValue)/2;
-	maxValue=maxValue+(maxValue-minValue)/2;
-	minValue=temp;
-
-	int minScale,maxScale;
-	if(minValue<0)minScale=10;
-	else minScale=-10;
-	if(maxValue<0)maxScale=10;
-	else maxScale=10;
 
 	_viewport->resize(width,height);
-	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*minScale,maxValue*maxScale);
-	//_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
 	_viewport->issueGL();
 	
 	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
@@ -236,17 +212,11 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 	if(iInteractionMode==1 && (event->buttons() & Qt::LeftButton)) // Pick Mode
 	{
 		setCursor(Qt::CrossCursor);
-		//mPickedActor=_picker->pickPoint(buffer,event->x(),event->y());
-		//if(mPickedActor!=NULL)
-		//	emit actorPicked(mPickedActor);
 		mPickBox->mousePressEvent(event);
 		return;
 	} //end of pick mode and start of normal mode
 	if (event->buttons() & Qt::MidButton)
 	{
-		//setCursor(Qt::CrossCursor);
-		//_picker->pickPoint(event->x(),event->y());
-		//updateGL();
 		setCursor(Qt::SizeVerCursor);
 		_trackball->initZoomFrom(event->x(),event->y());
 		isKeyPressed=true;
@@ -526,4 +496,35 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
 		break;
 	}
 	update();
+}
+
+/**
+ * This method calculates the default projection
+ */
+void GL3DWidget::defaultProjection()
+{
+	// Getting the bounding box of the scene and setting the orthagonal projection
+	// such that the orthogonal projection places the object completly in the screen
+	// Its a simplified version of placing the object completly in screen with same
+	// min and max values in all directions.
+	Mantid::Geometry::V3D minPoint,maxPoint;
+	scene->getBoundingBox(minPoint,maxPoint);
+	double minValue,maxValue;
+	minValue=minPoint[0];
+	if(minValue>minPoint[1])minValue=minPoint[1];
+	if(minValue>minPoint[2])minValue=minPoint[2];
+	maxValue=maxPoint[0];
+	if(maxValue<maxPoint[1])maxValue=maxPoint[1];
+	if(maxValue<maxPoint[2])maxValue=maxPoint[2];
+	double temp=minValue-(maxValue-minValue)/2;
+	maxValue=maxValue+(maxValue-minValue)/2;
+	minValue=temp;
+
+	int minScale,maxScale;
+	if(minValue<0)minScale=10;
+	else minScale=-10;
+	if(maxValue<0)maxScale=10;
+	else maxScale=10;
+	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);//minValue*minScale,maxValue*maxScale);
+	_viewport->issueGL();
 }

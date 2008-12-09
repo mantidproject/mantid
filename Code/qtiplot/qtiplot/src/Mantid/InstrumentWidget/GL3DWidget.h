@@ -67,7 +67,10 @@ protected:
 	void wheelEvent(QWheelEvent *);
 	void keyPressEvent(QKeyEvent *);
 	void keyReleaseEvent(QKeyEvent *);
+	void defaultProjection();
 	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
+    GLTrackball* _trackball;       ///< Trackball for user interaction
+    GLViewport* _viewport;         ///< Opengl View port [World -> Window]
 private:
 	void drawDisplayScene();
 	void drawPickingScene();
@@ -75,8 +78,6 @@ private:
 	QImage buffer;
 	int iInteractionMode;
 	bool mPickingDraw;
-    GLTrackball* _trackball;       ///< Trackball for user interaction
-    GLViewport* _viewport;         ///< Opengl View port [World -> Window]
 	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
 	GLActor* mPickedActor;
 	bool isKeyPressed;

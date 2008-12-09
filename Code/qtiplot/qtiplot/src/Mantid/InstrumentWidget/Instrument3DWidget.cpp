@@ -171,6 +171,8 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 	}
 	boost::shared_ptr<Mantid::API::Instrument> ins = output->getInstrument();
 	this->ParseInstrumentGeometry(ins);
+	defaultProjection(); // Calculate and set projection
+	AssignColors();
 }
 
 /**
@@ -211,7 +213,6 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 		} 
 	}	
 	this->setActorCollection(scene);
-	AssignColors();
 }
 
 /**
@@ -557,3 +558,39 @@ void Instrument3DWidget::setViewDirectionZNegative()
 	setViewDirection(ZNEGATIVE);
 }
 
+void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)
+{
+	//get the centre of the bounding box
+	V3D boundCentre;
+	double xhalf=(xmax-xmin)/2.0;
+	double yhalf=(ymax-ymin)/2.0;
+	double zhalf=(zmax-zmin)/2.0;
+	boundCentre[0]=-1*(xmin+xhalf);
+	boundCentre[1]=-1*(ymin+yhalf);
+	boundCentre[2]=-1*(zmin+zhalf);
+
+	double vxmin,vxmax,vymin,vymax,vzmin,vzmax;
+	_viewport->getProjection(vxmin,vxmax,vymin,vymax,vzmin,vzmax);
+
+	//vector from center to bounding box center
+	V3D vcb=pos-boundCentre;
+	vcb.normalize();
+	//get the rotation about zaxis
+	V3D zaxis(0,0,-1);
+	double angle=vcb.angle(zaxis);
+	V3D axis=vcb.cross_prod(zaxis);
+	axis.normalize();
+	double s=sin(angle/2);
+	Quat rotation(angle,axis);
+	_trackball->setRotation(rotation);
+	_trackball->_scaleFactor=1.0;
+	_trackball->setTranslation(V3D(0.0,0.0,0.0));
+	V3D minval(xmin,ymin,zmin);
+	V3D maxval(xmax,ymax,zmax);
+	rotation.rotate(minval);
+	rotation.rotate(maxval);
+	//_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
+	_viewport->setOrtho(minval[0],maxval[0],minval[1],maxval[1],minval[2]*-1,maxval[2]*-1);
+	_viewport->issueGL();
+	update();	
+}
