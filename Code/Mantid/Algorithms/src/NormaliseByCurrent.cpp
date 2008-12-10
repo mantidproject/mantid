@@ -43,6 +43,7 @@ void NormaliseByCurrent::exec()
 
   g_log.information() << "Normalisation constant: " << charge << std::endl;
   Workspace_sptr outputWS = inputWS / charge;
+  outputWS->setYUnit("Counts per microAmp.hour");
   setProperty("OutputWorkspace",outputWS);
 }
 

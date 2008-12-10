@@ -72,6 +72,8 @@ public:
       TS_ASSERT_EQUALS( it->Y(), 1.0 )
       TS_ASSERT_EQUALS( it->E(), 1.5 )
     }
+
+    TS_ASSERT_EQUALS( output->YUnit(), "Counts per microAmp.hour" )
   }
 
 private:
