@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CorrectForAttenuation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CropWorkspace.cpp"
 				>
 			</File>
@@ -207,6 +211,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FindDeadDetectors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FindPeaks.cpp"
 				>
 			</File>
 			<File
@@ -316,6 +324,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\CorrectForAttenuation.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CropWorkspace.h"
 				>
 			</File>
@@ -337,6 +349,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FindDeadDetectorsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FindPeaks.h"
 				>
 			</File>
 			<File

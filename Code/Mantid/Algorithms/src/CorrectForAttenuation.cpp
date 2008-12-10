@@ -58,7 +58,9 @@ void CorrectForAttenuation::exec()
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
-  const bool isHist = inputWS->isHistogramData();
+  const bool isHist = inputWS->isHistogramData();  
+  int iprogress_step = numHists / 100;
+  if (iprogress_step == 0) iprogress_step = 1;
   // Loop over the spectra
   for (int i = 0; i < numHists; ++i)
   {
@@ -92,6 +94,12 @@ void CorrectForAttenuation::exec()
     }
     // Element-detector distances are different for each spectrum (i.e. detector)
     m_L2s.clear();
+
+    if ( i % iprogress_step == 0)
+    {
+        progress( double(i)/numHists );
+        interruption_point();
+    }
 
   }
 
