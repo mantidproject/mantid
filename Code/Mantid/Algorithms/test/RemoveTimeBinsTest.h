@@ -8,6 +8,7 @@
 #include <string>
 #include <stdexcept>
 
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -78,12 +79,13 @@ public:
 		loader.setPropertyValue("Filename", "../../../../Test/Nexus/emu00006473.nxs");
 		loader.setPropertyValue("OutputWorkspace", "EMU6473");
 		loader.execute();
-				
+		
+		//Test removing time bins from the front		
 		alg2.initialize();
-		TS_ASSERT( alg.isInitialized() )
+		TS_ASSERT( alg2.isInitialized() )
 		
 		alg2.setPropertyValue("InputWorkspace", "EMU6473");
-		alg2.setPropertyValue("OutputWorkspace", "result");
+		alg2.setPropertyValue("OutputWorkspace", "result1");
 		alg2.setPropertyValue("StartTimeBin", "0");
 		alg2.setPropertyValue("EndTimeBin", "6");
 		
@@ -96,9 +98,31 @@ public:
 			TS_FAIL(e.what());
 		}
 		
-		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("result");
+		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("result1");
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
+		
+		//Test removing time bins from the back		
+		alg3.initialize();
+		TS_ASSERT( alg3.isInitialized() )
+		
+		alg3.setPropertyValue("InputWorkspace", "EMU6473");
+		alg3.setPropertyValue("OutputWorkspace", "result2");
+		alg3.setPropertyValue("StartTimeBin", "1994");
+		alg3.setPropertyValue("EndTimeBin", "2010");
+		
+		try 
+		{
+			TS_ASSERT_EQUALS(alg3.execute(),true);
+		}
+		catch(std::runtime_error e)
+		{
+			TS_FAIL(e.what());
+		}
+		
+		Workspace_const_sptr outputWS2 = AnalysisDataService::Instance().retrieve("result2");
+		
+		TS_ASSERT_EQUALS(outputWS2->dataX(0).size(), 1993);		
 	}
 
 	void makeDummyWorkspace2D()
@@ -128,6 +152,7 @@ public:
 private:
 	RemoveTimeBins alg;
 	RemoveTimeBins alg2;
+	RemoveTimeBins alg3;
 
 };
 

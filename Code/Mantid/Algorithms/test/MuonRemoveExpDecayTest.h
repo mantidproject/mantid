@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidAlgorithms/MuonRemoveExpDecay.h"
 #include "MantidAPI/Workspace.h"

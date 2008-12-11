@@ -60,6 +60,12 @@ namespace Mantid
 		    end = temp;
 	    }
 	    
+	    if (start != 0 && end != inputW->dataX(0).size())
+	    {    
+		    g_log.error("You are trying to remove timebins from middle of workspace, this algorithm is not suitable for that operation.");
+		    throw std::invalid_argument("You are trying to remove timebins from middle of workspace, this algorithm is not suitable for that operation.");
+	    }
+	    
 	    //Get number of histograms
 	    int histnumber = inputW->getNumberHistograms();
 	    
@@ -71,7 +77,7 @@ namespace Mantid
 	    {        
 		    int count = 0;
 		    
-		    for (int j=0; j < inputW->dataX(i).size(); ++j)
+		    for (int j=0; j < inputW->dataY(i).size(); ++j)
 		    {
 			    if (j >= start && j <= end)
 			    {
