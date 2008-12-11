@@ -58,7 +58,7 @@ void CorrectForAttenuation::exec()
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
-  const bool isHist = inputWS->isHistogramData();  
+  const bool isHist = inputWS->isHistogramData();
   int iprogress_step = numHists / 100;
   if (iprogress_step == 0) iprogress_step = 1;
   // Loop over the spectra
@@ -89,7 +89,7 @@ void CorrectForAttenuation::exec()
     // Loop through the bins in the current spectrum
     for (int j = 0; j < specSize; ++j)
     {
-      const double lambda = ( isHist ? (X[j]+X[j+1]/2.0) : X[j] );
+      const double lambda = ( isHist ? (0.5*(X[j]+X[j+1])) : X[j] );
       Y[j] = this->doIntegration(lambda);
     }
     // Element-detector distances are different for each spectrum (i.e. detector)
@@ -220,7 +220,6 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
         int tmp = m_cylinderSample.interceptSurface(outgoing);
         assert( tmp == 1 );
         m_L2s.push_back( outgoing.begin()->Dist );
-
       }
     }
   }
