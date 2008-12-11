@@ -47,7 +47,7 @@ void CorrectForAttenuation::exec()
 
   // Get the input parameters
   this->retrieveProperties();
-
+  const double cylinder_volume=m_cylHeight*M_PI*m_cylRadius*m_cylRadius;
   this->constructCylinderSample();
 
   // Get a pointer to the SpectraDetectorMap
@@ -91,6 +91,7 @@ void CorrectForAttenuation::exec()
     {
       const double lambda = ( isHist ? (0.5*(X[j]+X[j+1])) : X[j] );
       Y[j] = this->doIntegration(lambda);
+      Y[j]/= cylinder_volume; // Divide by total volume of the cylinder
     }
     // Element-detector distances are different for each spectrum (i.e. detector)
     m_L2s.clear();
@@ -178,7 +179,7 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
   // loop over slices
   for (int i = 0; i < numSlices; ++i)
   {
-    const double z = (i+0.5)*sliceThickness - m_cylHeight/2.0;
+    const double z = (i+0.5)*sliceThickness - 0.5*m_cylHeight;
 
     // Number of elements in 1st annulus
     int Ni = 0;
@@ -229,23 +230,22 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
 double CorrectForAttenuation::doIntegration(const double& lambda)
 {
   double integral = 0.0;
+  double exponent;
 
   assert( m_L1s.size() == m_L2s.size() );
   assert( m_L1s.size() == m_elementVolumes.size() );
   std::vector<double>::const_iterator l1it;
   std::vector<double>::const_iterator l2it = m_L2s.begin();
   std::vector<double>::const_iterator elit = m_elementVolumes.begin();
+
   // Iterate over all the elements, summing up the integral
   for (l1it = m_L1s.begin(); l1it != m_L1s.end(); ++l1it, ++l2it, ++elit)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
-    const double exponent = -1.0 * ((m_refAtten * lambda / 1.8) + m_scattering ) * ( *l1it + *l2it );
+    exponent = -1.0 * ((m_refAtten * lambda / 1.798) + m_scattering ) * ( *l1it + *l2it );
     integral += ( exp(exponent) * (*elit) );
   }
-
-  // Divide final number by total cylinder volume
-  integral /= m_cylHeight*M_PI*m_cylRadius*m_cylRadius;
 
   return integral;
 }
