@@ -101,28 +101,7 @@ public:
 		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("result1");
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
-		
-		//Test removing time bins from the back		
-		alg3.initialize();
-		TS_ASSERT( alg3.isInitialized() )
-		
-		alg3.setPropertyValue("InputWorkspace", "EMU6473");
-		alg3.setPropertyValue("OutputWorkspace", "result2");
-		alg3.setPropertyValue("StartTimeBin", "1994");
-		alg3.setPropertyValue("EndTimeBin", "2010");
-		
-		try 
-		{
-			TS_ASSERT_EQUALS(alg3.execute(),true);
-		}
-		catch(std::runtime_error e)
-		{
-			TS_FAIL(e.what());
-		}
-		
-		Workspace_const_sptr outputWS2 = AnalysisDataService::Instance().retrieve("result2");
-		
-		TS_ASSERT_EQUALS(outputWS2->dataX(0).size(), 1993);		
+
 	}
 
 	void makeDummyWorkspace2D()
