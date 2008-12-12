@@ -43,15 +43,17 @@ class DLLExport FileValidator : public IValidator<std::string>
 {
 public:
   /// Default constructor.
-  FileValidator() : IValidator<std::string>(), m_extensions()
+  FileValidator() : IValidator<std::string>(), m_extensions(), m_fullTest(true)
   {}
 
   /** Constructor
-   *  @param extensions The required file extensions (e.g. .RAW)
+   *  @param extensions The permitted file extensions (e.g. .RAW)
+   *  @param testFileExists Flag indicating whether to test for existence of file (default: yes)
    */
-  explicit FileValidator(const std::vector<std::string> extensions) :
+  explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true) :
     IValidator<std::string>(),
-    m_extensions(extensions)
+    m_extensions(extensions),
+    m_fullTest(testFileExists)
   {}
 
   /// Destructor
@@ -63,33 +65,31 @@ public:
    */
   const bool isValid(const std::string &value) const
   {
-	if (m_extensions.size() > 0)
-	{
-		//Find extension of value
-		std::size_t found=value.find_last_of(".");
-		std::string ext = value.substr(found+1);
+    if (m_extensions.size() > 0)
+    {
+      //Find extension of value
+      std::size_t found=value.find_last_of(".");
+      std::string ext = value.substr(found+1);
 
-		std::vector<std::string>::const_iterator itr;
+      std::vector<std::string>::const_iterator itr;
 
-		itr = std::find(m_extensions.begin(), m_extensions.end(), ext);
+      itr = std::find(m_extensions.begin(), m_extensions.end(), ext);
 
-		if (itr == m_extensions.end()) return false;
-	}
+      if (itr == m_extensions.end()) return false;
+    }
 
-	if ( boost::filesystem::exists(value) )
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+    if ( m_fullTest && !boost::filesystem::exists(value) )
+    {
+      return false;
+    }
+
+    return true;
   }
 
    ///Return the type of the validator
   const std::string getType() const
   {
-	  return "file";
+    return "file";
   }
 
   /// Returns the set of valid values
@@ -102,7 +102,9 @@ public:
 
 private:
   /// The list of permitted extensions
-	std::vector<std::string> m_extensions;
+  const std::vector<std::string> m_extensions;
+  /// Flag indicating whether to test for existence of filename
+  const bool m_fullTest;
 
 };
 

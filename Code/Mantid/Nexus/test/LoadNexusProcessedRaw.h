@@ -138,18 +138,18 @@ void testExecOnLoadraw()
     // check that the instrument data has been loaded, copied from LoadInstrumentTest
     //
     boost::shared_ptr<Instrument> i = output->getInstrument();
-    std::cerr << "Count = " << i.use_count();
+    //std::cerr << "Count = " << i.use_count();
     Component* source = i->getSource();
     TS_ASSERT( source != NULL);
     if(source != NULL )
     {
         TS_ASSERT_EQUALS( source->getName(), "undulator");
         TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
-    
+
         Component* samplepos = i->getSample();
         TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
         TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
-    
+
         Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
         TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
         TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
@@ -172,13 +172,13 @@ void testExecOnLoadraw()
         // above is value from LoadRaw, but only 12124 seem used and are
         // recorded in Nxus file
         TS_ASSERT_EQUALS(map->nElements(),12124);
-    
+
         // Test one to one mapping, for example spectra 6 has only 1 pixel
         TS_ASSERT_EQUALS(map->ndet(6),1);
-    
+
         // Test one to many mapping, for example 10 pixels contribute to spectra 2084
         TS_ASSERT_EQUALS(map->ndet(2084),10);
-    
+
         // Check the id number of all pixels contributing
         std::vector<Mantid::Geometry::IDetector*> detectorgroup;
         detectorgroup=map->getDetectors(2084);
@@ -186,7 +186,7 @@ void testExecOnLoadraw()
         int pixnum=101191;
         for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
         TS_ASSERT_EQUALS((*it)->getID(),pixnum++);
-     
+
         // Test with spectra that does not exist
         // Test that number of pixel=0
         TS_ASSERT_EQUALS(map->ndet(5),0);

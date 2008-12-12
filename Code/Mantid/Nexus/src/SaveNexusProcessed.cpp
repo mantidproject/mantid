@@ -47,7 +47,7 @@ namespace NeXus
     exts.push_back("NX5");
     exts.push_back("xml");
     exts.push_back("XML");
-    declareProperty("FileName","",new FileValidator(exts));
+    declareProperty("FileName","",new FileValidator(exts,false));
     //declareProperty("FileName","",new MandatoryValidator<std::string>);
 
     declareProperty("Title","",new MandatoryValidator<std::string>);
@@ -108,7 +108,7 @@ namespace NeXus
        std::transform(inst3Char.begin(), inst3Char.end(), inst3Char.begin(), toupper);
        std::string instrumentXml(inst3Char+"_Definition.xml");
        // Determine the search directory for XML instrument definition files (IDFs)
-       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
+       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
        if ( directoryName.empty() ) directoryName = "../Instrument";
        boost::filesystem::path file(directoryName+"/"+instrumentXml);
        if(!boost::filesystem::exists(file))
@@ -141,7 +141,7 @@ namespace NeXus
         if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
         {
             g_log.error("Invalid Spectrum min/max properties");
-            throw std::invalid_argument("Inconsistent properties defined"); 
+            throw std::invalid_argument("Inconsistent properties defined");
         }
     }
     nexusFile->writeNexusProcessedData(localworkspace,uniformSpectra,m_spec_min,m_spec_max);

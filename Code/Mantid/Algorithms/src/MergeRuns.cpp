@@ -78,12 +78,14 @@ void MergeRuns::exec()
   setProperty("OutputWorkspace",outWS);
 }
 
+/// @cond
 // Local function used within validateInputs() below in a call to std::list::sort(compare)
 // to order the input workspaces by the start of their frame (i.e. the first X value).
-bool compare(Workspace_sptr first, Workspace_sptr second)
+static bool compare(Workspace_sptr first, Workspace_sptr second)
 {
   return (first->readX(0).front() < second->readX(0).front() );
 }
+/// @endcond
 
 /** Checks that the input workspace all exist, that they are the same size, have the same units
  *  and the same instrument name. Will throw if they don't.
