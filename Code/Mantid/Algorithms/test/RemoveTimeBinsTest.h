@@ -55,6 +55,7 @@ public:
 	
 	void testExec()
 	{
+	
 		try 
 		{
 			TS_ASSERT_EQUALS(alg.execute(),true);
@@ -65,10 +66,45 @@ public:
 		}
 
 		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("output");
-		
-		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1);
+
+		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
+		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 1);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 2);
+
+	}
+	
+	void testRemoveFromBack()
+	{
+		alg3.initialize();
+		TS_ASSERT( alg3.isInitialized() )
+		
+		
+		alg3.setPropertyValue("InputWorkspace", "input2D");
+		alg3.setPropertyValue("OutputWorkspace", "output2");
+		alg3.setPropertyValue("StartTimeBin", "4");
+		alg3.setPropertyValue("EndTimeBin", "4");
+		
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("StartTimeBin"), "4");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("EndTimeBin"), "4");
+		
+		try 
+		{
+			TS_ASSERT_EQUALS(alg3.execute(),true);
+		}
+		catch(std::runtime_error e)
+		{
+			TS_FAIL(e.what());
+		}
+
+		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("output2");
+
+		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
+		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
 		
 	}
 	
@@ -101,7 +137,6 @@ public:
 		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("result1");
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
-
 	}
 
 	void makeDummyWorkspace2D()
@@ -109,23 +144,24 @@ public:
 		Workspace2D_sptr testWorkspace(new Workspace2D);
 
 		testWorkspace->setTitle("input2D");
-		testWorkspace->initialize(2,2,2);
+		testWorkspace->initialize(2,5,4);
 
 		std::vector<double> X;
 		std::vector<double> Y;
 
-		for (int i =0; i < 2; ++i)
+		for (int i =0; i < 4; ++i)
 		{
 			X.push_back(1.0*i);
 			Y.push_back(2.0*i);
 		}
+		X.push_back(4.0);	// X is one bigger
 
 		testWorkspace->setX(0, X);
 		testWorkspace->setX(1, X);
 		testWorkspace->setData(0, Y);
 		testWorkspace->setData(1, Y);
 
-		AnalysisDataService::Instance().add("input2D", testWorkspace);
+		AnalysisDataService::Instance().add("input2D", testWorkspace);		
 	}
 
 private:

@@ -10,7 +10,16 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    /** 
+   /**Removes time bins from either the front or the back of a workspace. Do not use to remove time
+	  bins from the middle!
+
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> StartTimeBin - The time bin to start removing from (including the bin specified). Note: is zero based, i.e. first bin has index 0.</LI>
+    <LI> BackwardSpectrum - The time bin to end removing from (including the bin specified). Note: is zero based. </LI>
+    </UL>
       
     @author 
     @date 11/07/2008

@@ -48,9 +48,9 @@ namespace Mantid
 	    int end = getProperty("EndTimeBin");
 	            
 	    //Check end does not exceed number of time bins
-	    if (end > inputW->dataX(0).size())
+	    if (end > inputW->dataX(0).size() -1)
 	    {
-		    end = inputW->dataX(0).size();
+		    end = inputW->dataX(0).size() -1;
 	    }
 	    
 	    if (start > end)
@@ -60,7 +60,7 @@ namespace Mantid
 		    end = temp;
 	    }
 	    
-	    if (start != 0 && end != inputW->dataX(0).size())
+	    if (start != 0 && end != inputW->dataX(0).size() -1)
 	    {    
 		    g_log.error("You are trying to remove timebins from middle of workspace, this algorithm is not suitable for that operation.");
 		    throw std::invalid_argument("You are trying to remove timebins from middle of workspace, this algorithm is not suitable for that operation.");
@@ -70,30 +70,39 @@ namespace Mantid
 	    int histnumber = inputW->getNumberHistograms();
 	    
 	    //Create new workspace
-	    API::Workspace_sptr outputWS 
-		= API::WorkspaceFactory::Instance().create(inputW, histnumber, inputW->dataX(0).size() - (end - start +1), inputW->blocksize());
+	    API::Workspace_sptr outputWS
+		= API::WorkspaceFactory::Instance().create(inputW, histnumber, inputW->dataX(0).size() - (end - start +1), inputW->dataY(0).size() - (end - start +1));
+	        
 	    
 	    for (int i=0; i < histnumber; ++i)
 	    {        
-		    int count = 0;
-		    
-		    for (int j=0; j < inputW->dataY(i).size(); ++j)
-		    {
-			    if (j >= start && j <= end)
-			    {
-				    //Do nothing as these are discarded
-				    //Maybe in the future we will want to put them
-				    //in a separate workspace?
-			    }
-			    else
-			    {
-				    outputWS->dataX(i)[count] = inputW->dataX(i)[j];
-				    outputWS->dataY(i)[count] = inputW->dataY(i)[j];
-				    outputWS->dataE(i)[count] = inputW->dataE(i)[j];
+		int count = 0;
+		int loopStart;
+		int loopEnd;
+	    
+		if (start == 0)
+		{
+			//Remove from front
+			loopStart = end + 1;
+			loopEnd = inputW->dataY(i).size();
+		}
+		else
+		{
+			//Remove from end
+			loopStart = 0;
+			loopEnd = start -1;
+		}
+		        
+		for (int j=loopStart; j < loopEnd; ++j)
+		{			
+			outputWS->dataX(i)[count] = inputW->dataX(i)[j];
+			outputWS->dataY(i)[count] = inputW->dataY(i)[j];
+			outputWS->dataE(i)[count] = inputW->dataE(i)[j];
 				    
-				    ++count;
-				}    
-		    }
+			++count;   
+		}
+		//X has one more value
+		outputWS->dataX(i)[count] = inputW->dataX(i)[loopEnd];		    		    
 	    }
 	    
 	    // Copy units
