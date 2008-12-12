@@ -49,12 +49,24 @@ void NormaliseByCurrent::exec()
 
   if (inputWS==outputWS) //
     {
-  	  Workspace::iterator it(*inputWS);
-  	  for (;it!=it.end();++it)
-  	  {
-  		  ((*it).Y())*=charge;
-  		  ((*it).E())*=charge;
-  	  }
+//  	  Workspace::iterator it(*inputWS);
+//  	  for (;it!=it.end();++it)
+//  	  {
+//  		  ((*it).Y())*=charge;
+//  		  ((*it).E())*=charge;
+//  	  }
+	  const int nspec=inputWS->getNumberHistograms()-1;
+	  const int nbin=inputWS->blocksize()-1;
+	  for (int i=nspec;i>=0;--i)
+	  {
+		  std::vector<double>& refY=inputWS->dataY(i);
+		  std::vector<double>& refE=inputWS->dataE(i);
+		  for (int j=nbin;j>=0;--j)
+		  {
+			 refY[j]*=charge;
+			 refE[j]*=charge;
+		  }
+	  }
     }
   else
   {
