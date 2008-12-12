@@ -18,7 +18,7 @@ namespace Mantid
 		* @param data information related to the GTS (usually GTS surface pointer)
 		*/
 		static void gts_surface_opengl_render (GtsTriangle * t, gpointer * data)
-		{	
+		{
 			GtsVertex *v1,*v2,*v3;
 			double    normalx,normaly,normalz;
 			gts_triangle_vertices(t,&v1,&v2,&v3);

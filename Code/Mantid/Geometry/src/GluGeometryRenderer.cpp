@@ -114,7 +114,8 @@ namespace Mantid
 				glNewList(iDisplaylistId,GL_COMPILE_AND_EXECUTE); //Construct display list for object representation
 				glTranslated(center[0],center[1],center[2]);
 				GLdouble mat[16];
-				Quat rot(V3D(0,0,1),axis);
+				V3D unit(0,0,1);
+				Quat rot(unit,axis);
 				rot.GLMatrix(mat);
 				glMultMatrixd(mat);
 				gluCylinder(qobj,0,radius,height,10,5);
@@ -132,7 +133,7 @@ namespace Mantid
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
 				iDisplaylistId=glGenLists(1);
-				//calculate angle 
+				//calculate angle
 				//create glu cylinder
 				GLUquadricObj *qobj=gluNewQuadric();
 				gluQuadricDrawStyle(qobj,GLU_FILL);
@@ -141,7 +142,8 @@ namespace Mantid
 				glPushMatrix();
 				glTranslated(center[0],center[1],center[2]);
 				GLdouble mat[16];
-				Quat rot(V3D(0,0,1),axis);
+        V3D unit(0,0,1);
+				Quat rot(unit,axis);
 				rot.GLMatrix(mat);
 				glMultMatrixd(mat);
 				gluCylinder(qobj,radius,radius,height,10,5);

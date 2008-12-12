@@ -28,7 +28,7 @@ namespace Mantid
 		{
 			gdouble x, y, z = g.z;
 			guint i, j;
-			
+
 			for (i = 0, x = g.x; i < g.nx; i++, x += g.dx)
 				for (j = 0, y = g.y; j < g.ny; j++, y += g.dy)
 					f[i][j] = ((SurfaceEvaluator*)data)->evaluate(V3D(x,y,z));
@@ -38,7 +38,7 @@ namespace Mantid
 		 * @param obj input object
 		 */
 		GtsGeometryGenerator::GtsGeometryGenerator(const Object *obj):Obj(obj)
-		{			
+		{
 			ObjSurface=NULL;
 		}
 
@@ -52,7 +52,6 @@ namespace Mantid
 					gts_face_class(),
 					gts_edge_class(),
 					gts_vertex_class());
-				int c = 0;
 				GtsCartesianGrid g;
 				gdouble iso;
 				iso=0.0;
@@ -63,7 +62,7 @@ namespace Mantid
 				double frac=modf((xmax-xmin),(double*)&g.nx);
 				frac=modf((ymax-ymin),(double*)&g.ny);
 				frac=modf((zmax-zmin),(double*)&g.nz);
-				g.nx=g.ny=g.nz=11.0;
+				g.nx=g.ny=g.nz=11;
 				g.x = xmin; g.dx = (xmax-xmin)/(gdouble) (g.nx - 1);
 				g.y = ymin; g.dy = (ymax-ymin)/(gdouble) (g.ny - 1);
 				g.z = zmin; g.dz = (zmax-zmin)/(gdouble) (g.nz - 1);
@@ -78,8 +77,8 @@ namespace Mantid
 				//Try to coarse the surface
 				double cost=100;
 				GtsVolumeOptimizedParams params = { 0.5, 0.5, 0};//1e-10 };
-				gts_surface_coarsen (gtsSurface, (GtsKeyFunc) gts_volume_optimized_cost, &params, 
-					(GtsCoarsenFunc) gts_volume_optimized_vertex, &params, 
+				gts_surface_coarsen (gtsSurface, (GtsKeyFunc) gts_volume_optimized_cost, &params,
+					(GtsCoarsenFunc) gts_volume_optimized_vertex, &params,
 					(GtsStopFunc) gts_coarsen_stop_number, &cost,
 					 90.0*M_PI/180.0);
 				////gts_surface_write_vtk_file(gtsSurface,"C:\\ObjSurf.vtk");
@@ -141,14 +140,14 @@ namespace Mantid
 				gtsSurface=NULL;
 			}
 		}
-		
+
 		/**
 		 * Destroy the surface generated for the object
 		 */
 		GtsGeometryGenerator::~GtsGeometryGenerator(){
 			if(ObjSurface!=NULL)
-			{				
-				  gts_object_destroy (GTS_OBJECT (ObjSurface));	
+			{
+				  gts_object_destroy (GTS_OBJECT (ObjSurface));
 			}
 		}
 
