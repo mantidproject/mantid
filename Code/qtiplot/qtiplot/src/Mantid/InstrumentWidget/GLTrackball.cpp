@@ -7,13 +7,9 @@
 #include <math.h>
 GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
 {
-    _rotationmatrix[0]=_rotationmatrix[5]=_rotationmatrix[10]=_rotationmatrix[15]=1;
-    _rotationmatrix[1]=_rotationmatrix[2]=_rotationmatrix[3]=_rotationmatrix[4]=0;
-    _rotationmatrix[6]=_rotationmatrix[7]=_rotationmatrix[8]=_rotationmatrix[9]=0;
-    _rotationmatrix[11]=_rotationmatrix[12]=_rotationmatrix[12]=_rotationmatrix[12]=0;
+	reset();
     _rotationspeed=2.0;
-	_translation=Mantid::Geometry::V3D(0,0,0);
-	_scaleFactor=1.0;
+	_modelCenter=Mantid::Geometry::V3D(0.0,0.0,0.0);
 }
 GLTrackball::~GLTrackball()
 {
@@ -46,9 +42,7 @@ void GLTrackball::initTranslateFrom(int a,int b)
 	x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)_viewport_w))));
 	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
-	_lastpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1]);
-	_lastpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5]);
-	_lastpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9]);
+	_lastpoint[0]=x;_lastpoint[1]=y;_lastpoint[2]=z;
 }
 
 void GLTrackball::generateTranslationTo(int a, int b)
@@ -62,9 +56,6 @@ void GLTrackball::generateTranslationTo(int a, int b)
 	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
 	Mantid::Geometry::V3D _newpoint= Mantid::Geometry::V3D(x,y,z);
-	_newpoint[0] = (x*_rotationmatrix[0]+y*_rotationmatrix[1]);
-	_newpoint[1] = (x*_rotationmatrix[4]+y*_rotationmatrix[5]);
-	_newpoint[2] = (x*_rotationmatrix[8]+y*_rotationmatrix[9]);
 	Mantid::Geometry::V3D diff= _newpoint - _lastpoint;
 	_translation += diff;
 }
@@ -102,10 +93,18 @@ void GLTrackball::IssueRotation()
 {	
 	if (_viewport){
 		glScaled(_scaleFactor,_scaleFactor,_scaleFactor);
-		glMultMatrixd(_rotationmatrix);
 		glTranslated(_translation[0],_translation[1],_translation[2]);
+		glTranslated(_modelCenter[0],_modelCenter[1],_modelCenter[2]);
+		glMultMatrixd(_rotationmatrix);
+		glTranslated(-_modelCenter[0],-_modelCenter[1],-_modelCenter[2]);
 	}
 }
+
+void GLTrackball::setModelCenter(Mantid::Geometry::V3D center)
+{
+	_modelCenter=center;
+}
+
 Mantid::Geometry::V3D GLTrackball::projectOnSphere(int a,int b)
 {
     double x,y,z;
@@ -132,50 +131,65 @@ void GLTrackball::setViewport(GLViewport* v)
     if (v) _viewport=v;
 }
 
+void GLTrackball::reset()
+{
+	//Reset rotation,scale and translation
+	_quaternion.init();
+    _quaternion.GLMatrix(_rotationmatrix);
+	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
+	_scaleFactor=1.0;
+}
+
 void GLTrackball::setViewToXPositive()
 {
-	Mantid::Geometry::Quat tempy(-90.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
-	Mantid::Geometry::Quat tempz(90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
-	tempy*=tempz;
+	reset();
+	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
+	_translation[0]=_modelCenter[2]-_modelCenter[0];
+	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(1.0,0.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
 }
 
 void GLTrackball::setViewToYPositive()
 {
-	Mantid::Geometry::Quat tempy(90.0,Mantid::Geometry::V3D(1.0,0.0,0.0));
-	Mantid::Geometry::Quat tempz(90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
-	tempy*=tempz;
+	reset();
+	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
+	_translation[1]=_modelCenter[2]-_modelCenter[1];
+	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(0.0,1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
 }
 
 void GLTrackball::setViewToZPositive()
 {
+	reset();
 	_quaternion.init();
 	_quaternion.GLMatrix(_rotationmatrix);
 }
 
 void GLTrackball::setViewToXNegative()
 {
-	Mantid::Geometry::Quat tempy(-90.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
-	Mantid::Geometry::Quat tempz(-90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
-	tempy*=tempz;
+	reset();
+	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
+	_translation[0]=_modelCenter[2]-_modelCenter[0];
+	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(-1.0,0.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
 }
 
 void GLTrackball::setViewToYNegative()
 {
-	Mantid::Geometry::Quat tempy(90.0,Mantid::Geometry::V3D(1.0,0.0,0.0));
-	Mantid::Geometry::Quat tempz(-90.0,Mantid::Geometry::V3D(0.0,0.0,1.0));
-	tempy*=tempz;
+	reset();
+	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
+	_translation[1]=_modelCenter[2]-_modelCenter[1];
+	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(0.0,-1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
 }
 
 void GLTrackball::setViewToZNegative()
 {
+	reset();
 	Mantid::Geometry::Quat tempy(180.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);

@@ -105,6 +105,9 @@ namespace Mantid
 
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);
+	
+	  /// create a special geometry handler for the known finite primitives
+	  void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Geometry::Object>);
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

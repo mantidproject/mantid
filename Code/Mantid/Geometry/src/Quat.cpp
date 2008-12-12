@@ -21,6 +21,23 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 {
 }
 
+/*! 
+ * Construct a Quat between two vectors.
+ * v=(src+des)/¦src+des¦
+ * w=v.des
+ * (a,b,c)=(v x des)
+ */
+Quat::Quat(V3D& src,V3D& des)
+{
+	V3D v = (src+des);
+	v.normalize();
+	V3D cross=v.cross_prod(des);
+	w = v.scalar_prod(des);
+	a = cross[0];
+	b = cross[1];
+	c = cross[2];
+}
+
 //! Constructor with values
 Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(_w),a(_a),b(_b),c(_c)
 {

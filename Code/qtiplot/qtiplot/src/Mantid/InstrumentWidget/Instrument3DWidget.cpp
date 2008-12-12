@@ -577,24 +577,40 @@ void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,dou
 	_viewport->getProjection(vxmin,vxmax,vymin,vymax,vzmin,vzmax);
 
 	//vector from center to bounding box center
-	V3D vcb=pos-boundCentre;
-	vcb.normalize();
+	//V3D vcb=pos-boundCentre;
+	//vcb.normalize();
 	//get the rotation about zaxis
-	V3D zaxis(0,0,-1);
-	double angle=vcb.angle(zaxis);
-	V3D axis=vcb.cross_prod(zaxis);
-	axis.normalize();
-	double s=sin(angle/2);
-	Quat rotation(angle,axis);
-	_trackball->setRotation(rotation);
-	_trackball->_scaleFactor=1.0;
-	_trackball->setTranslation(V3D(0.0,0.0,0.0));
-	V3D minval(xmin,ymin,zmin);
-	V3D maxval(xmax,ymax,zmax);
-	rotation.rotate(minval);
-	rotation.rotate(maxval);
-	//_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
-	_viewport->setOrtho(minval[0],maxval[0],minval[1],maxval[1],minval[2]*-1,maxval[2]*-1);
+	//V3D zaxis(0,0,-1);
+	//double angle=vcb.angle(zaxis);
+	//V3D axis=vcb.cross_prod(zaxis);
+	//axis.normalize();
+	//double s=sin(angle/2);
+	//Quat rotation(angle,axis);
+
+	//_trackball->setRotation(rotation);
+	//_trackball->_scaleFactor=1.0;
+	//_trackball->setTranslation(V3D(0.0,0.0,0.0));
+	//V3D minval(xmin,ymin,zmin);
+	//V3D maxval(xmax,ymax,zmax);
+	//rotation.rotate(minval);
+	//rotation.rotate(maxval);
+	////_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
+	//_viewport->setOrtho(minval[0],maxval[0],minval[1],maxval[1],minval[2]*-1,maxval[2]*-1);
+	//_viewport->issueGL();
+	//update();	
+	//V3D zaxis(0,0,-1);
+	//Quat rotation(vcb,zaxis);
+	//_trackball->setRotation(rotation);
+	//_trackball->_scaleFactor=1.0;
+	//_trackball->setTranslation(V3D(0.0,0.0,0.0));
+	//_viewport->setOrtho(vxmin,vxmax,vymin,vymax,zmin*-1,vzmax);
+	//_viewport->issueGL();
+
+	//V3D trans=boundCentre-pos;
+	//trans[2]=trans[2]-vzmin;
+	//_trackball->setTranslation(trans);
+	_trackball->reset();
+	_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
 	_viewport->issueGL();
-	update();	
+	update();
 }

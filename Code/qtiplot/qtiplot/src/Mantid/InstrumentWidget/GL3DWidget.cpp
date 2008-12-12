@@ -475,27 +475,43 @@ void GL3DWidget::saveToPPM(QString filename)
  */
 void GL3DWidget::setViewDirection(AxisDirection dir)
 {
+	Mantid::Geometry::V3D minPoint,maxPoint;
+	double minValue,maxValue,_bbmin[3],_bbmax[3];
+	scene->getBoundingBox(minPoint,maxPoint);
+	defaultProjection();
+	_viewport->getProjection(_bbmin[0],_bbmax[0],_bbmin[1],_bbmax[1],_bbmin[2],_bbmax[2]);
 	switch(dir)
 	{
 	case XPOSITIVE:
 		_trackball->setViewToXPositive();
+		_viewport->setOrtho(minPoint[2],maxPoint[2],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case YPOSITIVE:
 		_trackball->setViewToYPositive();
+		minValue=minPoint[1]-fabs(maxPoint[1]-minPoint[1])/2.0;
+		maxValue=maxPoint[1]+fabs(maxPoint[1]-minPoint[1])/2.0;
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[2],maxPoint[2],_bbmin[2],_bbmax[2]);
 		break;
 	case ZPOSITIVE:
 		_trackball->setViewToZPositive();
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case XNEGATIVE:
 		_trackball->setViewToXNegative();
+		_viewport->setOrtho(minPoint[2],maxPoint[2],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case YNEGATIVE:
 		_trackball->setViewToYNegative();
+		minValue=minPoint[1]-fabs(maxPoint[1]-minPoint[1])/2.0;
+		maxValue=maxPoint[1]+fabs(maxPoint[1]-minPoint[1])/2.0;
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[2],maxPoint[2],_bbmin[2],_bbmax[2]);
 		break;
 	case ZNEGATIVE:
 		_trackball->setViewToZNegative();
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	}
+	_viewport->issueGL();
 	update();
 }
 
@@ -517,8 +533,8 @@ void GL3DWidget::defaultProjection()
 	maxValue=maxPoint[0];
 	if(maxValue<maxPoint[1])maxValue=maxPoint[1];
 	if(maxValue<maxPoint[2])maxValue=maxPoint[2];
-	double temp=minValue-(maxValue-minValue)/2;
-	maxValue=maxValue+(maxValue-minValue)/2;
+	double temp=minValue-fabs(maxValue-minValue)/2;
+	maxValue=maxValue+fabs(maxValue-minValue)/2;
 	minValue=temp;
 
 	int minScale,maxScale;
@@ -527,6 +543,10 @@ void GL3DWidget::defaultProjection()
 	if(maxValue<0)maxScale=10;
 	else maxScale=10;
 	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);//minValue*minScale,maxValue*maxScale);
+	Mantid::Geometry::V3D center;
+	center=(minPoint+maxPoint)/2.0;
+	//center[2]=0.0;
+	_trackball->setModelCenter(center);
 	_viewport->issueGL();
 }
 

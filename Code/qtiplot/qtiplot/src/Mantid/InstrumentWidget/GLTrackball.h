@@ -75,6 +75,10 @@ public:
 	void setTranslation(Mantid::Geometry::V3D trans){_translation=trans;}
 	//! Set Rotation
 	void setRotation(Mantid::Geometry::Quat quat){_quaternion=quat;_quaternion.GLMatrix(_rotationmatrix);}
+	//! Set Model center
+	void setModelCenter(Mantid::Geometry::V3D center);
+	//! Reset Trackball
+	void reset();
 	double		_scaleFactor;
 private:
     GLViewport*      _viewport;
@@ -85,6 +89,7 @@ private:
 	double      _rotationspeed;
 
 	Mantid::Geometry::V3D  _translation;
+	Mantid::Geometry::V3D  _modelCenter;
 };
 
 

@@ -7,6 +7,7 @@
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/Component.h"
+#include "MantidGeometry/GluGeometryHandler.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <fstream>
@@ -85,6 +86,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   std::map<int, Surface*> primitives; // stores the primitives that will be used to build final shape
   int l_id = 1; // used to build up unique id's for each shape added. Must start from int > zero.
 
+  Element* lastElement=NULL; //This is to store element for the fixed complete objects such as sphere,cone,cylinder and cuboid
   for (unsigned int i = 0; i < pNL_length; i++)
   {
     if ( (pNL->item(i))->nodeType() == Node::ELEMENT_NODE )
@@ -100,6 +102,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
         if ( !primitiveName.compare("sphere"))
         {
+		  lastElement=pE;
           idMatching[idFromUser] = parseSphere(pE, primitives, l_id);  
           numPrimitives++;
         }
@@ -115,11 +118,13 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
         }
         else if ( !primitiveName.compare("cylinder"))
         {
+		  lastElement=pE;
           idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
           numPrimitives++;
         }
         else if ( !primitiveName.compare("cuboid"))
         {
+		  lastElement=pE;
           idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);  
           numPrimitives++;
         }
@@ -130,6 +135,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
         }
         else if ( !primitiveName.compare("cone"))
         {
+		  lastElement=pE;
           idMatching[idFromUser] = parseCone(pE, primitives, l_id);  
           numPrimitives++;
         }
@@ -192,7 +198,12 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   {
     retVal->setObject(21, algebraFromUser);
     retVal->populate(primitives);
-
+	//check whether there is only one surface/closed surface
+	if(numPrimitives == 1&&lastElement!=NULL)//special case
+	{
+		//parse the primitive and create a Geometry handler for the object
+		createGeometryHandler(lastElement,retVal);
+	}
 
     // get bounding box string
     NodeList* pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
@@ -800,6 +811,49 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)
   return retVal;
 }
 
+void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared_ptr<Object> Obj)
+{
+	if(pElem->tagName()=="cuboid"){
+		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
+		Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
+		Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
+		Element* pElem_rfb = getShapeElement(pElem, "right-front-bottom-point"); 
+
+		V3D lfb = parsePosition(pElem_lfb);  // left front bottom
+		V3D lft = parsePosition(pElem_lft);  // left front top
+		V3D lbb = parsePosition(pElem_lbb);  // left back bottom
+		V3D rfb = parsePosition(pElem_rfb);  // right front bottom
+		handler->setCuboid(lfb,lft,lbb,rfb);
+	}else if(pElem->tagName()=="sphere"){
+		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		Element* pElemCentre = getShapeElement(pElem, "centre"); 
+		Element* pElemRadius = getShapeElement(pElem, "radius"); 
+		handler->setSphere(parsePosition(pElemCentre),atof( (pElemRadius->getAttribute("val")).c_str() ));
+	}else if(pElem->tagName()=="cylinder"){
+		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base"); 
+		Element* pElemAxis = getShapeElement(pElem, "axis"); 
+		Element* pElemRadius = getShapeElement(pElem, "radius"); 
+		Element* pElemHeight = getShapeElement(pElem, "height");
+		V3D normVec = parsePosition(pElemAxis);
+		normVec.normalize();
+		handler->setCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
+	}else if(pElem->tagName()=="cone"){
+		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
+		Element* pElemAxis = getShapeElement(pElem, "axis");  
+		Element* pElemAngle = getShapeElement(pElem, "angle");  
+		Element* pElemHeight = getShapeElement(pElem, "height"); 
+
+		V3D normVec = parsePosition(pElemAxis);
+		normVec.normalize();
+		double height=atof( (pElemHeight->getAttribute("val")).c_str() );
+		double radius=height*tan(atof( (pElemAngle->getAttribute("val")).c_str() ));
+		handler->setCone(parsePosition(pElemTipPoint),normVec,radius,height);
+	}
+	
+}
 
 
 

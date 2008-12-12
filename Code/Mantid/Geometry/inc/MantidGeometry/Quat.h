@@ -57,6 +57,7 @@ namespace Mantid
     public:
       Quat();
       Quat(const double, const double, const double, const double);
+	  Quat(V3D& vec1,V3D& vec2);
       Quat(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
