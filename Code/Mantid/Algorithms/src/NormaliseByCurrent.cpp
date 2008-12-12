@@ -33,6 +33,8 @@ void NormaliseByCurrent::exec()
 {
   // Get the input workspace
   Workspace_sptr inputWS = getProperty("InputWorkspace");
+  Workspace_sptr outputWS = getProperty("OutputWorkspace");
+
   // Get the good proton charge and check it's valid
   const double charge = inputWS->getSample()->getProtonCharge();
   if ( charge < 1.0E-6 )
@@ -41,10 +43,25 @@ void NormaliseByCurrent::exec()
     throw std::out_of_range("The proton charge is not set to a valid value");
   }
 
-  g_log.information() << "Normalisation constant: " << charge << std::endl;
+  g_log.information() << "Normalisation current: " << charge << " uamps" <<  std::endl;
+
+
+  if (inputWS==outputWS) //
+    {
+  	  Workspace::iterator it(*inputWS);
+  	  for (;it!=it.end();++it)
+  	  {
+  		  ((*it).Y())/=charge;
+  		  ((*it).E())/=charge;
+  	  }
+    }
+  else
+  {
   Workspace_sptr outputWS = inputWS / charge;
+  }
   outputWS->setYUnit("Counts per microAmp.hour");
-  setProperty("OutputWorkspace",outputWS);
+   setProperty("OutputWorkspace",outputWS);
+
 }
 
 } // namespace Algorithm
