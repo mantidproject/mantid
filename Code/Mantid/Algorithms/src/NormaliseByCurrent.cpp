@@ -36,7 +36,7 @@ void NormaliseByCurrent::exec()
   Workspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Get the good proton charge and check it's valid
-  const double charge = inputWS->getSample()->getProtonCharge();
+  double charge = inputWS->getSample()->getProtonCharge();
   if ( charge < 1.0E-6 )
   {
     g_log.error() << "The proton charge is not set to a valid value. Charge = " << charge << std::endl;
@@ -45,19 +45,20 @@ void NormaliseByCurrent::exec()
 
   g_log.information() << "Normalisation current: " << charge << " uamps" <<  std::endl;
 
+  charge=1.0/charge; // Inverse of the charge to be multiplied by
 
   if (inputWS==outputWS) //
     {
   	  Workspace::iterator it(*inputWS);
   	  for (;it!=it.end();++it)
   	  {
-  		  ((*it).Y())/=charge;
-  		  ((*it).E())/=charge;
+  		  ((*it).Y())*=charge;
+  		  ((*it).E())*=charge;
   	  }
     }
   else
   {
-  Workspace_sptr outputWS = inputWS / charge;
+	  outputWS = WorkspaceFactory::Instance().create(inputWS*charge);
   }
   outputWS->setYUnit("Counts per microAmp.hour");
    setProperty("OutputWorkspace",outputWS);
