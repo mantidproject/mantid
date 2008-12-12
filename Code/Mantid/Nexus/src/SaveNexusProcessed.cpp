@@ -38,6 +38,7 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
     exts.push_back("NXS");
@@ -46,11 +47,10 @@ namespace NeXus
     exts.push_back("NX5");
     exts.push_back("xml");
     exts.push_back("XML");
-    //declareProperty("FileName","",new FileValidator(exts));
-    declareProperty("FileName","",new MandatoryValidator<std::string>);
+    declareProperty("FileName","",new FileValidator(exts));
+    //declareProperty("FileName","",new MandatoryValidator<std::string>);
 
     declareProperty("Title","",new MandatoryValidator<std::string>);
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
     // declare optional parameters
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();

@@ -234,6 +234,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MuonRemoveExpDecay.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\NormaliseByCurrent.cpp"
 				>
 			</File>
@@ -251,6 +255,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Regroup.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RemoveTimeBins.cpp"
 				>
 			</File>
 			<File
@@ -380,6 +388,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\MuonRemoveExpDecay.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\NormaliseByCurrent.h"
 				>
 			</File>
@@ -409,6 +421,10 @@
 			</File>
 			<File
 				RelativePath=".\test\RegroupTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\RemoveTimeBins.h"
 				>
 			</File>
 			<File

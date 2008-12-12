@@ -51,7 +51,7 @@ namespace NeXus
     exts.push_back("xml");
     exts.push_back("XML");
     // required
-    declareProperty("FileName","",new MandatoryValidator<std::string>);
+    declareProperty("FileName","",new FileValidator(exts));
     declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
     // optional
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();

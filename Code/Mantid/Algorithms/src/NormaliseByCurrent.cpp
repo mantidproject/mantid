@@ -58,11 +58,11 @@ void NormaliseByCurrent::exec()
     }
   else
   {
-	  outputWS = WorkspaceFactory::Instance().create(inputWS*charge);
+	  outputWS = inputWS*charge;
+    setProperty("OutputWorkspace",outputWS);
   }
-  outputWS->setYUnit("Counts per microAmp.hour");
-   setProperty("OutputWorkspace",outputWS);
 
+  outputWS->setYUnit("Counts per microAmp.hour");
 }
 
 } // namespace Algorithm
