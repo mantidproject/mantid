@@ -26,14 +26,14 @@ public:
   virtual ~DivideOpTest() {}
   virtual const std::string name() const {return "DivideOpTest";}
   virtual const int version() const {return(1);}
-  
-  void init() 
+
+  void init()
   {
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));   
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
   }
-  void exec() 
+  void exec()
   {
     Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
     Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
@@ -54,7 +54,7 @@ public:
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
     alg.setPropertyValue("InputWorkspace_1","test_in21");
-    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("InputWorkspace_2","test_in22");
     alg.setPropertyValue("OutputWorkspace","test_out2");
     );
 
@@ -73,7 +73,7 @@ public:
 
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1","test_in11");
-    alg.setPropertyValue("InputWorkspace_2","test_in12");    
+    alg.setPropertyValue("InputWorkspace_2","test_in12");
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -101,7 +101,7 @@ public:
     AnalysisDataService::Instance().add("test_in22", work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1","test_in21");
-    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("InputWorkspace_2","test_in22");
     alg.setPropertyValue("OutputWorkspace","test_out2");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -115,7 +115,7 @@ public:
     AnalysisDataService::Instance().remove("test_out2");
 
   }
-  
+
   void testExec1D2D()
   {
     int sizex = 10,sizey=20;
@@ -132,7 +132,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("InputWorkspace_2",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -162,7 +162,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("InputWorkspace_2",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -192,7 +192,7 @@ public:
     AnalysisDataService::Instance().add(wsNameIn2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsNameIn1);
-    alg.setPropertyValue("InputWorkspace_2",wsNameIn2);    
+    alg.setPropertyValue("InputWorkspace_2",wsNameIn2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -220,7 +220,7 @@ public:
 
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1","test_in11");
-    alg.setPropertyValue("InputWorkspace_2","test_in12");    
+    alg.setPropertyValue("InputWorkspace_2","test_in12");
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -233,8 +233,8 @@ public:
     AnalysisDataService::Instance().remove("test_in11");
     AnalysisDataService::Instance().remove("test_in12");
 
-  } 
-  
+  }
+
   void testExec2DSingleValue()
   {
     int sizex = 5,sizey=300;
@@ -251,7 +251,7 @@ public:
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
     alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("InputWorkspace_2",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -263,7 +263,7 @@ public:
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
     AnalysisDataService::Instance().remove(wsNameOut);
-   
+
   }
 
 private:
@@ -287,7 +287,7 @@ private:
     for (int i = 0; i < work_out1->size(); i++)
     {
       int ws2Index = i;
-    
+
       if (ws2LoopCount > 1)
       {
         if (loopOrientation == 0)
@@ -313,7 +313,8 @@ private:
       TS_ASSERT_DELTA(sig1 / sig2, sig3, 0.0001);
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double err2 = work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
-      double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));     
+      double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));
+      if ( err1 < 1.0e-7 ) err3 = 0.0;
       TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
   }
 
