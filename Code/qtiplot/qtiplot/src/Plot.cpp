@@ -725,7 +725,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     pfilter.apply((QwtPlot *)this);
 
     int baseLineDists[QwtPlot::axisCnt];
-    if ( !(pfilter.options() & QwtPlotPrintFilter::PrintCanvasBackground) ){
+    if ( !(pfilter.options() & 16) ){
         // In case of no background we set the backbone of
         // the scale on the frame of the canvas.
 
@@ -786,7 +786,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
         }
     }
 
-    if ( !(pfilter.options() & QwtPlotPrintFilter::PrintCanvasBackground) )
+    if ( !(pfilter.options() & 16) )
     {
         QRect boundingRect(
             canvasRect.left() - 1, canvasRect.top() - 1,
@@ -848,7 +848,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
     ((QwtPlot *)this)->plotLayout()->invalidate();
 
     // reset all widgets with their original attributes.
-    if ( !(pfilter.options() & QwtPlotPrintFilter::PrintCanvasBackground) ){
+    if ( !(pfilter.options() & 16) ){
         // restore the previous base line dists
         for (axisId = 0; axisId < QwtPlot::axisCnt; axisId++ ){
             QwtScaleWidget *scaleWidget = (QwtScaleWidget *)axisWidget(axisId);
