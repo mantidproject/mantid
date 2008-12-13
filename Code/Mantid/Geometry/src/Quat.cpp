@@ -1,8 +1,8 @@
-#include "MantidGeometry/Quat.h" 
+#include "MantidGeometry/Quat.h"
 #include "MantidGeometry/V3D.h"
 #include <cmath>
 #include <boost/test/floating_point_comparison.hpp>
-#include <stdexcept> 
+#include <stdexcept>
 
 
 namespace Mantid
@@ -10,7 +10,7 @@ namespace Mantid
 namespace Geometry
 {
 
-/// Use boost float comparison 	
+/// Use boost float comparison
 boost::test_tools::close_at_tolerance<double> quat_tol(boost::test_tools::percent_tolerance(1e-6));
 
 
@@ -21,13 +21,13 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 {
 }
 
-/*! 
+/*!
  * Construct a Quat between two vectors.
- * v=(src+des)/¦src+des¦
+ * v=(src+des)/ï¿½src+desï¿½
  * w=v.des
  * (a,b,c)=(v x des)
  */
-Quat::Quat(V3D& src,V3D& des)
+Quat::Quat(const V3D& src,const V3D& des)
 {
 	V3D v = (src+des);
 	v.normalize();
@@ -43,7 +43,7 @@ Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(
 {
 }
 
-//! Copy constructor 
+//! Copy constructor
 Quat::Quat(const Quat& _q)
 {
 	w=_q.w;
@@ -51,7 +51,7 @@ Quat::Quat(const Quat& _q)
 	b=_q.b;
 	c=_q.c;
 }
- 
+
 /*! Constructor from an angle and axis.
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
@@ -95,7 +95,7 @@ void Quat::set(const double ww, const double aa, const double bb, const double c
 /*! Constructor from an angle and axis.
  * \param _deg :: angle of rotation
  * \param _axis :: axis to rotate about
- * 
+ *
  * This construct a  quaternion to represent a rotation
  * of an angle _deg around the _axis. The _axis does not need to be a unit vector
  * */
@@ -108,7 +108,7 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	temp.normalize();
 	a=s*temp[0];
 	b=s*temp[1];
-	c=s*temp[2];	
+	c=s*temp[2];
 	return;
 }
 
@@ -130,7 +130,7 @@ void Quat::operator()(const double ww, const double aa, const double bb, const d
 void Quat::operator()(const double angle, const V3D& axis)
 {
 	this->setAngleAxis(angle,axis);
-} 
+}
 
 //! Destructor
 Quat::~Quat()
@@ -139,7 +139,7 @@ Quat::~Quat()
 
 /*! Re-initialise a quaternion to identity.
  */
-void Quat::init() 
+void Quat::init()
 {
 	w=1.0;
 	a=b=c=0.0;
@@ -154,7 +154,7 @@ Quat Quat::operator+(const Quat& _q) const
 {
 	return Quat(w+_q.w,a+_q.a,b+_q.b,c+_q.c);
 }
- 
+
 /*! Quaternion self-addition operator
  * \param _q :: the quaternion to add
  * \return *this+=_q
@@ -164,7 +164,7 @@ Quat& Quat::operator+=(const Quat& _q)
 	w+=_q.w;a+=_q.a;b+=_q.b;c+=_q.c;
 	return *this;
 }
- 
+
 /*! Quaternion subtraction operator
  * \param _q :: the quaternion to add
  * \return *this-_q
@@ -173,7 +173,7 @@ Quat Quat::operator-(const Quat& _q) const
 {
 	return Quat(w-_q.w,a-_q.a,b-_q.b,c-_q.c);
 }
- 
+
 /*! Quaternion self-substraction operator
  * \param _q :: the quaternion to add
  * \return *this-=_q
@@ -186,13 +186,13 @@ Quat& Quat::operator-=(const Quat& _q)
 	c-=_q.c;
 	return *this;
 }
- 
+
 /*! Quaternion multiplication operator
  * \param _q :: the quaternion to multiply
  * \return *this*_q
- * 
+ *
  *  Quaternion multiplication is non commutative
- *  in the same way multiplication of rotation matrices 
+ *  in the same way multiplication of rotation matrices
  *  isn't.
  */
 Quat Quat::operator*(const Quat& _q) const
@@ -204,12 +204,12 @@ Quat Quat::operator*(const Quat& _q) const
 	c1=w*_q.c+_q.w*c+a*_q.b-_q.a*b;
 	return Quat(w1,a1,b1,c1);
 }
- 
+
 /*! Quaternion self-multiplication operator
  * \param _q :: the quaternion to multiply
  * \return *this*=_q
  */
-Quat& Quat::operator*=(const Quat& _q) 
+Quat& Quat::operator*=(const Quat& _q)
 {
 	double w1,a1,b1,c1;
 	w1=w*_q.w-a*_q.a-b*_q.b-c*_q.c;
@@ -219,31 +219,31 @@ Quat& Quat::operator*=(const Quat& _q)
 	w=w1;a=a1;b=b1;c=c1;
 	return (*this);
 }
- 
+
 /*! Quaternion equal operator
  * \param q :: the quaternion to compare
- * 
+ *
  * Compare two quaternions at 1e-6%tolerance.
  * Use boost close_at_tolerance method
  */
-bool Quat::operator==(const Quat& q) const 
+bool Quat::operator==(const Quat& q) const
 {
 	return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));
-} 
- 
+}
+
 /*! Quaternion non-equal operator
  * \param _q :: the quaternion to compare
- * 
+ *
  * Compare two quaternions at 1e-6%tolerance.
  *  Use boost close_at_tolerance method
  */
 bool Quat::operator!=(const Quat& _q) const
 {
 	return (!operator==(_q));
-} 
- 
+}
+
 /*! Quaternion normalization
- * 
+ *
  * Divide all elements by the quaternion norm
  */
 void Quat::normalize()
@@ -255,10 +255,10 @@ void Quat::normalize()
 	c*=overnorm;
 	return;
 }
- 
+
 /*! Quaternion complex conjugate
- * 
- *  Reverse the sign of the 3 imaginary components of the 
+ *
+ *  Reverse the sign of the 3 imaginary components of the
  *  quaternion
  */
 void Quat::conjugate()
@@ -268,40 +268,40 @@ void Quat::conjugate()
 	c*=-1.0;
 	return;
 }
- 
+
 /*! Quaternion length
- *  
+ *
  */
 double Quat::len() const
 {
 	return sqrt(len2());
 }
 
-/*! Quaternion norm (length squared) 
- *    
+/*! Quaternion norm (length squared)
+ *
  */
 double Quat::len2() const
 {
 	return (w*w+a*a+b*b+c*c);
 }
- 
+
 /*! Inverse a quaternion
- *  
+ *
  */
-void Quat::inverse()  
+void Quat::inverse()
 {
 	conjugate();
 	normalize();
 	return;
 }
 
-/*! 	Rotate a vector. 
+/*! 	Rotate a vector.
  *  \param v :: the vector to be rotated
- *  
+ *
  *   The quaternion needs to be normalized beforehand to
  *   represent a rotation. If q is thequaternion, the rotation
- *   is represented by q.v.q-1 where q-1 is the inverse of 
- *   v. 
+ *   is represented by q.v.q-1 where q-1 is the inverse of
+ *   v.
  */
 void Quat::rotate(V3D& v) const
  {
@@ -315,12 +315,12 @@ void Quat::rotate(V3D& v) const
  	v[2]=pos[3];
  }
 
-/*! Convert quaternion rotation to an OpenGL matrix [4x4] matrix 
+/*! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
  * stored as an linear array of 16 double
  * The function glRotated must be called
  * param mat The output matrix
  */
-void Quat::GLMatrix(double mat[16])  
+void Quat::GLMatrix(double mat[16])
 {
 	double aa      = a * a;
 	double ab      = a * b;
@@ -344,7 +344,7 @@ void Quat::GLMatrix(double mat[16])
 	mat[15] = 1.0;
 	return;
 }
- 
+
 /*!
  * Converts the GL Matrix into Quat
  */
@@ -403,7 +403,7 @@ const double& Quat::operator[](const int Index) const
  * @param Index the index of the value required 0=w, 1=a, 2=b, 3=c
  * @returns a double of the value requested
  */
-double& Quat::operator[](const int Index) 
+double& Quat::operator[](const int Index)
 {
 	switch (Index)
 	    {
