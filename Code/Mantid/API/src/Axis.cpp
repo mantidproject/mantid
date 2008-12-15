@@ -25,7 +25,7 @@ Axis::Axis(const bool type, const int length) :
 }
 
 /// Protected copy constructor
-Axis::Axis(const Axis& right) : 
+Axis::Axis(const Axis& right) :
   m_size(right.m_size), m_title(right.m_title), m_unit(right.m_unit), m_isSpectra(right.m_isSpectra),
   m_spectraValues(right.m_spectraValues), m_numericValues(right.m_numericValues)
 {}
@@ -39,8 +39,8 @@ Axis::~Axis()
  *  @return A pointer to a copy of the Axis on which the method is called
  */
 Axis* Axis::clone(const Workspace* const parentWorkspace)
-{ 
-  return new Axis(*this); 
+{
+  return new Axis(*this);
 }
 
 /// Returns the user-defined title for this axis
@@ -95,7 +95,7 @@ const double Axis::operator()(const int index, const int verticalIndex) const
   {
     throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
   }
-  
+
   if (m_isSpectra)
   {
     return static_cast<double>(m_spectraValues[index]);
@@ -117,7 +117,7 @@ void Axis::setValue(const int index, const double value)
   {
     throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
   }
-  
+
   if (m_isSpectra)
   {
     m_spectraValues[index] = static_cast<int>(value);
@@ -125,7 +125,7 @@ void Axis::setValue(const int index, const double value)
   else
   {
     m_numericValues[index] = value;
-  }  
+  }
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)
@@ -141,7 +141,7 @@ const int& Axis::spectraNo(const int index) const
   {
     throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
   }
-  
+
   return m_spectraValues[index];
 }
 
@@ -158,8 +158,27 @@ int& Axis::spectraNo(const int index)
   {
     throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
   }
-  
+
   return m_spectraValues[index];
+}
+/** Returns a map where spectra is the key and index is the value
+ * This is used for efficient search of spectra number within a workspace
+ *  @param  map Reference to the map
+ */
+void Axis::getSpectraIndexMap(spec2index_map& map)
+{
+	if (!isSpectra())
+		throw std::runtime_error("getSpectraIndexMap(), not a spectra axis");
+
+	std::size_t nel=m_spectraValues.size();
+
+	if (nel==0)
+		throw std::runtime_error("getSpectraIndexMap(),  zero elements");
+	map.empty();
+	for (int i=nel-1;i>=0;--i)
+	{
+		map.insert(std::make_pair<int,int>(m_spectraValues[i],i));
+	}
 }
 
 } // namespace API

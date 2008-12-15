@@ -9,6 +9,12 @@
 #include <string>
 #include <vector>
 
+#ifndef HAS_UNORDERED_MAP_H
+#include <map>
+#else
+#include <tr1/unordered_map>
+#endif
+
 namespace Mantid
 {
 //----------------------------------------------------------------------
@@ -54,6 +60,11 @@ class Workspace;
 class DLLExport Axis
 {
 public:
+	#ifndef HAS_UNORDERED_MAP_H
+	typedef std::map<int,int> spec2index_map;
+	#else
+	typedef std::tr1::unordered_map<int,int> spec2index_map;
+	#endif
   Axis(const bool type, const int length);
   virtual ~Axis();
 
@@ -73,6 +84,8 @@ public:
 
   const int& spectraNo(const int index) const;
   int& spectraNo(const int index);
+
+  void getSpectraIndexMap(spec2index_map&);
 
 protected:
   Axis(const Axis& right);
