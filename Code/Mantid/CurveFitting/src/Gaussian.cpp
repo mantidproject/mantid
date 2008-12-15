@@ -50,7 +50,7 @@ struct FitData {
 * @param f Output function value
 * @return A GSL status information
 */
-int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
+static int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
     size_t n = ((struct FitData *)params)->n;
     double *X = ((struct FitData *)params)->X;
     double *Y = ((struct FitData *)params)->Y;
@@ -74,7 +74,7 @@ int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
 * @param J Output derivatives
 * @return A GSL status information
 */
-int gauss_df (const gsl_vector * x, void *params,
+static int gauss_df (const gsl_vector * x, void *params,
               gsl_matrix * J)
 {
     size_t n = ((struct FitData *)params)->n;
@@ -103,12 +103,13 @@ int gauss_df (const gsl_vector * x, void *params,
 * @param J Output derivatives
 * @return A GSL status information
 */
-int gauss_fdf (const gsl_vector * x, void *params,
+static int gauss_fdf (const gsl_vector * x, void *params,
                gsl_vector * f, gsl_matrix * J) {
     gauss_f (x, params, f);
     gauss_df (x, params, J);
     return GSL_SUCCESS;
 }
+
 /// Initialisation method
 void Gaussian::init()
 {

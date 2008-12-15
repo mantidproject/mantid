@@ -13,7 +13,7 @@ namespace Mantid
   {
     /**
     Takes a histogram in a 2D workspace and fit it to a Gaussian atop a flat background.
-    i.e. a function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2),.
+    i.e. a function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
 
     Required Properties:
     <UL>
@@ -92,12 +92,6 @@ namespace Mantid
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
-
-    /// Gaussian function and derivative function in GSL format
-    // defined as friend do get access to function pointers
-    //int gauss_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
-    //int gauss_df (const gsl_vector * x, void *params, gsl_matrix * J);
-    //int gauss_f (const gsl_vector * x, void *params,gsl_vector * f);
 
   } // namespace CurveFitting
 } // namespace Mantid
