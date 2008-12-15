@@ -13,7 +13,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CorrectForAttenuation);
+DECLARE_ALGORITHM(CorrectForAttenuation)
 
 using namespace Kernel;
 using namespace Geometry;
