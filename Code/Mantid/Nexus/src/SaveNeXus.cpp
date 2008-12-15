@@ -26,7 +26,7 @@ namespace NeXus
   Logger& SaveNeXus::g_log = Logger::get("SaveNeXus");
 
   /// Empty default constructor
-  SaveNeXus::SaveNeXus()
+  SaveNeXus::SaveNeXus():Algorithm()
   {
   }
 

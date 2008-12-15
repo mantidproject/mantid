@@ -29,7 +29,7 @@ namespace NeXus
   Logger& SaveNexusProcessed::g_log = Logger::get("SaveNexusProcessed");
 
   /// Empty default constructor
-  SaveNexusProcessed::SaveNexusProcessed()
+  SaveNexusProcessed::SaveNexusProcessed():Algorithm()
   {
   }
 
