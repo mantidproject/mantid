@@ -5,22 +5,19 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
 #include <gsl/gsl_matrix.h>
-
 
 namespace Mantid
 {
   namespace CurveFitting
   {
     /**
-    Takes a histogram in a 2D workspace and fit it to a Gaussian, i.e. a
-    function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
-
+    Takes a histogram in a 2D workspace and fit it to a Gaussian atop a flat background.
+    i.e. a function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2),.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
@@ -32,8 +29,8 @@ namespace Mantid
     <LI> height - height of peak (default 0.0)</LI>
     <LI> bg0 - constant background value (default 0.0)</LI>
 
-    <LI> StartX - X value to start fitting from (default to -4*sigma away from the peakCentre)</LI>
-    <LI> EndX - last X value to include in fitting range (default to +4*sigma away from the peakCentre)</LI>
+    <LI> StartX - X value to start fitting from (default to -6*sigma away from the peakCentre)</LI>
+    <LI> EndX - last X value to include in fitting range (default to +6*sigma away from the peakCentre)</LI>
 
     <LI> MaxIterations - Max iterations (default 500)</LI>
 
@@ -98,12 +95,11 @@ namespace Mantid
 
     /// Gaussian function and derivative function in GSL format
     // defined as friend do get access to function pointers
-    int gauss_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
-    int gauss_df (const gsl_vector * x, void *params, gsl_matrix * J);
-    int gauss_f (const gsl_vector * x, void *params,gsl_vector * f);
+    //int gauss_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
+    //int gauss_df (const gsl_vector * x, void *params, gsl_matrix * J);
+    //int gauss_f (const gsl_vector * x, void *params,gsl_vector * f);
 
-
-  } // namespace Algorithm
+  } // namespace CurveFitting
 } // namespace Mantid
 
 #endif /*MANTID_CURVEFITTING_GAUSSIAN_H_*/

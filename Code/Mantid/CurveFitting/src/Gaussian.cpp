@@ -44,7 +44,71 @@ struct FitData {
   double * sigmaData;
 };
 
+/** Gaussian function in GSL format
+* @param x Input function arguments
+* @param params Input data
+* @param f Output function value
+* @return A GSL status information
+*/
+int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
+    size_t n = ((struct FitData *)params)->n;
+    double *X = ((struct FitData *)params)->X;
+    double *Y = ((struct FitData *)params)->Y;
+    double *sigmaData = ((struct FitData *)params)->sigmaData;
+    double bg0 = gsl_vector_get (x, 0);
+    double height = gsl_vector_get (x, 1);
+    double peakCentre = gsl_vector_get (x, 2);
+    double weight = gsl_vector_get (x, 3);
+    size_t i;
+    for (i = 0; i < n; i++) {
+        double diff=X[i]-peakCentre;
+        double Yi = height*exp(-0.5*diff*diff*weight)+bg0;
+        gsl_vector_set (f, i, (Yi - Y[i])/sigmaData[i]);
+    }
+    return GSL_SUCCESS;
+}
 
+/** Calculates Gaussian derivatives in GSL format
+* @param x Input function arguments
+* @param params Input data
+* @param J Output derivatives
+* @return A GSL status information
+*/
+int gauss_df (const gsl_vector * x, void *params,
+              gsl_matrix * J)
+{
+    size_t n = ((struct FitData *)params)->n;
+    double *X = ((struct FitData *)params)->X;
+    double *sigmaData = ((struct FitData *)params)->sigmaData;
+    double height = gsl_vector_get (x, 1);
+    double peakCentre = gsl_vector_get (x, 2);
+    double weight = gsl_vector_get (x, 3);
+    size_t i;
+    for (i = 0; i < n; i++) {
+        double s = sigmaData[i];
+        double diff = X[i]-peakCentre;
+        double e = exp(-0.5*diff*diff*weight)/s;
+        gsl_matrix_set (J, i, 0, 1/s);
+        gsl_matrix_set (J, i, 1, e);
+        gsl_matrix_set (J, i, 2, diff*height*e*weight);
+        gsl_matrix_set (J, i, 3, -0.5*diff*diff*height*e);
+    }
+    return GSL_SUCCESS;
+}
+
+/** Calculates Gaussian derivatives and function value in GSL format
+* @param x Input function arguments
+* @param params Input data
+* @param f Output function value
+* @param J Output derivatives
+* @return A GSL status information
+*/
+int gauss_fdf (const gsl_vector * x, void *params,
+               gsl_vector * f, gsl_matrix * J) {
+    gauss_f (x, params, f);
+    gauss_df (x, params, J);
+    return GSL_SUCCESS;
+}
 /// Initialisation method
 void Gaussian::init()
 {
@@ -266,71 +330,7 @@ void Gaussian::exec()
 }
 
 
-/** Gaussian function in GSL format
-* @param x Input function arguments
-* @param params Input data
-* @param f Output function value
-* @return A GSL status information
-*/
-int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
-    size_t n = ((struct FitData *)params)->n;
-    double *X = ((struct FitData *)params)->X;
-    double *Y = ((struct FitData *)params)->Y;
-    double *sigmaData = ((struct FitData *)params)->sigmaData;
-    double bg0 = gsl_vector_get (x, 0);
-    double height = gsl_vector_get (x, 1);
-    double peakCentre = gsl_vector_get (x, 2);
-    double weight = gsl_vector_get (x, 3);
-    size_t i;
-    for (i = 0; i < n; i++) {
-        double diff=X[i]-peakCentre;
-        double Yi = height*exp(-0.5*diff*diff*weight)+bg0;
-        gsl_vector_set (f, i, (Yi - Y[i])/sigmaData[i]);
-    }
-    return GSL_SUCCESS;
-}
 
-/** Calculates Gaussian derivatives in GSL format
-* @param x Input function arguments
-* @param params Input data
-* @param J Output derivatives
-* @return A GSL status information
-*/
-int gauss_df (const gsl_vector * x, void *params,
-              gsl_matrix * J)
-{
-    size_t n = ((struct FitData *)params)->n;
-    double *X = ((struct FitData *)params)->X;
-    double *sigmaData = ((struct FitData *)params)->sigmaData;
-    double height = gsl_vector_get (x, 1);
-    double peakCentre = gsl_vector_get (x, 2);
-    double weight = gsl_vector_get (x, 3);
-    size_t i;
-    for (i = 0; i < n; i++) {
-        double s = sigmaData[i];
-        double diff = X[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight)/s;
-        gsl_matrix_set (J, i, 0, 1/s);
-        gsl_matrix_set (J, i, 1, e);
-        gsl_matrix_set (J, i, 2, diff*height*e*weight);
-        gsl_matrix_set (J, i, 3, -0.5*diff*diff*height*e);
-    }
-    return GSL_SUCCESS;
-}
-
-/** Calculates Gaussian derivatives and function value in GSL format
-* @param x Input function arguments
-* @param params Input data
-* @param f Output function value
-* @param J Output derivatives
-* @return A GSL status information
-*/
-int gauss_fdf (const gsl_vector * x, void *params,
-               gsl_vector * f, gsl_matrix * J) {
-    gauss_f (x, params, f);
-    gauss_df (x, params, J);
-    return GSL_SUCCESS;
-}
 
 
 
