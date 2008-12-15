@@ -30,7 +30,7 @@ namespace Mantid
 		*/
 		GluGeometryRenderer::~GluGeometryRenderer()
 		{
-			if(glIsList(iDisplaylistId)==GL_TRUE)
+			if(boolDisplaylistCreated && glIsList(iDisplaylistId)==GL_TRUE)
 				glDeleteLists(iDisplaylistId,1);
 		}
 
@@ -43,7 +43,7 @@ namespace Mantid
 				GLUquadricObj *qobj=gluNewQuadric();
 				gluQuadricDrawStyle(qobj,GLU_FILL);
 				gluQuadricNormals(qobj,GL_SMOOTH);
-				glNewList(iDisplaylistId,GL_COMPILE_AND_EXECUTE); //Construct display list for object representation
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
 				glPushMatrix();
 				glTranslated(center[0],center[1],center[2]);
 				gluSphere(qobj,radius,5,5);
