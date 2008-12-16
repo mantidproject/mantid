@@ -139,7 +139,6 @@ namespace NeXus
    // Return count of entries if OK, -1 failed to open file. Close file on exit.
    //
    NXhandle fileH;
-   int count=0;
    NXaccess mode= NXACC_READ;
    NXstatus stat=NXopen(fileName.c_str(), mode, &fileH);
    if(stat==NX_ERROR) return(-1);

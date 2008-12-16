@@ -222,7 +222,6 @@ namespace NeXus
                          const std::string& description, const std::string& pairValues)
   {
    NXstatus status;
-   int dimensions[1];
    status=NXmakegroup(fileID,noteName.c_str(),"NXnote");
    if(status==NX_ERROR)
        return(false);
@@ -284,7 +283,6 @@ namespace NeXus
 							const boost::shared_ptr<Mantid::DataObjects::Workspace2D> localworkspace,
 							const bool uniformSpectra, const int m_spec_min, const int m_spec_max)
   {
-   NXaccess mode;
    NXstatus status;
 
    //write data entry

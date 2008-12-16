@@ -214,10 +214,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FindPeaks.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\MergeRuns.cpp"
 				>
 			</File>

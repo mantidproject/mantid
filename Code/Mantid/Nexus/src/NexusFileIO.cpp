@@ -182,7 +182,7 @@ namespace NeXus
   {
    // Write Nexus mantid workspace header fields for the NXentry/IXmantid/NXprocessed field.
    // The URLs are not correct
-   std::string className="NXentry";
+   std::string className="Mantid Processed Workspace";
    std::vector<std::string> attributes,avalues;
    if( ! writeNxText("title", title, attributes, avalues) )
        return(3);
@@ -256,8 +256,7 @@ namespace NeXus
 
    status=NXclosegroup(fileID);
 
-   return((status==NX_ERROR)?3:0);
-      return(true);
+   return(true);
   }
 //
 // write an NXdata entry with char values
