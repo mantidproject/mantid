@@ -14,7 +14,7 @@ namespace Mantid
     /**
     Takes a histogram in a 2D workspace and fit it to a Gaussian on top of
     a linear background.
-    i.e. a function: height*exp(-0.5*((x-peakCentre)/sigma)^2) + bg0 + (bg1*x)
+    i.e. a function: height*exp(-0.5*((x-peakCentre)/sigma)^2) + bg0 + bg1*x
 
     Required Properties:
     <UL>

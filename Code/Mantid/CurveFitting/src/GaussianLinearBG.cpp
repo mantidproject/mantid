@@ -59,11 +59,11 @@ static int gauss_f (const gsl_vector * x, void *params, gsl_vector * f) {
     double height = gsl_vector_get (x, 1);
     double peakCentre = gsl_vector_get (x, 2);
     double weight = gsl_vector_get (x, 3);
-    double Y1 = gsl_vector_get (x, 4);
+    double bg1 = gsl_vector_get (x, 4);
     size_t i;
     for (i = 0; i < n; i++) {
         double diff=X[i]-peakCentre;
-        double Yi = height*exp(-0.5*diff*diff*weight)+bg0+Y1*X[i];
+        double Yi = height*exp(-0.5*diff*diff*weight)+bg0+bg1*X[i];
         gsl_vector_set (f, i, (Yi - Y[i])/sigmaData[i]);
     }
     return GSL_SUCCESS;
@@ -84,7 +84,6 @@ static int gauss_df (const gsl_vector * x, void *params,
     double height = gsl_vector_get (x, 1);
     double peakCentre = gsl_vector_get (x, 2);
     double weight = gsl_vector_get (x, 3);
-    double Y1 = gsl_vector_get (x, 4);
     size_t i;
     for (i = 0; i < n; i++) {
         double s = sigmaData[i];
