@@ -160,14 +160,21 @@ Cylinder::side(const Geometry::V3D& Pt) const
 {
   if (Nvec)      // Nvec =1-3 (point to exclude == Nvec-1)
     {
-      double x=Pt[Nvec % 3]-Centre[Nvec % 3];
-      x*=x;
-      double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
-      y*=y;
-      const double displace=x+y-Radius*Radius;
-      if (fabs(displace)<getSurfaceTolerance())
-	return 0;
-      return (displace>0.0) ? 1 : -1;
+			if (Radius > 0.0)
+			{
+				double x=Pt[Nvec % 3]-Centre[Nvec % 3];
+				x*=x;
+				double y=Pt[(Nvec+1) % 3]-Centre[(Nvec+1) % 3];;
+				y*=y;
+				const double displace=x+y-Radius*Radius;
+				if (fabs(displace/Radius)<getSurfaceTolerance())
+					return 0;
+				return (displace>0.0) ? 1 : -1;
+			}
+			else
+			{
+				return -1;
+			}
     }
   return Quadratic::side(Pt);
 }
