@@ -41,6 +41,7 @@ m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
 {
     m_appWindow = parent;
+    m_strName = name.toStdString();
     setup(ws,start,end);
 	setWindowTitle(name);
 	setName(name); 
@@ -711,9 +712,11 @@ void MantidMatrix::repaintAll()
     }
 }
 
-void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification>& pNf)
+void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::BeforeReplaceNotification>& pNf)
 {
-    if (pNf->object() == m_workspace)
+  if( !pNf->object() || !pNf->new_object() ) return;
+
+  if (pNf->new_object() != m_workspace && pNf->object_name() == m_strName)
     {
         emit needChangeWorkspace(pNf->new_object());
     }
@@ -729,7 +732,7 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
     QItemSelectionModel *oldSelModel = activeView()->selectionModel();
     QModelIndexList indexList = oldSelModel->selectedIndexes();
     QModelIndex curIndex = activeView()->currentIndex();
-
+    
     setup(ws,m_startRow,m_endRow);
     
     delete m_modelY;

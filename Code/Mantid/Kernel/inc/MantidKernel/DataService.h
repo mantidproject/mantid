@@ -81,8 +81,8 @@ public:
     };
 
 
-    /// ReplaceNotification is sent after an object is replaced with addOrReplace() function.
-    class ReplaceNotification: public DataServiceNotification
+    /// BeforeReplaceNotification is sent before an object is replaced in the addOrReplace() function.
+    class BeforeReplaceNotification: public DataServiceNotification
     {
     public:
         /** Constructor.
@@ -91,12 +91,27 @@ public:
             @param obj  The pointer to the old object
             @param new_obj The pointer to the new object
 
-            Both old and new objects are quaranteed to exist when an observer receives the notification.
+            Both old and new objects are guaranteed to exist when an observer receives the notification.
         */
-        ReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> new_obj):DataServiceNotification(name,obj),m_new_object(new_obj){}
+        BeforeReplaceNotification(const std::string& name, const boost::shared_ptr<T> obj,const boost::shared_ptr<T> new_obj):DataServiceNotification(name,obj),m_new_object(new_obj){}
         const boost::shared_ptr<T> new_object()const{return m_new_object;}///< Returns the pointer to the new object.
     private:
         boost::shared_ptr<T> m_new_object;///< shared pointer to the object
+    };
+
+    /// AfterReplaceNotification is sent after an object is replaced in the addOrReplace() function.
+    class AfterReplaceNotification: public DataServiceNotification
+    {
+    public:
+        /** Constructor.
+
+            @param name The name of the replaced object
+            @param obj  The pointer to the old object
+            @param new_obj The pointer to the new object
+
+            Only new objects are guaranteed to exist when an observer receives the notification.
+        */
+        AfterReplaceNotification(const std::string& name, const boost::shared_ptr<T> new_obj):DataServiceNotification(name,new_obj) {}
     };
 
     /// DeleteNotification is sent after an object is deleted from the data service.
@@ -148,8 +163,9 @@ public:
     if (it!=datamap.end())
     {
       g_log.warning("Data Object '"+ name +"' replaced in data service.");
-      notificationCenter.postNotification(new ReplaceNotification(name,it->second,Tobject));
+      notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
       datamap[name] = Tobject;
+      notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
     }
     else
     {

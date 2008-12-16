@@ -164,8 +164,8 @@ public:
     void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
-    void handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf);
-    Poco::NObserver<MantidUI, WorkspaceReplaceNotification> m_replaceObserver;
+    void handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidUI, WorkspaceAfterReplaceNotification> m_replaceObserver;
 
     void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;

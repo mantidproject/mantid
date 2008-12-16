@@ -71,8 +71,11 @@ private:
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification WorkspaceAddNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification>& WorkspaceAddNotification_ptr;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification WorkspaceReplaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ReplaceNotification>& WorkspaceReplaceNotification_ptr;
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::BeforeReplaceNotification WorkspaceBeforeReplaceNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::BeforeReplaceNotification>& WorkspaceBeforeReplaceNotification_ptr;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::AfterReplaceNotification WorkspaceAfterReplaceNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AfterReplaceNotification>& WorkspaceAfterReplaceNotification_ptr;
 
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification WorkspaceDeleteNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& WorkspaceDeleteNotification_ptr;

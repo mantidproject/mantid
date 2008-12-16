@@ -187,8 +187,8 @@ protected:
 
     void setup(Mantid::API::Workspace_sptr ws, int start=-1, int end=-1);
 
-    void handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf);
-    Poco::NObserver<MantidMatrix, WorkspaceReplaceNotification> m_replaceObserver;
+    void handleReplaceWorkspace(WorkspaceBeforeReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, WorkspaceBeforeReplaceNotification> m_replaceObserver;
 
     void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidMatrix, WorkspaceDeleteNotification> m_deleteObserver;
@@ -225,6 +225,10 @@ protected:
     MantidMatrixFunction m_funct;
 
     QAction *m_actionShowX;
+
+    private:
+    //name of the underlying workspace
+    std::string m_strName;
 };
 
 /**

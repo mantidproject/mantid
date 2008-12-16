@@ -122,7 +122,9 @@ void MantidUI::init()
 
 MantidUI::~MantidUI()
 {
-    InputHistory::Instance().save();
+  InputHistory::Instance().save();
+  if( m_algMonitor ) delete m_algMonitor;
+
 }
 
 QString MantidUI::releaseDate()
@@ -907,7 +909,7 @@ void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
     emit needsUpdating();
 }
 
-void MantidUI::handleReplaceWorkspace(WorkspaceReplaceNotification_ptr pNf)
+void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
 {
     emit needsUpdating();
 }
