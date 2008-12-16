@@ -55,7 +55,7 @@ namespace Mantid
 							const bool& uniformSpectra, const int& fromY, const int& toY);
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
-               bool& uniformBounds, std::string& axesNames );
+               bool& uniformBounds, std::string& axesNames, std::string& yUnits );
       /// read X values for one (or the generic if uniform) spectra
       int getXValues(std::vector<double>& xValues, const int& spectra);
       /// read values and erros for spectra

@@ -30,11 +30,17 @@ namespace NeXus
   // Initialise logger
   Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
 
-  /// Empty default constructor
+  /// Default constructor
   LoadNexusProcessed::LoadNexusProcessed() :
     Algorithm(), m_filename(), m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0),
     m_workspace_no(0)
   {
+      nexusFile= new NexusFileIO();
+  }
+  /// Delete NexusFileIO in destructor
+    LoadNexusProcessed::~LoadNexusProcessed()
+  {
+     delete nexusFile;
   }
 
   /** Initialisation method.
@@ -77,14 +83,14 @@ namespace NeXus
     boost::shared_ptr<Sample> sample;
     //
     m_entrynumber = getProperty("EntryNumber");
-    NexusFileIO *nexusFile= new NexusFileIO();
 
     if( nexusFile->openNexusRead( m_filename, m_workspace_no ) != 0 )
     {
-       g_log.error("Failed to read file");
+       g_log.error("Failed to read file " + m_filename);
        throw Exception::FileError("Failed to read to file", m_filename);
     }
-    if( nexusFile->getWorkspaceSize( m_numberofspectra, m_numberofchannels, m_xpoints, m_uniformbounds, m_axes) != 0 )
+    if( nexusFile->getWorkspaceSize( m_numberofspectra, m_numberofchannels, m_xpoints,
+        m_uniformbounds, m_axes, m_yunits) != 0 )
     {
        g_log.error("Failed to read data size");
        throw Exception::FileError("Failed to read data size", m_filename);
@@ -118,6 +124,9 @@ namespace NeXus
     size_t colon=m_axes.find(":");
     if(colon!=std::string::npos)
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0,colon));
+    // set Yunits
+    if(m_yunits.size()>0)
+        localWorkspace->setYUnit(m_yunits);
 
     std::vector<double> xValues;
     if(m_uniformbounds)

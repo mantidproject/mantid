@@ -507,6 +507,8 @@ namespace NeXus
 	   yLabel=yAxis->unit()->unitID();
    const std::string axesNames=xLabel+":"+yLabel;
    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
+   std::string yUnits=localworkspace->YUnit();
+   status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
    status=NXclosedata(fileID);
    // error
    name="errors";
@@ -555,10 +557,10 @@ namespace NeXus
   }
 
   int NexusFileIO::getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
-      bool& uniformBounds, std::string& axesNames )
+      bool& uniformBounds, std::string& axesNames, std::string& yUnits )
   {
    //
-   // Read the size of the data section in a mantid_workspace_entry
+   // Read the size of the data section in a mantid_workspace_entry and also get the names of axes
    //
    NXstatus status;
    //open workspace group
@@ -577,13 +579,18 @@ namespace NeXus
    numberOfSpectra=dim[0];
    numberOfChannels=dim[1];
    // get axes attribute
-   char sbuf[80];
-   int len=80;
+   char sbuf[NX_MAXNAMELEN];
+   int len=NX_MAXNAMELEN;
    type=NX_CHAR;
    status=NXgetattr(fileID,"axes",(void *)sbuf,&len,&type);
    if(status!=NX_ERROR)
        axesNames=sbuf;
+   len=NX_MAXNAMELEN;
+   status=NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+   if(status!=NX_ERROR)
+       yUnits=sbuf;
    status=NXclosedata(fileID);
+   //
    // read axis1 size
    status=NXopendata(fileID,"axis1");
    if(status==NX_ERROR)

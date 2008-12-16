@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidNexus/NexusFileIO.h"
+//class NexusFileIO;
 
 
 namespace Mantid
@@ -52,7 +54,7 @@ namespace Mantid
       LoadNexusProcessed();
 
       /// Destructor
-      ~LoadNexusProcessed() {}
+      ~LoadNexusProcessed();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadNexusProcessed";};
       /// Algorithm's version for identification overriding a virtual method
@@ -67,9 +69,11 @@ namespace Mantid
 
       /// Overwrites Algorithm method
       void exec();
-
+      /// NexusFileIO instance to do IO operations
+      NexusFileIO *nexusFile;
       /// check optional params
       void checkOptionalProperties();
+      /// Object to han
       /// The name and path of the input file
       std::string m_filename;
       /// The number of the input entry
@@ -100,6 +104,8 @@ namespace Mantid
       bool m_uniformbounds;
       /// axes names
       std::string m_axes;
+      /// Y units from Nexus file
+      std::string m_yunits;
       /// The instrument XML file name read from the Nexus file
       std::string m_instrumentxml;
       /// Instrument xml file date

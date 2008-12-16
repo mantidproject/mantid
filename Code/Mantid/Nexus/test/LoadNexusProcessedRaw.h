@@ -66,6 +66,9 @@ void testExecOnLoadraw()
     //
     if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 
+    // temp test
+    //output2D->setYUnit("Counts per aardvark");
+    //
     saveNexusP.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
     outputFile = "testSaveLoadrawHET.nxs";
@@ -130,6 +133,8 @@ void testExecOnLoadraw()
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
+    // Check units of Y axis are "Counts"
+    TS_ASSERT_EQUALS( output->YUnit(), "Counts" )
 
     // Check the proton charge has been set correctly
     TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
