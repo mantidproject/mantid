@@ -57,6 +57,7 @@ typedef struct _traceback {
 #include <QCoreApplication>
 
 #include <Qsci/qscilexerpython.h> //Mantid
+#include<iostream>
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "sipAPIqti.h"
@@ -166,6 +167,7 @@ QString PythonScripting::errorMsg()
 	  Py_DECREF(traceback);
 	}
        	msg.append("\n");
+	if( msg.contains("SystemExit") ) msg = QString("");
 	//----------------------------------------------
 	return msg;
 }

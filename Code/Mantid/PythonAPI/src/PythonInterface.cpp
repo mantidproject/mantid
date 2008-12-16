@@ -33,11 +33,12 @@ std::vector<std::string> GetAlgorithmNames()
 
 /**
   * Create the simple Python API module
+  * @param gui Whether the module is being made for use with qtiplot or not
   **/
-void createPythonSimpleAPI()
+void createPythonSimpleAPI(bool gui)
 {
   //Redirect to static helper class
-  Mantid::PythonAPI::SimplePythonAPI::createModule();
+  Mantid::PythonAPI::SimplePythonAPI::createModule(gui);
 }
 	
 }

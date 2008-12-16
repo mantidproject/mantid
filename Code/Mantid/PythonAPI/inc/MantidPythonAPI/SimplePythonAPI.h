@@ -57,7 +57,7 @@ class DLLExport SimplePythonAPI
   typedef std::vector<std::pair<std::string, std::string> > IndexVector;
 
   ///Public methods
-  static void createModule();
+  static void createModule(bool gui);
   static const std::string & getModuleName(); 
   
   private:
@@ -68,7 +68,7 @@ class DLLExport SimplePythonAPI
   static void createVersionMap(VersionMap & versionMap, const StringVector & algorithmKeys);
   static std::string extractAlgName(const std::string & algKey);
   static std::string extractAlgVersion(const std::string & algKey);
-  static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties);
+  static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, bool gui);
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties);
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);

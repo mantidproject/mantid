@@ -45,7 +45,7 @@ public:
 
   void testCreatePythonSimpleAPI()
   {
-    createPythonSimpleAPI();
+    createPythonSimpleAPI(false);
     TS_ASSERT(boost::filesystem::exists(SimplePythonAPI::getModuleName()));
     boost::filesystem::remove_all(SimplePythonAPI::getModuleName());
   }

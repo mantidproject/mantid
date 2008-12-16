@@ -1238,6 +1238,34 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
   return w;
 }
 
+// This is for the scripting side of things
+int MantidUI::createPropertyInputDialog(const QString & algName)
+{
+  vector<Mantid::API::Algorithm_sptr> algorithms = 
+    Mantid::API::AlgorithmManager::Instance().algorithms();
+  Mantid::API::Algorithm* alg(NULL);
+  vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
+  for(  vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 
+	aIter != aEnd; ++aIter )
+  {
+    if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )
+    {
+      alg = (*aIter).get();
+      break;
+    }
+  }
+  if( !alg ) return -1;
+
+  ExecuteAlgorithm* dlg = new ExecuteAlgorithm(true, (QDialog*)appWindow()->scriptWindow);
+  dlg->CreateLayout(alg);
+  dlg->setModal(true);
+
+  if( dlg->exec() == QDialog::Accepted ) return 0;
+  else return -1;
+  
+}
+
+
 //----------------------------------------------------------------------------------//
 #ifdef _WIN32
 

@@ -8,8 +8,9 @@
 #include <iomanip>
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -35,8 +36,10 @@ namespace Mantid
     /**
      * Create the python module with function definitions in the
      * file whose name is returned by getModule()
+     * @param gui If this is true create the necessary framework to use the dialog
+     * boxes in qtiplot
      */
-    void SimplePythonAPI::createModule()
+    void SimplePythonAPI::createModule(bool gui)
     {
       //open file
       std::ofstream module(getModuleName().c_str());
@@ -47,8 +50,14 @@ namespace Mantid
 #else
       module << "from libMantidPythonAPI import FrameworkManager\n";
 #endif
-      
-      //Also need string module for some text processing in help command
+
+      //If in gui mode also need sys and qti module
+      if( gui )
+      {
+	module << "import sys\n";
+	module << "import qti\n";
+      }
+      //Need string module regardless
       module << "import string\n\n";
 
       //Algorithm keys
@@ -62,17 +71,19 @@ namespace Mantid
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
 	   ++vIter)
       {
-	IAlgorithm* algm = FrameworkManager::Instance().createAlgorithm(vIter->first);
+	Algorithm_sptr algm = AlgorithmManager::Instance().createUnmanaged(vIter->first);
+	algm->initialize();
 	PropertyVector orderedProperties(algm->getProperties());
-	std::sort(orderedProperties.begin(), orderedProperties.end(),
-		  SimplePythonAPI::PropertyOrdering());
+	std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());
 	std::string name(vIter->first);
-	writeFunctionDef(module, name , orderedProperties);
+	writeFunctionDef(module, name , orderedProperties, false);
+	if( gui ) writeFunctionDef(module, name , orderedProperties, true);
 	std::transform(name.begin(), name.end(), name.begin(), tolower);
 	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
       }
       writeFunctionHelp(module, helpStrings);
       module.close();
+
     }
     
     /**
@@ -109,46 +120,74 @@ namespace Mantid
      * @param os The stream to use to write the definition
      * @param algm The name of the algorithm
      * @param properties The list of properties
+     * @param gui If this is true create the necessary framework to use the dialog
+     * boxes in qtiplot
      */
     void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
-    const PropertyVector & properties)
+					   const PropertyVector & properties, bool gui)
     {
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
-      os << "def " << algm << "(";
+      os << "def " << algm;
+      if( gui ) os << "Dialog";
+      os << "(";
       //Iterate through properties
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
       StringVector sanitizedNames(properties.size());
-      unsigned int iMand(0);
-      for( unsigned int iarg = 0; pIter != pEnd; ++iarg)
+      unsigned int iMand(0), iarg(0);
+      for( ; pIter != pEnd; ++iarg)
       {
 	sanitizedNames[iarg] = sanitizePropertyName((*pIter)->name());
 	os << sanitizedNames[iarg];
-	if( !(*pIter)->isValid() ) 
+
+	//For gui mode, set all properties as optional
+	if( gui )
 	{
-	  ++iMand;
+	  os << " = -1";
 	}
-	else 
+	else
 	{
-	  os  << " = -1";
+	  if( !(*pIter)->isValid() ) ++iMand;
+	  else os  << " = -1";
 	}
         if( ++pIter != pEnd ) os << ", ";
       }
       //end of function parameters
       os << "):\n";
       os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
+
+      if( gui )
+      os << "\tnset = 0\n";
+
       pIter = properties.begin();
-      for( unsigned int iarg = 0; pIter != pEnd; ++pIter, ++iarg )
+      iarg = 0;
+      for( ; pIter != pEnd; ++pIter, ++iarg )
       {
-	if( iarg < iMand )
+
+	if( !gui && iarg < iMand )
 	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
 	else {
 	  os << "\tif " << sanitizedNames[iarg] << " != -1:\n"
 	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
+	  if( gui )  os << "\t\tnset += 1\n";
+
 	}
       }
-      os << "\talgm.execute()\n";
+
+      if( gui )
+      {
+	os << "\tif nset != " << iarg + 1 << ":\n"
+	   << "\t\tres = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\")\n"
+	   << "\tif res == 0:\n"
+	   << "\t\talgm.execute()\n"
+	   << "\telse:\n"
+	   << "\t\tsys.exit(1)\n";
+      }
+      else
+      {
+	os << "\talgm.execute()\n";
+      }
       os << "\treturn algm\n";
       //Add space at end of definition
       os << "\n";
@@ -180,6 +219,8 @@ namespace Mantid
 	}
       }
       os << "\tprint \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\"\n";
+      os << "\tprint \"Note: Each command also has a counterpart with the word 'Dialog'"
+	 << " appended to it, which when run will bring up a property input dialog for that algorithm.\"\n";
       os << "\n";
     }
 

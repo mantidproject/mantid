@@ -20,8 +20,8 @@
 
 using Mantid::Kernel::PropertyWithValue;
 
-ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent) 
-	: QDialog(parent)
+ExecuteAlgorithm::ExecuteAlgorithm(bool forScript, QWidget *parent) 
+  : QDialog(parent), m_forScript(forScript)
 {
 	m_parent = parent;
     m_directory = "";
@@ -29,147 +29,167 @@ ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent)
 
 ExecuteAlgorithm::~ExecuteAlgorithm()
 {
- 	
 }
 
 void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 {
-	QGridLayout *grid = new QGridLayout();
-	
-	m_alg = alg;
-	m_props = m_alg->getProperties();
+  m_alg = alg;
+  m_props = m_alg->getProperties();
 
-	if (m_props.size() > 0)
-	{
-        QMap< QString, QString > savedProps = InputHistory::Instance().algorithmProperties(QString::fromStdString(alg->name()));
-        QString lastValue;
-		for (int i = 0; i < m_props.size(); ++i)
-		{
-		  // If this is an output property (other than a workspace) then skip
-      if ( m_props[i]->direction() == Mantid::Kernel::Direction::Output &&
-           !dynamic_cast<Mantid::API::IWorkspaceProperty*>(m_props[i])) continue;
+  if ( m_props.empty() ) return;
+
+  QGridLayout *grid = new QGridLayout();
+  std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = m_props.end();
+  int row(0);
+  QString lastValue("");
+  QMap<QString, QString> savedProps = InputHistory::Instance().algorithmProperties(QString::fromStdString(alg->name()));
+  for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = m_props.begin();
+	pIter != pEnd; ++pIter, ++row )
+    {
+      Mantid::Kernel::Property* prop = *pIter;
+      // If this is an output property (other than a workspace) then skip
+      if ( prop->direction() == Mantid::Kernel::Direction::Output &&
+	   !dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop)) continue;
            
-		  QLabel *tempLbl = new QLabel(QString::fromStdString(m_props[i]->name()));
-			//Add validator
-			QLabel *validLbl = new QLabel("*");
-			QPalette pal = validLbl->palette();
-			pal.setColor(QPalette::WindowText, Qt::darkRed);
-			validLbl->setPalette(pal);
-			validators[m_props[i]->name()] = validLbl;
-		
-			if (m_props[i]->getValidatorType() == "file")
-			{
-				QLineEdit *tempEdit = new QLineEdit;
-				QPushButton *tempBtn = new QPushButton(tr("Browse"));
-                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
-                if (!lastValue.isEmpty())
-                {
-                    tempEdit->setText(lastValue);
-                    m_directory = InputHistory::Instance().getDirectoryFromFilePath(lastValue);
-                }
-			
-				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
-				connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
-			
-				tempLbl->setBuddy(tempEdit);
-				
-				grid->addWidget(tempLbl, i, 0, 0);
-				grid->addWidget(tempEdit, i, 1, 0);
-				grid->addWidget(validLbl, i, 2, 0);
-				grid->addWidget(tempBtn, i, 3, 0);
-		
-				edits[tempEdit] = m_props[i]->name();
-				buttonsToEdits[tempBtn] = tempEdit;
-			}
-			else if (m_props[i]->allowedValues().size() > 0)
-			{		
-				//If the property has allowed values then use a combo box.			
-				QComboBox *tempCombo = new QComboBox;
-				tempLbl->setBuddy(tempCombo);
-			
-				QStringList list;
+      QLabel *tempLbl = new QLabel(QString::fromStdString(prop->name()));
+      //Add validator
+      QLabel *validLbl = new QLabel("*");
+      QPalette pal = validLbl->palette();
+      pal.setColor(QPalette::WindowText, Qt::darkRed);
+      validLbl->setPalette(pal);
+      validators[prop->name()] = validLbl;
+      
+      if (prop->getValidatorType() == "file")
+	{
+	  QLineEdit *tempEdit = new QLineEdit;
+	  QPushButton *tempBtn = new QPushButton(tr("Browse"));
+	  
+	  
+	  if( !m_forScript ) lastValue = savedProps[QString::fromStdString(prop->name())];
+	  else
+	  {
+	    if( prop->isDefault() ) lastValue = "";
+	    else lastValue = QString::fromStdString(alg->getPropertyValue(prop->name()));
+	  }
 
-				std::vector<std::string> temp = m_props[i]->allowedValues();
-				std::vector<std::string>::const_iterator vals_iter = temp.begin();
+	  if (!lastValue.isEmpty())
+	    {
+	      tempEdit->setText(lastValue);
+	      if( m_forScript ) m_directory = "";
+	      else m_directory = InputHistory::Instance().getDirectoryFromFilePath(lastValue);
+	    }
 			
-				for (;  vals_iter != temp.end(); ++vals_iter)
-				{
-					list << QString::fromStdString(*vals_iter);
-				}
-				
-				tempCombo->addItems(list);
-                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
-                if (!lastValue.isEmpty()) 
-                {
-                    int i = list.indexOf(lastValue);
-                    if (i >= 0) tempCombo->setCurrentIndex(i);
-                }
-				
-				grid->addWidget(tempLbl, i, 0, 0);
-				grid->addWidget(tempCombo, i, 1, 0);
-				grid->addWidget(validLbl, i, 2, 0);
+	  connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
+	  connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
 			
-				combos[tempCombo] = m_props[i]->name();
-			}
-			else if (PropertyWithValue<bool> *p = dynamic_cast<PropertyWithValue<bool>* >(m_props[i]))
-			{
-			  // Add a true/false
-				QComboBox *tempCombo = new QComboBox;
-				tempLbl->setBuddy(tempCombo);
-				tempCombo->addItem("No");
-				tempCombo->addItem("Yes");
-				// Set to show default value
-				tempCombo->setCurrentIndex(*p);
-
-				grid->addWidget(tempLbl, i, 0, 0);
-				grid->addWidget(tempCombo, i, 1, 0);
-				grid->addWidget(validLbl, i, 2, 0);
-			
-				combos[tempCombo] = m_props[i]->name();
-			}
-			else
-			{
-				QLineEdit *tempEdit = new QLineEdit;
-				tempLbl->setBuddy(tempEdit);
-                lastValue = savedProps[QString::fromStdString(m_props[i]->name())];
-                if (!lastValue.isEmpty()) tempEdit->setText(lastValue);
+	  tempLbl->setBuddy(tempEdit);
 				
-				connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
+	  grid->addWidget(tempLbl, row, 0, 0);
+	  grid->addWidget(tempEdit, row, 1, 0);
+	  grid->addWidget(validLbl, row, 2, 0);
+	  grid->addWidget(tempBtn, row, 3, 0);
 		
-				grid->addWidget(tempLbl, i, 0, 0);
-				grid->addWidget(tempEdit, i, 1, 0);
-				grid->addWidget(validLbl, i, 2, 0);
-		
-				edits[tempEdit] = m_props[i]->name();
-			}
-		}
+	  edits[tempEdit] = prop->name();
+	  buttonsToEdits[tempBtn] = tempEdit;
 	}
+      else if ( !prop->allowedValues().empty() )
+	{		
+	  //If the property has allowed values then use a combo box.			
+	  QComboBox *tempCombo = new QComboBox;
+	  tempLbl->setBuddy(tempCombo);
+			
+	  QStringList list;
+
+	  std::vector<std::string> temp = prop->allowedValues();
+	  std::vector<std::string>::const_iterator vals_iter = temp.begin();
+			
+	  for (;  vals_iter != temp.end(); ++vals_iter)
+	    {
+	      list << QString::fromStdString(*vals_iter);
+	    }
+				
+	  tempCombo->addItems(list);
+	  
+	  if( !m_forScript ) lastValue = savedProps[QString::fromStdString(prop->name())];
+	  else lastValue = QString::fromStdString(alg->getPropertyValue(prop->name()));
+	  
+	  if (!lastValue.isEmpty()) 
+	  {
+	    int index = list.indexOf(lastValue);
+	    if (index >= 0) tempCombo->setCurrentIndex(index);
+	  }
+				
+	  grid->addWidget(tempLbl, row, 0, 0);
+	  grid->addWidget(tempCombo, row, 1, 0);
+	  grid->addWidget(validLbl, row, 2, 0);
+			
+	  combos[tempCombo] = prop->name();
+	}
+      else if (PropertyWithValue<bool> *p = dynamic_cast<PropertyWithValue<bool>* >(prop))
+	{
+	  // Add a true/false
+	  QComboBox *tempCombo = new QComboBox;
+	  tempLbl->setBuddy(tempCombo);
+	  tempCombo->addItem("No");
+	  tempCombo->addItem("Yes");
+	  // Set to show default value
+	  tempCombo->setCurrentIndex(*p);
+
+	  grid->addWidget(tempLbl, row, 0, 0);
+	  grid->addWidget(tempCombo, row, 1, 0);
+	  grid->addWidget(validLbl, row, 2, 0);
+			
+	  combos[tempCombo] = prop->name();
+	}
+      else
+	{
+	  QLineEdit *tempEdit = new QLineEdit;
+	  tempLbl->setBuddy(tempEdit);
+
+	  if( !m_forScript ) lastValue = savedProps[QString::fromStdString(prop->name())];
+	  else
+	  {
+	    if( prop->isDefault() ) lastValue = "";
+	    else lastValue = QString::fromStdString(alg->getPropertyValue(prop->name()));
+	  }
+	  if (!lastValue.isEmpty()) tempEdit->setText(lastValue);
+				
+	  connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
+		
+	  grid->addWidget(tempLbl, row, 0, 0);
+	  grid->addWidget(tempEdit, row, 1, 0);
+	  grid->addWidget(validLbl, row, 2, 0);
+		
+	  edits[tempEdit] = prop->name();
+	}
+    }
+
 	
-	okButton = new QPushButton(tr("OK"));
-	connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-	okButton->setDefault(true);
-	//okButton->setEnabled(false);
+  okButton = new QPushButton(tr("OK"));
+  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+  okButton->setDefault(true);
+  //okButton->setEnabled(false);
 	
-	exitButton = new QPushButton(tr("Cancel"));
-	connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
+  exitButton = new QPushButton(tr("Cancel"));
+  connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
 	
-	QVBoxLayout *mainLay = new QVBoxLayout(this);
-	mainLay->addLayout(grid);
+  QVBoxLayout *mainLay = new QVBoxLayout(this);
+  mainLay->addLayout(grid);
 	
-	QHBoxLayout *buttonRowLayout = new QHBoxLayout;
-	buttonRowLayout->addStretch();
-	buttonRowLayout->addWidget(exitButton);
-	buttonRowLayout->addWidget(okButton);
+  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+  buttonRowLayout->addStretch();
+  buttonRowLayout->addWidget(exitButton);
+  buttonRowLayout->addWidget(okButton);
 	
-	mainLay->addLayout(buttonRowLayout);
+  mainLay->addLayout(buttonRowLayout);
 	
-	setLayout(mainLay);
+  setLayout(mainLay);
 	
-    setWindowTitle(tr("Enter properties - "+QString::fromStdString(alg->name())));
-	setFixedHeight(sizeHint().height());
+  setWindowTitle(tr("Enter properties - "+QString::fromStdString(alg->name())));
+  setFixedHeight(sizeHint().height());
 	
-	//setPropertiesAndValidate();
-	validateProperties();
+  //setPropertiesAndValidate();
+  validateProperties();
 }
 
 void ExecuteAlgorithm::browseClicked()
@@ -193,7 +213,7 @@ void ExecuteAlgorithm::browseClicked()
 	std::vector<std::string> exts = (*itr)->allowedValues();
 	QString allowed;
 	
-	if (exts.size() > 0)
+	if ( !exts.empty() )
 	{
 		allowed = "Files (";
 		

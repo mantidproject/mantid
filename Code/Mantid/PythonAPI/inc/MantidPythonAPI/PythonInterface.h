@@ -15,7 +15,7 @@ namespace PythonAPI
 	//Namespace functions
 	DLLExport std::vector<std::string> GetAlgorithmNames();
 	DLLExport std::vector<std::string> GetWorkspaceNames();
-  DLLExport void createPythonSimpleAPI();
+        DLLExport void createPythonSimpleAPI(bool);
 
 }
 }

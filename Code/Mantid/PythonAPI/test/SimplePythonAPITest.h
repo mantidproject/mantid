@@ -24,7 +24,7 @@ public:
   {
     using namespace Mantid::PythonAPI;
     //first call the function to create the module file
-    SimplePythonAPI::createModule();
+    SimplePythonAPI::createModule(false);
     std::string modname = SimplePythonAPI::getModuleName();
     //has it been written ?
     TS_ASSERT(boost::filesystem::exists(modname));

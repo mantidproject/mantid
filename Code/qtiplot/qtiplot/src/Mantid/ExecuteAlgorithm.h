@@ -31,7 +31,7 @@ class ExecuteAlgorithm : public QDialog
 	Q_OBJECT
 	
 public:
-	ExecuteAlgorithm(QWidget *parent = 0);
+  ExecuteAlgorithm(bool forScript, QWidget *parent = 0);
 	~ExecuteAlgorithm();
 	void CreateLayout(Mantid::API::Algorithm* alg);
 
@@ -54,6 +54,8 @@ private:
 	std::map<QComboBox*, std::string> combos;
 	std::map<QPushButton*, QLineEdit*> buttonsToEdits;
 	std::map<std::string, QLabel*> validators;
+  
+  bool m_forScript;
 
 	bool execute();
     bool setPropertiesAndValidate();

@@ -90,6 +90,7 @@ public:
   // Command purely for python interaction
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotTimeBin(const QString& wsName, int bin);
+  int createPropertyInputDialog(const QString & algName);
 
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);

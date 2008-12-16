@@ -23,6 +23,6 @@ else:
 # Ensure all algorithm libraries are loaded and get the FrameworkManager object
 mtd = FrameworkManager()
 # Now create simple API (makes mantidsimple.py file in cwd)
-createPythonSimpleAPI()
+createPythonSimpleAPI(True)
 # Import definitions
 from mantidsimple import *

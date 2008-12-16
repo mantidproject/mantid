@@ -186,11 +186,13 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 
 void ScriptEdit::insertErrorMsg(const QString &message)
 {
-  emit outputError(message);
+  if( !message.isEmpty() )
+    emit outputError(message);
 }
 
 void ScriptEdit::scriptPrint(const QString &text)
 {
+  if( !text.isEmpty() )
   emit outputMessage(text);
 }
 

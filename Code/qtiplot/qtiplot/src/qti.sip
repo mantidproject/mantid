@@ -1717,8 +1717,9 @@ public:
 %MethodCode
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
-MultiLayer* plotInstrumentSpectrum(const QString&, int);
-MultiLayer* plotTimeBin(const QString&, int);
-private:
+  MultiLayer* plotInstrumentSpectrum(const QString&, int);
+  MultiLayer* plotTimeBin(const QString&, int);
+  int createPropertyInputDialog(const QString & algName);
+  private:
 MantidUI(const MantidUI &);
 };
