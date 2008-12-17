@@ -80,7 +80,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(alg2D.execute());
 		TS_ASSERT( alg2D.isExecuted() )
 
-		Workspace_sptr output = AnalysisDataService::Instance(). retrieve(alg2D.getProperty("OutputWorkspace"));
+		Workspace_sptr output = AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace"));
 
 		std::vector<double>& Xold = input->dataX(0);
 		std::vector<double>& Xnew = output->dataX(0);
@@ -94,6 +94,7 @@ public:
 		TS_ASSERT(Xold[0] + offset == Xnew[0]);
 		TS_ASSERT(Xold[1] + offset == Xnew[1]);
 
+		AnalysisDataService::Instance().remove("input2D");
 	}
 
 	Workspace1D_sptr makeDummyWorkspace1D()

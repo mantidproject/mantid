@@ -22,11 +22,11 @@ fi
 echo
 
 echo "Compiling the test executable..."
-# -lboost_filesystem added for the SaveCSVTest test
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../DataHandling/inc -I ../../Geometry/inc  \
-                             -I ../../../Third_Party/include -L../../Debug -L../../Build -L../../../Third_Party/lib/linux64 \
-                             -lMantid -lboost_filesystem -lboost_date_time -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet \
-                             -lboost_python -lboost_regex -lboost_signals -lpython2.3 -lgsl -lgslcblas -lNeXus -lGL -lgts
+            -I ../../../Third_Party/include -L../../debug -L../../Build -L../../../Third_Party/lib/linux64 \
+            -lMantidNexus -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling \
+            -lboost_filesystem -lboost_date_time -lPocoFoundation -lPocoUtil \
+            -lboost_regex -lboost_signals -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts
 echo
 
 

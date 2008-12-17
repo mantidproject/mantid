@@ -23,9 +23,9 @@ echo
 
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../Geometry/inc -I ../../../Third_Party/include \
-            -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-            -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet \
-	        -lboost_python -lboost_regex -lboost_filesystem -lboost_date_time -lboost_signals -lpython2.3 -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts
+            -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+            -lMantidAPI -lMantidKernel -lMantidGeometry -lPocoFoundation -lPocoUtil \
+	        -lboost_regex -lboost_filesystem -lboost_signals -lgsl -lgslcblas -lGL -lGLU -lgts
 echo
 
 echo "Running the tests..."

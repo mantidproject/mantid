@@ -22,10 +22,10 @@ fi
 echo
 
 echo "Compiling the test executable..."
-g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../API/inc -I ../../../Third_Party/include \
-            -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-            -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python \
-            -lpython2.3 -lboost_regex -lboost_filesystem -lboost_date_time -lboost_signals -lgsl -lgslcblas -lNeXus -lGL -lgts
+g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/include \
+            -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+            -lMantidKernel -lPocoFoundation -lPocoUtil \
+            -lboost_filesystem -lboost_signals
 echo
 
 echo "Running the tests..."

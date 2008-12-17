@@ -1,3 +1,4 @@
+#include <fstream>
 #include "boost/filesystem.hpp"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -36,7 +37,7 @@
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/* 
+/*
  * The type  mexfunc_t  and the macro  declare_function()
  * must create the same function signature
  */
@@ -80,7 +81,7 @@ static mexfunc_s_t mex_functions[] = {
 /*
  *The mex function is called with the class name followed by the operation name
  * as the first two matlab arguments e.g. MantidMatlabAPI("ixtestclass", "plus")
- * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with 
+ * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with
  * the rest of the parameters
  */
 #define BUFFER_LEN	64
@@ -90,7 +91,7 @@ static mexfunc_s_t mex_functions[] = {
 #    define compare_nocase stricmp
 #    define mwSize int
 #    define uint64_t UINT64
-#else 
+#else
 #    define compare_nocase strcasecmp
 #endif
 
@@ -150,7 +151,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 		plhs[i] = NULL;
 	}
     sprintf(funcname, "%s_%s", classname, classop);
-	
+
 /*
  * look for the special case of function name ending in _varargin
  * If we find this, flatten any cell arays we find in prhs (varargin arrays)
@@ -196,7 +197,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 /*
 				matlab will now stop after all errors coming from fortran DLL and not continue
 				to reveres this change comments with the next line
-*/				
+*/
 				mexErrMsgTxt(error_buffer);
 /*			    mexWarnMsgTxt(error_buffer);  */
 			}
@@ -246,7 +247,7 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   mwSize dims[2] = {1, 1};
-	try 
+	try
 	{
         FrameworkManagerImpl& fmgr = FrameworkManager::Instance();
         plhs[0] = mxCreateNumericArray(2, dims, mxUINT64_CLASS, mxREAL);
@@ -298,7 +299,7 @@ int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
     mexPrintf("A workspace with the name %s could not be found.\n", wsName.c_str());
 		return 1;
   }
-  
+
 }
 
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
@@ -467,9 +468,9 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
   {
     mexErrMsgTxt("The named workspace could not be found.");
 	}
-  
-  mexPrintf("WorkspaceGetField %s %c %f \n", wsName.c_str(), field[0], ispec); 
-  
+
+  mexPrintf("WorkspaceGetField %s %c %f \n", wsName.c_str(), field[0], ispec);
+
   plhs[0] = WorkspaceGetFieldHelper(wksptr, field[0], (int)ispec);
 	return 0;
 }
@@ -537,7 +538,7 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
   for( ; pIter != pEnd ; ++pIter )
   {
     Mantid::Kernel::Property* prop = *pIter;
-    mfile << "%\t\tName: " << prop->name() << ", Optional: ";  
+    mfile << "%\t\tName: " << prop->name() << ", Optional: ";
     if( prop->isValid() )
     {
       ++iOpt;
@@ -557,8 +558,8 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
         if( ++sIter != sEnd ) mfile << ", ";
       }
     }
-    mfile << "\n";	
-  }  
+    mfile << "\n";
+  }
   mfile << "%\n%\tNote: All string arguments must be wrapped in single quotes ''.\n";
 
   //The function definition
@@ -566,7 +567,7 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
         << "\tfprintf('All mandatory arguments have not been supplied, type \"help " << algName << "\" for more information\\n');\n"
         << "\treturn\n"
         << "end\n";
-  
+
   mfile << "alg = MantidAlgorithm('" << algName << "');\n"
         << "argstring = '';\n";
   //Build arguments list
@@ -579,7 +580,7 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
   //Run the algorithm
   mfile << "res = run(alg, argstring);\n";
   mfile.close();
-} 
+}
 
 int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
 {
@@ -603,7 +604,7 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
   {
     mexErrMsgTxt("SimpleAPI_Create takes either 0 or 1 arguments.");
   }
-  
+
   boost::filesystem::path simpleAPI( mpath );
   if(  boost::filesystem::exists(simpleAPI) )
   {
@@ -624,7 +625,7 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
 	VersionMap vMap;
 	for( ; sIter != algKeys.end(); ++sIter )
 	{
-	  std::string key = (*sIter); 
+	  std::string key = (*sIter);
 	  std::string name = key.substr(0, key.find("|"));
 	  VersionMap::iterator vIter = vMap.find(name);
     if( vIter == vMap.end() ) vMap.insert(make_pair(name,1));
@@ -655,6 +656,6 @@ int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
   {
     mexPrintf((*sIter).c_str());
     mexPrintf("\n");
-  }    
+  }
   return 0;
 }

@@ -23,10 +23,12 @@ echo
 
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
-	                         -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../../Third_Party/include -I /usr/include/python2.3 \
-	                         -L ../../Debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-	                         -lMantid -lPocoFoundation -lPocoUtil -lPocoXML -lPocoNet -lboost_python -lboost_regex \
-	                         -lboost_filesystem -lboost_date_time -lboost_signals -lpython2.3 -lgsl -lgslcblas -lNeXus -lGL -lgts
+	                         -I ../../../Third_Party/include -I /usr/include/python2.3 \
+	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+	                         -lMantidPythonAPI -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
+	                         -lPocoFoundation -lPocoUtil -lboost_python -lboost_regex \
+	                         -lboost_filesystem -lboost_date_time -lboost_signals -lpython2.3 \
+	                         -lgsl -lgslcblas -lGL -lGLU -lgts
 echo
 
 echo "Running the tests..."
