@@ -60,7 +60,9 @@ QDockWidget(w)
 
     connect(m_deleteButton,SIGNAL(clicked()),m_mantidUI,SLOT(deleteWorkspace()));
     connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
-    connect(m_tree,SIGNAL(popupMenu()),this,SLOT(popupMenu()));
+
+    m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 }
 
 void MantidDockWidget::update()
@@ -96,30 +98,34 @@ void MantidDockWidget::clickedWorkspace(QTreeWidgetItem*, int)
 {
 }
 
-void MantidDockWidget::popupMenu()
+void MantidDockWidget::popupMenu(const QPoint & pos)
 {
-        QString selectedWsName = m_mantidUI->getSelectedWorkspaceName();
-        QMenu *menu = new QMenu(this);
+  QTreeWidgetItem* treeItem = m_tree->itemAt(pos);
+  QString selectedWsName("");
+  if( treeItem ) selectedWsName = treeItem->text(0);
+  else m_tree->selectionModel()->clear();
 
-        QAction *action = new QAction("Load RAW file",this);
-        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
-        menu->addAction(action);
+  QMenu *menu = new QMenu(this);
 
-        action = new QAction("Load form DAE",this);
-        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
-        menu->addAction(action);
+  QAction *action = new QAction("Load RAW file",this);
+  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
+  menu->addAction(action);
 
-        action = new QAction("Delete workspace",this);
-        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
-        if (selectedWsName.isEmpty()) action->setEnabled(false);
-        menu->addAction(action);
+  action = new QAction("Load form DAE",this);
+  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
+  menu->addAction(action);
 
-        action = new QAction("Show instrument",this);
-        connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
-        if (selectedWsName.isEmpty()) action->setEnabled(false);
-        menu->addAction(action);
+  action = new QAction("Delete workspace",this);
+  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
+  if (selectedWsName.isEmpty()) action->setEnabled(false);
+  menu->addAction(action);
 
-        menu->popup(QCursor::pos());
+  action = new QAction("Show instrument",this);
+  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
+  if (selectedWsName.isEmpty()) action->setEnabled(false);
+  menu->addAction(action);
+
+  menu->popup(QCursor::pos());
 }
 
 //------------ MantidTreeWidget -----------------------//
@@ -127,14 +133,11 @@ void MantidDockWidget::popupMenu()
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton)
-         m_dragStartPosition = e->pos();
-
-    if (e->button() == Qt::RightButton)
     {
-        emit popupMenu();
-        return;
+      if( !itemAt(e->pos()) ) selectionModel()->clear();
+      m_dragStartPosition = e->pos();
     }
-
+    
     QTreeWidget::mousePressEvent(e);
 }
 
@@ -366,7 +369,10 @@ void AlgorithmDockWidget::tst()
 void AlgorithmTreeWidget::mousePressEvent (QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton)
-         m_dragStartPosition = e->pos();
+    {
+      if( !itemAt(e->pos()) ) selectionModel()->clear();
+      m_dragStartPosition = e->pos();
+    }
 
     QTreeWidget::mousePressEvent(e);
 }

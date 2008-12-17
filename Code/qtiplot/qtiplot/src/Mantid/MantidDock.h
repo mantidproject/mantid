@@ -4,6 +4,7 @@
 #include <QDockWidget>
 #include <QTreeWidget>
 #include <QComboBox>
+#include <QPoint>
 
 class MantidUI;
 class ApplicationWindow;
@@ -21,7 +22,7 @@ public:
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
 protected slots:
-    void popupMenu();
+    void popupMenu(const QPoint & pos);
 protected:
     QTreeWidget *m_tree;
     friend class MantidUI;
@@ -39,8 +40,7 @@ public:
     MantidTreeWidget(QWidget *w):QTreeWidget(w){}
     void mousePressEvent (QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
-signals:
-    void popupMenu();
+
 private:
     QPoint m_dragStartPosition;
 };
