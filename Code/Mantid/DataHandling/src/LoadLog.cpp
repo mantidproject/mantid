@@ -173,8 +173,9 @@ void LoadLog::exec()
 
       if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
       {
-        g_log.error("File" + potentialLogFiles[i] + " is not a ISIS log file. Can't recognise TYPE");
-        throw Exception::FileError("ISIS log file contains unrecognised second column entries:", potentialLogFiles[i]);
+        g_log.warning("ISIS log file contains unrecognised second column entries: " + potentialLogFiles[i]);
+        inLogFile.close();
+        continue;
       }
     } 
 
