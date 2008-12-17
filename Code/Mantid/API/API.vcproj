@@ -243,6 +243,10 @@
 				RelativePath=".\src\WorkspaceOpOverloads.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WorkspaceTracer.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -423,6 +427,10 @@
 			</File>
 			<File
 				RelativePath=".\test\WorkspaceTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceTracer.h"
 				>
 			</File>
 			<File
