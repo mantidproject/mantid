@@ -110,6 +110,9 @@ public:
     MultiLayer* plotGraph2D(Graph::CurveType type);
     void setGraph1D(MultiLayer* ml, Table* t=0);
     void removeWindow();
+
+    bool setSelectedRows();
+    bool setSelectedColumns();
     void getSelectedRows(int& i0,int& i1);
     void getSelectedColumns(int& i0,int& i1);
 
@@ -229,6 +232,10 @@ protected:
     private:
     //name of the underlying workspace
     std::string m_strName;
+    
+    //Storage for column and row selection
+    int m_rowBegin, m_rowEnd;
+    int m_colBegin, m_colEnd;
 };
 
 /**

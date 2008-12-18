@@ -38,7 +38,8 @@
 MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
 : MdiSubWindow(label, parent, name, 0),m_funct(this),m_min(0),m_max(0),m_are_min_max_set(false),
 m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
-m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace)
+m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
+m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
 {
     m_appWindow = parent;
     m_strName = name.toStdString();
@@ -133,18 +134,20 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
     view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
     view->setSelectionMode(QAbstractItemView::ContiguousSelection);// only one contiguous selection supported
     view->setModel(model);
+    view->setCornerButtonEnabled(false);
     view->setFocusPolicy(Qt::StrongFocus);
-
+    
+    
     QPalette pal = view->palette();
-	pal.setColor(QColorGroup::Base, m_bk_color);
-	view->setPalette(pal);
-
-	// set header properties
-	QHeaderView* hHeader = (QHeaderView*)view->horizontalHeader();
-	hHeader->setMovable(false);
-	hHeader->setResizeMode(QHeaderView::Fixed);
-	hHeader->setDefaultSectionSize(m_column_width);
-
+    pal.setColor(QColorGroup::Base, m_bk_color);
+    view->setPalette(pal);
+    
+    // set header properties
+    QHeaderView* hHeader = (QHeaderView*)view->horizontalHeader();
+    hHeader->setMovable(false);
+    hHeader->setResizeMode(QHeaderView::Fixed);
+    hHeader->setDefaultSectionSize(m_column_width);
+    
     view->resizeRowToContents(0);
     int row_height = view->rowHeight(0);
 
@@ -602,52 +605,83 @@ void MantidMatrix::removeWindow()
 	}
 }
 
+void MantidMatrix::getSelectedRows(int& i0,int& i1)
+{
+  i0 = m_rowBegin;
+  i1 = m_rowEnd;
+}
+
 /*
    Returns indices of the first and last selected rows in i0 and i1.
 */
-void MantidMatrix::getSelectedRows(int& i0,int& i1)
+bool MantidMatrix::setSelectedRows()
 {
-    i0 = i1 = -1;
-    QTableView *tv = activeView();
-	QItemSelectionModel *selModel = activeView()->selectionModel();
-	if (!selModel || !selModel->hasSelection())
-		return;
+  QTableView *tv = activeView();
+  QItemSelectionModel *selModel = tv->selectionModel();
+  if( !selModel  ) return false;
 
-	int rows = numRows();
-    bool selectionStarted = false;
-	for (int i = 0; i<rows; i++){
-		if (selModel->isRowSelected (i, QModelIndex()))
-            if (!selectionStarted)
-            {
-                selectionStarted = true;
-                i0 = i1 = i;
-            }else
-                i1++;
-	}
+  QPoint localCursor = tv->mapFromGlobal(QCursor::pos());
+  if( localCursor.x() > tv->verticalHeader()->width() ) return false;
+
+  QModelIndex index = tv->indexAt(localCursor);
+  QModelIndex cursorIndex = index.sibling(index.row() - 1, index.column()); 
+      
+  if( selModel->selection().contains(cursorIndex)  && 
+      selModel->selection().front().left() == 0 && 
+      selModel->selection().front().right() == tv->horizontalHeader()->count() - 1 )
+  {
+    m_rowBegin = selModel->selection().front().top();
+    m_rowEnd = selModel->selection().front().bottom();
+  }
+  else
+  {
+    m_rowBegin = m_rowEnd = tv->indexAt(localCursor).row() - 1;
+    tv->selectRow(m_rowBegin);
+  }
+  if( m_rowBegin == -1 || m_rowEnd == -1 ) return false;
+
+  return true;
+}
+
+void MantidMatrix::getSelectedColumns(int& i0,int& i1)
+{
+  i0 = m_colBegin;
+  i1 = m_colEnd;
 }
 
 /*
    Returns indices of the first and last selected column in i0 and i1.
 */
-void MantidMatrix::getSelectedColumns(int& i0,int& i1)
+bool MantidMatrix::setSelectedColumns()
 {
-    i0 = i1 = -1;
-    QTableView *tv = activeView();
-	QItemSelectionModel *selModel = activeView()->selectionModel();
-	if (!selModel || !selModel->hasSelection())
-		return;
+  QTableView *tv = activeView();
+  QItemSelectionModel *selModel = tv->selectionModel();
+  if( !selModel ) return false;
 
-	int cols = numCols();
-    bool selectionStarted = false;
-	for (int i = 0; i<cols; i++){
-		if (selModel->isColumnSelected (i, QModelIndex()))
-            if (!selectionStarted)
-            {
-                selectionStarted = true;
-                i0 = i1 = i;
-            }else
-                i1++;
-	}
+  QPoint localCursor = tv->mapFromGlobal(QCursor::pos());
+  //This is due to what I think is a bug in Qt where it seems to include
+  //the width of the verticalHeader bar in determining the column that the mouse pointer
+  //is pointing at
+  localCursor.rx() -=  tv->verticalHeader()->width();
+  if( localCursor.y() > tv->horizontalHeader()->height() ) return false;
+
+  QModelIndex index = tv->indexAt(localCursor);
+  QModelIndex cursorIndex = index.sibling(index.row(), index.column()); 
+
+  if( selModel->selection().contains(cursorIndex) )
+  {
+    m_colBegin = selModel->selection().front().left();
+    m_colEnd = selModel->selection().front().right();
+  }
+  else
+  {
+    m_colBegin = m_colEnd = tv->indexAt(localCursor).column();
+    tv->selectColumn(m_colBegin);
+  }
+
+  if( m_colBegin == 0 && m_colEnd == tv->horizontalHeader()->count() - 1 ) return false;
+
+  return true;
 }
 
 void MantidMatrix::tst()

@@ -418,11 +418,8 @@ void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
     if (w->isA("MantidMatrix")) 
     {
-        int i0,i1; 
-        static_cast<MantidMatrix*>(w)->getSelectedRows(i0,i1);
-        bool areSpectraSelected = (i0 < 0 || i1 < 0)?false:true;
-        static_cast<MantidMatrix*>(w)->getSelectedColumns(i0,i1);
-        bool areColumnsSelected = (i0 < 0 || i1 < 0)?false:true;
+        bool areSpectraSelected = static_cast<MantidMatrix*>(w)->setSelectedRows();
+        bool areColumnsSelected = static_cast<MantidMatrix*>(w)->setSelectedColumns();
 
         cm.addAction(actionCopyValues);
         if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
@@ -993,7 +990,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 //    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
-    MultiLayer* ml;
+    MultiLayer* ml(NULL);
     if (!t) return ml;
 
     ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
@@ -1099,7 +1096,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin)
 {
      Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
      Table *t = createTableFromSelectedColumns(wsName,workspace,bin,bin,false,false);
-    MultiLayer* ml;
+     MultiLayer* ml(NULL);
     if (!t) return ml;
 
     ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
