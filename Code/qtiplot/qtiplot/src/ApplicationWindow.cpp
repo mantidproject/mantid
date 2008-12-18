@@ -1197,9 +1197,10 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	menuBar()->insertItem(tr("&Edit"), edit);
 	editMenuAboutToShow();
 	menuBar()->insertItem(tr("&View"), view);
-	menuBar()->insertItem(tr("Scripting"), scriptingMenu);
+	menuBar()->insertItem(tr("&Scripting"), scriptingMenu);
 	
 	scriptingMenu->clear();
+	scriptingMenu->addAction(actionShowScriptWindow); //Mantid
 #ifdef SCRIPTING_DIALOG
 	scriptingMenu->addAction(actionScriptingLang);
 #endif
