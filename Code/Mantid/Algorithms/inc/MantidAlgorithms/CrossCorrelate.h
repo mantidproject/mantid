@@ -85,24 +85,8 @@ private:
   spec2index_map::iterator index_map_it;
 };
 
+
 // Functor for vector sum
-struct sumV : public std::unary_function<double, void>
-{
-	sumV():sum(0){}
-	void operator()(double data) {sum+=data;}
-	double sum;
-};
-// Functor for computing variance
-struct varV : public std::unary_function<double, void>
-{
-	varV(double mean_):var(0),mean(mean_){}
-	void operator()(double data)
-	{
-		temp=(data-mean);
-		var+=(temp*temp);
-	}
-	double var, mean, temp;
-};
 
 } // namespace Algorithms
 } // namespace Mantid

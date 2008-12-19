@@ -1,10 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/CrossCorrelate.h"
-#include "MantidDataObjects/Workspace2D.h"
+
 #include <fstream>
 #include <sstream>
+#include "MantidKernel/VectorHelper.h"
+#include "MantidAlgorithms/CrossCorrelate.h"
+#include <numeric>
 
 namespace Mantid
 {
@@ -52,12 +54,16 @@ void CrossCorrelate::exec()
   		g_log.error(error.what());
   		throw;
   	}
+  	// Check whether the reference spectra is valid
    	int reference=getProperty("ReferenceSpectra");
    	index_map_it=index_map.find(reference);
    	if (index_map_it==index_map.end()) // Not in the map
    		throw std::runtime_error("Can't find reference spectra");
    	const int index_ref=index_map_it->second;
-   	// Now loop on the spectra
+
+
+   	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
+
    	int specmin=getProperty("Spectra_min");
    	int specmax=getProperty("Spectra_max");
    	// Get the number of spectra in range specmin to specmax
@@ -74,51 +80,97 @@ void CrossCorrelate::exec()
    	std::ostringstream mess;
    	if (nspecs==0) // Throw if no spectra in range
 	{
-		mess.clear();
 		mess<< "No spectra in range between" << specmin << " and " << specmax;
 		throw std::runtime_error(mess.str());
 	}
 
    	// Output message information
-   	mess << "There are " << nspecs << " spectra in the range";
+   	mess << "There are " << nspecs << " spectra in the range" << std::endl;
    	g_log.information(mess.str());
 
-   	// Now start the real stuff
-   	int nX=inputWS->readX(index_ref).size(); // Number of bins for spectra reference
-   	//Create new workspace
-   	bool add_reference=(reference<specmin || reference>specmax);
-   	if  (add_reference)  // Reference should be included in list
-   		nspecs++;
-   	Workspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,nX,nX-1);
-   	setProperty("OutputWorkspace",out);
-   	int offset=0;
-   	// Copy reference if not in the list of spectra
-   	if (add_reference)
+    const 	int nY=inputWS->readY(index_ref).size(); // Number of Yvalues for spectra reference
+
+    // Now start the real stuff
+    // Create a 2DWorkspace that will hold the result
+    const int npoints=2*nY-3;
+	Workspace_sptr out= WorkspaceFactory::Instance().create("Workspace2D",nspecs,npoints,npoints);
+
+	// Take a copy of  the reference spectrum
+   	std::vector<double> refX=inputWS->dataX(index_ref);
+   	std::vector<double> refY=inputWS->dataY(index_ref);
+   	std::vector<double> refE=inputWS->dataE(index_ref);
+
+   	// Calculate the mean value of the reference spectrum
+	double refMean=std::accumulate(refY.begin(),refY.end(),0);
+	refMean/=static_cast<double>(nY);
+
+	std::vector<double>::iterator it;
+	double refVar=0.0;
+	for (it=refY.begin();it!=refY.end();++it)
+	{
+		(*it)-=refMean; // Now the vector is (y[i]-refMean)
+		refVar+=(*it)*(*it);
+	}
+	mess << "Reference spectrum mean value: " << refMean << ", Variance: " << refVar;
+	g_log.information(mess.str());
+
+   	// Now copy the other spectra
+   	bool is_distrib=inputWS->isDistribution();
+
+   	std::vector<double> tempY(nY);
+   	std::vector<double> tempE(nY);
+   	std::vector<double> XX(npoints);
+   	for (int i=0;i<npoints;++i)
    	{
-   		out->getAxis(1)->spectraNo(0)=inputWS->getAxis(1)->spectraNo(index_ref);
-   		out->dataX(0)=inputWS->dataX(index_ref);
-   		out->dataY(0)=inputWS->dataY(index_ref);
-   		out->dataE(0)=inputWS->dataE(index_ref);
-   		offset=1;
-   	} // Now copy the other spectra
-   	for (int i=0;i<(nspecs-offset);++i) // Copy spectra in range from inputWS, including SpectraNo
-   	{
-   		int t_index=indexes[i];
-   		int o_index=i+offset;
-   		out->getAxis(1)->spectraNo(o_index)=inputWS->getAxis(1)->spectraNo(t_index);
-   		out->dataX(o_index)=inputWS->dataX(t_index);
-   		out->dataY(o_index)=inputWS->dataY(t_index);
-   		out->dataE(o_index)=inputWS->dataE(t_index);
+   		XX[i]=static_cast<double>(i-nY+2);
    	}
 
+   	for (int i=0;i<nspecs;++i) // Now loop on all spectra
+   	{
+   		int spec_index=indexes[i]; // Get the spectrum index from the table
+   		//Copy spectra info from input Workspace
+   		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
+   		out->dataX(i)=XX;
+   		// Get temp references
+   		const std::vector<double>&  iX=inputWS->dataX(spec_index);
+   		const std::vector<double>&  iY=inputWS->dataY(spec_index);
+   		const std::vector<double>&  iE=inputWS->dataE(spec_index);
+   		// Copy Y,E data of spec(i) to temp vector
+   		// Now rebin on the grid of reference spectrum
+   		rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
+   		// Calculate the mean value of tempY
+   		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0);
+   		tempMean/=static_cast<double>(nY);
+   		//
+   		double tempVar=0.0;
+		for (it=tempY.begin();it!=tempY.end();++it)
+		{
+			(*it)-=tempMean; // Now the vector is (y[i]-refMean)
+			tempVar+=(*it)*(*it);
+		}
+		double normalisation=1.0/sqrt(refVar*tempVar);
+		std::vector<double>& outY=out->dataY(i);
+		for (int k=-nY+2;k<=nY-2;++k)
+		{
+			int kp=abs(k);
+			double val=0;
+			for (int j=nY-1-kp;j>=0;--j)
+			{
+				(k>=0) ? val+=(refY[j]*tempY[j+kp]) : val+=(tempY[j]*refY[j+kp]);
+			}
+			outY[k+nY-2]=(val*normalisation);
+		}
+		// Update progress information
+		double prog=static_cast<double>(i)/nspecs;
+		progress(prog);
+		interruption_point();
+   	}
 
-
-
-
-
+   	setProperty("OutputWorkspace",out);
 
    	return;
 }
+
 
   } // namespace Algorithm
 } // namespace Mantid
