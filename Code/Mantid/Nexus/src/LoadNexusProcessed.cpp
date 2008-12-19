@@ -33,7 +33,7 @@ namespace NeXus
   /// Default constructor
   LoadNexusProcessed::LoadNexusProcessed() :
     Algorithm(), m_filename(), m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0),
-    m_workspace_no(0)
+    m_entrynumber(0)
   {
       nexusFile= new NexusFileIO();
   }
@@ -84,7 +84,7 @@ namespace NeXus
     //
     m_entrynumber = getProperty("EntryNumber");
 
-    if( nexusFile->openNexusRead( m_filename, m_workspace_no ) != 0 )
+    if( nexusFile->openNexusRead( m_filename, m_entrynumber ) != 0 )
     {
        g_log.error("Failed to read file " + m_filename);
        throw Exception::FileError("Failed to read to file", m_filename);
@@ -123,7 +123,16 @@ namespace NeXus
     // set first axis name
     size_t colon=m_axes.find(":");
     if(colon!=std::string::npos)
-        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0,colon));
+    {
+        try
+        {
+            localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0,colon));
+        }
+        catch(std::runtime_error& err)
+        {
+            g_log.warning("Unable to set Axis(0) units" );
+        }
+    }
     // set Yunits
     if(m_yunits.size()>0)
         localWorkspace->setYUnit(m_yunits);
@@ -157,7 +166,12 @@ namespace NeXus
     nexusFile->readNexusProcessedSample(sample);
     // Run the LoadIntsturment algorithm if name available
     if(nexusFile->readNexusInstrumentXmlName(m_instrumentxml,m_instrumentdate, m_instrumentversion))
-        runLoadInstrument(localWorkspace );
+    {
+        if(m_instrumentxml != "NoXmlFileFound" && m_instrumentxml != "NoNameAvailable")
+            runLoadInstrument(localWorkspace );
+        else
+            g_log.warning("No instrument file name found in the Nexus file");
+    }
     // get any spectraMap info
     boost::shared_ptr<Instrument> localInstrument=localWorkspace->getInstrument();
     boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap= localWorkspace->getSpectraMap();

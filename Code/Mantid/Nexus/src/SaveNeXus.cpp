@@ -1,5 +1,6 @@
 // SaveNeXus
 // @author Freddie Akeroyd, STFC ISIS Faility
+// @author Ronald Fowler, STFC eScience. Modified to fit with SaveNexusProcessed
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -7,6 +8,7 @@
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NeXusUtils.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -17,74 +19,117 @@ namespace NeXus
 {
 
   // Register the algorithm into the algorithm factory
-  DECLARE_ALGORITHM(SaveNeXus)
+  DECLARE_ALGORITHM(SaveNexus)
 
   using namespace Kernel;
   using namespace API;
   using namespace DataObjects;
 
-  Logger& SaveNeXus::g_log = Logger::get("SaveNeXus");
+  Logger& SaveNexus::g_log = Logger::get("SaveNexus");
 
   /// Empty default constructor
-  SaveNeXus::SaveNeXus():Algorithm()
+  SaveNexus::SaveNexus():Algorithm()
   {
   }
 
   /** Initialisation method.
    *
    */
-  void SaveNeXus::init()
+  void SaveNexus::init()
   {
-    declareProperty("FileName","",new MandatoryValidator<std::string>);
-    declareProperty("EntryName","",new MandatoryValidator<std::string>);
-    declareProperty("DataName","",new MandatoryValidator<std::string>);
+    // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspace
+    std::vector<std::string> exts;
+    exts.push_back("NXS");
+    exts.push_back("nxs");
+    exts.push_back("nx5");
+    exts.push_back("NX5");
+    exts.push_back("xml");
+    exts.push_back("XML");
+    declareProperty("FileName","",new FileValidator(exts,false));  
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+    //
+    // Declare optional input parameters
+    // These are:
+    // Title       - string to describe data
+    // EntryNumber - integer >0 to be used in entry name "mantid_workspace_<n>"
+    //                          Within a file the entries will be sequential from 1.
+    //                          This option should allow overwrite of existing entry,
+    //                          *not* addition of out-of-sequence entry numbers.
+    // spectrum_min, spectrum_max - range of "spectra" numbers to write
+    // spectrum_list            list of spectra values to write
+    //
+    declareProperty("Title","",new NullValidator<std::string>);
+    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    mustBePositive->setLower(0);
+    declareProperty("EntryNumber",0,mustBePositive);
+    declareProperty("spectrum_min",0, mustBePositive->clone());
+    declareProperty("spectrum_max",0, mustBePositive->clone());
+    declareProperty(new ArrayProperty<int>("spectrum_list"));
+    // option which might be required in future - should be a choice e.g. MantidProcessed/Muon1
+    // declareProperty("Filetype","",new NullValidator<std::string>);
   }
 
-  /** Executes the algorithm. Reading in the file and creating and populating
-   *  the output workspace
+  /** Execute the algorithm. Currently just calls SaveNexusProcessed but could
+   *  call write other formats if support added
    *
    *  @throw runtime_error Thrown if algorithm cannot execute
    */
-  void SaveNeXus::exec()
+  void SaveNexus::exec()
   {
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("FileName");
-    m_entryname = getPropertyValue("EntryName");
-	m_dataname = getPropertyValue("DataName");
-    m_inputWorkspace = getProperty("InputWorkspace");
+    m_inputWorkspace = getPropertyValue("InputWorkspace");
+    m_filetype="NexusProcessed";
 
-    const std::string workspaceID = m_inputWorkspace->id();
-    NeXusUtils *nexusFile= new NeXusUtils();
-    if (workspaceID == "Workspace1D")
+    if (m_filetype == "NexusProcessed")
     {
-        const Workspace1D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace1D>(m_inputWorkspace);
-        const std::vector<double>& xValue = localworkspace->dataX();
-        const std::vector<double>& yValue = localworkspace->dataY();
-        const std::vector<double>& eValue = localworkspace->dataE();
-	    nexusFile->writeEntry1D(m_filename, m_entryname, m_dataname, xValue, yValue, eValue);
-    }
-    else if (workspaceID == "Workspace2D")
-    {
-        const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
-        const int numberOfHist = localworkspace->getNumberHistograms();
-	    for(int i=0; i<numberOfHist; i++)
-	    {
-            std::ostringstream oss;
-	        oss << m_dataname << "_" << i << std::ends;
-            const std::vector<double>& xValue = localworkspace->dataX(i);
-            const std::vector<double>& yValue = localworkspace->dataY(i);
-            const std::vector<double>& eValue = localworkspace->dataE(i);
-	        nexusFile->writeEntry1D(m_filename, m_entryname, oss.str(), xValue, yValue, eValue);
-	    }
+        runSaveNexusProcessed();
     }
     else
     {
-        throw Exception::NotImplementedError("SaveNeXus passed invalid workspaces.");
+        throw Exception::NotImplementedError("SaveNexus passed invalid filetype.");
     }
 
     return;
   }
 
+  void SaveNexus::runSaveNexusProcessed()
+  {
+      Algorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed");
+      // Pass through the same output filename
+      saveNexusPro->setPropertyValue("Filename",m_filename);
+      // Set the workspace property
+      std::string inputWorkspace="inputWorkspace";
+      saveNexusPro->setPropertyValue(inputWorkspace,m_inputWorkspace);
+      //
+      Property *specList = getProperty("spectrum_list");
+      if( !(specList->isDefault()) )
+         saveNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+      //
+      Property *specMax = getProperty("spectrum_max");
+      if( !(specMax->isDefault()) )
+      {
+         saveNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
+         saveNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+      }
+      Property *title = getProperty("title");
+      if( !(title->isDefault()) )
+         saveNexusPro->setPropertyValue("title",getPropertyValue("title"));
+      Property *entryNumber = getProperty("EntryNumber");
+      if( !(title->isDefault()) )
+         saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        saveNexusPro->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.error("Unable to successfully run SaveNexusprocessed sub-algorithm");
+      }
+      if ( ! saveNexusPro->isExecuted() ) g_log.error("Unable to successfully run SaveNexusProcessed sub-algorithm");
+      //
+  }
 } // namespace NeXus
 } // namespace Mantid

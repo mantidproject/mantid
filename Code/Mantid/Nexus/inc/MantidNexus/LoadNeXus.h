@@ -12,10 +12,10 @@ namespace Mantid
 {
   namespace NeXus
   {
-    /** @class LoadNeXus LoadNeXus.h MantidDataHandling/LoadNeXus.h
+    /** @class LoadNexus LoadNeXus.h MantidDataHandling/LoadNeXus.h
 
     Loads a file in NeXus format and stores it in a 2D workspace 
-    (Workspace2D class). LoadNeXus is an algorithm and as such inherits
+    (Workspace2D class). LoadNexus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec() methods.
 
@@ -53,14 +53,14 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadNeXus : public API::Algorithm
+    class DLLExport LoadNexus : public API::Algorithm
     {
     public:
       /// Default constructor
-      LoadNeXus();
+      LoadNexus();
 
       /// Destructor
-      ~LoadNeXus() {}
+      ~LoadNexus() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadNexus";};
       /// Algorithm's version for identification overriding a virtual method

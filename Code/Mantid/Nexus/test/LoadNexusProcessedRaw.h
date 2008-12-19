@@ -27,6 +27,13 @@ using namespace Mantid::NeXus;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
+//
+// test does:
+//        loadraw of HET15869 to get workspace
+//        save this using SaveNexusProcessed
+//        test LoadNexusProcessed on this file
+//        test LoadNexus on the smae file.
+
 class LoadNexusProcessedTestRaw : public CxxTest::TestSuite
 {
 public:
@@ -85,7 +92,7 @@ void testExecOnLoadraw()
 
 }
 
-  void testExecRaw()
+  void testExecLNP()
   {
     // test LoadNexusProcessed reading the data from SNP on Loadraw HET15869
 
@@ -95,7 +102,7 @@ void testExecOnLoadraw()
     myOutputSpace="testLNP3";
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
     // file name to load
-    inputFile = "testSaveLoadrawHET.nxs";
+    inputFile = outputFile; // output from SNP used an input to LNP
     entryNumber=1;
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
     algToBeTested.setProperty("EntryNumber", entryNumber);
@@ -201,13 +208,97 @@ void testExecOnLoadraw()
         //
     }
 
+  }
+
+
+  void testExecLoadNexus()
+  {
+    // test LoadNexus reading the same data as above
+
+    if ( !loadNex.isInitialized() ) loadNex.initialize();
+
+    // specify name of workspace
+    myOutputSpace="testLN";
+    TS_ASSERT_THROWS_NOTHING(loadNex.setPropertyValue("OutputWorkspace", myOutputSpace));
+    // file name to load
+    inputFile = outputFile; // output from SNP used an input to LNP
+    entryNumber=1;
+    TS_ASSERT_THROWS_NOTHING(loadNex.setPropertyValue("FileName", inputFile));
+    loadNex.setProperty("EntryNumber", entryNumber);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loadNex.getPropertyValue("FileName") )
+    TS_ASSERT( ! result.compare(inputFile));
+    TS_ASSERT_THROWS_NOTHING( result = loadNex.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT( ! result.compare(myOutputSpace));
+    int res=-1;
+    TS_ASSERT_THROWS_NOTHING( res = loadNex.getProperty("EntryNumber") )
+    TS_ASSERT( res==entryNumber);
+
+    //
+    TS_ASSERT_THROWS_NOTHING(loadNex.execute());
+    TS_ASSERT( loadNex.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(myOutputSpace));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    // Should be 2584 for file HET15869.RAW
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
+    // Check two X vectors are the same
+    TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
+    // Check one particular value
+    TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataE(999)[777], 3);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
+
+    // Check the unit has been set correctly
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
+    TS_ASSERT( ! output-> isDistribution() )
+    // Check units of Y axis are "Counts"
+    TS_ASSERT_EQUALS( output->YUnit(), "Counts" )
+
+    // Check the proton charge has been set correctly
+    TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
+
+    //
+    // check that the instrument data has been loaded, copied from LoadInstrumentTest
+    //
+    boost::shared_ptr<Instrument> i = output->getInstrument();
+    //std::cerr << "Count = " << i.use_count();
+    Component* source = i->getSource();
+    TS_ASSERT( source != NULL);
+    if(source != NULL )
+    {
+        TS_ASSERT_EQUALS( source->getName(), "undulator");
+        TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+
+        Component* samplepos = i->getSample();
+        TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+        TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
+
+        Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
+        TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
+        TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
+        TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
+        TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
+        double d = ptrDet103->getPos().distance(samplepos->getPos());
+        TS_ASSERT_DELTA(d,2.512,0.0001);
+        double cmpDistance = ptrDet103->getDistance(*samplepos);
+        TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
+    }
+
     remove(outputFile.c_str());
 
   }
 
-
 private:
   LoadNexusProcessed algToBeTested;
+  LoadNexus loadNex;
   std::string inputFile;
   int entryNumber;
   Workspace2D myworkspace;

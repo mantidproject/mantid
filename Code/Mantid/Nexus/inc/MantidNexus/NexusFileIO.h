@@ -105,6 +105,8 @@ namespace Mantid
       /// read a float value and possible attributes
       bool readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
 	                           std::vector<std::string>& avalues);
+      /// check if the gievn item exists in the current level
+      bool checkEntryAtLevel(const std::string& item) const;
       /// write test field
       int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value);
       /// search for exisiting MantidWorkpace_n entries in opened file

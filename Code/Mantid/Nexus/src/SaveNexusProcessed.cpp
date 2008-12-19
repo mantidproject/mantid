@@ -50,9 +50,8 @@ namespace NeXus
     declareProperty("FileName","",new FileValidator(exts,false));
     //declareProperty("FileName","",new MandatoryValidator<std::string>);
 
-    declareProperty("Title","",new MandatoryValidator<std::string>);
-    // declare optional parameters
-    // Declare optional input parameters
+    // Declare optional parameters (title now optional, was mandatory)
+    declareProperty("Title","",new NullValidator<std::string>);
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("EntryNumber",0,mustBePositive);

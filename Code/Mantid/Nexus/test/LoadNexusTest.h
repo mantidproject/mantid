@@ -20,6 +20,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
+//
+// test does:
+//          load workspace from Muon(1) file emu..73.nxs using LoadNexus
+//          load workspace from Muon(1) file emu..75.nxs using LoadNexus
+//
 class LoadNeXusTest : public CxxTest::TestSuite
 {
 public: 
@@ -116,12 +121,12 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
   }
 
-  
+ 
 private:
-  LoadNeXus algToBeTested,alg2;
+  LoadNexus algToBeTested,alg2;
   std::string inputFile;
   std::string outputSpace;
 
 };
-  
+
 #endif /*LOADNEXUSTEST_H_*/

@@ -93,8 +93,6 @@ namespace Mantid
       /// The value of the spectrum_max property
       int m_spec_max;
       /// The value of the workspace number property
-      int m_workspace_no;
-      /// total number of spectra
       int m_numberofspectra;
       /// total channels
       int m_numberofchannels;

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SAVENEXUS_H_
-#define MANTID_DATAHANDLING_SAVENEXUS_H_
+#ifndef MANTID_NEXUS_SAVENEXUS_H_
+#define MANTID_NEXUS_SAVENEXUS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -46,16 +46,16 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport SaveNeXus : public API::Algorithm
+    class DLLExport SaveNexus : public API::Algorithm
     {
     public:
       /// Default constructor
-      SaveNeXus();
+      SaveNexus();
 
       /// Destructor
-      ~SaveNeXus() {}
+      ~SaveNexus() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "SaveNeXus";};
+      virtual const std::string name() const { return "SaveNexus";};
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
@@ -75,8 +75,12 @@ namespace Mantid
       std::string m_entryname;
 	  /// The prefix to be used to name spectra (_n added for nth spectra)
       std::string m_dataname;
+	  /// The file type to save, currently only one type possible
+      std::string m_filetype;
       /// Pointer to the local workspace
-      API::Workspace_sptr m_inputWorkspace;
+      std::string m_inputWorkspace;
+      /// Method to execute SNP sub algorithm
+      void runSaveNexusProcessed();
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
@@ -86,4 +90,4 @@ namespace Mantid
   } // namespace NeXus
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_SAVENEXUS_H_*/
+#endif /*MANTID_NEXUS_SAVENEXUS_H_*/

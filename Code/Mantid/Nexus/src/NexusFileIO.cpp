@@ -160,7 +160,7 @@ namespace NeXus
        }
        else
        {
-           g_log.error("File does not contains mantid_workspace_" + workspaceNumber + fileName);
+           g_log.error("Requested entry number is greater than available in file: " + fileName);
            throw Exception::FileError("File does not contains mantid_workspace_" + workspaceNumber , fileName);
        }
    }
@@ -335,8 +335,6 @@ namespace NeXus
 	                           std::vector<std::string>& avalues)
   {
    NXstatus status;
-   int dimensions[1];
-   dimensions[0]=1;
    status=NXopendata(fileID, name.c_str());
    if(status==NX_ERROR)
        return(false);
@@ -404,8 +402,10 @@ namespace NeXus
    status=NXopengroup(fileID,"sample","NXsample");
    //
    std::vector<std::string> attributes,avalues;
-   if( ! writeNxText( "name", name, attributes, avalues) )
-       return(3);
+   // only write name if not null
+   if( name.size()>0 )
+       if( ! writeNxText( "name", name, attributes, avalues) )
+           return(3);
    // Write proton_charge here, if available. Note that TOFRaw has this at the NXentry level, though there is
    // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
    const double totalProtonCharge=sample->getProtonCharge();
@@ -441,18 +441,26 @@ namespace NeXus
    //
    std::vector<std::string> attributes,avalues;
    std::string name;
-   if( ! readNxText( "name", name, attributes, avalues) )
-       return(2);
+   if( checkEntryAtLevel("name") )
+   {
+       readNxText( "name", name, attributes, avalues);
+   }
+   else
+       name="";  // Missing name entry, set null
+
    sample->setName(name);
    // Read proton_charge, if available. Note that TOFRaw has this at the NXentry level, though there is
    // some debate if this is appropriate. Hence for Mantid read it from the NXsample section as it is stored in Sample.
    double totalProtonCharge;
-   if( readNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
+   if( checkEntryAtLevel("proton_charge") )
    {
-       sample->setProtonCharge(totalProtonCharge);
-       if(attributes.size()==1) // check units if present
-           if(attributes[0].compare("units")==0 && avalues[0].compare("microAmps*hour")!=0)
-               g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
+       if( readNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
+       {
+           sample->setProtonCharge(totalProtonCharge);
+           if(attributes.size()==1) // check units if present
+               if(attributes[0].compare("units")==0 && avalues[0].compare("microAmps*hour")!=0)
+                   g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
+       }
    }
 
    status=NXclosegroup(fileID);
@@ -490,22 +498,22 @@ namespace NeXus
    int signal=1;
    status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
    Mantid::API::Axis *xAxis=localworkspace->getAxis(0);
-   Mantid::API::Axis *yAxis=localworkspace->getAxis(1);
-   std::string xLabel,yLabel;
+   Mantid::API::Axis *sAxis=localworkspace->getAxis(1);
+   std::string xLabel,sLabel;
    if(xAxis->isSpectra())
 	   xLabel="spectraNumber";
    else
 	   xLabel=xAxis->unit()->unitID();
    std::vector<double> histNumber;
-   if(yAxis->isSpectra())
+   if(sAxis->isSpectra())
    {
-	   yLabel="spectraNumber";
+	   sLabel="spectraNumber";
 	   for(int i=m_spec_min;i<=m_spec_max;i++)
-	       histNumber.push_back((double)yAxis->spectraNo(i));
+	       histNumber.push_back((double)sAxis->spectraNo(i));
    }
    else
-	   yLabel=yAxis->unit()->unitID();
-   const std::string axesNames=xLabel+":"+yLabel;
+	   sLabel=sAxis->unit()->unitID();
+   const std::string axesNames=xLabel+":"+sLabel;
    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
    std::string yUnits=localworkspace->YUnit();
    status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
@@ -748,6 +756,33 @@ namespace NeXus
    return count;
   }
 
+  bool NexusFileIO::checkEntryAtLevel(const std::string& item) const
+  {
+   // Search the currently open level for name "item"
+   NXstatus status;
+   char *nxname,*nxclass;
+   int nxdatatype;
+   nxname= new char[NX_MAXNAMELEN];
+   nxclass = new char[NX_MAXNAMELEN];
+   //
+   // read nexus fields at this level
+   status=NXinitgroupdir(fileID); // just in case
+   while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   {
+      std::string nxName=nxname;
+      if(nxName==item)
+      {
+         delete[] nxname;
+         delete[] nxclass;
+         return(true);
+      }
+   }
+   delete[] nxname;
+   delete[] nxclass;
+   return(false);
+  }
+  
+
   bool NexusFileIO::writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
                     const int& m_spec_min, const int& m_spec_max)
   {
@@ -847,6 +882,11 @@ namespace NeXus
    if(status==NX_ERROR)
        return(false);
    //
+   if(!checkEntryAtLevel("detector"))  // to avoid Nexus Error messages
+   {
+       NXclosegroup(fileID);
+       return(false);
+   }
    status=NXopengroup(fileID,"detector","NXdetector");
    if(status==NX_ERROR)
    {

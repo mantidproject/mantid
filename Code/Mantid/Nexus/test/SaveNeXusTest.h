@@ -27,23 +27,6 @@ class SaveNeXusTest : public CxxTest::TestSuite
 {
 public: 
   
-  SaveNeXusTest()
-  {
-    // create dummy 1D-workspace
-    
-    std::vector<double> lVecX; for(double d=0.0; d<0.95; d=d+0.1) lVecX.push_back(d);
-    std::vector<double> lVecY; for(double d=0.0; d<0.95; d=d+0.1) lVecY.push_back(d);
-    std::vector<double> lVecE; for(double d=0.0; d<0.95; d=d+0.1) lVecE.push_back(d);
-   
-    Workspace_sptr localWorkspace = Workspace_sptr(new Workspace1D);
-    
-    Workspace1D_sptr localWorkspace1D = boost::dynamic_pointer_cast<Workspace1D>(localWorkspace);
-   
-    localWorkspace1D->setX(lVecX);
-    localWorkspace1D->setData(lVecY, lVecE);
-
-    AnalysisDataService::Instance().add("SAVENEXUSTEST-testSpace", localWorkspace);
-}
   
   
   void testInit()
@@ -53,43 +36,10 @@ public:
   }
   
   
-  void testExec()
-  {
-    
-    if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
-  
-    algToBeTested.setPropertyValue("InputWorkspace", "SAVENEXUSTEST-testSpace");     
-    
-    // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
-        
-    
-    // Now set it...
-    // specify name of file to save 1D-workspace to
-    outputFile = "testOfSaveNeXus.nxs";
-    entryName = "test";
-	dataName = "spectra";
-    algToBeTested.setPropertyValue("FileName", outputFile);
-    algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("DataName", dataName);
-    remove(outputFile.c_str());
-    
-    std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(outputFile)); 
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
-    TS_ASSERT( ! result.compare(entryName)); 
-    
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());    
-    TS_ASSERT( algToBeTested.isExecuted() );    
-
-    remove(outputFile.c_str());
-   
-  }
 void testExecOnMuon()
   {
-    LoadNeXus nxLoad;
-	std::string outputSpace,inputFile;
+    LoadNexus nxLoad;
+    std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
     inputFile = "../../../../Test/Nexus/emu00006473.nxs";
@@ -107,32 +57,31 @@ void testExecOnMuon()
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-	//
+    //
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
+    // specify parameters to algorithm
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
-    // specify name of file to save 1D-workspace to
-    outputFile = "testOfSaveNeXusMuon.nxs";
-    entryName = "entry4";
-	dataName = "spectra";
+    outputFile = "testOfSaveNexus.nxs";
     algToBeTested.setPropertyValue("FileName", outputFile);
-    algToBeTested.setPropertyValue("EntryName", entryName);
-    algToBeTested.setPropertyValue("DataName", dataName);
+    title="Testing SaveNexus with Muon data";
+    algToBeTested.setPropertyValue("Title", title);
+    // comment line below to check the contents of the o/p file manually
     remove(outputFile.c_str());
     
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") );
-    TS_ASSERT( ! result.compare(entryName));
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("title") );
+    TS_ASSERT( ! result.compare(title));
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("InputWorkspace") );
+    TS_ASSERT( ! result.compare(outputSpace));
     
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
     TS_ASSERT( algToBeTested.isExecuted() );  
 
-    remove(outputFile.c_str());
-	// test writing two entries into one nexus file with different names.
-	entryName="entry5";
-    algToBeTested.setPropertyValue("EntryName", entryName);
+    // test writing two entries to one nexus file
+    algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute()); 
     TS_ASSERT( algToBeTested.isExecuted() );
     remove(outputFile.c_str());
@@ -141,10 +90,10 @@ void testExecOnMuon()
 
   
 private:
-  SaveNeXus algToBeTested;
+  SaveNexus algToBeTested;
   std::string outputFile;
-  std::string entryName;
-  std::string dataName;
+  std::string title;
+  int entryNumber;
   
 };
   
