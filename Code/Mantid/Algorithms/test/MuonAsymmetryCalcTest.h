@@ -53,8 +53,6 @@ public:
   void testProperties()
   {
     TS_ASSERT_EQUALS( asymCalc.getPropertyValue("Alpha"), "1");
-    //TS_ASSERT_EQUALS( asymCalc.getPropertyValue("ForwardSpectra"), "0");
-    //TS_ASSERT_EQUALS( asymCalc.getPropertyValue("BackwardSpectra"), "16");
   }
 
   void testExecute()

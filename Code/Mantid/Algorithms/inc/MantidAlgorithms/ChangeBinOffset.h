@@ -5,13 +5,21 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
-    /** 
-      
+    /**Takes a workspace and adjusts all the time bin values by the same amount.
+
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> Offset - The number by which to change the time bins by</LI>
+    </UL>
+	  
     @author 
     @date 11/07/2008
 
@@ -53,6 +61,8 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+    
+       API::Workspace_sptr createOutputWS(API::Workspace_sptr input);
             
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

@@ -41,29 +41,26 @@ namespace Mantid
     void ChangeBinOffset::exec()
     {
 	    //Get input workspace and offset
-	    Workspace_const_sptr inputW = getProperty("InputWorkspace");
+	    Workspace_sptr inputW = getProperty("InputWorkspace");
 	    double offset = getProperty("Offset");
-	        
-	    //Create new workspace for output from old
-	    API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW);
-	    outputW->isDistribution(inputW->isDistribution());
+	    
+	    API::Workspace_sptr outputW = createOutputWS(inputW);	    
 	    
 	    //Get number of histograms
 	    int histnumber = inputW->getNumberHistograms();
 	    
 	    for (int i=0; i < histnumber; ++i)
-	    {
-		    // get const references to input Workspace X data (no copying)
-		    const std::vector<double>& XValues = inputW->dataX(i);
-
-		    //get references to output workspace data (no copying)
-		    std::vector<double>& XValues_new=outputW->dataX(i);
-		    
-		    for (int j=0; j < XValues.size(); ++j)
+	    {		    
+		    //Do the offsetting
+		    for (int j=0; j <  inputW->dataX(i).size(); ++j)
 		    {
 			    //Change bin value by offset
-			    XValues_new[j] = XValues[j] + offset;
+			    outputW->dataX(i)[j] = inputW->dataX(i)[j] + offset;
 		    }
+		    
+		    //Copy y and e data
+		    outputW->dataY(i) = inputW->dataY(i);
+		    outputW->dataE(i) = inputW->dataE(i);
 	    }
 	    
 	    // Copy units
@@ -81,6 +78,23 @@ namespace Mantid
 	    // Assign it to the output workspace property
 	    setProperty("OutputWorkspace",outputW);
     }
+    
+    API::Workspace_sptr ChangeBinOffset::createOutputWS(API::Workspace_sptr input)
+   {
+	   //Check whether input = output to see whether a new workspace is required.
+	    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+	    {
+		    //Overwrite the original
+		    return input;
+	    }
+	    else
+	    {	    
+		//Create new workspace for output from old
+		API::Workspace_sptr output = API::WorkspaceFactory::Instance().create(input);
+		output->isDistribution(input->isDistribution());
+		return output;
+	    }
+    }	
     
   } // namespace Algorithm
 } // namespace Mantid
