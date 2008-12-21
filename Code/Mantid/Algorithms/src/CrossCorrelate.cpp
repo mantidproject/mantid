@@ -36,6 +36,9 @@ namespace Mantid
       // Spectra in the range [min to max] will be cross correlated to reference.
       declareProperty("Spectra_min",0, mustBePositive->clone());
       declareProperty("Spectra_max",0, mustBePositive->clone());
+      // Only the data in the range X_min, X_max will be used
+      declareProperty("X_min",0.0);
+      declareProperty("X_max",0.0);
      }
 
     /** Executes the algorithm
@@ -61,6 +64,20 @@ void CrossCorrelate::exec()
    		throw std::runtime_error("Can't find reference spectra");
    	const int index_ref=index_map_it->second;
 
+	// Now check if the range between x_min and x_max is valid
+   	const std::vector<double>& referenceX=inputWS->dataX(index_ref);
+   	double xmin=getProperty("X_min");
+   	std::vector<double>::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
+   	if (minIt==referenceX.end())
+   		throw std::runtime_error("No data above X_min");
+
+   	double xmax=getProperty("X_max");
+   	std::vector<double>::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
+   	if (minIt==maxIt)
+   		throw std::runtime_error("Range is not valid");
+   	//
+   	std::vector<double>::difference_type difminIt=std::distance(referenceX.begin(),minIt);
+   	std::vector<double>::difference_type difmaxIt=std::distance(referenceX.begin(),maxIt);
 
    	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
 
@@ -74,10 +91,12 @@ void CrossCorrelate::exec()
    		index_map_it=index_map.find(i);
    		if (index_map_it==index_map.end()) // Not in the map
    			continue; // Continue
-   		indexes.push_back(index_map_it->second); // If spectrum found then add its index.
+   		indexes.push_back(index_map_it->second); // If spectrum found then add its index to a vector.
    		++nspecs;
    	}
-   	std::ostringstream mess;
+
+   	std::ostringstream mess; // Use for log message
+
    	if (nspecs==0) // Throw if no spectra in range
 	{
 		mess<< "No spectra in range between" << specmin << " and " << specmax;
@@ -87,18 +106,32 @@ void CrossCorrelate::exec()
    	// Output message information
    	mess << "There are " << nspecs << " spectra in the range" << std::endl;
    	g_log.information(mess.str());
-
-    const 	int nY=inputWS->readY(index_ref).size(); // Number of Yvalues for spectra reference
-
-    // Now start the real stuff
-    // Create a 2DWorkspace that will hold the result
-    const int npoints=2*nY-3;
-	Workspace_sptr out= WorkspaceFactory::Instance().create("Workspace2D",nspecs,npoints,npoints);
+   	mess.str("");
 
 	// Take a copy of  the reference spectrum
-   	std::vector<double> refX=inputWS->dataX(index_ref);
-   	std::vector<double> refY=inputWS->dataY(index_ref);
-   	std::vector<double> refE=inputWS->dataE(index_ref);
+	const std::vector<double>& referenceY=inputWS->dataY(index_ref);
+	const std::vector<double>& referenceE=inputWS->dataE(index_ref);
+	int test=maxIt-minIt+1;
+	mess<< "There are " << test << " bins";
+	g_log.information(mess.str());
+	mess.str("");
+
+   	std::vector<double> refX(maxIt-minIt+1);
+   	std::vector<double> refY(maxIt-minIt+1);
+   	std::vector<double> refE(maxIt-minIt+1);
+
+   	std::copy(minIt,maxIt,refX.begin());
+   	std::copy(referenceY.begin()+difminIt,referenceY.begin()+difmaxIt,refY.begin());
+   	std::copy(referenceE.begin()+difminIt,referenceE.begin()+difmaxIt,refE.begin());
+
+   	// Now start the real stuff
+	// Create a 2DWorkspace that will hold the result
+   	const int nY=refY.size();
+   	mess << "and here there are " << nY << " bins";
+   	g_log.information(mess.str());
+   	mess.str("");
+	const int npoints=2*nY-3;
+	Workspace_sptr out= WorkspaceFactory::Instance().create("Workspace2D",nspecs,npoints,npoints);
 
    	// Calculate the mean value of the reference spectrum
 	double refMean=std::accumulate(refY.begin(),refY.end(),0);
@@ -148,7 +181,9 @@ void CrossCorrelate::exec()
 			(*it)-=tempMean; // Now the vector is (y[i]-refMean)
 			tempVar+=(*it)*(*it);
 		}
+		// Calculate the normalisation constant
 		double normalisation=1.0/sqrt(refVar*tempVar);
+		// Get reference to the ouput spectrum
 		std::vector<double>& outY=out->dataY(i);
 		for (int k=-nY+2;k<=nY-2;++k)
 		{
