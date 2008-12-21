@@ -131,7 +131,7 @@ void CrossCorrelate::exec()
    	g_log.information(mess.str());
    	mess.str("");
 	const int npoints=2*nY-3;
-	Workspace_sptr out= WorkspaceFactory::Instance().create("Workspace2D",nspecs,npoints,npoints);
+	Workspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
    	// Calculate the mean value of the reference spectrum
 	double refMean=std::accumulate(refY.begin(),refY.end(),0);
