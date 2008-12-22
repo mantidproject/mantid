@@ -76,7 +76,8 @@ namespace Mantid
       class Minus_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
-        Minus_fn(BinaryOperation *op,int count):BinaryOperation::BinaryOperation_fn(op,count){}
+        /// Constructor
+        Minus_fn(BinaryOperation *op,int count) : BinaryOperation::BinaryOperation_fn(op,count) {}
         API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
       };
 

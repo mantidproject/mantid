@@ -78,7 +78,8 @@ namespace Mantid
       class Plus_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
-        Plus_fn(BinaryOperation *op,int count):BinaryOperation::BinaryOperation_fn(op,count){}
+        /// Constructor
+        Plus_fn(BinaryOperation *op,int count) : BinaryOperation::BinaryOperation_fn(op,count) {}
         API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
       };
 

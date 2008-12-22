@@ -296,6 +296,19 @@ public:
    
   }
 
+  void testCompoundAssignment()
+  {
+    Workspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    const Workspace_const_sptr b = a;
+    Workspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    a -= 5;
+    TS_ASSERT_EQUALS(a->readY(0)[0],-2);
+    TS_ASSERT_EQUALS(a,b);
+    a -= c;
+    TS_ASSERT_EQUALS(a->readY(0)[0],-4);
+    TS_ASSERT_EQUALS(a,b);
+  }
+  
 private:
   void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)
   {

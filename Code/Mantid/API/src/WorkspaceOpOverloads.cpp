@@ -15,123 +15,33 @@ namespace Mantid
 namespace API
 {
 
-/** Adds two workspaces
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator+(const Workspace_sptr lhs, const Workspace_sptr rhs)
-{
-  return executeBinaryOperation("Plus",lhs,rhs);
-}
-
-/** Adds a workspace to a single value
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs the single value (error is taken as sqrt(value))
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator+(const Workspace_sptr lhs, const double rhsValue)
-{
-  return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue));
-}
-
-/** Subtracts two workspaces
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator-(const Workspace_sptr lhs, const Workspace_sptr rhs)
-{
-  return executeBinaryOperation("Minus",lhs,rhs);
-}
-
-/** Subtracts  a single value from a workspace
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs the single value (error is taken as sqrt(value))
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator-(const Workspace_sptr lhs, const double rhsValue)
-{
-  return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
-}
-
-/** Multiply two workspaces
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator*(const Workspace_sptr lhs, const Workspace_sptr rhs)
-{
-  return executeBinaryOperation("Multiply",lhs,rhs);
-}
-
-/** Multiply a workspace and a single value
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs the single value (error is taken as sqrt(value))
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator*(const Workspace_sptr lhs, const double rhsValue)
-{
-  return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
-}
-
-/** Divide two workspaces
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs left hand side workspace shared pointer
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator/(const Workspace_sptr lhs, const Workspace_sptr rhs)
-{
-  return executeBinaryOperation("Divide",lhs,rhs);
-}
-
-/** Divide a workspace by a single value
- *  @param lhs left hand side workspace shared pointer
- *  @param rhs the single value (error is taken as sqrt(value)
- *  @returns The result in a workspace shared pointer
- */
-Workspace_sptr operator/(const Workspace_sptr lhs, const double rhsValue)
-{
-  return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
-}
-
 /** Performs a binary operation on two workspaces
  *  @param algorithmName The name of the binary operation to perform
  *  @param lhs left hand side workspace shared pointer
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr executeBinaryOperation(const std::string algorithmName, const Workspace_sptr lhs, const Workspace_sptr rhs)
+static Workspace_sptr executeBinaryOperation(const std::string algorithmName, const Workspace_sptr lhs, const Workspace_sptr rhs, bool lhsAsOutput = false)
 {
   Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(true);
   alg->initialize();
 
-  //we have to set text names for the workspace parameters even though they will not be used.
-  //This satisfies the validation.
-  alg->setPropertyValue("InputWorkspace_1","��NotApplicable1");
-  alg->setPropertyValue("InputWorkspace_2","��NotApplicable2");
-  alg->setPropertyValue("OutputWorkspace","��NotApplicable3");
-
   alg->setProperty<Workspace_sptr>("InputWorkspace_1",lhs);
   alg->setProperty<Workspace_sptr>("InputWorkspace_2",rhs);
+  
+  // Have to set a text name for the output workspace even though it will not be used.
+  //   This satisfies the validation.
+  alg->setPropertyValue("OutputWorkspace","��NotApplicable");
+  // If calling from a compound assignment operator, set the left-hand operand to be the output workspace
+  if (lhsAsOutput) alg->setProperty<Workspace_sptr>("OutputWorkspace",lhs);
+
   alg->execute();
 
   if (alg->isExecuted())
   {
     //Get the output workspace property
-    const std::vector< Kernel::Property*> &props = alg->getProperties();
-    for (unsigned int i = 0; i < props.size(); ++i)
-    {
-      if (props[i]->name() == "OutputWorkspace")
-      {
-        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
-        if (wsProp)
-        {
-          return wsProp->getWorkspace();
-        }
-      }
-    }
+    return alg->getProperty("OutputWorkspace");
   }
   else
   {
@@ -150,13 +60,187 @@ Workspace_sptr executeBinaryOperation(const std::string algorithmName, const Wor
  *  @param rhsValue the value to use
  *  @returns The value in a workspace shared pointer
  */
-Workspace_sptr createWorkspaceSingleValue(const double rhsValue)
+static Workspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 {
   Workspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
   retVal->dataY(0)[0]=rhsValue;
 
   return retVal;
 }
+
+/** Adds two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator+(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Plus",lhs,rhs);
+}
+
+/** Adds a workspace to a single value
+ *  @param lhs      left hand side workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator+(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue));
+}
+
+/** Subtracts two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator-(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Minus",lhs,rhs);
+}
+
+/** Subtracts  a single value from a workspace
+ *  @param lhs      left hand side workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator-(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
+}
+
+/** Multiply two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator*(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Multiply",lhs,rhs);
+}
+
+/** Multiply a workspace and a single value
+ *  @param lhs      left hand side workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator*(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
+}
+
+/** Multiply a workspace and a single value. Allows you to write, e.g., 2*workspace.
+ *  @param lhsValue the single value
+ *  @param rhs      workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator*(const double& lhsValue, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Multiply",createWorkspaceSingleValue(lhsValue),rhs);
+}
+
+/** Divide two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator/(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Divide",lhs,rhs);
+}
+
+/** Divide a workspace by a single value
+ *  @param lhs      left hand side workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator/(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
+}
+
+/** Adds two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator+=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Plus",lhs,rhs,true);
+}
+
+/** Adds a single value to a workspace
+ *  @param lhs      workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator+=(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue),true);
+}
+
+/** Subtracts two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator-=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Minus",lhs,rhs,true);
+}
+
+/** Subtracts a single value from a workspace
+ *  @param lhs      workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator-=(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue),true);
+}
+
+/** Multiply two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator*=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Multiply",lhs,rhs,true);
+}
+
+/** Multiplies a workspace by a single value
+ *  @param lhs      workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator*=(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue),true);
+}
+
+/** Divide two workspaces
+ *  @param lhs left hand side workspace shared pointer
+ *  @param rhs left hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator/=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+{
+  return executeBinaryOperation("Divide",lhs,rhs,true);
+}
+
+/** Divides a workspace by a single value
+ *  @param lhs      workspace shared pointer
+ *  @param rhsValue the single value
+ *  @returns The result in a workspace shared pointer
+ */
+Workspace_sptr operator/=(const Workspace_sptr lhs, const double& rhsValue)
+{
+  return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue),true);
+}
+
+//----------------------------------------------------------------------
+// Now the WorkspaceHelpers methods
+//----------------------------------------------------------------------
 
 /** Checks whether a workspace has common bins (or values) in X
  *  @param WS The workspace to check

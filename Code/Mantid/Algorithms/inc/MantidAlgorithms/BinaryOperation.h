@@ -109,22 +109,21 @@ namespace Mantid
         /// Virtual destructor
         virtual ~BinaryOperation_fn()
         { }
-
         /** Abstract function that performs each element of the binary function
         * @param a The lhs data element
         * @param b The rhs data element
         * @returns The result data element
         */
-        virtual API::LocatedDataValue& operator()(const API::ILocatedData& a,const API::ILocatedData& b) =0;
+        virtual API::LocatedDataValue& operator()(const API::ILocatedData& a,const API::ILocatedData& b) = 0;
       protected:
         /**Temporary cache of the Histogram Result.
         This save creating a new object for each iteration and removes lifetime issues.
         */
         API::LocatedDataValue result;
-        int m_count;         // Total number of individual operations.
-        int m_progress;      // Number of performed operations;
-        int m_progress_step; // Call progerss(...) every m_progress_step operations.
-        BinaryOperation *m_op; // BinaryOperation
+        int m_count;         ///< Total number of individual operations.
+        int m_progress;      ///< Number of performed operations;
+        int m_progress_step; ///< Call progerss(...) every m_progress_step operations.
+        BinaryOperation *m_op; ///< BinaryOperation
         /// Reports algorithm progress from operator()
         void report_progress(){m_op->report_progress(double(m_progress)/m_count);}
       };

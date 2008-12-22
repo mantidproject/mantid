@@ -76,7 +76,8 @@ namespace Mantid
       class Divide_fn : public BinaryOperation::BinaryOperation_fn
       {
       public:
-        Divide_fn(BinaryOperation *op,int count):BinaryOperation::BinaryOperation_fn(op,count){}
+        /// Constructor
+        Divide_fn(BinaryOperation *op,int count) : BinaryOperation::BinaryOperation_fn(op,count) {}
         API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
       };
 

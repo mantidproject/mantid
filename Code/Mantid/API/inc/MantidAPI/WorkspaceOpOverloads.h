@@ -15,16 +15,21 @@ Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const Workspace_spt
 Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const Workspace_sptr rhs);
 Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const Workspace_sptr rhs);
 
-Workspace_sptr DLLExport operator+(const Workspace_sptr lhs, const double rhsValue);
-Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const double rhsValue);
-Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const double rhsValue);
-Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const double rhsValue);
+Workspace_sptr DLLExport operator+(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator*(const double& lhsValue, const Workspace_sptr rhs);
+Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const double& rhsValue);
 
-Workspace_sptr executeBinaryOperation(std::string AlgorithmName,
-                                      const Workspace_sptr lhs, const Workspace_sptr rhs);
+Workspace_sptr DLLExport operator+=(const Workspace_sptr lhs, const Workspace_sptr rhs);
+Workspace_sptr DLLExport operator-=(const Workspace_sptr lhs, const Workspace_sptr rhs);
+Workspace_sptr DLLExport operator*=(const Workspace_sptr lhs, const Workspace_sptr rhs);
+Workspace_sptr DLLExport operator/=(const Workspace_sptr lhs, const Workspace_sptr rhs);
 
-Workspace_sptr createWorkspaceSingleValue(const double rhsValue);
-
+Workspace_sptr DLLExport operator+=(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator-=(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator*=(const Workspace_sptr lhs, const double& rhsValue);
+Workspace_sptr DLLExport operator/=(const Workspace_sptr lhs, const double& rhsValue);
 
 /** A collection of static functions for use with workspaces
 

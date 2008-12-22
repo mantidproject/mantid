@@ -41,16 +41,31 @@ namespace Mantid
       // Check that the input workspace are compatible
       if (!checkCompatibility(in_work1,in_work2))
       {
-          std::ostringstream ostr;
-          ostr << "The two workspaces are not compatible for algorithm " << this->name();
-          g_log.error() << ostr << std::endl;
-          throw std::invalid_argument( ostr.str() );
+        std::ostringstream ostr;
+        ostr << "The two workspaces are not compatible for algorithm " << this->name();
+        g_log.error() << ostr << std::endl;
+        throw std::invalid_argument( ostr.str() );
       }
 
       Workspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
       Workspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
 
-      Workspace_sptr out_work = createOutputWorkspace(in_work1,in_work2);
+      Workspace_sptr out_work = getProperty("OutputWorkspace");
+      // We need to create a new workspace for the output if:
+      //   (a) the output workspace hasn't been set to one of the input ones, or
+      //   (b) it has been, but it's not the correct dimensions
+      if ( out_work == in_work1 )
+      {
+        if ( in_work2->size() > in_work1->size() ) out_work = createOutputWorkspace(in_work1,in_work2);
+      }
+      else if ( out_work == in_work2 )
+      {
+        if ( in_work1->size() > in_work2->size() ) out_work = createOutputWorkspace(in_work1,in_work2);        
+      }
+      else
+      {
+        out_work = createOutputWorkspace(in_work1,in_work2);
+      }
       Workspace::iterator ti_out(*out_work);
 
       //perform the operation through an abstract call
@@ -82,10 +97,10 @@ namespace Mantid
       // Check the size compatibility
       if (!checkSizeCompatibility(lhs,rhs))
       {
-          std::ostringstream ostr;
-          ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
-          g_log.error() << ostr << std::endl;
-          throw std::invalid_argument( ostr.str() );
+        std::ostringstream ostr;
+        ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
+        g_log.error() << ostr << std::endl;
+        throw std::invalid_argument( ostr.str() );
       }
 
       return true;
