@@ -1,10 +1,12 @@
-#ifndef  MANTID_KERNEL_VECTORHELPER_H_
+#ifndef MANTID_KERNEL_VECTORHELPER_H_
 #define MANTID_KERNEL_VECTORHELPER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/System.h"
 #include <vector>
+#include <functional>
 
 namespace Mantid
 {
@@ -37,7 +39,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-  void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+  void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
   struct sumV : public std::unary_function<double, void>

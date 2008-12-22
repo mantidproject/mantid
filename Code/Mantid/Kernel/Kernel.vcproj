@@ -244,6 +244,10 @@
 				RelativePath=".\src\UnitFactory.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\VectorHelper.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -296,6 +300,10 @@
 			</File>
 			<File
 				RelativePath=".\test\DynamicFactoryTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\EnvironmentHistory.h"
 				>
 			</File>
 			<File
@@ -444,6 +452,10 @@
 			</File>
 			<File
 				RelativePath=".\test\UnitTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\VectorHelper.h"
 				>
 			</File>
 		</Filter>

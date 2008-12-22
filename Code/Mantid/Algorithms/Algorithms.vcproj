@@ -202,6 +202,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CrossCorrelate.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DiffractionFocussing.cpp"
 				>
 			</File>
@@ -333,6 +337,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\CropWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CrossCorrelate.h"
 				>
 			</File>
 			<File
