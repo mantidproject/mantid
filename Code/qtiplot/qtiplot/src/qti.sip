@@ -909,7 +909,12 @@ public:
 
   Matrix* tableToMatrix(Table* t);
   Table* matrixToTable(Matrix* m, MatrixToTableConversion = Direct);
+
+  //---- Mantid
   MantidUI* mantidUI;
+  void addUserMenu(const QString &);
+  void addUserMenuAction(const QString &, const QString &, const QString &);
+  //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);
 };
