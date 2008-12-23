@@ -10,6 +10,7 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <stdexcept>
 
 namespace Mantid
 {
