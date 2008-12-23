@@ -8,10 +8,55 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/Workspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+
+class tstWorkspace: public Workspace
+{
+    std::vector<double> vec;
+public:
+
+  /// Return the workspace typeID
+    virtual const std::string id() const{return "tstWorkspace";}
+  /// Returns the number of single indexable items in the workspace
+    virtual int size() const{return 0;}
+  /// Returns the size of each block of data returned by the dataX accessors
+    virtual int blocksize() const{return 0;}
+  /// Returns the number of histograms in the workspace
+    virtual const int getNumberHistograms() const{return 0;}
+
+  /// Returns the x data
+    virtual std::vector<double>& dataX(int const index){return vec;}
+  /// Returns the y data
+  virtual std::vector<double>& dataY(int const index){return vec;}
+  /// Returns the error data
+  virtual std::vector<double>& dataE(int const index){return vec;}
+  /// Returns the x data const
+  virtual const std::vector<double>& dataX(int const index) const{return vec;}
+  /// Returns the y data const
+  virtual const std::vector<double>& dataY(int const index) const{return vec;}
+  /// Returns the error const
+  virtual const std::vector<double>& dataE(int const index) const{return vec;}
+  //----------------------------------------------------------------------
+
+  /// Returns the ErrorHelper applicable for this spectra
+  virtual const IErrorHelper* errorHelper(int const index) const{return 0;}
+  /// Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,IErrorHelper* errorHelper){}
+  /// Sets the ErrorHelper for this spectra
+  virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper){}
+protected:
+    void init(const int &NVectors, const int &XLength, const int &YLength){}
+};
+
+class NoDeleting
+{
+public:
+    void operator()(void*){}
+};
 
 class SpectraDetectorMapTest : public CxxTest::TestSuite
 {
@@ -21,19 +66,19 @@ public:
     offset = 100000;
     length = 100;
     populateInstrument(inst,length);
-    populateSDMap(sdMap,inst,length,offset);
+    populateSDMap(WS,inst,length,offset);
   }
 
   void testPopulate()
   {
-    TS_ASSERT_EQUALS(sdMap.nElements(),length);
+      TS_ASSERT_EQUALS(WS.getSpectraMap()->nElements(),length);
   }
 
   void testNdet()
   {
     for (int i = 0; i < length; i++)
     {
-      TS_ASSERT_EQUALS(sdMap.ndet(offset+i),1);
+      TS_ASSERT_EQUALS(WS.getSpectraMap()->ndet(offset+i),1);
     }
   }
 
@@ -41,7 +86,7 @@ public:
   {
     for (int i = 0; i < length; i++)
     {
-      boost::shared_ptr<IDetector> d = sdMap.getDetector(offset+i);
+      boost::shared_ptr<IDetector> d = WS.getSpectraMap()->getDetector(offset+i);
       TS_ASSERT_EQUALS(d->getID(),i);
     }
   }
@@ -50,7 +95,7 @@ public:
   {
     for (int i = 0; i < length; i++)
     {
-      std::vector<IDetector*> dvec = sdMap.getDetectors(offset+i);
+        std::vector<boost::shared_ptr<IDetector> > dvec = WS.getSpectraMap()->getDetectors(offset+i);
       TS_ASSERT_EQUALS(dvec.size(),1);
       TS_ASSERT_EQUALS(dvec[0]->getID(),i);
     }
@@ -59,22 +104,29 @@ public:
   void testRemap()
   {
     //use my own local instrument and sdmap as I will be altering them
-    SpectraDetectorMap sdMapLocal;
+    tstWorkspace LocalWS;
     Instrument instLocal;
 
     populateInstrument(instLocal,length);
-    populateSDMap(sdMapLocal,instLocal,length,offset);
+    populateSDMap(LocalWS,instLocal,length,offset);
 
-    TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
+    TS_ASSERT_EQUALS(LocalWS.getSpectraMap()->nElements(),length);
 
     //remap to a new spectra that doesn't exist -> no action
-    sdMapLocal.remap(offset,offset+length+1);
-    TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
+    LocalWS.getSpectraMap()->remap(offset,offset+length+1);
+    TS_ASSERT_EQUALS(LocalWS.getSpectraMap()->nElements(),length);
 
     //remap to a new spectra that does exist
-    sdMapLocal.remap(offset,offset+1);
-    TS_ASSERT_EQUALS(sdMapLocal.ndet(offset),0);
-    TS_ASSERT_EQUALS(sdMapLocal.ndet(offset+1),2);
+    LocalWS.getSpectraMap()->remap(offset,offset+1);
+    TS_ASSERT_EQUALS(LocalWS.getSpectraMap()->ndet(offset),0);
+    TS_ASSERT_EQUALS(LocalWS.getSpectraMap()->ndet(offset+1),2);
+  }
+
+  void testSetMap()
+  {
+      tstWorkspace LocalWS;
+      LocalWS.setSpectraMap(WS.getSpectraMap());
+      TS_ASSERT_EQUALS(LocalWS.getSpectraMap()->nElements(),length);
   }
 
 
@@ -89,7 +141,7 @@ public:
     }
 
     //remap them
-    std::vector<int> spectra = sdMap.getSpectra(dets);
+    std::vector<int> spectra = WS.getSpectraMap()->getSpectra(dets);
     for (int i = 0; i < detLength; i++)
     {
       TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);
@@ -112,7 +164,7 @@ private:
     }
   }
 
-  void populateSDMap(SpectraDetectorMap& sdMap, Instrument& inst,int length, int offset)
+  void populateSDMap(Workspace& ws, Instrument& inst,int length, int offset)
   {
     int* udet = new int [length];
     int* spec = new int [length];
@@ -121,12 +173,14 @@ private:
       spec[i] = i+offset;
       udet[i] = i;
     }
-    sdMap.populate(spec,udet,length,&inst);
+    ws.setInstrument(boost::shared_ptr<Instrument>(&inst,NoDeleting()));
+    ws.getSpectraMap()->populate(spec,udet,length);
     delete [] spec;
     delete [] udet;
   } 
 
-  SpectraDetectorMap sdMap;
+  tstWorkspace WS;
+  //SpectraDetectorMap sdMap;
   Instrument inst;
   int offset;
   int length;

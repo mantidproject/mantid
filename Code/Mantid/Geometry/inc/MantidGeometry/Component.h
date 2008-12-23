@@ -1,13 +1,18 @@
-#ifndef MANTID_GEOMETRY_COMPONENT_H_
-#define MANTID_GEOMETRY_COMPONENT_H_
+#ifndef MANTID_GEOMETRY_Component_H_
+#define MANTID_GEOMETRY_Component_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <string>
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidKernel/System.h"
+
+#ifdef _WIN32
+  #pragma warning( disable: 4250 )
+#endif
 
 namespace Mantid
 {
@@ -48,7 +53,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Component
+    class DLLExport Component:public virtual IComponent
 {
 public:
   /// Returns a string representation of the component type
@@ -65,13 +70,13 @@ public:
   //! Copy constructor
   Component(const Component&);
   //! Return a clone to the current object
-  virtual Component* clone() const;
+  virtual IComponent* clone() const;
   /// Destructor
   virtual ~Component();
   //! Assign a parent component. Previous parent link is lost
-  void setParent(Component*);
+  void setParent(IComponent*);
   //! Return a pointer to the current parent.
-  const Component* getParent() const;
+  const IComponent* getParent() const;
   //! Set the component name
   void setName(const std::string&);
   //! Get the component name
@@ -82,7 +87,7 @@ public:
   //! Set the orientation quaternion relative to parent (if present) otherwise absolute
   void setRot(const Quat&);
   //! Copy the Rotation from another component
-  void copyRot(const Component&);
+  void copyRot(const IComponent&);
   //! Translate the component (vector form). This is relative to parent if present.
   void translate(const V3D&);
   //! Translate the component (x,y,z form). This is relative to parent if present.
@@ -100,7 +105,7 @@ public:
   //! Get the absolute orientation of the component
   const Quat getRotation() const;
   //! Get the distance to another component
-  double getDistance(const Component&) const;
+  double getDistance(const IComponent&) const;
   void printSelf(std::ostream&) const;
 private:
   /// Private, unimplemented copy assignment operator
@@ -113,7 +118,7 @@ private:
   //! Orientation
   Quat rot;
   /// Parent component in the tree
-  Component* parent;
+  const IComponent* parent;
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const Component&);
@@ -121,4 +126,4 @@ DLLExport std::ostream& operator<<(std::ostream&, const Component&);
 } //Namespace Geometry
 } //Namespace Mantid
 
-#endif /*MANTID_GEOMETRY_COMPONENT_H_*/
+#endif /*MANTID_GEOMETRY_Component_H_*/

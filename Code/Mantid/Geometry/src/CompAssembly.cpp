@@ -7,6 +7,12 @@ namespace Mantid
 namespace Geometry
 {
 
+class NoDeleting
+{
+public:
+    void operator()(void*p){}
+};
+
 /*! Empty constructor
  */
 CompAssembly::CompAssembly() : Component()
@@ -41,10 +47,10 @@ CompAssembly::CompAssembly(const CompAssembly& ass) :
 {
   group=ass.group;
   // Need to do a deep copy
-  std::vector<Component*>::iterator it;
+  comp_it it;
   for (it = group.begin(); it != group.end(); ++it)
   {
-    *it = (*it)->clone();
+    *it =  (*it)->clone() ;
     // Move copied component object's parent from old to new CompAssembly
     (*it)->setParent(this);
   }
@@ -55,8 +61,8 @@ CompAssembly::CompAssembly(const CompAssembly& ass) :
 CompAssembly::~CompAssembly()
 {
   // Iterate over pointers in group, deleting them
-  std::vector<Component*>::iterator it;
-  for (it = group.begin(); it != group.end(); ++it)
+  //std::vector<IComponent*>::iterator it;
+  for (comp_it it = group.begin(); it != group.end(); ++it)
   {
     delete *it;
   }
@@ -67,7 +73,7 @@ CompAssembly::~CompAssembly()
  *  Make a copy of the component assembly
  *  @return new(*this)
  */
-Component* CompAssembly::clone() const
+IComponent* CompAssembly::clone() const
 {
   return new CompAssembly(*this);
 }
@@ -78,7 +84,7 @@ Component* CompAssembly::clone() const
  * 
  * This becomes the new parent of comp.
  */
-int CompAssembly::add(Component* comp)
+int CompAssembly::add(IComponent* comp)
 {
   if (comp)
   {
@@ -96,11 +102,11 @@ int CompAssembly::add(Component* comp)
  *  Comp is cloned if valid, then added in the assembly
  *  This becomes the parent of the cloned component
  */
-int CompAssembly::addCopy(Component* comp)
+int CompAssembly::addCopy(IComponent* comp)
 {
   if (comp)
   {
-    Component* newcomp=comp->clone();
+    IComponent* newcomp=comp->clone();
     newcomp->setParent(this);
     group.push_back(newcomp);
   }
@@ -116,11 +122,11 @@ int CompAssembly::addCopy(Component* comp)
  *  Comp is cloned if valid, then added in the assembly
  *  This becomes the parent of the cloned component
  */
-int CompAssembly::addCopy(Component* comp, const std::string& n)
+int CompAssembly::addCopy(IComponent* comp, const std::string& n)
 {
   if (comp)
   {
-    Component* newcomp=comp->clone();
+    IComponent* newcomp=comp->clone();
     newcomp->setParent(this);
     newcomp->setName(n);
     group.push_back(newcomp);
@@ -145,11 +151,11 @@ int CompAssembly::nelements() const
  * 
  *  Throws if i is not in range
  */
-Component* CompAssembly::operator[](int i) const
+boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
 {
   if (i<0 || i> static_cast<int>(group.size()-1))
   throw std::runtime_error("CompAssembly::operator[] range not valid");
-  return group[i];
+  return boost::shared_ptr<IComponent>(group[i],NoDeleting());
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -160,9 +166,9 @@ Component* CompAssembly::operator[](int i) const
  */
 void CompAssembly::printChildren(std::ostream& os) const
 {
-  std::vector<Component*>::const_iterator it;
+  //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (it=group.begin();it!=group.end();it++)
+  for (const_comp_it it=group.begin();it!=group.end();it++)
   {
     os << "Component " << i++ <<" : **********" <<std::endl;
     (*it)->printSelf(os);
@@ -177,9 +183,9 @@ void CompAssembly::printChildren(std::ostream& os) const
  */
 void CompAssembly::printTree(std::ostream& os) const
 {
-  std::vector<Component*>::const_iterator it;
+  //std::vector<IComponent*>::const_iterator it;
   int i=0;
-  for (it=group.begin();it!=group.end();it++)
+  for (const_comp_it it=group.begin();it!=group.end();it++)
   {
     const CompAssembly* test=dynamic_cast<CompAssembly*>(*it);
     os << "Element " << i++ << " in the assembly : ";

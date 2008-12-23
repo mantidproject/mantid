@@ -1,7 +1,8 @@
 #include "MantidGeometry/DetectorGroup.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include <iostream>
 
 namespace Mantid
 {
@@ -25,24 +26,30 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
-    SpectraDetectorMap::SpectraDetectorMap()
-    {}
+    SpectraDetectorMap::SpectraDetectorMap(const Workspace* ws)
+        :m_workspace(ws),_s2dmap(new smap)
+    {
+    }
 
-    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
+/*    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
     {
       _s2dmap.insert(copy._s2dmap.begin(),copy._s2dmap.end());
-    }
+    }*/
 
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
 
-    void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries, Instrument* instr)
+    void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries)
     {
+        _s2dmap.reset(new smap());
+        boost::shared_ptr<IInstrument> instr = m_workspace->getInstrument();
+        if (!instr)
+            throw std::runtime_error("Instrument iz zero!");
       if (nentries<=0)
       {
         throw std::invalid_argument("Populate : number of entries should be >0");
       }
-      IDetector* current;
+      boost::shared_ptr<IDetector> current;
       bool warn = true;
       for (int i=0; i<nentries; ++i)
       {
@@ -62,7 +69,7 @@ namespace Mantid
           ++_udettable;
           continue;
         }
-        _s2dmap.insert(std::pair<int,IDetector*>(*_spectable,current)); // Insert current detector with Spectra number as key 
+        _s2dmap->insert(std::pair<int,int>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key 
         ++_spectable;
         ++_udettable;
       }
@@ -86,26 +93,26 @@ namespace Mantid
         return;
       }
       // Get the list of detectors that contribute to the old spectrum
-      std::vector<IDetector*> dets = getDetectors(oldSpectrum);
+      std::vector<int> dets = getDetectorIDs(oldSpectrum);
 
       // Add them to the map with the new spectrum number as the key
-      std::vector<IDetector*>::const_iterator it;
+      std::vector<int>::const_iterator it;
       for (it = dets.begin(); it != dets.end(); ++it)
       {
-        _s2dmap.insert( std::pair<int,IDetector*>(newSpectrum,*it) );
+        _s2dmap->insert( std::pair<int,int>(newSpectrum,*it) );
       }
       // Finally, remove the old spectrum number from the map
-      _s2dmap.erase(oldSpectrum);
+      _s2dmap->erase(oldSpectrum);
     }
 
     const int SpectraDetectorMap::ndet(const int spectrum_number) const
     {
-      return _s2dmap.count(spectrum_number);
+      return _s2dmap->count(spectrum_number);
     }
 
-    std::vector<Geometry::IDetector*> SpectraDetectorMap::getDetectors(const int spectrum_number) const
+    std::vector<boost::shared_ptr<Geometry::IDetector> > SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {
-      std::vector<Geometry::IDetector*> detectors;
+      std::vector<boost::shared_ptr<Geometry::IDetector> > detectors;
       int ndets=ndet(spectrum_number);
 
       if (ndets<1)
@@ -113,7 +120,28 @@ namespace Mantid
         // Will just return an empty vector
         return detectors;
       }
-      std::pair<smap_it,smap_it> det_range=_s2dmap.equal_range(spectrum_number);
+      if (!m_workspace)
+          throw std::runtime_error("SpectraDetectorMap has not been populated.");
+      boost::shared_ptr<IInstrument> instr = m_workspace->getInstrument();
+      std::pair<smap_it,smap_it> det_range=_s2dmap->equal_range(spectrum_number);
+      for (smap_it it=det_range.first; it!=det_range.second; ++it)
+      {
+        detectors.push_back(instr->getDetector(it->second));
+      }
+      return detectors;
+    }
+
+    std::vector<int> SpectraDetectorMap::getDetectorIDs(const int spectrum_number) const
+    {
+      std::vector<int> detectors;
+      int ndets=ndet(spectrum_number);
+
+      if (ndets<1)
+      {
+        // Will just return an empty vector
+        return detectors;
+      }
+      std::pair<smap_it,smap_it> det_range=_s2dmap->equal_range(spectrum_number);
       for (smap_it it=det_range.first; it!=det_range.second; ++it)
       {
         detectors.push_back(it->second);
@@ -130,6 +158,8 @@ namespace Mantid
     */
     boost::shared_ptr<Geometry::IDetector> SpectraDetectorMap::getDetector(const int spectrum_number) const
     {
+      if (!m_workspace)
+          throw std::runtime_error("SpectraDetectorMap has not been populated.");
       int ndets=ndet(spectrum_number);
       if ( ndets == 0 )
       {
@@ -141,9 +171,11 @@ namespace Mantid
         // If only 1 detector for the spectrum number, just return it
         // Have to create the shared pointer with a null deleter in this case so that the detector
         //   doesn't get deleted when the shared pointer goes out of scope
-        return boost::shared_ptr<IDetector>(_s2dmap.find(spectrum_number)->second, Kernel::NullDeleter());
+          int id = _s2dmap->find(spectrum_number)->second;
+          return m_workspace->getInstrument()->getDetector(id);
       }
 
+          std::vector<boost::shared_ptr<Geometry::IDetector> > tmp = getDetectors(spectrum_number);
       // Else need to construct a DetectorGroup and return that
       return boost::shared_ptr<IDetector>(new Geometry::DetectorGroup(getDetectors(spectrum_number)));
     }
@@ -158,9 +190,9 @@ namespace Mantid
 
       //invert the sdmap into a dsMap
       std::multimap<int,int> dsMap;  
-      for (smap_it it = _s2dmap.begin();  it != _s2dmap.end(); ++it)
+      for (smap_it it = _s2dmap->begin();  it != _s2dmap->end(); ++it)
       {
-        std::pair<int,int> valuePair(it->second->getID(),it->first);
+        std::pair<int,int> valuePair(it->second,it->first);
         dsMap.insert(valuePair);
       }
 
@@ -180,6 +212,14 @@ namespace Mantid
         }
       }
       return spectraList;
+    }
+
+    /**
+        Copies detector ids from rhs spectra map.
+    */
+    void SpectraDetectorMap::copy(const SpectraDetectorMap& rhs)
+    {
+        _s2dmap = rhs._s2dmap;
     }
 
   } // Namespace API 

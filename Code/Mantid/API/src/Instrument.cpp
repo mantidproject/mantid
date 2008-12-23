@@ -3,11 +3,18 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/DetectorGroup.h"
 #include <algorithm>
+#include <iostream>
 
 namespace Mantid
 {
 namespace API
 {
+
+class NoDeleting
+{
+public:
+    void operator()(void*p){}
+};
 
 Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
@@ -23,31 +30,34 @@ Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
 
   
 /**	return reference to detector cache 
-* @returns a reference to the detector cache hold by the instrument
+* @returns a map of the detectors hold by the instrument
 */
-const std::map<int, Geometry::IDetector*>& Instrument::getDetectorCache() 
+std::map<int,  boost::shared_ptr<Geometry::IDetector> > Instrument::getDetectors()
 { 
-  return _detectorCache;
+    std::map<int,  boost::shared_ptr<Geometry::IDetector> > res;
+    for(std::map<int, Geometry::IDetector*>::iterator it=_detectorCache.begin();it!=_detectorCache.end();it++)
+        res.insert(std::pair<int,  boost::shared_ptr<Geometry::IDetector> >(it->first,boost::shared_ptr<Geometry::IDetector>(it->second,NoDeleting())));
+    return res;
 }
 
 /**	Gets a pointer to the source
 * @returns a pointer to the source
 */
-Geometry::ObjComponent* Instrument::getSource() const
+boost::shared_ptr<Geometry::IObjComponent> Instrument::getSource() const
 {
   if ( !_sourceCache )
     g_log.warning("In Instrument::getSource(). No source has been set.");
-  return _sourceCache;
+  return boost::shared_ptr<Geometry::IObjComponent>(_sourceCache,NoDeleting());
 }
 
 /**	Gets a pointer to the Sample Position
 * @returns a pointer to the Sample Position
 */
-Geometry::ObjComponent* Instrument::getSample() const
+boost::shared_ptr<Geometry::IObjComponent> Instrument::getSample() const
 {
   if ( !_sampleCache )
     g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
-  return _sampleCache;
+  return boost::shared_ptr<Geometry::IObjComponent>(_sampleCache,NoDeleting());
 }
 
 /**	Gets a pointer to the detector from its ID
@@ -58,7 +68,7 @@ Geometry::ObjComponent* Instrument::getSample() const
  *  @returns A pointer to the detector object
  *  @throw   NotFoundError If no detector is found for the detector ID given
  */
-Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
+boost::shared_ptr<Geometry::IDetector> Instrument::getDetector(const int &detector_id) const
 {
   std::map<int, Geometry::IDetector*>::const_iterator it;
 
@@ -70,17 +80,17 @@ Geometry::IDetector* Instrument::getDetector(const int &detector_id) const
     throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
   }
 
-  return it->second;
+  return boost::shared_ptr<Geometry::IDetector>(it->second,NoDeleting());
 }
 
 /** Returns the 2Theta scattering angle for a detector
  *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
  *  @return The scattering angle (0 < theta < pi)
  */
-const double Instrument::detectorTwoTheta(const Geometry::IDetector* const det) const
+const double Instrument::detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector> det) const
 {
-  const Geometry::V3D samplePos = this->getSample()->getPos();
-  const Geometry::V3D beamLine = samplePos - this->getSource()->getPos();
+    const Geometry::V3D samplePos = boost::dynamic_pointer_cast<Geometry::ObjComponent>(this->getSample())->getPos();
+  const Geometry::V3D beamLine = samplePos - boost::dynamic_pointer_cast<Geometry::ObjComponent>(this->getSource())->getPos();
   const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
   return sampleDetVec.angle(beamLine);
 }
@@ -89,16 +99,16 @@ const double Instrument::detectorTwoTheta(const Geometry::IDetector* const det) 
 * @param name the name of the object requested (case insensitive)
 * @returns a pointer to the component
 */
-Geometry::Component* Instrument::getChild(const std::string& name) const
+Geometry::IComponent* Instrument::getChild(const std::string& name) const
 {
-  Geometry::Component *retVal = 0;
+  Geometry::IComponent *retVal = 0;
   std::string searchName = name;
   std::transform(searchName.begin(), searchName.end(), searchName.begin(), toupper);
 
   int noOfChildren = this->nelements();
   for (int i = 0; i < noOfChildren; i++)
   {
-    Geometry::Component *loopPtr = (*this)[i];
+    Geometry::IComponent *loopPtr = (*this)[i].get();
     std::string loopName = loopPtr->getName();
     std::transform(loopName.begin(), loopName.end(), loopName.begin(), toupper);
     if (loopName == searchName)
@@ -183,6 +193,31 @@ void Instrument::markAsMonitor(Geometry::IDetector* det)
   {
     throw std::invalid_argument("The IDetector pointer does not point to a Detector object");
   }
+}
+
+std::vector< boost::shared_ptr<Geometry::IObjComponent> > Instrument::getPlottable()const
+{
+    std::vector< boost::shared_ptr<Geometry::IObjComponent> > res;
+    appendPlottable(*this,res);
+    return res;
+}
+
+void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector< boost::shared_ptr<Geometry::IObjComponent> >& lst)const
+{
+    for(int i=0;i<ca.nelements();i++)
+    {
+        Geometry::IComponent* c = ca[i].get();
+        Geometry::CompAssembly* a = dynamic_cast<Geometry::CompAssembly*>(c);
+        if (a) appendPlottable(*a,lst);
+        else
+        {
+            Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
+            if (o)
+                lst.push_back(boost::shared_ptr<Geometry::IObjComponent>(o,NoDeleting()));
+            else
+                std::cerr<<"Unknown comp type\n";
+        }
+    }
 }
 
 

@@ -2,6 +2,7 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidObject.h"
 #include "GLActor.h"
 #include <queue>
@@ -9,7 +10,7 @@
 #include <QString>
 #include <cfloat>
 
-void InstrumentTreeWidget::setInstrument(Mantid::API::Instrument* ins)
+void InstrumentTreeWidget::setInstrument(boost::shared_ptr<Mantid::API::IInstrument> ins)
 {
 	mInstrument=ins;
 	ParseInstrumentGeometry();
@@ -18,7 +19,7 @@ void InstrumentTreeWidget::setInstrument(Mantid::API::Instrument* ins)
 void InstrumentTreeWidget::ParseInstrumentGeometry()
 {
 	clear();
-	std::queue<Mantid::Geometry::Component *> CompList;
+    std::queue<boost::shared_ptr<Mantid::Geometry::IComponent> > CompList;
 	std::queue<QTreeWidgetItem *> itemQueue;
 	CompList.push(mInstrument);
 	//Add top level instrument
@@ -28,16 +29,16 @@ void InstrumentTreeWidget::ParseInstrumentGeometry()
 
 	while(!CompList.empty())
 	{
-		Mantid::Geometry::Component* tmp = CompList.front();
+        boost::shared_ptr<Mantid::Geometry::IComponent> tmp = CompList.front();
 		QTreeWidgetItem* item=itemQueue.front();
 		item->setFlags(Qt::ItemIsEnabled |  Qt::ItemIsSelectable);
 		CompList.pop();
 		itemQueue.pop();
 		//std::cout<<" Component: "<<tmp->getName()<<std::endl;
 		//std::cout<<" Component Type:"<<tmp->type()<<std::endl;
-		if(tmp->type()=="PhysicalComponent" ||tmp->type()=="DetectorComponent"){
+        if(boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(tmp)){
 			//boost::shared_ptr<MantidObject> obj(new MantidObject(dynamic_cast<Mantid::Geometry::ObjComponent*>(tmp)));
-		} else if(tmp->type()=="Instrument"){
+		/*} else if(tmp->type()=="Instrument"){
 			Mantid::API::Instrument *tmpIns=dynamic_cast<Mantid::API::Instrument*>(tmp);
 			for(int idx=0;idx<tmpIns->nelements();idx++)
 			{
@@ -45,9 +46,9 @@ void InstrumentTreeWidget::ParseInstrumentGeometry()
 				QTreeWidgetItem* newItem=new QTreeWidgetItem(QStringList((*tmpIns)[idx]->getName().c_str()));
 				item->addChild(newItem);
 				itemQueue.push(newItem);
-			}
-		} else if(tmp->type()=="CompAssembly"){
-			Mantid::Geometry::CompAssembly *tmpAssem=dynamic_cast<Mantid::Geometry::CompAssembly*>(tmp);
+			}*/
+		} else if(boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp)){
+            boost::shared_ptr<Mantid::Geometry::ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp);
 			for(int idx=0;idx<tmpAssem->nelements();idx++)
 			{
 				CompList.push((*tmpAssem)[idx]);
@@ -62,7 +63,7 @@ void InstrumentTreeWidget::ParseInstrumentGeometry()
 void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
 	QList<QTreeWidgetItem*> selectedList=this->selectedItems();
-	Mantid::Geometry::Component* selectedComponent=mInstrument;
+    boost::shared_ptr<Mantid::Geometry::IComponent> selectedComponent = mInstrument;
 	if(selectedList.size()==1)
 	{
 		QTreeWidgetItem* selectedItem=selectedList.first();
@@ -79,7 +80,7 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 
 			//parse through the Instrument hierarchy to get the component selected
 			selectedComponent=mInstrument;
-			while(indexes.size()!=0)
+			/*while(indexes.size()!=0)
 			{
 				int index=indexes.takeFirst();
 				if(selectedComponent->type()=="Instrument"){
@@ -87,6 +88,14 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 					selectedComponent=(*tmpIns)[index];
 				} else if(selectedComponent->type()=="CompAssembly"){
 					Mantid::Geometry::CompAssembly *tmpAssem=dynamic_cast<Mantid::Geometry::CompAssembly*>(selectedComponent);
+					selectedComponent=(*tmpAssem)[index];
+				} 
+			}*/
+			while(indexes.size()!=0)
+			{
+				int index=indexes.takeFirst();
+                boost::shared_ptr<Mantid::Geometry::ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(selectedComponent);
+                if(tmpAssem){
 					selectedComponent=(*tmpAssem)[index];
 				} 
 			}
@@ -98,28 +107,29 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 		//get the bounding box for the component
 		xmax=ymax=zmax=-DBL_MAX;
 		xmin=ymin=zmin=DBL_MAX;
-		std::queue<Mantid::Geometry::Component *> CompList;
+        std::queue<boost::shared_ptr<Mantid::Geometry::IComponent> > CompList;
 		CompList.push(selectedComponent);
 
 		while(!CompList.empty())
 		{
-			Mantid::Geometry::Component* tmp = CompList.front();
+            boost::shared_ptr<Mantid::Geometry::IComponent> tmp = CompList.front();
 			CompList.pop();
-			if(tmp->type()=="PhysicalComponent" ||tmp->type()=="DetectorComponent"){
+            boost::shared_ptr<Mantid::Geometry::IObjComponent> tmpObj = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(tmp);
+			if(tmpObj){
 				double txmax,tymax,tzmax,txmin,tymin,tzmin;
 				txmax=tymax=tzmax=-10000;
 				txmin=tymin=tzmin=10000;
-				dynamic_cast<Mantid::Geometry::ObjComponent*>(tmp)->getBoundingBox(txmax,tymax,tzmax,txmin,tymin,tzmin);
+				tmpObj->getBoundingBox(txmax,tymax,tzmax,txmin,tymin,tzmin);
 				if(txmax>xmax)xmax=txmax; if(tymax>ymax)ymax=tymax;if(tzmax>zmax)zmax=tzmax;
 				if(txmin<xmin)xmin=txmin; if(tymin<ymin)ymin=tymin;if(tzmin<zmin)zmin=tzmin;
-			} else if(tmp->type()=="Instrument"){
+			/*} else if(tmp->type()=="Instrument"){
 				Mantid::API::Instrument *tmpIns=dynamic_cast<Mantid::API::Instrument*>(tmp);
 				for(int idx=0;idx<tmpIns->nelements();idx++)
 				{
 					CompList.push((*tmpIns)[idx]);
-				}
-			} else if(tmp->type()=="CompAssembly"){
-				Mantid::Geometry::CompAssembly *tmpAssem=dynamic_cast<Mantid::Geometry::CompAssembly*>(tmp);
+				}*/
+            } else if(boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp)){
+                boost::shared_ptr<Mantid::Geometry::ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp);
 				for(int idx=0;idx<tmpAssem->nelements();idx++)
 				{
 					CompList.push((*tmpAssem)[idx]);
@@ -131,6 +141,6 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 
 Mantid::Geometry::V3D InstrumentTreeWidget::getSamplePos()const
 {
-		Mantid::Geometry::ObjComponent* sample=mInstrument->getSample();
+    boost::shared_ptr<Mantid::Geometry::IObjComponent> sample = mInstrument->getSample();
 		return sample->getPos();
 }

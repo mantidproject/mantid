@@ -179,7 +179,7 @@ namespace API
       };
 
       /// Map to store positions of parent components in spherical coordinates
-      std::map<const Geometry::Component*,SphVec> m_tempPosHolder;
+      std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

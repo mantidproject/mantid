@@ -63,7 +63,7 @@ Component::Component(const Component& comp)
  *  Make a copy of the component
  *  @return new(*this)
  */
-Component* Component::clone() const
+IComponent* Component::clone() const
 {
   return new Component(*this);
 }
@@ -71,7 +71,7 @@ Component* Component::clone() const
 /*! Set the parent. Previous parenting is lost.
  *  @param comp :: the parent component
  */
-void Component::setParent(Component* comp)
+void Component::setParent(IComponent* comp)
 {
   parent=comp;
 }
@@ -79,7 +79,7 @@ void Component::setParent(Component* comp)
 /*! Get a pointer to the parent.
  *  @return this.parent
  */
-const Component* Component::getParent() const
+const IComponent* Component::getParent() const
 {
   return parent;
 }
@@ -132,9 +132,9 @@ void Component::setRot(const Quat& q)
 /*! Copy the orientationmatrix from another component
  *  @param comp :: component to copy rotation from
  */
-void Component::copyRot(const Component& comp)
+void Component::copyRot(const IComponent& comp)
 {
-  rot=comp.rot;
+  rot = comp.getRotation();
 }
 
 /*! Translate the component relative to the parent component
@@ -233,7 +233,7 @@ const Quat Component::getRotation() const
  *  @param comp The Component to measure against
  *  @returns The distance
  */
-double Component::getDistance(const Component& comp) const
+double Component::getDistance(const IComponent& comp) const
 {
   return getPos().distance(comp.getPos());
 }
@@ -246,7 +246,7 @@ void Component::printSelf(std::ostream& os) const
   os << "Name : " << name << std::endl;
   os << "Type: " << this->type() << std::endl;
   if (parent)
-    os << "Parent: " << parent->name << std::endl;
+    os << "Parent: " << parent->getName() << std::endl;
   else
     os << "Parent: None" << std::endl;
 

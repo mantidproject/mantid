@@ -36,7 +36,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-	class ObjComponent;
+	class IObjComponent;
 	class V3D;
 	class DLLExport GluGeometryRenderer
     {
@@ -49,7 +49,7 @@ namespace Mantid
     public:
 		GluGeometryRenderer();       ///< Constructor
 		~GluGeometryRenderer();      ///< Destructor
-		void Render(ObjComponent* ObjComp);
+		void Render(IObjComponent* ObjComp);
 		void RenderSphere(V3D center,double radius);
 		void RenderCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4);
 		void RenderCone(V3D center,V3D axis,double radius,double height);

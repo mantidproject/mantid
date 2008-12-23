@@ -834,6 +834,24 @@ void MantidUI::closeProgressDialog()
 
 void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
+    /*if (pNf->algorithm()->name() == "LoadRaw")
+    {
+        std::cerr<<"Finished "<<pNf->algorithm()->name()<<' '
+            <<pNf->algorithm()->getPropertyValue("OutputWorkspace")
+            <<'\n';
+        QString wsName = QString::fromStdString(pNf->algorithm()->getPropertyValue("OutputWorkspace"));
+        if (wsName == "GEM38370")
+        {
+            Mantid::API::Workspace_sptr ws = getWorkspace(wsName);
+            ws->InstrumentParameters()->addString(0,"tst","TEST");
+            boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
+            std::cerr<<(*instr)[2]->getPos()+Mantid::Geometry::V3D(0,2,0)<<'\n';
+            ws->InstrumentParameters()->addV3D((*instr)[2].get(),"pos",(*instr)[2]->getPos()+Mantid::Geometry::V3D(0,2,0));
+            std::cerr<<ws->getInstrument()->getName()<<' '<<ws->getInstrument()->type()<<'\n';
+        }
+    }*/
+
+
     if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
     emit needToUpdateProgressDialog(100,"Algorithm finished.");
     emit needToCloseProgressDialog();

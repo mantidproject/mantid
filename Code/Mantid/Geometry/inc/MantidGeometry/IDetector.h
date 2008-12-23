@@ -15,7 +15,7 @@ namespace Geometry
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class Component;
+class IComponent;
 class V3D;
 
 /** Interface class for detector objects.
@@ -56,7 +56,7 @@ public:
    *  @param comp The component to give the distance to
    *  @return The distance
    */
-  virtual double getDistance(const Component& comp) const = 0;
+  virtual double getDistance(const IComponent& comp) const = 0;
 
   /// Indicates whether the detector is to be regarded as dead
   virtual bool isDead() const = 0;

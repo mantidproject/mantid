@@ -228,6 +228,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IObjComponent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Line.cpp"
 				>
 			</File>
@@ -279,6 +283,26 @@
 			</File>
 			<File
 				RelativePath=".\src\ObjectSurfaceEvaluator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ParameterMap.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ParametrizedComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ParCompAssembly.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ParDetector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ParObjComponent.cpp"
 				>
 			</File>
 			<File
@@ -490,11 +514,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidGeometry\ICompAssembly.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\IComponent.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\IDetector.h"
 				>
 			</File>
 			<File
 				RelativePath=".\auxinc\IndexIterator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\IObjComponent.h"
 				>
 			</File>
 			<File
@@ -526,11 +562,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -559,6 +595,30 @@
 			</File>
 			<File
 				RelativePath=".\test\ObjectTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Parameter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ParameterMap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ParametrizedComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ParCompAssembly.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ParDetector.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\ParObjComponent.h"
 				>
 			</File>
 			<File
@@ -602,11 +662,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File

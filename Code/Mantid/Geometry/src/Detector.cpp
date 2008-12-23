@@ -60,7 +60,7 @@ V3D Detector::getPos() const
   return ObjComponent::getPos();
 }
 
-double Detector::getDistance(const Component& comp) const
+double Detector::getDistance(const IComponent& comp) const
 {
   return ObjComponent::getDistance(comp);
 }

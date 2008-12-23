@@ -239,7 +239,7 @@ namespace NeXus
 
       return(true);
   }
-  bool NexusFileIO::writeNexusInstrument(const boost::shared_ptr<API::Instrument>& instrument)
+  bool NexusFileIO::writeNexusInstrument(const boost::shared_ptr<API::IInstrument>& instrument)
   {
    NXstatus status;
 
@@ -834,9 +834,9 @@ namespace NeXus
        detector_index[si]=detector_index[si-1]+ndet;
        detector_count[si-1]=ndet;
 
-       std::vector<Mantid::Geometry::IDetector*> detectorgroup;
+       std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
        detectorgroup=spectraMap->getDetectors(si);
-       std::vector<Mantid::Geometry::IDetector*>::iterator it;
+       std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> >::iterator it;
        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
             detector_list[id++]=(*it)->getID();
    }
@@ -867,7 +867,7 @@ namespace NeXus
    return(true);
   }
   bool NexusFileIO::readNexusProcessedSpectraMap(boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
-                    const boost::shared_ptr<Instrument> instrument, const int& m_spec_min, const int& m_spec_max)
+                    const boost::shared_ptr<Workspace> workspace, const int& m_spec_min, const int& m_spec_max)
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data. Use this to build spectraMap
@@ -929,7 +929,7 @@ namespace NeXus
            spectra_list[offset+j]=i+1;
        }
    }
-   spectraMap->populate(spectra_list,detector_list,nDet,instrument.get()); //Populate the Spectra Map with parameters
+   spectraMap->populate(spectra_list,detector_list,nDet); //Populate the Spectra Map with parameters
    status=NXclosedata(fileID);
    // tidy up
    delete[] detector_list;

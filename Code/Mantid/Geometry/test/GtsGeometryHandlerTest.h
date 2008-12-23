@@ -9,6 +9,7 @@
 
 #include "MantidGeometry/V3D.h" 
 #include "MantidGeometry/Object.h" 
+#include "MantidGeometry/ObjComponent.h" 
 #include "MantidGeometry/Cylinder.h" 
 #include "MantidGeometry/Sphere.h" 
 #include "MantidGeometry/Plane.h" 

@@ -40,7 +40,7 @@ namespace Mantid
 		class GeometryHandler;
 		class GtsGeometryRenderer;
 		class GtsGeometryGenerator;
-		class ObjComponent;
+		class IObjComponent;
 		class Object;
 		class DLLExport GtsGeometryHandler: public GeometryHandler
 		{
@@ -49,11 +49,11 @@ namespace Mantid
 			GtsGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
 			GtsGeometryGenerator* Triangulator;    ///< Geometry generator to triangulate Object
 		public:
-			GtsGeometryHandler(ObjComponent* obj); ///< Constructor
+			GtsGeometryHandler(IObjComponent* obj); ///< Constructor
 			GtsGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
 			GtsGeometryHandler(Object* obj); ///< Constructor
 			~GtsGeometryHandler(); ///< Destructor
-			GeometryHandler* createInstance(ObjComponent *comp);
+			GeometryHandler* createInstance(IObjComponent *comp);
 			GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
 			void Triangulate();
 			void Render();

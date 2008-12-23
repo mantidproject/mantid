@@ -21,22 +21,22 @@ public:
     instrument.markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument.markAsSamplePos(sample);
-    det = new Detector("det",0);
+    det = boost::shared_ptr<Detector>(new Detector("det",0));
     det->setID(1);
     det->setPos(1.0,0.0,0.0);
-    instrument.markAsDetector(det);
-    det2 = new Detector("det",0);
+    instrument.markAsDetector(det.get());
+    det2 = boost::shared_ptr<Detector>(new Detector("det",0));
     det2->setID(10);
-    instrument.markAsDetector(det2);
-    det3 = new Detector("det",0);
+    instrument.markAsDetector(det2.get());
+    det3 = boost::shared_ptr<Detector>(new Detector("det",0));
     det3->setID(11);
-    instrument.markAsDetector(det3);
+    instrument.markAsDetector(det3.get());
   }
 
   ~InstrumentTest()
   {
-    delete det, det2, det3;
-    delete instrument.getSample();
+    //delete det, det2, det3;
+    //delete instrument.getSample();
   }
 
   void testType()
@@ -62,10 +62,10 @@ public:
     TS_ASSERT( ! i.getSource() )
     ObjComponent *s = new ObjComponent("source");
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(s) )
-    TS_ASSERT_EQUALS( i.getSource(), s )
+    TS_ASSERT_EQUALS( i.getSource().get(), s )
     ObjComponent *ss = new ObjComponent("source2");
     TS_ASSERT_THROWS_NOTHING( i.markAsSource(ss) )
-    TS_ASSERT_EQUALS( i.getSource(), s )
+    TS_ASSERT_EQUALS( i.getSource().get(), s )
     delete s;
     delete ss;
   }
@@ -76,10 +76,10 @@ public:
     TS_ASSERT( ! i.getSample() )
     ObjComponent *s = new ObjComponent("sample");
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(s) )
-    TS_ASSERT_EQUALS( i.getSample(), s )
+    TS_ASSERT_EQUALS( i.getSample().get(), s )
     ObjComponent *ss = new ObjComponent("sample2");
     TS_ASSERT_THROWS_NOTHING( i.markAsSamplePos(ss) )
-    TS_ASSERT_EQUALS( i.getSample(), s )
+    TS_ASSERT_EQUALS( i.getSample().get(), s )
     delete s;
     delete ss;
   }
@@ -92,7 +92,7 @@ public:
     Detector *d = new Detector("det",0);
     d->setID(2);
     TS_ASSERT_THROWS_NOTHING( instrument.markAsDetector(d) )
-    TS_ASSERT_EQUALS( instrument.getDetector(2), d )
+    TS_ASSERT_EQUALS( instrument.getDetector(2).get(), d )
     delete d;
   }
 
@@ -111,7 +111,7 @@ public:
 
 private:
   Instrument instrument;
-  Detector *det, *det2, *det3;
+  boost::shared_ptr<Detector> det, det2, det3;
 };
 
 #endif /*INSTRUMENTTEST_H_*/

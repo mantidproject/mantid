@@ -227,7 +227,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<Kernel::Unit> fromUnit, API::Workspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
-  boost::shared_ptr<API::Instrument> instrument = outputWS->getInstrument();
+  boost::shared_ptr<API::IInstrument> instrument = outputWS->getInstrument();
   // And one to the SpectraDetectorMap
   boost::shared_ptr<API::SpectraDetectorMap> specMap = outputWS->getSpectraMap();
 
@@ -236,7 +236,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<K
   boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
-  Geometry::ObjComponent* sample = instrument->getSample();
+  boost::shared_ptr<Geometry::IObjComponent> sample = instrument->getSample();
   double l1;
   try
   {
@@ -277,7 +277,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<K
       {
         l2 = detPos.distance(samplePos);
         // The scattering angle for this detector (in radians).
-        twoTheta = instrument->detectorTwoTheta(det.get());
+        twoTheta = instrument->detectorTwoTheta(det);
       }
       else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
       {

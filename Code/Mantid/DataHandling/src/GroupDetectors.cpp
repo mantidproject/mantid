@@ -79,7 +79,7 @@ void GroupDetectors::exec()
     const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
     boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
-    std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
+     std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }

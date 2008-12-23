@@ -63,7 +63,7 @@ void LoadInstrumentFromNexus::exec()
   }
 
   // Get reference to Instrument and set its name
-  boost::shared_ptr<API::Instrument> instrument = (localWorkspace->getInstrument());
+  boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
   instrument->setName(nxload.getInstrumentName());
 
   // Add dummy source and samplepos to instrument

@@ -54,7 +54,7 @@ public:
 	// IDetector methods
   int getID() const;
 	V3D getPos() const;
-	double getDistance(const Component& comp) const;
+	double getDistance(const IComponent& comp) const;
 	bool isDead() const;
 	void markDead();
 	bool isMonitor() const;

@@ -34,13 +34,14 @@ public:
     input->getAxis(1)->spectraNo(2) = 2;
     Mantid::Geometry::Detector *mon = new Mantid::Geometry::Detector("monitor",NULL);
     mon->setID(0);
-    input->getInstrument()->add(mon);
-    input->getInstrument()->markAsMonitor(mon);
+    boost::shared_ptr<Instrument> instr = boost::dynamic_pointer_cast<Instrument>(input->getInstrument());
+    instr->add(mon);
+    instr->markAsMonitor(mon);
     Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("NOTmonitor",NULL);
     det->setID(1);
-    input->getInstrument()->add(det);
-    input->getInstrument()->markAsDetector(det);
-    input->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 3, input->getInstrument().get());
+    instr->add(det);
+    instr->markAsDetector(det);
+    input->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 3);
 
     AnalysisDataService::Instance().add("normMon",input);
   }

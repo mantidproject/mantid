@@ -29,18 +29,18 @@
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class Mantid::Geometry::ObjComponent;
+class Mantid::Geometry::IObjComponent;
 
 class MantidObject : public GLObject
 {
 private:
-	Mantid::Geometry::ObjComponent *Obj; ///< Holder for ObjComponenet
+    boost::shared_ptr<Mantid::Geometry::IObjComponent> Obj; ///< Holder for ObjComponenet
 public:
-	MantidObject(Mantid::Geometry::ObjComponent* obj); ///< Default Constructor
+	MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj); ///< Default Constructor
 	~MantidObject();								   ///< Destructor
 	virtual std::string type()const {return "MantidObject";} ///< Type of the GL object
     void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-	Mantid::Geometry::ObjComponent* getComponent(); ///< Returns the objcomponent held in this object
+	boost::shared_ptr<Mantid::Geometry::IObjComponent> getComponent(); ///< Returns the objcomponent held in this object
 };
 
 #endif /*GLTRIANGLE_H_*/

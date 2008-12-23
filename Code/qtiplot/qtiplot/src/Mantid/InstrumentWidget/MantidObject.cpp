@@ -2,11 +2,11 @@
 #include <windows.h>
 #endif
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidObject.h"
 #include <GL/gl.h> 
 
-MantidObject::MantidObject(Mantid::Geometry::ObjComponent* obj)
+MantidObject::MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj)
 {
 	double xmax,ymax,zmax,xmin,ymin,zmin;
 	xmax=ymax=zmax=10000;
@@ -26,7 +26,7 @@ void MantidObject::define()
     Obj->draw();
 }
 
-Mantid::Geometry::ObjComponent* MantidObject::getComponent()
+boost::shared_ptr<Mantid::Geometry::IObjComponent> MantidObject::getComponent()
 {
 	return Obj;
 }

@@ -18,9 +18,8 @@ namespace Geometry
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, Component* parent) :
-  Component(name,parent), shape()
+  IObjComponent(),Component(name,parent), shape()
 {
-	handle=new GtsGeometryHandler(this);
 }
 
 /** Constructor
@@ -29,23 +28,19 @@ ObjComponent::ObjComponent(const std::string& name, Component* parent) :
  *  @param parent The Parent geometry object of this component
  */
 ObjComponent::ObjComponent(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-  Component(name,parent), shape(shape)
+  IObjComponent(),Component(name,parent), shape(shape)
 {
-		handle=new GtsGeometryHandler(this);
 }
 
 /// Copy constructor
 ObjComponent::ObjComponent(const ObjComponent& rhs) :
-  Component(rhs), shape(rhs.shape),handle(0)
+  IObjComponent(),Component(rhs), shape(rhs.shape)//,handle(0)
 {
-		handle=new GtsGeometryHandler(this);
 }
 
 /// Destructor
 ObjComponent::~ObjComponent()
 {
-	if(handle!=NULL)
-		delete handle;
 }
 
 /// Does the point given lie within this object component?
@@ -214,23 +209,13 @@ const V3D ObjComponent::takeOutRotation(V3D point) const
 }
 
 /**
- * Set the geometry handler for ObjComponent
- * @param[in] handle is pointer to the geometry handler. don't delete this pointer in the calling function.
- */
-void ObjComponent::setGeometryHandler(GeometryHandler* handle)
-{
-	if(handle==NULL)return;
-	this->handle=handle;
-}
-
-/**
  * Draws the objcomponent, If the handler is not set then this function does nothing.
  */
 void ObjComponent::draw() const
 {
-	if(handle==NULL)return;
+	if(Handle()==NULL)return;
 	//Render the ObjComponent and then render the object
-	handle->Render();
+	Handle()->Render();
 }
 
 /**
@@ -246,10 +231,10 @@ void ObjComponent::drawObject() const
  */
 void ObjComponent::initDraw() const
 {
-	if(handle==NULL)return;
+	if(Handle()==NULL)return;
 	//Render the ObjComponent and then render the object
 	shape->initDraw();
-	handle->Initialize();
+	Handle()->Initialize();
 }
 
 } // namespace Geometry

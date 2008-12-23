@@ -71,9 +71,9 @@ public:
 	    // Test one to many mapping, for example 10 pixels contribute to spectra 2084
 	    TS_ASSERT_EQUALS(map->ndet(2084),10);
 	    // Check the id number of all pixels contributing
-	    std::vector<Mantid::Geometry::IDetector*> detectorgroup;
+        std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
 	    detectorgroup=map->getDetectors(2084);
-	    std::vector<Mantid::Geometry::IDetector*>::iterator it;
+	    std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> >::iterator it;
 	    int pixnum=101191;
 	    for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
 	    TS_ASSERT_EQUALS((*it)->getID(),pixnum++);

@@ -146,7 +146,7 @@ void LoadInstrument::exec()
 
 
   // Get reference to Instrument and set its name
-  m_instrument = (localWorkspace->getInstrument());
+  m_instrument = localWorkspace->getBaseInstrument();
   if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
 
   // do analysis for each top level compoment element

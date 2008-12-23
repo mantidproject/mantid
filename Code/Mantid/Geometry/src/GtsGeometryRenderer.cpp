@@ -1,6 +1,6 @@
 #include "gts.h"
 #include "MantidGeometry/GtsGeometryRenderer.h"
-#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include <climits>
 #ifdef _WIN32
 #include "windows.h"
@@ -64,7 +64,7 @@ namespace Mantid
 		* Render ObjComponent
 		* @param ObjComp input to render
 		*/
-		void GtsGeometryRenderer::Render(ObjComponent *ObjComp)
+		void GtsGeometryRenderer::Render(IObjComponent *ObjComp)
 		{
 			glPushMatrix();
 			V3D pos  =ObjComp->getPos();
@@ -100,7 +100,7 @@ namespace Mantid
 		* Initializes creates a display for the input ObjComponent
 		* @param ObjComp input object component for creating display
 		*/
-		void GtsGeometryRenderer::Initialize(ObjComponent *ObjComp)
+		void GtsGeometryRenderer::Initialize(IObjComponent *ObjComp)
 		{
 			glPushMatrix();
 			V3D pos  =ObjComp->getPos();

@@ -216,6 +216,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ParInstrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RefAxis.cpp"
 				>
 			</File>
@@ -334,6 +338,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IInstrument.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\ILocatedData.h"
 				>
 			</File>
@@ -367,6 +375,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\MemoryManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\ParInstrument.h"
 				>
 			</File>
 			<File

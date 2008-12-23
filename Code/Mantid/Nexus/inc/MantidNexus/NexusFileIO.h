@@ -73,13 +73,13 @@ namespace Mantid
       bool readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
                             std::string& version);
       /// write an instrument section - currently only the name
-      bool writeNexusInstrument(const boost::shared_ptr<API::Instrument>& instrument);
+      bool writeNexusInstrument(const boost::shared_ptr<API::IInstrument>& instrument);
       /// write any spectra map information to Nexus file
       bool writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
                             const int& m_spec_min, const int& m_spec_max);
       /// read spectra map information
       bool readNexusProcessedSpectraMap(boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
-          const boost::shared_ptr<Mantid::API::Instrument> instrument, const int& m_spec_min, const int& m_spec_max);
+          const boost::shared_ptr<Mantid::API::Workspace> workspace, const int& m_spec_min, const int& m_spec_max);
       /// close the nexus file
       int closeNexusFile();
 

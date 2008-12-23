@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/IInstrument.h"
 #include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Detector.h"
@@ -44,7 +45,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Instrument : public Geometry::CompAssembly
+class DLLExport Instrument : public Geometry::CompAssembly, public IInstrument
 {
 public:
   ///String description of the type of component
@@ -55,10 +56,10 @@ public:
   ///Virtual destructor
   virtual ~Instrument() {}
 
-  Geometry::ObjComponent* getSource() const;
-  Geometry::ObjComponent* getSample() const;
-  Geometry::IDetector* getDetector(const int &detector_id) const;
-  const double detectorTwoTheta(const Geometry::IDetector* const) const;
+  boost::shared_ptr<Geometry::IObjComponent> getSource() const;
+  boost::shared_ptr<Geometry::IObjComponent> getSample() const;
+  boost::shared_ptr<Geometry::IDetector> getDetector(const int &detector_id) const;
+  const double detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector> ) const;
 
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -79,9 +80,16 @@ public:
   void markAsMonitor(Geometry::IDetector*);
 
   /// return reference to detector cache 
-  const std::map<int, Geometry::IDetector*>& getDetectorCache();
+  std::map<int,  boost::shared_ptr<Geometry::IDetector> > getDetectors();
+
+  /// Get pointers to plottable components
+  std::vector< boost::shared_ptr<Geometry::IObjComponent> > getPlottable()const;
+  void appendPlottable(const Geometry::CompAssembly& ca,std::vector< boost::shared_ptr<Geometry::IObjComponent> >& lst)const;
+
+  std::string getName()const{return Geometry::CompAssembly::getName();}
 
 private:
+    friend class ParInstrument;
   /// Private copy assignment operator
   Instrument& operator=(const Instrument&);
   /// Private copy constructor
@@ -90,7 +98,7 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 
-  Geometry::Component* getChild(const std::string& name) const;
+  Geometry::IComponent* getChild(const std::string& name) const;
 
   /// Map which holds detector-IDs and pointers to detector components
   std::map<int, Geometry::IDetector*> _detectorCache;

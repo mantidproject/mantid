@@ -128,9 +128,9 @@ void Unwrap::exec()
 const double Unwrap::getPrimaryFlightpath() const
 {
   // Get a pointer to the instrument contained in the input workspace
-  boost::shared_ptr<API::Instrument> instrument = m_inputWS->getInstrument();
+  boost::shared_ptr<API::IInstrument> instrument = m_inputWS->getInstrument();
   // Get the distance between the source and the sample
-  Geometry::ObjComponent* sample = instrument->getSample();
+  boost::shared_ptr<Geometry::IObjComponent> sample = instrument->getSample();
   double L1;
   try
   {

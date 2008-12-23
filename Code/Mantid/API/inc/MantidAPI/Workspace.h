@@ -15,6 +15,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
+#include "MantidGeometry/ParameterMap.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid
@@ -73,15 +74,18 @@ public:
 
   void setTitle(const std::string&);
   void setComment(const std::string&);
-  void setInstrument(const boost::shared_ptr<Instrument>&);
+  void setInstrument(const boost::shared_ptr<IInstrument>&);
   void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
   void copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
   void setSample(const boost::shared_ptr<Sample>& sample);
   const std::string& getTitle() const;
   const std::string& getComment() const;
-  boost::shared_ptr<Instrument> getInstrument() const;
+  boost::shared_ptr<IInstrument> getInstrument()const;
+  boost::shared_ptr<Instrument> getBaseInstrument()const;
   boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
   boost::shared_ptr<Sample> getSample() const;
+
+  boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters(){return sptr_parmap;}
 
   /// Get the footprint in memory in KB.
   virtual long int getMemorySize() const;
@@ -182,6 +186,9 @@ private:
   std::string m_YUnit;
   /// Flag indicating whether the Y-values are dimensioned. False by default
   bool m_isDistribution;
+
+  /// Parameters modifying the base instrument
+  boost::shared_ptr<Geometry::ParameterMap> sptr_parmap;
 
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;

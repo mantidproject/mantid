@@ -6,8 +6,13 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Component.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Track.h"
 #include "boost/shared_ptr.hpp"
+
+#ifdef _WIN32
+  #pragma warning( disable: 4250 )
+#endif
 
 namespace Mantid
 {
@@ -16,8 +21,6 @@ namespace Geometry
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class Object;
-class GeometryHandler;
 
 /** Object Component class, this class brings together the physical attributes of the component
     to the positioning and geometry tree.
@@ -47,7 +50,7 @@ class GeometryHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ObjComponent : public Component
+class DLLExport ObjComponent : public Component, public IObjComponent
 {
 public:
   ///type string
@@ -61,7 +64,7 @@ public:
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
    */
-  virtual Component* clone() const {return new ObjComponent(*this);}
+  virtual IComponent* clone() const {return new ObjComponent(*this);}
 
   bool isValid(const V3D& point) const;
   bool isOnSide(const V3D& point) const;
@@ -73,9 +76,12 @@ public:
   void draw() const;
   void drawObject() const;
   void initDraw() const;
+  const boost::shared_ptr<const Object> Shape()const{return shape;};
+
 
 protected:
   ObjComponent(const ObjComponent&);
+
 
 private:
   /// Private, unimplemented copy assignment operator
@@ -89,10 +95,6 @@ private:
   // exposing non-const methods of Object through this class.
   const boost::shared_ptr<const Object> shape;
 
-  /// Geometry Handle for rendering
-  GeometryHandler* handle;
-  void setGeometryHandler(GeometryHandler *h);
-  friend class GeometryHandler;
 };
 
 } // namespace Geometry

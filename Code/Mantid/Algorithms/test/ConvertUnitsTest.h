@@ -62,7 +62,7 @@ public:
     loader.execute();
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256, space->getInstrument().get() );
+    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256 );
 
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }

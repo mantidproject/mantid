@@ -40,7 +40,7 @@ namespace Mantid
 		*/
 		class GeometryHandler;
 		class GluGeometryRenderer;
-		class ObjComponent;
+		class IObjComponent;
 		class Object;
 		class V3D;
 		class DLLExport GluGeometryHandler: public GeometryHandler
@@ -57,11 +57,11 @@ namespace Mantid
 			V3D axis; // ¦¦ to axis
 			GEOMETRY_TYPE type;
 		public:
-			GluGeometryHandler(ObjComponent* obj); ///< Constructor
+			GluGeometryHandler(IObjComponent* obj); ///< Constructor
 			GluGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
 			GluGeometryHandler(Object* obj); ///< Constructor
 			~GluGeometryHandler(); ///< Destructor
-			GeometryHandler* createInstance(ObjComponent *comp);
+			GeometryHandler* createInstance(IObjComponent *comp);
 			GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
 			void setCuboid(V3D,V3D,V3D,V3D);
 			void setSphere(V3D,double);

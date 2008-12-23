@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Object.h"
 #include "boost/weak_ptr.hpp"
 #include "MantidGeometry/Object.h"
@@ -48,16 +48,16 @@ namespace Mantid
 			static Kernel::Logger& PLog;           ///< The official logger
 
 		protected:
-			ObjComponent	*ObjComp;              ///< ObjComponent that uses this geometry handler
+			IObjComponent	*ObjComp;              ///< ObjComponent that uses this geometry handler
 			Object          *Obj;                  ///< Object that uses this geometry handler
 			bool			boolTriangulated;      ///< state of the geometry triangulation
 			bool			boolIsInitialized;     ///< state of the geometry initialization for rendering
 		public:
-			GeometryHandler(ObjComponent *comp);   ///< Constructor
+			GeometryHandler(IObjComponent *comp);   ///< Constructor
 			GeometryHandler(boost::shared_ptr<Object> obj); ///<Constructor
 			GeometryHandler(Object *obj); ///<Constructor
 			virtual ~GeometryHandler();
-			virtual GeometryHandler* createInstance(ObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent
+			virtual GeometryHandler* createInstance(IObjComponent *)=0; ///< Create an instance of concrete geometry handler for ObjComponent
 			virtual GeometryHandler* createInstance(boost::shared_ptr<Object> )=0; ///< Create an instance of concrete geometry handler for Object
 			virtual void Triangulate()=0; ///< Triangulate the Object
 			virtual void Render()=0;      ///< Render Object or ObjComponent

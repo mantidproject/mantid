@@ -65,6 +65,7 @@ namespace Mantid
       std::vector<int> deadDets;
       int countSpec = 0, countDets = 0;
 
+
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
       const int numSpec = integratedWorkspace->getNumberHistograms();
@@ -75,7 +76,7 @@ namespace Mantid
         double &y = integratedWorkspace->dataY(i)[0];
         if ( y > deadThreshold )
         {
-          y = liveValue;
+        y = liveValue;
         }
         else
         {
@@ -85,8 +86,8 @@ namespace Mantid
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<Geometry::IDetector*> dets = specMap->getDetectors(specNo);
-          std::vector<Geometry::IDetector*>::const_iterator it;
+          const std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specMap->getDetectors(specNo);
+          std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             const int detID = (*it)->getID();

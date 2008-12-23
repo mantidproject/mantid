@@ -162,7 +162,7 @@ namespace Mantid
 		* Render ObjComponent
 		* @param ObjComp input to render
 		*/
-		void GluGeometryRenderer::Render(ObjComponent *ObjComp)
+		void GluGeometryRenderer::Render(IObjComponent *ObjComp)
 		{
 			glPushMatrix();
 			V3D pos  =ObjComp->getPos();

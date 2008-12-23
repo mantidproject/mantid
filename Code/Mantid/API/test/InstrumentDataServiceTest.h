@@ -6,13 +6,14 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidKernel/Exception.h"
+#include <iostream>
 
 class InstrumentDataServiceTest : public CxxTest::TestSuite
 {
 public:
 	InstrumentDataServiceTest():inst1(new Mantid::API::Instrument), inst2(new Mantid::API::Instrument)
 	{
-		Mantid::API::FrameworkManager::Instance();
+		//Mantid::API::FrameworkManager::Instance();
 	}
 	void testAdd()
 	{

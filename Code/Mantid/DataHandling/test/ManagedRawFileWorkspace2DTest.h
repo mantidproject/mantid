@@ -152,17 +152,17 @@ public:
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Instrument> i = output->getInstrument();
-    Mantid::Geometry::Component* source = i->getSource();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-    Mantid::Geometry::Component* samplepos = i->getSample();
+    boost::shared_ptr<Mantid::Geometry::IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
-    Mantid::Geometry::Detector *ptrDet103 = dynamic_cast<Mantid::Geometry::Detector*>(i->getDetector(103));
+    boost::shared_ptr<Mantid::Geometry::Detector> ptrDet103 = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
@@ -191,9 +191,9 @@ public:
     // Test one to many mapping, for example 10 pixels contribute to spectra 2084
     TS_ASSERT_EQUALS(map->ndet(2084),10);
     // Check the id number of all pixels contributing
-    std::vector<Mantid::Geometry::IDetector*> detectorgroup;
+    std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
     detectorgroup=map->getDetectors(2084);
-    std::vector<Mantid::Geometry::IDetector*>::iterator it;
+    std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> >::iterator it;
     int pixnum=101191;
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
     TS_ASSERT_EQUALS((*it)->getID(),pixnum++);

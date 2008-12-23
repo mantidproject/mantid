@@ -297,7 +297,7 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 	mMaxValueBox->setText(text.setNum(maxValue));
 	updateColorMapWidget();
 	mInstrumentDisplay->update();
-	mInstrumentTree->setInstrument(output->getInstrument().get());
+	mInstrumentTree->setInstrument(output->getInstrument());
 }
 
 /**

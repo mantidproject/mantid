@@ -95,7 +95,7 @@ namespace NeXus
     }
 
     // write instrument data, if present and writer enabled
-    boost::shared_ptr<Instrument> instrument = m_inputWorkspace->getInstrument();
+    boost::shared_ptr<IInstrument> instrument = m_inputWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
 
     // write XML source file name, if it exists - otherwise write "NoNameAvailable"

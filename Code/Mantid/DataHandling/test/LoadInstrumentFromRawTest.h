@@ -69,16 +69,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "HET     ");
-    Component* source = i->getSource();
+    boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "Unknown");
     TS_ASSERT_DELTA( source->getPos().Y(), -11.8,0.01);
 
-    Component* samplepos = i->getSample();
+    boost::shared_ptr<IComponent> samplepos = i->getSample();
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    Detector *ptrDetSp = dynamic_cast<Detector*>(i->getDetector(5));
+    boost::shared_ptr<Detector> ptrDetSp = boost::dynamic_pointer_cast<Detector>(i->getDetector(5));
     TS_ASSERT_EQUALS( ptrDetSp->getID(), 5);
     TS_ASSERT_EQUALS( ptrDetSp->getName(), "det");
     TS_ASSERT_DELTA( ptrDetSp->getPos().X(), 0.5141,0.01);
@@ -91,7 +91,7 @@ public:
     TS_ASSERT_EQUALS( ptrDetSp->type(), "DetectorComponent");
 
     // also a few tests on the last detector and a test for the one beyond the last
-    Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(718048));
+    boost::shared_ptr<Detector> ptrDetLast = boost::dynamic_pointer_cast<Detector>(i->getDetector(718048));
     TS_ASSERT_EQUALS( ptrDetLast->getID(), 718048);
     TS_ASSERT_THROWS(i->getDetector(718049), Exception::NotFoundError);
 

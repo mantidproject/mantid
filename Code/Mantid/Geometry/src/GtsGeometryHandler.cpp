@@ -1,6 +1,6 @@
 #include "gts.h"
 #include "MantidGeometry/Object.h"
-#include "MantidGeometry/ObjComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/GeometryHandler.h"
 #include "MantidGeometry/GtsGeometryHandler.h"
 #include "MantidGeometry/GtsGeometryGenerator.h"
@@ -10,7 +10,7 @@ namespace Mantid
 {
 	namespace Geometry
 	{
-		GtsGeometryHandler::GtsGeometryHandler(ObjComponent *comp):GeometryHandler(comp)
+		GtsGeometryHandler::GtsGeometryHandler(IObjComponent *comp):GeometryHandler(comp)
 		{
 			Triangulator=NULL;
 			Renderer    = new GtsGeometryRenderer();
@@ -34,7 +34,7 @@ namespace Mantid
 			if(Renderer    !=NULL) delete Renderer;
 		}
 
-		GeometryHandler* GtsGeometryHandler::createInstance(ObjComponent *comp)
+		GeometryHandler* GtsGeometryHandler::createInstance(IObjComponent *comp)
 		{
 			return new GtsGeometryHandler(comp);
 		}

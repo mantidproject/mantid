@@ -414,18 +414,6 @@ bool ExecuteAlgorithm::execute()
 		return false;
 	}
 				
-	/* The algorithm will be run asynchronously outside the dialog
-    if (!m_alg->execute() == true)
-	{
-		//Algorithm did not execute properly
-		QMessageBox::warning(this, tr("Mantid Algorithm"),
-			tr("The algorithm failed to execute correctly. "
-			"Please see the Mantid log for details."),
-			QMessageBox::Ok);
-		
-		return false;
-	}*/
-	
 	return true;
 }
 

@@ -38,22 +38,22 @@ public:
     }
     Detector *d = new Detector("det",0);
     d->setID(0);
-    space->getInstrument()->markAsDetector(d);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d);
     Detector *d1 = new Detector("det",0);
     d1->setID(1);
-    space->getInstrument()->markAsDetector(d1);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d1);
     Detector *d2 = new Detector("det",0);
     d2->setID(2);
-    space->getInstrument()->markAsDetector(d2);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d2);
     Detector *d3 = new Detector("det",0);
     d3->setID(3);
-    space->getInstrument()->markAsDetector(d3);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d3);
     Detector *d4 = new Detector("det",0);
     d4->setID(4);
-    space->getInstrument()->markAsDetector(d4);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d4);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 5, space->getInstrument().get() );
+    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 5 );
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
@@ -136,7 +136,7 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataX(4), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
-    boost::shared_ptr<Instrument> i = outputWS->getInstrument();
+    boost::shared_ptr<IInstrument> i = outputWS->getInstrument();
     TS_ASSERT( i->getDetector(0)->isDead() )
     TS_ASSERT( ! i->getDetector(1)->isDead() )
     TS_ASSERT( i->getDetector(2)->isDead() )

@@ -14,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Component.h"
 #include <vector>
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -90,16 +91,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
-    Component* source = i->getSource();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-    Component* samplepos = i->getSample();
+    boost::shared_ptr<IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
-    Detector *ptrDet103 = dynamic_cast<Detector*>(i->getDetector(103));
+    boost::shared_ptr<Detector> ptrDet103 = boost::dynamic_pointer_cast<Detector>(i->getDetector(103));
     TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
     TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
@@ -112,12 +113,12 @@ public:
     TS_ASSERT_EQUALS( ptrDet103->type(), "DetectorComponent");
 
     // test if detector with det_id=603 has been marked as a monitor
-    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(601));
+    boost::shared_ptr<Detector> ptrMonitor = boost::dynamic_pointer_cast<Detector>(i->getDetector(601));
     TS_ASSERT( ptrMonitor->isMonitor() );
 
 
     // also a few tests on the last detector and a test for the one beyond the last
-    Detector *ptrDetLast = dynamic_cast<Detector*>(i->getDetector(413256));
+    boost::shared_ptr<Detector> ptrDetLast = boost::dynamic_pointer_cast<Detector>(i->getDetector(413256));
     TS_ASSERT_EQUALS( ptrDetLast->getID(), 413256);
     TS_ASSERT_EQUALS( ptrDetLast->getName(), "pixel");
     TS_ASSERT_THROWS(i->getDetector(413257), Exception::NotFoundError);
@@ -127,9 +128,11 @@ public:
     // Should be 2584
     TS_ASSERT_EQUALS( output2DInst->getNumberHistograms(), histogramNumber);
 
+
     // Check running algorithm for same XML file leads to same instrument object being attached
-    output->setInstrument(boost::shared_ptr<Instrument>());
-    TS_ASSERT_EQUALS( output->getInstrument(), boost::shared_ptr<Instrument>() )
+    boost::shared_ptr<Instrument> instr(new Instrument());
+    output->setInstrument(instr);
+    TS_ASSERT_EQUALS( output->getInstrument(), instr )
     LoadInstrument loadAgain;
     TS_ASSERT_THROWS_NOTHING( loadAgain.initialize() )
     loadAgain.setPropertyValue("Filename", inputFile);
@@ -173,16 +176,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
-    ObjComponent* source = i->getSource();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
-    ObjComponent* samplepos = i->getSample();
+    boost::shared_ptr<IObjComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101001));
+    boost::shared_ptr<Detector> ptrDet = boost::dynamic_pointer_cast<Detector>(i->getDetector(101001));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
     TS_ASSERT_DELTA( ptrDet->getPos().X(),  0.2607, 0.0001);
     TS_ASSERT_DELTA( ptrDet->getPos().Y(), -0.1505, 0.0001);
@@ -194,11 +197,11 @@ public:
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
 
     // test if detector with det_id=621 has been marked as a monitor
-    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(621));
+    boost::shared_ptr<Detector> ptrMonitor = boost::dynamic_pointer_cast<Detector>(i->getDetector(621));
     TS_ASSERT( ptrMonitor->isMonitor() );
 
     // test if shape on for 1st monitor which is located at (0,0,-10.78)
-    Detector *ptrMonitorShape = dynamic_cast<Detector*>(i->getDetector(611));
+    boost::shared_ptr<Detector> ptrMonitorShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(611));
     TS_ASSERT( ptrMonitorShape->isMonitor() );
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(0.0,0.0,0.001)+ptrMonitorShape->getPos()) );
     TS_ASSERT( ptrMonitorShape->isValid(V3D(0.0,0.0,-0.01)+ptrMonitorShape->getPos()) );
@@ -208,7 +211,7 @@ public:
     TS_ASSERT( !ptrMonitorShape->isValid(V3D(-200.0,-200.0,-2000.1)+ptrMonitorShape->getPos()) );
 
     // test of some detector...
-    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(101001));
+    boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(101001));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
 
     // test of sample shape
@@ -254,23 +257,23 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
-    ObjComponent* source = i->getSource();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -11.016,0.01);
 
-    ObjComponent* samplepos = i->getSample();
+    boost::shared_ptr<IObjComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    Detector *ptrDet = dynamic_cast<Detector*>(i->getDetector(101));
+    boost::shared_ptr<Detector> ptrDet = boost::dynamic_pointer_cast<Detector>(i->getDetector(101));
     TS_ASSERT_EQUALS( ptrDet->getID(), 101);
     TS_ASSERT_EQUALS( ptrDet->type(), "DetectorComponent");
 
-    Detector *ptrMonitor = dynamic_cast<Detector*>(i->getDetector(1));
+    boost::shared_ptr<Detector> ptrMonitor = boost::dynamic_pointer_cast<Detector>(i->getDetector(1));
     TS_ASSERT( ptrMonitor->isMonitor() );
 
-    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(102));
+    boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(102));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.01)+ptrDetShape->getPos()) );
     TS_ASSERT( ptrDetShape->isValid(V3D(0.005,0.1,0.02)+ptrDetShape->getPos()) );
@@ -315,9 +318,9 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
 
-    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(3100));
+    boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(3100));
     TS_ASSERT_EQUALS( ptrDetShape->getName(), "Det0");
 
     // Test of backscattering detector
@@ -366,16 +369,16 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
-    ObjComponent* source = i->getSource();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IObjComponent> source = i->getSource();
     TS_ASSERT_EQUALS( source->getName(), "undulator");
     TS_ASSERT_DELTA( source->getPos().Z(), -17.0,0.01);
 
-    ObjComponent* samplepos = i->getSample();
+    boost::shared_ptr<IObjComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
 
-    Detector *ptrDet1 = dynamic_cast<Detector*>(i->getDetector(1));
+    boost::shared_ptr<Detector> ptrDet1 = boost::dynamic_pointer_cast<Detector>(i->getDetector(1));
     TS_ASSERT_EQUALS( ptrDet1->getID(), 1);
     TS_ASSERT_DELTA( ptrDet1->getPos().X(),  0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 10.0, 0.0001);
@@ -386,7 +389,7 @@ public:
     TS_ASSERT_DELTA(cmpDistance,10.0,0.0001);
     TS_ASSERT_EQUALS( ptrDet1->type(), "DetectorComponent");
 
-    Detector *ptrDet2 = dynamic_cast<Detector*>(i->getDetector(2));
+    boost::shared_ptr<Detector> ptrDet2 = boost::dynamic_pointer_cast<Detector>(i->getDetector(2));
     TS_ASSERT_EQUALS( ptrDet2->getID(), 2);
     TS_ASSERT_DELTA( ptrDet2->getPos().X(),  0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet2->getPos().Y(), -10.0, 0.0001);
@@ -413,7 +416,7 @@ public:
     TS_ASSERT( !ptrDet2->isValid(V3D(0.0,0.0,0.02)+ptrDet2->getPos()) );
     TS_ASSERT( !ptrDet2->isValid(V3D(0.0,0.0,-0.02)+ptrDet2->getPos()) );
 
-    Detector *ptrDet3 = dynamic_cast<Detector*>(i->getDetector(3));
+    boost::shared_ptr<Detector> ptrDet3 = boost::dynamic_pointer_cast<Detector>(i->getDetector(3));
     TS_ASSERT( !ptrDet3->isValid(V3D(0.02,0.0,0.0)+ptrDet3->getPos()) );
     TS_ASSERT( !ptrDet3->isValid(V3D(-0.02,0.0,0.0)+ptrDet3->getPos()) );
     TS_ASSERT( !ptrDet3->isValid(V3D(0.0,0.02,0.0)+ptrDet3->getPos()) );
@@ -421,7 +424,7 @@ public:
     TS_ASSERT( ptrDet3->isValid(V3D(0.0,0.0,0.02)+ptrDet3->getPos()) );
     TS_ASSERT( !ptrDet3->isValid(V3D(0.0,0.0,-0.02)+ptrDet3->getPos()) );
 
-    Detector *ptrDet4 = dynamic_cast<Detector*>(i->getDetector(4));
+    boost::shared_ptr<Detector> ptrDet4 = boost::dynamic_pointer_cast<Detector>(i->getDetector(4));
     TS_ASSERT( !ptrDet4->isValid(V3D(0.02,0.0,0.0)+ptrDet4->getPos()) );
     TS_ASSERT( !ptrDet4->isValid(V3D(-0.02,0.0,0.0)+ptrDet4->getPos()) );
     TS_ASSERT( !ptrDet4->isValid(V3D(0.0,0.02,0.0)+ptrDet4->getPos()) );
@@ -430,7 +433,7 @@ public:
     TS_ASSERT( ptrDet4->isValid(V3D(0.0,0.0,-0.02)+ptrDet4->getPos()) );
 
     // test of facing as a sub-element of location
-    Detector *ptrDet5 = dynamic_cast<Detector*>(i->getDetector(5));
+    boost::shared_ptr<Detector> ptrDet5 = boost::dynamic_pointer_cast<Detector>(i->getDetector(5));
     TS_ASSERT( !ptrDet5->isValid(V3D(0.02,0.0,0.0)+ptrDet5->getPos()) );
     TS_ASSERT( ptrDet5->isValid(V3D(-0.02,0.0,0.0)+ptrDet5->getPos()) );
     TS_ASSERT( !ptrDet5->isValid(V3D(0.0,0.02,0.0)+ptrDet5->getPos()) );
@@ -439,7 +442,7 @@ public:
     TS_ASSERT( !ptrDet5->isValid(V3D(0.0,0.0,-0.02)+ptrDet5->getPos()) );
 
     // test of infinite-cone. 
-    Detector *ptrDet6 = dynamic_cast<Detector*>(i->getDetector(6));
+    boost::shared_ptr<Detector> ptrDet6 = boost::dynamic_pointer_cast<Detector>(i->getDetector(6));
     TS_ASSERT( !ptrDet6->isValid(V3D(0.02,0.0,0.0)+ptrDet6->getPos()) );
     TS_ASSERT( !ptrDet6->isValid(V3D(-0.02,0.0,0.0)+ptrDet6->getPos()) );
     TS_ASSERT( !ptrDet6->isValid(V3D(0.0,0.02,0.0)+ptrDet6->getPos()) );
@@ -449,7 +452,7 @@ public:
     TS_ASSERT( ptrDet6->isValid(V3D(0.0,0.0,-1.02)+ptrDet6->getPos()) );
 
     // test of (finite) cone. 
-    Detector *ptrDet7 = dynamic_cast<Detector*>(i->getDetector(7));
+    boost::shared_ptr<Detector> ptrDet7 = boost::dynamic_pointer_cast<Detector>(i->getDetector(7));
     TS_ASSERT( !ptrDet7->isValid(V3D(0.02,0.0,0.0)+ptrDet7->getPos()) );
     TS_ASSERT( !ptrDet7->isValid(V3D(-0.02,0.0,0.0)+ptrDet7->getPos()) );
     TS_ASSERT( !ptrDet7->isValid(V3D(0.0,0.02,0.0)+ptrDet7->getPos()) );
@@ -459,7 +462,7 @@ public:
     TS_ASSERT( !ptrDet7->isValid(V3D(0.0,0.0,-1.02)+ptrDet7->getPos()) );
 
     // test of hexahedron. 
-    Detector *ptrDet8 = dynamic_cast<Detector*>(i->getDetector(8));
+    boost::shared_ptr<Detector> ptrDet8 = boost::dynamic_pointer_cast<Detector>(i->getDetector(8));
     TS_ASSERT( ptrDet8->isValid(V3D(0.4,0.4,0.0)+ptrDet8->getPos()) );
     TS_ASSERT( ptrDet8->isValid(V3D(0.8,0.8,0.0)+ptrDet8->getPos()) );
     TS_ASSERT( ptrDet8->isValid(V3D(0.4,0.4,2.0)+ptrDet8->getPos()) );
@@ -469,7 +472,7 @@ public:
     TS_ASSERT( ptrDet8->isValid(V3D(0.5,0.5,0.1)+ptrDet8->getPos()) );
 
     // test for "cuboid-rotating-test". 
-    Detector *ptrDet10 = dynamic_cast<Detector*>(i->getDetector(10));
+    boost::shared_ptr<Detector> ptrDet10 = boost::dynamic_pointer_cast<Detector>(i->getDetector(10));
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.0,0.1)+ptrDet10->getPos()) );
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.0,-0.1)+ptrDet10->getPos()) );
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.02,0.1)+ptrDet10->getPos()) );
@@ -478,7 +481,7 @@ public:
     TS_ASSERT( !ptrDet10->isValid(V3D(0.0,-0.05,0.0)+ptrDet10->getPos()) );
     TS_ASSERT( !ptrDet10->isValid(V3D(0.0,-0.01,0.05)+ptrDet10->getPos()) );
     TS_ASSERT( !ptrDet10->isValid(V3D(0.0,-0.01,-0.05)+ptrDet10->getPos()) );
-    Detector *ptrDet11 = dynamic_cast<Detector*>(i->getDetector(11));
+    boost::shared_ptr<Detector> ptrDet11 = boost::dynamic_pointer_cast<Detector>(i->getDetector(11));
     TS_ASSERT( ptrDet11->isValid(V3D(-0.07,0.0,-0.07)+ptrDet11->getPos()) );
     TS_ASSERT( ptrDet11->isValid(V3D(0.07,0.0,0.07)+ptrDet11->getPos()) );
     TS_ASSERT( ptrDet11->isValid(V3D(0.07,0.01,0.07)+ptrDet11->getPos()) );
@@ -489,7 +492,7 @@ public:
     TS_ASSERT( !ptrDet11->isValid(V3D(0.0,-0.01,-0.05)+ptrDet11->getPos()) );
 
     // test for "infinite-cylinder-test". 
-    Detector *ptrDet12 = dynamic_cast<Detector*>(i->getDetector(12));
+    boost::shared_ptr<Detector> ptrDet12 = boost::dynamic_pointer_cast<Detector>(i->getDetector(12));
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,0.1)+ptrDet12->getPos()) );
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.0,-0.1)+ptrDet12->getPos()) );
     TS_ASSERT( ptrDet12->isValid(V3D(0.0,0.1,0.0)+ptrDet12->getPos()) );
@@ -500,7 +503,7 @@ public:
     TS_ASSERT( !ptrDet12->isValid(V3D(2.0,0.0,0.0)+ptrDet12->getPos()) );
 
     // test for "finite-cylinder-test". 
-    Detector *ptrDet13 = dynamic_cast<Detector*>(i->getDetector(13));
+    boost::shared_ptr<Detector> ptrDet13 = boost::dynamic_pointer_cast<Detector>(i->getDetector(13));
     TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.0,0.1)+ptrDet13->getPos()) );
     TS_ASSERT( !ptrDet13->isValid(V3D(0.0,0.0,-0.1)+ptrDet13->getPos()) );
     TS_ASSERT( ptrDet13->isValid(V3D(0.0,0.1,0.0)+ptrDet13->getPos()) );
@@ -558,9 +561,9 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
 
-    boost::shared_ptr<Instrument> i = output->getInstrument();
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
 
-    Detector *ptrDetShape = dynamic_cast<Detector*>(i->getDetector(1100));
+    boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(1100));
     TS_ASSERT_EQUALS( ptrDetShape->getID(), 1100);
     TS_ASSERT_EQUALS( ptrDetShape->type(), "DetectorComponent");
 
@@ -579,7 +582,7 @@ public:
     //TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0621,0.0621,0.0)+ptrDetShape->getPos()) );
 
     // Test of monitor shape
-    Detector *ptrMonShape = dynamic_cast<Detector*>(i->getDetector(1001));
+    boost::shared_ptr<Detector> ptrMonShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(1001));
     TS_ASSERT( ptrMonShape->isValid(V3D(0.002,0.0,0.0)+ptrMonShape->getPos()) );
     TS_ASSERT( ptrMonShape->isValid(V3D(-0.002,0.0,0.0)+ptrMonShape->getPos()) );
     TS_ASSERT( !ptrMonShape->isValid(V3D(0.003,0.0,0.0)+ptrMonShape->getPos()) );

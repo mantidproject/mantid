@@ -173,9 +173,9 @@ namespace NeXus
             g_log.warning("No instrument file name found in the Nexus file");
     }
     // get any spectraMap info
-    boost::shared_ptr<Instrument> localInstrument=localWorkspace->getInstrument();
+    boost::shared_ptr<IInstrument> localInstrument=localWorkspace->getInstrument();
     boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap= localWorkspace->getSpectraMap();
-    nexusFile->readNexusProcessedSpectraMap( spectraMap, localInstrument, m_spec_min, m_spec_max);
+    nexusFile->readNexusProcessedSpectraMap( spectraMap, localWorkspace, m_spec_min, m_spec_max);
     // Assign the result to the output workspace property
     std::string outputWorkspace = "OutputWorkspace";
     setProperty(outputWorkspace,localWorkspace);

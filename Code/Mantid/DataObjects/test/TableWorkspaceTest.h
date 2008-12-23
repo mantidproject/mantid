@@ -164,6 +164,44 @@ public:
 
   }
 
+  void testBoolean()
+  {
+  try
+  {
+      TableWorkspace tw(10);
+      tw.createColumn("int","Number");
+      tw.createColumn("bool","OK");
+
+      TableRow row = tw.getFirstRow();
+      do
+      {
+          int i = row.row();
+          row << i << (i % 2 == 0);
+      }
+      while(row.next());
+
+      TableColumn_ptr<bool> bc = tw.getColumn("OK");
+      std::cerr<<bc->get_type_info().name()<<'\n';
+
+      // std::vector<bool>& bv = tw.getStdVector<bool>("OK"); // doesn't work
+      //std::vector<bool>& bv = bc->data();  // doesn't work
+      std::vector<Boolean>& bv = bc->data();  // works
+      //bool& br = bc->data()[1]; // doesn't work
+      bool b = bc->data()[1]; // works
+      bc->data()[1] = true;
+
+      for(int i=0;i<tw.rowCount();i++)
+      {
+          std::cerr<<bc->data()[i]<<'\n';
+      }
+  }
+  catch(std::exception& e)
+  {
+      std::cerr<<"Error: "<<e.what()<<'\n';
+  }
+  }
+
+
 
 };
 #endif /*TESTTABLEWORKSPACE_*/

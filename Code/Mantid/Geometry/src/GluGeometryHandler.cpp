@@ -10,7 +10,7 @@ namespace Mantid
 {
 	namespace Geometry
 	{
-		GluGeometryHandler::GluGeometryHandler(ObjComponent *comp):GeometryHandler(comp)
+		GluGeometryHandler::GluGeometryHandler(IObjComponent *comp):GeometryHandler(comp)
 		{
 			Renderer    = new GluGeometryRenderer();
 		}
@@ -30,7 +30,7 @@ namespace Mantid
 			if(Renderer    !=NULL) delete Renderer;
 		}
 
-		GeometryHandler* GluGeometryHandler::createInstance(ObjComponent *comp)
+		GeometryHandler* GluGeometryHandler::createInstance(IObjComponent *comp)
 		{
 			return new GluGeometryHandler(comp);
 		}

@@ -101,7 +101,7 @@ public:
     Component parent("Parent",V3D(1,1,1));
     //name and parent
     Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
-    Component *copy = q.clone();
+    IComponent *copy = q.clone();
     TS_ASSERT_EQUALS(q.getName(),copy->getName());
     TS_ASSERT_EQUALS(q.getParent()->getName(),copy->getParent()->getName());
     TS_ASSERT_EQUALS(q.getRelativePos(),copy->getRelativePos());

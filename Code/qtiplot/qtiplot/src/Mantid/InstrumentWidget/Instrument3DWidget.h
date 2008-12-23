@@ -36,7 +36,7 @@
 */
 namespace Mantid{
 	namespace API{
-		class Instrument;
+		class IInstrument;
 	}
 }
 namespace Mantid{
@@ -99,7 +99,7 @@ private:
 	double BinMinValue;
 	double BinMaxValue;
 	void AssignColors();
-	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument>);
+	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);
 	std::vector<int> getDetectorIDList();
 	std::vector<int> getSpectraIndexList(std::vector<int> idDecVec);
 	void setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colMap);

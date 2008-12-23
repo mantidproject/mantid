@@ -36,7 +36,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-	  class ObjComponent;
+	  class IObjComponent;
 	class DLLExport GtsGeometryRenderer
     {
     private:
@@ -49,9 +49,9 @@ namespace Mantid
 		GtsGeometryRenderer();       ///< Constructor
 		~GtsGeometryRenderer();      ///< Destructor
 		void Render(GtsSurface* ObjSurf);
-		void Render(ObjComponent* ObjComp);
+		void Render(IObjComponent* ObjComp);
 		void Initialize(GtsSurface* ObjSurf);
-		void Initialize(ObjComponent* ObjComp);
+		void Initialize(IObjComponent* ObjComp);
     };
 
   }   // NAMESPACE Geometry

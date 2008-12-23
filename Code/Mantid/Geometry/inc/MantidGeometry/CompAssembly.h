@@ -4,6 +4,11 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Component.h"
+#include "MantidGeometry/ICompAssembly.h"
+
+#ifdef _WIN32
+  #pragma warning( disable: 4250 )
+#endif
 
 namespace Mantid
 {
@@ -39,8 +44,10 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompAssembly : public Component
+class DLLExport CompAssembly : public ICompAssembly, public Component
 {
+    typedef std::vector< IComponent* >::iterator comp_it;
+    typedef std::vector< IComponent* >::const_iterator const_comp_it;
 public:
   ///String description of the type of component
   virtual std::string type() const { return "CompAssembly";}
@@ -52,26 +59,26 @@ public:
   CompAssembly(const CompAssembly&);
   virtual ~CompAssembly();
   //! Make a clone of the present component
-  virtual Component* clone() const;
+  virtual IComponent* clone() const;
   //! Return the number of elements in the assembly
   int nelements() const;
   //! Add a component to the assembly
-  int add(Component*);
+  int add(IComponent*);
   //! Add a copy (clone) of a component 
-  int addCopy(Component*);
+  int addCopy(IComponent*);
   //! Add a copy (clone) of a component and rename it
-  int addCopy(Component*, const std::string&);
+  int addCopy(IComponent*, const std::string&);
   //! Get a pointer to the ith component in the assembly
-  Component* operator[](int i) const;
+  boost::shared_ptr<IComponent> operator[](int i) const;
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
 private:
   /// Private copy assignment operator
-  CompAssembly& operator=(const CompAssembly&);
+  CompAssembly& operator=(const ICompAssembly&);
 
   ///the group of child components
-  std::vector<Component*> group;
+  std::vector< IComponent* > group;
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const CompAssembly&);

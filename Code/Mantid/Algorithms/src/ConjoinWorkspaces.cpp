@@ -134,8 +134,8 @@ void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Work
   {
     const int spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    std::vector<Geometry::IDetector*> dets = specmap1->getDetectors(spectrum);
-    std::vector<Geometry::IDetector*>::const_iterator it;
+    std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specmap1->getDetectors(spectrum);
+    std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       detectors.insert((*it)->getID());
@@ -154,8 +154,8 @@ void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Work
       g_log.error("The input workspaces overlap");
       throw std::invalid_argument("The input workspaces overlap");
     }
-    std::vector<Geometry::IDetector*> dets = specmap2->getDetectors(spectrum);
-    std::vector<Geometry::IDetector*>::const_iterator it;
+    std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specmap2->getDetectors(spectrum);
+    std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       if ( detectors.find((*it)->getID()) != detectors.end() )

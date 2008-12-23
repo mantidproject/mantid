@@ -14,12 +14,12 @@
 //Forward declaration of IDetector
 //class Mantid::Geometry::IDetector;
 //class Mantid::API::Instrument;
-//
 
 namespace Mantid
 {
 namespace API
 {
+class Workspace;
 /** @class SpectraDetectorMap SpectraDetectorMap.h
 
  SpectraDetectorMap provides a multimap between Spectra number (int)
@@ -55,40 +55,45 @@ class DLLExport SpectraDetectorMap
 public:
 #ifndef HAS_UNORDERED_MAP_H
   /// Spectra Detector map typedef
-  typedef std::multimap<int,Mantid::Geometry::IDetector*> smap;
+  typedef std::multimap<int,int> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::multimap<int,Mantid::Geometry::IDetector*>::const_iterator smap_it;
+  typedef std::multimap<int,int>::const_iterator smap_it;
 #else
   /// Spectra Detector map typedef
-  typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*> smap;
+  typedef std::tr1::unordered_multimap<int,int> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::tr1::unordered_multimap<int,Mantid::Geometry::IDetector*>::const_iterator smap_it;
+  typedef std::tr1::unordered_multimap<int,int>::const_iterator smap_it;
 #endif
   ///Constructor
-  SpectraDetectorMap();
+  SpectraDetectorMap(const Workspace* ws);
   ///virtual destructor
   virtual ~SpectraDetectorMap();
   /// populate the Map with _spec and _udet C array
-  void populate(int* _spec, int* _udet, int nentries, Instrument*);
+  void populate(int* _spec, int* _udet, int nentries);
   /// Move a detector from one spectrum to another
   void remap(const int oldSpectrum, const int newSpectrum);
   /// Return number of detectors contributing to this spectrum
-  const int ndet(const int spectrum_number) const;
+  const int ndet(const int spber) const;
   /// Get a vector of IDetector contributing to a spectrum
-  std::vector<Geometry::IDetector*> getDetectors(const int spectrum_number) const;
+  std::vector<boost::shared_ptr<Geometry::IDetector> > getDetectors(const int spectrum_number) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
   boost::shared_ptr<Geometry::IDetector> getDetector(const int spectrum_number) const;
   /// Gets a list of spectra corresponding to a list of detector numbers
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map
-  int nElements() const {return _s2dmap.size();}
-  ///Copy Contructor
-  SpectraDetectorMap(const SpectraDetectorMap& copy);
+  int nElements() const {return _s2dmap->size();}
+  /// Copy data from rhs.
+  void copy(const SpectraDetectorMap& rhs);
 private:
   ///Assignment operator
   SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
+  ///Copy Contructor
+  SpectraDetectorMap(const SpectraDetectorMap& copy);
   /// insternal spectra detector map instance
-  smap _s2dmap;
+  boost::shared_ptr<smap> _s2dmap;
+
+  const Workspace* m_workspace;
+  std::vector<int> getDetectorIDs(const int spectrum_number) const;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

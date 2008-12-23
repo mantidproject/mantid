@@ -49,12 +49,13 @@ public:
         work_in->setData(i,yDead,yDead);
       }
       work_in->getAxis(1)->spectraNo(i) = i;
-      Mantid::Geometry::Detector *det = new Mantid::Geometry::Detector("",NULL);
+      Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",NULL);
       det->setID(i);
-      work_in->getInstrument()->add(det);
-      work_in->getInstrument()->markAsDetector(det);
+      boost::shared_ptr<Mantid::API::Instrument> instr = boost::dynamic_pointer_cast<Mantid::API::Instrument>(work_in->getInstrument());
+      instr->add(det);
+      instr->markAsDetector(det);
     }
-    work_in->getSpectraMap()->populate(forSpecDetMap,forSpecDetMap,20,work_in->getInstrument().get());
+    work_in->getSpectraMap()->populate(forSpecDetMap,forSpecDetMap,20);
 
     FindDeadDetectors alg;
 

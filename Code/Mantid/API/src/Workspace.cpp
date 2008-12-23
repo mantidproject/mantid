@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/ParInstrument.h"
 
 
 namespace Mantid
@@ -15,8 +16,8 @@ Kernel::Logger& Workspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
 Workspace::Workspace() : m_axes(), m_isInitialized(false), m_title(), m_comment(),
-  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap), sptr_sample(new Sample),
-  m_history(), m_YUnit("Counts"), m_isDistribution(false)
+  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap(this)), sptr_sample(new Sample),
+  m_history(), m_YUnit("Counts"), m_isDistribution(false),sptr_parmap(new Geometry::ParameterMap)
 {}
 
 /// Destructor
@@ -95,16 +96,30 @@ void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
  */
 void Workspace::copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
 {
-	sptr_spectramap.reset(new SpectraDetectorMap(*map));
+	sptr_spectramap->copy(*map);
 }
 
 /** Set the instrument
  *
  * \param instr Shared pointer to an instrument.
  */
-void Workspace::setInstrument(const boost::shared_ptr<Instrument>& instr)
+void Workspace::setInstrument(const boost::shared_ptr<IInstrument>& instr)
 {
-	sptr_instrument=instr;
+    boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
+    if (tmp)
+    {
+        sptr_instrument=tmp;
+    }
+    else
+    {
+        boost::shared_ptr<ParInstrument> tmp = boost::dynamic_pointer_cast<ParInstrument>(instr);
+        if (tmp)
+        {
+            sptr_instrument = tmp->baseInstrument();
+            sptr_parmap = tmp->getParameterMap();
+        }
+    }
+        
 }
 
 /** Set the sample
@@ -147,9 +162,22 @@ boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
  *
  *  @return The instrument class
  */
-boost::shared_ptr<Instrument> Workspace::getInstrument() const
+boost::shared_ptr<IInstrument> Workspace::getInstrument()const
 {
-  return sptr_instrument;
+    if ( sptr_parmap->size() == 0 )  return sptr_instrument;
+    ParInstrument* pi = new ParInstrument(sptr_instrument,sptr_parmap);
+    IInstrument* ii = static_cast<IInstrument*>(pi);
+    boost::shared_ptr<IInstrument> tmp(ii);
+    return (tmp);
+}
+
+/** Get a shared pointer to the instrument associated with this workspace
+ *
+ *  @return The instrument class
+ */
+boost::shared_ptr<Instrument> Workspace::getBaseInstrument()const
+{
+    return sptr_instrument;
 }
 
 /** Get the sample associated with this workspace

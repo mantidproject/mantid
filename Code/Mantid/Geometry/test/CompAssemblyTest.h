@@ -72,7 +72,7 @@ public:
     bank.add(det2);
     bank.add(det3);
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    Component *det1copy =0;
+    boost::shared_ptr<IComponent> det1copy;
     TS_ASSERT_THROWS_NOTHING(det1copy = bank[0]);
     TS_ASSERT_EQUALS(det1->getName(), det1copy->getName());
     //show that they are the same object
@@ -92,7 +92,7 @@ public:
     bank.addCopy(&det2);
     bank.addCopy(&det3, "ChangedDet3Name");
     TS_ASSERT_EQUALS(bank.nelements(), 3);
-    Component *detcopy =0;
+    boost::shared_ptr<IComponent> detcopy;
     TS_ASSERT_THROWS_NOTHING(detcopy = bank[0]);
     TS_ASSERT_EQUALS(det1.getName(), detcopy->getName());
     //show that they are NOT the same object
@@ -143,7 +143,7 @@ public:
     Component gc3("Grandchild3");
     q.addCopy(&gc3);
     TS_ASSERT_EQUALS(q.nelements(), 3);
-    Component* copyAsComponent = q.clone();
+    IComponent* copyAsComponent = q.clone();
     CompAssembly* copy = dynamic_cast<CompAssembly*>(copyAsComponent);
     TS_ASSERT_EQUALS(q.getName(), copy->getName());
     TS_ASSERT_EQUALS(q.getParent()->getName(), copy->getParent()->getName());

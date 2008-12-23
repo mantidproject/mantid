@@ -13,19 +13,19 @@ class DetectorGroupTest : public CxxTest::TestSuite
 public:
   DetectorGroupTest()
   {
-    d1 = new Detector("d1",0);
+    d1 = boost::shared_ptr<Detector>(new Detector("d1",0));
     d1->setID(99);
     d1->setPos(2.0,2.0,2.0);
     d1->markAsMonitor();
     detvec.push_back(d1);
     group = new DetectorGroup(detvec);
-    d2 = new Detector("d2",0);
+    d2 = boost::shared_ptr<Detector>(new Detector("d2",0));
     d2->setID(11);
     d2->setPos(3.0,4.0,5.0);
     d2->markAsMonitor();
     group->addDetector(d2);
-    dg = new DetectorGroup( *(new std::vector<IDetector*>(1,group)) );
-    d3 = new Detector("d3",0);
+    dg = new DetectorGroup( *(new std::vector<boost::shared_ptr<IDetector> >(1,boost::shared_ptr<IDetector>(group))) );
+    d3 = boost::shared_ptr<Detector>(new Detector("d3",0));
     d3->setID(10);
     d3->setPos(5.0,5.0,5.0);
     dg->addDetector(d3);
@@ -33,13 +33,13 @@ public:
 
   ~DetectorGroupTest()
   {
-    delete d1, d2, d3;
-    delete dg, group;
+    //delete d1, d2, d3;
+    //delete dg, group;
   }
 
   void testConstructors()
   {
-    std::vector<IDetector*> vec;
+    std::vector<boost::shared_ptr<IDetector> > vec;
     vec.push_back(d3);
     vec.push_back(d1);
     DetectorGroup detg(vec);
@@ -56,10 +56,9 @@ public:
     TS_ASSERT_EQUALS( detg.getPos()[0], 2.0 )
     TS_ASSERT_EQUALS( detg.getPos()[1], 2.0 )
     TS_ASSERT_EQUALS( detg.getPos()[2], 2.0 )
-    Detector *d = new Detector("d",0);
+    boost::shared_ptr<Detector> d(new Detector("d",0));
     d->setID(5);
     d->setPos(6.0, 3.0, 2.0);
-
     d->markDead();
     TS_ASSERT( ! detg.isDead() )
     d1->markDead();
@@ -70,7 +69,6 @@ public:
     TS_ASSERT_EQUALS( detg.getPos()[0], 4.0 )
     TS_ASSERT_EQUALS( detg.getPos()[1], 2.5 )
     TS_ASSERT_EQUALS( detg.getPos()[2], 2.0 )
-    delete d;
   }
 
   void testGetID()
@@ -109,9 +107,9 @@ public:
   }
 
 private:
-  std::vector<IDetector*> detvec;
+  std::vector<boost::shared_ptr<IDetector> > detvec;
   DetectorGroup *dg, *group;
-  Detector *d1, *d2, *d3;
+  boost::shared_ptr<Detector> d1, d2, d3;
   Component comp;
 };
 

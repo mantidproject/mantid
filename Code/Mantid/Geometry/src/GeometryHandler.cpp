@@ -9,7 +9,7 @@ namespace Mantid
 		*  @param[in] comp 
 		*  This geometry handler will be ObjComponent's geometry handler
 		*/
-		GeometryHandler::GeometryHandler(ObjComponent *comp):Obj()
+		GeometryHandler::GeometryHandler(IObjComponent *comp):Obj()
 		{
 			ObjComp=comp;
 			ObjComp->setGeometryHandler(this);

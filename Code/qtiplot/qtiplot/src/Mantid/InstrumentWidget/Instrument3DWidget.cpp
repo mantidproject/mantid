@@ -2,15 +2,15 @@
 #include <windows.h>
 #endif
 #include "GL3DWidget.h"
-#include "MantidAPI/Instrument.h"
+#include "MantidAPI/IInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"  
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Component.h"
-#include "MantidGeometry/ObjComponent.h"
-#include "MantidGeometry/CompAssembly.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "Instrument3DWidget.h"
 #include "boost/shared_ptr.hpp"
@@ -23,6 +23,7 @@
 #include <float.h>
 #include <QMessageBox>
 #include <QString>
+#include <iostream>
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -59,11 +60,11 @@ void Instrument3DWidget::fireDetectorsPicked(std::vector<GLActor*> pickedActor)
 			//type cast to the mantid object
 			MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
 			//get the component
-			ObjComponent* tmpObjComp=tmpMantidObject->getComponent();
+            boost::shared_ptr<IObjComponent> tmpObjComp=tmpMantidObject->getComponent();
 			//check the component type if its detector or not
-			if(tmpObjComp->type()=="PhysicalComponent" ||tmpObjComp->type()=="DetectorComponent")
+            boost::shared_ptr<Mantid::Geometry::IDetector>  iDec=(boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(tmpObjComp));
+			if(iDec.get())
 			{
-				Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(tmpObjComp));
 				detectorIds.push_back(iDec->getID());
 			}
 
@@ -110,11 +111,11 @@ void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
 		//type cast to the mantid object
 		MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
 		//get the component
-		ObjComponent* tmpObjComp=tmpMantidObject->getComponent();
+		boost::shared_ptr<IObjComponent> tmpObjComp=tmpMantidObject->getComponent();
 		//check the component type if its detector or not
-		if(tmpObjComp->type()=="PhysicalComponent" ||tmpObjComp->type()=="DetectorComponent")
+        boost::shared_ptr<Mantid::Geometry::Detector>  iDec=(boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(tmpObjComp));
+		if(iDec.get())
 		{
-			Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(tmpObjComp));
 			//convert detector id to spectra index id
 			std::vector<int> idDecVec;
 			idDecVec.push_back(iDec->getID());
@@ -169,7 +170,7 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 		else if(BinMaxValue<*(values.end()-1))
 			BinMaxValue=*(values.end()-1);
 	}
-	boost::shared_ptr<Mantid::API::Instrument> ins = output->getInstrument();
+	boost::shared_ptr<Mantid::API::IInstrument> ins = output->getInstrument();
 	this->ParseInstrumentGeometry(ins);
 	defaultProjection(); // Calculate and set projection
 	AssignColors();
@@ -178,40 +179,40 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 /**
  * This method parses the instrument information and creates the actors relating to the detectors.
  */
-void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::Instrument> ins)
+void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument> ins)
 {
 	boost::shared_ptr<GLActorCollection> scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection);
 	makeCurrent();
-	std::queue<Component *> CompList;
-	CompList.push(ins.get());
+    std::queue<boost::shared_ptr<IComponent> > CompList;
+    CompList.push(boost::dynamic_pointer_cast<ICompAssembly>(ins));
 	boost::shared_ptr<GLColor> col(new GLColor(1.0,0.5,0.0,1.0));
 	while(!CompList.empty())
 	{
-		Component* tmp = CompList.front();
+		boost::shared_ptr<IComponent> tmp = CompList.front();
 		CompList.pop();
-		//std::cout<<" Component: "<<tmp->getName()<<std::endl;
-		//std::cout<<" Component Type:"<<tmp->type()<<std::endl;
-		if(tmp->type()=="PhysicalComponent" ||tmp->type()=="DetectorComponent"){
-			boost::shared_ptr<MantidObject> obj(new MantidObject(dynamic_cast<ObjComponent*>(tmp)));
+        boost::shared_ptr<IObjComponent> iobj = boost::dynamic_pointer_cast<IObjComponent>(tmp);
+        //std::cerr<<tmp<<'\n';
+        //std::cerr<<" Component: "<<tmp->getName()<<std::endl;
+        //std::cerr<<" Component Type:"<<tmp->type()<<std::endl;
+		if(iobj.get()){
+            boost::shared_ptr<MantidObject> obj(new MantidObject(iobj));
 			GLActor* actor1=new GLActor();
 			actor1->setRepresentation(obj);
 			actor1->setPos(0.0,0.0,0.0);
 			actor1->setColor(col);
 			scene->addActor(actor1);
-		} else if(tmp->type()=="Instrument"){
-			Instrument *tmpIns=dynamic_cast<Instrument*>(tmp);
-			for(int idx=0;idx<tmpIns->nelements();idx++)
-			{
-				CompList.push((*tmpIns)[idx]);
-			}
-		} else if(tmp->type()=="CompAssembly"){
-			CompAssembly *tmpAssem=dynamic_cast<CompAssembly*>(tmp);
+		} 
+        else 
+        {
+            boost::shared_ptr<ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<ICompAssembly>(tmp);
+			if (tmpAssem.get())
 			for(int idx=0;idx<tmpAssem->nelements();idx++)
 			{
-				CompList.push((*tmpAssem)[idx]);
+                boost::shared_ptr<IComponent> o = (*tmpAssem)[idx];
+				CompList.push(o);
 			}
 		} 
-	}	
+	}
 	this->setActorCollection(scene);
 }
 
@@ -234,9 +235,9 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
 		GLActor* tmpActor=scene->getActor(i);
 		if(tmpActor->getRepresentation()->type()=="MantidObject"){
 			boost::shared_ptr<GLObject> mObj = tmpActor->getRepresentation();
-			Mantid::Geometry::ObjComponent* objComp= (dynamic_cast<MantidObject*>(mObj.get()))->getComponent();
-			if(objComp->type()=="PhysicalComponent" ||objComp->type()=="DetectorComponent"){
-				Mantid::Geometry::Detector*  iDec=(dynamic_cast<Mantid::Geometry::Detector *>(objComp));
+            boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp = dynamic_cast<MantidObject*>(mObj.get())->getComponent();
+            boost::shared_ptr<Mantid::Geometry::IDetector>  iDec = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objComp);
+			if(iDec.get()){
 				if(!iDec->isMonitor())
 					idDecVec.push_back(iDec->getID());
 				else

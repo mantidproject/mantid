@@ -58,7 +58,12 @@ void LoadInstrumentFromRaw::exec()
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
   // Get reference to Instrument and set its name
-  boost::shared_ptr<API::Instrument> instrument = (localWorkspace->getInstrument());
+  boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
+  if (instrument.get() == 0)
+  {
+      g_log.error("Trying to use ParInstrument as an Instrument.");
+      throw std::runtime_error("Trying to use ParInstrument as an Instrument.");
+  }
   instrument->setName(iraw.i_inst);
 
   // Add dummy source and samplepos to instrument
@@ -109,7 +114,7 @@ void LoadInstrumentFromRaw::exec()
   for (int j = 0; j < numMonitors; ++j)
   {
     const int detectorToMark = detID[monIndex[j]-1];
-    Geometry::Detector *det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(detectorToMark));
+    boost::shared_ptr<Geometry::Detector> det = boost::dynamic_pointer_cast<Geometry::Detector>(instrument->getDetector(detectorToMark));
     det->markAsMonitor();
     g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }

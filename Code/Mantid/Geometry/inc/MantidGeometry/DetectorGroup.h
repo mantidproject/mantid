@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Component.h"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 namespace Mantid
@@ -46,15 +47,15 @@ namespace Geometry
 class DLLExport DetectorGroup : public IDetector
 {
 public:
-  DetectorGroup(const std::vector<IDetector*>& dets);
+    DetectorGroup(const std::vector<boost::shared_ptr<IDetector> >& dets);
   virtual ~DetectorGroup();
 
-  void addDetector(IDetector* det);
+  void addDetector(boost::shared_ptr<IDetector> det);
 
   // IDetector methods
   int getID() const;
   V3D getPos() const;
-	double getDistance(const Component& comp) const;
+	double getDistance(const IComponent& comp) const;
 	bool isDead() const;
 	void markDead();
 	bool isMonitor() const;
@@ -70,7 +71,7 @@ private:
   /// The type of collection used for the detectors
   ///          - a map of detector pointers with the detector ID as the key
   // May want to change this to a hash_map in due course
-  typedef std::map<int, IDetector*> DetCollection;
+  typedef std::map<int, boost::shared_ptr<IDetector> > DetCollection;
   /// The collection of grouped detectors
   DetCollection m_detectors;
 
