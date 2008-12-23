@@ -15133,6 +15133,11 @@ void ApplicationWindow::addUserMenu(const QString & topMenu)
 {
   if( topMenu.isEmpty() ) return;
 
+  foreach(QMenu* menu, d_user_menus)
+  {
+    if( menu->title() == topMenu ) return;
+  } 
+
   QMenu* menu = new QMenu(topMenu);
   menu->setName(topMenu);
   connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
@@ -15150,6 +15155,11 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   } 
   
   if( !topMenu ) return;
+
+  foreach(QAction* userAction, topMenu->actions())
+  {
+    if( userAction->text() == itemName ) return;
+  }
 
   QAction* scriptAction = new QAction(tr(itemName), topMenu);
   scriptAction->setData(QFileInfo(itemData).absoluteFilePath()); 
