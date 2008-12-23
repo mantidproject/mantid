@@ -164,6 +164,7 @@
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
+#include "Mantid/MantidCustomActionDialog.h"
 
 using namespace Qwt3D;
 
@@ -880,9 +881,10 @@ void ApplicationWindow::initToolBars()
 	formatToolBar->setEnabled(false);
 	formatToolBar->hide();
 
-	QList<QToolBar *> toolBars = toolBarsList();
-	foreach (QToolBar *t, toolBars)
-		connect(t, SIGNAL(actionTriggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
+	//Mantid
+// 	QList<QToolBar *> toolBars = toolBarsList();
+// 	foreach (QToolBar *t, toolBars)
+// 		connect(t, SIGNAL(actionTriggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
 }
 
 void ApplicationWindow::insertTranslatedStrings()
@@ -1067,9 +1069,10 @@ void ApplicationWindow::initMainMenu()
 	help->insertSeparator();
 	help->addAction(actionAbout);
 
-	QList<QMenu *> menus = customizableMenusList();
-	foreach (QMenu *m, menus)
-    	connect(m, SIGNAL(triggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
+	//Mantid
+// 	QList<QMenu *> menus = customizableMenusList();
+// 	foreach (QMenu *m, menus)
+//     	connect(m, SIGNAL(triggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
 
 	disableActions();
 }
@@ -1305,6 +1308,14 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
     menuBar()->insertItem(tr("&Windows"), windowsMenu);
 	windowsMenuAboutToShow();
 	menuBar()->insertItem(tr("&Help"), help );
+
+	// -- Mantid: add script actions, if any exist --
+	QListIterator<QMenu*> mIter(d_user_menus);
+	while( mIter.hasNext() )
+	{
+	  QMenu* item = mIter.next();
+	  menuBar()->insertItem(tr(item->title()), item);
+	}
 
 	reloadCustomActions();
 }
@@ -4544,6 +4555,23 @@ void ApplicationWindow::readSettings()
 	d_display_tool_bar = settings.value("/DisplayToolBar", false).toBool();
 	d_format_tool_bar = settings.value("/FormatToolBar", true).toBool();
 	settings.endGroup();
+
+	//---------------------------------
+	// Mantid
+	//Check for user defined scripts in settings and create menus for them
+	//Top level scripts group
+	settings.beginGroup("CustomScripts");
+
+	foreach(QString menu, settings.childGroups())
+	{ 
+	  addUserMenu(menu);
+	  settings.beginGroup(menu);
+	  foreach(QString keyName, settings.childKeys())
+	  {
+	   addUserMenuAction(menu, keyName, settings.value(keyName).toString());
+	  }
+	  settings.endGroup();
+	}
 }
 
 void ApplicationWindow::saveSettings()
@@ -4846,6 +4874,24 @@ void ApplicationWindow::saveSettings()
     settings.setValue("/DisplayToolBar", d_display_tool_bar);
 	settings.setValue("/FormatToolBar", d_format_tool_bar);
 	settings.endGroup();
+
+	
+	//--------------------------------------
+	// Mantid - Save custom scripts
+	settings.beginGroup("CustomScripts");
+	settings.remove("");
+	foreach( QMenu* menu, d_user_menus )
+	{
+	  settings.beginGroup(menu->title());
+	  foreach( QAction* action, menu->actions() )
+	  {
+	    settings.setValue(action->text(), action->data().toString());
+	  }
+	  settings.endGroup();
+	} 
+	settings.endGroup();
+	//-----------------------------------
+
 }
 
 void ApplicationWindow::exportGraph()
@@ -10950,7 +10996,7 @@ void ApplicationWindow::setPlot3DOptions()
 
 void ApplicationWindow::createActions()
 {
-    actionCustomActionDialog = new QAction(tr("Add &Custom Script Action..."), this);
+    actionCustomActionDialog = new QAction(tr("Manage Custom Script Actions..."), this);
 	connect(actionCustomActionDialog, SIGNAL(activated()), this, SLOT(showCustomActionDialog()));
 
 	actionNewProject = new QAction(QIcon(QPixmap(new_xpm)), tr("New &Project"), this);
@@ -11844,7 +11890,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
 
-	actionCustomActionDialog->setMenuText(tr("Add &Custom Script Action..."));
+	actionCustomActionDialog->setMenuText(tr("Manage Custom Script Actions..."));
 
 	actionAddLayer->setMenuText(tr("Add La&yer"));
 	actionAddLayer->setToolTip(tr("Add Layer"));
@@ -13357,8 +13403,8 @@ void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compr
 	f.close();
 
 	if (compress)
-		file_compress((char *)fn.ascii(), "wb9");
-
+       	  file_compress((char *)fn.ascii(), "w9");
+	
 	QApplication::restoreOverrideCursor();
 }
 
@@ -14965,10 +15011,11 @@ void ApplicationWindow::insertMathSymbol()
 
 void ApplicationWindow::showCustomActionDialog()
 {
-    CustomActionDialog *ad = new CustomActionDialog(this);
-	ad->setAttribute(Qt::WA_DeleteOnClose);
-	ad->show();
-	ad->setFocus();
+  //CustomActionDialog *ad = new CustomActionDialog(this);
+  MantidCustomActionDialog *ad = new MantidCustomActionDialog(this);
+  ad->setAttribute(Qt::WA_DeleteOnClose);
+  ad->show();
+  ad->setFocus();
 }
 
 void ApplicationWindow::addCustomAction(QAction *action, const QString& parentName, int index)
@@ -15030,7 +15077,6 @@ void ApplicationWindow::performCustomAction(QAction *action)
 {
 	if (!action || !d_user_actions.contains(action))
 		return;
-
 #ifdef SCRIPTING_PYTHON
 	setScriptingLanguage("Python");
 
@@ -15081,6 +15127,101 @@ QList<QMenu *> ApplicationWindow::customizableMenusList()
 	return lst;
 }
 
+//-------------------------------
+// Mantid
+void ApplicationWindow::addUserMenu(const QString & topMenu)
+{
+  if( topMenu.isEmpty() ) return;
+
+  QMenu* menu = new QMenu(topMenu);
+  menu->setName(topMenu);
+  connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+  d_user_menus.append(menu);
+  d_user_menu_map.insert(topMenu,QStringList());
+  menuBar()->insertItem(tr(topMenu), menu);
+}
+
+void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData)
+{
+  QMenu* topMenu;
+  foreach(topMenu, d_user_menus)
+  {
+    if( topMenu->title() == parentMenu ) break;
+  } 
+  
+  if( !topMenu ) return;
+
+  QAction* scriptAction = new QAction(tr(itemName), topMenu);
+  scriptAction->setData(QFileInfo(itemData).absoluteFilePath()); 
+  topMenu->addAction(scriptAction);
+  d_user_actions.append(scriptAction);
+  //Add to map
+  addToScriptMap(parentMenu, itemName);
+}
+
+void ApplicationWindow::removeUserMenu(const QString & parentMenu)
+{
+  int i(-1);
+  QMenu *menu;
+  foreach(menu, d_user_menus)
+  {
+    ++i;
+    if( menu->title() == parentMenu ) break;
+  }
+  if( menu ) 
+  {
+    d_user_menu_map.remove(parentMenu);
+    d_user_menus.removeAt(i);
+
+    menuBar()->removeAction(menu->menuAction());
+    delete menu;
+  }
+}
+
+void ApplicationWindow::removeUserMenuAction(const QString & parentMenu, const QString & userAction)
+{
+  QMenu *menu;
+  foreach(menu, d_user_menus)
+  {
+    if( menu->title() == parentMenu ) break;
+  }
+
+  QAction *action;
+  foreach(action, d_user_actions)
+  {
+    if( action->text() == userAction ) break;
+  }
+
+  if( menu && action )
+  {
+    QMap<QString, QStringList>::iterator kItr = d_user_menu_map.find(parentMenu);
+    if( kItr == d_user_menu_map.end() ) return;
+    int index = kItr->indexOf(userAction);
+    if( index != -1 ) kItr->removeAt(index);
+    menu->removeAction(action);
+    delete action;
+  }
+  
+}
+
+
+void ApplicationWindow::addToScriptMap(const QString & menu, const QString & action)
+{
+  if( d_user_menu_map.contains(menu) )
+  {
+    d_user_menu_map[menu].append(action);
+  }
+  else
+  {
+    d_user_menu_map.insert(menu,QStringList(action));
+  }
+}
+
+const QMap<QString, QStringList> & ApplicationWindow::getScriptMap() const
+{
+  return d_user_menu_map;
+}
+
 QList<QMenu *> ApplicationWindow::menusList()
 {
 	QList<QMenu *> lst;
@@ -15091,6 +15232,9 @@ QList<QMenu *> ApplicationWindow::menusList()
     }
 	return lst;
 }
+
+// End of a section of Mantid custom functions
+//-------------------------------------------
 
 QList<QToolBar *> ApplicationWindow::toolBarsList()
 {

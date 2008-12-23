@@ -149,7 +149,17 @@ public:
 	void addCustomAction(QAction *, const QString& parentName, int index = -1);
     QList<QAction *> customActionsList(){return d_user_actions;};
 	QList<QMenu *> customizableMenusList();
-	//@}
+
+  
+  //------ Mantid-------
+        void addUserMenu(const QString & topMenu);  //Mantid
+  void addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData); //Mantid
+        void removeUserMenu(const QString &);  //Mantid
+        void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
+        void addToScriptMap(const QString & menu, const QString & action);  //Mantid
+        const QMap<QString, QStringList> & getScriptMap() const;  //Mantid
+  //-------------------
+  	//@}
 
 	QList<QMenu *> menusList();
 	QList<QToolBar *> toolBarsList();
@@ -1262,7 +1272,11 @@ private:
     QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
     QAction *actionShowUndoStack;
     QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
+
     QList<QAction *> d_user_actions;
+    QList<QMenu* > d_user_menus; //Mantid
+  QMap<QString, QStringList> d_user_menu_map; //Mantid
+
     QUndoView *d_undo_view;
 
     friend class MantidUI;
