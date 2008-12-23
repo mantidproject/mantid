@@ -76,8 +76,6 @@ private slots:
   void removeSelectedItem();
   //Choose a file
   void chooseFile();
-  //Choose a file
-  void chooseDirectory();
   //Add a new menu when requested
   void handleComboSelection(const QString &);
   //Validate user input
@@ -91,8 +89,8 @@ private:
   QTreeWidget *m_tree;
   
   //Text fields
-  QLineEdit *fileBox, *dirBox;
-  QPushButton *fileBtn, *dirBtn;
+  QLineEdit *fileBox;
+  QPushButton *fileBtn;
 
   //Buttons
   QPushButton *buttonAdd, *buttonRemove, *buttonCancel;
@@ -100,6 +98,9 @@ private:
   //Combo menu box
   QComboBox *menuList;
 
+  //Stores a string list of files chosen by the the user
+  QStringList m_scriptFiles;
+  
   //Pointer to the application window
   ApplicationWindow* m_appWindow;
 };

@@ -34,7 +34,7 @@
 MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags flags) : 
   QDialog(parent, flags)
 {
-  setWindowTitle(tr("MantidPlot") + " - " + tr("Add Custom Action"));
+  setWindowTitle(tr("MantidPlot") + " - " + tr("Manage Custom Actions"));
 
   m_appWindow = static_cast<ApplicationWindow*>(parent);
 
@@ -50,19 +50,12 @@ MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags f
   QGridLayout *gl1 = new QGridLayout(gb1);
   //Choose file to add to menu
 
-  gl1->addWidget(new QLabel(tr("Single File")), 0, 0);
+  gl1->addWidget(new QLabel(tr("Script File(s)")), 0, 0);
   fileBox = new QLineEdit;
   gl1->addWidget(fileBox, 0, 1);
 
   fileBtn = new QPushButton(tr("Browse ..."));
   gl1->addWidget(fileBtn, 0, 2);
-
-  gl1->addWidget(new QLabel(tr("Entire Directory")), 1, 0);
-  dirBox = new QLineEdit;
-  gl1->addWidget(dirBox, 1, 1);
-
-  dirBtn = new QPushButton(tr("Browse ..."));
-  gl1->addWidget(dirBtn, 1, 2);
 
   gl1->addWidget(new QLabel(tr("Menu")), 2, 0);
   menuList = new QComboBox;
@@ -101,7 +94,6 @@ MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags f
 
   //Connections for buttons
   connect(fileBtn, SIGNAL(clicked()), this, SLOT(chooseFile()));
-  connect(dirBtn, SIGNAL(clicked()), this, SLOT(chooseDirectory()));
   connect(buttonAdd,SIGNAL(clicked()), this, SLOT(addActions()));
   connect(buttonRemove,SIGNAL(clicked()), this, SLOT(removeSelectedItem()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
@@ -113,8 +105,6 @@ MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags f
   //Use the delete key
   QShortcut *accelRemove = new QShortcut(QKeySequence(Qt::Key_Delete), this);
   connect(accelRemove, SIGNAL(activated()), this, SLOT(removeSelectedItem()));
-
-  
 }
 
 //----------------------------------
@@ -154,22 +144,13 @@ void MantidCustomActionDialog::addActions()
     if( !validUserInput() ) return;
   }
 
-  if( !dirBox->text().isEmpty() )
+  QListIterator<QString> sItr(m_scriptFiles);
+  while( sItr.hasNext() )
   {
-    QDir di(dirBox->text());
-    QStringList filters;
-    filters << "*.py" << "*.PY";
-    QStringList scripts = di.entryList(filters, QDir::Files);
-    QListIterator<QString> sItr(scripts);
-    while( sItr.hasNext() )
-    {
-      addAction(di.absoluteFilePath(sItr.next()));
-    }
+    addAction(QFileInfo(sItr.next()).absoluteFilePath());
   }
-  else
-  {
-    addAction(fileBox->text());
-  }  
+  m_scriptFiles.clear();
+  fileBox->clear();
 }
 
 /**
@@ -225,23 +206,17 @@ void MantidCustomActionDialog::removeSelectedItem()
  */
 void MantidCustomActionDialog::chooseFile()
 {
-  QString path = QFileDialog::getOpenFileName(this, tr("Choose file"),
-					      qApp->applicationDirPath(),	
-					      tr("Python Scripts (*.py *.PY)"));
-  if( path.isEmpty() ) return;
-  fileBox->setText(path);
-}
-
-/**
- * A slot to handle the signal sent when the 'browse' directory button is clicked
- */
-void MantidCustomActionDialog::chooseDirectory()
-{
-  QString path = QFileDialog::getExistingDirectory(this, tr("Choose directory"),
-					      qApp->applicationDirPath());
-  if( path.isEmpty() ) return;
-  
-  dirBox->setText(path);
+  m_scriptFiles = QFileDialog::getOpenFileNames(this, tr("Select one or more files to open"),
+                  qApp->applicationDirPath(),	
+                  tr("Python Scripts (*.py *.PY)"));
+  if( m_scriptFiles.size() == 1 )
+  {
+    fileBox->setText(m_scriptFiles[0]);
+  }
+  else
+  {
+    fileBox->setText("Multiple file selection made.");
+  }
 }
 
 /**
@@ -278,29 +253,11 @@ void MantidCustomActionDialog::handleComboSelection(const QString & text)
 
 bool MantidCustomActionDialog::validUserInput()
 {
-  QString file = fileBox->text();
-  QString dir = dirBox->text();
-  if( !dir.isEmpty() && !file.isEmpty() )
+  if ( m_scriptFiles.isEmpty() )
   {
     QMessageBox::warning(m_appWindow, tr("MantidPlot") + " - " + tr("Error"),
-			  tr("Both a single file and a directory have been specified, please choose one."));
+			  tr("You have not specified the path the a script file."));
     fileBox->setFocus();
-    return false;
-  }
-  
-  if ( dir.isEmpty() && !QFileInfo(file).exists() )
-  {
-    QMessageBox::warning(m_appWindow, tr("MantidPlot") + " - " + tr("Error"),
-			  tr("The file you have specified does not exist, please choose a valid script file."));
-    fileBox->setFocus();
-    return false;
-  }
-  QDir di(dir);
-  if ( file.isEmpty() && ( !di.exists() || !di.isReadable() ) )
-  {
-    QMessageBox::warning(m_appWindow, tr("MantidPlot") + " - " + tr("Error"),
-			  tr("The directory you have specified does not exist or is not readable."));
-    dirBox->setFocus();
     return false;
   }
   
