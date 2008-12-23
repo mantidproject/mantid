@@ -1697,6 +1697,7 @@ public:
   double dataY(int,int) const;
   double dataE(int,int) const;
   int indexX(double) const;
+  Graph3D* plotGraph3D(int) /PyName=plotContour/;
 private:
   MantidMatrix(const MantidMatrix&);
 };
