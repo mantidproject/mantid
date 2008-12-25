@@ -133,17 +133,32 @@ void CrossCorrelate::exec()
 	const int npoints=2*nY-3;
 	Workspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
-   	// Calculate the mean value of the reference spectrum
-	double refMean=std::accumulate(refY.begin(),refY.end(),0);
+   	// Calculate the mean value of the reference spectrum and associated error squared
+	double refMean=std::accumulate(refY.begin(),refY.end(),0.0);
+	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,SumSquares<double>());
 	refMean/=static_cast<double>(nY);
+	refMeanE2/=static_cast<double>(nY*nY);
+    mess.str("");
+    mess << "refMeanE2" << refMeanE2;
+    g_log.information(mess.str());
+    std::vector<double>::iterator itY=refY.begin();
+	std::vector<double>::iterator itE=refE.begin();
 
-	std::vector<double>::iterator it;
-	double refVar=0.0;
-	for (it=refY.begin();it!=refY.end();++it)
+	double refVar=0.0, refVarE=0.0;
+	for (;itY!=refY.end();++itY,++itE)
 	{
-		(*it)-=refMean; // Now the vector is (y[i]-refMean)
-		refVar+=(*it)*(*it);
+		(*itY)-=refMean; // Now the vector is (y[i]-refMean)
+		(*itE)=(*itE)*(*itE)+refMeanE2; // New error squared
+		double t=(*itY)*(*itY);
+		refVar+=t;
+		refVarE+=4.0*t*(*itE)*(*itE);
 	}
+
+	double refNorm=1.0/sqrt(refVar);
+	double refNormE=0.5*pow(refNorm,3)*sqrt(refVarE);
+	mess.str("");
+	mess << "refNorm" << refNorm << "error" << refNormE;
+	g_log.information(mess.str());
 	mess << "Reference spectrum mean value: " << refMean << ", Variance: " << refVar;
 	g_log.information(mess.str());
 
@@ -172,28 +187,57 @@ void CrossCorrelate::exec()
    		// Now rebin on the grid of reference spectrum
    		rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
    		// Calculate the mean value of tempY
-   		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0);
+   		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0.0);
    		tempMean/=static_cast<double>(nY);
+   		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,SumSquares<double>());
+   		tempMeanE2/=static_cast<double>(nY*nY);
    		//
-   		double tempVar=0.0;
-		for (it=tempY.begin();it!=tempY.end();++it)
+   		itY=tempY.begin();
+   		itE=tempE.begin();
+   		double tempVar=0.0, tempVarE=0.0;
+		for (;itY!=tempY.end();++itY,++itE)
 		{
-			(*it)-=tempMean; // Now the vector is (y[i]-refMean)
-			tempVar+=(*it)*(*it);
+			(*itY)-=tempMean; // Now the vector is (y[i]-refMean)
+			(*itE)=(*itE)*(*itE)+tempMeanE2; // New error squared
+			double t=(*itY)*(*itY);
+			tempVar+=t;
+			tempVarE+=4.0*t*(*itE)*(*itE);
 		}
+
 		// Calculate the normalisation constant
-		double normalisation=1.0/sqrt(refVar*tempVar);
+		double tempNorm=1.0/sqrt(tempVar);
+		double tempNormE=0.5*pow(tempNorm,3)*sqrt(tempVarE);
+		double normalisation=refNorm*tempNorm;
+		double normalisationE2=pow((refNorm*tempNormE),2)+pow((tempNorm*refNormE),2);
 		// Get reference to the ouput spectrum
 		std::vector<double>& outY=out->dataY(i);
+		std::vector<double>& outE=out->dataE(i);
+
 		for (int k=-nY+2;k<=nY-2;++k)
 		{
 			int kp=abs(k);
-			double val=0;
+			double val=0, err2=0, x, y, xE, yE;
 			for (int j=nY-1-kp;j>=0;--j)
 			{
-				(k>=0) ? val+=(refY[j]*tempY[j+kp]) : val+=(tempY[j]*refY[j+kp]);
+				if (k>=0)
+				{
+					x=refY[j];
+					y=tempY[j+kp];
+					xE=refE[j];
+					yE=tempE[j+kp];
+				}
+				else
+				{
+					x=tempY[j];
+					y=refY[j+kp];
+					xE=tempE[j];
+					yE=refE[j+kp];
+				}
+				val+=(x*y);
+				err2+=pow((x*yE),2)+pow((y*xE),2);
 			}
 			outY[k+nY-2]=(val*normalisation);
+			outE[k+nY-2]=sqrt(val*val*normalisationE2+normalisation*normalisation*err2);
 		}
 		// Update progress information
 		double prog=static_cast<double>(i)/nspecs;
