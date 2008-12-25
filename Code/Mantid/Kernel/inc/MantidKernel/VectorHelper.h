@@ -42,22 +42,14 @@ namespace Mantid
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
-  struct sumV : public std::unary_function<double, void>
+  //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
+  template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {
-  	sumV():sum(0){}
-  	void operator()(double data) {sum+=data;}
-  	double sum;
-  };
-  // Functor for computing variance
-  struct varianceV : public std::unary_function<double, void>
-  {
-  	varianceV(double mean_):var(0),mean(mean_){}
-  	void operator()(double data)
-  	{
-  		data-=mean;
-  		var+=(data*data);
-  	}
-  	double var, mean;
+	  SumSquares(){}
+	  T operator()(const T& r, const T& x) const
+	  {
+		  return (r+x*x);
+	  }
   };
 
   } // namespace Kernel
