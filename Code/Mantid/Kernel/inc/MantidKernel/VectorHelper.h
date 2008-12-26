@@ -52,6 +52,16 @@ namespace Mantid
 	  }
   };
 
+  //! Square functor
+  template <class T> struct Squares: public std::unary_function<T,T>
+  {
+    Squares(){}
+    T operator()(const T& x) const
+    {
+  	  return (x*x);
+    }
+  };
+
   } // namespace Kernel
 } // namespace Mantid
 
