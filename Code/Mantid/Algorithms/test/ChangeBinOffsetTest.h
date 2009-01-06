@@ -85,11 +85,11 @@ public:
 		std::vector<double>& Xold = input->dataX(0);
 		std::vector<double>& Xnew = output->dataX(0);
 
-		for (int i=0; i < Xnew.size(); ++i)
-		{
-		    std::cout << "old value: " << Xold[i] << std::endl;
-		    std::cout << "new value: " << Xnew[i] << std::endl;
-		}
+//		for (int i=0; i < Xnew.size(); ++i)
+//		{
+//		    std::cout << "old value: " << Xold[i] << std::endl;
+//		    std::cout << "new value: " << Xnew[i] << std::endl;
+//		}
 
 		TS_ASSERT(Xold[0] + offset == Xnew[0]);
 		TS_ASSERT(Xold[1] + offset == Xnew[1]);

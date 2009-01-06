@@ -81,7 +81,7 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 						{
 							//Successfully opened, so add to map
 							g_log.debug("Opened library: " + libName + ".\n");
-							std::cout << "Opened library: " << libName << ".\n";
+							std::cout << "Opened library: " << libName << " ";
 							boost::shared_ptr<LibraryWrapper> pLib(tmp);
 							OpenLibs.insert(std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, pLib) );
 							++libCount;

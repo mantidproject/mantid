@@ -99,13 +99,20 @@ filetestsRun = logDir+'testResults.log'
 f = open(filetestsRun,'r')
 
 reTestCount = re.compile("Running\\s*(\\d+)\\s*tests", re.IGNORECASE)
+reCrashCount = re.compile("OK!")
 reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
 for line in f.readlines():
-	m=reTestCount.match(line)
+        m=reTestCount.match(line)
         if m:
             testCount += int(m.group(1))
+            m=reCrashCount.search(line)
+            if not m:
+                failCount += 1
+                testsPass = False
         m=reFailCount.match(line)
         if m:
+            # Need to decrement failCount because crashCount will have incremented it above
+            failCount -= 1
             failCount += int(m.group(1))
             testsPass = False
 	mssgTestsResults = mssgTestsResults + line

@@ -35,15 +35,15 @@ public:
     vec.push_back("raw");
     vec.push_back("RAW");
     FileValidator v(vec);
-    TS_ASSERT(!v.isValid("FileValidatorTest.h"));
+    TS_ASSERT(!v.isValid("FileValidatorTest.cpp"));
   }
 
   void testPassesOnRightExtension()
   {
     std::vector<std::string> vec;
-    vec.push_back("h");
+    vec.push_back("cpp");
     FileValidator v(vec);
-    TS_ASSERT(v.isValid("FileValidatorTest.h"));
+    TS_ASSERT(v.isValid("FileValidatorTest.cpp"));
   }
   
   void testFailsOnNonexistentFile()
@@ -57,9 +57,9 @@ public:
    void testPassesOnExistentFile()
   {
     std::vector<std::string> vec;
-    vec.push_back("h");
+    vec.push_back("cpp");
     FileValidator v(vec);
-    TS_ASSERT(v.isValid("FileValidatorTest.h"));
+    TS_ASSERT(v.isValid("FileValidatorTest.cpp"));
   }
   
 };
