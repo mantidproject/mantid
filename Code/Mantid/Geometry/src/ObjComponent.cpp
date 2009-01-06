@@ -223,7 +223,8 @@ void ObjComponent::draw() const
  */
 void ObjComponent::drawObject() const
 {
-	shape->draw();
+	if(shape!=NULL)
+		shape->draw();
 }
 
 /**
@@ -233,7 +234,8 @@ void ObjComponent::initDraw() const
 {
 	if(Handle()==NULL)return;
 	//Render the ObjComponent and then render the object
-	shape->initDraw();
+	if(shape!=NULL)
+		shape->initDraw();
 	Handle()->Initialize();
 }
 
