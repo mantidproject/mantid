@@ -141,6 +141,9 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 
 Mantid::Geometry::V3D InstrumentTreeWidget::getSamplePos()const
 {
-    boost::shared_ptr<Mantid::Geometry::IObjComponent> sample = mInstrument->getSample();
-		return sample->getPos();
+    boost::shared_ptr<Mantid::Geometry::IComponent> sample = mInstrument->getSample();
+		if(sample!=NULL)
+			return sample->getPos();
+		else
+			return Mantid::Geometry::V3D(0.0,0.0,0.0);
 }
