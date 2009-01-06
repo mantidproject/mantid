@@ -102,7 +102,7 @@ reTestCount = re.compile("Running\\s*(\\d+)\\s*tests", re.IGNORECASE)
 reCrashCount = re.compile("OK!")
 reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
 for line in f.readlines():
-        m=reTestCount.match(line)
+        m=reTestCount.search(line)
         if m:
             testCount += int(m.group(1))
             m=reCrashCount.search(line)
