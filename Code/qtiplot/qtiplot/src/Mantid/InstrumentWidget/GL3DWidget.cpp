@@ -68,9 +68,6 @@ void GL3DWidget::initializeGL()
 	glEnable (GL_LIGHTING);            // Enable light
 	glEnable(GL_LIGHT0);               // Enable opengl first light
 	glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
-	glEnable(GL_BLEND);                // Enable blending
-	glEnable(GL_NORMALIZE);            // Normalize the input normals (its expensive better to normalize normals manually)
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //Set Blend function
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
 	// Set Light0 Attributes, Ambient, diffuse,specular and position
 	// Its a directional light which follows camera position
@@ -97,9 +94,7 @@ void GL3DWidget::drawDisplayScene()
 	glEnable(GL_LIGHTING);              
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_BLEND);
-	glEnable(GL_NORMALIZE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
 	glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -117,6 +112,10 @@ void GL3DWidget::drawDisplayScene()
 	{
 		QApplication::setOverrideCursor(Qt::WaitCursor);
 		scene->draw();
+		glPointSize(3.0);
+		glBegin(GL_POINTS);
+		glVertex3d(0.0,0.0,0.0);
+		glEnd();
 		QApplication::restoreOverrideCursor();
 	}
 	glPopMatrix();
@@ -478,19 +477,20 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
 	Mantid::Geometry::V3D minPoint,maxPoint;
 	double minValue,maxValue,_bbmin[3],_bbmax[3];
 	scene->getBoundingBox(minPoint,maxPoint);
+	Mantid::Geometry::V3D centre=(maxPoint+minPoint)/2.0;
 	defaultProjection();
 	_viewport->getProjection(_bbmin[0],_bbmax[0],_bbmin[1],_bbmax[1],_bbmin[2],_bbmax[2]);
 	switch(dir)
 	{
 	case XPOSITIVE:
 		_trackball->setViewToXPositive();
-		_viewport->setOrtho(minPoint[2],maxPoint[2],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case YPOSITIVE:
 		_trackball->setViewToYPositive();
-		minValue=minPoint[1]-fabs(maxPoint[1]-minPoint[1])/2.0;
-		maxValue=maxPoint[1]+fabs(maxPoint[1]-minPoint[1])/2.0;
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[2],maxPoint[2],_bbmin[2],_bbmax[2]);
+		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case ZPOSITIVE:
 		_trackball->setViewToZPositive();
@@ -498,16 +498,17 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
 		break;
 	case XNEGATIVE:
 		_trackball->setViewToXNegative();
-		_viewport->setOrtho(minPoint[2],maxPoint[2],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case YNEGATIVE:
 		_trackball->setViewToYNegative();
-		minValue=minPoint[1]-fabs(maxPoint[1]-minPoint[1])/2.0;
-		maxValue=maxPoint[1]+fabs(maxPoint[1]-minPoint[1])/2.0;
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[2],maxPoint[2],_bbmin[2],_bbmax[2]);
+		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	case ZNEGATIVE:
 		_trackball->setViewToZNegative();
+		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
 		break;
 	}
@@ -546,7 +547,7 @@ void GL3DWidget::defaultProjection()
 	Mantid::Geometry::V3D center;
 	center=(minPoint+maxPoint)/2.0;
 	//center[2]=0.0;
-	_trackball->setModelCenter(center);
+	//_trackball->setModelCenter(center);
 	_viewport->issueGL();
 }
 

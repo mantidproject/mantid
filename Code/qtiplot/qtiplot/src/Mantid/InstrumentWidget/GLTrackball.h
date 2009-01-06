@@ -71,15 +71,14 @@ public:
 	void setViewToYNegative();
 	//! Call to set the View to Z- direction
 	void setViewToZNegative();
-	//! Set Translation
-	void setTranslation(Mantid::Geometry::V3D trans){_translation=trans;}
 	//! Set Rotation
 	void setRotation(Mantid::Geometry::Quat quat){_quaternion=quat;_quaternion.GLMatrix(_rotationmatrix);}
 	//! Set Model center
 	void setModelCenter(Mantid::Geometry::V3D center);
 	//! Reset Trackball
 	void reset();
-	double		_scaleFactor;
+	//! Rotates a bounding box
+	void rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax);
 private:
     GLViewport*      _viewport;
 	Mantid::Geometry::V3D projectOnSphere(int,int);
@@ -87,8 +86,6 @@ private:
 	Mantid::Geometry::Quat  _quaternion; 
     double _rotationmatrix[16];
 	double      _rotationspeed;
-
-	Mantid::Geometry::V3D  _translation;
 	Mantid::Geometry::V3D  _modelCenter;
 };
 

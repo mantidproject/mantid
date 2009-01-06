@@ -53,17 +53,23 @@ public:
 	void issueGL() const;
 	void setOrtho(double,double,double,double,double,double);
 	void setPrespective(double,double,double,double,double,double);
+	void setZoomFactor(double);
+	double getZoomFactor();
+	void setTranslation(double,double);
+	void getTranslation(double&,double&);
 
 protected:
-    int _width         ///< Width of the viewport
-		, _height;     ///< Height of the viewport
-	ProjectionType projection; ///< Type of display projection
-	double Left   ///< Ortho/Prespective Projection xmin value (Left side of the x axis)
-		,Right    ///< Ortho/Prespective Projection xmax value (Right side of the x axis)
-		,Bottom   ///< Ortho/Prespective Projection ymin value (Bottom side of the y axis)
-		,Top      ///< Ortho/Prespective Projection ymax value (Top side of the y axis)
-		,Near     ///< Ortho/Prespective Projection zmin value (Near side of the z axis)
-		,Far;     ///< Ortho/Prespective Projection zmax value (Far side of the z axis)
+    int mWidth         ///< Width of the viewport
+		, mHeight;     ///< Height of the viewport
+	double mZoomFactor;
+	double mXTrans,mYTrans;
+	ProjectionType mProjection; ///< Type of display projection
+	double mLeft   ///< Ortho/Prespective Projection xmin value (Left side of the x axis)
+		,mRight    ///< Ortho/Prespective Projection xmax value (Right side of the x axis)
+		,mBottom   ///< Ortho/Prespective Projection ymin value (Bottom side of the y axis)
+		,mTop      ///< Ortho/Prespective Projection ymax value (Top side of the y axis)
+		,mNear     ///< Ortho/Prespective Projection zmin value (Near side of the z axis)
+		,mFar;     ///< Ortho/Prespective Projection zmax value (Far side of the z axis)
 
 };
 

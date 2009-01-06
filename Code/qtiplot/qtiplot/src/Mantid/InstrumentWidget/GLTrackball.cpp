@@ -5,6 +5,7 @@
 #include "GL/glu.h"
 #define _USE_MATH_DEFINES true
 #include <math.h>
+#include <float.h>
 GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
 {
 	reset();
@@ -39,6 +40,10 @@ void GLTrackball::initTranslateFrom(int a,int b)
 	double xmin,xmax,ymin,ymax,zmin,zmax;
     _viewport->getViewport(&_viewport_w,&_viewport_h);
 	_viewport->getProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+	xmin*=_viewport->getZoomFactor();
+	ymin*=_viewport->getZoomFactor();
+	xmax*=_viewport->getZoomFactor();
+	ymax*=_viewport->getZoomFactor();
 	x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)_viewport_w))));
 	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
@@ -52,12 +57,17 @@ void GLTrackball::generateTranslationTo(int a, int b)
 	double xmin,xmax,ymin,ymax,zmin,zmax;
     _viewport->getViewport(&_viewport_w,&_viewport_h);
 	_viewport->getProjection(xmin,xmax,ymin,ymax,zmin,zmax);
+	xmin*=_viewport->getZoomFactor();
+	ymin*=_viewport->getZoomFactor();
+	xmax*=_viewport->getZoomFactor();
+	ymax*=_viewport->getZoomFactor();
 	x=static_cast<double>((xmin+((xmax-xmin)*((double)a/(double)_viewport_w))));
 	y=static_cast<double>((ymin+((ymax-ymin)*(_viewport_h-b)/_viewport_h)));
 	z=0.0;
 	Mantid::Geometry::V3D _newpoint= Mantid::Geometry::V3D(x,y,z);
 	Mantid::Geometry::V3D diff= _newpoint - _lastpoint;
-	_translation += diff;
+	_viewport->getTranslation(x,y);
+	_viewport->setTranslation(x+diff[0],y+diff[1]);
 }
 
 void GLTrackball::initZoomFrom(int a,int b)
@@ -85,15 +95,14 @@ void GLTrackball::generateZoomTo(int a, int b)
 	z=0.0;
 	if(y==0) y=_lastpoint[1];
 	double diff= _lastpoint[1]/y ;
-	_scaleFactor*=diff;
+	diff*=_viewport->getZoomFactor();
+	_viewport->setZoomFactor(diff);
 }
 
 
 void GLTrackball::IssueRotation()
 {	
 	if (_viewport){
-		glScaled(_scaleFactor,_scaleFactor,_scaleFactor);
-		glTranslated(_translation[0],_translation[1],_translation[2]);
 		glTranslated(_modelCenter[0],_modelCenter[1],_modelCenter[2]);
 		glMultMatrixd(_rotationmatrix);
 		glTranslated(-_modelCenter[0],-_modelCenter[1],-_modelCenter[2]);
@@ -136,15 +145,13 @@ void GLTrackball::reset()
 	//Reset rotation,scale and translation
 	_quaternion.init();
     _quaternion.GLMatrix(_rotationmatrix);
-	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
-	_scaleFactor=1.0;
+	_viewport->setTranslation(0.0,0.0);
+	_viewport->setZoomFactor(1.0);
 }
 
 void GLTrackball::setViewToXPositive()
 {
 	reset();
-	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
-	_translation[0]=_modelCenter[2]-_modelCenter[0];
 	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(1.0,0.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
@@ -153,8 +160,6 @@ void GLTrackball::setViewToXPositive()
 void GLTrackball::setViewToYPositive()
 {
 	reset();
-	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
-	_translation[1]=_modelCenter[2]-_modelCenter[1];
 	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(0.0,1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
@@ -170,8 +175,6 @@ void GLTrackball::setViewToZPositive()
 void GLTrackball::setViewToXNegative()
 {
 	reset();
-	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
-	_translation[0]=_modelCenter[2]-_modelCenter[0];
 	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(-1.0,0.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
@@ -180,8 +183,6 @@ void GLTrackball::setViewToXNegative()
 void GLTrackball::setViewToYNegative()
 {
 	reset();
-	_translation=Mantid::Geometry::V3D(0.0,0.0,0.0);
-	_translation[1]=_modelCenter[2]-_modelCenter[1];
 	Mantid::Geometry::Quat tempy(Mantid::Geometry::V3D(0.0,0.0,1.0),Mantid::Geometry::V3D(0.0,-1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
@@ -193,4 +194,32 @@ void GLTrackball::setViewToZNegative()
 	Mantid::Geometry::Quat tempy(180.0,Mantid::Geometry::V3D(0.0,1.0,0.0));
 	_quaternion=tempy;
 	_quaternion.GLMatrix(_rotationmatrix);
+}
+
+void GLTrackball::rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax)
+{
+	Mantid::Geometry::V3D maxT(xmax,ymax,zmax);
+	Mantid::Geometry::V3D minT(xmin,ymin,zmin);
+	Mantid::Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
+		v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
+	std::vector<Mantid::Geometry::V3D> points;
+	points.clear();
+	points.push_back(v0); points.push_back(v1); points.push_back(v2); points.push_back(v3);
+	points.push_back(v4); points.push_back(v5); points.push_back(v6); points.push_back(v7);
+	maxT[0]=-DBL_MAX;maxT[1]=-DBL_MAX;maxT[2]=-DBL_MAX;
+	minT[0]=DBL_MAX; minT[1]=DBL_MAX; minT[2]=DBL_MAX;
+	Mantid::Geometry::Quat Rotate = _quaternion;
+	std::vector<Mantid::Geometry::V3D>::const_iterator vc;
+	for(vc=points.begin();vc!=points.end();vc++)
+	{
+		Mantid::Geometry::V3D pt= (*vc);
+		Rotate.rotate(pt);
+		for(int i=0;i<3;i++)
+		{
+			if(maxT[i]<pt[i]) maxT[i]=pt[i];
+			if(minT[i]>pt[i]) minT[i]=pt[i];
+		}
+	}
+	xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
+	xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
 }
