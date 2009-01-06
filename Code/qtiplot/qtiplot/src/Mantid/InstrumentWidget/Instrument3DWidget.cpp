@@ -307,7 +307,11 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,std::v
 	for(int i=0;i<count;i++)
 	{
 		GLActor* tmpActor=scene->getActor(i);
-		int cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
+		int cIndex;
+		if(maxval-minval<0.00000001)
+			cIndex=0;
+		else
+			cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
 		if(cIndex<0)
 		{
 			cIndex=0;
