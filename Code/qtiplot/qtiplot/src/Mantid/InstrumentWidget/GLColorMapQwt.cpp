@@ -39,6 +39,7 @@ QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 unsigned char GLColorMapQwt::colorIndex(const QwtDoubleInterval &interval,double value)const
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
+	double delta;
 	if(interval.maxValue()-interval.minValue()<0.00000001)
 		delta=-1;
 	else
