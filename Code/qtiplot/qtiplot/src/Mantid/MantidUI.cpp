@@ -8,8 +8,10 @@
 #include "AlgMonitor.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
+#include "MantidSampleLogDialog.h"
 
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "InputHistory.h"
@@ -989,6 +991,16 @@ void MantidUI::showMantidInstrumentSelected()
     if (!wsName.isEmpty()) showMantidInstrument(wsName);
 }
 
+void MantidUI::showLogFileWindow()
+{
+  //Need a new window to display entries
+  MantidSampleLogDialog *dlg = new MantidSampleLogDialog(getSelectedWorkspaceName(), this);
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);
+  dlg->show();
+  dlg->setFocus();
+}
+
 void MantidUI::mantidMenuAboutToShow()
 {
 	mantidMenu->clear();
@@ -1278,6 +1290,62 @@ int MantidUI::createPropertyInputDialog(const QString & algName)
   if( dlg->exec() == QDialog::Accepted ) return 0;
   else return -1;
   
+}
+
+void MantidUI::importSampleLog(const QString & filename, const QString & data)
+{
+  QStringList loglines = data.split("\n", QString::SkipEmptyParts);
+
+  int rowcount(loglines.count());
+  Table* t = new Table(appWindow()->scriptEnv, rowcount, 2, "", appWindow(), 0);
+  if( !t ) return;
+
+  //Have to replace "_" since the legend widget uses them to separate things
+  QString label = filename;
+  label.replace("_","-");
+
+  appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+  t->setColName(0, "Time elapsed(secs)");
+  t->setColName(1, label.section("-",1));
+
+  //Find start time
+  QStringList::const_iterator sItr = loglines.begin();
+  QStringList ts = (*sItr).split(QRegExp("\\s+"));
+  const QString dateTimeFormat = "yyyy-MMM-dd HH:mm:ss";
+  QDateTime tzero = QDateTime::fromString(ts[0] + " " + ts[1], dateTimeFormat);
+  //Set first value
+  t->setCell(0,0, 0);
+  t->setCell(0,1, ts[2].toDouble());
+  
+  QStringList::const_iterator sEnd = loglines.end();
+  int row(1);
+  //done first one
+  ++sItr;
+  for(  ; sItr != sEnd; ++sItr, ++row )
+  {
+    ts = (*sItr).split(QRegExp("\\s+"));
+    int elapsed = tzero.secsTo(QDateTime::fromString(ts[0] + " " + ts[1], dateTimeFormat));
+    t->setCell(row, 0, elapsed);
+    t->setCell(row, 1, ts[2].toDouble());
+  }
+
+  //Show table
+  t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
+	    (QMIN(10,rowcount)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+ t->askOnCloseEvent(false);
+ t->setAttribute(Qt::WA_DeleteOnClose);
+ t->showNormal(); 
+
+ MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+ ml->askOnCloseEvent(false);
+ ml->setAttribute(Qt::WA_DeleteOnClose);
+ 
+ Graph* g = ml->activeGraph();
+ g->setXAxisTitle(tr("Time elapsed (secs)"));
+ g->setYAxisTitle(tr("Y"));
+ g->setTitle(label.section("-",0, 0));
+ 
+ ml->showNormal();
 }
 
 

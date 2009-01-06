@@ -329,6 +329,7 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidAbout.h \
 	    src/Mantid/InputHistory.h \
             src/Mantid/MantidCustomActionDialog.h \
+            src/Mantid/MantidSampleLogDialog.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLColorMap.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
@@ -482,6 +483,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/MantidAbout.cpp \
 	    src/Mantid/InputHistory.cpp \
             src/Mantid/MantidCustomActionDialog.cpp \
+            src/Mantid/MantidSampleLogDialog.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLColorMap.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \

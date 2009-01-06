@@ -125,6 +125,11 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
   if (selectedWsName.isEmpty()) action->setEnabled(false);
   menu->addAction(action);
 
+  action = new QAction("Sample Logs...", this);
+  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
+  if (selectedWsName.isEmpty()) action->setEnabled(false);
+  menu->addAction(action);
+
   menu->popup(QCursor::pos());
 }
 

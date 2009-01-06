@@ -142,10 +142,13 @@ public slots:
 	void showMantidInstrument();
 	void showMantidInstrumentSelected();
 	void showMantidInstrument(const QString&);
+  void showLogFileWindow();
     void insertMenu();
 
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
 	MultiLayer* plotInstrumentSpectrumList(const QString&,std::vector<int>);
+
+  void importSampleLog(const QString & filename, const QString & data);
 
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
