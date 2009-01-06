@@ -21,8 +21,12 @@ QwtColorMap* GLColorMapQwt::copy()const
 QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
-	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
-	int index;
+	double delta;
+	if(interval.maxValue()-interval.minValue()<0.00000001)
+		delta=-1;
+	else
+	    delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
+	int index=0;
 	if(delta<0)index=0;
 	else if(delta>(count-1))index=(count-1);
 	else index=int(delta);
@@ -35,8 +39,11 @@ QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 unsigned char GLColorMapQwt::colorIndex(const QwtDoubleInterval &interval,double value)const
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
-	double delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
-	int index;
+	if(interval.maxValue()-interval.minValue()<0.00000001)
+		delta=-1;
+	else
+	    delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
+	int index=0;
 	if(delta<0)index=0;
 	else if(delta>(count-1))index=count-1;
 	else index=int(delta);
