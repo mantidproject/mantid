@@ -2,6 +2,7 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidObject.h"
 #include "GLActor.h"
@@ -116,12 +117,17 @@ void InstrumentTreeWidget::getSelectedBoundingBox(double &xmax, double &ymax, do
 			CompList.pop();
             boost::shared_ptr<Mantid::Geometry::IObjComponent> tmpObj = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(tmp);
 			if(tmpObj){
-				double txmax,tymax,tzmax,txmin,tymin,tzmin;
-				txmax=tymax=tzmax=-10000;
-				txmin=tymin=tzmin=10000;
-				tmpObj->getBoundingBox(txmax,tymax,tzmax,txmin,tymin,tzmin);
-				if(txmax>xmax)xmax=txmax; if(tymax>ymax)ymax=tymax;if(tzmax>zmax)zmax=tzmax;
-				if(txmin<xmin)xmin=txmin; if(tymin<ymin)ymin=tymin;if(tzmin<zmin)zmin=tzmin;
+				try{
+					double txmax,tymax,tzmax,txmin,tymin,tzmin;
+					txmax=tymax=tzmax=-10000;
+					txmin=tymin=tzmin=10000;
+					tmpObj->getBoundingBox(txmax,tymax,tzmax,txmin,tymin,tzmin);
+					if(txmax>xmax)xmax=txmax; if(tymax>ymax)ymax=tymax;if(tzmax>zmax)zmax=tzmax;
+					if(txmin<xmin)xmin=txmin; if(tymin<ymin)ymin=tymin;if(tzmin<zmin)zmin=tzmin;
+				}
+				catch(Mantid::Kernel::Exception::NullPointerException Ex)
+				{
+				}
 			/*} else if(tmp->type()=="Instrument"){
 				Mantid::API::Instrument *tmpIns=dynamic_cast<Mantid::API::Instrument*>(tmp);
 				for(int idx=0;idx<tmpIns->nelements();idx++)
