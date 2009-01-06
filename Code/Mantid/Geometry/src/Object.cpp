@@ -28,7 +28,7 @@
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/GeometryHandler.h"
 #include "MantidGeometry/GtsGeometryHandler.h"
-
+//#include "MantidGeometry/OCGeometryHandler.h"
 namespace Mantid
 {
 
@@ -49,6 +49,7 @@ namespace Mantid
       */
     {
 		handle = new GtsGeometryHandler(this);
+//		handle=new OCGeometryHandler(this);
 	}
 
     Object::Object(const Object& A) :
@@ -67,6 +68,7 @@ namespace Mantid
       */
     {
 		handle = new GtsGeometryHandler(this);
+//		handle=new OCGeometryHandler(this);
 	}
 
     Object&
@@ -1004,7 +1006,10 @@ namespace Mantid
 	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
 	{
 		if (!TopRule)
+		{ //If no rule defined then return zero boundbing box
+			xmax=ymax=zmax=xmin=ymin=zmin=0.0;
 			return;
+		}
 		if(!boolBounded){
 			AABBxMax=xmax;AABByMax=ymax;AABBzMax=zmax;
 			AABBxMin=xmin;AABByMin=ymin;AABBzMin=zmin;

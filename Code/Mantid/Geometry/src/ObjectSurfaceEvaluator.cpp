@@ -17,6 +17,7 @@ namespace Mantid
 		 */
 		double ObjectSurfaceEvaluator::evaluate(Rule* rTree,V3D point)
 		{
+			if(rTree==NULL) return 0.0;
 			if(rTree->className()=="Intersection"){
 				return evaluate((Intersection*)rTree,point);
 			}else if(rTree->className()=="Union"){

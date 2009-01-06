@@ -23,7 +23,9 @@ namespace Mantid
 			double    normalx,normaly,normalz;
 			gts_triangle_vertices(t,&v1,&v2,&v3);
 			gts_triangle_normal(t,&normalx,&normaly,&normalz);
-			glNormal3d(normalx,normaly,normalz);
+			double norm=sqrt(normalx*normalx+normaly*normaly+normalz*normalz);
+			if(norm==0)norm=1;
+			glNormal3d(normalx/norm,normaly/norm,normalz/norm);
 			glVertex3f(v1->p.x,v1->p.y,v1->p.z);
 			glVertex3f(v2->p.x,v2->p.y,v2->p.z);
 			glVertex3f(v3->p.x,v3->p.y,v3->p.z);
