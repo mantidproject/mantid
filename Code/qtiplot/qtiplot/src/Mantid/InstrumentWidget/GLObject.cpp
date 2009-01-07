@@ -6,6 +6,8 @@
 GLObject::GLObject():_changed(true)
 {
      _displaylist= glGenLists(2);
+	_bbmax(0.0,0.0,0.0);
+	_bbmin(0.0,0.0,0.0);
 }
 GLObject::~GLObject()
 {
