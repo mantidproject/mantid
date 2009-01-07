@@ -621,11 +621,15 @@ bool MantidMatrix::setSelectedRows()
   if( !selModel  ) return false;
 
   QPoint localCursor = tv->mapFromGlobal(QCursor::pos());
-  if( localCursor.x() > tv->verticalHeader()->width() ) return false;
+  //This is due to what I think is a bug in Qt where it seems to include
+  //the height  of the horizontalHeader bar in determining the row that the mouse pointer
+  //is pointing at. This results in the last row having an undefined index so we need to trick
+  // the function by asking for a different postion
+  localCursor.ry() -=  tv->horizontalHeader()->height();
 
-  QModelIndex index = tv->indexAt(localCursor);
-  QModelIndex cursorIndex = index.sibling(index.row() - 1, index.column()); 
-      
+  if( localCursor.x() > tv->verticalHeader()->width() ) return false;
+  QModelIndex cursorIndex = tv->indexAt(localCursor);
+
   if( selModel->selection().contains(cursorIndex)  && 
       selModel->selection().front().left() == 0 && 
       selModel->selection().front().right() == tv->horizontalHeader()->count() - 1 )
@@ -635,7 +639,7 @@ bool MantidMatrix::setSelectedRows()
   }
   else
   {
-    m_rowBegin = m_rowEnd = tv->indexAt(localCursor).row() - 1;
+    m_rowBegin = m_rowEnd = cursorIndex.row();
     tv->selectRow(m_rowBegin);
   }
   if( m_rowBegin == -1 || m_rowEnd == -1 ) return false;
