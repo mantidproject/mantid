@@ -523,7 +523,7 @@ void ApplicationWindow::initGlobalConstants()
 	autoscale2DPlots = true;
 	autoScaleFonts = true;
 	autoResizeLayers = true;
-	antialiasing2DPlots = true;
+	antialiasing2DPlots = false; 	//Mantid
 	d_scale_plots_on_print = false;
 	d_print_cropmarks = false;
 
@@ -550,7 +550,7 @@ void ApplicationWindow::initGlobalConstants()
 
 	showPlot3DLegend = true;
 	showPlot3DProjection = false;
-	smooth3DMesh = true;
+	smooth3DMesh = false;
 	plot3DResolution = 1;
 	orthogonal3DPlots = false;
 	autoscale3DPlots = true;
@@ -4413,7 +4413,7 @@ void ApplicationWindow::readSettings()
 	autoscale2DPlots = settings.value("/Autoscale", true).toBool();
 	autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
 	autoResizeLayers = settings.value("/AutoResizeLayers", true).toBool();
-	antialiasing2DPlots = settings.value("/Antialiasing", true).toBool();
+	antialiasing2DPlots = settings.value("/Antialiasing", false).toBool(); //Mantid
 	d_scale_plots_on_print = settings.value("/ScaleLayersOnPrint", false).toBool();
 	d_print_cropmarks = settings.value("/PrintCropmarks", false).toBool();
 
@@ -4462,7 +4462,7 @@ void ApplicationWindow::readSettings()
 	settings.beginGroup("/3DPlots");
 	showPlot3DLegend = settings.value("/Legend",true).toBool();
 	showPlot3DProjection = settings.value("/Projection", false).toBool();
-	smooth3DMesh = settings.value("/Antialiasing", true).toBool();
+	smooth3DMesh = settings.value("/Antialiasing", false).toBool(); //Mantid
 	plot3DResolution = settings.value ("/Resolution", 1).toInt();
 	orthogonal3DPlots = settings.value("/Orthogonal", false).toBool();
 	autoscale3DPlots = settings.value ("/Autoscale", true).toBool();
