@@ -13,16 +13,13 @@ namespace Geometry
 
 class CompAssembly;
 
-/** @class CompAssembly 
-    @brief Class for Assembly of geometric components. 
+/** @class ParCompAssembly 
+    @brief A wrapper for CompAssembly with possiblty modified parameters.
     @version A
     @author Laurent C Chapon, ISIS RAL
     @date 01/11/2007
 
-    CompAssembly allows Components to be positioned
-    in a hierarchical structure in the form of a tree.
-    CompAssembly inherits from component.
-
+    
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.

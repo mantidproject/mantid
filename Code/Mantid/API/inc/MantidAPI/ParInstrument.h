@@ -16,9 +16,11 @@ namespace Mantid
 {
 namespace API
 {
-/** @class ParParInstrument ParParInstrument.h
+/** @class ParInstrument ParInstrument.h
 
- 	ParParInstrument Class.
+ 	ParInstrument Class. Implements IInstrument interface.
+    It is a wrapping object for an instrument allowing to parametrize its
+    components.
 
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007
@@ -63,7 +65,9 @@ public:
   virtual boost::shared_ptr<Geometry::IDetector> getDetector(const int &detector_id) const;
   virtual const double detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector>) const;
 
+  /// Pointer to the 'real' instrument
   boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}
+  /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
   boost::shared_ptr<Geometry::ParameterMap> getParameterMap(){return m_parmap;}
 
 
@@ -73,6 +77,7 @@ public:
   /// Get pointers to plottable components
   virtual std::vector< boost::shared_ptr<Geometry::IObjComponent> > getPlottable()const;
 
+  /// Name of the instrument.
   std::string getName()const{return Geometry::ParCompAssembly::getName();}
 
 private:
@@ -80,7 +85,9 @@ private:
   ParInstrument& operator=(const ParInstrument&);
   /// Private copy constructor
   ParInstrument(const ParInstrument&);
+  /// Pointer to the "real" instrument.
   boost::shared_ptr<Instrument> m_instr;
+  /// Pointer to the parameter map
   boost::shared_ptr<Geometry::ParameterMap> m_parmap;
 
   /// Static reference to the logger class

@@ -80,14 +80,19 @@ int ParCompAssembly::addCopy(IComponent* comp, const std::string& n)
 boost::shared_ptr<IComponent> ParCompAssembly::operator[](int i) const
 {
   if (i<0 || i> nelements()-1)
-  throw std::runtime_error("ParCompAssembly::operator[] range not valid");
+  {
+      throw std::runtime_error("ParCompAssembly::operator[] range not valid");
+  }
   boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->operator[](i);
   CompAssembly* ac = dynamic_cast<CompAssembly*>(child_base.get());
   ObjComponent* oc = dynamic_cast<ObjComponent*>(child_base.get());
+  Component* cc = dynamic_cast<Component*>(child_base.get());
   if (ac)
       return boost::shared_ptr<IComponent>(new ParCompAssembly(ac,m_map));
   else if (oc)
       return boost::shared_ptr<IComponent>(new ParObjComponent(oc,m_map));
+  else if (cc)
+      return boost::shared_ptr<IComponent>(new ParametrizedComponent(cc,m_map));
   else
   {
       std::cerr<<"ParCompAssembly::operator[] zero pointer.\n";

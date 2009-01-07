@@ -19,7 +19,7 @@ namespace Geometry
     @author Laurent C Chapon, ISIS RAL
     @date 01/11/2007
 
-    This is the base class for geometric IComponents.
+    This is the base class for geometric components.
     Geometric IComponent can be placed in a hierarchical
     structure and are defined with respect to a
     parent IComponent. The IComponent position and orientation

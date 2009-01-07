@@ -610,7 +610,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ParametrizedComponentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\ParCompAssembly.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ParCompAssemblyTest.h"
 				>
 			</File>
 			<File

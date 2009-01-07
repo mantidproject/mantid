@@ -21,7 +21,8 @@ class Geometry::IObjComponent;
 
 /** @class IInstrument IInstrument.h
 
- 	IInstrument Class.
+ 	IInstrument Class. The abstract instrument class it is the base for 
+    Instrument and ParInstrument classes.
 
     @author Nick Draper, ISIS, RAL
     @date 26/09/2007

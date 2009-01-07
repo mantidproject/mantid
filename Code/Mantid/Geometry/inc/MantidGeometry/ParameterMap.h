@@ -25,6 +25,10 @@ class IComponent;
 /** @class ParameterMap ParameterMap.h
 
 
+    ParameterMap class. Holds the parameters of modified (parametrized) instrument
+    components. ParameterMap has a number of 'add' methods for adding parameters of
+    different types. 
+
     @author Roman Tolchenov, Tessella Support Services plc
     @date 2/12/2008
 

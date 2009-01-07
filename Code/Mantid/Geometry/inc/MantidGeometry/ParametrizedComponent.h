@@ -18,7 +18,8 @@ namespace Geometry
 
 /** @class ParametrizedComponent ParametrizedComponent.h Geometry/ParametrizedComponent.h
 
-    
+    ParametrizedComponent is a wrapper for a Component which can modify some of its
+    parameters, e.g. position, orientation. Implements IComponent.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 4/12/2008
