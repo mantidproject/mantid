@@ -219,6 +219,16 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 			}
 		} 
 	}
+    /*std::vector< boost::shared_ptr<IObjComponent> > plist = ins->getPlottable();
+    for(std::vector< boost::shared_ptr<IObjComponent> >::iterator o = plist.begin();o!=plist.end();o++)
+    {
+        boost::shared_ptr<MantidObject> obj(new MantidObject(*o));
+	    GLActor* actor1=new GLActor();
+	    actor1->setRepresentation(obj);
+	    actor1->setPos(0.0,0.0,0.0);
+	    actor1->setColor(col);
+	    scene->addActor(actor1);
+    }*/
 	this->setActorCollection(scene);
 }
 
@@ -245,7 +255,9 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
             boost::shared_ptr<Mantid::Geometry::IDetector>  iDec = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objComp);
 			if(iDec.get()){
 				if(!iDec->isMonitor())
+                {
 					idDecVec.push_back(iDec->getID());
+                }
 				else
 					idDecVec.push_back(-1);
 			}else{
@@ -376,7 +388,7 @@ void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexLi
 	minval=DBL_MAX;
 	maxval=-DBL_MAX;
 	for(int i=0;i<histogramIndexList.size();i++){
-		if(histogramIndexList[i]!=-1)
+        if(histogramIndexList[i]!=-1)
 		{
 			double value=0.0;
 			std::vector<double> outputdata=output->readY(histogramIndexList[i]);

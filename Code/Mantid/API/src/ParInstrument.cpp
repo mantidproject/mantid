@@ -80,7 +80,12 @@ std::vector< boost::shared_ptr<Geometry::IObjComponent> > ParInstrument::getPlot
     std::vector< boost::shared_ptr<Geometry::IObjComponent> > res;
     std::vector< boost::shared_ptr<Geometry::IObjComponent> > objs = dynamic_cast<const Instrument*>(m_base)->getPlottable();
     for(std::vector< boost::shared_ptr<Geometry::IObjComponent> >::iterator it = objs.begin();it!= objs.end();it++)
+    {
+        if ( dynamic_cast<Geometry::Detector*>(it->get()) )
+        res.push_back(boost::shared_ptr<Geometry::IObjComponent>(new Geometry::ParDetector(dynamic_cast<Geometry::Detector*>(it->get()),m_map)));
+        else
         res.push_back(boost::shared_ptr<Geometry::IObjComponent>(new Geometry::ParObjComponent(dynamic_cast<Geometry::ObjComponent*>(it->get()),m_map)));
+    }
     return res;
 }
 

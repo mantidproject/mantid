@@ -211,8 +211,11 @@ void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector< b
         if (a) appendPlottable(*a,lst);
         else
         {
+            Geometry::Detector* d = dynamic_cast<Geometry::Detector*>(c);
             Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
-            if (o)
+            if (d)
+                lst.push_back(boost::shared_ptr<Geometry::IObjComponent>(d,NoDeleting()));
+            else if (o)
                 lst.push_back(boost::shared_ptr<Geometry::IObjComponent>(o,NoDeleting()));
             else
                 std::cerr<<"Unknown comp type\n";

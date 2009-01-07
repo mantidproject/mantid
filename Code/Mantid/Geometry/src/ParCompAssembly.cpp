@@ -1,5 +1,7 @@
 #include "MantidGeometry/ParCompAssembly.h" 
 #include "MantidGeometry/CompAssembly.h" 
+#include "MantidGeometry/Detector.h" 
+#include "MantidGeometry/ParDetector.h" 
 #include "MantidGeometry/ParObjComponent.h" 
 #include <algorithm>
 #include <stdexcept> 
@@ -84,10 +86,13 @@ boost::shared_ptr<IComponent> ParCompAssembly::operator[](int i) const
       throw std::runtime_error("ParCompAssembly::operator[] range not valid");
   }
   boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->operator[](i);
+  Detector* dc = dynamic_cast<Detector*>(child_base.get());
   CompAssembly* ac = dynamic_cast<CompAssembly*>(child_base.get());
   ObjComponent* oc = dynamic_cast<ObjComponent*>(child_base.get());
   Component* cc = dynamic_cast<Component*>(child_base.get());
-  if (ac)
+  if (dc)
+      return boost::shared_ptr<IComponent>(new ParDetector(dc,m_map));
+  else if (ac)
       return boost::shared_ptr<IComponent>(new ParCompAssembly(ac,m_map));
   else if (oc)
       return boost::shared_ptr<IComponent>(new ParObjComponent(oc,m_map));
