@@ -41,6 +41,7 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 
 Instrument3DWidget::~Instrument3DWidget()
 {
+	makeCurrent();
 }
 
 /**
