@@ -758,9 +758,11 @@ void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::Da
 
 void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
 {
-
     if (m_workspace->blocksize() != ws->blocksize() ||
-        m_workspace->getNumberHistograms() != ws->getNumberHistograms()) closeDependants();
+        m_workspace->getNumberHistograms() != ws->getNumberHistograms())
+      { 
+	closeDependants();
+      }
 
     // Save selection
     QItemSelectionModel *oldSelModel = activeView()->selectionModel();
@@ -796,18 +798,23 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
 
 void MantidMatrix::closeDependants()
 {
-    for(int i=0;i<m_plots2D.size();i++)
-    {
-        m_plots2D[i]->askOnCloseEvent(false);
-        m_plots2D[i]->close();
+  for( QVector<MultiLayer*>::iterator itr = m_plots2D.begin(); itr != m_plots2D.end(); )
+  {
+    (*itr)->askOnCloseEvent(false);
+      //M.Gigg - Calling close deletes the key object and invalidates the iterator so 
+      //the post-fix operator is used to both increment and then return the old iterator
+    (*(itr++))->close();
     }
-    for(QMap<MultiLayer*,Table*>::iterator it = m_plots1D.begin();it!=m_plots1D.end();it++)
-    {
-        it.key()->askOnCloseEvent(false);
-        it.key()->close();
-    }
-    m_plots2D.clear();
-    m_plots1D.clear();
+  
+  for( QMap<MultiLayer*,Table*>::iterator itr = m_plots1D.begin(); itr != m_plots1D.end(); )
+  {
+    itr.key()->askOnCloseEvent(false);
+     //M.Gigg - Calling close deletes the key object and invalidates the iterator so 
+    //the post-fix operator is used to both increment and then return the old iterator
+    (itr++).key()->close();
+  }
+  m_plots2D.clear();
+  m_plots1D.clear();
 }
 
 void MantidMatrix::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
@@ -826,7 +833,7 @@ void MantidMatrix::deleteWorkspace()
 
 void MantidMatrix::selfClosed(MdiSubWindow* w)
 {
-    closeDependants();
+  closeDependants();
 }
 
 
