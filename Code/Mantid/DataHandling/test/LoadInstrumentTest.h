@@ -214,13 +214,6 @@ public:
     boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(101001));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
 
-    // test of sample shape
-    TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
-    TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
-
-    // test of source shape
-    TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
-    TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
   }
 
   void testExecSLS()
