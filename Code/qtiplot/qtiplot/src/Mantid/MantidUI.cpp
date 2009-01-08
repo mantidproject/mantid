@@ -770,7 +770,11 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialo
         //m_progressDialog->setWindowModality(Qt::WindowModal);
         connect(m_progressDialog,SIGNAL(canceled()),this,SLOT(cancelAsyncAlgorithm()));
         connect(m_progressDialog,SIGNAL(toBackground()),this,SLOT(backgroundAsyncAlgorithm()));
-        connect(m_progressDialog,SIGNAL(rejected()),this,SLOT(backgroundAsyncAlgorithm()));
+
+	//M.Gigg - Not sure why this is necessary. It seems to have the effect (on Linux anway)
+	//of trying to close the same dialog twice
+	//        connect(m_progressDialog,SIGNAL(rejected()),this,SLOT(backgroundAsyncAlgorithm()));
+
         alg->notificationCenter.addObserver(m_progressObserver);
     }
     alg->notificationCenter.addObserver(m_finishedObserver);
@@ -781,7 +785,11 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialo
     {
         alg->executeAsync();
         if (showDialog)
-            m_progressDialog->exec();
+	{
+	  //Use show rather than exec so that control is returned to the caller immediately
+	  m_progressDialog->setModal(true);
+	  m_progressDialog->show();
+	}
         InputHistory::Instance().updateAlgorithm(alg);
     }
     catch(...)
