@@ -1697,7 +1697,8 @@ public:
   double dataY(int,int) const;
   double dataE(int,int) const;
   int indexX(double) const;
-  Graph3D* plotGraph3D(int) /PyName=plotContour/;
+  Graph3D* plotGraph3D(int = 3);
+  MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
 private:
   MantidMatrix(const MantidMatrix&);
 };
