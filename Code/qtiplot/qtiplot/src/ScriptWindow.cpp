@@ -44,6 +44,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QPixmap>
 #include <QCloseEvent>
@@ -53,7 +54,7 @@
 #include <QPrintDialog>
 
 ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
-  : QMainWindow(), d_env(env), d_app(app)
+  : QMainWindow(), d_env(env), d_app(app), fileName(QString::null), fileSaved(false)
 {	
   //---------- Mantid ---------------
 	outputWindow = new QDockWidget(this);
@@ -69,7 +70,7 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 	outputWindow->setMinimumHeight(25);
   //---------------------------------
 	
-  fileName = QString::null;
+
 
 	te = new ScriptEdit(env, this, name());
 	te->setContext(this);
@@ -78,6 +79,7 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 	connect(te, SIGNAL(dirPathChanged(const QString&)), d_app, SLOT(scriptsDirPathChanged(const QString&)));
 	connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
 	connect(te, SIGNAL(outputError(const QString&)), this, SLOT(scriptError(const QString&)));
+	connect(te, SIGNAL(textChanged()), this, SLOT(editChanged()));
 	setCentralWidget(te);
 
 	initMenu();
@@ -86,7 +88,9 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 	initActions();
 
 	setIcon(QPixmap(logo_xpm));
-	setWindowTitle(tr("MantidPlot - " + env->scriptingLanguage() + " Script Window"));
+
+	updateWindowTitle(env->scriptingLanguage());
+
 	setFocusProxy(te);
 	setFocusPolicy(Qt::StrongFocus);
 }
@@ -109,7 +113,7 @@ void ScriptWindow::customEvent(QEvent *e)
     {
       outputText->clear();
       ScriptingChangeEvent* event = (ScriptingChangeEvent*)e;
-      setWindowTitle(tr("MantidPlot - " + event->scriptingEnv()->scriptingLanguage() + " Script Window")); 
+      updateWindowTitle(event->scriptingEnv()->scriptingLanguage());
     }
 }
 
@@ -240,7 +244,7 @@ void ScriptWindow::initActions()
 
 void ScriptWindow::languageChange()
 {
-	setWindowTitle(tr("QtiPlot - Script Window"));
+        updateWindowTitle(d_env->scriptingLanguage()); //Mantid
 
 	menuBar()->clear();
 	menuBar()->addMenu(file);
@@ -290,17 +294,35 @@ void ScriptWindow::languageChange()
 }
 
 
+void ScriptWindow::updateWindowTitle(const QString& scriptLang)
+{
+  QString title("MantidPlot: " + scriptLang + " Window - ");
+  if( fileName.isNull() || fileName.isEmpty() )
+  {
+    title += "New File";
+  }
+  else
+  {
+    title += QFileInfo(fileName).fileName();
+  }
+  if( !fileSaved ) title += " (unsaved)";
+  setWindowTitle(title);
+}
+
 void ScriptWindow::newScript()
 {
 	fileName = QString::null;
 	te->clear();
+	updateWindowTitle(d_env->scriptingLanguage());
 }
 
 void ScriptWindow::open(const QString& fn)
 {
 	QString s = te->importASCII(fn);
-	if (!s.isEmpty())
-		fileName = s;
+	//Mantid
+	if (!s.isEmpty()) fileName = s;
+	fileSaved = true;
+	updateWindowTitle(d_env->scriptingLanguage());
 }
 
 void ScriptWindow::saveAs()
@@ -308,6 +330,8 @@ void ScriptWindow::saveAs()
 	QString fn = te->exportASCII();
 	if (!fn.isEmpty())
 		fileName = fn;
+	fileSaved = true;
+	updateWindowTitle(d_env->scriptingLanguage());
 }
 
 void ScriptWindow::save()
@@ -325,6 +349,9 @@ void ScriptWindow::save()
 		f.close();
 	} else
 		saveAs();
+
+	fileSaved = true;
+	updateWindowTitle(d_env->scriptingLanguage());
 }
 
 void ScriptWindow::setVisible(bool visible)
@@ -376,6 +403,12 @@ void ScriptWindow::scriptError(const QString& text)
 void ScriptWindow::viewScriptOutput(bool visible)
 {
   outputWindow->setVisible(visible);
+}
+
+void ScriptWindow::editChanged()
+{
+  fileSaved = false;
+  updateWindowTitle(d_env->scriptingLanguage());
 }
 
 

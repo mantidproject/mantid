@@ -33,7 +33,7 @@
 
 /**
   * Mantid - This class has been modified from the qtiplot class so that
-  * the output goes into a seperate window.
+  * the output goes into a seperate area within the window
   */
 
 #include "ScriptEdit.h"
@@ -73,9 +73,12 @@ public slots:
                 void scriptMessage(const QString&);				    
 		void scriptError(const QString&);
 
+                void updateWindowTitle(const QString& scriptLang);
+
 private slots:
 		void setAlwaysOnTop(bool on);
 		void viewScriptOutput(bool on);
+                void editChanged();
 
 signals:
 		void visibilityChanged(bool visible);
@@ -94,6 +97,7 @@ private:
 		ApplicationWindow *d_app;
 
 		QString fileName;
+                bool fileSaved;
 
 		QMenu *file, *edit, *run, *windowMenu;
 		QAction *actionNew, *actionUndo, *actionRedo, *actionCut, *actionCopy, *actionPaste;
