@@ -55,10 +55,10 @@ void WorkspaceTracerImpl::AlgorithmChain::executeChain()
  */
 void WorkspaceTracerImpl::handleAfterReplaceNotification(Mantid::API::WorkspaceAfterReplaceNotification_ptr  pNf)
 {
-  // if( !m_isRunning )
-//   {
-//     executeTrace(pNf->object_name());
-//   }
+  if( !m_isRunning )
+  {
+    executeTrace(pNf->object_name());
+  }
 }
 
 //-----------------------------------
