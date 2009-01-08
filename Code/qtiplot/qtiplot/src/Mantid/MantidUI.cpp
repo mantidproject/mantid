@@ -783,13 +783,13 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialo
     m_algMonitor->add(alg);
     try
     {
-        alg->executeAsync();
-        if (showDialog)
-	{
-	  //Use show rather than exec so that control is returned to the caller immediately
-	  m_progressDialog->setModal(true);
-	  m_progressDialog->show();
-	}
+      Poco::ActiveResult<bool> res = alg->executeAsync();
+      if ( !res.tryWait(100) && showDialog)
+      {
+	//Use show rather than exec so that control is returned to the caller immediately
+	m_progressDialog->exec();
+      }
+
         InputHistory::Instance().updateAlgorithm(alg);
     }
     catch(...)
@@ -861,7 +861,7 @@ void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::A
         }
     }*/
 
-
+  
     if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
     emit needToUpdateProgressDialog(100,"Algorithm finished.");
     emit needToCloseProgressDialog();
@@ -870,11 +870,13 @@ void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::A
 
 void MantidUI::handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf)
 {
-    if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
-    emit needToCloseProgressDialog();
-    emit needsUpdating();
-    if (pNf->what != "Algorithm terminated")
-        emit needToShowCritical("Error in algorithm: "+QString::fromStdString(pNf->what));
+
+  if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
+  if (pNf->what != "Algorithm terminated")
+    emit needToShowCritical("Error in algorithm: "+QString::fromStdString(pNf->what));
+
+  //emit needToCloseProgressDialog();
+  emit needsUpdating();
 }
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
@@ -922,6 +924,7 @@ void MantidUI::handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::A
 void MantidUI::showCritical(const QString& text)
 {
     QMessageBox::critical(appWindow(),"Mantid - Error",text);
+    closeProgressDialog();
 }
 
 void MantidUI::showAlgMonitor()
