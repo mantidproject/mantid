@@ -4,7 +4,8 @@
 #endif
 #include "GL/gl.h"
 #include "GL/glu.h"
-
+#include "math.h"
+#include "MantidGeometry/V3D.h"
 GLViewport::GLViewport(int w, int h):mWidth(w),mHeight(h)
 {
 	mProjection=GLViewport::ORTHO;
@@ -106,15 +107,20 @@ void GLViewport::getTranslation(double& xval,double& yval)
 
 void GLViewport::issueGL() const
 {
+	Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
+	Mantid::Geometry::V3D distance((mRight-mLeft),(mTop-mBottom),(mNear-mFar));
+	//use zoom now
+	distance*=mZoomFactor/2.0;
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glViewport(0, 0, mWidth, mHeight);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	if(mProjection==GLViewport::PERSPECTIVE){	
-		glFrustum(mLeft*mZoomFactor, mRight*mZoomFactor, mBottom*mZoomFactor, mTop*mZoomFactor, mNear*mZoomFactor, mFar);
+		glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans, center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans, center[2]+distance[2], mFar);
 	}else{
-		glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
+//		glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);
+		glOrtho(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans, center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans, center[2]+distance[2], mFar);
 	}
 	glMatrixMode(GL_MODELVIEW);
 }

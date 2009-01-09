@@ -248,7 +248,11 @@ bool Quat::operator!=(const Quat& _q) const
  */
 void Quat::normalize()
 {
-	double overnorm=1.0/len2();
+	double overnorm;
+	if(len2()==0) 
+		overnorm=1.0;
+	else
+		overnorm=1.0/len2();
 	w*=overnorm;
 	a*=overnorm;
 	b*=overnorm;

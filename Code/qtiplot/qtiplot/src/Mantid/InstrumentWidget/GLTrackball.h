@@ -75,6 +75,8 @@ public:
 	void setRotation(Mantid::Geometry::Quat quat){_quaternion=quat;_quaternion.GLMatrix(_rotationmatrix);}
 	//! Set Model center
 	void setModelCenter(Mantid::Geometry::V3D center);
+	//! Get Model center
+	Mantid::Geometry::V3D getModelCenter();
 	//! Reset Trackball
 	void reset();
 	//! Rotates a bounding box

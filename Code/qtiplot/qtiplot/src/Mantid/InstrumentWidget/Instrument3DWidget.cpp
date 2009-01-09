@@ -595,10 +595,6 @@ void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,dou
 	boundCentre[0]=-1*(xmin+xhalf);
 	boundCentre[1]=-1*(ymin+yhalf);
 	boundCentre[2]=-1*(zmin+zhalf);
-
-	double vxmin,vxmax,vymin,vymax,vzmin,vzmax;
-	_viewport->getProjection(vxmin,vxmax,vymin,vymax,vzmin,vzmax);
-
 	//vector from center to bounding box center
 	V3D vcb=pos-boundCentre;
 	vcb.normalize();
@@ -606,62 +602,19 @@ void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,dou
 	//get the rotation about zaxis
 	Quat rotation(zaxis,vcb);
 	rotation.inverse();
-	//get the updated bounding box
-  // transform result back and find new bounds by transforming all corner points and finding min/max box
-	V3D maxT(xmax,ymax,zmax);
-	V3D minT(xmin,ymin,zmin);
-	V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
-		v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
-	std::vector<V3D> points;
-	points.clear();
-	points.push_back(v0); points.push_back(v1); points.push_back(v2); points.push_back(v3);
-	points.push_back(v4); points.push_back(v5); points.push_back(v6); points.push_back(v7);
-	maxT[0]=-DBL_MAX;maxT[1]=-DBL_MAX;maxT[2]=-DBL_MAX;
-	minT[0]=DBL_MAX; minT[1]=DBL_MAX; minT[2]=DBL_MAX;
-	Quat Rotate = rotation;
-	std::vector<V3D>::const_iterator vc;
-	for(vc=points.begin();vc!=points.end();vc++)
-	{
-		V3D pt= (*vc);
-		Rotate.rotate(pt);
-		for(int i=0;i<3;i++)
-		{
-			if(maxT[i]<pt[i]) maxT[i]=pt[i];
-			if(minT[i]>pt[i]) minT[i]=pt[i];
-		}
-	}
-	xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
-	xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
 	_trackball->reset();
-	_trackball->setRotation(rotation);
+	_trackball->setModelCenter(pos);
+	if(rotation!=Quat(0,0,0,0))
+		_trackball->setRotation(rotation);
+	_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
+	//QString info;
+	//QString num;
+	//info+="XMin: "+num.setNum(xmin)+" XMax: "+num.setNum(xmax);
+	//info+="YMin: "+num.setNum(ymin)+" YMax: "+num.setNum(ymax);
+	//info+="ZMin: "+num.setNum(zmin)+" ZMax: "+num.setNum(zmax);
+	//info+="Rotation Quat: "+num.setNum(rotation[0])+" "+num.setNum(rotation[1])+" "+num.setNum(rotation[2])+" "+num.setNum(rotation[3]);
+	//QMessageBox::information(this,tr("Detector Name Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmin,-zmax);
 	_viewport->issueGL();
-
-	//_trackball->setRotation(rotation);
-	//_trackball->_scaleFactor=1.0;
-	//_trackball->setTranslation(V3D(0.0,0.0,0.0));
-	//V3D minval(xmin,ymin,zmin);
-	//V3D maxval(xmax,ymax,zmax);
-	//rotation.rotate(minval);
-	//rotation.rotate(maxval);
-	////_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
-	//_viewport->setOrtho(minval[0],maxval[0],minval[1],maxval[1],minval[2]*-1,maxval[2]*-1);
-	//_viewport->issueGL();
-	//update();	
-	//V3D zaxis(0,0,-1);
-	//Quat rotation(vcb,zaxis);
-	//_trackball->setRotation(rotation);
-	//_trackball->_scaleFactor=1.0;
-	//_trackball->setTranslation(V3D(0.0,0.0,0.0));
-	//_viewport->setOrtho(vxmin,vxmax,vymin,vymax,zmin*-1,vzmax);
-	//_viewport->issueGL();
-
-	//V3D trans=boundCentre-pos;
-	//trans[2]=trans[2]-vzmin;
-	//_trackball->setTranslation(trans);
-	////Working
-	////_trackball->reset();
-	////_viewport->setOrtho(xmin,xmax,ymin,ymax,zmin*-1,zmax*-1);
-	////_viewport->issueGL();
 	update();
 }

@@ -114,6 +114,11 @@ void GLTrackball::setModelCenter(Mantid::Geometry::V3D center)
 	_modelCenter=center;
 }
 
+Mantid::Geometry::V3D GLTrackball::getModelCenter()
+{
+	return _modelCenter;
+}
+
 Mantid::Geometry::V3D GLTrackball::projectOnSphere(int a,int b)
 {
     double x,y,z;
@@ -200,6 +205,8 @@ void GLTrackball::rotateBoundingBox(double& xmin,double& xmax,double& ymin,doubl
 {
 	Mantid::Geometry::V3D maxT(xmax,ymax,zmax);
 	Mantid::Geometry::V3D minT(xmin,ymin,zmin);
+	maxT=maxT-_modelCenter;
+	minT=minT-_modelCenter;
 	Mantid::Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
 		v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
 	std::vector<Mantid::Geometry::V3D> points;
@@ -220,6 +227,8 @@ void GLTrackball::rotateBoundingBox(double& xmin,double& xmax,double& ymin,doubl
 			if(minT[i]>pt[i]) minT[i]=pt[i];
 		}
 	}
+	maxT=maxT+_modelCenter;
+	minT=minT+_modelCenter;
 	xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
 	xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
 }
