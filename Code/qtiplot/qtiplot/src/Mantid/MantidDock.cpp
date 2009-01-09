@@ -107,28 +107,35 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
 
   QMenu *menu = new QMenu(this);
 
-  QAction *action = new QAction("Load RAW file",this);
-  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
-  menu->addAction(action);
+  //If no workspace is here then have load raw and dae
+  if( selectedWsName.isEmpty() )
+  {
+    QAction *action = new QAction("Load RAW file",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadWorkspace()));
+    menu->addAction(action);
 
-  action = new QAction("Load form DAE",this);
-  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
-  menu->addAction(action);
+    action = new QAction("Load from DAE",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
+    menu->addAction(action);
+  }
+  //else show instrument, sample logs and delete
+  else
+  {
+    QAction *action = new QAction("Show instrument",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
+    menu->addAction(action);
 
-  action = new QAction("Delete workspace",this);
-  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
-  if (selectedWsName.isEmpty()) action->setEnabled(false);
-  menu->addAction(action);
+    action = new QAction("Sample Logs...", this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
+    menu->addAction(action);
+  
+    //separate delete
+    menu->addSeparator();
 
-  action = new QAction("Show instrument",this);
-  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
-  if (selectedWsName.isEmpty()) action->setEnabled(false);
-  menu->addAction(action);
-
-  action = new QAction("Sample Logs...", this);
-  connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
-  if (selectedWsName.isEmpty()) action->setEnabled(false);
-  menu->addAction(action);
+    action = new QAction("Delete workspace",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
+    menu->addAction(action);
+  }
 
   menu->popup(QCursor::pos());
 }
