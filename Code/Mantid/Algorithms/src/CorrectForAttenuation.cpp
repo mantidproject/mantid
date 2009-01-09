@@ -55,6 +55,7 @@ void CorrectForAttenuation::exec()
 
   // Create the output workspace
   Workspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
+  correctionFactors->setYUnit("Attenuation factor");
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
