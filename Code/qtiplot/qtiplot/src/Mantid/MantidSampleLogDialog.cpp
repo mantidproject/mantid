@@ -6,6 +6,7 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <QTreeWidgetItem>
 #include <QTreeWidget>
 #include <QHeaderView>
 #include <QPushButton>
@@ -64,6 +65,9 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   //want a custom context menu
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+
+  //Double-click imports a log file
+  connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(importItem(QTreeWidgetItem *)));
 }
 
 //----------------------------------
@@ -78,10 +82,20 @@ void MantidSampleLogDialog::importSelectedFiles()
   QListIterator<QTreeWidgetItem *> pItr(items);
   while( pItr.hasNext() )
   {
-    QTreeWidgetItem *wi = pItr.next();
-    m_mantidUI->importSampleLog(wi->text(0), wi->data(0, Qt::UserRole).toString());
+    importItem(pItr.next());
   }
 }
+
+
+/**
+* Import an item
+* @param item The item to be imported
+*/
+void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
+{
+  m_mantidUI->importSampleLog(item->text(0), item->data(0, Qt::UserRole).toString());
+}
+
 
 /**
  * Popup a custom context menu

@@ -10,6 +10,7 @@
 //----------------------------------
 // Forward declarations
 //----------------------------------
+class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
 class MantidUI;
@@ -55,6 +56,9 @@ private slots:
 
   //Context menu popup
   void popupMenu(const QPoint & pos);
+
+  //Import a single item
+  void importItem(QTreeWidgetItem *item);
 
 private:
   //Initialize the layout
