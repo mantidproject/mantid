@@ -11,6 +11,7 @@
 #include <io.h>
 #endif /* _WIN32 */
 #include "MantidAPI/Instrument.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -354,7 +355,24 @@ namespace NeXus
    status=NXclosedata(fileID);
    return(true);
   }
-
+//
+// write an NXdata entry with Float array values
+//
+  bool NexusFileIO::writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
+	                           const std::vector<std::string>& avalues)
+  {
+   NXstatus status;
+   int dimensions[1];
+   dimensions[0]=values.size();
+   status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
+   if(status==NX_ERROR) return(false);
+   status=NXopendata(fileID, name.c_str());
+   for(unsigned int it=0; it<attributes.size(); ++it)
+       status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+   status=NXputdata(fileID, (void*)&(values[0]));
+   status=NXclosedata(fileID);
+   return(true);
+  }
 //
 // Write an NXnote entry with data giving parameter pair values for algorithm history and environment
 // Use NX_CHAR instead of NX_BINARY for the parameter values to make more simple.
@@ -386,6 +404,7 @@ namespace NeXus
    status=NXclosegroup(fileID);
    return(true);
   }
+
 //
 // Write sample related information to the nexus file
 //}
@@ -416,10 +435,32 @@ namespace NeXus
        if( ! writeNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
            return(4);
    }
+   // Examine TimeSeries (Log) data and call function to write double or string data
+   std::vector<Kernel::Property*> sampleProps=sample->getLogData();
+   for(unsigned int i=0;i<sampleProps.size();i++)
+   {
+       
+       std::string name=sampleProps[i]->name();
+       std::string type=sampleProps[i]->type();
+       //std::string value=sampleProps[i]->value();
+       TimeSeriesProperty<double> *d_timeSeries=dynamic_cast<TimeSeriesProperty<double>*>(sampleProps[i]);
+       if(d_timeSeries!=0)
+       {
+           writeNexusDoubleLog(d_timeSeries);
+       }
+       else
+       {
+           TimeSeriesProperty<std::string> *s_timeSeries=dynamic_cast<TimeSeriesProperty<std::string>*>(sampleProps[i]);
+           if(s_timeSeries!=0)
+           {
+                writeNexusStringLog(s_timeSeries);
+           }
+       }
+   }
 
    status=NXclosegroup(fileID);
 
-   return((status==NX_ERROR)?3:0);
+   return(0);
   }
 
 //
@@ -462,10 +503,149 @@ namespace NeXus
                    g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
        }
    }
-
+   //
+   char *nxname,*nxclass;
+   int nxdatatype;
+   nxname= new char[NX_MAXNAMELEN];
+   nxclass = new char[NX_MAXNAMELEN];
+   //
+   // search for NXlog sections to read
+   status=NXinitgroupdir(fileID); // just in case
+   while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   {
+      std::string nxClass=nxclass;
+      if(nxClass=="NXlog")
+      {
+         readNXlog(nxname,sample);
+      }
+   }
+   delete[] nxname;
+   delete[] nxclass;
+   //
    status=NXclosegroup(fileID);
    return((status==NX_ERROR)?3:0);
   }
+
+  void NexusFileIO::writeNexusDoubleLog(const TimeSeriesProperty<double> *d_timeSeries)
+  {
+   // write NXlog section for double values
+   NXstatus status;
+   // get a name for the log, possibly removing the the path component
+   std::string logName=d_timeSeries->name();
+   size_t ipos=logName.find_last_of("/\\");
+   if(ipos!=std::string::npos)
+       logName=logName.substr(ipos+1);
+   // extract values from timeseries
+   std::vector<std::string> dV=d_timeSeries->time_tValue();
+   std::vector<double> values;
+   std::vector<double> times;
+   time_t t0,time;
+   bool first=true;
+   for(int i=0;i<dV.size();i++)
+   {
+       std::stringstream ins;
+       double val;
+       time_t time;
+       ins << dV[i];
+       ins >> time >> val;
+       values.push_back(val);
+       if(first)
+       {
+           t0=time; // start time of log
+           first=false;
+       }
+       times.push_back(static_cast<double>(time-t0));
+   }
+   // create log
+   status=NXmakegroup(fileID,logName.c_str(),"NXlog");
+   if(status==NX_ERROR)
+       return;
+   status=NXopengroup(fileID,logName.c_str(),"NXlog");
+   // write log data
+   std::vector<std::string> attributes,avalues;
+   writeNxFloatArray("value", values,  attributes, avalues);
+   // get ISO time, if t0 valid
+   char buffer [25];
+   if(t0>0)
+   {
+      strftime (buffer,25,"%Y-%m-%dT%H:%M:%S",localtime(&t0));
+      attributes.push_back("start");
+      avalues.push_back(buffer);
+   }
+   else
+   {
+       g_log.warning("Bad start time in log file " + logName);
+   }
+
+   writeNxFloatArray("time", times,  attributes, avalues);
+   //
+   status=NXclosegroup(fileID);
+   //
+  }
+
+  void NexusFileIO::writeNexusStringLog(const TimeSeriesProperty<std::string> *s_timeSeries)
+  {
+  // write NXlog section for string log values - not yet implemented and may not be supported by Nexus NXlog
+  }
+
+  void NexusFileIO::readNXlog(const char* nxname, boost::shared_ptr<Mantid::API::Sample>& sample)
+  {
+   // read an NXlog section and save the timeseries data within the sample
+   NXstatus status;
+   status=NXopengroup(fileID,nxname,"NXlog");
+   if(status==NX_ERROR) return;
+   //
+   int stat,rank,dims[4],type;
+   char values[]="value",time[]="time"; // section names
+   //
+   // read time values
+   status=NXopendata(fileID,time);
+   if(status==NX_ERROR) return;
+   status=NXgetinfo(fileID,&rank,dims,&type);
+   double* timeVals= new double[dims[0]];
+   status=NXgetdata(fileID,timeVals);
+
+   char buffer[26];
+   int length=25;
+   type=NX_CHAR;
+   status=NXgetattr(fileID, "start", buffer, &length, &type);
+   if(status==NX_ERROR)
+   {
+       g_log.warning("readNXlog found NXlog with no start time - ignoring log ");
+       NXclosedata(fileID);
+       NXclosegroup(fileID);
+       return;
+   }
+   buffer[length]='\0';
+   struct tm *tm;
+   std::string startT=buffer;
+   if( (startT.find('T')) >0 )
+       startT.replace(startT.find('T'),1," ");
+   boost::posix_time::ptime pt=boost::posix_time::time_from_string(startT);
+   time_t startTime=to_time_t(pt);
+   //strptime(buffer,"%Y-%m-%dT%H:%M:%S",tm);
+   //time_t startTime = mktime(tm);
+   status=NXclosedata(fileID);
+   // read data values
+   stat=NXopendata(fileID,values);
+   stat=NXgetinfo(fileID,&rank,dims,&type);
+   if(type==NX_FLOAT64)
+   {
+      TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(nxname);
+      double* dataVals= new double[dims[0]];
+      status=NXgetdata(fileID,dataVals);
+      double logValue;
+      std::time_t logTime;
+      for( int j=0;j<dims[0];j++)
+      {
+          l_PropertyDouble->addValue(startTime+static_cast<time_t>(timeVals[j]), dataVals[j]);
+      }
+      sample->addLogData(l_PropertyDouble);
+   }
+   status=NXclosedata(fileID);
+   status=NXclosegroup(fileID);
+  }
+
 
   int NexusFileIO::writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
 							const bool& uniformSpectra, const int& m_spec_min, const int& m_spec_max)

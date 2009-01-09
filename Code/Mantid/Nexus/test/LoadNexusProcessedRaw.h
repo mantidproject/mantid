@@ -20,6 +20,7 @@
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Component.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -290,6 +291,14 @@ void testExecOnLoadraw()
         TS_ASSERT_DELTA(d,2.512,0.0001);
         double cmpDistance = ptrDet103->getDistance(*samplepos);
         TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
+        //
+        // Test log data is loaded
+        //
+        boost::shared_ptr<Sample> sample = output->getSample();
+        Property *l_property = sample->getLogData( std::string("HET15869_TEMP1.txt") );
+        TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+        std::string timeSeriesString = l_timeSeriesDouble->value();
+        TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
     }
 
     remove(outputFile.c_str());

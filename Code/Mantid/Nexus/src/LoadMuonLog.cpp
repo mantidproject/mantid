@@ -80,36 +80,37 @@ void LoadMuonLog::exec()
     // Read log file into Property which is then stored in Sample object
     if(!nxload.logTypeNumeric(i))
     {
-		// string log data not yet implemented as not present in Nexus example files
+       g_log.warning("In LoadMuonLog: " + m_filename + " skipping non-numeric log data");
+       // string log data not yet implemented as not present in Nexus example files
        //std::string logValue;
-	   //std::time_t logTime;
-	   //for( int j=0;j<nxload.getLogLength(i);j++)
-	   //{
+       //std::time_t logTime;
+       //for( int j=0;j<nxload.getLogLength(i);j++)
+       //{
        //   nxload.getLogValues(i,j,logTime,logValue);
        //   l_PropertyDouble->addValue(logTime, logValue);
-	   //}
+       //}
     }
     else
     {
        double logValue;
-	   std::time_t logTime;
-	   for( int j=0;j<nxload.getLogLength(i);j++)
-	   {
+       std::time_t logTime;
+       for( int j=0;j<nxload.getLogLength(i);j++)
+       {
           nxload.getLogValues(i,j,logTime,logValue);
           l_PropertyDouble->addValue(logTime, logValue);
-	   }
+       }
     }
 
     // store Property in Sample object and delete unused object
     if ( nxload.logTypeNumeric(i) )
     {
       sample->addLogData(l_PropertyDouble);
-	  delete l_PropertyString;
+      delete l_PropertyString;
     }
     else
     {
       sample->addLogData(l_PropertyString);
-	  delete l_PropertyDouble;
+      delete l_PropertyDouble;
     }
 
   } // end for

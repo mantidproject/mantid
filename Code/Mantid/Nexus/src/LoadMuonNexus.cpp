@@ -102,7 +102,7 @@ namespace Mantid
       int total_specs;
       if( m_interval || m_list)
       {
-		total_specs = m_spec_list.size();
+        total_specs = m_spec_list.size();
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
@@ -152,11 +152,11 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
 //-          runLoadMappingTable(localWorkspace );
-		  runLoadLog(localWorkspace );
+          runLoadLog(localWorkspace );
           // Cache these for copying to workspaces for later periods
           instrument = localWorkspace->getInstrument();
 //-          specMap = localWorkspace->getSpectraMap();
-		  sample = localWorkspace->getSample();
+          sample = localWorkspace->getSample();
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -172,7 +172,7 @@ namespace Mantid
           // Copy the shared instrument, sample & spectramap onto the workspace for this period
           localWorkspace->setInstrument(instrument);
 //-          localWorkspace->setSpectraMap(specMap);
-		  localWorkspace->setSample(sample);
+          localWorkspace->setSample(sample);
         }
         
       bool autogroup = getProperty("auto_group");
@@ -182,7 +182,7 @@ namespace Mantid
           //Get the groupings
           for (int i =0; i < nxload.numDetectors; ++i)
           {
-	      m_groupings.push_back(nxload.detectorGroupings[i]);
+          m_groupings.push_back(nxload.detectorGroupings[i]);
 		  std::cerr << nxload.detectorGroupings[i] << std::endl;
           }
 	  	  
@@ -269,7 +269,7 @@ namespace Mantid
           g_log.error("Invalid Spectrum min/max properties");
           throw std::invalid_argument("Inconsistent properties defined"); 
         }
-	  }
+      }
     }
     
     /** Load in a single spectrum taken from a NeXus file
@@ -328,9 +328,9 @@ namespace Mantid
       }
 
       // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
-	  // This does not work at present as the example files do not hold the necessary data
-	  // but is a place holder. Hopefully the new version of Nexus Muon files should be more
-	  // complete.
+      // This does not work at present as the example files do not hold the necessary data
+      // but is a place holder. Hopefully the new version of Nexus Muon files should be more
+      // complete.
       if ( ! loadInst->isExecuted() )
       {
         runLoadInstrumentFromNexus(localWorkspace);
@@ -375,7 +375,7 @@ namespace Mantid
 //-      }
 //-      catch (std::runtime_error& err)
 //-      {
-//-    	  g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
+//-          g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
 //-      }
 //-      
 //-      if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
@@ -401,7 +401,7 @@ namespace Mantid
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
-	}
+    }
 
     double LoadMuonNexus::dblSqrt(double in)
     {

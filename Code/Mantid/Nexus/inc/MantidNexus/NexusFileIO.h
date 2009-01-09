@@ -2,6 +2,9 @@
 #define NEXUSFILEIO_H
 #include <napi.h>
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <limits.h>
 namespace Mantid
 {
   namespace NeXus
@@ -105,12 +108,37 @@ namespace Mantid
       /// read a float value and possible attributes
       bool readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
 	                           std::vector<std::string>& avalues);
+      bool writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
+	                           const std::vector<std::string>& avalues);
+      /// Write NXlog data for given double TimeSeriesProperty
+      void writeNexusDoubleLog(const Kernel::TimeSeriesProperty<double> *d_timeSeries);
+      /// Write NXlog data for given string TimeSeriesProperty
+      void writeNexusStringLog(const Kernel::TimeSeriesProperty<std::string> *s_timeSeries);
+      /// read the named NXlog and create TimeSeriesProp in sample
+      void readNXlog(const char* nxname, boost::shared_ptr<Mantid::API::Sample>& sample);
       /// check if the gievn item exists in the current level
       bool checkEntryAtLevel(const std::string& item) const;
       /// write test field
       int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value);
       /// search for exisiting MantidWorkpace_n entries in opened file
       int findMantidWSEntries();
+      /// convert posix time to time_t
+      std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
+      {
+			/*!
+			Take the input Posix time, subtract the unix epoch, and return the seconds
+			as a std::time_t value.
+			@param t :: time of interest as ptime
+			@return :: time_t value of t
+			*/
+            if( t == boost::posix_time::neg_infin )
+             return 0;
+            else if( t == boost::posix_time::pos_infin )
+             return LONG_MAX;
+            boost::posix_time::ptime start(boost::gregorian::date(1970,1,1));
+            return (t-start).total_seconds();
+       } 
+
       /// nexus file name
       std::string m_filename;
       ///static reference to the logger class

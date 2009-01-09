@@ -87,6 +87,27 @@ public:
     return ins.str();
 	}
 
+  /*  New method to return time series value pairs as std::vector<std::string>
+   *
+   * @return time series property values as a string vector "<time_t> value"
+   */
+    std::vector<std::string> time_tValue() const
+  {
+    std::vector<std::string> values;
+
+    typename std::map<dateAndTime, TYPE>::const_iterator p = m_propertySeries.begin();
+
+    while ( p != m_propertySeries.end() )
+    {
+      std::stringstream line;
+      line << p->first << " " << p->second;
+      values.push_back(line.str());
+      p++;
+    }
+
+    return values;
+  }
+
   /** Overwrite Property method.
    *  @param value The new value
    *  @throws Exception::NotImplementedError Not yet implemented
