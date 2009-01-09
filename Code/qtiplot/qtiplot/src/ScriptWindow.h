@@ -58,7 +58,9 @@ public:
 		ScriptWindow(ScriptingEnv *env, ApplicationWindow *app);
     virtual ~ScriptWindow();						       
   
-    void customEvent(QEvent*);				       
+    void customEvent(QEvent*);
+    void closeEvent(QCloseEvent* event);
+    void askSave();
 
 public slots:
 		void newScript();
@@ -73,7 +75,7 @@ public slots:
                 void scriptMessage(const QString&);				    
 		void scriptError(const QString&);
 
-                void updateWindowTitle(const QString& scriptLang);
+                void updateWindowTitle();
 
 private slots:
 		void setAlwaysOnTop(bool on);

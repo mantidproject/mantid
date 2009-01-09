@@ -89,7 +89,8 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 
 	setIcon(QPixmap(logo_xpm));
 
-	updateWindowTitle(env->scriptingLanguage());
+	//updateWindowTitle(env->scriptingLanguage());
+  setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window - New File");
 
 	setFocusProxy(te);
 	setFocusPolicy(Qt::StrongFocus);
@@ -113,8 +114,39 @@ void ScriptWindow::customEvent(QEvent *e)
     {
       outputText->clear();
       ScriptingChangeEvent* event = (ScriptingChangeEvent*)e;
-      updateWindowTitle(event->scriptingEnv()->scriptingLanguage());
+      d_env = event->scriptingEnv();
+      updateWindowTitle();
     }
+}
+
+void ScriptWindow::closeEvent(QCloseEvent* event)
+{
+  if( !fileSaved && !te->text().isEmpty() )
+  {
+    askSave();
+  }
+  event->accept();
+}
+
+void ScriptWindow::askSave()
+{
+  QMessageBox msgBox;
+  msgBox.setWindowTitle("MantidPlot");
+  msgBox.setText(tr("The script has been modified."));
+  msgBox.setInformativeText(tr("Save changes?"));
+  msgBox.addButton(QMessageBox::Save);
+  QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
+  msgBox.addButton(QMessageBox::Discard);
+  int ret = msgBox.exec();
+  if( msgBox.clickedButton() == saveAsButton ) 
+  {
+     saveAs();
+  }
+  else if( ret == QMessageBox::Save )
+  {
+     save();
+  }
+  else return;
 }
 
 void ScriptWindow::initMenu()
@@ -244,7 +276,7 @@ void ScriptWindow::initActions()
 
 void ScriptWindow::languageChange()
 {
-        updateWindowTitle(d_env->scriptingLanguage()); //Mantid
+        updateWindowTitle(); //Mantid
 
 	menuBar()->clear();
 	menuBar()->addMenu(file);
@@ -294,26 +326,27 @@ void ScriptWindow::languageChange()
 }
 
 
-void ScriptWindow::updateWindowTitle(const QString& scriptLang)
+void ScriptWindow::updateWindowTitle()
 {
-  QString title("MantidPlot: " + scriptLang + " Window - ");
+  QString title("MantidPlot: " + d_env->scriptingLanguage() + " Window - ");
   if( fileName.isNull() || fileName.isEmpty() )
   {
     title += "New File";
   }
   else
   {
-    title += QFileInfo(fileName).fileName();
+    title += fileName;//QFileInfo(fileName).fileName();
   }
-  if( !fileSaved ) title += " (unsaved)";
+  if( !fileSaved && !te->text().isEmpty() ) title += " (unsaved)";
   setWindowTitle(title);
 }
 
 void ScriptWindow::newScript()
 {
+  if( !fileSaved ) save();
 	fileName = QString::null;
 	te->clear();
-	updateWindowTitle(d_env->scriptingLanguage());
+	updateWindowTitle();
 }
 
 void ScriptWindow::open(const QString& fn)
@@ -322,7 +355,7 @@ void ScriptWindow::open(const QString& fn)
 	//Mantid
 	if (!s.isEmpty()) fileName = s;
 	fileSaved = true;
-	updateWindowTitle(d_env->scriptingLanguage());
+	updateWindowTitle();
 }
 
 void ScriptWindow::saveAs()
@@ -331,7 +364,7 @@ void ScriptWindow::saveAs()
 	if (!fn.isEmpty())
 		fileName = fn;
 	fileSaved = true;
-	updateWindowTitle(d_env->scriptingLanguage());
+	updateWindowTitle();
 }
 
 void ScriptWindow::save()
@@ -351,7 +384,7 @@ void ScriptWindow::save()
 		saveAs();
 
 	fileSaved = true;
-	updateWindowTitle(d_env->scriptingLanguage());
+	updateWindowTitle();
 }
 
 void ScriptWindow::setVisible(bool visible)
@@ -408,7 +441,7 @@ void ScriptWindow::viewScriptOutput(bool visible)
 void ScriptWindow::editChanged()
 {
   fileSaved = false;
-  updateWindowTitle(d_env->scriptingLanguage());
+  updateWindowTitle();
 }
 
 
