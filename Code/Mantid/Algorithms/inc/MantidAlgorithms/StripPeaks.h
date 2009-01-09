@@ -1,6 +1,9 @@
 #ifndef MANTID_ALGORITHMS_STRIPPEAKS_H_
 #define MANTID_ALGORITHMS_STRIPPEAKS_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 

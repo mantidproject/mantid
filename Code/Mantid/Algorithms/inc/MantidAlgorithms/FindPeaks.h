@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
@@ -20,7 +21,8 @@ namespace Algorithms
 
     Optional Properties:
     <UL>
-    <LI> fwhm - The number of points covered on average by the fwhm of a peak (default 8) </LI>
+    <LI> fwhm - The number of points covered on average by the fwhm of a peak (default 7) </LI>
+    <LI> Tolerance - Sets the strictness desired in meeting the conditions on peak candidates (default 4, Mariscotti recommended 2) </LI>
     </UL>
     
     @author Russell Taylor, Tessella Support Services plc
@@ -49,8 +51,8 @@ namespace Algorithms
 class DLLExport FindPeaks : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
-  FindPeaks() : API::Algorithm() {}
+  /// Constructor
+  FindPeaks();
   /// Virtual destructor
   virtual ~FindPeaks() {}
   /// Algorithm's name
@@ -70,9 +72,17 @@ private:
   void smoothData(API::Workspace_sptr &WS, const int &w);
   void calculateStandardDeviation(const API::Workspace_const_sptr &input, const API::Workspace_sptr &smoothed, const int &w);
 
+  void fitPeak(const API::Workspace_sptr &input, const int spectrum, const int i0, const int i4);
+
+  /// Strip peaks method - living here until I can pass TableWorkspace as property
+  API::Workspace_sptr removePeaks(const API::Workspace_const_sptr &input);
+
   /// The number of smoothing iterations
   static int g_z;
   
+  /// Storage of the peak data
+  boost::shared_ptr<DataObjects::TableWorkspace> m_peaks;
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
+#include "MantidDataObjects/TableRow.h"
 
 namespace Mantid
 {
@@ -20,21 +21,37 @@ Logger& FindPeaks::g_log = Logger::get("FindPeaks");
 // Set the number of smoothing iterations to 5, the optimum value according to Mariscotti
 int FindPeaks::g_z = 5;
 
+/// Constructor
+FindPeaks::FindPeaks() : API::Algorithm(), m_peaks(new DataObjects::TableWorkspace) {}
+
 void FindPeaks::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
-  declareProperty("fwhm",8,min);
+  // The estimated width of a peak in terms of number of channels
+  declareProperty("fwhm",7,min);
+  // The tolerance allowed in meeting the conditions
+  declareProperty("Tolerance",4,min->clone());
   
   // Temporary so that I can look at the smoothed data
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
+  // Temporary until a TableWorkspace containing the peaks can be passed out as an output property
+  declareProperty(new WorkspaceProperty<>("WithPeaksStripped","",Direction::Output));
+  
+  // Set up the columns for the TableWorkspace holding the peak information
+  m_peaks->createColumn("int","spectrum");
+  m_peaks->createColumn("double","centre");
+  m_peaks->createColumn("double","width");
+  m_peaks->createColumn("double","height");
+  m_peaks->createColumn("double","backgroundintercept");
+  m_peaks->createColumn("double","backgroundslope");
 }
 
 void FindPeaks::exec()
 {
   // Retrieve the input workspace
-  Workspace_const_sptr inputWS = getProperty("InputWorkspace");
+  Workspace_sptr inputWS = getProperty("InputWorkspace");
 
   Workspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
@@ -56,6 +73,7 @@ void FindPeaks::exec()
   const double kz = 1.22; // This kz corresponds to z=5 & w=0.6*fwhm - see Mariscotti Fig. 8
   const int n1 = static_cast<int>(kz * fwhm + 0.5);
   // Can't calculate n2 or n3 yet because they need i0
+  const int tolerance = getProperty("Tolerance");
 
   // Temporary - to allow me to look at smoothed data
   setProperty("SmoothedData",smoothedData);
@@ -64,12 +82,11 @@ void FindPeaks::exec()
   const int numHists = smoothedData->getNumberHistograms();
   const int blocksize = smoothedData->blocksize();
   for (int k = 0; k < numHists; ++k)
-//  int k = 3;
   {
-    //    std::cout << std::endl;
     const std::vector<double> &S = smoothedData->readY(k);
     const std::vector<double> &F = smoothedData->readE(k);
 
+    // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
     for ( int i = 1; i < blocksize; ++i)
     {
@@ -144,7 +161,6 @@ void FindPeaks::exec()
         // Check we have a correctly ordered set of points. If not, reset and continue
         if ( i1>i2 || i2>i3 || i3>i4 || i5<=i4 )
         {
-          //i1 = 0, i2 = 0, i3 = 0, i4 = 0,
           i5 = 0;
           continue;
         }
@@ -153,47 +169,42 @@ void FindPeaks::exec()
         // Mariscotti eqn. (14)
         if ( std::abs(S[i4]) < 2*F[i4] )
         {
-          //i1 = 0, i2 = 0, i3 = 0, i4 = 0, 
           i5 = 0;
-          //std::cout << "First" << std::endl;
           continue;
         }
         // Mariscotti eqn. (19)
-        if ( abs( i5-i3+1-n1 ) > 2 )
+        if ( abs( i5-i3+1-n1 ) > tolerance )
         {
-          //i1 = 0, i2 = 0, i3 = 0, i4 = 0, 
           i5 = 0;
-          //std::cout << "Second" << std::endl;
           continue;
         }
         // Calculate n2 (Mariscotti eqn. 20)
-        int n2 = abs( static_cast<int>(0.5*(F[i0]/S[i0])*(n1+2)+0.5) );
-        const int n2b = abs( static_cast<int>(0.5*(F[i0]/S[i0])*(n1-2)+0.5) );
+        int n2 = abs( static_cast<int>(0.5*(F[i0]/S[i0])*(n1+tolerance)+0.5) );
+        const int n2b = abs( static_cast<int>(0.5*(F[i0]/S[i0])*(n1-tolerance)+0.5) );
         if (n2b > n2) n2 = n2b;
         // Mariscotti eqn. (21)
-        if ( (n2 == 0 && i3-i2-1 > 1) || i3-i2-1 > n2 )
+        const int testVal = n2 ? n2 : 1;
+        if ( i3-i2-1 > testVal )
         {
-          //i1 = 0, i2 = 0, i3 = 0, i4 = 0, 
           i5 = 0;
-          //std::cout << "Third" << std::endl;
           continue;
         }
         // Calculate n3 (Mariscotti eqn. 22)
-        int n3 = abs( static_cast<int>((n1+2)*(1-2*(F[i0]/S[i0])) + 0.5) );
-        const int n3b = abs( static_cast<int>((n1-2)*(1-2*(F[i0]/S[i0])) + 0.5) );
+        int n3 = abs( static_cast<int>((n1+tolerance)*(1-2*(F[i0]/S[i0])) + 0.5) );
+        const int n3b = abs( static_cast<int>((n1-tolerance)*(1-2*(F[i0]/S[i0])) + 0.5) );
         if ( n3b < n3 ) n3 = n3b;
         // Mariscotti eqn. (23)
-        if ( i2-1+2 < n3 )
+        if ( i2-i1+1 < n3 )
         {
-          //i1 = 0, i2 = 0, i3 = 0, i4 = 0, 
           i5 = 0;
-          //std::cout << "Fourth" << std::endl;
           continue;
         }
 
         // If we get to here then we've identified a peak
-        g_log.information() << "Spectrum=" << k << " i0=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
+        g_log.debug() << "Spectrum=" << k << " i0=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
 
+        this->fitPeak(inputWS,k,i0,i4);
+        
         // reset and go searching for the next peak
         i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
       }
@@ -201,6 +212,11 @@ void FindPeaks::exec()
     } // loop through a single spectrum
   } // loop over spectra
 
+  g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
+  
+  // This is temporary until I can pass out the list of peaks in a property
+  Workspace_sptr outputWS = this->removePeaks(inputWS);
+  setProperty("WithPeaksStripped",outputWS);  
 }
 
 /** Calculates the second difference of the data (Y values) in a workspace.
@@ -303,6 +319,137 @@ void FindPeaks::calculateStandardDeviation(const API::Workspace_const_sptr &inpu
       Fi[j] = constant * E[j];
     }
   }
+}
+
+/** Attempts to fit a candidate peak
+ * 
+ *  @param input    The input workspace
+ *  @param spectrum The spectrum index of the peak
+ *  @param i0       Channel number of peak i0
+ *  @param i4       Channel number of peak i4
+ */
+void FindPeaks::fitPeak(const API::Workspace_sptr &input, const int spectrum, const int i0, const int i4)
+{
+  Algorithm_sptr fit;
+  try
+  {
+    // Fitting the candidate peaks to a Gaussian
+    fit = createSubAlgorithm("Gaussian");
+  }
+  catch (Exception::NotFoundError)
+  {
+    g_log.error("The StripPeaks algorithm requires the CurveFitting library");
+    throw;
+  }
+  fit->setProperty("InputWorkspace",input);
+  fit->setProperty("SpectrumIndex",spectrum);
+
+  const std::vector<double> &X = input->readX(spectrum);
+  const std::vector<double> &Y = input->readY(spectrum);
+  
+  for (int width = 2; width <= 10; width +=2)
+  {
+    // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
+    unsigned int i_min = i0 - 5*width;
+    unsigned int i_max = i0 + 5*width;
+    // Bounds checks
+    if (i_min<1) i_min=1;
+    if (i_max>=Y.size()) i_max=Y.size()-2;
+    const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
+    const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
+
+    const double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
+    const double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0*(i_max-i_min+1));
+    const double in_height = Y[i4] - in_bg0;
+    const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
+    const double in_sigma = X[i0+width] - X[i0];
+  
+    fit->setProperty("bg0",in_bg0);
+    fit->setProperty("bg1",in_bg1);
+    fit->setProperty("peakCentre",in_centre);
+    fit->setProperty("sigma",in_sigma);
+    fit->setProperty("height",in_height);
+    fit->setProperty("StartX",X[i_min]);
+    fit->setProperty("EndX",X[i_max]);
+  
+    try {
+      fit->execute();
+    } catch (std::runtime_error) {
+      g_log.error("Unable to successfully run Gaussian Fit sub-algorithm");
+      throw;
+    }
+
+    if ( ! fit->isExecuted() )
+    {
+      g_log.error("Unable to successfully run Gaussian Fit sub-algorithm");
+      throw std::runtime_error("Unable to successfully run Gaussian Fit sub-algorithm");
+    }
+ 
+    std::string fitStatus = fit->getProperty("Output Status");
+    const double height = fit->getProperty("height");
+    if ( height < 0 ) fitStatus.clear();              // Height must be positive
+    if ( ! fitStatus.compare("success") ) 
+    {
+      const double centre = fit->getProperty("peakCentre");
+      const double width = fit->getProperty("sigma");
+      const double bgintercept = fit->getProperty("bg0");
+      const double bgslope = fit->getProperty("bg1");
+      g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height 
+                    << ", Background sl " << bgslope << " " << bgintercept << std::endl;
+      DataObjects::TableRow t = m_peaks->appendRow();
+      t << spectrum << centre << width << height << bgintercept << bgslope;
+      break;
+    }
+  }
+
+}
+
+/// Method copied temporarily from StripPeaks until I am able to pass the list of peaks out of this algorithm
+API::Workspace_sptr FindPeaks::removePeaks(const API::Workspace_const_sptr &input)
+{
+  g_log.information("Subtracting peaks");
+  // Create an output workspace - same size a input one
+  Workspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
+  // Copy the data over from the input to the output workspace
+  const int hists = input->getNumberHistograms();
+  for (int k = 0; k < hists; ++k)
+  {
+    outputWS->dataX(k) = input->readX(k);
+    outputWS->dataY(k) = input->readY(k);
+    outputWS->dataE(k) = input->readE(k);
+  }
+
+  const bool isHistogramData = outputWS->isHistogramData();
+  // Loop over the list of peaks
+  for (int i = 0; i < m_peaks->rowCount(); ++i)
+  {
+    g_log.debug() << "Subtracting peak from spectrum " << m_peaks->getRef<int>("spectrum",i) << std::endl;
+    // Get references to the data
+    const std::vector<double> &X = outputWS->readX(m_peaks->getRef<int>("spectrum",i));
+    std::vector<double> &Y = outputWS->dataY(m_peaks->getRef<int>("spectrum",i));
+    // Get back the gaussian parameters
+    const double height = m_peaks->getRef<double>("height",i);
+    const double centre = m_peaks->getRef<double>("centre",i);
+    const double width = m_peaks->getRef<double>("width",i);
+    // Loop over the spectrum elements
+    const int spectrumLength = Y.size();
+    for (int j = 0; j < spectrumLength; ++j)
+    {
+      // If this is histogram data, we want to use the bin's central value
+      double x;
+      if (isHistogramData) x = 0.5*(X[j]+X[j+1]);
+        else x = X[j];
+      // Skip if not anywhere near this peak
+      if ( x < centre-3.0*width ) continue;
+      if ( x > centre+3.0*width ) break;
+      // Calculate the value of the Gaussian function at this point
+      const double funcVal = height*exp(-0.5*pow((x-centre)/width,2));
+      // Subtract the calculated value from the data
+      Y[j] -= funcVal;
+    }
+  }
+
+  return outputWS;
 }
 
 } // namespace Algorithms
