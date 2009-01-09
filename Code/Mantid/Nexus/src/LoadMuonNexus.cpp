@@ -204,8 +204,10 @@ namespace Mantid
 			}
 			
 			//Copy all the X data
-			groupedWS->dataX(m_groupings[i] -1) = localWorkspace->dataY(i);
+			groupedWS->dataX(m_groupings[i] -1) = localWorkspace->dataX(i);
 	    }
+	    
+	    m_groupings.clear();
 	    	    
 	    // Assign the result to the output workspace property
 	    setProperty(outputWorkspace,groupedWS);

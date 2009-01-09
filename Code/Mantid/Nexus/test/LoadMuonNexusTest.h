@@ -211,13 +211,7 @@ public:
     sample2 = output2->getSample();
     TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
     TS_ASSERT_EQUALS(sample, sample2)
-    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
-    
-    //Check groupings
-    std::vector<int> groupings = nxLoad.getProperty("detector_groups");
-
-    TS_ASSERT(groupings.size() > 0);
-    
+    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")    
   }
 
   void testarrayin()
