@@ -18,8 +18,8 @@ namespace Mantid
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    <LI> ForwardSpectra - The detector numbers of the first group </LI>
-    <LI> BackwardSpectra - The detector numbers of the second group </LI>
+    <LI> ForwardSpectra - The detector number of the first group </LI>
+    <LI> BackwardSpectra - The detector number of the second group </LI>
     <LI> Alpha - ?? </LI>
     </UL>
 

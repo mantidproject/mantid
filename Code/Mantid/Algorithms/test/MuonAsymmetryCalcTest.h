@@ -5,6 +5,7 @@
 
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAlgorithms/MuonAsymmetryCalc.h"
 #include "MantidAPI/Workspace.h"
@@ -37,17 +38,31 @@ public:
 
   void testLoadNexusAndSetProperties()
   {
+    //Load the muon nexus file
     loader.initialize();
     loader.setPropertyValue("Filename", "../../../../Test/Nexus/emu00006473.nxs");
     loader.setPropertyValue("OutputWorkspace", "EMU6473");
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);
+	  
+    //Create the forward and backward groups
+    group1.initialize();
+    group1.setPropertyValue("Workspace","EMU6473");
+    group1.setPropertyValue("SpectraList", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
+    TS_ASSERT_THROWS_NOTHING( group1.execute() );
+    TS_ASSERT_EQUALS(group1.isExecuted(),true);
+	  
+    group2.initialize();
+    group2.setPropertyValue("SpectraList", "16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31");
+    group2.setPropertyValue("Workspace","EMU6473");
+    TS_ASSERT_THROWS_NOTHING( group2.execute() );
+    TS_ASSERT_EQUALS(group2.isExecuted(),true);
 
     asymCalc.setPropertyValue("InputWorkspace", "EMU6473");
     asymCalc.setPropertyValue("OutputWorkspace", "Result");
     asymCalc.setPropertyValue("Alpha", "1.0");
-    asymCalc.setPropertyValue("ForwardSpectra", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
-    asymCalc.setPropertyValue("BackwardSpectra", "16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31");
+    asymCalc.setPropertyValue("ForwardSpectra", "0");
+    asymCalc.setPropertyValue("BackwardSpectra", "16");
   }
 
   void testProperties()
@@ -76,6 +91,8 @@ public:
 private:
   MuonAsymmetryCalc asymCalc;
   Mantid::NeXus::LoadMuonNexus loader;
+  Mantid::DataHandling::GroupDetectors group1;
+  Mantid::DataHandling::GroupDetectors group2;
 
 };
 

@@ -6,6 +6,7 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/MuonRemoveExpDecay.h"
 
 namespace Mantid
@@ -28,7 +29,8 @@ namespace Mantid
     {
        declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
        declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
-       declareProperty("Spectra",-1);
+       std::vector<int> empty;
+	declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty,new MandatoryValidator<std::vector<int> >));
     }
 
     /** Executes the algorithm
@@ -36,7 +38,7 @@ namespace Mantid
      */
     void MuonRemoveExpDecay::exec()
     {
-	    int Spectra = getProperty("Spectra");
+	   std::vector<int> Spectra = getProperty("Spectra");
 	    
 	    //Get original workspace
 	    API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -44,10 +46,11 @@ namespace Mantid
 	    int numSpectra = inputWS->size() / inputWS->blocksize();
 	    
 	    //Create output workspace with same dimensions as input
-	    API::Workspace_sptr outputWS 
+	    API::Workspace_sptr outputWS
 		= API::WorkspaceFactory::Instance().create(inputWS);
+
 	    
-	    if (Spectra == -1)
+	    if (Spectra.size() == 0)
 	    {
 		    //Do all the spectra	    
 		    for (int i=0; i < numSpectra; ++i)
@@ -60,15 +63,31 @@ namespace Mantid
 	    }
 	    else
 	    {
-		    //Do one spectra
-		    if (Spectra > numSpectra)
-		    {
-			g_log.error("Spectra size greater than the number of spectra!");
-			throw std::invalid_argument("Spectra size greater than the number of spectra!");
+		    if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
+		   {
+			//Copy all the X,Y and E data
+			for (int i=0; i < numSpectra; ++i)
+			{
+			    outputWS->dataX(i) = inputWS->dataX(i);
+			    outputWS->dataY(i) = inputWS->dataY(i);
+			    outputWS->dataE(i) = inputWS->dataE(i);
+			}  
 		    }
-
-		    removeDecay(inputWS->dataX(Spectra), inputWS->dataY(Spectra), outputWS->dataY(Spectra));
-		    outputWS->dataX(Spectra) = inputWS->dataX(Spectra);
+		    
+		    //Do the specified spectra only
+		    for (int i=0; i < Spectra.size(); ++i)
+		    {
+			    if (Spectra[i] > numSpectra)
+				{
+					g_log.error("Spectra size greater than the number of spectra!");
+					throw std::invalid_argument("Spectra size greater than the number of spectra!");
+				}
+			    			    
+			   removeDecay(inputWS->dataX(Spectra[i]), inputWS->dataY(Spectra[i]), outputWS->dataY(Spectra[i]));
+			   outputWS->dataX(Spectra[i]) = inputWS->dataX(Spectra[i]);
+			    
+			    //Need to do something about the errors?
+		    }
 	    }
   
 	    setProperty("OutputWorkspace", outputWS);

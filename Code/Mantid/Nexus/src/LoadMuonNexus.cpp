@@ -7,6 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidGeometry/Detector.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -44,6 +45,8 @@ namespace Mantid
       mustBePositive->setLower(0);
       declareProperty("spectrum_min",0, mustBePositive);
       declareProperty("spectrum_max",0, mustBePositive->clone());
+	    
+      declareProperty("auto_group",false);
   
       declareProperty(new ArrayProperty<int>("spectrum_list"));
     }
@@ -172,16 +175,48 @@ namespace Mantid
 		  localWorkspace->setSample(sample);
         }
         
-        // Assign the result to the output workspace property
-        setProperty(outputWorkspace,localWorkspace);
-        
-      } // loop over periods
+      bool autogroup = getProperty("auto_group");
       
-      //Get the groupings
-      for (int i =0; i < nxload.numDetectors; ++i)
-      {
+      if (autogroup)
+     {
+          //Get the groupings
+          for (int i =0; i < nxload.numDetectors; ++i)
+          {
 	      m_groupings.push_back(nxload.detectorGroupings[i]);
+		  std::cerr << nxload.detectorGroupings[i] << std::endl;
+          }
+	  	  
+	    //Create a workspace with only two spectra for forward and back
+	    DataObjects::Workspace2D_sptr  groupedWS 
+		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                 (API::WorkspaceFactory::Instance().create(localWorkspace, 2, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
+	  
+	  //Compile the groups
+	    for (int i = 0; i < m_groupings.size(); ++i)
+	    {    
+		    for (int j = 0; j < localWorkspace->blocksize(); ++j)
+			{
+				groupedWS->dataY(m_groupings[i] -1)[j] = groupedWS->dataY(m_groupings[i] -1)[j] + localWorkspace->dataY(i)[j];
+				
+				//Add the errors in quadrature
+				groupedWS->dataE(m_groupings[i] -1)[j] 
+					= sqrt(pow(groupedWS->dataE(m_groupings[i] -1)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
+			}
+			
+			//Copy all the X data
+			groupedWS->dataX(m_groupings[i] -1) = localWorkspace->dataY(i);
+	    }
+	    	    
+	    // Assign the result to the output workspace property
+	    setProperty(outputWorkspace,groupedWS);
       }
+      else
+      {
+         // Assign the result to the output workspace property
+        setProperty(outputWorkspace,localWorkspace);
+      }
+      
+      } // loop over periods
       
       // Clean up
       delete[] timeChannels;

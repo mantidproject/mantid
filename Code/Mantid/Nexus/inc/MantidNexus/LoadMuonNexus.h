@@ -37,8 +37,8 @@ namespace Mantid
     <LI> spectrum_min  - The spectrum to start loading from</LI>
     <LI> spectrum_max  - The spectrum to load to</LI>
     <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
+    <LI> auto_group - Determines whether the spectra are automatically grouped together based on the groupings in the NeXus file. </LI>
     </UL>
-
     
     Based on LoadRaw by Russell Taylor, Tessella Support Services plc
 
