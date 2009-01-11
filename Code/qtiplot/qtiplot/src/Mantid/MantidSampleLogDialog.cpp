@@ -33,7 +33,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   
   m_tree = new QTreeWidget;
   QStringList titles;
-  titles << "File name";// << "Type";
+  titles << "File name" << "Type";
   m_tree->setHeaderLabels(titles);
   m_tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -93,7 +93,8 @@ void MantidSampleLogDialog::importSelectedFiles()
 */
 void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
 {
-  m_mantidUI->importSampleLog(item->text(0), item->data(0, Qt::UserRole).toString());
+  m_mantidUI->importSampleLog(item->text(0), item->data(0, Qt::UserRole).toString(), 
+			      item->data(1, Qt::UserRole).toBool());
 }
 
 
@@ -130,14 +131,24 @@ void MantidSampleLogDialog::init()
   for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();
        pItr != pEnd; ++pItr )
   {
-    if( !dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr) ) continue;
     //name() contains the full path, so strip to file name
     QString filename = QFileInfo((**pItr).name().c_str()).fileName();
     if( filename.size() > max_length ) max_length = filename.size();
-    //See what type of data we have
-    //Add tree item
     QTreeWidgetItem *treeItem = new QTreeWidgetItem(QStringList(filename));
     treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+    //See what type of data we have    
+    if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr) )
+    {
+      treeItem->setText(1, "numeric");
+      treeItem->setData(1, Qt::UserRole, true);
+    }
+    else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
+    {
+      treeItem->setText(1, "string");
+      treeItem->setData(1, Qt::UserRole, false);
+    }
+
+    //Add tree item
     m_tree->addTopLevelItem(treeItem);
   }
   

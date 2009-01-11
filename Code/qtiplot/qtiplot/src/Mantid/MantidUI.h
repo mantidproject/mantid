@@ -148,7 +148,7 @@ public slots:
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
 	MultiLayer* plotInstrumentSpectrumList(const QString&,std::vector<int>);
 
-  void importSampleLog(const QString & filename, const QString & data);
+	void importSampleLog(const QString & filename, const QString & data, bool numeric);
 
 public:
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);

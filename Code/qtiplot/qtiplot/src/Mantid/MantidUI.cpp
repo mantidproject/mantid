@@ -1303,7 +1303,7 @@ int MantidUI::createPropertyInputDialog(const QString & algName)
   
 }
 
-void MantidUI::importSampleLog(const QString & filename, const QString & data)
+void MantidUI::importSampleLog(const QString & filename, const QString & data, bool numeric)
 {
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
@@ -1327,7 +1327,8 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data)
   {
     QStringList ts = (*sItr).split(QRegExp("\\s+"));
     t->setText(row, 0, ts[1]);
-    t->setCell(row, 1, ts[2].toDouble());
+    if( numeric ) t->setCell(row, 1, ts[2].toDouble());
+    else t->setText(row, 1, ts[2]);
   }
 
   //Show table
@@ -1337,6 +1338,9 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data)
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal(); 
   
+  // For string data we are done
+  if( !numeric ) return;
+
   MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
   ml->askOnCloseEvent(false);
   ml->setAttribute(Qt::WA_DeleteOnClose);
