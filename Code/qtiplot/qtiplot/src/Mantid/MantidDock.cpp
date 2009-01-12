@@ -3,6 +3,9 @@
 #include "../ApplicationWindow.h"
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
+#include <MantidDataObjects/Workspace2D.h>
+#include <MantidDataObjects/ManagedWorkspace2D.h>
+#include <MantidDataHandling/ManagedRawFileWorkspace2D.h>
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -87,8 +90,12 @@ void MantidDockWidget::update()
             s += "Unknown";
         wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
         s = "Y axis: " + ws->YUnit();
-        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));         
-        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(ws->id()))));
+        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
+        QString WsType = "Workspace";
+        if (dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws.get())) WsType = "Workspace2D";
+        if (dynamic_cast<Mantid::DataObjects::ManagedWorkspace2D*>(ws.get())) WsType = "ManagedWorkspace2D";
+        if (dynamic_cast<Mantid::DataHandling::ManagedRawFileWorkspace2D*>(ws.get())) WsType = "ManagedRawFileWorkspace2D";
+        wsItem->addChild(new QTreeWidgetItem(QStringList(WsType)));
         wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
         m_tree->addTopLevelItem(wsItem);
     }

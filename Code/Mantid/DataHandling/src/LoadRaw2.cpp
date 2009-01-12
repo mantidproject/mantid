@@ -92,8 +92,32 @@ namespace Mantid
       // Read in the time bin boundaries 
       const int lengthIn = channelsPerSpectrum + 1;
 
+      // Call private method to validate the optional parameters, if set
+      checkOptionalProperties();
+            
+
+      // Calculate the size of a workspace, given its number of periods & spectra to read
+      int total_specs;
+      if( m_interval || m_list)
+      {
+        total_specs = m_spec_list.size();
+        if (m_interval)
+        {
+          total_specs += (m_spec_max-m_spec_min+1);
+          m_spec_max += 1;
+        }
+      }
+      else
+      {
+        total_specs = m_numberOfSpectra;
+        // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
+        m_spec_min = 1;
+        m_spec_max = m_numberOfSpectra + 1;
+      }
+
       // If there is not enough memory use ManagedRawFileWorkspace2D.
-      if (MemoryManager::Instance().goForManagedWorkspace(m_numberOfSpectra,lengthIn,channelsPerSpectrum))
+      if (MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) && 
+          total_specs == m_numberOfSpectra)
       {
           ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;
           DataObjects::Workspace2D_sptr localWorkspace( dynamic_cast<DataObjects::Workspace2D*>(localWorkspace_ptr) );
@@ -125,29 +149,6 @@ namespace Mantid
       boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
       
-      // Call private method to validate the optional parameters, if set
-      checkOptionalProperties();
-            
-
-      // Calculate the size of a workspace, given its number of periods & spectra to read
-      int total_specs;
-      if( m_interval || m_list)
-      {
-        total_specs = m_spec_list.size();
-        if (m_interval)
-        {
-          total_specs += (m_spec_max-m_spec_min+1);
-          m_spec_max += 1;
-        }
-      }
-      else
-      {
-        total_specs = m_numberOfSpectra;
-        // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
-        m_spec_min = 1;
-        m_spec_max = m_numberOfSpectra + 1;
-      }
-
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
