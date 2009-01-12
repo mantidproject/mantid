@@ -130,7 +130,7 @@ void ScriptWindow::closeEvent(QCloseEvent* event)
 
 void ScriptWindow::askSave()
 {
-  QMessageBox msgBox;
+  QMessageBox msgBox(this);
   msgBox.setWindowTitle("MantidPlot");
   msgBox.setText(tr("The script has been modified."));
   msgBox.setInformativeText(tr("Save changes?"));

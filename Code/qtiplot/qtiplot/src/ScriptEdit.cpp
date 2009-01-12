@@ -343,7 +343,7 @@ QString ScriptEdit::importASCII(const QString &filename)
 {
         if( !text().isEmpty() )
 	{
-	  QMessageBox msgBox;
+	  QMessageBox msgBox(this);
 	  msgBox.setWindowTitle(tr("MantidPlot - Save To File..."));
 	  msgBox.setText("The script window contents will be cleared.");
 	  msgBox.setInformativeText("Do you want to save your changes?");
