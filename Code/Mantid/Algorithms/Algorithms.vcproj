@@ -218,6 +218,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FindPeaks.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GeneralisedSecondDifference.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MergeRuns.cpp"
 				>
 			</File>
@@ -365,6 +373,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\FindPeaks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\GeneralisedSecondDifference.h"
 				>
 			</File>
 			<File
