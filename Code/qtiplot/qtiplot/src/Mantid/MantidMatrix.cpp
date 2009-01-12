@@ -802,23 +802,18 @@ void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
 
 void MantidMatrix::closeDependants()
 {
-  for( QVector<MultiLayer*>::iterator itr = m_plots2D.begin(); itr != m_plots2D.end(); )
+  while(m_plots2D.size())
   {
-    (*itr)->askOnCloseEvent(false);
-      //M.Gigg - Calling close deletes the key object and invalidates the iterator so 
-      //the post-fix operator is used to both increment and then return the old iterator
-    (*(itr++))->close();
-    }
-  
-  for( QMap<MultiLayer*,Table*>::iterator itr = m_plots1D.begin(); itr != m_plots1D.end(); )
-  {
-    itr.key()->askOnCloseEvent(false);
-     //M.Gigg - Calling close deletes the key object and invalidates the iterator so 
-    //the post-fix operator is used to both increment and then return the old iterator
-    (itr++).key()->close();
+      MultiLayer* ml = m_plots2D.front();
+      ml->askOnCloseEvent(false);
+      ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots2D
   }
-  m_plots2D.clear();
-  m_plots1D.clear();
+  while(m_plots1D.size())
+  {
+      MultiLayer* ml = m_plots1D.begin().key();
+      ml->askOnCloseEvent(false);
+      ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots1D
+  }
 }
 
 void MantidMatrix::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
