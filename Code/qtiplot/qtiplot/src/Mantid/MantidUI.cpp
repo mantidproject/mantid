@@ -535,12 +535,12 @@ Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool visible, bool
      for(int i=i0;i<=i1;i++)
      {
          kY = c*(i-i0)+1;
-         t->setColName(kY,"Y"+QString::number(i));
+         t->setColName(kY,"YS"+QString::number(i));
          if (errs)
          {
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"E"+QString::number(i));
+             t->setColName(kErr,"ES"+QString::number(i));
          }
          for(int j=0;j<m->numCols();j++)
          {
@@ -586,12 +586,12 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool visible, b
      for(int i=i0;i<=i1;i++)
      {
          kY = c*(i-i0)+1;
-         t->setColName(kY,"Y"+QString::number(i));
+         t->setColName(kY,"YB"+QString::number(i));
          if (errs)
          {
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"E"+QString::number(i));
+             t->setColName(kErr,"EB"+QString::number(i));
          }
          for(int j=0;j<numRows;j++)
          {
@@ -1103,12 +1103,12 @@ Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::
          const std::vector<double>& dataE = workspace->readE(index[i]);
     
          kY = c*i+1;
-         t->setColName(kY,"Y"+QString::number(index[i]));
+         t->setColName(kY,"YS"+QString::number(index[i]));
          if (errs)
          {
              kErr = 2*i + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"E"+QString::number(index[i]));
+             t->setColName(kErr,"ES"+QString::number(index[i]));
          }
          for(int j=0;j<numRows;j++)
          {
@@ -1183,13 +1183,13 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
     
 //         kY = c*i+1;
          kY = c*(i-i0)+1;
-         t->setColName(kY,"Y"+QString::number(i));//index(i)
+         t->setColName(kY,"YS"+QString::number(i));//index(i)
          if (errs)
          {
 //             kErr = 2*i + 2;
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
-             t->setColName(kErr,"E"+QString::number(i));//index(i)
+             t->setColName(kErr,"ES"+QString::number(i));//index(i)
          }
          for(int j=0;j<numRows;j++)
          {
@@ -1230,12 +1230,12 @@ Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::A
   for(int i = c0; i <= c1; i++)
   {
     kY = c*(i-c0)+1;
-    t->setColName(kY,"Y"+QString::number(i));
+    t->setColName(kY,"YB"+QString::number(i));
     if (errs)
     {
       kErr = 2*(i - c0) + 2;
       t->setColPlotDesignation(kErr,Table::yErr);
-      t->setColName(kErr,"E"+QString::number(i));
+      t->setColName(kErr,"EB"+QString::number(i));
     }
     for(int j = 0; j < numRows; j++)
       {

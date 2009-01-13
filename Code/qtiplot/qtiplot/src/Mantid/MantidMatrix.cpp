@@ -719,33 +719,52 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
 void MantidMatrix::repaintAll()
 {
     repaint();
-    for(int i=0;i<m_plots2D.size();i++)
+    QVector<MultiLayer*>::iterator vEnd  = m_plots2D.end();
+    for( QVector<MultiLayer*>::iterator vItr = m_plots2D.begin(); vItr != vEnd; ++vItr )
     {
-        Graph *g = m_plots2D[i]->activeGraph();
-        g->replot();
+      (*vItr)->activeGraph()->replot();
     }
-    for(QMap<MultiLayer*,Table*>::iterator it = m_plots1D.begin();it!=m_plots1D.end();it++)
+    QMap<MultiLayer*,Table*>::iterator mEnd = m_plots1D.end();
+    for(QMap<MultiLayer*,Table*>::iterator mItr = m_plots1D.begin(); mItr != mEnd;  ++mItr)
     {
-        Table* t = it.value();
-        if (!t) continue;
+        Table* t = mItr.value();
+        if ( !t ) continue;
         int charsToRemove = t->name().size() + 1;
-        for(int col=1;col<t->numCols();col++)
+	int nTableCols(t->numCols());
+        for(int col = 1; col < nTableCols; ++col)
         {
-            QString name = t->colName(col).remove(0,charsToRemove);
-            if (name.isEmpty()) break;
-            // Retrieve row number from the column name
-            QChar c = name[0];
-            name.remove(0,1);
-            int i = name.toInt();
-            if (i < 0 || i >= numRows()) break;
-            if (c == 'Y')
-                for(int j=0;j<numCols();j++)
-                {
-                    t->setCell(j,col, dataY(i,j));
-                }
+	  QString colName = t->colName(col).remove(0,charsToRemove);
+	  if( colName.isEmpty() ) break;
+	  //Need to determine whether the table was created from plotting a spectrum
+	  //or a time bin. A spectrum has a Y column name YS and a bin YB
+	  QString ident = colName.left(2);
+	  colName.remove(0,2); //This now contains the number in the MantidMatrix
+	  int matrixNumber = colName.toInt();
+	  if( matrixNumber < 0 ) break;
+	  bool errs = (ident[0] == QChar('E')) ? true : false;
+	  if( ident[1] == QChar('S') )
+	  {
+	    if( matrixNumber >= numRows() ) break;
+	    int endCount = numCols();
+	    for(int j = 0; j < endCount; ++j)
+	    {
+	      if( errs ) t->setCell(j, col, dataE(matrixNumber, j));
+	      else t->setCell(j, col, dataY(matrixNumber, j));
+	    }	    
+	  }
+	  else
+	  {
+	    if( matrixNumber >= numCols() ) break;
+	    int endCount = numRows();
+	    for(int j = 0; j < endCount; ++j)
+	    {
+	      if( errs ) t->setCell(j, col, dataE(j, matrixNumber));
+	      else t->setCell(j, col, dataY(j, matrixNumber));
+	    }
+	  }
         }
         t->notifyChanges();
-        Graph *g = it.key()->activeGraph();
+        Graph *g = mItr.key()->activeGraph();
         if (g) g->setAutoScale();
     }
 }
