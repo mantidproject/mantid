@@ -65,6 +65,11 @@ double Detector::getDistance(const IComponent& comp) const
   return ObjComponent::getDistance(comp);
 }
 
+double Detector::solidAngle(const V3D& observer) const
+{
+  return ObjComponent::solidAngle(observer);
+}
+
 bool Detector::isDead() const
 {
   return m_isDead;

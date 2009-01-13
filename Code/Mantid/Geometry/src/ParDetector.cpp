@@ -54,6 +54,11 @@ double ParDetector::getDistance(const IComponent& comp) const
   return ParObjComponent::getDistance(comp);
 }
 
+double ParDetector::solidAngle(const V3D& observer) const
+{
+  return ParObjComponent::solidAngle(observer);
+}
+
 bool ParDetector::isDead() const
 {
   return dynamic_cast<const Detector*>(m_base)->isDead();

@@ -125,7 +125,7 @@ public:
    */
   const bool isValid( const boost::shared_ptr<TYPE>& value ) const
   {
-    boost::shared_ptr<Kernel::Unit> unit = value->getAxis(0)->unit();
+    Kernel::Unit_const_sptr unit = value->getAxis(0)->unit();
     // If no unit has been given to the validator, just check that the workspace has a unit...
     if ( m_unitID.empty() )
     {

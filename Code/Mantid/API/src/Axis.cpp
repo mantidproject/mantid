@@ -11,7 +11,7 @@ namespace API
 
 /// Constructor
 Axis::Axis(const bool type, const int length) :
-  m_size(length), m_title(), m_unit(boost::shared_ptr<Kernel::Unit>()),
+  m_size(length), m_title(), m_unit(Kernel::Unit_sptr()),
   m_isSpectra(type), m_spectraValues(), m_numericValues()
 {
   if (m_isSpectra)
@@ -58,7 +58,7 @@ std::string& Axis::title()
 /** The unit for this axis
  *  @return A shared pointer to the unit object
  */
-const boost::shared_ptr<Kernel::Unit>& Axis::unit() const
+const Kernel::Unit_sptr& Axis::unit() const
 {
   return m_unit;
 }
@@ -66,7 +66,7 @@ const boost::shared_ptr<Kernel::Unit>& Axis::unit() const
 /** The unit object for this workspace (non const version)
  *  @return A shared pointer to the unit object
  */
-boost::shared_ptr<Kernel::Unit>& Axis::unit()
+Kernel::Unit_sptr& Axis::unit()
 {
   return m_unit;
 }

@@ -59,6 +59,13 @@ public:
    */
   virtual double getDistance(const IComponent& comp) const = 0;
 
+  /** Gives the approximate angle subtended by the detector
+   *  @param observer The point from which the detector is being viewed
+   *  @return The solid angle in steradians
+   *  @throw NullPointerException If geometrical form of the detector has not been provided in the instrument definition file
+   */
+  virtual double solidAngle(const V3D& observer) const = 0;
+
   /// Indicates whether the detector is to be regarded as dead
   virtual bool isDead() const = 0;
   /// Flag the detector as dead

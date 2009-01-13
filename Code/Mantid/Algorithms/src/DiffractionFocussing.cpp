@@ -162,7 +162,7 @@ Workspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Workspace
 {
   const std::string CONVERSION_UNIT = "dSpacing";
 
-  boost::shared_ptr<Kernel::Unit>& xUnit = workspace->getAxis(0)->unit();
+  Unit_const_sptr xUnit = workspace->getAxis(0)->unit();
 
   g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 

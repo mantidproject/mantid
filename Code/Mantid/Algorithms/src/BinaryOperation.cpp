@@ -80,8 +80,8 @@ namespace Mantid
 
     const bool BinaryOperation::checkCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
     {
-      boost::shared_ptr<Unit> lhs_unit = boost::shared_ptr<Unit>();
-      boost::shared_ptr<Unit> rhs_unit = boost::shared_ptr<Unit>();
+      Unit_sptr lhs_unit = Unit_sptr();
+      Unit_sptr rhs_unit = Unit_sptr();
       if ( lhs->axes() && rhs->axes() ) // If one of these is a WorkspaceSingleValue then we don't want to check units match
       {
         lhs_unit = lhs->getAxis(0)->unit();

@@ -88,6 +88,23 @@ double DetectorGroup::getDistance(const IComponent& comp) const
   return getPos().distance(comp.getPos());
 }
 
+/** Gives the total solid angle subtended by a group of detectors by summing the
+ *  contributions from the individual detectors.
+ *  @param observer The point from which the detector is being viewed
+ *  @return The solid angle in steradians
+ *  @throw NullPointerException If geometrical form of any detector has not been provided in the instrument definition file
+ */
+double DetectorGroup::solidAngle(const V3D& observer) const
+{
+  double result = 0.0;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    result += (*it).second->solidAngle(observer);
+  }
+  return result;
+}
+
 bool DetectorGroup::isDead() const
 {
   bool isDead = true;

@@ -53,9 +53,10 @@ public:
 	void setID(int);
 
 	// IDetector methods
-    int getID() const;
+	int getID() const;
 	V3D getPos() const;
 	double getDistance(const IComponent& comp) const;
+  double solidAngle(const V3D& observer) const; 
 	bool isDead() const;
 	void markDead();
 	bool isMonitor() const;

@@ -98,7 +98,7 @@ std::list<API::Workspace_sptr> MergeRuns::validateInputs(const std::vector<std::
 {
   std::list<Workspace_sptr> inWS;
   int numSpec;
-  boost::shared_ptr<Unit> unit;
+  Unit_sptr unit;
   bool dist;
   // Going to check that name of instrument matches - think that's the best possible at the moment
   //   because if instrument is created from raw file it'll be a different object

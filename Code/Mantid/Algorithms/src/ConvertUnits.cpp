@@ -66,7 +66,7 @@ void ConvertUnits::exec()
 
   // Check that the input workspace doesn't already have the desired unit.
   // If it does, just set the output workspace to point to the input one.
-  boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
+  Kernel::Unit_sptr inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
   if ( inputUnit->unitID() == targetUnit )
   {
@@ -84,7 +84,7 @@ void ConvertUnits::exec()
   }
 
   // Set the final unit that our output workspace will have
-  boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
+  Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
 
   // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
   const bool distribution = outputWS->isDistribution(inputWS->isDistribution());
@@ -224,7 +224,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
  * @param fromUnit The unit of the input workspace
  * @param outputWS The output workspace
  */
-void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<Kernel::Unit> fromUnit, API::Workspace_sptr outputWS)
+void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::Workspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -233,7 +233,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<K
 
   // Get the unit object for each workspace
   //boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
-  boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit();
+  Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();

@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -103,6 +104,10 @@ private:
   static ConversionsMap s_conversionFactors;
 };
 
+/// Shared pointer to the Unit base class
+typedef boost::shared_ptr<Unit> Unit_sptr;
+/// Shared pointer to the Unit base class (const version)
+typedef boost::shared_ptr<const Unit> Unit_const_sptr;
 
 
 //----------------------------------------------------------------------

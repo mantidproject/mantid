@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
@@ -17,14 +18,6 @@
 
 namespace Mantid
 {
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-namespace Kernel
-{
-  class Unit;
-}
-
 namespace API
 {
 //----------------------------------------------------------------------
@@ -73,8 +66,8 @@ public:
   const std::string& title() const;
   std::string& title();
 
-  const boost::shared_ptr<Kernel::Unit>& unit() const;
-  boost::shared_ptr<Kernel::Unit>& unit();
+  const Kernel::Unit_sptr& unit() const;
+  Kernel::Unit_sptr& unit();
 
   const bool isSpectra() const;
   const bool isNumeric() const;
@@ -100,7 +93,7 @@ private:
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis
-  boost::shared_ptr<Kernel::Unit> m_unit;
+  Kernel::Unit_sptr m_unit;
   /// Is this axis of spectra or numeric type? if true it's spectra
   const bool m_isSpectra;
   /// A vector holding the axis values for a spectra axis. Empty otherwise.
