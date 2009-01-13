@@ -7,7 +7,7 @@
 # Author Martyn Gigg, Tessella Support Services
 #
 #----------------------------------
-MantidUIImports = ['newMantidMatrix','plotInstrumentSpectrum','plotTimeBin']
+MantidUIImports = ['newMantidMatrix','plotSpectrum','plotTimeBin','getMantidMatrix']
 
 for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))

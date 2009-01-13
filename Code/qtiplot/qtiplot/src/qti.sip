@@ -1719,13 +1719,14 @@ sipTypeDef *t;
     sipClass = sipModuleAPI_qti.em_types[i];
 %End
 
-public:
+public:  
+  MultiLayer* plotSpectrum(const QString&,int,bool = false);
+  MantidMatrix* getMantidMatrix(const QString &);
+  MultiLayer* plotTimeBin(const QString&,int,bool = false);  
   MantidMatrix* newMantidMatrix(const QString&, int=-1, int=-1);
 %MethodCode
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
-  MultiLayer* plotInstrumentSpectrum(const QString&, int);
-  MultiLayer* plotTimeBin(const QString&, int);
   int createPropertyInputDialog(const QString & algName);
   private:
 MantidUI(const MantidUI &);

@@ -88,8 +88,10 @@ public:
 
 
   // Command purely for python interaction
+  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showMatrix = false);
+  MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  MultiLayer* plotTimeBin(const QString& wsName, int bin);
+  MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
   int createPropertyInputDialog(const QString & algName);
 
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
@@ -117,7 +119,7 @@ public slots:
     void loadWorkspace();
     void loadDAEWorkspace();
     void deleteWorkspace();
-    MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true);
+  MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
     void importWorkspace();
     void copyRowToTable();
     void copyColumnToTable();

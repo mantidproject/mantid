@@ -358,7 +358,7 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 
 }
 
-MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg)
+MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
     Workspace_sptr ws;
   	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -394,7 +394,8 @@ MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg)
     connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
 
     appWindow()->d_workspace->addSubWindow(w);
-    w->showNormal(); 
+    if( makeVisible ) w->showNormal(); 
+    else w->showMinimized();
     return w;
 }
 
@@ -573,9 +574,8 @@ Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool visible, b
 
      int c = errs?2:1;
      int numRows = m->numRows();
-
-	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
-	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
+     Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
+     appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-"));
      if (visible) 
      {
          t->showNormal();
@@ -611,7 +611,7 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
 {
     Table *t = createTableFromSelectedRows(m,visible,errs,true);
     if (!t) return;
-
+    t->showNormal();
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
     Graph *g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
@@ -623,7 +623,7 @@ void MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool visible, boo
 {
     Table *t = createTableFromSelectedColumns(m,visible,errs);
     if (!t) return;
-
+    t->showNormal();
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
     Graph *g = ml->activeGraph();
     appWindow()->polishGraph(g,Graph::Line);
@@ -900,7 +900,7 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::Algorithm* alg)
 	    return;
     }
 
-    MantidMatrix *m = importWorkspace(dae->m_WorkspaceName,false);
+    MantidMatrix *m = importWorkspace(dae->m_WorkspaceName,false, true);
 
     if (dae->m_UpdateInterval > 0)
     {
@@ -1133,29 +1133,30 @@ Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::
      return t;
  }
 
-MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin)
+MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatrix)
 {
-     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-     Table *t = createTableFromSelectedColumns(wsName,workspace,bin,bin,false,false);
-     MultiLayer* ml(NULL);
-    if (!t) return ml;
-
-    ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-    ml->askOnCloseEvent(false);
-    ml->setAttribute(Qt::WA_QuitOnClose);
-    Graph* g = ml->activeGraph();
-    appWindow()->polishGraph(g,Graph::Line);
-    g->setTitle(tr("Workspace ")+ wsName);
-    Mantid::API::Axis* ax;
-    ax = workspace->getAxis(0);
-    std::string s;
-    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
-    else
-        s = "X axis";
-    g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
-    return ml;
- 
+  MantidMatrix* m = getMantidMatrix(wsName);
+  if( !m )
+  {
+    m = importWorkspace(wsName, false, showMatrix);
+  }
+  Workspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  }
+  if( !ws.get() ) return NULL;
+  
+  Table *t = createTableFromSelectedColumns(wsName, ws, bin, bin, false, false);
+  MultiLayer* ml(NULL);
+  if( !t ) return ml;
+  
+  ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+  Graph *g = ml->activeGraph();
+  appWindow()->polishGraph(g,Graph::Line);
+  m->setGraph1D(ml,t);
+  ml->askOnCloseEvent(false);
+  return ml;
 }
 
 Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs, bool forPlotting)
@@ -1253,6 +1254,50 @@ Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::A
   return t;
 }
 
+//For python scripts we don't click and import a matrix so that we can plot
+//spectra from it so this command is does an import of a workspace and then plots
+//the requested spectrum
+MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMatrix)
+{
+  MantidMatrix* m = getMantidMatrix(wsName);
+  if( !m )
+  {
+    m = importWorkspace(wsName, false, showMatrix);
+  }
+  Workspace_sptr ws;
+  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  }
+  if (!ws.get()) return NULL;
+  
+  Table *t = createTableFromSelectedRows(wsName, ws, spec, spec, false, false);
+  MultiLayer* ml(NULL);
+  if (!t) return ml;
+
+  ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+  Graph *g = ml->activeGraph();
+  appWindow()->polishGraph(g,Graph::Line);
+  m->setGraph1D(ml,t);
+  ml->askOnCloseEvent(false);
+  return ml;
+}
+
+MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
+{
+  QList<MdiSubWindow*> windows = appWindow()->windowsList();
+  QListIterator<MdiSubWindow*> itr(windows);
+  MantidMatrix* m(0);
+  while( itr.hasNext() )
+  {
+    MdiSubWindow *w = itr.next();
+    if( w->isA("MantidMatrix") && w->name() == wsName )
+    {
+      m = qobject_cast<MantidMatrix*>(w);
+    }
+  }
+  return m;
+}
 
 MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
 {

@@ -1310,7 +1310,7 @@ void Graph::exportImage(const QString& fileName, int quality, bool transparent)
 	pic.save(fileName, 0, quality);
 }
 
-void Graph::exportVector(const QString& fileName, int res, bool color, bool keepAspect, QPrinter::PageSize pageSize)
+void Graph::exportVector(const QString& fileName, int, bool color, bool keepAspect, QPrinter::PageSize pageSize)
 {
 	if ( fileName.isEmpty() ){
 		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
@@ -2918,16 +2918,8 @@ void Graph::insertCurve(Graph* g, int i)
 {
   if( g == this ) return;
   
-  QwtPlotCurve* c = g->curve(i);
-  if( c ) {
-    insertPlotItem(c,Graph::Line);
-    CurveLayout cl = initCurveLayout();
-    int colour, symbol;
-    guessUniqueCurveLayout(colour, symbol);
-    c->setPen(QPen(ColorBox::color(colour)));
-    setAutoScale();
-  }
-
+  DataCurve *dc = static_cast<DataCurve *>(g->curve(i));
+  if( dc ) addCurves(dc->table(), QStringList(dc->table()->colName(1)));
 }
 
 
