@@ -8,10 +8,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "Poco/Mutex.h"
 #include "Poco/ScopedLock.h"
 #include "Poco/Thread.h"
+
+#include <iostream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -55,7 +58,7 @@ void WorkspaceTracerImpl::AlgorithmChain::executeChain()
  */
 void WorkspaceTracerImpl::handleAfterReplaceNotification(Mantid::API::WorkspaceAfterReplaceNotification_ptr  pNf)
 {
-  if( !m_isRunning )
+  if( m_isSwitchedOn && !m_isRunning )
   {
     executeTrace(pNf->object_name());
   }
@@ -70,8 +73,19 @@ void WorkspaceTracerImpl::handleAfterReplaceNotification(Mantid::API::WorkspaceA
 WorkspaceTracerImpl::WorkspaceTracerImpl() :
   m_wkspAftReplaceObserver(*this, &Mantid::API::WorkspaceTracerImpl::handleAfterReplaceNotification), 
   executeTrace(this, &Mantid::API::WorkspaceTracerImpl::executeTraceImpl),
-  m_strWsName(""), m_vecAlgHistories(), m_algChain(), m_mutex(), m_isRunning(false)
+  m_strWsName(""), m_vecAlgHistories(), m_algChain(), m_mutex(), m_isRunning(false), 
+  m_isSwitchedOn(false)
 {
+  std::cerr << "WorkspaceTracer object created.\n";
+  //Check the configure properties to see if we should switch it on
+  int isOn(-1);
+  int result = Kernel::ConfigService::Instance().getValue("AlgorithmChaining.SwitchedOn", isOn);
+  if( result == 0 ) m_isSwitchedOn = false;
+  else
+  {
+    if( isOn > 0 ) m_isSwitchedOn = true;
+    else m_isSwitchedOn = false;
+  }
 }
 
 /**
@@ -82,18 +96,21 @@ WorkspaceTracerImpl::~WorkspaceTracerImpl()
 }
 
 /**
- * Executes in a separated thread
- * The name of the replaced workspace
+ * Executes in a separate thread
+ * @param wsname The name of the replaced workspace
  */
-Poco::Void WorkspaceTracerImpl::executeTraceImpl(const std::string & arg)
+Poco::Void WorkspaceTracerImpl::executeTraceImpl(const std::string & wsname)
 {
   Poco::ScopedLock<Poco::Mutex> s_lock(m_mutex);
   m_isRunning = true;
 
-  // I don't really like this
+  // When the workspace replace signal is received, the algorithm that
+  // caused it hasn't finised yet. This waits until that occurs, however, maybe using
+  // the finished notification as well would be better but I don't know how to get this to
+  // listen for those events
   Poco::Thread::sleep(2000);
 
-  m_strWsName = arg;
+  m_strWsName = wsname;
   createAlgorithmList();
   
   m_algChain.executeChain();
@@ -103,7 +120,6 @@ Poco::Void WorkspaceTracerImpl::executeTraceImpl(const std::string & arg)
 
 /**
  * Find the list algorithms to run given that the workspace indicated has been refreshed
- * @params wsName The name of the workspace that has been refreshed
  */
 void WorkspaceTracerImpl::createAlgorithmList()
 {

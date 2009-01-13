@@ -180,6 +180,8 @@ private:
 
   Poco::Mutex m_mutex;
   bool m_isRunning;
+
+  bool m_isSwitchedOn;
   
   //A reference to the logger
   static Kernel::Logger& g_log;
