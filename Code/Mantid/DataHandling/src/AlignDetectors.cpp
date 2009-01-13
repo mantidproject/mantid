@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AlignDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <fstream>
@@ -68,12 +67,12 @@ void AlignDetectors::exec()
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
   // Get a pointer to the instrument contained in the workspace
-  boost::shared_ptr<API::IInstrument> instrument = inputWS->getInstrument();
+  IInstrument_const_sptr instrument = inputWS->getInstrument();
   // And one to the SpectraDetectorMap
-  boost::shared_ptr<API::SpectraDetectorMap> specMap = inputWS->getSpectraMap();
+  SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
 
   // Get the distance between the source and the sample (assume in metres)
-  boost::shared_ptr<Geometry::IObjComponent> sample = instrument->getSample();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double l1;
   try
   {
@@ -98,7 +97,7 @@ void AlignDetectors::exec()
       const int spec = inputWS->getAxis(1)->spectraNo(i);
       // Loop over the detectors that contribute to this spectrum and calculate the average correction
       const int ndets = specMap->ndet(spec);
-      std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specMap->getDetectors(spec);
+      std::vector<Geometry::IDetector_sptr> dets = specMap->getDetectors(spec);
       double factor = 0.0;
       for (int j = 0; j < ndets; ++j)
       {

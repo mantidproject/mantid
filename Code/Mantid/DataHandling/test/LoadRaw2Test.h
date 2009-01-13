@@ -185,7 +185,7 @@ public:
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "0");
+    loader3.setPropertyValue("spectrum_max", "1");
      loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 

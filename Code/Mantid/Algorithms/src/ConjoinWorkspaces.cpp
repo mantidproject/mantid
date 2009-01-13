@@ -127,15 +127,15 @@ void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Work
 {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
-  const boost::shared_ptr<const SpectraDetectorMap> specmap1 = ws1->getSpectraMap();
+  const SpectraMap_const_sptr specmap1 = ws1->getSpectraMap();
   std::set<int> spectra, detectors;
   const int& nhist1 = ws1->getNumberHistograms();
   for (int i = 0; i < nhist1; ++i)
   {
     const int spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specmap1->getDetectors(spectrum);
-    std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
+    const std::vector<Geometry::IDetector_sptr> dets = specmap1->getDetectors(spectrum);
+    std::vector<Geometry::IDetector_sptr>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       detectors.insert((*it)->getID());
@@ -144,7 +144,7 @@ void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Work
 
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
   const Axis* axis2 = ws2->getAxis(1);
-  const boost::shared_ptr<const SpectraDetectorMap> specmap2 = ws2->getSpectraMap();
+  const SpectraMap_const_sptr specmap2 = ws2->getSpectraMap();
   const int& nhist2 = ws2->getNumberHistograms();
   for (int j = 0; j < nhist2; ++j)
   {
@@ -154,8 +154,8 @@ void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Work
       g_log.error("The input workspaces overlap");
       throw std::invalid_argument("The input workspaces overlap");
     }
-    std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specmap2->getDetectors(spectrum);
-    std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
+    std::vector<Geometry::IDetector_sptr> dets = specmap2->getDetectors(spectrum);
+    std::vector<Geometry::IDetector_sptr>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       if ( detectors.find((*it)->getID()) != detectors.end() )

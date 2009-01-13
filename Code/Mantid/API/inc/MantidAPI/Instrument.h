@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_INSTRUMENT_H_
-#define MANTID_KERNEL_INSTRUMENT_H_
+#ifndef MANTID_API_INSTRUMENT_H_
+#define MANTID_API_INSTRUMENT_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -56,10 +56,10 @@ public:
   ///Virtual destructor
   virtual ~Instrument() {}
 
-  boost::shared_ptr<Geometry::IObjComponent> getSource() const;
-  boost::shared_ptr<Geometry::IObjComponent> getSample() const;
-  boost::shared_ptr<Geometry::IDetector> getDetector(const int &detector_id) const;
-  const double detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector> ) const;
+  Geometry::IObjComponent_sptr getSource() const;
+  Geometry::IObjComponent_sptr getSample() const;
+  Geometry::IDetector_sptr getDetector(const int &detector_id) const;
+  const double detectorTwoTheta(Geometry::IDetector_const_sptr) const;
 
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -80,11 +80,11 @@ public:
   void markAsMonitor(Geometry::IDetector*);
 
   /// return reference to detector cache 
-  std::map<int,  boost::shared_ptr<Geometry::IDetector> > getDetectors();
+  std::map<int, Geometry::IDetector_sptr> getDetectors();
 
   /// Get pointers to plottable components
-  std::vector< boost::shared_ptr<Geometry::IObjComponent> > getPlottable()const;
-  void appendPlottable(const Geometry::CompAssembly& ca,std::vector< boost::shared_ptr<Geometry::IObjComponent> >& lst)const;
+  std::vector< Geometry::IObjComponent_sptr > getPlottable()const;
+  void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst)const;
 
   std::string getName()const{return Geometry::CompAssembly::getName();}
 
@@ -114,4 +114,4 @@ private:
 
 } // namespace API
 } //Namespace Mantid
-#endif /*MANTID_KERNEL_INSTRUMENT_H_*/
+#endif /*MANTID_APIINSTRUMENT_H_*/

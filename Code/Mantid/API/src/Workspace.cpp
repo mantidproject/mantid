@@ -85,7 +85,7 @@ void Workspace::setComment(const std::string& c)
  *
  * \param map:: Shared pointer to the SpectraDetectorMap
  */
-void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
+void Workspace::setSpectraMap(const SpectraMap_sptr& map)
 {
 	sptr_spectramap=map;
 }
@@ -94,7 +94,7 @@ void Workspace::setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
  *
  * \param map:: Shared pointer to the SpectraDetectorMap
  */
-void Workspace::copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
+void Workspace::copySpectraMap(const SpectraMap_sptr& map)
 {
 	sptr_spectramap->copy(*map);
 }
@@ -103,7 +103,7 @@ void Workspace::copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map)
  *
  * \param instr Shared pointer to an instrument.
  */
-void Workspace::setInstrument(const boost::shared_ptr<IInstrument>& instr)
+void Workspace::setInstrument(const IInstrument_sptr& instr)
 {
     boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
     if (tmp)
@@ -153,7 +153,7 @@ const std::string& Workspace::getComment() const
  *
  *  @return The SpectraDetectorMap
  */
-boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
+SpectraMap_sptr Workspace::getSpectraMap() const
 {
   return sptr_spectramap;
 }
@@ -162,7 +162,7 @@ boost::shared_ptr<SpectraDetectorMap> Workspace::getSpectraMap() const
  *
  *  @return The instrument class
  */
-boost::shared_ptr<IInstrument> Workspace::getInstrument()const
+IInstrument_sptr Workspace::getInstrument()const
 {
     if ( sptr_parmap->size() == 0 )  return sptr_instrument;
     ParInstrument* pi = new ParInstrument(sptr_instrument,sptr_parmap);

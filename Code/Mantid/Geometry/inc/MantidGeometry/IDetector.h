@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -71,6 +72,11 @@ public:
 	/// Virtual destructor
 	virtual ~IDetector() {}
 };
+
+/// Shared pointer to IDetector
+typedef boost::shared_ptr<Mantid::Geometry::IDetector> IDetector_sptr;
+/// Shared pointer to IDetector (const version)
+typedef const boost::shared_ptr<const Mantid::Geometry::IDetector> IDetector_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

@@ -27,7 +27,7 @@ namespace Mantid
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
     SpectraDetectorMap::SpectraDetectorMap(const Workspace* ws)
-        :m_workspace(ws),_s2dmap(new smap)
+        : _s2dmap(new smap), m_workspace(ws)
     {
     }
 
@@ -110,9 +110,9 @@ namespace Mantid
       return _s2dmap->count(spectrum_number);
     }
 
-    std::vector<boost::shared_ptr<Geometry::IDetector> > SpectraDetectorMap::getDetectors(const int spectrum_number) const
+    std::vector<Geometry::IDetector_sptr> SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {
-      std::vector<boost::shared_ptr<Geometry::IDetector> > detectors;
+      std::vector<Geometry::IDetector_sptr> detectors;
       int ndets=ndet(spectrum_number);
 
       if (ndets<1)
@@ -122,7 +122,7 @@ namespace Mantid
       }
       if (!m_workspace)
           throw std::runtime_error("SpectraDetectorMap has not been populated.");
-      boost::shared_ptr<IInstrument> instr = m_workspace->getInstrument();
+      IInstrument_const_sptr instr = m_workspace->getInstrument();
       std::pair<smap_it,smap_it> det_range=_s2dmap->equal_range(spectrum_number);
       for (smap_it it=det_range.first; it!=det_range.second; ++it)
       {
@@ -156,7 +156,7 @@ namespace Mantid
     *  the returned object's concrete type will be DetectorGroup.
     *  @todo Write a test for this method
     */
-    boost::shared_ptr<Geometry::IDetector> SpectraDetectorMap::getDetector(const int spectrum_number) const
+    Geometry::IDetector_sptr SpectraDetectorMap::getDetector(const int spectrum_number) const
     {
       if (!m_workspace)
           throw std::runtime_error("SpectraDetectorMap has not been populated.");
@@ -175,9 +175,9 @@ namespace Mantid
           return m_workspace->getInstrument()->getDetector(id);
       }
 
-          std::vector<boost::shared_ptr<Geometry::IDetector> > tmp = getDetectors(spectrum_number);
+      std::vector<Geometry::IDetector_sptr> tmp = getDetectors(spectrum_number);
       // Else need to construct a DetectorGroup and return that
-      return boost::shared_ptr<IDetector>(new Geometry::DetectorGroup(getDetectors(spectrum_number)));
+      return Geometry::IDetector_sptr(new Geometry::DetectorGroup(getDetectors(spectrum_number)));
     }
 
     /** Gets a list of spectra corresponding to a list of detector numbers.

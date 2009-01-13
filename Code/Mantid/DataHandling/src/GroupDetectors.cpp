@@ -4,7 +4,6 @@
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <set>
 #include <numeric>
@@ -78,8 +77,8 @@ void GroupDetectors::exec()
   {// Dealing with DetectorList
     const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
-    boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
-     std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
+    SpectraMap_const_sptr spectraMap = WS->getSpectraMap();
+    std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }

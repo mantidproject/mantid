@@ -227,16 +227,16 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<Kernel::Unit> fromUnit, API::Workspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
-  boost::shared_ptr<API::IInstrument> instrument = outputWS->getInstrument();
+  IInstrument_const_sptr instrument = outputWS->getInstrument();
   // And one to the SpectraDetectorMap
-  boost::shared_ptr<API::SpectraDetectorMap> specMap = outputWS->getSpectraMap();
+  SpectraMap_const_sptr specMap = outputWS->getSpectraMap();
 
   // Get the unit object for each workspace
   //boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
   boost::shared_ptr<Unit> outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
-  boost::shared_ptr<Geometry::IObjComponent> sample = instrument->getSample();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double l1;
   try
   {
@@ -269,7 +269,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, boost::shared_ptr<K
       // Get the spectrum number for this histogram
       const int spec = outputWS->getAxis(1)->spectraNo(i);
       // Now get the detector to which this relates
-      boost::shared_ptr<Geometry::IDetector> det = specMap->getDetector(spec);
+      Geometry::IDetector_const_sptr det = specMap->getDetector(spec);
       Geometry::V3D detPos = det->getPos();
       // Get the sample-detector distance for this detector (in metres)
       double l2, twoTheta;
@@ -356,13 +356,13 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspac
 {
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
-  boost::shared_ptr<SpectraDetectorMap> specMap = workspace->getSpectraMap();
+  SpectraMap_const_sptr specMap = workspace->getSpectraMap();
   Axis* specAxis = workspace->getAxis(1);
   const int numSpec = workspace->getNumberHistograms();
   for (int i = 0; i < numSpec; ++i)
   {
     try {
-      boost::shared_ptr<Geometry::IDetector> det = specMap->getDetector(specAxis->spectraNo(i));
+      Geometry::IDetector_const_sptr det = specMap->getDetector(specAxis->spectraNo(i));
       if ( !det->isMonitor() && !det->isDead() )
       {
         const std::vector<double> XData = workspace->readX(i);

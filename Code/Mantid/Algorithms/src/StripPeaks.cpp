@@ -9,7 +9,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(StripPeaks)
+//DECLARE_ALGORITHM(StripPeaks)
 
 using namespace Kernel;
 using namespace API;
@@ -168,9 +168,9 @@ void StripPeaks::fitPeaks(API::Workspace_sptr WS)
     const double height = fit->getProperty("height");
     if ( height < 0 ) fitStatus.clear();              // Height must be positive
     const double background = fit->getProperty("bg0");
-    //if ( background < 0 ) fitStatus.clear();          // So must background
+    if ( background < 0 ) fitStatus.clear();          // So must background
     const double width = fit->getProperty("sigma");
-    //if ( std::abs(width) > 0.03 ) fitStatus.clear();  // Peak shouldn't be too broad
+    if ( std::abs(width) > 0.03 ) fitStatus.clear();  // Peak shouldn't be too broad
 
     // If the fit converged, update the values for this peak
     if ( ! fitStatus.compare("success") )

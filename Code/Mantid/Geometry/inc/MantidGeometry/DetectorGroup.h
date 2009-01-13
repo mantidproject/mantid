@@ -47,10 +47,10 @@ namespace Geometry
 class DLLExport DetectorGroup : public IDetector
 {
 public:
-    DetectorGroup(const std::vector<boost::shared_ptr<IDetector> >& dets);
+  DetectorGroup(const std::vector<IDetector_sptr>& dets);
   virtual ~DetectorGroup();
 
-  void addDetector(boost::shared_ptr<IDetector> det);
+  void addDetector(IDetector_sptr det);
 
   // IDetector methods
   int getID() const;
@@ -71,7 +71,7 @@ private:
   /// The type of collection used for the detectors
   ///          - a map of detector pointers with the detector ID as the key
   // May want to change this to a hash_map in due course
-  typedef std::map<int, boost::shared_ptr<IDetector> > DetCollection;
+  typedef std::map<int, IDetector_sptr> DetCollection;
   /// The collection of grouped detectors
   DetCollection m_detectors;
 

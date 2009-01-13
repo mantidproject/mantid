@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Unwrap.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -128,9 +127,9 @@ void Unwrap::exec()
 const double Unwrap::getPrimaryFlightpath() const
 {
   // Get a pointer to the instrument contained in the input workspace
-  boost::shared_ptr<API::IInstrument> instrument = m_inputWS->getInstrument();
+  IInstrument_const_sptr instrument = m_inputWS->getInstrument();
   // Get the distance between the source and the sample
-  boost::shared_ptr<Geometry::IObjComponent> sample = instrument->getSample();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double L1;
   try
   {
@@ -161,7 +160,7 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
     // Get the spectrum number for this histogram
     const int spec = m_inputWS->getAxis(1)->spectraNo(spectrum);
     // Get the detector object for this histogram
-    boost::shared_ptr<Geometry::IDetector> det = m_inputWS->getSpectraMap()->getDetector(spec);
+    Geometry::IDetector_const_sptr det = m_inputWS->getSpectraMap()->getDetector(spec);
     // Get the sample-detector distance for this detector (or source-detector if a monitor)
     // This is the total flightpath
     isMonitor = det->isMonitor();

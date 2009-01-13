@@ -1,11 +1,10 @@
-#ifndef MANTID_KERNEL_IINSTRUMENT_H_
-#define MANTID_KERNEL_IINSTRUMENT_H_
+#ifndef MANTID_API_IINSTRUMENT_H_
+#define MANTID_API_IINSTRUMENT_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-//#include "MantidGeometry/CompAssembly.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Detector.h"
 #include <boost/shared_ptr.hpp>
@@ -19,9 +18,7 @@ namespace API
 
 class Geometry::IObjComponent;
 
-/** @class IInstrument IInstrument.h
-
- 	IInstrument Class. The abstract instrument class it is the base for 
+/** IInstrument Class. The abstract instrument class it is the base for 
     Instrument and ParInstrument classes.
 
     @author Nick Draper, ISIS, RAL
@@ -58,22 +55,26 @@ public:
   ///Virtual destructor
   virtual ~IInstrument() {}
 
-  virtual boost::shared_ptr<Geometry::IObjComponent> getSource() const = 0;
-  virtual boost::shared_ptr<Geometry::IObjComponent>  getSample() const = 0;
-  virtual boost::shared_ptr<Geometry::IDetector> getDetector(const int &detector_id) const = 0;
-  virtual const double detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector>) const = 0;
+  virtual Geometry::IObjComponent_sptr getSource() const = 0;
+  virtual Geometry::IObjComponent_sptr getSample() const = 0;
+  virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
+  virtual const double detectorTwoTheta(Geometry::IDetector_const_sptr) const = 0;
 
   virtual std::string getName() const = 0;
 
-
   /// return reference to detector cache 
-  virtual std::map<int,  boost::shared_ptr<Geometry::IDetector> > getDetectors() = 0;
+  virtual std::map<int, Geometry::IDetector_sptr> getDetectors() = 0;
 
   /// Get pointers to plottable components
-  virtual std::vector< boost::shared_ptr<Geometry::IObjComponent> > getPlottable()const = 0;
-
+  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable()const = 0;
 };
 
+/// Shared pointer to IInstrument
+typedef boost::shared_ptr<IInstrument> IInstrument_sptr;
+/// Shared pointer to IInstrument (const version)
+typedef const boost::shared_ptr<const IInstrument> IInstrument_const_sptr;
+
 } // namespace API
-} //Namespace Mantid
+} // namespace Mantid
+
 #endif /*MANTID_KERNEL_PARINSTRUMENT_H_*/

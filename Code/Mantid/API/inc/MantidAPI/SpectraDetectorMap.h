@@ -75,9 +75,9 @@ public:
   /// Return number of detectors contributing to this spectrum
   const int ndet(const int spber) const;
   /// Get a vector of IDetector contributing to a spectrum
-  std::vector<boost::shared_ptr<Geometry::IDetector> > getDetectors(const int spectrum_number) const;
+  std::vector<Geometry::IDetector_sptr> getDetectors(const int spectrum_number) const;
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum number
-  boost::shared_ptr<Geometry::IDetector> getDetector(const int spectrum_number) const;
+  Geometry::IDetector_sptr getDetector(const int spectrum_number) const;
   /// Gets a list of spectra corresponding to a list of detector numbers
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map
@@ -99,8 +99,12 @@ private:
   static Kernel::Logger& g_log;
 };
 
-} // Namespace API
+/// Shared pointer to the SpectraDetectorMap
+typedef boost::shared_ptr<SpectraDetectorMap> SpectraMap_sptr;
+/// Shared pointer to the SpectraDetectorMap (const version)
+typedef const boost::shared_ptr<const SpectraDetectorMap> SpectraMap_const_sptr;
 
+} // Namespace API
 } // Namespace Mantid
 
 #endif /*SPECTRADETECTORMAP_*/

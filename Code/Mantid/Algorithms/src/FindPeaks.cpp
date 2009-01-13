@@ -395,7 +395,7 @@ void FindPeaks::fitPeak(const API::Workspace_sptr &input, const int spectrum, co
       const double bgintercept = fit->getProperty("bg0");
       const double bgslope = fit->getProperty("bg1");
       g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height 
-                    << ", Background sl " << bgslope << " " << bgintercept << std::endl;
+                    << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
       DataObjects::TableRow t = m_peaks->appendRow();
       t << spectrum << centre << width << height << bgintercept << bgslope;
       break;

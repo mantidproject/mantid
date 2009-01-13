@@ -41,9 +41,9 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(0);
-      declareProperty("spectrum_min",0, mustBePositive);
-      declareProperty("spectrum_max",0, mustBePositive->clone());
+      mustBePositive->setLower(1);
+      declareProperty("spectrum_min",1, mustBePositive);
+      declareProperty("spectrum_max",1, mustBePositive->clone());
 
       declareProperty(new ArrayProperty<int>("spectrum_list"));
     }

@@ -60,10 +60,10 @@ public:
   ///Virtual destructor
   virtual ~ParInstrument() {}
 
-  virtual boost::shared_ptr<Geometry::IObjComponent> getSource() const;
-  virtual boost::shared_ptr<Geometry::IObjComponent>  getSample() const;
-  virtual boost::shared_ptr<Geometry::IDetector> getDetector(const int &detector_id) const;
-  virtual const double detectorTwoTheta(const boost::shared_ptr<Geometry::IDetector>) const;
+  virtual Geometry::IObjComponent_sptr getSource() const;
+  virtual Geometry::IObjComponent_sptr  getSample() const;
+  virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const;
+  virtual const double detectorTwoTheta(Geometry::IDetector_const_sptr) const;
 
   /// Pointer to the 'real' instrument
   boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}
@@ -72,10 +72,10 @@ public:
 
 
   /// return reference to detector cache 
-  std::map<int,  boost::shared_ptr<Geometry::IDetector> > getDetectors();
+  std::map<int, Geometry::IDetector_sptr> getDetectors();
 
   /// Get pointers to plottable components
-  virtual std::vector< boost::shared_ptr<Geometry::IObjComponent> > getPlottable()const;
+  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable()const;
 
   /// Name of the instrument.
   std::string getName()const{return Geometry::ParCompAssembly::getName();}

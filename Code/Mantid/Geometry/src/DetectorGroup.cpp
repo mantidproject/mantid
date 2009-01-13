@@ -16,17 +16,17 @@ Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
  *  @param dets The vector of IDetector pointers that this virtual detector will hold
  *  @throw std::invalid_argument If an empty vector is passed as argument
  */
-DetectorGroup::DetectorGroup(const std::vector<boost::shared_ptr<IDetector> >& dets) :
+DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets) :
   IDetector(),
   m_id(),
   m_detectors()
 {
   if ( dets.empty() )
   {
-    g_log.error("Illegal attempt to create and empty DetectorGroup");
+    g_log.error("Illegal attempt to create an empty DetectorGroup");
     throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
   }
-  std::vector<boost::shared_ptr<IDetector> >::const_iterator it;
+  std::vector<IDetector_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it)
   {
     addDetector(*it);
@@ -39,7 +39,7 @@ DetectorGroup::~DetectorGroup()
 }
 
 /// Add a detector to the collection
-void DetectorGroup::addDetector(boost::shared_ptr<IDetector>  det)
+void DetectorGroup::addDetector(IDetector_sptr  det)
 {
   // Warn if adding a dead detector
   if ( det->isDead() )

@@ -75,12 +75,12 @@ namespace Mantid
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
-      const std::map<int, boost::shared_ptr<Geometry::IDetector> > detCache = instrument->getDetectors();
+      const std::map<int, Geometry::IDetector_sptr> detCache = instrument->getDetectors();
       int number_spectra = static_cast<int>(detCache.size());
       int *spec = new int[number_spectra];
       int *udet = new int[number_spectra];
 
-      std::map<int, boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
+      std::map<int, Geometry::IDetector_sptr>::const_iterator it;
       int counter = 0;
       for ( it = detCache.begin(); it != detCache.end(); ++it )
       {
@@ -90,7 +90,7 @@ namespace Mantid
         udet[counter-1] = it->first;
       }
 
-      boost::shared_ptr<SpectraDetectorMap> localmap=localWorkspace->getSpectraMap();
+      SpectraMap_sptr localmap=localWorkspace->getSpectraMap();
       localmap->populate(spec,udet,number_spectra);
 
       int spectraLength = 1; // put spectra lenght to 1. Since assumes histograms this mean x axis one longer

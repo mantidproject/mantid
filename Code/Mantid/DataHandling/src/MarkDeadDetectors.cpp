@@ -4,7 +4,6 @@
 #include "MantidDataHandling/MarkDeadDetectors.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include <set>
 
 namespace Mantid
@@ -70,7 +69,7 @@ void MarkDeadDetectors::exec()
   {// Dealing with DetectorList
     const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
-    boost::shared_ptr<API::SpectraDetectorMap> spectraMap = WS->getSpectraMap();
+    SpectraMap_const_sptr spectraMap = WS->getSpectraMap();
     std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);

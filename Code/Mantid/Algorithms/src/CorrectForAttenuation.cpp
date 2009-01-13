@@ -51,7 +51,7 @@ void CorrectForAttenuation::exec()
   this->constructCylinderSample();
 
   // Get a pointer to the SpectraDetectorMap
-  boost::shared_ptr<API::SpectraDetectorMap> specMap = inputWS->getSpectraMap();
+  SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
 
   // Create the output workspace
   Workspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);

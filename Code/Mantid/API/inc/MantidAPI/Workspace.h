@@ -74,15 +74,15 @@ public:
 
   void setTitle(const std::string&);
   void setComment(const std::string&);
-  void setInstrument(const boost::shared_ptr<IInstrument>&);
-  void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
-  void copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
+  void setInstrument(const IInstrument_sptr&);
+  void setSpectraMap(const SpectraMap_sptr& map);
+  void copySpectraMap(const SpectraMap_sptr& map);
   void setSample(const boost::shared_ptr<Sample>& sample);
   const std::string& getTitle() const;
   const std::string& getComment() const;
-  boost::shared_ptr<IInstrument> getInstrument()const;
+  IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
-  boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
+  SpectraMap_sptr getSpectraMap() const;
   boost::shared_ptr<Sample> getSample() const;
 
   boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters(){return sptr_parmap;}
@@ -175,7 +175,7 @@ private:
   /// The instrument used for this experiment
   boost::shared_ptr<Instrument> sptr_instrument;
   /// The SpectraDetector table used for this experiment
-  boost::shared_ptr<SpectraDetectorMap> sptr_spectramap;
+  SpectraMap_sptr sptr_spectramap;
   /// The information on the sample environment
   boost::shared_ptr<Sample> sptr_sample;
 

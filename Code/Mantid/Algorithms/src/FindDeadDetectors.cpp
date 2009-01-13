@@ -58,8 +58,8 @@ namespace Mantid
       // Get the integrated input workspace
       Workspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
-      // Get
-      boost::shared_ptr<SpectraDetectorMap> specMap = integratedWorkspace->getSpectraMap();
+      // Get hold of the spectraDetectorMap and axis
+      SpectraMap_const_sptr specMap = integratedWorkspace->getSpectraMap();
       Axis* specAxis = integratedWorkspace->getAxis(1);
 
       std::vector<int> deadDets;
@@ -86,8 +86,8 @@ namespace Mantid
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<boost::shared_ptr<Geometry::IDetector> > dets = specMap->getDetectors(specNo);
-          std::vector<boost::shared_ptr<Geometry::IDetector> >::const_iterator it;
+          const std::vector<Geometry::IDetector_sptr> dets = specMap->getDetectors(specNo);
+          std::vector<Geometry::IDetector_sptr>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             const int detID = (*it)->getID();

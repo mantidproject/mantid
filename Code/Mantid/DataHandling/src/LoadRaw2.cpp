@@ -51,9 +51,9 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(0);
-      declareProperty("spectrum_min",0, mustBePositive);
-      declareProperty("spectrum_max",0, mustBePositive->clone());
+      mustBePositive->setLower(1);
+      declareProperty("spectrum_min",1, mustBePositive);
+      declareProperty("spectrum_max",1, mustBePositive->clone());
       
       declareProperty(new ArrayProperty<int>("spectrum_list"));
       m_cache_options.push_back("If slow");
@@ -146,7 +146,7 @@ namespace Mantid
       std::string localWSName = ws->value();
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
       boost::shared_ptr<IInstrument> instrument;
-      boost::shared_ptr<SpectraDetectorMap> specMap;
+      SpectraMap_sptr specMap;
       boost::shared_ptr<Sample> sample;
       
 
@@ -268,7 +268,7 @@ namespace Mantid
         m_spec_list = getProperty("spectrum_list");
         const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
         const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
-        if ( maxlist > m_numberOfSpectra || minlist == 0)
+        if ( maxlist > m_numberOfSpectra || minlist <= 0)
         {
           g_log.error("Invalid list of spectra");
           throw std::invalid_argument("Inconsistent properties defined"); 
