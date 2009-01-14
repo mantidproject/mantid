@@ -57,6 +57,7 @@ fortran_type=''
 third_party=''
 gts_path = ''
 glib_path = ''
+opencascade_path = ''
 
 #Get paths
 if os.name == 'nt': 
@@ -66,7 +67,7 @@ if os.name == 'nt':
 	boost_path = third_party + '/include/'
 	
 	python_path = 'C:/Python25/'
-
+	opencascade_path=third_party + '/include/OpenCascade'
 	gts_path = third_party + '/include/gts'
 	glib_path = third_party + '/include/gts/glib-2.0'
 	libList.append('PocoUtil')
@@ -94,8 +95,17 @@ if os.name == 'nt':
 	libList.append('opengl32')#opengl required for rendering
 	libList.append('glu32') #glu companion for opengl
 	libList.append('ws2_32')   # winsock library
+#   Opencascade libraries
+	libList.append('TKBO')
+	libList.append('TKPrim')
+	libList.append('TKBRep')
+	libList.append('TKernel')
+	libList.append('TKTopAlgo')
+	libList.append('TKMath')
+	libList.append('TKMesh')
+	libList.append('TKG2d')
 
-	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', gts_path, glib_path]
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', gts_path, glib_path, opencascade_path]
 	
 	#set up scons to embed manifest files
 	env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
@@ -113,12 +123,14 @@ else:
 			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 		f.close()
 		python_path = '/usr/local/python2.5'
+		opencascade_path= '/opt/OpenCASCADE'
 	else:
 		boost_path=''
 		poco_path=''
 		fortran_type=''
 		third_party=''
 		python_path = ''
+		opencascade_path = ''
 		boost_append = ''
 		
 	#Find the boost_path and the boost append
@@ -159,9 +171,9 @@ if os.name == 'nt':
 		env.Append(LINKFLAGS=['-g','-Wl,--export-all-symbols'])
 	else :
 		if int(debug) :
-			cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP', '/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275', '/wd4996' ]
+			cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP', '/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275', '/wd4996', '/DWNT' ]
 		else :
-			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275']
+			cflags = ['/Ox', '/Ot', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500', '/D_USE_MATH_DEFINES', '/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE', '/wd4275', '/DWNT']
 else:
 	
 	if not rpmBuild:
@@ -182,8 +194,14 @@ else:
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
 	#cppPaths.append(USRINCLUDE + '/glib-2.0/')
 	#cppPaths.append(USRLIB + '/glib-2.0/include/')
+	#OpenCASCADE Include
+	cppPaths.append(opencascade_path + '/inc')
 	
 	libDirList.append(USRLIB)
+	#OpenCASCADE lib
+	libDirList.append(opencascade_path + '/lib64')
+	libDirList.append(opencascade_path + '/lib')	
+	
 	libList.append('python' + sys.version[0:3])
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
@@ -197,6 +215,16 @@ else:
 	libList.append('NeXus')
 	libList.append('GL')
 	libList.append('GLU')
+	
+	#OpenCASCADE Libraries
+	libList.append('TKBO')
+	libList.append('TKPrim')
+	libList.append('TKBRep')
+	libList.append('TKernel')
+	libList.append('TKTopAlgo')
+	libList.append('TKMath')
+	libList.append('TKMesh')
+	libList.append('TKG2d')
 
 	if int(debug) :
 	    cflags.append(['-g','-O0','-Wall'])

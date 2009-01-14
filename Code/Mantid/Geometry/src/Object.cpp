@@ -28,7 +28,7 @@
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/GeometryHandler.h"
 #include "MantidGeometry/GtsGeometryHandler.h"
-//#include "MantidGeometry/OCGeometryHandler.h"
+#include "MantidGeometry/OCGeometryHandler.h"
 namespace Mantid
 {
 
@@ -48,8 +48,8 @@ namespace Mantid
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
     {
-		handle = new GtsGeometryHandler(this);
-//		handle=new OCGeometryHandler(this);
+//		handle = new GtsGeometryHandler(this);
+		handle=new OCGeometryHandler(this);
 	}
 
     Object::Object(const Object& A) :
@@ -67,8 +67,8 @@ namespace Mantid
       \param A :: Object to copy
       */
     {
-		handle = new GtsGeometryHandler(this);
-//		handle=new OCGeometryHandler(this);
+//		handle = new GtsGeometryHandler(this);
+		handle=new OCGeometryHandler(this);
 	}
 
     Object&
