@@ -20,7 +20,7 @@
 
 using Mantid::Kernel::PropertyWithValue;
 
-ExecuteAlgorithm::ExecuteAlgorithm(bool forScript, QWidget *parent) 
+ExecuteAlgorithm::ExecuteAlgorithm(QWidget *parent, bool forScript) 
   : QDialog(parent), m_forScript(forScript)
 {
 	m_parent = parent;
@@ -78,7 +78,7 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	      if( m_forScript ) m_directory = "";
 	      else m_directory = InputHistory::Instance().getDirectoryFromFilePath(lastValue);
 	    }
-			
+
 	  connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 	  connect(tempBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
 			

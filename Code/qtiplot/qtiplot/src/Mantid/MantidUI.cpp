@@ -859,7 +859,7 @@ void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::A
             ws->InstrumentParameters()->addV3D((*instr)[2].get(),"pos",(*instr)[2]->getPos()+Mantid::Geometry::V3D(0,2,0));
             std::cerr<<ws->getInstrument()->getName()<<' '<<ws->getInstrument()->type()<<'\n';
         }
-    }*/
+    }//*/
 
   
     if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
@@ -1339,7 +1339,7 @@ int MantidUI::createPropertyInputDialog(const QString & algName)
   }
   if( !alg ) return -1;
 
-  ExecuteAlgorithm* dlg = new ExecuteAlgorithm(true, (QDialog*)appWindow()->scriptWindow);
+  ExecuteAlgorithm* dlg = new ExecuteAlgorithm((QDialog*)appWindow()->scriptWindow, true);
   dlg->CreateLayout(alg);
   dlg->setModal(true);
 

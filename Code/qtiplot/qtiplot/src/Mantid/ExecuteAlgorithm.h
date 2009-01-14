@@ -31,7 +31,7 @@ class ExecuteAlgorithm : public QDialog
 	Q_OBJECT
 	
 public:
-  ExecuteAlgorithm(bool forScript, QWidget *parent = 0);
+  ExecuteAlgorithm(QWidget *parent = 0, bool forScript = false);
 	~ExecuteAlgorithm();
 	void CreateLayout(Mantid::API::Algorithm* alg);
 
