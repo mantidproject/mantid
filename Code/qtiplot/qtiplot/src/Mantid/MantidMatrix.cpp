@@ -696,16 +696,29 @@ void MantidMatrix::tst()
 
 void MantidMatrix::dependantClosed(MdiSubWindow* w)
 {
-    if (w->isA("MultiLayer")) 
+  if( w->isA("Table") )
+  {
+    QMap<MultiLayer*,Table*>::iterator itr;
+    for( itr = m_plots1D.begin(); itr != m_plots1D.end(); ++itr )
     {
-        int i = m_plots2D.indexOf((MultiLayer*)w);
-        if (i >= 0) m_plots2D.remove(i);
-        else
-        {
-            QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
-            if (i != m_plots1D.end())
-            {
-                if (i.value() != 0) 
+      if( itr.value() == (Table*)w )
+      {
+	m_plots1D.erase(itr);
+	break;
+      }
+    }
+  }
+  else if (w->isA("MultiLayer")) 
+  {
+    int i = m_plots2D.indexOf((MultiLayer*)w);
+    if (i >= 0) m_plots2D.remove(i);
+    else
+    {
+      QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
+      if (i != m_plots1D.end())
+	{
+	  std::cerr << "removing 1d graph " << i.value() << "\n";
+	  if (i.value() != 0) 
                 {
                     i.value()->askOnCloseEvent(false);
                     i.value()->close();

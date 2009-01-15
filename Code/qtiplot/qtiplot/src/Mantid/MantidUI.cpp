@@ -611,6 +611,7 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
 {
     Table *t = createTableFromSelectedRows(m,visible,errs,true);
     if (!t) return;
+    t->askOnCloseEvent(false);
     t->showNormal();
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
     Graph *g = ml->activeGraph();
@@ -622,6 +623,7 @@ void MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool visible, bool e
 void MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool visible, bool errs)
 {
     Table *t = createTableFromSelectedColumns(m,visible,errs);
+    t->askOnCloseEvent(false);
     if (!t) return;
     t->showNormal();
     MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
@@ -1028,9 +1030,10 @@ void MantidUI::insertMenu()
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
-//    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
+  QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
+    t->askOnCloseEvent(false);
     MultiLayer* ml(NULL);
     if (!t) return ml;
 
@@ -1057,6 +1060,8 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::vec
 //    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
     Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     Table *t = createTableFromSelectedRowsList(wsName,workspace,spec,false,false);
+    t->askOnCloseEvent(false);
+    t->setAttribute(Qt::WA_QuitOnClose);
     MultiLayer* ml=NULL;
     if (!t) return ml;
 
@@ -1094,6 +1099,7 @@ Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::
 
 	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*index.size() + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+	 t->askOnCloseEvent(false);
 
      int kY,kErr;
      for(int i=0;i<index.size();i++)
@@ -1148,6 +1154,8 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   if( !ws.get() ) return NULL;
   
   Table *t = createTableFromSelectedColumns(wsName, ws, bin, bin, false, false);
+  t->askOnCloseEvent(false);
+  t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
   if( !t ) return ml;
   
@@ -1173,6 +1181,7 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
 //	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*index.size() + 1, "", appWindow(), 0);
 	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+	 t->askOnCloseEvent(false);
 
      int kY,kErr;
 //     for(int i=0;i<=index.size();i++)
@@ -1226,7 +1235,7 @@ Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::A
 
   Table* t = new Table(appWindow()->scriptEnv, numRows, c*(c1 - c0 + 1) + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
-  
+  t->askOnCloseEvent(false);
   int kY,kErr;
   for(int i = c0; i <= c1; i++)
   {
@@ -1355,7 +1364,7 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   int rowcount(loglines.count());
   Table* t = new Table(appWindow()->scriptEnv, rowcount, 2, "", appWindow(), 0);
   if( !t ) return;
-
+  t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = filename;
   label.replace("_","-");
