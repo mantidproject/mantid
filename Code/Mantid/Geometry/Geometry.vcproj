@@ -38,8 +38,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/DWNT"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts/;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts/;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include;..\..\Third_Party\include\OpenCascade"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
@@ -55,7 +56,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib glib-2.0.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib glib-2.0.lib opengl32.lib glu32.lib TKBO.lib TKPrim.lib TKBRep.lib TKernel.lib TKTopAlgo.lib TKMath.lib TKMesh.lib TKG2d.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -296,6 +297,10 @@
 			</File>
 			<File
 				RelativePath=".\src\OCGeometryRenderer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Parameter.cpp"
 				>
 			</File>
 			<File
@@ -575,11 +580,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -703,11 +708,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
