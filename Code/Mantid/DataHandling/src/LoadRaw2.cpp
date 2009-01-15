@@ -9,6 +9,11 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
+#include "MantidDataHandling/XMLlogfile.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 
 #include "LoadRaw/isisraw2.h"
 
@@ -231,6 +236,9 @@ namespace Mantid
           localWorkspace->setSample(sample);
         }
         
+        // check if values stored in logfiles should be used to define parameters of the instrument
+        populateInstrumentParameters(localWorkspace);
+
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
         
@@ -421,6 +429,67 @@ namespace Mantid
     {
       return sqrt(in);
     }
+
+    /** Add parameters to the instrument parameter map that are defined in instrument
+     *  definition file and for which logfile data are available
+     *
+     *  @param localWorkspace A pointer to a workspace
+     */
+    void LoadRaw2::populateInstrumentParameters(DataObjects::Workspace2D_sptr localWorkspace) 
+    {
+      // Get instrument and sample
+
+      boost::shared_ptr<Instrument> instrument;
+      boost::shared_ptr<Sample> sample;
+      instrument = localWorkspace->getBaseInstrument();
+      sample = localWorkspace->getSample();
+
+
+      // Get the data in the logfiles associated with the raw data
+
+      const std::vector<Kernel::Property*>& logfileProp = sample->getLogData();
+
+
+      // Get pointer to parameter map that we may add parameters to and information about
+      // the parameters that my be specified in the instrument definition file (IDF)
+    
+      boost::shared_ptr<Geometry::ParameterMap> paramMap = localWorkspace->InstrumentParameters();
+      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
+
+      
+      // iterator to browse throw the multimap: paramInfoFromIDF
+
+      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> > :: const_iterator it;
+      std::pair<std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator,
+        std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator> ret;
+
+
+      // loop over all logfiles and see if any of these are associated with parameters in the 
+      // IDF
+
+      unsigned int N = logfileProp.size();
+      for (unsigned int i = 0; i < N; i++)
+      {
+        // Remove the path, the run number and extension from logfile filename
+
+        std::string logFilename = logfileProp[i]->name();
+        boost::filesystem::path l_path( logFilename );
+        std::string filenamePart = l_path.leaf();  // get filename part only        
+        filenamePart = filenamePart.erase(filenamePart.size()-4, filenamePart.size()); // remove extension
+        filenamePart = filenamePart.substr(9); // remove front run number part
+
+
+        // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map 
+
+        ret = paramInfoFromIDF.equal_range(filenamePart);
+        for (it=ret.first; it!=ret.second; ++it)
+        {
+          double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
+          paramMap->addDouble(((*it).second)->m_component, ((*it).second)->m_paramName, value);
+        }
+      }   
+    }
+
 
   } // namespace DataHandling
 } // namespace Mantid

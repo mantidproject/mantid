@@ -255,6 +255,10 @@
 				RelativePath=".\src\LoadRaw\vms_convert.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\XMLlogfile.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -391,6 +395,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\vms_convert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\XMLlogfile.h"
 				>
 			</File>
 		</Filter>

@@ -86,6 +86,7 @@ namespace Mantid
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
+      void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
 
       /// ISISRAW class instance which does raw file reading
       ISISRAW2 *isisRaw;

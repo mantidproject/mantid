@@ -91,7 +91,7 @@ public:
    *
    * @return time series property values as a string vector "<time_t> value"
    */
-    std::vector<std::string> time_tValue() const
+  std::vector<std::string> time_tValue() const
   {
     std::vector<std::string> values;
 
@@ -107,6 +107,12 @@ public:
 
     return values;
   }
+
+  /*  Return the time series as a C++ map<dateAndTime, TYPE>
+   *
+   * @return time series property values as map
+   */
+  std::map<dateAndTime, TYPE> valueAsMap()const {return m_propertySeries;} 
 
   /** Overwrite Property method.
    *  @param value The new value

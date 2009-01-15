@@ -7,6 +7,7 @@
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidDataHandling/XMLlogfile.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -149,6 +150,7 @@ void LoadInstrument::exec()
   m_instrument = localWorkspace->getBaseInstrument();
   if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
 
+
   // do analysis for each top level compoment element
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
   unsigned int pNL_comp_length = pNL_comp->length();
@@ -266,10 +268,12 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     ass->setName(pCompElem->getAttribute("type"));
   }
 
-  // set location for this newly added comp and set facing if specified in instrument def. file
+  // set location for this newly added comp and set facing if specified in instrument def. file. Also
+  // check if any logfiles are referred to through the <parameter> element.
 
   setLocation(ass, pLocElem);
   setFacing(ass, pLocElem);
+  setLogfile(ass, pCompElem);
 
 
   // The newly added component is required to have a type. Find out what this
@@ -355,9 +359,12 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     detector->setID(idList.vec[idList.counted]);
     idList.counted++;
     parent->add(detector);
-    // set location for this comp and set facing if specified in instrument def. file
+
+    // set location for this newly added comp and set facing if specified in instrument def. file. Also
+    // check if any logfiles are referred to through the <parameter> element.
     setLocation(detector, pLocElem);
     setFacing(detector, pLocElem);
+    setLogfile(detector, pCompElem);
 
     try
     {
@@ -407,10 +414,12 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
       m_instrument->markAsSamplePos(comp);
     }
 
-    // set location for this comp and set facing if specified in instrument def. file
+    // set location for this newly added comp and set facing if specified in instrument def. file. Also
+    // check if any logfiles are referred to through the <parameter> element.
 
     setLocation(comp, pLocElem);
     setFacing(comp, pLocElem);
+    setLogfile(comp, pCompElem);
   }
 }
 
@@ -796,6 +805,55 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
     if (m_haveDefaultFacing)
       makeXYplaneFaceComponent(comp, m_defaultFacing);
 }
+
+/** Set parameter/logfile info (if any) associated with component
+ *
+ *  @param comp Some component
+ *  @param pElem  Associated Poco::XML element to component that may hold a <parameter> element
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ */
+void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem)
+{
+  NodeList* pNL = pElem->getElementsByTagName("parameter");
+
+  unsigned int numberParam = pNL->length();
+  if ( numberParam == 0 ) return;
+
+  // Get logfile-cache from instrument
+  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
+
+  for (unsigned int i = 0; i < numberParam; i++)
+  {
+    Element* pParamElem = static_cast<Element*>(pNL->item(i));
+
+    if ( !pParamElem->hasAttribute("name") )
+      throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+        " contain <parameter> element with no name attribute in XML instrument file", m_filename);
+
+    if ( !pParamElem->hasAttribute("logfile-id") )
+      throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+        " contain <parameter> element with no logfile-id attribute in XML instrument file", m_filename);
+
+    std::string paramName = pParamElem->getAttribute("name");
+    std::string logfileID = pParamElem->getAttribute("logfile-id");
+    std::string type = "";
+    std::string extractSingleValueAs = "";
+    std::string eq = "";
+
+    if ( pParamElem->hasAttribute("eq") )
+      eq = pParamElem->getAttribute("eq");
+    if ( pParamElem->hasAttribute("type") )
+      type = pParamElem->getAttribute("type");
+    if ( pParamElem->hasAttribute("extract-single-value-as") )
+      extractSingleValueAs = pParamElem->getAttribute("extract-single-value-as");
+
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, paramName, type, extractSingleValueAs, eq, comp));
+    logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
+  }
+  pNL->release();
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

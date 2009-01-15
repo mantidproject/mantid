@@ -12,8 +12,17 @@
 #include <string>
 #include <ostream>
 
+
+//#include "MantidDataHandling/XMLlogfile.h"
+
 namespace Mantid
 {
+
+namespace DataHandling
+{
+  class XMLlogfile;
+}
+
 namespace API
 {
 /** @class Instrument Instrument.h
@@ -88,6 +97,9 @@ public:
 
   std::string getName()const{return Geometry::CompAssembly::getName();}
 
+  /// Get information about the parameters described in the instrument definition file
+  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& getLogfileCache() {return _logfileCache;}
+
 private:
     friend class ParInstrument;
   /// Private copy assignment operator
@@ -110,6 +122,10 @@ private:
   /// Purpose to hold copy of samplePos component. For now assumed to
   /// be just one component
   Geometry::ObjComponent* _sampleCache;
+
+  /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs,
+  /// which equals logfile filename minus the run number and file extension
+  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> > _logfileCache;
 };
 
 } // namespace API

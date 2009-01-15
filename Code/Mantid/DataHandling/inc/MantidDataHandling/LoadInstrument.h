@@ -121,6 +121,9 @@ namespace API
       /// Set location (position) of comp as specified in XML location element
       void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
 
+      /// Set parameter/logfile info (if any) associated with component
+      void setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem);
+
       /// Get parent component element of location element
       Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
 
@@ -158,10 +161,13 @@ namespace API
 
       /// map which holds names of types and pointers to these type for fast retrievel in code
       std::map<std::string,Poco::XML::Element*> getTypeElement;
+
       /// The name and path of the input file
       std::string m_filename;
+
       /// For convenience added pointer to instrument here
       boost::shared_ptr<API::Instrument> m_instrument;
+
       /// Flag to indicate whether offsets given in spherical coordinates are to be added to the current
       /// position (true) or are a vector from the current position (false, default)
       bool m_deltaOffsets;

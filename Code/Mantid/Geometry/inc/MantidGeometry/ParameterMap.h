@@ -5,6 +5,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Parameter.h"
 #include "boost/shared_ptr.hpp"
+#include "MantidGeometry/IComponent.h"
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -20,7 +21,7 @@ namespace Mantid
 namespace Geometry
 {
 
-class IComponent;
+//class IComponent;
 
 /** @class ParameterMap ParameterMap.h
 
@@ -132,7 +133,7 @@ public:
 
     Parameter* get(const IComponent* compName,const std::string& name)const;
 
-    /// Templated get method
+    /// Get the value of a given parameter associated with a given component 
     template<class T>
     T getType(const IComponent* compName,const std::string& name)const
     {
@@ -144,7 +145,27 @@ public:
         return tparam->value();
     }
 
+    /// Get the values of a given parameter of all the components that have the name: compName
+    template<class T>
+    std::vector<T> getType(const std::string& compName,const std::string& name)const
+    {
+      std::vector<T> retval;
+
+      pmap_it it;
+      for (it = m_map.begin(); it != m_map.end(); ++it)
+      {
+        if ( compName.compare(((*it).first)->getName()) == 0 )  
+        {
+          Parameter *param = get((*it).first,name);
+          if (param)
+            retval.push_back( getType<T>((*it).first, name) );
+        }
+      }
+      return retval;
+    }
+
     double getDouble(const IComponent* compName,const std::string& name)const{return getType<double>(compName,name);}
+    std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
     int getInt(const IComponent* compName,const std::string& name)const{return getType<int>(compName,name);}
     bool getBool(const IComponent* compName,const std::string& name)const{return getType<bool>(compName,name);}
     V3D getV3D(const IComponent* compName,const std::string& name)const{return getType<V3D>(compName,name);}
