@@ -37,11 +37,24 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
 	mDataMapping=INTEGRAL;
+	mAxisDirection=Mantid::Geometry::V3D(0.0,0.0,1.0);
+	mAxisUpVector=Mantid::Geometry::V3D(0.0,1.0,0.0);
+	//mAxisDirection=Mantid::Geometry::V3D(1.0,0.0,0.0);
+	//mAxisUpVector=Mantid::Geometry::V3D(0.0,0.0,1.0);
 }
 
 Instrument3DWidget::~Instrument3DWidget()
 {
 	makeCurrent();
+}
+
+/**
+ * Set the default Axis direction of the model
+ */
+void Instrument3DWidget::setAxis(Mantid::Geometry::V3D& direction,Mantid::Geometry::V3D& up)
+{
+	mAxisDirection=direction;
+	mAxisUpVector=up;
 }
 
 /**
@@ -587,34 +600,59 @@ void Instrument3DWidget::setViewDirectionZNegative()
 
 void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)
 {
-	//get the centre of the bounding box
+	////get the centre of the bounding box
+	//V3D boundCentre;
+	//double xhalf=(xmax-xmin)/2.0;
+	//double yhalf=(ymax-ymin)/2.0;
+	//double zhalf=(zmax-zmin)/2.0;
+	//boundCentre[0]=-1*(xmin+xhalf);
+	//boundCentre[1]=-1*(ymin+yhalf);
+	//boundCentre[2]=-1*(zmin+zhalf);
+	////vector from center to bounding box center
+	//V3D vcb=pos-boundCentre;
+	//vcb.normalize();
+	//V3D zaxis(0,0,1);
+	////get the rotation about zaxis
+	//Quat rotation(zaxis,vcb);
+	//rotation.inverse();
+	//_trackball->reset();
+	//_trackball->setModelCenter(pos);
+	//if(rotation!=Quat(0,0,0,0))
+	//	_trackball->setRotation(rotation);
+	//_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
+	//_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmin,-zmax);
+	//_viewport->issueGL();
+	//update();
+
+	//Change the View to the axis orientation
+	V3D s=mAxisDirection.cross_prod(mAxisUpVector);
+	V3D u=s.cross_prod(mAxisDirection);
+	double Mat[16];
+	Mat[0]=s[0];              Mat[4]=s[1];              Mat[8]=s[2];               Mat[12]=0;
+	Mat[1]=u[0];              Mat[5]=u[1];              Mat[9]=u[2];               Mat[13]=0;
+	Mat[2]=-mAxisDirection[0];Mat[6]=-mAxisDirection[1];Mat[10]=-mAxisDirection[2];Mat[14]=0;
+	Mat[3]=0;                 Mat[7]=0;                 Mat[11]=0;                 Mat[15]=1;
+	Quat defaultView;
+	defaultView.setQuat(Mat);
+	defaultView.normalize();
+	//get the rotation to make the center of the bounding box to the view
 	V3D boundCentre;
-	double xhalf=(xmax-xmin)/2.0;
-	double yhalf=(ymax-ymin)/2.0;
-	double zhalf=(zmax-zmin)/2.0;
-	boundCentre[0]=-1*(xmin+xhalf);
-	boundCentre[1]=-1*(ymin+yhalf);
-	boundCentre[2]=-1*(zmin+zhalf);
-	//vector from center to bounding box center
-	V3D vcb=pos-boundCentre;
+	boundCentre[0]=(xmax+xmin)/2.0;
+	boundCentre[1]=(ymax+ymin)/2.0;
+	boundCentre[2]=(zmax+zmin)/2.0;
+	V3D vcb=boundCentre-pos;
 	vcb.normalize();
 	V3D zaxis(0,0,1);
-	//get the rotation about zaxis
 	Quat rotation(zaxis,vcb);
 	rotation.inverse();
+	if(rotation!=Quat(0,0,0,0))
+		defaultView=rotation*defaultView;
 	_trackball->reset();
 	_trackball->setModelCenter(pos);
-	if(rotation!=Quat(0,0,0,0))
-		_trackball->setRotation(rotation);
+	if(defaultView!=Quat(0,0,0,0))
+		_trackball->setRotation(defaultView);
 	_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
-	//QString info;
-	//QString num;
-	//info+="XMin: "+num.setNum(xmin)+" XMax: "+num.setNum(xmax);
-	//info+="YMin: "+num.setNum(ymin)+" YMax: "+num.setNum(ymax);
-	//info+="ZMin: "+num.setNum(zmin)+" ZMax: "+num.setNum(zmax);
-	//info+="Rotation Quat: "+num.setNum(rotation[0])+" "+num.setNum(rotation[1])+" "+num.setNum(rotation[2])+" "+num.setNum(rotation[3]);
-	//QMessageBox::information(this,tr("Detector Name Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
-	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmin,-zmax);
+	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmax,-zmin);
 	_viewport->issueGL();
-	update();
+	update();	
 }

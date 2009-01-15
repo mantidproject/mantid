@@ -6,6 +6,7 @@
 #include "GLColorMapQwt.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
+#include "MantidGeometry/V3D.h"
 /*!
   \class  GL3DWidget
   \brief  OpenGL Qt Widget which renders Instrument
@@ -39,11 +40,6 @@ namespace Mantid{
 		class IInstrument;
 	}
 }
-namespace Mantid{
-	namespace Geometry{
-		class V3D;
-	}
-}
 
 class Instrument3DWidget : public GL3DWidget
 {
@@ -61,6 +57,7 @@ public:
 	double getDataMaxValue();
 	void setDataMappingType(DataMappingType);
 	void setView(Mantid::Geometry::V3D,double,double,double,double,double,double);
+	void setAxis(Mantid::Geometry::V3D&,Mantid::Geometry::V3D&);
 public slots:
 	void fireDetectorsPicked(std::vector<GLActor*> );
 	void fireDetectorHighligted(GLActor* pickedActor);
@@ -94,6 +91,8 @@ private:
 	int iTimeBin;
 	DataMappingType mDataMapping;
 	GLColorMapQwt mColorMap;
+	Mantid::Geometry::V3D mAxisDirection;
+	Mantid::Geometry::V3D mAxisUpVector;
 	double DataMinValue;
 	double DataMaxValue;
 	double BinMinValue;

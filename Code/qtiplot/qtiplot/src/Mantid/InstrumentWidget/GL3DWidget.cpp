@@ -548,7 +548,6 @@ void GL3DWidget::defaultProjection()
 	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);
 	Mantid::Geometry::V3D center;
 	center=(minPoint+maxPoint)/2.0;
-	_trackball->setModelCenter(center);
 	_viewport->issueGL();
 }
 

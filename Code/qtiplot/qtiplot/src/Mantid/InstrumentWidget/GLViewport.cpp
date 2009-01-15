@@ -108,7 +108,42 @@ void GLViewport::getTranslation(double& xval,double& yval)
 void GLViewport::issueGL() const
 {
 	Mantid::Geometry::V3D center((mRight+mLeft)/2.0,(mTop+mBottom)/2.0,(mNear+mFar)/2.0);
-	Mantid::Geometry::V3D distance((mRight-mLeft),(mTop-mBottom),(mNear-mFar));
+	Mantid::Geometry::V3D distance(mRight-mLeft,mTop-mBottom,mNear-mFar);
+	//Window Aspect ratio
+	GLdouble windowAspect=(GLdouble)mWidth/(GLdouble)mHeight;
+	//Adjust width and height to show the dimensions correct
+	//Adjust window aspect ratio
+	if(windowAspect<1.0) //window height is higher than width (x<y)
+	{
+		if(distance[0]<distance[1]&&distance[0]/windowAspect<distance[1])///TESTING
+		{
+			distance[0]=distance[1];
+			distance[0]*=windowAspect;
+		}
+		else
+		{
+			distance[1]=distance[0];
+			distance[1]/=windowAspect;
+		}
+	}
+	else
+	{
+		if(distance[0]<distance[1])
+		{
+			distance[0]=distance[1];
+			distance[0]*=windowAspect;
+		}
+		else if(distance[0]/windowAspect<distance[1])
+		{
+			distance[0]=distance[1];
+			distance[0]*=windowAspect;
+		}
+		else
+		{
+			distance[1]=distance[0];
+			distance[1]/=windowAspect;				
+		}
+	}
 	//use zoom now
 	distance*=mZoomFactor/2.0;
 	glMatrixMode(GL_MODELVIEW);
