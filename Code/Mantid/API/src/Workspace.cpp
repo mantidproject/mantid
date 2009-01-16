@@ -52,8 +52,6 @@ const std::string& Workspace::getComment() const
 } // Namespace Mantid
 
 
-template DLLExport class Mantid::API::WorkspaceProperty<Mantid::API::Workspace>;
-
 namespace Mantid
 {
 namespace Kernel

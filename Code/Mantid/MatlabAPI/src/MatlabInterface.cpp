@@ -3,7 +3,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
@@ -397,7 +397,7 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 	return 0;
 }
 
-static mxArray* WorkspaceGetFieldHelper(Workspace_sptr wksptr, char field, int ispec)
+static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field, int ispec)
 {
 	mxArray* mptr;
   std::vector<double>* data = NULL;
@@ -460,9 +460,9 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
   }
   double ispec(0);
   if( nrhs == 3 ) ispec = mxGetScalar(prhs[2]);
-  Workspace_sptr wksptr;
+  MatrixWorkspace_sptr wksptr;
   try {
-    wksptr = AnalysisDataService::Instance().retrieve(wsName);
+      wksptr = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
   }
   catch (Exception::NotFoundError&)
   {
