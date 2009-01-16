@@ -62,8 +62,8 @@ public:
     //
     // Test workspace data (copied from LoadRawTest.h)
     //
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -155,7 +155,7 @@ public:
 //    //TS_ASSERT( loader4.isExecuted() )
 //
 //    // Get back workspace and check it really is a ManagedWorkspace2D
-//    Workspace_sptr output;
+//    MatrixWorkspace_sptr output;
 //    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws") );    
 //    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
 //  }
@@ -181,11 +181,11 @@ public:
     //
     // Test workspace data - should be 4 separate workspaces for this 4 period file
     //
-    Workspace_sptr output,output2,output3,output4;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(output2 = AnalysisDataService::Instance().retrieve(outputSpace+"_2"));
-    TS_ASSERT_THROWS_NOTHING(output3 = AnalysisDataService::Instance().retrieve(outputSpace+"_3"));
-    TS_ASSERT_THROWS_NOTHING(output4 = AnalysisDataService::Instance().retrieve(outputSpace+"_4"));
+    MatrixWorkspace_sptr output,output2,output3,output4;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+    TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+    TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
@@ -228,8 +228,8 @@ public:
     TS_ASSERT( nxload3.isExecuted() );    
     
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));    
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     // Should be 6 for selected input

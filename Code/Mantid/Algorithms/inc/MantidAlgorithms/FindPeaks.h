@@ -68,14 +68,14 @@ private:
   /// Execution code
   void exec();
 
-  API::Workspace_sptr calculateSecondDifference(const API::Workspace_const_sptr &input);
-  void smoothData(API::Workspace_sptr &WS, const int &w);
-  void calculateStandardDeviation(const API::Workspace_const_sptr &input, const API::Workspace_sptr &smoothed, const int &w);
+  API::MatrixWorkspace_sptr calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
+  void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
+  void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
 
-  void fitPeak(const API::Workspace_sptr &input, const int spectrum, const int i0, const int i4);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4);
 
   /// Strip peaks method - living here until I can pass TableWorkspace as property
-  API::Workspace_sptr removePeaks(const API::Workspace_const_sptr &input);
+  API::MatrixWorkspace_sptr removePeaks(const API::MatrixWorkspace_const_sptr &input);
 
   /// The number of smoothing iterations
   static int g_z;

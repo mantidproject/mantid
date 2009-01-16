@@ -15,7 +15,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
 {
 
   //private test class - using this removes the dependency on the DataObjects library
-  class WorkspaceTest: public Workspace
+  class WorkspaceTest: public MatrixWorkspace
   {
   public:
     virtual const int getNumberHistograms() const { return 1;}
@@ -57,7 +57,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   };
 
   // Second, identical private test class - used for testing check on workspace type in isValid()
-  class WorkspaceTest2 : public Workspace
+  class WorkspaceTest2 : public MatrixWorkspace
   {
   public:
      virtual const int getNumberHistograms() const { return 1;}

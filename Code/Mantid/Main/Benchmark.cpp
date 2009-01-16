@@ -116,8 +116,8 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   int sizex = detectorCount;
   int sizey = timeBinCount;
 
-  Workspace_sptr work_in3 = Create2DWorkspace123(sizex,sizey);
-  Workspace_sptr work_in4 = Create2DWorkspace154(sizex,sizey);
+  MatrixWorkspace_sptr work_in3 = Create2DWorkspace123(sizex,sizey);
+  MatrixWorkspace_sptr work_in4 = Create2DWorkspace154(sizex,sizey);
 
   AnalysisDataService::Instance().add("test_in11", work_in3);
   AnalysisDataService::Instance().add("test_in12", work_in4);

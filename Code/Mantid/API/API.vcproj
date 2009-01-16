@@ -212,6 +212,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MatrixWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MemoryManager.cpp"
 				>
 			</File>
@@ -374,6 +378,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\MatrixWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MatrixWorkspaceTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\MemoryManager.h"
 				>
 			</File>
@@ -439,10 +451,6 @@
 			</File>
 			<File
 				RelativePath=".\test\WorkspacePropertyTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\WorkspaceTest.h"
 				>
 			</File>
 			<File

@@ -24,7 +24,7 @@ LoadMappingTable::LoadMappingTable()
 void LoadMappingTable::init()
 {
   declareProperty("Filename","",new MandatoryValidator<std::string>); // Filename for RAW file
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut)); // Associated workspace
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut)); // Associated workspace
 }
 
 void LoadMappingTable::exec()
@@ -32,7 +32,7 @@ void LoadMappingTable::exec()
   //Get the raw file name
   m_filename = getPropertyValue("Filename");
   // Get the input workspace
-  const Workspace_sptr localWorkspace = getProperty("Workspace");
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   ISISRAW iraw(NULL);
   if (iraw.readFromFile(m_filename.c_str(),0) != 0) // ReadFrom File with no data
   {

@@ -71,10 +71,10 @@ private:
   ///Execution code
   void exec();
 
-  API::Workspace_sptr smoothInput(API::Workspace_sptr input);
-  void findPeaks(API::Workspace_sptr WS);
-  void fitPeaks(API::Workspace_sptr WS);
-  API::Workspace_sptr removePeaks(API::Workspace_sptr input);
+  API::MatrixWorkspace_sptr smoothInput(API::MatrixWorkspace_sptr input);
+  void findPeaks(API::MatrixWorkspace_sptr WS);
+  void fitPeaks(API::MatrixWorkspace_sptr WS);
+  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_sptr input);
 
   /// Storage of the peak data
   DataObjects::TableWorkspace m_peaks;

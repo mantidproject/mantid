@@ -79,8 +79,8 @@ private:
   void exec();
 
   const bool checkProperties();
-  void findMonitorIndex(API::Workspace_const_sptr inputWorkspace);
-  API::Workspace_sptr normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace);
+  void findMonitorIndex(API::MatrixWorkspace_const_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace);
 
   /// The index of the monitor to which to normalise
   int m_monitorIndex;

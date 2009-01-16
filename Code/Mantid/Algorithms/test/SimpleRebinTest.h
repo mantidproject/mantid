@@ -35,7 +35,7 @@ public:
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebindata->dataX(0);
     const std::vector<double> outY=rebindata->dataY(0);
     const std::vector<double> outE=rebindata->dataE(0);
@@ -69,7 +69,7 @@ public:
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
     const std::vector<double> outX=rebindata->dataX(0);
     const std::vector<double> outY=rebindata->dataY(0);
@@ -103,7 +103,7 @@ public:
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
     const std::vector<double> outX=rebindata->dataX(5);
     const std::vector<double> outY=rebindata->dataY(5);
@@ -138,7 +138,7 @@ public:
     rebin.setPropertyValue("params", "1.5,2.0,20,-0.1,30,1.0,35");
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
-    Workspace_sptr rebindata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebindata->dataX(5);
     const std::vector<double> outY=rebindata->dataY(5);
     const std::vector<double> outE=rebindata->dataE(5);

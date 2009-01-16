@@ -143,16 +143,16 @@ public:
     TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-    TS_ASSERT( ! output-> isDistribution() )
+    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF" )
+    TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->getSample()->getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+    boost::shared_ptr<IInstrument> i = output2D->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS( source->getName(), "undulator");
@@ -171,7 +171,7 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Sample> sample = output->getSample();
+    boost::shared_ptr<Sample> sample = output2D->getSample();
     Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HET15869_TEMP1.txt") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
@@ -180,7 +180,7 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    boost::shared_ptr<SpectraDetectorMap> map= output->getSpectraMap();
+    boost::shared_ptr<SpectraDetectorMap> map= output2D->getSpectraMap();
 
     // Check the total number of elements in the map for HET
     TS_ASSERT_EQUALS(map->nElements(),12124);

@@ -23,9 +23,9 @@ namespace Mantid
     */
     void BinaryOperation::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_1","",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_2","",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
     }
 
     /** Executes the algorithm
@@ -35,8 +35,8 @@ namespace Mantid
     void BinaryOperation::exec()
     {
       // get input workspace, dynamic cast not needed
-      Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
-      Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
+      MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
+      MatrixWorkspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
       // Check that the input workspace are compatible
       if (!checkCompatibility(in_work1,in_work2))
@@ -47,10 +47,10 @@ namespace Mantid
         throw std::invalid_argument( ostr.str() );
       }
 
-      Workspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
-      Workspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
+      MatrixWorkspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
+      MatrixWorkspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
 
-      Workspace_sptr out_work = getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr out_work = getProperty("OutputWorkspace");
       // We need to create a new workspace for the output if:
       //   (a) the output workspace hasn't been set to one of the input ones, or
       //   (b) it has been, but it's not the correct dimensions
@@ -66,7 +66,7 @@ namespace Mantid
       {
         out_work = createOutputWorkspace(in_work1,in_work2);
       }
-      Workspace::iterator ti_out(*out_work);
+      MatrixWorkspace::iterator ti_out(*out_work);
 
       //perform the operation through an abstract call
       performBinaryOperation(ti_in1,ti_in2,ti_out);
@@ -78,7 +78,7 @@ namespace Mantid
     }
 
 
-    const bool BinaryOperation::checkCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    const bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       Unit_sptr lhs_unit = Unit_sptr();
       Unit_sptr rhs_unit = Unit_sptr();
@@ -114,7 +114,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkSizeCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    const bool BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       //in order to be size compatible then the larger workspace
       //must divide by the size of the smaller workspace leaving no remainder
@@ -129,7 +129,7 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool BinaryOperation::checkXarrayCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const
+    const bool BinaryOperation::checkXarrayCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       // Not using the WorkspaceHelpers::matching bins method because that requires the workspaces to be
       // the same size, which isn't a requirement of BinaryOperation
@@ -154,7 +154,7 @@ namespace Mantid
     * @param rhs the second workspace to compare
     * @returns Integer division of rhs.size()/lhs.size() with a minimum of 1
     */
-    const int BinaryOperation::getRelativeLoopCount(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const
+    const int BinaryOperation::getRelativeLoopCount(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const
     {
       int lhsSize = lhs->size();
       if (lhsSize == 0) return 1;
@@ -169,12 +169,12 @@ namespace Mantid
     * @param rhs the second workspace to compare
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
-    API::Workspace_sptr BinaryOperation::createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const
+    API::MatrixWorkspace_sptr BinaryOperation::createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const
     {
       //get the largest workspace
-      const API::Workspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
+      const API::MatrixWorkspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
       //create a new workspace
-      API::Workspace_sptr retVal = API::WorkspaceFactory::Instance().create(wsLarger);
+      API::MatrixWorkspace_sptr retVal = API::WorkspaceFactory::Instance().create(wsLarger);
 
       return retVal;
     }
@@ -184,7 +184,7 @@ namespace Mantid
     * @param wsComparison The workspace to be used for axes comparisons
     * @returns a const iterator to wsMain, with loop count and orientation set appropriately
     */
-    Workspace::const_iterator BinaryOperation::createConstIterator(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const
+    MatrixWorkspace::const_iterator BinaryOperation::createConstIterator(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const
     {
      //get loop count
       unsigned int loopDirection = LoopOrientation::Vertical;
@@ -201,7 +201,7 @@ namespace Mantid
           throw std::invalid_argument("The x arrays of the workspaces are not identical");
         }
       }
-      Workspace::const_iterator it(*wsMain,loopCount,loopDirection);
+      MatrixWorkspace::const_iterator it(*wsMain,loopCount,loopDirection);
       return it;
     }
 
@@ -212,7 +212,7 @@ namespace Mantid
     * @retval 0 Horizontal - The number and contents of the X axis bins match
     * @retval 1 Vertical - The number of detector elements match
     */
-    unsigned int BinaryOperation::getLoopDirection(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const
+    unsigned int BinaryOperation::getLoopDirection(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const
     {
       unsigned int retVal = LoopOrientation::Horizontal;
 

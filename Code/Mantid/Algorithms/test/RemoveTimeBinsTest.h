@@ -65,7 +65,7 @@ public:
 			TS_FAIL(e.what());
 		}
 
-		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("output");
+		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output"));
 
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
@@ -97,7 +97,7 @@ public:
 			TS_FAIL(e.what());
 		}
 
-		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("output2");
+		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output2"));
 
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
@@ -134,7 +134,7 @@ public:
 			TS_FAIL(e.what());
 		}
 		
-		Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("result1");
+		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("result1"));
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
 	}

@@ -23,8 +23,8 @@ namespace Mantid
     * @param it_in2 The const iterator to the rhs data item
     * @param it_out The output iterator to the new workspace
     */
-    void Divide::performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
-        API::Workspace::iterator it_out)
+    void Divide::performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
+        API::MatrixWorkspace::iterator it_out)
     {
       int count = it_in1.end() - it_in1.begin();
       std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Divide_fn(this,count));

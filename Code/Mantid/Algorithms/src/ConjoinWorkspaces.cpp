@@ -51,7 +51,7 @@ void ConjoinWorkspaces::exec()
 
   // Create the output workspace
   const int totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
-  Workspace_sptr output = WorkspaceFactory::Instance().create(ws1,totalHists,ws1->readX(0).size(),
+  MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create(ws1,totalHists,ws1->readX(0).size(),
                                                                              ws1->readY(0).size());
   Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
@@ -97,7 +97,7 @@ void ConjoinWorkspaces::exec()
  *  @param ws2 The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
  */
-void ConjoinWorkspaces::validateInputs(API::Workspace_const_sptr ws1, API::Workspace_const_sptr ws2) const
+void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
 {
   if ( !WorkspaceHelpers::commonBoundaries(ws1) || !WorkspaceHelpers::commonBoundaries(ws2) )
   {
@@ -123,7 +123,7 @@ void ConjoinWorkspaces::validateInputs(API::Workspace_const_sptr ws1, API::Works
  *  @param ws2 The second input workspace
  *  @throw std::invalid_argument If there is some overlap
  */
-void ConjoinWorkspaces::checkForOverlap(API::Workspace_const_sptr ws1, API::Workspace_const_sptr ws2) const
+void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
 {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);

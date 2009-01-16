@@ -17,7 +17,7 @@ private:
 public:
   NormaliseToMonitorTest()
   {
-    Workspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
     // Change the data in the monitor spectrum
     input->dataY(0).assign(10,10.0);
     // Need to change bins
@@ -87,8 +87,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("normMon2") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon2")) )
 
     // Check the non-monitor spectra
     for (int i = 1; i < output->getNumberHistograms(); ++i)
@@ -122,8 +122,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( norm2.execute() )
     TS_ASSERT( norm2.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("normMon3") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon3")) )
     TS_ASSERT( !output->isDistribution() )
 
     // Check the non-monitor spectra

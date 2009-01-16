@@ -37,7 +37,7 @@ namespace DataHandling
   {
     //Declare mandatory properties
     declareProperty("Filename", "", new MandatoryValidator<std::string>(), "", Direction::Input);
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input));
     //Declare optional properties
     BoundedValidator<double> * mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0.0);
@@ -56,7 +56,7 @@ namespace DataHandling
     //add extension
     filename += ".vtu";
     
-    Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
     if( !inputWorkspace )
     {
       g_log.error("Failed to retrieve inputWorkspace.");

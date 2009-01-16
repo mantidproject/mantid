@@ -52,7 +52,7 @@ void UserAlgorithmTest::RunPropertyAlgorithmTest()
 void UserAlgorithmTest::RunWorkspaceAlgorithmTest()
 {
 
-  Workspace_sptr work = Create1DWorkspace(10);
+  MatrixWorkspace_sptr work = Create1DWorkspace(10);
 
   AnalysisDataService::Instance().add("test", work);
   
@@ -69,8 +69,8 @@ void UserAlgorithmTest::RunWorkspaceAlgorithmTest()
 void UserAlgorithmTest::RunModifyDataTest()
 {
 
-  Workspace_sptr inW = Create2DWorkspace(4,2);
-  Workspace_sptr outW = Create2DWorkspace(2,2);
+  MatrixWorkspace_sptr inW = Create2DWorkspace(4,2);
+  MatrixWorkspace_sptr outW = Create2DWorkspace(2,2);
 
   AnalysisDataService::Instance().add("inTest", inW);
   AnalysisDataService::Instance().add("outTest", outW);

@@ -38,7 +38,7 @@ Axis::~Axis()
  *  @param parentWorkspace Needed for subclass's (RefAxis) clone method
  *  @return A pointer to a copy of the Axis on which the method is called
  */
-Axis* Axis::clone(const Workspace* const parentWorkspace)
+Axis* Axis::clone(const MatrixWorkspace* const parentWorkspace)
 {
   return new Axis(*this);
 }

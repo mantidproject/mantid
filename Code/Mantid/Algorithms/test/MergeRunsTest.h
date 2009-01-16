@@ -54,11 +54,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( merge.execute() )
     TS_ASSERT( merge.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outWS") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS")) )
 
-    Workspace::const_iterator inIt(*(AnalysisDataService::Instance().retrieve("in1")));
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    MatrixWorkspace::const_iterator inIt(*(boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("in1"))));
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_EQUALS( it->Y(), 6.0 )
@@ -75,7 +75,7 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","null") )
 	  TS_ASSERT_THROWS( merge2.execute(), std::runtime_error )
     TS_ASSERT( ! merge2.isExecuted() )
-    Workspace_sptr badIn = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    MatrixWorkspace_sptr badIn = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
 	  badIn->dataX(0) = std::vector<double>(11,2.0);
     AnalysisDataService::Instance().add("badIn",badIn);
     TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","ws1,badIn") )
@@ -92,8 +92,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
     const std::vector<double> &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 17 )
@@ -119,8 +119,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
     const std::vector<double> &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 )
@@ -146,8 +146,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("outer") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
     const std::vector<double> &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 )

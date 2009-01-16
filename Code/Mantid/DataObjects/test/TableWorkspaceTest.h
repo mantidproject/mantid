@@ -181,7 +181,6 @@ public:
       while(row.next());
 
       TableColumn_ptr<bool> bc = tw.getColumn("OK");
-      std::cerr<<bc->get_type_info().name()<<'\n';
 
       // std::vector<bool>& bv = tw.getStdVector<bool>("OK"); // doesn't work
       //std::vector<bool>& bv = bc->data();  // doesn't work

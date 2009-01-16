@@ -25,7 +25,7 @@ namespace Mantid
     void FindDeadDetectors::init()
     {
       declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
@@ -56,7 +56,7 @@ namespace Mantid
       file << "Index Spectrum UDET(S)" << std::endl;
 
       // Get the integrated input workspace
-      Workspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
+      MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
       // Get hold of the spectraDetectorMap and axis
       SpectraMap_const_sptr specMap = integratedWorkspace->getSpectraMap();
@@ -119,7 +119,7 @@ namespace Mantid
     }
 
     /// Run Integration as a sub-algorithm
-    Workspace_sptr FindDeadDetectors::integrateWorkspace(std::string outputWorkspaceName)
+    MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace(std::string outputWorkspaceName)
     {
       g_log.information() << "Integrating input workspace" << std::endl;
 
@@ -140,7 +140,7 @@ namespace Mantid
 
       if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Integration sub-algorithm");
 
-      Workspace_sptr retVal = childAlg->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr retVal = childAlg->getProperty("OutputWorkspace");
 
       return retVal;
     }

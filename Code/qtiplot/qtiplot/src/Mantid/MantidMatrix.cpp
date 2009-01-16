@@ -35,7 +35,7 @@
 #include <iostream>
 #include <algorithm>
 
-MantidMatrix::MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
+MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
 : MdiSubWindow(label, parent, name, 0),m_funct(this),m_min(0),m_max(0),m_are_min_max_set(false),
 m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
@@ -93,7 +93,7 @@ MantidMatrix::~MantidMatrix()
     delete m_modelE;
 }
 
-void MantidMatrix::setup(Mantid::API::Workspace_sptr ws, int start, int end)
+void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int end)
 {
     if (!ws.get())
     {
@@ -792,7 +792,7 @@ void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::Da
     }
 }
 
-void MantidMatrix::changeWorkspace(Mantid::API::Workspace_sptr ws)
+void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
     if (m_workspace->blocksize() != ws->blocksize() ||
         m_workspace->getNumberHistograms() != ws->getNumberHistograms())

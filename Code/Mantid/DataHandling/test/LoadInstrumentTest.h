@@ -88,8 +88,8 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     boost::shared_ptr<IComponent> source = i->getSource();
@@ -149,7 +149,7 @@ public:
 
     //create a workspace with some sample data
     wsName = "LoadInstrumentTestGEM";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     //put this workspace in the data service
@@ -173,8 +173,8 @@ public:
     TS_ASSERT( loaderGEM.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
@@ -247,8 +247,8 @@ public:
     TS_ASSERT( loaderSLS.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
@@ -308,8 +308,8 @@ public:
     TS_ASSERT( loaderHRP.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
 
@@ -359,8 +359,8 @@ public:
     TS_ASSERT( loaderIDF.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     boost::shared_ptr<IObjComponent> source = i->getSource();
@@ -551,8 +551,8 @@ public:
     TS_ASSERT( loaderIDF2.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
 

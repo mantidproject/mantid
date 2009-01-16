@@ -20,11 +20,11 @@ namespace Mantid
     * @retval true The two workspaces are size compatible
     * @retval false The two workspaces are NOT size compatible
     */
-    const bool CommutativeBinaryOperation::checkSizeCompatibility(const API::Workspace_const_sptr rhs,const API::Workspace_const_sptr lhs) const
+    const bool CommutativeBinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr rhs,const API::MatrixWorkspace_const_sptr lhs) const
     {
       //get the largest workspace
-      API::Workspace_const_sptr wsLarger;
-      API::Workspace_const_sptr wsSmaller;
+      API::MatrixWorkspace_const_sptr wsLarger;
+      API::MatrixWorkspace_const_sptr wsSmaller;
       if (rhs->size() > lhs->size())
       {
         wsLarger = rhs;
@@ -44,12 +44,12 @@ namespace Mantid
     * @param lhs the second workspace to compare
     * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
     */
-    API::Workspace_sptr CommutativeBinaryOperation::createOutputWorkspace(const API::Workspace_const_sptr rhs, const API::Workspace_const_sptr lhs) const
+    API::MatrixWorkspace_sptr CommutativeBinaryOperation::createOutputWorkspace(const API::MatrixWorkspace_const_sptr rhs, const API::MatrixWorkspace_const_sptr lhs) const
     {
       //get the largest workspace
-      const API::Workspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
+      const API::MatrixWorkspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
       //get the smallest workspace
-      const API::Workspace_const_sptr wsSmaller = (lhs->size() > rhs->size()) ? rhs : lhs;
+      const API::MatrixWorkspace_const_sptr wsSmaller = (lhs->size() > rhs->size()) ? rhs : lhs;
 
       return BinaryOperation::createOutputWorkspace(wsLarger,wsSmaller);
     }

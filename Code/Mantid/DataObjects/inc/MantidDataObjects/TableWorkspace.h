@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TablePointerColumn.h"
+#include "MantidAPI/Workspace.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -82,13 +83,18 @@ public:
   #define TableWorkspace_DllImport
 #endif
 
-class TableWorkspace_DllExport TableWorkspace
+class TableWorkspace_DllExport TableWorkspace: public API::Workspace
 {
 public:
     /// Constructor.
     TableWorkspace(int nrows=0);
     /// Virtual destructor.
     virtual ~TableWorkspace();
+    /// Return the workspace typeID
+    virtual const std::string id() const{return "TableWorkspace";}
+    /// Get the footprint in memory in KB.
+    virtual long int getMemorySize() const{return 0;}
+
     /// Creates a new column.
     bool createColumn(const std::string& type, const std::string& name);
     /// Removes a column.
@@ -242,6 +248,8 @@ private:
     TablePointerColumn_ptr<T> m_column;
 };
 
+typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+typedef boost::shared_ptr<const TableWorkspace> TableWorkspace_const_sptr;
 
 
 } // namespace DataObjects

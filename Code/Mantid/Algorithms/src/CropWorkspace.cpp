@@ -54,7 +54,7 @@ void CropWorkspace::exec()
   this->checkProperties();
 
   // Create the output workspace
-  Workspace_sptr outputWorkspace =
+  MatrixWorkspace_sptr outputWorkspace =
     WorkspaceFactory::Instance().create(m_inputWorkspace,m_maxSpec-m_minSpec+1,m_maxX-m_minX,m_maxX-m_minX-histogram);
   DataObjects::Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
 

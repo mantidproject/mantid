@@ -23,7 +23,7 @@ namespace API
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class Workspace;
+class MatrixWorkspace;
 
 /** Class to represent the axis of a workspace.
 
@@ -61,7 +61,7 @@ public:
   Axis(const bool type, const int length);
   virtual ~Axis();
 
-  virtual Axis* clone(const Workspace* const parentWorkspace = NULL);
+  virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
 
   const std::string& title() const;
   std::string& title();

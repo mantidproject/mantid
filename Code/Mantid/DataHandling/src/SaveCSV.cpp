@@ -45,8 +45,8 @@ DECLARE_ALGORITHM(SaveCSV)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace;
-using API::Workspace_sptr;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace1D;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace1D_sptr;
@@ -64,7 +64,7 @@ SaveCSV::SaveCSV()
  */
 void SaveCSV::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
   declareProperty("Filename", "", new Kernel::MandatoryValidator<std::string>);
   declareProperty("Separator", ",");
   declareProperty("LineSeparator", "\n");
@@ -102,7 +102,7 @@ void SaveCSV::exec()
   }
 
   // Get the input workspace
-  const Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  const MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // get workspace ID string. Used to differentiate between
   // workspace1D and workspace2D in the if statement below

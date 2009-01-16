@@ -149,7 +149,7 @@ namespace Mantid
       
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try

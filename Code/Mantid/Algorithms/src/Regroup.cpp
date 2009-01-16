@@ -49,9 +49,9 @@ DECLARE_ALGORITHM(Regroup)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace_sptr;
-using API::Workspace_const_sptr;
-using API::Workspace;
+using API::MatrixWorkspace_sptr;
+using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace;
 
 // Get a reference to the logger
 Logger& Regroup::g_log = Logger::get("Regroup");
@@ -62,8 +62,8 @@ void Regroup::init()
   API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
   wsVal->add(new API::HistogramValidator<>);
   wsVal->add(new API::CommonBinsValidator<>);
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input, wsVal));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   declareProperty(new ArrayProperty<double>("params", new RegroupParamsValidator));
 }
@@ -78,7 +78,7 @@ void Regroup::exec()
   std::vector<double> rb_params=getProperty("params");
 
   // Get the input workspace
-  Workspace_const_sptr inputW = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
   // can work only if all histograms have the same boundaries
   if (!API::WorkspaceHelpers::commonBoundaries(inputW))
@@ -97,7 +97,7 @@ void Regroup::exec()
   int ntcnew = newAxis(rb_params,XValues_old,XValues_new.access(),xoldIndex);
 
   // make output Workspace the same type is the input, but with new length of signal array
-  API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
   // Try to cast it to a Workspace2D for use later
   DataObjects::Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputW);
 

@@ -22,8 +22,8 @@ DECLARE_ALGORITHM(GaussianLinearBG)
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::Axis;
-using API::Workspace_const_sptr;
-using API::Workspace;
+using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace;
 using API::Algorithm;
 
 // Get a reference to the logger
@@ -115,7 +115,7 @@ static int gauss_fdf (const gsl_vector * x, void *params,
 /// Initialisation method
 void GaussianLinearBG::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -152,7 +152,7 @@ void GaussianLinearBG::exec()
   const double sigma = getProperty("sigma");
 
   // Get the input workspace
-  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   // number of histogram is equal to the number of spectra
   const int numberOfSpectra = localworkspace->getNumberHistograms();

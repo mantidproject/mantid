@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  Workspace *space, *space2;
+  MatrixWorkspace *space, *space2;
   RefAxis *refAxis;
 };
 

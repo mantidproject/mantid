@@ -39,7 +39,7 @@ void NormaliseToMonitor::init()
   val->add(new RawCountValidator<Workspace2D>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -57,7 +57,7 @@ void NormaliseToMonitor::exec()
 
   // Get the input workspace
   const Workspace2D_sptr inputWS = getProperty("InputWorkspace");
-  Workspace_sptr outputWS;
+  MatrixWorkspace_sptr outputWS;
   // Get the workspace index relating to the spectrum number given
   this->findMonitorIndex(inputWS);
 
@@ -68,7 +68,7 @@ void NormaliseToMonitor::exec()
   else
   {
     // Create a Workspace1D with the monitor spectrum in it.
-    Workspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWS->blocksize()+1,inputWS->blocksize());
+    MatrixWorkspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWS->blocksize()+1,inputWS->blocksize());
     const std::vector<double> &monX = monitor->dataX(0) = inputWS->readX(m_monitorIndex);
     const std::vector<double> &monY = monitor->dataY(0) = inputWS->readY(m_monitorIndex);
     monitor->dataE(0) = inputWS->readE(m_monitorIndex);
@@ -76,7 +76,7 @@ void NormaliseToMonitor::exec()
 
     const double monitorSum = std::accumulate(monY.begin(), monY.end(), 0.0);
     const double range = monX.back() - monX.front();
-    for(Workspace::iterator wi(*monitor); wi != wi.end(); ++wi)
+    for(MatrixWorkspace::iterator wi(*monitor); wi != wi.end(); ++wi)
     {
         LocatedDataRef tr = *wi;
         const double factor = (tr.X2()-tr.X()) * monitorSum / range;
@@ -148,7 +148,7 @@ const bool NormaliseToMonitor::checkProperties()
 }
 
 /// Finds the workspace index of the monitor from the spectrum number
-void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspace)
+void NormaliseToMonitor::findMonitorIndex(API::MatrixWorkspace_const_sptr inputWorkspace)
 {
   const int monitorIndex = getProperty("MonitorSpectrum");
   Axis* spectraAxis = inputWorkspace->getAxis(1);
@@ -167,7 +167,7 @@ void NormaliseToMonitor::findMonitorIndex(API::Workspace_const_sptr inputWorkspa
 }
 
 /// Carries out a normalisation based on the integrated count of the monitor over a range
-API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspace_sptr inputWorkspace)
+API::MatrixWorkspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace)
 {
   // Don't run CropWorkspace algorithm if integrating over full workspace range
   if ( m_integrationMin != inputWorkspace->readX(0).front() || m_integrationMax != inputWorkspace->readX(0).back() )
@@ -188,7 +188,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   }
 
   // Now create a Workspace1D with the monitor spectrum
-  Workspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWorkspace->blocksize()+1,inputWorkspace->blocksize());
+  MatrixWorkspace_sptr monitor = WorkspaceFactory::Instance().create("Workspace1D",1,inputWorkspace->blocksize()+1,inputWorkspace->blocksize());
   monitor->dataX(0) = inputWorkspace->readX(m_monitorIndex);
   monitor->dataY(0) = inputWorkspace->readY(m_monitorIndex);
   monitor->dataE(0) = inputWorkspace->readE(m_monitorIndex);
@@ -196,7 +196,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
 
   // Add up all the bins so it's just effectively a single value with an error
   Algorithm_sptr integrate = createSubAlgorithm("Integration");
-  integrate->setProperty<Workspace_sptr>("InputWorkspace", monitor);
+  integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitor);
   try {
     integrate->execute();
   } catch (std::runtime_error) {
@@ -206,7 +206,7 @@ API::Workspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Workspac
   // Get back the result
   monitor = integrate->getProperty("OutputWorkspace");
 
-  Workspace_sptr outputWS = inputWorkspace / monitor;
+  MatrixWorkspace_sptr outputWS = inputWorkspace / monitor;
 //  WorkspaceHelpers::makeDistribution(outputWS);
   return outputWS;
 }

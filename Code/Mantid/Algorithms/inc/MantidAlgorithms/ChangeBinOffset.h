@@ -62,7 +62,7 @@ namespace Mantid
       void init();
       void exec();
     
-       API::Workspace_sptr createOutputWS(API::Workspace_sptr input);
+       API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
             
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

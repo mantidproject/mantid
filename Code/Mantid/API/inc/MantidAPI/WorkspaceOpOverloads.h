@@ -2,7 +2,7 @@
 #define MANTID_API_WORKOPOVERLOADS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -10,26 +10,26 @@ namespace API
 {
 
 // Workspace operator overloads
-Workspace_sptr DLLExport operator+(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const Workspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
-Workspace_sptr DLLExport operator+(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator-(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator*(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator*(const double& lhsValue, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator/(const Workspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue);
 
-Workspace_sptr DLLExport operator+=(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator-=(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator*=(const Workspace_sptr lhs, const Workspace_sptr rhs);
-Workspace_sptr DLLExport operator/=(const Workspace_sptr lhs, const Workspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
+MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 
-Workspace_sptr DLLExport operator+=(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator-=(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator*=(const Workspace_sptr lhs, const double& rhsValue);
-Workspace_sptr DLLExport operator/=(const Workspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue);
 
 /** A collection of static functions for use with workspaces
 
@@ -59,14 +59,14 @@ Workspace_sptr DLLExport operator/=(const Workspace_sptr lhs, const double& rhsV
 struct DLLExport WorkspaceHelpers
 {
   // Checks whether a workspace has common X bins/values
-  static const bool commonBoundaries(const Workspace_const_sptr WS);
+  static const bool commonBoundaries(const MatrixWorkspace_const_sptr WS);
   // Checks whether the binning is the same in two histograms
-  static const bool matchingBins(const Workspace_const_sptr ws1,
-                                 const Workspace_const_sptr ws2, const bool firstOnly = false);
+  static const bool matchingBins(const MatrixWorkspace_const_sptr ws1,
+                                 const MatrixWorkspace_const_sptr ws2, const bool firstOnly = false);
   // Checks whether a the X vectors in a workspace are actually the same vector
-  static const bool sharedXData(const Workspace_const_sptr WS);
+  static const bool sharedXData(const MatrixWorkspace_const_sptr WS);
   // Divides the data in a workspace by the bin width to make it a distribution (or the reverse)
-  static void makeDistribution(Workspace_sptr workspace, const bool forwards = true);
+  static void makeDistribution(MatrixWorkspace_sptr workspace, const bool forwards = true);
 };
 
 } // namespace API

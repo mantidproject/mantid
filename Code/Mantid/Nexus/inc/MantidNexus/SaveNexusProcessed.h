@@ -74,7 +74,7 @@ namespace Mantid
 	  /// The title of the processed data section
       std::string m_title;
       /// Pointer to the local workspace
-      API::Workspace_sptr m_inputWorkspace;
+      API::MatrixWorkspace_sptr m_inputWorkspace;
 	  /// Flag set if list of spectra to save is specifed
 	  bool m_list;
 	  /// Flag set if interval of spectra to write is set

@@ -17,7 +17,7 @@ namespace Mantid
     Kernel::Logger& Workspace1D::g_log = Kernel::Logger::get("Workspace1D");
 
     /// Constructor
-    Workspace1D::Workspace1D() : API::Workspace(),
+    Workspace1D::Workspace1D() : API::MatrixWorkspace(),
       Histogram1D()
     { }
 

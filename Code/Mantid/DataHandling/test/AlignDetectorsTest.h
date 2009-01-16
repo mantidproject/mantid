@@ -62,8 +62,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( align.execute() )
     TS_ASSERT( align.isExecuted() )
 
-    boost::shared_ptr<Workspace> inWS = AnalysisDataService::Instance().retrieve(inputWS);
-    boost::shared_ptr<Workspace> outWS = AnalysisDataService::Instance().retrieve(outputWS);
+    boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
+    boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS));
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" )
     TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )

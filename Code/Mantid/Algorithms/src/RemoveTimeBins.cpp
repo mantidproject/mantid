@@ -29,8 +29,8 @@ namespace Mantid
     */
     void RemoveTimeBins::init()
     {
-        declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-        declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+        declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+        declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 	BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
         zeroOrGreater->setLower(0);    
 	declareProperty("StartTimeBin",0, zeroOrGreater);
@@ -43,7 +43,7 @@ namespace Mantid
     void RemoveTimeBins::exec()
     {
 	    //Get input workspace and offset
-	    Workspace_const_sptr inputW = getProperty("InputWorkspace");
+	    MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 	    int start = getProperty("StartTimeBin");
 	    int end = getProperty("EndTimeBin");
 	            
@@ -70,7 +70,7 @@ namespace Mantid
 	    int histnumber = inputW->getNumberHistograms();
 	    
 	    //Create new workspace
-	    API::Workspace_sptr outputWS
+	    API::MatrixWorkspace_sptr outputWS
 		= API::WorkspaceFactory::Instance().create(inputW, histnumber, inputW->dataX(0).size() - (end - start +1), inputW->dataY(0).size() - (end - start +1));
 	        
 	    

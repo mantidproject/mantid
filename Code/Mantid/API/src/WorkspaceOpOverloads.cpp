@@ -21,20 +21,20 @@ namespace API
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-static Workspace_sptr executeBinaryOperation(const std::string algorithmName, const Workspace_sptr lhs, const Workspace_sptr rhs, bool lhsAsOutput = false)
+static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false)
 {
   Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(true);
   alg->initialize();
 
-  alg->setProperty<Workspace_sptr>("InputWorkspace_1",lhs);
-  alg->setProperty<Workspace_sptr>("InputWorkspace_2",rhs);
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_1",lhs);
+  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_2",rhs);
   
   // Have to set a text name for the output workspace even though it will not be used.
   //   This satisfies the validation.
   alg->setPropertyValue("OutputWorkspace","��NotApplicable");
   // If calling from a compound assignment operator, set the left-hand operand to be the output workspace
-  if (lhsAsOutput) alg->setProperty<Workspace_sptr>("OutputWorkspace",lhs);
+  if (lhsAsOutput) alg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace",lhs);
 
   alg->execute();
 
@@ -52,7 +52,7 @@ static Workspace_sptr executeBinaryOperation(const std::string algorithmName, co
 
   //Horendous code inclusion to satisfy compilers that all code paths return a value
   // in reality the above code should either throw or return successfully.
-  Workspace_sptr retVal = WorkspaceFactory::Instance().create("Workspace2D");
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("Workspace2D");
   return retVal;
 }
 
@@ -60,9 +60,9 @@ static Workspace_sptr executeBinaryOperation(const std::string algorithmName, co
  *  @param rhsValue the value to use
  *  @returns The value in a workspace shared pointer
  */
-static Workspace_sptr createWorkspaceSingleValue(const double& rhsValue)
+static MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 {
-  Workspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
   retVal->dataY(0)[0]=rhsValue;
 
   return retVal;
@@ -73,7 +73,7 @@ static Workspace_sptr createWorkspaceSingleValue(const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator+(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Plus",lhs,rhs);
 }
@@ -83,7 +83,7 @@ Workspace_sptr operator+(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator+(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue));
 }
@@ -93,7 +93,7 @@ Workspace_sptr operator+(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator-(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Minus",lhs,rhs);
 }
@@ -103,7 +103,7 @@ Workspace_sptr operator-(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator-(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
 }
@@ -113,7 +113,7 @@ Workspace_sptr operator-(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator*(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Multiply",lhs,rhs);
 }
@@ -123,7 +123,7 @@ Workspace_sptr operator*(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator*(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue));
 }
@@ -133,7 +133,7 @@ Workspace_sptr operator*(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs      workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator*(const double& lhsValue, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Multiply",createWorkspaceSingleValue(lhsValue),rhs);
 }
@@ -143,7 +143,7 @@ Workspace_sptr operator*(const double& lhsValue, const Workspace_sptr rhs)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator/(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Divide",lhs,rhs);
 }
@@ -153,7 +153,7 @@ Workspace_sptr operator/(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator/(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
 }
@@ -163,7 +163,7 @@ Workspace_sptr operator/(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator+=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Plus",lhs,rhs,true);
 }
@@ -173,7 +173,7 @@ Workspace_sptr operator+=(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator+=(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator+=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Plus",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
@@ -183,7 +183,7 @@ Workspace_sptr operator+=(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator-=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Minus",lhs,rhs,true);
 }
@@ -193,7 +193,7 @@ Workspace_sptr operator-=(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator-=(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator-=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
@@ -203,7 +203,7 @@ Workspace_sptr operator-=(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator*=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Multiply",lhs,rhs,true);
 }
@@ -213,7 +213,7 @@ Workspace_sptr operator*=(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator*=(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator*=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Multiply",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
@@ -223,7 +223,7 @@ Workspace_sptr operator*=(const Workspace_sptr lhs, const double& rhsValue)
  *  @param rhs left hand side workspace shared pointer
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator/=(const Workspace_sptr lhs, const Workspace_sptr rhs)
+MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs)
 {
   return executeBinaryOperation("Divide",lhs,rhs,true);
 }
@@ -233,7 +233,7 @@ Workspace_sptr operator/=(const Workspace_sptr lhs, const Workspace_sptr rhs)
  *  @param rhsValue the single value
  *  @returns The result in a workspace shared pointer
  */
-Workspace_sptr operator/=(const Workspace_sptr lhs, const double& rhsValue)
+MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue),true);
 }
@@ -246,7 +246,7 @@ Workspace_sptr operator/=(const Workspace_sptr lhs, const double& rhsValue)
  *  @param WS The workspace to check
  *  @return True if the bins match
  */
-const bool WorkspaceHelpers::commonBoundaries(const Workspace_const_sptr WS)
+const bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
 {
   if ( !WS->blocksize() || WS->getNumberHistograms() < 2) return true;
   // Quickest check is to see if they are actually all the same vector
@@ -270,8 +270,8 @@ const bool WorkspaceHelpers::commonBoundaries(const Workspace_const_sptr WS)
  *                   are checked and the two workspaces must have the same number of spectra
  *  @return True if the test passes
  */
-const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1,
-                                          const Workspace_const_sptr ws2, const bool firstOnly)
+const bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
+                                          const MatrixWorkspace_const_sptr ws2, const bool firstOnly)
 {
   // First of all, the first vector must be the same size
   if ( ws1->readX(0).size() != ws2->readX(0).size() ) return false;
@@ -307,7 +307,7 @@ const bool WorkspaceHelpers::matchingBins(const Workspace_const_sptr ws1,
 }
 
 /// Checks whether all the X vectors in a workspace are the same one underneath
-const bool WorkspaceHelpers::sharedXData(const Workspace_const_sptr WS)
+const bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS)
 {
   const double& first = WS->readX(0)[0];
   const int numHist = WS->getNumberHistograms();
@@ -324,7 +324,7 @@ const bool WorkspaceHelpers::sharedXData(const Workspace_const_sptr WS)
  *  @param workspace The workspace on which to carry out the operation
  *  @param forwards If true (the default) divides by bin width, if false multiplies
  */
-void WorkspaceHelpers::makeDistribution(Workspace_sptr workspace, const bool forwards)
+void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bool forwards)
 {
   // Check workspace isn't already in the correct state - do nothing if it is
   if ( workspace->isDistribution() == forwards ) return;

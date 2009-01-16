@@ -5,7 +5,7 @@
 #include <vector>
 #include <iostream>
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/ConfigService.h"
@@ -17,7 +17,7 @@ using namespace Mantid::API;
 class WorkspaceFactoryTest : public CxxTest::TestSuite
 {
   //private test classes - using this removes the dependency on the DataObjects library
-  class WorkspaceTest: public Workspace
+  class WorkspaceTest: public MatrixWorkspace
   {
   public:
 	virtual const int getNumberHistograms() const { return 1;}
@@ -119,19 +119,19 @@ public:
   void testReturnType()
   {
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("work");
-    Workspace_sptr space;
+    MatrixWorkspace_sptr space;
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("work") );
     TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space.get()) );
   }
 
   void testCreateFromParent()
   {
-    Workspace_sptr ws1D(new Workspace1DTest);
-    Workspace_sptr child;
+    MatrixWorkspace_sptr ws1D(new Workspace1DTest);
+    MatrixWorkspace_sptr child;
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws1D) )
     TS_ASSERT( ! child->id().compare("Workspace1DTest") )
 
-    Workspace_sptr ws2D(new Workspace2DTest);
+    MatrixWorkspace_sptr ws2D(new Workspace2DTest);
     TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(ws2D) )
         TS_ASSERT( child->id().find("2D") != std::string::npos )
 
@@ -139,13 +139,13 @@ public:
     //TS_ASSERT_THROWS_NOTHING( child = WorkspaceFactory::Instance().create(mws2D) )
     //TS_ASSERT_EQUALS( child->id(), "ManagedWorkspace2D")
 
-    Workspace_sptr nif(new NotInFactory);
+    MatrixWorkspace_sptr nif(new NotInFactory);
     TS_ASSERT_THROWS( child = WorkspaceFactory::Instance().create(nif), std::runtime_error )
   }
 
   void testAccordingToSize()
   {
-    Workspace_sptr ws;
+    MatrixWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",1,2,3) )
     TS_ASSERT( ! ws->id().compare("Workspace2DTest") )
     Workspace2DTest& space = dynamic_cast<Workspace2DTest&>(*ws);

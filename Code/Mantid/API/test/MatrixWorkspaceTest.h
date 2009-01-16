@@ -3,16 +3,16 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-class WorkspaceTester : public Workspace
+class WorkspaceTester : public MatrixWorkspace
 {
 public:
-  WorkspaceTester() : Workspace() {}
+  WorkspaceTester() : MatrixWorkspace() {}
   virtual ~WorkspaceTester() {}
 
   // Empty overrides of virtual methods

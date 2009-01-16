@@ -37,16 +37,16 @@ void StripPeaks::init()
 void StripPeaks::exec()
 {
   // Retrieve the input workspace
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Smooth the data
-  Workspace_sptr smoothWS = this->smoothInput(inputWS);
+  MatrixWorkspace_sptr smoothWS = this->smoothInput(inputWS);
   // Look for peaks in the smoothed data
   this->findPeaks(smoothWS);
   // Clear the shared pointer to the smoothed data - we don't need it anymore
   smoothWS.reset();
 
-  Workspace_sptr outputWS;
+  MatrixWorkspace_sptr outputWS;
   if ( m_peaks.rowCount() > 0 )
   {
     // Try and perform fits on the candidate peaks to the original data
@@ -70,7 +70,7 @@ void StripPeaks::exec()
  *  @return A workspace containing the smoothed data
  *  @throw std::runtime_error if the SmoothData subalgorithm fails
  */
-API::Workspace_sptr StripPeaks::smoothInput(API::Workspace_sptr input)
+API::MatrixWorkspace_sptr StripPeaks::smoothInput(API::MatrixWorkspace_sptr input)
 {
   g_log.information("Smoothing the input data");
   Algorithm_sptr smooth = createSubAlgorithm("SmoothData");
@@ -96,7 +96,7 @@ API::Workspace_sptr StripPeaks::smoothInput(API::Workspace_sptr input)
 /** Searches for peaks in the smoothed data.
  *  @param WS The workspace to search
  */
-void StripPeaks::findPeaks(API::Workspace_sptr WS)
+void StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Searching for peaks");
   // Will in future use peak finding algorithm
@@ -118,7 +118,7 @@ void StripPeaks::findPeaks(API::Workspace_sptr WS)
  *  @param WS The workspace to perform the fits on
  *  @throw std::runtime_error if the fitting sub-algorithm fails
  */
-void StripPeaks::fitPeaks(API::Workspace_sptr WS)
+void StripPeaks::fitPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting peaks");
   // Loop over the candidate peaks in turn
@@ -194,11 +194,11 @@ void StripPeaks::fitPeaks(API::Workspace_sptr WS)
  *  @param input The input workspace
  *  @return A workspace containing the peak-subtracted data
  */
-API::Workspace_sptr StripPeaks::removePeaks(API::Workspace_sptr input)
+API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_sptr input)
 {
   g_log.information("Subtracting peaks");
   // Create an output workspace - same size a input one
-  Workspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace
   const int hists = input->getNumberHistograms();
   for (int k = 0; k < hists; ++k)

@@ -33,8 +33,8 @@ void AlignDetectors::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
-  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
   declareProperty("CalibrationFile","",new FileValidator(std::vector<std::string>(1,"cal")));
 }
 
@@ -46,7 +46,7 @@ void AlignDetectors::init()
 void AlignDetectors::exec()
 {
   // Get the input workspace
-  const Workspace_const_sptr inputWS = getProperty("InputWorkspace");
+  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
@@ -56,7 +56,7 @@ void AlignDetectors::exec()
     throw Exception::FileError("Problem reading file", calFileName);
   }
 
-  API::Workspace_sptr outputWS = getProperty("OutputWorkspace");
+  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for the output
   if (outputWS != inputWS )
   {

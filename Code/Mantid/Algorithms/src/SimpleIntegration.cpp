@@ -49,7 +49,7 @@ void SimpleIntegration::exec()
   m_MaxSpec = getProperty("EndSpectrum");
 
   // Get the input workspace
-  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
   const int YLength = localworkspace->blocksize();
@@ -72,7 +72,7 @@ void SimpleIntegration::exec()
   }
 
   // Create the 1D workspace for the output
-  Workspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
+  MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
   int progress_step = (m_MaxSpec-m_MinSpec+1) / 100;
   if (progress_step == 0) progress_step = 1;

@@ -1047,7 +1047,7 @@ namespace NeXus
    return(true);
   }
   bool NexusFileIO::readNexusProcessedSpectraMap(boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
-                    const boost::shared_ptr<Workspace> workspace, const int& m_spec_min, const int& m_spec_max)
+                    const boost::shared_ptr<MatrixWorkspace> workspace, const int& m_spec_min, const int& m_spec_max)
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data. Use this to build spectraMap

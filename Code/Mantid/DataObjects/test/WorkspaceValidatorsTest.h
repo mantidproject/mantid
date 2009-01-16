@@ -18,8 +18,8 @@ private:
   CommonBinsValidator<>* binVal;
   CompositeValidator<> compVal;
 
-  Workspace_sptr ws1;
-  Workspace_sptr ws2;
+  MatrixWorkspace_sptr ws1;
+  MatrixWorkspace_sptr ws2;
 
 public:
   WorkspaceValidatorsTest()
@@ -29,9 +29,9 @@ public:
     rawVal = new RawCountValidator<>();
     binVal = new CommonBinsValidator<>();
 
-    ws1 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
+    ws1 = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
     ws1->initialize(2,10,9);
-    ws2 = Workspace_sptr(new Mantid::DataObjects::Workspace2D);
+    ws2 = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
     ws2->initialize(2,10,10);
     ws2->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
     ws2->isDistribution(true);
@@ -44,10 +44,10 @@ public:
 
   void testCast()
   {
-    TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(unitVal) )
-    TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(histVal) )
-    TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(rawVal) )
-    TS_ASSERT( dynamic_cast<IValidator<Workspace_sptr>* >(binVal) )
+    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(unitVal) )
+    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(histVal) )
+    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(rawVal) )
+    TS_ASSERT( dynamic_cast<IValidator<MatrixWorkspace_sptr>* >(binVal) )
   }
 
   void testWorkspaceUnitValidator()
@@ -68,7 +68,7 @@ public:
 
   void testWorkspaceUnitValidator_clone()
   {
-    IValidator<Workspace_sptr> *v = unitVal->clone();
+    IValidator<MatrixWorkspace_sptr> *v = unitVal->clone();
     TS_ASSERT_DIFFERS( v, unitVal )
     TS_ASSERT( dynamic_cast<WorkspaceUnitValidator<>*>(v) )
     delete v;
@@ -95,7 +95,7 @@ public:
 
   void testHistogramValidator_clone()
   {
-    IValidator<Workspace_sptr> *v = histVal->clone();
+    IValidator<MatrixWorkspace_sptr> *v = histVal->clone();
     TS_ASSERT_DIFFERS( v, histVal )
     TS_ASSERT( dynamic_cast<HistogramValidator<>*>(v) )
     delete v;
@@ -114,7 +114,7 @@ public:
 
   void testRawCountValidator_clone()
   {
-    IValidator<Workspace_sptr> *v = rawVal->clone();
+    IValidator<MatrixWorkspace_sptr> *v = rawVal->clone();
     TS_ASSERT_DIFFERS( v, rawVal )
     TS_ASSERT( dynamic_cast<RawCountValidator<>*>(v) )
     delete v;
@@ -137,7 +137,7 @@ public:
 
   void testCommonBinsValidator_clone()
   {
-    IValidator<Workspace_sptr> *v = binVal->clone();
+    IValidator<MatrixWorkspace_sptr> *v = binVal->clone();
     TS_ASSERT_DIFFERS( v, binVal )
     TS_ASSERT( dynamic_cast<CommonBinsValidator<>*>(v) )
     delete v;
@@ -150,7 +150,7 @@ public:
 
   void testCompositeValidator_clone()
   {
-    IValidator<Workspace_sptr> *v = compVal.clone();
+    IValidator<MatrixWorkspace_sptr> *v = compVal.clone();
     TS_ASSERT_DIFFERS( v, &compVal )
     TS_ASSERT( dynamic_cast<CompositeValidator<>*>(v) )
   }
@@ -174,7 +174,7 @@ public:
     TS_ASSERT( ! compVal2.isValid(ws1) )
     TS_ASSERT( ! compVal2.isValid(ws2) )
 
-    IValidator<Workspace_sptr>* compVal3 = compVal.clone();
+    IValidator<MatrixWorkspace_sptr>* compVal3 = compVal.clone();
     TS_ASSERT( ! compVal3->isValid(ws1) )
     TS_ASSERT( compVal3->isValid(ws2) )
     delete compVal3;

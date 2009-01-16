@@ -91,7 +91,7 @@ private:
 	LoadMappingTable loader;
 	std::string inputFile;
 	std::string outputSpace;
-	Workspace_sptr work1;
+	MatrixWorkspace_sptr work1;
 	boost::shared_ptr<SpectraDetectorMap> map;
 };
 #endif /*LOADMAPPINGTABLETEST_H_*/

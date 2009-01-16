@@ -13,7 +13,7 @@ namespace API
 
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
-  Mantid::Kernel::DynamicFactory<Workspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
+  Mantid::Kernel::DynamicFactory<MatrixWorkspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
 {
   g_log.debug() << "WorkspaceFactory created." << std::endl;
 }
@@ -41,7 +41,7 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr& parent,
                                             int NVectors, int XLength, int YLength) const
 {
 
@@ -58,7 +58,7 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
     NVectors = parent->size() / YLength;
   }
 
-  Workspace_sptr ws = create(parent->id(),NVectors,XLength,YLength);
+  MatrixWorkspace_sptr ws = create(parent->id(),NVectors,XLength,YLength);
 
   // Copy over certain parent data members
   ws->setInstrument(parent->getInstrument());
@@ -103,10 +103,10 @@ Workspace_sptr WorkspaceFactoryImpl::create(const Workspace_const_sptr& parent,
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-Workspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors,
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors,
                                             const int& XLength, const int& YLength) const
 {
-  Workspace_sptr ws;
+  MatrixWorkspace_sptr ws;
 
   // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
   // Otherwise calls the vanilla create method.

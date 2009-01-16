@@ -51,9 +51,9 @@ void FindPeaks::init()
 void FindPeaks::exec()
 {
   // Retrieve the input workspace
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  Workspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
+  MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
   // The optimum number of points in the smoothing, according to Mariscotti, is 0.6*fwhm
   const int fwhm = getProperty("fwhm");
@@ -215,7 +215,7 @@ void FindPeaks::exec()
   g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
   
   // This is temporary until I can pass out the list of peaks in a property
-  Workspace_sptr outputWS = this->removePeaks(inputWS);
+  MatrixWorkspace_sptr outputWS = this->removePeaks(inputWS);
   setProperty("WithPeaksStripped",outputWS);  
 }
 
@@ -225,10 +225,10 @@ void FindPeaks::exec()
  *  @param input The workspace to calculate the second difference of
  *  @return A workspace containing the second difference
  */
-API::Workspace_sptr FindPeaks::calculateSecondDifference(const API::Workspace_const_sptr &input)
+API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input)
 {
   // We need a new workspace the same size as the input ont
-  Workspace_sptr diffed = WorkspaceFactory::Instance().create(input);
+  MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
 
   const int numHists = input->getNumberHistograms();
   const int blocksize = input->blocksize();
@@ -256,7 +256,7 @@ API::Workspace_sptr FindPeaks::calculateSecondDifference(const API::Workspace_co
  *  @param WS The workspace containing the data to be smoothed. The smoothed result will be stored in this pointer.
  *  @param w  The number of data points which should contribute to each smoothed point
  */
-void FindPeaks::smoothData(API::Workspace_sptr &WS, const int &w)
+void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
 {
   g_log.information("Smoothing the input data");
   Algorithm_sptr smooth = createSubAlgorithm("SmoothData");
@@ -286,7 +286,7 @@ void FindPeaks::smoothData(API::Workspace_sptr &WS, const int &w)
  *  @param w        The value of w (the size of the smoothing 'window')
  *  @throw std::invalid_argument if w is greater than 19
  */
-void FindPeaks::calculateStandardDeviation(const API::Workspace_const_sptr &input, const API::Workspace_sptr &smoothed, const int &w)
+void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w)
 {
   // Guard against anyone changing the value of z, which would mean different phi values were needed (see Marriscotti p.312)
   assert( g_z == 5 );
@@ -328,7 +328,7 @@ void FindPeaks::calculateStandardDeviation(const API::Workspace_const_sptr &inpu
  *  @param i0       Channel number of peak i0
  *  @param i4       Channel number of peak i4
  */
-void FindPeaks::fitPeak(const API::Workspace_sptr &input, const int spectrum, const int i0, const int i4)
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4)
 {
   Algorithm_sptr fit;
   try
@@ -405,11 +405,11 @@ void FindPeaks::fitPeak(const API::Workspace_sptr &input, const int spectrum, co
 }
 
 /// Method copied temporarily from StripPeaks until I am able to pass the list of peaks out of this algorithm
-API::Workspace_sptr FindPeaks::removePeaks(const API::Workspace_const_sptr &input)
+API::MatrixWorkspace_sptr FindPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input)
 {
   g_log.information("Subtracting peaks");
   // Create an output workspace - same size a input one
-  Workspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace
   const int hists = input->getNumberHistograms();
   for (int k = 0; k < hists; ++k)

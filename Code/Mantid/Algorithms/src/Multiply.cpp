@@ -23,8 +23,8 @@ namespace Mantid
     * @param it_in2 The const iterator to the rhs data item
     * @param it_out The output iterator to the new workspace
     */
-    void Multiply::performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
-        Workspace::iterator it_out)
+    void Multiply::performBinaryOperation(MatrixWorkspace::const_iterator it_in1, MatrixWorkspace::const_iterator it_in2,
+        MatrixWorkspace::iterator it_out)
     {
       std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Multiply_fn(this,it_in1.end() - it_in1.begin()));
     }

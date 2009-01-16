@@ -33,7 +33,7 @@ void SmoothData::init()
 void SmoothData::exec()
 {
   // Get the input properties
-  Workspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
   int npts = getProperty("NPoints");
   // Number of smoothing points must always be an odd number, so add 1 if it isn't.
@@ -53,7 +53,7 @@ void SmoothData::exec()
   const int halfWidth = (npts-1)/2;
 
   // Create the output workspace
-  Workspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
   Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
 
   // Next lines enable sharing of the X vector to be carried over to the output workspace if in the input one

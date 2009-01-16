@@ -38,7 +38,7 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
     exts.push_back("NXS");

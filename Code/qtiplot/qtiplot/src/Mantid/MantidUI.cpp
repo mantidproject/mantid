@@ -313,13 +313,13 @@ Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
 
 int MantidUI::getHistogramNumber(const QString& workspaceName)
 {
-	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+    MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
 	return output->getNumberHistograms();
 }
 
 int MantidUI::getBinNumber(const QString& workspaceName)
 {
-	Workspace_sptr output = AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
+	MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName.toStdString()));
 	return output->blocksize();
 }
 
@@ -360,10 +360,10 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 
 MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
-    Workspace_sptr ws;
+    MatrixWorkspace_sptr ws;
   	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
 	{
-		ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+		ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 	}
 
     if (!ws.get()) return 0;
@@ -640,7 +640,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
      t->showNormal();
      t->askOnCloseEvent(false);
     
-     Mantid::API::Workspace_sptr ws = m->workspace();
+     Mantid::API::MatrixWorkspace_sptr ws = m->workspace();
      Mantid::API::Axis *spectraAxis = ws->getAxis(1);
      boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap = ws->getSpectraMap();
      for(int i=0;i<m->numRows();i++)
@@ -1031,7 +1031,7 @@ void MantidUI::insertMenu()
 MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
   QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
-    Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     Table *t = createTableFromSelectedRows(wsName,workspace,spec,spec,false,false);
     t->askOnCloseEvent(false);
     MultiLayer* ml(NULL);
@@ -1058,7 +1058,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::vector<int> spec)
 {
 //    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
-    Mantid::API::Workspace_sptr workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     Table *t = createTableFromSelectedRowsList(wsName,workspace,spec,false,false);
     t->askOnCloseEvent(false);
     t->setAttribute(Qt::WA_QuitOnClose);
@@ -1082,7 +1082,7 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::vec
     return ml;
 }
 
-Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::API::Workspace_sptr workspace, std::vector<int> index, bool errs, bool forPlotting)
+Table* MantidUI::createTableFromSelectedRowsList(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> index, bool errs, bool forPlotting)
 {
      int nspec = workspace->getNumberHistograms();
 	 //Loop through the list of index and remove all the indexes that are out of range
@@ -1146,10 +1146,10 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   {
     m = importWorkspace(wsName, false, showMatrix);
   }
-  Workspace_sptr ws;
+  MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
   if( !ws.get() ) return NULL;
   
@@ -1167,7 +1167,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   return ml;
 }
 
-Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs, bool forPlotting)
+Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs, bool forPlotting)
 {
      if (i0 < 0 || i1 < 0) return 0;
      int nspec = workspace->getNumberHistograms();
@@ -1226,7 +1226,7 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      return t;
  }
 
-Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::API::Workspace_sptr workspace, int c0, int c1, bool errs, bool forPlotting)
+Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs, bool forPlotting)
 {
   if (c0 < 0 || c1 < 0) return NULL;
 
@@ -1273,10 +1273,10 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMat
   {
     m = importWorkspace(wsName, false, showMatrix);
   }
-  Workspace_sptr ws;
+  MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
-    ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
   if (!ws.get()) return NULL;
   
@@ -1310,10 +1310,10 @@ MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 
 MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
 {
-  Workspace_sptr ws;
+  MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
     {
-      ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     }
   
   if (!ws.get()) return 0;

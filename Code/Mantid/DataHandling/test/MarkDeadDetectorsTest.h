@@ -24,7 +24,7 @@ public:
   MarkDeadDetectorsTest()
   {
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     std::vector<double> x(6,10.0);
     std::vector<double>  vec(5,1.0);
@@ -117,7 +117,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( marker2.execute());
     TS_ASSERT( marker2.isExecuted() );
 
-    Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve("testSpace");
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testSpace"));
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
     std::vector<double> zeroes(5,0.0);

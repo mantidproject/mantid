@@ -34,8 +34,8 @@ void Unwrap::init()
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   BoundedValidator<double> *validator = new BoundedValidator<double>;
   validator->setLower(0.01);
@@ -57,7 +57,7 @@ void Unwrap::exec()
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Need a new workspace. Will just be used temporarily until the data is rebinned.
-  Workspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS);
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS);
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
@@ -111,7 +111,7 @@ void Unwrap::exec()
   const double minLambda = (m_conversionConstant * m_Tmin) / m_LRef;
   const double maxLambda = (m_conversionConstant * m_Tmax) / m_LRef;
   // Rebin the data into common wavelength bins
-  Workspace_sptr outputWS = this->rebin( tempWS, minLambda, maxLambda, max_bins-1);
+  MatrixWorkspace_sptr outputWS = this->rebin( tempWS, minLambda, maxLambda, max_bins-1);
 
   g_log.debug() << "Rebinned workspace has " << outputWS->getNumberHistograms() << " histograms of "
                 << outputWS->blocksize() << " bins each" << std::endl;
@@ -190,7 +190,7 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
  *  @param Ld       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower ranges start & end
  */
-const std::vector<int> Unwrap::unwrapX(const API::Workspace_sptr& tempWS, const int& spectrum, const double& Ld)
+const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld)
 {
   // Create and initalise the vector that will store the bin ranges, and will be returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range start
@@ -286,7 +286,7 @@ std::pair<int,int> Unwrap::handleFrameOverlapped(const std::vector<double>& xdat
  *  @param spectrum    The workspace index
  *  @param rangeBounds The upper and lower ranges for the unwrapping
  */
-void Unwrap::unwrapYandE(const API::Workspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds)
+void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds)
 {
   // Copy over the relevant ranges of Y & E data
   std::vector<double>& Y = tempWS->dataY(spectrum);
@@ -324,7 +324,7 @@ void Unwrap::unwrapYandE(const API::Workspace_sptr& tempWS, const int& spectrum,
  *  @return A pointer to the workspace containing the rebinned data
  *  @throw std::runtime_error If the Rebin child algorithm fails
  */
-API::Workspace_sptr Unwrap::rebin(const API::Workspace_sptr& workspace, const double& min, const double& max, const int& numBins)
+API::MatrixWorkspace_sptr Unwrap::rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const int& numBins)
 {
   // Calculate the width of a bin
   const double step = (max - min)/numBins;
@@ -332,7 +332,7 @@ API::Workspace_sptr Unwrap::rebin(const API::Workspace_sptr& workspace, const do
   // Create a Rebin child algorithm
   Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setPropertyValue("InputWorkspace", "Anonymous");
-  childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
   // Construct the vector that holds the rebin parameters and set the property

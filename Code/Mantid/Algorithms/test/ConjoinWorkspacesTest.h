@@ -62,8 +62,8 @@ public:
     if ( !conj.isInitialized() ) conj.initialize();
 
     // Get the two input workspaces for later
-    Workspace_const_sptr in1 = AnalysisDataService::Instance().retrieve("top");
-    Workspace_const_sptr in2 = AnalysisDataService::Instance().retrieve("bottom");
+    MatrixWorkspace_const_sptr in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top"));
+    MatrixWorkspace_const_sptr in2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("bottom"));
 
     // Check it fails if properties haven't been set
     TS_ASSERT_THROWS( conj.execute(), std::runtime_error )
@@ -80,8 +80,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( conj.execute() )
     TS_ASSERT( conj.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("top") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("top")) )
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 25 )
     // Check a few values
     TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] )

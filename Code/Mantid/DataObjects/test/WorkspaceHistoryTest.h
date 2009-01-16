@@ -56,15 +56,15 @@ public:
 
   void init()
   {
-    declareProperty(new WorkspaceProperty<Workspace>("InWS_1","",Direction::Input));
-    declareProperty(new WorkspaceProperty<Workspace>("InWS_2","",Direction::Input));
-    declareProperty(new WorkspaceProperty<Workspace>("InoutWS","",Direction::InOut));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InWS_1","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InWS_2","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InoutWS","",Direction::InOut));
   }
   void exec()
   {
-    Workspace_sptr in_work1 = getProperty("InWS_1");
-    Workspace_sptr in_work2 = getProperty("InWS_2");
-    Workspace_sptr out = getProperty("InoutWS");
+    MatrixWorkspace_sptr in_work1 = getProperty("InWS_1");
+    MatrixWorkspace_sptr in_work2 = getProperty("InWS_2");
+    MatrixWorkspace_sptr out = getProperty("InoutWS");
 
 
     for (int i=0;i<100;i++)

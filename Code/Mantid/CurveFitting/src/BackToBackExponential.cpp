@@ -21,8 +21,8 @@ DECLARE_ALGORITHM(BackToBackExponential)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace_const_sptr;
-using API::Workspace;
+using API::MatrixWorkspace_const_sptr;
+using API::MatrixWorkspace;
 
 
 // Get a reference to the logger
@@ -47,7 +47,7 @@ struct FitData {
 /// Initialisation method
 void BackToBackExponential::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -83,7 +83,7 @@ void BackToBackExponential::exec()
   const int maxInterations = getProperty("MaxIterations");
 
   // Get the input workspace
-  Workspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   // number of histogram is equal to the number of spectra
   const int numberOfSpectra = localworkspace->getNumberHistograms();

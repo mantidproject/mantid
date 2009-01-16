@@ -73,16 +73,16 @@ private:
   void exec();
 
   /// Convert the workspace units according to a simple output = a * (input^b) relationship
-  void convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power);
+  void convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power);
   /// Convert the workspace units using TOF as an intermediate step in the conversion
-  void convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::Workspace_sptr outputWS);
+  void convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
 
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace
-  API::Workspace_sptr alignBins(const API::Workspace_sptr workspace);
-  const std::vector<double> calculateRebinParams(const API::Workspace_const_sptr workspace) const;
+  API::MatrixWorkspace_sptr alignBins(const API::MatrixWorkspace_sptr workspace);
+  const std::vector<double> calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const;
 
   /// Reverses the workspace if X values are in descending order
-  void reverse(API::Workspace_sptr workspace);
+  void reverse(API::MatrixWorkspace_sptr workspace);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

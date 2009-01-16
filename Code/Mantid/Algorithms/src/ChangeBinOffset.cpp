@@ -29,8 +29,8 @@ namespace Mantid
     */
     void ChangeBinOffset::init()
     {
-        declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-        declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+        declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+        declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 	BoundedValidator<double> *isDouble = new BoundedValidator<double>();
 	declareProperty("Offset",0.0,isDouble);
     }
@@ -41,10 +41,10 @@ namespace Mantid
     void ChangeBinOffset::exec()
     {
 	    //Get input workspace and offset
-	    Workspace_sptr inputW = getProperty("InputWorkspace");
+	    MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 	    double offset = getProperty("Offset");
 	    
-	    API::Workspace_sptr outputW = createOutputWS(inputW);	    
+	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
 	    
 	    //Get number of histograms
 	    int histnumber = inputW->getNumberHistograms();
@@ -79,7 +79,7 @@ namespace Mantid
 	    setProperty("OutputWorkspace",outputW);
     }
     
-    API::Workspace_sptr ChangeBinOffset::createOutputWS(API::Workspace_sptr input)
+    API::MatrixWorkspace_sptr ChangeBinOffset::createOutputWS(API::MatrixWorkspace_sptr input)
    {
 	   //Check whether input = output to see whether a new workspace is required.
 	    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
@@ -90,7 +90,7 @@ namespace Mantid
 	    else
 	    {	    
 		//Create new workspace for output from old
-		API::Workspace_sptr output = API::WorkspaceFactory::Instance().create(input);
+		API::MatrixWorkspace_sptr output = API::WorkspaceFactory::Instance().create(input);
 		output->isDistribution(input->isDistribution());
 		return output;
 	    }

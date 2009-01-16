@@ -24,11 +24,11 @@ using namespace Mantid::DataObjects;
       CommutativeBinaryOpHelper() : CommutativeBinaryOperation() {};
       /// Destructor
       virtual ~CommutativeBinaryOpHelper() {};
-      const bool checkSizeCompatibility(const Workspace_sptr ws1,const Workspace_sptr ws2) const
+      const bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2) const
       {
         return CommutativeBinaryOperation::checkSizeCompatibility(ws1,ws2);
       }
-      Workspace_sptr createOutputWorkspace(const Workspace_sptr ws1, const Workspace_sptr ws2) const
+      MatrixWorkspace_sptr createOutputWorkspace(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) const
       {
         return CommutativeBinaryOperation::createOutputWorkspace(ws1,ws2);
       }
@@ -37,8 +37,8 @@ using namespace Mantid::DataObjects;
 
     private:
       // Overridden BinaryOperation methods
-      void performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
-        Workspace::iterator it_out)
+      void performBinaryOperation(MatrixWorkspace::const_iterator it_in1, MatrixWorkspace::const_iterator it_in2,
+        MatrixWorkspace::iterator it_out)
       {}
     };
 
@@ -151,12 +151,12 @@ public:
     checkOutputWorkspace(helper.createOutputWorkspace(work_in1,work_in6),work_in1,work_in6);
   }
 
-  void checkOutputWorkspace(Workspace_sptr ws, Workspace_sptr wsIn1,Workspace_sptr wsIn2 ) const
+  void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
   {
     int targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
     TS_ASSERT_EQUALS(ws->size(),targetsize);
     //check they arre all 0
-    for(Workspace::iterator ti(*ws); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::iterator ti(*ws); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
       (

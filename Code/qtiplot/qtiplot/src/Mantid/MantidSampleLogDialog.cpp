@@ -125,7 +125,12 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
 void MantidSampleLogDialog::init()
 {
   m_tree->clear();
-  const std::vector< Mantid::Kernel::Property * > & logData = m_mantidUI->getWorkspace(m_wsname)->getSample()->getLogData();
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(m_mantidUI->getWorkspace(m_wsname));
+  if (!ws)
+  {
+      throw std::runtime_error("Wrong type of a Workspace");
+  }
+  const std::vector< Mantid::Kernel::Property * > & logData = ws->getSample()->getLogData();
   std::vector< Mantid::Kernel::Property * >::const_iterator pEnd = logData.end();
   int max_length(0);
   for( std::vector< Mantid::Kernel::Property * >::const_iterator pItr = logData.begin();

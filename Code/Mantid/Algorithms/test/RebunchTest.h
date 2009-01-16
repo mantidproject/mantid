@@ -29,7 +29,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("n_bunch", "5");
     rebunch.execute();
-    Workspace_sptr rebunchdata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebunchdata->dataX(0);
     const std::vector<double> outY=rebunchdata->dataY(0);
     const std::vector<double> outE=rebunchdata->dataE(0);
@@ -59,7 +59,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("n_bunch", "7");
     rebunch.execute();
-    Workspace_sptr rebunchdata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
     const std::vector<double> outX=rebunchdata->dataX(0);
     const std::vector<double> outY=rebunchdata->dataY(0);
@@ -93,7 +93,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("n_bunch", "5");
     rebunch.execute();
-    Workspace_sptr rebunchdata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
     const std::vector<double> outX=rebunchdata->dataX(5);
     const std::vector<double> outY=rebunchdata->dataY(5);
@@ -126,7 +126,7 @@ public:
     rebunch.setPropertyValue("OutputWorkspace","test_out");
     rebunch.setPropertyValue("n_bunch", "7");
     rebunch.execute();
-    Workspace_sptr rebunchdata = AnalysisDataService::Instance().retrieve("test_out");
+    MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebunchdata->dataX(5);
     const std::vector<double> outY=rebunchdata->dataY(5);
     const std::vector<double> outE=rebunchdata->dataE(5);

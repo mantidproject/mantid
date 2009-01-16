@@ -41,7 +41,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE = Workspace>
+template <typename TYPE = MatrixWorkspace>
 class DLLExport CompositeValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
@@ -106,7 +106,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace>
+template <typename TYPE = MatrixWorkspace>
 class DLLExport WorkspaceUnitValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
@@ -153,7 +153,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace>
+template <typename TYPE = MatrixWorkspace>
 class DLLExport HistogramValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
@@ -188,7 +188,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 16/09/2008
  */
-template <typename TYPE = Workspace>
+template <typename TYPE = MatrixWorkspace>
 class DLLExport RawCountValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:
@@ -227,7 +227,7 @@ private:
  *  @author Russell Taylor, Tessella Support Services plc
  *  @date 18/09/2008
  */
-template <typename TYPE = Workspace>
+template <typename TYPE = MatrixWorkspace>
 class DLLExport CommonBinsValidator : public Kernel::IValidator<boost::shared_ptr<TYPE> >
 {
 public:

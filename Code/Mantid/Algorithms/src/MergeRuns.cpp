@@ -29,7 +29,7 @@ void MergeRuns::init()
 {
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 }
 
 /** Executes the algorithm
@@ -45,16 +45,16 @@ void MergeRuns::exec()
     g_log.error("Only one input workspace specified");
     throw std::invalid_argument("Only one input workspace specified");
   }
-  std::list<Workspace_sptr> inWS = this->validateInputs(inputs);
+  std::list<MatrixWorkspace_sptr> inWS = this->validateInputs(inputs);
 
   // Iterate over the collection of input workspaces
-  std::list<Workspace_sptr>::iterator it = inWS.begin();
+  std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
   // Take the first input workspace as the first argument to the addition
-  Workspace_sptr outWS = inWS.front();
+  MatrixWorkspace_sptr outWS = inWS.front();
   // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
   for (++it; it != inWS.end(); ++it)
   {
-    Workspace_sptr addee;
+    MatrixWorkspace_sptr addee;
     // Only do a rebinning if the bins don't already match - otherwise can just add (see the 'else')
     if ( ! WorkspaceHelpers::matchingBins(outWS,*it,true) )
     {
@@ -81,7 +81,7 @@ void MergeRuns::exec()
 /// @cond
 // Local function used within validateInputs() below in a call to std::list::sort(compare)
 // to order the input workspaces by the start of their frame (i.e. the first X value).
-static bool compare(Workspace_sptr first, Workspace_sptr second)
+static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 {
   return (first->readX(0).front() < second->readX(0).front() );
 }
@@ -94,9 +94,9 @@ static bool compare(Workspace_sptr first, Workspace_sptr second)
  *  @throw  Exception::NotFoundError If an input workspace doesn't exist
  *  @throw  std::invalid_argument    If the input workspaces are not compatible
  */
-std::list<API::Workspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces) const
+std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces) const
 {
-  std::list<Workspace_sptr> inWS;
+  std::list<MatrixWorkspace_sptr> inWS;
   int numSpec;
   Unit_sptr unit;
   bool dist;
@@ -108,7 +108,13 @@ std::list<API::Workspace_sptr> MergeRuns::validateInputs(const std::vector<std::
   {
     // Fetch the next input workspace - throw an error if it's not there
     try {
-      inWS.push_back(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
+        if (!ws)
+        {
+            g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found." << std::endl;
+            throw Kernel::Exception::NotFoundError("Data Object",inputWorkspaces[i]);
+        }
+      inWS.push_back(ws);
     }
     catch (Exception::NotFoundError) {
       g_log.error() << "Input workspace " << inputWorkspaces[i] << " not found." << std::endl;
@@ -155,7 +161,7 @@ std::list<API::Workspace_sptr> MergeRuns::validateInputs(const std::vector<std::
  *  @param ws2    The second input workspace.
  *  @param params A reference to the vector of rebinning parameters
  */
-void MergeRuns::calculateRebinParams(const API::Workspace_const_sptr& ws1, const API::Workspace_const_sptr& ws2, std::vector<double>& params) const
+void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const
 {
   const std::vector<double> &X1 = ws1->readX(0);
   const std::vector<double> &X2 = ws2->readX(0);
@@ -316,7 +322,7 @@ void MergeRuns::inclusionParams(const std::vector<double>& X1, int& i, const std
  *  @return A shared pointer to the output (rebinned) workspace
  *  @throw  std::runtime_error If the Rebin algorithm fails
  */
-API::Workspace_sptr MergeRuns::rebinInput(const API::Workspace_sptr& workspace, const std::vector<double>& params)
+API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params)
 {
   // Create a Rebin child algorithm
   Algorithm_sptr rebin = createSubAlgorithm("Rebin");

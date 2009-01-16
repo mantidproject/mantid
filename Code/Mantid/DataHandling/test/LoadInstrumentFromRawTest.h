@@ -66,8 +66,8 @@ public:
     TS_ASSERT( loader.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(wsName));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
 
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "HET     ");

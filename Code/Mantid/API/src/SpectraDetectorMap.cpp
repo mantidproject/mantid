@@ -1,6 +1,6 @@
 #include "MantidGeometry/DetectorGroup.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <iostream>
 
@@ -26,7 +26,7 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
-    SpectraDetectorMap::SpectraDetectorMap(const Workspace* ws)
+    SpectraDetectorMap::SpectraDetectorMap(const MatrixWorkspace* ws)
         : _s2dmap(new smap), m_workspace(ws)
     {
     }

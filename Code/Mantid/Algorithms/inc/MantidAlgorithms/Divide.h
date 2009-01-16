@@ -67,8 +67,8 @@ namespace Mantid
 
     private:
       // Overridden BinaryOperation methods
-      void performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
-        API::Workspace::iterator it_out);
+      void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
+        API::MatrixWorkspace::iterator it_out);
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 

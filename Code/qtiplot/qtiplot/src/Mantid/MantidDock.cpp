@@ -76,27 +76,31 @@ void MantidDockWidget::update()
     for(int i=0;i<sl.size();i++)
     {
         QTreeWidgetItem *wsItem = new QTreeWidgetItem(QStringList(sl[i]));
-        Mantid::API::Workspace_sptr ws = m_mantidUI->getWorkspace(sl[i]);
-        wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-        wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
-        wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
-        bool isHistogram = ws->blocksize() && ws->isHistogramData();
-        wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
-        Mantid::API::Axis* ax;
-        ax = ws->getAxis(0);
-        std::string s = "X axis: ";
-        if (ax->unit().get()) s += ax->unit()->caption() + " / " + ax->unit()->label();
-        else
-            s += "Unknown";
-        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
-        s = "Y axis: " + ws->YUnit();
-        wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-        QString WsType = "Workspace";
-        if (dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws.get())) WsType = "Workspace2D";
-        if (dynamic_cast<Mantid::DataObjects::ManagedWorkspace2D*>(ws.get())) WsType = "ManagedWorkspace2D";
-        if (dynamic_cast<Mantid::DataHandling::ManagedRawFileWorkspace2D*>(ws.get())) WsType = "ManagedRawFileWorkspace2D";
-        wsItem->addChild(new QTreeWidgetItem(QStringList(WsType)));
-        wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
+        Mantid::API::Workspace_sptr ws0 = m_mantidUI->getWorkspace(sl[i]);
+        if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws0))
+        {
+            MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws0);
+            wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
+            wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
+            wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
+            bool isHistogram = ws->blocksize() && ws->isHistogramData();
+            wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
+            Mantid::API::Axis* ax;
+            ax = ws->getAxis(0);
+            std::string s = "X axis: ";
+            if (ax->unit().get()) s += ax->unit()->caption() + " / " + ax->unit()->label();
+            else
+                s += "Unknown";
+            wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
+            s = "Y axis: " + ws->YUnit();
+            wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
+            QString WsType = "Workspace";
+            if (dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws.get())) WsType = "Workspace2D";
+            if (dynamic_cast<Mantid::DataObjects::ManagedWorkspace2D*>(ws.get())) WsType = "ManagedWorkspace2D";
+            if (dynamic_cast<Mantid::DataHandling::ManagedRawFileWorkspace2D*>(ws.get())) WsType = "ManagedRawFileWorkspace2D";
+            wsItem->addChild(new QTreeWidgetItem(QStringList(WsType)));
+            wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
+        }
         m_tree->addTopLevelItem(wsItem);
     }
 }

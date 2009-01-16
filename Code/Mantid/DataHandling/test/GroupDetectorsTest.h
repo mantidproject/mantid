@@ -25,7 +25,7 @@ public:
   GroupDetectorsTest()
   {
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
     Histogram1D::RCtype x;
@@ -125,7 +125,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper2.execute());
     TS_ASSERT( grouper2.isExecuted() );
 
-    Workspace_sptr outputWS = AnalysisDataService::Instance().retrieve("GroupTestWS");
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("GroupTestWS"));
     std::vector<double> tens(6,10.0);
     std::vector<double> ones(5,1.0);
     std::vector<double> threes(5,3.0);

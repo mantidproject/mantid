@@ -39,11 +39,11 @@ public:
 
     TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" )
     TS_ASSERT( props[0]->isDefault() )
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[0]) )
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[0]) )
 
     TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" )
     TS_ASSERT( props[1]->isDefault() )
-    TS_ASSERT( dynamic_cast<WorkspaceProperty<Workspace>* >(props[1]) )
+    TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) )
 
     TS_ASSERT_EQUALS( props[2]->name(), "LRef" )
     TS_ASSERT( props[2]->isDefault() )
@@ -68,8 +68,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( unwrap.execute() )
     TS_ASSERT( unwrap.isExecuted() )
 
-    boost::shared_ptr<Workspace> inWS = AnalysisDataService::Instance().retrieve(outputSpace);
-    boost::shared_ptr<Workspace> outWS = AnalysisDataService::Instance().retrieve("unwrappedWS");
+    boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
+    boost::shared_ptr<MatrixWorkspace> outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unwrappedWS"));
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
     TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )

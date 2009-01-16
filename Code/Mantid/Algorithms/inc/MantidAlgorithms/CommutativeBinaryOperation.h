@@ -57,10 +57,10 @@ namespace Mantid
     protected:
       // Overridden BinaryOperation methods
       /// Checks the overall size compatability of two workspaces
-      virtual const bool checkSizeCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
+      virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
       /// Creates a suitable output workspace for two input workspaces
-      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
+      virtual API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
 
     private:
       /// Static reference to the logger class

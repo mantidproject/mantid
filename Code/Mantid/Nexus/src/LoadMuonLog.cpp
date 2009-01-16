@@ -21,8 +21,8 @@ DECLARE_ALGORITHM(LoadMuonLog)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace;
-using API::Workspace_sptr;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
@@ -36,7 +36,7 @@ LoadMuonLog::LoadMuonLog()
 void LoadMuonLog::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("Filename","");
 }
 
@@ -62,7 +62,7 @@ void LoadMuonLog::exec()
   // the log data will be loaded into the Sample container of the workspace
   // Also set the sample name at this point, as part of the sample related log data.
 
-  const Workspace_sptr localWorkspace = getProperty("Workspace");
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
   sample->setName(nxload.getSampleName());
 

@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACE1D_H_
 #define MANTID_DATAOBJECTS_WORKSPACE1D_H_
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 
@@ -39,7 +39,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace1D : public API::Workspace, public Histogram1D
+class DLLExport Workspace1D : public API::MatrixWorkspace, public Histogram1D
 {
 
 public:

@@ -21,8 +21,8 @@ DECLARE_ALGORITHM(LoadLog)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace;
-using API::Workspace_sptr;
+using API::MatrixWorkspace;
+using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
@@ -38,7 +38,7 @@ LoadLog::LoadLog()
 void LoadLog::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("Filename","");
 }
 
@@ -71,7 +71,7 @@ void LoadLog::exec()
   // Get the input workspace and retrieve sample from workspace.
   // the log file(s) will be loaded into the Sample container of the workspace 
 
-  const Workspace_sptr localWorkspace = getProperty("Workspace");
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
 
 

@@ -67,8 +67,8 @@ void testExecOnLoadraw()
     //
     // get workspace
     //
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     map=output2D->getSpectraMap();
     //
@@ -122,8 +122,8 @@ void testExecOnLoadraw()
     TS_ASSERT( algToBeTested.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(myOutputSpace));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
@@ -241,8 +241,8 @@ void testExecOnLoadraw()
     TS_ASSERT( loadNex.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(myOutputSpace));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);

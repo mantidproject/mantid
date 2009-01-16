@@ -25,15 +25,15 @@ NormaliseByCurrent::~NormaliseByCurrent() {}
 
 void NormaliseByCurrent::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 }
 
 void NormaliseByCurrent::exec()
 {
   // Get the input workspace
-  Workspace_sptr inputWS = getProperty("InputWorkspace");
-  Workspace_sptr outputWS = getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Get the good proton charge and check it's valid
   double charge = inputWS->getSample()->getProtonCharge();

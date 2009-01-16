@@ -66,12 +66,12 @@ private:
   void exec();
 
   // Methods called by exec()
-  std::list<API::Workspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
-  void calculateRebinParams(const API::Workspace_const_sptr& ws1, const API::Workspace_const_sptr& ws2, std::vector<double>& params) const;
+  std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
+  void calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const;
   void noOverlapParams(const std::vector<double>& X1, const std::vector<double>& X2, std::vector<double>& params) const;
   void intersectionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
   void inclusionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
-  API::Workspace_sptr rebinInput(const API::Workspace_sptr& workspace, const std::vector<double>& params);
+  API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

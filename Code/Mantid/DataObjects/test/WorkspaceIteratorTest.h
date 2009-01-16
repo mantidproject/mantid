@@ -37,7 +37,7 @@ private:
   typedef boost::shared_ptr<Workspace1D> W1D;
   typedef boost::shared_ptr<Workspace2D> W2D;
   typedef boost::shared_ptr<WorkspaceSingleValue> WSV;
-  typedef boost::shared_ptr<Workspace> Wbase;
+  typedef boost::shared_ptr<MatrixWorkspace> Wbase;
 
 public:
 
@@ -132,7 +132,7 @@ public:
     Wbase workspace = Create1DWorkspace(size);
 
     int count = 0;
-    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
         (
@@ -155,7 +155,7 @@ public:
     Wbase workspace = Create2DWorkspace(histogramCount,size);
     //workspace->dataX(0) // this is the first spectrum in the workspace with real data
     int count = 0;
-    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
       (
@@ -240,7 +240,7 @@ public:
     {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      for(MatrixWorkspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
       {
         TS_ASSERT_THROWS_NOTHING
         (
@@ -272,7 +272,7 @@ public:
     {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      for(MatrixWorkspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
       {
         TS_ASSERT_THROWS_NOTHING
         (
@@ -308,7 +308,7 @@ public:
     {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for(Workspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Vertical); ti != ti.end(); ++ti)
+      for(MatrixWorkspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Vertical); ti != ti.end(); ++ti)
       {
         TS_ASSERT_THROWS_NOTHING
         (
@@ -341,7 +341,7 @@ public:
     {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for(Workspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Vertical); ti != ti.end(); ++ti)
+      for(MatrixWorkspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Vertical); ti != ti.end(); ++ti)
       {
         TS_ASSERT_THROWS_NOTHING
         (
@@ -363,7 +363,7 @@ public:
     Wbase workspace = WSV(new WorkspaceSingleValue(1.1,2.2));
 
     int count = 0;
-    for(Workspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
       (
@@ -394,7 +394,7 @@ public:
     {
       int loopCount = loopCountArray[i];
       int count = 0;
-      for(Workspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
+      for(MatrixWorkspace::const_iterator ti(*workspace,loopCount); ti != ti.end(); ++ti)
       {
         TS_ASSERT_THROWS_NOTHING
         (

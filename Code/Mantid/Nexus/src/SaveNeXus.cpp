@@ -46,7 +46,7 @@ namespace NeXus
     exts.push_back("xml");
     exts.push_back("XML");
     declareProperty("FileName","",new FileValidator(exts,false));  
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
     //
     // Declare optional input parameters
     // These are:

@@ -315,7 +315,7 @@ namespace Mantid
       
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -346,7 +346,7 @@ namespace Mantid
       Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above
-      loadInst->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -388,7 +388,7 @@ namespace Mantid
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
-      loadLog->setProperty<Workspace_sptr>("Workspace",localWorkspace);
+      loadLog->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try

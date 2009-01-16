@@ -29,16 +29,16 @@ public:
   virtual ~ComplexOpTest() {}
   void init() 
   {
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_1","",Direction::Input));
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace_2","",Direction::Input));
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));   
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_1","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_2","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));   
   }
   void exec() 
   {
-    Workspace_sptr in_work1 = getProperty("InputWorkspace_1");
-    Workspace_sptr in_work2 = getProperty("InputWorkspace_2");
+    MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
+    MatrixWorkspace_sptr in_work2 = getProperty("InputWorkspace_2");
 
-    Workspace_sptr out_work = (in_work1 + in_work2)/(in_work1 - in_work2)+3;
+    MatrixWorkspace_sptr out_work = (in_work1 + in_work2)/(in_work1 - in_work2)+3;
     setProperty("OutputWorkspace",out_work);
   }
   virtual const std::string name() const {return "ComplexOpTest";}
@@ -54,8 +54,8 @@ public:
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    Workspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    Workspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     ComplexOpTest alg;
 
@@ -70,8 +70,8 @@ public:
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
-    Workspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = AnalysisDataService::Instance().retrieve(wsNameOut));
+    MatrixWorkspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
 
     checkData(work_in1, work_in2, work_out1);
 
@@ -82,7 +82,7 @@ public:
 
 private:
 
-  void checkData( Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1)
+  void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1)
   {
     int ws2LoopCount;
     if (work_in2->size() > 0)
@@ -97,7 +97,7 @@ private:
     }
   }
 
-  void checkDataItem (Workspace_sptr work_in1,  Workspace_sptr work_in2, Workspace_sptr work_out1, int i, int ws2Index)
+  void checkDataItem (MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, int i, int ws2Index)
   {
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double sig2 = work_in2->dataY(ws2Index/work_in1->blocksize())[ws2Index%work_in1->blocksize()];

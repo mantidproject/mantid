@@ -8,13 +8,13 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-class tstWorkspace: public Workspace
+class tstWorkspace: public MatrixWorkspace
 {
     std::vector<double> vec;
 public:
@@ -164,7 +164,7 @@ private:
     }
   }
 
-  void populateSDMap(Workspace& ws, Instrument& inst,int length, int offset)
+  void populateSDMap(MatrixWorkspace& ws, Instrument& inst,int length, int offset)
   {
     int* udet = new int [length];
     int* spec = new int [length];

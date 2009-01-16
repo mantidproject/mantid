@@ -76,23 +76,23 @@ namespace Mantid
       * @param it_in2 The const iterator to the rhs data item
       * @param it_out The output iterator to the new workspace
       */
-      virtual void performBinaryOperation(API::Workspace::const_iterator it_in1, API::Workspace::const_iterator it_in2,
-        API::Workspace::iterator it_out) =0;
+      virtual void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
+        API::MatrixWorkspace::iterator it_out) =0;
 
       /// Checks the compatibility of the two workspaces
-      virtual const bool checkCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
+      virtual const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the overall size compatibility of two workspaces
-      virtual const bool checkSizeCompatibility(const API::Workspace_const_sptr lhs,const API::Workspace_const_sptr rhs) const;
+      virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the compatibility the X arrays of two workspaces
-      virtual const bool checkXarrayCompatibility(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
+      virtual const bool checkXarrayCompatibility(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
       /// Returns the number of times lhs will have to loop to match the size of rhs
-      virtual const int getRelativeLoopCount(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
+      virtual const int getRelativeLoopCount(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
       /// Creates a suitable output workspace for two input workspaces
-      virtual API::Workspace_sptr createOutputWorkspace(const API::Workspace_const_sptr lhs, const API::Workspace_const_sptr rhs) const;
+      virtual API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
       /// Creates a const iterator with appropriate looping settings.
-      API::Workspace::const_iterator createConstIterator(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const;
+      API::MatrixWorkspace::const_iterator createConstIterator(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const;
       /// Gets the looping orientation for a looping iterator
-      unsigned int getLoopDirection(const API::Workspace_const_sptr wsMain, const API::Workspace_const_sptr wsComparison) const;
+      unsigned int getLoopDirection(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const;
 
 
       friend class BinaryOperation_fn;

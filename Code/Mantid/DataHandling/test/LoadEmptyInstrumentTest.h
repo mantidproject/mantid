@@ -53,8 +53,8 @@ public:
     TS_ASSERT( loaderSLS.isExecuted() );
 
 
-    Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(wsName);
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
 
     boost::shared_ptr<SpectraDetectorMap>map= output->getSpectraMap();

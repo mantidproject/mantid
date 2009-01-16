@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
@@ -50,7 +50,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Workspace2D : public API::Workspace
+class DLLExport Workspace2D : public API::MatrixWorkspace
 {
 public:
   /// Typedef for the workspace_iterator to use with a Workspace2D

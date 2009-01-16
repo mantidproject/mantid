@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/RefAxis.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -13,7 +13,7 @@ namespace API
  *  @param length The length of this axis
  *  @param parentWorkspace A pointer to the workspace that holds this axis
  */
-RefAxis::RefAxis(const int length, const Workspace* const parentWorkspace) : 
+RefAxis::RefAxis(const int length, const MatrixWorkspace* const parentWorkspace) : 
   Axis(AxisType::Numeric, 0),
   m_parentWS(parentWorkspace)
 {
@@ -26,7 +26,7 @@ RefAxis::RefAxis(const int length, const Workspace* const parentWorkspace) :
  *  @param right The axis to copy
  *  @param parentWorkspace A pointer to the parent workspace of the new axis
  */
-RefAxis::RefAxis(const RefAxis& right, const Workspace* const parentWorkspace) :
+RefAxis::RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace) :
   Axis(right), m_parentWS(parentWorkspace)
 {}
 
@@ -37,7 +37,7 @@ RefAxis::~RefAxis()
  *  @param parentWorkspace A pointer to the workspace that will hold the new axis
  *  @return A pointer to a copy of the Axis on which the method is called
  */
-Axis* RefAxis::clone(const Workspace* const parentWorkspace)
+Axis* RefAxis::clone(const MatrixWorkspace* const parentWorkspace)
 { 
   return new RefAxis(*this, parentWorkspace); 
 }

@@ -86,8 +86,8 @@ public:
       TS_ASSERT_EQUALS( output2D->dataY(0).size(), output2D->dataY(1).size() );
 
       // Check the unit has been set correctly
-      TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
-        TS_ASSERT( ! output-> isDistribution() )
+      TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF" )
+        TS_ASSERT( ! output2D-> isDistribution() )
     }
   }
 

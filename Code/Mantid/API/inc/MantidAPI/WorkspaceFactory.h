@@ -19,7 +19,7 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -54,15 +54,15 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
+class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<MatrixWorkspace>
 {
 public:
   // Unhide the inherited create method
-  using Kernel::DynamicFactory<Workspace>::create;
+  using Kernel::DynamicFactory<MatrixWorkspace>::create;
 
-  Workspace_sptr create(const Workspace_const_sptr& parent,
+  MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr& parent,
                         int NVectors = -1, int XLength = -1, int YLength = -1) const;
-  Workspace_sptr create(const std::string& className, const int& NVectors,
+  MatrixWorkspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;
 
 private:

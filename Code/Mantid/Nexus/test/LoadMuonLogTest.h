@@ -57,7 +57,7 @@ public:
     outputSpace = "LoadMuonLogTest-nexusdatafile";
     loaderNexusFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D");
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D");
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
@@ -74,8 +74,8 @@ public:
     TS_ASSERT( loaderNexusFile.isExecuted() );
 
     // Get back the saved workspace
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
     boost::shared_ptr<Sample> sample = output->getSample();
 

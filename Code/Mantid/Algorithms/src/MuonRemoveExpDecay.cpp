@@ -27,8 +27,8 @@ namespace Mantid
     */
     void MuonRemoveExpDecay::init()
     {
-       declareProperty(new API::WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input));
-       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
+       declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input));
+       declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
        std::vector<int> empty;
 	declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty,new MandatoryValidator<std::vector<int> >));
     }
@@ -41,12 +41,12 @@ namespace Mantid
 	   std::vector<int> Spectra = getProperty("Spectra");
 	    
 	    //Get original workspace
-	    API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
+	    API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 	    
 	    int numSpectra = inputWS->size() / inputWS->blocksize();
 	    
 	    //Create output workspace with same dimensions as input
-	    API::Workspace_sptr outputWS
+	    API::MatrixWorkspace_sptr outputWS
 		= API::WorkspaceFactory::Instance().create(inputWS);
 
 	    

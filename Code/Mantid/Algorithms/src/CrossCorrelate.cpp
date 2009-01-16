@@ -26,8 +26,8 @@ namespace Mantid
     void CrossCorrelate::init()
     {
     	//Input and output workspaces
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
@@ -47,7 +47,7 @@ namespace Mantid
      */
 void CrossCorrelate::exec()
 {
-  	Workspace_const_sptr inputWS=getProperty("InputWorkspace");
+  	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
 
   	//Get the map between spectra number and index
   	try{
@@ -131,7 +131,7 @@ void CrossCorrelate::exec()
    	g_log.information(mess.str());
    	mess.str("");
 	const int npoints=2*nY-3;
-	Workspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
+	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
    	// Calculate the mean value of the reference spectrum and associated error squared
 	double refMean=std::accumulate(refY.begin(),refY.end(),0.0);

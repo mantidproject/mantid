@@ -4,7 +4,7 @@
 #include "GL3DWidget.h"
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Workspace.h"  
+#include "MantidAPI/MatrixWorkspace.h"  
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -134,8 +134,8 @@ void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
 			std::vector<int> idDecVec;
 			idDecVec.push_back(iDec->getID());
 			std::vector<int> indexList = getSpectraIndexList(idDecVec);
-			Workspace_sptr workspace;
-			workspace = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+			MatrixWorkspace_sptr workspace;
+			workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 			Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
 			int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
 			std::vector<double> outputdata=workspace->readY(indexList[0]);
@@ -167,8 +167,8 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 {
 	strWorkspaceName=wsName;
     // Get back the saved workspace
-    Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(wsName);
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 	//Get the workspace min bin value and max bin value
 	BinMinValue=DBL_MAX;
 	BinMaxValue=-DBL_MAX;
@@ -290,8 +290,8 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
 std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecVec)
 {
 	if(strWorkspaceName=="")return std::vector<int>();
-	Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	boost::shared_ptr<SpectraDetectorMap> specMap=output->getSpectraMap(); 
 	
 	std::map<int,int> indexMap;
@@ -361,8 +361,8 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,std::v
  */
 void Instrument3DWidget::CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList)
 {
-	Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	//Get the spectra timebin out and find min and max
 	valuesList.clear();
 	minval=DBL_MAX;
@@ -394,8 +394,8 @@ void Instrument3DWidget::CollectTimebinValues(int timebin, std::vector<int> hist
  */
 void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList)
 {
-	Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	//Get the spectra timebin out and find min and max
 	valuesList.clear();
 	minval=DBL_MAX;
@@ -433,8 +433,8 @@ void Instrument3DWidget::AssignColors()
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
 	std::vector<double> values;	
 	double minval,maxval;
-	Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
+	MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	switch(mDataMapping)
 	{
 	case SINGLE_BIN:

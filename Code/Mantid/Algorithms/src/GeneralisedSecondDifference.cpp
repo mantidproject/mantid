@@ -38,8 +38,8 @@ namespace Mantid
     {
 
       //Input and output workspaces
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
@@ -59,7 +59,7 @@ void GeneralisedSecondDifference::exec()
 	std::ostringstream message;
 
 	// Get some properties
-  	Workspace_const_sptr inputWS=getProperty("InputWorkspace");
+  	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
   	int spec_min=getProperty("spectra_min");
   	int spec_max=getProperty("spectra_max");
 	if (spec_min>spec_max)
@@ -83,7 +83,7 @@ void GeneralisedSecondDifference::exec()
 	const int n_specs=spec_max-spec_min+1;
 	const int n_points=inputWS->dataY(0).size()-2*n_av;
   	//Create OuputWorkspace
-  	Workspace_sptr out= WorkspaceFactory::Instance().create(inputWS,n_specs,n_points+1,n_points);
+  	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,n_specs,n_points+1,n_points);
 
 	const int nsteps=2*n_av+1;
 

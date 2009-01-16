@@ -62,9 +62,9 @@ public:
     loader.execute();
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256 );
+    space2D->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 256 );
 
-    space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
 
   void testInit()
@@ -143,8 +143,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( quickly.execute() )
     TS_ASSERT( quickly.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("quickOut2") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut2")) )
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy")
     TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 )
   }
@@ -163,11 +163,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( quickly.execute() )
     TS_ASSERT( quickly.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("quickOut") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut")) )
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "dSpacing")
     TS_ASSERT_EQUALS( &(output->dataX(0)[0]), &(output->dataX(0)[0]) )
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it)
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it)
     {
       TS_ASSERT_EQUALS( it->X(), 2.0*M_PI )
     }

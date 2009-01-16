@@ -7,7 +7,7 @@
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
 #include "MantidPythonAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -42,7 +42,7 @@ public:
 	void testGetDeleteWorkspace()
 	{
     API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
-		API::Workspace* ws = mgr->getWorkspace("TestWorkspace1");
+    API::MatrixWorkspace* ws = dynamic_cast<API::MatrixWorkspace*>(mgr->getWorkspace("TestWorkspace1"));
 
 		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 22);
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace1"));

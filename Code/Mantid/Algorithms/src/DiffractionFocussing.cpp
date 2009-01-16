@@ -18,8 +18,8 @@ DECLARE_ALGORITHM(DiffractionFocussing)
 
 using namespace Kernel;
 using API::WorkspaceProperty;
-using API::Workspace_sptr;
-using API::Workspace;
+using API::MatrixWorkspace_sptr;
+using API::MatrixWorkspace;
 
 // Get a reference to the logger
 Logger& DiffractionFocussing::g_log = Logger::get("DiffractionFocussing");
@@ -29,8 +29,8 @@ Logger& DiffractionFocussing::g_log = Logger::get("DiffractionFocussing");
  */
 void DiffractionFocussing::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
 }
@@ -46,7 +46,7 @@ void DiffractionFocussing::exec()
   std::string groupingFileName=getProperty("GroupingFileName");
 
   // Get the input workspace
-  Workspace_sptr inputW = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
   bool dist = inputW->isDistribution();
 
@@ -58,7 +58,7 @@ void DiffractionFocussing::exec()
   }
 
   //Convert to d-spacing units
-  API::Workspace_sptr tmpW = convertUnitsToDSpacing(inputW);
+  API::MatrixWorkspace_sptr tmpW = convertUnitsToDSpacing(inputW);
 
   //Rebin to a common set of bins
   RebinWorkspace(tmpW);
@@ -123,7 +123,7 @@ void DiffractionFocussing::exec()
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and copy them in
   int newSize = tmpW->blocksize();
-  API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,resultIndeces.size(),newSize+1,newSize);
+  API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,resultIndeces.size(),newSize+1,newSize);
   // Copy units
   outputW->getAxis(0)->unit() = tmpW->getAxis(0)->unit();
   outputW->getAxis(1)->unit() = tmpW->getAxis(1)->unit();
@@ -158,7 +158,7 @@ void DiffractionFocussing::exec()
 }
 
 /// Run ConvertUnits as a sub-algorithm to convert to dSpacing
-Workspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Workspace_sptr& workspace)
+MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::MatrixWorkspace_sptr& workspace)
 {
   const std::string CONVERSION_UNIT = "dSpacing";
 
@@ -189,7 +189,7 @@ Workspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Workspace
 }
 
 /// Run Rebin as a sub-algorithm to harmonise the bin boundaries
-void DiffractionFocussing::RebinWorkspace(API::Workspace_sptr& workspace)
+void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
 {
 
   double min=0;
@@ -206,7 +206,7 @@ void DiffractionFocussing::RebinWorkspace(API::Workspace_sptr& workspace)
                          " in "<< step <<" logaritmic steps.\n";
 
   API::Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
-  childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("params",paramArray);
   childAlg->notificationCenter.addObserver(m_childProgressObserver);
 
@@ -238,7 +238,7 @@ void DiffractionFocussing::RebinWorkspace(API::Workspace_sptr& workspace)
     @param max       (return) The calculated frame ending point
     @param step      (return) The calculated bin width
  */
-void DiffractionFocussing::calculateRebinParams(const API::Workspace_const_sptr& workspace,double& min,double& max,double& step)
+void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step)
 {
 
   min=999999999;

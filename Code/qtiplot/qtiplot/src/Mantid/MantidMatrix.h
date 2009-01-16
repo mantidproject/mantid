@@ -12,7 +12,7 @@
 
 #include <Poco/NObserver.h>
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "../UserFunction.h"
 #include "../MdiSubWindow.h"
@@ -81,7 +81,7 @@ class MantidMatrix: public MdiSubWindow
 
 public:
 
-	MantidMatrix(Mantid::API::Workspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
+	MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
     ~MantidMatrix();
 
     void connectTableView(QTableView*,MantidMatrixModel*);
@@ -101,7 +101,7 @@ public:
 	double dataE(int row, int col) const;
     int indexX(double s)const;
 
-    Mantid::API::Workspace_sptr workspace(){return m_workspace;}
+    Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
 
     const char **matrixIcon(){return m_matrix_icon;}
     //void copy(Matrix *m);
@@ -130,7 +130,7 @@ signals:
 
 public slots:
 
-    void changeWorkspace(Mantid::API::Workspace_sptr ws);
+    void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
     void deleteWorkspace();
     void tst();
 
@@ -188,7 +188,7 @@ public slots:
 
 protected:
 
-    void setup(Mantid::API::Workspace_sptr ws, int start=-1, int end=-1);
+    void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
 
     void handleReplaceWorkspace(WorkspaceBeforeReplaceNotification_ptr pNf);
     Poco::NObserver<MantidMatrix, WorkspaceBeforeReplaceNotification> m_replaceObserver;
@@ -197,7 +197,7 @@ protected:
     Poco::NObserver<MantidMatrix, WorkspaceDeleteNotification> m_deleteObserver;
 
     ApplicationWindow *m_appWindow;
-    Mantid::API::Workspace_sptr m_workspace;
+    Mantid::API::MatrixWorkspace_sptr m_workspace;
     QTabWidget *m_tabs;
     QTableView *m_table_viewY;
     QTableView *m_table_viewX;
@@ -250,7 +250,7 @@ class MantidMatrixModel:public QAbstractTableModel
 public:
       typedef enum {Y,X,E} Type;
     MantidMatrixModel(QObject *parent, 
-                      Mantid::API::Workspace_sptr ws, 
+                      Mantid::API::MatrixWorkspace_sptr ws, 
                       int rows,
                       int cols,
                       int start, 
@@ -261,7 +261,7 @@ public:
       }
 
     /// Call this function if the workspace has changed
-    void setup(Mantid::API::Workspace_sptr ws, 
+    void setup(Mantid::API::MatrixWorkspace_sptr ws, 
                       int rows,
                       int cols,
                       int start)
@@ -322,7 +322,7 @@ public slots:
     /// Signals QTableView that the data have changed.
     void resetData(){reset();}
 private:
-    Mantid::API::Workspace_sptr m_workspace;
+    Mantid::API::MatrixWorkspace_sptr m_workspace;
     int m_startRow; ///< starting workspace index to display
     int m_endRow;   ///< ending workspace index to display
     int m_rows,m_cols; ///< numbers of rows and columns

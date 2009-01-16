@@ -288,7 +288,7 @@ InstrumentWindow::~InstrumentWindow()
 void InstrumentWindow::setWorkspaceName(std::string wsName)
 {
 	mInstrumentDisplay->setWorkspace(wsName);
-	Workspace_sptr output = AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName());
+	MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName()));
 	int count=output->blocksize();
 	double minValue=mInstrumentDisplay->getDataMinValue();
 	double maxValue=mInstrumentDisplay->getDataMaxValue();

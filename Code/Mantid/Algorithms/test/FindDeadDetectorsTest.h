@@ -77,8 +77,8 @@ public:
     TS_ASSERT_EQUALS( deadDets.size(), 10 )
 
     // Get back the output workspace
-    Workspace_sptr work_out;
-    TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieve("testdead_out"));
+    MatrixWorkspace_sptr work_out;
+    TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("testdead_out")));
 
     for (int i=0; i< sizey; i++)
     {

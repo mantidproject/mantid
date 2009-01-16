@@ -24,7 +24,7 @@ void ConvertToDistribution::init()
 
 void ConvertToDistribution::exec()
 {
-  Workspace_sptr workspace = getProperty("Workspace");
+  MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
   WorkspaceHelpers::makeDistribution(workspace);
 }

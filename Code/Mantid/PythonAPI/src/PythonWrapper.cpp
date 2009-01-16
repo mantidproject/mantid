@@ -71,7 +71,7 @@ struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
     PyObject* py_self;
 };
 
-struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
+struct Mantid_API_Workspace_Wrapper: Mantid::API::MatrixWorkspace
 {
     const std::string id() const {
         return call_method< const std::string >(py_self, "id");
@@ -86,7 +86,7 @@ struct Mantid_API_Workspace_Wrapper: Mantid::API::Workspace
     }
 
     long int default_getMemorySize() const {
-        return Mantid::API::Workspace::getMemorySize();
+        return Mantid::API::MatrixWorkspace::getMemorySize();
     }
 
     int size() const {
@@ -414,7 +414,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	  .def( vector_indexing_suite< property_vec >() )
 	  ;
   
-	register_ptr_to_python< boost::shared_ptr<Mantid::API::Workspace> >();
+	register_ptr_to_python< boost::shared_ptr<Mantid::API::MatrixWorkspace> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
 	register_ptr_to_python< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >();
 
@@ -464,23 +464,23 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
         ;
 
 	//Workspace Class
-	class_< Mantid::API::Workspace, boost::noncopyable, Mantid_API_Workspace_Wrapper >("Workspace", no_init)
-        .def("id", pure_virtual(&Mantid::API::Workspace::id))
-        .def("initialize", &Mantid::API::Workspace::initialize)
-        .def("getMemorySize", &Mantid::API::Workspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
-        .def("size", pure_virtual(&Mantid::API::Workspace::size))
-        .def("getSpectraMap", &Mantid::API::Workspace::getSpectraMap)
-        .def("blocksize", pure_virtual(&Mantid::API::Workspace::blocksize))
-        .def("setTitle", &Mantid::API::Workspace::setTitle)
-        .def("setComment", &Mantid::API::Workspace::setComment)
-        .def("getNumberHistograms", pure_virtual(&Mantid::API::Workspace::getNumberHistograms))
-        .def("getComment", &Mantid::API::Workspace::getComment, return_value_policy< copy_const_reference >())
-        .def("getTitle", &Mantid::API::Workspace::getTitle, return_value_policy< copy_const_reference >())
-        .def("isDistribution", (const bool& (Mantid::API::Workspace::*)() const)&Mantid::API::Workspace::isDistribution, return_value_policy< copy_const_reference >())
-        .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readX), return_value_policy< reference_existing_object >())
-        .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readY), return_value_policy< reference_existing_object >())
-        .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::Workspace::*)(const int) const)&Mantid::API::Workspace::readE), return_value_policy< reference_existing_object >())
-        .def("getHistory", &Mantid::API::Workspace::getHistory, return_value_policy< copy_const_reference >())
+	class_< Mantid::API::MatrixWorkspace, boost::noncopyable, Mantid_API_Workspace_Wrapper >("Workspace", no_init)
+        .def("id", pure_virtual(&Mantid::API::MatrixWorkspace::id))
+        .def("initialize", &Mantid::API::MatrixWorkspace::initialize)
+        .def("getMemorySize", &Mantid::API::MatrixWorkspace::getMemorySize, &Mantid_API_Workspace_Wrapper::default_getMemorySize)
+        .def("size", pure_virtual(&Mantid::API::MatrixWorkspace::size))
+        .def("getSpectraMap", &Mantid::API::MatrixWorkspace::getSpectraMap)
+        .def("blocksize", pure_virtual(&Mantid::API::MatrixWorkspace::blocksize))
+        .def("setTitle", &Mantid::API::MatrixWorkspace::setTitle)
+        .def("setComment", &Mantid::API::MatrixWorkspace::setComment)
+        .def("getNumberHistograms", pure_virtual(&Mantid::API::MatrixWorkspace::getNumberHistograms))
+        .def("getComment", &Mantid::API::MatrixWorkspace::getComment, return_value_policy< copy_const_reference >())
+        .def("getTitle", &Mantid::API::MatrixWorkspace::getTitle, return_value_policy< copy_const_reference >())
+        .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_const_reference >())
+        .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readX), return_value_policy< reference_existing_object >())
+        .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readY), return_value_policy< reference_existing_object >())
+        .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readE), return_value_policy< reference_existing_object >())
+        .def("getHistory", &Mantid::API::MatrixWorkspace::getHistory, return_value_policy< copy_const_reference >())
 	;
 
 	//Framework Class

@@ -61,6 +61,10 @@ public:
 	/// Set the value of the property via a string
     virtual void fromString( const std::string& value ){m_str_value = value;}
 
+    /// Returns the parameter value of type T if the parameter has type ParameterType<T>
+    template<class T>
+    T value();
+
 private:
   /// The name of the property
   const std::string m_name;
@@ -107,6 +111,14 @@ public:
 private:
     Type m_value;
 };
+
+template<class T>
+T Parameter::value()
+{
+    ParameterType<T> *p = dynamic_cast<ParameterType<T>*>(this);
+    if (!p) throw std::runtime_error("Wrong type of parameter.");
+    return p->ParameterType<T>::value();
+}
 
 typedef DLLExport ParameterType<int> ParameterInt;
 typedef DLLExport ParameterType<double> ParameterDouble;

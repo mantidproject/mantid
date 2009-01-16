@@ -15,7 +15,7 @@ class ConvertFromDistributionTest : public CxxTest::TestSuite
 public:
   ConvertFromDistributionTest() : dist("dist")
   {
-    Workspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,10,0,0.5);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,10,0,0.5);
     WS->isDistribution(true);
     AnalysisDataService::Instance().add(dist,WS);
   }
@@ -50,8 +50,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( conv.execute() )
     TS_ASSERT( conv.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve(dist) )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(dist)) )
 
     const std::vector<double> &X = output->dataX(0);
     const std::vector<double> &Y = output->dataY(0);

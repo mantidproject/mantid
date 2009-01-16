@@ -43,7 +43,7 @@ void CorrectForAttenuation::init()
 void CorrectForAttenuation::exec()
 {
   // Retrieve the input workspace
-  Workspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Get the input parameters
   this->retrieveProperties();
@@ -54,7 +54,7 @@ void CorrectForAttenuation::exec()
   SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
 
   // Create the output workspace
-  Workspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
+  MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
   correctionFactors->setYUnit("Attenuation factor");
 
   const int numHists = inputWS->getNumberHistograms();

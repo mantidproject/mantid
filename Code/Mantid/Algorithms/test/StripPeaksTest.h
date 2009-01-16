@@ -17,7 +17,7 @@ class StripPeaksTest : public CxxTest::TestSuite
 public:
   StripPeaksTest()
   {
-    Workspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,100,0.5,0.02);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,100,0.5,0.02);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
     std::vector<double> &X = WS->dataX(1);
@@ -70,12 +70,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( strip.execute() )
     TS_ASSERT( strip.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve(outputWS) )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
 
-    Workspace_const_sptr input = AnalysisDataService::Instance().retrieve("toStrip");
-    Workspace::const_iterator inIt(*input);
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toStrip"));
+    MatrixWorkspace::const_iterator inIt(*input);
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_DELTA( it->Y(), 5000.0, 0.5 )

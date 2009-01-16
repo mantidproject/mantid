@@ -6,7 +6,6 @@ namespace Mantid
 namespace Geometry
 {
 
-
 } // Namespace Geometry
 
 } // Namespace Mantid

@@ -61,8 +61,8 @@ public:
     TS_ASSERT( algToBeTested.isExecuted() );
     //
     //  test workspace, copied from LoadMuonNexusTest.h
-    Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));    
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -97,11 +97,11 @@ public:
     // Copied from LoadMuonTest.h
     // Test workspace data - should be 4 separate workspaces for this 4 period file
     //
-    Workspace_sptr output,output2,output3,output4;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
-    TS_ASSERT_THROWS_NOTHING(output2 = AnalysisDataService::Instance().retrieve(outputSpace+"_2"));
-    TS_ASSERT_THROWS_NOTHING(output3 = AnalysisDataService::Instance().retrieve(outputSpace+"_3"));
-    TS_ASSERT_THROWS_NOTHING(output4 = AnalysisDataService::Instance().retrieve(outputSpace+"_4"));
+    MatrixWorkspace_sptr output,output2,output3,output4;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+    TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+    TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+    TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";

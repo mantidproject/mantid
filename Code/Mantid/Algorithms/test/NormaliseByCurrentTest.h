@@ -55,18 +55,18 @@ public:
     TS_ASSERT( ! norm.execute() )
     TS_ASSERT( ! norm.isExecuted() )
     // Now set the charge
-    Workspace_sptr input = AnalysisDataService::Instance().retrieve("normIn");
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normIn"));
     input->getSample()->setProtonCharge(2.0);
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("normOut") )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normOut")) )
 
-    Workspace::const_iterator inIt(*input);
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    MatrixWorkspace::const_iterator inIt(*input);
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_EQUALS( it->Y(), 1.0 )

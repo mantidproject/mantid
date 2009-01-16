@@ -24,19 +24,19 @@ using namespace Mantid::DataObjects;
       BinaryOpHelper() : BinaryOperation() {};
       /// Destructor
       virtual ~BinaryOpHelper() {};
-      const bool checkSizeCompatibility(const Workspace_sptr ws1,const Workspace_sptr ws2) const
+      const bool checkSizeCompatibility(const MatrixWorkspace_sptr ws1,const MatrixWorkspace_sptr ws2) const
       {
         return BinaryOperation::checkSizeCompatibility(ws1,ws2);
       }
-      const bool checkXarrayCompatibility(const Workspace_sptr ws1, const Workspace_sptr ws2) const
+      const bool checkXarrayCompatibility(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) const
       {
         return BinaryOperation::checkXarrayCompatibility(ws1,ws2);
       }
-      const int getRelativeLoopCount(const Workspace_sptr ws1, const Workspace_sptr ws2) const
+      const int getRelativeLoopCount(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) const
       {
         return BinaryOperation::getRelativeLoopCount(ws1,ws2);
       }
-      Workspace_sptr createOutputWorkspace(const Workspace_sptr ws1, const Workspace_sptr ws2) const
+      MatrixWorkspace_sptr createOutputWorkspace(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) const
       {
         return BinaryOperation::createOutputWorkspace(ws1,ws2);
       }
@@ -45,8 +45,8 @@ using namespace Mantid::DataObjects;
 
     private:
       // Overridden BinaryOperation methods
-      void performBinaryOperation(Workspace::const_iterator it_in1, Workspace::const_iterator it_in2,
-        Workspace::iterator it_out)
+      void performBinaryOperation(MatrixWorkspace::const_iterator it_in1, MatrixWorkspace::const_iterator it_in2,
+        MatrixWorkspace::iterator it_out)
       {}
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
@@ -187,12 +187,12 @@ public:
   }
 
 
-  void checkOutputWorkspace(Workspace_sptr ws, Workspace_sptr wsIn1,Workspace_sptr wsIn2 ) const
+  void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
   {
     int targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
     TS_ASSERT_EQUALS(ws->size(),targetsize);
     //check they arre all 0
-    for(Workspace::iterator ti(*ws); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::iterator ti(*ws); ti != ti.end(); ++ti)
     {
       TS_ASSERT_THROWS_NOTHING
       (

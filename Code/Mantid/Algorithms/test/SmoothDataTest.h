@@ -14,7 +14,7 @@ public:
   SmoothDataTest()
   {
     // Set up a small workspace for testing
-    Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2,10,10);
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2,10,10);
     for (int i = 0; i < 10; ++i)
     {
       space->dataY(0)[i] = i+1.0;
@@ -75,8 +75,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( smooth.execute() )
     TS_ASSERT( smooth.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve(outputWS) )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
     const std::vector<double> &Y = output->dataY(0);
     const std::vector<double> &E = output->dataE(0);
     TS_ASSERT_EQUALS( Y[0], 2 )

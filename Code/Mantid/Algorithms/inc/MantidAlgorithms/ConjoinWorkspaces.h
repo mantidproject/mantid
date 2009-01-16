@@ -64,8 +64,8 @@ private:
   void init();
   void exec();
 
-  void validateInputs(API::Workspace_const_sptr ws1, API::Workspace_const_sptr ws2) const;
-  void checkForOverlap(API::Workspace_const_sptr ws1, API::Workspace_const_sptr ws2) const;
+  void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
+  void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

@@ -42,7 +42,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(alg1D.execute());
 		TS_ASSERT( alg1D.isExecuted() )
 
-		Workspace_sptr output = AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace"));
+            MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace")));
 
 		std::vector<double>& Xold = input->dataX(0);
 		std::vector<double>& Xnew = output->dataX(0);
@@ -80,7 +80,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(alg2D.execute());
 		TS_ASSERT( alg2D.isExecuted() )
 
-		Workspace_sptr output = AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace"));
+		MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace")));
 
 		std::vector<double>& Xold = input->dataX(0);
 		std::vector<double>& Xnew = output->dataX(0);

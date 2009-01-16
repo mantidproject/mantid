@@ -40,8 +40,8 @@ void ConvertUnits::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);
   wsValidator->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<API::Workspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<API::Workspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
   declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()) );
@@ -61,8 +61,8 @@ void ConvertUnits::init()
 void ConvertUnits::exec()
 {
   // Get the workspaces
-  API::Workspace_const_sptr inputWS = getProperty("InputWorkspace");
-  API::Workspace_sptr outputWS = getProperty("OutputWorkspace");
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Check that the input workspace doesn't already have the desired unit.
   // If it does, just set the output workspace to point to the input one.
@@ -72,7 +72,7 @@ void ConvertUnits::exec()
   {
     g_log.information() << "Input workspace already has target unit (" << targetUnit
                         << "), so just pointing the output workspace property to the input workspace." << std::endl;
-    setProperty("OutputWorkspace",boost::const_pointer_cast<Workspace>(inputWS));
+    setProperty("OutputWorkspace",boost::const_pointer_cast<MatrixWorkspace>(inputWS));
     return;
   }
 
@@ -172,7 +172,7 @@ void ConvertUnits::exec()
  * @param factor the conversion factor a to apply
  * @param power the Power b to apply to the conversion
  */
-void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_sptr outputWS, const double& factor, const double& power)
+void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power)
 {
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
@@ -224,7 +224,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::Workspace_spt
  * @param fromUnit The unit of the input workspace
  * @param outputWS The output workspace
  */
-void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::Workspace_sptr outputWS)
+void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -322,11 +322,11 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 }
 
 /// Calls Rebin as a sub-algorithm to align the bins
-API::Workspace_sptr ConvertUnits::alignBins(API::Workspace_sptr workspace)
+API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace)
 {
   // Create a Rebin child algorithm
   Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
-  childAlg->setProperty<Workspace_sptr>("InputWorkspace", workspace);
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("params",this->calculateRebinParams(workspace));
 
   // Now execute the sub-algorithm. Catch and log any error
@@ -352,7 +352,7 @@ API::Workspace_sptr ConvertUnits::alignBins(API::Workspace_sptr workspace)
 }
 
 /// The Rebin parameters should cover the full range of the converted unit, with the same number of bins
-const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspace_const_sptr workspace) const
+const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const
 {
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
@@ -381,7 +381,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::Workspac
   return retval;
 }
 
-void ConvertUnits::reverse(API::Workspace_sptr WS)
+void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
 {
   const int numberOfSpectra = WS->getNumberHistograms();
 

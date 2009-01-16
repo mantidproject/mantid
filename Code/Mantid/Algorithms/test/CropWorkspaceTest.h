@@ -102,13 +102,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop.execute() )
     TS_ASSERT( crop.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve(outputWS) )
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
 
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 3 )
     TS_ASSERT_EQUALS( output->blocksize(), 3 )
 
-    Workspace_const_sptr input = AnalysisDataService::Instance().retrieve("toCrop");
+    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
     for (int i=0; i < 3; ++i)
     {
       for (int j = 0; j < 3; ++j)
@@ -131,12 +131,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop2.execute() )
     TS_ASSERT( crop2.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("unCropped") )
-    Workspace_const_sptr input = AnalysisDataService::Instance().retrieve("toCrop");
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("unCropped")) )
+    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
 
-    Workspace::const_iterator inIt(*input);
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    MatrixWorkspace::const_iterator inIt(*input);
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_EQUALS( it->X2(), inIt->X2() )
@@ -159,12 +159,12 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop3.execute() )
     TS_ASSERT( crop3.isExecuted() )
 
-    Workspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("pointOut") )
-    Workspace_const_sptr input = AnalysisDataService::Instance().retrieve("point");
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("pointOut")) )
+    MatrixWorkspace_const_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("point"));
 
-    Workspace::const_iterator inIt(*input);
-    for (Workspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
+    MatrixWorkspace::const_iterator inIt(*input);
+    for (MatrixWorkspace::const_iterator it(*output); it != it.end(); ++it,++inIt)
     {
       TS_ASSERT_EQUALS( it->X(), inIt->X() )
       TS_ASSERT_THROWS( it->X2(), Mantid::Kernel::Exception::NotFoundError )

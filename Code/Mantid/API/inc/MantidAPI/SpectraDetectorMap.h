@@ -19,7 +19,7 @@ namespace Mantid
 {
 namespace API
 {
-class Workspace;
+class MatrixWorkspace;
 /** @class SpectraDetectorMap SpectraDetectorMap.h
 
  SpectraDetectorMap provides a multimap between Spectra number (int)
@@ -65,7 +65,7 @@ public:
   typedef std::tr1::unordered_multimap<int,int>::const_iterator smap_it;
 #endif
   ///Constructor
-  SpectraDetectorMap(const Workspace* ws);
+  SpectraDetectorMap(const MatrixWorkspace* ws);
   ///virtual destructor
   virtual ~SpectraDetectorMap();
   /// populate the Map with _spec and _udet C array
@@ -92,7 +92,7 @@ private:
   /// insternal spectra detector map instance
   boost::shared_ptr<smap> _s2dmap;
 
-  const Workspace* m_workspace;
+  const MatrixWorkspace* m_workspace;
   std::vector<int> getDetectorIDs(const int spectrum_number) const;
 
   /// Static reference to the logger class

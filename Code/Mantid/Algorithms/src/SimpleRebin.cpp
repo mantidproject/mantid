@@ -32,8 +32,8 @@ namespace Mantid
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
       declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
     }
@@ -48,7 +48,7 @@ namespace Mantid
       std::vector<double> rb_params=getProperty("params");
 
       // Get the input workspace
-      Workspace_const_sptr inputW = getProperty("InputWorkspace");
+      MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
       bool dist = inputW->isDistribution();
 
@@ -59,7 +59,7 @@ namespace Mantid
       int ntcnew = newAxis(rb_params,XValues_new.access());
 
       // make output Workspace the same type is the input, but with new length of signal array
-      API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
+      API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
       // Try to cast it to a Workspace2D for use later
       Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
 

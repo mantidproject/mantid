@@ -81,10 +81,10 @@ public:
     Table* createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs);
     void createGraphFromSelectedColumns(MantidMatrix *m, bool vis = true, bool errs = true);
 
-    Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::Workspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
-	Table* createTableFromSelectedRowsList(const QString& wsName, Mantid::API::Workspace_sptr workspace, std::vector<int> index, bool errs=true, bool forPlotting=false);
+    Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
+	Table* createTableFromSelectedRowsList(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> index, bool errs=true, bool forPlotting=false);
 
-    Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::Workspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
+    Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
 
 
   // Command purely for python interaction

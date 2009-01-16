@@ -33,7 +33,7 @@ LoadInstrumentFromRaw::LoadInstrumentFromRaw()
 void LoadInstrumentFromRaw::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>("Workspace","Anonymous",Direction::InOut));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("Filename","",new MandatoryValidator<std::string>);
 }
 
@@ -48,7 +48,7 @@ void LoadInstrumentFromRaw::exec()
   m_filename = getPropertyValue("Filename");
 
   // Get the input workspace
-  const Workspace_sptr localWorkspace = getProperty("Workspace");
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // open raw file
   ISISRAW iraw(NULL);

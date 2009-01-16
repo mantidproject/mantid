@@ -18,8 +18,8 @@ namespace Mantid
 
 		using namespace Kernel;
 		using API::WorkspaceProperty;
-		using API::Workspace_const_sptr;
-		using API::Workspace;
+		using API::MatrixWorkspace_const_sptr;
+		using API::MatrixWorkspace;
 
 		// Get a reference to the logger
 		Logger& Rebunch::g_log = Logger::get("Rebunch");
@@ -29,8 +29,8 @@ namespace Mantid
 		*/
 		void Rebunch::init()
 		{
-			declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input));
-			declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+			declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+			declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
 			mustBePositive->setLower(1);
@@ -48,7 +48,7 @@ namespace Mantid
 			int n_bunch=getProperty("n_bunch");
 
 			// Get the input workspace
-			Workspace_const_sptr inputW = getProperty("InputWorkspace");
+			MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
 
 			bool dist = inputW->isDistribution();
 
@@ -77,7 +77,7 @@ namespace Mantid
 			}
 
 			// make output Workspace the same type is the input, but with new length of signal array
-			API::Workspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
+			API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
 
             int progress_step = histnumber / 100;
             if (progress_step == 0) progress_step = 1;
