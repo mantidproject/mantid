@@ -8,6 +8,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <iostream>
 
