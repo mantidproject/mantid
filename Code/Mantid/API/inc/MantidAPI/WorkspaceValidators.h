@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <numeric>
