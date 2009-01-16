@@ -1,6 +1,5 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid
 {
