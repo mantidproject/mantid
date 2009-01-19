@@ -54,6 +54,7 @@ public:
     virtual const std::string id() const = 0;
 
     Workspace();
+    virtual ~Workspace() {}
     void setTitle(const std::string&);
     void setComment(const std::string&);
     const std::string& getTitle() const;

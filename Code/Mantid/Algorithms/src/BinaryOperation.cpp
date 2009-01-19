@@ -89,8 +89,14 @@ namespace Mantid
       }
 
       // Check the workspaces have the same units and distribution flag
-      if ( lhs_unit != rhs_unit || lhs->YUnit() != rhs->YUnit() || lhs->isDistribution() != rhs->isDistribution() )
+      if ( lhs_unit != rhs_unit )
       {
+        g_log.error("The two workspace are not compatible because they have different units on the X axis.");
+        return false;
+      }
+      if ( lhs->isDistribution() != rhs->isDistribution() )
+      {
+        g_log.error("The two workspace are not compatible because one is flagged as a distribution.");
         return false;
       }
 

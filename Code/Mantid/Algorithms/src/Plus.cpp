@@ -30,6 +30,17 @@ namespace Mantid
       std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),Plus_fn(this,it_in1.end() - it_in1.begin()));
     }
 
+    const bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if ( lhs->YUnit() != rhs->YUnit() )
+      {
+        g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
+        return false;
+      }
+      
+      return BinaryOperation::checkCompatibility(lhs,rhs);
+    }
+
     /** Performs the addition with Gaussian errors within the transform function
     * @param a The LocatedData ref of the first workspace data item
     * @param b The LocatedData ref of the second workspace data item

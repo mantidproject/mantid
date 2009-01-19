@@ -9,6 +9,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/InstrumentDataService.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
@@ -49,13 +50,14 @@ FrameworkManagerImpl::~FrameworkManagerImpl()
 //	g_log.debug() << "FrameworkManager destroyed." << std::endl;
 }
 
-/** At the moment clears all memory associated with AlgorithmManager.
- *  May do more in the future
+/** Clears all memory associated with the AlgorithmManager
+ *  and with the Analysis & Instrument data services.
  */
 void FrameworkManagerImpl::clear()
 {
   AlgorithmManager::Instance().clear();
   AnalysisDataService::Instance().clear();
+  InstrumentDataService::Instance().clear();
 }
 
 /** Creates and initialises an instance of an algorithm

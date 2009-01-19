@@ -58,7 +58,7 @@ namespace Mantid
 			/// Creates all of the required services
 			//void initialize();
 
-			/// Clears all memory associated with the AlgorithmManager 
+			/// Clears all memory associated with the AlgorithmManager, ADS & IDS 
 			void clear();
 
 			/// Creates and instance of an algorithm

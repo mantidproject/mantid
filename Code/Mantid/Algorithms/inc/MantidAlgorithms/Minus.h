@@ -69,6 +69,8 @@ namespace Mantid
       // Overridden BinaryOperation methods
       void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
         API::MatrixWorkspace::iterator it_out);
+      const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
 

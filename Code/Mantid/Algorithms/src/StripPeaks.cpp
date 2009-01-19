@@ -9,7 +9,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-//DECLARE_ALGORITHM(StripPeaks)
+DECLARE_ALGORITHM(StripPeaks)
 
 using namespace Kernel;
 using namespace API;
