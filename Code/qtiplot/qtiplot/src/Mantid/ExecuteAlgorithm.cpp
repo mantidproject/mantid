@@ -75,7 +75,11 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	  if (!lastValue.isEmpty())
 	    {
 	      tempEdit->setText(lastValue);
-	      if( m_forScript ) m_directory = "";
+	      if( m_forScript ) {
+		m_directory = "";
+		tempEdit->setEnabled(false);
+		tempBtn->setEnabled(false);
+	      }
 	      else m_directory = InputHistory::Instance().getDirectoryFromFilePath(lastValue);
 	    }
 
@@ -117,6 +121,10 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	  {
 	    int index = list.indexOf(lastValue);
 	    if (index >= 0) tempCombo->setCurrentIndex(index);
+	    if( m_forScript && !prop->isDefault() )
+	    {
+	      tempCombo->setEnabled(false);
+	    }
 	  }
 				
 	  grid->addWidget(tempLbl, row, 0, 0);
@@ -152,7 +160,11 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
 	    if( prop->isDefault() ) lastValue = "";
 	    else lastValue = QString::fromStdString(alg->getPropertyValue(prop->name()));
 	  }
-	  if (!lastValue.isEmpty()) tempEdit->setText(lastValue);
+	  if (!lastValue.isEmpty()) 
+	    {
+	      tempEdit->setText(lastValue);
+	      if( m_forScript ) tempEdit->setEnabled(false);
+	    }
 				
 	  connect(tempEdit, SIGNAL(editingFinished()), this, SLOT(textChanged()));
 		
