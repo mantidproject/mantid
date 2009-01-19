@@ -121,7 +121,7 @@ namespace Mantid
       }
 
       // If there is not enough memory use ManagedRawFileWorkspace2D.
-      if (MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) && 
+      if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) && 
           total_specs == m_numberOfSpectra)
       {
           ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;

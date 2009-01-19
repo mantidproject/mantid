@@ -252,7 +252,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\WorkspaceProperty.cpp"
+				RelativePath=".\src\WorkspaceProperty.cpp"
 				>
 			</File>
 			<File

@@ -69,10 +69,24 @@ namespace Mantid
     {
         // check potential size to create and determine trigger  
         int availPercent;
-        if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.MinSize", availPercent) )
+        if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.LowerMemoryLimit", availPercent) )
         {
             // Default to 40% if missing
             availPercent = 40;
+        }
+        if (availPercent > 150)
+        {
+            g_log.warning("ManagedWorkspace.LowerMemoryLimit is not allowed to be greater than 150%.");
+            availPercent = 150;
+        }
+        if (availPercent < 0)
+        {
+            g_log.warning("Negative value for ManagedWorkspace.LowerMemoryLimit. Setting to 0.");
+            availPercent = 0;
+        }
+        if (availPercent > 90)
+        {
+            g_log.warning("ManagedWorkspace.LowerMemoryLimit is greater than 90%. Danger of memory errors.");
         }
         MemoryInfo mi = getMemoryInfo();
         int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);

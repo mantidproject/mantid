@@ -94,7 +94,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
 /** Creates a new instance of the class with the given name, and allocates memory for the arrays
  *  where it creates and initialises either a Workspace1D, Workspace2D or a ManagedWorkspace2D
  *  according to the size requested and the value of the configuration parameter
- *  ManagedWorkspace.MinSize (default 25M elements) Workspace2D only.
+ *  ManagedWorkspace.LowerMemoryLimit (default 40% of available physical memory) Workspace2D only.
  *  @param  className The name of the class you wish to create
  *  @param  NVectors  The number of vectors/histograms/detectors in the workspace
  *  @param  XLength   The number of X data points/bin boundaries in each vector (must all be the same)

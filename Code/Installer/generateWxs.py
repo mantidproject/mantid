@@ -260,8 +260,8 @@ MantidDlls = addComponent('MantidDLLs','{FABC0481-C18D-415e-A0B1-CCB76C35FBE8}',
 prop_file = open('../Mantid/release/Mantid.properties','r')
 prop_file_ins = open('Mantid.properties','w')
 for line in prop_file:
-    if line.find('ManagedWorkspace.MinSize') >= 0:
-        prop_file_ins.write('ManagedWorkspace.MinSize = 50\n')
+    if line.find('ManagedWorkspace.LowerMemoryLimit') >= 0:
+        prop_file_ins.write('ManagedWorkspace.LowerMemoryLimit = 40\n')
     elif line.find('plugins.directory') >= 0:
         prop_file_ins.write('plugins.directory = ../plugins\n')
     elif line.find('instrumentDefinition.directory') >= 0:

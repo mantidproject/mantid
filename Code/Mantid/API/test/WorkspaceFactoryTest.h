@@ -153,7 +153,7 @@ public:
     TS_ASSERT_EQUALS( space.size[1], 2 )
     TS_ASSERT_EQUALS( space.size[2], 3 )
 
-    // ManagedWorkspace.MinSize should be set to 1 in MantidTest.properties file
+    // ManagedWorkspace.LowerMemoryLimit should be set to 1 in MantidTest.properties file
     MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
     int nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
     //TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
