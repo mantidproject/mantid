@@ -50,9 +50,8 @@ public:
     if ( !finder.isInitialized() ) finder.initialize();
 
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","peaksWS") )
-    std::string outputWS("stripped");
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","smoothed") )
-    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("WithPeaksStripped",outputWS) )
+    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","foundpeaks") )
 
     TS_ASSERT_THROWS_NOTHING( finder.execute() )
     TS_ASSERT( finder.isExecuted() )

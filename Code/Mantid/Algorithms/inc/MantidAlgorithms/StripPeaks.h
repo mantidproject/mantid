@@ -11,16 +11,10 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** This algorithm attempts to find all the peaks in all spectra of a workspace
-    and subtract them from the data, leaving just the 'background'.
+/** This algorithm calls FindPeaks as a subalgorithm and then subtracts
+    all the peaks found from the data, leaving just the 'background'.
 
-    *** AT PRESENT, AUTOMATIC PEAK FINDING IS MISSING SO A FEW VANADIUM PEAK
-    POSITIONS ARE HARD-CODED IN. THIS MEANS, OF COURSE, THAT THE ALGORITHM,
-    WHICH IS INTENDED TO BE GENERAL, CAN ONLY BE USED FOR VANADIUM DATA FILES
-    (WHICH ARE IN UNITS OF D-SPACING). INDEED, IT MAY BE OVER-TUNED TO THE
-    PARTICULAR DATA FILE USED WHEN WRITING IT!
-    THERE ARE ALSO IMPROVEMENTS PENDING TO THE FITTING SUBROUTINE USED,
-    WHICH SHOULD IMPROVE ACCURACY OF THE PEAK FITTING. ***
+    *** IT IS ASSUMED THAT THE FITTING FUNCTION WAS A GAUSSIAN ***
 
     Required Properties:
     <UL>
@@ -71,13 +65,8 @@ private:
   ///Execution code
   void exec();
 
-  API::MatrixWorkspace_sptr smoothInput(API::MatrixWorkspace_sptr input);
-  void findPeaks(API::MatrixWorkspace_sptr WS);
-  void fitPeaks(API::MatrixWorkspace_sptr WS);
-  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_sptr input);
-
-  /// Storage of the peak data
-  DataObjects::TableWorkspace m_peaks;
+  DataObjects::TableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
+  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input, DataObjects::TableWorkspace_sptr peakslist);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

@@ -36,8 +36,9 @@ void FindPeaks::init()
   
   // Temporary so that I can look at the smoothed data
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
-  // Temporary until a TableWorkspace containing the peaks can be passed out as an output property
-  declareProperty(new WorkspaceProperty<>("WithPeaksStripped","",Direction::Output));
+
+  // The found peaks in a table
+  declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PeaksList","",Direction::Output));
   
   // Set up the columns for the TableWorkspace holding the peak information
   m_peaks->createColumn("int","spectrum");
@@ -213,10 +214,7 @@ void FindPeaks::exec()
   } // loop over spectra
 
   g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;
-  
-  // This is temporary until I can pass out the list of peaks in a property
-  MatrixWorkspace_sptr outputWS = this->removePeaks(inputWS);
-  setProperty("WithPeaksStripped",outputWS);  
+  setProperty("PeaksList",m_peaks);
 }
 
 /** Calculates the second difference of the data (Y values) in a workspace.

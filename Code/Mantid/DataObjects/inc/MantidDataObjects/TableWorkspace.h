@@ -100,13 +100,13 @@ public:
     /// Removes a column.
     void removeColumn( const std::string& name);
     /// Number of columns in the workspace.
-    int columnCount(){return m_columns.size();}
+    int columnCount() const {return m_columns.size();}
     /// Gets the shared pointer to a column.
     boost::shared_ptr<Column> getColumn(const std::string& name);
     /// Returns a vector of all column names.
     std::vector<std::string> getColumnNames();
     /// Number of rows in the workspace.
-    int rowCount(){return m_rowCount;}
+    int rowCount() const {return m_rowCount;}
     /// Resizes the workspace.
     void setRowCount(int count);
     /// Inserts a row before row pointed to by index and fills it with default vales.

@@ -1,6 +1,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidDataObjects/ColumnFactory.h"
+#include "MantidAPI/WorkspaceProperty.h"
 
 #include <iostream>
 
@@ -143,3 +144,28 @@ namespace Mantid
   } // namespace DataObjects
 } // namespace Mantid
 
+///\cond TEMPLATE
+namespace Mantid
+{
+  namespace Kernel
+  {
+    template<> DLLExport
+    DataObjects::TableWorkspace_sptr PropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<DataObjects::TableWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
+      }
+    }
+
+  } // namespace Kernel
+} // namespace Mantid
+
+///\endcond TEMPLATE
