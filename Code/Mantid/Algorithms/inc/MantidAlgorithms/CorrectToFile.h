@@ -14,7 +14,10 @@ namespace Algorithms
   /**
      Required properties:
      <UL>
-     <LI> Filename - The filename containing the data
+     <LI>WorkspaceToCorrect - The input workspace to correct</LI>
+     <LI>Filename - The filename containing the data to use</LI>
+     <LI>WorkspaceOperation - Whether to divide or multiply by the file data</LI>
+     <LI>OutputWorkspace - The output workspace to use for the results </LI> 
      </UL>
 
      @author Martyn Gigg, Tessella Support Services plc

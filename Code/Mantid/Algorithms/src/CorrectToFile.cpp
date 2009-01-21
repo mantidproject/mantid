@@ -3,6 +3,7 @@
 //----------------------------
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidKernel/FileValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -17,8 +18,10 @@ void CorrectToFile::init()
 {
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input));
   declareProperty("Filename","",new Kernel::FileValidator());
+  std::vector<std::string> operations(1, std::string("Divide"));
+  operations.push_back("Multiply");
+  declareProperty("WorkspaceOperation", "Divide", new Kernel::ListValidator(operations));
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output));
-
 }
 
 void CorrectToFile::exec()
@@ -64,11 +67,17 @@ void CorrectToFile::exec()
   }
   
   MatrixWorkspace_sptr rkhworkspace = rebinToWS->getProperty("OutputWorkspace");
-  //Use divide to correct
-  MatrixWorkspace_sptr corrected_ws = toCorrect / rkhworkspace;
-  
-  setProperty("Outputworkspace", corrected_ws);
 
+  //Use specified operation to correct
+  std::string operation = getProperty("WorkspaceOperation");
+  MatrixWorkspace_sptr corrected_ws;
+  if( operation == "Divide" )
+    corrected_ws = toCorrect / rkhworkspace;
+  else
+    corrected_ws = toCorrect * rkhworkspace;
+  
+  //Set the resulting workspace
+  setProperty("Outputworkspace", corrected_ws);
 }
 
 /**
