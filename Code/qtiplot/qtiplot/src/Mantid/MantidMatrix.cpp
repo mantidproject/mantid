@@ -76,8 +76,9 @@ m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
     {
         Workspace_sptr_qRegistered = true;
         qRegisterMetaType<Mantid::API::Workspace_sptr>();
+        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     }
-    connect(this,SIGNAL(needChangeWorkspace(Mantid::API::Workspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::Workspace_sptr)));
+    connect(this,SIGNAL(needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr)));
     connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
     connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
@@ -786,12 +787,14 @@ void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::Da
 {
   if( !pNf->object() || !pNf->new_object() ) return;
 
-  if (pNf->new_object() != m_workspace && pNf->object_name() == m_strName)
+  Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->new_object());
+
+  if (new_workspace && pNf->new_object() != m_workspace && pNf->object_name() == m_strName)
     {
-        emit needChangeWorkspace(pNf->new_object());
+        emit needChangeWorkspace(new_workspace);
     }
 }
-
+ 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
     if (m_workspace->blocksize() != ws->blocksize() ||

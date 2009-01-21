@@ -125,7 +125,7 @@ public:
 
 signals:
     void needsUpdating();
-    void needChangeWorkspace(Mantid::API::Workspace_sptr ws);
+    void needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
     void needDeleteWorkspace();
 
 public slots:
@@ -333,5 +333,6 @@ private:
 
 /// Required by Qt to us Mantid::API::Workspace_sptr as a parameter type in signals
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
 
 #endif
