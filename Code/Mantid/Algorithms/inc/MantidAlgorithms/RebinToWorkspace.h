@@ -43,7 +43,7 @@ namespace Algorithms
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
 
-class RebinToWorkspace : public Mantid::API::Algorithm
+class DLLExport RebinToWorkspace : public Mantid::API::Algorithm
 {
 public:
   /// Constructor

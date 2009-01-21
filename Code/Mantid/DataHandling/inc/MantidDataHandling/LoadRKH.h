@@ -46,7 +46,7 @@ namespace DataHandling
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
 
-class LoadRKH : public Mantid::API::Algorithm
+class DLLExport LoadRKH : public Mantid::API::Algorithm
 {
 public:
   /// Constructor
