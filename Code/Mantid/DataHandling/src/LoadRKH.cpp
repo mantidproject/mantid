@@ -26,6 +26,14 @@ void LoadRKH::init()
 {
   declareProperty("Filename","", new Kernel::FileValidator());
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
+  //Get the units registered with the UnitFactory
+  std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
+  m_unitKeys.insert(propOptions.begin(), propOptions.end());
+
+  //Add some others that will make this orient the other way
+  m_RKHKeys.insert("SpectraNumber");
+  propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
+  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions) );
 }
 
 /**
@@ -78,6 +86,16 @@ void LoadRKH::exec()
   g_log.information() << "Total number of data points declared to be in the data file: " 
 		      << totalPoints << "\n";
 
+  //What are we reading?
+  std::string firstColVal = getProperty("FirstColumnValue");
+  bool colIsUnit(true);
+  if( m_RKHKeys.find( firstColVal ) != m_RKHKeys.end() ) 
+  {
+    colIsUnit = false;
+    readStart = 1;
+    readEnd = totalPoints;
+  }
+  
   if( readStart < 1 || readEnd < 1 || readEnd < readStart ||
       readStart > totalPoints || readEnd > totalPoints )
   {
@@ -91,10 +109,11 @@ void LoadRKH::exec()
   
   //The 4th and 5th line do not contain useful information either
   skipLines(file, 2);
+
   int pointsToRead = readEnd - readStart + 1;
   //Now stream sits at the first line of data 
   fileline = "";
-  std::vector<double> xdata, ydata, errdata;
+  std::vector<double> columnOne, ydata, errdata;
   for( int index = 1; index <= readEnd; ++index )
   {
     getline(file, fileline);
@@ -102,38 +121,63 @@ void LoadRKH::exec()
     double x(0.), y(0.), yerr(0.);
     std::istringstream datastr(fileline);
     datastr >> x >> y >> yerr;
-    xdata.push_back(x);
+    columnOne.push_back(x);
     ydata.push_back(y);
     errdata.push_back(yerr);
   }
+  file.close();
 
-  //The data is bin centred and so needs to be adjusted to a histogram format
-  std::vector<double> xnew(pointsToRead + 1, 0.0);
-  for( int i = 0; i < pointsToRead; ++i )
+  assert( pointsToRead == static_cast<int>(columnOne.size()) );
+  assert( pointsToRead == static_cast<int>(ydata.size()) );
+  assert( pointsToRead == static_cast<int>(errdata.size()) );
+    
+  //The output workspace
+  API::MatrixWorkspace_sptr localworkspace;
+  if( colIsUnit )
   {
-    if( i == 0 )
+    //The data is bin centred and so needs to be adjusted to a histogram format
+    std::vector<double> xnew(pointsToRead + 1, 0.0);
+    for( int i = 0; i < pointsToRead; ++i )
     {
-      double delta = xdata[i+1] - xdata[i];
-      xnew[i] = xdata[i] - delta/2.0;
-      xnew[i + 1] = xdata[i] + delta/2.0;
+      if( i == 0 )
+      {
+	double delta = columnOne[i+1] - columnOne[i];
+	xnew[i] = columnOne[i] - delta/2.0;
+	xnew[i + 1] = columnOne[i] + delta/2.0;
+      }
+      else
+      {
+	double delta = columnOne[i] - xnew[i];
+	xnew[i + 1] = columnOne[i] + delta;
+      }
     }
-    else
+
+    localworkspace = 
+      WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead + 1, pointsToRead);
+    localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create(firstColVal);
+    localworkspace->dataX(0) = xnew;
+    localworkspace->dataY(0) = ydata;
+    localworkspace->dataE(0) = errdata;
+  }
+  else
+  {
+    localworkspace = 
+      WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 2, 1);
+    localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    //Set the appropriate values
+    for( int index = 0; index < pointsToRead; ++index )
     {
-      double delta = xdata[i] - xnew[i];
-      xnew[i + 1] = xdata[i] + delta;
+      localworkspace->getAxis(1)->spectraNo(index) = (int)columnOne[index];
+      localworkspace->dataX(index)[0] = 0.0;
+      localworkspace->dataX(index)[1] = 1.0;
+      localworkspace->dataY(index)[0] = ydata[index];
+      localworkspace->dataE(index)[0] = errdata[index];
     }
+
   }
 
-  API::MatrixWorkspace_sptr localworkspace = 
-    WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead + 1, pointsToRead);
-  localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-  localworkspace->dataX(0) = xnew;
-  localworkspace->dataY(0) = ydata;
-  localworkspace->dataE(0) = errdata;
-
+  //Set the output workspace
   setProperty("OutputWorkspace", localworkspace);
-  
-  file.close();
 }
 
 /**

@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -18,6 +19,11 @@ void CorrectToFile::init()
 {
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input));
   declareProperty("Filename","",new Kernel::FileValidator());
+
+  std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
+  propOptions.push_back("SpectraNumber");
+  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions) );
+
   std::vector<std::string> operations(1, std::string("Divide"));
   operations.push_back("Multiply");
   declareProperty("WorkspaceOperation", "Divide", new Kernel::ListValidator(operations));
@@ -31,6 +37,8 @@ void CorrectToFile::exec()
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
+  std::string columnValue = getProperty("FirstColumnValue");
+  loadRKH->setPropertyValue("FirstColumnValue", columnValue);
 
   try
   {
@@ -47,26 +55,9 @@ void CorrectToFile::exec()
 
   //Check that the workspace to rebin has the same units as the one that we are matching to
   MatrixWorkspace_sptr toCorrect = getProperty("WorkspaceToCorrect");
-  checkWorkspaceUnits(rkhInput, toCorrect);
   
-  //Need to rebin the RKH to the same binning as the workspace we are going to correct
-  //using the RebinToWorkspace algorithm
-  Algorithm_sptr rebinToWS = createSubAlgorithm("RebinToWorkspace");
-  rebinToWS->setProperty("WorkspaceToRebin", rkhInput);
-  rebinToWS->setProperty("WorkspaceToMatch", toCorrect);
-  rebinToWS->setPropertyValue("OutputWorkspace", "rkhout");
-  
-  try
-  {
-    rebinToWS->execute();
-  }
-  catch(std::runtime_error&)
-  {
-    g_log.error() << "Unable to run RebinToWorkspace subalgorithm.";
-    throw std::runtime_error("Error executing RebinToWorkspace as a sub algorithm.");
-  }
-  
-  MatrixWorkspace_sptr rkhworkspace = rebinToWS->getProperty("OutputWorkspace");
+  //This only runs if it needs to otherwise it returns the original workspace
+  MatrixWorkspace_sptr rkhworkspace = runRebinToWorkspace(rkhInput, toCorrect);
 
   //Use specified operation to correct
   std::string operation = getProperty("WorkspaceOperation");
@@ -78,6 +69,32 @@ void CorrectToFile::exec()
   
   //Set the resulting workspace
   setProperty("Outputworkspace", corrected_ws);
+}
+
+MatrixWorkspace_sptr CorrectToFile::runRebinToWorkspace(MatrixWorkspace_sptr toRebin, MatrixWorkspace_sptr toMatch)
+{
+  //Check units
+  checkWorkspaceUnits(toRebin, toMatch);
+  
+  //Need to rebin the RKH to the same binning as the workspace we are going to correct
+  //using the RebinToWorkspace algorithm
+  Algorithm_sptr rebinToWS = createSubAlgorithm("RebinToWorkspace");
+  rebinToWS->setProperty("WorkspaceToRebin", toRebin);
+  rebinToWS->setProperty("WorkspaceToMatch", toMatch);
+  rebinToWS->setPropertyValue("OutputWorkspace", "rkhout");
+  
+  try
+  {
+    rebinToWS->execute();
+  }
+  catch(std::runtime_error&)
+  {
+    g_log.error() << "Unable to run RebinToWorkspace subalgorithm.";
+    throw std::runtime_error("Error executing RebinToWorkspace as a sub algorithm.");
+  }
+
+  MatrixWorkspace_sptr result = rebinToWS->getProperty("OutputWorkspace");
+  return result;
 }
 
 /**

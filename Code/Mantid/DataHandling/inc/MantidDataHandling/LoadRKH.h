@@ -19,6 +19,7 @@ namespace DataHandling
      Required properties:
      <UL>
      <LI> Filename - The path to the file in RKH format</LI>
+     <LI> FirstColumnValue - The units of the first column in the file</LI>
      <LI> OutputWorkspace - The name output workspace.</LI>
      </UL>
 
@@ -50,7 +51,7 @@ class DLLExport LoadRKH : public Mantid::API::Algorithm
 {
 public:
   /// Constructor
-  LoadRKH() : Mantid::API::Algorithm() {}
+  LoadRKH() : Mantid::API::Algorithm(), m_unitKeys(), m_RKHKeys() {}
   /// Virtual destructor
   virtual ~LoadRKH() {}
   /// Algorithm's name
@@ -68,6 +69,12 @@ private:
 
   // Remove lines from an input stream
   void skipLines(std::istream & strm, int nlines);
+
+  //Store the units known to the UnitFactory
+  std::set<std::string> m_unitKeys;
+
+  //Store the units added as options for this algorithm
+  std::set<std::string> m_RKHKeys;
 
   // Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

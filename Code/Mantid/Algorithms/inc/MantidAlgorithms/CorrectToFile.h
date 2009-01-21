@@ -16,6 +16,7 @@ namespace Algorithms
      <UL>
      <LI>WorkspaceToCorrect - The input workspace to correct</LI>
      <LI>Filename - The filename containing the data to use</LI>
+     <LI>FirstColumnValue - What does the first column of the file denote</LI>
      <LI>WorkspaceOperation - Whether to divide or multiply by the file data</LI>
      <LI>OutputWorkspace - The output workspace to use for the results </LI> 
      </UL>
@@ -63,6 +64,9 @@ private:
   ///Execution code
   void exec();
 
+  //Run the RebinToWorkspace algorithm, if applicable
+  Mantid::API::MatrixWorkspace_sptr runRebinToWorkspace(Mantid::API::MatrixWorkspace_sptr toRebin, Mantid::API::MatrixWorkspace_sptr toMatch);
+  
   //Check if the workspace units match
   void checkWorkspaceUnits(Mantid::API::MatrixWorkspace_sptr toRebin, Mantid::API::MatrixWorkspace_sptr toMatch);
 
