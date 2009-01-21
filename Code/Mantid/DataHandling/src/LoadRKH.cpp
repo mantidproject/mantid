@@ -3,12 +3,10 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidKernel/FileValidator.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 
 #include <fstream>
-#include <iomanip>
 
 using namespace Mantid::DataHandling;
 
@@ -28,11 +26,6 @@ void LoadRKH::init()
 {
   declareProperty("Filename","", new Kernel::FileValidator());
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
-  
-  Kernel::BoundedValidator<int> *mustBePositive = new Kernel::BoundedValidator<int>();
-  mustBePositive->setLower(1);
-  declareProperty("DataStart",1, mustBePositive);
-  declareProperty("DataEnd",1, mustBePositive->clone());
 }
 
 /**
@@ -58,7 +51,7 @@ void LoadRKH::exec()
 
   //The 3rd line contains information regarding the number of points in the file and
   // start and end reading points
-  int fileStart(0), fileEnd(0), buried(0);
+  int totalPoints(0), readStart(0), readEnd(0), buried(0);
   std::string fileline("");
   getline(file, fileline);
   std::istringstream is(fileline);
@@ -68,13 +61,13 @@ void LoadRKH::exec()
     switch( counter )
     {
     case 1: 
-      is >> m_intTotalPoints;
+      is >> totalPoints;
       break;
     case 5:
-      is >> fileStart;
+      is >> readStart;
       break;
     case 6:
-      is >> fileEnd;
+      is >> readEnd;
       break;
     default:
       is >> buried;
@@ -82,31 +75,30 @@ void LoadRKH::exec()
     }
   }
 
-  g_log.information() << "Total number of data points in the data file: " 
-		      << m_intTotalPoints << "\n";
-  m_intReadStart = fileStart;
-  m_intReadEnd = fileEnd;
+  g_log.information() << "Total number of data points declared to be in the data file: " 
+		      << totalPoints << "\n";
 
-  //Check property start and end points
-  checkOptionalProperties();
+  if( readStart < 1 || readEnd < 1 || readEnd < readStart ||
+      readStart > totalPoints || readEnd > totalPoints )
+  {
+    g_log.error("Invalid data range specfied.");
+    file.close();
+    throw std::invalid_argument("Invalid data range specfied.");
+  }
 
-  if( m_intReadStart != fileStart )
-    g_log.warning() << "Overriding file default starting point, started reading at: " 
-		    << m_intReadStart << "\n";
-  if( m_intReadEnd != fileEnd )
-    g_log.warning() << "Overriding file default end point, finished reading at: " 
-		    << m_intReadEnd << "\n";
+  g_log.information() << "Reading started on data line: "  << readStart << "\n";
+  g_log.information() << "Reading finished on data line: " << readEnd << "\n";
   
   //The 4th and 5th line do not contain useful information either
   skipLines(file, 2);
-  int pointsToRead = m_intReadEnd - m_intReadStart + 1;
+  int pointsToRead = readEnd - readStart + 1;
   //Now stream sits at the first line of data 
   fileline = "";
   std::vector<double> xdata, ydata, errdata;
-  for( int index = 1; index <= m_intReadEnd; ++index )
+  for( int index = 1; index <= readEnd; ++index )
   {
     getline(file, fileline);
-    if( index < m_intReadStart ) continue;
+    if( index < readStart ) continue;
     double x(0.), y(0.), yerr(0.);
     std::istringstream datastr(fileline);
     datastr >> x >> y >> yerr;
@@ -132,7 +124,8 @@ void LoadRKH::exec()
     }
   }
 
-  API::MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead + 1, pointsToRead);
+  API::MatrixWorkspace_sptr localworkspace = 
+    WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead + 1, pointsToRead);
   localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   localworkspace->dataX(0) = xnew;
   localworkspace->dataY(0) = ydata;
@@ -141,25 +134,6 @@ void LoadRKH::exec()
   setProperty("OutputWorkspace", localworkspace);
   
   file.close();
-}
-
-void LoadRKH::checkOptionalProperties()
-{
-  Kernel::Property* prop = getProperty("DataStart");
-  if( !prop->isDefault() ) 
-    m_intReadStart = getProperty("DataStart");
-  
-  prop = getProperty("DataEnd");
-  if( !prop->isDefault() ) 
-    m_intReadEnd = getProperty("DataEnd");
-
-  if( m_intReadStart < 1 || m_intReadEnd < 1 || m_intReadEnd < m_intReadStart ||
-      m_intReadStart > m_intTotalPoints || m_intReadEnd > m_intTotalPoints )
-  {
-    g_log.error("Invalid data range specfied.");
-    throw std::invalid_argument("Invalid data range specfied.");
-  }
- 
 }
 
 /**

@@ -22,12 +22,6 @@ namespace DataHandling
      <LI> OutputWorkspace - The name output workspace.</LI>
      </UL>
 
-     Optional Properties:
-     <UL>
-     <LI>DataStart - The line of data to start reading from</LI>
-     <LI>DataEnd - The line of data to stop reading</LI>
-     </UL>
-
      @author Martyn Gigg, Tessella Support Services plc
      @date 19/01/2009
      
@@ -56,7 +50,7 @@ class LoadRKH : public Mantid::API::Algorithm
 {
 public:
   /// Constructor
-  LoadRKH() : Mantid::API::Algorithm(), m_intTotalPoints(0), m_intReadStart(1), m_intReadEnd(1) {}
+  LoadRKH() : Mantid::API::Algorithm() {}
   /// Virtual destructor
   virtual ~LoadRKH() {}
   /// Algorithm's name
@@ -72,17 +66,8 @@ private:
   //Execution code
   void exec();
 
-  //Check optional properties 
-  void checkOptionalProperties();
   // Remove lines from an input stream
   void skipLines(std::istream & strm, int nlines);
-
-  //Total number of lines in this set
-  int m_intTotalPoints;
-  //Line to start reading from
-  int m_intReadStart;
-  //Line to finish reading
-  int m_intReadEnd;
 
   // Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
