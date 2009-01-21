@@ -286,6 +286,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SumSpectra.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Unwrap.cpp"
 				>
 			</File>
@@ -465,6 +469,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\StripPeaks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SumSpectra.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SumSpectraTest.h"
 				>
 			</File>
 			<File
