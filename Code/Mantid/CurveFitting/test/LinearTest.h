@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Linear.h"
+#include "MantidDataObjects/Workspace1D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -15,7 +16,8 @@ public:
     c0 = 10.0;
     c1 = 1.0;
     const int numBins = 30;
-    MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create("Workspace1D",1,numBins+1,numBins);
+    Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
+    WS->initialize(1,numBins+1,numBins);
     
     for (int i = 0; i < numBins; ++i)
     {
@@ -64,9 +66,9 @@ public:
 
     TS_ASSERT_EQUALS( lin.getPropertyValue("FitStatus"), "success" )
     const double intercept = lin.getProperty("FitIntercept");
-    TS_ASSERT_DELTA( intercept, c0, 0.05*c0 )
+    TS_ASSERT_DELTA( intercept, c0, 0.1*c0 )
     const double slope = lin.getProperty("FitSlope");
-    TS_ASSERT_DELTA( slope, c1, 0.05*c1 )
+    TS_ASSERT_DELTA( slope, c1, 0.1*c1 )
     const double chisq = lin.getProperty("Chi^2");
     TS_ASSERT( chisq )
     

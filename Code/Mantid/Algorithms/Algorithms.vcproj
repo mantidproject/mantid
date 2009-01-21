@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CorrectToFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CropWorkspace.cpp"
 				>
 			</File>
@@ -255,6 +259,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Plus.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RebinToWorkspace.cpp"
 				>
 			</File>
 			<File
@@ -348,6 +356,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\CorrectToFile.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CropWorkspace.h"
 				>
 			</File>
@@ -425,6 +437,10 @@
 			</File>
 			<File
 				RelativePath=".\test\PlusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\RebinToWorkspace.h"
 				>
 			</File>
 			<File

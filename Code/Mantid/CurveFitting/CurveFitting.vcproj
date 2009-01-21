@@ -199,6 +199,10 @@
 				RelativePath=".\src\GaussianLinearBG.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\Linear.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -223,6 +227,10 @@
 			</File>
 			<File
 				RelativePath=".\test\GaussianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Linear.h"
 				>
 			</File>
 		</Filter>
