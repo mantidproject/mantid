@@ -46,7 +46,10 @@ void LoadInstrument::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("Filename","",new MandatoryValidator<std::string>);
+  std::vector<std::string> exts;
+  exts.push_back("XML");
+  exts.push_back("xml");
+  declareProperty("Filename","",new FileValidator(exts));
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -62,6 +65,9 @@ void LoadInstrument::exec()
 
   // Get the input workspace
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+
+  // Clear off any existing instrument for this workspace
+  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
   // Remove the path from the filename for use with the InstrumentDataService
   const int stripPath = m_filename.find_last_of("\\/");

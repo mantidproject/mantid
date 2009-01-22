@@ -240,6 +240,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MoveInstrumentComponent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveCSV.cpp"
 				>
 			</File>
@@ -375,6 +379,10 @@
 			</File>
 			<File
 				RelativePath=".\test\MarkDeadDetectorsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\MoveInstrumentComponent.h"
 				>
 			</File>
 			<File

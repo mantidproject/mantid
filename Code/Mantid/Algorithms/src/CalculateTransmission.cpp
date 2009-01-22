@@ -21,7 +21,6 @@ using namespace DataObjects;
 Logger& CalculateTransmission::g_log = Logger::get("CalculateTransmission");
 
 static const double dblLog(double in) { return std::log10(in); }
-static const double dblExp(double in) { return std::exp(in); }
 
 void CalculateTransmission::init()
 {
@@ -84,9 +83,6 @@ void CalculateTransmission::exec()
  
   // Now fit this to a straight line
   MatrixWorkspace_sptr fit = this->fitToData(logTransmission);
-  // Need to undo the log in the data
-//  std::vector<double> &Yfit = fit->dataY(0);
-//  std::transform(Yfit.begin(),Yfit.end(),Yfit.begin(),dblExp);
   // What do I do with the errors? Zero for now
   std::vector<double> &Efit = fit->dataE(0);
   Efit.assign(Efit.size(),0.0);
