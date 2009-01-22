@@ -34,8 +34,8 @@ namespace Mantid
         declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 	BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
         zeroOrGreater->setLower(0);    
-	declareProperty("StartTimeBin",0, zeroOrGreater);
-	declareProperty("EndTimeBin",0, zeroOrGreater->clone());
+	declareProperty("XMin",0, zeroOrGreater);
+	declareProperty("XMax",0, zeroOrGreater->clone());
 	std::vector<std::string> propOptions;
 	propOptions.push_back("None");
 	propOptions.push_back("Linear");
@@ -50,8 +50,8 @@ namespace Mantid
     {
 	    //Get input workspace and offset
 	    MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
-	    int start = getProperty("StartTimeBin");
-	    int end = getProperty("EndTimeBin");
+	    int start = getProperty("XMin");
+	    int end = getProperty("XMax");
 	    
 	            
 	    //Check end does not exceed number of time bins

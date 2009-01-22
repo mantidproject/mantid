@@ -19,8 +19,8 @@ namespace Mantid
     <UL>
     <LI> InputWorkspace - The name of the Workspace to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    <LI> StartTimeBin - The time bin to start removing from (including the bin specified). Note: is zero based, i.e. first bin has index 0.</LI>
-    <LI> EndTimeBin - The time bin to end removing from (including the bin specified). Note: is zero based. </LI>
+    <LI> XMin - The time bin to start removing from (including the bin specified). Note: is zero based, i.e. first bin has index 0.</LI>
+    <LI> XMax - The time bin to end removing from (including the bin specified). Note: is zero based. </LI>
     <LI> Interpolation - The type of interpolation to use for removed bins. </LI>
     </UL>
       

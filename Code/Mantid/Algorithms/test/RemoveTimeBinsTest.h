@@ -46,11 +46,11 @@ public:
 		
 		alg.setPropertyValue("InputWorkspace", "input2D");
 		alg.setPropertyValue("OutputWorkspace", "output");
-		alg.setPropertyValue("StartTimeBin", "0");
-		alg.setPropertyValue("EndTimeBin", "0");
+		alg.setPropertyValue("XMin", "0");
+		alg.setPropertyValue("XMax", "0");
 		
-		TS_ASSERT_EQUALS( alg.getPropertyValue("StartTimeBin"), "0");
-		TS_ASSERT_EQUALS( alg.getPropertyValue("EndTimeBin"), "0");
+		TS_ASSERT_EQUALS( alg.getPropertyValue("XMin"), "0");
+		TS_ASSERT_EQUALS( alg.getPropertyValue("XMax"), "0");
 	}
 	
 	void testExec()
@@ -82,11 +82,11 @@ public:
 		
 		alg3.setPropertyValue("InputWorkspace", "input2D");
 		alg3.setPropertyValue("OutputWorkspace", "output2");
-		alg3.setPropertyValue("StartTimeBin", "4");
-		alg3.setPropertyValue("EndTimeBin", "4");
+		alg3.setPropertyValue("XMin", "4");
+		alg3.setPropertyValue("XMax", "4");
 		
-		TS_ASSERT_EQUALS( alg3.getPropertyValue("StartTimeBin"), "4");
-		TS_ASSERT_EQUALS( alg3.getPropertyValue("EndTimeBin"), "4");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMin"), "4");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMax"), "4");
 		
 		try 
 		{
@@ -114,12 +114,12 @@ public:
 		TS_ASSERT( alg4.isInitialized() )	
 		alg4.setPropertyValue("InputWorkspace", "input2D");
 		alg4.setPropertyValue("OutputWorkspace", "output3");
-		alg4.setPropertyValue("StartTimeBin", "2");
-		alg4.setPropertyValue("EndTimeBin", "2");
+		alg4.setPropertyValue("XMin", "2");
+		alg4.setPropertyValue("XMax", "2");
 		alg4.setPropertyValue("Interpolation", "Linear");
 		
-		TS_ASSERT_EQUALS( alg4.getPropertyValue("StartTimeBin"), "2");
-		TS_ASSERT_EQUALS( alg4.getPropertyValue("EndTimeBin"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMin"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMax"), "2");
 		
 		try 
 		{
@@ -154,8 +154,8 @@ public:
 		
 		alg2.setPropertyValue("InputWorkspace", "EMU6473");
 		alg2.setPropertyValue("OutputWorkspace", "result1");
-		alg2.setPropertyValue("StartTimeBin", "0");
-		alg2.setPropertyValue("EndTimeBin", "6");
+		alg2.setPropertyValue("XMin", "0");
+		alg2.setPropertyValue("XMax", "6");
 		
 		try 
 		{
