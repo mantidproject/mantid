@@ -170,6 +170,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CalculateTransmission.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ChangeBinOffset.cpp"
 				>
 			</File>
@@ -313,6 +317,10 @@
 			</File>
 			<File
 				RelativePath=".\test\BinaryOperationTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CalculateTransmission.h"
 				>
 			</File>
 			<File
