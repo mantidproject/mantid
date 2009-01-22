@@ -26,7 +26,7 @@ public:
 
 	void testName()
 	{
-		TS_ASSERT_EQUALS( alg.name(), "RemoveTimeBins" )
+		TS_ASSERT_EQUALS( alg.name(), "RemoveBins" )
 	}
 
 	void testCategory()
@@ -104,8 +104,40 @@ public:
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 5);
 		
+	}
+	
+	void testRemoveFromMiddle()
+	{
+		alg4.initialize();
+		TS_ASSERT( alg4.isInitialized() )	
+		alg4.setPropertyValue("InputWorkspace", "input2D");
+		alg4.setPropertyValue("OutputWorkspace", "output3");
+		alg4.setPropertyValue("StartTimeBin", "2");
+		alg4.setPropertyValue("EndTimeBin", "2");
+		alg4.setPropertyValue("Interpolation", "Linear");
+		
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("StartTimeBin"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("EndTimeBin"), "2");
+		
+		try 
+		{
+			TS_ASSERT_EQUALS(alg4.execute(),true);
+		}
+		catch(std::runtime_error e)
+		{
+			TS_FAIL(e.what());
+		}
+
+		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output3"));
+
+		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 5);
+		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 4);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
 	}
 	
 	void testRealData()
@@ -152,7 +184,15 @@ public:
 		for (int i =0; i < 4; ++i)
 		{
 			X.push_back(1.0*i);
-			Y.push_back(2.0*i);
+			
+			if (i == 2)
+			{
+				Y.push_back(2.0*i + 1);
+			}
+			else
+			{
+				Y.push_back(2.0*i);
+			}
 		}
 		X.push_back(4.0);	// X is one bigger
 
@@ -168,6 +208,7 @@ private:
 	RemoveTimeBins alg;
 	RemoveTimeBins alg2;
 	RemoveTimeBins alg3;
+	RemoveTimeBins alg4;
 
 };
 

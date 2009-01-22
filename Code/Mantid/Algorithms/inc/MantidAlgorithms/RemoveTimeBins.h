@@ -5,9 +5,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
+	
   namespace Algorithms
   {
    /**Removes time bins from either the front or the back of a workspace. Do not use to remove time
@@ -19,6 +21,7 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     <LI> StartTimeBin - The time bin to start removing from (including the bin specified). Note: is zero based, i.e. first bin has index 0.</LI>
     <LI> EndTimeBin - The time bin to end removing from (including the bin specified). Note: is zero based. </LI>
+    <LI> Interpolation - The type of interpolation to use for removed bins. </LI>
     </UL>
       
     @author 
@@ -44,6 +47,8 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
+    
     class DLLExport RemoveTimeBins : public API::Algorithm
     {
     public:
@@ -52,7 +57,7 @@ namespace Mantid
       /// Destructor
       virtual ~RemoveTimeBins() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "RemoveTimeBins";}
+      virtual const std::string name() const { return "RemoveBins";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
@@ -62,6 +67,11 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
+      void RemoveFromEnds(Mantid::API::MatrixWorkspace_const_sptr inputW, 
+		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, int start, int end);
+    
+      void RemoveFromMiddle(Mantid::API::MatrixWorkspace_const_sptr inputW, 
+		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, int start, int end);
             
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
