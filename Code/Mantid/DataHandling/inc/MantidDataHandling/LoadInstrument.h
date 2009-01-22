@@ -124,6 +124,13 @@ namespace API
       /// Set parameter/logfile info (if any) associated with component
       void setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem);
 
+      /// Holds all the xml elements that have a <parameter> child element.
+      /// Added purely for the purpose of computing speed and is used in setLogFile()
+      /// for the purpose of quickly accessing if a component have a parameter/logfile
+      /// associated with it or not - instead of using the comparatively slow poco
+      /// call getElementsByTagName() (or getChildElement)
+      std::vector<Poco::XML::Element*> hasParameterElement;
+
       /// Get parent component element of location element
       Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
 

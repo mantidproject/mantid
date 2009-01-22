@@ -146,6 +146,19 @@ void LoadInstrument::exec()
   pNL_type->release();
 
 
+  // create hasParameterElement
+
+  NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
+
+  unsigned int numParameter = pNL_parameter->length();
+  for (unsigned int i = 0; i < numParameter; i++)
+  {
+    Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
+    hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
+  }
+  pNL_parameter->release();
+
+
   // Get reference to Instrument and set its name
   m_instrument = localWorkspace->getBaseInstrument();
   if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
@@ -815,10 +828,13 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
  */
 void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem)
 {
-  NodeList* pNL = pElem->getElementsByTagName("parameter");
+  // check first if pElem contains any <parameter> child elements
 
+  if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
+
+
+  NodeList* pNL = pElem->getElementsByTagName("parameter");
   unsigned int numberParam = pNL->length();
-  if ( numberParam == 0 ) return;
 
   // Get logfile-cache from instrument
   std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
