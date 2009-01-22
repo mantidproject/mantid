@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
+#include "boost/shared_ptr.hpp"
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -116,6 +117,8 @@ public:
 private:
     Type m_value;
 };
+
+typedef boost::shared_ptr<Parameter> Parameter_sptr;
 
 template<class T>
 T Parameter::value()

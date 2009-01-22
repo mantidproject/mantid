@@ -4,7 +4,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Parameter.h"
-#include "boost/shared_ptr.hpp"
 #include "MantidGeometry/IComponent.h"
 
 #ifndef HAS_UNORDERED_MAP_H
