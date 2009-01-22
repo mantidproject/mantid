@@ -144,7 +144,7 @@ public:
       {
         if ( compName.compare(((*it).first)->getName()) == 0 )  
         {
-          Parameter_sptr param = get((*it).first,name);
+          boost::shared_ptr<Parameter> param = get((*it).first,name);
           if (param)
             retval.push_back( param->value<T>() );
         }
@@ -166,8 +166,6 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
-
-typedef boost::shared_ptr<Parameter> Parameter_sptr;
 
 } // Namespace Geometry
 
