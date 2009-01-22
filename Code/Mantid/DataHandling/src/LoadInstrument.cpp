@@ -49,7 +49,8 @@ void LoadInstrument::init()
   std::vector<std::string> exts;
   exts.push_back("XML");
   exts.push_back("xml");
-  declareProperty("Filename","",new FileValidator(exts));
+  declareProperty("Filename","",new FileValidator(exts,false));
+  //declareProperty("Filename","",new MandatoryValidator<std::string>);
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -67,7 +68,7 @@ void LoadInstrument::exec()
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // Clear off any existing instrument for this workspace
-  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+//  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
   // Remove the path from the filename for use with the InstrumentDataService
   const int stripPath = m_filename.find_last_of("\\/");
