@@ -59,6 +59,8 @@ void Linear::exec()
   const std::vector<double>& X = inputWorkspace->dataX(histNumber);
   const std::vector<double>& Y = inputWorkspace->dataY(histNumber);
   const std::vector<double>& E = inputWorkspace->dataE(histNumber);
+  // Check if this spectrum has errors
+  bool noErrors = true;
 
   // Retrieve the Start/EndX properties, if set
   this->setRange(X,Y);
@@ -73,15 +75,31 @@ void Linear::exec()
     // Need to adjust X to centre of bin, if a histogram
     XCen[i] = ( isHistogram ? 0.5*(X[m_minX+i]+X[m_minX+i+1]) : X[m_minX] );
     // GSL wants the errors as weights, i.e. 1/sigma^2
+    // We need to be careful if E is zero because that would naively lead to an infinite weight on the point.
+    // Solution taken here is to zero weight if error is zero, which typically means Y is zero
+    //   (so it is effectively excluded from the fit).
     const double& currentE = E[m_minX+i];
-    weights[i] = 1.0/(currentE*currentE);
+    weights[i] = (currentE ? 1.0/(currentE*currentE) : 0.0);
+    // However, if the spectrum given has all errors of zero, then we should use the gsl function that
+    //   doesn't take account of the errors.
+    if ( noErrors && currentE ) noErrors = false;
   }
   
   // Call the gsl fitting function
   // The stride value of 1 reflects that fact that we want every element of out input vectors
   const int stride = 1;
   double *c0(new double),*c1(new double),*cov00(new double),*cov01(new double),*cov11(new double),*chisq(new double);
-  const int status = gsl_fit_wlinear(&XCen[0],stride,&weights[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
+  int status;
+  // If this spectrum had ALL zeros for the errors, call the gsl function that doesn't use errors
+  if ( noErrors )
+  {
+    status = gsl_fit_linear(&XCen[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
+  }
+  // Otherwise, call the one that does account for errors on the data points
+  else
+  {
+    status = gsl_fit_wlinear(&XCen[0],stride,&weights[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
+  }
   
   // Check that the fit succeeded
   std::string fitStatus = gsl_strerror(status);
