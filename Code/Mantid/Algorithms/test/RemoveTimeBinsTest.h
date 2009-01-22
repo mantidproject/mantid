@@ -114,12 +114,13 @@ public:
 		TS_ASSERT( alg4.isInitialized() )	
 		alg4.setPropertyValue("InputWorkspace", "input2D");
 		alg4.setPropertyValue("OutputWorkspace", "output3");
-		alg4.setPropertyValue("XMin", "2");
+		alg4.setPropertyValue("XMin", "1");
 		alg4.setPropertyValue("XMax", "2");
 		alg4.setPropertyValue("Interpolation", "Linear");
 		
-		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMin"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMin"), "1");
 		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMax"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("Interpolation"), "Linear");
 		
 		try 
 		{
@@ -137,7 +138,8 @@ public:
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 3);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 3);
 	}
 	
 	void testRealData()
