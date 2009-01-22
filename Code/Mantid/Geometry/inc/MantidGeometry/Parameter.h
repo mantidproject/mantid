@@ -65,6 +65,11 @@ public:
     template<class T>
     T value();
 
+    /// Sets the value of type T to the parameter if it has type ParameterType<T>
+    /// Throws exception if types are wrong.
+    template<class T>
+    void set(const T& t);
+
 private:
   /// The name of the property
   const std::string m_name;
@@ -118,6 +123,14 @@ T Parameter::value()
     ParameterType<T> *p = dynamic_cast<ParameterType<T>*>(this);
     if (!p) throw std::runtime_error("Wrong type of parameter.");
     return p->ParameterType<T>::value();
+}
+
+template<class T>
+void Parameter::set(const T& t)
+{
+    ParameterType<T> *p = dynamic_cast<ParameterType<T>*>(this);
+    if (!p) throw std::runtime_error("Wrong type of parameter.");
+    p->ParameterType<T>::setValue(t);
 }
 
 typedef DLLExport ParameterType<int> ParameterInt;

@@ -106,6 +106,9 @@ public:
      double getDistance(const IComponent&) const;
      void printSelf(std::ostream&) const;
 
+     /// Returns the address of the base component
+     const IComponent* base()const{return m_base;}
+
 protected:
 
     /// The base component 

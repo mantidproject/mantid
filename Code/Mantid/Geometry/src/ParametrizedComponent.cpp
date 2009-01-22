@@ -153,11 +153,10 @@ void ParametrizedComponent::rotate(double angle, const V3D& axis)
  */
 V3D ParametrizedComponent::getRelativePos() const
 {
-    Parameter * par = m_map->get(m_base,"pos");
+    Parameter_sptr par = m_map->get(m_base,"pos");
     if (par)
     {
-        //std::cerr<<static_cast<ParameterV3D*>(par)->value()<<'\n';
-        return static_cast<ParameterV3D*>(par)->value();
+        return par->value<V3D>();
     }
     return m_base->getRelativePos();
 }
@@ -189,11 +188,10 @@ V3D ParametrizedComponent::getPos() const
  */
 const Quat& ParametrizedComponent::getRelativeRot() const
 {
-    Parameter * par = m_map->get(m_base,"rot");
+    Parameter_sptr par = m_map->get(m_base,"rot");
     if (par)
     {
-        //std::cerr<<static_cast<ParameterQuat*>(par)->value()<<'\n';
-        return static_cast<ParameterQuat*>(par)->value();
+        return par->value<Quat>();
     }
     return m_base->getRelativeRot();
 }

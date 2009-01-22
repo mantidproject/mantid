@@ -78,72 +78,60 @@ public:
 
     /// Templated method for adding a parameter providing its value as a string
     template<class T>
-    void addTypeString(const IComponent* compName,const std::string& name, const std::string& value)
+    void addTypeString(const IComponent* comp,const std::string& name, const std::string& value)
     {
         ParameterType<T> *param = new ParameterType<T>(name);
         param->fromString(value);
-        m_map.insert(std::make_pair(compName,boost::shared_ptr<Parameter>(param)));
+        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
     /// Templated method for adding a parameter providing its value of a particular type
     template<class T>
-    void addType(const IComponent* compName,const std::string& name, const T& value)
+    void addType(const IComponent* comp,const std::string& name, const T& value)
     {
         ParameterType<T> *param = new ParameterType<T>(name);
         param->setValue(value);
-        m_map.insert(std::make_pair(compName,boost::shared_ptr<Parameter>(param)));
+        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
     /// Method is provided to add a parameter of any custom type which must be created with 'new' operator.
-    /// ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"compName","name","value");
-    void add(Parameter* param,const IComponent* compName,const std::string& name, const std::string& value)
+    /// ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"comp","name","value");
+    void add(Parameter* param,const IComponent* comp,const std::string& name, const std::string& value)
     {
         param->fromString(value);
-        m_map.insert(std::make_pair(compName,boost::shared_ptr<Parameter>(param)));
+        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
     /// The same as above except that the caller is resposible for setting the parameter's value.
     /// e.g. CustomParameter* param = new CustomParameter;
     ///      param->setItsValue(value);
-    ///      AMap.add(param,"compName","name");
-    void add(Parameter* param,const IComponent* compName,const std::string& name)
+    ///      AMap.add(param,"comp","name");
+    void add(Parameter* param,const IComponent* comp,const std::string& name)
     {
-        m_map.insert(std::make_pair(compName,boost::shared_ptr<Parameter>(param)));
+        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
     /// Concrete parameter adding methods.
-    void addDouble(const IComponent* compName,const std::string& name, const std::string& value){addTypeString<double>(compName,name,value);}
-    void addDouble(const IComponent* compName,const std::string& name, double value){addType(compName,name,value);}
+    void addDouble(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<double>(comp,name,value);}
+    void addDouble(const IComponent* comp,const std::string& name, double value){addType(comp,name,value);}
 
-    void addInt(const IComponent* compName,const std::string& name, const std::string& value){addTypeString<int>(compName,name,value);}
-    void addInt(const IComponent* compName,const std::string& name, int value){addType(compName,name,value);}
+    void addInt(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<int>(comp,name,value);}
+    void addInt(const IComponent* comp,const std::string& name, int value){addType(comp,name,value);}
 
-    void addBool(const IComponent* compName,const std::string& name, const std::string& value){addTypeString<bool>(compName,name,value);}
-    void addBool(const IComponent* compName,const std::string& name, bool value){addType(compName,name,value);}
+    void addBool(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<bool>(comp,name,value);}
+    void addBool(const IComponent* comp,const std::string& name, bool value){addType(comp,name,value);}
 
-    void addString(const IComponent* compName,const std::string& name, const std::string& value){addTypeString<std::string>(compName,name,value);}
+    void addString(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<std::string>(comp,name,value);}
 
-    void addV3D(const IComponent* compName,const std::string& name, const std::string& value){addTypeString<V3D>(compName,name,value);}
-    void addV3D(const IComponent* compName,const std::string& name, const V3D& value){addType(compName,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<V3D>(comp,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const V3D& value){addType(comp,name,value);}
 
-    void addQuat(const IComponent* compName,const std::string& name, const Quat& value){addType(compName,name,value);}
+    void addQuat(const IComponent* comp,const std::string& name, const Quat& value){addType(comp,name,value);}
 
     /// Return the value of a parameter as a string.
-    std::string getString(const IComponent* compName,const std::string& name);
+    std::string getString(const IComponent* comp,const std::string& name);
 
-    Parameter* get(const IComponent* compName,const std::string& name)const;
-
-    /// Get the value of a given parameter associated with a given component 
-    template<class T>
-    T getType(const IComponent* compName,const std::string& name)const
-    {
-        Parameter *param = get(compName,name);
-        if (!param) return T();
-        ParameterType<T> *tparam = dynamic_cast<ParameterType<T> *>(param);
-        if (!tparam)
-            throw std::runtime_error("Parameter "+name+" is not of type " + typeid(T).name());
-        return tparam->value();
-    }
+    boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name)const;
 
     /// Get the values of a given parameter of all the components that have the name: compName
     template<class T>
@@ -156,23 +144,18 @@ public:
       {
         if ( compName.compare(((*it).first)->getName()) == 0 )  
         {
-          Parameter *param = get((*it).first,name);
+          Parameter_sptr param = get((*it).first,name);
           if (param)
-            retval.push_back( getType<T>((*it).first, name) );
+            retval.push_back( param->value<T>() );
         }
       }
       return retval;
     }
 
-    double getDouble(const IComponent* compName,const std::string& name)const{return getType<double>(compName,name);}
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
-    int getInt(const IComponent* compName,const std::string& name)const{return getType<int>(compName,name);}
-    bool getBool(const IComponent* compName,const std::string& name)const{return getType<bool>(compName,name);}
-    V3D getV3D(const IComponent* compName,const std::string& name)const{return getType<V3D>(compName,name);}
-    Quat getQuat(const IComponent* compName,const std::string& name)const{return getType<Quat>(compName,name);}
 
-    /// Returns a vector with all parameter names for componenet compName
-    std::vector<std::string> nameList(const IComponent* compName)const;
+    /// Returns a vector with all parameter names for componenet comp
+    std::vector<std::string> nameList(const IComponent* comp)const;
 
 private:
   ///Assignment operator
@@ -183,6 +166,8 @@ private:
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
+
+typedef boost::shared_ptr<Parameter> Parameter_sptr;
 
 } // Namespace Geometry
 
