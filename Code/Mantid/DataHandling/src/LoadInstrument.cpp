@@ -68,7 +68,7 @@ void LoadInstrument::exec()
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // Clear off any existing instrument for this workspace
-//  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
   // Remove the path from the filename for use with the InstrumentDataService
   const int stripPath = m_filename.find_last_of("\\/");
