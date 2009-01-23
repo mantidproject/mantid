@@ -140,6 +140,7 @@ public:
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 3);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 3);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[3], 6);
 	}
 	
 	void testRealData()

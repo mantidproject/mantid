@@ -164,7 +164,7 @@ namespace Mantid
 				errNext = inputW->dataE(i)[end + 1];
 			}
 			   
-			double ave = (valPrev + valNext)/2;
+			double ave = (valPrev + valNext)/2; //Currently only does average - will do proper interpolation later
 			double aveE = (errPrev + errNext)/2; //Cheat: should add in quadrature will do later
 			    
 			for (int j=0; j < inputW->dataY(i).size(); ++j)
@@ -172,10 +172,15 @@ namespace Mantid
 				outputWS->dataX(i)[j] = inputW->dataX(i)[j];
 				 
 				 if (j >= start && j <= end)
-				 {						 
+				 {					 
 					outputWS->dataY(i)[j] = ave;
 					outputWS->dataE(i)[j] = aveE;
-				 }  
+				 }
+				 else
+				 {
+					outputWS->dataY(i)[j] =  inputW->dataY(i)[j];
+					outputWS->dataE(i)[j] =  inputW->dataE(i)[j];
+				 }
 			}
 			    
 			//X has one more value
