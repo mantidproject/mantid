@@ -101,9 +101,9 @@ namespace Mantid
 
       counter = 0;
       std::vector<double> x; x.push_back(1.0); x.push_back(2.0);
-      std::vector<double> v(detector_value, 1);
-      std::vector<double> v_monitor(monitor_value, 1);
-      std::vector<double> e(detector_value, 1);
+      std::vector<double> v(1, detector_value);
+      std::vector<double> v_monitor(1, monitor_value);
+      std::vector<double> e(1, detector_value);
 
       for ( it = detCache.begin(); it != detCache.end(); ++it )
       {
