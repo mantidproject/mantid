@@ -1,5 +1,4 @@
 #LOQ data analysis script
-#First draft
 #######################
 #Step 1 - Load the data file 
 LoadDataAlg = LoadRawDialog(OutputWorkspace="Monitor",spectrummin="2",spectrummax="2")
@@ -54,9 +53,12 @@ Rebin("High_Angle","High_Angle","2.2,-0.035,10.0")
 #Divide("Small_Angle","Flood_Source_Small_Angle","Small_Angle_norm_flood_source")
 
 #OPTION 2
-CorrectToFileDialog("Small_Angle",FirstColumnValue="SpectraNumber",WorkspaceOperation="Divide",OutputWorkspace="Small_Angle")
+#CorrectToFileDialog("Small_Angle",FirstColumnValue="SpectraNumber",WorkspaceOperation="Divide",OutputWorkspace="Small_Angle")
 #LoadRKH with scalar value for wavelength ranges
 #data/flat(wavelength)
+LoadRKHDialog(OutputWorkspace="flat",FirstColumnValue="SpectraNumber")
+#Doesn't currently work because we don't have all spectra in our workspace
+#Divide("Small_Angle","flat","Small_Angle")
 
 #OPTION 3
 #Correction using instrument geometry
@@ -68,8 +70,8 @@ Divide("Small_Angle","Monitor","Small_Angle")
 #######################
 #Step 6 - Correct by transmission
 # Load the run with sample
-LoadRaw("../../../Test/Data/LOQ trans configuration/LOQ48129.raw","sample")
-#LoadRawDialog(OutputWorkspace="sample")
+#LoadRaw("../../../Test/Data/LOQ trans configuration/LOQ48129.raw","sample")
+LoadRawDialog(OutputWorkspace="sample")
 # Change the instrument definition to the correct one
 LoadInstrument("sample","../../../Test/Instrument/LOQ_trans_Definition.xml")
 # Need to remove prompt spike and, later, flat background
@@ -77,8 +79,8 @@ LoadInstrument("sample","../../../Test/Instrument/LOQ_trans_Definition.xml")
 ConvertUnits("sample","lambdaSample","Wavelength")
 Rebin("lambdaSample","lambdaSample","2.2,-0.035,10.0")
 # Now load and convert the direct run
-LoadRaw("../../../Test/Data/LOQ trans configuration/LOQ48127.raw","direct")
-#LoadRawDialog(OutputWorkspace="direct")
+#LoadRaw("../../../Test/Data/LOQ trans configuration/LOQ48127.raw","direct")
+LoadRawDialog(OutputWorkspace="direct")
 LoadInstrument("direct","../../../Test/Instrument/LOQ_trans_Definition.xml")
 ConvertUnits("direct","lambdaDirect","Wavelength")
 Rebin("lambdaDirect","lambdaDirect","2.2,-0.035,10.0")
@@ -105,14 +107,15 @@ thickness = 1.0
 area = 1.0
 
 correction = rescale/(thickness*area)
+#NEED WAY TO CREATE SINGLEVALUEWORKSPACE
 #Multiply("Small_Angle",correction,"Small_Angle")
 
 #######################
 #Step 11 - Convert to Q
 #Convert units to Q (MomentumTransfer)
-ConvertUnits("Small_Angle","Small_Angle","MomentumTransfer")
+#ConvertUnits("Small_Angle","Small_Angle","MomentumTransfer")
 #rebin to desired Q bins
-Rebin("Small_Angle","Small_Angle","0.008,0.002,0.3")
+#Rebin("Small_Angle","Small_Angle","0.008,0.002,0.3")
 #Sum all spectra
 SumSpectra("Small_Angle","Small_Angle")
 
