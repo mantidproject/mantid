@@ -137,7 +137,7 @@ void ConvertUnits::exec()
 
   // If the units conversion has flipped the ascending direction of X, reverse all the vectors
   if (outputWS->dataX(0).size() && ( outputWS->dataX(0).front() > outputWS->dataX(0).back()
-        || outputWS->dataX(numberOfSpectra-1).front() > outputWS->dataX(numberOfSpectra-1).back() ) )
+        || outputWS->dataX(numberOfSpectra/2).front() > outputWS->dataX(numberOfSpectra/2).back() ) )
   {
     this->reverse(outputWS);
   }
@@ -363,9 +363,9 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
   {
     try {
       Geometry::IDetector_const_sptr det = specMap->getDetector(specAxis->spectraNo(i));
-      if ( !det->isMonitor() && !det->isDead() )
+      if ( !det->isDead() )
       {
-        const std::vector<double> XData = workspace->readX(i);
+        const std::vector<double> &XData = workspace->readX(i);
         if ( XData.front() < XMin ) XMin = XData.front();
         if ( XData.back() > XMax )  XMax = XData.back();
       }

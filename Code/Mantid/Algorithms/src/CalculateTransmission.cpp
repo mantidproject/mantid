@@ -87,6 +87,9 @@ void CalculateTransmission::exec()
   std::vector<double> &Efit = fit->dataE(0);
   Efit.assign(Efit.size(),0.0);
   
+  // TEMPORARY: set units on outputworkspace - this should be done in Linear
+  fit->getAxis(0)->unit() = transmission->getAxis(0)->unit();
+
   setProperty("OutputWorkspace",fit);
 }
 
