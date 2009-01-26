@@ -5,6 +5,7 @@
 #include "MantidDataHandling/SaveRKH.h"
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
+#include <fstream>
 #include <boost/filesystem.hpp>
 
 class SaveRKHTest : public CxxTest::TestSuite

@@ -7,6 +7,7 @@
 #include "Poco/Timestamp.h"
 #include "Poco/DateTimeFormatter.h"
 
+#include <fstream>
 #include <iomanip>
 
 using namespace Mantid::DataHandling;
@@ -77,7 +78,7 @@ void SaveRKH::exec()
     outRKH << Poco::DateTimeFormatter::format(timestamp, std::string("%w")) << " " << Poco::DateTimeFormatter::format(timestamp, std::string("%d")) 
            << "-";
     std::string month = Poco::DateTimeFormatter::format(timestamp, std::string("%b"));
-    std::transform(month.begin(), month.end(), month.begin(), std::toupper);
+    std::transform(month.begin(), month.end(), month.begin(), toupper);
     outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << " W 26  INST_DIRECT_BEAM\n"
            << " rwr50 standard, new mon2, 800v\n"
            << noDataPoints << " 0    0    0    1     " << noDataPoints << "    0\n"
@@ -89,7 +90,7 @@ void SaveRKH::exec()
     const std::vector<double> & ydata = inputWS->dataY(0);
     const std::vector<double> & edata = inputWS->dataE(0);
 
-    assert( xdata.size() == noDataPoints + 1);
+    assert( (int)xdata.size() == noDataPoints + 1);
 
     for( int i = 0; i < noDataPoints; ++i )
     {
@@ -112,7 +113,7 @@ void SaveRKH::exec()
     outRKH << Poco::DateTimeFormatter::format(timestamp, std::string("%w")) << " " << Poco::DateTimeFormatter::format(timestamp, std::string("%d")) 
            << "-";
     std::string month = Poco::DateTimeFormatter::format(timestamp, std::string("%b"));
-    std::transform(month.begin(), month.end(), month.begin(), std::toupper);
+    std::transform(month.begin(), month.end(), month.begin(), toupper);
     outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << " W  3  LOQ_DATA:?????.???\n"
            << "LOQ  Run no. ??????.???    Summed spectra ~15140/pixel\n"
            << noHist << " 0    0    0    0     " << noHist << "    0\n"
