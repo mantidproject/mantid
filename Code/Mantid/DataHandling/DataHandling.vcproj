@@ -248,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SaveRKH.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveVTK.cpp"
 				>
 			</File>
@@ -395,6 +399,14 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveNeXusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveRKH.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SaveRKHTest.h"
 				>
 			</File>
 			<File
