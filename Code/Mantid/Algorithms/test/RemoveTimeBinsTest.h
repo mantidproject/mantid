@@ -213,6 +213,7 @@ private:
 	RemoveTimeBins alg3;
 	RemoveTimeBins alg4;
 
+
 };
 
 #endif /*REMOVETIMEBINSTEST_H_*/
