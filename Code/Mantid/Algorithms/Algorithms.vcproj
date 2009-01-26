@@ -294,6 +294,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SolidAngle.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\StripPeaks.cpp"
 				>
 			</File>
@@ -489,6 +493,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\SmoothData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SolidAngle.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SolidAngleTest.h"
 				>
 			</File>
 			<File
