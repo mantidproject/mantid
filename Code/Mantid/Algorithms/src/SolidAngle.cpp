@@ -39,6 +39,13 @@ namespace Mantid
 		{
 			declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input));
 			declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+
+			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+			mustBePositive->setLower(0);
+			declareProperty("StartSpectrum",0, mustBePositive);
+			// As the property takes ownership of the validator pointer, have to take care to pass in a unique
+			// pointer to each property.
+			declareProperty("EndSpectrum",0, mustBePositive->clone());
 		}
 
 		/** Executes the algorithm
@@ -46,17 +53,32 @@ namespace Mantid
 		void SolidAngle::exec()
 		{
 			// Get the workspaces
-			API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+			API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");	
+			int m_MinSpec = getProperty("StartSpectrum");
+			int m_MaxSpec = getProperty("EndSpectrum");
 
-			API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,inputWS->getNumberHistograms(),2,1);
+			const int numberOfSpectra = inputWS->getNumberHistograms();
+
+			// Check 'StartSpectrum' is in range 0-numberOfSpectra
+			if ( m_MinSpec > numberOfSpectra )
+			{
+				g_log.warning("StartSpectrum out of range! Set to 0.");
+				m_MinSpec = 0;
+			}
+			if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
+			if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
+			{
+				g_log.warning("EndSpectrum out of range! Set to max detector number");
+				m_MaxSpec = numberOfSpectra;
+			}
+
+			API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,m_MaxSpec-m_MinSpec+1,2,1);
 			setProperty("OutputWorkspace",outputWS);
 
-
-
 			// Get a pointer to the instrument contained in the workspace
-			IInstrument_const_sptr instrument = outputWS->getInstrument();
+			IInstrument_const_sptr instrument = inputWS->getInstrument();
 			// And one to the SpectraDetectorMap
-			SpectraMap_const_sptr specMap = outputWS->getSpectraMap();
+			SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
 
 			outputWS->setYUnit("Steradian");
 
@@ -67,25 +89,24 @@ namespace Mantid
 			const int notFailed = -99;
 			int failedDetectorIndex = notFailed;
 
-			const int numberOfSpectra = outputWS->getNumberHistograms();
 
-			int iprogress_step = numberOfSpectra / 100;
+			int iprogress_step = (m_MaxSpec-m_MinSpec+1) / 100;
 			if (iprogress_step == 0) iprogress_step = 1;
 			// Loop over the histograms (detector spectra)
-			for (int i = 0; i < numberOfSpectra; ++i) {
+			for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j) {
 				try {
 					// Get the spectrum number for this histogram
 					const int spec = inputWS->getAxis(1)->spectraNo(i);
-					outputWS->getAxis(1)->spectraNo(i) = spec;
+					outputWS->getAxis(1)->spectraNo(j) = spec;
 					// Now get the detector to which this relates
 					Geometry::IDetector_const_sptr det = specMap->getDetector(spec);
 					double solidAngle = det->solidAngle(samplePos);
 					
 	
-					outputWS->dataX(i)[0] = inputWS->readX(i)[0];
-					outputWS->dataX(i)[1] = inputWS->readX(i)[inputWS->readX(i).size()-1];
-					outputWS->dataY(i)[0] = solidAngle;
-					outputWS->dataE(i)[0] = 0;
+					outputWS->dataX(j)[0] = inputWS->readX(i)[0];
+					outputWS->dataX(j)[1] = inputWS->readX(i)[inputWS->readX(i).size()-1];
+					outputWS->dataY(j)[0] = solidAngle;
+					outputWS->dataE(j)[0] = 0;
 					if (failedDetectorIndex != notFailed)
 					{
 						g_log.information() << "Unable to calculate solid angle[" << failedDetectorIndex << "-" << i-1 << "]. Zeroing spectrum." << std::endl;
@@ -99,14 +120,14 @@ namespace Mantid
 					{
 						failedDetectorIndex = i;
 					}
-					outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
-					outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
-					outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
+					outputWS->dataX(j).assign(outputWS->dataX(j).size(),0.0);
+					outputWS->dataY(j).assign(outputWS->dataY(j).size(),0.0);
+					outputWS->dataE(j).assign(outputWS->dataE(j).size(),0.0);
 				}
 
-				if ( i % 100 == 0)
+				if ( j % 100 == 0)
 				{
-					progress( double(i)/numberOfSpectra );
+					progress( double(j)/numberOfSpectra );
 					interruption_point();
 				}
 			} // loop over spectra
