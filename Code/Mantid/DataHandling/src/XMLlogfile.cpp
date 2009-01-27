@@ -3,16 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/XMLlogfile.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-//#include "MantidGeometry/CompAssembly.h"
+#include "muparser/muParser.h"
 #include "MantidGeometry/Component.h"
-//#include "MantidKernel/PhysicalConstants.h"
 
 #include <ctime>
-
-
-
-
 
 namespace Mantid
 {
@@ -36,9 +30,29 @@ XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::stri
  *
  *  @param logData Data in logfile
  *  @return parameter value
+ *
+ *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument definition file
  */
 double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData) 
-{
+{  
+  try 
+  {
+    mu::Parser p;
+
+    double x = 1;
+
+    p.DefineVar(std::string("x"), &x);
+    //parser.DefineVar("my_var", var);
+    p.SetExpr("1+1");
+   //std::cout << p.Eval() << std::endl;
+  }
+  catch (mu::Parser::exception_type &e)
+  {
+    throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>") 
+      + " element (eq=" + m_eq + ") in instrument definition file cannot be parsed." 
+      + ". Muparser error message is: " + e.GetMsg());
+  }
+
 
   std::map<std::time_t, double> logMap = logData->valueAsMap();
 
