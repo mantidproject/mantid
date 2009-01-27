@@ -95,6 +95,7 @@ if os.name == 'nt':
 	libList.append('opengl32')#opengl required for rendering
 	libList.append('glu32') #glu companion for opengl
 	libList.append('ws2_32')   # winsock library
+	libList.append('muparser') # Muparser used in DataHandling
 #   Opencascade libraries
 	libList.append('TKBO')
 	libList.append('TKPrim')
