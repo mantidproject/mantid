@@ -22,7 +22,7 @@ class SolidAngleTest : public CxxTest::TestSuite
 {
 public:
 
-  SolidAngleTest() : inputSpace(""), outputSpace(""), Nhist(144)
+  SolidAngleTest() : inputSpace(""), outputSpace("")
   {
     // Set up a small workspace for testing
 		//Nhist = 144;
@@ -98,7 +98,7 @@ public:
    
 			
 		const int numberOfSpectra = output2D->getNumberHistograms();
-		TS_ASSERT_EQUALS(numberOfSpectra,Nhist);
+    TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
 		for (int i = 0; i < numberOfSpectra; ++i) {
 			//all of the values should fall in this range for INES
 			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00217,0.00021);
@@ -160,7 +160,7 @@ private:
   SolidAngle alg;
   std::string inputSpace;
   std::string outputSpace;
-  const int Nhist;
+  enum { Nhist = 144 };
 };
 
 #endif /*SOLIDANGLETEST_H_*/
