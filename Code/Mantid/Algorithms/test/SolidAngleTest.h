@@ -22,7 +22,7 @@ class SolidAngleTest : public CxxTest::TestSuite
 {
 public:
 
-  SolidAngleTest()
+  SolidAngleTest() : inputSpace(""), outputSpace(""), Nhist(144)
   {
     // Set up a small workspace for testing
 		//Nhist = 144;
@@ -160,7 +160,7 @@ private:
   SolidAngle alg;
   std::string inputSpace;
   std::string outputSpace;
-	static const int Nhist = 144;
+  const int Nhist;
 };
 
 #endif /*SOLIDANGLETEST_H_*/
