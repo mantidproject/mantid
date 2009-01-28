@@ -12,9 +12,6 @@
 #include <string>
 #include <ostream>
 
-
-//#include "MantidDataHandling/XMLlogfile.h"
-
 namespace Mantid
 {
 
@@ -34,7 +31,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -68,7 +65,6 @@ public:
   Geometry::IObjComponent_sptr getSource() const;
   Geometry::IObjComponent_sptr getSample() const;
   Geometry::IDetector_sptr getDetector(const int &detector_id) const;
-  const double detectorTwoTheta(Geometry::IDetector_const_sptr) const;
 
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
@@ -93,6 +89,7 @@ public:
 
   /// Get pointers to plottable components
   std::vector< Geometry::IObjComponent_sptr > getPlottable()const;
+  /// Add a plottable component
   void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst)const;
 
   std::string getName()const{return Geometry::CompAssembly::getName();}

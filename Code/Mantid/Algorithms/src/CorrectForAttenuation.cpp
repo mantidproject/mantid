@@ -50,9 +50,6 @@ void CorrectForAttenuation::exec()
   const double cylinder_volume=m_cylHeight*M_PI*m_cylRadius*m_cylRadius;
   this->constructCylinderSample();
 
-  // Get a pointer to the SpectraDetectorMap
-  SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
-
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
   correctionFactors->setYUnit("Attenuation factor");
@@ -69,12 +66,10 @@ void CorrectForAttenuation::exec()
     const std::vector<double> &X = inputWS->readX(i);
     correctionFactors->dataX(i) = X;
 
-    // Get the spectrum number for this histogram
-    const int spec = inputWS->getAxis(1)->spectraNo(i);
     // Get detector position
     V3D detPos;
     try {
-      detPos = specMap->getDetector(spec)->getPos();
+      detPos = inputWS->getDetector(i)->getPos();
       // Need to convert detPos from metres to cm
       detPos *= 100.0;
     } catch (Exception::NotFoundError) {

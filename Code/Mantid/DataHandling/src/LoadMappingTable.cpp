@@ -2,6 +2,7 @@
 #include "LoadRaw/isisraw.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadMappingTable.h"
 
 

@@ -2,8 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/MarkDeadDetectors.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/ArrayProperty.h"
 #include <set>
 
 namespace Mantid
@@ -42,8 +43,6 @@ void MarkDeadDetectors::exec()
   const Workspace2D_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
   const int vectorSize = WS->blocksize();
-  // Get hold of the axis that holds the spectrum numbers
-  Axis *spectraAxis = WS->getAxis(1);
 
   Property *wil = getProperty("WorkspaceIndexList");
   Property *sl = getProperty("SpectraList");
@@ -85,7 +84,7 @@ void MarkDeadDetectors::exec()
   for (it = indexList.begin(); it != indexList.end(); ++it)
   {
     // Mark associated detector as dead
-    WS->getSpectraMap()->getDetector(spectraAxis->spectraNo(*it))->markDead();
+    WS->getDetector(*it)->markDead();
 
     // Zero the workspace spectra (data and errors, not X values)
     WS->dataY(*it).assign(vectorSize,0.0);

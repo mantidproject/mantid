@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/ParInstrument.h"
-
+#include "MantidGeometry/DetectorGroup.h"
 
 namespace Mantid
 {
@@ -16,7 +16,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
-  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap(this)), sptr_sample(new Sample),
+  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap), sptr_sample(new Sample),
    m_YUnit("Counts"), m_isDistribution(false),sptr_parmap(new Geometry::ParameterMap)
 {}
 
@@ -120,6 +120,56 @@ void MatrixWorkspace::setSample(const boost::shared_ptr<Sample>& sample)
 SpectraMap_sptr MatrixWorkspace::getSpectraMap() const
 {
   return sptr_spectramap;
+}
+
+/** Get the effective detector for the given spectrum
+ *  @param  index The workspace index for which the detector is required
+ *  @return A single detector object representing the detector(s) contributing
+ *          to the given spectrum number. If more than one detector contributes then
+ *          the returned object's concrete type will be DetectorGroup.
+ *  @throw  std::runtime_error if the SpectraDetectorMap has not been filled
+ */
+Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
+{
+  if ( ! sptr_spectramap->nElements() )
+  {
+    g_log.error("SpectraDetectorMap has not been populated.");
+    throw std::runtime_error("SpectraDetectorMap has not been populated.");
+  }
+  
+  const int spectrum_number = getAxis(1)->spectraNo(index);
+  const std::vector<int> dets = sptr_spectramap->getDetectors(spectrum_number);
+  if ( dets.empty() )
+  {
+    g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;
+    throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
+  }
+  else if ( dets.size() == 1 ) 
+  {
+    // If only 1 detector for the spectrum number, just return it
+    return getInstrument()->getDetector(dets[0]);
+  }
+  // Else need to construct a DetectorGroup and return that
+  std::vector<Geometry::IDetector_sptr> dets_ptr;
+  std::vector<int>::const_iterator it;
+  for ( it = dets.begin(); it != dets.end(); ++it )
+  {
+    dets_ptr.push_back( getInstrument()->getDetector(*it) );
+  }
+  
+  return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr) );
+}
+
+/** Returns the 2Theta scattering angle for a detector
+ *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
+ *  @return The scattering angle (0 < theta < pi)
+ */
+const double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
+{
+  const Geometry::V3D samplePos = getInstrument()->getSample()->getPos();
+  const Geometry::V3D beamLine = samplePos - getInstrument()->getSource()->getPos();
+  const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
+  return sampleDetVec.angle(beamLine);
 }
 
 /** Get a shared pointer to the instrument associated with this workspace

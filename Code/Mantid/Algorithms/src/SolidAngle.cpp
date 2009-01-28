@@ -77,8 +77,6 @@ namespace Mantid
 
 			// Get a pointer to the instrument contained in the workspace
 			IInstrument_const_sptr instrument = inputWS->getInstrument();
-			// And one to the SpectraDetectorMap
-			SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
 
 			outputWS->setYUnit("Steradian");
 
@@ -96,10 +94,9 @@ namespace Mantid
 			for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j) {
 				try {
 					// Get the spectrum number for this histogram
-					const int spec = inputWS->getAxis(1)->spectraNo(i);
-					outputWS->getAxis(1)->spectraNo(j) = spec;
+					outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
 					// Now get the detector to which this relates
-					Geometry::IDetector_const_sptr det = specMap->getDetector(spec);
+					Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
 					double solidAngle = det->solidAngle(samplePos);
 					
 	

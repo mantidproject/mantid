@@ -10,10 +10,12 @@ namespace Mantid
 namespace API
 {
 
+/// An object for constructing a shared_ptr that won't ever delete its pointee
 class NoDeleting
 {
 public:
-    void operator()(void*){}
+  /// Does nothing
+  void operator()(void*){}
 };
 
 Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
@@ -81,18 +83,6 @@ Geometry::IDetector_sptr Instrument::getDetector(const int &detector_id) const
   }
 
   return Geometry::IDetector_sptr(it->second,NoDeleting());
-}
-
-/** Returns the 2Theta scattering angle for a detector
- *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
- *  @return The scattering angle (0 < theta < pi)
- */
-const double Instrument::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
-{
-  const Geometry::V3D samplePos = boost::dynamic_pointer_cast<Geometry::ObjComponent>(this->getSample())->getPos();
-  const Geometry::V3D beamLine = samplePos - boost::dynamic_pointer_cast<Geometry::ObjComponent>(this->getSource())->getPos();
-  const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
-  return sampleDetVec.angle(beamLine);
 }
 
 /**	Gets a pointer to the requested child component

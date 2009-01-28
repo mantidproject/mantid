@@ -26,7 +26,7 @@ class Geometry::IObjComponent;
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -55,10 +55,12 @@ public:
   ///Virtual destructor
   virtual ~IInstrument() {}
 
+  /// Returns a pointer to the geometrical object representing the source
   virtual Geometry::IObjComponent_sptr getSource() const = 0;
+  /// Returns a pointer to the geometrical object representing the sample
   virtual Geometry::IObjComponent_sptr getSample() const = 0;
+  /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
-  virtual const double detectorTwoTheta(Geometry::IDetector_const_sptr) const = 0;
 
   virtual std::string getName() const = 0;
 

@@ -7,7 +7,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Instrument.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/IErrorHelper.h"
@@ -17,27 +16,23 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidGeometry/ParameterMap.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-
+namespace API
+{
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-namespace Kernel
-{
-  class Logger;
-}
+class SpectraDetectorMap;
 
-namespace API
-{
 /** Base MatrixWorkspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -57,7 +52,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport MatrixWorkspace: public Workspace
+class DLLExport MatrixWorkspace : public Workspace
 {
 public:
   // The Workspace Factory create-from-parent method needs direct access to the axes.
@@ -71,18 +66,23 @@ public:
   virtual ~MatrixWorkspace();
 
   void setInstrument(const IInstrument_sptr&);
-  void setSpectraMap(const SpectraMap_sptr& map);
-  void copySpectraMap(const SpectraMap_sptr& map);
   void setSample(const boost::shared_ptr<Sample>& sample);
   IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
-  SpectraMap_sptr getSpectraMap() const;
   boost::shared_ptr<Sample> getSample() const;
 
+  void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
+  void copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
+  boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
+  /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
+  Geometry::IDetector_sptr getDetector(const int index) const;
+  const double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+  
   /// Get the footprint in memory in KB.
   virtual long int getMemorySize() const;
 
-  boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters(){return sptr_parmap;}
+  /// Returns the set of parameters modifying the base instrument
+  boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters() {return sptr_parmap;}
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
@@ -159,7 +159,7 @@ private:
   /// The instrument used for this experiment
   boost::shared_ptr<Instrument> sptr_instrument;
   /// The SpectraDetector table used for this experiment
-  SpectraMap_sptr sptr_spectramap;
+  boost::shared_ptr<SpectraDetectorMap> sptr_spectramap;
   /// The information on the sample environment
   boost::shared_ptr<Sample> sptr_sample;
 

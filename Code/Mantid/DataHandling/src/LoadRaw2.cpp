@@ -2,23 +2,22 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
+#include "MantidDataHandling/XMLlogfile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
-#include "MantidDataHandling/XMLlogfile.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
 #include "LoadRaw/isisraw2.h"
 
-#include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+#include <cmath>
 #include <iostream>
 
 namespace Mantid

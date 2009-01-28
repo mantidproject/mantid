@@ -82,22 +82,22 @@ public:
     }
   }
 
-  void testGetDetector()
-  {
-    for (int i = 0; i < length; i++)
-    {
-      boost::shared_ptr<IDetector> d = WS.getSpectraMap()->getDetector(offset+i);
-      TS_ASSERT_EQUALS(d->getID(),i);
-    }
-  }
+//  void testGetDetector()
+//  {
+//    for (int i = 0; i < length; i++)
+//    {
+//      boost::shared_ptr<IDetector> d = WS.getSpectraMap()->getDetector(offset+i);
+//      TS_ASSERT_EQUALS(d->getID(),i);
+//    }
+//  }
 
   void testGetDetectors()
   {
     for (int i = 0; i < length; i++)
     {
-        std::vector<boost::shared_ptr<IDetector> > dvec = WS.getSpectraMap()->getDetectors(offset+i);
+      std::vector<int> dvec = WS.getSpectraMap()->getDetectors(offset+i);
       TS_ASSERT_EQUALS(dvec.size(),1);
-      TS_ASSERT_EQUALS(dvec[0]->getID(),i);
+      TS_ASSERT_EQUALS(dvec[0],i);
     }
   }
 

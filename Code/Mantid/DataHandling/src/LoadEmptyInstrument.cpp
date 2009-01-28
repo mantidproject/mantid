@@ -2,13 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>

@@ -50,7 +50,7 @@ public:
     }
 
     // Register the workspace in the data service
-    inputSpace = "testWorkspace";
+    inputSpace = "SATestWorkspace";
     AnalysisDataService::Instance().add(inputSpace, space);
 
     // Load the instrument data

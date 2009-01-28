@@ -1,35 +1,17 @@
-#include "MantidGeometry/DetectorGroup.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <iostream>
 
 namespace Mantid
 {
-
-  namespace Kernel
-  {
-    /// An object for constructing a shared_ptr that won't ever delete its pointee
-    struct NullDeleter
-    {
-      /// Does nothing
-      void operator()(void const *) const
-      {}  
-    };
-  } // namespace Kernel
-
   namespace API
   {
-
-    using Geometry::IDetector;
 
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
-    SpectraDetectorMap::SpectraDetectorMap(const MatrixWorkspace* ws)
-        : _s2dmap(new smap), m_workspace(ws)
-    {
-    }
+    SpectraDetectorMap::SpectraDetectorMap() : _s2dmap(new smap)//, m_workspace(ws)
+    {}
 
 /*    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
     {
@@ -41,34 +23,14 @@ namespace Mantid
 
     void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries)
     {
-        _s2dmap.reset(new smap());
-        boost::shared_ptr<IInstrument> instr = m_workspace->getInstrument();
-        if (!instr)
-            throw std::runtime_error("Instrument iz zero!");
+      _s2dmap.reset(new smap());
       if (nentries<=0)
       {
-        throw std::invalid_argument("Populate : number of entries should be >0");
+        g_log.error("Populate : number of entries should be > 0");
+        throw std::invalid_argument("Populate : number of entries should be > 0");
       }
-      boost::shared_ptr<IDetector> current;
-      bool warn = true;
       for (int i=0; i<nentries; ++i)
       {
-        try
-        {
-          current=instr->getDetector(*_udettable); // Get the Detector associated to the current udet
-        }
-        catch(Kernel::Exception::NotFoundError& error) // No spectra association possible, continue loop
-
-        {
-          if (warn)
-          {
-            g_log.warning("Some detectors not found in instrument definition");
-            warn = false;  // Just print this warning once.
-          }
-          ++_spectable;
-          ++_udettable;
-          continue;
-        }
         _s2dmap->insert(std::pair<int,int>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key 
         ++_spectable;
         ++_udettable;
@@ -93,7 +55,7 @@ namespace Mantid
         return;
       }
       // Get the list of detectors that contribute to the old spectrum
-      std::vector<int> dets = getDetectorIDs(oldSpectrum);
+      std::vector<int> dets = getDetectors(oldSpectrum);
 
       // Add them to the map with the new spectrum number as the key
       std::vector<int>::const_iterator it;
@@ -110,33 +72,11 @@ namespace Mantid
       return _s2dmap->count(spectrum_number);
     }
 
-    std::vector<Geometry::IDetector_sptr> SpectraDetectorMap::getDetectors(const int spectrum_number) const
-    {
-      std::vector<Geometry::IDetector_sptr> detectors;
-      int ndets=ndet(spectrum_number);
-
-      if (ndets<1)
-      {
-        // Will just return an empty vector
-        return detectors;
-      }
-      if (!m_workspace)
-          throw std::runtime_error("SpectraDetectorMap has not been populated.");
-      IInstrument_const_sptr instr = m_workspace->getInstrument();
-      std::pair<smap_it,smap_it> det_range=_s2dmap->equal_range(spectrum_number);
-      for (smap_it it=det_range.first; it!=det_range.second; ++it)
-      {
-        detectors.push_back(instr->getDetector(it->second));
-      }
-      return detectors;
-    }
-
-    std::vector<int> SpectraDetectorMap::getDetectorIDs(const int spectrum_number) const
+    std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
     {
       std::vector<int> detectors;
-      int ndets=ndet(spectrum_number);
 
-      if (ndets<1)
+      if ( ! ndet(spectrum_number) )
       {
         // Will just return an empty vector
         return detectors;
@@ -147,37 +87,6 @@ namespace Mantid
         detectors.push_back(it->second);
       }
       return detectors;
-    }
-
-    /** Get the effective detector for this spectrum number.
-    *  @param spectrum_number The spectrum number for which the detector is required
-    *  @return A single detector object representing the detector(s) contributing
-    *  to the given spectrum number. If more than one detector contributes then
-    *  the returned object's concrete type will be DetectorGroup.
-    *  @todo Write a test for this method
-    */
-    Geometry::IDetector_sptr SpectraDetectorMap::getDetector(const int spectrum_number) const
-    {
-      if (!m_workspace)
-          throw std::runtime_error("SpectraDetectorMap has not been populated.");
-      int ndets=ndet(spectrum_number);
-      if ( ndets == 0 )
-      {
-        g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;
-        throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
-      }
-      else if ( ndets == 1) 
-      {
-        // If only 1 detector for the spectrum number, just return it
-        // Have to create the shared pointer with a null deleter in this case so that the detector
-        //   doesn't get deleted when the shared pointer goes out of scope
-          int id = _s2dmap->find(spectrum_number)->second;
-          return m_workspace->getInstrument()->getDetector(id);
-      }
-
-      std::vector<Geometry::IDetector_sptr> tmp = getDetectors(spectrum_number);
-      // Else need to construct a DetectorGroup and return that
-      return Geometry::IDetector_sptr(new Geometry::DetectorGroup(getDetectors(spectrum_number)));
     }
 
     /** Gets a list of spectra corresponding to a list of detector numbers.

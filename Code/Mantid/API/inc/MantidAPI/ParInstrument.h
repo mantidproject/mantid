@@ -27,7 +27,7 @@ namespace API
     @author Anders Markvardsen, ISIS, RAL
     @date 1/4/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -47,8 +47,6 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-//class Instrument;
-
 class DLLExport ParInstrument : public Geometry::ParCompAssembly, public IInstrument
 {
 public:
@@ -63,7 +61,6 @@ public:
   virtual Geometry::IObjComponent_sptr getSource() const;
   virtual Geometry::IObjComponent_sptr  getSample() const;
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const;
-  virtual const double detectorTwoTheta(Geometry::IDetector_const_sptr) const;
 
   /// Pointer to the 'real' instrument
   boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}

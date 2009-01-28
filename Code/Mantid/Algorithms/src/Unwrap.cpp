@@ -157,10 +157,8 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
   double Ld = -1.0;
   try
   {
-    // Get the spectrum number for this histogram
-    const int spec = m_inputWS->getAxis(1)->spectraNo(spectrum);
     // Get the detector object for this histogram
-    Geometry::IDetector_const_sptr det = m_inputWS->getSpectraMap()->getDetector(spec);
+    Geometry::IDetector_const_sptr det = m_inputWS->getDetector(spectrum);
     // Get the sample-detector distance for this detector (or source-detector if a monitor)
     // This is the total flightpath
     isMonitor = det->isMonitor();

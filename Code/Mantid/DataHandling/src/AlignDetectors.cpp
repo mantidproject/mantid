@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/AlignDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <fstream>
@@ -97,17 +98,18 @@ void AlignDetectors::exec()
       const int spec = inputWS->getAxis(1)->spectraNo(i);
       // Loop over the detectors that contribute to this spectrum and calculate the average correction
       const int ndets = specMap->ndet(spec);
-      std::vector<Geometry::IDetector_sptr> dets = specMap->getDetectors(spec);
+      std::vector<int> dets = specMap->getDetectors(spec);
       double factor = 0.0;
       for (int j = 0; j < ndets; ++j)
       {
-        Geometry::V3D detPos = dets[j]->getPos();
+        Geometry::IDetector_const_sptr det = instrument->getDetector(dets[j]);
+        Geometry::V3D detPos = det->getPos();
         // Get the sample-detector distance for this detector (in metres)
         const double l2 = detPos.distance(samplePos);
         // The scattering angle for this detector (in radians).
-        const double twoTheta = instrument->detectorTwoTheta(dets[j]);
+        const double twoTheta = inputWS->detectorTwoTheta(det);
         // Get the correction for this detector
-        const double offset = offsets[dets[j]->getID()];
+        const double offset = offsets[dets[j]];
         const double numerator = constant * (1.0+offset);
         const double denom = ((l1+l2)*sin(twoTheta/2.0));
         factor += numerator / denom;

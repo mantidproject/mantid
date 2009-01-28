@@ -63,18 +63,6 @@ Geometry::IDetector_sptr ParInstrument::getDetector(const int &detector_id) cons
   return Geometry::IDetector_sptr(new Geometry::ParDetector(det.get(),m_map));
 }
 
-/** Returns the 2Theta scattering angle for a detector
- *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
- *  @return The scattering angle (0 < theta < pi)
- */
-const double ParInstrument::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
-{
-  const Geometry::V3D samplePos = this->getSample()->getPos();
-  const Geometry::V3D beamLine = samplePos - this->getSource()->getPos();
-  const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
-  return sampleDetVec.angle(beamLine);
-}
-
 std::vector<Geometry::IObjComponent_sptr> ParInstrument::getPlottable() const
 {
   std::vector<Geometry::IObjComponent_sptr> res;

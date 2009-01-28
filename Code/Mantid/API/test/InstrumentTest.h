@@ -96,11 +96,6 @@ public:
     delete d;
   }
 
-  void testDetectorTwoTheta()
-  {
-    TS_ASSERT_EQUALS( instrument.detectorTwoTheta(det), M_PI/2.0 )
-  }
-
   void testCasts()
   {
     Instrument *i = new Instrument;

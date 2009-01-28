@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include <fstream>
 
 namespace Mantid
@@ -16,7 +17,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using DataObjects::Workspace2D;
-//    using DataObjects::Workspace2D_sptr;
 
     // Get a reference to the logger
     Logger& FindDeadDetectors::g_log = Logger::get("FindDeadDetectors");
@@ -86,15 +86,14 @@ namespace Mantid
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<Geometry::IDetector_sptr> dets = specMap->getDetectors(specNo);
-          std::vector<Geometry::IDetector_sptr>::const_iterator it;
+          const std::vector<int> dets = specMap->getDetectors(specNo);
+          std::vector<int>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
-            const int detID = (*it)->getID();
             // Write the detector ID to file, log & the FoundDead output property
-            file << " " << detID;
-            g_log.debug() << "Dead detector: " << detID << std::endl;
-            deadDets.push_back(detID);
+            file << " " << *it;
+            g_log.debug() << "Dead detector: " << *it << std::endl;
+            deadDets.push_back(*it);
             ++countDets;
           }
           file << std::endl;

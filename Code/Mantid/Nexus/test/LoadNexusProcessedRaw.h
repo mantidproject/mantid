@@ -181,10 +181,7 @@ void testExecOnLoadraw()
     {
 
         // Check the total number of elements in the map for HET
-        //TS_ASSERT_EQUALS(map->nElements(),24964);
-        // above is value from LoadRaw, but only 12124 seem used and are
-        // recorded in Nxus file
-        TS_ASSERT_EQUALS(map->nElements(),12124);
+        TS_ASSERT_EQUALS(map->nElements(),24964);
 
         // Test one to one mapping, for example spectra 6 has only 1 pixel
         TS_ASSERT_EQUALS(map->ndet(6),1);
@@ -193,20 +190,19 @@ void testExecOnLoadraw()
         TS_ASSERT_EQUALS(map->ndet(2084),10);
 
         // Check the id number of all pixels contributing
-        std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
+        std::vector<int> detectorgroup;
         detectorgroup=map->getDetectors(2084);
-        std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> >::iterator it;
+        std::vector<int>::const_iterator it;
         int pixnum=101191;
         for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-        TS_ASSERT_EQUALS((*it)->getID(),pixnum++);
+          TS_ASSERT_EQUALS(*it,pixnum++);
 
         // Test with spectra that does not exist
         // Test that number of pixel=0
         TS_ASSERT_EQUALS(map->ndet(5),0);
         // Test that trying to get the Detector throws.
-        boost::shared_ptr<Mantid::Geometry::IDetector> test;
-        TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
-        //
+        std::vector<int> test = map->getDetectors(5);
+        TS_ASSERT(test.empty());
     }
 
   }

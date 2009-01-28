@@ -228,11 +228,8 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 {
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
-  // And one to the SpectraDetectorMap
-  SpectraMap_const_sptr specMap = outputWS->getSpectraMap();
 
   // Get the unit object for each workspace
-  //boost::shared_ptr<Unit> inputUnit = inputWS->getAxis(0)->unit();
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
@@ -266,10 +263,8 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     const double delta = 0.0;
 
     try {
-      // Get the spectrum number for this histogram
-      const int spec = outputWS->getAxis(1)->spectraNo(i);
-      // Now get the detector to which this relates
-      Geometry::IDetector_const_sptr det = specMap->getDetector(spec);
+      // Now get the detector object for this histogram
+      Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
       Geometry::V3D detPos = det->getPos();
       // Get the sample-detector distance for this detector (in metres)
       double l2, twoTheta;
@@ -277,7 +272,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
       {
         l2 = detPos.distance(samplePos);
         // The scattering angle for this detector (in radians).
-        twoTheta = instrument->detectorTwoTheta(det);
+        twoTheta = outputWS->detectorTwoTheta(det);
       }
       else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
       {
@@ -356,13 +351,11 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
 {
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
-  SpectraMap_const_sptr specMap = workspace->getSpectraMap();
-  Axis* specAxis = workspace->getAxis(1);
   const int numSpec = workspace->getNumberHistograms();
   for (int i = 0; i < numSpec; ++i)
   {
     try {
-      Geometry::IDetector_const_sptr det = specMap->getDetector(specAxis->spectraNo(i));
+      Geometry::IDetector_const_sptr det = workspace->getDetector(i);
       if ( !det->isDead() )
       {
         const std::vector<double> &XData = workspace->readX(i);

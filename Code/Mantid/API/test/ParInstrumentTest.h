@@ -61,12 +61,6 @@ public:
     delete d;
   }
 
-  void testDetectorTwoTheta()
-  {
-    ParInstrument pinstrument(instrument,pmap);
-    TS_ASSERT_EQUALS( pinstrument.detectorTwoTheta(det), M_PI/2.0 )
-  }
-
   void testCasts()
   {
     ParInstrument *pi = new ParInstrument(instrument,pmap);

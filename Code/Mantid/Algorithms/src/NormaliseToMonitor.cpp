@@ -112,7 +112,10 @@ const bool NormaliseToMonitor::checkProperties()
 
   // Check that the spectrum given is related to a monitor
   const int monitorSpec = getProperty("MonitorSpectrum");
-  if (! inputWS->getSpectraMap()->getDetector(monitorSpec)->isMonitor() )
+  Axis::spec2index_map specs;
+  inputWS->getAxis(1)->getSpectraIndexMap(specs);
+  const int workspaceIndex = specs[monitorSpec];
+  if (! inputWS->getDetector(workspaceIndex)->isMonitor() )
   {
     g_log.error("MonitorSpectrum does not refer to a monitor spectrum");
     throw std::runtime_error("MonitorSpectrum does not refer to a monitor spectrum");

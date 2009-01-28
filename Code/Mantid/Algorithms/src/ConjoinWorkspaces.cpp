@@ -134,11 +134,11 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   {
     const int spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    const std::vector<Geometry::IDetector_sptr> dets = specmap1->getDetectors(spectrum);
-    std::vector<Geometry::IDetector_sptr>::const_iterator it;
+    const std::vector<int> dets = specmap1->getDetectors(spectrum);
+    std::vector<int>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
-      detectors.insert((*it)->getID());
+      detectors.insert(*it);
     }
   }
 
@@ -154,11 +154,11 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
       g_log.error("The input workspaces overlap");
       throw std::invalid_argument("The input workspaces overlap");
     }
-    std::vector<Geometry::IDetector_sptr> dets = specmap2->getDetectors(spectrum);
-    std::vector<Geometry::IDetector_sptr>::const_iterator it;
+    std::vector<int> dets = specmap2->getDetectors(spectrum);
+    std::vector<int>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
-      if ( detectors.find((*it)->getID()) != detectors.end() )
+      if ( detectors.find(*it) != detectors.end() )
       {
         g_log.error("The input workspaces have common detectors");
         throw std::invalid_argument("The input workspaces have common detectors");
