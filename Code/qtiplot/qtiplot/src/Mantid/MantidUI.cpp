@@ -10,7 +10,6 @@
 #include "../pixmaps.h"
 #include "MantidSampleLogDialog.h"
 
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
@@ -642,7 +641,6 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
     
      Mantid::API::MatrixWorkspace_sptr ws = m->workspace();
      Mantid::API::Axis *spectraAxis = ws->getAxis(1);
-     boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap = ws->getSpectraMap();
      for(int i=0;i<m->numRows();i++)
      {
          
@@ -655,7 +653,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          double Phi = 0.;
          try
          {
-             boost::shared_ptr<Mantid::Geometry::IDetector> det = spectraMap->getDetector(currentSpec);
+             boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
              detID = det->getID();
              det->getPos().getSpherical(R,Theta,Phi);
          }
