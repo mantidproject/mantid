@@ -48,8 +48,10 @@ public:
     // check that parameter have been read into the instrument parameter map
     std::vector<double> ret1 = paramMap->getDouble("point-detector", "z");
     TS_ASSERT_EQUALS( ret1.size(), 1 );
+    TS_ASSERT_DELTA( ret1[0], 0.0081, 0.0001);
     std::vector<double> ret2 = paramMap->getDouble("linear-detector", "z");
     TS_ASSERT_EQUALS( ret2.size(), 1 );
+    TS_ASSERT_DELTA( ret2[0], 0.1499, 0.0001);
 
   }
 };
