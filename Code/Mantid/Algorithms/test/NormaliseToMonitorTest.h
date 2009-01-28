@@ -5,6 +5,7 @@
 #include "WorkspaceCreationHelper.hh"
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

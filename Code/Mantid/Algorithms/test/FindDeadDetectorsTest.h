@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "WorkspaceCreationHelper.hh"
 #include <fstream>

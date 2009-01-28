@@ -7,6 +7,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace std;
 using namespace Mantid::API;
