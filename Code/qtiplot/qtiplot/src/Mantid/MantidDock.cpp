@@ -85,12 +85,16 @@ void MantidDockWidget::update()
             wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
             bool isHistogram = ws->blocksize() && ws->isHistogramData();
             wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
-            Mantid::API::Axis* ax;
-            ax = ws->getAxis(0);
             std::string s = "X axis: ";
-            if (ax->unit().get()) s += ax->unit()->caption() + " / " + ax->unit()->label();
+            if (ws->axes() > 0 )
+	    {
+	      Mantid::API::Axis *ax = ws->getAxis(0);
+	      if( ax && ax->unit().get() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
+	    }
             else
+	    {
                 s += "Unknown";
+	    }
             wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
             s = "Y axis: " + ws->YUnit();
             wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
