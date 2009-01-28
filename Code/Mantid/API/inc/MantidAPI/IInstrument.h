@@ -15,9 +15,6 @@ namespace Mantid
 {
 namespace API
 {
-
-class Geometry::IObjComponent;
-
 /** IInstrument Class. The abstract instrument class it is the base for 
     Instrument and ParInstrument classes.
 

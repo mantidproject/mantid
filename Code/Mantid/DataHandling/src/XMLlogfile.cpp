@@ -2,10 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/XMLlogfile.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "muparser/muParser.h"
 #include "MantidGeometry/Component.h"
-
+#include "MantidKernel/TimeSeriesProperty.h"
+#include <muparser/muParser.h>
 #include <ctime>
 
 namespace Mantid
