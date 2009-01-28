@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/SaveNexusProcessed.h"
 #include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidNexus/LoadMuonNexus.h"
