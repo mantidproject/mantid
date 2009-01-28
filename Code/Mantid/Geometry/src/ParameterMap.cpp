@@ -70,6 +70,47 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 
 }
 
+
+/// Create or adjust "pos" parameter for a component
+/// Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
+void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::string& name, double value)
+{
+  Parameter_sptr param = get(comp,"pos");
+  V3D position;
+  if (param)
+  {
+    // so "pos" already defined
+    position = param->value<V3D>();
+  }
+  else
+  {
+    // so "pos" is not defined - therefore get position from component
+    position = comp->getPos();
+  }
+
+  // adjust position
+
+  if ( name.compare("x")==0 )
+    position.setX(value);
+  else if ( name.compare("y")==0 )
+    position.setY(value);
+  else if ( name.compare("z")==0 )
+    position.setZ(value);
+  else
+  {
+    g_log.warning() << "addPositionCoordinate() called with unrecognised coordinate symbol: " << name;
+    return;
+  }
+
+  // finally add or update "pos" parameter
+
+  if (param)
+    param->set(position);
+  else
+    addV3D(comp, "pos", position);
+}
+
+
 } // Namespace Geometry
 
 } // Namespace Mantid

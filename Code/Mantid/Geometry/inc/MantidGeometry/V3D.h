@@ -73,6 +73,9 @@ namespace Mantid
       // Setting x, y and z values
       void operator()(const double xx, const double yy, const double zz);
       void spherical(const double& R, const double& theta, const double& phi);
+      void setX(const double xx);
+      void setY(const double yy);
+      void setZ(const double zz);
 
       const double& X() const { return x; } ///< Get x
       const double& Y() const { return y; } ///< Get y

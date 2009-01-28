@@ -429,6 +429,10 @@
 				RelativePath=".\inc\MantidDataHandling\XMLlogfile.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\XMLlogfileTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

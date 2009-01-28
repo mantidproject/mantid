@@ -292,6 +292,33 @@ V3D::operator()(const double xx, const double yy, const double zz)
 }
 
   /**
+    Set is x position 
+    \param xx The X coordinate
+  */
+void V3D::setX(const double xx)
+{
+  x=xx;
+}
+
+  /**
+    Set is y position 
+    \param y The Y coordinate
+  */
+void V3D::setY(const double yy)
+{
+  y=yy;
+}
+
+  /**
+    Set is z position 
+    \param zz The Z coordinate
+  */
+void V3D::setZ(const double zz)
+{
+  z=zz;
+}
+
+  /**
     Returns the axis value based in the index provided
     \param Index 0=x, 1=y, 2=z
     \returns a double value of the requested axis

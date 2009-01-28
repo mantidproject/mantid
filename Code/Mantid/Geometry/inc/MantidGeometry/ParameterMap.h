@@ -110,6 +110,10 @@ public:
         m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
+    /// Create or adjust "pos" parameter for a component
+    void addPositionCoordinate(const IComponent* comp,const std::string& name, double value);
+
+
     /// Concrete parameter adding methods.
     void addDouble(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<double>(comp,name,value);}
     void addDouble(const IComponent* comp,const std::string& name, double value){addType(comp,name,value);}
@@ -152,6 +156,7 @@ public:
     }
 
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
+    std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
 
     /// Returns a vector with all parameter names for componenet comp
     std::vector<std::string> nameList(const IComponent* comp)const;
