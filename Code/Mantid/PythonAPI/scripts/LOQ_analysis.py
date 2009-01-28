@@ -11,16 +11,20 @@ LoadRaw(Filename = data_file, OutputWorkspace="High_Angle",spectrummin="16386",s
 #######################
 #Step 1.1 - Move the sample if incorrect
 # Coming soon....
+MoveIntrumentComponent("Small_Angle","componentName",X="1",Y="1",Z="1")
 
 #######################
 #Step 1.2 - Correct the monitor spectrum for flat background and remove prompt spike
-# Flat background correction is pending. Interpolation is just linear for now
-#RemoveBins("Monitor","19900","20500")
+
+# Missing BackgroundCorrection - for flat backgrounds #392
+
+# Interpolation is just linear for now
+RemoveBins("Monitor","19900","20500")
 
 #######################
 #Step 1.3 - Mask out unwanted detetctors
 MarkDeadDetectors("Small_Angle",DetectorList="126,127")
-#Future Missing - Mask by volume projection (e.g. radius)
+# Missing - Mask by volume projection (e.g. radius) #383
 
 #######################
 #Step 2 - Convert all of the files to wavelength and rebin
@@ -37,31 +41,35 @@ Rebin("High_Angle","High_Angle","2.2,-0.035,10.0")
 #######################
 #step 2.5 remove unwanted Wavelength bins
 #Remove non edge bins and linear interpolate #373
-#RemoveBins("Small_Angle","1.05", "1.20")
+##bin values should be accepted v soon - just seen it working at Matt's PC
+RemoveBins("Small_Angle","1.05", "1.20")
 #Future Missing - add cubic interpolation
 
 #######################
 #Step 3 - Flat cell correction
 
 #OPTION 1
-#Load flood Source file (data only for the Small angle bank)
-#LoadRawDialog(OutputWorkspace="Flood_Source_Small_Angle",spectrummin="3",spectrummax="16386")
-#Convert to wavelength
-#Future - correct for ratio of solid angles for different positions
-#Rebin to "Small_Angle" workspace
-#?? Normalise the flood source file
-#Divide("Small_Angle","Flood_Source_Small_Angle","Small_Angle_norm_flood_source")
+#calculate from raw flood source file
+#maybe later!
 
 #OPTION 2
 #CorrectToFileDialog("Small_Angle",FirstColumnValue="SpectraNumber",WorkspaceOperation="Divide",OutputWorkspace="Small_Angle")
 #LoadRKH with scalar value for wavelength ranges
 #data/flat(wavelength)
 LoadRKHDialog(OutputWorkspace="flat",FirstColumnValue="SpectraNumber")
-#Doesn't currently work because we don't have all spectra in our workspace
-#Divide("Small_Angle","flat","Small_Angle")
+CropWorksapce("flat","flat",StartSpectrum="3",EndSpectrum="16386")
+#optional correct for diffrernt detector positions
+SolidAngle("flat","flatsolidangle",StartSpectrum="3",EndSpectrum="16386")
+SolidAngle("Small_Angle","solidangle",StartSpectrum="3",EndSpectrum="16386")
+Divide("flatsolidangle","solidangle","SAcorrection")
+Divide("flat","SAcorrection","flat")
+#RETRY
+Divide("Small_Angle","flat","Small_Angle")
 
 #OPTION 3
 #Correction using instrument geometry
+SolidAngle("Small_Angle","solidangle",StartSpectrum="3",EndSpectrum="16386")
+Divide("Small_Angle","solidangle","Small_Angle corrected by solidangle")
 
 #######################
 #Step 4 - Correct by incident beam monitor
@@ -107,17 +115,24 @@ thickness = 1.0
 area = 1.0
 
 correction = rescale/(thickness*area)
-#NEED WAY TO CREATE SINGLEVALUEWORKSPACE
+#NEED WAY TO CREATE SINGLEVALUEWORKSPACE #394
+##should be available now!
 #Multiply("Small_Angle",correction,"Small_Angle")
 
 #######################
 #Step 11 - Convert to Q
 #Convert units to Q (MomentumTransfer)
-#ConvertUnits("Small_Angle","Small_Angle","MomentumTransfer")
+ConvertUnits("Small_Angle","Small_Angle","MomentumTransfer")
+SolidAngle("Small_Angle","solidangle",StartSpectrum="3",EndSpectrum="16386")
+
 #rebin to desired Q bins
-#Rebin("Small_Angle","Small_Angle","0.008,0.002,0.3")
+Rebin("Small_Angle","Small_Angle","0.008,0.002,0.3")
+RebinPreserveValue("solidangle","solidangle","0.008,0.002,0.3") #395
 #Sum all spectra
 SumSpectra("Small_Angle","Small_Angle")
+SumSpectra("solidangle","solidangle")
+#correct for solidangle
+Divide("Small_Angle","solidangle","Small_Angle")
 
 #######################
 #step 12 - Cross section (remove can scatering)
@@ -127,3 +142,4 @@ SumSpectra("Small_Angle","Small_Angle")
 #######################
 #step 12 - Save 1D data
 #Missing - save as RKH format #377
+SaveRKHDialog("Small_Angle",FirstColumnValue="SpectraNumber")
