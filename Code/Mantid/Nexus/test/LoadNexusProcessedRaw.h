@@ -71,7 +71,6 @@ void testExecOnLoadraw()
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    map=output2D->getSpectraMap();
     //
     if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 
@@ -176,23 +175,23 @@ void testExecOnLoadraw()
     }
     //
     // Get the map from the workspace : TESTS from LoadMappingTest.h
-    map=output->getSpectraMap();
-    TS_ASSERT( map != NULL);
-    if(map != NULL )
+    const SpectraDetectorMap& map=output->spectraMap();
+    TS_ASSERT( &map != NULL);
+    if( &map != NULL )
     {
 
         // Check the total number of elements in the map for HET
-        TS_ASSERT_EQUALS(map->nElements(),24964);
+        TS_ASSERT_EQUALS(map.nElements(),24964);
 
         // Test one to one mapping, for example spectra 6 has only 1 pixel
-        TS_ASSERT_EQUALS(map->ndet(6),1);
+        TS_ASSERT_EQUALS(map.ndet(6),1);
 
         // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-        TS_ASSERT_EQUALS(map->ndet(2084),10);
+        TS_ASSERT_EQUALS(map.ndet(2084),10);
 
         // Check the id number of all pixels contributing
         std::vector<int> detectorgroup;
-        detectorgroup=map->getDetectors(2084);
+        detectorgroup=map.getDetectors(2084);
         std::vector<int>::const_iterator it;
         int pixnum=101191;
         for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
@@ -200,9 +199,9 @@ void testExecOnLoadraw()
 
         // Test with spectra that does not exist
         // Test that number of pixel=0
-        TS_ASSERT_EQUALS(map->ndet(5),0);
+        TS_ASSERT_EQUALS(map.ndet(5),0);
         // Test that trying to get the Detector throws.
-        std::vector<int> test = map->getDetectors(5);
+        std::vector<int> test = map.getDetectors(5);
         TS_ASSERT(test.empty());
     }
 
@@ -315,7 +314,6 @@ private:
   Mantid::DataHandling::LoadRaw loader;
   std::string outputSpace;
   std::string outputFile;
-  boost::shared_ptr<SpectraDetectorMap> map;
 };
 
 #endif /*LOADNEXUSPROCESSEDTESTRAW_H_*/

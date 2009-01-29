@@ -73,7 +73,7 @@ public:
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "Wavelength" )
     TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )
-    TS_ASSERT_EQUALS( outWS->getSpectraMap(), inWS->getSpectraMap() )
+    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) )
     TS_ASSERT_DIFFERS( outWS->size(), inWS->size() )
     TS_ASSERT_DIFFERS( outWS->blocksize(), inWS->blocksize() )
     TS_ASSERT_EQUALS( outWS->blocksize(), 712 )

@@ -53,7 +53,7 @@ public:
     boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d4);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 5 );
+    space->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 5 );
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);

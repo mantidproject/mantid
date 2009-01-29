@@ -48,7 +48,6 @@ public:
 
     Workspace_sptr outWS = AnalysisDataService::Instance().retrieve("output");
     Workspace2D_sptr WS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
-    std::cerr<<"Output: "<<WS->getNumberHistograms()<<' '<<WS->blocksize()<<'\n';
 
     TS_ASSERT_EQUALS(WS->getNumberHistograms(),10)
     TS_ASSERT_EQUALS(WS->blocksize(),7)
@@ -76,9 +75,8 @@ public:
         std::vector<double>& Y = WS->dataY(i);
         for(int j=0;j<WS->blocksize();j++)
         {
-            std::cerr<<'('<<X[j]<<','<<Y[j]<<") ";
+//            std::cerr<<'('<<X[j]<<','<<Y[j]<<") ";
         }
-        std::cerr<<'\n'<<'\n';
     }
   }
 

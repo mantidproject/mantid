@@ -40,10 +40,9 @@ void LoadMappingTable::exec()
     g_log.error("Unable to open file " + m_filename);
     throw Kernel::Exception::FileError("Unable to open File:" , m_filename);
   }
-  SpectraMap_sptr localmap=localWorkspace->getSpectraMap();  //Get hold of the workspace
-  //boost::shared_ptr<IInstrument> localInstrument=localWorkspace->getInstrument(); // Get hold of the instrument associated to the workspace
   int number_spectra=iraw.i_det; // Number of entries in the spectra/udet table
-  localmap->populate(iraw.spec,iraw.udet,number_spectra); //Populate the Spectra Map with parameters
+  //Populate the Spectra Map with parameters
+  localWorkspace->mutableSpectraMap().populate(iraw.spec,iraw.udet,number_spectra);
 
   return;
 }

@@ -963,7 +963,7 @@ namespace NeXus
   }
   
 
-  bool NexusFileIO::writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+  bool NexusFileIO::writeNexusProcessedSpectraMap(const API::SpectraDetectorMap& spectraMap,
                     const int& m_spec_min, const int& m_spec_max)
   {
    /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
@@ -978,7 +978,7 @@ namespace NeXus
        TODO check on how to make min/max spectra work
    */
 
-   int nDetectors=spectraMap->nElements();
+   const int nDetectors = spectraMap.nElements();
    if(nDetectors<1)
    {
        // No data in spectraMap to write
@@ -1010,11 +1010,11 @@ namespace NeXus
    // get data from map into Nexus Muon format
    for(int si=1;si<=numberSpec;si++)
    {
-       int ndet=spectraMap->ndet(si);
+       const int ndet=spectraMap.ndet(si);
        detector_index[si]=detector_index[si-1]+ndet;
        detector_count[si-1]=ndet;
 
-       std::vector<int> detectorgroup=spectraMap->getDetectors(si);
+       const std::vector<int> detectorgroup = spectraMap.getDetectors(si);
        std::vector<int>::const_iterator it;
        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
             detector_list[id++]=(*it);
@@ -1046,7 +1046,7 @@ namespace NeXus
    return(true);
   }
   
-  bool NexusFileIO::readNexusProcessedSpectraMap(boost::shared_ptr<API::SpectraDetectorMap>& spectraMap,
+  bool NexusFileIO::readNexusProcessedSpectraMap(API::SpectraDetectorMap& spectraMap,
                     const boost::shared_ptr<API::MatrixWorkspace> workspace, const int& m_spec_min, const int& m_spec_max)
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
@@ -1109,7 +1109,7 @@ namespace NeXus
            spectra_list[offset+j]=i+1;
        }
    }
-   spectraMap->populate(spectra_list,detector_list,nDet); //Populate the Spectra Map with parameters
+   spectraMap.populate(spectra_list,detector_list,nDet); //Populate the Spectra Map with parameters
    status=NXclosedata(fileID);
    // tidy up
    delete[] detector_list;

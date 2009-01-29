@@ -67,7 +67,7 @@ public:
 
     TS_ASSERT_EQUALS( outWS->getAxis(0)->unit()->unitID(), "dSpacing" )
     TS_ASSERT_EQUALS( outWS->getInstrument(), inWS->getInstrument() )
-    TS_ASSERT_EQUALS( outWS->getSpectraMap(), inWS->getSpectraMap() )
+    TS_ASSERT_EQUALS( &(outWS->spectraMap()), &(inWS->spectraMap()) )
     TS_ASSERT_EQUALS( outWS->size(), inWS->size() )
     TS_ASSERT_EQUALS( outWS->blocksize(), inWS->blocksize() )
 

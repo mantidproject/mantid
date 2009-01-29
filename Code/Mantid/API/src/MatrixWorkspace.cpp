@@ -16,7 +16,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("Workspace");
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
-  sptr_instrument(new Instrument), sptr_spectramap(new SpectraDetectorMap), sptr_sample(new Sample),
+  sptr_instrument(new Instrument), m_spectramap(), sptr_sample(new Sample),
    m_YUnit("Counts"), m_isDistribution(false),sptr_parmap(new Geometry::ParameterMap)
 {}
 
@@ -63,24 +63,6 @@ void MatrixWorkspace::initialize(const int &NVectors, const int &XLength, const 
   m_isInitialized = true;
 }
 
-/** Set the Spectra to DetectorMap
- *
- * \param map:: Shared pointer to the SpectraDetectorMap
- */
-void MatrixWorkspace::setSpectraMap(const SpectraMap_sptr& map)
-{
-	sptr_spectramap=map;
-}
-
-/** Set the Spectra to a copy DetectorMap
- *
- * \param map:: Shared pointer to the SpectraDetectorMap
- */
-void MatrixWorkspace::copySpectraMap(const SpectraMap_sptr& map)
-{
-	sptr_spectramap->copy(*map);
-}
-
 /** Set the instrument
  *
  * \param instr Shared pointer to an instrument.
@@ -113,13 +95,26 @@ void MatrixWorkspace::setSample(const boost::shared_ptr<Sample>& sample)
   sptr_sample = sample;
 }
 
-/** Get a shared pointer to the SpectraDetectorMap associated with this workspace
+/** Get a const reference to the SpectraDetectorMap associated with this workspace.
+ *  Can ONLY be taken as a const reference!
  *
  *  @return The SpectraDetectorMap
  */
-SpectraMap_sptr MatrixWorkspace::getSpectraMap() const
+const SpectraDetectorMap& MatrixWorkspace::spectraMap() const
 {
-  return sptr_spectramap;
+  return *m_spectramap;
+}
+
+/** Get a reference to the SpectraDetectorMap associated with this workspace.
+ *  This non-const method will copy the map if it is shared between more than one workspace,
+ *  and the reference returned will be to the copy.
+ *  Can ONLY be taken by reference!
+ *
+ *  @return The SpectraDetectorMap
+ */
+SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
+{
+  return m_spectramap.access();
 }
 
 /** Get the effective detector for the given spectrum
@@ -131,14 +126,14 @@ SpectraMap_sptr MatrixWorkspace::getSpectraMap() const
  */
 Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
 {
-  if ( ! sptr_spectramap->nElements() )
+  if ( ! m_spectramap->nElements() )
   {
     g_log.error("SpectraDetectorMap has not been populated.");
     throw std::runtime_error("SpectraDetectorMap has not been populated.");
   }
   
   const int spectrum_number = getAxis(1)->spectraNo(index);
-  const std::vector<int> dets = sptr_spectramap->getDetectors(spectrum_number);
+  const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
   if ( dets.empty() )
   {
     g_log.debug() << "Spectrum number " << spectrum_number << " not found" << std::endl;

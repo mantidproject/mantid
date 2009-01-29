@@ -42,7 +42,7 @@ public:
     det->setID(1);
     instr->add(det);
     instr->markAsDetector(det);
-    input->getSpectraMap()->populate(forSpecDetMap, forSpecDetMap, 3);
+    input->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 3);
 
     AnalysisDataService::Instance().add("normMon",input);
   }

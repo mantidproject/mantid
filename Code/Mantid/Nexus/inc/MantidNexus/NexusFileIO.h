@@ -3,7 +3,7 @@
 #include <napi.h>
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <limits.h>
 namespace Mantid
 {
@@ -13,7 +13,7 @@ namespace Mantid
 
     Utility method for saving NeXus format of Mantid Workspace
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -78,10 +78,10 @@ namespace Mantid
       /// write an instrument section - currently only the name
       bool writeNexusInstrument(const boost::shared_ptr<API::IInstrument>& instrument);
       /// write any spectra map information to Nexus file
-      bool writeNexusProcessedSpectraMap(const boost::shared_ptr<Mantid::API::SpectraDetectorMap>& spectraMap,
+      bool writeNexusProcessedSpectraMap(const API::SpectraDetectorMap& spectraMap,
                             const int& m_spec_min, const int& m_spec_max);
       /// read spectra map information
-      bool readNexusProcessedSpectraMap(boost::shared_ptr<API::SpectraDetectorMap>& spectraMap,
+      bool readNexusProcessedSpectraMap(API::SpectraDetectorMap& spectraMap,
           const boost::shared_ptr<API::MatrixWorkspace> workspace, const int& m_spec_min, const int& m_spec_max);
       /// close the nexus file
       int closeNexusFile();

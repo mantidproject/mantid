@@ -131,23 +131,23 @@ namespace NeXus
     const int numberOfHist = localworkspace->getNumberHistograms();
     // check if all X() are in fact the same array
     bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(localworkspace);
-	m_spec_min=0;
+    m_spec_min=0;
     m_spec_max=numberOfHist-1;
-	if( m_interval )
+    if( m_interval )
     {
-        m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
-        if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
-        {
-            g_log.error("Invalid Spectrum min/max properties");
-            throw std::invalid_argument("Inconsistent properties defined");
-        }
+      m_spec_min = getProperty("spectrum_min");
+      m_spec_max = getProperty("spectrum_max");
+      if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
+      {
+        g_log.error("Invalid Spectrum min/max properties");
+        throw std::invalid_argument("Inconsistent properties defined");
+      }
     }
     nexusFile->writeNexusProcessedData(localworkspace,uniformSpectra,m_spec_min,m_spec_max);
     nexusFile->writeNexusProcessedProcess(localworkspace);
-    boost::shared_ptr<SpectraDetectorMap> spectraMap=localworkspace->getSpectraMap();
+    const SpectraDetectorMap& spectraMap=localworkspace->spectraMap();
     nexusFile->writeNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
-	nexusFile->closeNexusFile();
+    nexusFile->closeNexusFile();
 
     return;
   }

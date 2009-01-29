@@ -78,8 +78,7 @@ void GroupDetectors::exec()
   {// Dealing with DetectorList
     const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
-    SpectraMap_const_sptr spectraMap = WS->getSpectraMap();
-    std::vector<int> mySpectraList = spectraMap->getSpectra(detectorList);
+    std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
@@ -90,9 +89,6 @@ void GroupDetectors::exec()
       return;
   }
 
-  // Copy the spectra-detector map because it's going to be changed
-  WS->copySpectraMap(WS->getSpectraMap());
-
   const int vectorSize = WS->blocksize();
   const int firstIndex = indexList[0];
   const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
@@ -102,7 +98,7 @@ void GroupDetectors::exec()
   {
     const int currentIndex = indexList[i+1];
     // Move the current detector to belong to the first spectrum
-    WS->getSpectraMap()->remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
+    WS->mutableSpectraMap().remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
     // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
     std::vector<double> &firstY = WS->dataY(firstIndex);

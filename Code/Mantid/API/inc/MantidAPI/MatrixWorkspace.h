@@ -12,10 +12,11 @@
 #include "MantidAPI/IErrorHelper.h"
 #include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidAPI/Axis.h"
+#include "MantidGeometry/ParameterMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
-#include "MantidGeometry/ParameterMap.h"
+#include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -71,9 +72,10 @@ public:
   boost::shared_ptr<Instrument> getBaseInstrument()const;
   boost::shared_ptr<Sample> getSample() const;
 
-  void setSpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
-  void copySpectraMap(const boost::shared_ptr<SpectraDetectorMap>& map);
-  boost::shared_ptr<SpectraDetectorMap> getSpectraMap() const;
+  // SpectraDetectorMap accessors
+  const SpectraDetectorMap& spectraMap() const;
+  SpectraDetectorMap& mutableSpectraMap();
+  
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
   Geometry::IDetector_sptr getDetector(const int index) const;
   const double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
@@ -158,8 +160,8 @@ private:
 
   /// The instrument used for this experiment
   boost::shared_ptr<Instrument> sptr_instrument;
-  /// The SpectraDetector table used for this experiment
-  boost::shared_ptr<SpectraDetectorMap> sptr_spectramap;
+  /// The SpectraDetector table used for this experiment. Inside a copy-on-write pointer.
+  Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
   /// The information on the sample environment
   boost::shared_ptr<Sample> sptr_sample;
 

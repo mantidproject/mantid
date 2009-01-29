@@ -73,10 +73,6 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
-      boost::shared_ptr<IInstrument> instrument;
-      boost::shared_ptr<SpectraDetectorMap> specMap;
-      boost::shared_ptr<Sample> sample;
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
@@ -114,14 +110,17 @@ namespace Mantid
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
+      
+      // Create the 2D workspace for the output
+      DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+               (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
 
-        // Create the 2D workspace for the output
-        DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-                 (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
-        // Set the unit on the workspace to TOF
-        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+        if ( period > 0 ) localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                                              (WorkspaceFactory::Instance().create(localWorkspace));
 
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
@@ -154,13 +153,9 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-          // Cache these for copying to workspaces for later periods
-          instrument = localWorkspace->getInstrument();
-          specMap = localWorkspace->getSpectraMap();
-          sample = localWorkspace->getSample();
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-          sample->setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
+          localWorkspace->getSample()->setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -173,10 +168,6 @@ namespace Mantid
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
-          // Copy the shared instrument, sample & spectramap onto the workspace for this period
-          localWorkspace->setInstrument(instrument);
-          localWorkspace->setSpectraMap(specMap);
-          localWorkspace->setSample(sample);
         }
 
         // Assign the result to the output workspace property

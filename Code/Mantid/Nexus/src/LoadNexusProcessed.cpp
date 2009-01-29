@@ -174,7 +174,7 @@ namespace NeXus
     }
     // get any spectraMap info
     boost::shared_ptr<IInstrument> localInstrument=localWorkspace->getInstrument();
-    boost::shared_ptr<Mantid::API::SpectraDetectorMap> spectraMap= localWorkspace->getSpectraMap();
+    SpectraDetectorMap& spectraMap= localWorkspace->mutableSpectraMap();
     nexusFile->readNexusProcessedSpectraMap( spectraMap, localWorkspace, m_spec_min, m_spec_max);
     // Assign the result to the output workspace property
     std::string outputWorkspace = "OutputWorkspace";

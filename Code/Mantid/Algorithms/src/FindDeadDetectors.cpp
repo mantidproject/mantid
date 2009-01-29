@@ -59,7 +59,7 @@ namespace Mantid
       MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
 
       // Get hold of the spectraDetectorMap and axis
-      SpectraMap_const_sptr specMap = integratedWorkspace->getSpectraMap();
+      const SpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
       Axis* specAxis = integratedWorkspace->getAxis(1);
 
       std::vector<int> deadDets;
@@ -86,7 +86,7 @@ namespace Mantid
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<int> dets = specMap->getDetectors(specNo);
+          const std::vector<int> dets = specMap.getDetectors(specNo);
           std::vector<int>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {

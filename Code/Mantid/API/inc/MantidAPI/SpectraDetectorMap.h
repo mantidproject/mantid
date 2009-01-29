@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/cow_ptr.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
 #ifndef HAS_UNORDERED_MAP_H
@@ -46,6 +47,9 @@ namespace API
 class DLLExport SpectraDetectorMap
 {
 public:
+  // The cow_ptr in which SpectraDetectorMap is held in Workspace needs access to the copy constructor
+  friend class Kernel::cow_ptr<SpectraDetectorMap>;
+  
 #ifndef HAS_UNORDERED_MAP_H
   /// Spectra Detector map typedef
   typedef std::multimap<int,int> smap;
@@ -57,9 +61,10 @@ public:
   /// Spectra Detector map iterator typedef
   typedef std::tr1::unordered_multimap<int,int>::const_iterator smap_it;
 #endif
-  ///Constructor
+  
+  /// Constructor
   SpectraDetectorMap();
-  ///virtual destructor
+  /// virtual destructor
   virtual ~SpectraDetectorMap();
   /// populate the Map with _spec and _udet C array
   void populate(int* _spec, int* _udet, int nentries);
@@ -72,25 +77,19 @@ public:
   /// Gets a list of spectra corresponding to a list of detector numbers
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map
-  int nElements() const {return _s2dmap->size();}
-  /// Copy data from rhs.
-  void copy(const SpectraDetectorMap& rhs);
+  int nElements() const {return m_s2dmap.size();}
+  
 private:
-  ///Assignment operator
-  SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
-  ///Copy Contructor
+  /// Copy Contructor
   SpectraDetectorMap(const SpectraDetectorMap& copy);
+  /// Assignment operator
+  SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
   /// internal spectra detector map instance
-  boost::shared_ptr<smap> _s2dmap;
+  smap m_s2dmap;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };
-
-/// Shared pointer to the SpectraDetectorMap
-typedef boost::shared_ptr<SpectraDetectorMap> SpectraMap_sptr;
-/// Shared pointer to the SpectraDetectorMap (const version)
-typedef const boost::shared_ptr<const SpectraDetectorMap> SpectraMap_const_sptr;
 
 } // namespace API
 } // namespace Mantid

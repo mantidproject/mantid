@@ -57,11 +57,8 @@ public:
     MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     
-
-    boost::shared_ptr<SpectraDetectorMap>map= output->getSpectraMap();
-
     // Check the total number of elements in the map for SLS
-    TS_ASSERT_EQUALS(map->nElements(),683);
+    TS_ASSERT_EQUALS(output->spectraMap().nElements(),683);
   }
 
 

@@ -10,20 +10,18 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
-    SpectraDetectorMap::SpectraDetectorMap() : _s2dmap(new smap)//, m_workspace(ws)
+    SpectraDetectorMap::SpectraDetectorMap() : m_s2dmap()
     {}
 
-/*    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy)
-    {
-      _s2dmap.insert(copy._s2dmap.begin(),copy._s2dmap.end());
-    }*/
+    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy) : m_s2dmap(copy.m_s2dmap)
+    {}
 
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
 
     void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries)
     {
-      _s2dmap.reset(new smap());
+      m_s2dmap.clear();
       if (nentries<=0)
       {
         g_log.error("Populate : number of entries should be > 0");
@@ -31,7 +29,7 @@ namespace Mantid
       }
       for (int i=0; i<nentries; ++i)
       {
-        _s2dmap->insert(std::pair<int,int>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key 
+        m_s2dmap.insert(std::pair<int,int>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key 
         ++_spectable;
         ++_udettable;
       }
@@ -42,7 +40,6 @@ namespace Mantid
     *  Does nothing if the oldSpectrum number does not exist in the map.
     *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
     *  @param newSpectrum The spectrum number to map the detectors to
-    *  @todo Write a test for this method
     */
     void SpectraDetectorMap::remap(const int oldSpectrum, const int newSpectrum)
     {
@@ -61,15 +58,15 @@ namespace Mantid
       std::vector<int>::const_iterator it;
       for (it = dets.begin(); it != dets.end(); ++it)
       {
-        _s2dmap->insert( std::pair<int,int>(newSpectrum,*it) );
+        m_s2dmap.insert( std::pair<int,int>(newSpectrum,*it) );
       }
       // Finally, remove the old spectrum number from the map
-      _s2dmap->erase(oldSpectrum);
+      m_s2dmap.erase(oldSpectrum);
     }
 
     const int SpectraDetectorMap::ndet(const int spectrum_number) const
     {
-      return _s2dmap->count(spectrum_number);
+      return m_s2dmap.count(spectrum_number);
     }
 
     std::vector<int> SpectraDetectorMap::getDetectors(const int spectrum_number) const
@@ -81,7 +78,7 @@ namespace Mantid
         // Will just return an empty vector
         return detectors;
       }
-      std::pair<smap_it,smap_it> det_range=_s2dmap->equal_range(spectrum_number);
+      std::pair<smap_it,smap_it> det_range=m_s2dmap.equal_range(spectrum_number);
       for (smap_it it=det_range.first; it!=det_range.second; ++it)
       {
         detectors.push_back(it->second);
@@ -99,7 +96,7 @@ namespace Mantid
 
       //invert the sdmap into a dsMap
       std::multimap<int,int> dsMap;  
-      for (smap_it it = _s2dmap->begin();  it != _s2dmap->end(); ++it)
+      for (smap_it it = m_s2dmap.begin();  it != m_s2dmap.end(); ++it)
       {
         std::pair<int,int> valuePair(it->second,it->first);
         dsMap.insert(valuePair);
@@ -123,13 +120,6 @@ namespace Mantid
       return spectraList;
     }
 
-    /**
-        Copies detector ids from rhs spectra map.
-    */
-    void SpectraDetectorMap::copy(const SpectraDetectorMap& rhs)
-    {
-        _s2dmap = rhs._s2dmap;
-    }
 
   } // Namespace API 
 } // Namespace Mantid

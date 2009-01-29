@@ -70,7 +70,7 @@ void AlignDetectors::exec()
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = inputWS->getInstrument();
   // And one to the SpectraDetectorMap
-  SpectraMap_const_sptr specMap = inputWS->getSpectraMap();
+  const SpectraDetectorMap& specMap = inputWS->spectraMap();
 
   // Get the distance between the source and the sample (assume in metres)
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
@@ -97,8 +97,8 @@ void AlignDetectors::exec()
       // Get the spectrum number for this histogram
       const int spec = inputWS->getAxis(1)->spectraNo(i);
       // Loop over the detectors that contribute to this spectrum and calculate the average correction
-      const int ndets = specMap->ndet(spec);
-      std::vector<int> dets = specMap->getDetectors(spec);
+      const int ndets = specMap.ndet(spec);
+      const std::vector<int> dets = specMap.getDetectors(spec);
       double factor = 0.0;
       for (int j = 0; j < ndets; ++j)
       {

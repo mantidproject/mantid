@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_SIMPLEREBIN_H_
-#define MANTID_ALGORITHM_SIMPLEREBIN_H_
+#ifndef MANTID_ALGORITHM_REBINPRESERVEVALUE_H_
+#define MANTID_ALGORITHM_REBINPRESERVEVALUE_H_
 
 //----------------------------------------------------------------------
 // Includes

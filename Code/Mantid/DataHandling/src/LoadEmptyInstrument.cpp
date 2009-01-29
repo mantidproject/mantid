@@ -91,8 +91,7 @@ namespace Mantid
         udet[counter-1] = it->first;
       }
 
-      SpectraMap_sptr localmap=localWorkspace->getSpectraMap();
-      localmap->populate(spec,udet,number_spectra);
+      localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
 
       int spectraLength = 1; // put spectra lenght to 1. Since assumes histograms this mean x axis one longer
       localWorkspace->initialize(number_spectra, spectraLength+1, spectraLength);

@@ -127,14 +127,14 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
 {
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
-  const SpectraMap_const_sptr specmap1 = ws1->getSpectraMap();
+  const SpectraDetectorMap& specmap1 = ws1->spectraMap();
   std::set<int> spectra, detectors;
   const int& nhist1 = ws1->getNumberHistograms();
   for (int i = 0; i < nhist1; ++i)
   {
     const int spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    const std::vector<int> dets = specmap1->getDetectors(spectrum);
+    const std::vector<int> dets = specmap1.getDetectors(spectrum);
     std::vector<int>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
@@ -144,7 +144,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
 
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
   const Axis* axis2 = ws2->getAxis(1);
-  const SpectraMap_const_sptr specmap2 = ws2->getSpectraMap();
+  const SpectraDetectorMap& specmap2 = ws2->spectraMap();
   const int& nhist2 = ws2->getNumberHistograms();
   for (int j = 0; j < nhist2; ++j)
   {
@@ -154,7 +154,7 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
       g_log.error("The input workspaces overlap");
       throw std::invalid_argument("The input workspaces overlap");
     }
-    std::vector<int> dets = specmap2->getDetectors(spectrum);
+    std::vector<int> dets = specmap2.getDetectors(spectrum);
     std::vector<int>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {

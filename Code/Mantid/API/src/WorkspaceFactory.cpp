@@ -6,6 +6,8 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 
+#include "MantidAPI/SpectraDetectorMap.h"
+
 namespace Mantid
 {
 namespace API
@@ -62,7 +64,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
 
   // Copy over certain parent data members
   ws->setInstrument(parent->getInstrument());
-  ws->setSpectraMap(parent->getSpectraMap());
+  ws->m_spectramap = parent->m_spectramap;
   ws->setSample(parent->getSample());
   ws->setYUnit(parent->m_YUnit);
   ws->isDistribution(parent->isDistribution());

@@ -108,19 +108,19 @@ public:
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    map= output2D->getSpectraMap();
+    const SpectraDetectorMap& map= output2D->spectraMap();
 
     // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map->nElements(),24964);
+    TS_ASSERT_EQUALS(map.nElements(),24964);
 
     // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map->ndet(6),1);
+    TS_ASSERT_EQUALS(map.ndet(6),1);
 
     // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-    TS_ASSERT_EQUALS(map->ndet(2084),10);
+    TS_ASSERT_EQUALS(map.ndet(2084),10);
     // Check the id number of all pixels contributing
     std::vector<int> detectorgroup;
-    detectorgroup=map->getDetectors(2084);
+    detectorgroup=map.getDetectors(2084);
     std::vector<int>::const_iterator it;
     int pixnum=101191;
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
@@ -128,9 +128,9 @@ public:
 
     // Test with spectra that does not exist
     // Test that number of pixel=0
-    TS_ASSERT_EQUALS(map->ndet(5),0);
+    TS_ASSERT_EQUALS(map.ndet(5),0);
     // Test that trying to get the Detector throws.
-    std::vector<int> test = map->getDetectors(5);
+    std::vector<int> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
   }
 
@@ -294,13 +294,13 @@ public:
 
     // Check these are the same
     TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
-    TS_ASSERT_EQUALS( output1->getSpectraMap(), output2->getSpectraMap() )
+    TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
     TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
     TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
-    TS_ASSERT_EQUALS( output1->getSpectraMap(), output6->getSpectraMap() )
+    TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
     TS_ASSERT_EQUALS( output1->getSample(), output6->getSample() )
     TS_ASSERT_EQUALS( output1->getInstrument(), output12->getInstrument() )
-    TS_ASSERT_EQUALS( output1->getSpectraMap(), output12->getSpectraMap() )
+    TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output12->spectraMap()) )
     TS_ASSERT_EQUALS( output1->getSample(), output12->getSample() )
   }
 
@@ -324,7 +324,6 @@ private:
   LoadRaw loader,loader2,loader3;
   std::string inputFile;
   std::string outputSpace;
-  boost::shared_ptr<SpectraDetectorMap> map;
 };
 
 #endif /*LOADRAWTEST_H_*/

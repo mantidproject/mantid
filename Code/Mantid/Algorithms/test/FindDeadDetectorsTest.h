@@ -56,7 +56,7 @@ public:
       instr->add(det);
       instr->markAsDetector(det);
     }
-    work_in->getSpectraMap()->populate(forSpecDetMap,forSpecDetMap,20);
+    work_in->mutableSpectraMap().populate(forSpecDetMap,forSpecDetMap,20);
 
     FindDeadDetectors alg;
 
