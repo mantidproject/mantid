@@ -292,11 +292,10 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecV
 	if(strWorkspaceName=="")return std::vector<int>();
 	MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
-	boost::shared_ptr<SpectraDetectorMap> specMap=output->getSpectraMap(); 
 	
 	std::map<int,int> indexMap;
-	std::vector<int> spectraList=specMap->getSpectra(idDecVec);//dynamic_cast<std::vector<Mantid::Geometry::IDetector*>(idDecVec));
-
+	const std::vector<int> spectraList = output->spectraMap().getSpectra(idDecVec);
+	
 	// There is no direct way of getting histogram index from the spectra id,
 	// get the spectra axis and convert form index to spectra number and create
 	// a map.
