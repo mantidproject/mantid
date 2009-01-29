@@ -293,13 +293,13 @@ public:
 //    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output12->dataY(1)[555] )
 
     // Check these are the same
-    TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
+    TS_ASSERT_DIFFERS( output1->getInstrument(), output2->getInstrument() )
     TS_ASSERT_EQUALS( output1->getSpectraMap(), output2->getSpectraMap() )
     TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
-    TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
+    TS_ASSERT_DIFFERS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( output1->getSpectraMap(), output6->getSpectraMap() )
     TS_ASSERT_EQUALS( output1->getSample(), output6->getSample() )
-    TS_ASSERT_EQUALS( output1->getInstrument(), output12->getInstrument() )
+    TS_ASSERT_DIFFERS( output1->getInstrument(), output12->getInstrument() )
     TS_ASSERT_EQUALS( output1->getSpectraMap(), output12->getSpectraMap() )
     TS_ASSERT_EQUALS( output1->getSample(), output12->getSample() )
   }
