@@ -214,6 +214,7 @@ else:
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)
 	libList.append('NeXus')
+	libList.append('muparser')
 	libList.append('GL')
 	libList.append('GLU')
 	
