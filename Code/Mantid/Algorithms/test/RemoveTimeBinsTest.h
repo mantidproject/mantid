@@ -67,9 +67,13 @@ public:
 
 		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output"));
 
+		//Should give:
+		//10   20   30   40   X
+		//     2     5     6       Y
+		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
-		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 1);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 10);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 2);
 
 	}
@@ -82,11 +86,11 @@ public:
 		
 		alg3.setPropertyValue("InputWorkspace", "input2D");
 		alg3.setPropertyValue("OutputWorkspace", "output2");
-		alg3.setPropertyValue("XMin", "4");
-		alg3.setPropertyValue("XMax", "4");
+		alg3.setPropertyValue("XMin", "40");
+		alg3.setPropertyValue("XMax", "40");
 		
-		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMin"), "4");
-		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMax"), "4");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMin"), "40");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMax"), "40");
 		
 		try 
 		{
@@ -99,11 +103,14 @@ public:
 
 		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output2"));
 
+		//0   10   20   30    X
+		//   0     2     5        Y
+		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 3);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
-		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 30);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 5);
 		
 	}
@@ -114,12 +121,12 @@ public:
 		TS_ASSERT( alg4.isInitialized() )	
 		alg4.setPropertyValue("InputWorkspace", "input2D");
 		alg4.setPropertyValue("OutputWorkspace", "output3");
-		alg4.setPropertyValue("XMin", "1");
-		alg4.setPropertyValue("XMax", "2");
+		alg4.setPropertyValue("XMin", "11");
+		alg4.setPropertyValue("XMax", "21");
 		alg4.setPropertyValue("Interpolation", "Linear");
 		
-		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMin"), "1");
-		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMax"), "2");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMin"), "11");
+		TS_ASSERT_EQUALS( alg4.getPropertyValue("XMax"), "21");
 		TS_ASSERT_EQUALS( alg4.getPropertyValue("Interpolation"), "Linear");
 		
 		try 
@@ -133,13 +140,16 @@ public:
 
 		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output3"));
 
+		//0   10   20   30   40   X
+		//   0     2     4     6       Y
+		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 5);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
-		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 3);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 3);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 3);
+		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 30);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 2);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[3], 6);
 	}
 	
@@ -157,8 +167,8 @@ public:
 		
 		alg2.setPropertyValue("InputWorkspace", "EMU6473");
 		alg2.setPropertyValue("OutputWorkspace", "result1");
-		alg2.setPropertyValue("XMin", "0");
-		alg2.setPropertyValue("XMax", "6");
+		alg2.setPropertyValue("XMin", "-0.255");
+		alg2.setPropertyValue("XMax", "-0.158");
 		
 		try 
 		{
@@ -186,7 +196,7 @@ public:
 
 		for (int i =0; i < 4; ++i)
 		{
-			X.push_back(1.0*i);
+			X.push_back(10*i);
 			
 			if (i == 2)
 			{
@@ -197,7 +207,10 @@ public:
 				Y.push_back(2.0*i);
 			}
 		}
-		X.push_back(4.0);	// X is one bigger
+		X.push_back(40);	// X is one bigger
+		
+		//0   10   20   30   40   X
+		//   0     2     5     6       Y
 
 		testWorkspace->setX(0, X);
 		testWorkspace->setX(1, X);

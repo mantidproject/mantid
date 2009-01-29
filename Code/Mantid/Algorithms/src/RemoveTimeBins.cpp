@@ -32,15 +32,12 @@ namespace Mantid
     {
         declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
         declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-	BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
-        zeroOrGreater->setLower(0);    
-	declareProperty("XMin",0, zeroOrGreater);
-	declareProperty("XMax",0, zeroOrGreater->clone());
+	declareProperty("XMin",0.0);
+	declareProperty("XMax",0.0);
 	std::vector<std::string> propOptions;
 	propOptions.push_back("None");
 	propOptions.push_back("Linear");
         declareProperty("Interpolation", "None", new ListValidator(propOptions) );
-
     }
 
     /** Executes the algorithm
@@ -50,23 +47,63 @@ namespace Mantid
     {
 	    //Get input workspace and offset
 	    MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
-	    int start = getProperty("XMin");
-	    int end = getProperty("XMax");
+	    double startX = getProperty("XMin");
+	    double endX = getProperty("XMax");
+	    int start=0;
+	    int end=0;
 	    
-	            
+	    if (startX > endX)
+	    {
+		    int temp = startX;
+		    startX = endX;
+		    endX = temp;
+	    }
+	    
+	    //Convert X values into bin numbers
+	    for (int i=0; i < inputW->dataX(0).size() ; ++i)
+	    {
+		    if (i == 0 && inputW->dataX(0)[i]  > startX)
+		    {
+			    start = 0;
+			    break;
+		    }
+		    else if (i == inputW->dataX(0).size() -1)
+		    {
+			    start = i;
+			    break;
+		    }
+		    else if (startX >= inputW->dataX(0)[i] && startX < inputW->dataX(0)[i + 1] )
+		    {
+			    start = i;
+			    break;
+		    }    
+	    }
+	    
+	    for (int i=0; i < inputW->dataX(0).size() ; ++i)
+	    {
+		    if (i == 0 && inputW->dataX(0)[i]  > endX)
+		    {
+			    end = 0;
+			    break;
+		    }
+		    else if (i == inputW->dataX(0).size() -1)
+		    {
+			    end = i;
+			    break;
+		    }
+		    else if (endX >= inputW->dataX(0)[i] && endX < inputW->dataX(0)[i + 1] )
+		    {
+			    end = i;
+			    break;
+		    }
+	    }		   
+	            	            
 	    //Check end does not exceed number of time bins
 	    if (end > inputW->dataX(0).size() -1)
 	    {
 		    end = inputW->dataX(0).size() -1;
 	    }
-	    
-	    if (start > end)
-	    {
-		    int temp = start;
-		    start = end;
-		    end = temp;
-	    }
-	    
+
 	    //Get number of histograms
 	    int numHists = inputW->getNumberHistograms();
 
@@ -163,9 +200,11 @@ namespace Mantid
 				errPrev = inputW->dataE(i)[start - 1];
 				errNext = inputW->dataE(i)[end + 1];
 			}
-			   
-			double ave = (valPrev + valNext)/2; //Currently only does average - will do proper interpolation later
-			double aveE = (errPrev + errNext)/2; //Cheat: should add in quadrature will do later
+
+			double m = (valNext - valPrev)/(1.0*(end - start) + 2.0); //Gradient
+			double c = valPrev; //Intercept
+						
+			double aveE = (errPrev + errNext)/2; //Cheat: will do properly later
 			    
 			for (int j=0; j < inputW->dataY(i).size(); ++j)
 			{			
@@ -173,7 +212,7 @@ namespace Mantid
 				 
 				 if (j >= start && j <= end)
 				 {					 
-					outputWS->dataY(i)[j] = ave;
+					outputWS->dataY(i)[j] = m * (j - start + 1) + c;
 					outputWS->dataE(i)[j] = aveE;
 				 }
 				 else
@@ -184,7 +223,7 @@ namespace Mantid
 			}
 			    
 			//X has one more value
-			outputWS->dataX(i)[inputW->dataY(i).size() - 1] = inputW->dataX(i)[inputW->dataY(i).size() -1];
+			outputWS->dataX(i)[inputW->dataX(i).size() - 1] = inputW->dataX(i)[inputW->dataX(i).size() -1];
 		}	  
 
 		// Copy units
