@@ -69,7 +69,7 @@ namespace Mantid
 			if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
 			{
 				g_log.warning("EndSpectrum out of range! Set to max detector number");
-				m_MaxSpec = numberOfSpectra;
+				m_MaxSpec = numberOfSpectra-1;
 			}
 
 			API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,m_MaxSpec-m_MinSpec+1,2,1);
