@@ -61,6 +61,11 @@ namespace Mantid
       //  So after taking proportions, squaring, summing,
       //  and taking the square root, you get a proportional error to the product c.
       //  Multiply that proportional error by c to get the actual standard deviation Sc.
+      if (fabs(lhs.Y())<1e-7 || fabs(rhs.Y())<1e-7)
+      {
+    	  result.E()=0;
+    	  return;
+      }
       result.E() = result.Y()*sqrt(pow((lhs.E()/lhs.Y()),2) + pow((rhs.E()/rhs.Y()),2));
     }
 
