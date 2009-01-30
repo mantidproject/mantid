@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CreateSingleValuedWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CropWorkspace.cpp"
 				>
 			</File>
@@ -373,6 +377,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\CorrectToFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CreateSingleValuedWorkspace.h"
 				>
 			</File>
 			<File
