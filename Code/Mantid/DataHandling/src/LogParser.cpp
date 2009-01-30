@@ -29,6 +29,12 @@ Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
 
 enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
 
+#ifdef WIN32
+#define __isnan(x) _isnan(x)
+#else
+#define __isnan(x) isnan(x)
+#endif
+
 LogParser::LogParser(const std::string& eventFName)
 :m_nOfPeriods(1),m_unknown(true)
 {
@@ -356,7 +362,7 @@ double timeMean(const Kernel::Property* p)
             total += dt;
             res += it0->second * dt;
         }
-        if (_isnan(it->second))
+        if (__isnan(it->second))
         {
             skip = true;
         }
