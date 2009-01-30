@@ -11,7 +11,7 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
-#include <cfloat>
+#include <cmath>
 
 namespace Mantid
 {
