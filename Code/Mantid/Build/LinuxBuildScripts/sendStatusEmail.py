@@ -4,7 +4,7 @@ from time import strftime
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 
-RECIPIENTS = ['mantid-buildserver@mantidproject.org']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org'] #['m.j.clarke@rl.ac.uk']
 #,'mantid-developers@mantidproject.org'
 SENDER = 'BuildServer1@mantidproject.org'
 
@@ -71,6 +71,9 @@ for line in f.readlines():
 	if line.startswith('Failed ')  != -1 and line.endswith(' tests\n'):
 		#A test failed
 		testsPass = False
+	if line.startswith('Failed ')  != -1 and line.endswith(' test\n'):
+		#A test failed
+		testsPass = False
 	mssgTestsResults = mssgTestsResults + line
      
 f.close()
@@ -106,10 +109,11 @@ message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
 message += mssgSvn + "\n"
 message += 'UNIT TESTS LOG\n\n'
 message += mssgTestsResults + "\n"
-message += '------------------------------------------------------------------------\n'
+
+#~ message += '------------------------------------------------------------------------\n'
 #~ message += 'PYTHON TESTS LOG\n\n'
 #~ message += mssgPythonResults + "\n"
-#~ message += '------------------------------------------------------------------------\n'
+message += '------------------------------------------------------------------------\n'
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += mssgScons + "\n\n"
 message += mssgSconsErr + "\n"
@@ -121,6 +125,8 @@ message += mssgTestsRunErr  + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += mssgDoxy + "\n"
+
+print mssgTestsResults
 
 #Create Subject
 subject = 'Subject: Build Report: '
@@ -139,7 +145,6 @@ if testsPass:
 	subject += 'Tests Successful]\n'
 else:
 	subject += 'Tests Failed]\n'	
-
 
 #Send Email
 session = smtplib.SMTP(smtpserver)
