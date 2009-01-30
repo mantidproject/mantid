@@ -4,6 +4,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include "boost/date_time/local_time_adjustor.hpp"
+#include "boost/date_time/c_local_time_adjustor.hpp"
 #include <limits.h>
 namespace Mantid
 {
@@ -108,7 +110,11 @@ namespace Mantid
       /// read a float value and possible attributes
       bool readNxFloat(const std::string& name, double& value, std::vector<std::string>& attributes,
 	                           std::vector<std::string>& avalues);
+      /// write a float array along with any defined attributes
       bool writeNxFloatArray(const std::string& name, const std::vector<double>& values, const std::vector<std::string>& attributes,
+	                           const std::vector<std::string>& avalues);
+      /// write a char array along with any defined attributes
+      bool writeNxStringArray(const std::string& name, const std::vector<std::string>& values, const std::vector<std::string>& attributes,
 	                           const std::vector<std::string>& avalues);
       /// Write NXlog data for given double TimeSeriesProperty
       void writeNexusDoubleLog(const Kernel::TimeSeriesProperty<double> *d_timeSeries);
@@ -143,6 +149,23 @@ namespace Mantid
       std::string m_filename;
       ///static reference to the logger class
       static Kernel::Logger& g_log;
+      // copied from TimesSeriesProperty.h
+      /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
+      std::time_t createTime_t_FromString(const std::string &str)
+      {
+          std::tm time_since_1900;
+          time_since_1900.tm_isdst = -1;
+ 
+         // create tm struct
+         time_since_1900.tm_year = atoi(str.substr(0,4).c_str()) - 1900;
+         time_since_1900.tm_mon = atoi(str.substr(5,2).c_str()) - 1;
+         time_since_1900.tm_mday = atoi(str.substr(8,2).c_str());
+         time_since_1900.tm_hour = atoi(str.substr(11,2).c_str());
+         time_since_1900.tm_min = atoi(str.substr(14,2).c_str());
+         time_since_1900.tm_sec = atoi(str.substr(17,2).c_str());
+    
+         return std::mktime(&time_since_1900);
+      }
 
     };
 
