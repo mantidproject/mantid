@@ -33,9 +33,7 @@ public:
             X[j] = double(i+j) + .5;
             X[j+1] = double(i+j) + 2.;
             Y[j] = 10.*(i+1+j);
-            //std::cerr<<'('<<X[j]<<' '<<X[j+1]<<' '<<Y[j]<<") ";
         }
-        //std::cerr<<'\n';
     }
 
     AnalysisDataService::Instance().add("input",inWS);
@@ -69,15 +67,6 @@ public:
     TS_ASSERT_EQUALS(Y2[2],40)
 
 
-    for(int i=0;i<WS->getNumberHistograms();i++)
-    {
-        std::vector<double>& X = WS->dataX(i);
-        std::vector<double>& Y = WS->dataY(i);
-        for(int j=0;j<WS->blocksize();j++)
-        {
-//            std::cerr<<'('<<X[j]<<','<<Y[j]<<") ";
-        }
-    }
   }
 
 };

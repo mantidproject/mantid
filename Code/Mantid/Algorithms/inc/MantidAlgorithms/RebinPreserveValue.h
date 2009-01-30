@@ -83,4 +83,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_SIMPLEREBIN_H_*/
+#endif /*MANTID_ALGORITHM_REBINPRESERVEVALUE_H_*/

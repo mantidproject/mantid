@@ -161,8 +161,13 @@ namespace Mantid
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
         
-        if ( period > 0 ) localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-                                              (WorkspaceFactory::Instance().create(localWorkspace));
+        if ( period > 0 ) 
+        {
+            localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                (WorkspaceFactory::Instance().create(localWorkspace));
+            localWorkspace->newSample();
+            localWorkspace->newInstrumentParameters();
+        }
 
         isisRaw->skipData(period*(m_numberOfSpectra+1));
         int counter = 0;
@@ -221,6 +226,7 @@ namespace Mantid
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
+          runLoadLog(localWorkspace,period+1);
         }
         
         // check if values stored in logfiles should be used to define parameters of the instrument
@@ -391,13 +397,14 @@ namespace Mantid
     }
 
     /// Run the LoadLog sub-algorithm
-    void LoadRaw2::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadRaw2::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int period)
     {
       Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
+      loadLog->setProperty("Period",period);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -462,8 +469,11 @@ namespace Mantid
         std::string logFilename = logfileProp[i]->name();
         boost::filesystem::path l_path( logFilename );
         std::string filenamePart = l_path.leaf();  // get filename part only        
-        filenamePart = filenamePart.erase(filenamePart.size()-4, filenamePart.size()); // remove extension
-        filenamePart = filenamePart.substr(9); // remove front run number part
+        if (filenamePart.size() > 4 && filenamePart.rfind('.') == filenamePart.size() - 4)
+        {
+            filenamePart = filenamePart.erase(filenamePart.size()-4, filenamePart.size()); // remove extension
+            filenamePart = filenamePart.substr(9); // remove front run number part
+        }
 
 
         // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map 

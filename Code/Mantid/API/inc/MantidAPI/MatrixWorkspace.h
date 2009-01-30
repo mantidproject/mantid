@@ -71,6 +71,7 @@ public:
   IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
   boost::shared_ptr<Sample> getSample() const;
+  void newSample();
 
   // SpectraDetectorMap accessors
   const SpectraDetectorMap& spectraMap() const;
@@ -85,6 +86,7 @@ public:
 
   /// Returns the set of parameters modifying the base instrument
   boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters() {return sptr_parmap;}
+  void newInstrumentParameters();
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace

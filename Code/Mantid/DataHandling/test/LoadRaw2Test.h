@@ -100,10 +100,11 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     boost::shared_ptr<Sample> sample = output2D->getSample();
-    Property *l_property = sample->getLogData( std::string("../../../../Test/Data/HET15869_TEMP1.txt") );
+    const std::vector< Property* >& pro = sample->getLogData();
+    Property *l_property = sample->getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:19  0" );
 
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
@@ -295,13 +296,13 @@ public:
     // Check these are the same
     TS_ASSERT_DIFFERS( output1->getInstrument(), output2->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
+    TS_ASSERT_DIFFERS( output1->getSample(), output2->getSample() )
     TS_ASSERT_DIFFERS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output6->getSample() )
+    TS_ASSERT_DIFFERS( output1->getSample(), output6->getSample() )
     TS_ASSERT_DIFFERS( output1->getInstrument(), output12->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output12->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output12->getSample() )
+    TS_ASSERT_DIFFERS( output1->getSample(), output12->getSample() )
   }
 
   void testWithManagedWorkspace()

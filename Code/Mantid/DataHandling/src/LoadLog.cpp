@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadLog.h"
+#include "MantidDataHandling/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -40,6 +41,7 @@ void LoadLog::init()
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("Filename","");
+  declareProperty("Period",1);
 }
 
 /** Executes the algorithm. Reading in ISIS log file(s)
@@ -74,6 +76,8 @@ void LoadLog::exec()
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
 
+  int Period = getProperty("Period");
+
 
   // If m_filename is the filename of a raw datafile then search for potential log files
   // in the directory of this raw datafile. Otherwise check if m_filename is a potential
@@ -85,6 +89,7 @@ void LoadLog::exec()
   // start the process or populating potential log files into the container: potentialLogFiles
 
   std::string l_filenamePart = l_path.leaf();  // get filename part only
+  bool rawFile = false;// Will be true if Filename property is a name of a RAW file
 
   if ( isLogFile(l_filenamePart) )
   {
@@ -96,6 +101,7 @@ void LoadLog::exec()
               stringToLower(l_filenamePart).find(".s") != std::string::npos ) && l_filenamePart.size() >= 10 )
   {
     // then we will assume that m_filename is an ISIS raw file
+      rawFile = true;
 
     // strip out the raw data file identifier
 
@@ -128,17 +134,18 @@ void LoadLog::exec()
 
   // Attempt to load the content of each potential log file into the Sample object
 
-  for (unsigned int i = 0; i < potentialLogFiles.size(); i++)
+  std::vector<std::string>::iterator file = potentialLogFiles.begin();
+  for (; file != potentialLogFiles.end(); file++)
   {
     // open log file
 
-    std::ifstream inLogFile(potentialLogFiles[i].c_str());
+    std::ifstream inLogFile(file->c_str());
 
     if (!inLogFile)
     {
       // Unable to open file
-      g_log.error("Unable to open file " + potentialLogFiles[i]);
-      throw Exception::FileError("Unable to open file:" , potentialLogFiles[i]);
+      g_log.error("Unable to open file " + (*file));
+      throw Exception::FileError("Unable to open file:" , (*file));
     }
 
 
@@ -153,8 +160,10 @@ void LoadLog::exec()
     {
       if ( !isDateTimeString(aLine) )
       {
-        g_log.warning("File" + potentialLogFiles[i] + " is not a standard ISIS log file. Expected to be a two column file.");
+        g_log.warning("File" + (*file) + " is not a standard ISIS log file. Expected to be a two column file.");
         inLogFile.close();
+        file = potentialLogFiles.erase(file);
+        if (file == potentialLogFiles.end()) break;
         continue;
       }
 
@@ -173,22 +182,25 @@ void LoadLog::exec()
 
       if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
       {
-        g_log.warning("ISIS log file contains unrecognised second column entries: " + potentialLogFiles[i]);
+        g_log.warning("ISIS log file contains unrecognised second column entries: " + (*file));
         inLogFile.close();
+        file = potentialLogFiles.erase(file);
+        if (file == potentialLogFiles.end()) break;
         continue;
       }
     } 
 
 
-    // reset random access to beginning
+
+    /*/ reset random access to beginning
 
     inLogFile.seekg(0, std::ios::beg);
 
 
     // Read log file into Property which is then stored in Sample object
 
-    TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(potentialLogFiles[i]);
-    TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(potentialLogFiles[i]);
+    TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(*file);
+    TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(*file);
 
     // read in the log file
 
@@ -198,7 +210,7 @@ void LoadLog::exec()
     {
       if ( !isDateTimeString(aLine) )
       {
-        g_log.warning("File" + potentialLogFiles[i] + " is not a standard ISIS log file. Expected to be two a column file.");
+        g_log.warning("File" + (*file) + " is not a standard ISIS log file. Expected to be two a column file.");
         l_JumpToNextLogFile = true;
         inLogFile.close();
         break; // break out of while look
@@ -242,11 +254,49 @@ void LoadLog::exec()
     {
       sample->addLogData(l_PropertyString);
       delete l_PropertyDouble;
-    }
+    }//*/
 
     inLogFile.close();
   } // end for
 
+  // Extract the common part of log file names (the workspace name)
+  fs::path ws_path(m_filename);
+  std::string ws_name = ws_path.leaf();
+  ws_name.erase(ws_name.find_last_of('.'));
+  ws_name += '_';
+
+
+  // Find the icpevent filename
+  std::string icpevent_file_name;
+  for(size_t i=0;i<potentialLogFiles.size();i++)
+  {
+      if (stringToLower(potentialLogFiles[i]).find("icpevent") != std::string::npos)
+      {
+          icpevent_file_name = potentialLogFiles[i];
+          break;
+      }
+  }
+
+  LogParser parser(icpevent_file_name);
+  int nPeriods = parser.nPeriods();
+
+  for(size_t i=0;i<potentialLogFiles.size();i++)
+  {
+      // Make the property name by removing the workspce name and file extension from the log filename
+      fs::path log_path(potentialLogFiles[i]);
+      std::string log_name = log_path.leaf();
+
+      if (rawFile)
+          log_name.erase(0,ws_name.size());
+
+      size_t j = log_name.find_last_of('.');
+      if (j != std::string::npos)
+          log_name.erase(j);
+
+      Property* log = parser.createLogProperty(potentialLogFiles[i],stringToLower(log_name),Period);
+      if (log)
+          sample->addLogData(log);
+  }
 
   // operation was a success and ended normally
   return;

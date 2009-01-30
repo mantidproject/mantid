@@ -198,6 +198,28 @@ boost::shared_ptr<Sample> MatrixWorkspace::getSample() const
   return sptr_sample;
 }
 
+/** Replace the sample with a new one. 
+ *  The new sample copies the name and proton charge from the old one.
+ *  Used when creating workspaces for multiple period data: each period must have
+ *  a sample of its own.
+ */
+void MatrixWorkspace::newSample() 
+{
+    boost::shared_ptr<Sample> old_sample = sptr_sample;
+    sptr_sample.reset(new Sample);
+    sptr_sample->setProtonCharge(old_sample->getProtonCharge());
+    sptr_sample->setName(old_sample->getName());
+}
+
+/** Create new empty instrument parameter map
+ *  Used when creating workspaces for multiple period data: each period must have
+ *  instrumet parameters of its own.
+ */
+void MatrixWorkspace::newInstrumentParameters() 
+{
+    sptr_parmap.reset(new Geometry::ParameterMap);
+}
+
 /// The number of axes which this workspace has
 const int MatrixWorkspace::axes() const
 {
