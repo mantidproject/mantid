@@ -22,7 +22,7 @@ QRgb GLColorMapQwt::rgb(const QwtDoubleInterval& interval,double value) const
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
 	double delta;
-	if(interval.maxValue()-interval.minValue()<0.00000001)
+	if(interval.maxValue()-interval.minValue()<0.00000001||count==0)
 		delta=-1;
 	else
 	    delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
@@ -40,7 +40,7 @@ unsigned char GLColorMapQwt::colorIndex(const QwtDoubleInterval &interval,double
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
 	double delta;
-	if(interval.maxValue()-interval.minValue()<0.00000001)
+	if(interval.maxValue()-interval.minValue()<0.00000001||count==0)
 		delta=-1;
 	else
 	    delta=(value-interval.minValue())/((interval.maxValue()-interval.minValue())/count);
@@ -54,6 +54,7 @@ unsigned char GLColorMapQwt::colorIndex(const QwtDoubleInterval &interval,double
 QVector<QRgb> GLColorMapQwt::colorTable(const QwtDoubleInterval &interval)const
 {
 	int count=((GLColorMap*)this)->getNumberOfColors();
+	if(count<=1) count=2;
 	QVector<QRgb>  table(count);
 
 	if ( interval.isValid() )
