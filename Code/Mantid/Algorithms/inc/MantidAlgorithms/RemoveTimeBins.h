@@ -5,15 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
 	
   namespace Algorithms
   {
-   /**Removes time bins from either the front or the back of a workspace. Do not use to remove time
-	  bins from the middle!
+   /** Removes bins from a workspace.
 
     Required Properties:
     <UL>
@@ -27,7 +25,7 @@ namespace Mantid
     @author 
     @date 11/07/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -47,8 +45,6 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-
-    
     class DLLExport RemoveTimeBins : public API::Algorithm
     {
     public:
@@ -68,10 +64,10 @@ namespace Mantid
       void init();
       void exec();
       void RemoveFromEnds(Mantid::API::MatrixWorkspace_const_sptr inputW, 
-		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, int start, int end);
+		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, unsigned int start, unsigned int end);
     
       void RemoveFromMiddle(Mantid::API::MatrixWorkspace_const_sptr inputW, 
-		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, int start, int end);
+		Mantid::API::MatrixWorkspace_sptr outputW, int numHists, unsigned int start, unsigned int end);
             
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
