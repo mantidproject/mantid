@@ -57,7 +57,7 @@ typedef struct _traceback {
 #include <QCoreApplication>
 
 #include <Qsci/qscilexerpython.h> //Mantid
-#include<iostream>
+#include <sstream>
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "sipAPIqti.h"
@@ -78,7 +78,10 @@ QString PythonScripting::toString(PyObject *object, bool decref)
 	QString ret;
 	if (!object) return "";
 	PyObject *repr = PyObject_Str(object);
-	if (decref) Py_DECREF(object);
+	if (decref) 
+	{
+	  Py_DECREF(object);
+	}
 	if (!repr) return "";
 	ret = PyString_AsString(repr);
 	Py_DECREF(repr);
@@ -166,8 +169,7 @@ QString PythonScripting::errorMsg()
 	  }
 	  Py_DECREF(traceback);
 	}
-       	msg.append("\n");
-	if( msg.contains("SystemExit") ) msg = QString("");
+	msg.append("\n");
 	//----------------------------------------------
 	return msg;
 }
@@ -241,6 +243,21 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 
 //	PyEval_ReleaseLock();
 	d_initialized = true;
+
+	std::ostringstream os;
+	
+	os << "import sys\n\n"
+	   << "def traceit(frame, event, arg):\n"
+	   << "\tif event == \"line\":\n"
+	   << "\t\tlineno = frame.f_lineno\n"
+	   << "\t\tfilename = frame.f_globals[\"__file__\"]\n"
+	   << "\t\tif filename == './qtiUtil.pyc':\n"
+	   << "\t\t\tprint \"LINENUMBER:\" + str(lineno),\n"
+	   << "\treturn traceit\n\n"
+	   << "sys.settrace(traceit)\n";
+
+	PyRun_SimpleString(os.str().c_str());
+
 }
 
 bool PythonScripting::initialize()

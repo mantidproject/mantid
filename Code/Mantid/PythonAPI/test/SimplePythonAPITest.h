@@ -47,6 +47,11 @@ public:
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));
 
+    getline( is, line );
+    getline( is, line );
+
+    TS_ASSERT_EQUALS(line, std::string("PYTHONAPIINMANTIDPLOT = False"));
+
     //next non-blank line should be help()
     //eat blank lines
     while( getline(is, line) && line.empty() ) 

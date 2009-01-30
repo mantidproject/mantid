@@ -38,7 +38,7 @@
 
 // Qt includes
 #include <QMenu>
-#include <QThread>
+#include <QEvent>
 
 // Scintilla needs an extra macro defining on windows
 #ifdef Q_WS_WIN
@@ -49,9 +49,6 @@
 class QAction;
 class QMenu;
 class QsciLexer;
-
-//Mantid
-class ExecuteThread;
 
 /*!\brief Editor widget with support for evaluating expressions and executing code.
  *
@@ -70,11 +67,10 @@ class ScriptEdit: public QsciScintilla, public scripted
   int lineNumber() const;
 
 public slots:
-    void executeAsync();
-    void executeAllAsync();
-    void execute();
-    void executeAll();
-    void evaluate();
+  void execute();
+  void executeAll();
+  void evaluate();
+
     void print();
     void exportPDF(const QString& fileName);
     QString exportASCII(const QString &file=QString::null);
@@ -87,6 +83,8 @@ public slots:
 
   void undoredoAvailable();
 
+  void setEditorActive(bool);
+  void setExecuteActionsEnabled(bool);
 
   signals:
   void outputMessage(const QString& text);
@@ -96,13 +94,14 @@ public slots:
   void undoAvailable(bool available);
   void redoAvailable(bool available);
 
+  //  void cancelAllAlgorithms();
+
   protected:
   virtual void contextMenuEvent(QContextMenuEvent *e);
 
   private:
-    ExecuteThread *exThread;
     Script *myScript;
-    QAction *actionExecute, *actionExecuteAll, *actionEval, *actionPrint, *actionImport, *actionExport;
+  QAction *actionExecute, *actionExecuteAll, *actionEval;
     //! Submenu of context menu with mathematical functions.
   	QMenu *functionsMenu;
   	//! Cursor used for output of evaluation results and error messages.  
@@ -112,6 +111,9 @@ public slots:
 
   //! True if we are inside evaluate(), execute() or executeAll() there were errors.
   bool d_error;
+
+  //An integer defining the handle to a code marker     
+  int m_iCodeMarkerHandle;
 
   private slots:
   //! Insert an error message from the scripting system at printCursor.
@@ -123,16 +125,5 @@ public slots:
 
 };
 
-//Mantid
-/// Thread to execute the script asynchronously.
-class ExecuteThread:public QThread
-{
-    ScriptEdit *edit;
-    bool all;
-public:
-    ExecuteThread(ScriptEdit *sedit,bool yes=false):edit(sedit),all(yes){}
-    void run();
-    void stop();
-};
 
 #endif

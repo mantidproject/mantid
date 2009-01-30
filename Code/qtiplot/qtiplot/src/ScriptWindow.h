@@ -74,8 +74,10 @@ public slots:
 
                 void scriptMessage(const QString&);				    
 		void scriptError(const QString&);
-
+                void insertOutputSeparator();
                 void updateWindowTitle();
+
+                void setEditEnabled(bool);
 
 private slots:
 		void setAlwaysOnTop(bool on);
@@ -109,6 +111,10 @@ private:
 		QAction *actionAlwaysOnTop, *actionHide;
 		QAction *actionViewScriptOutput;
                 QAction *actionPrintInput, *actionPrintOutput;
+  
+                // These need to be stored so that they can be enabled/disabled when the
+                //corresponding actions are toggled since Qt < v4.5 doesn't do this itself
+                QList<QKeySequence> executeShortcuts;
 };
 
 //Mantid - This class is here so that the context menu handler can be overridden but it can't be nested in the private section of 

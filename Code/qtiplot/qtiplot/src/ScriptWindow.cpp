@@ -94,18 +94,19 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 
 	setFocusProxy(te);
 	setFocusPolicy(Qt::StrongFocus);
+
 }
 
 ScriptWindow::~ScriptWindow()
 {
- // ------Mantid -------------
+  if( te )
+    delete te;
+  // ------Mantid -------------
   if( outputText ) 
     delete outputText;
   if( outputWindow ) 
     delete outputWindow;
   // -------------------------
-    if( te )
-    delete te;
 }
 
 void ScriptWindow::customEvent(QEvent *e)
@@ -237,16 +238,19 @@ void ScriptWindow::initActions()
    // Run actions
 	actionExecute = new QAction(tr("E&xecute"), this);
 	actionExecute->setShortcut( tr("Ctrl+Return") );
+	executeShortcuts.append(QKeySequence("Ctrl+Return"));
 	connect(actionExecute, SIGNAL(activated()), te, SLOT(execute()));
 	run->addAction(actionExecute);
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
 	actionExecuteAll->setShortcut( tr("Ctrl+Shift+Return") );
+	executeShortcuts.append(QKeySequence("Ctrl+Shift+Return"));
 	connect(actionExecuteAll, SIGNAL(activated()), te, SLOT(executeAll()));
 	run->addAction(actionExecuteAll);
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
 	actionEval->setShortcut( tr("Ctrl+E") );
+	executeShortcuts.append(QKeySequence("Ctrl+E"));
 	connect(actionEval, SIGNAL(activated()), te, SLOT(evaluate()));
 	run->addAction(actionEval);
 
@@ -422,13 +426,15 @@ void ScriptWindow::resizeEvent( QResizeEvent* e )
 void ScriptWindow::scriptMessage(const QString& text)
 {
   outputText->setTextColor(Qt::black);
-  outputText->textCursor().insertText(text);
+  insertOutputSeparator();
+  outputText->textCursor().insertText(text + "\n");
   outputText->moveCursor(QTextCursor::End);
 }				    
 
 void ScriptWindow::scriptError(const QString& text)
 {
   outputText->setTextColor(Qt::red);
+  insertOutputSeparator();
   outputText->textCursor().insertText(text);
   outputText->moveCursor(QTextCursor::End);
 }				    
@@ -438,12 +444,41 @@ void ScriptWindow::viewScriptOutput(bool visible)
   outputWindow->setVisible(visible);
 }
 
+void ScriptWindow::insertOutputSeparator()
+{
+  QString hashes(20, '#');
+  QString separator(hashes + " " + QDateTime::currentDateTime().toString() + "  " + hashes + "\n");
+  outputText->textCursor().insertText(separator);
+}
+
 void ScriptWindow::editChanged()
 {
   fileSaved = false;
   updateWindowTitle();
 }
 
+void ScriptWindow::setEditEnabled(bool toggle)
+{
+  te->setReadOnly(!toggle);
+  te->setExecuteActionsEnabled(toggle);
+  run->setEnabled(toggle);
+  
+  actionExecute->setEnabled(toggle);
+  actionExecuteAll->setEnabled(toggle);
+  actionEval->setEnabled(toggle);
+  if( toggle == true ) 
+  {
+    actionExecute->setShortcut(executeShortcuts[0]);
+    actionExecuteAll->setShortcut(executeShortcuts[1]);
+    actionEval->setShortcut(executeShortcuts[2]);
+  }
+  else 
+  {
+    actionExecute->setShortcut(tr(""));
+    actionExecuteAll->setShortcut(tr(""));
+    actionEval->setShortcut(tr(""));
+  }
+}
 
 OutputTextArea::OutputTextArea(QWidget * parent, const char * name) : QTextEdit(parent, name)
 {

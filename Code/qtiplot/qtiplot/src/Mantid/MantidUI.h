@@ -19,6 +19,7 @@
 #include <QTreeWidget>
 #include <QProgressDialog>
 #include <QMap>
+#include <QMutex>
 
 class Graph3D;
 class ScriptingEnv;
@@ -87,19 +88,34 @@ public:
     Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
 
 
-  // Command purely for python interaction
-  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showMatrix = false);
-  MantidMatrix* getMantidMatrix(const QString& wsName);
-  MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
-  int createPropertyInputDialog(const QString & algName);
-
   // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
 #ifdef _WIN32
     // Shows 2D plot of current memory usage.
     void memoryImage();
 #endif
+  /** ---------------------------------
+   * Commands purely for python interaction
+   */
+  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showMatrix = false);
+  MantidMatrix* getMantidMatrix(const QString& wsName);
+  MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
+  MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
+  bool runAlgorithmAsynchronously(const QString & algName);
+  bool createPropertyInputDialog(const QString & algName);
+
+public slots:
+  void cancelAllRunningAlgorithms();
+
+signals:
+  //A signal to indicate that we want a script to produce a dialog
+  void showPropertyInputDialog(const QString & algName);
+private:
+  Mantid::API::Algorithm* findAlgorithmPointer(const QString & algName);
+
+  //-----------------------------------
+
+public:
 
 signals:
 
@@ -109,6 +125,7 @@ signals:
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
     void needToShowCritical(const QString&);
 
+					   
 public slots:
 
     void logMessage(const Poco::Message& msg);

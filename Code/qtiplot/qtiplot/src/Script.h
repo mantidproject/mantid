@@ -64,7 +64,7 @@ class Script : public QObject
     //! Like QObject::name, but with unicode support.
     const QString name() const { return Name; }
     //! Return whether errors / exceptions are to be emitted or silently ignored
-    const bool emitErrors() const { return EmitErrors; }
+    bool emitErrors() const { return EmitErrors; }
     //! Append to the code that will be executed when calling exec() or eval()
     virtual void addCode(const QString &code) { Code.append(code); compiled = notCompiled; emit codeChanged(); }
     //! Set the code that will be executed when calling exec() or eval()

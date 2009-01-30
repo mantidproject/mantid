@@ -48,8 +48,10 @@
 #include "ScriptWindow.h"
 #include <QPrinterInfo>
 
+#include <iostream>
+
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QsciScintilla(parent), scripted(env),exThread(0), d_error(false)//Mantid
+  : QsciScintilla(parent), scripted(env), d_error(false)//Mantid
 {
 	myScript = scriptEnv->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
@@ -61,30 +63,22 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	codeLexer = env->scriptCodeLexer();
 	setLexer(codeLexer);
 	setAutoIndent(true);
-  setMarginLineNumbers(1,true);
-  setMarginWidth(1, 25);
-
+	setMarginLineNumbers(1,true);
+	setMarginWidth(1, 40);
+	
+	//Define line marker to be a right arrow
+	m_iCodeMarkerHandle = markerDefine(QsciScintilla::RightArrow);
+	
 	scriptsDirPath = qApp->applicationDirPath();
 
 	actionExecute = new QAction(tr("E&xecute"), this);
-	actionExecute->setShortcut( tr("Ctrl+Return") );
 	connect(actionExecute, SIGNAL(activated()), this, SLOT(execute()));
 
 	actionExecuteAll = new QAction(tr("Execute &All"), this);
-	actionExecuteAll->setShortcut( tr("Ctrl+Shift+Return") );
 	connect(actionExecuteAll, SIGNAL(activated()), this, SLOT(executeAll()));
 
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
-	actionEval->setShortcut( tr("Ctrl+E") );
 	connect(actionEval, SIGNAL(activated()), this, SLOT(evaluate()));
-
-	actionImport = new QAction(tr("&Open..."), this);
-	actionImport->setShortcut(tr("Ctrl+O"));
-	connect(actionImport, SIGNAL(activated()), this, SLOT(importASCII()));
-
-	actionExport = new QAction(tr("&Save..."), this);
-	actionExport->setShortcut(tr("Ctrl+S"));	
-	connect(actionExport, SIGNAL(activated()), this, SLOT(exportASCII()));
 
 	functionsMenu = new QMenu(this);
 	Q_CHECK_PTR(functionsMenu);
@@ -93,11 +87,6 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 
 ScriptEdit::~ScriptEdit()
 {
-    if (exThread)
-    {
-        exThread->stop();
-        delete exThread;
-    }
     if( codeLexer )
       delete codeLexer;
 }
@@ -124,30 +113,37 @@ void ScriptEdit::customEvent(QEvent *e)
 void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 {
   QMenu menu(this);
-  
-  menu.addAction(actionImport);
-  menu.addAction(actionExport);
-  
+
+  //First the options to open/save
+
+  QAction *action = new QAction(tr("&Open..."), this);
+  connect(action, SIGNAL(activated()), this, SLOT(importASCII()));
+  menu.addAction(action);
+
+  action = new QAction(tr("&Save..."), this);
+  connect(action, SIGNAL(activated()), this, SLOT(exportASCII()));
+  menu.addAction(action);
+
   if( !text().isEmpty() )
   {
-    QAction* print = new QAction(QPixmap(fileprint_xpm), "Print", this);
-    connect(print, SIGNAL(activated()), this, SLOT(print()));
-    menu.addAction(print);
+    action = new QAction(QPixmap(fileprint_xpm), "Print", this);
+    connect(action, SIGNAL(activated()), this, SLOT(print()));
+    menu.addAction(action);
   }
-  
-  menu.insertSeparator();
 
+  menu.insertSeparator();
+  //Now the running actions (the shortcuts are assigned to the ScriptWindow actions)
   menu.addAction(actionExecute);
   menu.addAction(actionExecuteAll);  
-  menu.addAction(actionEval);
+  menu.addAction(actionEval);  
 
   if (parent()->isA("Note")){
     Note *sp = (Note*) parent();
-    QAction *actionAutoexec = new QAction(tr("Auto&exec"), &menu);
-    actionAutoexec->setToggleAction(true);
-    actionAutoexec->setOn(sp->autoexec());
-    connect(actionAutoexec, SIGNAL(toggled(bool)), sp, SLOT(setAutoexec(bool)));
-    menu.addAction(actionAutoexec);
+    action = new QAction(tr("Auto&exec"), &menu);
+    action->setToggleAction(true);
+    action->setOn(sp->autoexec());
+    connect(action, SIGNAL(toggled(bool)), sp, SLOT(setAutoexec(bool)));
+    menu.addAction(action);
   }
   
   if( scriptEnv->scriptingLanguage() == "muParser" )
@@ -187,14 +183,36 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 
 void ScriptEdit::insertErrorMsg(const QString &message)
 {
-  if( !message.isEmpty() )
+  if( message.isEmpty() ) return;
+  setMarkerBackgroundColor(QColor("red"), m_iCodeMarkerHandle);
+  if( message.contains("SystemExit") )
+  {
+    //Alter it to something more meaningful
+    emit outputError(QString("Information: Script execution has been cancelled."));
+  }
+  else
+  {
     emit outputError(message);
+  }
+  setEditorActive(true);
 }
 
 void ScriptEdit::scriptPrint(const QString &text)
 {
-  if( !text.isEmpty() )
-  emit outputMessage(text);
+  if( text.isEmpty() || text.contains(QRegExp("^\\s$")) || text == QString('\n') ) return;
+
+  //If the text contains the current line number, mark the line instead of 
+  //outputting
+  if( text.contains("LINENUMBER:") ) 
+  {
+    int lineNumber = text.section(':',1, 1).toInt();
+    markerDeleteAll();
+    markerAdd(lineNumber - 1, m_iCodeMarkerHandle);
+  }
+  else
+  {
+    emit outputMessage(text);
+  }
 }
 
 void ScriptEdit::insertFunction(const QString &fname)
@@ -214,46 +232,6 @@ int ScriptEdit::lineNumber() const
   return linenumber;
 }
 
-//Mantid
-void ScriptEdit::executeAsync()
-{
-    if (exThread)
-    {
-        if (exThread->isRunning())
-        {
-            int answer = QMessageBox::question(this,"Mantid - Python Script",
-                "Python is currently running a script. Do you want to stop it?",
-                QMessageBox::Yes,QMessageBox::No);
-            if (answer != QMessageBox::Yes) return;
-        }
-        exThread->stop();
-        delete exThread;
-    }
-
-    exThread = new ExecuteThread(this);
-    exThread->start(QThread::LowestPriority);
-}
-
-//Mantid
-void ScriptEdit::executeAllAsync()
-{
-    if (exThread)
-    {
-        if (exThread->isRunning())
-        {
-            int answer = QMessageBox::question(this,"Mantid - Python Script",
-                "Python is currently running a script. Do you want to stop it?",
-                QMessageBox::Yes,QMessageBox::No);
-            if (answer != QMessageBox::Yes) return;
-        }
-        exThread->stop();
-        delete exThread;
-    }
-
-    exThread = new ExecuteThread(this,true);
-    exThread->start();
-}
-
 void ScriptEdit::execute()
 {
   QString code = selectedText().remove("\r");
@@ -262,23 +240,42 @@ void ScriptEdit::execute()
     executeAll();
     return;
   }
-  else
-  {
-    int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
-    //Qscintilla function
-    getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-    scriptEnv->setFirstLineNumber(lineFrom);
-    myScript->setCode(code);
-    myScript->exec();
-  }
+  int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
+  //Qscintilla function
+  getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+  scriptEnv->setFirstLineNumber(lineFrom);
+
+  //Disable editor
+  setEditorActive(false);
+
+  //If we get here everything is successful
+  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
+
+  //Execute the code 
+  myScript->setCode(code);
+  myScript->exec();
+  
+  //Reenable editor
+  setEditorActive(true);
 }
 
 void ScriptEdit::executeAll()
 {
   if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
-  myScript->setCode(text().remove("\r"));
+
+  //Disable editor
+  setEditorActive(false);
+
+  //If we get here everything is successful
+  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
+    
+  //Execute the code 
+  myScript->setCode(text().remove('\r'));
   myScript->exec();
+
+  //Reenable editor
+  setEditorActive(true);
 }
 
 void ScriptEdit::evaluate()
@@ -298,8 +295,8 @@ void ScriptEdit::evaluate()
     scriptEnv->setFirstLineNumber(lineFrom);
   }
   if( code.isEmpty() ) return;
+ 
   myScript->setCode(code);
-
   QVariant res = myScript->eval();
 
   if (res.isValid())
@@ -311,6 +308,24 @@ void ScriptEdit::evaluate()
       if (!strVal.isEmpty())
 	scriptPrint("#> "+strVal+"\n");
     }
+
+}
+
+//------------------------------------
+void ScriptEdit::setEditorActive(bool toggle)
+{
+  ScriptWindow *scriptWindow = static_cast<ScriptWindow*>(parent());
+  if( scriptWindow )
+  {
+    scriptWindow->setEditEnabled(toggle);
+  }
+}
+
+void ScriptEdit::setExecuteActionsEnabled(bool toggle)
+{
+  actionExecute->setEnabled(toggle);
+  actionExecuteAll->setEnabled(toggle);
+  actionEval->setEnabled(toggle);
 }
 
 void ScriptEdit::exportPDF(const QString&)
@@ -458,20 +473,3 @@ void ScriptEdit::setDirPath(const QString& path)
 	scriptsDirPath = path;
 }
 
-//Mantid
-void ExecuteThread::run()
-{
-    if (all) edit->executeAll();
-    else
-        edit->execute();
-}
-
-//Mantid
-void ExecuteThread::stop()
-{
-    if (isRunning())
-    {
-        terminate();
-        wait();
-    }
-}

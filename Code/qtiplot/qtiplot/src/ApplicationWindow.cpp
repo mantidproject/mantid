@@ -4064,7 +4064,7 @@ void ApplicationWindow::executeNotes()
 			((Note*)widget)->executeAll();
 }
 
-void ApplicationWindow::scriptError(const QString &message, const QString &scriptName, int lineNumber)
+void ApplicationWindow::scriptError(const QString &message, const QString &, int)
 {
 	QMessageBox::critical(this, tr("MantidPlot") + " - "+ tr("Script Error"), message);//Mantid
 }
@@ -14470,8 +14470,10 @@ ApplicationWindow::~ApplicationWindow()
 
 	delete hiddenWindows;
 
-	if (scriptWindow)
-		scriptWindow->close();
+	if (scriptWindow){
+	  scriptWindow->setAttribute(Qt::WA_DeleteOnClose);
+	  scriptWindow->close();
+	}
 
     if (d_text_editor)
 		delete d_text_editor;
@@ -14518,7 +14520,7 @@ void ApplicationWindow::cascade()
     modifiedProject();
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool factorySettings)
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool)
 {
 #ifdef SCRIPTING_PYTHON
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));	
@@ -15148,7 +15150,7 @@ void ApplicationWindow::addUserMenu(const QString & topMenu)
 
 void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData)
 {
-  QMenu* topMenu;
+  QMenu* topMenu(NULL);
   foreach(topMenu, d_user_menus)
   {
     if( topMenu->title() == parentMenu ) break;
@@ -15172,7 +15174,7 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
 void ApplicationWindow::removeUserMenu(const QString & parentMenu)
 {
   int i(-1);
-  QMenu *menu;
+  QMenu *menu(NULL);
   foreach(menu, d_user_menus)
   {
     ++i;
@@ -15190,13 +15192,13 @@ void ApplicationWindow::removeUserMenu(const QString & parentMenu)
 
 void ApplicationWindow::removeUserMenuAction(const QString & parentMenu, const QString & userAction)
 {
-  QMenu *menu;
+  QMenu *menu(NULL);
   foreach(menu, d_user_menus)
   {
     if( menu->title() == parentMenu ) break;
   }
-
-  QAction *action;
+  
+  QAction *action(NULL);
   foreach(action, d_user_actions)
   {
     if( action->text() == userAction ) break;

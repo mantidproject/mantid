@@ -35,7 +35,7 @@ public:
     /// Returns number of running algorithms
     int count(){return m_algorithms.size();}
     /// Returns pointers to running algorithms
-    QVector<Algorithm*>& algorithms(){return m_algorithms;}
+    const QVector<Algorithm*>& algorithms(){return m_algorithms;}
     void lock(){s_mutex.lock();}
     void unlock(){s_mutex.unlock();}
     Algorithm_sptr getShared(const Algorithm *alg);
@@ -54,22 +54,18 @@ protected:
     void handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf);
     Poco::NObserver<AlgorithmMonitor, Algorithm::ErrorNotification> m_errorObserver;
 
-    /// Runs constantly and detects algorithms launched from outside MantidUI (e.g. from Python script).
-    void run();
-    /// Stops run()
-    void stop(){m_running = false;wait();}
+
 public slots:
     void update();
     void showDialog();
     void cancel(Algorithm*);
+  void cancelAll();
 private:
     MantidUI *m_mantidUI;
     int m_nRunning;                 // number of running algorithms
     QVector<Algorithm*> m_algorithms; // pointers to running algorithms
     MonitorDlg* m_monitorDlg;
     static QMutex s_mutex;
-    /// Method run() is running
-    bool m_running;
 };
 
 class MonitorDlg: public QDialog

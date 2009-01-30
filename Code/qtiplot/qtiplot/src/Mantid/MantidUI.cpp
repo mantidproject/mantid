@@ -9,6 +9,7 @@
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "MantidSampleLogDialog.h"
+#include "../ScriptWindow.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
@@ -1328,8 +1329,42 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
   return w;
 }
 
-// This is for the scripting side of things
-int MantidUI::createPropertyInputDialog(const QString & algName)
+/**
+ * This is for the scripting side of things.
+ */
+bool MantidUI::runAlgorithmAsynchronously(const QString & algName)
+{
+  Mantid::API::Algorithm *alg = findAlgorithmPointer(algName);
+  if( !alg ) return false;
+  if( m_algMonitor ) m_algMonitor->add(alg);
+  Poco::ActiveResult<bool> result = alg->executeAsync();
+  while( !result.available() )
+  {
+    QCoreApplication::processEvents();
+  }
+  return result.data();
+}
+
+void MantidUI::cancelAllRunningAlgorithms()
+{
+  if( m_algMonitor ) m_algMonitor->cancelAll();
+}
+
+bool MantidUI::createPropertyInputDialog(const QString & algName)
+{
+  Mantid::API::Algorithm *alg = findAlgorithmPointer(algName);
+  if( !alg ) 
+  {
+    return false;
+  }
+  ScriptWindow* sw = appWindow()->scriptWindow;  
+  ExecuteAlgorithm* dlg = new ExecuteAlgorithm(sw, true);
+  dlg->CreateLayout(alg);
+  dlg->setModal(true);
+  return (dlg->exec() == QDialog::Accepted);
+}
+
+Mantid::API::Algorithm* MantidUI::findAlgorithmPointer(const QString & algName)
 {
   vector<Mantid::API::Algorithm_sptr> algorithms = 
     Mantid::API::AlgorithmManager::Instance().algorithms();
@@ -1344,15 +1379,7 @@ int MantidUI::createPropertyInputDialog(const QString & algName)
       break;
     }
   }
-  if( !alg ) return -1;
-
-  ExecuteAlgorithm* dlg = new ExecuteAlgorithm((QDialog*)appWindow()->scriptWindow, true);
-  dlg->CreateLayout(alg);
-  dlg->setModal(true);
-
-  if( dlg->exec() == QDialog::Accepted ) return 0;
-  else return -1;
-  
+  return alg;
 }
 
 void MantidUI::importSampleLog(const QString & filename, const QString & data, bool numeric)

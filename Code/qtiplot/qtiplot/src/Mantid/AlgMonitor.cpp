@@ -1,5 +1,6 @@
 #include "AlgMonitor.h"
 #include "MantidUI.h"
+#include "MantidDock.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/PropertyManager.h"
 
@@ -13,16 +14,20 @@ using namespace std;
 
 QMutex AlgorithmMonitor::s_mutex;
 
-AlgorithmMonitor::AlgorithmMonitor(MantidUI *m):m_mantidUI(m),m_nRunning(0),m_running(false),
+AlgorithmMonitor::AlgorithmMonitor(MantidUI *m) : 
 m_finishedObserver(*this, &AlgorithmMonitor::handleAlgorithmFinishedNotification),
 m_progressObserver(*this, &AlgorithmMonitor::handleAlgorithmProgressNotification),
-m_errorObserver(*this, &AlgorithmMonitor::handleAlgorithmErrorNotification)
+m_errorObserver(*this, &AlgorithmMonitor::handleAlgorithmErrorNotification),
+m_mantidUI(m), m_nRunning(0)
 {
 }
 
 AlgorithmMonitor::~AlgorithmMonitor()
 {
-    stop();
+  cancelAll();
+  wait(1000);
+  exit();
+  wait();
 }
 
 void AlgorithmMonitor::add(Algorithm *alg)
@@ -32,38 +37,26 @@ void AlgorithmMonitor::add(Algorithm *alg)
     alg->notificationCenter.addObserver(m_errorObserver);
     alg->notificationCenter.addObserver(m_progressObserver);
     m_algorithms.push_back(alg);
+    ++m_nRunning;
+    emit countChanged(m_nRunning);
     unlock();
-    emit countChanged(count());
+    //    std::cerr << "Add to Monitor Algorithms running " << m_nRunning << "\n";
+
 }
 
 void AlgorithmMonitor::remove(const Algorithm *alg)
 {
     lock();
     QVector<Algorithm*>::iterator i = find(m_algorithms.begin(),m_algorithms.end(),alg);
-    if (i != m_algorithms.end()) m_algorithms.erase(i);
+    if (i != m_algorithms.end()) 
+    { 
+      m_algorithms.erase(i);
+      --m_nRunning;
+    }
     unlock();
-    emit countChanged(count());
-}
+    //std::cerr << "Monitor removal Algorithms running " << m_nRunning << "\n";
+    emit countChanged(m_nRunning);
 
-void AlgorithmMonitor::run()
-{
-        m_running = true;
-        while(m_running)
-        {
-            sleep(1);
-            const std::vector<Algorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
-            lock();
-            for(std::vector<Algorithm_sptr>::const_iterator a=algs.begin();a!=algs.end();a++)
-            {
-                if ((*a)->isRunning() && find(m_algorithms.begin(),m_algorithms.end(),a->get()) == m_algorithms.end())
-                {
-                    unlock();
-                    add(a->get());
-                    lock();
-                }
-            }
-            unlock();
-        }
 }
 
 Algorithm_sptr AlgorithmMonitor::getShared(const Algorithm *alg)
@@ -80,7 +73,7 @@ void AlgorithmMonitor::update()
 
 void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Algorithm::FinishedNotification>& pNf)
 {
-    remove(pNf->algorithm());
+  remove(pNf->algorithm());
 }
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
@@ -105,6 +98,11 @@ void AlgorithmMonitor::cancel(Algorithm *alg)
     Algorithm_sptr a = getShared(alg);
     if (!a.get()) return;
     a->cancel();
+}
+
+void AlgorithmMonitor::cancelAll()
+{
+  for_each(m_algorithms.begin(), m_algorithms.end(), mem_fun(&Mantid::API::Algorithm::cancel));
 }
 
 //-----------------------------------------------------------------------------------------------//
@@ -134,7 +132,7 @@ MonitorDlg::~MonitorDlg()
 {
 }
 
-void MonitorDlg::update(int n)
+void MonitorDlg::update(int)
 {
     if (!m_tree)
     {
@@ -151,23 +149,26 @@ void MonitorDlg::update(int n)
     }
     else
         m_tree->clear();
+    
     m_algMonitor->lock();
-    for(int i=0;i<m_algMonitor->count();i++)
+    QVector<Mantid::API::Algorithm*>::const_iterator iend = m_algMonitor->algorithms().end();
+    for(QVector<Mantid::API::Algorithm*>::const_iterator itr = m_algMonitor->algorithms().begin(); 
+	itr != iend; ++itr)
     {
-        const Algorithm* alg = m_algMonitor->algorithms()[i];
-        m_algorithms << alg;
-        QStringList iList;
-        iList<<QString::fromStdString(m_algMonitor->algorithms()[i]->name());
-        QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
-        m_tree->addTopLevelItem(algItem);
-        QProgressBar *algProgress = new QProgressBar;
-        algProgress->setAlignment(Qt::AlignHCenter);
-        AlgButton *cancelButton = new AlgButton("Cancel",m_algMonitor->algorithms()[i]);
-        m_tree->setItemWidget(algItem,1,algProgress);
-        m_tree->setItemWidget(algItem,2,cancelButton);
-        const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
+      const Algorithm* alg = *itr;
+      m_algorithms << alg;
+      QStringList iList;
+      iList<<QString::fromStdString(alg->name());
+      QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
+      m_tree->addTopLevelItem(algItem);
+      QProgressBar *algProgress = new QProgressBar;
+      algProgress->setAlignment(Qt::AlignHCenter);
+      AlgButton *cancelButton = new AlgButton("Cancel", *itr);
+      m_tree->setItemWidget(algItem,1,algProgress);
+      m_tree->setItemWidget(algItem,2,cancelButton);
+      const std::vector< Mantid::Kernel::Property* >& prop_list = alg->getProperties();
         for(std::vector< Mantid::Kernel::Property* >::const_iterator prop=prop_list.begin();prop!=prop_list.end();prop++)
-        {
+	  {
             QStringList lstr;
             lstr  << QString::fromStdString((**prop).name()) + ": " << QString::fromStdString((**prop).value());
             if ((**prop).isDefault()) lstr << " Default";

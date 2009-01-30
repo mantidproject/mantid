@@ -1727,7 +1727,8 @@ public:
 %MethodCode
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
-  int createPropertyInputDialog(const QString & algName);
+  bool runAlgorithmAsynchronously(const QString &);
+  bool createPropertyInputDialog(const QString &);
   private:
 MantidUI(const MantidUI &);
 };

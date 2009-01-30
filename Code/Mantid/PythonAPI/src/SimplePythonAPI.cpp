@@ -60,6 +60,10 @@ namespace Mantid
       //Need string module regardless
       module << "import string\n\n";
 
+      //In GUI need to define a global variable to tell if we are using it or not
+      if( gui )	module << "PYTHONAPIINMANTIDPLOT = True\n\n";
+      else module << "PYTHONAPIINMANTIDPLOT = False\n\n";
+		  
       //Algorithm keys
       using namespace Mantid::API;
       StringVector algKeys = AlgorithmFactory::Instance().getKeys();
@@ -178,17 +182,25 @@ namespace Mantid
       if( gui )
       {
 	os << "\tif nset != " << iarg + 1 << ":\n"
-	   << "\t\tres = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\")\n"
-	   << "\tif res == 0:\n"
-	   << "\t\talgm.execute()\n"
+	   << "\t\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\")\n"
+	   << "\tif dialog == True:\n"
+	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\telse:\n"
-	   << "\t\tsys.exit(1)\n";
+	   << "\t\tsys.exit(1)\n"
+	   << "\tif result == False:\n"
+	   << "\t\tsys.exit(1)\n"
+	   << "\treturn algm\n";
       }
       else
       {
-	os << "\talgm.execute()\n";
+	os << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
+	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
+	   << "\t\tif result == False:\n"
+	   << "\t\t\tsys.exit(1)\n"
+	   << "\telse:\n"
+	   << "\t\talgm.execute()\n"
+	   << "\treturn algm\n";
       }
-      os << "\treturn algm\n";
       //Add space at end of definition
       os << "\n";
     }
@@ -202,25 +214,26 @@ namespace Mantid
     {
       os << "# The help command with no parameters\n";
       os << "def mtdGlobalHelp():\n";
-      os << "\tprint \"The algorithms available are:\"\n";
+      os << "\thelpmsg =  \"The algorithms available are:\\n\"\n";
       VersionMap::const_iterator vIter = vMap.begin();
       for( ; vIter != vMap.end(); ++vIter )
       {
  	if( vIter->second == 1 )
- 	  os << "\tprint \"\\t" << vIter->first << "\"\n";
+ 	  os << "\thelpmsg += \"\\t" << vIter->first << "\\n\"\n"; 
  	else {
-	  os << "\tprint \"\\t" << vIter->first << " ";
+	  os << "\thelpmsg += \"\\t" << vIter->first << " "; 
 	  int i = 0;
 	  while( ++i <= vIter->second )
 	    {
 	      os << "v" << i << " ";
 	    }
-	  os << "\"\n";
+	  os << "\\n\"\n";
 	}
       }
-      os << "\tprint \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\"\n";
-      os << "\tprint \"Note: Each command also has a counterpart with the word 'Dialog'"
-	 << " appended to it, which when run will bring up a property input dialog for that algorithm.\"\n";
+      os << "\thelpmsg += \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\\n\"\n";
+      os << "\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
+	 << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n";
+      os << "\tprint helpmsg,\n";
       os << "\n";
     }
 
@@ -232,7 +245,7 @@ namespace Mantid
     std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties)
     {
       std::ostringstream os;
-      os << "\t\tprint \"Usage: " << algm << "(";
+      os << "\t\thelpmsg =  \"Usage: " << algm << "(";
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
       for( ; pIter != pEnd ; )
@@ -240,13 +253,13 @@ namespace Mantid
 	os << sanitizePropertyName((*pIter)->name());
 	if( ++pIter != pEnd ) os << ", ";
       }
-      os << ")\"\n";
-      os << "\t\tprint \"Argument description:\"\n";
+      os << ")\\n\"\n";
+      os << "\t\thelpmsg += \"Argument description:\\n\"\n";
       pIter = properties.begin();
       for( ; pIter != pEnd ; ++pIter )
       {
 	Mantid::Kernel::Property* prop = *pIter;
-	os << "\t\tprint \"\\tName: " << sanitizePropertyName((*pIter)->name()) << ", Optional: ";  
+	os << "\t\thelpmsg += \"\\tName: " << sanitizePropertyName((*pIter)->name()) << ", Optional: ";  
 	if( prop->isValid() ) os << "Yes, Default value: " << sanitizePropertyValue(prop->value());
 	else os << "No";
 	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
@@ -262,10 +275,11 @@ namespace Mantid
 	    if( ++sIter != sEnd ) os << ", ";
 	  }
 	}
-	os << "\"\n";	
+	os << "\\n\"\n";	
       }
-      os << "\t\tprint \"\\nNote 1: All arguments must be wrapped in string quotes  \\\"\\\", regardless of their type.\"\n";
-      os << "\t\tprint \"Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\\"value\\\".\"\n\n";
+      os << "\t\thelpmsg += \"Note 1: All arguments must be wrapped in string quotes  \\\"\\\", regardless of their type.\\n\"\n";
+      os << "\t\thelpmsg += \"Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\\"value\\\".\\n\"\n";
+      os << "\t\tprint helpmsg,\n\n";
       return os.str();
     }
 
