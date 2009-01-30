@@ -27,6 +27,8 @@ namespace DataHandling
 
 Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
 
+enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
+
 LogParser::LogParser(const std::string& eventFName)
 :m_nOfPeriods(1),m_unknown(true)
 {
@@ -37,7 +39,6 @@ LogParser::LogParser(const std::string& eventFName)
         return;
     }
 
-    enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
     std::map<std::string,commands> command_map;
     command_map["BEGIN"] = BEGIN;
     command_map["RESUME"] = BEGIN;
