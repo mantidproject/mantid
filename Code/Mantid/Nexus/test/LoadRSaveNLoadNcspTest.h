@@ -47,7 +47,7 @@ void testExecOnLoadraw()
 {
     // use SaveNexusProcessed to build a test file to load
     // for this use LoadRaw
-    std::string inputFile = "../../../../Test/Data/CSP78173.RAW";
+    std::string inputFile = "../../../../Test/Data/CSP78173.raw";
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -218,7 +218,7 @@ void testExecOnLoadraw()
     //
     //TS_ASSERT_EQUALS( timeSeriesString.substr(0,38), "2008-Jun-17 11:11:13  CHANGE PERIOD 12" );
 
-    //remove(outputFile.c_str());
+    remove(outputFile.c_str());
 
   }
 
