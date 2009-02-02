@@ -1,8 +1,9 @@
-#ifndef GTS_GEOMETRYHANDLER_H
-#define GTS_GEOMETRYHANDLER_H
+#ifndef CACHE_GEOMETRYHANDLER_H
+#define CACHE_GEOMETRYHANDLER_H
 
 #include "MantidKernel/System.h"
 #include "boost/shared_ptr.hpp"
+#include "MantidGeometry/GeometryHandler.h"
 
 namespace Mantid
 {
@@ -10,13 +11,14 @@ namespace Mantid
 	namespace Geometry
 	{
 		/*!
-		\class GtsGeometryHandler
-		\brief Place holder for GTS library geometry triangulation and rendering.
+		\class CacheGeometryHandler
+		\brief Place holder for geometry triangulation and rendering with caching triangles.
 		\author Srikanth Nagella
-		\date July 2008
+		\date Jan 2009
 		\version 1.0
 
-		This is an implementation class for handling geometry using GTS(GNU Triangulation Surface).
+		This is an implementation class for handling geometry from cache, if the cache doesn't exist then the 
+		triangulation is done using another triangulation handler and store in cache.
 
 		Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
 
@@ -38,21 +40,23 @@ namespace Mantid
 		File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 		*/
 		class GeometryHandler;
-		class GtsGeometryRenderer;
-		class GtsGeometryGenerator;
+		class CacheGeometryRenderer;
+		class CacheGeometryGenerator;
 		class IObjComponent;
 		class Object;
-		class DLLExport GtsGeometryHandler: public GeometryHandler
+		class V3D;
+		class DLLExport CacheGeometryHandler: public GeometryHandler
 		{
 		private:
 			static Kernel::Logger& PLog;           ///< The official logger
-			GtsGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
-			GtsGeometryGenerator* Triangulator;    ///< Geometry generator to triangulate Object
+			CacheGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
+			CacheGeometryGenerator* Triangulator;    ///< Geometry generator to triangulate Object
+
 		public:
-			GtsGeometryHandler(IObjComponent* obj); ///< Constructor
-			GtsGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
-			GtsGeometryHandler(Object* obj); ///< Constructor
-			~GtsGeometryHandler(); ///< Destructor
+			CacheGeometryHandler(IObjComponent* obj); ///< Constructor
+			CacheGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
+			CacheGeometryHandler(Object* obj); ///< Constructor
+			~CacheGeometryHandler(); ///< Destructor
 			GeometryHandler* createInstance(IObjComponent *comp);
 			GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
 			void Triangulate();
@@ -63,6 +67,7 @@ namespace Mantid
 			int     NumberOfPoints();
 			double* getTriangleVertices();
 			int*    getTriangleFaces();
+			void setGeometryCache(int noPts,int noFaces,double* pts,int* faces);
 		};
 
 	}   // NAMESPACE Geometry

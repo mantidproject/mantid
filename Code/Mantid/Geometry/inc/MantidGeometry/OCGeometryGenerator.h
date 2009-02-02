@@ -80,6 +80,10 @@ namespace Mantid
 			~OCGeometryGenerator();
 			void Generate();
 			TopoDS_Shape* getObjectSurface();
+			int getNumberOfTriangles();
+			int getNumberOfPoints();
+			double* getTriangleVertices();
+			int* getTriangleFaces();
 		};
 
 	}    // NAMESPACE Geometry

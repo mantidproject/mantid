@@ -71,5 +71,58 @@ namespace Mantid
 				Renderer->Initialize(ObjComp);
 			}
 		}
+
+		int OCGeometryHandler::NumberOfTriangles()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false)	Triangulate();
+				return Triangulator->getNumberOfTriangles();
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		int OCGeometryHandler::NumberOfPoints()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false)	Triangulate();
+				return Triangulator->getNumberOfPoints();
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		double* OCGeometryHandler::getTriangleVertices()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false)	Triangulate();
+				return Triangulator->getTriangleVertices();
+			}
+			else
+			{
+				return NULL;
+			}
+		}
+
+		int*    OCGeometryHandler::getTriangleFaces()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false)	Triangulate();
+				return Triangulator->getTriangleFaces();
+			}
+			else
+			{
+				return NULL;
+			}
+		}
+
 	}
 }

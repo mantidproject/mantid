@@ -58,6 +58,11 @@ namespace Mantid
 			void Triangulate();
 			void Render();
 			void Initialize();
+			bool    canTriangulate(){return true;}
+			int     NumberOfTriangles();
+			int     NumberOfPoints();
+			double* getTriangleVertices();
+			int*    getTriangleFaces();
 		};
 
 	}   // NAMESPACE Geometry

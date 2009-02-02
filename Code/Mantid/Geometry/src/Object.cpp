@@ -27,8 +27,7 @@
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/GeometryHandler.h"
-#include "MantidGeometry/GtsGeometryHandler.h"
-#include "MantidGeometry/OCGeometryHandler.h"
+#include "MantidGeometry/CacheGeometryHandler.h"
 namespace Mantid
 {
 
@@ -48,8 +47,7 @@ namespace Mantid
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
     {
-//		handle = new GtsGeometryHandler(this);
-		handle=new OCGeometryHandler(this);
+		handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
 	}
 
     Object::Object(const Object& A) :
@@ -61,14 +59,13 @@ namespace Mantid
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
       AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),
-      handle(0),SurList(A.SurList)
+      SurList(A.SurList)
       /*!
       Copy constructor
       \param A :: Object to copy
       */
     {
-//		handle = new GtsGeometryHandler(this);
-		handle=new OCGeometryHandler(this);
+		handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
 	}
 
     Object&
@@ -106,9 +103,6 @@ namespace Mantid
       */
     {
       delete TopRule;
-	  if(handle!=NULL){
-		  delete handle;
-	  }
 	  //for(int i=0;i<SurList.size();i++)
 		 // delete SurList[i];
     }
@@ -1271,7 +1265,7 @@ namespace Mantid
 	* Set the geometry handler for Object
 	* @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
 	*/
-	void Object::setGeometryHandler(GeometryHandler *h)
+	void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h)
 	{
 		if(h==NULL)return;
 		handle=h;

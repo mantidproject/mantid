@@ -8,6 +8,7 @@
 #include "MantidGeometry/Surface.h"
 #include "MantidGeometry/Track.h"
 #include "MantidGeometry/Quat.h"
+#include "boost/shared_ptr.hpp"
 
 
 namespace Mantid
@@ -79,8 +80,7 @@ class DLLExport Object
 	                         const double&, const double&, const double&,
 	                         const double&, const double&, const double& ) const;
   /// Geometry Handle for rendering
-  GeometryHandler* handle;
-  void setGeometryHandler(GeometryHandler *h);
+  boost::shared_ptr<GeometryHandler> handle;
   friend class GeometryHandler;
 
  protected:
@@ -162,7 +162,9 @@ class DLLExport Object
   void draw() const;
   //Initialize Drawing
   void initDraw() const;
-
+  //Get Geometry Handler
+  boost::shared_ptr<GeometryHandler> getGeometryHandler(){return handle;}
+  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
 };
 
 }  // NAMESPACE Geometry

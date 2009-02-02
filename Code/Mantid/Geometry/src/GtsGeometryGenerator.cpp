@@ -33,6 +33,15 @@ namespace Mantid
 				for (j = 0, y = g.y; j < g.ny; j++, y += g.dy)
 					f[i][j] = ((SurfaceEvaluator*)data)->evaluate(V3D(x,y,z));
 		}
+
+		/**
+		 * This method assigns the point index
+		 */ 
+		void mantid_gts_assign_point_index(GtsPoint * p, gpointer * data)
+		{
+			GTS_OBJECT (p)->reserved = GUINT_TO_POINTER ((*((guint *) data))++);
+		}
+
 		/**
 		 * Constructor
 		 * @param obj input object
@@ -134,8 +143,8 @@ namespace Mantid
 				//gts_surface_add_face (gtsSurface, gts_face_new (klass, e17, e11, e9));
 				//gts_surface_add_face (gtsSurface, gts_face_new (klass, e18, e13, e1));
 				//gts_surface_add_face (gtsSurface, gts_face_new (klass, e18, e14, e6));
-
-
+				int val=0;
+				gts_surface_foreach_vertex (gtsSurface, (GtsFunc) mantid_gts_assign_point_index,&val);
 				ObjSurface=gtsSurface;
 				gtsSurface=NULL;
 			}

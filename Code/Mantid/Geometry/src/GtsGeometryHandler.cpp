@@ -10,6 +10,37 @@ namespace Mantid
 {
 	namespace Geometry
 	{
+	   /*
+		* This is private method used for traversing gts surface and retriving points
+		* @param p Points of the surface
+		* @param data user information, data points pointer
+		*/
+		static void mantid_gts_surface_vertex_point (GtsPoint * p, gpointer * data)
+		{
+			double* pts = (double*)*data;
+			int index   = GPOINTER_TO_UINT (GTS_OBJECT (p)->reserved);
+			pts[index*3]   = p->x;
+			pts[index*3+1] = p->y;
+			pts[index*3+2] = p->z;
+		}
+
+	   /*
+		* This is private method used for traversing gts surface and retriving triangle indexes
+		* @param t triangle faces of the surface
+		* @param data user information, data[0] face index pointer and data[1] index
+		*/
+		static void mantid_gts_surface_vertex_face (GtsTriangle * t, gpointer * data)
+		{
+			int* pts  = (int*) data[0];
+			int index = (int) data[1];
+			GUINT_TO_POINTER ((*((guint *) data[1]))++);
+			GtsVertex * v1, * v2, * v3;
+			gts_triangle_vertices (t, &v1, &v2, &v3);
+			pts[index*3]   = GPOINTER_TO_UINT (GTS_OBJECT (v1)->reserved);
+			pts[index*3+1] = GPOINTER_TO_UINT (GTS_OBJECT (v2)->reserved);
+			pts[index*3+2] = GPOINTER_TO_UINT (GTS_OBJECT (v3)->reserved);
+		}
+
 		GtsGeometryHandler::GtsGeometryHandler(IObjComponent *comp):GeometryHandler(comp)
 		{
 			Triangulator=NULL;
@@ -71,6 +102,56 @@ namespace Mantid
 			}else if(ObjComp!=NULL){
 				Renderer->Initialize(ObjComp);
 			}
+		}
+
+		int GtsGeometryHandler::NumberOfTriangles()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false) Triangulate();
+				return gts_surface_face_number(Triangulator->getObjectSurface());
+			}
+			else
+				return 0;
+		}
+		
+		int GtsGeometryHandler::NumberOfPoints()
+		{
+			if(Obj!=NULL)
+			{
+				if(boolTriangulated==false) Triangulate();
+				return gts_surface_vertex_number(Triangulator->getObjectSurface());
+			}
+			else
+				return 0;
+		}
+
+		double* GtsGeometryHandler::getTriangleVertices()
+		{
+			double* points=NULL;
+			int nPts=this->NumberOfPoints();
+			if(nPts>0)
+			{
+				points=new double[nPts*3];
+				gts_surface_foreach_vertex(Triangulator->getObjectSurface(),(GtsFunc)mantid_gts_surface_vertex_point,&points);
+			}
+			return points;
+		}
+
+		int*    GtsGeometryHandler::getTriangleFaces()
+		{
+			int* faces=NULL;
+			int nFaces=this->NumberOfTriangles();
+			if(nFaces>0)
+			{
+				faces=new int[nFaces*3];
+				guint n = 0;
+				gpointer data[2];
+				data[0]=faces;
+				data[1]=&n;
+				gts_surface_foreach_vertex(Triangulator->getObjectSurface(),(GtsFunc)mantid_gts_surface_vertex_face,data);
+			}
+			return faces;
 		}
 	}
 }

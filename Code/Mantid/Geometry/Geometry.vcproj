@@ -112,7 +112,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/DWNT"
 				Optimization="3"
-				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include;../../Third_Party/include/OpenCascade"
+				AdditionalIncludeDirectories="&quot;../../Third_Party/include/gts/glib-2.0&quot;;../../Third_Party/include/gts;inc;Deprecated/inc;../Kernel/inc;../../Third_Party/include;../../Third_Party/OpenCascade"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;MS_VISUAL_STUDIO;IN_MANTID_GEOMETRY=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
@@ -175,6 +175,18 @@
 			</File>
 			<File
 				RelativePath=".\src\BnId.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CacheGeometryGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CacheGeometryHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CacheGeometryRenderer.cpp"
 				>
 			</File>
 			<File
@@ -417,6 +429,10 @@
 				RelativePath=".\src\V3D.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\vtkGeometryCacheWriter.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -445,6 +461,18 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidGeometry\BnId.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\CacheGeometryGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\CacheGeometryHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\CacheGeometryRenderer.h"
 				>
 			</File>
 			<File
@@ -769,6 +797,14 @@
 			</File>
 			<File
 				RelativePath=".\test\V3DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\vtkGeometryCacheReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\vtkGeometryCacheWriter.h"
 				>
 			</File>
 			<File

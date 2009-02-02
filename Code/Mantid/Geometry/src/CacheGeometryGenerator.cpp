@@ -1,0 +1,86 @@
+#include "MantidKernel/Logger.h"
+#include <vector>
+#include <math.h>
+#include "MantidGeometry/V3D.h"
+#include "MantidGeometry/Matrix.h"
+#include "MantidGeometry/Object.h"
+#include "MantidGeometry/CacheGeometryGenerator.h"
+#include "MantidGeometry/GeometryHandler.h"
+#include "MantidGeometry/OCGeometryHandler.h"
+
+namespace Mantid
+{
+
+	namespace Geometry
+	{
+		Kernel::Logger& CacheGeometryGenerator::PLog(Kernel::Logger::get("CacheGeometryGenerator"));
+		/**
+		 * Constructor
+		 * @param obj input object
+		 */
+		CacheGeometryGenerator::CacheGeometryGenerator(Object *obj):Obj(obj)
+		{
+			mNoOfVertices=0;
+			mNoOfTriangles=0;
+			mFaces=NULL;
+			mPoints=NULL;
+		}
+
+		/**
+		 * Generate geometry, if there is no cache then it uses OpenCascade to generate surface triangles.
+		 */
+		void CacheGeometryGenerator::Generate()
+		{
+			if(mNoOfVertices<=0) //There are no triangles defined to use OpenCascade handler
+			{
+				OCGeometryHandler h(Obj);
+				mNoOfVertices=h.NumberOfPoints();
+				mNoOfTriangles=h.NumberOfTriangles();
+				mPoints=h.getTriangleVertices();
+				mFaces=h.getTriangleFaces();
+			}
+		}
+
+		/**
+		 * Destroy the surface generated for the object
+		 */
+		CacheGeometryGenerator::~CacheGeometryGenerator()
+		{
+			if(mFaces!=NULL) delete mFaces;
+			if(mPoints!=NULL) delete mPoints;
+		}
+
+
+    	int CacheGeometryGenerator::getNumberOfTriangles()
+		{
+			return mNoOfTriangles;
+		}
+
+		int CacheGeometryGenerator::getNumberOfPoints()
+		{
+			return mNoOfVertices;
+		}
+
+		double* CacheGeometryGenerator::getTriangleVertices()
+		{
+			return mPoints;
+		}
+
+		int* CacheGeometryGenerator::getTriangleFaces()
+		{
+			return mFaces;
+		}
+
+		void CacheGeometryGenerator::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
+		{
+			if(mPoints!=NULL) delete mPoints;
+			if(mFaces!=NULL) delete mFaces;
+			mNoOfVertices=noPts;
+			mNoOfTriangles=noFaces;
+			mPoints=pts;
+			mFaces=faces;
+		}
+
+	}  // NAMESPACE Geometry
+
+}  // NAMESPACE Mantid

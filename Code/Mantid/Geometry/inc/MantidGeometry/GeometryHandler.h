@@ -62,6 +62,12 @@ namespace Mantid
 			virtual void Triangulate()=0; ///< Triangulate the Object
 			virtual void Render()=0;      ///< Render Object or ObjComponent
 			virtual void Initialize()=0;  ///< Prepare/Initialize Object/ObjComponent to be rendered
+			virtual bool    canTriangulate(){return false;}
+			virtual int     NumberOfTriangles(){return 0;}
+			virtual int     NumberOfPoints(){return 0;}
+			virtual double* getTriangleVertices(){return NULL;}
+			virtual int*    getTriangleFaces(){return NULL;}
+			virtual void setGeometryCache(int noPts,int noFaces,double* pts,int* faces){};
 		};
 
 	}   // NAMESPACE Geometry

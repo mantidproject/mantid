@@ -12,7 +12,7 @@ namespace Mantid
 		GeometryHandler::GeometryHandler(IObjComponent *comp):Obj()
 		{
 			ObjComp=comp;
-			ObjComp->setGeometryHandler(this);
+//			ObjComp->setGeometryHandler(this);
 			boolTriangulated=true;
 			boolIsInitialized = false;
 		}
@@ -24,7 +24,7 @@ namespace Mantid
 		GeometryHandler::GeometryHandler(boost::shared_ptr<Object> obj):Obj(obj.get())
 		{
 			ObjComp=NULL;
-			Obj->setGeometryHandler(this);
+//			Obj->setGeometryHandler(this);
 			boolTriangulated=false;
 			boolIsInitialized=false;
 		}
@@ -36,7 +36,7 @@ namespace Mantid
 		GeometryHandler::GeometryHandler(Object* obj):Obj(obj)
 		{
 			ObjComp=NULL;
-			Obj->setGeometryHandler(this);
+//			Obj->setGeometryHandler(this);
 			boolTriangulated=false;
 			boolIsInitialized=false;
 		}

@@ -20,6 +20,8 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Solid.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopExp_Explorer.hxx>
 #include <BRepMesh.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Common.hxx>
@@ -31,6 +33,8 @@
 #include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRep_Tool.hxx>
+#include <Poly_Triangulation.hxx>
 namespace Mantid
 {
 
@@ -249,6 +253,101 @@ namespace Mantid
 			return TopoDS_Shape();
 		}
 
+		int OCGeometryGenerator::getNumberOfTriangles()
+		{
+			int countFace=0;
+			if(ObjSurface!=NULL)
+			{
+				TopExp_Explorer Ex;
+				for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+				{
+					TopoDS_Face F=TopoDS::Face(Ex.Current());
+					TopLoc_Location L;
+					Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+					countFace+=facing->NbTriangles();
+				}
+			}
+			return countFace;
+		}
+
+		int OCGeometryGenerator::getNumberOfPoints()
+		{
+			int countVert=0;
+			if(ObjSurface!=NULL)
+			{
+				TopExp_Explorer Ex;
+				for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+				{
+					TopoDS_Face F=TopoDS::Face(Ex.Current());
+					TopLoc_Location L;
+					Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+					countVert+=facing->NbNodes();
+				}
+			}
+			return countVert;
+		}
+
+		double* OCGeometryGenerator::getTriangleVertices()
+		{
+			double* points=NULL;
+			int nPts=this->getNumberOfPoints();
+			if(nPts>0)
+			{
+				points=new double[nPts*3];
+				int index=0;
+				TopExp_Explorer Ex;
+				for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+				{
+					TopoDS_Face F=TopoDS::Face(Ex.Current());
+					TopLoc_Location L;
+					Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+					TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+					tab = facing->Nodes();
+					for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
+						gp_Pnt pnt=tab.Value(i);
+						points[index*3+0]=pnt.X();
+						points[index*3+1]=pnt.Y();
+						points[index*3+2]=pnt.Z();
+						index++;
+					}
+				}				
+			}
+			return points;
+		}
+
+		int* OCGeometryGenerator::getTriangleFaces()
+		{
+			int* faces=NULL;
+			int nFaces=this->getNumberOfPoints();
+			if(nFaces>0)
+			{
+				faces=new int[nFaces*3];
+				TopExp_Explorer Ex;
+				int maxindex=0;
+				int index=0;
+				for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+				{
+					TopoDS_Face F=TopoDS::Face(Ex.Current());
+					TopLoc_Location L;
+					Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+					TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+					tab = facing->Nodes();
+					Poly_Array1OfTriangle tri(1,facing->NbTriangles());
+					tri = facing->Triangles();
+					for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
+						Poly_Triangle trian = tri.Value(i);
+						Standard_Integer index1,index2,index3,M,N;
+						trian.Get(index1,index2,index3);
+						faces[index*3+0]=maxindex+index1-1;
+						faces[index*3+1]=maxindex+index2-1;
+						faces[index*3+2]=maxindex+index3-1;
+						index++;
+					}		
+					maxindex+=facing->NbNodes();
+				}
+			}
+			return faces;
+		}
 	}  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid
