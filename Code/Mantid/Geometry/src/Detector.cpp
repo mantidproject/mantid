@@ -67,7 +67,8 @@ double Detector::getDistance(const IComponent& comp) const
 
 double Detector::solidAngle(const V3D& observer) const
 {
-  return ObjComponent::solidAngle(observer);
+	//Return a solid angle of 0 if the detector is marked dead
+	return isDead()?0:ObjComponent::solidAngle(observer);
 }
 
 bool Detector::isDead() const
