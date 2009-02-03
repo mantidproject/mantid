@@ -42,9 +42,19 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
+	  Poco::XML::Document* mDoc;
+	  Poco::XML::Element*  mRoot;
+	  Poco::XML::DOMParser*  pParser;
+	  std::string          mFileName;
+	  //Private Methods
+	  void Init();
+	  Poco::XML::Element* vtkGeometryCacheReader::getElementByObjectName(std::string name);
+	  void vtkGeometryCacheReader::readPoints(Poco::XML::Element* pEle,int *noOfPoints,double** points);
+	  void vtkGeometryCacheReader::readTriangles(Poco::XML::Element* pEle,int *noOfTriangles,int** faces);
     public:
 		vtkGeometryCacheReader(std::string filename);       ///< Constructor
 		~vtkGeometryCacheReader();      ///< Destructor
+		void readCacheForObject(Object *obj);
     };
 
   }   // NAMESPACE Geometry
