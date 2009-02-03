@@ -23,9 +23,9 @@ namespace Mantid
     */
     void BinaryOperation::init()
     {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_1","",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_2","",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName1(),"",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(inputPropName2(),"",Direction::Input));
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>(outputPropName(),"",Direction::Output));
     }
 
     /** Executes the algorithm
@@ -35,8 +35,8 @@ namespace Mantid
     void BinaryOperation::exec()
     {
       // get input workspace, dynamic cast not needed
-      MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
-      MatrixWorkspace_sptr in_work2 = getProperty("InputWorkspace_2");
+      MatrixWorkspace_sptr in_work1 = getProperty(inputPropName1());
+      MatrixWorkspace_sptr in_work2 = getProperty(inputPropName2());
 
       // Check that the input workspace are compatible
       if (!checkCompatibility(in_work1,in_work2))
@@ -50,7 +50,7 @@ namespace Mantid
       MatrixWorkspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
       MatrixWorkspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
 
-      MatrixWorkspace_sptr out_work = getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr out_work = getProperty(outputPropName());
       // We need to create a new workspace for the output if:
       //   (a) the output workspace hasn't been set to one of the input ones, or
       //   (b) it has been, but it's not the correct dimensions
@@ -72,7 +72,7 @@ namespace Mantid
       performBinaryOperation(ti_in1,ti_in2,ti_out);
 
       // Assign it to the output workspace property
-      setProperty("OutputWorkspace",out_work);
+      setProperty(outputPropName(),out_work);
 
       return;
     }

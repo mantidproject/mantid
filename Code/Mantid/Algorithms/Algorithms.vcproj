@@ -270,6 +270,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PoissonErrors.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RebinPreserveValue.cpp"
 				>
 			</File>
@@ -344,6 +348,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ChangeBinOffsetTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CommutativeBinaryOperation.h"
 				>
 			</File>
@@ -356,11 +364,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ConjoinWorkspacesTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\ConvertFromDistribution.h"
 				>
 			</File>
 			<File
+				RelativePath=".\test\ConvertFromDistributionTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\ConvertToDistribution.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ConvertToDistributionTest.h"
 				>
 			</File>
 			<File
@@ -376,7 +396,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CorrectForAttenuationTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CorrectToFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CorrectToFileTest.h"
 				>
 			</File>
 			<File
@@ -384,7 +412,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CreateSingleValuedWorkspaceTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CropWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CropWorkspaceTest.h"
 				>
 			</File>
 			<File
@@ -393,6 +429,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\DiffractionFocussing.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DiffractionFocussingTest.h"
 				>
 			</File>
 			<File
@@ -416,11 +456,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FindPeaksTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\GeneralisedSecondDifference.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\MergeRuns.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MergeRunsTest.h"
 				>
 			</File>
 			<File
@@ -444,7 +492,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\MuonAsymmetryCalcTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\MuonRemoveExpDecay.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MuonRemoveExpDecayTest.h"
 				>
 			</File>
 			<File
@@ -452,7 +508,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\NormaliseByCurrentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\NormaliseToMonitor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\NormaliseToMonitorTest.h"
 				>
 			</File>
 			<File
@@ -464,11 +528,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\PoissonErrors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\PoissonErrorsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\RebinPreserveValue.h"
 				>
 			</File>
 			<File
+				RelativePath=".\test\RebinPreserveValueTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\RebinToWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RebinToWorkspaceTest.h"
 				>
 			</File>
 			<File
@@ -492,6 +572,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\RemoveTimeBinsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\SimpleIntegration.h"
 				>
 			</File>
@@ -512,6 +596,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SmoothDataTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\SolidAngle.h"
 				>
 			</File>
@@ -524,6 +612,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\StripPeaksTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\SumSpectra.h"
 				>
 			</File>
@@ -533,6 +625,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\Unwrap.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UnwrapTest.h"
 				>
 			</File>
 		</Filter>

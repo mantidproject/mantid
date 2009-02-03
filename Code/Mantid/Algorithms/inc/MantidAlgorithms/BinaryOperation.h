@@ -71,6 +71,10 @@ namespace Mantid
       void init();
       void exec();
 
+			virtual const std::string inputPropName1() const { return "InputWorkspace_1";}
+			virtual const std::string inputPropName2() const { return "InputWorkspace_2";}
+			virtual const std::string outputPropName() const { return "OutputWorkspace";}
+
       /** Abstract method to perform the binary operation in the inheriting class.
       * @param it_in1 The const iterator to the lhs data item
       * @param it_in2 The const iterator to the rhs data item
