@@ -13,11 +13,11 @@ namespace Mantid
   {
     /**
     Takes a histogram in a 2D workspace and fit it to a Gaussian atop a flat background.
-    i.e. a function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
+    i.e. the function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
+    <LI> InputWorkspace - The name of the input Workspace </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
@@ -34,8 +34,8 @@ namespace Mantid
 
     <LI> MaxIterations - Max iterations (default 500)</LI>
 
-    <LI> Output Status - whether fit successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - measure of how good the fit is (default 0.0). Direction::Output</LI>
+    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
+    <LI> Output Chi^2/DoF - measure of how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
