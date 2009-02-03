@@ -210,8 +210,11 @@ namespace Mantid
 			V3D center=cylinder->getCentre();
 			V3D axis=cylinder->getNormal();
 			double radius=cylinder->getRadius();
+			center[0]=center[0]-axis[0]*500;
+			center[1]=center[1]-axis[1]*500;
+			center[2]=center[2]-axis[2]*500;
 			gp_Ax2 gpA(gp_Pnt(center[0],center[1],center[2]),gp_Dir(axis[0],axis[1],axis[2]));
-			TopoDS_Shape shape=BRepPrimAPI_MakeCylinder(gpA,radius,100,2*M_PI).Solid();
+			TopoDS_Shape shape=BRepPrimAPI_MakeCylinder(gpA,radius,1000,2*M_PI).Solid();
 			return shape;
 		}
 		TopoDS_Shape OCGeometryGenerator::CreateCone(Cone* cone)
