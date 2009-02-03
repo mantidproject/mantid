@@ -48,9 +48,9 @@ namespace Mantid
 	  std::string          mFileName;
 	  //Private Methods
 	  void Init();
-	  Poco::XML::Element* vtkGeometryCacheReader::getElementByObjectName(std::string name);
-	  void vtkGeometryCacheReader::readPoints(Poco::XML::Element* pEle,int *noOfPoints,double** points);
-	  void vtkGeometryCacheReader::readTriangles(Poco::XML::Element* pEle,int *noOfTriangles,int** faces);
+	  Poco::XML::Element* getElementByObjectName(std::string name);
+	  void readPoints(Poco::XML::Element* pEle,int *noOfPoints,double** points);
+	  void readTriangles(Poco::XML::Element* pEle,int *noOfTriangles,int** faces);
     public:
 		vtkGeometryCacheReader(std::string filename);       ///< Constructor
 		~vtkGeometryCacheReader();      ///< Destructor
