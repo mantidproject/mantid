@@ -32,7 +32,7 @@ namespace Mantid
 		static void mantid_gts_surface_vertex_face (GtsTriangle * t, gpointer * data)
 		{
 			int* pts  = (int*) data[0];
-			int index = (int) data[1];
+			int index = static_cast<int>(reinterpret_cast<long>(data[1]));
 			GUINT_TO_POINTER ((*((guint *) data[1]))++);
 			GtsVertex * v1, * v2, * v3;
 			gts_triangle_vertices (t, &v1, &v2, &v3);
