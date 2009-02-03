@@ -814,7 +814,8 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)
 void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared_ptr<Object> Obj)
 {
 	if(pElem->tagName()=="cuboid"){
-		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+		Obj->setGeometryHandler(handler);
 		Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
 		Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
 		Element* pElem_lbb = getShapeElement(pElem, "left-back-bottom-point"); 
@@ -824,23 +825,26 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
 		V3D lft = parsePosition(pElem_lft);  // left front top
 		V3D lbb = parsePosition(pElem_lbb);  // left back bottom
 		V3D rfb = parsePosition(pElem_rfb);  // right front bottom
-		handler->setCuboid(lfb,lft,lbb,rfb);
+		((GluGeometryHandler*)(handler.get()))->setCuboid(lfb,lft,lbb,rfb);
 	}else if(pElem->tagName()=="sphere"){
-		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+		Obj->setGeometryHandler(handler);
 		Element* pElemCentre = getShapeElement(pElem, "centre"); 
 		Element* pElemRadius = getShapeElement(pElem, "radius"); 
-		handler->setSphere(parsePosition(pElemCentre),atof( (pElemRadius->getAttribute("val")).c_str() ));
+		((GluGeometryHandler*)(handler.get()))->setSphere(parsePosition(pElemCentre),atof( (pElemRadius->getAttribute("val")).c_str() ));
 	}else if(pElem->tagName()=="cylinder"){
-		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+		Obj->setGeometryHandler(handler);
 		Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base"); 
 		Element* pElemAxis = getShapeElement(pElem, "axis"); 
 		Element* pElemRadius = getShapeElement(pElem, "radius"); 
 		Element* pElemHeight = getShapeElement(pElem, "height");
 		V3D normVec = parsePosition(pElemAxis);
 		normVec.normalize();
-		handler->setCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
+		((GluGeometryHandler*)(handler.get()))->setCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
 	}else if(pElem->tagName()=="cone"){
-		GluGeometryHandler* handler=new GluGeometryHandler(Obj);
+		boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
+		Obj->setGeometryHandler(handler);
 		Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
 		Element* pElemAxis = getShapeElement(pElem, "axis");  
 		Element* pElemAngle = getShapeElement(pElem, "angle");  
@@ -850,7 +854,7 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
 		normVec.normalize();
 		double height=atof( (pElemHeight->getAttribute("val")).c_str() );
 		double radius=height*tan(atof( (pElemAngle->getAttribute("val")).c_str() ));
-		handler->setCone(parsePosition(pElemTipPoint),normVec,radius,height);
+		((GluGeometryHandler*)(handler.get()))->setCone(parsePosition(pElemTipPoint),normVec,radius,height);
 	}
 	
 }
