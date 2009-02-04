@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <iostream>
-#include <sstream>
+#include <fstream>
 
 #include "MantidDataHandling/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
