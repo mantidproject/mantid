@@ -866,7 +866,19 @@ namespace Mantid
     }
 
     double
-      Object::solidAngle(const Geometry::V3D& observer) const
+        Object::solidAngle(const Geometry::V3D& observer) const
+        /*!
+        Find soild angle of object wrt the observer. This interface routine calls either
+        getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of triangles
+        in the discete surface representation.
+        */
+    {
+        if( this->NumberOfTriangles()>30000 )
+            return rayTraceSolidAngle(observer);
+        return triangleSolidAngle(observer);
+    }
+    double
+      Object::rayTraceSolidAngle(const Geometry::V3D& observer) const
       /*!
       Given an observer position find the approximate solid angle of the object
       \param observer :: position of the observer (V3D)
@@ -983,7 +995,89 @@ namespace Mantid
 		    if(countPhi==0) break;
 	     }
 	  }
+
       return sum;
+    }
+
+    /**
+     * Find the solid angle of a triangle defined by vectors a,b,c from point "observer"
+     *
+     * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+     *
+     * @param a :: first point of triangle
+     * @param b :: second point of triangle
+     * @param c :: third point of triangle
+     * @param observer :: point from which solid angle is required
+     * @return :: solid angle of triangle in Steradians.
+     */
+    double Object::getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const
+    {
+        const V3D ao=a-observer;
+        const V3D bo=b-observer;
+        const V3D co=c-observer;
+        const double modao=ao.norm();
+        const double modbo=bo.norm();
+        const double modco=co.norm();
+        const double aobo=ao.scalar_prod(bo);
+        const double aoco=ao.scalar_prod(co);
+        const double boco=bo.scalar_prod(co);
+        const double scalTripProd=ao.scalar_prod(bo.cross_prod(co));
+        const double denom=modao*modbo*modco+modco*aobo+modbo*aoco+modao*boco;
+        if(denom!=0.0)
+            return 2.0*atan(scalTripProd/denom);
+        else
+            return 0.0; // not certain this is correct
+    }
+
+
+	/**
+	 * Find solid angle of object from point "observer" using the
+	 * OC triangluation of the object, if it exists
+	 *
+	 * @param observer :: Point from which solid angle is required
+	 */
+	double Object::triangleSolidAngle(const V3D observer) const
+    {
+       this->initDraw();
+       //
+       // Because the triangles from OC are not consistently ordered wrt their outward normal
+       // internal points give incorrect solid angle. Surface points are difficult to get right
+       // with the triangle based method. Hence catch these two (unlikely) cases.
+       if(!boolBounded)
+       {
+           const double big(1e8);
+           AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
+           getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+       }
+       if(inBoundingBox(observer,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
+       {
+           if(isValid(observer))
+           {
+               if(isOnSide(observer))
+                   return(2.0*M_PI);
+               else
+                   return(4.0*M_PI);
+           }
+       }
+	   int nTri=this->NumberOfTriangles();
+	   int nPoints=this->NumberOfPoints();
+	   double* vertices=this->getTriangleVertices();
+	   int *faces=this->getTriangleFaces();
+       double sangle=0,sneg=0;
+       for(int i=0;i<NumberOfTriangles();i++)
+       {
+           int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
+           V3D vp1=V3D(vertices[3*p1],vertices[3*p1+1],vertices[3*p1+2]);
+           V3D vp2=V3D(vertices[3*p2],vertices[3*p2+1],vertices[3*p2+2]);
+           V3D vp3=V3D(vertices[3*p3],vertices[3*p3+1],vertices[3*p3+2]);
+           double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
+           if(sa>0)
+              sangle+=sa;
+           else
+              sneg+=sa;
+     //    std::cout << vp1 << vp2 << vp2;
+       }
+       return(0.5*(sangle-sneg));
     }
 
 	/**
@@ -1216,8 +1310,8 @@ namespace Mantid
     {
       //
       const double tol=Surface::getSurfaceTolerance();
-      if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymax-tol
-         && point.Z()<=zmax+tol && point.Z()>=zmax-tol )
+      if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymin-tol
+         && point.Z()<=zmax+tol && point.Z()>=zmin-tol )
 		   return 1;
 	   return 0;
 	}
@@ -1291,8 +1385,41 @@ namespace Mantid
 		//Render the Object
 		handle->Initialize();
 	}
-
 	//Initialize Draw Object
-  }  // NAMESPACE MonteCarlo
+
+	/**
+	* get number of triangles
+	*/
+	int Object::NumberOfTriangles() const
+	{
+		if(handle==NULL)return 0;
+		return handle->NumberOfTriangles();
+	}
+	/**
+	* get number of points
+	*/
+	int Object::NumberOfPoints() const
+	{
+		if(handle==NULL)return 0;
+		return handle->NumberOfPoints();
+	}
+	/**
+	* get vertices
+	*/
+	double* Object::getTriangleVertices() const
+	{
+		if(handle==NULL)return NULL;
+		return handle->getTriangleVertices();
+	}
+	/**
+	* get faces
+	*/
+	int* Object::getTriangleFaces() const
+	{
+		if(handle==NULL)return NULL;
+		return handle->getTriangleFaces();
+	}
+
+  }  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid

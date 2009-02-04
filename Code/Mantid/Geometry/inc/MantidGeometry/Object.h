@@ -79,9 +79,16 @@ class DLLExport Object
   double bbAngularWidth(const Geometry::V3D&,
 	                         const double&, const double&, const double&,
 	                         const double&, const double&, const double& ) const;
+  double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class GeometryHandler;
+  /// for solid angle from triangulation
+  int NumberOfTriangles() const;
+  int NumberOfPoints() const;
+  int* getTriangleFaces() const;
+  double* getTriangleVertices() const;
+
 
  protected:
 
@@ -146,8 +153,12 @@ class DLLExport Object
   // INTERSECTION
   int interceptSurface(Geometry::Track&) const;
 
-  // Solid angle
+  // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Geometry::V3D& observer) const;
+  // solid angle via triangulation
+  double triangleSolidAngle(const V3D observer) const;
+  // solid angle via ray tracing
+  double rayTraceSolidAngle(const Geometry::V3D& observer) const;
 
   // Calculate (or return cached value of) Axis Aligned Bounding box
   void getBoundingBox(double& xmax,double& ymax,double& zmax,double& xmin,double& ymin,double& zmin) const;

@@ -6,6 +6,7 @@
 #include <ostream>
 #include <vector>
 #include <algorithm>
+#include <ctime>
 
 #include "MantidGeometry/V3D.h" 
 #include "MantidGeometry/Object.h" 
@@ -531,18 +532,26 @@ public:
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
+    // distant points
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(20,0,0)),0.133442,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(200,0,0)),0.0013204,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(2000,0,0)),1.32025e-5,satol);
+    //
+    // test solidAngle interface, which will be main method to solid angle
+    //
     TS_ASSERT_DELTA(A.solidAngle(V3D(8.1,0,0)),0.864364,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,8.1,0)),0.864364,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,8.1)),0.864364,satol);
     TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-8.1)),0.864364,satol);
-    // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
-    // surface point
-    TS_ASSERT_DELTA(A.solidAngle(V3D(4.1,0,0)),2*M_PI,satol);
-    // distant points
-    TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.133442,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.0013204,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),1.32025e-5,satol);
+    //
   }
 
   void testSolidAngleCappedCylinder()
@@ -558,41 +567,63 @@ public:
     // soild angle of circle radius 3, distance 3 is 2pi(1-cos(t)) where
     // t is atan(3/3), should be 1.840302,
     // Work round for reverse track intercept has been made in Object.cpp
-    TS_ASSERT_DELTA(A.solidAngle(V3D(4.2,0,0)),1.840302,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(-7.2,0,0)),1.25663708,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(4.2,0,0)),1.840302,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(-7.2,0,0)),1.25663708,satol);
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,7)),0.7531,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,7,0)),0.7531,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,7)),0.7531,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,7,0)),0.7531,satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
-    TS_ASSERT_DELTA(A.solidAngle(V3D(1.2,0,0)),2*M_PI,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(-3.2,0,0)),2*M_PI,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,3,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(1.2,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(-3.2,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,3,0)),2*M_PI,satol);
     // distant points
-    TS_ASSERT_DELTA(A.solidAngle(V3D(20,0,0)),0.07850147,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(200,0,0)),0.000715295,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(2000,0,0)),7.08131e-6,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(20,0,0)),0.07850147,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(200,0,0)),0.000715295,satol);
+    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(2000,0,0)),7.08131e-6,satol);
   }
 
-  void testSolidAngleCube()
+  void testSolidAngleCubeTriangles()
     /*!
-    Test solid angle calculation for a cube
+    Test solid angle calculation for a cube using triangles
+    - test for using Open Cascade surface triangulation for all solid angles.
     */
   {
     Object A = createUnitCube();
-    double satol=2e-2; // tolerance for solid angle
+    double satol=1e-3; // tolerance for solid angle
 
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     //
-    TS_ASSERT_DELTA(A.solidAngle(V3D(1.0,0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(-1.0,0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
-    // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,0)),4*M_PI,satol);
+    // tests for Triangulated cube
+    //
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
+
+    if(timeTest)
+    {
+      // block to test time of solid angle methods
+      // change false to true to include
+      double saRay,saTri;
+      V3D observer(1.0,0,0);
+      int iter=4000;
+      int starttime=clock();
+      for (int i=0;i<iter;i++)
+        saTri=A.triangleSolidAngle(observer);
+      int endtime=clock();
+      std::cout << std::endl << "Cube tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+      iter=50;
+      starttime=clock();
+      for (int i=0;i<iter;i++)
+        saRay=A.rayTraceSolidAngle(observer);
+      endtime=clock();
+      std::cout << "Cube ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+    }
+
   }
 
   void testGetBoundingBox()
@@ -634,10 +665,118 @@ public:
     TS_ASSERT_THROWS(A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
 
   }
+  void testSurfaceTriangulation()
+    /*!
+    Test triangle solid angle calc
+    */
+  {
+    Object A = createCappedCylinder();
+    double xmax,ymax,zmax,xmin,ymin,zmin;
+    xmax=20;ymax=20.0;zmax=20.0;
+    xmin=-20.0;ymin=-20.0;zmin=-20.0;
+    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    A.initDraw();
+    double saTri,saRay;
+    V3D observer(4.2,0,0);
+    
+    double satol=1e-3; // typical result tolerance
+
+    if(timeTest)
+    {
+      // block to test time of solid angle methods
+      // change false to true to include
+      int iter=4000;
+      int starttime=clock();
+      for (int i=0;i<iter;i++)
+        saTri=A.triangleSolidAngle(observer);
+      int endtime=clock();
+      std::cout << std::endl << "Cyl tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+      iter=50;
+      starttime=clock();
+      for (int i=0;i<iter;i++)
+        saRay=A.rayTraceSolidAngle(observer);
+      endtime=clock();
+      std::cout << "Cyl ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+    }
+
+    saTri=A.triangleSolidAngle(observer);
+    saRay=A.rayTraceSolidAngle(observer);
+    TS_ASSERT_DELTA(saTri,1.840302,0.001);
+    TS_ASSERT_DELTA(saRay,1.840302,0.01);
+    
+    observer=V3D(-7.2,0,0);
+    saTri=A.triangleSolidAngle(observer);
+    saRay=A.rayTraceSolidAngle(observer);
+    
+    TS_ASSERT_DELTA(saTri,1.25663708,0.001);
+    TS_ASSERT_DELTA(saRay,1.25663708,0.001);
+
+    // No analytic value for side on SA, using hi-res value
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,7)),0.7531,0.753*satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,7,0)),0.7531,0.753*satol);
+
+    saTri=A.triangleSolidAngle(V3D(20,0,0));
+    TS_ASSERT_DELTA(saTri,0.07850147,satol*0.0785);
+    saTri=A.triangleSolidAngle(V3D(200,0,0));
+    TS_ASSERT_DELTA(saTri,0.000715295,satol*0.000715);
+    saTri=A.triangleSolidAngle(V3D(2000,0,0));
+    TS_ASSERT_DELTA(saTri,7.08131e-6,satol*7.08e-6);
+    
+  }
+  void testSolidAngleSphereTri()
+    /*!
+    Test solid angle calculation for a sphere from triangulation
+    */
+  {
+    Object A = createSphere();
+    double satol=1e-3; // tolerance for solid angle
+
+    // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
+    // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
+    // where R is sphere radius and r is distance of observer from sphere centre
+    // Intercept for track in reverse direction now worked round
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,0)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
+    // distant points
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(20,0,0)),0.133442,satol*0.133);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(200,0,0)),0.0013204,satol*0.00132);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(2000,0,0)),1.32025e-5,satol*1.32e-5);
+
+    if(timeTest)
+    {
+      // block to test time of solid angle methods
+      // change false to true to include
+      double saTri,saRay;
+      int iter=400;
+      V3D observer(8.1,0,0);
+      int starttime=clock();
+      for (int i=0;i<iter;i++)
+        saTri=A.triangleSolidAngle(observer);
+      int endtime=clock();
+      std::cout << std::endl << "Sphere tri time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+      iter=40;
+      starttime=clock();
+      for (int i=0;i<iter;i++)
+        saRay=A.rayTraceSolidAngle(observer);
+      endtime=clock();
+      std::cout << "Sphere ray time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+    }
+
+  }
+
 private:
 
   /// Surface type
   typedef std::map<int,Surface*> STYPE ; 
+
+  /// set timeTest true to get time comparisons of soild angle methods
+  const static bool timeTest=false;
   
   STYPE SMap;   ///< Surface Map
 

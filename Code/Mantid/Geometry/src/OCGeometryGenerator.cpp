@@ -320,8 +320,8 @@ namespace Mantid
 
 		int* OCGeometryGenerator::getTriangleFaces()
 		{
-			int* faces=NULL;
-			int nFaces=this->getNumberOfPoints();
+            int* faces=NULL;
+            int nFaces=this->getNumberOfTriangles(); // was Points
 			if(nFaces>0)
 			{
 				faces=new int[nFaces*3];
