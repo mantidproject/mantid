@@ -10,6 +10,7 @@
 
 #include "MantidAlgorithms/RemoveBins.h"
 #include "MantidNexus/LoadMuonNexus.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 

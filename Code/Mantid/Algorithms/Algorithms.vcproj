@@ -290,7 +290,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\RemoveTimeBins.cpp"
+				RelativePath=".\src\RemoveBins.cpp"
 				>
 			</File>
 			<File
@@ -568,11 +568,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\RemoveTimeBins.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\RemoveTimeBinsTest.h"
+				RelativePath=".\inc\MantidAlgorithms\RemoveBins.h"
 				>
 			</File>
 			<File
