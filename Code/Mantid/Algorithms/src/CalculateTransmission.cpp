@@ -80,7 +80,7 @@ void CalculateTransmission::exec()
   {
     const double errorPerc = E[i]/Y[i];
     Y[i] = std::log10(Y[i]);
-    E[i] = errorPerc*Y[i];
+    E[i] = std::abs(errorPerc*Y[i]);
   }
  
   // Now fit this to a straight line
@@ -167,7 +167,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   {
     const double errorPerc = E[i]/Y[i];
     Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
-    E[i] = errorPerc*Y[i];
+    E[i] = std::abs(errorPerc*Y[i]);
   }
 
   return result;
