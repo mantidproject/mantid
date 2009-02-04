@@ -125,7 +125,7 @@ namespace Mantid
       /// check if the gievn item exists in the current level
       bool checkEntryAtLevel(const std::string& item) const;
       /// check if given attribute name is in currently opened entry
-      bool NexusFileIO::checkAttributeName(const std::string& target) const;
+      bool checkAttributeName(const std::string& target) const;
       /// write test field
       int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value);
       /// search for exisiting MantidWorkpace_n entries in opened file
