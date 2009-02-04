@@ -11,7 +11,6 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
-#include <cmath>
 
 namespace Mantid
 {
@@ -28,12 +27,6 @@ namespace DataHandling
 Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
 
 enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
-
-#ifdef WIN32
-#define __isnan(x) _isnan(x)
-#else
-#define __isnan(x) isnan(x)
-#endif
 
 LogParser::LogParser(const std::string& eventFName)
 :m_nOfPeriods(1),m_unknown(true)
@@ -259,6 +252,7 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     }
     else // run_intervals.size() == 0
     {
+        if (period > 1) return 0;
         if (change_times.size() == 1)
         {
             start_time = change_times.begin()->first - seconds(1);
@@ -285,6 +279,7 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     }
 
     double lastv = 0;
+    std::string lasts;
     time_period prev = time_period(ptime(),ptime());
     // Find intersections of running time intervals and intervals of constant values
     for(std::vector<time_period>::iterator r = run_intervals.begin();r!=run_intervals.end();r++)
@@ -315,9 +310,10 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
             }
             else
             {
+                lasts = change_times[c->begin()];
                 if (mkEmpty)
-                    static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv)->addValue(t2, change_times[c->begin()]);
-                static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv)->addValue(t1, change_times[c->begin()]);
+                    static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv)->addValue(t2, lasts);
+                static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv)->addValue(t1, lasts);
             }
             prev = inter;
             //std::cerr<<"--"<<*r<<' '<<*c<<'\n'; 
@@ -327,12 +323,17 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     }
 
     // Insert the last value
+    std::tm tinfo = to_tm(prev.end());
+    std::time_t t = std::mktime(&tinfo);
     if (isNumeric)
     {
-        std::tm tinfo = to_tm(prev.end());
-        std::time_t t = std::mktime(&tinfo);
         Kernel::TimeSeriesProperty<double>* p = static_cast<Kernel::TimeSeriesProperty<double>*>(logv);
         p->addValue(t,lastv);
+    }
+    else
+    {
+        Kernel::TimeSeriesProperty<std::string>* p = static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv);
+        p->addValue(t,lasts);
     }
 
     return logv;
@@ -362,7 +363,7 @@ double timeMean(const Kernel::Property* p)
             total += dt;
             res += it0->second * dt;
         }
-        if (__isnan(it->second))
+        if (isNaN(it->second))
         {
             skip = true;
         }

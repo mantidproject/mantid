@@ -10,10 +10,16 @@
 #include <map>
 #include <vector>
 #include <ctime>
+#include <cmath>
 
 using namespace boost::posix_time;
 using namespace boost::gregorian;
 
+#ifdef WIN32
+#define isNaN(x) _isnan(x)
+#else
+#define isNaN(x) isnan(x)
+#endif
 
 namespace Mantid
 {
