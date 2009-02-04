@@ -118,6 +118,14 @@ void Linear::exec()
   // Create and fill a workspace1D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin
   const int YSize = Y.size();
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace1D",1,X.size(),YSize);
+  // Copy over various data members from the input workspace
+  outputWorkspace->setInstrument(inputWorkspace->getInstrument());
+  outputWorkspace->setSample(inputWorkspace->getSample());
+  outputWorkspace->setYUnit(inputWorkspace->YUnit());
+  outputWorkspace->isDistribution(inputWorkspace->isDistribution());
+  outputWorkspace->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
+  outputWorkspace->getAxis(0)->title() = inputWorkspace->getAxis(0)->title();
+  
   // Copy over the X bins
   outputWorkspace->dataX(0).assign(X.begin(),X.end());
   // Now loop over the spectrum and use gsl function to calculate the Y & E values for the function

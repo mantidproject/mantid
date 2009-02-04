@@ -20,8 +20,6 @@ using namespace DataObjects;
 // Get a reference to the logger. It is used to print out information, warning and error messages
 Logger& CalculateTransmission::g_log = Logger::get("CalculateTransmission");
 
-static const double dblLog(double in) { return std::log10(in); }
-
 void CalculateTransmission::init()
 {
   CompositeValidator<Workspace2D> *wsValidator = new CompositeValidator<Workspace2D>;
@@ -75,21 +73,19 @@ void CalculateTransmission::exec()
 
   // Take a copy of this workspace for the fitting
   MatrixWorkspace_sptr logTransmission = this->extractSpectrum(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(transmission),0);
-  // Take the log of each datapoint for fitting. Zero the errors until I work out what to do with them.
+  // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
   std::vector<double> &Y = logTransmission->dataY(0);
-  std::transform(Y.begin(),Y.end(),Y.begin(),dblLog);
   std::vector<double> &E = logTransmission->dataE(0);
-  E.assign(E.size(),0.0);
+  for (unsigned int i=0; i < Y.size(); ++i)
+  {
+    const double errorPerc = E[i]/Y[i];
+    Y[i] = std::log10(Y[i]);
+    E[i] = errorPerc*Y[i];
+  }
  
   // Now fit this to a straight line
   MatrixWorkspace_sptr fit = this->fitToData(logTransmission);
-  // What do I do with the errors? Zero for now
-  std::vector<double> &Efit = fit->dataE(0);
-  Efit.assign(Efit.size(),0.0);
   
-  // TEMPORARY: set units on outputworkspace - this should be done in Linear
-  fit->getAxis(0)->unit() = transmission->getAxis(0)->unit();
-
   setProperty("OutputWorkspace",fit);
 }
 
@@ -166,9 +162,12 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
 
   const std::vector<double> &X = result->readX(0);
   std::vector<double> &Y = result->dataY(0);
+  std::vector<double> &E = result->dataE(0);
   for (unsigned int i = 0; i < Y.size(); ++i)
   {
+    const double errorPerc = E[i]/Y[i];
     Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
+    E[i] = errorPerc*Y[i];
   }
 
   return result;
