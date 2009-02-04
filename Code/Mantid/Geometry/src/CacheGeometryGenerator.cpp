@@ -6,8 +6,7 @@
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/CacheGeometryGenerator.h"
 #include "MantidGeometry/GeometryHandler.h"
-#include "MantidGeometry/GtsGeometryHandler.h"
-//#include "MantidGeometry/OCGeometryHandler.h"
+#include "MantidGeometry/OCGeometryHandler.h"
 
 namespace Mantid
 {
@@ -34,8 +33,7 @@ namespace Mantid
 		{
 			if(mNoOfVertices<=0) //There are no triangles defined to use OpenCascade handler
 			{
-			  GtsGeometryHandler h(Obj);
-//				OCGeometryHandler h(Obj);
+				OCGeometryHandler h(Obj);
 				mNoOfVertices=h.NumberOfPoints();
 				mNoOfTriangles=h.NumberOfTriangles();
 				mPoints=h.getTriangleVertices();
