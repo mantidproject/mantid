@@ -1,5 +1,5 @@
-#ifndef REMOVETIMEBINSTEST_H_
-#define REMOVETIMEBINSTEST_H_
+#ifndef RemoveBinsTest_H_
+#define RemoveBinsTest_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -8,19 +8,16 @@
 #include <string>
 #include <stdexcept>
 
-#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAlgorithms/RemoveBins.h"
 #include "MantidNexus/LoadMuonNexus.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAlgorithms/RemoveTimeBins.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-class RemoveTimeBinsTest : public CxxTest::TestSuite
+class RemoveBinsTest : public CxxTest::TestSuite
 {
 public:
 
@@ -47,10 +44,10 @@ public:
 		alg.setPropertyValue("InputWorkspace", "input2D");
 		alg.setPropertyValue("OutputWorkspace", "output");
 		alg.setPropertyValue("XMin", "0");
-		alg.setPropertyValue("XMax", "0");
+		alg.setPropertyValue("XMax", "5");
 		
 		TS_ASSERT_EQUALS( alg.getPropertyValue("XMin"), "0");
-		TS_ASSERT_EQUALS( alg.getPropertyValue("XMax"), "0");
+		TS_ASSERT_EQUALS( alg.getPropertyValue("XMax"), "5");
 	}
 	
 	void testExec()
@@ -86,10 +83,10 @@ public:
 		
 		alg3.setPropertyValue("InputWorkspace", "input2D");
 		alg3.setPropertyValue("OutputWorkspace", "output2");
-		alg3.setPropertyValue("XMin", "40");
+		alg3.setPropertyValue("XMin", "35");
 		alg3.setPropertyValue("XMax", "40");
 		
-		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMin"), "40");
+		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMin"), "35");
 		TS_ASSERT_EQUALS( alg3.getPropertyValue("XMax"), "40");
 		
 		try 
@@ -146,10 +143,10 @@ public:
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 5);
 		TS_ASSERT_EQUALS(outputWS->dataY(0).size(), 4);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[0], 0);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
 		TS_ASSERT_EQUALS(outputWS->dataX(0)[3], 30);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 4);
-		TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 2);
+    TS_ASSERT_EQUALS(outputWS->dataY(0)[0], 0);
+    TS_ASSERT_EQUALS(outputWS->dataY(0)[1], 1.5);
+		TS_ASSERT_EQUALS(outputWS->dataY(0)[2], 3);
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[3], 6);
 	}
 	
@@ -217,16 +214,18 @@ public:
 		testWorkspace->setData(0, Y);
 		testWorkspace->setData(1, Y);
 
+		testWorkspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+
 		AnalysisDataService::Instance().add("input2D", testWorkspace);		
 	}
 
 private:
-	RemoveTimeBins alg;
-	RemoveTimeBins alg2;
-	RemoveTimeBins alg3;
-	RemoveTimeBins alg4;
+	RemoveBins alg;
+	RemoveBins alg2;
+	RemoveBins alg3;
+	RemoveBins alg4;
 
 
 };
 
-#endif /*REMOVETIMEBINSTEST_H_*/
+#endif /*RemoveBinsTest_H_*/
