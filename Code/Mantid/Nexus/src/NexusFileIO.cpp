@@ -875,14 +875,18 @@ namespace NeXus
    char sbuf[NX_MAXNAMELEN];
    int len=NX_MAXNAMELEN;
    type=NX_CHAR;
+   //
    status=NXgetattr(fileID,"axes",(void *)sbuf,&len,&type);
    if(status!=NX_ERROR)
        axesNames=sbuf;
    len=NX_MAXNAMELEN;
-   status=NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
-   if(status!=NX_ERROR)
-       yUnits=sbuf;
-   status=NXclosedata(fileID);
+   if(checkAttributeName("units"))
+   {
+      status=NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+      if(status!=NX_ERROR)
+         yUnits=sbuf;
+      status=NXclosedata(fileID);
+   }
    //
    // read axis1 size
    status=NXopendata(fileID,"axis1");
@@ -902,6 +906,25 @@ namespace NeXus
    }
    status=NXclosegroup(fileID);
    return(0);
+  }
+
+  bool NexusFileIO::checkAttributeName(const std::string& target) const
+  {
+    // see if the given attribute name is in the current level
+    // return true if it is.
+    NXstatus status;
+    int length=NX_MAXNAMELEN,type;
+    status=NXinitattrdir(fileID);
+    char aname[NX_MAXNAMELEN];
+    char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
+    while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
+    {
+       if(target.compare(aname)==0)
+       {
+          return true;
+       }
+    }
+    return false;
   }
 
   int NexusFileIO::getXValues(std::vector<double>& xValues, const int& spectra)

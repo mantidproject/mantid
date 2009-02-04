@@ -1036,7 +1036,7 @@ namespace Mantid
 	 *
 	 * @param observer :: Point from which solid angle is required
 	 */
-	double Object::triangleSolidAngle(const V3D observer) const
+	double Object::triangleSolidAngle(const V3D& observer) const
     {
        this->initDraw();
        //
@@ -1060,6 +1060,13 @@ namespace Mantid
            }
        }
 	   int nTri=this->NumberOfTriangles();
+       //
+       // If triangulation is not available fall back to ray tracing method
+       //
+       if(nTri==0)
+       {
+           return rayTraceSolidAngle(observer);
+       }
 	   int nPoints=this->NumberOfPoints();
 	   double* vertices=this->getTriangleVertices();
 	   int *faces=this->getTriangleFaces();

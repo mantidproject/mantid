@@ -156,7 +156,7 @@ class DLLExport Object
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Geometry::V3D& observer) const;
   // solid angle via triangulation
-  double triangleSolidAngle(const V3D observer) const;
+  double triangleSolidAngle(const Geometry::V3D& observer) const;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Geometry::V3D& observer) const;
 
