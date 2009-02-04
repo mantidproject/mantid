@@ -427,6 +427,29 @@ double lastValue(const Kernel::Property* p)
     return dpmap.rbegin()->second;
 }
 
+double nthValue(const Kernel::Property* p, int i)
+{
+    const Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<const Kernel::TimeSeriesProperty<double>*>(p);
+    if (!dp)
+    {
+        throw std::runtime_error("TimeSeriesProperty of a wromg type.");
+    }
+
+    std::map<std::time_t, double> dpmap = dp->valueAsMap();
+    if (dpmap.empty())
+        throw std::runtime_error("TimeSeriesProperty is empty");
+
+    std::map<std::time_t, double>::iterator it = dpmap.begin();
+    for(int j=0;it!=dpmap.end();it++)
+        if (!isNaN(it->second))
+        {
+            if (j == i) return it->second;
+            j++;
+        }
+
+    return dpmap.rbegin()->second;
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

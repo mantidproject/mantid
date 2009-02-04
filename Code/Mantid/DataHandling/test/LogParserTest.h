@@ -85,6 +85,19 @@ public:
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),7.194, 0.001);
 
+        TS_ASSERT_EQUALS(nthValue(p1,0),1);
+        TS_ASSERT_EQUALS(nthValue(p1,1),2);
+        TS_ASSERT_EQUALS(nthValue(p1,2),3);
+        TS_ASSERT_EQUALS(nthValue(p1,3),4);
+        TS_ASSERT_EQUALS(nthValue(p1,4),8);
+        TS_ASSERT_EQUALS(nthValue(p1,5),8);
+        TS_ASSERT_EQUALS(nthValue(p1,6),8);
+        TS_ASSERT_EQUALS(nthValue(p1,7),8);
+
+        TS_ASSERT_EQUALS(firstValue(p1),1);
+        TS_ASSERT_EQUALS(secondValue(p1),2);
+        TS_ASSERT_EQUALS(lastValue(p1),8);
+
         TimeSeriesProperty<double>* tp2 = dynamic_cast<TimeSeriesProperty<double>*>(p2);
         vmap = tp2->valueAsMap();
         v= vmap.begin();

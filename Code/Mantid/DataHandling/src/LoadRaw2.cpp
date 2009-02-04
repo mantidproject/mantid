@@ -135,6 +135,7 @@ namespace Mantid
           localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
           for (int i = 0; i < m_numberOfSpectra; ++i)
               localWorkspace->getAxis(1)->spectraNo(i)= i+1;
+          populateInstrumentParameters(localWorkspace);
           setProperty("OutputWorkspace",localWorkspace);
           return;
       }

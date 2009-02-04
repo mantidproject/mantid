@@ -114,17 +114,21 @@ private:
 /// Returns the mean value if the property is TimeSeriesProperty<double>
 double LogParser_DllExport timeMean(const Kernel::Property* p);
 
-/// Returnd the first value in the time series (if nimeric).
+/// Returns the first value in the time series (if nimeric).
 /// Throws runtime_error if empty
 double LogParser_DllExport firstValue(const Kernel::Property* p);
 
-/// Returnd the second value in the time series (if nimeric).
+/// Returns the second value in the time series (if nimeric).
 /// Throws runtime_error if empty or has only single value
 double LogParser_DllExport secondValue(const Kernel::Property* p);
 
-/// Returnd the last value in the time series (if nimeric).
+/// Returns the last value in the time series (if nimeric).
 /// Throws runtime_error if empty
 double LogParser_DllExport lastValue(const Kernel::Property* p);
+
+/// Returns the n-th value in the numeric time series
+/// Throws runtime_error if empty
+double LogParser_DllExport nthValue(const Kernel::Property* p, int i);
 
 } // namespace DataHandling
 } // namespace Mantid
