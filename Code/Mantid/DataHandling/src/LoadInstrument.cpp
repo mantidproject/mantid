@@ -860,8 +860,8 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
 
     std::string paramName = pParamElem->getAttribute("name");
     std::string logfileID = pParamElem->getAttribute("logfile-id");
-    std::string type = "";
-    std::string extractSingleValueAs = "";
+    std::string type = "double"; // default
+    std::string extractSingleValueAs = "mean"; // default
     std::string eq = "";
 
     if ( pParamElem->hasAttribute("eq") )

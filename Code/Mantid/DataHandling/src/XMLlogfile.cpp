@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muparser/muParser.h>
 #include <ctime>
+#include "MantidDataHandling/LogParser.h"
 
 namespace Mantid
 {
@@ -36,16 +37,38 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
 {  
   // Get for now just 1st entry of timeserie
 
-  std::map<std::time_t, double> logMap = logData->valueAsMap();
-  std::map<std::time_t, double> :: iterator it;
-  it = logMap.begin(); 
-  double firstEntry = (*it).second;
+  //std::map<std::time_t, double> logMap = logData->valueAsMap();
+  //std::map<std::time_t, double> :: iterator it;
+  //it = logMap.begin(); 
+  double extractedValue; // = nthValue(logData, 1); //(*it).second;
 
+
+  // get value from time series
+
+  if ( m_extractSingleValueAs.compare("mean" ) == 0 )
+  {
+    extractedValue = timeMean(logData);
+  }
+  // Looking for string: "position n", where n is an integer
+  else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )  
+  {
+    std::stringstream extractPosition(m_extractSingleValueAs);  
+    std::string dummy;
+    int position;
+    extractPosition >> dummy >> position;
+
+    extractedValue = nthValue(logData, position);
+  }
+  else
+  {
+    throw Kernel::Exception::InstrumentDefinitionError(std::string("extract-single-value-as attribute for <parameter>") 
+        + " element (eq=" + m_eq + ") in instrument definition file is not recognised.");
+  }
 
   // Check if m_eq is specified if yes evaluate this equation
 
   if ( m_eq.empty() )
-    return firstEntry;
+    return extractedValue;
   else
   {
     size_t found;
@@ -59,16 +82,16 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     }
 
     std::stringstream readDouble;
-    readDouble << firstEntry;
-    std::string firstEntryStr = readDouble.str();
-    equationStr.replace(found, 5, firstEntryStr);
+    readDouble << extractedValue;
+    std::string extractedValueStr = readDouble.str();
+    equationStr.replace(found, 5, extractedValueStr);
 
     // check if more than one 'value' in m_eq
 
     while ( equationStr.find("value") != std::string::npos )
     {
       found = equationStr.find("value");
-      equationStr.replace(found, 5, firstEntryStr);
+      equationStr.replace(found, 5, extractedValueStr);
     }
 
     try 
