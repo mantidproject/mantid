@@ -30,7 +30,7 @@ namespace Mantid
 		*/
 		GluGeometryRenderer::~GluGeometryRenderer()
 		{
-			if(boolDisplaylistCreated && glIsList(iDisplaylistId)==GL_TRUE)
+			if(boolDisplaylistCreated && iDisplaylistId!=0 && glIsList(iDisplaylistId)==GL_TRUE)
 				glDeleteLists(iDisplaylistId,1);
 		}
 
