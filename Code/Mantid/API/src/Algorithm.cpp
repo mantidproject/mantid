@@ -19,7 +19,8 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManager(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false)
+  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
+  m_progressObserver(*this, &Algorithm::handleChildProgressNotification)
 {}
 
 /// Virtual destructor
@@ -221,7 +222,7 @@ bool Algorithm::isExecuted() const
  *  @param name    The concrete algorithm class of the sub algorithm
  *  @returns Set to point to the newly created algorithm object
  */
-Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
+Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double startProgress, double endProgress)
 {
   Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
   //set as a child
@@ -247,6 +248,12 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name)
     }
   }
 
+  if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
+  {
+      alg->notificationCenter.addObserver(m_progressObserver);
+      m_startChildProgress = startProgress;
+      m_endChildProgress = endProgress;
+  }
 
   return alg;
 }
@@ -436,6 +443,14 @@ bool Algorithm::executeAsyncImpl(const int&)
     { }
     return false;
 }
+
+void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
+{
+    double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
+    progress(p,pNf->message);
+    std::cerr<<"progress: "<<p<<'\n';
+}
+
 
 } // namespace API
 } // namespace Mantid

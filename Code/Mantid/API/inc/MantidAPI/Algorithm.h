@@ -32,6 +32,7 @@
 #include <Poco/ActiveMethod.h>
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
+#include <Poco/NObserver.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -212,7 +213,7 @@ protected:
   virtual void exec() = 0;
 
   //creates a sub algorithm for use in this algorithm
-  Algorithm_sptr createSubAlgorithm(const std::string& name);
+  Algorithm_sptr createSubAlgorithm(const std::string& name, double startProgress = -1., double endProgress = -1.);
 
   void setInitialized();
   void setExecuted(bool state);
@@ -225,6 +226,9 @@ protected:
   /// Interrupts algorithm execution if Algorithm::cancel() has been called.
   /// Does nothing otherwise.
   void interruption_point();
+
+  void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
+  Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
 
 private:
 
@@ -253,6 +257,9 @@ private:
   bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
+
+  double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
+  double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
 };
 
 ///Typedef for a shared pointer to an Algorithm
