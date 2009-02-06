@@ -80,9 +80,13 @@ namespace Mantid
 			~OCGeometryGenerator();
 			void Generate();
 			TopoDS_Shape* getObjectSurface();
+            /// return number of triangles in mesh (0 for special shapes)
 			int getNumberOfTriangles();
+            /// return number of points used in mesh (o for special shapes)
 			int getNumberOfPoints();
+            /// get a pointer to the 3x(NumberOfPoints) coordinates (x1,y1,z1,x2..) of mesh
 			double* getTriangleVertices();
+            /// get a pointer to the 3x(NumberOFaces) integers describing points forming faces (p1,p2,p3)(p4,p5,p6)..
 			int* getTriangleFaces();
 		};
 

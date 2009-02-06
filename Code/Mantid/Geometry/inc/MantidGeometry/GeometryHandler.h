@@ -68,6 +68,8 @@ namespace Mantid
 			virtual double* getTriangleVertices(){return NULL;}
 			virtual int*    getTriangleFaces(){return NULL;}
 			virtual void setGeometryCache(int noPts,int noFaces,double* pts,int* faces){};
+            /// return the actual type and points of one of the "standard" objects, cuboid/cone/cyl/sphere
+            virtual void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight){};
 		};
 
 	}   // NAMESPACE Geometry

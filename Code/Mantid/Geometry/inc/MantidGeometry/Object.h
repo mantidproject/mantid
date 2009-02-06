@@ -80,6 +80,7 @@ class DLLExport Object
 	                         const double&, const double&, const double&,
 	                         const double&, const double&, const double& ) const;
   double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
+  double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class GeometryHandler;
@@ -88,6 +89,7 @@ class DLLExport Object
   int NumberOfPoints() const;
   int* getTriangleFaces() const;
   double* getTriangleVertices() const;
+  void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight) const;
 
 
  protected:

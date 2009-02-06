@@ -101,7 +101,7 @@ public:
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
 		for (int i = 0; i < numberOfSpectra; ++i) {
 			//all of the values should fall in this range for INES
-			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00217,0.00021);
+			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00212,0.00038);
 			
 			TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
 			TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
@@ -109,10 +109,10 @@ public:
 		}
 
 		//some specific, more accurate values
-		TS_ASSERT_DELTA(output2D->readY(5)[0],0.00209132,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(10)[0],0.00212688,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(20)[0],0.00226644,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(50)[0],0.00233863,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(5)[0],0.0019071,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(10)[0],0.00204056,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(20)[0],0.00229294,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(50)[0],0.00242779,0.0000001);
     
   }
 
@@ -141,7 +141,7 @@ public:
 		TS_ASSERT_EQUALS(numberOfSpectra,10);
 		for (int i = 0; i < numberOfSpectra; ++i) {
 			//all of the values should fall in this range for INES
-			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00217,0.00021);
+			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00237,0.00006);
 			
 			TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
 			TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
@@ -149,9 +149,9 @@ public:
 		}
 
 		//some specific, more accurate values
-		TS_ASSERT_DELTA(output2D->readY(3)[0],0.00231491,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(6)[0],0.00229907,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(9)[0],0.00227472,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(3)[0],0.00239761,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(6)[0],0.00236088,0.0000001);
+		TS_ASSERT_DELTA(output2D->readY(9)[0],0.00231774,0.0000001);
     
   }
 

@@ -871,6 +871,8 @@ namespace Mantid
         Find soild angle of object wrt the observer. This interface routine calls either
         getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of triangles
         in the discete surface representation.
+        @param observer :: point to measure solid angle from
+        @return :: estimate of solid angle of object. Accuracy depends on object shape.
         */
     {
         if( this->NumberOfTriangles()>30000 )
@@ -1065,6 +1067,14 @@ namespace Mantid
        //
        if(nTri==0)
        {
+           double height,radius;
+           int type;
+           std::vector<Geometry::V3D> vectors;
+           this->GetObjectGeom( type, vectors, radius, height);
+           if(type==1)
+               return CuboidSolidAngle(observer,vectors);
+           //else if(type==2)
+           //    return SphereSolidAngle(observer,vectors,radius);
            return rayTraceSolidAngle(observer);
        }
 	   int nPoints=this->NumberOfPoints();
@@ -1086,7 +1096,49 @@ namespace Mantid
        }
        return(0.5*(sangle-sneg));
     }
+    /**
+     * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle based soild angle
+     * calculation. Should work for parallel-piped as well.
+     * @param observer :: point from which solid angle required
+     * @param vectors :: vector of V3D - the values are the 4 points used to defined the cuboid
+     * @return :: solid angle of cuboid - good accuracy
+     */
+	double Object::CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const
+	{
+      // Build bounding points, then set up map of 12 bounding
+      // triangles defining the 6 surfaces of the bounding box. Using a consistent
+      // ordering of points the "away facing" triangles give -ve contributions to the
+      // solid angle and hence are ignored.
+      std::vector<V3D> pts;
+      Geometry::V3D dx=vectors[1]-vectors[0];
+      Geometry::V3D dz=vectors[3]-vectors[0];
+      pts.push_back(vectors[2]); pts.push_back(vectors[2]+dx);
+      pts.push_back(vectors[1]); pts.push_back(vectors[0]);
+      pts.push_back(vectors[2]+dz); pts.push_back(vectors[2]+dz+dx);
+      pts.push_back(vectors[1]+dz); pts.push_back(vectors[0]+dz);
 
+      std::vector<std::vector<int>> triMap;
+      for(int i=0;i<12;i++)
+      {
+          triMap.push_back(std::vector<int>());
+          for(int j=0;j<3;j++)
+              triMap[i].push_back(0);
+      }
+      triMap[0][0]=1; triMap[0][1]=4; triMap[0][2]=3;triMap[1][0]=3;triMap[1][1]=2;triMap[1][2]=1;
+      triMap[2][0]=5; triMap[2][1]=6; triMap[2][2]=7;triMap[3][0]=7;triMap[3][1]=8;triMap[3][2]=5;
+      triMap[4][0]=1; triMap[4][1]=2; triMap[4][2]=6;triMap[5][0]=6;triMap[5][1]=5;triMap[5][2]=1;
+      triMap[6][0]=2; triMap[6][1]=3; triMap[6][2]=7;triMap[7][0]=7;triMap[7][1]=6;triMap[7][2]=2;
+      triMap[8][0]=3; triMap[8][1]=4; triMap[8][2]=8;triMap[9][0]=8;triMap[9][1]=7;triMap[9][2]=3;
+      triMap[10][0]=1; triMap[10][1]=5; triMap[10][2]=8;triMap[11][0]=8;triMap[11][1]=4;triMap[11][2]=1;
+      double sangle=0.0;
+      for(int i=0;i<triMap.size();i++)
+      {
+          double sa=getTriangleSolidAngle(pts[triMap[i][0]-1],pts[triMap[i][1]-1],pts[triMap[i][2]-1],observer);
+          if(sa>0)
+              sangle+=sa;
+      }
+      return(sangle);
+   }
 	/**
 	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
 	 * object and returns them back in max and min points.
@@ -1426,6 +1478,15 @@ namespace Mantid
 		if(handle==NULL)return NULL;
 		return handle->getTriangleFaces();
 	}
+    /**
+    * get info on standard shapes
+    */
+    void Object::GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight) const
+    {
+       type=0;
+       if(handle==NULL)return;
+       handle->GetObjectGeom( type, vectors, myradius, myheight);
+    }
 
   }  // NAMESPACE Geometry
 
