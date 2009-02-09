@@ -12,15 +12,16 @@ namespace Mantid
 {
 namespace Geometry
 {
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+class Detector;
 
 /** An extension of the ObjectComponent class to add a detector id.
 
-  @class Detector
-  @version A
-  @author Laurent C Chapon, ISIS RAL
-  @date 01/11/2007
+  @author Roman Tolchenov, Tessella Support Services plc
 
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+  Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
 
@@ -40,8 +41,6 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class Detector;
-
 class DLLExport ParDetector : public ParObjComponent, public IDetector
 {
 public:
@@ -56,6 +55,7 @@ public:
 	int getID() const;
 	V3D getPos() const;
 	double getDistance(const IComponent& comp) const;
+  double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double solidAngle(const V3D& observer) const; 
 	bool isDead() const;
 	void markDead();

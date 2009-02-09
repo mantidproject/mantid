@@ -85,7 +85,6 @@ void AlignDetectors::exec()
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
   }
-  Geometry::V3D samplePos = sample->getPos();
   const double constant = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
   // Calculate the number of spectra in this workspace
@@ -103,9 +102,8 @@ void AlignDetectors::exec()
       for (int j = 0; j < ndets; ++j)
       {
         Geometry::IDetector_const_sptr det = instrument->getDetector(dets[j]);
-        Geometry::V3D detPos = det->getPos();
         // Get the sample-detector distance for this detector (in metres)
-        const double l2 = detPos.distance(samplePos);
+        const double l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
         const double twoTheta = inputWS->detectorTwoTheta(det);
         // Get the correction for this detector

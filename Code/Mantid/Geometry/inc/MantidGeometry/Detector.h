@@ -20,7 +20,7 @@ namespace Geometry
   @author Laurent C Chapon, ISIS RAL
   @date 01/11/2007
 
-  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+  Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
   This file is part of Mantid.
 
@@ -55,6 +55,7 @@ public:
   int getID() const;
 	V3D getPos() const;
 	double getDistance(const IComponent& comp) const;
+  double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double solidAngle(const V3D& observer) const;	
 	bool isDead() const;
 	void markDead();

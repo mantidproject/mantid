@@ -65,6 +65,12 @@ double Detector::getDistance(const IComponent& comp) const
   return ObjComponent::getDistance(comp);
 }
 
+double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
+{
+  const V3D sampleDetVec = this->getPos() - observer;
+  return sampleDetVec.angle(axis);
+}
+
 double Detector::solidAngle(const V3D& observer) const
 {
 	//Return a solid angle of 0 if the detector is marked dead

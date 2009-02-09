@@ -159,12 +159,12 @@ Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
  *  @param det A pointer to the detector object (N.B. might be a DetectorGroup)
  *  @return The scattering angle (0 < theta < pi)
  */
-const double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
+double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
 {
   const Geometry::V3D samplePos = getInstrument()->getSample()->getPos();
   const Geometry::V3D beamLine = samplePos - getInstrument()->getSource()->getPos();
-  const Geometry::V3D sampleDetVec = det->getPos() - samplePos;
-  return sampleDetVec.angle(beamLine);
+
+  return det->getTwoTheta(samplePos,beamLine);
 }
 
 /** Get a shared pointer to the instrument associated with this workspace

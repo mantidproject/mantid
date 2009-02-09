@@ -24,7 +24,7 @@ namespace Geometry
     @author Russell Taylor, Tessella Support Services plc
     @date 08/04/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -56,6 +56,7 @@ public:
   int getID() const;
   V3D getPos() const;
 	double getDistance(const IComponent& comp) const;
+  double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double solidAngle(const V3D& observer) const; 
 	bool isDead() const;
 	void markDead();

@@ -79,7 +79,7 @@ public:
   
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
   Geometry::IDetector_sptr getDetector(const int index) const;
-  const double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+  double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
   
   /// Get the footprint in memory in KB.
   virtual long int getMemorySize() const;

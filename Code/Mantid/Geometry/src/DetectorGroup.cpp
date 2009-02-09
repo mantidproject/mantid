@@ -39,7 +39,7 @@ DetectorGroup::~DetectorGroup()
 }
 
 /// Add a detector to the collection
-void DetectorGroup::addDetector(IDetector_sptr  det)
+void DetectorGroup::addDetector(IDetector_sptr det)
 {
   // Warn if adding a dead detector
   if ( det->isDead() )
@@ -83,9 +83,29 @@ V3D DetectorGroup::getPos() const
   return newPos /= m_detectors.size(); // protection against divide by zero in V3D
 }
 
+/// Gives the average distance of a group of detectors from the given component
 double DetectorGroup::getDistance(const IComponent& comp) const
 {
-  return getPos().distance(comp.getPos());
+  double result = 0.0;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    result += (*it).second->getDistance(comp);
+  }
+  return result/m_detectors.size();
+}
+
+/// Gives the average angle of a group of detectors from the observation point, relative to the axis given
+double DetectorGroup::getTwoTheta(const V3D& observer, const V3D& axis) const
+{
+  double result = 0.0;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    const V3D sampleDetVec = (*it).second->getPos() - observer;
+    result += sampleDetVec.angle(axis);
+  }
+  return result/m_detectors.size();
 }
 
 /** Gives the total solid angle subtended by a group of detectors by summing the

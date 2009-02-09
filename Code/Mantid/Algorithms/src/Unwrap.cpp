@@ -165,13 +165,13 @@ const double Unwrap::calculateFlightpath(const int& spectrum, const double& L1, 
     // Get the L2 distance if this detector is not a monitor
     if ( !isMonitor )
     {
-      double L2 = det->getPos().distance(m_inputWS->getInstrument()->getSample()->getPos());
+      double L2 = det->getDistance(*(m_inputWS->getInstrument()->getSample()));
       Ld = L1 + L2;
     }
     // If it is a monitor, then the flightpath is the distance to the source
     else
     {
-      Ld = det->getPos().distance(m_inputWS->getInstrument()->getSource()->getPos());
+      Ld = det->getDistance(*(m_inputWS->getInstrument()->getSource()));
     }
   }
   catch (Exception::NotFoundError)

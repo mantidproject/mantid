@@ -54,6 +54,12 @@ double ParDetector::getDistance(const IComponent& comp) const
   return ParObjComponent::getDistance(comp);
 }
 
+double ParDetector::getTwoTheta(const V3D& observer, const V3D& axis) const
+{
+  const V3D sampleDetVec = this->getPos() - observer;
+  return sampleDetVec.angle(axis);
+}
+
 double ParDetector::solidAngle(const V3D& observer) const
 {
   return ParObjComponent::solidAngle(observer);

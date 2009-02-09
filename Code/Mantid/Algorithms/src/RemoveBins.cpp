@@ -253,17 +253,17 @@ void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double&
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   l1 = instrument->getSource()->getDistance(*sample);
   Geometry::IDetector_const_sptr det = m_inputWorkspace->getDetector(index);
-  Geometry::V3D detPos = det->getPos();
+  //Geometry::V3D detPos = det->getPos();
   // Get the sample-detector distance for this detector (in metres)
   if ( ! det->isMonitor() )
   {
-    l2 = detPos.distance(sample->getPos());
+    l2 = det->getDistance(*sample);
     // The scattering angle for this detector (in radians).
     twoTheta = m_inputWorkspace->detectorTwoTheta(det);
   }
   else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
   {
-    l2 = detPos.distance(instrument->getSource()->getPos());
+    l2 = det->getDistance(*(instrument->getSource()));
     l2 = l2 - l1;
     twoTheta = 0.0;
   }

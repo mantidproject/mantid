@@ -233,11 +233,12 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr source = instrument->getSource();
   Geometry::IObjComponent_const_sptr sample = instrument->getSample();
   double l1;
   try
   {
-    l1 = instrument->getSource()->getDistance(*sample);
+    l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
   catch (Exception::NotFoundError e)
@@ -245,7 +246,6 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
   }
-  Geometry::V3D samplePos = sample->getPos();
 
   const int notFailed = -99;
   int failedDetectorIndex = notFailed;
@@ -265,18 +265,17 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     try {
       // Now get the detector object for this histogram
       Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
-      Geometry::V3D detPos = det->getPos();
       // Get the sample-detector distance for this detector (in metres)
       double l2, twoTheta;
       if ( ! det->isMonitor() )
       {
-        l2 = detPos.distance(samplePos);
+        l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
         twoTheta = outputWS->detectorTwoTheta(det);
       }
       else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
       {
-        l2 = detPos.distance(instrument->getSource()->getPos());
+        l2 = det->getDistance(*source);
         l2 = l2 - l1;
         twoTheta = 0.0;
       }

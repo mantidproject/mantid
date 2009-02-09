@@ -24,7 +24,7 @@ class V3D;
     @author Russell Taylor, Tessella Support Services plc
     @date 08/04/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -58,6 +58,13 @@ public:
    *  @return The distance
    */
   virtual double getDistance(const IComponent& comp) const = 0;
+
+  /** Gives the angle of this detector object with respect to an axis
+   *  @param observer The point to calculate the angle relative to (typically the sample position)
+   *  @param axis     The axis to which the required angle is relative
+   *  @return The angle
+   */
+  virtual double getTwoTheta(const V3D& observer, const V3D& axis) const = 0;
 
   /** Gives the approximate angle subtended by the detector
    *  @param observer The point from which the detector is being viewed
