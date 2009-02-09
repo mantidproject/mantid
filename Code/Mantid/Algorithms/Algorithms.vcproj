@@ -234,6 +234,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FlatBackground.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GeneralisedSecondDifference.cpp"
 				>
 			</File>
@@ -457,6 +461,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FindPeaksTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FlatBackground.h"
 				>
 			</File>
 			<File

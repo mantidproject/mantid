@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/FlatBackground.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "MantidCurveFitting/Linear.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -74,7 +75,7 @@ public:
     const std::vector<double> &Y = outputWS->readY(0);
     for (unsigned int i=0; i<Y.size(); ++i)
     {
-      TS_ASSERT_LESS_THAN( Y[i], 1.0 )
+      TS_ASSERT_LESS_THAN( Y[i], 1.5 )
     }
   }
 
