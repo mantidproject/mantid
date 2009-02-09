@@ -637,17 +637,18 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 {
 	 Table* t = new Table(appWindow()->scriptEnv, m->numRows(), 6, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-Detectors-"));
-     t->showNormal();
-     t->askOnCloseEvent(false);
+   t->showNormal();
+   t->askOnCloseEvent(false);
     
-     Mantid::API::MatrixWorkspace_sptr ws = m->workspace();
-     Mantid::API::Axis *spectraAxis = ws->getAxis(1);
-     for(int i=0;i<m->numRows();i++)
-     {
+   Mantid::API::MatrixWorkspace_sptr ws = m->workspace();
+   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
+   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+   for(int i=0;i<m->numRows();i++)
+   {
          
          int ws_index = m->workspaceIndex(i);
          int currentSpec = spectraAxis->spectraNo(ws_index);
-         Mantid::Geometry::V3D pos;
+         //Mantid::Geometry::V3D pos;
          int detID = 0;
          double R = 0.;
          double Theta = 0.;
@@ -656,7 +657,12 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          {
              boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
              detID = det->getID();
-             det->getPos().getSpherical(R,Theta,Phi);
+             // We want the position of the detector relative to the sample
+             Mantid::Geometry::V3D pos = det->getPos() - sample->getPos();
+             pos.getSpherical(R,Theta,Phi);
+             // Need to get R & Theta through these methods to be correct for grouped detectors
+             R = det->getDistance(*sample);
+             Theta = ws->detectorTwoTheta(det);
          }
          catch(...)
          {
@@ -679,8 +685,8 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 
          t->setCell(i,5,Phi); 
          if (i == 0) t->setColName(5,"Phi");
-     }
-     return t;
+   }
+   return t;
  }
 
 bool MantidUI::drop(QDropEvent* e)
