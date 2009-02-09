@@ -191,7 +191,7 @@ public:
 
       for(int i=0;i<tw.rowCount();i++)
       {
-          std::cerr<<bc->data()[i]<<'\n';
+//          std::cerr<<bc->data()[i]<<'\n';
       }
   }
   catch(std::exception& e)

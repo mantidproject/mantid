@@ -87,7 +87,7 @@ public:
 
   void testGetDistance()
   {
-    TS_ASSERT_DELTA( dg->getDistance(comp), 6.9372, 0.0001 )
+    TS_ASSERT_DELTA( dg->getDistance(comp), 6.9639, 0.0001 )
   }
 
   void testDead()
