@@ -4073,7 +4073,7 @@ void ApplicationWindow::scriptError(const QString &message, const QString &, int
 void ApplicationWindow::scriptPrint(const QString &text)
 {
 #ifdef SCRIPTING_CONSOLE
-	if(!text.stripWhiteSpace().isEmpty()) console->append(text);
+	if(!text.stripWhiteSpace().isEmpty() && !text.contains("MTDPYLN") ) console->append(text);
 #else
 	printf(text.ascii());
 #endif

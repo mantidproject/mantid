@@ -203,7 +203,7 @@ void ScriptEdit::scriptPrint(const QString &text)
 
   //If the text contains the current line number, mark the line instead of 
   //outputting
-  if( text.contains("LINENUMBER:") ) 
+  if( text.contains("MTDPYLN:") ) 
   {
     int lineNumber = text.section(':',1, 1).toInt();
     markerDeleteAll();

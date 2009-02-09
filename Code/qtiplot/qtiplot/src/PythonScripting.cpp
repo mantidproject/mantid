@@ -243,20 +243,21 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 
 //	PyEval_ReleaseLock();
 	d_initialized = true;
-
-	std::ostringstream os;
-	
-	os << "import sys\n\n"
+  
+ 	std::ostringstream os;
+	os << "import sys\n"
+     << "import os.path\n\n"
 	   << "def traceit(frame, event, arg):\n"
 	   << "\tif event == \"line\":\n"
 	   << "\t\tlineno = frame.f_lineno\n"
 	   << "\t\tfilename = frame.f_globals[\"__file__\"]\n"
-	   << "\t\tif filename == './qtiUtil.pyc':\n"
-	   << "\t\t\tprint \"LINENUMBER:\" + str(lineno),\n"
+	   << "\t\tif os.path.basename(filename) == \"qtiUtil.pyc\":\n"
+	   << "\t\t\tprint \"MTDPYLN:\" + str(lineno),\n"
 	   << "\treturn traceit\n\n"
 	   << "sys.settrace(traceit)\n";
 
 	PyRun_SimpleString(os.str().c_str());
+
 
 }
 
@@ -281,7 +282,7 @@ bool PythonScripting::initialize()
 	if(!initmtd)
 	  initmtd = loadInitFile("./mantidplotrc");
 
-	return (initglob && initmtd);
+    return (initglob && initmtd);
 
 //	PyEval_ReleaseLock();
 }
