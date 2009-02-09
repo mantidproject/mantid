@@ -63,6 +63,7 @@ MantidAbout::MantidAbout(QWidget *parent):QDialog(parent)
     layout->addLayout(buttonLayout);
 	setLayout(layout);
 	setWindowTitle("Mantid - About");
+	setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 
 }
 

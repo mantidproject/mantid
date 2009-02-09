@@ -891,7 +891,7 @@ void ConfigDialog::initFileLocationsPage()
 
 void ConfigDialog::languageChange()
 {
-	setWindowTitle( tr( "QtiPlot - Choose default settings" ) );
+  setWindowTitle( tr( "MantidPlot - Choose default settings" ) ); //Mantid
 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
 
 	// pages list

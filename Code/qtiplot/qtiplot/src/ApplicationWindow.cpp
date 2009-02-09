@@ -604,7 +604,8 @@ void ApplicationWindow::initToolBars()
 {
 	initPlot3DToolBar();
 
-	setWindowIcon(QIcon(QPixmap(logo_xpm)));
+	//	setWindowIcon(QIcon(QPixmap(logo_xpm)));
+	setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 	QPixmap openIcon, saveIcon;
 
 	fileTools = new QToolBar(tr( "File" ), this);
@@ -7200,7 +7201,7 @@ void ApplicationWindow::showImageDialog()
 		id->setAttribute(Qt::WA_DeleteOnClose);
 		connect (id, SIGNAL(setGeometry(int, int, int, int)),
 				g, SLOT(updateImageMarker(int, int, int, int)));
-		id->setIcon(QPixmap(logo_xpm));
+		//		id->setIcon(QPixmap(logo_xpm));
 		id->setOrigin(im->origin());
 		id->setSize(im->size());
 		id->exec();
@@ -13712,7 +13713,7 @@ void ApplicationWindow::projectProperties()
 	QMessageBox *mbox = new QMessageBox ( tr("Properties"), s, QMessageBox::NoIcon,
 			QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton, this);
 
-	mbox->setIconPixmap(QPixmap( qtiplot_logo_xpm ));
+	//mbox->setIconPixmap(QPixmap( qtiplot_logo_xpm ));
 	mbox->show();
 }
 

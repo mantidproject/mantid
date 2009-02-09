@@ -87,7 +87,8 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
   //Mantid - Moved this to after output and scriptedit have been created
 	initActions();
 
-	setIcon(QPixmap(logo_xpm));
+	//	setIcon(QPixmap(logo_xpm));
+	setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 
 	//updateWindowTitle(env->scriptingLanguage());
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window - New File");
