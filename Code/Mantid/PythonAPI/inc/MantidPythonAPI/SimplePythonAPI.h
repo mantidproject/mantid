@@ -70,7 +70,7 @@ class DLLExport SimplePythonAPI
   static std::string extractAlgVersion(const std::string & algKey);
   static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, bool gui);
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
-  static std::string createHelpString(const std::string & algm, const PropertyVector & properties);
+  static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
   static std::string sanitizePropertyValue(const std::string & value);
   static std::string sanitizePropertyName(const std::string & name);

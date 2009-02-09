@@ -33,7 +33,7 @@ class ExecuteAlgorithm : public QDialog
 public:
   ExecuteAlgorithm(QWidget *parent = 0, bool forScript = false);
 	~ExecuteAlgorithm();
-	void CreateLayout(Mantid::API::Algorithm* alg);
+  void CreateLayout(Mantid::API::Algorithm* alg, const QString & message = "");
 
 protected:
 	

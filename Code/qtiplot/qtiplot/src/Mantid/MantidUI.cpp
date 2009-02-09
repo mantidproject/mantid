@@ -1350,7 +1350,7 @@ void MantidUI::cancelAllRunningAlgorithms()
   if( m_algMonitor ) m_algMonitor->cancelAll();
 }
 
-bool MantidUI::createPropertyInputDialog(const QString & algName)
+bool MantidUI::createPropertyInputDialog(const QString & algName, const QString & message)
 {
   Mantid::API::Algorithm *alg = findAlgorithmPointer(algName);
   if( !alg ) 
@@ -1359,7 +1359,7 @@ bool MantidUI::createPropertyInputDialog(const QString & algName)
   }
   ScriptWindow* sw = appWindow()->scriptWindow;  
   ExecuteAlgorithm* dlg = new ExecuteAlgorithm(sw, true);
-  dlg->CreateLayout(alg);
+  dlg->CreateLayout(alg, message);
   dlg->setModal(true);
   return (dlg->exec() == QDialog::Accepted);
 }

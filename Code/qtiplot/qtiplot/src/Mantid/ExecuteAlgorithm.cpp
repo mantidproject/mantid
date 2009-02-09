@@ -31,16 +31,17 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 {
 }
 
-void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
+void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg, const QString & message)
 {
   m_alg = alg;
   m_props = m_alg->getProperties();
 
   if ( m_props.empty() ) return;
 
-  QGridLayout *grid = new QGridLayout();
-  std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = m_props.end();
+  QGridLayout *grid = new QGridLayout;
+  grid->setName("PropertyArea");
   int row(0);
+  std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = m_props.end();
   QString lastValue("");
   QMap<QString, QString> savedProps = InputHistory::Instance().algorithmProperties(QString::fromStdString(alg->name()));
   for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = m_props.begin();
@@ -186,9 +187,23 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg)
   connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
 	
   QVBoxLayout *mainLay = new QVBoxLayout(this);
+  mainLay->setName("MainArea");
+
+  if( !message.isEmpty() )
+  {
+    QLabel *inputMessage = new QLabel(this);
+    inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    inputMessage->setText(QString("Script information: ") + message);
+    QHBoxLayout *msgArea = new QHBoxLayout;
+    msgArea->setName("InformationArea");
+    msgArea->addWidget(inputMessage);
+    mainLay->addLayout(msgArea);
+  }
+  
   mainLay->addLayout(grid);
 	
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+  buttonRowLayout->setName("ButtonArea");
   buttonRowLayout->addStretch();
   buttonRowLayout->addWidget(exitButton);
   buttonRowLayout->addWidget(okButton);

@@ -83,8 +83,14 @@ namespace Mantid
 	writeFunctionDef(module, name , orderedProperties, false);
 	if( gui ) writeFunctionDef(module, name , orderedProperties, true);
 	std::transform(name.begin(), name.end(), name.begin(), tolower);
-	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties)));
+	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false)));
+	//The help for the dialog functions if necessary
+	if( gui )
+	{
+	  helpStrings.push_back(make_pair(name + "dialog", createHelpString(vIter->first, orderedProperties, true)));
+	}
       }
+      //First function without dialog
       writeFunctionHelp(module, helpStrings);
       module.close();
 
@@ -148,21 +154,28 @@ namespace Mantid
 	//For gui mode, set all properties as optional
 	if( gui )
 	{
-	  os << " = -1";
+	  os << " = -1,";
+	  ++pIter;
 	}
 	else
 	{
 	  if( !(*pIter)->isValid() ) ++iMand;
 	  else os  << " = -1";
+	  if( ++pIter != pEnd ) os << ", ";
 	}
-        if( ++pIter != pEnd ) os << ", ";
       }
       //end of function parameters
-      os << "):\n";
+      if( gui )
+      {
+	os << "message = \"\"):\n";
+      }
+      else
+      {
+	os << "):\n";
+      }
       os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
 
-      if( gui )
-      os << "\tnset = 0\n";
+      if( gui ) os << "\tnset = 0\n";
 
       pIter = properties.begin();
       iarg = 0;
@@ -182,7 +195,7 @@ namespace Mantid
       if( gui )
       {
 	os << "\tif nset != " << iarg + 1 << ":\n"
-	   << "\t\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\")\n"
+	   << "\t\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\" , message)\n"
 	   << "\tif dialog == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\telse:\n"
@@ -241,11 +254,14 @@ namespace Mantid
      * Construct a  help command for a specific algorithm
      * @param algm The name of the algorithm
      * @param properties The list of properties
+     * @param dialog A boolean indicating whether this is a dialog function or not
      */
-    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties)
+    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
     {
       std::ostringstream os;
-      os << "\t\thelpmsg =  \"Usage: " << algm << "(";
+      os << "\t\thelpmsg =  \"Usage: " << algm;
+      if( dialog ) os << "Dialog(";
+      else os << "(";
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
       for( ; pIter != pEnd ; )
@@ -253,7 +269,8 @@ namespace Mantid
 	os << sanitizePropertyName((*pIter)->name());
 	if( ++pIter != pEnd ) os << ", ";
       }
-      os << ")\\n\"\n";
+      if( dialog ) os << ", message)\\n\"\n";
+      else os << ")\\n\"\n";
       os << "\t\thelpmsg += \"Argument description:\\n\"\n";
       pIter = properties.begin();
       for( ; pIter != pEnd ; ++pIter )
@@ -276,6 +293,10 @@ namespace Mantid
 	  }
 	}
 	os << "\\n\"\n";	
+      }
+      if( dialog )
+      {      
+	os << "\t\thelpmsg += \"\\tName: message, Optional: Yes, Default value: \\\"\\\", Direction: Input\\n\"\n";
       }
       os << "\t\thelpmsg += \"Note 1: All arguments must be wrapped in string quotes  \\\"\\\", regardless of their type.\\n\"\n";
       os << "\t\thelpmsg += \"Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\\"value\\\".\\n\"\n";
