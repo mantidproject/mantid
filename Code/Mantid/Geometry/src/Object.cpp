@@ -1117,7 +1117,7 @@ namespace Mantid
       pts.push_back(vectors[2]+dz); pts.push_back(vectors[2]+dz+dx);
       pts.push_back(vectors[1]+dz); pts.push_back(vectors[0]+dz);
 
-      std::vector<std::vector<int>> triMap;
+      std::vector<std::vector<int> > triMap;
       for(int i=0;i<12;i++)
       {
           triMap.push_back(std::vector<int>());
