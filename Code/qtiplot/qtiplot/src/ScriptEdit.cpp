@@ -51,7 +51,7 @@
 #include <iostream>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QsciScintilla(parent), scripted(env), d_error(false)//Mantid
+  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0)//Mantid
 {
 	myScript = scriptEnv->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
@@ -207,7 +207,7 @@ void ScriptEdit::scriptPrint(const QString &text)
   {
     int lineNumber = text.section(':',1, 1).toInt();
     markerDeleteAll();
-    markerAdd(lineNumber - 1, m_iCodeMarkerHandle);
+    markerAdd(m_iFirstLineNumber + lineNumber - 1, m_iCodeMarkerHandle);
   }
   else
   {
@@ -244,6 +244,7 @@ void ScriptEdit::execute()
   //Qscintilla function
   getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
   scriptEnv->setFirstLineNumber(lineFrom);
+  m_iFirstLineNumber = lineFrom;
 
   //Disable editor
   setEditorActive(false);
@@ -263,7 +264,7 @@ void ScriptEdit::executeAll()
 {
   if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
-
+   m_iFirstLineNumber = 0;
   //Disable editor
   setEditorActive(false);
 

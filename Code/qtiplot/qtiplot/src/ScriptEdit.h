@@ -114,6 +114,7 @@ public slots:
 
   //An integer defining the handle to a code marker     
   int m_iCodeMarkerHandle;
+  int m_iFirstLineNumber;
 
   private slots:
   //! Insert an error message from the scripting system at printCursor.
