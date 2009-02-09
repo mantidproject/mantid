@@ -27,6 +27,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/Progress.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
@@ -195,10 +196,10 @@ public:
   Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);
-  Poco::NotificationCenter notificationCenter;
+  mutable Poco::NotificationCenter notificationCenter;
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
-  void cancel();
+  void cancel()const;
   /// True if the algorithm is running asynchronously.
   bool isRunningAsync(){return m_runningAsync;}
   /// True if the algorithm is running.
@@ -221,6 +222,7 @@ protected:
   // Make PropertyManager's declareProperty methods protected in Algorithm
   using Kernel::PropertyManager::declareProperty;
 
+  friend class Progress;
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
   void progress(double p, const std::string& msg = "");
   /// Interrupts algorithm execution if Algorithm::cancel() has been called.
@@ -254,7 +256,7 @@ private:
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
   bool executeAsyncImpl(const int&);///< executeAsync implementation.
-  bool m_cancel; ///< set to true to stop execution
+  mutable bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
 

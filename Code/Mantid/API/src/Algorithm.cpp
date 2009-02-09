@@ -286,7 +286,7 @@ const std::vector< Mantid::Kernel::Property* >& Algorithm::getProperties() const
   return PropertyManager::getProperties();
 }
 
-void Algorithm::cancel()
+void Algorithm::cancel()const
 {
     m_cancel = true;
 }
@@ -448,9 +448,7 @@ void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNoti
 {
     double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
     progress(p,pNf->message);
-    std::cerr<<"progress: "<<p<<'\n';
 }
-
 
 } // namespace API
 } // namespace Mantid

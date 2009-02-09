@@ -224,6 +224,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Progress.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RefAxis.cpp"
 				>
 			</File>
@@ -287,6 +291,10 @@
 			</File>
 			<File
 				RelativePath=".\test\AlgorithmManagerTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\AlgorithmObserver.h"
 				>
 			</File>
 			<File
@@ -399,6 +407,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ParInstrumentTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\Progress.h"
 				>
 			</File>
 			<File
