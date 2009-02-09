@@ -25,7 +25,7 @@ namespace Mantid
 {
 	namespace Geometry
 	{
-
+		Kernel::Logger& vtkGeometryCacheWriter::PLog(Kernel::Logger::get("vtkGeometryCacheWriter"));
 		/**
 		* Constructor
 		*/
@@ -41,6 +41,7 @@ namespace Mantid
 		*/
 		vtkGeometryCacheWriter::~vtkGeometryCacheWriter()
 		{
+			write();
 			//Write to file
 			mDoc->release();
 		}
@@ -76,7 +77,7 @@ namespace Mantid
 		{
 			//First check whether Object can be written to the file
 			boost::shared_ptr<GeometryHandler> handle=obj->getGeometryHandler();
-			if(!handle->canTriangulate()) return; //Cannot add the object to the file
+			if(!(handle->canTriangulate())) return; //Cannot add the object to the file
 			std::stringstream buf;
 			//get the name of the Object
 			int name=obj->getName();

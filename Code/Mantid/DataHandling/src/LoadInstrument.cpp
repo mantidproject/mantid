@@ -6,6 +6,8 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Detector.h"
+#include "MantidGeometry/vtkGeometryCacheReader.h"
+#include "MantidGeometry/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataHandling/XMLlogfile.h"
 
@@ -15,6 +17,7 @@
 #include "Poco/DOM/NodeList.h"
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
+#include "Poco/File.h"
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
@@ -145,6 +148,7 @@ void LoadInstrument::exec()
       // for now try to create a geometry shape associated with every type
       // that does not contain any component elements
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
+	  mapTypeNameToShape[typeName]->setName(iType);
     }
     else
       isTypeAssembly[typeName] = true;
@@ -248,9 +252,38 @@ void LoadInstrument::exec()
 
   pDoc->release();
 
+  // Get cached file name
+  std::string cacheFilename=m_filename.replace(m_filename.length()-3,3,"vtp");
+  // check for the geometry cache
+  Poco::File defFile(m_filename);
+  Poco::File vtkFile(cacheFilename);
+  bool cacheAvailable=true;
+  if((!vtkFile.exists())||defFile.getLastModified()>vtkFile.getLastModified())
+	  cacheAvailable=false;
+  if(cacheAvailable)
+  {
+	  g_log.information("Loading geometry cache from "+cacheFilename);
+	  // create a vtk reader
+	  std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+	  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
+	  for( objItr=mapTypeNameToShape.begin(); objItr!=mapTypeNameToShape.end();objItr++)
+	  {
+		  ((*objItr).second)->setVtkGeometryCacheReader(reader);
+	  }
+  }
+  else
+  {
+  	  g_log.information("Geometry cache is not avilable");
+	  // create a vtk writer
+	  std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+	  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
+	  for( objItr=mapTypeNameToShape.begin(); objItr!=mapTypeNameToShape.end();objItr++)
+	  {
+		  ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+	  }
+  }
   // Add the instrument to the InstrumentDataService
   InstrumentDataService::Instance().add(instrumentFile,m_instrument);
-
   return;
 }
 

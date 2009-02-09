@@ -4,6 +4,15 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 
+namespace Poco
+{
+	namespace XML
+	{
+		class Document;
+		class Element;
+		class DOMParser;
+	}
+}
 namespace Mantid
 {
 

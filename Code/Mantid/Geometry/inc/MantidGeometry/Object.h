@@ -46,6 +46,9 @@ namespace Geometry
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 	class GeometryHandler;
+	class CacheGeometryHandler;
+	class vtkGeometryCacheReader;
+	class vtkGeometryCacheWriter;
 class DLLExport Object
 {
  private:
@@ -83,7 +86,11 @@ class DLLExport Object
   double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
-  friend class GeometryHandler;
+  friend class CacheGeometryHandler;
+  bool bGeometryCaching;
+  boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+  boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
+  void updateGeometryHandler();
   /// for solid angle from triangulation
   int NumberOfTriangles() const;
   int NumberOfPoints() const;
@@ -176,8 +183,14 @@ class DLLExport Object
   //Initialize Drawing
   void initDraw() const;
   //Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler(){return handle;}
+  boost::shared_ptr<GeometryHandler> getGeometryHandler();
+  /// Set Geometry Handler
   void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+
+  ///set vtkGeometryCache writer
+  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  ///set vtkGeometryCache reader
+  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
 };
 
 }  // NAMESPACE Geometry

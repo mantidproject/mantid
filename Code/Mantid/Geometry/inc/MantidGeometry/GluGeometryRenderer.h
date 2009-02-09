@@ -45,7 +45,7 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
 	  unsigned int           iDisplaylistId; ///< OpenGL display list id
 	  bool                   boolDisplaylistCreated; ///< flag to store whether display list is created or not
-	  
+	  int					 mErrorCode;
     public:
 		GluGeometryRenderer();       ///< Constructor
 		~GluGeometryRenderer();      ///< Destructor
@@ -54,6 +54,10 @@ namespace Mantid
 		void RenderCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4);
 		void RenderCone(V3D center,V3D axis,double radius,double height);
 		void RenderCylinder(V3D center,V3D axis,double radius,double height);
+		void CreateSphere(V3D center,double radius);
+		void CreateCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4);
+		void CreateCone(V3D center,V3D axis,double radius,double height);
+		void CreateCylinder(V3D center,V3D axis,double radius,double height);
     };
 
   }   // NAMESPACE Geometry

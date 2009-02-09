@@ -97,12 +97,6 @@ namespace Mantid
 			buff>>noOfTriangles;
 			buff.clear();
 
-			Faces =new int[noOfTriangles*3];
-			if(Points==NULL || Faces==NULL) // Out of memory
-			{
-				PLog.error("Cannot allocate memory for triangle cache of Object " + objName.str());
-				return;
-			}
 			// Read Points
 			Element* pPts = pEle->getChildElement("Points")->getChildElement("DataArray");
 			readPoints(pPts,&noOfPoints,&Points);
@@ -142,11 +136,16 @@ namespace Mantid
 			}
 			//Allocate memory
 			*points=new double[(*noOfPoints)*3];
+			if(*points==NULL) // Out of memory
+			{
+				PLog.error("Cannot allocate memory for triangle cache of Object ");
+				return;
+			}
 			if(pEle->getAttribute("format").compare("ascii")==0) 
 			{ //Read from Ascii
 				std::stringstream buf;
 				buf<<pEle->innerText();
-				for(int i=0;i<*noOfPoints;i++)
+				for(int i=0;i<(*noOfPoints)*3;i++)
 				{
 					buf>>(*points)[i];
 				}
@@ -169,11 +168,16 @@ namespace Mantid
 			}
 			//Allocate memory
 			*faces=new int[(*noOfTriangles)*3];
+			if(*faces==NULL) // Out of memory
+			{
+				PLog.error("Cannot allocate memory for triangle cache of Object ");
+				return;
+			}
 			if(pEle->getAttribute("format").compare("ascii")==0) 
 			{ //Read from Ascii
 				std::stringstream buf;
 				buf<<pEle->innerText();
-				for(int i=0;i<*noOfTriangles;i++)
+				for(int i=0;i<(*noOfTriangles)*3;i++)
 				{
 					buf>>(*faces)[i];
 				}

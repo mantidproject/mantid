@@ -67,6 +67,7 @@ namespace Mantid
 		void CacheGeometryHandler::Initialize()
 		{
 			if(Obj!=NULL){
+				Obj->updateGeometryHandler();
 				if(boolTriangulated==false)	Triangulate();
 				Renderer->Initialize(Triangulator->getNumberOfPoints(),Triangulator->getNumberOfTriangles(),Triangulator->getTriangleVertices(),Triangulator->getTriangleFaces());
 			}else if(ObjComp!=NULL){
@@ -78,6 +79,7 @@ namespace Mantid
 		{
 			if(Obj!=NULL)
 			{
+				Obj->updateGeometryHandler();
 				if(boolTriangulated==false)	Triangulate();
 				return Triangulator->getNumberOfTriangles();
 			}
@@ -91,6 +93,7 @@ namespace Mantid
 		{
 			if(Obj!=NULL)
 			{
+				Obj->updateGeometryHandler();
 				if(boolTriangulated==false)	Triangulate();
 				return Triangulator->getNumberOfPoints();
 			}
@@ -104,6 +107,7 @@ namespace Mantid
 		{
 			if(Obj!=NULL)
 			{
+				Obj->updateGeometryHandler();
 				if(boolTriangulated==false)	Triangulate();
 				return Triangulator->getTriangleVertices();
 			}
@@ -117,6 +121,7 @@ namespace Mantid
 		{
 			if(Obj!=NULL)
 			{
+				Obj->updateGeometryHandler();
 				if(boolTriangulated==false)	Triangulate();
 				return Triangulator->getTriangleFaces();
 			}
@@ -129,6 +134,7 @@ namespace Mantid
 		void CacheGeometryHandler::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
 		{
 			Triangulator->setGeometryCache(noPts,noFaces,pts,faces);
+			boolTriangulated=true;
 		}
 	}
 }

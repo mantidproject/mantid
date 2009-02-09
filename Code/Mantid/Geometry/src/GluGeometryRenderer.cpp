@@ -14,6 +14,7 @@ namespace Mantid
 	namespace Geometry
 	{
 
+		Kernel::Logger& GluGeometryRenderer::PLog(Kernel::Logger::get("GluGeometryRenderer"));
 		/**
 		* Constructor
 		* Generated the display list
@@ -38,123 +39,77 @@ namespace Mantid
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
+				while(glGetError() != GL_NO_ERROR);
 				iDisplaylistId=glGenLists(1);
-				//create glu sphere
-				GLUquadricObj *qobj=gluNewQuadric();
-				gluQuadricDrawStyle(qobj,GLU_FILL);
-				gluQuadricNormals(qobj,GL_SMOOTH);
 				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-				glPushMatrix();
-				glTranslated(center[0],center[1],center[2]);
-				gluSphere(qobj,radius,5,5);
-				glPopMatrix();
+				CreateSphere(center,radius);
 				glEndList();
-				gluDeleteQuadric(qobj);
 				boolDisplaylistCreated=true;
-			}else{
+				mErrorCode=glGetError();
+			}else if(mErrorCode == GL_NO_ERROR){
 				glCallList(iDisplaylistId);
+			}else{
+				CreateSphere(center,radius);
 			}
 		}
 		void GluGeometryRenderer::RenderCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
-				//Calculate the points for the cube using 4 points.
-				V3D vec0=Point1;
-				V3D vec1=Point2-Point1;
-				V3D vec2=Point3-Point1;
-				V3D vec3=Point4-Point1;
-				V3D vertex[8];
-				vertex[0]=vec0;
-				vertex[1]=vec0+vec3;
-				vertex[2]=vec0+vec3+vec1;
-				vertex[3]=vec0+vec1;
-				vertex[4]=vec0+vec2;
-				vertex[5]=vec0+vec2+vec3;
-				vertex[6]=vec0+vec2+vec3+vec1;
-				vertex[7]=vec0+vec1+vec2;
-				//int faceindex[6][4]={{0,1,2,3},{0,3,7,4},{3,2,6,7},{2,1,5,6},{0,4,5,1},{4,7,6,5}};
-				//int faceindex[6][4]={{0,3,2,1},{0,4,7,3},{3,7,6,2},{2,6,5,1},{0,1,5,4},{4,5,6,7}};
-				int faceindex[6][4]={
-					{0,1,2,3}, //top
-					{0,3,7,4}, //left
-					{3,2,6,7}, //back
-					{2,1,5,6}, //right
-					{0,4,5,1}, //front
-					{4,7,6,5}, //bottom
-				};
-				V3D normal;
-				//calculate normals not done yet
+				while(glGetError() != GL_NO_ERROR );
 				iDisplaylistId=glGenLists(1);
-				glNewList(iDisplaylistId,GL_COMPILE_AND_EXECUTE); //Construct display list for object representation
-				//first face
-				glBegin(GL_QUADS);
-				for(int i=0;i<6;i++){
-					normal=(vertex[faceindex[i][0]]-vertex[faceindex[i][1]]).cross_prod((vertex[faceindex[i][0]]-vertex[faceindex[i][2]]));
-					normal.normalize();
-					glNormal3d(normal[0],normal[1],normal[2]);
-					for(int j=0;j<4;j++)
-						glVertex3d(vertex[faceindex[i][j]][0],vertex[faceindex[i][j]][1],vertex[faceindex[i][j]][2]);
-				}
-				glEnd();
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+				CreateCube(Point1,Point2,Point3,Point4);
 				glEndList();
+				mErrorCode=glGetError();
 				boolDisplaylistCreated=true;
-			}else{
+			}else if(mErrorCode == GL_NO_ERROR){
 				glCallList(iDisplaylistId);
+			}else{
+				CreateCube(Point1,Point2,Point3,Point4);
 			}
 		}
 		void GluGeometryRenderer::RenderCone(V3D center,V3D axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
-				GLUquadricObj *qobj=gluNewQuadric();
-				gluQuadricDrawStyle(qobj,GLU_FILL);
-				gluQuadricNormals(qobj,GL_SMOOTH);
+				while(glGetError() != GL_NO_ERROR);
 				iDisplaylistId=glGenLists(1);
-				glNewList(iDisplaylistId,GL_COMPILE_AND_EXECUTE); //Construct display list for object representation
-				glTranslated(center[0],center[1],center[2]);
-				GLdouble mat[16];
-				V3D unit(0,0,1);
-				Quat rot(unit,axis);
-				rot.GLMatrix(mat);
-				glMultMatrixd(mat);
-				gluCylinder(qobj,0,radius,height,10,5);
-				glTranslated(0.0,0.0,height);
-				gluDisk(qobj,0,radius,10,1);
-				glPopMatrix();
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+				CreateCone(center,axis,radius,height);
 				glEndList();
+				mErrorCode=glGetError();
 				boolDisplaylistCreated=true;
-			}else{
+			}else if(mErrorCode == GL_NO_ERROR){
 				glCallList(iDisplaylistId);
+			}else {
+				CreateCone(center,axis,radius,height);
 			}
 		}
 		void GluGeometryRenderer::RenderCylinder(V3D center,V3D axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
+				GLenum error;
+				do{
+					error=glGetError();
+					if(error==GL_OUT_OF_MEMORY) 
+					{
+						mErrorCode=GL_OUT_OF_MEMORY;
+						return;
+					}
+					PLog.error(std::string((char*)gluErrorString(error)));
+				}while(error != GL_NO_ERROR);
 				iDisplaylistId=glGenLists(1);
-				//calculate angle
-				//create glu cylinder
-				GLUquadricObj *qobj=gluNewQuadric();
-				gluQuadricDrawStyle(qobj,GLU_FILL);
-				gluQuadricNormals(qobj,GL_SMOOTH);
-				glNewList(iDisplaylistId,GL_COMPILE_AND_EXECUTE); //Construct display list for object representation
-				glPushMatrix();
-				glTranslated(center[0],center[1],center[2]);
-				GLdouble mat[16];
-        V3D unit(0,0,1);
-				Quat rot(unit,axis);
-				rot.GLMatrix(mat);
-				glMultMatrixd(mat);
-				gluCylinder(qobj,radius,radius,height,10,5);
-				gluDisk(qobj,0,radius,10,1);
-				glTranslated(0.0,0.0,height);
-				gluDisk(qobj,0,radius,10,1);
-				glPopMatrix();
+				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
+				CreateCylinder(center,axis,radius,height);		
 				glEndList();
+				mErrorCode=glGetError();
 				boolDisplaylistCreated=true;
-			}else{
+			}else if(mErrorCode == GL_NO_ERROR){
 				glCallList(iDisplaylistId);
+			}else{
+				CreateCylinder(center,axis,radius,height);
 			}
 		}
 
@@ -175,5 +130,118 @@ namespace Mantid
 			glPopMatrix();
 		}
 
+		/**
+		 * Creates a GLU Sphere
+		 * @param center center of the sphere
+		 * @param radius radius of the sphere
+		 */
+		void GluGeometryRenderer::CreateSphere(V3D center,double radius)
+		{
+			//create glu sphere
+			GLUquadricObj *qobj=gluNewQuadric();
+			gluQuadricDrawStyle(qobj,GLU_FILL);
+			gluQuadricNormals(qobj,GL_SMOOTH);
+			glPushMatrix();
+			glTranslated(center[0],center[1],center[2]);
+			gluSphere(qobj,radius,5,5);
+			glPopMatrix();
+			gluDeleteQuadric(qobj);
+		}
+
+		/**
+		 * Creates a Cube
+		 * @param Point1 first point of the cube
+		 * @param Point2 second point of the cube
+		 * @param Point3 thrid point of the cube
+		 * @param Point4 fourth point of the cube
+		 */
+		void GluGeometryRenderer::CreateCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4)
+		{
+			V3D vec0=Point1;
+			V3D vec1=Point2-Point1;
+			V3D vec2=Point3-Point1;
+			V3D vec3=Point4-Point1;
+			V3D vertex[8];
+			vertex[0]=vec0;
+			vertex[1]=vec0+vec3;
+			vertex[2]=vec0+vec3+vec1;
+			vertex[3]=vec0+vec1;
+			vertex[4]=vec0+vec2;
+			vertex[5]=vec0+vec2+vec3;
+			vertex[6]=vec0+vec2+vec3+vec1;
+			vertex[7]=vec0+vec1+vec2;
+			//int faceindex[6][4]={{0,1,2,3},{0,3,7,4},{3,2,6,7},{2,1,5,6},{0,4,5,1},{4,7,6,5}};
+			//int faceindex[6][4]={{0,3,2,1},{0,4,7,3},{3,7,6,2},{2,6,5,1},{0,1,5,4},{4,5,6,7}};
+			int faceindex[6][4]={
+				{0,1,2,3}, //top
+				{0,3,7,4}, //left
+				{3,2,6,7}, //back
+				{2,1,5,6}, //right
+				{0,4,5,1}, //front
+				{4,7,6,5}, //bottom
+			};
+			V3D normal;
+			//first face
+			glBegin(GL_QUADS);
+			for(int i=0;i<6;i++){
+				normal=(vertex[faceindex[i][0]]-vertex[faceindex[i][1]]).cross_prod((vertex[faceindex[i][0]]-vertex[faceindex[i][2]]));
+				normal.normalize();
+				glNormal3d(normal[0],normal[1],normal[2]);
+				for(int j=0;j<4;j++)
+					glVertex3d(vertex[faceindex[i][j]][0],vertex[faceindex[i][j]][1],vertex[faceindex[i][j]][2]);
+			}
+			glEnd();
+		}
+		
+		/**
+		 * Creates a Cone
+		 * @param center center of the cone
+		 * @param axis   axis of the cone
+		 * @param radius radius of the cone
+		 * @param height height of the cone
+		 */
+		void GluGeometryRenderer::CreateCone(V3D center,V3D axis,double radius,double height)
+		{
+			glPushMatrix();
+			GLUquadricObj *qobj=gluNewQuadric();
+			gluQuadricDrawStyle(qobj,GLU_FILL);
+			gluQuadricNormals(qobj,GL_SMOOTH);
+			glTranslated(center[0],center[1],center[2]);
+			GLdouble mat[16];
+			V3D unit(0,0,1);
+			Quat rot(unit,axis);
+			rot.GLMatrix(mat);
+			glMultMatrixd(mat);
+			gluCylinder(qobj,0,radius,height,10,5);
+			glTranslated(0.0,0.0,height);
+			gluDisk(qobj,0,radius,10,1);
+			glPopMatrix();
+		}
+
+		/**
+		 * Create a Cylinder
+		 * @param center center of the cylinder
+		 * @param axis  axis of the cylinder
+		 * @param radius radius of the cylinder
+		 * @param height height of the cylinder
+		 */
+		void GluGeometryRenderer::CreateCylinder(V3D center,V3D axis,double radius,double height)
+		{
+			GLUquadricObj *qobj=gluNewQuadric();
+			gluQuadricDrawStyle(qobj,GLU_FILL);
+			gluQuadricNormals(qobj,GL_SMOOTH);
+			glPushMatrix();
+			glTranslated(center[0],center[1],center[2]);
+			GLdouble mat[16];
+			V3D unit(0,0,1);
+			Quat rot(unit,axis);
+			rot.GLMatrix(mat);
+			glMultMatrixd(mat);
+			gluCylinder(qobj,radius,radius,height,10,5);
+			gluDisk(qobj,0,radius,10,1);
+			glTranslated(0.0,0.0,height);
+			gluDisk(qobj,0,radius,10,1);
+			glPopMatrix();
+		}
 	}
 }

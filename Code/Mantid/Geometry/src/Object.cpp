@@ -28,6 +28,8 @@
 #include "MantidGeometry/Rules.h"
 #include "MantidGeometry/GeometryHandler.h"
 #include "MantidGeometry/CacheGeometryHandler.h"
+#include "MantidGeometry/vtkGeometryCacheReader.h"
+#include "MantidGeometry/vtkGeometryCacheWriter.h"
 namespace Mantid
 {
 
@@ -42,7 +44,9 @@ namespace Mantid
 
     Object::Object() :
       ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
-      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false)
+		  AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),bGeometryCaching(false),
+		  vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
+		  vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
@@ -58,7 +62,9 @@ namespace Mantid
       AABBzMax(A.AABBzMax),
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
-      AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),
+      AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),bGeometryCaching(A.bGeometryCaching),
+	  vtkCacheReader(A.vtkCacheReader),
+	  vtkCacheWriter(A.vtkCacheWriter),
       SurList(A.SurList)
       /*!
       Copy constructor
@@ -1443,6 +1449,52 @@ namespace Mantid
 		if(handle==NULL)return;
 		//Render the Object
 		handle->Initialize();
+	}
+	/**
+	 * set vtkGeometryCache writer 
+	 */
+	void Object::setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter> writer)
+	{
+		vtkCacheWriter=writer;
+	}
+
+	/**
+	 * set vtkGeometryCache reader
+	 */
+	void Object::setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader> reader)
+	{
+		vtkCacheReader=reader;
+	}
+
+	/**
+	 * Returns the geometry handler
+	 */
+	boost::shared_ptr<GeometryHandler> Object::getGeometryHandler()
+	{
+		//Check if the geometry handler is upto dated with the cache, if not then
+		//cache it now.
+		return handle;
+	}
+	/**
+	 * Updates the geometry handler if needed
+	 */
+	void Object::updateGeometryHandler()
+	{
+		if(bGeometryCaching) return;
+		bGeometryCaching=true;
+		//Check if the Geometry handler can be handled for cache
+		if(handle==NULL)return;
+		if(!handle->canTriangulate()) return;
+		//Check if the reader exist then read the cache
+		if(vtkCacheReader.get()!=NULL)
+		{
+			vtkCacheReader->readCacheForObject(this);
+		}
+		//Check if the writer exist then write the cache
+		if(vtkCacheWriter.get()!=NULL)
+		{
+			vtkCacheWriter->addObject(this);
+		}
 	}
 	//Initialize Draw Object
 
