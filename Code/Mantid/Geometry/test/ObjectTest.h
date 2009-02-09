@@ -675,7 +675,6 @@ public:
     xmax=20;ymax=20.0;zmax=20.0;
     xmin=-20.0;ymin=-20.0;zmin=-20.0;
     A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    A.initDraw();
     double saTri,saRay;
     V3D observer(4.2,0,0);
     

@@ -1046,7 +1046,6 @@ namespace Mantid
 	 */
 	double Object::triangleSolidAngle(const V3D& observer) const
     {
-       this->initDraw();
        //
        // Because the triangles from OC are not consistently ordered wrt their outward normal
        // internal points give incorrect solid angle. Surface points are difficult to get right
