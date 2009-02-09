@@ -22,6 +22,8 @@ else:
 
 # Ensure all algorithm libraries are loaded and get the FrameworkManager object
 mtd = FrameworkManager()
+# Have an alias
+mantid = mtd
 # Now create simple API (makes mantidsimple.py file in cwd)
 createPythonSimpleAPI(True)
 # Import definitions

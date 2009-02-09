@@ -331,6 +331,10 @@ namespace Mantid
       }
       os << "\telse:\n"
 	 << "\t\tprint \"mtdHelp() - '\" + cmd + \"' not found in help list\"\n\n";
+   
+  //Write an alias function called mantidHelp
+      os << "def mantidHelp(cmd = -1):\n"
+         << "\tmtdHelp(cmd)\n\n";
     }
 
     /**
