@@ -37,17 +37,12 @@ class BinDialog: public QDialog
 public:
     BinDialog(QWidget *parent = 0);
     ~BinDialog();
-	void setSingleBinNumber(int);
-	void setIntegralMinMax(int,int);
+	void setIntegralMinMax(double,double);
 signals:
-    void SingleBinNumber(int);
-	void IntegralMinMax(int,int);
+	void IntegralMinMax(double,double);
 public slots:
 	void btnOKClicked();
 private:
-	QRadioButton* mSingleBinRBtn;
-	QRadioButton* mIntegralRBtn;
-	QLineEdit* mSingleBinValue;
 	QLineEdit* mIntegralMinValue;
 	QLineEdit* mIntegralMaxValue;
 

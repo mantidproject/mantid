@@ -536,7 +536,7 @@ void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
 	AssignColors();
 }
 
-void Instrument3DWidget::setDataMappingIntegral(int minValue,int maxValue)
+void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue)
 {
 	this->BinMinValue=minValue;
 	this->BinMaxValue=maxValue;

@@ -4,7 +4,7 @@
 #include <QString>
 #include <QGroupBox>
 #include <QGridLayout>
-#include <QIntValidator>
+#include <QDoubleValidator>
 #include <QPushButton>
 #include <QLabel>
 /**
@@ -13,34 +13,24 @@
 BinDialog::BinDialog(QWidget* parent):QDialog(parent)
 {
 	//Set the tile of the window
-	setWindowTitle (QString("Select Bin Operation"));
+	setWindowTitle (QString("Select X Range"));
 
-	//Create a group for the radio button to select bin map type
-	QGroupBox *groupBox = new QGroupBox();
-	mSingleBinRBtn = new QRadioButton(tr("Single Bin"));
-	mIntegralRBtn=new QRadioButton(tr("Integral Value"));
-	
-	//Input value for SingleBin options
-	QValidator *validator = new QIntValidator(this);
-	mSingleBinValue = new QLineEdit();
-	mSingleBinValue->setValidator(validator);
+	//frame for group box
+	QFrame* groupBox=new QFrame();
+	//Double Validator
+	QValidator *validator = new QDoubleValidator(this);
 	//Input value for Integral option
 	mIntegralMinValue = new QLineEdit();
 	mIntegralMinValue->setValidator(validator);
 	mIntegralMaxValue = new QLineEdit();
 	mIntegralMaxValue->setValidator(validator);
-	//Make Integral as default
-	mIntegralRBtn->setChecked(true);
+
 	//Create a grid layout
 	QGridLayout  *gridbox = new QGridLayout;
-	gridbox->addWidget(mSingleBinRBtn,0,0);
-	gridbox->addWidget(new QLabel("Value:"),1,0);
-	gridbox->addWidget(mSingleBinValue,1,1);
-	gridbox->addWidget(mIntegralRBtn,2,0);
-	gridbox->addWidget(new QLabel("Min Bin:"),3,0);
-	gridbox->addWidget(mIntegralMinValue,3,1);
-	gridbox->addWidget(new QLabel("Max Bin:"),4,0);
-	gridbox->addWidget(mIntegralMaxValue,4,1);
+	gridbox->addWidget(new QLabel("Min X Value:"),0,0);
+	gridbox->addWidget(mIntegralMinValue,0,1);
+	gridbox->addWidget(new QLabel("Max X Value:"),1,0);
+	gridbox->addWidget(mIntegralMaxValue,1,1);
 	groupBox->setLayout(gridbox);
 
 	//create a frame for Ok and Cancel btn
@@ -66,13 +56,7 @@ BinDialog::~BinDialog()
 {
 }
 
-void BinDialog::setSingleBinNumber(int binNum)
-{
-	QString strBinNum;
-	mSingleBinValue->setText(strBinNum.setNum(binNum));
-}
-
-void BinDialog::setIntegralMinMax(int minBin,int maxBin)
+void BinDialog::setIntegralMinMax(double minBin,double maxBin)
 {
 	QString strBinNum;
 	mIntegralMinValue->setText(strBinNum.setNum(minBin));
@@ -81,13 +65,6 @@ void BinDialog::setIntegralMinMax(int minBin,int maxBin)
 
 void BinDialog::btnOKClicked()
 {
-	if(mSingleBinRBtn->isChecked()) // Single Bin value
-	{
-		emit SingleBinNumber( mSingleBinValue->displayText().toInt() );
-	}
-	else if(mIntegralRBtn->isChecked()) // Integral Value Selected
-	{
-		emit IntegralMinMax( mIntegralMinValue->displayText().toInt(),mIntegralMaxValue->displayText().toInt());
-	}
+	emit IntegralMinMax( mIntegralMinValue->displayText().toDouble(),mIntegralMaxValue->displayText().toDouble());
 	accept();
 }

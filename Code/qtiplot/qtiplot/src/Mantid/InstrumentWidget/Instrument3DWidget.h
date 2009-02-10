@@ -64,7 +64,7 @@ public slots:
 	void setTimeBin(int value);
 	void setColorMapMinValue(double minValue);
 	void setColorMapMaxValue(double maxValue);
-	void setDataMappingIntegral(int minValue,int maxValue);
+	void setDataMappingIntegral(double minValue,double maxValue);
 	void setDataMappingSingleBin(int binNumber);
 	void setViewDirectionXPositive();
 	void setViewDirectionYPositive();
