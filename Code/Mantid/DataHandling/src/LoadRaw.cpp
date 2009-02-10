@@ -37,6 +37,8 @@ namespace Mantid
       std::vector<std::string> exts;
       exts.push_back("RAW");
       exts.push_back("raw");
+      exts.push_back("sav");
+      exts.push_back("SAV");
       declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
 
@@ -110,7 +112,7 @@ namespace Mantid
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
-      
+
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
@@ -250,7 +252,7 @@ namespace Mantid
       localWorkspace->setData(hist, v, e);
 
       localWorkspace->setX(hist, tcbs);
-	    	    
+
       localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
       // NOTE: Raw numbers go straight into the workspace
