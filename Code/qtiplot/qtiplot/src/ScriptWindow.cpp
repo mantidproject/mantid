@@ -40,6 +40,8 @@
 #include "ScriptEdit.h"
 #include "pixmaps.h"
 
+#include "Mantid/MantidUI.h"
+
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
@@ -52,14 +54,16 @@
 #include <QDockWidget>
 #include <QTextEdit>
 #include <QPrintDialog>
+#include <QStatusBar>
 
 ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
-  : QMainWindow(), d_env(env), d_app(app), fileName(QString::null), fileSaved(false)
+  : QMainWindow(), d_env(env), d_app(app), fileName(QString::null), fileSaved(true)
 {	
   //---------- Mantid ---------------
 	outputWindow = new QDockWidget(this);
 	outputWindow->setObjectName(tr("outputWindow"));
-	outputWindow->setWindowTitle(tr("Script Output"));
+	outputWindow->setWindowTitle(tr("Script Output - Status: Stopped"));
+	outputWindow->titleBarWidget();
 	outputWindow->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
 	
 	addDockWidget( Qt::BottomDockWidgetArea, outputWindow );
@@ -80,6 +84,9 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 	connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
 	connect(te, SIGNAL(outputError(const QString&)), this, SLOT(scriptError(const QString&)));
 	connect(te, SIGNAL(textChanged()), this, SLOT(editChanged()));
+	connect(te, SIGNAL(abortExecution()), static_cast<QObject*>(d_app->mantidUI), SLOT(cancelAllRunningAlgorithms()));
+	connect(te, SIGNAL(ScriptIsActive(bool)), this, SLOT(executionStateChange(bool)));
+
 	setCentralWidget(te);
 
 	initMenu();
@@ -95,11 +102,13 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 
 	setFocusProxy(te);
 	setFocusPolicy(Qt::StrongFocus);
-
 }
 
 ScriptWindow::~ScriptWindow()
 {
+  //Do we need to save anything?
+  askSave();
+
   if( te )
     delete te;
   // ------Mantid -------------
@@ -121,25 +130,20 @@ void ScriptWindow::customEvent(QEvent *e)
     }
 }
 
-void ScriptWindow::closeEvent(QCloseEvent* event)
-{
-  if( !fileSaved && !te->text().isEmpty() )
-  {
-    askSave();
-  }
-  event->accept();
-}
-
 void ScriptWindow::askSave()
 {
+  if( fileSaved ) return;
+
   QMessageBox msgBox(this);
+  msgBox.setModal(true);
   msgBox.setWindowTitle("MantidPlot");
-  msgBox.setText(tr("The script has been modified."));
+  msgBox.setText(tr("The current script has been modified."));
   msgBox.setInformativeText(tr("Save changes?"));
   msgBox.addButton(QMessageBox::Save);
   QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
   msgBox.addButton(QMessageBox::Discard);
   int ret = msgBox.exec();
+  fileSaved = true;
   if( msgBox.clickedButton() == saveAsButton ) 
   {
      saveAs();
@@ -342,8 +346,21 @@ void ScriptWindow::updateWindowTitle()
   {
     title += fileName;//QFileInfo(fileName).fileName();
   }
-  if( !fileSaved && !te->text().isEmpty() ) title += " (unsaved)";
+  //  if( !fileSaved && !te->text().isEmpty() ) title += " (unsaved)";
+  if( !fileSaved ) title += " (unsaved)";
   setWindowTitle(title);
+}
+
+void ScriptWindow::executionStateChange(bool active)
+{
+  if( active )
+  {
+    outputWindow->setWindowTitle("Script Output - Status: Running ...");
+  }
+  else
+  {
+    outputWindow->setWindowTitle("Script Output - Status: Stopped");
+  }
 }
 
 void ScriptWindow::newScript()
@@ -454,7 +471,8 @@ void ScriptWindow::insertOutputSeparator()
 
 void ScriptWindow::editChanged()
 {
-  fileSaved = false;
+  if( te->isUndoAvailable() ) fileSaved = false;
+  else fileSaved = true;
   updateWindowTitle();
 }
 

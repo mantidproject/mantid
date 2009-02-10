@@ -57,10 +57,9 @@ class ScriptWindow: public QMainWindow
 public:
 		ScriptWindow(ScriptingEnv *env, ApplicationWindow *app);
     virtual ~ScriptWindow();						       
-  
     void customEvent(QEvent*);
-    void closeEvent(QCloseEvent* event);
     void askSave();
+    ScriptEdit* scriptEditor() { return te; };			     
 
 public slots:
 		void newScript();
@@ -83,6 +82,7 @@ private slots:
 		void setAlwaysOnTop(bool on);
 		void viewScriptOutput(bool on);
                 void editChanged();
+                void executionStateChange(bool active);
 
 signals:
 		void visibilityChanged(bool visible);

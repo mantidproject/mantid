@@ -87,7 +87,7 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
     m_algMonitor = new AlgorithmMonitor(this);
-    connect(m_algMonitor,SIGNAL(countChanged(int)),m_exploreAlgorithms,SLOT(countChanged(int)));
+    connect(m_algMonitor,SIGNAL(countChanged(int)),m_exploreAlgorithms,SLOT(countChanged(int)), Qt::QueuedConnection);
     m_algMonitor->start();
 
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
@@ -1372,8 +1372,7 @@ bool MantidUI::createPropertyInputDialog(const QString & algName, const QString 
 
 Mantid::API::Algorithm* MantidUI::findAlgorithmPointer(const QString & algName)
 {
-  vector<Mantid::API::Algorithm_sptr> algorithms = 
-    Mantid::API::AlgorithmManager::Instance().algorithms();
+  const vector<Mantid::API::Algorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
   Mantid::API::Algorithm* alg(NULL);
   vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
   for(  vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 

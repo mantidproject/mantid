@@ -20,10 +20,17 @@ m_progressObserver(*this, &AlgorithmMonitor::handleAlgorithmProgressNotification
 m_errorObserver(*this, &AlgorithmMonitor::handleAlgorithmErrorNotification),
 m_mantidUI(m), m_nRunning(0)
 {
+  m_monitorDlg = new MonitorDlg(m_mantidUI->appWindow(), this);
+  m_monitorDlg->setVisible(false);
 }
 
 AlgorithmMonitor::~AlgorithmMonitor()
 {
+  if( m_monitorDlg )
+  {
+    m_monitorDlg->close();
+    delete m_monitorDlg;
+  }
   cancelAll();
   wait(1000);
   exit();
@@ -40,8 +47,6 @@ void AlgorithmMonitor::add(Algorithm *alg)
     ++m_nRunning;
     emit countChanged(m_nRunning);
     unlock();
-    //    std::cerr << "Add to Monitor Algorithms running " << m_nRunning << "\n";
-
 }
 
 void AlgorithmMonitor::remove(const Algorithm *alg)
@@ -53,10 +58,8 @@ void AlgorithmMonitor::remove(const Algorithm *alg)
       m_algorithms.erase(i);
       --m_nRunning;
     }
-    unlock();
-    //std::cerr << "Monitor removal Algorithms running " << m_nRunning << "\n";
     emit countChanged(m_nRunning);
-
+    unlock();
 }
 
 Algorithm_sptr AlgorithmMonitor::getShared(const Algorithm *alg)
@@ -78,7 +81,8 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
-    if (m_monitorDlg) emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100),QString::fromStdString(pNf->message));
+  //  if (m_monitorDlg->isVisible()) 
+  emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100),QString::fromStdString(pNf->message));
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
@@ -88,9 +92,11 @@ void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algo
 
 void AlgorithmMonitor::showDialog()
 {
-    m_monitorDlg = new MonitorDlg(m_mantidUI->appWindow(),this);
-    m_monitorDlg->exec();
-    m_monitorDlg = 0;
+  if( !m_monitorDlg->isVisible() )
+  {
+    m_monitorDlg->setVisible(true);
+    m_monitorDlg->update(m_nRunning);
+  }
 }
 
 void AlgorithmMonitor::cancel(Algorithm *alg)
@@ -108,10 +114,9 @@ void AlgorithmMonitor::cancelAll()
 //-----------------------------------------------------------------------------------------------//
 MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(parent),m_algMonitor(algMonitor)
 {
-    setAttribute(Qt::WA_DeleteOnClose);
     m_tree = 0;
     update(0);
-    connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)));
+    connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)), Qt::QueuedConnection);
     connect(algMonitor,SIGNAL(needUpdateProgress(const Algorithm*,int, const QString&)),SLOT(updateProgress(const Algorithm*,int, const QString&)));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
@@ -123,8 +128,9 @@ MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(par
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(m_tree);
     layout->addLayout(buttonLayout);
-	setLayout(layout);
-	setWindowTitle("Mantid - Algorithm progress");
+    setLayout(layout);
+    setWindowTitle("Mantid - Algorithm progress");
+    setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
     resize(500,300);
 }
 
@@ -136,7 +142,7 @@ void MonitorDlg::update(int)
 {
     if (!m_tree)
     {
-        m_tree = new QTreeWidget;
+      m_tree = new QTreeWidget(this);
         m_tree->setColumnCount(3);
         m_tree->setSelectionMode(QAbstractItemView::NoSelection);
         QStringList hList;
@@ -149,6 +155,8 @@ void MonitorDlg::update(int)
     }
     else
         m_tree->clear();
+
+    if( !isVisible() ) return;
     
     m_algMonitor->lock();
     QVector<Mantid::API::Algorithm*>::const_iterator iend = m_algMonitor->algorithms().end();
@@ -156,7 +164,7 @@ void MonitorDlg::update(int)
 	itr != iend; ++itr)
     {
       const Algorithm* alg = *itr;
-      m_algorithms << alg;
+      //m_algorithms << alg;
       QStringList iList;
       iList<<QString::fromStdString(alg->name());
       QTreeWidgetItem *algItem = new QTreeWidgetItem(iList);
@@ -182,15 +190,13 @@ void MonitorDlg::update(int)
 
 void MonitorDlg::updateProgress(const Algorithm* alg,int p, const QString& msg)
 {
-    int i = m_algorithms.indexOf(alg);
-    if (i >= 0)
-    {
-        QTreeWidgetItem *item = m_tree->topLevelItem(i);
-        if (item)
-        {
-            QProgressBar *algProgress = static_cast<QProgressBar*>(m_tree->itemWidget(item,1));
-            algProgress->setValue(p);
-            algProgress->setFormat(msg + " %p%");
-        }
-    }
+  m_algMonitor->lock();
+  int index = m_algMonitor->algorithms().indexOf(const_cast<Algorithm*>(alg));
+  m_algMonitor->unlock();
+  QTreeWidgetItem *item = m_tree->topLevelItem(index);
+  if( !item ) return;
+ 
+  QProgressBar *algProgress = static_cast<QProgressBar*>( m_tree->itemWidget(item, 1) );
+  algProgress->setValue(p);
+  algProgress->setFormat(msg + " %p%");
 }

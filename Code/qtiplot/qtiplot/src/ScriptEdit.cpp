@@ -51,7 +51,7 @@
 #include <iostream>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0)//Mantid
+  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0), m_bIsRunning(false) //Mantid
 {
 	myScript = scriptEnv->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
@@ -80,6 +80,10 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	actionEval = new QAction(tr("&Evaluate Expression"), this);
 	connect(actionEval, SIGNAL(activated()), this, SLOT(evaluate()));
 
+	actionAbort = new QAction(tr("Abort Execution"), this);
+	actionAbort->setEnabled(false);
+	connect(actionAbort, SIGNAL(activated()), this, SIGNAL(abortExecution()));
+
 	functionsMenu = new QMenu(this);
 	Q_CHECK_PTR(functionsMenu);
 	connect(functionsMenu, SIGNAL(triggered(QAction *)), this, SLOT(insertFunction(QAction *)));
@@ -87,7 +91,7 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 
 ScriptEdit::~ScriptEdit()
 {
-    if( codeLexer )
+  if( codeLexer )
       delete codeLexer;
 }
 
@@ -136,6 +140,10 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
   menu.addAction(actionExecute);
   menu.addAction(actionExecuteAll);  
   menu.addAction(actionEval);  
+
+  menu.insertSeparator();
+  //Abort option
+  menu.addAction(actionAbort);
 
   if (parent()->isA("Note")){
     Note *sp = (Note*) parent();
@@ -188,7 +196,7 @@ void ScriptEdit::insertErrorMsg(const QString &message)
   if( message.contains("SystemExit") )
   {
     //Alter it to something more meaningful
-    emit outputError(QString("Information: Script execution has been cancelled."));
+    emit outputError(QString("Information: Script execution has been cancelled.\n"));
   }
   else
   {
@@ -246,34 +254,35 @@ void ScriptEdit::execute()
   scriptEnv->setFirstLineNumber(lineFrom);
   m_iFirstLineNumber = lineFrom;
 
-  //Disable editor
-  setEditorActive(false);
-
-  //If we get here everything is successful
-  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
-
-  //Execute the code 
-  myScript->setCode(code);
-  myScript->exec();
-  
-  //Reenable editor
-  setEditorActive(true);
+  //Run the code
+  runScript(code);
 }
 
 void ScriptEdit::executeAll()
 {
   if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
-   m_iFirstLineNumber = 0;
-  //Disable editor
+  m_iFirstLineNumber = 0;
+  
+  //Run the code
+  runScript(text().remove('\r'));
+}
+
+void ScriptEdit::runScript(const QString & code)
+{
+   //Disable editor
   setEditorActive(false);
 
   //If we get here everything is successful
   setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
     
   //Execute the code 
-  myScript->setCode(text().remove('\r'));
+  myScript->setCode(code);
+  m_bIsRunning = true;
+  emit ScriptIsActive(true);
   myScript->exec();
+  emit ScriptIsActive(false);
+  m_bIsRunning = false;
 
   //Reenable editor
   setEditorActive(true);
@@ -327,6 +336,8 @@ void ScriptEdit::setExecuteActionsEnabled(bool toggle)
   actionExecute->setEnabled(toggle);
   actionExecuteAll->setEnabled(toggle);
   actionEval->setEnabled(toggle);
+  
+  actionAbort->setEnabled(!toggle);
 }
 
 void ScriptEdit::exportPDF(const QString&)
@@ -357,30 +368,12 @@ void ScriptEdit::print()
 
 QString ScriptEdit::importASCII(const QString &filename)
 {
-        if( !text().isEmpty() )
-	{
-	  QMessageBox msgBox(this);
-	  msgBox.setWindowTitle(tr("MantidPlot - Save To File..."));
-	  msgBox.setText("The script window contents will be cleared.");
-	  msgBox.setInformativeText("Do you want to save your changes?");
-	  msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-	  msgBox.setDefaultButton(QMessageBox::Save);
-	  int ret = msgBox.exec();
-	  switch (ret) {
-	  case QMessageBox::Save:
-	    exportASCII(QString(""));
-	    break;
-	  case QMessageBox::Cancel:
-	    return QString("");
-	    break;
-	  case QMessageBox::Discard:
-	    break;
-	  default:
-	    // should never be reached
-	    break;
-	  }
-	}
 
+  ScriptWindow* scriptWindow = static_cast<ScriptWindow*>(parent());
+  if( scriptWindow )
+  {
+    scriptWindow->askSave();
+  }
 	QString filter = scriptEnv->fileFilter();
 	filter += tr("Text") + " (*.txt *.TXT);;";
 	filter += tr("All Files")+" (*)";

@@ -50,6 +50,7 @@ class QAction;
 class QMenu;
 class QsciLexer;
 
+
 /*!\brief Editor widget with support for evaluating expressions and executing code.
  *
  * Inherits from QsciScintilla, which supports syntax highlighting and line numbering
@@ -65,6 +66,8 @@ class ScriptEdit: public QsciScintilla, public scripted
     void customEvent(QEvent*);
   	//! Map cursor positions to line numbers.
   int lineNumber() const;
+			
+  bool isRunning() const { return m_bIsRunning; }
 
 public slots:
   void execute();
@@ -93,15 +96,19 @@ public slots:
 
   void undoAvailable(bool available);
   void redoAvailable(bool available);
-
-  //  void cancelAllAlgorithms();
+  
+  void ScriptIsActive(bool active);
+  void abortExecution();
 
   protected:
   virtual void contextMenuEvent(QContextMenuEvent *e);
 
+private:
+  void runScript(const QString & code);
+
   private:
     Script *myScript;
-  QAction *actionExecute, *actionExecuteAll, *actionEval;
+  QAction *actionExecute, *actionExecuteAll, *actionEval, *actionAbort;
     //! Submenu of context menu with mathematical functions.
   	QMenu *functionsMenu;
   	//! Cursor used for output of evaluation results and error messages.  
@@ -115,6 +122,8 @@ public slots:
   //An integer defining the handle to a code marker     
   int m_iCodeMarkerHandle;
   int m_iFirstLineNumber;
+
+  bool m_bIsRunning;			
 
   private slots:
   //! Insert an error message from the scripting system at printCursor.

@@ -182,6 +182,8 @@ ApplicationWindow::ApplicationWindow(bool factorySettings)
     mantidUI = new MantidUI(this);
 	setAttribute(Qt::WA_DeleteOnClose);
 	init(factorySettings);
+	//Mantid 
+	d_user_script_running = false;
 }
 
 void ApplicationWindow::init(bool factorySettings)
@@ -8328,6 +8330,21 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
         showDemoVersionMessage();
     #endif
 
+	//Mantid. Need to do something if a script is still running
+	if( ( scriptWindow && scriptWindow->scriptEditor()->isRunning() ) ||  d_user_script_running )
+	{
+	  if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", 
+				    tr("Yes"), tr("No")) == 0 )
+	  {
+	    mantidUI->cancelAllRunningAlgorithms();
+	  }
+	  else
+	  {
+	    ce->ignore();
+	    return;
+	  }	  
+	}
+	
 	if (!saved){
 		QString s = tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
 		switch( QMessageBox::information(this, tr("MantidPlot"), s, tr("Yes"), tr("No"),//Mantid
@@ -15087,7 +15104,9 @@ void ApplicationWindow::performCustomAction(QAction *action)
     connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(showResults(const QString &)));
     connect(script, SIGNAL(outputError(const QString &)), this, SLOT(showResults(const QString &)));
     script->importASCII(action->data().toString());
+    d_user_script_running = true;
     script->executeAll();
+    d_user_script_running = false;
     delete script;
 #else
     QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid

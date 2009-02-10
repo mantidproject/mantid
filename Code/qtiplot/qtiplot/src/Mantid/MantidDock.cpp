@@ -383,7 +383,6 @@ void AlgorithmDockWidget::selectionChanged(const QString& algName)
 void AlgorithmDockWidget::countChanged(int n)
 {
     m_runningAlgsLabel->setText("Running "+QString::number(n));
-    repaint();
 }
 
 void AlgorithmDockWidget::tst()

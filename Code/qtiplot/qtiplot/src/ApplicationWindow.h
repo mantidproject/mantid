@@ -1276,6 +1276,7 @@ private:
     QList<QAction *> d_user_actions;
     QList<QMenu* > d_user_menus; //Mantid
   QMap<QString, QStringList> d_user_menu_map; //Mantid
+  bool d_user_script_running;
 
     QUndoView *d_undo_view;
 
