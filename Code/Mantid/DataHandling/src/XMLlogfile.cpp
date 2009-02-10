@@ -4,7 +4,7 @@
 #include "MantidDataHandling/XMLlogfile.h"
 #include "MantidGeometry/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <muparser/muParser.h>
+#include <muParser/muParser.h>
 #include <ctime>
 #include "MantidDataHandling/LogParser.h"
 
@@ -19,9 +19,9 @@ using namespace API;
 Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
 
 /// Constructor
-XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::string& type, 
-                       std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp) 
-                       : m_logfileID(logfileID), m_paramName(paramName), m_type(type), 
+XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::string& type,
+                       std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp)
+                       : m_logfileID(logfileID), m_paramName(paramName), m_type(type),
                        m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {}
 
@@ -33,13 +33,13 @@ XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::stri
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument definition file
  */
-double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData) 
-{  
+double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
+{
   // Get for now just 1st entry of timeserie
 
   //std::map<std::time_t, double> logMap = logData->valueAsMap();
   //std::map<std::time_t, double> :: iterator it;
-  //it = logMap.begin(); 
+  //it = logMap.begin();
   double extractedValue; // = nthValue(logData, 1); //(*it).second;
 
 
@@ -50,9 +50,9 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     extractedValue = timeMean(logData);
   }
   // Looking for string: "position n", where n is an integer
-  else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )  
+  else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )
   {
-    std::stringstream extractPosition(m_extractSingleValueAs);  
+    std::stringstream extractPosition(m_extractSingleValueAs);
     std::string dummy;
     int position;
     extractPosition >> dummy >> position;
@@ -61,7 +61,7 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
   }
   else
   {
-    throw Kernel::Exception::InstrumentDefinitionError(std::string("extract-single-value-as attribute for <parameter>") 
+    throw Kernel::Exception::InstrumentDefinitionError(std::string("extract-single-value-as attribute for <parameter>")
         + " element (eq=" + m_eq + ") in instrument definition file is not recognised.");
   }
 
@@ -76,8 +76,8 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     found = equationStr.find("value");
     if ( found==std::string::npos )
     {
-      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>") 
-        + " element (eq=" + m_eq + ") in instrument definition file must contain the string: \"value\"." 
+      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
+        + " element (eq=" + m_eq + ") in instrument definition file must contain the string: \"value\"."
         + ". \"value\" is replaced by a value from the logfile.");
     }
 
@@ -94,7 +94,7 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
       equationStr.replace(found, 5, extractedValueStr);
     }
 
-    try 
+    try
     {
       mu::Parser p;
       p.SetExpr(equationStr);
@@ -102,8 +102,8 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     }
     catch (mu::Parser::exception_type &e)
     {
-      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>") 
-        + " element (eq=" + m_eq + ") in instrument definition file cannot be parsed." 
+      throw Kernel::Exception::InstrumentDefinitionError(std::string("Equation attribute for <parameter>")
+        + " element (eq=" + m_eq + ") in instrument definition file cannot be parsed."
         + ". Muparser error message is: " + e.GetMsg());
     }
   }
