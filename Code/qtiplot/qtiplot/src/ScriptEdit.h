@@ -84,7 +84,7 @@ public slots:
     void scriptPrint(const QString&);
 	void setDirPath(const QString& path);
 
-  void undoredoAvailable();
+  void updateEditor();
 
   void setEditorActive(bool);
   void setExecuteActionsEnabled(bool);

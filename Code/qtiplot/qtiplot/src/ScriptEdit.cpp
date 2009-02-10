@@ -47,6 +47,7 @@
 #include <Qsci/qsciprinter.h>
 #include "ScriptWindow.h"
 #include <QPrinterInfo>
+#include <cmath>
 
 #include <iostream>
 
@@ -57,14 +58,14 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
 	connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
-	connect(this, SIGNAL(textChanged()), this, SLOT(undoredoAvailable()));
+	connect(this, SIGNAL(textChanged()), this, SLOT(updateEditor()));
 
 	//QScintilla specific stuff
 	codeLexer = env->scriptCodeLexer();
 	setLexer(codeLexer);
 	setAutoIndent(true);
 	setMarginLineNumbers(1,true);
-	setMarginWidth(1, 40);
+	setMarginWidth(1, 38);
 	
 	//Define line marker to be a right arrow
 	m_iCodeMarkerHandle = markerDefine(QsciScintilla::RightArrow);
@@ -214,8 +215,10 @@ void ScriptEdit::scriptPrint(const QString &text)
   if( text.contains("MTDPYLN:") ) 
   {
     int lineNumber = text.section(':',1, 1).toInt();
+    lineNumber += m_iFirstLineNumber - 1;
+    ensureLineVisible(lineNumber);
     markerDeleteAll();
-    markerAdd(m_iFirstLineNumber + lineNumber - 1, m_iCodeMarkerHandle);
+    markerAdd(lineNumber, m_iCodeMarkerHandle);
   }
   else
   {
@@ -451,10 +454,13 @@ QString ScriptEdit::exportASCII(const QString &filename)
 	return fn;
 }
 
-void ScriptEdit::undoredoAvailable()
+void ScriptEdit::updateEditor()
 {
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
+
+  //This adjusts the margin width to accomodate the line number and the arrow
+  setMarginWidth(1, 38 + 5*std::log10(lines()) );
 }
 
 
