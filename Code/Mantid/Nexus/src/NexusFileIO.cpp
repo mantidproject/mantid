@@ -933,7 +933,7 @@ namespace NeXus
    // find the X values for spectra. If uniform, the spectra number is ignored.
    //
    NXstatus status;
-   int rank,dim[2],type;
+   int rank,dim[2],type,nx;
 
    //open workspace group
    status=NXopengroup(fileID,"workspace","NXdata");
@@ -945,19 +945,24 @@ namespace NeXus
        return(2);
    status=NXgetinfo(fileID, &rank, dim, &type);
    // non-uniform X has 2D axis1 data
-   double *buffer=new double[dim[0]];
+   if(rank==2)
+       nx=dim[1];
+   else
+       nx=dim[0];
+   //double *buffer=new double[dim[0]];
+   xValues.resize(nx,-1.0);
    if(rank==1)
    {
-       status=NXgetdata(fileID,(void*)buffer);
+       status=NXgetdata(fileID,&xValues[0]);
    }
    else
    {
        int start[2]={spectra,0};
        int  size[2]={1,dim[1]};
-       status=NXgetslab(fileID,(void*)buffer,start,size);
+       status=NXgetslab(fileID,&xValues[0],start,size);
    }
-   for(int i=1;i<=dim[0];i++) xValues.push_back(buffer[i-1]);
-   delete[] buffer;
+   //for(int i=1;i<=nx;i++) xValues.push_back(buffer[i-1]);
+   //delete[] buffer;
    status=NXclosedata(fileID);
    status=NXclosegroup(fileID);
    return(0);

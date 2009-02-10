@@ -151,7 +151,7 @@ namespace NeXus
             nexusFile->getSpectra(values,errors,i);
             localWorkspace->setData(counter,values,errors);
             if(!m_uniformbounds)
-                nexusFile->getXValues(xValues,i);
+                nexusFile->getXValues(xValues,i-1);
             localWorkspace->setX(counter, xValues);
             localWorkspace->setErrorHelper(counter,GaussianErrorHelper::Instance());
             localWorkspace->getAxis(1)->spectraNo(counter)= i;
