@@ -57,12 +57,18 @@ namespace Mantid
 	module << "import sys\n";
 	module << "import qti\n";
       }
-      //Need string module regardless
+      //Need string and os module regardless
+      module << "import os\n";
       module << "import string\n\n";
 
       //In GUI need to define a global variable to tell if we are using it or not
       if( gui )	module << "PYTHONAPIINMANTIDPLOT = True\n\n";
       else module << "PYTHONAPIINMANTIDPLOT = False\n\n";
+
+      //First a simple function to change the working directory
+      module << "# A wrapper for changing the directory\n"
+	     << "def setWorkingDirectory(path):\n"
+	     << "\tos.chdir(path)\n\n";
 		  
       //Algorithm keys
       using namespace Mantid::API;
@@ -208,8 +214,8 @@ namespace Mantid
       {
 	os << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	   << "\tif result == False:\n"
-	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
+	   << "\t\tif result == False:\n"
+	   << "\t\t\tsys.exit('An error occurred while running " << algm << "')\n"
 	   << "\telse:\n"
 	   << "\t\talgm.execute()\n"
 	   << "\treturn algm\n";

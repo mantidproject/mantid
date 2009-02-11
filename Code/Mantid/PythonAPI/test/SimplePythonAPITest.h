@@ -43,6 +43,9 @@ public:
     getline( is, line );
     TS_ASSERT_EQUALS(line, modline);
     
+    //next line should be os import
+    getline( is, line );
+    TS_ASSERT_EQUALS(line, std::string("import os"));
     //next line should be string import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));
@@ -52,12 +55,22 @@ public:
 
     TS_ASSERT_EQUALS(line, std::string("PYTHONAPIINMANTIDPLOT = False"));
 
+    //next non-blank line should be setWorkingDirectory()
+    //eat blank lines
+    while( getline(is, line) && line.empty() ) 
+    {
+    }
+    
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "def setWorkingDirectory(path):");
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "\tos.chdir(path)");
+
     //next non-blank line should be help()
     //eat blank lines
     while( getline(is, line) && line.empty() ) 
-      {
-      }
-    
+    {
+    }
     modline = "def mtdGlobalHelp():";
     getline(is, line);
     TS_ASSERT_EQUALS(line, modline);
