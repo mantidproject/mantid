@@ -52,7 +52,8 @@
 #include <iostream>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0), m_bIsRunning(false) //Mantid
+  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0), 
+    m_bIsRunning(false), m_bErrorRaised(false) //Mantid
 {
 	myScript = scriptEnv->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
@@ -194,21 +195,23 @@ void ScriptEdit::insertErrorMsg(const QString &message)
 {
   if( message.isEmpty() ) return;
   setMarkerBackgroundColor(QColor("red"), m_iCodeMarkerHandle);
-  if( message.contains("SystemExit") )
-  {
-    //Alter it to something more meaningful
-    emit outputError(QString("Information: Script execution has been cancelled.\n"));
-  }
-  else
-  {
-    emit outputError(message);
-  }
+//   if( message.contains("SystemExit") )
+//   {
+//     //Alter it to something more meaningful
+//     emit outputError(QString("Information: Script execution has been cancelled.\n"));
+//   }
+//   else
+//   {
+//     emit outputError(message);
+//   }
+  emit outputError(message);
+  m_bErrorRaised = true;
   setEditorActive(true);
 }
 
 void ScriptEdit::scriptPrint(const QString &text)
 {
-  if( text.isEmpty() || text.contains(QRegExp("^\\s$")) || text == QString('\n') ) return;
+  if( text.isEmpty() || text.contains(QRegExp("^\\s$")) ) return;
 
   //If the text contains the current line number, mark the line instead of 
   //outputting
@@ -282,10 +285,13 @@ void ScriptEdit::runScript(const QString & code)
   //Execute the code 
   myScript->setCode(code);
   m_bIsRunning = true;
+  m_bErrorRaised = false;
+  emit outputMessage("Script execution started.");
   emit ScriptIsActive(true);
   myScript->exec();
   emit ScriptIsActive(false);
   m_bIsRunning = false;
+  if( !m_bErrorRaised ) emit outputMessage("Script execution completed successfully.");
 
   //Reenable editor
   setEditorActive(true);

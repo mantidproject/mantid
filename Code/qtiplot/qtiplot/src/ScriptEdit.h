@@ -123,7 +123,8 @@ private:
   int m_iCodeMarkerHandle;
   int m_iFirstLineNumber;
 
-  bool m_bIsRunning;			
+  bool m_bIsRunning;
+  bool m_bErrorRaised;		   
 
   private slots:
   //! Insert an error message from the scripting system at printCursor.

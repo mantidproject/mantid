@@ -199,17 +199,17 @@ namespace Mantid
 	   << "\tif dialog == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\telse:\n"
-	   << "\t\tsys.exit(1)\n"
+	   << "\t\tsys.exit('Information: Script execution cancelled')\n"
 	   << "\tif result == False:\n"
-	   << "\t\tsys.exit(1)\n"
+	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
 	   << "\treturn algm\n";
       }
       else
       {
 	os << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	   << "\t\tif result == False:\n"
-	   << "\t\t\tsys.exit(1)\n"
+	   << "\tif result == False:\n"
+	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
 	   << "\telse:\n"
 	   << "\t\talgm.execute()\n"
 	   << "\treturn algm\n";
