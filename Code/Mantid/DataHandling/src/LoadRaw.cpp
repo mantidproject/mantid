@@ -35,10 +35,11 @@ namespace Mantid
     void LoadRaw::init()
     {
       std::vector<std::string> exts;
-      exts.push_back("RAW");
-      exts.push_back("raw");
-      exts.push_back("sav");
-      exts.push_back("SAV");
+//      exts.push_back("RAW");
+//      exts.push_back("raw");
+//      exts.push_back("sav");
+//      exts.push_back("SAV");
+      exts.clear();
       declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
 
