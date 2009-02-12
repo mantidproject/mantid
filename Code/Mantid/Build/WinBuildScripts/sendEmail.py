@@ -117,7 +117,7 @@ for line in f.readlines():
             failCount -= 1
             failCount += int(m.group(1))
             testsPass = False
-	mssgTestsResults = mssgTestsResults + line
+        mssgTestsResults = mssgTestsResults + line
      
 f.close()
 move(filetestsRun,archiveDir)
@@ -150,7 +150,7 @@ if failCount>0:
 message += str(testCount) + " tests)\n"
 message += "Code Documentation Passed: " + str(doxyWarnings)
 if warnCount>0:
-  message += " ("str(warnCount) +"doxygen warnings)\n"
+  message += " ("+str(warnCount) +"doxygen warnings)\n"
 else:
   message += "\n"
 message += "\n"
