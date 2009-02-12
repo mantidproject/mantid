@@ -268,8 +268,8 @@ public:
 
     boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(102));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.01)+ptrDetShape->getPos()) );
-    TS_ASSERT( ptrDetShape->isValid(V3D(0.005,0.1,0.02)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.000001)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(0.005,0.1,0.000002)+ptrDetShape->getPos()) );
 
 
     // test of sample shape
@@ -323,7 +323,7 @@ public:
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.003,0.0,0.0)+ptrDetShape->getPos()) );
     TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.0)+ptrDetShape->getPos()) );
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0071,0.0227,0.0)+ptrDetShape->getPos()) );
-    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.009)+ptrDetShape->getPos()) );
+    TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.000009)+ptrDetShape->getPos()) );
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0069,0.0227,0.011)+ptrDetShape->getPos()) );
   }
 
