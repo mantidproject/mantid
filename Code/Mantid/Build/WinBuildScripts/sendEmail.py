@@ -150,7 +150,7 @@ if failCount>0:
 message += str(testCount) + " tests)\n"
 message += "Code Documentation Passed: " + str(doxyWarnings)
 if warnCount>0:
-  message += " ("+str(warnCount) +"doxygen warnings)\n"
+  message += " ("+str(warnCount) +" doxygen warnings)\n"
 else:
   message += "\n"
 message += "\n"
