@@ -135,7 +135,7 @@ m=reWarnCount.findall(mssgDoxy)
 if m:
   warnCount = len(m)
   if warnCount >0:
-    doxyWarnings = FALSE
+    doxyWarnings = False
 move(filedoxy,archiveDir)
 
 #Construct Message
