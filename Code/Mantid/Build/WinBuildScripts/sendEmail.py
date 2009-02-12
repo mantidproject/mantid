@@ -40,6 +40,7 @@ logDir = '../../../../logs/Mantid/'
 
 testCount = 0
 failCount = 0
+warnCount = 0
 
 #create archive directory
 archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
@@ -128,6 +129,10 @@ move(filesvn,archiveDir)
 #Read doxygen log
 filedoxy = logDir+'doxy.log'
 mssgDoxy = open(filedoxy,'r').read()
+reWarnCount = re.compile("Warning:")
+m=reWarnCount.findall(mssgDoxy)
+if m:
+  warnCount = len(m)
 move(filedoxy,archiveDir)
 
 #Construct Message
@@ -139,7 +144,9 @@ message += 'Units Tests Passed: ' + str(testsPass)
 message += ' (' 
 if failCount>0:
     message += str(failCount) + " failed out of "
-message += str(testCount) + " tests)\n\n"
+message += str(testCount) + " tests)\n"
+message += mssgSvn + "doxygen warnings: " + str(warnCount) +"\n"
+message += mssgSvn + "\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
@@ -161,7 +168,7 @@ message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
 message += '------------------------------------------------------------------------\n'
 message += 'DOXYGEN LOG\n\n'
 message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
-#message += mssgDoxy + "\n"
+
 
 #Create Subject
 subject = 'Subject: '
