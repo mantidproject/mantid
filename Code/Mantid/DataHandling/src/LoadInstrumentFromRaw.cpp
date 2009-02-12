@@ -69,12 +69,12 @@ void LoadInstrumentFromRaw::exec()
   // Add dummy source and samplepos to instrument
   // The L2 and 2-theta values from Raw file assumed to be relative to sample position
 
-  Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Unknown",instrument.get());
+  Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample",instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0,0.0,0.0);
 
-  Geometry::ObjComponent *source = new Geometry::ObjComponent("Unknown",instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
   double l1;
@@ -86,7 +86,7 @@ void LoadInstrumentFromRaw::exec()
     // Default to 10 if the raw file doesn't have it set
     if (l1 == 0)  l1 = 10.0;
   }
-  source->setPos(0.0,-1.0*l1,0.0);
+  source->setPos(0.0,0.0,-1.0*l1);
 
   // add detectors
   const int numDetector = iraw.i_det;    // number of detectors
@@ -124,8 +124,8 @@ void LoadInstrumentFromRaw::exec()
     << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"
     << "L2 and two-theta values were read from raw file and used to set the r and theta spherical coordinates; \n"
     << "the remaining spherical coordinate phi was set to zero.\n"
-    << "Source component added with position set to (0,-" << l1 << ",0). In standard configuration, with \n"
-    << "the beam along y-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"
+    << "Source component added with position set to (0,0,-" << l1 << "). In standard configuration, with \n"
+    << "the beam along z-axis pointing from source to sample, this implies the source is " << l1 << "m in front \n"
     << "of the sample. This value can be changed via the 'instrument.l1' configuration property.\n";
 
   return;

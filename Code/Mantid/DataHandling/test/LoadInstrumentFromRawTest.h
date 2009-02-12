@@ -72,8 +72,8 @@ public:
     boost::shared_ptr<IInstrument> i = output->getInstrument();
     TS_ASSERT_EQUALS( i->getName(), "HET     ");
     boost::shared_ptr<IComponent> source = i->getSource();
-    TS_ASSERT_EQUALS( source->getName(), "Unknown");
-    TS_ASSERT_DELTA( source->getPos().Y(), -11.8,0.01);
+    TS_ASSERT_EQUALS( source->getName(), "Source");
+    TS_ASSERT_DELTA( source->getPos().Z(), -11.8,0.01);
 
     boost::shared_ptr<IComponent> samplepos = i->getSample();
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 0.0,0.01);
