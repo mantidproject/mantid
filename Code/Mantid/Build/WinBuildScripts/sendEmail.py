@@ -27,6 +27,7 @@ testsBuildSuccess = False
 sconsResult = ''
 testsResult = ''
 testsPass = True
+doxyWarnings = True
 
 mssgScons = ''
 mssgSconsErr = ''
@@ -133,6 +134,8 @@ reWarnCount = re.compile("Warning:")
 m=reWarnCount.findall(mssgDoxy)
 if m:
   warnCount = len(m)
+  if warnCount >0:
+    doxyWarnings = FALSE
 move(filedoxy,archiveDir)
 
 #Construct Message
@@ -145,8 +148,12 @@ message += ' ('
 if failCount>0:
     message += str(failCount) + " failed out of "
 message += str(testCount) + " tests)\n"
-message += mssgSvn + "doxygen warnings: " + str(warnCount) +"\n"
-message += mssgSvn + "\n"
+message += "Code Documentation Passed: " + str(doxyWarnings)
+if warnCount>0:
+  message += " ("str(warnCount) +"doxygen warnings)\n"
+else:
+  message += "\n"
+message += "\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
