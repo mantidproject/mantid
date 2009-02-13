@@ -79,7 +79,7 @@ void CorrectToFile::exec()
     const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
     // Find out the index of the first correction point after this value
     std::vector<double>::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
-    const int index = pos-Xcor.begin();
+    const unsigned int index = pos-Xcor.begin();
     if ( index == Xcor.size() )
     {
       // If we're past the end of the correction factors vector, use the last point

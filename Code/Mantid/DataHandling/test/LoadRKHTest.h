@@ -7,7 +7,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadRKH.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace1D.h"
 
 class LoadRKHTest : public CxxTest::TestSuite
 {
@@ -55,7 +55,7 @@ public:
     //Now need to test the resultant workspace, first retrieve it
     Workspace_sptr rkhspace;
     TS_ASSERT_THROWS_NOTHING( rkhspace = AnalysisDataService::Instance().retrieve(outputSpace) );
-    Workspace2D_sptr data = boost::dynamic_pointer_cast<Workspace2D>(rkhspace);
+    Workspace1D_sptr data = boost::dynamic_pointer_cast<Workspace1D>(rkhspace);
     
     //The data in the 2D workspace does not match the file data directly because the
     //file contains bin-centered values and the algorithm adjusts the x values so that 
@@ -65,23 +65,22 @@ public:
     TS_ASSERT_EQUALS( data->getNumberHistograms(), 1 );
 
     //Test the size of the data vectors (there should be 102 data points so x have 103)
-    TS_ASSERT_EQUALS( static_cast<int>(data->dataX(0).size()), 103);
+    TS_ASSERT_EQUALS( static_cast<int>(data->dataX(0).size()), 102);
     TS_ASSERT_EQUALS( static_cast<int>(data->dataY(0).size()), 102);
     TS_ASSERT_EQUALS( static_cast<int>(data->dataE(0).size()), 102);
 
     //Test first 3 bin edges for the correct values
     double tolerance(1e-06);
-    TS_ASSERT_DELTA( data->dataX(0)[0], 1.326575, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[1], 1.360785, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[2], 1.394995, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[0], 1.34368, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[1], 1.37789, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[2], 1.41251, tolerance );
     //Test a couple of random ones
-    TS_ASSERT_DELTA( data->dataX(0)[20], 2.175855, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[45], 4.034205, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[87], 11.380725, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[20], 2.20313, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[45], 4.08454, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[87], 11.52288, tolerance );
     //Test the last 3
-    TS_ASSERT_DELTA( data->dataX(0)[100], 15.690655, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[101], 16.084285, tolerance );
-    TS_ASSERT_DELTA( data->dataX(0)[102], 16.481355,tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[100], 15.88747, tolerance );
+    TS_ASSERT_DELTA( data->dataX(0)[101], 16.28282, tolerance );
 
     //Now Y values
     TS_ASSERT_DELTA( data->dataY(0)[0], 0.168419, tolerance );
