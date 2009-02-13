@@ -55,12 +55,12 @@ void BackToBackExponential::init()
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   declareProperty("StartX",0.0);
-  declareProperty("EndX",0.0);
+  declareProperty("EndX",1.0);
   declareProperty("I",0.0, Direction::InOut);
   declareProperty("a",0.0, Direction::InOut);
   declareProperty("b",0.0, Direction::InOut);
-  declareProperty("c",0.0, Direction::InOut);
-  declareProperty("s",0.0, Direction::InOut);
+  declareProperty("x0",0.0, Direction::InOut);
+  declareProperty("s",1.0, Direction::InOut);
   declareProperty("bk",0.0, Direction::InOut);
   declareProperty("MaxIterations",500, mustBePositive->clone());
   declareProperty("Output Status","", Direction::Output);
@@ -174,7 +174,7 @@ void BackToBackExponential::exec()
 	gsl_vector_set(initFuncArg, 0, getProperty("I"));
 	gsl_vector_set(initFuncArg, 1, getProperty("a"));
 	gsl_vector_set(initFuncArg, 2, getProperty("b"));
-	gsl_vector_set(initFuncArg, 3, getProperty("c"));
+	gsl_vector_set(initFuncArg, 3, getProperty("x0"));
 	gsl_vector_set(initFuncArg, 4, getProperty("s"));
 	gsl_vector_set(initFuncArg, 5, getProperty("bk"));
 
@@ -226,7 +226,7 @@ void BackToBackExponential::exec()
     "Status = " << gsl_strerror(status) << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n" <<
     "I = " << gsl_vector_get(s->x,0) << "; a = " << gsl_vector_get(s->x,1) <<
-    "; b = " << gsl_vector_get(s->x,2) << "; c = " << gsl_vector_get(s->x,3) <<
+    "; b = " << gsl_vector_get(s->x,2) << "; x0 = " << gsl_vector_get(s->x,3) <<
     "; s = " << gsl_vector_get(s->x,4) << "; bk = " << gsl_vector_get(s->x,5) << "\n";
 
 
@@ -237,7 +237,7 @@ void BackToBackExponential::exec()
   setProperty("I", gsl_vector_get(s->x,0));
   setProperty("a", gsl_vector_get(s->x,1));
   setProperty("b", gsl_vector_get(s->x,2));
-  setProperty("c", gsl_vector_get(s->x,3));
+  setProperty("x0", gsl_vector_get(s->x,3));
   setProperty("s", gsl_vector_get(s->x,4));
   setProperty("bk", gsl_vector_get(s->x,5));
 
@@ -269,7 +269,7 @@ int bTbExpo_f (const gsl_vector * x, void *params, gsl_vector * f) {
     double I = gsl_vector_get (x, 0);
     double a = gsl_vector_get (x, 1);
     double b = gsl_vector_get (x, 2);
-    double c = gsl_vector_get (x, 3);
+    double x0 = gsl_vector_get (x, 3);
     double s = gsl_vector_get (x, 4);
     double bk = gsl_vector_get (x, 5);
 
@@ -277,9 +277,9 @@ int bTbExpo_f (const gsl_vector * x, void *params, gsl_vector * f) {
 
     double s2 = s*s;
     for (i = 0; i < n; i++) {
-      double diff=X[i]-c;
+      double diff=X[i]-x0;
       double Yi = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
-                    + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(s*s2)))+bk;
+                    + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)))+bk;
       gsl_vector_set (f, i, (Yi - Y[i])/sigma[i]);
     }
     return GSL_SUCCESS;
@@ -300,7 +300,7 @@ int bTbExpo_df (const gsl_vector * x, void *params,
     double I = gsl_vector_get (x, 0);
     double a = gsl_vector_get (x, 1);
     double b = gsl_vector_get (x, 2);
-    double c = gsl_vector_get (x, 3);
+    double x0 = gsl_vector_get (x, 3);
     double s = gsl_vector_get (x, 4);
     size_t i;
 
@@ -308,27 +308,27 @@ int bTbExpo_df (const gsl_vector * x, void *params,
     double s2 = s*s;
     for (i = 0; i < n; i++) {
 
-        double diff = X[i]-c;
+        double diff = X[i]-x0;
 
         double e_a = exp(0.5*a*(a*s2+2*diff));
         double e_b = exp(0.5*b*(b*s2-2*diff));
         double erfc_a = gsl_sf_erfc((a*s2+diff)/sqrt(2*s2));
-        double erfc_b = gsl_sf_erfc((b*s2-diff)/sqrt(s*s2));
+        double erfc_b = gsl_sf_erfc((b*s2-diff)/sqrt(2*s2));
 
-        // apart from a prefactor terms arising from defivative or argument of erfc's
-        double div_erfc_a = exp(-(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff))*M_SQRT2/M_SQRTPI;
-        double div_erfc_b = exp(-(b*s2-diff)*(b*s2-diff)/(s*s2)+0.5*b*(b*s2-2.0*diff))*2.0*sqrt(s)/M_SQRTPI;
+        // apart from a prefactor terms arising from defivative or argument of erfc's divided by sqrt(2)
+        double div_erfc_a = - exp( -(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff) ) * M_SQRT2/M_SQRTPI;
+        double div_erfc_b = - exp( -(b*s2-diff)*(b*s2-diff)/(2*s2)+0.5*b*(b*s2-2.0*diff) ) * M_SQRT2/M_SQRTPI;
 
 
         gsl_matrix_set (J, i, 0, (e_a*erfc_a+e_b*erfc_b)/sigma[i]);    // deriv I
         gsl_matrix_set (J, i, 1,                                       // deriv a
-          I*( - s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )/sigma[i]);
+          I*( s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 2,                                       // deriv b
-          I*( - div_erfc_b + e_b*(b*s2-diff)*erfc_a )/sigma[i]);
-        gsl_matrix_set (J, i, 3,                                                    // deriv c
-          I*( (div_erfc_a-div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )/sigma[i]);
+          I*( s*div_erfc_b + e_b*(b*s2-diff)*erfc_b )/sigma[i]);
+        gsl_matrix_set (J, i, 3,                                                    // deriv x0
+          I*( (-div_erfc_a+div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 4,                                                    // deriv s
-          I*( - div_erfc_b*(3*diff/s2-b)/s-div_erfc_a*(a-diff/s2)
+          I*( div_erfc_b*(b+diff/s2)+div_erfc_a*(a-diff/s2)
               + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a )/sigma[i]);
         gsl_matrix_set (J, i, 5, 1/sigma[i]);                                       // deriv bk
     }

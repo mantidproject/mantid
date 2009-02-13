@@ -17,7 +17,7 @@ namespace Mantid
     Takes a histogram in a 2D workspace and fit it to a back-to-back exponential
     peak function, that is the function:
 
-      I*(exp(a/2*(a*s^2+2*(x-c)))*erfc((a*s^2+(x-c))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-c)))*erfc((b*s^2-(x-c))/sqrt(s*s^2)))+bk.
+      I*(exp(a/2*(a*s^2+2*(x-x0)))*erfc((a*s^2+(x-x0))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-x0)))*erfc((b*s^2-(x-x0))/sqrt(2*s^2)))+bk.
 
     Required Properties:
     <UL>
@@ -26,10 +26,18 @@ namespace Mantid
 
     Optional Properties (assume that you count from zero):
     <UL>
-    <LI> StartX - X bin number to integrate from (default 0)</LI>
-    <LI> EndX - X bin number to integrate to (default max)</LI>
-    <LI> SpectrumNumber - The spectrum to fit (default first spectrum in dataset)</LI>
+    <LI> SpectrumNumber - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
+    <LI> StartX - X value to start fitting from (default 0.0)</LI>
+    <LI> EndX - last X value to include in fitting range (default 1.0)</LI>
+    <LI> I - height of peak (default 0.0)</LI>
+    <LI> a - exponential constant of rising part of neutron pulse (default 0.0)</LI>
+    <LI> b - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
+    <LI> x0 - peak position (default 0.0)</LI>
+    <LI> s - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
+    <LI> bk - constant background (default 0.0)</LI>
     <LI> MaxIterations - The spectrum to fit (default 500)</LI>
+    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
+    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

@@ -35,7 +35,7 @@ namespace Mantid
     <LI> MaxIterations - Max iterations (default 500)</LI>
 
     <LI> Output Status - whether the fit was successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - measure of how good the fit was (default 0.0). Direction::Output</LI>
+    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
