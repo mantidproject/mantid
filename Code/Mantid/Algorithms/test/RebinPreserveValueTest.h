@@ -22,27 +22,26 @@ public:
   {
     Workspace2D_sptr inWS(new Workspace2D());
     int n = 10;
-    int m = 3;
+    int m = 1;
     inWS->initialize(n,m+1,m);
     for(int i=0;i<n;i++)
     {
         std::vector<double>& X = inWS->dataX(i);
         std::vector<double>& Y = inWS->dataY(i);
-        for(int j=0;j<m;j++)
-        {
-            X[j] = double(i+j) + .5;
-            X[j+1] = double(i+j) + 2.;
-            Y[j] = 10.*(i+1+j);
-        }
+        X[0] = double(i) + .5;
+        X[1] = double(i) + 4.;
+        Y[0] = 10.*(i+1);
     }
 
     AnalysisDataService::Instance().add("input",inWS);
     RebinPreserveValue alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace","input");
-    alg.setPropertyValue("OutputWorkspace","output");
-    alg.setPropertyValue("params","0,2,13");
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace","input") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","output") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("params","0,2,13") )
+    TS_ASSERT_THROWS_NOTHING( alg.execute() )
+    TS_ASSERT( alg.isExecuted() )
 
     Workspace_sptr outWS = AnalysisDataService::Instance().retrieve("output");
     Workspace2D_sptr WS = boost::dynamic_pointer_cast<Workspace2D>(outWS);
@@ -52,19 +51,19 @@ public:
 
 
     std::vector<double>& Y0 = WS->dataY(0);
-    TS_ASSERT_EQUALS(Y0[0],10)
-    TS_ASSERT_EQUALS(Y0[1],20)
+    TS_ASSERT_EQUALS(Y0[0],7.5)
+    TS_ASSERT_EQUALS(Y0[1],10)
     TS_ASSERT_EQUALS(Y0[2],0)
 
     std::vector<double>& Y1 = WS->dataY(1);
-    TS_ASSERT_EQUALS(Y1[0],20)
+    TS_ASSERT_EQUALS(Y1[0],5)
     TS_ASSERT_EQUALS(Y1[1],20)
-    TS_ASSERT_EQUALS(Y1[2],40)
+    TS_ASSERT_EQUALS(Y1[2],10)
 
     std::vector<double>& Y2 = WS->dataY(2);
     TS_ASSERT_EQUALS(Y2[0],0)
-    TS_ASSERT_EQUALS(Y2[1],30)
-    TS_ASSERT_EQUALS(Y2[2],40)
+    TS_ASSERT_EQUALS(Y2[1],22.5)
+    TS_ASSERT_EQUALS(Y2[2],30)
 
 
   }

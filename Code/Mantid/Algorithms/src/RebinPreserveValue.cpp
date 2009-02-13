@@ -31,8 +31,11 @@ namespace Mantid
     *
     */
     void RebinPreserveValue::init()
-    {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
+    {  
+      CompositeValidator<> *wsValidator = new CompositeValidator<>;
+      wsValidator->add(new HistogramValidator<>);
+      wsValidator->add(new RawCountValidator<>);
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
       declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
@@ -40,7 +43,6 @@ namespace Mantid
 
     /** Executes the rebin algorithm
     *
-    *  @throw runtime_error Thrown if
     */
     void RebinPreserveValue::exec()
     {
@@ -49,8 +51,12 @@ namespace Mantid
 
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
-
-      bool dist = inputW->isDistribution();
+      // The input workspace has to have just one bin per spectrum
+      if ( inputW->blocksize() > 1 )
+      {
+        g_log.error("The input workspace is restricted to having only one bin");
+        throw std::invalid_argument("The input workspace is restricted to having only one bin");
+      }
 
       // workspace independent determination of length
       int histnumber = inputW->size()/inputW->blocksize();
@@ -85,7 +91,7 @@ namespace Mantid
         std::vector<double>& YErrors_new=outputW->dataE(hist);
 
         // output data arrays are implicitly filled by function
-        rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new, dist);
+        rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new);
         // Populate the output workspace X values
         if (outputW_2D)
         {
@@ -108,7 +114,6 @@ namespace Mantid
             interruption_point();
         }
       }
-      outputW->isDistribution(dist);
 
       // Copy units
       if (outputW->getAxis(0)->unit().get())
@@ -136,16 +141,13 @@ namespace Mantid
     * @param ynew - new y array of data
     * @param eold - old error array of data
     * @param enew - new error array of data
-    * @param distribution - flag defining if distribution data (1) or not (0)
-    * @throw runtime_error Thrown if algorithm cannot execute
-    * @throw invalid_argument Thrown if input to function is incorrect
     **/
     void RebinPreserveValue::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
+      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew)
 
     {
-      int i,iold = 0,inew = 0;
-      double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
+      int iold = 0,inew = 0;
+      double xo_low, xo_high, xn_low, xn_high;
       int size_yold=yold.size();
       int size_ynew=ynew.size();
 
@@ -163,19 +165,25 @@ namespace Mantid
         {
           iold++;		/* old and new bins do not overlap */
         }
+        else if ( xn_low < xo_low && xo_low < xn_high )
+        {
+          // If the new bin is partially overlapped by the old then scale the value
+          const double delta = (xn_high-xo_low)/(xn_high-xn_low);
+          ynew[inew] = yold[iold]*delta;
+          enew[inew] = eold[iold]*delta;
+          ++inew;
+        }
+        else if ( xn_low < xo_high && xo_high < xn_high )
+        {
+          // If the new bin is partially overlapped by the old then scale the value
+          const double delta = (xo_high-xn_low)/(xn_high-xn_low);
+          ynew[inew] = yold[iold]*delta;
+          enew[inew] = eold[iold]*delta;
+          ++iold;
+        }
         else
         {
-          /*/        delta is the overlap of the bins on the x axis
-          //delta = std::min(xo_high, xn_high) - std::max(xo_low, xn_low);
-          delta = xo_high<xn_high?xo_high:xn_high;
-          delta -= xo_low>xn_low?xo_low:xn_low;
-          width = xo_high - xo_low;
-          if ( (delta <= 0.0) || (width <= 0.0) )
-          {
-            g_log.error("SimpleRebin: no bin overlap detected");
-            throw std::runtime_error("no bin overlap detected");
-          }//*/
-
+          // Other wise the new bin is entirely within the old one and we just copy the value
           ynew[inew] = yold[iold];
           enew[inew] = eold[iold];
 
@@ -183,10 +191,8 @@ namespace Mantid
           {
             iold++;
           }
-          //else
-          //{
-            inew++;
-          //}
+          
+          inew++;
         }
       }
 
@@ -194,18 +200,19 @@ namespace Mantid
     }
 
     /** Creates a new  output X array  according to specific boundary defnitions
-    *
-    * @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
-    * @param xnew - new output workspace x array
-    **/
-    int RebinPreserveValue::newAxis(const std::vector<double>& params,
-      std::vector<double>& xnew)
+     *
+     *  @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
+     *  @param xnew - new output workspace x array
+     *  @return The number of bin boundaries in the new X array
+     **/
+    int RebinPreserveValue::newAxis(const std::vector<double>& params, std::vector<double>& xnew)
     {
       double xcurr, xs;
       int ibound(2), istep(1), inew(1);
       int ibounds=params.size(); //highest index in params array containing a bin boundary
       int isteps=ibounds-1; // highest index in params array containing a step
-
+      xnew.clear();
+      
       xcurr = params[0];
       xnew.push_back(xcurr);
 
@@ -230,9 +237,15 @@ namespace Mantid
         xnew.push_back(xcurr);
         inew++;
       }
-      //returns length of new x array or -1 if failure
+      
+      // If the last bin is smaller than 25% of the penultimate one, then combine the last two
+      if ( inew > 2 && (xnew[inew-1]-xnew[inew-2]) < 0.25*(xnew[inew-2]-xnew[inew-3]) )
+      {
+        xnew.erase(xnew.end()-2);
+        --inew;
+      }
+      
       return inew;
-      //return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
     }
 
   } // namespace Algorithm

@@ -40,7 +40,7 @@ namespace Mantid
 
     /** Executes the rebin algorithm
     *
-    *  @throw runtime_error Thrown if
+    *  @throw runtime_error Thrown if the bin range does not intersect the range of the input workspace
     */
     void SimpleRebin::exec()
     {
@@ -129,20 +129,19 @@ namespace Mantid
     }
 
     /** Rebins the data according to new output X array
-    *
-    * @param xold - old x array of data
-    * @param xnew - new x array of data
-    * @param yold - old y array of data
-    * @param ynew - new y array of data
-    * @param eold - old error array of data
-    * @param enew - new error array of data
-    * @param distribution - flag defining if distribution data (1) or not (0)
-    * @throw runtime_error Thrown if algorithm cannot execute
-    * @throw invalid_argument Thrown if input to function is incorrect
-    **/
+     *
+     * @param xold - old x array of data
+     * @param xnew - new x array of data
+     * @param yold - old y array of data
+     * @param ynew - new y array of data
+     * @param eold - old error array of data
+     * @param enew - new error array of data
+     * @param distribution - flag defining if distribution data (1) or not (0)
+     * @throw runtime_error Thrown if algorithm cannot execute
+     * @throw invalid_argument Thrown if input to function is incorrect
+     **/
     void SimpleRebin::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
       const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
-
     {
       int i,iold = 0,inew = 0;
       double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
@@ -239,18 +238,19 @@ namespace Mantid
     }
 
     /** Creates a new  output X array  according to specific boundary defnitions
-    *
-    * @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
-    * @param xnew - new output workspace x array
-    **/
-    int SimpleRebin::newAxis(const std::vector<double>& params,
-      std::vector<double>& xnew)
+     *
+     *  @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
+     *  @param xnew - new output workspace x array
+     *  @return The number of bin boundaries in the new X array
+     **/
+    int SimpleRebin::newAxis(const std::vector<double>& params, std::vector<double>& xnew)
     {
       double xcurr, xs;
       int ibound(2), istep(1), inew(1);
       int ibounds=params.size(); //highest index in params array containing a bin boundary
       int isteps=ibounds-1; // highest index in params array containing a step
-
+      xnew.clear();
+      
       xcurr = params[0];
       xnew.push_back(xcurr);
 
@@ -275,9 +275,15 @@ namespace Mantid
         xnew.push_back(xcurr);
         inew++;
       }
-      //returns length of new x array or -1 if failure
+      
+      // If the last bin is smaller than 25% of the penultimate one, then combine the last two
+      if ( inew > 2 && (xnew[inew-1]-xnew[inew-2]) < 0.25*(xnew[inew-2]-xnew[inew-3]) )
+      {
+        xnew.erase(xnew.end()-2);
+        --inew;
+      }
+      
       return inew;
-      //return( (ibound == ibounds) && (istep == isteps) ? inew : -1 );
     }
 
   } // namespace Algorithm

@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_REBINPRESERVEVALUE_H_
-#define MANTID_ALGORITHM_REBINPRESERVEVALUE_H_
+#ifndef MANTID_ALGORITHMS_REBINPRESERVEVALUE_H_
+#define MANTID_ALGORITHMS_REBINPRESERVEVALUE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -9,31 +9,33 @@
 
 namespace Mantid
 {
-  namespace Algorithms
-  {
-    /**
-
-    Takes a 1D workspace as input and rebins the data according to the input rebin parameters.
+namespace Algorithms
+{
+/** A specialised rebin algorithm, created for the SANS instruments, in which a an
+    input workspace with a single bin is taken and, for each spectrum, the value is
+    distributed into the new bins according to the following scheme:
+    <UL>
+    <LI> No overlap between old and new bins: 0 (as regular rebin) </LI>
+    <LI> New bin entirely within old bin range: Full value of input bin copied </LI>
+    <LI> New bin partially covered by old bin: Old value scaled according to fraction of new bin covered by old bin </LI>
+    </UL>
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    <LI> RebinParameters -  </LI>
+    <LI> InputWorkspace  - The name of the Workspace2D to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
-    </UL>
-
-    Optional Properties (assume that you count from zero):
-    <UL>
-    <LI>   -  (default max)</LI>
+    <LI> RebinParameters - The new bin boundaries in the form X1,deltaX1,X2,deltaX2,X3,... </LI>
     </UL>
 
     The algorithms used in the SimpleRebin::rebin() and SimpleRebin::newAxis() are based on the
     algorithms used in OPENGENIE /src/transform_utils.cxx (Freddie Akeroyd, ISIS)
+    When calculating the bin boundaries, if the last bin ends up with a width being less than 25%
+    of the penultimate one, then the two are combined. 
 
-    @author Dickon Champion, STFC
-    @date 25/02/2008
+    @author Roman Tolchenov, Tessella Support Services plc
+    @date 28/01/2009
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -53,34 +55,34 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport RebinPreserveValue : public API::Algorithm
-    {
-    public:
-      /// Default constructor
-      RebinPreserveValue() : API::Algorithm() {};
-      /// Destructor
-      virtual ~RebinPreserveValue() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "RebinPreserveValue";}
-      /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1;}
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Rebin\\Specialized";}
+class DLLExport RebinPreserveValue : public API::Algorithm
+{
+public:
+  /// Default constructor
+  RebinPreserveValue() : API::Algorithm() {};
+  /// Destructor
+  virtual ~RebinPreserveValue() {};
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "RebinPreserveValue";}
+  /// Algorithm's version for identification overriding a virtual method
+  virtual const int version() const { return 1;}
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "Rebin\\Specialized";}
 
-    private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-      void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
-          const DataObjects::Histogram1D::RCtype& , std::vector<double>&, std::vector<double>&, bool);
-      int newAxis(const std::vector<double>& , std::vector<double>& );
-        /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
-    };
+private:
+  // Overridden Algorithm methods
+  void init();
+  void exec();
+  
+  void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew);
+  int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
 
+  /// Static reference to the logger class
+  static Mantid::Kernel::Logger& g_log;
+};
 
-
-  } // namespace Algorithm
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_REBINPRESERVEVALUE_H_*/
+#endif /*MANTID_ALGORITHMS_REBINPRESERVEVALUE_H_*/
