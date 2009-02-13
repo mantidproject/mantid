@@ -12,7 +12,6 @@ extern bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const 
 /// Constructor
 InputHistoryImpl::InputHistoryImpl()
 {
-	std::cerr << "InputHistory created." << std::endl;
     QSettings settings;
     settings.beginGroup("Mantid/Algorithms");
 
@@ -43,7 +42,6 @@ InputHistoryImpl::InputHistoryImpl()
         m_history[algName] = prop_hist_list;
     }
     settings.endGroup();
-    printAll();
 }
 
 /// Destructor
@@ -53,7 +51,6 @@ InputHistoryImpl::~InputHistoryImpl()
 
 void InputHistoryImpl::save()
 {
-	std::cerr << "InputHistory destroyed." << std::endl;
     QSettings settings;
     settings.beginGroup("Mantid/Algorithms");
     QMapIterator<QString,QList< PropertyData > > alg(m_history);
@@ -68,7 +65,10 @@ void InputHistoryImpl::save()
     }
     settings.endGroup();
 }
-
+/**
+     Upadates the non-default algorithm properties in the history.
+     @param alg Pointer to the algorthm
+*/
 void InputHistoryImpl::updateAlgorithm(Mantid::API::Algorithm *alg)
 {
     const std::vector< Property* >& props = alg->getProperties();
@@ -100,6 +100,9 @@ void InputHistoryImpl::printAll()
     }
 }
 
+/** 
+    @param algName Algorithm name
+*/
 QMap< QString,QString > InputHistoryImpl::algorithmProperties(const QString& algName)
 {
     QMap< QString,QList< PropertyData > >::const_iterator a = m_history.find(algName);
@@ -113,6 +116,12 @@ QMap< QString,QString > InputHistoryImpl::algorithmProperties(const QString& alg
     }
     return QMap< QString,QString >();
 }
+
+/**  Returns the last entered value for property propName
+     @param algName Name of the algorithm
+     @param propName Property
+     @return The last entered value for the property or the empty string if the default value was used.
+*/
 
 QString InputHistoryImpl::algorithmProperty(const QString& algName,const QString& propName)
 {

@@ -3,8 +3,9 @@
 #include "../Graph3D.h"
 #include "../ApplicationWindow.h"
 #include "../Spectrogram.h"
+#include "MantidMatrixDialog.h"
 #include "MantidDataObjects/Workspace2D.h"
-
+#include "Preferences.h"
 #include <QtGlobal>
 #include <QTextStream>
 #include <QList>
@@ -51,14 +52,23 @@ m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
     m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     m_table_viewY = new QTableView();
     connectTableView(m_table_viewY,m_modelY);
+    setColumnsWidth(0,MantidPreferences::MantidMatrixColumnWidthY());
+    setNumberFormat(0,MantidPreferences::MantidMatrixNumberFormatY(),
+                      MantidPreferences::MantidMatrixNumberPrecisionY());
 
     m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     m_table_viewX = new QTableView();
     connectTableView(m_table_viewX,m_modelX);
+    setColumnsWidth(1,MantidPreferences::MantidMatrixColumnWidthX());
+    setNumberFormat(1,MantidPreferences::MantidMatrixNumberFormatX(),
+                      MantidPreferences::MantidMatrixNumberPrecisionX());
 
     m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     m_table_viewE = new QTableView();
     connectTableView(m_table_viewE,m_modelE);
+    setColumnsWidth(2,MantidPreferences::MantidMatrixColumnWidthE());
+    setNumberFormat(2,MantidPreferences::MantidMatrixNumberFormatE(),
+                      MantidPreferences::MantidMatrixNumberPrecisionE());
 
     m_tabs = new QTabWidget(this);
     m_tabs->insertTab(0,m_table_viewY,"Y values");
@@ -169,25 +179,70 @@ QString MantidMatrix::text(int row, int col)
     return QString::number(activeModel()->data(row, col));
 }
 
-void MantidMatrix::setColumnsWidth(int width)
+void MantidMatrix::setColumnsWidth(int width, bool all)
 {
-	if (m_column_width == width)
-		return;
-
-    m_column_width = width;
-    m_table_viewY->horizontalHeader()->setDefaultSectionSize(m_column_width);
-    m_table_viewX->horizontalHeader()->setDefaultSectionSize(m_column_width);
-    m_table_viewE->horizontalHeader()->setDefaultSectionSize(m_column_width);
-
-    int cols = numCols();
-    for(int i=0; i<cols; i++)
+    if (all)
     {
-        m_table_viewY->setColumnWidth(i, width);
-        m_table_viewX->setColumnWidth(i, width);
-        m_table_viewE->setColumnWidth(i, width);
+        m_table_viewY->horizontalHeader()->setDefaultSectionSize(width);
+        m_table_viewX->horizontalHeader()->setDefaultSectionSize(width);
+        m_table_viewE->horizontalHeader()->setDefaultSectionSize(width);
+
+        int cols = numCols();
+        for(int i=0; i<cols; i++)
+        {
+            m_table_viewY->setColumnWidth(i, width);
+            m_table_viewX->setColumnWidth(i, width);
+            m_table_viewE->setColumnWidth(i, width);
+        }
+        MantidPreferences::MantidMatrixColumnWidth(width);
+    }
+    else
+    {
+        QTableView* table_view = activeView();
+        table_view->horizontalHeader()->setDefaultSectionSize(width);
+        int cols = numCols();
+        for(int i=0; i<cols; i++)
+            table_view->setColumnWidth(i, width);
+        switch (m_tabs->currentIndex())
+        {
+        case 0: MantidPreferences::MantidMatrixColumnWidthY(width);break;
+        case 1: MantidPreferences::MantidMatrixColumnWidthX(width);break;
+        case 2: MantidPreferences::MantidMatrixColumnWidthE(width);break;
+        }
     }
 
 	emit modifiedWindow(this);
+}
+
+void MantidMatrix::setColumnsWidth(int i,int width)
+{
+
+    QTableView* table_view;
+    switch(i)
+    {
+    case 0: table_view =  m_table_viewY; MantidPreferences::MantidMatrixColumnWidthY(width); break;
+    case 1: table_view =  m_table_viewX; MantidPreferences::MantidMatrixColumnWidthX(width); break;
+    case 2: table_view =  m_table_viewE; MantidPreferences::MantidMatrixColumnWidthE(width); break;
+    default: table_view = activeView();
+    };
+
+    table_view->horizontalHeader()->setDefaultSectionSize(width);
+    int cols = numCols();
+    for(int i=0; i<cols; i++)
+        table_view->setColumnWidth(i, width);
+
+	emit modifiedWindow(this);
+}
+
+int MantidMatrix::columnsWidth(int i)
+{
+    switch(i)
+    {
+    case 0: return m_table_viewY->columnWidth(0);
+    case 1: return m_table_viewX->columnWidth(0);
+    case 2: return m_table_viewE->columnWidth(0);
+    };
+    return activeView()->columnWidth(0);
 }
 
 QTableView *MantidMatrix::activeView()
@@ -684,7 +739,8 @@ bool MantidMatrix::setSelectedColumns()
     tv->selectColumn(m_colBegin);
   }
 
-  if( m_colBegin == 0 && m_colEnd == tv->horizontalHeader()->count() - 1 ) return false;
+  // tv->horizontalHeader()->count() can be small...
+  //if( m_colBegin == 0 && m_colEnd == tv->horizontalHeader()->count() - 1 ) return false;
 
   return true;
 }
@@ -851,6 +907,73 @@ void MantidMatrix::closeDependants()
   }
 }
 
+void MantidMatrix::setNumberFormat(const QChar& f,int prec, bool all)
+{
+    if (all)
+    {
+        modelY()->setFormat(f,prec);
+        modelX()->setFormat(f,prec);
+        modelE()->setFormat(f,prec);
+        MantidPreferences::MantidMatrixNumberFormat(f);
+        MantidPreferences::MantidMatrixNumberPrecision(prec);
+    }
+    else
+    {
+        activeModel()->setFormat(f,prec);
+        switch (m_tabs->currentIndex())
+        {
+        case 0: MantidPreferences::MantidMatrixNumberFormatY(f);
+                MantidPreferences::MantidMatrixNumberPrecisionY(prec);
+                break;
+        case 1: MantidPreferences::MantidMatrixNumberFormatX(f);
+                MantidPreferences::MantidMatrixNumberPrecisionX(prec);
+                break;
+        case 2: MantidPreferences::MantidMatrixNumberFormatE(f);
+                MantidPreferences::MantidMatrixNumberPrecisionE(prec);
+                break;
+        }
+    }
+}
+
+void MantidMatrix::setNumberFormat(int i,const QChar& f,int prec, bool all)
+{
+    
+    switch (i)
+    {
+    case 0: m_modelY->setFormat(f,prec);
+            MantidPreferences::MantidMatrixNumberFormatY(f);
+            MantidPreferences::MantidMatrixNumberPrecisionY(prec);
+            break;
+    case 1: m_modelX->setFormat(f,prec);
+            MantidPreferences::MantidMatrixNumberFormatX(f);
+            MantidPreferences::MantidMatrixNumberPrecisionX(prec);
+            break;
+    case 2: m_modelE->setFormat(f,prec);
+            MantidPreferences::MantidMatrixNumberFormatE(f);
+            MantidPreferences::MantidMatrixNumberPrecisionE(prec);
+            break;
+    }
+}
+
+QChar MantidMatrix::numberFormat()
+{
+    return activeModel()->format();
+}
+
+int MantidMatrix::precision()
+{
+    return activeModel()->precision();
+}
+
+
+
+void MantidMatrix::setMatrixProperties()
+{
+    MantidMatrixDialog* dlg = new MantidMatrixDialog(m_appWindow);
+    dlg->setMatrix(this);
+    dlg->exec();
+}
+
 void MantidMatrix::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
 {
     if (pNf->object() == m_workspace)
@@ -870,10 +993,95 @@ void MantidMatrix::selfClosed(MdiSubWindow* w)
   closeDependants();
 }
 
+// ----------   MantidMatrixModel   ------------------ //
+
+/**   MantidMatrixModel constructor.
+      @param parent Pointer to the parent MantidMatrix
+      @param ws Underlying workspace
+      @param rows Number of rows in the workspace to be visible via MantidMatrixModel
+      @param cols Number of columns (time bins)
+      @param start Starting index 
+      @param type Type of the data to display: Y, X, or E
+  */
+MantidMatrixModel::MantidMatrixModel(QObject *parent, 
+                  Mantid::API::MatrixWorkspace_sptr ws, 
+                  int rows,
+                  int cols,
+                  int start, 
+                  Type type):
+QAbstractTableModel(parent),m_type(type),
+m_format('e'),m_prec(6)
+  {
+      setup(ws,rows,cols,start);
+  }
+
+/// Call this function if the workspace has changed
+void MantidMatrixModel::setup(Mantid::API::MatrixWorkspace_sptr ws, 
+                  int rows,
+                  int cols,
+                  int start)
+{
+    m_workspace = ws;
+    m_rows = rows;
+    m_cols = cols;
+    m_startRow = start >= 0? start : 0;
+    if (ws->blocksize() != 0)
+        m_colNumCorr = ws->isHistogramData() ? 1 : 0;
+    else
+        m_colNumCorr = 0;
+}
+
+
+double MantidMatrixModel::data(int row, int col) const
+{
+    double val;
+    if (m_type == X)
+    {
+        val = m_workspace->readX(row + m_startRow)[col];
+    }
+    else if (m_type == Y)
+    {
+        val = m_workspace->readY(row + m_startRow)[col];
+    }
+    else
+    {
+        val = m_workspace->readE(row + m_startRow)[col];
+    }
+    return val;
+}
+
+QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation, int role ) const   
+{
+    if (role != Qt::DisplayRole) return QVariant();
+    return section;
+}
+
+Qt::ItemFlags MantidMatrixModel::flags(const QModelIndex & index ) const
+{
+    if (index.isValid())
+        return Qt::ItemIsSelectable;
+    else
+        return Qt::ItemIsEnabled;
+}
+
+/**
+      @param f Number format:  'f' - fixed, 'e' - scientific.
+      @param prec New precision (number of digits after the decimal point) with which the data will
+                   be shown in MantidMatrix.
+  */
+void MantidMatrixModel::setFormat(const QChar& f,int prec)
+{
+    QString formats = " ef";
+    if ( formats.indexOf(f) > 0 )
+    {
+        m_format = f.toAscii();
+        m_prec = prec;
+    }
+}
 
 QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
 {
     if (role != Qt::DisplayRole) return QVariant();
     double val = data(index.row(),index.column());
-    return QVariant(m_locale.toString(val,'f',6));
+    return QVariant(m_locale.toString(val,m_format,m_prec));
 }

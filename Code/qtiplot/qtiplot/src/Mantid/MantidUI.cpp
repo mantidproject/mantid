@@ -98,8 +98,12 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
 	mantidMenu->setObjectName("mantidMenu");
 	connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
 
+    menuMantidMatrix = new QMenu(m_appWindow);
+	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
+
 }
 
+// Should it be moved to the constructor?
 void MantidUI::init()
 {
     FrameworkManager::Instance();
@@ -323,6 +327,8 @@ int MantidUI::getBinNumber(const QString& workspaceName)
 	return output->blocksize();
 }
 
+/**   Extension to ApplicationWindow::menuAboutToShow() to deal with Mantid.
+  */
 bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 {
 
@@ -333,6 +339,8 @@ bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 		appWindow()->actionPasteSelection->setEnabled(false);
 		appWindow()->actionClearSelection->setEnabled(false);
         appWindow()->plotMatrixBar->setEnabled (true);
+
+        appWindow()->menuBar()->insertItem(tr("Mantid &Matrix"),menuMantidMatrix);
         return true;
     }
 
@@ -851,24 +859,6 @@ void MantidUI::closeProgressDialog()
 
 void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
-    /*if (pNf->algorithm()->name() == "LoadRaw")
-    {
-        std::cerr<<"Finished "<<pNf->algorithm()->name()<<' '
-            <<pNf->algorithm()->getPropertyValue("OutputWorkspace")
-            <<'\n';
-        QString wsName = QString::fromStdString(pNf->algorithm()->getPropertyValue("OutputWorkspace"));
-        if (wsName == "GEM38370")
-        {
-            Mantid::API::Workspace_sptr ws = getWorkspace(wsName);
-            ws->InstrumentParameters()->addString(0,"tst","TEST");
-            boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
-            std::cerr<<(*instr)[2]->getPos()+Mantid::Geometry::V3D(0,2,0)<<'\n';
-            ws->InstrumentParameters()->addV3D((*instr)[2].get(),"pos",(*instr)[2]->getPos()+Mantid::Geometry::V3D(0,2,0));
-            std::cerr<<ws->getInstrument()->getName()<<' '<<ws->getInstrument()->type()<<'\n';
-        }
-    }//*/
-
-  
     if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
     emit needToUpdateProgressDialog(100,"Algorithm finished.");
     emit needToCloseProgressDialog();
@@ -1029,7 +1019,36 @@ void MantidUI::mantidMenuAboutToShow()
 
 void MantidUI::insertMenu()
 {
-	appWindow()->menuBar()->insertItem(tr("Mantid"), mantidMenu);
+	appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);}
+
+/**
+  *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
+  */
+void MantidUI::menuMantidMatrixAboutToShow()
+{
+    menuMantidMatrix->clear();
+    MantidMatrix *w = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+    menuMantidMatrix->addAction(actionCopyValues);
+    menuMantidMatrix->addAction(actionCopyDetectorsToTable);
+    menuMantidMatrix->addSeparator();
+    menuMantidMatrix->insertItem(tr("Set &Properties..."), w, SLOT(setMatrixProperties() ) );
+
+    /*bool areSpectraSelected;
+    int i0,i1;
+    w->getSelectedRows(i0,i1);
+    areSpectraSelected = i0 >= 0 && i1 >= 0;
+
+    bool areColumnsSelected = w->setSelectedColumns();
+    if (areSpectraSelected)
+    {
+        menuMantidMatrix->addAction(actionCopyRowToGraph);
+        menuMantidMatrix->addAction(actionCopyRowToGraphErr);
+    }
+    if (areColumnsSelected)
+    {
+        menuMantidMatrix->addAction(actionCopyColumnToGraph);
+        menuMantidMatrix->addAction(actionCopyColumnToGraphErr);
+    }*/
 }
 
 /// Catches the signal from InstrumentWindow to plot a spectrum.
@@ -1183,32 +1202,27 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
      bool isHistogram = workspace->isHistogramData();
      if (isHistogram && !forPlotting) numRows++;
 
-//	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*index.size() + 1, "", appWindow(), 0);
 	 Table* t = new Table(appWindow()->scriptEnv, numRows, c*(i1 - i0 + 1) + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
 	 t->askOnCloseEvent(false);
 
      int kY,kErr;
-//     for(int i=0;i<=index.size();i++)
      for(int i=i0;i<=i1;i++)
      {
          const std::vector<double>& dataX = workspace->readX(i);//index(i)
          const std::vector<double>& dataY = workspace->readY(i);
          const std::vector<double>& dataE = workspace->readE(i);
     
-//         kY = c*i+1;
          kY = c*(i-i0)+1;
          t->setColName(kY,"YS"+QString::number(i));//index(i)
          if (errs)
          {
-//             kErr = 2*i + 2;
              kErr = 2*(i - i0) + 2;
              t->setColPlotDesignation(kErr,Table::yErr);
              t->setColName(kErr,"ES"+QString::number(i));//index(i)
          }
          for(int j=0;j<numRows;j++)
          {
-//             if (i == 0) 
              if (i == i0) 
              {
                  // in histograms the point is to be drawn in the centre of the bin.
@@ -1222,7 +1236,6 @@ Table* MantidUI::createTableFromSelectedRows(const QString& wsName, Mantid::API:
          if (isHistogram && !forPlotting)
          {
              int iRow = numRows - 1;
-//             if (i == 0) t->setCell(iRow,0,dataX[iRow]);
              if (i == i0) t->setCell(iRow,0,dataX[iRow]);
              t->setCell(iRow,kY,0); 
              if (errs) t->setCell(iRow,kErr,0);

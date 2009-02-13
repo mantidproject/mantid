@@ -123,6 +123,16 @@ public:
 
     bool isHistogram(){return m_histogram;}
 
+    // Set format and precision of displayed numbers.
+    void setNumberFormat(const QChar& f,int prec, bool all = false);
+    void setNumberFormat(int i,const QChar& f,int prec, bool all = false);
+
+    // Return number format of the active model
+    QChar numberFormat();
+
+    // Return number precision of the active model
+    int precision();
+
 signals:
     void needsUpdating();
     void needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
@@ -135,9 +145,11 @@ public slots:
     void tst();
 
 	//! Return the width of all columns
-	int columnsWidth(){return m_column_width;};
-	//! Set the width of all columns
-	void setColumnsWidth(int width);
+	int columnsWidth(int i=-1);
+	//! Set the width of all columns for all views (all==true) or the active view (all==false)
+	void setColumnsWidth(int width, bool all = true);
+    // Set the width of column in view i (0 - Y, 1 - X, 2 - E)
+	void setColumnsWidth(int i, int width);
 
 	//! Return the content of the cell as a string
 	QString text(int row, int col);
@@ -186,6 +198,8 @@ public slots:
     void repaintAll();
     void closeDependants();
 
+    // Opens modified QtiPlot's MatrixDialog and sets column width and number format
+    void setMatrixProperties();
 protected:
 
     void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
@@ -207,10 +221,10 @@ protected:
     MantidMatrixModel *m_modelE;
     QColor m_bk_color;
     const char **m_matrix_icon;
-	double x_start, //!< X value corresponding to column 1
-	x_end,  //!< X value corresponding to the last column
-	y_start,  //!< Y value corresponding to row 1
-	y_end;  //!< Y value corresponding to the last row
+	double x_start,             //!< X value corresponding to column 1
+	x_end,                      //!< X value corresponding to the last column
+	y_start,                    //!< Y value corresponding to row 1
+	y_end;                      //!< Y value corresponding to the last row
     int m_rows,m_cols;
     int m_startRow;
     int m_endRow;
@@ -223,9 +237,8 @@ protected:
     QVector<MultiLayer*> m_plots2D;
     QMap< MultiLayer*,Table* > m_plots1D;
 
-	//! Column width in pixels;
-	int m_column_width;
     MantidMatrixFunction m_funct;
+    int m_column_width;
 
     QAction *m_actionShowX;
 
@@ -254,27 +267,13 @@ public:
                       int rows,
                       int cols,
                       int start, 
-                      Type type):
-      QAbstractTableModel(parent),m_type(type)
-      {
-          setup(ws,rows,cols,start);
-      }
+                      Type type);
 
     /// Call this function if the workspace has changed
     void setup(Mantid::API::MatrixWorkspace_sptr ws, 
                       int rows,
                       int cols,
-                      int start)
-    {
-        m_workspace = ws;
-        m_rows = rows;
-        m_cols = cols;
-        m_startRow = start >= 0? start : 0;
-        if (ws->blocksize() != 0)
-            m_colNumCorr = ws->isHistogramData() ? 1 : 0;
-        else
-            m_colNumCorr = 0;
-    }
+                      int start);
 
     /// Implementation of QAbstractTableModel::rowCount() -- number of rows (spectra) that can be shown
     int rowCount(const QModelIndex &parent = QModelIndex()) const{return m_rows;}
@@ -283,41 +282,19 @@ public:
     /// the numner of bin boundaries. If type is Y or E it is the number of data values.
     int columnCount(const QModelIndex &parent = QModelIndex()) const{return m_type == X? m_cols + m_colNumCorr : m_cols;}
 
-    double data(int row, int col) const
-    {
-        double val;
-        if (m_type == X)
-        {
-            val = m_workspace->readX(row + m_startRow)[col];
-        }
-        else if (m_type == Y)
-        {
-            val = m_workspace->readY(row + m_startRow)[col];
-        }
-        else
-        {
-            val = m_workspace->readE(row + m_startRow)[col];
-        }
-        return val;
-    }
+    double data(int row, int col) const;
 
     /// Implementation of QAbstractTableModel::data(...). QTableView uses this function
     /// to retrieve data for displaying.
     QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const   
-    {
-        if (role != Qt::DisplayRole) return QVariant();
-        return section;
-    }
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
-    Qt::ItemFlags flags(const QModelIndex & index ) const
-    {
-	    if (index.isValid())
-            return Qt::ItemIsSelectable;
-	    else
-            return Qt::ItemIsEnabled;
-    }
+    Qt::ItemFlags flags(const QModelIndex & index ) const;
 
+    // Set format and precision of displayed numbers.
+    void setFormat(const QChar& f,int prec);
+    QChar format(){return m_format;}
+    int precision(){return m_prec;}
 public slots:
     /// Signals QTableView that the data have changed.
     void resetData(){reset();}
@@ -329,9 +306,11 @@ private:
     int m_colNumCorr;  ///< == 1 for histograms and == 0 for point data
     QLocale m_locale;
     Type m_type;///< The type: X for bin boundaries, Y for the spectrum data, E for errors
+    char m_format;   //  Format of numbers returned by data(): 'f' - fixed, 'e' - scientific.
+    int m_prec;       //  Number precision 
 };
 
-/// Required by Qt to us Mantid::API::Workspace_sptr as a parameter type in signals
+/// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
 

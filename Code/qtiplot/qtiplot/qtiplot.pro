@@ -16,6 +16,7 @@ DEFINES         += SCRIPTING_DIALOG
 #DEFINES         += QTIPLOT_DEMO
 DEFINES         += GSL_DLL
 win32:DEFINES   += _WIN32_WINNT=0x0400
+win32:DEFINES   += _WIN32
 RESOURCES        = ../../../Images/images.qrc
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
@@ -328,8 +329,10 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/MantidPlotReleaseDate.h \
 	    src/Mantid/MantidAbout.h \
 	    src/Mantid/InputHistory.h \
+	    src/Mantid/Preferences.h \
             src/Mantid/MantidCustomActionDialog.h \
             src/Mantid/MantidSampleLogDialog.h \
+        src/Mantid/MantidMatrixDialog.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLColorMap.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
@@ -482,8 +485,10 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/ProgressDlg.cpp \
 	    src/Mantid/MantidAbout.cpp \
 	    src/Mantid/InputHistory.cpp \
+	    src/Mantid/Preferences.cpp \
             src/Mantid/MantidCustomActionDialog.cpp \
             src/Mantid/MantidSampleLogDialog.cpp \
+        src/Mantid/MantidMatrixDialog.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLColorMap.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
