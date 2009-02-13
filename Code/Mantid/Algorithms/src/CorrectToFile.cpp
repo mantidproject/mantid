@@ -113,3 +113,7 @@ void CorrectToFile::exec()
       outIt->E() = inIt->E()*Efactor;
     }
   }
+
+  //Set the resulting workspace
+  setProperty("Outputworkspace", outputWS);
+}
