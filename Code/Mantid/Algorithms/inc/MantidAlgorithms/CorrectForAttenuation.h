@@ -14,6 +14,30 @@ namespace Algorithms
 /** Calculates bin-by-bin correction factors for attenuation due to absorption and
     scattering in a cylindrical sample.
 
+    Properties:
+    <UL>
+    <LI> InputWorkspace  - The name of the input workspace. </LI>
+    <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
+    <LI> CylinderSampleHeight - The height of the cylindrical sample in centimetres. </LI>
+    <LI> CylinderSampleRadius - The radius of the cylindrical sample in centimetres. </LI>
+    <LI> AttenuationXSection - The attenuation cross-section for the sample material in barns. </LI>
+    <LI> ScatteringXSection - The scattering cross-section for the sample material in barns. </LI>
+    <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
+    <LI> NumberOfSlices - The number of slices into which the cylinder is divided for the calculation. </LI>
+    <LI> NumberOfAnnuli - The number of annuli into which each slice is divided for the calculation. </LI>
+    </UL>
+
+    This algorithm uses a quasi-Monte Carlo/quasi-numerical integration method to calculate attenuation factors
+    resulting from absorption and single scattering in a cylindrical sample with the dimensions and material 
+    properties given. Factors are calculated for each spectrum (i.e. detector position) and wavelength point,
+    as defined by the input workspace. The sample is divided up into a stack of slices, which are then divided 
+    into annuli (rings). These annuli are further divided to give the full set of elements for which a calculation
+    will be carried out. Thus the calculation speed depends linearly on the total number of bins in the workspace 
+    and on the number of slices. The dependence on the number of annuli is stronger, going as 3n(n + 1).
+
+    Path lengths through the sample are then calculated for the centre-point of each element and a numerical
+    integration is carried out using these path lengths over the volume elements.
+
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008
 
