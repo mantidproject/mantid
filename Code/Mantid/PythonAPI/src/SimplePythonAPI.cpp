@@ -72,6 +72,8 @@ namespace Mantid
 		  
       //Algorithm keys
       using namespace Mantid::API;
+      //Ensure that a FrameworkManager object has been instantiated to initialise the framework
+      FrameworkManager::Instance();
       StringVector algKeys = AlgorithmFactory::Instance().getKeys();
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
@@ -249,11 +251,12 @@ namespace Mantid
 	  os << "\\n\"\n";
 	}
       }
-      os << "\thelpmsg += \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\\n\"\n";
-      os << "\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
-	 << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n";
-      os << "\tprint helpmsg,\n";
-      os << "\n";
+      os << "\thelpmsg += \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\\n\"\n"
+       << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
+       << "\t\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
+       << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
+       << "\tprint helpmsg,\n"
+       << "\n";
     }
 
     /**
