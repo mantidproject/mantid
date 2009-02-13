@@ -5,12 +5,10 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
 #include <istream>
 
 namespace Mantid
 {
-
 namespace DataHandling
 {
   /**
@@ -26,7 +24,7 @@ namespace DataHandling
      @author Martyn Gigg, Tessella Support Services plc
      @date 19/01/2009
      
-     Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
      
      This file is part of Mantid.
      
@@ -46,7 +44,6 @@ namespace DataHandling
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
-
 class DLLExport LoadRKH : public Mantid::API::Algorithm
 {
 public:
@@ -64,23 +61,21 @@ public:
 private:
   // Initialisation code
   void init();
-  //Execution code
+  // Execution code
   void exec();
 
   // Remove lines from an input stream
   void skipLines(std::istream & strm, int nlines);
 
-  //Store the units known to the UnitFactory
+  /// Store the units known to the UnitFactory
   std::set<std::string> m_unitKeys;
-
-  //Store the units added as options for this algorithm
+  /// Store the units added as options for this algorithm
   std::set<std::string> m_RKHKeys;
 
-  // Static reference to the logger class
+  /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
 };
 
 }
-
 }
 #endif /*MANTID_DATAHANDLING_LOADRKH_H_*/

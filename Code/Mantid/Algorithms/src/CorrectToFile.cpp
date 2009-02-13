@@ -51,80 +51,65 @@ void CorrectToFile::exec()
   }
 
   //Now get input workspace for this algorithm
-  MatrixWorkspace_sptr rkhInput = loadRKH->getProperty("OutputWorkspace");
+  MatrixWorkspace_const_sptr toCorrect = getProperty("WorkspaceToCorrect");
+  MatrixWorkspace_const_sptr rkhInput = loadRKH->getProperty("OutputWorkspace");
 
-  //Check that the workspace to rebin has the same units as the one that we are matching to
-  MatrixWorkspace_sptr toCorrect = getProperty("WorkspaceToCorrect");
-  
-  //This only runs if it needs to otherwise it returns the original workspace
-  MatrixWorkspace_sptr rkhworkspace = runRebinToWorkspace(rkhInput, toCorrect);
-
-  //Use specified operation to correct
-  std::string operation = getProperty("WorkspaceOperation");
-  MatrixWorkspace_sptr corrected_ws;
-  if( operation == "Divide" )
-    corrected_ws = toCorrect / rkhworkspace;
-  else
-    corrected_ws = toCorrect * rkhworkspace;
-  
-  //Set the resulting workspace
-  setProperty("Outputworkspace", corrected_ws);
-}
-
-MatrixWorkspace_sptr CorrectToFile::runRebinToWorkspace(MatrixWorkspace_sptr toRebin, MatrixWorkspace_sptr toMatch)
-{
-  //Check units
-  checkWorkspaceUnits(toRebin, toMatch);
-  
-  //Need to rebin the RKH to the same binning as the workspace we are going to correct
-  //using the RebinToWorkspace algorithm
-  Algorithm_sptr rebinToWS = createSubAlgorithm("RebinToWorkspace");
-  rebinToWS->setProperty("WorkspaceToRebin", toRebin);
-  rebinToWS->setProperty("WorkspaceToMatch", toMatch);
-  rebinToWS->setPropertyValue("OutputWorkspace", "rkhout");
-  
-  try
+  // Check that the workspace to rebin has the same units as the one that we are matching to
+  // However, just print a warning if it isn't, don't abort (since user provides the file's unit)
+  if (toCorrect->getAxis(0)->unit() != rkhInput->getAxis(0)->unit())
   {
-    rebinToWS->execute();
-  }
-  catch(std::runtime_error&)
-  {
-    g_log.error() << "Unable to run RebinToWorkspace subalgorithm.";
-    throw std::runtime_error("Error executing RebinToWorkspace as a sub algorithm.");
+    g_log.warning("Unit on input workspace is different to that specified in 'FirstColumnValue' property");
   }
 
-  MatrixWorkspace_sptr result = rebinToWS->getProperty("OutputWorkspace");
-  return result;
-}
+  // Get references to the correction factors
+  const std::vector<double> &Xcor = rkhInput->readX(0);
+  const std::vector<double> &Ycor = rkhInput->readY(0);
+  const std::vector<double> &Ecor = rkhInput->readE(0);
 
-/**
- * Check whether the units on both workspaces match
- * @param base The workspace to test against
- * @param test The workspace to test units of
- */
-void CorrectToFile::checkWorkspaceUnits(MatrixWorkspace_sptr base, MatrixWorkspace_sptr test)
-{
-  std::string baseUnit = base->getAxis(0)->unit()->unitID();
-  if( test->getAxis(0)->unit()->unitID() ==  baseUnit ) return;
-  g_log.warning() << "The workspace being corrected does not have the correct units. They will "
-		  << "be converted to " << baseUnit << "\n"; 
-  //Convert the test workspace in place
-  //Run convert units on workspace that we are matching to
-  Algorithm_sptr convert = createSubAlgorithm("ConvertUnits");
-  convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace", test);
-  convert->setProperty("Target", baseUnit);
-  convert->setProperty("OutputWorkspace", test);
-  
-  try
-  {
-    convert->execute();
-  }
-  catch(std::runtime_error&)
-  {
-    g_log.error() << "Unable to run sub-algorithm ConvertUnits.";
-    throw std::runtime_error("Error running ConvertUnits as a sub algorithm.");
-  }
-  test = convert->getProperty("OutputWorkspace");
-  g_log.information() << "Units converted successfully.\n";
-}
+  // Create the output workspace
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(toCorrect);
+  const bool histogramData = outputWS->isHistogramData();
+  const std::string operation = getProperty("WorkspaceOperation");
+  const bool divide = (operation == "Divide") ? true : false;
+  double Yfactor,Efactor;
 
+  MatrixWorkspace::iterator outIt(*outputWS);
+  for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
+  {
+    const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
+    // Find out the index of the first correction point after this value
+    std::vector<double>::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
+    const int index = pos-Xcor.begin();
+    if ( index == Xcor.size() )
+    {
+      // If we're past the end of the correction factors vector, use the last point
+      Yfactor = Ycor[index-1];
+      Efactor = Ycor[index-1];
+    }
+    else if (index)
+    {
+      // Calculate where between the two closest points our current X value is
+      const double fraction = (currentX-Xcor[index-1])/(Xcor[index]-Xcor[index-1]);
+      // Now linearly interpolate to find the correction factors to use
+      Yfactor = Ycor[index-1] + fraction*(Ycor[index]-Ycor[index-1]);
+      Efactor = Ecor[index-1] + fraction*(Ecor[index]-Ecor[index-1]);
+    }
+    else
+    {
+      // If we're before the start of the correction factors vector, use the first point
+      Yfactor = Ycor[0];
+      Efactor = Ycor[0];
+    }
+
+    // Now do the correction on the current point
+    if (divide)
+    {
+      outIt->Y() = inIt->Y()/Yfactor;
+      outIt->E() = inIt->E()/Efactor;
+    }
+    else
+    {
+      outIt->Y() = inIt->Y()*Yfactor;
+      outIt->E() = inIt->E()*Efactor;
+    }
+  }

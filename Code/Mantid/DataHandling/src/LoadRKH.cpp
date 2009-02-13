@@ -136,44 +136,41 @@ void LoadRKH::exec()
   if( colIsUnit )
   {
     //The data is bin centred and so needs to be adjusted to a histogram format
-    std::vector<double> xnew(pointsToRead + 1, 0.0);
-    for( int i = 0; i < pointsToRead; ++i )
-    {
-      if( i == 0 )
-      {
-	double delta = columnOne[i+1] - columnOne[i];
-	xnew[i] = columnOne[i] - delta/2.0;
-	xnew[i + 1] = columnOne[i] + delta/2.0;
-      }
-      else
-      {
-	double delta = columnOne[i] - xnew[i];
-	xnew[i + 1] = columnOne[i] + delta;
-      }
-    }
+ //   std::vector<double> xnew(pointsToRead + 1, 0.0);
+ //   for( int i = 0; i < pointsToRead; ++i )
+ //   {
+ //     if( i == 0 )
+ //     {
+	//double delta = columnOne[i+1] - columnOne[i];
+	//xnew[i] = columnOne[i] - delta/2.0;
+	//xnew[i + 1] = columnOne[i] + delta/2.0;
+ //     }
+ //     else
+ //     {
+	//double delta = columnOne[i] - xnew[i];
+	//xnew[i + 1] = columnOne[i] + delta;
+ //     }
+ //   }
 
     localworkspace = 
-      WorkspaceFactory::Instance().create("Workspace2D", 1, pointsToRead + 1, pointsToRead);
+      WorkspaceFactory::Instance().create("Workspace1D", 1, pointsToRead, pointsToRead);
     localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create(firstColVal);
-    localworkspace->dataX(0) = xnew;
+    localworkspace->dataX(0) = columnOne;
+//    localworkspace->dataX(0) = xnew;
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
   }
   else
   {
     localworkspace = 
-      WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 2, 1);
-    localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      WorkspaceFactory::Instance().create("Workspace2D", pointsToRead, 1, 1);
     //Set the appropriate values
     for( int index = 0; index < pointsToRead; ++index )
     {
       localworkspace->getAxis(1)->spectraNo(index) = (int)columnOne[index];
-      localworkspace->dataX(index)[0] = 0.0;
-      localworkspace->dataX(index)[1] = 1.0;
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
-
   }
 
   //Set the output workspace

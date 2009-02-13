@@ -8,7 +8,6 @@
 
 namespace Mantid
 {
-
 namespace Algorithms
 {
   /**
@@ -24,7 +23,7 @@ namespace Algorithms
      @author Martyn Gigg, Tessella Support Services plc
      @date 19/01/2009
      
-     Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
      
      This file is part of Mantid.
      
@@ -64,17 +63,10 @@ private:
   ///Execution code
   void exec();
 
-  //Run the RebinToWorkspace algorithm, if applicable
-  Mantid::API::MatrixWorkspace_sptr runRebinToWorkspace(Mantid::API::MatrixWorkspace_sptr toRebin, Mantid::API::MatrixWorkspace_sptr toMatch);
-  
-  //Check if the workspace units match
-  void checkWorkspaceUnits(Mantid::API::MatrixWorkspace_sptr toRebin, Mantid::API::MatrixWorkspace_sptr toMatch);
-
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
 };
 
 }
-
 }
 #endif /*ALGORITHMSCORRECTTOFILE_H_*/
