@@ -1,3 +1,6 @@
+#ifndef MANTID_KERNEL_SYSTEM_H_
+#define MANTID_KERNEL_SYSTEM_H_
+
 /*  A system-wide file to contain, e.g., useful system-dependent macros
 
     @author Russell Taylor, Tessella Support Services plc
@@ -29,9 +32,9 @@
  * 
  */
 
-#ifndef MANTID_KERNEL_SYSTEM_H_
-#define MANTID_KERNEL_SYSTEM_H_
-
+/**
+ * Definitions of the DLLImport and DLLExport compiler directives for MSVC
+ */
 #ifdef _WIN32
   #pragma warning( disable: 4251 )
   #define DLLExport __declspec( dllexport )
@@ -40,6 +43,8 @@
   #define DLLExport
   #define DLLImport
 #endif
+
+#include <string>
 
 namespace Mantid 
 {
@@ -61,6 +66,9 @@ namespace Kernel
       // Does nothing 
     }
   };
+
+  //Return the executable path
+  DLLExport std::string getDirectoryOfExecutable();
 
 } // namespace Kernel
 } // namespace Mantid
