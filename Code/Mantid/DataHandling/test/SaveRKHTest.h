@@ -6,7 +6,7 @@
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
 #include <fstream>
-#include <boost/filesystem.hpp>
+#include "Poco/File.h"
 
 class SaveRKHTest : public CxxTest::TestSuite
 {
@@ -48,8 +48,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( testAlgorithm1.execute() );
     TS_ASSERT( testAlgorithm1.isExecuted() );
     
-    //Check if the file exists  
-    TS_ASSERT( boost::filesystem::exists(outputFile) );
+    //Check if the file exists
+    TS_ASSERT( Poco::File(outputFile).exists() );
 
     //Open it and check a few lines
     std::ifstream file(outputFile.c_str());
@@ -93,8 +93,8 @@ public:
     
     file.close();
     //Remove the file
-    TS_ASSERT_THROWS_NOTHING( boost::filesystem::remove(outputFile) );
-    TS_ASSERT( ! boost::filesystem::exists(outputFile) );
+    TS_ASSERT_THROWS_NOTHING( Poco::File(outputFile).remove() );
+    TS_ASSERT( ! Poco::File(outputFile).exists() );
 
     //Now a workspace of the other kind
     if ( !testAlgorithm2.isInitialized() ) testAlgorithm2.initialize();
@@ -114,7 +114,7 @@ public:
     TS_ASSERT( testAlgorithm2.isExecuted() );
     
     //Check if the file exists  
-    TS_ASSERT( boost::filesystem::exists(outputFile) );
+      TS_ASSERT( Poco::File(outputFile).exists() );
 
     //Open it and check a few lines
     std::ifstream file2(outputFile.c_str());
@@ -160,8 +160,8 @@ public:
     
     file2.close();
     //Remove the file
-    TS_ASSERT_THROWS_NOTHING( boost::filesystem::remove(outputFile) );
-    TS_ASSERT( ! boost::filesystem::exists(outputFile) );
+    TS_ASSERT_THROWS_NOTHING( Poco::File(outputFile).remove() );
+    TS_ASSERT( ! Poco::File(outputFile).exists() );
   }
 
 private:

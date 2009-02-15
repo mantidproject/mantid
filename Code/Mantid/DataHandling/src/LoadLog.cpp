@@ -6,8 +6,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include "Poco/File.h"
+#include "Poco/Path.h"
+#include "Poco/DirectoryIterator.h"
 
 #include <fstream>  // used to get ifstream
 #include <sstream>
@@ -26,8 +27,6 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
-
-namespace fs = boost::filesystem; // to help clarify which bits are boost in code below
 
 Logger& LoadLog::g_log = Logger::get("LoadLog");
 
@@ -55,20 +54,19 @@ void LoadLog::exec()
 
   m_filename = getPropertyValue("Filename");
 
-  fs::path l_path( m_filename );
+  Poco::File l_path( m_filename );
 
-  if ( !fs::exists( l_path ) )
+  if ( !l_path.exists() )
   {
     g_log.error("In LoadLog: " + m_filename + " does not exist.");
     throw Exception::FileError("File does not exist:" , m_filename);
   }
 
-  if ( fs::is_directory( l_path ) )
+  if ( l_path.isDirectory() )
   {
     g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory.");
     throw Exception::FileError("Filename is a directory:" , m_filename);
   }
-
 
   // Get the input workspace and retrieve sample from workspace.
   // the log file(s) will be loaded into the Sample container of the workspace 
@@ -88,7 +86,8 @@ void LoadLog::exec()
   
   // start the process or populating potential log files into the container: potentialLogFiles
 
-  std::string l_filenamePart = l_path.leaf();  // get filename part only
+  std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
+
   bool rawFile = false;// Will be true if Filename property is a name of a RAW file
 
   if ( isLogFile(l_filenamePart) )
@@ -111,17 +110,17 @@ void LoadLog::exec()
 
     // look for log files in the directory of the raw datafile
 
-    l_path = l_path.remove_leaf();
-
-    fs::directory_iterator end_iter;
-    for ( fs::directory_iterator dir_itr( l_path ); dir_itr != end_iter; ++dir_itr )
+    Poco::DirectoryIterator end_iter;
+    for ( Poco::DirectoryIterator dir_itr( Poco::Path(l_path.path()).parent()); dir_itr != end_iter; ++dir_itr )
     {
-      if ( fs::is_regular( dir_itr->status() ) )
+      if ( Poco::File(dir_itr->path() ).isFile() )
       {
-        l_filenamePart = dir_itr->path().leaf();
-        if ( isLogFile(l_filenamePart) )
-        if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
-        potentialLogFiles.push_back( dir_itr->path().string() );
+        l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+        if ( !isLogFile(l_filenamePart) ) continue;
+	if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
+	{
+	  potentialLogFiles.push_back( dir_itr->path() );
+	}
       }
     }
   }
@@ -260,8 +259,7 @@ void LoadLog::exec()
   } // end for
 
   // Extract the common part of log file names (the workspace name)
-  fs::path ws_path(m_filename);
-  std::string ws_name = ws_path.leaf();
+  std::string ws_name = Poco::Path(m_filename).getFileName();
   ws_name.erase(ws_name.find_last_of('.'));
   ws_name += '_';
 
@@ -278,13 +276,12 @@ void LoadLog::exec()
   }
 
   LogParser parser(icpevent_file_name);
-  int nPeriods = parser.nPeriods();
+  //  int nPeriods = parser.nPeriods();
 
   for(size_t i=0;i<potentialLogFiles.size();i++)
   {
       // Make the property name by removing the workspce name and file extension from the log filename
-      fs::path log_path(potentialLogFiles[i]);
-      std::string log_name = log_path.leaf();
+    std::string log_name = Poco::Path(potentialLogFiles[i]).getFileName();
 
       if (rawFile)
           log_name.erase(0,ws_name.size());

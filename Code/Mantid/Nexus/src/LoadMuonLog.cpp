@@ -6,9 +6,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
 #include <ctime>
 
 namespace Mantid

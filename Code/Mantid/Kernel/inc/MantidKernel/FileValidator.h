@@ -7,8 +7,7 @@
 #include "IValidator.h"
 #include <set>
 #include <algorithm>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include "Poco/File.h"
 
 namespace Mantid
 {
@@ -78,7 +77,7 @@ public:
       if (itr == m_extensions.end()) return false;
     }
 
-    if ( m_fullTest && !boost::filesystem::exists(value) )
+    if ( m_fullTest && !value.empty() && !Poco::File(value).exists() )
     {
       return false;
     }

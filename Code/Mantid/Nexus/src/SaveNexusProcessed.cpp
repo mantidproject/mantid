@@ -11,6 +11,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
 
+#include "Poco/File.h"
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
@@ -109,8 +110,8 @@ namespace NeXus
        // Determine the search directory for XML instrument definition files (IDFs)
        std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
        if ( directoryName.empty() ) directoryName = "../Instrument";
-       boost::filesystem::path file(directoryName+"/"+instrumentXml);
-       if(!boost::filesystem::exists(file))
+       Poco::File file(directoryName+"/"+instrumentXml);
+       if(!file.exists())
            instrumentXml="NoXmlFileFound";
        std::string version("1"); // these should be read from xml file
        std::string date("20081031");

@@ -6,7 +6,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "boost/filesystem.hpp"
 
 #include <string>
 #include <fstream>
@@ -127,7 +126,7 @@ namespace DataHandling
     else
     {
       outVTP.close();
-      boost::filesystem::remove_all(filename);
+      Poco::File(filename).remove();
       throw Exception::NotImplementedError("SaveVTK only implemented for Workspace2D\n");
     }
     

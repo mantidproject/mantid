@@ -9,6 +9,8 @@
 #include "MantidDataHandling/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include "Poco/File.h"
+
 #include <boost/timer.hpp>
 
 using namespace Mantid::Kernel;
@@ -19,9 +21,6 @@ using namespace Mantid::DataHandling;
 
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-
-#include <boost/filesystem.hpp>
-using namespace boost::filesystem;
 
 class LogParserTest : public CxxTest::TestSuite
 {
@@ -41,24 +40,22 @@ public:
   
   ~LogParserTest()
     {
-        if ( exists(log_num_good) ) remove(log_num_good);
-        if ( exists(log_num_late) ) remove(log_num_late);
-        if ( exists(log_num_early) ) remove(log_num_early);
-        if ( exists(log_num_single) ) remove(log_num_single);
-        if ( exists(log_str) ) remove(log_str);
-        if ( exists(icp_file) ) remove(icp_file);
-
-
+      if ( log_num_good.exists() ) log_num_good.remove();
+      if ( log_num_late.exists() ) log_num_late.remove();
+      if ( log_num_early.exists() ) log_num_early.remove();
+      if ( log_num_single.exists() ) log_num_single.remove();
+      if ( log_str.exists() ) log_str.remove();
+      if ( icp_file.exists() ) icp_file.remove();
     }
   
     void testGood()
     {
         mkICP();
         mkGood();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_num_good.file_string(),"good",1);
-        Property* p2 = lp.createLogProperty(log_num_good.file_string(),"good",2);
-        Property* p3 = lp.createLogProperty(log_num_good.file_string(),"good",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_num_good.path(),"good",1);
+        Property* p2 = lp.createLogProperty(log_num_good.path(),"good",2);
+        Property* p3 = lp.createLogProperty(log_num_good.path(),"good",4);
         TS_ASSERT(p1)
         TS_ASSERT(p2)
         TS_ASSERT(!p3)
@@ -126,10 +123,10 @@ public:
     {
         mkICP();
         mkLate();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_num_late.file_string(),"late",1);
-        Property* p2 = lp.createLogProperty(log_num_late.file_string(),"late",2);
-        Property* p3 = lp.createLogProperty(log_num_late.file_string(),"late",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_num_late.path(),"late",1);
+        Property* p2 = lp.createLogProperty(log_num_late.path(),"late",2);
+        Property* p3 = lp.createLogProperty(log_num_late.path(),"late",4);
         TS_ASSERT(p1);
         TS_ASSERT(p2);
         TS_ASSERT(!p3);
@@ -163,10 +160,10 @@ public:
     {
         mkICP();
         mkEarly();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_num_early.file_string(),"early",1);
-        Property* p2 = lp.createLogProperty(log_num_early.file_string(),"early",2);
-        Property* p3 = lp.createLogProperty(log_num_early.file_string(),"early",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_num_early.path(),"early",1);
+        Property* p2 = lp.createLogProperty(log_num_early.path(),"early",2);
+        Property* p3 = lp.createLogProperty(log_num_early.path(),"early",4);
         TS_ASSERT(p1);
         TS_ASSERT(p2);
         TS_ASSERT(!p3);
@@ -200,10 +197,10 @@ public:
     {
         mkICP();
         mkSingle();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_num_single.file_string(),"single",1);
-        Property* p2 = lp.createLogProperty(log_num_single.file_string(),"single",2);
-        Property* p3 = lp.createLogProperty(log_num_single.file_string(),"single",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_num_single.path(),"single",1);
+        Property* p2 = lp.createLogProperty(log_num_single.path(),"single",2);
+        Property* p3 = lp.createLogProperty(log_num_single.path(),"single",4);
         TS_ASSERT(p1);
         TS_ASSERT(p2);
         TS_ASSERT(!p3);
@@ -237,10 +234,10 @@ public:
     {
         mkICP();
         mkStr();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_str.file_string(),"str",1);
-        Property* p2 = lp.createLogProperty(log_str.file_string(),"str",2);
-        Property* p3 = lp.createLogProperty(log_str.file_string(),"str",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_str.path(),"str",1);
+        Property* p2 = lp.createLogProperty(log_str.path(),"str",2);
+        Property* p3 = lp.createLogProperty(log_str.path(),"str",4);
         TS_ASSERT(p1);
         TS_ASSERT(p2);
         TS_ASSERT(!p3);
@@ -293,12 +290,12 @@ public:
 
     void testNoICPevent()
     {
-        if ( exists(icp_file) ) remove(icp_file);
+      if ( icp_file.exists() ) icp_file.remove();
         mkGood();
-        LogParser lp(icp_file.file_string());
-        Property* p1 = lp.createLogProperty(log_num_good.file_string(),"good",1);
-        Property* p2 = lp.createLogProperty(log_num_good.file_string(),"good",2);
-        Property* p3 = lp.createLogProperty(log_num_good.file_string(),"good",4);
+        LogParser lp(icp_file.path());
+        Property* p1 = lp.createLogProperty(log_num_good.path(),"good",1);
+        Property* p2 = lp.createLogProperty(log_num_good.path(),"good",2);
+        Property* p3 = lp.createLogProperty(log_num_good.path(),"good",4);
         TS_ASSERT(p1);
         TS_ASSERT(!p2);
         TS_ASSERT(!p3);
@@ -329,7 +326,7 @@ private:
 
     void mkICP()
     {
-        std::ofstream f( icp_file.file_string().c_str());
+        std::ofstream f( icp_file.path().c_str());
         int dt = 0;
         f << to_iso_extended_string(start_time - minutes(5))<<"   START_SE_WAIT"<<'\n';
         f << to_iso_extended_string(start_time + minutes(dt))<<"   BEGIN"<<'\n';dt+=8;
@@ -351,7 +348,7 @@ private:
 
     void mkGood()
     {
-        std::ofstream f( log_num_good.file_string().c_str());
+        std::ofstream f( log_num_good.path().c_str());
         int dt = 4;
         f << to_iso_extended_string(start_time - minutes(2))<<"   "<<1<<'\n';
         f << to_iso_extended_string(start_time + minutes(dt))<<"   "<<2<<'\n';dt+=1;
@@ -367,7 +364,7 @@ private:
 
     void mkLate()
     {
-        std::ofstream f( log_num_late.file_string().c_str());
+        std::ofstream f( log_num_late.path().c_str());
         int dt = 4;
         f << to_iso_extended_string(start_time + minutes(dt))<<"   "<<2<<'\n';dt+=1;
         f << to_iso_extended_string(start_time + minutes(dt))<<"   "<<3<<'\n';dt+=1;
@@ -382,7 +379,7 @@ private:
 
     void mkEarly()
     {
-        std::ofstream f( log_num_early.file_string().c_str());
+        std::ofstream f( log_num_early.path().c_str());
         int dt = 4;
         f << to_iso_extended_string(start_time - minutes(2))<<"   "<<1<<'\n';
         f << to_iso_extended_string(start_time + minutes(dt))<<"   "<<2<<'\n';dt+=1;
@@ -397,14 +394,14 @@ private:
 
     void mkSingle()
     {
-        std::ofstream f( log_num_single.file_string().c_str());
+        std::ofstream f( log_num_single.path().c_str());
         f << to_iso_extended_string(start_time + minutes(18))<<"   "<<4<<'\n';
         f.close();
     }
 
     void mkStr()
     {
-        std::ofstream f( log_str.file_string().c_str());
+        std::ofstream f( log_str.path().c_str());
         int dt = 4;
         f << to_iso_extended_string(start_time - minutes(2))<<"   line "<<1<<'\n';
         f << to_iso_extended_string(start_time + minutes(dt))<<"   line "<<2<<'\n';dt+=1;
@@ -418,12 +415,12 @@ private:
         f.close();
     }
 //*/
-    path log_num_good;// run time interval is within first - last times of the log
-    path log_num_late;// first time is later than run start
-    path log_num_early;// last time is earlier than run ends
-    path log_num_single;// single value
-    path log_str;// file of strings
-    path icp_file;// icpevent file
+    Poco::File log_num_good;// run time interval is within first - last times of the log
+    Poco::File log_num_late;// first time is later than run start
+    Poco::File log_num_early;// last time is earlier than run ends
+    Poco::File log_num_single;// single value
+    Poco::File log_str;// file of strings
+    Poco::File icp_file;// icpevent file
     ptime start_time;
     ptime end_time;
 

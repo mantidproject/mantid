@@ -6,7 +6,7 @@
 //--------------------------------
 #include <fstream>
 #include <cxxtest/TestSuite.h>
-#include "boost/filesystem.hpp"
+#include "Poco/File.h"
 
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -25,12 +25,12 @@ public:
     using namespace Mantid::PythonAPI;
     //first call the function to create the module file
     SimplePythonAPI::createModule(false);
-    std::string modname = SimplePythonAPI::getModuleName();
+    Poco::File apimodule(SimplePythonAPI::getModuleName());
     //has it been written ?
-    TS_ASSERT(boost::filesystem::exists(modname));
+    TS_ASSERT(apimodule.exists());
 
     //does it contain what we expect
-    std::ifstream is(modname.c_str());
+    std::ifstream is(apimodule.path().c_str());
     //first line should import main Python API
     std::string modline("");
 #ifdef _WIN32
@@ -101,7 +101,8 @@ public:
 
     is.close();
     // remove
-    boost::filesystem::remove_all(modname);
+    TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
+    TS_ASSERT( !apimodule.exists() );
 
   }
 

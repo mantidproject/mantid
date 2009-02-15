@@ -40,7 +40,7 @@ public:
 		Property *p = new PropertyWithValue<double>("myProp", 9.99);
 		TS_ASSERT_THROWS_NOTHING( mgr.declareProperty(p) )
 		TS_ASSERT( mgr.existsProperty(p->name()) )
-		TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
+		TS_ASSERT_EQUALS( mgr.getPropertyValue("myProp"),  "9.99" )
 
 		TS_ASSERT_THROWS( mgr.declareProperty(p), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty(new PropertyWithValue<int>("",0)), std::invalid_argument )
@@ -155,7 +155,7 @@ public:
     TS_ASSERT_EQUALS( d, 1.11 );
     TS_ASSERT_THROWS( int ii = manager.getProperty("anotherprop"), std::runtime_error )
 		std::string ss = manager.getProperty("anotherprop");
-    TS_ASSERT( ! ss.compare("1.11") )
+    TS_ASSERT_EQUALS( ss, "1.11" )
 
     // This works, but CANNOT at present declare the string on a separate line and then assign
     //               (as I did for the int & double above)

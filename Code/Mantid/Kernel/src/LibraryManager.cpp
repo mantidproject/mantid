@@ -1,7 +1,8 @@
 #include <iostream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include "Poco/Path.h"
+#include "Poco/File.h"
+#include "Poco/DirectoryIterator.h"
 #include "boost/algorithm/string.hpp"
 
 #include "MantidKernel/DllOpen.h"
@@ -12,9 +13,6 @@ namespace Mantid
 {
 namespace Kernel
 {
-
-// to help clarify which bits are boost in code below
-namespace fs = boost::filesystem;
 
 /// Constructor
 LibraryManagerImpl::LibraryManagerImpl() :
@@ -39,29 +37,30 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 		bool isRecursive)
 {
 	int libCount = 0;
-
+	  
 	//validate inputs
-	if (fs::exists(filePath) )
+	Poco::File libPath(filePath);
+	if ( libPath.isDirectory() )
 	{
 
         DllOpen::addSearchDirectory(filePath);
 	
 		//iteratate over the available files
-		fs::directory_iterator end_itr; // default construction yields past-the-end
-		for (fs::directory_iterator itr(filePath); itr != end_itr; ++itr)
+	        Poco::DirectoryIterator end_itr;
+		for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr)
 		{
-			if (fs::is_directory(itr->status()) )
+		        if ( Poco::Path(itr->path()).isDirectory() )
 			{
 				if (isRecursive)
 				{
-					libCount += OpenAllLibraries(itr->path().string());
+					libCount += OpenAllLibraries(itr->path());
 				}
 			}
 			else
 			{
 				//if they are libraries
-				std::string libName = DllOpen::ConvertToLibName(itr->path().leaf());
-				
+			  std::string libName = DllOpen::ConvertToLibName(Poco::Path(itr->path()).getFileName());
+
 				if (libName != "")
 				{
 					//load them

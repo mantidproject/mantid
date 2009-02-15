@@ -10,7 +10,7 @@
 #endif /* _WIN32 */
 #include "MantidNexus/NeXusUtils.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
+#include "Poco/File.h"
 
 namespace Mantid
 {
@@ -47,8 +47,7 @@ namespace NeXus
     NXhandle h;
     NXaccess mode;
     int status;
-    boost::filesystem::path file(filename);
-    if(boost::filesystem::exists(file))
+    if(Poco::File(filename).exists())
         mode = NXACC_RDWR;
     else
         mode = NXACC_CREATE5;

@@ -4,9 +4,6 @@
 #include "MantidDataHandling/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
 #include <fstream>  // used to get ifstream
 #include <sstream>
 #include <algorithm>
@@ -197,7 +194,7 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     std::map<ptime,std::string> change_times;
 
     std::string str,old_data;
-    bool isNumeric;
+    bool isNumeric(false);
     while(std::getline(file,str))
     {
         std::string stime,sdata;
@@ -291,7 +288,7 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
         {
             std::tm tinfo = to_tm(inter.begin());
             std::time_t t1 = std::mktime(&tinfo);
-            std::time_t t2;
+            std::time_t t2(0);
             bool mkEmpty = ! prev.end().is_not_a_date_time() && inter.begin() != prev.end();
             if (mkEmpty)
             {

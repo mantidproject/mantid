@@ -12,7 +12,6 @@
 #endif /* _WIN32 */
 #include "MantidNexus/NexusFileWriter.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
 
 namespace Mantid
 {
@@ -74,9 +73,8 @@ namespace NeXus
    NXstatus status;
    std::string className="NXentry";
    std::string mantidEntryName=entryName; // temp allow this for existing files
-   boost::filesystem::path file(fileName);
    m_filename=fileName;
-   if(boost::filesystem::exists(file))
+   if(Poco::File(m_filename).exists())
        mode = NXACC_RDWR;
    else
    {
@@ -398,7 +396,8 @@ namespace NeXus
    time(&now);
    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
    writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
-   for(int i=0;i<algHist.size();i++)
+   int histsize = static_cast<int>(algHist.size());
+   for(int i=0; i < histsize;i++)
    {
        std::stringstream algNumber,algData;
        algNumber << "MantidAlgorithm_" << i;

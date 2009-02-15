@@ -42,7 +42,7 @@ libList = []
 boost_append=''
 if not env.GetOption('clean'): # do not re-rerun checking on a "scons -c"
 	conf = Configure(env)
-	if conf.CheckLib('boost_filesystem-gcc41', '_ZN5boost10filesystem6nativeERKSs') :
+	if conf.CheckLib('boost_date_time-gcc41','_ZNK5boost9gregorian10greg_month14as_long_stringEv'):
 		boost_append = '-gcc41'
 	env = conf.Finish()
 
@@ -77,14 +77,12 @@ if os.name == 'nt':
 	if int(mingw) :
 		libDirList.append(third_party + '/lib/win32-MinGW/')
 		libList.append('boost_python-mgw34-mt-1_34_1')
-		libList.append('boost_filesystem-mgw34-mt-1_34_1')
 		libList.append('boost_regex-mgw34-mt-1_34_1')
 		libList.append('libpython25')
 		libList.append('NeXus')
 	else :
 		libDirList.append(third_party + '/lib/win32/')
 #		libList.append('boost_python-vc80-mt-1_34_1')
-#		libList.append('boost_filesystem-vc80-mt-1_34_1')
 #		libList.append('boost_regex-vc80-mt-1_34_1')
 		libList.append('python25')
 		libList.append('libNeXus-0')
@@ -209,7 +207,6 @@ else:
 	libList.append('PocoXML')
 	libList.append('PocoNet')
 	libList.append('boost_python'+boost_append)
-	libList.append('boost_filesystem'+boost_append)
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)

@@ -2,13 +2,13 @@
 #define SAVECSVTEST_H_
 
 #include <fstream>
-#include "boost/filesystem.hpp"  // used to delete file from disk
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/SaveCSV.h"
+#include "Poco/File.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -76,7 +76,7 @@ public:
     
     // has the algorithm written a file to disk?
     
-    TS_ASSERT( boost::filesystem::exists(outputFile) );
+    TS_ASSERT( Poco::File(outputFile).exists() );
     
     
     // Do a few tests to see if the content of outputFile is what you
@@ -97,8 +97,7 @@ public:
     
     
     // remove file created by this algorithm
-    
-    boost::filesystem::remove_all(outputFile);    
+    Poco::File(outputFile).remove();    
   
   }
 

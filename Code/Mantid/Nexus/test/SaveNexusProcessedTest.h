@@ -18,7 +18,7 @@
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
-#include <boost/filesystem/operations.hpp>
+#include "Poco/File.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -34,8 +34,8 @@ public:
 
     // clearfiles - make true for SVN as dont want to leave on build server.
     // Unless the file "KEEP_NXS_FILES" exists, then clear up nxs files
-    boost::filesystem::path file("KEEP_NXS_FILES");
-    clearfiles= !boost::filesystem::exists(file);
+    Poco::File file("KEEP_NXS_FILES");
+    clearfiles = !file.exists();
     //clearfiles=true;
     //
 
@@ -83,7 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", outputFile));
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
-    remove(outputFile.c_str());
+    Poco::File(outputFile).remove();
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
@@ -225,7 +225,7 @@ void testExecOnMuonXml()
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
     outputFile = "testOfSaveNexusProcessed2.xml";
-    remove(outputFile.c_str());
+    Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
@@ -245,7 +245,7 @@ void testExecOnMuonXml()
 	// try writing data again
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
-    if(clearfiles) remove(outputFile.c_str());
+    if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
   }

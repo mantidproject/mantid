@@ -11,7 +11,9 @@
 
 #include "LoadRaw/isisraw2.h"
 #include <boost/timer.hpp>
-#include <boost/filesystem.hpp>
+#include "Poco/File.h"
+#include "Poco/Path.h"
+#include "Poco/Exception.h"
 
 //DECLARE_WORKSPACE(ManagedRawFileWorkspace2D)
 
@@ -186,15 +188,23 @@ namespace Mantid
                 path.push_back('/');
             }
         }
+	
+	if( !Poco::File(path).exists() )
+	{
+	  path = "./";
+	}
 
-        boost::filesystem::path source(m_filenameRaw);
+	if( !Poco::File(path).canWrite() )
+	{
+	  throw std::runtime_error(std::string("Temporary file path '") + path + "' is not writable");
+	}
+
         std::stringstream filename;
-        filename << "WS2D_" <<boost::filesystem::basename(source)<<'_'<< ManagedRawFileWorkspace2D::g_uniqueID<<".raw";
+        filename << "WS2D_" << Poco::Path(m_filenameRaw).getBaseName() <<'_'<< ManagedRawFileWorkspace2D::g_uniqueID <<".raw";
         // Increment the instance count
         ++ManagedRawFileWorkspace2D::g_uniqueID;
         m_tempfile = path + filename.str();
-        boost::filesystem::path dest(m_tempfile);
-        boost::filesystem::copy_file(source,dest);
+	Poco::File(m_filenameRaw).copyTo(m_tempfile);
 
         FILE *fileRaw = fopen(m_tempfile.c_str(),"rb");
         if (fileRaw)
@@ -205,9 +215,9 @@ namespace Mantid
 
     }
 
-    void ManagedRawFileWorkspace2D::removeTempFile()const
+    void ManagedRawFileWorkspace2D::removeTempFile() const
     {
-        if (!m_tempfile.empty()) remove(m_tempfile.c_str());
+      if (!m_tempfile.empty()) Poco::File(m_tempfile).remove();
     }
 
   } // namespace DataHandling

@@ -1,5 +1,5 @@
 #include <fstream>
-#include "boost/filesystem.hpp"
+#include "Poco/File.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -605,16 +605,16 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
     mexErrMsgTxt("SimpleAPI_Create takes either 0 or 1 arguments.");
   }
 
-  boost::filesystem::path simpleAPI( mpath );
-  if(  boost::filesystem::exists(simpleAPI) )
+  Poco::File simpleAPI( mpath );
+  if(  simpleAPI.exists() )
   {
-    boost::filesystem::remove_all(simpleAPI);
+    simpleAPI.remove(true);
   }
   try
   {
-    boost::filesystem::create_directory(mpath);
+    simpleAPI.makeDirectory();
   }
-  catch( std::exception&)
+  catch( std::exception& )
   {
     mexErrMsgTxt("An error occurred while creating the directory for the simple API.");
   }

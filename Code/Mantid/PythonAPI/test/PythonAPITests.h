@@ -11,7 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "boost/filesystem.hpp"
+#include "Poco/File.h"
 
 using namespace Mantid::PythonAPI;
 using namespace Mantid::API;
@@ -46,8 +46,10 @@ public:
   void testCreatePythonSimpleAPI()
   {
     createPythonSimpleAPI(false);
-    TS_ASSERT(boost::filesystem::exists(SimplePythonAPI::getModuleName()));
-    boost::filesystem::remove_all(SimplePythonAPI::getModuleName());
+    Poco::File apimodule(SimplePythonAPI::getModuleName());
+    TS_ASSERT( apimodule.exists() );
+    TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
+    TS_ASSERT( !apimodule.exists() );
   }
 
 };

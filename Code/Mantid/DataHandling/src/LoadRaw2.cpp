@@ -15,8 +15,7 @@
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include "Poco/Path.h"
 #include <cmath>
 #include <iostream>
 
@@ -471,8 +470,7 @@ namespace Mantid
         // Remove the path, the run number and extension from logfile filename
 
         std::string logFilename = logfileProp[i]->name();
-        boost::filesystem::path l_path( logFilename );
-        std::string filenamePart = l_path.leaf();  // get filename part only
+        std::string filenamePart = Poco::Path(logFilename).getFileName(); // get filename part only
         if (filenamePart.size() > 4 && filenamePart.rfind('.') == filenamePart.size() - 4)
         {
             filenamePart = filenamePart.erase(filenamePart.size()-4, filenamePart.size()); // remove extension

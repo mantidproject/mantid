@@ -21,7 +21,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/filesystem/operations.hpp>
+#include "Poco/File.h"
 
 namespace Mantid
 {
@@ -83,9 +83,8 @@ namespace NeXus
    NXstatus status;
    std::string className="NXentry";
    std::string mantidEntryName;
-   boost::filesystem::path file(fileName);
    m_filename=fileName;
-   if(boost::filesystem::exists(file))
+   if(Poco::File(m_filename).exists())
        mode = NXACC_RDWR;
    else
    {
@@ -130,11 +129,10 @@ namespace NeXus
    NXstatus status;
    std::string className="NXentry";
    std::string mantidEntryName;
-   boost::filesystem::path file(fileName);
    m_filename=fileName;
    mode = NXACC_READ;
    // check file exists
-   if(!boost::filesystem::exists(file))
+   if(!Poco::File(fileName).exists())
    {
        g_log.error("File not found " + fileName);
        throw Exception::FileError("File not found:" , fileName);	  
@@ -568,7 +566,7 @@ namespace NeXus
    std::vector<std::string> dV=d_timeSeries->time_tValue();
    std::vector<double> values;
    std::vector<double> times;
-   time_t t0,time;
+   time_t t0; // ,time;
    bool first=true;
    for(int i=0;i<dV.size();i++)
    {
@@ -708,7 +706,7 @@ namespace NeXus
        return;
    }
    buffer[length]='\0';
-   struct tm *tm;
+   //struct tm *tm;
    std::string startT=buffer;
    if( (startT.find('T')) >0 )
        startT.replace(startT.find('T'),1," ");
@@ -916,7 +914,7 @@ namespace NeXus
     int length=NX_MAXNAMELEN,type;
     status=NXinitattrdir(fileID);
     char aname[NX_MAXNAMELEN];
-    char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
+    //    char avalue[NX_MAXNAMELEN]; // value is not restricted to this, but it is a reasonably large value
     while(NXgetnextattr(fileID,aname,&length,&type)==NX_OK)
     {
        if(target.compare(aname)==0)
