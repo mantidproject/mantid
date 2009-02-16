@@ -27,7 +27,7 @@ g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/
 	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
 	                         -lMantidPythonAPI -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
 	                         -lPocoFoundation -lPocoUtil -lboost_python -lboost_regex \
-	                         -lboost_filesystem -lboost_date_time -lboost_signals -lpython2.3 \
+	                         -lboost_date_time -lboost_signals -lpython2.3 \
 	                         -lgsl -lgslcblas -lGL -lGLU -lgts
 echo
 

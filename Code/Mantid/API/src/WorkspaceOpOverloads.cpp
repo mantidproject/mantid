@@ -344,5 +344,37 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
   workspace->isDistribution(forwards);
 }
 
+/** Converts a list of spectrum numbers to the corresponding workspace indices.
+ *  Not a very efficient operation, but unfortunately it's sometimes required.
+ *  @param WS          The workspace on which to carry out the operation
+ *  @param spectraList The list of spectrum numbers required
+ *  @param indexList   Returns a reference to the vector of indices (empty if not a Workspace2D)
+ */
+void WorkspaceHelpers::getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS, const std::vector<int>& spectraList,
+                                  std::vector<int>& indexList)
+{
+  // Convert the vector of properties into a set for easy searching
+  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
+  // Clear the output index list
+  indexList.clear();
+  // get the spectra axis
+  Axis *spectraAxis;
+  if (WS->axes() == 2)
+  {
+    spectraAxis = WS->getAxis(1);
+  }
+  // Just return an empty list if this isn't a Workspace2D
+  else return;
+
+  for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  {
+    int currentSpec = spectraAxis->spectraNo(i);
+    if ( spectraSet.find(currentSpec) != spectraSet.end() )
+    {
+      indexList.push_back(i);
+    }
+  }  
+}
+
 } // namespace API
 } // namespace Mantid

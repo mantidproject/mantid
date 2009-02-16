@@ -11,11 +11,24 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** 
+/** Calculates the transmission correction, as a function of wavelength, for a SANS
+    instrument. Currently makes the assumption that the incident beam monitor's
+    UDET is 2, while that of the transmission monitor is 3 (as for LOQ). 
+   
     Required Properties:
     <UL>
-    <LI> InputWorkspace1  - The name of the first input workspace. </LI>
-    <LI> InputWorkspace2  - The name of the second input workspace. </LI>
+    <LI> SampleRunWorkspace  - The workspace containing the sample transmission run. </LI>
+    <LI> DirectRunWorkspace  - The workspace containing the direct beam transmission run. </LI>
+    <LI> OutputWorkspace     - The fitted transmission correction. </LI>
+    </UL>
+
+    Optional Properties:
+    <UL>
+    <LI> MinWavelength       - The minimum wavelength for the fit (Default: 2.2 Angstroms). </LI>
+    <LI> MaxWavelength       - The maximum wavelength for the fit (Default: 10 Angstroms). </LI>
+    <LI> OutputUnfittedData  - If true (false is the default), will output an additional workspace
+                               called [OutputWorkspace]_unfitted containing the unfitted transmission
+                               correction. </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc

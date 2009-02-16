@@ -36,7 +36,7 @@ MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const 
     @author Russell Taylor, Tessella Support Services plc
     @date 19/09/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,6 +67,9 @@ struct DLLExport WorkspaceHelpers
   static const bool sharedXData(const MatrixWorkspace_const_sptr WS);
   // Divides the data in a workspace by the bin width to make it a distribution (or the reverse)
   static void makeDistribution(MatrixWorkspace_sptr workspace, const bool forwards = true);
+  // Convert a list of spectrum numbers to the corresponding workspace indices
+  static void getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS, const std::vector<int>& spectraList,
+                                    std::vector<int>& indexList);
 };
 
 } // namespace API

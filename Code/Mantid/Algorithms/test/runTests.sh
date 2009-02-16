@@ -26,8 +26,7 @@ g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/
 	                         -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../../Third_Party/include \
 	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
 	                         -lMantidAlgorithms -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling -lMantidNexus -lMantidCurveFitting \
-	                         -lPocoFoundation -lPocoUtil -lboost_regex \
-	                         -lboost_filesystem -lboost_date_time -lboost_signals \
+	                         -lPocoFoundation -lPocoUtil -lboost_regex -lboost_date_time -lboost_signals \
 	                         -lmuparserd -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts
 echo
 

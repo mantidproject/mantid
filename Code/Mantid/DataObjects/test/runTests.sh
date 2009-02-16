@@ -26,7 +26,7 @@ g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/
             -I ../../../Third_Party/include \
             -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
             -lMantidDataObjects -lMantidKernel -lMantidGeometry -lMantidAPI -lPocoFoundation -lPocoUtil \
-	        -lboost_regex -lboost_filesystem -lboost_signals -lgsl -lgslcblas -lGL -lGLU -lgts
+	        -lboost_regex -lboost_signals -lgsl -lgslcblas -lGL -lGLU -lgts
 echo
 
 echo "Running the tests..."

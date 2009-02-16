@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include <cmath>
 
 namespace Mantid
@@ -49,12 +50,25 @@ void CalculateTransmission::exec()
   }
   
   // Extract the required spectra into separate workspaces
-  // Hard coding the spectrum indices is risky - what if someone doesn't load whole workspace?
-  // Better solution would be to retrieve the indices from the linked UDET
-  MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,1);
-  MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,2);
-  MatrixWorkspace_sptr M2_direct = this->extractSpectrum(directWS,1);
-  MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,2);
+  std::vector<int> udets,indices;
+  // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
+  udets.push_back(2);
+  udets.push_back(3);
+  const std::vector<int> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
+  WorkspaceHelpers::getIndicesFromSpectra(sampleWS,sampleSpectra,indices);
+  // These asserts may need changing/removing when this algorithm is used for instruments other than LOQ
+  assert( sampleSpectra.size() == 2 );
+  assert( sampleSpectra[0] == 2 );
+  assert( sampleSpectra[1] == 3 );
+  MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
+  MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
+  const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
+  assert( directSpectra.size() == 2 );
+  assert( directSpectra[0] == 2 );
+  assert( directSpectra[1] == 3 );
+  WorkspaceHelpers::getIndicesFromSpectra(sampleWS,directSpectra,indices);
+  MatrixWorkspace_sptr M2_direct = this->extractSpectrum(directWS,indices[0]);
+  MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[1]);
   
   // Need to remove prompt spike and correct for flat background in each
   
@@ -89,6 +103,11 @@ void CalculateTransmission::exec()
   setProperty("OutputWorkspace",fit);
 }
 
+/** Extracts a single spectrum from a Workspace2D into a new workspaces. Uses CropWorkspace to do this.
+ *  @param WS    The workspace containing the spectrum to extract
+ *  @param index The workspace index of the spectrum to extract
+ *  @return A Workspace2D containing the extracted spectrum
+ */
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index)
 {
   // Would be better to write an 'ExtractSingleSpectrum' algorithm for here, that returns a Workspace1D
@@ -118,6 +137,10 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
   return childAlg->getProperty("OutputWorkspace");
 }
 
+/** Uses 'Linear' as a subalgorithm to fit the log of the exponential curve expected for the transmission.
+ *  @param WS The single-spectrum workspace to fit
+ *  @return A workspace containing the fit
+ */
 API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting the experimental transmission curve");

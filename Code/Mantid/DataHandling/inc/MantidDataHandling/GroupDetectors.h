@@ -35,7 +35,7 @@ namespace DataHandling
     @author Russell Taylor, Tessella Support Services plc
     @date 17/04/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -72,8 +72,6 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
-                                const DataObjects::Workspace2D_sptr WS);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

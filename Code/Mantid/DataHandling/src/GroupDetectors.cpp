@@ -72,7 +72,7 @@ void GroupDetectors::exec()
   if ( ! sl->isDefault() )
   {
     std::vector<int> spectraList = getProperty("SpectraList");
-    fillIndexListFromSpectra(indexList,spectraList,WS);
+    WorkspaceHelpers::getIndicesFromSpectra(WS,spectraList,indexList);
   }// End dealing with spectraList
   else if ( ! dl->isDefault() )
   {// Dealing with DetectorList
@@ -80,7 +80,7 @@ void GroupDetectors::exec()
     //convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
-    fillIndexListFromSpectra(indexList,mySpectraList,WS);
+    WorkspaceHelpers::getIndicesFromSpectra(WS,mySpectraList,indexList);
   }
 
   if ( indexList.size() == 0 )
@@ -120,28 +120,6 @@ void GroupDetectors::exec()
   }
 
 }
-
-/// Convert a list of spectra numbers into the corresponding workspace indices
-void GroupDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
-                                              const DataObjects::Workspace2D_sptr WS)
-{
-  // Convert the vector of properties into a set for easy searching
-  std::set<int> spectraSet(spectraList.begin(),spectraList.end());
-  // Next line means that anything in Clear the index list first
-  indexList.clear();
-  //get the spectra axis
-  Axis *spectraAxis = WS->getAxis(1);
-
-  for (int i = 0; i < WS->getNumberHistograms(); ++i)
-  {
-    int currentSpec = spectraAxis->spectraNo(i);
-    if ( spectraSet.find(currentSpec) != spectraSet.end() )
-    {
-      indexList.push_back(i);
-    }
-  }
-}
-
 
 } // namespace DataHandling
 } // namespace Mantid
