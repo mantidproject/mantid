@@ -18,8 +18,8 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> Filename - The name of file to store the workspace to </LI>
-    <LI> InputWorkspace - The name of a workspace </LI>
+    <LI> Filename - The filename of the output CSV file </LI>
+    <LI> InputWorkspace - The name of a workspace containing the data you want to save to a CSV file </LI>
     </UL>
 
     Optional Properties:
