@@ -37,7 +37,7 @@
 #include <algorithm>
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-: MdiSubWindow(label, parent, name, 0),m_funct(this),m_min(0),m_max(0),m_are_min_max_set(false),
+: MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),m_min(0),m_max(0),m_are_min_max_set(false),
 m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
 m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
@@ -120,8 +120,7 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
     m_endRow   = (end<0 || end>=ws->getNumberHistograms() || end < start)?ws->getNumberHistograms()-1:end;
     m_rows = m_endRow - m_startRow + 1;
 	m_cols = ws->blocksize(); 
-    m_histogram = false;
-    if ( m_workspace->blocksize() || m_workspace->readX(0).size() != m_workspace->readY(0).size() ) m_histogram = true;
+    if ( ws->isHistogramData() ) m_histogram = true;
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
     x_start = ws->readX(0)[0];
