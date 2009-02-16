@@ -7,7 +7,7 @@
 #include <algorithm> 
 #include <float.h>
 
-GLActorCollection::GLActorCollection()
+GLActorCollection::GLActorCollection():GLObject(false)
 {
 	_bbmin=Mantid::Geometry::V3D(DBL_MAX,DBL_MAX,DBL_MAX);
 	_bbmax=Mantid::Geometry::V3D(-DBL_MAX,-DBL_MAX,-DBL_MAX);
@@ -143,8 +143,8 @@ void GLActorCollection::getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::G
 {
 	if(_actors.size()==0)
 	{
-		minPoint=Mantid::Geometry::V3D(0,0,0);
-		maxPoint=Mantid::Geometry::V3D(0,0,0);
+		minPoint=Mantid::Geometry::V3D(-1,-1,-1);
+		maxPoint=Mantid::Geometry::V3D(1,1,1);
 	}else{
 		minPoint=_bbmin;
 		maxPoint=_bbmax;

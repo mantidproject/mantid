@@ -7,7 +7,7 @@
 #include "MantidObject.h"
 #include <GL/gl.h> 
 
-MantidObject::MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj)
+MantidObject::MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj,bool withDisplayList):GLObject(withDisplayList)
 {
 	try
 	{

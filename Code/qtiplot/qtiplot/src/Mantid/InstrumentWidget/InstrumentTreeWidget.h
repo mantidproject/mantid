@@ -1,20 +1,20 @@
 #ifndef INSTRUMENTTREEWIDGET_H
 #define INSTRUMENTTREEWIDGET_H
 
-#include <QTreeWidget>
+#include <QTreeView>
 #include "MantidAPI/IInstrument.h"
-
-class InstrumentTreeWidget:public QTreeWidget
+#include "InstrumentTreeModel.h"
+class InstrumentTreeWidget:public QTreeView
 {
     Q_OBJECT
 public:
-    InstrumentTreeWidget(QWidget *w):QTreeWidget(w){};
+    InstrumentTreeWidget(QWidget *w):QTreeView(w){};
 	void setInstrument(boost::shared_ptr<Mantid::API::IInstrument>);
-	void getSelectedBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
+	void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
 	Mantid::Geometry::V3D getSamplePos()const;
 private:
-	void ParseInstrumentGeometry();
     boost::shared_ptr<Mantid::API::IInstrument> mInstrument;
+	InstrumentTreeModel *mTreeModel;
 };
 
 #endif

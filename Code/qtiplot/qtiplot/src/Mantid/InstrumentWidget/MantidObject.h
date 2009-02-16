@@ -36,7 +36,7 @@ class MantidObject : public GLObject
 private:
     boost::shared_ptr<Mantid::Geometry::IObjComponent> Obj; ///< Holder for ObjComponenet
 public:
-	MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj); ///< Default Constructor
+	MantidObject(boost::shared_ptr<Mantid::Geometry::IObjComponent> obj,bool withDisplayList=true); ///< Default Constructor
 	~MantidObject();								   ///< Destructor
 	virtual std::string type()const {return "MantidObject";} ///< Type of the GL object
     void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method

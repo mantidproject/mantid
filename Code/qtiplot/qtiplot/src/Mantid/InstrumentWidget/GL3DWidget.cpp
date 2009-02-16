@@ -11,6 +11,7 @@
 #include "boost/shared_ptr.hpp"
 #include <QApplication>
 #include <iostream>
+#include <cfloat>
 #ifndef GL_MULTISAMPLE
 #define GL_MULTISAMPLE  0x809D
 #endif
@@ -527,6 +528,11 @@ void GL3DWidget::defaultProjection()
 	// min and max values in all directions.
 	Mantid::Geometry::V3D minPoint,maxPoint;
 	scene->getBoundingBox(minPoint,maxPoint);
+	if(minPoint[0]==DBL_MAX||minPoint[1]==DBL_MAX||minPoint[2]==DBL_MAX||maxPoint[0]==-DBL_MAX||maxPoint[1]==-DBL_MAX||maxPoint[2]==-DBL_MAX)
+	{
+		minPoint=Mantid::Geometry::V3D(-1.0,-1.0,-1.0);
+		maxPoint=Mantid::Geometry::V3D( 1.0, 1.0, 1.0);
+	}
 	double minValue,maxValue;
 	minValue=minPoint[0];
 	if(minValue>minPoint[1])minValue=minPoint[1];
@@ -557,4 +563,12 @@ void GL3DWidget::defaultProjection()
 void GL3DWidget::setBackgroundColor(QColor input)
 {
 	bgColor=input;
+}
+
+/**
+ * Resets the widget for new instrument definition
+ */
+void GL3DWidget::resetWidget()
+{
+	setActorCollection(boost::shared_ptr<GLActorCollection>(new GLActorCollection()));
 }

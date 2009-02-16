@@ -66,7 +66,7 @@ public slots:
 	void minValueChanged();
 	void maxValueChanged();
 	void setViewDirection(const QString&);
-	void componentSelected();
+	void componentSelected(const QItemSelection&, const QItemSelection&);
 	void pickBackgroundColor();
 signals:
     void plotSpectra(const QString&,int);

@@ -36,13 +36,14 @@
 class GLObject
 {
 public:
-	GLObject();                            ///< Constructor
+	GLObject(bool withDisplayList);        ///< Constructor
 	virtual ~GLObject();                   ///< Destructor
 	virtual std::string type()const {return "GLObject";} ///< Type of the GL object
     virtual void draw();
     virtual void drawBoundingBox();
 	void getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint);
     virtual void define();
+	void defineBoundingBox();
     void construct();
 protected:
     GLuint _displaylist;                   ///< OpengGL Display list id

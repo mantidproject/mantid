@@ -28,7 +28,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent)
+Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent),mFastRendering(true)
 {
 	iTimeBin=0;
 	strWorkspaceName="";
@@ -214,7 +214,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
         //std::cerr<<" Component: "<<tmp->getName()<<std::endl;
         //std::cerr<<" Component Type:"<<tmp->type()<<std::endl;
 		if(iobj.get()){
-            boost::shared_ptr<MantidObject> obj(new MantidObject(iobj));
+            boost::shared_ptr<MantidObject> obj(new MantidObject(iobj,mFastRendering));
 			GLActor* actor1=new GLActor();
 			actor1->setRepresentation(obj);
 			actor1->setPos(0.0,0.0,0.0);
@@ -595,6 +595,40 @@ void Instrument3DWidget::setViewDirectionYNegative()
 void Instrument3DWidget::setViewDirectionZNegative()
 {
 	setViewDirection(ZNEGATIVE);
+}
+
+/**
+ * Sets the slow rendering not using display list
+ * NOTE: This method will ***NOT*** have any effect after the workspace name is set.
+ */
+void Instrument3DWidget::setSlowRendering()
+{
+	mFastRendering=false;
+}
+
+/**
+ * Sets the fast rendering using display list
+ * NOTE: This method will ***NOT*** have any effect after the workspace name is set.
+ */
+void Instrument3DWidget::setFastRendering()
+{
+	mFastRendering=true;
+}
+
+
+/**
+ * Completely resets the data in the instrument widget. ready for new workspace
+ */
+void Instrument3DWidget::resetWidget()
+{
+	iTimeBin=0;
+	strWorkspaceName="";
+	DataMinValue=-DBL_MAX;
+	DataMaxValue=DBL_MAX;
+	mDataMapping=INTEGRAL;
+	mAxisDirection=Mantid::Geometry::V3D(0.0,0.0,1.0);
+	mAxisUpVector=Mantid::Geometry::V3D(0.0,1.0,0.0);
+	GL3DWidget::resetWidget();
 }
 
 void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)

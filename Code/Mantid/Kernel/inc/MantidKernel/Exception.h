@@ -246,6 +246,28 @@ class DLLExport InstrumentDefinitionError : public std::runtime_error
   const char* what() const throw();
 };
 
+/**
+ * OpenGL Exception
+ */
+class DLLExport OpenGLError: public std::runtime_error
+{
+ private:
+  /// The name of the search object
+  const std::string objectName;
+  /// The message returned by what()
+  std::string outMessage;
+
+ public:
+  OpenGLError(const std::string&,const std::string&);
+  OpenGLError(const std::string&);
+  OpenGLError(const OpenGLError& A);
+  /// Assignment operator
+  OpenGLError& operator=(const OpenGLError& A);
+  /// Destructor
+  ~OpenGLError() throw() {}
+
+  const char* what() const throw();
+};
   /*!
   \class MisMatch
   \brief Error when two numbers should be identical (or close)

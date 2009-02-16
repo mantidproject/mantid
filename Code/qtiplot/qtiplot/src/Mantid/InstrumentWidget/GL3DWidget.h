@@ -59,6 +59,7 @@ signals:
 		void actorHighlighted( GLActor* );
 protected:
 	void initializeGL();
+	void resetWidget();
     void MakeObject();
 	void paintEvent(QPaintEvent *event);
 	void resizeGL(int,int);

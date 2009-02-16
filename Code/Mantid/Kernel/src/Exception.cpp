@@ -187,6 +187,42 @@ const char* InstrumentDefinitionError::what() const throw()
 
 
 //-------------------------
+// OpenGLError
+//-------------------------
+/** Constructor
+	@param Desc Function description
+	@param ObjectName The name of the search object
+*/
+OpenGLError::OpenGLError(const std::string& Desc,const std::string& ObjectName) :
+std::runtime_error(Desc),objectName(ObjectName)
+{
+	outMessage = std::string(std::runtime_error::what()) + " rendering " + objectName;
+}
+
+/** Constructor
+	@param Desc Function description
+*/
+OpenGLError::OpenGLError(const std::string& Desc) :
+std::runtime_error(Desc)
+{
+	outMessage = std::string(std::runtime_error::what());
+}
+
+/// Copy constructor
+OpenGLError::OpenGLError(const OpenGLError& A) :
+  std::runtime_error(A),objectName(A.objectName)
+{}
+
+/** Writes out the range and limits
+	@returns a char array of foramtted error information
+*/
+const char* OpenGLError::what() const throw()
+{
+	return outMessage.c_str();
+}
+
+
+//-------------------------
 // MisMatch
 //-------------------------
 

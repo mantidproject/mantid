@@ -98,7 +98,6 @@ namespace Mantid
 						mErrorCode=GL_OUT_OF_MEMORY;
 						return;
 					}
-					PLog.error(std::string((char*)gluErrorString(error)));
 				}while(error != GL_NO_ERROR);
 				iDisplaylistId=glGenLists(1);
 				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation

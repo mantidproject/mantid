@@ -108,7 +108,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mInteractionInfo=new QLabel(tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate"));
 	mInteractionInfo->setMaximumHeight(30);
 	mainLayout->addWidget(mInteractionInfo);
-	connect(mInstrumentTree,SIGNAL(itemSelectionChanged()),this,SLOT(componentSelected()));
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
 	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
@@ -286,17 +285,52 @@ InstrumentWindow::~InstrumentWindow()
  */
 void InstrumentWindow::setWorkspaceName(std::string wsName)
 {
-	mInstrumentDisplay->setWorkspace(wsName);
-	MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName()));
-	int count=output->blocksize();
-	double minValue=mInstrumentDisplay->getDataMinValue();
-	double maxValue=mInstrumentDisplay->getDataMaxValue();
-	QString text;
-	mMinValueBox->setText(text.setNum(minValue));
-	mMaxValueBox->setText(text.setNum(maxValue));
-	updateColorMapWidget();
-	mInstrumentDisplay->update();
-	mInstrumentTree->setInstrument(output->getInstrument());
+	bool resultError=false;
+	try
+	{
+		mInstrumentDisplay->setWorkspace(wsName);
+		MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName()));
+		int count=output->blocksize();
+		double minValue=mInstrumentDisplay->getDataMinValue();
+		double maxValue=mInstrumentDisplay->getDataMaxValue();
+		QString text;
+		mMinValueBox->setText(text.setNum(minValue));
+		mMaxValueBox->setText(text.setNum(maxValue));
+		updateColorMapWidget();
+		mInstrumentDisplay->update();
+		mInstrumentTree->setInstrument(output->getInstrument());
+	}
+	catch(...)
+	{
+		mInstrumentDisplay->resetWidget();
+		mInstrumentDisplay->setSlowRendering();
+		resultError=true;
+	}
+	if(resultError)
+	{
+		QMessageBox::critical(this,"Mantid -- Error","Trying Slow Rendering");
+		try
+		{
+			mInstrumentDisplay->setWorkspace(wsName);
+			MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mInstrumentDisplay->getWorkspaceName()));
+			int count=output->blocksize();
+			double minValue=mInstrumentDisplay->getDataMinValue();
+			double maxValue=mInstrumentDisplay->getDataMaxValue();
+			QString text;
+			mMinValueBox->setText(text.setNum(minValue));
+			mMaxValueBox->setText(text.setNum(maxValue));
+			updateColorMapWidget();
+			mInstrumentDisplay->update();
+			mInstrumentTree->setInstrument(output->getInstrument());
+		}
+		catch(std::bad_alloc &e)
+		{
+			QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
+			mInstrumentDisplay->resetWidget();
+		}
+		
+	}
+	connect(mInstrumentTree->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),this,SLOT(componentSelected(const QItemSelection&, const QItemSelection&)));
 }
 
 /**
@@ -364,10 +398,12 @@ void InstrumentWindow::setViewDirection(const QString& input)
 	}
 }
 
-void InstrumentWindow::componentSelected()
+void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection & deselected)
 {
+    QModelIndexList items=selected.indexes();
+	if(items.size()<=0) return;
 	double xmax,xmin,ymax,ymin,zmax,zmin;
-	mInstrumentTree->getSelectedBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	mInstrumentTree->getSelectedBoundingBox(items.first(),xmax,ymax,zmax,xmin,ymin,zmin);
 	Mantid::Geometry::V3D pos;
 	pos=mInstrumentTree->getSamplePos();
 	mInstrumentDisplay->setView(pos,xmax,ymax,zmax,xmin,ymin,zmin);

@@ -233,6 +233,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\System.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeSeriesProperty.cpp"
 				>
 			</File>

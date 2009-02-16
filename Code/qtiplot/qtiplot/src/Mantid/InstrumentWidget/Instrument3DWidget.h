@@ -45,6 +45,7 @@ class Instrument3DWidget : public GL3DWidget
 {
 	Q_OBJECT
 	enum DataMappingType { SINGLE_BIN, INTEGRAL };
+	enum Handedness { LEFT, RIGHT };
 
 public:
 	Instrument3DWidget(QWidget* parent=0); ///< Constructor
@@ -58,6 +59,9 @@ public:
 	void setDataMappingType(DataMappingType);
 	void setView(Mantid::Geometry::V3D,double,double,double,double,double,double);
 	void setAxis(Mantid::Geometry::V3D&,Mantid::Geometry::V3D&);
+	void resetWidget();
+	void setFastRendering();
+	void setSlowRendering();
 public slots:
 	void fireDetectorsPicked(std::vector<GLActor*> );
 	void fireDetectorHighligted(GLActor* pickedActor);
@@ -88,6 +92,7 @@ signals:
 	void actionDetectorSelectedList(std::vector<int>);
 	void actionSpectraSelectedList(std::vector<int>);
 private:
+	bool mFastRendering;
 	int iTimeBin;
 	DataMappingType mDataMapping;
 	GLColorMapQwt mColorMap;

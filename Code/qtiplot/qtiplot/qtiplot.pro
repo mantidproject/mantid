@@ -347,7 +347,8 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/GLColorMapQwt.h \
 		src/Mantid/InstrumentWidget/BinDialog.h	\
 		src/Mantid/InstrumentWidget/GLGroupPickBox.h \
-		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
+		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h \
+		src/Mantid/InstrumentWidget/InstrumentTreeModel.h
 
 ###################### FORMS ##############################################
 
@@ -503,7 +504,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/GLColorMapQwt.cpp \
 		src/Mantid/InstrumentWidget/BinDialog.cpp  \
 		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp \
-		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp		
+		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp \
+		src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
 
 
 ###############################################################
