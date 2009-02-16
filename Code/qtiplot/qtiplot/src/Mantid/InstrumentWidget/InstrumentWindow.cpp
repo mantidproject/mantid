@@ -172,6 +172,7 @@ void InstrumentWindow::changeColormap()
 	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile","../colormap/_standard.map").value<QString>();
 	QFileInfo fileinfo(filename);
 	QString file=QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), fileinfo.filePath(),tr("Colormaps (*.map *.MAP)"));
+	if(file=="") return; //User cancelled the colormap pick
 	mInstrumentDisplay->setColorMapName(std::string(file.ascii()));
 	QFileInfo retfile(file);
 	settings.setValue("Mantid/InstrumentWindow/ColormapFile",retfile.absoluteFilePath());
