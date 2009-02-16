@@ -112,6 +112,10 @@ void CorrectToFile::exec()
       outIt->Y() = inIt->Y()*Yfactor;
       outIt->E() = inIt->E()*Efactor;
     }
+    // Copy X value over
+    outIt->X() = inIt->X();
+    if (histogramData) outIt->X2() = inIt->X2();
+
   }
 
   //Set the resulting workspace
