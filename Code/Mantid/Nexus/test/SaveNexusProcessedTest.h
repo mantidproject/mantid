@@ -83,7 +83,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", outputFile));
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
-    Poco::File(outputFile).remove();
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
@@ -95,7 +95,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-    if(clearfiles) remove(outputFile.c_str());
+    if(clearfiles) Poco::File(outputFile).remove();
 
   }
 void testExecOnMuon()
@@ -127,7 +127,7 @@ void testExecOnMuon()
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
     outputFile = "testOfSaveNexusProcessed2.nxs";
-    remove(outputFile.c_str());
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
@@ -147,7 +147,7 @@ void testExecOnMuon()
 	// try writing data again
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
-    if(clearfiles) remove(outputFile.c_str());
+    if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
   }
@@ -177,7 +177,7 @@ void testExecOnLoadraw()
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
     outputFile = "testSaveFromLoadraw.nxs";
-    remove(outputFile.c_str());
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a workspace from Loadraw file";
@@ -194,7 +194,7 @@ void testExecOnLoadraw()
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
-    if(clearfiles) remove(outputFile.c_str());
+    if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
 }
@@ -225,7 +225,7 @@ void testExecOnMuonXml()
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to
     outputFile = "testOfSaveNexusProcessed2.xml";
-    Poco::File(outputFile).remove();
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
