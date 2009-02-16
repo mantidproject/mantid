@@ -9,6 +9,8 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidGeometry/Detector.h"
 
+#include "Poco/Path.h"
+
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
@@ -304,8 +306,12 @@ namespace Mantid
     {
       // Determine the search directory for XML instrument definition files (IDFs)
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
-      if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
-
+      if ( directoryName.empty() )
+      {
+	// This is the assumed deployment directory for IDFs, where we need to be relative to the
+	// directory of the executable, not the current working directory.
+	directoryName = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../Instrument").toString();  
+      }
       //const int stripPath = m_filename.find_last_of("\\/");
       // For Nexus, Instrument name given by MuonNexusReader from Nexus file
       std::string instrumentID = m_instrument_name; //m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part

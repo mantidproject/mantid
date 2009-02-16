@@ -76,7 +76,6 @@ void LoadLog::exec()
 
   int Period = getProperty("Period");
 
-
   // If m_filename is the filename of a raw datafile then search for potential log files
   // in the directory of this raw datafile. Otherwise check if m_filename is a potential
   // log file. Add the filename of these potential log files to: potentialLogFiles.
@@ -89,11 +88,9 @@ void LoadLog::exec()
   std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
 
   bool rawFile = false;// Will be true if Filename property is a name of a RAW file
-
   if ( isLogFile(l_filenamePart) )
   {
     // then we will assume that m_filename is an ISIS log file
-
     potentialLogFiles.push_back(m_filename);
   }
   else if ( ( stringToLower(l_filenamePart).find(".raw") != std::string::npos ||
@@ -109,19 +106,19 @@ void LoadLog::exec()
     std::string l_rawID = stringToLower(l_filenamePart.substr(0,l_pos));
 
     // look for log files in the directory of the raw datafile
-
     Poco::DirectoryIterator end_iter;
-    for ( Poco::DirectoryIterator dir_itr( Poco::Path(l_path.path()).parent()); dir_itr != end_iter; ++dir_itr )
+    for ( Poco::DirectoryIterator dir_itr( Poco::Path(l_path.path()).makeAbsolute().parent() ); dir_itr != end_iter; ++dir_itr )
     {
-      if ( Poco::File(dir_itr->path() ).isFile() )
+      if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
+
+      l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+      if ( !isLogFile(l_filenamePart) ) continue;
+	
+      if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
       {
-        l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-        if ( !isLogFile(l_filenamePart) ) continue;
-	if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
-	{
 	  potentialLogFiles.push_back( dir_itr->path() );
-	}
       }
+
     }
   }
   else
@@ -280,7 +277,7 @@ void LoadLog::exec()
 
   for(size_t i=0;i<potentialLogFiles.size();i++)
   {
-      // Make the property name by removing the workspce name and file extension from the log filename
+    // Make the property name by removing the workspce name and file extension from the log filename
     std::string log_name = Poco::Path(potentialLogFiles[i]).getFileName();
 
       if (rawFile)

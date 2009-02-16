@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MemoryManager.h"
 
+#include "Poco/Path.h"
 
 #include<string>
 #include<iostream>
@@ -34,9 +35,9 @@ void MemoryTest::runMemoryTests() const
   std::cerr << "\nStarted memory tests with " << mem_start << " KB of memory available\n";
   
   //First load some GEM data
-
+  std::string datadir = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../../../../Test/Data/").toString();
   IAlgorithm* alg = fmgr.createAlgorithm("LoadRaw");
-  alg->setPropertyValue("Filename", "../../../../Test/Data/GEM38370.raw");
+  alg->setPropertyValue("Filename", datadir + "GEM38370.raw");
   std::string loadraw ("GEM38370");
   alg->setPropertyValue("OutputWorkspace", loadraw);    
   alg->execute();
@@ -98,7 +99,7 @@ void MemoryTest::runMemoryTests() const
   std::cerr << "Load some HET data into a new workspace\n";
   //Load some HET data
   alg = fmgr.createAlgorithm("LoadRaw");
-  alg->setPropertyValue("Filename", "../../../../Test/Data/HET15869.RAW");
+  alg->setPropertyValue("Filename", datadir + "HET15869.RAW");
   loadraw = "HET15869";
   alg->setPropertyValue("OutputWorkspace", loadraw);    
   alg->execute();

@@ -12,6 +12,8 @@
 #include "MantidKernel/ConfigService.h"
 
 #include "Poco/File.h"
+#include "Poco/Path.h"
+
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
@@ -109,7 +111,12 @@ namespace NeXus
        std::string instrumentXml(inst3Char+"_Definition.xml");
        // Determine the search directory for XML instrument definition files (IDFs)
        std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
-       if ( directoryName.empty() ) directoryName = "../Instrument";
+       if ( directoryName.empty() )
+       {
+	 // This is the assumed deployment directory for IDFs, where we need to be relative to the
+	 // directory of the executable, not the current working directory.
+	 directoryName = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../Instrument").toString();  
+       }
        Poco::File file(directoryName+"/"+instrumentXml);
        if(!file.exists())
            instrumentXml="NoXmlFileFound";

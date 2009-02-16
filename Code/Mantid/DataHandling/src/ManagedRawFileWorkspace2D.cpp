@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 
 #include "LoadRaw/isisraw2.h"
 #include <boost/timer.hpp>
@@ -191,7 +192,7 @@ namespace Mantid
 	
 	if( !Poco::File(path).exists() )
 	{
-	  path = "./";
+	  path = Mantid::Kernel::getDirectoryOfExecutable();
 	}
 
 	if( !Poco::File(path).canWrite() )

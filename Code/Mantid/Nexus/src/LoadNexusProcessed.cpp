@@ -10,8 +10,10 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 #include "MantidNexus/NexusFileIO.h"
 
+#include "Poco/Path.h"
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
@@ -240,7 +242,12 @@ namespace NeXus
       /// Determine the search directory for XML instrument definition files (IDFs)
       /// @param localWorkspace - pointer to the 2D workspace to put the instrument data into
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
-      if ( directoryName.empty() ) directoryName = "../Instrument";  // This is the assumed deployment directory for IDFs
+      if ( directoryName.empty() ) 
+      {
+	// This is the assumed deployment directory for IDFs, where we need to be relative to the
+	// directory of the executable, not the current working directory.
+	directoryName = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../Instrument").toString();  
+      }
 
       // For Nexus Mantid processed, Instrument XML file name is read from nexus 
       std::string instrumentID = m_instrumentxml;
