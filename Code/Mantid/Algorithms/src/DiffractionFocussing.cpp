@@ -285,7 +285,11 @@ bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::m
     istr >> n >> udet >> offset >> sel >> group;
     // Check the line wasn't badly formatted - return a failure if it is
     //if ( ! istr.good() ) return false;
-    if (sel) detectorGroups.insert(std::make_pair(group,udet));
+		// only allow groups with +ve ids
+    if ((sel) && (group>0))
+		{
+			detectorGroups.insert(std::make_pair(group,udet));
+		}
   }
   return true;
 }

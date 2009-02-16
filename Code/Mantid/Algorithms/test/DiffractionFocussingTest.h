@@ -9,6 +9,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 
 class DiffractionFocussingTest : public CxxTest::TestSuite
 {
@@ -53,6 +54,12 @@ public:
 
 	  TS_ASSERT_THROWS_NOTHING( focus.execute() )
 	  TS_ASSERT( focus.isExecuted() )
+
+		MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("focusedWS")) )
+
+		// only 2 groups for this limited range of spectra
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 2 )
 	}
 
 private:
