@@ -67,7 +67,6 @@ class DLLExport SimplePythonAPI
   ///Private methods
   static void createVersionMap(VersionMap & versionMap, const StringVector & algorithmKeys);
   static std::string extractAlgName(const std::string & algKey);
-  static std::string extractAlgVersion(const std::string & algKey);
   static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, bool gui);
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);

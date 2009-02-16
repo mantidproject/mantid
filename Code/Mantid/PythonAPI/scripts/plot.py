@@ -1,6 +1,6 @@
 ###########################################################################
 def PlotWorkspace(name):
-	w=mtd.getWorkspace(name)
+	w=mtd.getMatrixWorkspace(name)
 	print ("histogram count =" + str(w.getNumberHistograms()))
 	x = w.readX(0)
 	y = w.readY(0)

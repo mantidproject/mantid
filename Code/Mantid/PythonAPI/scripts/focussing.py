@@ -57,7 +57,7 @@ def ConvertUdettoSpectrumNumber(groupDictionary,dataFilename):
 	LoadRawSegment(dataFilename,tempWorkspaceName,range(100,200))
 	
 	#get a handle to the spectra-detector map
-	tempworkspace=mtd.getWorkspace(tempWorkspaceName)
+	tempworkspace=mtd.getMatrixWorkspace(tempWorkspaceName)
 	sdMap = tempworkspace.getSpectraMap()
 	
 	for groupNumber in groupDictionary.keys():

@@ -8,16 +8,11 @@
 
 using namespace Mantid::API;
 
-namespace Mantid
-{
-namespace PythonAPI
-{
-
 /**
  * Returns the name of all the workspaces.
  * \return Vector of strings.
  **/
-std::vector<std::string> GetWorkspaceNames()
+std::vector<std::string> Mantid::PythonAPI::GetWorkspaceNames()
 {
 	return AnalysisDataService::Instance().getObjectNames();
 }
@@ -26,7 +21,7 @@ std::vector<std::string> GetWorkspaceNames()
  * Returns the name of all the algorithms.
  * \return Vector of strings.
  **/
-std::vector<std::string> GetAlgorithmNames()
+std::vector<std::string> Mantid::PythonAPI::GetAlgorithmNames()
 {
 	return AlgorithmFactory::Instance().getKeys();
 }
@@ -35,12 +30,9 @@ std::vector<std::string> GetAlgorithmNames()
   * Create the simple Python API module
   * @param gui Whether the module is being made for use with qtiplot or not
   **/
-void createPythonSimpleAPI(bool gui)
+void Mantid::PythonAPI::createPythonSimpleAPI(bool gui)
 {
   //Redirect to static helper class
   Mantid::PythonAPI::SimplePythonAPI::createModule(gui);
 }
 	
-}
-}
-

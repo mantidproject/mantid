@@ -6,7 +6,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/FrameworkManager.h"
 
@@ -95,13 +95,13 @@ API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std
 }
 
 /**
- * Returns a specified workspace.
+ * Returns a specified MatrixWorkspace.
  * \param wsName :: The name of the workspace to retrieve.
  * \return Shared pointer to workspace.
  **/
-API::Workspace* FrameworkManager::getWorkspace(const std::string& wsName)
+API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& wsName)
 {
-	return API::FrameworkManager::Instance().getWorkspace(wsName);
+  return dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
 }
 
 /**

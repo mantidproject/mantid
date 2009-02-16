@@ -15,7 +15,7 @@ namespace API
 {
 class IAlgorithm;
 class Algorithm;
-class Workspace;
+class MatrixWorkspace;
 }
 
 namespace PythonAPI
@@ -71,8 +71,8 @@ public:
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray);
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version);
 
-	/// Returns a shared pointer to the workspace requested
-	API::Workspace* getWorkspace(const std::string& wsName);
+	/// Returns a shared pointer to the MatrixWorkspace requested
+	API::MatrixWorkspace* getMatrixWorkspace(const std::string& wsName);
 
 	/// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);

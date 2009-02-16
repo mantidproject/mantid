@@ -6,7 +6,7 @@ mtd.execute("Rebin","converted;rebinned;0.1,0.001,5",-1)
 mtd.deleteWorkspace("test")
 mtd.deleteWorkspace("converted")
 #extract the one we want
-w=mtd.getWorkspace('rebinned')
+w=mtd.getMatrixWorkspace('rebinned')
 print w.getNumberHistograms()
 
 x = w.readX(450)

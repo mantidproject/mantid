@@ -42,7 +42,7 @@ public:
 	void testGetDeleteWorkspace()
 	{
     API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
-    API::MatrixWorkspace* ws = dynamic_cast<API::MatrixWorkspace*>(mgr->getWorkspace("TestWorkspace1"));
+    API::MatrixWorkspace* ws = dynamic_cast<API::MatrixWorkspace*>(mgr->getMatrixWorkspace("TestWorkspace1"));
 
 		TS_ASSERT_EQUALS(ws->getNumberHistograms(), 22);
 		TS_ASSERT(mgr->deleteWorkspace("TestWorkspace1"));

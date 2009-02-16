@@ -12,10 +12,15 @@ namespace Mantid
 {
 namespace PythonAPI
 {
-	//Namespace functions
-	DLLExport std::vector<std::string> GetAlgorithmNames();
-	DLLExport std::vector<std::string> GetWorkspaceNames();
-        DLLExport void createPythonSimpleAPI(bool);
+  /**
+   * @namespace Mantid::PythonAPI
+   * All Python related functionality is declared here
+   */
+
+  //Namespace functions
+  DLLExport std::vector<std::string> GetAlgorithmNames();
+  DLLExport std::vector<std::string> GetWorkspaceNames();
+  DLLExport void createPythonSimpleAPI(bool);
 
 }
 }
