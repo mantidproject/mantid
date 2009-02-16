@@ -54,7 +54,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class CalculateTransmission : public API::Algorithm
+class DLLExport CalculateTransmission : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
