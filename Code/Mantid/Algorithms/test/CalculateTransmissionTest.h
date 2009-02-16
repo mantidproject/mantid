@@ -6,6 +6,8 @@
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidAlgorithms/ConvertUnits.h"
+#include "MantidAlgorithms/CropWorkspace.h"
+#include "MantidCurveFitting/Linear.h"
 
 using namespace Mantid::API;
 
