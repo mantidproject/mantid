@@ -10,6 +10,7 @@
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
 #include "Poco/LoggingFactory.h"
+#include "Poco/Path.h"
 #include <sstream>
 #include <iostream>
 #include <string>
@@ -19,12 +20,16 @@ namespace Mantid
 namespace Kernel
 {
 
+//-------------------------------
+// Private member functions
+//-------------------------------
+
   /// Private constructor for singleton class
 	ConfigServiceImpl::ConfigServiceImpl() : g_log(Logger::get("ConfigService"))
 	{
-		//getting at system details
-		m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
-		m_pConf = 0;
+	  //getting at system details
+	  m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
+	  m_pConf = 0;
         
         //Register the FilterChannel with the Poco logging factory
         Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel",new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
@@ -32,9 +37,18 @@ namespace Kernel
         //Register the SignalChannel with the Poco logging factory
         Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel",new Poco::Instantiator<Poco::SignalChannel, Poco::Channel>);
 
-        //attempt to load the default properties filename
-		loadConfig("Mantid.properties");
-		g_log.debug() << "ConfigService created." << std::endl;
+        //attempt to load the default properties file that resides in the directory of the executable
+	loadConfig(Mantid::Kernel::getDirectoryOfExecutable() + "Mantid.properties");
+
+	//Fill the list of possible relative path keys that may require conversion to absolute paths
+	m_vConfigPaths.clear();
+	m_vConfigPaths.push_back("plugins.directory");
+	m_vConfigPaths.push_back("instrumentDefinition.directory");
+	m_vConfigPaths.push_back("ManagedWorkspace.FilePath");
+	
+	convertRelativePaths();
+
+	g_log.debug() << "ConfigService created." << std::endl;
 	}
 
   /// Private copy constructor for singleton class
@@ -52,6 +66,34 @@ namespace Kernel
 //		g_log.debug() << "ConfigService destroyed." << std::endl;
 	}
 
+  /**
+   * Searches the stored list for keys that have been loaded from the config file and may contain
+   * relative paths. Any it find are converted to absolute paths and stored separately
+   */
+  void ConfigServiceImpl::convertRelativePaths()
+  {
+    if( m_vConfigPaths.empty() ) return;
+
+    std::string execdir(Mantid::Kernel::getDirectoryOfExecutable());
+
+    std::vector<std::string>::const_iterator send = m_vConfigPaths.end();
+    for( std::vector<std::string>::const_iterator sitr = m_vConfigPaths.begin(); sitr != send; ++sitr )
+    {
+      if( !m_pConf->hasProperty(*sitr) ) continue;
+      
+      std::string value(m_pConf->getString(*sitr));
+      if( Poco::Path(value).isRelative() )
+      {
+	m_mAbsolutePaths.insert(std::make_pair(*sitr, Poco::Path(execdir).resolve(value).toString()));
+      }
+      
+    }
+
+  }
+
+//-------------------------------
+// Public member functions
+//-------------------------------
 
   /** Loads the config file provided, any previous configuration is discarded.
    *  If the file contains logging setup instructions then these will be used to setup the logging framework.
@@ -106,15 +148,22 @@ namespace Kernel
 			std::cerr << "Trouble configuring the logging framework " << e.what()<<std::endl;
 		}
 	}
+  
 	
   /** Searches for a string within the currently loaded configuaration values and 
-   *  returns the value as a string.
+   *  returns the value as a string. If the key is one of those that was a possible relative path
+   *  then the local store is searched first.
    *
    *  @param keyName The case sensitive name of the property that you need the value of.
    *  @returns The string value of the property, or an empty string if the key cannot be found
    */
-	std::string ConfigServiceImpl::getString(const std::string& keyName)
-	{
+  std::string ConfigServiceImpl::getString(const std::string& keyName)
+  {
+    std::map<std::string, std::string>::const_iterator mitr = m_mAbsolutePaths.find(keyName);
+    if( mitr != m_mAbsolutePaths.end() ) 
+    {
+      return (*mitr).second;
+    }
     std::string retVal;
     try
     {

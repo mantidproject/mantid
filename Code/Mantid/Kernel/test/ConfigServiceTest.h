@@ -5,6 +5,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "Poco/Path.h"
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -90,7 +91,12 @@ public:
 
 	  TS_ASSERT_EQUALS(noseCountString, "");
   }
-  
+
+  void TestRelativeToAbsolute()
+  {
+    std::string instrumentPath = ConfigService::Instance().getString("instrumentDefinition.directory");
+    TS_ASSERT( Poco::Path(instrumentPath).isAbsolute() );
+  } 
  
 private:
 	ConfigService *configSvc;

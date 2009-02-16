@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <vector>
+#include <map>
 
 #include "MantidKernel/DllExport.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -148,9 +150,18 @@ class Logger;
 		/// the POCO system Config Object
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
+		/// Convert any relative paths to absolute ones and store them locally so that
+		/// if the working directory is altered the paths will not be affected
+		void convertRelativePaths();
+
     /// static reference to the logger class
 	  Logger& g_log;
 
+	  /// A list of keys that may contain relative paths and need to be altered
+	  std::vector<std::string> m_vConfigPaths;
+	  
+	  /// Local storage for the relative path key/values that have been changed 
+	  std::map<std::string, std::string> m_mAbsolutePaths;
 	};
 	
 	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
