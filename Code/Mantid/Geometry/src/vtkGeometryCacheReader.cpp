@@ -78,8 +78,7 @@ namespace Mantid
 			Poco::XML::Element *pEle=getElementByObjectName(objName.str());
 			if(pEle==NULL) //Element not found
 			{
-				PLog.error("Cache not found for Object with name " + objName.str());
-				printf("Cache not found");
+				PLog.debug("Cache not found for Object with name " + objName.str());
 				return;
 			}
 			// Read the cache from the element
