@@ -77,7 +77,7 @@ public:
       if (itr == m_extensions.end()) return false;
     }
 
-    if ( m_fullTest && !value.empty() && !Poco::File(value).exists() )
+    if ( m_fullTest && ( value.empty() || !Poco::File(value).exists() ) )
     {
       return false;
     }

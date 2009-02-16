@@ -61,6 +61,12 @@ public:
     FileValidator v(vec);
     TS_ASSERT(v.isValid("FileValidatorTest.cpp"));
   }
+
+  void testFailsOnEmptyFileString()
+  {
+    FileValidator file_val;
+    TS_ASSERT( !file_val.isValid("") );
+  }
   
 };
 
