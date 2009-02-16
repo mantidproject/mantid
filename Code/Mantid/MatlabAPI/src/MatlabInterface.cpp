@@ -612,7 +612,7 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
   }
   try
   {
-    simpleAPI.makeDirectory();
+    simpleAPI.createDirectory();
   }
   catch( std::exception& )
   {
@@ -632,7 +632,7 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
     else ++(vIter->second);
 	}
 
-  std::string contents_path = simpleAPI.directory_string() + "/Contents.m";
+  std::string contents_path = simpleAPI.path() + "/Contents.m";
   std::ofstream contents(contents_path.c_str());
   contents << "%A simpler API for Mantid\n%\n%The algorithms available are:\n";
   VersionMap::const_iterator vIter = vMap.begin();
