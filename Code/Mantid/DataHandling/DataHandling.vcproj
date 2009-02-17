@@ -55,7 +55,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib ws2_32.lib muparser_d.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib ws2_32.lib muparser.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -169,6 +169,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FindDetectorsInShape.cpp"
 				>
 			</File>
 			<File
@@ -287,6 +291,14 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\FindDetectorsInShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FindDetectorsInShapeTest.h"
 				>
 			</File>
 			<File
