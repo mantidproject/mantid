@@ -1,0 +1,87 @@
+#ifndef MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_
+#define MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include <vector>
+
+
+namespace Mantid
+{
+namespace DataHandling
+{
+/** An algorithm for finding marking as dead detectors that are contained within a user defined shape within the instrument.
+
+    Required Properties:
+    <UL>
+    <LI> Workspace - The name of the input Workspace2D on which to perform the algorithm </LI>
+		<LI> ShapeXML - An XML definition of the shape to be projected within the instruemnt of the workspace </LI>
+    </UL>
+
+    Optional Properties:
+    <UL>
+    <LI> IncludeMonitors - True/False whether to include monitors in the results</LI>
+		</UL>
+
+		Output Properties:
+    <UL>
+    <LI> DetectorList - An array property containing the detectors ids marked dead in the shape </LI>
+    </UL>
+
+    @author Nick Draper, Tessella plc
+    @date 16/02/2009
+
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport MarkDeadDetectorsInShape : public API::Algorithm
+{
+public:
+  MarkDeadDetectorsInShape();
+  virtual ~MarkDeadDetectorsInShape();
+
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "MarkDeadDetectorsInShape";};
+  /// Algorithm's version for identification overriding a virtual method
+  virtual const int version() const { return 1;};
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "DataHandling\\Detectors";}
+
+private:
+  // Implement abstract Algorithm methods
+  void init();
+  void exec();
+
+	//internal functions
+	std::vector<int> runFindDetectorsInShape(DataObjects::Workspace2D_sptr workspace, 
+		const std::string shapeXML, const bool includeMonitors);
+	void runMarkDeadDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds);
+
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
+};
+
+} // namespace DataHandling
+} // namespace Mantid
+
+#endif /*MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_*/

@@ -88,7 +88,7 @@ public:
     }
     else
     {
-      throw std::invalid_argument("Attempt to assign to property of incorrect type");
+      throw std::invalid_argument("Attempt to assign to property (" + name + ") of incorrect type");
     }
   }
 

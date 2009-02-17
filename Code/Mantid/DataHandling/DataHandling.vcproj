@@ -248,6 +248,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MarkDeadDetectorsInShape.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MoveInstrumentComponent.cpp"
 				>
 			</File>
@@ -399,6 +403,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectorsInShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MarkDeadDetectorsInShapeTest.h"
 				>
 			</File>
 			<File

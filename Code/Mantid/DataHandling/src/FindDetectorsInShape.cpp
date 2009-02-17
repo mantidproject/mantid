@@ -4,7 +4,6 @@
 #include "MantidDataHandling/FindDetectorsInShape.h"
 #include "MantidDataHandling/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "Poco/DOM/DOMParser.h"
