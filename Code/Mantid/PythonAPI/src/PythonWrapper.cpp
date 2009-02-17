@@ -150,6 +150,12 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+  /// Some function pointers since MSVC can't figure out the function to call when placing this directlyin the .def functions below
+  std::vector<int>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetIntegerColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<int>;
+  std::vector<double>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetDoubleColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<double>;
+  std::vector<std::string>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetStringColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<std::string>;
+  
+  
   /// An wrapper for PropertyManager
   struct Mantid_Kernel_PropertyManager_Wrapper: Mantid::Kernel::PropertyManager
   {
@@ -556,9 +562,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("columnCount", &Mantid::DataObjects::TableWorkspace::columnCount)
      .def("getColumnNames",&Mantid::DataObjects::TableWorkspace::getColumnNames)
      .def("rowCount", &Mantid::DataObjects::TableWorkspace::rowCount)
-     .def("getIntColumn", (std::vector<int>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
-     .def("getDoubleColumn", (std::vector<double>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
-     .def("getStringColumn", (std::vector<std::string>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
+     .def("getIntColumn", Mantid::PythonAPI::TableWorkspace_GetIntegerColumn, return_value_policy<reference_existing_object>() )
+     .def("getDoubleColumn", Mantid::PythonAPI::TableWorkspace_GetDoubleColumn, return_value_policy<reference_existing_object>() )
+     .def("getStringColumn", Mantid::PythonAPI::TableWorkspace_GetStringColumn, return_value_policy<reference_existing_object>() )
      ;
 
    //Framework Class
