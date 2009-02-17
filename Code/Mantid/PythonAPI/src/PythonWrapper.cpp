@@ -12,7 +12,7 @@
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
@@ -20,6 +20,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 //Given the frequent use, this makes things more readable
 using namespace boost::python;
@@ -34,8 +35,9 @@ namespace PythonAPI
  * Wrappers for the C++ code
  * @name Python wrappers
  */
+  //@cond
 //@{
-  
+  /// An wrapper for IAlgorithm
   struct Mantid_API_IAlgorithm_Wrapper: Mantid::API::IAlgorithm
   {
     Mantid_API_IAlgorithm_Wrapper(PyObject* py_self_, const Mantid::API::IAlgorithm& p0):
@@ -75,6 +77,7 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+  /// An wrapper for MatrixWorkspace
   struct Mantid_API_MatrixWorkspace_Wrapper: Mantid::API::MatrixWorkspace
   {
     const std::string id() const {
@@ -128,6 +131,26 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+  /// An wrapper for TableWorkspace
+  struct Mantid_DataObjects_TableWorkspace_Wrapper: Mantid::DataObjects::TableWorkspace
+  {
+   
+    int columnCount() const {
+      return call_method<int>(py_self, "columnCount");
+    }
+    
+    std::vector<std::string> getColumnNames() {
+      return call_method<std::vector<std::string> >(py_self, "getColumnNames");
+    }
+    
+    int rowCount() const {
+      return call_method<int>(py_self, "rowCount");
+    }
+
+    PyObject* py_self;
+  };
+
+  /// An wrapper for PropertyManager
   struct Mantid_Kernel_PropertyManager_Wrapper: Mantid::Kernel::PropertyManager
   {
 
@@ -190,6 +213,7 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+  /// A wrapper for Property
   struct Mantid_Kernel_Property_Wrapper: Mantid::Kernel::Property
   {
     const bool isValid() const {
@@ -227,6 +251,7 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+  ///A wrapper for Algorithm
   struct Mantid_API_Algorithm_Wrapper: Mantid::API::Algorithm
   {
     const std::string name() const {
@@ -319,7 +344,8 @@ namespace PythonAPI
 
     PyObject* py_self;
   };
-
+  
+  ///A wrapper for IDetector
   struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
   {
     Mantid_Geometry_IDetector_Wrapper(PyObject* py_self_, const Mantid::Geometry::IDetector& p0):
@@ -343,6 +369,7 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
+    ///A wrapper for PyAlgorithm
   struct Mantid_PythonAPI_PyAlgorithm_Wrapper: Mantid::PythonAPI::PyAlgorithm
   {
     Mantid_PythonAPI_PyAlgorithm_Wrapper(PyObject* py_self_, std::string p0):
@@ -374,7 +401,9 @@ namespace PythonAPI
 
     PyObject* py_self;
   };
+//@endcond
 //@}
+
 
 /// Declare functions with overloaded names
 /**@name Function overloads. */
@@ -395,7 +424,7 @@ namespace PythonAPI
 
 
 /**
- * Make a macro to quickly register container classes
+ * A macro to quickly register container classes
  */
 #define REGISTER_VECTOR_WITH_PYTHON(classname, pythonname) \
   class_< std::vector<classname> >( pythonname ) \
@@ -403,7 +432,6 @@ namespace PythonAPI
   .def("size", &std::vector<classname>::size) \
   .def("push_back", &std::vector<classname>::push_back) \
   ;
-
 
 /**
  * The actual module definition begins here. The names are different for
@@ -441,6 +469,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   //@{
   /// A pointer to a MatrixWorkspace object
   register_ptr_to_python< boost::shared_ptr<Mantid::API::MatrixWorkspace> >();
+
+  /// A pointer to a TableWorkspace object
+  register_ptr_to_python< boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >();
 
   /// A pointer to a Unit object
   register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
@@ -520,6 +551,16 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getHistory", &Mantid::API::MatrixWorkspace::getHistory, return_value_policy< copy_const_reference >())
      ;
 
+   //TableWorkspace class
+   class_< Mantid::DataObjects::TableWorkspace, boost::noncopyable, Mantid_DataObjects_TableWorkspace_Wrapper >("TableWorkspace", no_init)
+     .def("columnCount", &Mantid::DataObjects::TableWorkspace::columnCount)
+     .def("getColumnNames",&Mantid::DataObjects::TableWorkspace::getColumnNames)
+     .def("rowCount", &Mantid::DataObjects::TableWorkspace::rowCount)
+     .def("getIntColumn", (std::vector<int>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
+     .def("getDoubleColumn", (std::vector<double>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
+     .def("getStringColumn", (std::vector<std::string>& (Mantid::DataObjects::TableWorkspace::*)(const std::string&))&Mantid::DataObjects::TableWorkspace::getStdVector, return_value_policy<reference_existing_object>() )
+     ;
+
    //Framework Class
    class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())
      .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
@@ -530,6 +571,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
      .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
+     .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
      .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
      .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)

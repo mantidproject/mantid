@@ -4,11 +4,12 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/FrameworkManager.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid;
 
@@ -17,11 +18,13 @@ namespace Mantid
 namespace PythonAPI
 {
 
+/// Default constructor
 FrameworkManager::FrameworkManager()
 {
 	API::FrameworkManager::Instance();
 }
-	
+
+/// Clear the FrameworkManager	
 void FrameworkManager::clear()
 {
 	API::FrameworkManager::Instance().clear();
@@ -102,6 +105,16 @@ API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std
 API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& wsName)
 {
   return dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+}
+
+/**
+ * Returns a specified TableWorkspace.
+ * \param wsName :: The name of the workspace to retrieve.
+ * \return Shared pointer to workspace.
+ **/
+DataObjects::TableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
+{
+  return dynamic_cast<DataObjects::TableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
 }
 
 /**

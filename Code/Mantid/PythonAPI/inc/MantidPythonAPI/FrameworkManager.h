@@ -18,11 +18,15 @@ class Algorithm;
 class MatrixWorkspace;
 }
 
+namespace DataObjects
+{
+class TableWorkspace;
+}
+
 namespace PythonAPI
 {
 
-/** @class FrameworkManager FrameworkManager.h PythonAPI/FrameworkManager.h
-
+/** 
     FrameworkManager is a wrapper for the FrameworkManager class in Mantid. 
     As FrameworkManager is a singleton in Mantid it was easier to create a wrapper
     class to be used from python.
@@ -56,33 +60,37 @@ public:
 	FrameworkManager();
 	~FrameworkManager() {};
 
-	/// Clears all memory associated with the AlgorithmManager 
+	// Clears all memory associated with the FrameworkManager 
 	void clear();
 
-	/// Creates and instance of an algorithm
+	// Creates and instance of an algorithm
 	API::IAlgorithm* createAlgorithm(const std::string& algName);
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version);
 
-	/// Creates an instance of an algorithm and sets the properties provided
+	// Creates an instance of an algorithm and sets the properties provided
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version);
 
-	/// Creates an instance of an algorithm, sets the properties provided & then executes it.
+	// Creates an instance of an algorithm, sets the properties provided & then executes it.
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray);
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version);
 
-	/// Returns a shared pointer to the MatrixWorkspace requested
+	// Returns a pointer to the MatrixWorkspace requested
 	API::MatrixWorkspace* getMatrixWorkspace(const std::string& wsName);
 
-	/// Deletes a workspace from the framework
+	// Returns a pointer to the TableWorkspace requested
+	DataObjects::TableWorkspace* getTableWorkspace(const std::string& wsName);
+
+	// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
 	
 	int addPythonAlgorithm(PyObject* pyAlg);
 	void executePythonAlgorithm(std::string algName);
 
 private:
-
+	/// Copy constructor
 	FrameworkManager(const FrameworkManager&);
+	/// Assignment operator
 	FrameworkManager& operator = (const FrameworkManager&);
 
 };
