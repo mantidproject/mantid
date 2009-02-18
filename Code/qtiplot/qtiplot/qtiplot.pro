@@ -645,6 +645,7 @@ contains(SCRIPTING_LANGS, Python) {
 #			 $${SIP_DIR}/sipqtiDeconvolution.h \
 #             $${SIP_DIR}/sipqtiMantidMatrix.h\
 #             $${SIP_DIR}/sipqtiMantidUI.h\
+#             $${SIP_DIR}/sipqtiInstrumentWindow.h
 
 
   SOURCES += $${SIP_DIR}/sipqticmodule.cpp\
@@ -690,8 +691,8 @@ contains(SCRIPTING_LANGS, Python) {
 			 $${SIP_DIR}/sipqtiConvolution.cpp \
 			 $${SIP_DIR}/sipqtiDeconvolution.cpp \
              $${SIP_DIR}/sipqtiMantidMatrix.cpp\
-             $${SIP_DIR}/sipqtiMantidUI.cpp
-
+             $${SIP_DIR}/sipqtiMantidUI.cpp \
+             $${SIP_DIR}/sipqtiInstrumentWindow.cpp
 }
 ###############################################################
 

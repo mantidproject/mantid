@@ -969,20 +969,50 @@ void MantidUI::manageMantidWorkspaces()
 #endif
 }
 
+//----------------------------
+// Python API functions
+//----------------------------
+/**
+ * Create an instrument window from a named workspace or simply return the window if
+ * it already exists
+ */
+InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
+{
+
+  //See if a window for this instrument already exists
+  QMdiSubWindow *subWin(NULL);
+  foreach( subWin, appWindow()->d_workspace->subWindowList(QMdiArea::StackingOrder) )
+  {
+    if( subWin->name() == QString("InstrumentWindow:") + wsName ) break;
+  }
+  if( subWin )
+  {
+    return static_cast<InstrumentWindow*>(subWin);
+  }
+  
+  //Need a new window
+  InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
+  insWin->setName(QString("InstrumentWindow:") + wsName);
+  insWin->setWindowTitle(QString("Instrument - ") + wsName);
+  appWindow()->d_workspace->addSubWindow(insWin);
+
+  insWin->setWorkspaceName(wsName.toStdString());
+  connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+  connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+  connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
+  connect(insWin,SIGNAL(plotSpectra(const QString&,int)),this,SLOT(plotInstrumentSpectrum(const QString&,int)));
+  connect(insWin,SIGNAL(plotSpectraList(const QString&,std::vector<int>)),this,SLOT(plotInstrumentSpectrumList(const QString&,std::vector<int>)));
+
+  //  insWin->resize(400,400);
+
+  return insWin;
+}
+
+
 void MantidUI::showMantidInstrument(const QString& wsName)
 {
-	InstrumentWindow *insWin=new InstrumentWindow(QString("Instrument"),appWindow());
-	connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-	connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-	connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
-	appWindow()->d_workspace->addSubWindow(insWin);
-	insWin->setNormal();
-	insWin->setName(wsName);
-	insWin->resize(400,400);
-	insWin->show();
-	insWin->setWorkspaceName(std::string(wsName.ascii()));
-    connect(insWin,SIGNAL(plotSpectra(const QString&,int)),this,SLOT(plotInstrumentSpectrum(const QString&,int)));
-	connect(insWin,SIGNAL(plotSpectraList(const QString&,std::vector<int>)),this,SLOT(plotInstrumentSpectrumList(const QString&,std::vector<int>)));
+  InstrumentWindow *insWin = getInstrumentView(wsName);
+  insWin->showWindow();
 }
 
 void MantidUI::showMantidInstrument()

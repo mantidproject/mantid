@@ -33,6 +33,7 @@ class MantidMatrix;
 class MantidDockWidget;
 class AlgorithmDockWidget;
 class AlgorithmMonitor;
+class InstrumentWindow;
 
 using namespace Mantid::API;
 
@@ -272,6 +273,9 @@ public slots:
 
 	void manageMantidWorkspaces();
 
+
+  //Python related functions
+  InstrumentWindow* getInstrumentView(const QString & wsName);
 
 	void showMantidInstrument();
 

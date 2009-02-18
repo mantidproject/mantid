@@ -1703,6 +1703,23 @@ private:
   MantidMatrix(const MantidMatrix&);
 };
 
+class InstrumentWindow: MdiSubWindow
+{
+%TypeHeaderCode
+#include "src/Mantid/InstrumentWidget/InstrumentWindow.h"
+%End
+public:
+  void showWindow();
+  void changeColormap() /PyName = changeColorMap/;
+  void changeColormap(const QString & file) /PyName = changeColorMap/;
+  void setColorMapMinValue(double);
+  void setColorMapMaxValue(double);
+  void setColorMapRange(double, double);
+  void setDataMappingIntegral(double, double) /PyName = setBinRange/;
+private:
+InstrumentWindow(const InstrumentWindow &);
+};
+
 class MantidUI: QObject
 {
 %TypeHeaderCode
@@ -1729,6 +1746,7 @@ public:
 %End
   bool runAlgorithmAsynchronously(const QString &);
   bool createPropertyInputDialog(const QString &, const QString &);
+  InstrumentWindow* getInstrumentView(const QString &);
   private:
 MantidUI(const MantidUI &);
 };

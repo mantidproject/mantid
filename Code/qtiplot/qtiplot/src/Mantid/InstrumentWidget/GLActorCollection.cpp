@@ -107,7 +107,7 @@ GLActor* GLActorCollection::findColorID(unsigned char color[3])
 		//}
   //  }
 	GLActor* picked=NULL;
-	std::cout<<"Number of actors "<<_actors.size()<<std::endl;
+	//	std::cout<<"Number of actors "<<_actors.size()<<std::endl;
 	for(int i=0;i<_actors.size();i++)
 	{
 		if(_actors[i]->isColorID(color))

@@ -56,6 +56,8 @@ public:
 	GLColorMapQwt getColorMap()const;
 	double getDataMinValue();
 	double getDataMaxValue();
+	double getBinMinValue() const;
+	double getBinMaxValue() const;
 	void setDataMappingType(DataMappingType);
 	void setView(Mantid::Geometry::V3D,double,double,double,double,double,double);
 	void setAxis(Mantid::Geometry::V3D&,Mantid::Geometry::V3D&);
@@ -110,6 +112,7 @@ private:
 	void CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
 	void CollectIntegralValues(std::vector<int> historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);
 	std::string strWorkspaceName;
+	bool mHaveBinMaxMin;
 
 };
 

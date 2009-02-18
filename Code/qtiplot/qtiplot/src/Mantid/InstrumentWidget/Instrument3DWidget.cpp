@@ -37,6 +37,9 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent),mFast
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
 	mDataMapping=INTEGRAL;
+	BinMinValue=-DBL_MAX;
+	BinMinValue=DBL_MAX;
+	mHaveBinMaxMin = false;
 	mAxisDirection=Mantid::Geometry::V3D(0.0,0.0,1.0);
 	mAxisUpVector=Mantid::Geometry::V3D(0.0,1.0,0.0);
 	//mAxisDirection=Mantid::Geometry::V3D(1.0,0.0,0.0);
@@ -170,9 +173,13 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
     MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
 	//Get the workspace min bin value and max bin value
-	BinMinValue=DBL_MAX;
-	BinMaxValue=-DBL_MAX;
-	for (int i = 0; i < output->getNumberHistograms(); ++i)
+//  	BinMinValue=DBL_MAX;
+//  	BinMaxValue=-DBL_MAX;
+    
+    if( !mHaveBinMaxMin )
+    {
+        int nHist = output->getNumberHistograms();
+        for (int i = 0; i < nHist; ++i)
 	{
 		std::vector<double> values=output->readX(i);
 		if(BinMinValue>values[0])
@@ -184,6 +191,7 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 		else if(BinMaxValue<*(values.end()-1))
 			BinMaxValue=*(values.end()-1);
 	}
+    }
 	boost::shared_ptr<Mantid::API::IInstrument> ins = output->getInstrument();
 	this->ParseInstrumentGeometry(ins);
 	boost::shared_ptr<Mantid::Geometry::IObjComponent> sample=ins->getSample();
@@ -528,6 +536,19 @@ double Instrument3DWidget::getDataMaxValue()
 }
 
 /**
+ * Returns the current minimum bin value
+ */
+double Instrument3DWidget::getBinMinValue() const
+{
+  return this->BinMinValue;
+}
+
+double Instrument3DWidget::getBinMaxValue() const
+{
+    return this->BinMaxValue;
+}
+
+/**
  * This method sets the Data mapping type for the color mapping.
  */
 void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
@@ -540,6 +561,7 @@ void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue)
 {
 	this->BinMinValue=minValue;
 	this->BinMaxValue=maxValue;
+	mHaveBinMaxMin = true;
 	setDataMappingType(INTEGRAL);
 }
 
@@ -625,6 +647,7 @@ void Instrument3DWidget::resetWidget()
 	strWorkspaceName="";
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
+	mHaveBinMaxMin = false;
 	mDataMapping=INTEGRAL;
 	mAxisDirection=Mantid::Geometry::V3D(0.0,0.0,1.0);
 	mAxisUpVector=Mantid::Geometry::V3D(0.0,1.0,0.0);

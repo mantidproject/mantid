@@ -16,6 +16,16 @@
 #include <vector>
 #include "qwt_scale_widget.h"
 
+namespace Mantid
+{
+
+namespace API
+{
+  class MatrixWorkspace;
+}
+
+}
+
 /*!
   \class  InstrumentWindow
   \brief  This is the main window for the control of display on geometry
@@ -51,8 +61,19 @@ public:
 	InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
 	~InstrumentWindow();
 	void setWorkspaceName(std::string wsName);
+        void updateWindow();
+        void showWindow();		 
+
+  /// Alter data from a script. These just foward calls to the 3D widget
+  void setColorMapMinValue(double minValue);
+  void setColorMapMaxValue(double maxValue);
+  void setColorMapRange(double minValue, double maxValue);
+  void setDataMappingIntegral(double minValue,double maxValue);
+  //  void setDataMappingSingleBin(int binNumber);
+		   
 public slots:
 	void modeSelectButtonClicked();
+	void selectBinButtonClicked();
 	void spectraInformation(int);
 	void detectorInformation(int value);
 	void detectorHighlighted(int detectorId,int spectraid,int count);
@@ -61,6 +82,7 @@ public slots:
 	void spectraInfoDialog();
 	void spectraGroupInfoDialog();
 	void changeColormap();
+	void changeColormap(const QString & file);
     void sendPlotSpectraSignal();
 	void sendPlotSpectraGroupSignal();
 	void minValueChanged();
@@ -74,6 +96,8 @@ signals:
 private:
 	void updateColorMapWidget();
 	void loadSettings();
+	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
+
 	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
     QMenu*       mPopupContext; ///< Popup menu for detector picking
@@ -90,6 +114,9 @@ private:
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
 	BinDialog*   mBinMapDialog;
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
+
+        std::string mWorkspaceName; ///The name of workpace that this window is associated with
+        std::string mDefaultColorMap; ///The full path of the default color map
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/
