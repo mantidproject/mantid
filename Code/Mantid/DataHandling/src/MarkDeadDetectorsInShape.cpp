@@ -75,7 +75,7 @@ namespace Mantid
 		void MarkDeadDetectorsInShape::runMarkDeadDetectors(Workspace2D_sptr workspace, const std::vector<int> detectorIds)
     {
       Algorithm_sptr alg = createSubAlgorithm("MarkDeadDetectors",85,100);
-			alg->setProperty<std::vector<int>>("DetectorList", detectorIds);
+			alg->setProperty<std::vector<int> >("DetectorList", detectorIds);
       alg->setProperty<Workspace2D_sptr>("Workspace",workspace);
       try
       {
