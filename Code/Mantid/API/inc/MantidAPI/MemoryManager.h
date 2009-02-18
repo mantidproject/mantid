@@ -74,6 +74,10 @@ namespace Mantid
 			/// Standard Assignment operator    
 			MemoryManagerImpl& operator = (const MemoryManagerImpl&);
 
+#ifndef _WIN32
+			bool ReadMemInfo(MemoryInfo & mi);
+#endif
+
 			/// Static reference to the logger class
 			Kernel::Logger& g_log;
 
