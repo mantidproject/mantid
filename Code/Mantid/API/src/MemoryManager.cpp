@@ -67,6 +67,10 @@ namespace Mantid
     */
     bool MemoryManagerImpl::goForManagedWorkspace(int NVectors,int XLength,int YLength)
     {
+        int AlwaysInMemory;// Check for disabling flag
+        if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory) &&
+            AlwaysInMemory) return false;
+
         // check potential size to create and determine trigger  
         int availPercent;
         if ( ! Kernel::ConfigService::Instance().getValue("ManagedWorkspace.LowerMemoryLimit", availPercent) )
@@ -91,6 +95,9 @@ namespace Mantid
         MemoryInfo mi = getMemoryInfo();
         int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
         int wsSize = NVectors * (YLength * 2 + XLength) / 1024;
+        g_log.information()<<"Requested memory: "<<wsSize*sizeof(double)<<" KB.\n";
+        g_log.information()<<"Available memory: "<<mi.availMemory<<" KB.\n";
+        g_log.information()<<"MWS trigger memory: "<<triggerSize*sizeof(double)<<" KB.\n";
         return wsSize > triggerSize;
     }
 
