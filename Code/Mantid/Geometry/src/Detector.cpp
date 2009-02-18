@@ -73,8 +73,7 @@ double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
 
 double Detector::solidAngle(const V3D& observer) const
 {
-	//Return a solid angle of 0 if the detector is marked dead
-	return isDead()?0:ObjComponent::solidAngle(observer);
+	return ObjComponent::solidAngle(observer);
 }
 
 bool Detector::isDead() const

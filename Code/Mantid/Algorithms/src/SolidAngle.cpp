@@ -83,6 +83,7 @@ namespace Mantid
 			// Get the distance between the source and the sample (assume in metres)
 			Geometry::IObjComponent_const_sptr sample = instrument->getSample();
 			Geometry::V3D samplePos = sample->getPos();
+      g_log.debug() << "Sample position is " << samplePos << std::endl;
 
 			const int notFailed = -99;
 			int failedDetectorIndex = notFailed;
@@ -97,11 +98,11 @@ namespace Mantid
 					outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
 					// Now get the detector to which this relates
 					Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-					double solidAngle = det->solidAngle(samplePos);
-					
+          // Solid angle should be zero if detector is masked ('dead')
+          double solidAngle = det->isDead() ? 0.0 : det->solidAngle(samplePos);
 	
-					outputWS->dataX(j)[0] = inputWS->readX(i)[0];
-					outputWS->dataX(j)[1] = inputWS->readX(i)[inputWS->readX(i).size()-1];
+					outputWS->dataX(j)[0] = inputWS->readX(i).front();
+					outputWS->dataX(j)[1] = inputWS->readX(i).back();
 					outputWS->dataY(j)[0] = solidAngle;
 					outputWS->dataE(j)[0] = 0;
 					if (failedDetectorIndex != notFailed)

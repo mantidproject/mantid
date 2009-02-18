@@ -72,8 +72,8 @@ bool ParDetector::isDead() const
 
 void ParDetector::markDead()
 {
-//  if ( m_isDead ) g_log.warning() << "ParDetector " << getID() << " is already marked as dead." << std::endl;
-//  m_isDead = true;
+  // Ugly, but hopefully only temporary (see Trac #405)
+  dynamic_cast<Detector*>(const_cast<IComponent*>(m_base))->markDead();
 }
 
 bool ParDetector::isMonitor() const
