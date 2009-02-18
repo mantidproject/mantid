@@ -55,6 +55,7 @@ void MoveInstrumentComponent::exec()
   boost::shared_ptr<IInstrument> inst = WS->getInstrument();
   boost::shared_ptr<IComponent> comp;
 
+  // Find the component to move
   if (DetID != -1)
   {
       comp = findByID(inst,DetID);
@@ -83,23 +84,28 @@ void MoveInstrumentComponent::exec()
       throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  V3D Pos;
+  V3D Pos;// New relative position
+  // First set it to the new absolute position
   if (RelativePosition)
   {
-      Pos = V3D(X,Y,Z);
+      Pos = comp->getPos() + V3D(X,Y,Z);
   }
   else
   {
-      const IComponent* parent = comp->getParent();
-      if (!parent) Pos = V3D(X,Y,Z);
-      else
-      {
-          Pos = V3D(X,Y,Z) - parent->getPos();
-          Quat rot = parent->getRelativeRot();
-          rot.inverse();
-          rot.rotate(Pos);
-      }
+      Pos = V3D(X,Y,Z);
   }
+
+  // Then find the corresponding relative position
+  const IComponent* parent = comp->getParent();
+  if (parent)
+  {
+      Pos -= parent->getPos();
+      Quat rot = parent->getRelativeRot();
+      rot.inverse();
+      rot.rotate(Pos);
+  }
+
+  //Need to get the address to the base instrument component
   boost::shared_ptr<Geometry::ParameterMap> pmap = WS->InstrumentParameters();
   ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
   const IComponent* baseComp;
@@ -112,6 +118,7 @@ void MoveInstrumentComponent::exec()
       baseComp = comp.get();
   }
 
+  // Set "pos" instrument parameter. 
   Parameter_sptr par = pmap->get(baseComp,"pos");
   if (par) par->set(Pos);
   else

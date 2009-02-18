@@ -68,8 +68,9 @@ public:
       boost::shared_ptr<IComponent> comp = (*boost::dynamic_pointer_cast<ICompAssembly>(
                                               (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[0]))[0];
 
-      V3D pos = comp->getRelativePos();
-      TS_ASSERT_EQUALS(pos,V3D(10,20,30))
+      V3D pos = comp->getPos();
+      TS_ASSERT_EQUALS(pos,det1->getPos() + V3D(10,20,30))
+
   }
 
   void testAbsolute()
