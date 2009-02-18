@@ -66,6 +66,9 @@ public:
     space2D->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist );
 
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    
+    // Mark one detector dead to test that it leads to zero solid angle
+    space2D->getDetector(143)->markDead();
   }
 
   void testInit()
@@ -99,7 +102,7 @@ public:
 			
 		const int numberOfSpectra = output2D->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
-		for (int i = 0; i < numberOfSpectra; ++i) {
+		for (int i = 0; i < numberOfSpectra-1; ++i) {
 			//all of the values should fall in this range for INES
 			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00139,0.00001);
 			
@@ -114,6 +117,8 @@ public:
 		TS_ASSERT_DELTA(output2D->readY(20)[0],0.00139822,0.0000001);
 		TS_ASSERT_DELTA(output2D->readY(50)[0],0.00139822,0.0000001);
     
+		// Check 'dead' detector spectrum gives zero solid angle
+		TS_ASSERT_EQUALS(output2D->readY(143).front(), 0)
   }
 
   void testExecSubset()

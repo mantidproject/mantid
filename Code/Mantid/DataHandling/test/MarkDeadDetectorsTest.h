@@ -142,13 +142,6 @@ public:
     TS_ASSERT( i->getDetector(2)->isDead() )
     TS_ASSERT( i->getDetector(3)->isDead() )
     TS_ASSERT( ! i->getDetector(4)->isDead() )
-
-		//test solid angles of dead detector return 0, live detectors would error as there is now shape definition
-		V3D observer(0,0,0);
-    TS_ASSERT_EQUALS( i->getDetector(0)->solidAngle(observer), 0.0 )
-    TS_ASSERT_EQUALS( i->getDetector(2)->solidAngle(observer), 0.0 )
-    TS_ASSERT_EQUALS( i->getDetector(3)->solidAngle(observer), 0.0 )
-    //TS_ASSERT_EQUALS( i->getDetector(4)->solidAngle(observer), 0.0 )
   }
 
 private:
