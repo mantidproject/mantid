@@ -204,8 +204,8 @@ protected:
 
     void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
 
-    void handleReplaceWorkspace(WorkspaceBeforeReplaceNotification_ptr pNf);
-    Poco::NObserver<MantidMatrix, WorkspaceBeforeReplaceNotification> m_replaceObserver;
+    void handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, WorkspaceAfterReplaceNotification> m_replaceObserver;
 
     void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidMatrix, WorkspaceDeleteNotification> m_deleteObserver;
@@ -228,6 +228,7 @@ protected:
     int m_rows,m_cols;
     int m_startRow;
     int m_endRow;
+    int m_workspaceTotalHist;
     bool m_histogram;
     double m_min;           // Saved minimum Y-value
     double m_max;           // Saved maximum Y-value
@@ -263,14 +264,14 @@ class MantidMatrixModel:public QAbstractTableModel
 public:
       typedef enum {Y,X,E} Type;
     MantidMatrixModel(QObject *parent, 
-                      Mantid::API::MatrixWorkspace_sptr ws, 
+                      Mantid::API::MatrixWorkspace* ws, 
                       int rows,
                       int cols,
                       int start, 
                       Type type);
 
     /// Call this function if the workspace has changed
-    void setup(Mantid::API::MatrixWorkspace_sptr ws, 
+    void setup(Mantid::API::MatrixWorkspace* ws, 
                       int rows,
                       int cols,
                       int start);
@@ -299,7 +300,7 @@ public slots:
     /// Signals QTableView that the data have changed.
     void resetData(){reset();}
 private:
-    Mantid::API::MatrixWorkspace_sptr m_workspace;
+    Mantid::API::MatrixWorkspace* m_workspace;
     int m_startRow; ///< starting workspace index to display
     int m_endRow;   ///< ending workspace index to display
     int m_rows,m_cols; ///< numbers of rows and columns

@@ -44,26 +44,27 @@ m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
 {
     m_appWindow = parent;
     m_strName = name.toStdString();
+    m_workspace = ws;
     setup(ws,start,end);
 	setWindowTitle(name);
 	setName(name); 
 	setIcon( QPixmap(matrixIcon()) );
 
-    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
+    m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     m_table_viewY = new QTableView();
     connectTableView(m_table_viewY,m_modelY);
     setColumnsWidth(0,MantidPreferences::MantidMatrixColumnWidthY());
     setNumberFormat(0,MantidPreferences::MantidMatrixNumberFormatY(),
                       MantidPreferences::MantidMatrixNumberPrecisionY());
 
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::X);
+    m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     m_table_viewX = new QTableView();
     connectTableView(m_table_viewX,m_modelX);
     setColumnsWidth(1,MantidPreferences::MantidMatrixColumnWidthX());
     setNumberFormat(1,MantidPreferences::MantidMatrixNumberFormatX(),
                       MantidPreferences::MantidMatrixNumberPrecisionX());
 
-    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::E);
+    m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     m_table_viewE = new QTableView();
     connectTableView(m_table_viewE,m_modelE);
     setColumnsWidth(2,MantidPreferences::MantidMatrixColumnWidthE());
@@ -115,11 +116,12 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
         m_endRow = 0;
         return;
     }
-    m_workspace = ws;
-    m_startRow = (start<0 || start>=ws->getNumberHistograms())?0:start;
-    m_endRow   = (end<0 || end>=ws->getNumberHistograms() || end < start)?ws->getNumberHistograms()-1:end;
+
+    m_workspaceTotalHist = ws->getNumberHistograms();
+    m_startRow = (start<0 || start>=m_workspaceTotalHist)?0:start;
+    m_endRow   = (end<0 || end>=m_workspaceTotalHist || end < start)? m_workspaceTotalHist - 1 : end;
     m_rows = m_endRow - m_startRow + 1;
-	m_cols = ws->blocksize(); 
+	  m_cols = ws->blocksize(); 
     if ( ws->isHistogramData() ) m_histogram = true;
     connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
@@ -838,26 +840,25 @@ void MantidMatrix::repaintAll()
     }
 }
 
-void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::BeforeReplaceNotification>& pNf)
+void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AfterReplaceNotification>& pNf)
 {
-  if( !pNf->object() || !pNf->new_object() ) return;
-
-  Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->new_object());
-
-  if (new_workspace && pNf->new_object() != m_workspace && pNf->object_name() == m_strName)
-    {
-        emit needChangeWorkspace(new_workspace);
-    }
+  if( pNf->object_name() != m_strName || !pNf->object().get() ) return;
+  
+  Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
+  m_workspace = new_workspace;
+  emit needChangeWorkspace( new_workspace );
+  
 }
  
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
-    if (m_workspace->blocksize() != ws->blocksize() ||
-        m_workspace->getNumberHistograms() != ws->getNumberHistograms())
+    if (m_cols != ws->blocksize() ||
+        m_workspaceTotalHist != ws->getNumberHistograms())
       { 
-	closeDependants();
+        closeDependants();
       }
 
+  
     // Save selection
     QItemSelectionModel *oldSelModel = activeView()->selectionModel();
     QModelIndexList indexList = oldSelModel->selectedIndexes();
@@ -866,15 +867,15 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
     setup(ws,m_startRow,m_endRow);
     
     delete m_modelY;
-    m_modelY = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
+    m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     connectTableView(m_table_viewY,m_modelY);
 
     delete m_modelX;
-    m_modelX = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::X);
+    m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     connectTableView(m_table_viewX,m_modelX);
 
     delete m_modelE;
-    m_modelE = new MantidMatrixModel(this,ws,m_rows,m_cols,m_startRow,MantidMatrixModel::E);
+    m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     connectTableView(m_table_viewE,m_modelE);
 
     // Restore selection
@@ -1003,7 +1004,7 @@ void MantidMatrix::selfClosed(MdiSubWindow* w)
       @param type Type of the data to display: Y, X, or E
   */
 MantidMatrixModel::MantidMatrixModel(QObject *parent, 
-                  Mantid::API::MatrixWorkspace_sptr ws, 
+                  Mantid::API::MatrixWorkspace* ws, 
                   int rows,
                   int cols,
                   int start, 
@@ -1015,7 +1016,7 @@ m_format('e'),m_prec(6)
   }
 
 /// Call this function if the workspace has changed
-void MantidMatrixModel::setup(Mantid::API::MatrixWorkspace_sptr ws, 
+void MantidMatrixModel::setup(Mantid::API::MatrixWorkspace* ws, 
                   int rows,
                   int cols,
                   int start)
