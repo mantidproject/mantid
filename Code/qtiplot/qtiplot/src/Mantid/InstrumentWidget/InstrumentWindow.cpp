@@ -481,15 +481,28 @@ void InstrumentWindow::setViewDirection(const QString& input)
 	}
 }
 
+/**
+ * For the scripting API
+ */
+void InstrumentWindow::selectComponent(const QString & name)
+{
+  QModelIndex component = mInstrumentTree->findComponentByName(name);
+  if( !component.isValid() ) return;
+
+  mInstrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible );
+  mInstrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
+}
+
+/// A slot for the mouse selection
 void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection &)
 {
-  QModelIndexList items=selected.indexes();
+  QModelIndexList items = selected.indexes();
   if( items.isEmpty() ) return;
-  double xmax, xmin, ymax, ymin, zmax, zmin;
-  mInstrumentTree->getSelectedBoundingBox(items.first(),xmax,ymax,zmax,xmin,ymin,zmin);
-  Mantid::Geometry::V3D pos;
-  pos=mInstrumentTree->getSamplePos();
-  mInstrumentDisplay->setView(pos,xmax,ymax,zmax,xmin,ymin,zmin);
+  
+  double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
+  mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
+  Mantid::Geometry::V3D pos = mInstrumentTree->getSamplePos();
+  mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
 }
 
 /**

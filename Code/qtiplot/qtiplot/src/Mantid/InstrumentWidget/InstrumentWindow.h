@@ -69,7 +69,7 @@ public:
   void setColorMapMaxValue(double maxValue);
   void setColorMapRange(double minValue, double maxValue);
   void setDataMappingIntegral(double minValue,double maxValue);
-  //  void setDataMappingSingleBin(int binNumber);
+  void selectComponent(const QString & name);
 		   
 public slots:
 	void modeSelectButtonClicked();

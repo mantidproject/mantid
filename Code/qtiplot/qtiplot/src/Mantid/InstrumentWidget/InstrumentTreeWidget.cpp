@@ -66,3 +66,14 @@ Mantid::Geometry::V3D InstrumentTreeWidget::getSamplePos()const
 		else
 			return Mantid::Geometry::V3D(0.0,0.0,0.0);
 }
+
+QModelIndex InstrumentTreeWidget::findComponentByName(const QString & name) const
+{
+  if( !mTreeModel ) return QModelIndex();
+  //The data is in a tree model so recursively search until we find the string we want. Note the match is NOT
+  //case sensitive
+  QModelIndexList matches = mTreeModel->match(mTreeModel->index(0, 0, QModelIndex()), Qt::DisplayRole, name, 1, 
+					      Qt::MatchFixedString | Qt::MatchRecursive);
+  if( matches.isEmpty() ) return QModelIndex();
+  return matches.first();
+}

@@ -8,10 +8,11 @@ class InstrumentTreeWidget:public QTreeView
 {
     Q_OBJECT
 public:
-    InstrumentTreeWidget(QWidget *w):QTreeView(w){};
+  InstrumentTreeWidget(QWidget *w):QTreeView(w), mTreeModel(0) {};
 	void setInstrument(boost::shared_ptr<Mantid::API::IInstrument>);
 	void getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin);
 	Mantid::Geometry::V3D getSamplePos()const;
+        QModelIndex findComponentByName(const QString & name) const;
 private:
     boost::shared_ptr<Mantid::API::IInstrument> mInstrument;
 	InstrumentTreeModel *mTreeModel;

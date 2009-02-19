@@ -289,15 +289,7 @@ void ScriptEdit::runScript(const QString & code)
   emit outputMessage("Script execution started.");
   emit ScriptIsActive(true);
 
-  try
-  {
-    myScript->exec();
-  }
-  catch( std::exception & e )
-  {
-    m_bErrorRaised = true;
-    emit outputError(QString::fromStdString(e.what()));
-  }
+  myScript->exec();
 
   emit ScriptIsActive(false);
   m_bIsRunning = false;

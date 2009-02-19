@@ -979,6 +979,8 @@ void MantidUI::manageMantidWorkspaces()
 InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
 {
 
+  if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
+
   //See if a window for this instrument already exists
   QMdiSubWindow *subWin(NULL);
   foreach( subWin, appWindow()->d_workspace->subWindowList(QMdiArea::StackingOrder) )

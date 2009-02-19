@@ -1716,6 +1716,8 @@ public:
   void setColorMapMaxValue(double);
   void setColorMapRange(double, double);
   void setDataMappingIntegral(double, double) /PyName = setBinRange/;
+  void selectComponent(const QString &);
+
 private:
 InstrumentWindow(const InstrumentWindow &);
 };
@@ -1746,6 +1748,7 @@ public:
 %End
   bool runAlgorithmAsynchronously(const QString &);
   bool createPropertyInputDialog(const QString &, const QString &);
+  QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &);
   private:
 MantidUI(const MantidUI &);
