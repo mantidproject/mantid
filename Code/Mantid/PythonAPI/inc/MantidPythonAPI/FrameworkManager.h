@@ -18,10 +18,10 @@ class Algorithm;
 class MatrixWorkspace;
 }
 
-namespace DataObjects
-{
-class TableWorkspace;
-}
+// namespace DataObjects
+// {
+// class TableWorkspace;
+// }
 
 namespace PythonAPI
 {
@@ -79,7 +79,7 @@ public:
 	API::MatrixWorkspace* getMatrixWorkspace(const std::string& wsName);
 
 	// Returns a pointer to the TableWorkspace requested
-	DataObjects::TableWorkspace* getTableWorkspace(const std::string& wsName);
+	//DataObjects::TableWorkspace* getTableWorkspace(const std::string& wsName);
 
 	// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);

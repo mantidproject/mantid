@@ -9,7 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/FrameworkManager.h"
-#include "MantidDataObjects/TableWorkspace.h"
+
+//#include "MantidDataObjects/TableWorkspace.h"
 
 using namespace Mantid;
 
@@ -112,10 +113,10 @@ API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& ws
  * \param wsName :: The name of the workspace to retrieve.
  * \return Shared pointer to workspace.
  **/
-DataObjects::TableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
-{
-  return dynamic_cast<DataObjects::TableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
-}
+// DataObjects::TableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
+// {
+  // return dynamic_cast<DataObjects::TableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+// }
 
 /**
  * Deletes a specified workspace.
