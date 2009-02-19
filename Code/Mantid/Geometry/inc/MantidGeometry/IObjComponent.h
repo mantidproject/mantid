@@ -72,16 +72,21 @@ public:
   virtual void drawObject() const = 0;
   virtual void initDraw() const = 0;
   virtual const boost::shared_ptr<const Object> Shape()const = 0;
+  void setScaleFactor(double xFactor,double yFactor, double zFactor);
+  V3D  getScaleFactor(){return m_ScaleFactor;}
   GeometryHandler* Handle()const{return handle;}
 
 protected:
   IObjComponent(const IObjComponent&);
+  /// Object Scaling factor in 3 axis direction. given as a vector
+  V3D	m_ScaleFactor;
 
 private:
   /// Private, unimplemented copy assignment operator
   IObjComponent& operator=(const IObjComponent&);
   /// Geometry Handle for rendering
   GeometryHandler* handle;
+
   /**
   * Set the geometry handler for IObjComponent
   * @param[in] handle is pointer to the geometry handler. don't delete this pointer in the calling function.

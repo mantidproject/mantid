@@ -82,11 +82,16 @@ int ObjComponent::interceptSurface(Track& track) const
   {
     V3D in = it->PtA;
     this->getRotation().rotate(in);
+	//use the scale factor
+	in *= m_ScaleFactor;
     in += this->getPos();
     V3D out = it->PtB;
     this->getRotation().rotate(out);
+	//use the scale factor
+	out *= m_ScaleFactor;
     out += this->getPos();
-    track.addTUnit(shape->getName(),in,out,it->Dist);
+	track.addTUnit(shape->getName(),in,out,out.distance(track.getInit()));
+//    track.addTUnit(shape->getName(),in,out,it->Dist);
   }
 
   return intercepts;
@@ -143,6 +148,9 @@ void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, doub
   }
   // pass bounds to getBoundingBox
   shape->getBoundingBox(maxT[0],maxT[1],maxT[2],minT[0],minT[1],minT[2]);
+  //Apply scale factor
+  maxT*=m_ScaleFactor;
+  minT*=m_ScaleFactor;
   // transform result back and find new bounds by transforming all corner points and finding min/max box
   Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
                 v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
@@ -176,6 +184,8 @@ int ObjComponent::getPointInObject(V3D& point) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
+  //Apply scale down
+  point/=m_ScaleFactor;
   // Call the Object::getPointInObject method, which may give a point in Object coordinates
   int result= shape->getPointInObject( point );
   // transform point back to component space
@@ -183,7 +193,13 @@ int ObjComponent::getPointInObject(V3D& point) const
   {
     Quat Rotate = this->getRotation();
     Rotate.rotate(point);
+	//Scale up
+	point*=m_ScaleFactor;
     point+=this->getPos();
+  }
+  else // scale back the point
+  {
+	point*=m_ScaleFactor;
   }
   return result;
 }
@@ -205,6 +221,8 @@ const V3D ObjComponent::takeOutRotation(V3D point) const
   // Now rotate our point by the angle calculated above
   unRotate.rotate(point);
 
+  //Consider scaling factor
+  point/=m_ScaleFactor;
   return point;
 }
 

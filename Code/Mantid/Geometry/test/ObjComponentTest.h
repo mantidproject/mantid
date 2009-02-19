@@ -40,6 +40,7 @@ public:
   void testIsValid()
   {
     ObjComponent ocyl("ocyl", createCappedCylinder());
+	
     ocyl.setPos(10,0,0);
     ocyl.setRot(Quat(90.0,V3D(0,0,1)));
     // Check centre point
@@ -240,6 +241,70 @@ void testgetPointInObject()
     TS_ASSERT_DELTA(point.X(),21.5,1e-6);
     TS_ASSERT_DELTA(point.Y(),10.0,1e-6);
     TS_ASSERT_DELTA(point.Z(),-11.0,1e-6);
+  }
+
+  void testIsValidWithScaleFactor()
+  {
+    ObjComponent ocyl("ocyl", createCappedCylinder());
+	//set the scale factor
+	ocyl.setScaleFactor(2.0,1.0,1.0);
+	TS_ASSERT(ocyl.isValid(V3D(2.4,0.0,0.0)));
+	TS_ASSERT(ocyl.isValid(V3D(-6.4,0.0,0.0)));
+	TS_ASSERT(!ocyl.isValid(V3D(2.5,0.0,0.0)));
+	TS_ASSERT(!ocyl.isValid(V3D(-6.5,0.0,0.0)));
+	TS_ASSERT(ocyl.isValid(V3D(2.3,0.0,0.0)));
+	TS_ASSERT(ocyl.isValid(V3D(-6.3,0.0,0.0)));
+  }
+
+  void testIsOnSideWithScaleFactor()
+  {
+    ObjComponent ocyl("ocyl", createCappedCylinder());
+	//set the scale factor
+	ocyl.setScaleFactor(2.0,1.0,1.0);
+	TS_ASSERT(ocyl.isOnSide(V3D(2.4,0.0,0.0)));
+	TS_ASSERT(ocyl.isOnSide(V3D(-6.4,0.0,0.0)));
+	TS_ASSERT(!ocyl.isOnSide(V3D(2.5,0.0,0.0)));
+	TS_ASSERT(!ocyl.isOnSide(V3D(-6.5,0.0,0.0)));
+	TS_ASSERT(!ocyl.isOnSide(V3D(2.3,0.0,0.0)));
+	TS_ASSERT(!ocyl.isOnSide(V3D(-6.3,0.0,0.0)));
+  }
+
+  void testIntercepSurfaceWithScaleFactor()
+  {
+    ObjComponent ocyl("ocyl", createCappedCylinder());
+	//set the scale factor
+	ocyl.setScaleFactor(2.0,1.0,1.0);
+    Track trackScale(V3D(-6.5,0,0),V3D(1.0,0,0));
+    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScale), 1 );
+	Track::LType::const_iterator itscale=trackScale.begin();
+	TS_ASSERT_EQUALS(itscale->Dist, 8.9);
+	TS_ASSERT_EQUALS(itscale->PtA, V3D(-6.4,0.0,0.0));
+	TS_ASSERT_EQUALS(itscale->PtB, V3D( 2.4,0.0,0.0));
+  }
+
+  void testBoundingBoxWithScaleFactor()
+  {
+    ObjComponent A("ocyl", createCappedCylinder());
+	//set the scale factor
+	A.setScaleFactor(2.0,1.0,1.0);
+	double xmax,ymax,zmax,xmin,ymin,zmin;
+	xmax=100; ymax=100; zmax=100;
+	xmin=-100;  ymin=-100; zmin=-100;
+	A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);	
+	TS_ASSERT_DELTA(xmax, 2.4,0.00001);
+	TS_ASSERT_DELTA(xmin,-6.4,0.00001);
+  }
+
+  void testPointInObjectWithScaleFactor()
+  {
+    ObjComponent A("ocyl", createCappedCylinder());
+	//set the scale factor
+	V3D scalept;
+	A.setScaleFactor(2.0,1.0,1.0);
+	TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
+	TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
+	TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
+	TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
   }
 
 private:

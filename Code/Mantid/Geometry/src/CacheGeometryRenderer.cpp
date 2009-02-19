@@ -48,6 +48,8 @@ namespace Mantid
 			rot.GLMatrix(rotGL);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
+			V3D scaleFactor=ObjComp->getScaleFactor();
+			glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
 			ObjComp->drawObject();
 			glPopMatrix();
 		}
@@ -97,6 +99,8 @@ namespace Mantid
 			rot.GLMatrix(rotGL);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
+			V3D scaleFactor=ObjComp->getScaleFactor();
+			glScaled(scaleFactor[0],scaleFactor[1],scaleFactor[2]);
 			ObjComp->drawObject();
 			glPopMatrix();
 		}
