@@ -41,8 +41,6 @@ namespace Mantid
 		*/
 		vtkGeometryCacheWriter::~vtkGeometryCacheWriter()
 		{
-			write();
-			//Write to file
 			mDoc->release();
 		}
 
@@ -52,6 +50,7 @@ namespace Mantid
 		void vtkGeometryCacheWriter::Init()
 		{
 			mRoot=mDoc->createElement("PolyData");
+			createVTKFileHeader();
 		}
 		/**
 		 * creates VTK XML header
@@ -154,17 +153,25 @@ namespace Mantid
 
 			//add this piece to root
 			mRoot->appendChild(pPiece);
+			write();
 		}
 
 		void vtkGeometryCacheWriter::write()
 		{
-			createVTKFileHeader();
 			DOMWriter writer;
 			writer.setNewLine("\n");
 			writer.setOptions(XMLWriter::PRETTY_PRINT);
 			std::ofstream file;
-			file.open(mFileName.c_str());
-			writer.writeNode(file, mDoc);
+			try
+			{
+				file.open(mFileName.c_str(),std::ios::trunc);
+				writer.writeNode(file, mDoc);
+				file.close();
+			}
+			catch(...)
+			{
+				PLog.error("Geometry Cache file writing exception");
+			}
 		}
 	}
 }
