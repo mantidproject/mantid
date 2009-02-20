@@ -281,6 +281,7 @@ void LoadInstrument::exec()
 	  {
 		  ((*objItr).second)->setVtkGeometryCacheWriter(writer);
 	  }
+	  writer->write();
   }
   // Add the instrument to the InstrumentDataService
   InstrumentDataService::Instance().add(instrumentFile,m_instrument);

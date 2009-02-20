@@ -153,7 +153,6 @@ namespace Mantid
 
 			//add this piece to root
 			mRoot->appendChild(pPiece);
-			write();
 		}
 
 		void vtkGeometryCacheWriter::write()

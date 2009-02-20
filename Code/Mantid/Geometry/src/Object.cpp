@@ -1455,6 +1455,7 @@ namespace Mantid
 	void Object::setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter> writer)
 	{
 		vtkCacheWriter=writer;
+		updateGeometryHandler();
 	}
 
 	/**
