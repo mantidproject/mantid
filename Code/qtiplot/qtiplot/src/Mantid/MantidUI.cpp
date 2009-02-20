@@ -969,9 +969,6 @@ void MantidUI::manageMantidWorkspaces()
 #endif
 }
 
-//----------------------------
-// Python API functions
-//----------------------------
 /**
  * Create an instrument window from a named workspace or simply return the window if
  * it already exists
@@ -1029,16 +1026,6 @@ void MantidUI::showMantidInstrumentSelected()
 {
     QString wsName = getSelectedWorkspaceName();
     if (!wsName.isEmpty()) showMantidInstrument(wsName);
-}
-
-void MantidUI::showLogFileWindow()
-{
-  //Need a new window to display entries
-  MantidSampleLogDialog *dlg = new MantidSampleLogDialog(getSelectedWorkspaceName(), this);
-  dlg->setModal(false);
-  dlg->setAttribute(Qt::WA_DeleteOnClose);
-  dlg->show();
-  dlg->setFocus();
 }
 
 void MantidUI::mantidMenuAboutToShow()
@@ -1313,9 +1300,14 @@ Table* MantidUI::createTableFromSelectedColumns(const QString& wsName, Mantid::A
   return t;
 }
 
-//For python scripts we don't click and import a matrix so that we can plot
-//spectra from it so this command is does an import of a workspace and then plots
-//the requested spectrum
+//-------------------------------------------------
+// The following commands are purely for the Python
+// interface
+//-------------------------------------------------
+
+// In Python scripts we don't click and import a matrix so that we can plot
+// spectra from it so this command does an import of a workspace and then plots
+// the requested spectrum
 MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMatrix)
 {
   MantidMatrix* m = getMantidMatrix(wsName);
@@ -1339,6 +1331,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMat
   appWindow()->polishGraph(g,Graph::Line);
   m->setGraph1D(ml,t);
   ml->askOnCloseEvent(false);
+  t->showMinimized();
   return ml;
 }
 
@@ -1480,6 +1473,16 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   g->setTitle(label.section("-",0, 0));
  
   ml->showNormal();
+}
+
+void MantidUI::showLogFileWindow()
+{
+  //Need a new window to display entries
+  MantidSampleLogDialog *dlg = new MantidSampleLogDialog(getSelectedWorkspaceName(), this);
+  dlg->setModal(false);
+  dlg->setAttribute(Qt::WA_DeleteOnClose);
+  dlg->show();
+  dlg->setFocus();
 }
 
 

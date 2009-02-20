@@ -184,6 +184,9 @@ public slots:
 	void goToRow(int row);
 	//! Scroll to column (column starts with 1)
 	void goToColumn(int col);
+      // Set the active tab by name
+    void goToTab(const QString & name);
+
     void copySelection();
 
 	//! Allocate memory for a matrix buffer
@@ -250,6 +253,9 @@ protected:
     //Storage for column and row selection
     int m_rowBegin, m_rowEnd;
     int m_colBegin, m_colEnd;
+
+    //The tab labels
+    QString m_YTabLabel, m_XTabLabel, m_ETabLabel;
 };
 
 /**

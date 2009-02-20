@@ -71,10 +71,14 @@ m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
     setNumberFormat(2,MantidPreferences::MantidMatrixNumberFormatE(),
                       MantidPreferences::MantidMatrixNumberPrecisionE());
 
+    m_YTabLabel = QString("Y values");
+    m_XTabLabel = QString("X values");
+    m_ETabLabel = QString("Errors");
+
     m_tabs = new QTabWidget(this);
-    m_tabs->insertTab(0,m_table_viewY,"Y values");
-    m_tabs->insertTab(1,m_table_viewX,"X values"); 
-    m_tabs->insertTab(2,m_table_viewE,"Errors");
+    m_tabs->insertTab(0,m_table_viewY, m_YTabLabel);
+    m_tabs->insertTab(1,m_table_viewX, m_XTabLabel); 
+    m_tabs->insertTab(2,m_table_viewE, m_ETabLabel);
     setWidget(m_tabs);
 
     setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
@@ -148,7 +152,6 @@ void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
     view->setModel(model);
     view->setCornerButtonEnabled(false);
     view->setFocusPolicy(Qt::StrongFocus);
-    
     
     QPalette pal = view->palette();
     pal.setColor(QColorGroup::Base, m_bk_color);
@@ -369,6 +372,7 @@ void MantidMatrix::goTo(int row,int col)
 	if(col < 1 || col > numCols())
 		return;
 
+	activeView()->selectionModel()->select(activeModel()->index(row - 1, col - 1), QItemSelectionModel::ClearAndSelect);
 	activeView()->scrollTo(activeModel()->index(row - 1, col - 1), QAbstractItemView::PositionAtTop);
 }
 
@@ -376,9 +380,11 @@ void MantidMatrix::goToRow(int row)
 {
 	if(row < 1 || row > numRows())
 		return;
+	
+	//	activeView()->selectRow(row - 1); //For some reason, this did not highlight the row at all, hence the stupid line below
+	activeView()->selectionModel()->select(QItemSelection(activeModel()->index(row - 1, 0), activeModel()->index(row - 1, numCols() - 1)), QItemSelectionModel::ClearAndSelect);
 
-	activeView()->selectRow(row - 1);
-	activeView()->scrollTo(activeModel()->index(row - 1, 0), QAbstractItemView::PositionAtTop);
+	activeView()->scrollTo(activeModel()->index(row - 1, 0), QAbstractItemView::PositionAtCenter);
 }
 
 void MantidMatrix::goToColumn(int col)
@@ -386,8 +392,10 @@ void MantidMatrix::goToColumn(int col)
 	if(col < 1 || col > numCols())
 		return;
 
-	activeView()->selectColumn(col - 1);
+	//	activeView()->selectColumn(col - 1); //For some reason, this did not highlight the row at all, hence the stupid line below
+	activeView()->selectionModel()->select(QItemSelection(activeModel()->index(0, col - 1), activeModel()->index(numRows() - 1, col - 1)), QItemSelectionModel::ClearAndSelect);
 	activeView()->scrollTo(activeModel()->index(0, col - 1), QAbstractItemView::PositionAtCenter);
+
 }
 
 double MantidMatrix::dataX(int row, int col) const
@@ -991,6 +999,29 @@ void MantidMatrix::deleteWorkspace()
 void MantidMatrix::selfClosed(MdiSubWindow* w)
 {
   closeDependants();
+}
+
+//-------------------------------
+// Python API commands
+//------------------------------
+
+void MantidMatrix::goToTab(const QString & name)
+{
+  if( m_tabs->tabText(m_tabs->currentIndex()) == name ) return;
+
+  if( name == m_YTabLabel )
+  {
+    m_tabs->setCurrentIndex(0);
+  }
+  else if( name == m_XTabLabel )
+  {
+    m_tabs->setCurrentIndex(1);
+  }
+  else if( name == m_ETabLabel )
+  {
+    m_tabs->setCurrentIndex(2);
+  }
+  else return;
 }
 
 // ----------   MantidMatrixModel   ------------------ //

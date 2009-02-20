@@ -28,8 +28,8 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
-CONFIG          += release
-#CONFIG          += debug
+#CONFIG          += release
+CONFIG          += debug
 #win32: CONFIG   += console
 
 ##################### 3rd PARTY HEADER FILES SECTION ########################
@@ -47,8 +47,10 @@ win32:INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
 win32:INCLUDEPATH       += ../3rdparty/qwt/src
 
 unix:INCLUDEPATH       += /usr/include/
-unix:INCLUDEPATH       += /usr/include/qwt/
-unix:INCLUDEPATH       += /usr/include/qwtplot3d/
+unix:INCLUDEPATH       += /usr/include/qwt-qt4/
+unix:INCLUDEPATH       += /usr/include/qwtplot3d-qt4/
+unix:INCLUDEPATH       += /usr/include/muParser
+unix:INCLUDEPATH       += ../3rdParty/liborigin
 
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -67,7 +69,7 @@ unix:INCLUDEPATH       += /usr/include/qwtplot3d/
 unix:LIBS         += -lqscintilla2
 unix:LIBS         += -lmuparser
 unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
-unix:LIBS         += -L/usr/lib/ -lqwt
+unix:LIBS         += -L/usr/lib/ -lqwt-qt4
 unix:LIBS         += -lgsl -lgslcblas
 
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
