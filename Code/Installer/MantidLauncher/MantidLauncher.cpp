@@ -44,6 +44,11 @@ DWORD WINAPI ThreadProc(PVOID pParameter);
 // Returns true if HKLM\Software\Mantid exists meaning Mantid is installed
 bool ReadMantidRegValue(const std::string& valueName,std::string& value);
 
+void mess(const string& str)
+{
+    MessageBoxA(0,str.c_str(),"Mantid Laincher",MB_OK);
+}
+
 // Global variables
 HINSTANCE hInst;
 HWND hwndPB;
@@ -196,7 +201,6 @@ void readFile(const wchar_t* ws,const wchar_t* fn,const string& lfn)
   // End the request.
   if( bResults )
   {
-      cerr<<"send request ok\n";
     bResults = WinHttpReceiveResponse( hRequest, NULL );
   }
 
@@ -208,6 +212,18 @@ void readFile(const wchar_t* ws,const wchar_t* fn,const string& lfn)
   // Keep checking for data until there is nothing left.
   if( bResults )
   {
+      // Check that we receiving what we asked for. Status code must be 200
+      DWORD dwStatusCode = 0;
+      DWORD dwSize = sizeof(DWORD);
+      bResults = WinHttpQueryHeaders( hRequest, 
+                                      WINHTTP_QUERY_STATUS_CODE |
+                                      WINHTTP_QUERY_FLAG_NUMBER,
+                                      NULL, 
+                                      &dwStatusCode, 
+                                      &dwSize, 
+                                      NULL );
+      if (dwStatusCode != 200) throw runtime_error("");
+
     int nDownloaded = 0;
     do 
     {
