@@ -9,20 +9,23 @@ import md5
 import string
 
 QTDIR = 'toget/qt'
-#QTDIR = 'C:/Qt/4_4_0/bin'
+#QTDIR = 'c:/qt/bin'
 
 vfile = open('build_number.txt','r')
 vstr = vfile.read()
 vlen = len(vstr)
 vfile.close()
 
-MantidVersion = '1.0.' + vstr[12:vlen-2]
+MantidVersion = '1.0.' + vstr[12:vlen-1]
+print('Mantid version '+MantidVersion)
 
-product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'
+#product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'
+product_uuid = '{83F7E727-C069-4d45-A3F9-F47797F7970F}'
 
 MantidInstallDir = 'MantidInstall'
 
-pfile = open('product_uuid.txt','w')
+pfile = open('mantid_version.txt','w')
+pfile.write(MantidVersion+'\n')
 pfile.write(product_uuid)
 pfile.close()
 
@@ -256,6 +259,9 @@ InstallDir = addDirectory('INSTALLDIR','MInstall',MantidInstallDir,TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
 
 MantidDlls = addComponent('MantidDLLs','{FABC0481-C18D-415e-A0B1-CCB76C35FBE8}',binDir)
+addTo(MantidDlls,'Registry',{'Id':'RegInstallDir','Root':'HKLM','Key':'Software\Mantid','Name':'InstallDir','Action':'write','Type':'string','Value':'[INSTALLDIR]'})
+addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Software\Mantid','Name':'Version','Action':'write','Type':'string','Value':MantidVersion})
+addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
 # Modify Mantid.properties to set directories right
 prop_file = open('../Mantid/release/Mantid.properties','r')
 prop_file_ins = open('Mantid.properties','w')
@@ -309,13 +315,15 @@ addFileV('Matlabsetup','mtd_set','mantid_setup.m','mantid_setup.m',MantidDlls)
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
 addDlls(QTDIR,'qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
-startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
-desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin'})
+MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
+startmenuQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
+desktopQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
 addAllFiles('toget/pyc','pyc',QTIPlot)
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
+addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/qtiplot.exe'})
 
 #plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
@@ -395,15 +403,15 @@ Data = addComponent('Data','{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}',dataDir)
 addTo(Data,'CreateFolder',{})
 
 #-------------------  Source  ------------------------------------------
-# sourceDir = addDirectory('SourceDir','source','source',InstallDir)
+#sourceDir = addDirectory('SourceDir','source','source',InstallDir)
 
-# sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
-# SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC9}',sourceMantidAlgorithmsDir)
-# addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
+#sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
+#SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC3}',sourceMantidAlgorithmsDir)
+#addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
 
-# sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
-# SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
-# addAllFilesExt('../Mantid/API/src','api','cpp',SourceMantidAPI)
+#sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
+#SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
+#addAllFilesExt('../Mantid/API/src','api','cpp',SourceMantidAPI)
 
 # sourceMantidDataHandlingDir = addDirectory('SourceMantidDataHandlingDir','Mdh','MantidDataHandling',sourceDir)
 # SourceMantidDataHandling = addComponent('SourceMantidDataHandling','{3DE8C8E7-86F1-457f-8933-149AD79EA9D7}',sourceMantidDataHandlingDir)
@@ -567,15 +575,25 @@ for file in sfiles:
 addText(SipTest, addTo(SipPyd,'Condition',{'Level':'0'}))
 
 #------------- Source files ------------------------
-# SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1000',Complete)
-# addCRef('SourceMantidAlgorithms',SourceFiles)
-# addCRef('SourceMantidAPI',SourceFiles)
+#SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1',Complete)
+#addCRef('SourceMantidAlgorithms',SourceFiles)
+#addCRef('SourceMantidAPI',SourceFiles)
 # addCRef('SourceMantidDataHandling',SourceFiles)
 # addCRef('SourceMantidDataObjects',SourceFiles)
 # addCRef('SourceMantidGeometry',SourceFiles)
 # addCRef('SourceMantidKernel',SourceFiles)
 # addCRef('SourceMantidNexus',SourceFiles)
 # addCRef('SourceMantidPythonAPI',SourceFiles)
+
+
+
+#tstDir = addDirectory('TstDir','tst','tst',InstallDir)
+#TstTst = addComponent('TSTST','{42AD79C6-8A51-4dcd-8E03-289077D880AA}',tstDir)
+#addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',TstTst)
+#addAllFilesExt('../Mantid/API/src','alg','cpp',TstTst)
+#TstFiles = addFeature('TstFiles1','TstFiles1','TstFiles1','1',Complete)
+#addCRef('TSTST',TstFiles)
+
 
 #addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
 addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
