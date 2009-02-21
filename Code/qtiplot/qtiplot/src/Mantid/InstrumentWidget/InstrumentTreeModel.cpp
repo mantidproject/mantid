@@ -63,7 +63,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
 		Mantid::Geometry::ICompAssembly* tmpAssem=dynamic_cast<Mantid::Geometry::ICompAssembly*>(component);
 		//Check whether its a component assembly
 		if(tmpAssem)
-			return QString((*tmpAssem)[index.column()]->getName().c_str());
+			return QString((tmpAssem)->getName().c_str());
 		Mantid::Geometry::IObjComponent* tmpObj=dynamic_cast<Mantid::Geometry::IObjComponent*>(component);
 		//Check whether its a object component
 		if(tmpObj)
