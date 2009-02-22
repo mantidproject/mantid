@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Cylinder.h"
 #include "MantidGeometry/Plane.h"
+#include "MantidKernel/Fast_Exponential.h"
 
 namespace Mantid
 {
@@ -38,6 +39,11 @@ void CorrectForAttenuation::init()
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices",1,positiveInt);
   declareProperty("NumberOfAnnuli",1,positiveInt->clone());
+  declareProperty("NumberOfWavelengthPoints",0,positiveInt->clone());
+
+  exp_options.push_back("Normal");
+  exp_options.push_back("FastApprox");
+  declareProperty("ExpMethod","Normal",new ListValidator(exp_options));
 }
 
 void CorrectForAttenuation::exec()
@@ -46,9 +52,9 @@ void CorrectForAttenuation::exec()
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   // Get the input parameters
-  this->retrieveProperties();
+  retrieveProperties();
   const double cylinder_volume=m_cylHeight*M_PI*m_cylRadius*m_cylRadius;
-  this->constructCylinderSample();
+  constructCylinderSample();
 
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
@@ -56,6 +62,17 @@ void CorrectForAttenuation::exec()
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
+
+  x_step=specSize/n_lambda; // Bin step between points to calculate
+
+  if (x_step==0) //Number of wavelength points >number of histogram points
+	  x_step=1;
+
+  std::ostringstream message;
+  message << "Numerical integration performed every " << x_step << " wavelength points" << std::endl;
+  g_log.information(message.str());
+  message.str("");
+
   const bool isHist = inputWS->isHistogramData();
   int iprogress_step = numHists / 100;
   if (iprogress_step == 0) iprogress_step = 1;
@@ -82,15 +99,24 @@ void CorrectForAttenuation::exec()
     // Get a reference to the Y's in the output WS for storing the factors
     std::vector<double> &Y = correctionFactors->dataY(i);
 
-    // Loop through the bins in the current spectrum
-    for (int j = 0; j < specSize; ++j)
+    // Loop through the bins in the current spectrum every x_step
+    for (int j = 0; j < specSize; j=j+x_step)
     {
       const double lambda = ( isHist ? (0.5*(X[j]+X[j+1])) : X[j] );
       Y[j] = this->doIntegration(lambda);
       Y[j]/= cylinder_volume; // Divide by total volume of the cylinder
     }
+
+    if (x_step>1) // Interpolate linearly between points separated by x_step, last point required
+    {
+		const double lambda = ( isHist ? (0.5*(X[specSize-1]+X[specSize])) : X[specSize-1] );
+		Y[specSize-1] = this->doIntegration(lambda);
+		Y[specSize-1]/= cylinder_volume;
+		interpolate(X,Y,isHist);
+    }
+
     // Element-detector distances are different for each spectrum (i.e. detector)
-    m_L2s.clear();
+    m_Ltot.clear();
 
     if ( i % iprogress_step == 0)
     {
@@ -116,8 +142,16 @@ void CorrectForAttenuation::retrieveProperties()
   const double sigma_atten = getProperty("AttenuationXSection");   // in barns
   const double sigma_s = getProperty("ScatteringXSection");         // in barns
   const double rho = getProperty("SampleNumberDensity");        // in Angstroms-3
-  m_refAtten = sigma_atten*rho;
-  m_scattering = sigma_s*rho;
+  m_refAtten = -sigma_atten*rho/1.798;
+  m_scattering = -sigma_s*rho;
+  n_lambda=getProperty("NumberOfWavelengthPoints");
+
+  std::string exp_string=getProperty("ExpMethod");
+
+  if (exp_string=="Normal") // Use the system exp function
+	  EXPONENTIAL=exp;
+  else if (exp_string=="FastApprox") // Use the compact approximation
+	  EXPONENTIAL=fast_exp;
 }
 
 /// Create the cylinder object using the Geometry classes
@@ -172,6 +206,17 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
   const int numAnnuli = getProperty("NumberOfAnnuli");;
   const double deltaR = m_cylRadius/numAnnuli;
 
+  /* The number of volume elements is
+   * numslices*(1+2+3+.....+numAnnuli)*6
+   * Since the first annulus is separated in 6 segments, the next one in 12 and so on.....
+   */
+  int n_volume_elements=numSlices*numAnnuli*(numAnnuli+1)*3;
+
+  m_L1s.resize(n_volume_elements);
+  m_Ltot.resize(n_volume_elements);
+  m_elementVolumes.resize(n_volume_elements);
+
+  int counter=0;
   // loop over slices
   for (int i = 0; i < numSlices; ++i)
   {
@@ -188,7 +233,7 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
       for (int k = 0; k < Ni; ++k)
       {
         const double phi = 2*M_PI*k/Ni;
-        // Calculate the current position in the sample in cartesian coordinates.
+        // Calculate the current position in the sample in Cartesian coordinates.
         // Remember that our cylinder has its axis along the y axis
         V3D currentPosition(R*sin(phi),z,R*cos(phi));
         assert( m_cylinderSample.isValid(currentPosition) );
@@ -200,38 +245,53 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
           // Remember beam along Z direction
           Track incoming(currentPosition,V3D(0.0,0.0,-1.0));
           int tmp = m_cylinderSample.interceptSurface(incoming);
-          assert( tmp == 1 );
-          m_L1s.push_back( incoming.begin()->Dist );
+          assert(tmp==1);
+          m_L1s[counter]=incoming.begin()->Dist;
 
           // Also calculate element volumes here
           const double outerR = R + (deltaR/2.0);
           const double innerR = R - (deltaR/2.0);
           const double elementVolume = M_PI*(outerR*outerR-innerR*innerR)*sliceThickness/Ni;
-          m_elementVolumes.push_back(elementVolume);
+          m_elementVolumes[counter]=elementVolume;
         }
 
         // Create track for distance in cylinder between scattering point and detector
-        V3D direction = currentPosition - detectorPos;
+        V3D direction = detectorPos-currentPosition;
         direction.normalize();
         Track outgoing(currentPosition,direction);
-        int tmp = m_cylinderSample.interceptSurface(outgoing);
-        assert( tmp == 1 );
-        m_L2s.push_back( outgoing.begin()->Dist );
+        int temp=m_cylinderSample.interceptSurface(outgoing);
+
+        /* Most of the time, the number of hits is 1. Sometime, we have more than one intersection due to
+        * arithmetic imprecision. If it is the case, then selecting the first intersection is valid.
+        * In principle, one could check the consistency of all distances if hits is larger than one by doing:
+        * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
+        * and looping until outgoing.end() checking the distances with it->Dist
+        */
+        // Not hitting the cylinder from inside, usually means detector is badly defined,
+        // i.e, position is (0,0,0).
+        if (temp<1)
+        {
+        	std::ostringstream message;
+        	message << "Problem with detector at" << detectorPos << std::endl;
+        	message << "This usually means that this detector is defined inside the sample cylinder";
+        	g_log.error(message.str());
+        	throw std::runtime_error("Problem in CorrectForAttenuation::calculateDistances");
+        }
+        m_Ltot[counter]=outgoing.begin()->Dist+m_L1s[counter];
+        counter++;
       }
     }
   }
 }
 
 /// Carries out the numerical integration over the cylinder
-double CorrectForAttenuation::doIntegration(const double& lambda)
+double CorrectForAttenuation::doIntegration(const double& lambda) const
 {
   double integral = 0.0;
   double exponent;
 
-  assert( m_L1s.size() == m_L2s.size() );
-  assert( m_L1s.size() == m_elementVolumes.size() );
   std::vector<double>::const_iterator l1it;
-  std::vector<double>::const_iterator l2it = m_L2s.begin();
+  std::vector<double>::const_iterator l2it = m_Ltot.begin();
   std::vector<double>::const_iterator elit = m_elementVolumes.begin();
 
   // Iterate over all the elements, summing up the integral
@@ -239,11 +299,37 @@ double CorrectForAttenuation::doIntegration(const double& lambda)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
-    exponent = -1.0 * ((m_refAtten * lambda / 1.798) + m_scattering ) * ( *l1it + *l2it );
-    integral += ( exp(exponent) * (*elit) );
+    exponent = ((m_refAtten * lambda) + m_scattering ) * ( *l2it );
+    integral += (EXPONENTIAL(exponent) * (*elit) );
   }
 
   return integral;
+}
+
+void CorrectForAttenuation::interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram)
+{
+	int step=x_step, index2;
+	double x1=0,x2=0,y1=0,y2=0,xp;
+	int specsize=y.size();
+	for (int i=0;i<specsize-1;++i) // Last point should have been calculated
+	{
+		if (step==x_step) //Point numerically integrated, does not need interpolation
+		{
+			x1= ( is_histogram ? (0.5*(x[i]+x[i+1])) : x[i]);
+			index2=((i+x_step)>=specsize ? specsize-1 : (i+x_step));
+			x2= ( is_histogram ? (0.5*(x[index2]+x[index2+1])) : x[index2]);
+			y1=y[i];
+			y2=y[index2];
+			step=1;
+			continue;
+		}
+		xp= ( is_histogram ? (0.5*(x[i]+x[i+1])) : x[i]);
+		// Interpolation
+		y[i]=(xp-x1)*y2+(x2-xp)*y1;
+		y[i]/=(x2-x1);
+		step++;
+	}
+	return;
 }
 
 } // namespace Algorithms

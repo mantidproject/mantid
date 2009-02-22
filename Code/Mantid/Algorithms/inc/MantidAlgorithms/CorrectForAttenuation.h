@@ -11,7 +11,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Calculates bin-by-bin correction factors for attenuation due to absorption and
+/** Calculates attenuation due to absorption and
     scattering in a cylindrical sample.
 
     Properties:
@@ -25,14 +25,16 @@ namespace Algorithms
     <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
     <LI> NumberOfSlices - The number of slices into which the cylinder is divided for the calculation. </LI>
     <LI> NumberOfAnnuli - The number of annuli into which each slice is divided for the calculation. </LI>
+    <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated </LI>
+    <LI> ExpMethod - The method to calculate exponential function (Normal of Fast approximation) </LI>
     </UL>
 
-    This algorithm uses a quasi-Monte Carlo/quasi-numerical integration method to calculate attenuation factors
-    resulting from absorption and single scattering in a cylindrical sample with the dimensions and material 
+    This algorithm uses numerical integration method to calculate attenuation factors
+    resulting from absorption and single scattering in a cylindrical sample with the dimensions and material
     properties given. Factors are calculated for each spectrum (i.e. detector position) and wavelength point,
-    as defined by the input workspace. The sample is divided up into a stack of slices, which are then divided 
+    as defined by the input workspace. The sample is divided up into a stack of slices, which are then divided
     into annuli (rings). These annuli are further divided to give the full set of elements for which a calculation
-    will be carried out. Thus the calculation speed depends linearly on the total number of bins in the workspace 
+    will be carried out. Thus the calculation speed depends linearly on the total number of bins in the workspace
     and on the number of slices. The dependence on the number of annuli is stronger, going as 3n(n + 1).
 
     Path lengths through the sample are then calculated for the centre-point of each element and a numerical
@@ -65,7 +67,7 @@ class DLLExport CorrectForAttenuation : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  CorrectForAttenuation() : API::Algorithm() {}
+  CorrectForAttenuation() :API::Algorithm() {}
   /// Virtual destructor
   virtual ~CorrectForAttenuation() {}
   /// Algorithm's name
@@ -76,6 +78,7 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
+
   /// Initialisation code
   void init();
   ///Execution code
@@ -84,20 +87,29 @@ private:
   void retrieveProperties();
   void constructCylinderSample();
   void calculateDistances(const Geometry::V3D& detectorPos);
-  double doIntegration(const double& lambda);
-
+  inline double doIntegration(const double& lambda) const;
+  void interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram);
   /// Sample object. Keeping separate from the full instrument geometry for now.
   Geometry::Object m_cylinderSample;
-  double m_cylHeight;   ///< The height of the cylindrical sample
-  double m_cylRadius;   ///< The radius of the cylindrical sample
-  double m_refAtten;    ///< The attenuation factor at 1.8A
-  double m_scattering;  ///< The scattering factor
-  std::vector<double> m_L1s,  ///< Cached distances
-                      m_L2s,  ///< Cached distances
+  double m_cylHeight;   ///< The height of the cylindrical sample in cm
+  double m_cylRadius;   ///< The radius of the cylindrical sample in cm
+  double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
+  double m_scattering;  ///< The scattering cross-section in barns
+  std::vector<double> m_L1s,  ///< Cached L1 distances
+                      m_Ltot,  ///< Cached (L1+L2) distances
                       m_elementVolumes;  ///< Cached element volumes
+  int n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
+  int x_step;           ///< The step in bin number between adjacent points
+
+  std::vector<std::string> exp_options; ///< Options to compute exponential function
+
+
+  typedef double (*expfunction)(double); //< Typedef pointer to exponential function
+  expfunction EXPONENTIAL; //< Pointer to exponential function
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+
 };
 
 } // namespace Algorithms
