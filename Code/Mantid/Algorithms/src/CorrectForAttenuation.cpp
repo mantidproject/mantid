@@ -115,9 +115,6 @@ void CorrectForAttenuation::exec()
 		interpolate(X,Y,isHist);
     }
 
-    // Element-detector distances are different for each spectrum (i.e. detector)
-    m_Ltot.clear();
-
     if ( i % iprogress_step == 0)
     {
         progress( double(i)/numHists );
@@ -125,12 +122,7 @@ void CorrectForAttenuation::exec()
     }
 
   }
-
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;
-  // Clear these out so it's not taking up memory after the algorithm is finished
-  m_L1s.clear();
-  m_elementVolumes.clear();
-
   setProperty("OutputWorkspace",correctionFactors);
 }
 
@@ -210,17 +202,22 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
    * numslices*(1+2+3+.....+numAnnuli)*6
    * Since the first annulus is separated in 6 segments, the next one in 12 and so on.....
    */
+  if (calculateL1s)
+  {
   int n_volume_elements=numSlices*numAnnuli*(numAnnuli+1)*3;
 
   m_L1s.resize(n_volume_elements);
   m_Ltot.resize(n_volume_elements);
   m_elementVolumes.resize(n_volume_elements);
-
+  }
   int counter=0;
   // loop over slices
+
+  V3D currentPosition;
+
   for (int i = 0; i < numSlices; ++i)
   {
-    const double z = (i+0.5)*sliceThickness - 0.5*m_cylHeight;
+	const double z = (i+0.5)*sliceThickness - 0.5*m_cylHeight;
 
     // Number of elements in 1st annulus
     int Ni = 0;
@@ -232,15 +229,14 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
       // loop over elements in current annulus
       for (int k = 0; k < Ni; ++k)
       {
-        const double phi = 2*M_PI*k/Ni;
-        // Calculate the current position in the sample in Cartesian coordinates.
-        // Remember that our cylinder has its axis along the y axis
-        V3D currentPosition(R*sin(phi),z,R*cos(phi));
-        assert( m_cylinderSample.isValid(currentPosition) );
-
         // These need only be calculated once
         if (calculateL1s)
         {
+        	const double phi = 2*M_PI*k/Ni;
+		  // Calculate the current position in the sample in Cartesian coordinates.
+		  // Remember that our cylinder has its axis along the y axis
+		  currentPosition(R*sin(phi),z,R*cos(phi));
+		  assert( m_cylinderSample.isValid(currentPosition) );
           // Create track for distance in cylinder before scattering point
           // Remember beam along Z direction
           Track incoming(currentPosition,V3D(0.0,0.0,-1.0));
@@ -250,7 +246,7 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
 
           // Also calculate element volumes here
           const double outerR = R + (deltaR/2.0);
-          const double innerR = R - (deltaR/2.0);
+          const double innerR = outerR-deltaR;
           const double elementVolume = M_PI*(outerR*outerR-innerR*innerR)*sliceThickness/Ni;
           m_elementVolumes[counter]=elementVolume;
         }
@@ -290,17 +286,15 @@ double CorrectForAttenuation::doIntegration(const double& lambda) const
   double integral = 0.0;
   double exponent;
 
-  std::vector<double>::const_iterator l1it;
-  std::vector<double>::const_iterator l2it = m_Ltot.begin();
-  std::vector<double>::const_iterator elit = m_elementVolumes.begin();
+  int el=m_Ltot.size();
 
   // Iterate over all the elements, summing up the integral
-  for (l1it = m_L1s.begin(); l1it != m_L1s.end(); ++l1it, ++l2it, ++elit)
+  for (int i=0; i<el;++i)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
-    exponent = ((m_refAtten * lambda) + m_scattering ) * ( *l2it );
-    integral += (EXPONENTIAL(exponent) * (*elit) );
+    exponent = ((m_refAtten * lambda) + m_scattering ) * ( m_Ltot[i] );
+    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i] ));
   }
 
   return integral;
@@ -309,15 +303,16 @@ double CorrectForAttenuation::doIntegration(const double& lambda) const
 void CorrectForAttenuation::interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram)
 {
 	int step=x_step, index2;
-	double x1=0,x2=0,y1=0,y2=0,xp;
+	double x1=0,x2=0,y1=0,y2=0,xp,overgap=0;
 	int specsize=y.size();
-	for (int i=0;i<specsize-1;++i) // Last point should have been calculated
+	for (int i=0;i<specsize-1;++i) // Last point has been calculated
 	{
 		if (step==x_step) //Point numerically integrated, does not need interpolation
 		{
 			x1= ( is_histogram ? (0.5*(x[i]+x[i+1])) : x[i]);
 			index2=((i+x_step)>=specsize ? specsize-1 : (i+x_step));
 			x2= ( is_histogram ? (0.5*(x[index2]+x[index2+1])) : x[index2]);
+			overgap=1.0/(x2-x1);
 			y1=y[i];
 			y2=y[index2];
 			step=1;
@@ -326,7 +321,7 @@ void CorrectForAttenuation::interpolate(const std::vector<double>& x, std::vecto
 		xp= ( is_histogram ? (0.5*(x[i]+x[i+1])) : x[i]);
 		// Interpolation
 		y[i]=(xp-x1)*y2+(x2-xp)*y1;
-		y[i]/=(x2-x1);
+		y[i]*=overgap;
 		step++;
 	}
 	return;
