@@ -62,14 +62,20 @@ void GeneralisedSecondDifference::exec()
   	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
   	int spec_min=getProperty("spectra_min");
   	int spec_max=getProperty("spectra_max");
-	if (spec_min>spec_max)
+  	int n_hists=inputWS->getNumberHistograms();
+
+  	if (spec_min==0 && spec_max==0) // Values per default, take all spectra
+  		spec_max=n_hists-1;
+
+  	if (spec_min>spec_max)
 		std::swap(spec_min,spec_max);
 
-	if (spec_max>inputWS->getNumberHistograms())
+	if (spec_max>n_hists)
 	{
-		message << "The value of spectra_max "<< spec_max << "is not valid";
-		throw std::runtime_error(message.str());
+		message << "Spectra_max "<< spec_max << " > number of histograms, Spectra_max reset to "<< (n_hists-1);
+		g_log.information(message.str());
 		message.str("");
+		spec_max=n_hists-1;
 	}
 
 	// Get some more input fields
@@ -77,7 +83,7 @@ void GeneralisedSecondDifference::exec()
   	m=getProperty("m");
   	const int n_av=z*m+1;
 
-  	// Calculate thre Cij and Cij^2 coefficients
+  	// Calculate the Cij and Cij^2 coefficients
   	computePrefactors();
 
 	const int n_specs=spec_max-spec_min+1;
