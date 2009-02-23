@@ -104,8 +104,8 @@ private:
   std::vector<std::string> exp_options; ///< Options to compute exponential function
 
 
-  typedef double (*expfunction)(double); //< Typedef pointer to exponential function
-  expfunction EXPONENTIAL; //< Pointer to exponential function
+  typedef double (*expfunction)(double); ///< Typedef pointer to exponential function
+  expfunction EXPONENTIAL; ///< Pointer to exponential function
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
