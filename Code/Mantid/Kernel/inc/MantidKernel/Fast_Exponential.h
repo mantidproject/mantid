@@ -21,7 +21,7 @@ namespace Kernel{
 
 inline double fast_exp(double y)
 {
-    union
+    static union
     {
         double d;
 #ifdef LITTLE_ENDIAN
