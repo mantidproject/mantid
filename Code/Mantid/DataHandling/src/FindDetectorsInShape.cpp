@@ -98,7 +98,7 @@ namespace Mantid
 						if (shape_sptr->isValid(detector_sptr->getPos()))
 						{
 							//shape encloses this objectComponent
-							g_log.debug()<<"Detector contained in shape " << detector_sptr->getID();
+              g_log.debug()<<"Detector contained in shape " << detector_sptr->getID() << std::endl;
 							foundDets.push_back(detector_sptr->getID());
 						}
 					}

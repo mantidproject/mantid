@@ -34,7 +34,7 @@ namespace Mantid
     {  
       CompositeValidator<> *wsValidator = new CompositeValidator<>;
       wsValidator->add(new HistogramValidator<>);
-      wsValidator->add(new RawCountValidator<>);
+      //wsValidator->add(new RawCountValidator<>);
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 

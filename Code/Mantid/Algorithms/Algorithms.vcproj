@@ -112,7 +112,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL"
+				PreprocessorDefinitions="_USE_MATH_DEFINES;WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL"
 				RuntimeLibrary="2"
 				DisableSpecificWarnings="4996"
 			/>

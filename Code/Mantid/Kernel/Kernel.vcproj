@@ -315,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\Fast_Exponential.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\FileValidator.h"
 				>
 			</File>
