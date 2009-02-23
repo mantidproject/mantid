@@ -39,7 +39,9 @@ void CorrectForAttenuation::init()
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices",1,positiveInt);
   declareProperty("NumberOfAnnuli",1,positiveInt->clone());
-  declareProperty("NumberOfWavelengthPoints",0,positiveInt->clone());
+  BoundedValidator<int> *zero = new BoundedValidator<int>();
+  zero->setLower(0);
+  declareProperty("NumberOfWavelengthPoints",0,zero);
 
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
@@ -124,6 +126,12 @@ void CorrectForAttenuation::exec()
   }
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;
   setProperty("OutputWorkspace",correctionFactors);
+
+  // Now do some cleaning-up since destructor is not called
+  m_L1s.clear();
+  m_Ltot.clear();
+  m_elementVolumes.clear();
+  exp_options.clear();
 }
 
 /// Fetch the properties and set the appropriate member variables
