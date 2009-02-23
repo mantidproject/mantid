@@ -120,6 +120,11 @@ void GeneralisedSecondDifference::exec()
   		}
   	}
   	setProperty("OutputWorkspace",out);
+
+  	// Now do some cleanup, necessary at this time since destructor is not called
+  	Cij.clear();
+  	Cij2.clear();
+
   	return;
 }
 /** Compute the Cij
