@@ -330,7 +330,7 @@ namespace Mantid
       {
 	// This is the assumed deployment directory for IDFs, where we need to be relative to the
 	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../Instrument").toString();  
+	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
       }
 
       const int stripPath = m_filename.find_last_of("\\/");

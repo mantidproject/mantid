@@ -134,6 +134,7 @@ class Logger;
 		std::string getOSVersion();	
 		std::string getCurrentDir();
 		std::string getTempDir();
+    std::string getBaseDir();
 
 	private:
 		friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
@@ -162,6 +163,9 @@ class Logger;
 	  
 	  /// Local storage for the relative path key/values that have been changed 
 	  std::map<std::string, std::string> m_mAbsolutePaths;
+
+    /// The directory that is considered to be the base directory
+    std::string m_strBaseDir;
 	};
 	
 	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

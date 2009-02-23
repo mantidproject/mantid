@@ -69,6 +69,9 @@ namespace Kernel
 
   //Return the executable path
   DLLExport std::string getDirectoryOfExecutable();
+  
+  //Return the full path to the executable
+  DLLExport std::string getPathToExecutable();
 
 } // namespace Kernel
 } // namespace Mantid

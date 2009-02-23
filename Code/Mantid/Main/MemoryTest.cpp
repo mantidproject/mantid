@@ -6,6 +6,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "Poco/Path.h"
 
@@ -35,7 +36,7 @@ void MemoryTest::runMemoryTests() const
   std::cerr << "\nStarted memory tests with " << mem_start << " KB of memory available\n";
   
   //First load some GEM data
-  std::string datadir = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../../../../Test/Data/").toString();
+  std::string datadir = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../../../../Test/Data/").toString();
   IAlgorithm* alg = fmgr.createAlgorithm("LoadRaw");
   alg->setPropertyValue("Filename", datadir + "GEM38370.raw");
   std::string loadraw ("GEM38370");

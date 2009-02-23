@@ -37,10 +37,20 @@ namespace Kernel
         //Register the SignalChannel with the Poco logging factory
         Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel",new Poco::Instantiator<Poco::SignalChannel, Poco::Channel>);
 
+    //Determine how we are running mantid
+    if( Mantid::Kernel::getPathToExecutable().rfind("python") != std::string::npos )
+    {
+      m_strBaseDir = Poco::Path::current();
+    }
+    else
+    {
+      m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
+    }
+        
         //attempt to load the default properties file that resides in the directory of the executable
-	loadConfig(Mantid::Kernel::getDirectoryOfExecutable() + "Mantid.properties");
+	loadConfig( getBaseDir() + "Mantid.properties");
 
-	//Fill the list of possible relative path keys that may require conversion to absolute paths
+    //Fill the list of possible relative path keys that may require conversion to absolute paths
 	m_vConfigPaths.clear();
 	m_vConfigPaths.push_back("plugins.directory");
 	m_vConfigPaths.push_back("instrumentDefinition.directory");
@@ -49,6 +59,8 @@ namespace Kernel
 	convertRelativePaths();
 
 	g_log.debug() << "ConfigService created." << std::endl;
+	g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
+
 	}
 
   /// Private copy constructor for singleton class
@@ -74,7 +86,7 @@ namespace Kernel
   {
     if( m_vConfigPaths.empty() ) return;
 
-    std::string execdir(Mantid::Kernel::getDirectoryOfExecutable());
+    std::string execdir(getBaseDir());
 
     std::vector<std::string>::const_iterator send = m_vConfigPaths.end();
     for( std::vector<std::string>::const_iterator sitr = m_vConfigPaths.begin(); sitr != send; ++sitr )
@@ -257,6 +269,16 @@ namespace Kernel
 		return m_pSysConfig->getString("system.tempDir");
 	}
 
+  /**
+      * Gets the directory that we consider to be the bse directory. Basically, this is the 
+      * executable directory when running normally or the current directory on startup when
+      * running through Python on the command line
+      * @returns The directory to consider as the base directory, including a trailing slash
+      */
+  std::string ConfigServiceImpl::getBaseDir()
+	{
+		return m_strBaseDir;
+	}
 
 	
 /// \cond TEMPLATE 

@@ -246,7 +246,7 @@ namespace NeXus
       {
 	// This is the assumed deployment directory for IDFs, where we need to be relative to the
 	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../Instrument").toString();  
+	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
       }
 
       // For Nexus Mantid processed, Instrument XML file name is read from nexus 

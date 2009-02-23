@@ -18,6 +18,17 @@
  */
 std::string Mantid::Kernel::getDirectoryOfExecutable()
 {
+  return Poco::Path(getPathToExecutable()).parent().toString();
+}
+
+/**
+  * Get the  full path the the program executable. This is not necessarily MantidPlot or a main
+  * program since if we are running through Python, it is the Python executable that is considered
+  * as the executing program
+  * @returns A string containing the full path the the executable
+  */
+std::string Mantid::Kernel::getPathToExecutable()
+{
   std::string execpath("");
   const size_t LEN(1024);
   char pBuf[LEN];
@@ -34,5 +45,5 @@ std::string Mantid::Kernel::getDirectoryOfExecutable()
     pBuf[bytes] = '\0';
     execpath = std::string(pBuf);
   }
-  return Poco::Path(execpath).parent().toString();
+  return execpath;
 }

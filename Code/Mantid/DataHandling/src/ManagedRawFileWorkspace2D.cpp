@@ -192,7 +192,7 @@ namespace Mantid
 	
 	if( !Poco::File(path).exists() )
 	{
-	  path = Mantid::Kernel::getDirectoryOfExecutable();
+	  path = Mantid::Kernel::ConfigService::Instance().getBaseDir();
 	}
 
 	if( !Poco::File(path).canWrite() )
