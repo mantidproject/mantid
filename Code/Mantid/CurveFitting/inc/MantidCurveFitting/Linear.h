@@ -16,7 +16,7 @@ namespace CurveFitting
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace containing the spectrum to fit </LI>
+    <LI> InputWorkspace  - The name of the Workspace containing the spectrum to fit </LI>
     <LI> OutputWorkspace - A 1D workspace containing the fit result & errors for the X of the input spectrum </LI>
     </UL>
 
@@ -29,6 +29,7 @@ namespace CurveFitting
 
     Output Properties:
     <UL>
+    <LI> FitStatus    - Whether the fit succeeded (empty string if so, error message otherwise)
     <LI> FitIntercept - The c0 in the equation above </LI>
     <LI> FitSlope     - The slope of the fit; c1 in the equation above </LI>
     <LI> Chi2         - The chi^2 of the fit </LI>

@@ -78,7 +78,8 @@ DataObjects::TableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr
 /** If a peak was successfully fitted, it is subtracted from the data.
  *  THIS METHOD ASSUMES THAT THE FITTING WAS DONE TO A GAUSSIAN FUNCTION.
  *  Note that the error value is left unchanged.
- *  @param input The input workspace
+ *  @param input     The input workspace
+ *  @param peakslist The succesfully fitted peaks
  *  @return A workspace containing the peak-subtracted data
  */
 API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, DataObjects::TableWorkspace_sptr peakslist)
@@ -113,8 +114,6 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     {
       // If this is histogram data, we want to use the bin's central value
       double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : x = X[j]);
-      //if (isHistogramData) x = 0.5*(X[j]+X[j+1]);
-      //  else x = X[j];
       // Skip if not anywhere near this peak
       if ( x < centre-3.0*width ) continue;
       if ( x > centre+3.0*width ) break;

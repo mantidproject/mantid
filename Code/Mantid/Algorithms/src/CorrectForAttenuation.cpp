@@ -23,6 +23,11 @@ using namespace API;
 // Get a reference to the logger. It is used to print out information, warning and error messages
 Logger& CorrectForAttenuation::g_log = Logger::get("CorrectForAttenuation");
 
+CorrectForAttenuation::CorrectForAttenuation() :
+  API::Algorithm(), m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
+  m_L1s(), m_Ltot(), m_elementVolumes(), n_lambda(0), x_step(0), exp_options()
+{}
+
 void CorrectForAttenuation::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new WorkspaceUnitValidator<>("Wavelength")));
@@ -39,9 +44,7 @@ void CorrectForAttenuation::init()
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices",1,positiveInt);
   declareProperty("NumberOfAnnuli",1,positiveInt->clone());
-  BoundedValidator<int> *zero = new BoundedValidator<int>();
-  zero->setLower(0);
-  declareProperty("NumberOfWavelengthPoints",0,zero);
+  declareProperty("NumberOfWavelengthPoints",1,positiveInt->clone());
 
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
@@ -65,6 +68,8 @@ void CorrectForAttenuation::exec()
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
 
+  // If the number of wavelength points has not been given, use them all
+  if ( n_lambda == 0 ) n_lambda = specSize;
   x_step=specSize/n_lambda; // Bin step between points to calculate
 
   if (x_step==0) //Number of wavelength points >number of histogram points
@@ -144,7 +149,9 @@ void CorrectForAttenuation::retrieveProperties()
   const double rho = getProperty("SampleNumberDensity");        // in Angstroms-3
   m_refAtten = -sigma_atten*rho/1.798;
   m_scattering = -sigma_s*rho;
-  n_lambda=getProperty("NumberOfWavelengthPoints");
+  
+  Property *numPoints = getProperty("NumberOfWavelengthPoints");
+  if ( !numPoints->isDefault() ) n_lambda=getProperty("NumberOfWavelengthPoints");
 
   std::string exp_string=getProperty("ExpMethod");
 
@@ -308,6 +315,7 @@ double CorrectForAttenuation::doIntegration(const double& lambda) const
   return integral;
 }
 
+/// Calculate the value of the correction at the points not explicitly numerically integrated
 void CorrectForAttenuation::interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram)
 {
 	int step=x_step, index2;

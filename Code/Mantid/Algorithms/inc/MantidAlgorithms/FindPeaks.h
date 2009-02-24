@@ -17,6 +17,7 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace to search for peaks. </LI>
+    <LI> PeaksList      - The name of the TableWorkspace in which to store the list of peaks found. </LI>
     </UL>
 
     Optional Properties:
@@ -28,7 +29,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/11/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

@@ -25,8 +25,8 @@ namespace Algorithms
     <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
     <LI> NumberOfSlices - The number of slices into which the cylinder is divided for the calculation. </LI>
     <LI> NumberOfAnnuli - The number of annuli into which each slice is divided for the calculation. </LI>
-    <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated </LI>
-    <LI> ExpMethod - The method to calculate exponential function (Normal of Fast approximation) </LI>
+    <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated (default: all points). </LI>
+    <LI> ExpMethod - The method to calculate exponential function (Normal of Fast approximation). </LI>
     </UL>
 
     This algorithm uses numerical integration method to calculate attenuation factors
@@ -43,7 +43,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,7 +67,7 @@ class DLLExport CorrectForAttenuation : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  CorrectForAttenuation() :API::Algorithm() {}
+  CorrectForAttenuation();
   /// Virtual destructor
   virtual ~CorrectForAttenuation() {}
   /// Algorithm's name
@@ -89,6 +89,7 @@ private:
   void calculateDistances(const Geometry::V3D& detectorPos);
   inline double doIntegration(const double& lambda) const;
   void interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram);
+  
   /// Sample object. Keeping separate from the full instrument geometry for now.
   Geometry::Object m_cylinderSample;
   double m_cylHeight;   ///< The height of the cylindrical sample in cm
@@ -102,7 +103,6 @@ private:
   int x_step;           ///< The step in bin number between adjacent points
 
   std::vector<std::string> exp_options; ///< Options to compute exponential function
-
 
   typedef double (*expfunction)(double); ///< Typedef pointer to exponential function
   expfunction EXPONENTIAL; ///< Pointer to exponential function
