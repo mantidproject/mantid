@@ -451,7 +451,6 @@ addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib','../Mantid/Kernel/l
 addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib','../Mantid/API/lib/MantidAPI.lib',UserAlgorithms)
 addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib','../Mantid/DataObjects/lib/MantidDataObjects.lib',UserAlgorithms)
 addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib','../Mantid/Geometry/lib/MantidGeometry.lib',UserAlgorithms)
-addFileV('boost_filsystem_lib','boost_fs.lib','libboost_filesystem-vc80-mt-1_34_1.lib','../Third_Party/lib/win32/libboost_filesystem-vc80-mt-1_34_1.lib',UserAlgorithms)
 addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party/lib/win32/PocoFoundation.lib',UserAlgorithms)
 
 #--------------- Python ------------------------------------------------
