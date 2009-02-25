@@ -84,6 +84,7 @@ class DLLExport Object
 	                         const double&, const double&, const double& ) const;
   double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
   double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
+  double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class CacheGeometryHandler;
@@ -164,8 +165,12 @@ class DLLExport Object
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Geometry::V3D& observer) const;
+  // Solid angle with a scaling of the object
+  double solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const;
   // solid angle via triangulation
   double triangleSolidAngle(const Geometry::V3D& observer) const;
+  // Solid angle via triangulation with scaling factor for object size
+  double triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const;
   // solid angle via ray tracing
   double rayTraceSolidAngle(const Geometry::V3D& observer) const;
 

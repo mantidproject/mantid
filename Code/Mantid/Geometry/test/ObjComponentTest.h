@@ -307,6 +307,39 @@ void testgetPointInObject()
 	TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
   }
 
+  void testSolidAngleCappedCylinderWithScaleFactor()
+  {
+    ObjComponent A("ocyl", createCappedCylinder());
+
+    A.setScaleFactor(2.0,1.0,1.0);
+    A.setPos(10,0,0);
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+    double satol=3e-3; // tolerance for solid angle
+
+    // this point should be 0.5 above the cylinder on its axis of sym
+    TS_ASSERT_DELTA(A.solidAngle(V3D(10,2.9,0)),1.840302,satol);
+    // Surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(10,-5,0.5)),2*M_PI,satol);
+
+    // Add a parent with a rotation of its own;
+    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
+    A.setParent(&parent);
+
+    // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset of them
+    // assume this is the same position as above
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-12.9)),1.840302,satol);
+    // this one was done "experimentally" and now the shape is different
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-2.93333333)),1.25663708,satol);
+    // internal point (should be 4pi)
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0,10,-10)),4*M_PI,satol);
+    // surface point
+    TS_ASSERT_DELTA(A.solidAngle(V3D(0.5,10,-10)),2*M_PI,satol);
+
+    // Calling on an ObjComponent without an associated geometric object will throw
+    ObjComponent B("noShape");
+    TS_ASSERT_THROWS( B.solidAngle(V3D(1,2,3)), Exception::NullPointerException )
+  }
+
 private:
   boost::shared_ptr<Object> createCappedCylinder()
   {

@@ -106,8 +106,12 @@ double ObjComponent::solidAngle(const V3D& observer) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle","shape");
-  // Otherwise pass through the shifted point to the Object::solidAngle method
-  return shape->solidAngle( factorOutComponentPosition(observer) );
+  // Otherwise pass through the shifted point to the Object::solidAngle method, if non-unity
+  // scaling also pass the scaling vector
+  if((m_ScaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
+      return shape->solidAngle( factorOutComponentPosition(observer) );
+  else
+      return shape->solidAngle( factorOutComponentPosition(observer)*m_ScaleFactor, m_ScaleFactor);
 }
 
 /**

@@ -885,6 +885,19 @@ namespace Mantid
             return rayTraceSolidAngle(observer);
         return triangleSolidAngle(observer);
     }
+
+    double
+        Object::solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const
+        /*!
+        Find soild angle of object wrt the observer with a scaleFactor for the object.
+        @param observer :: point to measure solid angle from
+        @param scaleFactor :: V3D giving scaling of the object
+        @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
+        */
+    {
+        return triangleSolidAngle(observer,scaleFactor);
+    }
+
     double
       Object::rayTraceSolidAngle(const Geometry::V3D& observer) const
       /*!
@@ -1068,7 +1081,9 @@ namespace Mantid
        }
 	   int nTri=this->NumberOfTriangles();
        //
-       // If triangulation is not available fall back to ray tracing method
+       // If triangulation is not available fall back to ray tracing method, unless
+       // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
+       // and Cone cases as well.
        //
        if(nTri==0)
        {
@@ -1078,8 +1093,11 @@ namespace Mantid
            this->GetObjectGeom( type, vectors, radius, height);
            if(type==1)
                return CuboidSolidAngle(observer,vectors);
-           //else if(type==2)
-           //    return SphereSolidAngle(observer,vectors,radius);
+           else if(type==2)
+               return SphereSolidAngle(observer,vectors,radius);
+           //
+           // No special case, do the ray trace.
+           //
            return rayTraceSolidAngle(observer);
        }
 	   int nPoints=this->NumberOfPoints();
@@ -1101,6 +1119,105 @@ namespace Mantid
        }
        return(0.5*(sangle-sneg));
     }
+	/**
+	 * Find solid angle of object from point "observer" using the
+	 * OC triangluation of the object, if it exists. This method expects a
+     * scaling vector scaleFactor that scales the three axes.
+	 *
+	 * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
+     * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
+	 */
+	double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const
+    {
+       //
+       // Because the triangles from OC are not consistently ordered wrt their outward normal
+       // internal points give incorrect solid angle. Surface points are difficult to get right
+       // with the triangle based method. Hence catch these two (unlikely) cases.
+       if(!boolBounded)
+       {
+           const double big(1e8);
+           AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
+           getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+       }
+       double sx=scaleFactor[0],sy=scaleFactor[1],sz=scaleFactor[2];
+       V3D sObserver=observer/scaleFactor;
+       if(inBoundingBox(sObserver,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
+       {
+           if(isValid(sObserver))
+           {
+               if(isOnSide(sObserver))
+                   return(2.0*M_PI);
+               else
+                   return(4.0*M_PI);
+           }
+       }
+	   int nTri=this->NumberOfTriangles();
+       //
+       // If triangulation is not available fall back to ray tracing method, unless
+       // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
+       // and Cone cases as well.
+       //
+       if(nTri==0)
+       {
+           double height,radius;
+           int type;
+           std::vector<Geometry::V3D> vectors;
+           this->GetObjectGeom( type, vectors, radius, height);
+           if(type==1)
+           {
+               for(int i=0;i<6;i++)
+                   vectors[i] *= scaleFactor;
+               return CuboidSolidAngle(observer,vectors);
+           }
+           else if(type==2) // this is wrong for scaled objects
+               return SphereSolidAngle(observer,vectors,radius);
+           //
+           // No special case, do the ray trace.
+           //
+           return rayTraceSolidAngle(observer); // so is this
+       }
+	   int nPoints=this->NumberOfPoints();
+	   double* vertices=this->getTriangleVertices();
+	   int *faces=this->getTriangleFaces();
+       double sangle=0,sneg=0;
+       for(int i=0;i<NumberOfTriangles();i++)
+       {
+           int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
+           // would be more efficient to pre-multiply the vertices (copy of) by these factors beforehand
+           V3D vp1=V3D(sx*vertices[3*p1],sy*vertices[3*p1+1],sz*vertices[3*p1+2]);
+           V3D vp2=V3D(sx*vertices[3*p2],sy*vertices[3*p2+1],sz*vertices[3*p2+2]);
+           V3D vp3=V3D(sx*vertices[3*p3],sy*vertices[3*p3+1],sz*vertices[3*p3+2]);
+           double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
+           if(sa>0)
+              sangle+=sa;
+           else
+              sneg+=sa;
+     //    std::cout << vp1 << vp2 << vp2;
+       }
+       return(0.5*(sangle-sneg));
+    }
+    /**
+     * Get the solid angle of a sphere defined by centre and radius using an analytic formula
+     * @param observer :: point from which solid angle required
+     * @param vectors :: vector of V3D - the only value is the sphere centre
+     * @param radius :: sphere radius
+     * @return :: solid angle of sphere
+     */
+	double Object::SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const
+	{
+        const double distance=(observer-vectors[0]).norm();
+		const double tol=Surface::getSurfaceTolerance();
+        if(distance>radius+tol)
+        {
+           const double sa=2.0*M_PI*(1.0-cos(asin(radius/distance)));
+           return sa;
+        }
+        else if(distance<radius-tol)
+           return 4.0*M_PI; // internal point
+        else
+           return 2.0*M_PI; // surface point
+    }
+ 
     /**
      * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle based soild angle
      * calculation. Should work for parallel-piped as well.
