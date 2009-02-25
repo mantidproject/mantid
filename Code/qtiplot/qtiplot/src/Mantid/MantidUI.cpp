@@ -14,7 +14,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
-#include "InputHistory.h"
+#include "InputHistory.h" 
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -979,22 +979,22 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
 
   //See if a window for this instrument already exists
-  QMdiSubWindow *subWin(NULL);
-  foreach( subWin, appWindow()->d_workspace->subWindowList(QMdiArea::StackingOrder) )
-  {
-    if( subWin->name() == QString("InstrumentWindow:") + wsName ) break;
-  }
-  if( subWin )
-  {
-    return static_cast<InstrumentWindow*>(subWin);
-  }
+  //QMdiSubWindow *subWin(NULL);
+  //foreach( subWin, appWindow()->d_workspace->subWindowList(QMdiArea::StackingOrder) )
+  //{
+  //  if( subWin->name() == QString("InstrumentWindow:") + wsName ) break;
+  //}
+  //if( subWin )
+  //{
+  //  return static_cast<InstrumentWindow*>(subWin);
+  //}
   
   //Need a new window
   InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
   insWin->setName(QString("InstrumentWindow:") + wsName);
   insWin->setWindowTitle(QString("Instrument - ") + wsName);
   appWindow()->d_workspace->addSubWindow(insWin);
-
+  
   insWin->setWorkspaceName(wsName.toStdString());
   connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
   connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
