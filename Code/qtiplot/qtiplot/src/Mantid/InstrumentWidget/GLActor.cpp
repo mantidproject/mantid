@@ -4,24 +4,12 @@
 #include <GL/gl.h>
 #include "GLActor.h"
 
-unsigned char GLActor::_referencecolorID[3]={1,0,0};
+
 boost::shared_ptr<GLColor> redColor(new GLColor(1.0,0.5,0.0,1.0));
+
 GLActor::GLActor(char* name):_name(name), _picked(false)
 {
-    _colorID[0]=_referencecolorID[0];
-    _colorID[1]=_referencecolorID[1];
-    _colorID[2]=_referencecolorID[2];
-    _referencecolorID[0]++;
-    if (_referencecolorID[0]>254)
-    {
-        _referencecolorID[0]=1;
-        _referencecolorID[1]++;
-         if (_referencecolorID[1]>254)
-        {
-            _referencecolorID[1]=0;
-            _referencecolorID[2]++;
-        }
-    }
+	_colorID[0]=0;_colorID[1]=0;_colorID[2]=0;
 	_color=redColor;
 	_pos=new Mantid::Geometry::V3D;
 }
@@ -34,7 +22,7 @@ GLActor::~GLActor()
  * This method draws the GL object
  */
 void GLActor::draw()
-{ 
+{
     glPushMatrix();
         glTranslated((*_pos)[0],(*_pos)[1],(*_pos)[2]);
 		_color->paint(GLColor::MATERIAL);
@@ -55,6 +43,10 @@ void GLActor::drawBoundingBox()
        glPopMatrix();
 }
 
+void GLActor::setColorID(unsigned char r, unsigned char g, unsigned char b)
+{
+	_colorID[0]=r;_colorID[1]=g;_colorID[2]=b;
+}
 /**
  * This method get the bounding box values of the GLObject
  * @param minPoint Its the return value of the min point of actor bounding box
@@ -90,21 +82,11 @@ void GLActor::setRepresentation(boost::shared_ptr<GLObject> o)
 
 /**
  * This method returns the GLobject held by the actor
- * @return internal GLobject 
+ * @return internal GLobject
  */
 boost::shared_ptr<GLObject> GLActor::getRepresentation()
 {
 	return _representation;
-}
-
-/**
- * This method compares the input color id with the actor color id.
- * @param c input color id
- * @return boolean value true if the input color and actor color id are same otherwise false
- */
-bool GLActor::isColorID(unsigned char c[3])
-{
-    return (_colorID[0]==c[0] && _colorID[1]==c[1] && _colorID[2]==c[2]);
 }
 
 /**
@@ -141,5 +123,5 @@ void GLActor::drawIDColor()
         glTranslated((*_pos)[0],(*_pos)[1],(*_pos)[2]);
          glColor3f(_colorID[0]/255.0f,_colorID[1]/255.0f,_colorID[2]/255.0f);
         _representation->draw();
-    glPopMatrix();    
+    glPopMatrix();
 }
