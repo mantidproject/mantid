@@ -207,7 +207,14 @@ GLActor* GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate
 void GLGroupPickBox::draw(QPainter* painter)
 {
 	painter->drawImage(0,0,mDisplayImage);
+	drawPickBox(painter);
+}
+
+/**
+ * This method draws the pick box
+ */
+void GLGroupPickBox::drawPickBox(QPainter* painter)
+{
     painter->setPen(Qt::blue);
 	painter->drawRect(mBoxStartPtX,mBoxStartPtY,mBoxEndPtX-mBoxStartPtX,mBoxEndPtY-mBoxStartPtY);
 }
-

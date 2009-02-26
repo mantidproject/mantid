@@ -16,6 +16,10 @@
 #define GL_MULTISAMPLE  0x809D
 #endif
 
+//NOTES:
+//1) if the sample buffers are not available then the paint of image on the mdi windows 
+//   seems to not work on intel chipset
+
 
 GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(QGLFormat(QGL::SampleBuffers),parent)
 {
@@ -171,10 +175,21 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
 		if(mPickingDraw==true)
 			switchToPickingMode();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		QPainter painter(this);
-		painter.setRenderHint(QPainter::Antialiasing);
-		mPickBox->draw(&painter);
-		painter.end();
+		if(format().sampleBuffers())
+		{
+			QPainter painter(this);
+			painter.setRenderHint(QPainter::Antialiasing);
+			mPickBox->draw(&painter);
+			painter.end();
+		}
+		else
+		{
+			drawDisplayScene();
+			QPainter painter(this);
+			painter.setRenderHint(QPainter::Antialiasing);
+			mPickBox->drawPickBox(&painter);
+			painter.end();
+		}
 	} 
 	else
 	{

@@ -21,8 +21,6 @@ GLActorCollection::GLActorCollection():GLObject(false)
 
 GLActorCollection::~GLActorCollection()
 {
-	for(Actormap::iterator i=_actors.begin();i!=_actors.end();i++)
-		delete (*i).second;
 	_actors.clear();
 	for(std::vector<GLActor*>::iterator i=_actorsV.begin();i!=_actorsV.end();i++)
 			delete (*i);
