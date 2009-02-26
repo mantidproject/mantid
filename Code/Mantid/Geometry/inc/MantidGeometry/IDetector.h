@@ -73,10 +73,8 @@ public:
    */
   virtual double solidAngle(const V3D& observer) const = 0;
 
-  /// Indicates whether the detector is to be regarded as dead
-  virtual bool isDead() const = 0;
-  /// Flag the detector as dead
-  virtual void markDead() = 0;
+  /// Indicates whether the detector has been masked
+  virtual bool isMasked() const = 0;
 
   /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;

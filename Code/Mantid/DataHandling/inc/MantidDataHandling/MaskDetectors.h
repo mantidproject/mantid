@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MARKDEADDETECTORS_H_
-#define MANTID_DATAHANDLING_MARKDEADDETECTORS_H_
+#ifndef MANTID_DATAHANDLING_MASKDETECTORS_H_
+#define MANTID_DATAHANDLING_MASKDETECTORS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,7 +11,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-/** An algorithm to mark a detector, or set of detectors, as dead.
+/** An algorithm to mask a detector, or set of detectors.
     The workspace spectra associated with those detectors are zeroed.
 
     Required Properties:
@@ -19,17 +19,17 @@ namespace DataHandling
     <LI> Workspace - The name of the (input & output) Workspace2D on which to perform the algorithm </LI>
     </UL>
 
-    Optional Properties (One or the other should be set. SpectraList is used if both are set.):
+    Optional Properties (One should be set. The highest listed below will be used if more than one is.):
     <UL>
-    <LI> SpectraList - An ArrayProperty containing a list of spectra to mark dead </LI>
-    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to mark dead </LI>
-    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to mark dead </LI>
+    <LI> SpectraList - An ArrayProperty containing a list of spectra to mask </LI>
+    <LI> DetectorList - An ArrayProperty containing a list of detector IDs to mask </LI>
+    <LI> WorkspaceIndexList - An ArrayProperty containing the workspace indices to mask </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 15/04/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -49,14 +49,14 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MarkDeadDetectors : public API::Algorithm
+class DLLExport MaskDetectors : public API::Algorithm
 {
 public:
-  MarkDeadDetectors();
-  virtual ~MarkDeadDetectors();
+  MaskDetectors();
+  virtual ~MaskDetectors();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MarkDeadDetectors";};
+  virtual const std::string name() const { return "MaskDetectors";};
   /// Algorithm's version for identification overriding a virtual method
   virtual const int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
@@ -76,4 +76,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_MARKDEADDETECTORS_H_*/
+#endif /*MANTID_DATAHANDLING_MASKDETECTORS_H_*/

@@ -41,10 +41,10 @@ DetectorGroup::~DetectorGroup()
 /// Add a detector to the collection
 void DetectorGroup::addDetector(IDetector_sptr det)
 {
-  // Warn if adding a dead detector
-  if ( det->isDead() )
+  // Warn if adding a masked detector
+  if ( det->isMasked() )
   {
-    g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as dead." << std::endl;
+    g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as masked." << std::endl;
   }
 
   // For now at least, the ID is the same as the first detector that is added
@@ -68,7 +68,7 @@ int DetectorGroup::getID() const
 /** Returns the position of the DetectorGroup.
  *  In the absence of a full surface/solid angle implementation, this is a simple
  *  average of the component detectors (i.e. there's no weighting for size or if one
- *  or more of the detectors is dead). Also, no regard is made to whether a
+ *  or more of the detectors is masked). Also, no regard is made to whether a
  *  constituent detector is itself a DetectorGroup - it's just treated as a single,
  *  pointlike object with the same weight as any other detector.
  */
@@ -125,24 +125,15 @@ double DetectorGroup::solidAngle(const V3D& observer) const
   return result;
 }
 
-bool DetectorGroup::isDead() const
+bool DetectorGroup::isMasked() const
 {
-  bool isDead = true;
+  bool isMasked = true;
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
   {
-    if ( !(*it).second->isDead() ) isDead = false;
+    if ( !(*it).second->isMasked() ) isMasked = false;
   }
-  return isDead;
-}
-
-void DetectorGroup::markDead()
-{
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
-  {
-    (*it).second->markDead();
-  }
+  return isMasked;
 }
 
 /** Indicates whether this is a monitor.

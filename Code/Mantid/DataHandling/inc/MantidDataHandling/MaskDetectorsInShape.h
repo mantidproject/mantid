@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_
-#define MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_
+#ifndef MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
+#define MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,7 +13,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-/** An algorithm for finding marking as dead detectors that are contained within a user defined shape within the instrument.
+/** An algorithm for finding masking detectors that are contained within a user defined shape within the instrument.
 
     Required Properties:
     <UL>
@@ -28,7 +28,7 @@ namespace DataHandling
 
 		Output Properties:
     <UL>
-    <LI> DetectorList - An array property containing the detectors ids marked dead in the shape </LI>
+    <LI> DetectorList - An array property containing the detectors ids masked in the shape </LI>
     </UL>
 
     @author Nick Draper, Tessella plc
@@ -54,14 +54,14 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MarkDeadDetectorsInShape : public API::Algorithm
+class DLLExport MaskDetectorsInShape : public API::Algorithm
 {
 public:
-  MarkDeadDetectorsInShape();
-  virtual ~MarkDeadDetectorsInShape();
+  MaskDetectorsInShape();
+  virtual ~MaskDetectorsInShape();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MarkDeadDetectorsInShape";};
+  virtual const std::string name() const { return "MaskDetectorsInShape";};
   /// Algorithm's version for identification overriding a virtual method
   virtual const int version() const { return 1;};
   /// Algorithm's category for identification overriding a virtual method
@@ -75,7 +75,7 @@ private:
 	//internal functions
 	std::vector<int> runFindDetectorsInShape(DataObjects::Workspace2D_sptr workspace, 
 		const std::string shapeXML, const bool includeMonitors);
-	void runMarkDeadDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds);
+	void runMaskDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
@@ -84,4 +84,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_MARKDEADDETECTORSINSHAPE_H_*/
+#endif /*MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_*/

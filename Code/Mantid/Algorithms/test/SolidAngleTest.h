@@ -14,6 +14,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
@@ -68,7 +69,9 @@ public:
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     
     // Mark one detector dead to test that it leads to zero solid angle
-    space2D->getDetector(143)->markDead();
+    Detector* det143 = dynamic_cast<Detector*>(space2D->getDetector(143).get());
+    boost::shared_ptr<ParameterMap> pmap = space2D->InstrumentParameters();
+    pmap->addBool(det143,"masked",true);
   }
 
   void testInit()

@@ -16,7 +16,7 @@ public:
     TS_ASSERT_EQUALS(det.getName(),"det1");
     TS_ASSERT(!det.getParent());
     TS_ASSERT_EQUALS(det.getID(),0);
-    TS_ASSERT(!det.isDead());
+    TS_ASSERT(!det.isMasked());
     TS_ASSERT(!det.isMonitor());
   }
 
@@ -27,7 +27,7 @@ public:
     TS_ASSERT_EQUALS(det.getName(),"det1");
     TS_ASSERT(det.getParent());
     TS_ASSERT_EQUALS(det.getID(),0);
-    TS_ASSERT(!det.isDead());
+    TS_ASSERT(!det.isMasked());
     TS_ASSERT(!det.isMonitor());
   }
 
@@ -52,12 +52,7 @@ public:
   void testDead()
   {
     Detector det("det",0);
-    TS_ASSERT( ! det.isDead() )
-    TS_ASSERT_THROWS_NOTHING( det.markDead() )
-    TS_ASSERT( det.isDead() )
-    // Re-flagging as dead doesn't throw, just prints a warning
-    TS_ASSERT_THROWS_NOTHING( det.markDead() )
-    TS_ASSERT( det.isDead() )
+    TS_ASSERT( ! det.isMasked() )
   }
 
   void testMonitor()

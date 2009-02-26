@@ -65,15 +65,10 @@ double ParDetector::solidAngle(const V3D& observer) const
   return ParObjComponent::solidAngle(observer);
 }
 
-bool ParDetector::isDead() const
+bool ParDetector::isMasked() const
 {
-  return dynamic_cast<const Detector*>(m_base)->isDead();
-}
-
-void ParDetector::markDead()
-{
-  // Ugly, but hopefully only temporary (see Trac #405)
-  dynamic_cast<Detector*>(const_cast<IComponent*>(m_base))->markDead();
+  Parameter_sptr par = m_map->get(m_base,"masked");
+  return par ? true : false;
 }
 
 bool ParDetector::isMonitor() const

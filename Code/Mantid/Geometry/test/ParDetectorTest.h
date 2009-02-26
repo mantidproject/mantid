@@ -21,7 +21,7 @@ public:
     TS_ASSERT_EQUALS(pdet.getName(),"det1");
     TS_ASSERT(!pdet.getParent());
     TS_ASSERT_EQUALS(pdet.getID(),0);
-    TS_ASSERT(!pdet.isDead());
+    TS_ASSERT(!pdet.isMasked());
     TS_ASSERT(!pdet.isMonitor());
   }
 
@@ -36,7 +36,7 @@ public:
     TS_ASSERT_EQUALS(pdet.getName(),"det1");
     TS_ASSERT(pdet.getParent());
     TS_ASSERT_EQUALS(pdet.getID(),0);
-    TS_ASSERT(!pdet.isDead());
+    TS_ASSERT(!pdet.isMasked());
     TS_ASSERT(!pdet.isMonitor());
   }
 
@@ -66,19 +66,16 @@ public:
     TS_ASSERT_EQUALS(pdet.type(),"ParDetectorComponent");
   }
 
-  void testDead()
+  void testMasked()
   {
     Detector det("det",0);
 
     ParameterMap pmap;
     ParDetector pdet(&det,&pmap);
 
-    TS_ASSERT( ! pdet.isDead() )
-    TS_ASSERT_THROWS_NOTHING( det.markDead() )
-    TS_ASSERT( pdet.isDead() )
-    // Re-flagging as dead doesn't throw, just prints a warning
-    TS_ASSERT_THROWS_NOTHING( det.markDead() )
-    TS_ASSERT( pdet.isDead() )
+    TS_ASSERT( ! pdet.isMasked() )
+    pmap.addBool(&det,"masked",true);
+    TS_ASSERT( pdet.isMasked() )
   }
 
   void testMonitor()

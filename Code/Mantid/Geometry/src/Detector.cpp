@@ -13,7 +13,7 @@ Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
  *  @param parent The parent component
  */
 Detector::Detector(const std::string& name, Component* parent) :
-  ObjComponent(name,parent), IDetector(), m_id(0), m_isDead(false), m_isMonitor(false)
+  ObjComponent(name,parent), IDetector(), m_id(0), m_isMonitor(false)
 {
 }
 
@@ -23,13 +23,13 @@ Detector::Detector(const std::string& name, Component* parent) :
  *  @param parent The parent component
  */
 Detector::Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-  ObjComponent(name,shape,parent), IDetector(), m_id(0), m_isDead(false), m_isMonitor(false)
+  ObjComponent(name,shape,parent), IDetector(), m_id(0), m_isMonitor(false)
 {
 }
 
 /// Copy constructor
 Detector::Detector(const Detector& rhs) :
-  ObjComponent(rhs), m_id(rhs.m_id), m_isDead(rhs.m_isDead), m_isMonitor(rhs.m_isMonitor)
+  ObjComponent(rhs), m_id(rhs.m_id), m_isMonitor(rhs.m_isMonitor)
 {
 }
 
@@ -76,15 +76,14 @@ double Detector::solidAngle(const V3D& observer) const
 	return ObjComponent::solidAngle(observer);
 }
 
-bool Detector::isDead() const
+/** This method will only be called if this detector is not part of a parameterized instrument,
+ *  in which case there are no masked detectors.
+ *  @return false
+ */
+bool Detector::isMasked() const
 {
-  return m_isDead;
-}
-
-void Detector::markDead()
-{
-  if ( m_isDead ) g_log.warning() << "Detector " << getID() << " is already marked as dead." << std::endl;
-  m_isDead = true;
+  // If you get to here, instead of the ParDetector method, then it isn't masked
+  return false;
 }
 
 bool Detector::isMonitor() const

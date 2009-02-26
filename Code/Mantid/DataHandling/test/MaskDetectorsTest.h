@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MarkDeadDetectors.h"
+#include "MantidDataHandling/MaskDetectors.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -18,10 +18,10 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-class MarkDeadDetectorsTest : public CxxTest::TestSuite
+class MaskDetectorsTest : public CxxTest::TestSuite
 {
 public:
-  MarkDeadDetectorsTest()
+  MaskDetectorsTest()
   {
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
@@ -61,7 +61,7 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( marker.name(), "MarkDeadDetectors" )
+    TS_ASSERT_EQUALS( marker.name(), "MaskDetectors" )
   }
 
   void testVersion()
@@ -74,7 +74,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( marker.initialize() )
     TS_ASSERT( marker.isInitialized() );
 
-    MarkDeadDetectors mdd;
+    MaskDetectors mdd;
     TS_ASSERT_THROWS_NOTHING( mdd.initialize() )
     TS_ASSERT( mdd.isInitialized() );
 
@@ -110,7 +110,7 @@ public:
     marker.setPropertyValue("WorkspaceIndexList","0,3");
     TS_ASSERT_THROWS_NOTHING( marker.execute());
 
-    MarkDeadDetectors marker2;
+    MaskDetectors marker2;
     marker2.initialize();
     marker2.setPropertyValue("Workspace","testSpace");
     marker2.setPropertyValue("SpectraList","2");
@@ -137,15 +137,15 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataY(4), ones )
     TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
     boost::shared_ptr<IInstrument> i = outputWS->getInstrument();
-    TS_ASSERT( i->getDetector(0)->isDead() )
-    TS_ASSERT( ! i->getDetector(1)->isDead() )
-    TS_ASSERT( i->getDetector(2)->isDead() )
-    TS_ASSERT( i->getDetector(3)->isDead() )
-    TS_ASSERT( ! i->getDetector(4)->isDead() )
+    TS_ASSERT( i->getDetector(0)->isMasked() )
+    TS_ASSERT( ! i->getDetector(1)->isMasked() )
+    TS_ASSERT( i->getDetector(2)->isMasked() )
+    TS_ASSERT( i->getDetector(3)->isMasked() )
+    TS_ASSERT( ! i->getDetector(4)->isMasked() )
   }
 
 private:
-  MarkDeadDetectors marker;
+  MaskDetectors marker;
 };
 
 #endif /*MARKDEADDETECTORSTEST_H_*/

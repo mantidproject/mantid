@@ -632,8 +632,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
    //IDetector Class
    class_< Mantid::Geometry::IDetector, boost::noncopyable, Mantid_Geometry_IDetector_Wrapper >("IDetector", no_init)
      .def("getID", pure_virtual(&Mantid::Geometry::IDetector::getID))
-     .def("isDead", pure_virtual(&Mantid::Geometry::IDetector::isDead))
-     .def("markDead", pure_virtual(&Mantid::Geometry::IDetector::markDead))
+     .def("isMasked", pure_virtual(&Mantid::Geometry::IDetector::isMasked))
      ;
 
    //SpectraDetectorMap Class

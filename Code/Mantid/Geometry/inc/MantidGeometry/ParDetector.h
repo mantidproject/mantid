@@ -57,8 +57,7 @@ public:
 	double getDistance(const IComponent& comp) const;
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double solidAngle(const V3D& observer) const; 
-	bool isDead() const;
-	void markDead();
+	bool isMasked() const;
 	bool isMonitor() const;
 	// end IDetector methods
 

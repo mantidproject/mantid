@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/MarkDeadDetectorsInShape.h"
+#include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid
@@ -9,22 +9,22 @@ namespace Mantid
 	namespace DataHandling
 	{
 		// Register the algorithm into the algorithm factory
-		DECLARE_ALGORITHM(MarkDeadDetectorsInShape)
+		DECLARE_ALGORITHM(MaskDetectorsInShape)
 
 		using namespace Kernel;
 		using namespace API;
 		using namespace DataObjects;
 
 		// Initialise the logger
-		Kernel::Logger& MarkDeadDetectorsInShape::g_log = Kernel::Logger::get("MarkDeadDetectorsInShape");
+		Kernel::Logger& MaskDetectorsInShape::g_log = Kernel::Logger::get("MaskDetectorsInShape");
 
 		/// (Empty) Constructor
-		MarkDeadDetectorsInShape::MarkDeadDetectorsInShape() {}
+		MaskDetectorsInShape::MaskDetectorsInShape() {}
 
 		/// Destructor
-		MarkDeadDetectorsInShape::~MarkDeadDetectorsInShape() {}
+		MaskDetectorsInShape::~MaskDetectorsInShape() {}
 
-		void MarkDeadDetectorsInShape::init()
+		void MaskDetectorsInShape::init()
 		{
 			declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut));
 			declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
@@ -32,7 +32,7 @@ namespace Mantid
 			declareProperty("DetectorList",std::vector<int>(),Direction::Output);
 		}
 
-		void MarkDeadDetectorsInShape::exec()
+		void MaskDetectorsInShape::exec()
 		{
 			// Get the input workspace
 			Workspace2D_sptr WS = getProperty("Workspace");
@@ -42,13 +42,13 @@ namespace Mantid
 
 
 			std::vector<int> foundDets = runFindDetectorsInShape(WS,shapeXML,includeMonitors);
-			runMarkDeadDetectors(WS,foundDets);
+			runMaskDetectors(WS,foundDets);
 			setProperty("Workspace",WS);
 			setProperty("DetectorList",foundDets);
 		}
 
 		/// Run the FindDetectorsInShape sub-algorithm
-    std::vector<int> MarkDeadDetectorsInShape::runFindDetectorsInShape(Workspace2D_sptr workspace,
+    std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(Workspace2D_sptr workspace,
 			const std::string shapeXML, const bool includeMonitors)
     {
       Algorithm_sptr alg = createSubAlgorithm("FindDetectorsInShape",0,85);
@@ -72,21 +72,21 @@ namespace Mantid
 			return alg->getProperty("DetectorList");
     }
 
-		void MarkDeadDetectorsInShape::runMarkDeadDetectors(Workspace2D_sptr workspace, const std::vector<int> detectorIds)
+		void MaskDetectorsInShape::runMaskDetectors(Workspace2D_sptr workspace, const std::vector<int> detectorIds)
     {
-      Algorithm_sptr alg = createSubAlgorithm("MarkDeadDetectors",85,100);
+      Algorithm_sptr alg = createSubAlgorithm("MaskDetectors",85,100);
 			alg->setProperty<std::vector<int> >("DetectorList", detectorIds);
       alg->setProperty<Workspace2D_sptr>("Workspace",workspace);
       try
       {
         if (!alg->execute())
 				{
-					throw std::runtime_error("MarkDeadDetectors sub-algorithm has not executed successfully\n");
+					throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully\n");
 				}
       }
       catch (std::runtime_error& err)
       {
-    	  g_log.error("Unable to successfully execute MarkDeadDetectors sub-algorithm");
+    	  g_log.error("Unable to successfully execute MaskDetectors sub-algorithm");
 				throw;
       }
     }

@@ -355,7 +355,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
   {
     try {
       Geometry::IDetector_const_sptr det = workspace->getDetector(i);
-      if ( !det->isDead() )
+      if ( !det->isMasked() )
       {
         const std::vector<double> &XData = workspace->readX(i);
         if ( XData.front() < XMin ) XMin = XData.front();

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/MarkDeadDetectors.h"
+#include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -13,7 +13,7 @@ namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(MarkDeadDetectors)
+DECLARE_ALGORITHM(MaskDetectors)
 
 using namespace Kernel;
 using namespace API;
@@ -21,15 +21,15 @@ using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
 // Initialise the logger
-Kernel::Logger& MarkDeadDetectors::g_log = Kernel::Logger::get("MarkDeadDetectors");
+Kernel::Logger& MaskDetectors::g_log = Kernel::Logger::get("MaskDetectors");
 
 /// (Empty) Constructor
-MarkDeadDetectors::MarkDeadDetectors() {}
+MaskDetectors::MaskDetectors() {}
 
 /// Destructor
-MarkDeadDetectors::~MarkDeadDetectors() {}
+MaskDetectors::~MaskDetectors() {}
 
-void MarkDeadDetectors::init()
+void MaskDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
   declareProperty(new ArrayProperty<int>("SpectraList"));
@@ -37,7 +37,7 @@ void MarkDeadDetectors::init()
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
 }
 
-void MarkDeadDetectors::exec()
+void MaskDetectors::exec()
 {
   // Get the input workspace
   const Workspace2D_sptr WS = getProperty("Workspace");
@@ -56,6 +56,7 @@ void MarkDeadDetectors::exec()
   }
 
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
+  const std::vector<int> detectorList = getProperty("DetectorList");
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
   // appropriate spectra number and adding the indices they are linked to the list to be processed
@@ -66,25 +67,56 @@ void MarkDeadDetectors::exec()
   }// End dealing with spectraList
   else if ( ! dl->isDefault() )
   {// Dealing with DetectorList
-    const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
 
+  // Need to get hold of the parameter map
+  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->InstrumentParameters();
+  
+  // If explicitly given a list of detectors to mask, just mark those.
+  // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
+  bool detsMasked = false;
+  std::vector<int>::const_iterator it;
+  boost::shared_ptr<Instrument> instrument = WS->getBaseInstrument();
+  if ( !detectorList.empty() )
+  {
+    for (it = detectorList.begin(); it != detectorList.end(); ++it)
+    {
+      if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+      {
+        pmap->addBool(det,"masked",true);
+      }
+    }
+    detsMasked = true;
+  }
+  
   if ( indexList.size() == 0 )
   {
-      g_log.warning("Nothing to do");
+      g_log.warning("No spectra affected.");
       return;
   }
-
-  std::vector<int>::const_iterator it;
+  
+  // Get a reference to the spectra-detector map to get hold of detector ID's
+  const SpectraDetectorMap& specMap = WS->spectraMap();
+  
   for (it = indexList.begin(); it != indexList.end(); ++it)
   {
-    // Mark associated detector as dead
-    WS->getDetector(*it)->markDead();
-
+    if (!detsMasked)
+    {
+      // In this case, mask all detectors contributing to spectrum
+      const std::vector<int> dets = specMap.getDetectors(*it);
+      for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+      {
+        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+        {
+          pmap->addBool(det,"masked",true);
+        }        
+      }
+    }
+    
     // Zero the workspace spectra (data and errors, not X values)
     WS->dataY(*it).assign(vectorSize,0.0);
     WS->dataE(*it).assign(vectorSize,0.0);
@@ -93,7 +125,7 @@ void MarkDeadDetectors::exec()
 }
 
 /// Convert a list of spectra numbers into the corresponding workspace indices
-void MarkDeadDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
+void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
                                               const DataObjects::Workspace2D_sptr WS)
 {
   // Convert the vector of properties into a set for easy searching

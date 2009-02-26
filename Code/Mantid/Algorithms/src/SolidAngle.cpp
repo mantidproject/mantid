@@ -99,7 +99,7 @@ namespace Mantid
 					// Now get the detector to which this relates
 					Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
           // Solid angle should be zero if detector is masked ('dead')
-          double solidAngle = det->isDead() ? 0.0 : det->solidAngle(samplePos);
+          double solidAngle = det->isMasked() ? 0.0 : det->solidAngle(samplePos);
 	
 					outputWS->dataX(j)[0] = inputWS->readX(i).front();
 					outputWS->dataX(j)[1] = inputWS->readX(i).back();

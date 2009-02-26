@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/MarkDeadDetectorsInShape.h"
+#include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Instrument.h"
@@ -24,11 +24,11 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class MarkDeadDetectorsInShapeTest : public CxxTest::TestSuite
+class MaskDetectorsInShapeTest : public CxxTest::TestSuite
 {
 public:
 
-  MarkDeadDetectorsInShapeTest()
+  MaskDetectorsInShapeTest()
   {
 		loadTestWS();
   }
@@ -62,7 +62,7 @@ public:
 
 	void runTest(std::string xmlShape, std::string expectedHits,bool includeMonitors = true)
   {
-		MarkDeadDetectorsInShape alg;
+		MaskDetectorsInShape alg;
 		TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );
 
@@ -90,7 +90,7 @@ public:
 		boost::shared_ptr<IInstrument> i = outWS->getInstrument();
 		for (std::vector<int>::iterator it = expectedDetectorArray.begin(); it!=expectedDetectorArray.end(); ++it) 
 		{
-			TS_ASSERT( i->getDetector((*it))->isDead() )
+			TS_ASSERT( i->getDetector((*it))->isMasked() )
 		}
   }
 
@@ -108,7 +108,7 @@ public:
     TS_ASSERT( loaderSLS.isInitialized() );
     inputFile = "../../../../Test/Instrument/SLS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", inputFile);
-    wsName = "MarkDeadDetectorsInShapeTestSLS";
+    wsName = "MaskDetectorsInShapeTestSLS";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
 
     std::string result;
