@@ -40,10 +40,14 @@ void GLViewport::setOrtho(double l,double r,double b,double t,double nearz,doubl
 {
 	mLeft=l;
 	mRight=r;
+	if (mLeft>mRight) std::swap(mLeft,mRight); // Make sure that it is only from back to front otherwise the
 	mBottom=b;
 	mTop=t;
+	if (mBottom>mTop) std::swap(mBottom,mTop);
 	mNear=nearz;
 	mFar=farz;
+	if (mNear>mFar) std::swap(mNear,mFar);
+
 	mProjection=GLViewport::ORTHO;
 }
 
@@ -141,7 +145,7 @@ void GLViewport::issueGL() const
 		else
 		{
 			distance[1]=distance[0];
-			distance[1]/=windowAspect;				
+			distance[1]/=windowAspect;
 		}
 	}
 	//use zoom now
@@ -151,7 +155,7 @@ void GLViewport::issueGL() const
 	glViewport(0, 0, mWidth, mHeight);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	if(mProjection==GLViewport::PERSPECTIVE){	
+	if(mProjection==GLViewport::PERSPECTIVE){
 		glFrustum(center[0]-distance[0]-mXTrans, center[0]+distance[0]-mXTrans, center[1]-distance[1]-mYTrans, center[1]+distance[1]-mYTrans, center[2]+distance[2], mFar);
 	}else{
 //		glOrtho(mLeft*mZoomFactor-mXTrans, mRight*mZoomFactor-mXTrans, mBottom*mZoomFactor-mYTrans, mTop*mZoomFactor-mYTrans, mNear*mZoomFactor, mFar);

@@ -4,7 +4,7 @@
 #include "GL3DWidget.h"
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"  
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -54,7 +54,7 @@ Instrument3DWidget::~Instrument3DWidget()
 /**
  * Set the default Axis direction of the model
  */
-void Instrument3DWidget::setAxis(Mantid::Geometry::V3D& direction,Mantid::Geometry::V3D& up)
+void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction,const Mantid::Geometry::V3D& up)
 {
 	mAxisDirection=direction;
 	mAxisUpVector=up;
@@ -62,7 +62,7 @@ void Instrument3DWidget::setAxis(Mantid::Geometry::V3D& direction,Mantid::Geomet
 
 /**
  * This method is the slot when the detectors are picked using mouse. This method emits
- * signals the ids of the detector and the spectra index(not spectra number). 
+ * signals the ids of the detector and the spectra index(not spectra number).
  * @param pickedActor the input passed by the the signal.
  */
 void Instrument3DWidget::fireDetectorsPicked(std::vector<GLActor*> pickedActor)
@@ -112,7 +112,7 @@ void Instrument3DWidget::fireDetectorsPicked(std::vector<GLActor*> pickedActor)
 
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
- * signals the id of the detector and the spectra index(not spectra number). 
+ * signals the id of the detector and the spectra index(not spectra number).
  * @param pickedActor the input passed by the the signal.
  */
 void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
@@ -175,7 +175,7 @@ void Instrument3DWidget::setWorkspace(std::string wsName)
 	//Get the workspace min bin value and max bin value
 //  	BinMinValue=DBL_MAX;
 //  	BinMaxValue=-DBL_MAX;
-    
+
     if( !mHaveBinMaxMin )
     {
         int nHist = output->getNumberHistograms();
@@ -228,8 +228,8 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 			actor1->setPos(0.0,0.0,0.0);
 			actor1->setColor(col);
 			scene->addActor(actor1);
-		} 
-        else 
+		}
+        else
         {
             boost::shared_ptr<ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<ICompAssembly>(tmp);
 			if (tmpAssem.get())
@@ -238,7 +238,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
                 boost::shared_ptr<IComponent> o = (*tmpAssem)[idx];
 				CompList.push(o);
 			}
-		} 
+		}
 	}
     /*std::vector< boost::shared_ptr<IObjComponent> > plist = ins->getPlottable();
     for(std::vector< boost::shared_ptr<IObjComponent> >::iterator o = plist.begin();o!=plist.end();o++)
@@ -254,7 +254,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 }
 
 /**
- * This method returns the vector list of all detector id's corresponding to the actor collections. 
+ * This method returns the vector list of all detector id's corresponding to the actor collections.
  * The id's are in the same order as the indexs of the actor in the actor collections. If dectector is not assigned
  * to the actor then -1 is set.
  * @return std::vector<int> list of detector id's
@@ -287,7 +287,7 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
 		}else{
 			idDecVec.push_back(-1);
 		}
-	}	
+	}
 	return idDecVec;
 }
 
@@ -300,10 +300,10 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecV
 	if(strWorkspaceName=="")return std::vector<int>();
 	MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
-	
+
 	std::map<int,int> indexMap;
 	const std::vector<int> spectraList = output->spectraMap().getSpectra(idDecVec);
-	
+
 	// There is no direct way of getting histogram index from the spectra id,
 	// get the spectra axis and convert form index to spectra number and create
 	// a map.
@@ -314,7 +314,7 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecV
 		int currentSpec = spectraAxis->spectraNo(i);
 		indexMap[currentSpec]=i;
 	}
-	std::vector<int> indexList;	
+	std::vector<int> indexList;
 	for(int i=0;i<spectraList.size();i++)
 	{
 		if(idDecVec[i]!=-1)
@@ -326,13 +326,13 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecV
 }
 
 /**
- * This method assigns colors to the dectors using the values 
+ * This method assigns colors to the dectors using the values
  * @param minval input minimum value for scaling of the colormap
  * @param maxval input maximum value for scaling of the colormap
  * @param values input values that coorespond to each detector
  * @param colorMap input color map class which is used for looking up the color to be assigned based on the value of detector.
  */
-void Instrument3DWidget::setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colorMap)
+void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colorMap)
 {
 	int count=scene->getNumberOfActors();
 	int noOfColors=colorMap.getNumberOfColors();
@@ -358,15 +358,15 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,std::v
 }
 
 /**
- * This method collects the values of the given timebin,spectra list and calculates min and max values and collection of values 
+ * This method collects the values of the given timebin,spectra list and calculates min and max values and collection of values
  * with the spectra list.
  * @param timebin input time bin value
- * @param histogramIndexList input list of historgram index 
+ * @param histogramIndexList input list of historgram index
  * @param minval output minimum value of the histogram time bin value
  * @param maxval output maximum value of the histogram time bin value
  * @param valuesList output list of histogram values corresponding to timebin value
  */
-void Instrument3DWidget::CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList)
+void Instrument3DWidget::CollectTimebinValues(int timebin,const std::vector<int>& histogramIndexList, double& minval,double& maxval,std::vector<double>& valuesList)
 {
 	MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
@@ -390,16 +390,16 @@ void Instrument3DWidget::CollectTimebinValues(int timebin, std::vector<int> hist
 }
 
 /**
- * This method collects the integral values of the spectra list and calculates min and max values and collection of values 
+ * This method collects the integral values of the spectra list and calculates min and max values and collection of values
  * with the spectra list.
- * @param histogramIndexList input list of historgram index 
+ * @param histogramIndexList input list of historgram index
  * @param startbin is the starting bin number to integrate
  * @param endbin is the ending bin number to integrate
  * @param minval output minimum value of the histogram time bin value
  * @param maxval output maximum value of the histogram time bin value
  * @param valuesList output list of histogram values corresponding to timebin value
  */
-void Instrument3DWidget::CollectIntegralValues(std::vector<int> histogramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList)
+void Instrument3DWidget::CollectIntegralValues(const std::vector<int>& histogramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList)
 {
 	MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
@@ -438,7 +438,7 @@ void Instrument3DWidget::AssignColors()
 	std::vector<int> detectorList = this->getDetectorIDList();
 	if(detectorList.size()==0)return; ///< to check whether any detectors are present
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
-	std::vector<double> values;	
+	std::vector<double> values;
 	double minval,maxval;
 	MatrixWorkspace_sptr output;
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
@@ -465,7 +465,7 @@ void Instrument3DWidget::AssignColors()
  * This method takes the input name as the filename and reads the file for the color index values.
  * NOTE: This method can only read 256 color index with RGB values
  */
-void Instrument3DWidget::setColorMapName(std::string name)
+void Instrument3DWidget::setColorMapName(const std::string& name)
 {
 	mColorMap.setColorMapFile(name);
 	AssignColors();
@@ -654,7 +654,7 @@ void Instrument3DWidget::resetWidget()
 	GL3DWidget::resetWidget();
 }
 
-void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)
+void Instrument3DWidget::setView(const V3D& pos,double xmax,double ymax,double zmax,double xmin,double ymin,double zmin)
 {
 	////get the centre of the bounding box
 	//V3D boundCentre;
@@ -710,5 +710,5 @@ void Instrument3DWidget::setView(V3D pos,double xmax,double ymax,double zmax,dou
 	_trackball->rotateBoundingBox(xmin,xmax,ymin,ymax,zmin,zmax);//rotate the bounding box
 	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmax,-zmin);
 	_viewport->issueGL();
-	update();	
+	update();
 }

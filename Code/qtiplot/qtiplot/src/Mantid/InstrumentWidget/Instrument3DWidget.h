@@ -1,7 +1,7 @@
 #ifndef INSTRUMENT3DWIDGET_H_
 #define INSTRUMENT3DWIDGET_H_
 
-#include <QGLWidget> 
+#include <QGLWidget>
 #include "GL3DWidget.h"
 #include "GLColorMapQwt.h"
 #include "boost/shared_ptr.hpp"
@@ -14,25 +14,25 @@
   \date   August 2008
   \version 1.0
 
-  This Class takes input a Instrument and renders them with in the Qt widget. 
+  This Class takes input a Instrument and renders them with in the Qt widget.
 
   Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
   This file is part of Mantid.
- 	
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   Mantid is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 namespace Mantid{
@@ -52,15 +52,15 @@ public:
 	virtual ~Instrument3DWidget();         ///< Destructor
 	void setWorkspace(std::string name);
 	std::string getWorkspaceName();
-	void setColorMapName(std::string name);
+	void setColorMapName(const std::string& name);
 	GLColorMapQwt getColorMap()const;
 	double getDataMinValue();
 	double getDataMaxValue();
 	double getBinMinValue() const;
 	double getBinMaxValue() const;
 	void setDataMappingType(DataMappingType);
-	void setView(Mantid::Geometry::V3D,double,double,double,double,double,double);
-	void setAxis(Mantid::Geometry::V3D&,Mantid::Geometry::V3D&);
+	void setView(const Mantid::Geometry::V3D&,double,double,double,double,double,double);
+	void setAxis(const Mantid::Geometry::V3D&,const Mantid::Geometry::V3D&);
 	void resetWidget();
 	void setFastRendering();
 	void setSlowRendering();
@@ -108,9 +108,9 @@ private:
 	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);
 	std::vector<int> getDetectorIDList();
 	std::vector<int> getSpectraIndexList(std::vector<int> idDecVec);
-	void setColorForDetectors(double minval,double maxval,std::vector<double> values,GLColorMap colMap);
-	void CollectTimebinValues(int timebin, std::vector<int> histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
-	void CollectIntegralValues(std::vector<int> historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);
+	void setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colMap);
+	void CollectTimebinValues(int timebin,const std::vector<int>& histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
+	void CollectIntegralValues(const std::vector<int>& historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);
 	std::string strWorkspaceName;
 	bool mHaveBinMaxMin;
 

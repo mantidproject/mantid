@@ -3,9 +3,9 @@
 #endif
 #include "GL3DWidget.h"
 #include <QtOpenGL>
-#include "GLActor.h" 
-#include <QSpinBox> 
-#include "GLColor.h" 
+#include "GLActor.h"
+#include <QSpinBox>
+#include "GLColor.h"
 #include <map>
 #include <string>
 #include "boost/shared_ptr.hpp"
@@ -17,11 +17,12 @@
 #endif
 
 //NOTES:
-//1) if the sample buffers are not available then the paint of image on the mdi windows 
+//1) if the sample buffers are not available then the paint of image on the mdi windows
 //   seems to not work on intel chipset
 
 
-GL3DWidget::GL3DWidget(QWidget* parent):QGLWidget(QGLFormat(QGL::SampleBuffers),parent)
+GL3DWidget::GL3DWidget(QWidget* parent):
+				QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent)
 {
 	_viewport=new GLViewport;
 	_trackball=new GLTrackball(_viewport);
@@ -66,25 +67,24 @@ GLActor* GL3DWidget::getPickedActor()
  * is initialized.
  */
 void GL3DWidget::initializeGL()
-{ 
+{
 	setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
 	glEnable(GL_DEPTH_TEST);           // Enable opengl depth test to render 3D object properly
-	glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)  
+	glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
 	glEnable (GL_LIGHTING);            // Enable light
 	glEnable(GL_LIGHT0);               // Enable opengl first light
 	glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
 	// Set Light0 Attributes, Ambient, diffuse,specular and position
 	// Its a directional light which follows camera position
-	float lamp_ambient[4]={0.0,0.0,0.0,1.0}; 
+	float lamp_ambient[4]={0.0,0.0,0.0,1.0};
 	float lamp_diffuse[4]={1.0,1.0,1.0,1.0};
 	float lamp_specular[4]={1.0,1.0,1.0,1.0};
 	glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
 	float lamp_pos[4]={0.0,0.0,1.0,0.0};
-	glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);	
-//	MakeObject();                      // This is default make object TODO: Remove this
+	glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
 
 }
 
@@ -96,7 +96,7 @@ void GL3DWidget::drawDisplayScene()
 	glEnable(GL_DEPTH_TEST);            // Enable Depth test
 	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
 	glShadeModel(GL_SMOOTH);            // Shade model is smooth
-	glEnable(GL_LIGHTING);              
+	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LINE_SMOOTH);
 	glDisable(GL_BLEND);
@@ -134,7 +134,7 @@ void GL3DWidget::drawPickingScene()
 	glEnable(GL_DEPTH_TEST);            // Enable Depth test
 	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
 	glShadeModel(GL_FLAT);            // Shade model is flat
-	glDisable(GL_LIGHTING);              
+	glDisable(GL_LIGHTING);
 	glDisable(GL_LIGHT0);
 	glDisable(GL_LINE_SMOOTH);
 	glDisable(GL_BLEND);
@@ -190,7 +190,7 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
 			mPickBox->drawPickBox(&painter);
 			painter.end();
 		}
-	} 
+	}
 	else
 	{
 		drawDisplayScene();
@@ -208,7 +208,7 @@ void GL3DWidget::resizeGL(int width, int height)
 
 	_viewport->resize(width,height);
 	_viewport->issueGL();
-	
+
 	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
 	{
 		mPickingDraw=true;
@@ -242,7 +242,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 		setCursor(Qt::OpenHandCursor);
 		_trackball->initRotationFrom(event->x(),event->y());
 		isKeyPressed=true;
-	} 
+	}
 	else if(event->buttons() & Qt::RightButton)
 	{
 		setCursor(Qt::CrossCursor);
@@ -316,7 +316,7 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
 	setCursor(Qt::SizeVerCursor);
 	_trackball->initZoomFrom(event->x(),event->y());
 	_trackball->generateZoomTo(event->x(),event->y()+event->delta());
-	update();	
+	update();
 	setCursor(Qt::PointingHandCursor);
 }
 
@@ -441,7 +441,7 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
 }
 
 /**
- * This method is to handle keyboard events to mimic the mouse operations of mouse button up. 
+ * This method is to handle keyboard events to mimic the mouse operations of mouse button up.
  * @param event This is the event variable which has the status of the keyboard
  */
 void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
@@ -471,7 +471,7 @@ void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
  * object to all the widgets.
  */
 void GL3DWidget::MakeObject()
-{	
+{
 }
 
 /**

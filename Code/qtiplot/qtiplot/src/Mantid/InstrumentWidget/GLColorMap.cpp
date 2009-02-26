@@ -13,7 +13,7 @@ GLColorMap::GLColorMap()
 	defaultColormap();
 }
 
-void GLColorMap::setColorMapFile(std::string name)
+void GLColorMap::setColorMapFile(const std::string& name)
 {
 	std::string line;
 	std::ifstream cmapfile(name.c_str(),std::ios::in);
@@ -38,7 +38,7 @@ void GLColorMap::setColorMapFile(std::string name)
 
 }
 
-boost::shared_ptr<GLColor> GLColorMap::getColor(int id)
+boost::shared_ptr<GLColor> GLColorMap::getColor(int id) const
 {
 	if(mNumberOfColors==0)
 		return boost::shared_ptr<GLColor>(new GLColor(1.0,0.0,0.0));
@@ -78,7 +78,7 @@ void GLColorMap::defaultColormap()
 	mNumberOfColors=256;
 }
 
-int GLColorMap::getNumberOfColors()
+int GLColorMap::getNumberOfColors() const
 {
 	return mNumberOfColors;
 }
