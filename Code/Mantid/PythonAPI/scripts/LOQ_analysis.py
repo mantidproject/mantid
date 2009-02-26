@@ -1,7 +1,6 @@
 #LOQ data analysis script
 path = "C:/MantidInstall/"
 #path = "C:/Mantid/Test/"
-#LoadNexusProcessedDialog(path+"Data/LOQ sans configuration/solidAngle.nxs","solidangle")
 # this makes a list for a rectangular block (wide x high) from pixel startID [with (1,1) at bottom left in usual LOQ sense
 # thouhg may need to change for SANS2d ??? ] for square array dim x dim
 def detBlock(startID,wide,high,dim=128):
@@ -13,7 +12,6 @@ def detBlock(startID,wide,high,dim=128):
         output = output.rstrip(",")
         return output
 #
-#print detBlock(4,1,5,128)
 #######################
 #Step 1 - Load the data file 
 LoadDataAlg = LoadRaw(path+"Data/LOQ sans configuration/LOQ48098.raw",OutputWorkspace="Monitor",spectrummin="2",spectrummax="2")
@@ -27,28 +25,49 @@ LoadRaw(Filename = data_file, OutputWorkspace="Small_Angle",spectrummin=str(firs
 #LoadRaw(Filename = data_file, OutputWorkspace="High_Angle",spectrummin="16386",spectrummax="17792")
 
 #######################
-#Step 1.1 - Move the sample if incorrect
-#MoveInstrumentComponent("High_Angle","some-sample-holder",X="0.001",Y="0.001",Z="0.001",RelativePosition="0")
-
-#######################
 #Step 1.2 - Correct the monitor spectrum for flat background and remove prompt spike
-# Missing BackgroundCorrection - for flat backgrounds #392
 # Interpolation is just linear for now
 RemoveBins("Monitor","Monitor","19900","20500",Interpolation="Linear")
 FlatBackground("Monitor","Monitor","0","31000","39000")
 
 #######################
 #Step 1.3 - Mask out unwanted detetctors
-# list for beam stop region
-MarkDeadDetectors("Small_Angle",DetectorList="7361,	7362,	7363,	7364,	7365,	7487,	7488,	7489,	7490,	7491,	7492,	7493,	7494,	7495,	7614,	7615,	7616,	7617,	7618,	7619,	7620,	7621,	7622,	7623,	7624,	7741,	7742,	7743,	7744,	7745,	7746,	7747,	7748,	7749,	7750,	7751,	7752,	7753,	7868,	7869,	7870,	7871,	7872,	7873,	7874,	7875,	7876,	7877,	7878,	7879,	7880,	7881,	7996,	7997,	7998,	7999,	8000,	8001,	8002,	8003,	8004,	8005,	8006,	8007,	8008,	8009,	8124,	8125,	8126,	8127,	8128,	8129,	8130,	8131,	8132,	8133,	8134,	8135,	8136,	8137,	8138,	8252,	8253,	8254,	8255,	8256,	8257,	8258,	8259,	8260,	8261,	8262,	8263,	8264,	8265,	8266,	8380,	8381,	8382,	8383,	8384,	8385,	8386,	8387,	8388,	8389,	8390,	8391,	8392,	8393,	8394,	8508,	8509,	8510,	8511,	8512,	8513,	8514,	8515,	8516,	8517,	8518,	8519,	8520,	8521,	8522,	8636,	8637,	8638,	8639,	8640,	8641,	8642,	8643,	8644,	8645,	8646,	8647,	8648,	8649,	8765,	8766,	8767,	8768,	8769,	8770,	8771,	8772,	8773,	8774,	8775,	8776,	8777,	8894,	8895,	8896,	8897,	8898,	8899,	8900,	8901,	8902,	8903,	8904,	9023,	9024,	9025,	9026,	9027,	9028,	9029,	9030,	9031,	9152,	9153,	9154,	9155,	9156,	9157")
-# now need take off some corners 
-MarkDeadDetectors("Small_Angle",DetectorList=detBlock(1+2,8,8))	
-MarkDeadDetectors("Small_Angle",DetectorList=detBlock(121+2,8,8))	
-MarkDeadDetectors("Small_Angle",DetectorList=detBlock(120*128+1+2,8,8))	
-MarkDeadDetectors("Small_Angle",DetectorList=detBlock(120*128+121+2,8,8))	
+# Set the radius range
+min_radius = 38
+max_radius = 419
+# XML description of a cylinder containing detectors to remove
+inner = "<infinite-cylinder id='inner'> "
+inner +=	"<centre x='0.0' y='0.0' z='0.0' /> " 
+inner +=	"<axis x='0.0' y='0.0' z='1' /> "
+inner +=	"<radius val='"+str(min_radius/1000.0)+"' /> "
+inner +=	"</infinite-cylinder> "
+inner +=	"<algebra val='inner' /> "
+
+# Remove the beam stop
+MarkDeadDetectorsInShape("Small_Angle",inner)
+
+outer = "<infinite-cylinder id='outer'> "
+outer +=	"<centre x='0.0' y='0.0' z='0.0' /> " 
+outer +=	"<axis x='0.0' y='0.0' z='1' /> "
+outer +=	"<radius val='"+str(max_radius/1000.0)+"' /> "
+outer +=	"</infinite-cylinder> "
+# The hash in front of the name says that we want to keep everything inside the cylinder
+outer +=	"<algebra val='#outer' /> "
+
+# Remove the corners
+dets = MarkDeadDetectorsInShape("Small_Angle",outer)
+
 # mask right hand column
 MarkDeadDetectors("Small_Angle",DetectorList=detBlock(128+2,1,128))	
-# Missing - Mask by volume projection (e.g. radius) #383
+
+#######################
+#Step 1.1 - try move detector for beam centre (324.95, 328.02),
+#This step has to happen after the detector masking
+#RelativePosition="0" is a logical variable, which means an "absolute shift"
+# the detector centr is at X=Y=0 so does relative or absolute matter ?
+xshift=str((317.5-324.95)/1000.0)
+yshift=str((317.5-328.02)/1000.0)
+MoveInstrumentComponent("Small_Angle","main-detector-bank",X=xshift,Y=yshift,RelativePosition="1")
 
 #######################
 #Step 2 - Convert all of the files to wavelength and rebin
@@ -159,12 +178,18 @@ mantid.deleteWorkspace("scalar")
 #Step 11 - Convert to Q
 #Convert units to Q (MomentumTransfer)
 ConvertUnits("Small_Angle","Small_Angle","MomentumTransfer")
-# remove Dialog to stoip the pop up boxes
+
+#Need to mark the workspace as a distribution at this point to get next rebin right
+ws = mantid.getMatrixWorkspace("Small_Angle")
+ws.isDistribution(True)
+
+# Calculate the solid angle corrections
 SolidAngle("Small_Angle","solidangle")
 
 #rebin to desired Q bins
 Rebin("Small_Angle","Small_Angle","0.008,0.002,0.28")
 RebinPreserveValue("solidangle","solidangle","0.008,0.002,0.28")
+
 #Sum all spectra
 SumSpectra("Small_Angle","Small_Angle"+wavname)
 SumSpectra("solidangle","solidangle"+wavname)
@@ -179,5 +204,4 @@ Divide("Small_Angle"+wavname,"solidangle"+wavname,"Small_Angle"+wavname)
 #######################
 #step 12 - Save 1D data
 # this writes to the /bin directory - why ?
-#SaveRKHDialog("Small_Angle"+wavname,FirstColumnValue="MomentumTransfer")
 SaveRKH("Small_Angle"+wavname,Filename="Small_Angle"+wavname+".Q",FirstColumnValue="MomentumTransfer")
