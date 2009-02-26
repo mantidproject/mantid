@@ -53,6 +53,10 @@ public:
   /// Creates an instance of a concrete subclass of Base. 
   virtual boost::shared_ptr<Base> createInstance() const = 0;
 
+  /// Creates an instance of a concrete subclass of Base, which is
+  /// not wrapped in a boost shared_ptr
+  virtual Base* createUnwrappedInstance() const = 0;
+
 private:
   /// Private copy constructor
   AbstractInstantiator(const AbstractInstantiator&);
@@ -87,6 +91,14 @@ public:
   {
     boost::shared_ptr<Base> ptr(new C);
     return ptr;
+  }
+
+  /** Creates an instance of a concrete subclass of Base that is not wrapped in a boost shared_ptr.
+   *  @return A bare pointer to the base type
+   */
+  virtual Base* createUnwrappedInstance() const
+  {
+    return static_cast<Base*>(new C);
   }
 };
 

@@ -74,6 +74,21 @@ public:
     else
       throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n", className);
   }
+
+  /// Creates a new instance of the class with the given name, which
+  /// is not wrapped in a boost shared_ptr. This should be used with
+  /// extreme care.
+  /// The class must have been registered with registerClass.
+  /// If the class name is unknown, a NotFoundException is thrown.
+  /// @param className the name of the class you wish to create
+  virtual Base* createUnwrapped(const std::string& className) const
+  {   
+    typename FactoryMap::const_iterator it = _map.find(className);
+    if (it != _map.end())
+      return it->second->createUnwrappedInstance();
+    else
+      throw Exception::NotFoundError("DynamicFactory:"+ className + " is not registered.\n", className);
+  }
   
   /// Registers the instantiator for the given class with the DynamicFactory.
   /// The DynamicFactory takes ownership of the instantiator and deletes

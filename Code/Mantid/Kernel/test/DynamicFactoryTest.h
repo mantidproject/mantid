@@ -26,6 +26,13 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( int_ptr i = factory.create("testEntry") );
 	}
 
+        void testCreateUnwrapped()
+        {
+	  TS_ASSERT_THROWS( factory.createUnwrapped("testUnrappedEntry"), std::runtime_error )
+	  factory.subscribe<int>("testUnwrappedEntry");
+	  TS_ASSERT_THROWS_NOTHING( int *i = factory.createUnwrapped("testEntry") );
+        }
+
 	void testSubscribe()
 	{
 		TS_ASSERT_THROWS_NOTHING( factory.subscribe<int>("int") );
