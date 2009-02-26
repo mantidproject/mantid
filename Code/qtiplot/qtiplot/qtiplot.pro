@@ -70,16 +70,11 @@ unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
 unix:LIBS         += -L/usr/lib/ -lqwt
 unix:LIBS         += -lgsl -lgslcblas
 
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidPythonAPI
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidDataHandling
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAlgorithms
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidDataObjects
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
 unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
 
 unix:LIBS		+= -L/usr/lib/ -lPocoUtil
-unix:LIBS		+= -L/usr/lib/ -lPocoXML
 unix:LIBS		+= -L/usr/lib/ -lPocoFoundation
 
 ##################### Windows ###############################################
@@ -92,18 +87,12 @@ win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
 win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
 win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
 
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidPythonAPI.lib
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataHandling.lib
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAlgorithms.lib
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidDataObjects.lib
 win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAPI.lib
 win32:LIBS		+= ../../Mantid/Bin/Shared/MantidGeometry.lib
 win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.lib
 
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.lib
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoXML.lib
 win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.lib
-win32:LIBS		+= ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib
 
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
