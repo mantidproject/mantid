@@ -244,11 +244,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\MarkDeadDetectors.cpp"
+				RelativePath=".\src\MaskDetectors.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\MarkDeadDetectorsInShape.cpp"
+				RelativePath=".\src\MaskDetectorsInShape.cpp"
 				>
 			</File>
 			<File
@@ -402,19 +402,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\MarkDeadDetectorsInShape.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\MarkDeadDetectorsInShapeTest.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\MarkDeadDetectorsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\MaskDetectors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\MaskDetectorsInShape.h"
 				>
 			</File>
 			<File
