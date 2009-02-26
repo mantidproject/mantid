@@ -110,7 +110,7 @@ public:
   ManagedWorkspace2D();
   virtual ~ManagedWorkspace2D();
 
-  virtual const std::string id() const {return "Workspace2D";}
+  virtual const std::string id() const {return "ManagedWorkspace2D";}
 
   virtual void setX(const int histnumber, const std::vector<double>&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype&);

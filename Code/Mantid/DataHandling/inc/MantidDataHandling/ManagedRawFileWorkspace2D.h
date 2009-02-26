@@ -59,7 +59,7 @@ public:
   Gets the name of the workspace type
   \return Standard string name
    */
-  virtual const std::string id() const {return "Workspace2D";}
+  virtual const std::string id() const {return "ManagedRawFileWorkspace2D";}
 
   ManagedRawFileWorkspace2D();
   virtual ~ManagedRawFileWorkspace2D();

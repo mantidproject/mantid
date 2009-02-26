@@ -81,7 +81,7 @@ public:
 
   void testId()
   {
-    TS_ASSERT( ! smallWorkspace.id().compare("Workspace2D") )
+    TS_ASSERT( ! smallWorkspace.id().compare("ManagedWorkspace2D") )
   }
 
   void testgetNumberHistograms()

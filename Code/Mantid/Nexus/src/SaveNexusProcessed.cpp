@@ -81,7 +81,7 @@ namespace NeXus
     Property *specMax = getProperty("spectrum_max");
     m_interval = !(specMax->isDefault());
     const std::string workspaceID = m_inputWorkspace->id();
-    if (workspaceID != "Workspace2D")
+    if (workspaceID.find("Workspace2D") == std::string::npos )
         throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
 
     NexusFileIO *nexusFile= new NexusFileIO();

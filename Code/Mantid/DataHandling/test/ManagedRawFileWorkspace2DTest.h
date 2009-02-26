@@ -56,7 +56,7 @@ public:
 
   void testId()
   {
-    TS_ASSERT( ! Workspace.id().compare("Workspace2D") )
+    TS_ASSERT( ! Workspace.id().compare("ManagedRawFileWorkspace2D") )
   }
 
   void testData()

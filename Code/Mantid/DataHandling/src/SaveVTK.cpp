@@ -78,7 +78,7 @@ namespace DataHandling
       "<UnstructuredGrid>\n";
     
     const std::string workspaceID = inputWorkspace->id();    
-    if( workspaceID == "Workspace2D" )
+    if( workspaceID.find("Workspace2D") != std::string::npos )
     {
       const Workspace2D_sptr localWorkspace = 
 	boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
