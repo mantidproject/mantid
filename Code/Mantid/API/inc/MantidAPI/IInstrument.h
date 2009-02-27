@@ -61,6 +61,9 @@ public:
 
   virtual std::string getName() const = 0;
 
+  /// Returns a shared pointer to a component
+  virtual boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id) = 0;
+
   /// return reference to detector cache 
   virtual std::map<int, Geometry::IDetector_sptr> getDetectors() = 0;
 

@@ -73,6 +73,8 @@ public:
   virtual IComponent* clone() const;
   /// Destructor
   virtual ~Component();
+  //! Returns the ComponentID - a unique identifier of the component.
+  ComponentID getComponentID();
   //! Assign a parent component. Previous parent link is lost
   void setParent(IComponent*);
   //! Return a pointer to the current parent.

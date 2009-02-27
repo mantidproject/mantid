@@ -77,6 +77,9 @@ public:
   /// Name of the instrument.
   std::string getName()const{return Geometry::ParCompAssembly::getName();}
 
+  /// Returns a shared pointer to a component
+  boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
+
 private:
   /// Private copy assignment operator
   ParInstrument& operator=(const ParInstrument&);

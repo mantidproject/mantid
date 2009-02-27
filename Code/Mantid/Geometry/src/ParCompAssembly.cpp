@@ -100,7 +100,6 @@ boost::shared_ptr<IComponent> ParCompAssembly::operator[](int i) const
       return boost::shared_ptr<IComponent>(new ParametrizedComponent(cc,m_map));
   else
   {
-      std::cerr<<"ParCompAssembly::operator[] zero pointer.\n";
       throw std::runtime_error("ParCompAssembly::operator[] zero pointer.");
   }
     //  return new ParObjComponent(dynamic_cast<ObjComponent*>(child_base),m_map);

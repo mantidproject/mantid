@@ -49,6 +49,32 @@ Geometry::IObjComponent_sptr ParInstrument::getSample() const
   return Geometry::IObjComponent_sptr(new Geometry::ParObjComponent(dynamic_cast<const Instrument*>(m_base)->_sampleCache,m_map));
 }
 
+/**  Get a shared pointer to a component by its ID
+ *   @param id ID
+ *   @return A pointer to the component.
+ */
+boost::shared_ptr<Geometry::IComponent> ParInstrument::getComponentByID(Geometry::ComponentID id)
+{
+    Geometry::IComponent* base = (Geometry::IComponent*)(id);
+    Geometry::Detector* dc = dynamic_cast<Geometry::Detector*>(base);
+    Geometry::CompAssembly* ac = dynamic_cast<Geometry::CompAssembly*>(base);
+    Geometry::ObjComponent* oc = dynamic_cast<Geometry::ObjComponent*>(base);
+    Geometry::Component* cc = dynamic_cast<Geometry::Component*>(base);
+    if (dc)
+      return boost::shared_ptr<Geometry::IComponent>(new Geometry::ParDetector(dc,m_map));
+    else if (ac)
+      return boost::shared_ptr<Geometry::IComponent>(new Geometry::ParCompAssembly(ac,m_map));
+    else if (oc)
+      return boost::shared_ptr<Geometry::IComponent>(new Geometry::ParObjComponent(oc,m_map));
+    else if (cc)
+      return boost::shared_ptr<Geometry::IComponent>(new Geometry::ParametrizedComponent(cc,m_map));
+    else
+    {
+      throw std::runtime_error("ParInstrument::getComponentByID: Error creating parametruzed component.");
+    }
+    return  boost::shared_ptr<Geometry::IComponent>() ;
+}
+
 /**	Gets a pointer to the detector from its ID
  *  Note that for getting the detector associated with a spectrum, the SpectraDetectorMap::getDetector
  *  method should be used rather than this one because it takes account of the possibility of more

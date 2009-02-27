@@ -21,14 +21,14 @@ public:
     instrument.markAsSource(source);
     ObjComponent *sample = new ObjComponent("sample");
     instrument.markAsSamplePos(sample);
-    det = boost::shared_ptr<Detector>(new Detector("det",0));
+    det = boost::shared_ptr<Detector>(new Detector("det1",0));
     det->setID(1);
     det->setPos(1.0,0.0,0.0);
     instrument.markAsDetector(det.get());
-    det2 = boost::shared_ptr<Detector>(new Detector("det",0));
+    det2 = boost::shared_ptr<Detector>(new Detector("det2",0));
     det2->setID(10);
     instrument.markAsDetector(det2.get());
-    det3 = boost::shared_ptr<Detector>(new Detector("det",0));
+    det3 = boost::shared_ptr<Detector>(new Detector("det3",0));
     det3->setID(11);
     instrument.markAsDetector(det3.get());
   }
@@ -102,6 +102,19 @@ public:
     TS_ASSERT( dynamic_cast<CompAssembly*>(i) )
     TS_ASSERT( dynamic_cast<Component*>(i) )
     delete i;
+  }
+
+  void testIDs()
+  {
+      ComponentID id1 = det->getComponentID();
+      TS_ASSERT_EQUALS(det->getName(), instrument.getComponentByID(id1)->getName() )
+
+      ComponentID id2 = det2->getComponentID();
+      TS_ASSERT_EQUALS(det2->getName(), instrument.getComponentByID(id2)->getName() )
+
+      ComponentID id3 = det3->getComponentID();
+      TS_ASSERT_EQUALS(det3->getName(), instrument.getComponentByID(id3)->getName() )
+
   }
 
 private:

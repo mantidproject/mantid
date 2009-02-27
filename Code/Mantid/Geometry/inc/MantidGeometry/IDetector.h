@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+//#include "MantidGeometry/IComponent.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -44,7 +45,7 @@ class V3D;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IDetector
+class DLLExport IDetector//: public virtual IComponent
 {
 public:
   /// Get the detector ID

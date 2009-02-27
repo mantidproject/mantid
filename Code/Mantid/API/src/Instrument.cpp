@@ -62,6 +62,15 @@ Geometry::IObjComponent_sptr Instrument::getSample() const
   return boost::shared_ptr<Geometry::IObjComponent>(_sampleCache,NoDeleting());
 }
 
+/**  Get a shared pointer to a component by its ID
+ *   @param id ID
+ *   @return A pointer to the component.
+ */
+boost::shared_ptr<Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)
+{
+    return boost::shared_ptr<Geometry::IComponent>((Geometry::Component*)id,NoDeleting());
+}
+
 /**	Gets a pointer to the detector from its ID
  *  Note that for getting the detector associated with a spectrum, the SpectraDetectorMap::getDetector
  *  method should be used rather than this one because it takes account of the possibility of more

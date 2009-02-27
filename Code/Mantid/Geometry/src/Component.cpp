@@ -68,6 +68,14 @@ IComponent* Component::clone() const
   return new Component(*this);
 }
 
+/*!  Get the component's ID
+ *   @return ID
+*/
+ComponentID Component::getComponentID()
+{
+    return ComponentID(this);
+}
+
 /*! Set the parent. Previous parenting is lost.
  *  @param comp :: the parent component
  */

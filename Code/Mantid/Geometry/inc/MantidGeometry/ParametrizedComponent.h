@@ -55,6 +55,9 @@ public:
     ~ParametrizedComponent();
 
      IComponent* clone() const;
+     
+     //! Returns the ComponentID - a unique identifier of the component.
+     ComponentID getComponentID();
 
     //! Assign a parent IComponent. Previous parent link is lost
      void setParent(IComponent*);

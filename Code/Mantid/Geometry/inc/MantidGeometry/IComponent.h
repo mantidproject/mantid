@@ -48,6 +48,10 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+class IComponent;
+/// Define a type for a unique component identifier.
+typedef int ComponentID;
+
 class DLLExport IComponent
 {
 public:
@@ -57,6 +61,8 @@ public:
   virtual IComponent* clone() const=0;
   /// Destructor
   virtual ~IComponent(){}
+  //! Returns the ComponentID - a unique identifier of the component.
+  virtual ComponentID getComponentID() = 0;
   //! Assign a parent IComponent. Previous parent link is lost
   virtual void setParent(IComponent*)= 0;
   //! Return a pointer to the current parent.

@@ -32,6 +32,14 @@ IComponent* ParametrizedComponent::clone() const
   return new ParametrizedComponent(*this);
 }
 
+/*!  Get the component's ID
+ *   @return ID
+ */
+ComponentID ParametrizedComponent::getComponentID()
+{
+    return ComponentID(m_base);
+}
+
 /*! Set the parent. Previous parenting is lost.
  *  @param comp :: the parent ParametrizedComponent
  */
@@ -48,14 +56,13 @@ const IComponent* ParametrizedComponent::getParent() const
     const IComponent* parent = m_base->getParent();
     if (parent)
     {
-        //std::cerr<<"New parent\n";
         m_parent = new ParametrizedComponent(parent,m_map);
         return m_parent;
     }
     return 0;
 }
 
-/*! Set the name of the ParametrizedComponent
+/*! Set the name of the ParametrizedComponent (currently does nothing)
  *  @param s :: name string
  */
 void ParametrizedComponent::setName(const std::string& s)

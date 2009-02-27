@@ -94,6 +94,9 @@ public:
 
   std::string getName()const{return Geometry::CompAssembly::getName();}
 
+  /// Returns a shared pointer to a component
+  boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
+
   /// Get information about the parameters described in the instrument definition file
   std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& getLogfileCache() {return _logfileCache;}
 
