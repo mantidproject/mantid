@@ -60,7 +60,7 @@ public:
 	GLActor* getActor(int index);
 	void refresh();
     void define();
-	void drawBoundingBox();
+	void defineBoundingBox();
     GLActor* findColorID(unsigned char[3]);
     void drawColorID();
 	void getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint);

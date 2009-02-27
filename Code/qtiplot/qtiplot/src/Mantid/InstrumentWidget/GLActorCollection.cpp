@@ -38,7 +38,7 @@ void GLActorCollection::define()
 /**
  * This method call the bounding box method of the all actors
  */
-void GLActorCollection::drawBoundingBox()
+void GLActorCollection::defineBoundingBox()
 {
     for_each(_actorsV.begin(),_actorsV.end(),std::mem_fun(&GLActor::drawBoundingBox));
 }
