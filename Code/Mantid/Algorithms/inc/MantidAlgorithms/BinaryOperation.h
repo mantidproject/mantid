@@ -71,8 +71,11 @@ namespace Mantid
       void init();
       void exec();
 
+      /// The name of the first input workspace property
 			virtual const std::string inputPropName1() const { return "InputWorkspace_1";}
+      /// The name of the second input workspace property
 			virtual const std::string inputPropName2() const { return "InputWorkspace_2";}
+      /// The name of the output workspace property
 			virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
       /** Abstract method to perform the binary operation in the inheriting class.

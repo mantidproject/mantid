@@ -37,6 +37,11 @@ namespace Mantid
         g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
         return false;
       }
+      if ( lhs->isDistribution() != rhs->isDistribution() )
+      {
+        g_log.error("The two workspace are not compatible because one is flagged as a distribution.");
+        return false;
+      }
       
       return BinaryOperation::checkCompatibility(lhs,rhs);
     }

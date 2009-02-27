@@ -43,7 +43,7 @@ namespace Mantid
       {
         std::ostringstream ostr;
         ostr << "The two workspaces are not compatible for algorithm " << this->name();
-        g_log.error() << ostr << std::endl;
+        g_log.error() << ostr.str() << std::endl;
         throw std::invalid_argument( ostr.str() );
       }
 
@@ -89,18 +89,10 @@ namespace Mantid
       }
 
       // Check the workspaces have the same units and distribution flag
-      if ( lhs->blocksize() > 1 && rhs->blocksize() > 1 )
-      {
       if ( lhs_unit != rhs_unit && lhs->blocksize() > 1 && rhs->blocksize() > 1 )
       {
         g_log.error("The two workspace are not compatible because they have different units on the X axis.");
         return false;
-      }
-      if ( lhs->isDistribution() != rhs->isDistribution() )
-      {
-        g_log.error("The two workspace are not compatible because one is flagged as a distribution.");
-        return false;
-      }
       }
 
       // Check the size compatibility
@@ -108,7 +100,7 @@ namespace Mantid
       {
         std::ostringstream ostr;
         ostr<<"The sizes of the two workspaces are not compatible for algorithm "<<this->name();
-        g_log.error() << ostr << std::endl;
+        g_log.error() << ostr.str() << std::endl;
         throw std::invalid_argument( ostr.str() );
       }
 

@@ -12,11 +12,9 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Takes a Data workspace and an original counts workspace input and updates the error values the data workspace
-		to those as they would be claculated using a Gaussian approximation of Poisson Errors.  
-		More specifically it copies the counts values from counts workspace calculates the square root 
-		and stores the result in the error values of the data workspace.
-		The number of histograms the bin ranges and units of the two workspaces must match.
+/** Takes a Data workspace and an original counts workspace input and updates the 
+    error values in the data workspace to be the same fractionally as the counts workspace.
+		The number of histograms, the binning and units of the two workspaces must match.
 
     Required Properties:
     <UL>
@@ -64,14 +62,16 @@ public:
 
 private:
 
-	const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 // Overridden BinaryOperation methods
   void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
     API::MatrixWorkspace::iterator it_out);
 	virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-      
+  
+  /// The name of the first input workspace property for BinaryOperation
 	virtual const std::string inputPropName1() const { return "InputWorkspace";}
+  /// The name of the second input workspace property for BinaryOperation
 	virtual const std::string inputPropName2() const { return "CountsWorkspace";}
+  /// The name of the output workspace property for BinaryOperation
 	virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
 	/// Internal class providing the binary function

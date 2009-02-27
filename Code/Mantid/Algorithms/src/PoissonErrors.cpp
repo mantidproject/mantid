@@ -30,7 +30,7 @@ namespace Mantid
       return (lhs->size() == rhs->size());
     }
 
-    /** Performs the minus operation using Iterators and the std::tranform function.
+    /** Performs the binary operation using Iterators and the std::tranform function.
     * @param it_in1 The const iterator to the lhs data item
     * @param it_in2 The const iterator to the rhs data item
     * @param it_out The output iterator to the new workspace
@@ -41,21 +41,10 @@ namespace Mantid
       std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),PoissonErrors_fn(this,it_in1.end() - it_in1.begin()));
     }
 
-    const bool PoissonErrors::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
-    {
-      if ( lhs->YUnit() != rhs->YUnit() )
-      {
-        g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
-        return false;
-      }
-      
-      return BinaryOperation::checkCompatibility(lhs,rhs);
-    }
-
-    /** Performs the addition with Gausian errors within the transform function
+    /** Performs the copying of the fractional error within the transform function
     * @param a The LocatedData ref of the first workspace data item
     * @param b The LocatedData ref of the second workspace data item
-    * @returns A LocatedData ref of the result with Gausian errors
+    * @returns A LocatedData ref of the result with Gaussian errors
     */
     LocatedDataValue&
       PoissonErrors::PoissonErrors_fn::operator() (const ILocatedData& a,const ILocatedData& b)
@@ -63,7 +52,8 @@ namespace Mantid
       //copy the values from lhs
       result = a;
       //copy the square root of the error value from the rhs counts
-      result.E() = sqrt(b.Y());
+      const double fractional = b.Y() ? b.E()/b.Y() : 0.0;
+      result.E() = fractional*a.Y();
 
       if (m_progress++ % m_progress_step == 0) report_progress();
       return result;
