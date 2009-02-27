@@ -62,7 +62,7 @@ public:
   /// Destructor
   virtual ~IComponent(){}
   //! Returns the ComponentID - a unique identifier of the component.
-  virtual ComponentID getComponentID() = 0;
+  virtual const ComponentID getComponentID()const = 0;
   //! Assign a parent IComponent. Previous parent link is lost
   virtual void setParent(IComponent*)= 0;
   //! Return a pointer to the current parent.

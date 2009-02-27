@@ -57,7 +57,7 @@ public:
      IComponent* clone() const;
      
      //! Returns the ComponentID - a unique identifier of the component.
-     ComponentID getComponentID();
+     const ComponentID getComponentID()const;
 
     //! Assign a parent IComponent. Previous parent link is lost
      void setParent(IComponent*);

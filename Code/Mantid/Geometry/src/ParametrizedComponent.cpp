@@ -35,7 +35,7 @@ IComponent* ParametrizedComponent::clone() const
 /*!  Get the component's ID
  *   @return ID
  */
-ComponentID ParametrizedComponent::getComponentID()
+const ComponentID ParametrizedComponent::getComponentID()const
 {
     return ComponentID(m_base);
 }
