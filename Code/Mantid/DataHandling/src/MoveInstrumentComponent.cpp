@@ -144,7 +144,7 @@ boost::shared_ptr<IComponent> MoveInstrumentComponent::findByID(boost::shared_pt
 boost::shared_ptr<IComponent> MoveInstrumentComponent::findByName(boost::shared_ptr<IComponent> comp,const std::string& CName)
 {
     if (comp->getName() == CName) return comp;
-    boost::shared_ptr<CompAssembly> asmb = boost::dynamic_pointer_cast<CompAssembly>(comp);
+    boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
     if (asmb)
         for(int i=0;i<asmb->nelements();i++)
         {
