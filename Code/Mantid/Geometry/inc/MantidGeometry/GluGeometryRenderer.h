@@ -38,6 +38,7 @@ namespace Mantid
     */
 	class IObjComponent;
 	class V3D;
+
 	class DLLExport GluGeometryRenderer
     {
     private:
@@ -49,15 +50,15 @@ namespace Mantid
     public:
 		GluGeometryRenderer();       ///< Constructor
 		~GluGeometryRenderer();      ///< Destructor
-		void Render(IObjComponent* ObjComp);
-		void RenderSphere(V3D center,double radius);
-		void RenderCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4);
-		void RenderCone(V3D center,V3D axis,double radius,double height);
-		void RenderCylinder(V3D center,V3D axis,double radius,double height);
-		void CreateSphere(V3D center,double radius);
-		void CreateCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4);
-		void CreateCone(V3D center,V3D axis,double radius,double height);
-		void CreateCylinder(V3D center,V3D axis,double radius,double height);
+		void Render(IObjComponent* ObjComp) const;
+		void RenderSphere(const V3D& center,double radius);
+		void RenderCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4);
+		void RenderCone(const V3D& center,const V3D &axis,double radius,double height);
+		void RenderCylinder(const V3D& center,const V3D& axis,double radius,double height);
+		void CreateSphere(const V3D& center,double radius);
+		void CreateCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4);
+		void CreateCone(const V3D& center,const V3D& axis,double radius,double height);
+		void CreateCylinder(const V3D& center,const V3D& axis,double radius,double height);
     };
 
   }   // NAMESPACE Geometry

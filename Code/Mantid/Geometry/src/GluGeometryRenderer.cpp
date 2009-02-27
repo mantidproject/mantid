@@ -35,7 +35,7 @@ namespace Mantid
 				glDeleteLists(iDisplaylistId,1);
 		}
 
-	    void GluGeometryRenderer::RenderSphere(V3D center,double radius)
+	    void GluGeometryRenderer::RenderSphere(const V3D& center,double radius)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
@@ -52,7 +52,7 @@ namespace Mantid
 				CreateSphere(center,radius);
 			}
 		}
-		void GluGeometryRenderer::RenderCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4)
+		void GluGeometryRenderer::RenderCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
@@ -69,7 +69,7 @@ namespace Mantid
 				CreateCube(Point1,Point2,Point3,Point4);
 			}
 		}
-		void GluGeometryRenderer::RenderCone(V3D center,V3D axis,double radius,double height)
+		void GluGeometryRenderer::RenderCone(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
@@ -86,14 +86,14 @@ namespace Mantid
 				CreateCone(center,axis,radius,height);
 			}
 		}
-		void GluGeometryRenderer::RenderCylinder(V3D center,V3D axis,double radius,double height)
+		void GluGeometryRenderer::RenderCylinder(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			if(!boolDisplaylistCreated||glIsList(iDisplaylistId)==GL_FALSE)
 			{
 				GLenum error;
 				do{
 					error=glGetError();
-					if(error==GL_OUT_OF_MEMORY) 
+					if(error==GL_OUT_OF_MEMORY)
 					{
 						mErrorCode=GL_OUT_OF_MEMORY;
 						return;
@@ -101,7 +101,7 @@ namespace Mantid
 				}while(error != GL_NO_ERROR);
 				iDisplaylistId=glGenLists(1);
 				glNewList(iDisplaylistId,GL_COMPILE); //Construct display list for object representation
-				CreateCylinder(center,axis,radius,height);		
+				CreateCylinder(center,axis,radius,height);
 				glEndList();
 				mErrorCode=glGetError();
 				boolDisplaylistCreated=true;
@@ -116,7 +116,7 @@ namespace Mantid
 		* Render ObjComponent
 		* @param ObjComp input to render
 		*/
-		void GluGeometryRenderer::Render(IObjComponent *ObjComp)
+		void GluGeometryRenderer::Render(IObjComponent *ObjComp) const
 		{
 			glPushMatrix();
 			V3D pos  =ObjComp->getPos();
@@ -134,7 +134,7 @@ namespace Mantid
 		 * @param center center of the sphere
 		 * @param radius radius of the sphere
 		 */
-		void GluGeometryRenderer::CreateSphere(V3D center,double radius)
+		void GluGeometryRenderer::CreateSphere(const V3D& center,double radius)
 		{
 			//create glu sphere
 			GLUquadricObj *qobj=gluNewQuadric();
@@ -154,7 +154,7 @@ namespace Mantid
 		 * @param Point3 thrid point of the cube
 		 * @param Point4 fourth point of the cube
 		 */
-		void GluGeometryRenderer::CreateCube(V3D Point1,V3D Point2,V3D Point3,V3D Point4)
+		void GluGeometryRenderer::CreateCube(const V3D& Point1,const V3D& Point2,const V3D& Point3,const V3D& Point4)
 		{
 			V3D vec0=Point1;
 			V3D vec1=Point2-Point1;
@@ -191,7 +191,7 @@ namespace Mantid
 			}
 			glEnd();
 		}
-		
+
 		/**
 		 * Creates a Cone
 		 * @param center center of the cone
@@ -199,7 +199,7 @@ namespace Mantid
 		 * @param radius radius of the cone
 		 * @param height height of the cone
 		 */
-		void GluGeometryRenderer::CreateCone(V3D center,V3D axis,double radius,double height)
+		void GluGeometryRenderer::CreateCone(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			glPushMatrix();
 			GLUquadricObj *qobj=gluNewQuadric();
@@ -224,7 +224,7 @@ namespace Mantid
 		 * @param radius radius of the cylinder
 		 * @param height height of the cylinder
 		 */
-		void GluGeometryRenderer::CreateCylinder(V3D center,V3D axis,double radius,double height)
+		void GluGeometryRenderer::CreateCylinder(const V3D& center,const V3D& axis,double radius,double height)
 		{
 			GLUquadricObj *qobj=gluNewQuadric();
 			gluQuadricDrawStyle(qobj,GLU_FILL);

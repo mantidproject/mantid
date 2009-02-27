@@ -39,7 +39,7 @@ namespace Mantid
 		* Render ObjComponent
 		* @param ObjComp input to render
 		*/
-		void CacheGeometryRenderer::Render(IObjComponent *ObjComp)
+		void CacheGeometryRenderer::Render(IObjComponent *ObjComp) const
 		{
 			glPushMatrix();
 			V3D pos  =ObjComp->getPos();
@@ -54,7 +54,7 @@ namespace Mantid
 			glPopMatrix();
 		}
 
-		void CacheGeometryRenderer::Render(int noPts,int noFaces,double* points,int* faces)
+		void CacheGeometryRenderer::Render(int noPts,int noFaces,double* points,int* faces) const
 		{
 			glCallList(iDisplaylistId);
 		}
@@ -87,7 +87,7 @@ namespace Mantid
 				glEnd();
 				glEndList();
 				boolDisplaylistCreated=true;
-			}			
+			}
 		}
 
 		void CacheGeometryRenderer::Initialize(IObjComponent *ObjComp)

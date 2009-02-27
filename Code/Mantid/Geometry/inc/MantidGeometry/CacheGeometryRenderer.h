@@ -45,12 +45,12 @@ namespace Mantid
       static Kernel::Logger& PLog;           ///< The official logger
 	  unsigned int           iDisplaylistId; ///< OpenGL display list id
 	  bool                   boolDisplaylistCreated; ///< flag to store whether display list is created or not
-	  
+
     public:
 		CacheGeometryRenderer();       ///< Constructor
 		~CacheGeometryRenderer();      ///< Destructor
-		void Render(IObjComponent* ObjComp);
-		void Render(int noPts,int noFaces,double* points,int* faces);
+		void Render(IObjComponent* ObjComp) const;
+		void Render(int noPts,int noFaces,double* points,int* faces) const;
 		void Initialize(int noPts,int noFaces,double* points,int* faces);
 		void Initialize(IObjComponent* ObjComp);
     };
