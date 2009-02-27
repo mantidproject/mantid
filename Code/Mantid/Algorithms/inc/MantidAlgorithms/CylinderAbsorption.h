@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CORRECTFORATTENUATION_H_
-#define MANTID_ALGORITHMS_CORRECTFORATTENUATION_H_
+#ifndef MANTID_ALGORITHMS_CYLINDERABSORPTION_H_
+#define MANTID_ALGORITHMS_CYLINDERABSORPTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -63,15 +63,15 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CorrectForAttenuation : public API::Algorithm
+class DLLExport CylinderAbsorption : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  CorrectForAttenuation();
+  CylinderAbsorption();
   /// Virtual destructor
-  virtual ~CorrectForAttenuation() {}
+  virtual ~CylinderAbsorption() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CorrectForAttenuation"; }
+  virtual const std::string name() const { return "CylinderAbsorption"; }
   /// Algorithm's version
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
@@ -115,4 +115,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CORRECTFORATTENUATION_H_*/
+#endif /* MANTID_ALGORITHMS_CYLINDERABSORPTION_H_*/

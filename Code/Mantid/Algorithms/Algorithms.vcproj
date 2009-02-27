@@ -198,10 +198,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\CorrectForAttenuation.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\CorrectToFile.cpp"
 				>
 			</File>
@@ -215,6 +211,10 @@
 			</File>
 			<File
 				RelativePath=".\src\CrossCorrelate.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CylinderAbsorption.cpp"
 				>
 			</File>
 			<File
@@ -234,11 +234,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FindPeaks1D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FlatBackground.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\GeneralisedSecondDifference.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LOQScriptInput.cpp"
 				>
 			</File>
 			<File
@@ -344,6 +352,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CalculateTransmissionTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\ChainedOperatorTest.h"
 				>
 			</File>
@@ -396,14 +408,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\CorrectForAttenuation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\CorrectForAttenuationTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAlgorithms\CorrectToFile.h"
 				>
 			</File>
@@ -429,6 +433,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\CrossCorrelate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CylinderAbsorption.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CylinderAbsorptionTest.h"
 				>
 			</File>
 			<File
@@ -460,6 +472,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\FindPeaks1D.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\FindPeaksTest.h"
 				>
 			</File>
@@ -468,7 +484,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FlatBackgroundTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\GeneralisedSecondDifference.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\LOQScriptInput.h"
 				>
 			</File>
 			<File
@@ -577,6 +601,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\RemoveBins.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RemoveBinsTest.h"
 				>
 			</File>
 			<File

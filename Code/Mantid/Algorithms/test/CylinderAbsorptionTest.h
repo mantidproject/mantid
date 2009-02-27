@@ -1,16 +1,16 @@
-#ifndef CORRECTFORATTENUATIONTEST_H_
-#define CORRECTFORATTENUATIONTEST_H_
+#ifndef CYLINDERABSORPTIONTEST_H_
+#define CYLINDERABSORPTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/CorrectForAttenuation.h"
+#include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 
-class CorrectForAttenuationTest : public CxxTest::TestSuite
+class CylinderAbsorptionTest : public CxxTest::TestSuite
 {
 public:
-  CorrectForAttenuationTest()
+  CylinderAbsorptionTest()
   {
     Mantid::DataHandling::LoadRaw2 loader;
     loader.initialize();
@@ -31,7 +31,7 @@ public:
 
   void testName()
   {
-    TS_ASSERT_EQUALS( atten.name(), "CorrectForAttenuation" )
+    TS_ASSERT_EQUALS( atten.name(), "CylinderAbsorption" )
   }
 
   void testVersion()
@@ -70,8 +70,8 @@ public:
   }
 
 private:
-  Mantid::Algorithms::CorrectForAttenuation atten;
+  Mantid::Algorithms::CylinderAbsorption atten;
   std::string inputWS;
 };
 
-#endif /*CORRECTFORATTENUATIONTEST_H_*/
+#endif /*CYLINDERABSORPTIONTEST_H_*/

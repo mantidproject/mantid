@@ -12,9 +12,9 @@ Load("empty run", "Empty")
 Minus(InputWorkspace1=dataWorkspace,InputWorkspace2="Empty",OutputWorkspace=dataWorkspace)
 # Calculate absorption and correct for it
 transWorkspace="Transmission"
-#The input workspace needs to be in units of wavelength for the CorrectForAttentuation algorithm
+#The input workspace needs to be in units of wavelength for the CylinderAbsorption algorithm
 ConvertUnits(InputWorkspace=dataWorkspace, OutputWorkspace=dataWorkspace, Target="Wavelength")
-CorrectForAttenuationDialog(InputWorkspace=dataWorkspace, OutputWorkspace=transWorkspace,SampleNumberDensity="0.072",ScatteringXSection="5.08",AttenuationXSection="5.1",message="Enter size parameters")
+CylinderAbsorptionDialog(InputWorkspace=dataWorkspace, OutputWorkspace=transWorkspace,SampleNumberDensity="0.072",ScatteringXSection="5.08",AttenuationXSection="5.1",message="Enter size parameters")
 Divide(InputWorkspace1=dataWorkspace, InputWorkspace2=transWorkspace, OutputWorkspace=dataWorkspace)
 
 # === Save as a Nexus file ===

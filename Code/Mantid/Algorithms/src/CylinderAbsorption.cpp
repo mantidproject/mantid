@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/CorrectForAttenuation.h"
+#include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Cylinder.h"
@@ -14,21 +14,21 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CorrectForAttenuation)
+DECLARE_ALGORITHM(CylinderAbsorption)
 
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 
 // Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& CorrectForAttenuation::g_log = Logger::get("CorrectForAttenuation");
+Logger& CylinderAbsorption::g_log = Logger::get("CylinderAbsorption");
 
-CorrectForAttenuation::CorrectForAttenuation() :
+CylinderAbsorption::CylinderAbsorption() :
   API::Algorithm(), m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
   m_L1s(), m_Ltot(), m_elementVolumes(), n_lambda(0), x_step(0), exp_options()
 {}
 
-void CorrectForAttenuation::init()
+void CylinderAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new WorkspaceUnitValidator<>("Wavelength")));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
@@ -51,7 +51,7 @@ void CorrectForAttenuation::init()
   declareProperty("ExpMethod","Normal",new ListValidator(exp_options));
 }
 
-void CorrectForAttenuation::exec()
+void CylinderAbsorption::exec()
 {
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -140,7 +140,7 @@ void CorrectForAttenuation::exec()
 }
 
 /// Fetch the properties and set the appropriate member variables
-void CorrectForAttenuation::retrieveProperties()
+void CylinderAbsorption::retrieveProperties()
 {
   m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
   m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
@@ -162,7 +162,7 @@ void CorrectForAttenuation::retrieveProperties()
 }
 
 /// Create the cylinder object using the Geometry classes
-void CorrectForAttenuation::constructCylinderSample()
+void CylinderAbsorption::constructCylinderSample()
 {
   std::map<int,Surface*> surfaces;
 
@@ -203,7 +203,7 @@ void CorrectForAttenuation::constructCylinderSample()
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
+void CylinderAbsorption::calculateDistances(const Geometry::V3D& detectorPos)
 {
   // Test whether I need to calculate distances
   const bool calculateL1s = m_L1s.empty();
@@ -286,7 +286,7 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
         	message << "Problem with detector at" << detectorPos << std::endl;
         	message << "This usually means that this detector is defined inside the sample cylinder";
         	g_log.error(message.str());
-        	throw std::runtime_error("Problem in CorrectForAttenuation::calculateDistances");
+        	throw std::runtime_error("Problem in CylinderAbsorption::calculateDistances");
         }
         m_Ltot[counter]=outgoing.begin()->Dist+m_L1s[counter];
         counter++;
@@ -296,7 +296,7 @@ void CorrectForAttenuation::calculateDistances(const Geometry::V3D& detectorPos)
 }
 
 /// Carries out the numerical integration over the cylinder
-double CorrectForAttenuation::doIntegration(const double& lambda) const
+double CylinderAbsorption::doIntegration(const double& lambda) const
 {
   double integral = 0.0;
   double exponent;
@@ -316,7 +316,7 @@ double CorrectForAttenuation::doIntegration(const double& lambda) const
 }
 
 /// Calculate the value of the correction at the points not explicitly numerically integrated
-void CorrectForAttenuation::interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram)
+void CylinderAbsorption::interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram)
 {
 	int step=x_step, index2;
 	double x1=0,x2=0,y1=0,y2=0,xp,overgap=0;
