@@ -7,6 +7,7 @@
 #include <QLayout>
 #include <QGroupBox>
 #include <QSpinBox>
+#include <QLineEdit>
 
 MantidMatrixDialog::MantidMatrixDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ),
@@ -24,22 +25,28 @@ MantidMatrixDialog::MantidMatrixDialog( QWidget* parent, Qt::WFlags fl )
 	topLayout->addWidget( boxColWidth, 0, 1 );
 
 	topLayout->addWidget( new QLabel(tr( "Data Format" )), 1, 0 );
-	boxFormat = new QComboBox();
+	
+    boxFormat = new QComboBox();
     boxFormat->addItem( tr( "Decimal: 1000" ) );
 	boxFormat->addItem( tr( "Scientific: 1E3" ) );
-
 	topLayout->addWidget( boxFormat, 1, 1 );
 
 	topLayout->addWidget( new QLabel( tr( "Numeric Display" )), 2, 0 );
 	boxNumericDisplay = new QComboBox();
     boxNumericDisplay->addItem( tr( "Default Decimal Digits" ) );
 	boxNumericDisplay->addItem( tr( "Significant Digits=" ) );
-
 	topLayout->addWidget( boxNumericDisplay, 2, 1 );
+
 	boxPrecision = new QSpinBox();
 	boxPrecision->setRange(0, 13);
 	boxPrecision->setEnabled( false );
 	topLayout->addWidget( boxPrecision, 2, 2 );
+
+    topLayout->addWidget( new QLabel( tr( "Set new range" )), 3, 0 );
+    editRangeMin = new QLineEdit();
+    topLayout->addWidget(editRangeMin, 3, 1 );
+    editRangeMax = new QLineEdit();
+    topLayout->addWidget(editRangeMax, 3, 2 );
 
 	buttonOk = new QPushButton(tr( "&OK" ));
 	buttonOk->setAutoDefault( true );
@@ -86,6 +93,11 @@ void MantidMatrixDialog::apply()
     }
 
    d_matrix->setNumberFormat(format, prec);
+
+    double yMin,yMax;
+    yMin = editRangeMin->text().toDouble();
+    yMax = editRangeMax->text().toDouble();
+    d_matrix->setRange(yMin,yMax);
 }
 
 void MantidMatrixDialog::setMatrix(MantidMatrix *m)
@@ -106,6 +118,13 @@ void MantidMatrixDialog::setMatrix(MantidMatrix *m)
 		boxPrecision->setEnabled( true );
 		boxNumericDisplay->setCurrentIndex(1);
 	}
+
+    double yMin,yMax;
+    m->range(&yMin,&yMax);
+    editRangeMin->setText(QString::number(yMin));
+    editRangeMax->setText(QString::number(yMax));
+    editRangeMin->setValidator(new QDoubleValidator(this));
+    editRangeMax->setValidator(new QDoubleValidator(this));
 }
 
 void MantidMatrixDialog::accept()

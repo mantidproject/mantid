@@ -42,7 +42,7 @@ m_errorObserver(*this, &MantidUI::handleAlgorithmErrorNotification),
 m_addObserver(*this,&MantidUI::handleAddWorkspace),
 m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
-{
+{ 
     m_progressDialog = 0;
     m_algAsync = 0;
     m_exploreMantid = new MantidDockWidget(this,aw);
@@ -158,15 +158,29 @@ QStringList MantidUI::getAlgorithmNames()
     return sl;
 }
 
+/**
+    CreateAlgorithm
 
-
+    @param algName Algorithm's name
+    @return Pointer to the created algorithm
+*/
 IAlgorithm* MantidUI::CreateAlgorithm(const QString& algName)
 {
 	IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName.toStdString());
 
 	return alg;
 }
+/**
+     LoadIsisRawFile. Loads a raw file by executing LoadRaw algorithm asynchronously.
 
+     @param fileName The name of the RAW file
+     @param workspaceName The name of the workspace
+     @param spectrum_min Lowest spectrum to load
+     @param spectrum_max Highest spectrum to load
+     @param spectrum_list Comma-separated list of spectra to load
+     @param cache Three-valued parameter defining when to cache the raw file if it is to be loaded into a ManagedRawFileWorkspace2D.
+                  Possible values are "If slow", "Always", "Never". The default is "If slow".
+*/
 void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max
                                ,const QString& spectrum_list,const QString& cache)
 {
@@ -194,6 +208,11 @@ void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceN
     executeAlgorithmAsync(alg);
 }
 
+/**
+     loadWorkspace.
+
+     Loads a workspace from a raw file. The LoadRaw's properties are set in loadRawDlg dialog.
+*/
 void MantidUI::loadWorkspace()
 {
     
@@ -211,8 +230,15 @@ void MantidUI::loadWorkspace()
                         dlg->getSpectrumList(),
                         dlg->getCacheOption());
 	}
+
 }
 
+/**
+    loadDAEWorkspace
+
+    Loads a workspace from DAE by executing LoadDAE algorithm asynchronously. 
+    Algorithm's proprties are set in loadDAEDlg dialog.
+*/
 void MantidUI::loadDAEWorkspace()
 {
     
@@ -257,6 +283,11 @@ void MantidUI::loadDAEWorkspace()
 	}
 }
 
+/**
+     deleteWorkspace
+
+     @param workspaceName Name of the workspace to delete
+*/
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
     bool ret = FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
@@ -264,6 +295,9 @@ bool MantidUI::deleteWorkspace(const QString& workspaceName)
     return ret;
 }
 
+/**
+     deleteWorkspace
+*/
 void MantidUI::deleteWorkspace()
 {
     QString wsName = getSelectedWorkspaceName();
@@ -271,12 +305,22 @@ void MantidUI::deleteWorkspace()
 	deleteWorkspace(wsName);
 }
 
+/**
+     update
+
+     Widgets showing workspaces and algorithms are updated.
+*/
 void MantidUI::update()
 {
     m_exploreMantid->update();
     m_exploreAlgorithms->update();
 }
 
+/**
+       getSelectedWorkspaceName
+
+
+*/
 QString MantidUI::getSelectedWorkspaceName()
 {
     QList<QTreeWidgetItem*> items = m_exploreMantid->m_tree->selectedItems();

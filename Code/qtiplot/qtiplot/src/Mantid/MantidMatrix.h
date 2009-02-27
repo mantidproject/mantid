@@ -107,7 +107,10 @@ public:
     //void copy(Matrix *m);
     ApplicationWindow *appWindow(){return m_appWindow;}
     Graph3D *plotGraph3D(int style);
+
+    // Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram
     MultiLayer* plotGraph2D(Graph::CurveType type);
+
     void setGraph1D(MultiLayer* ml, Table* t=0);
     void removeWindow();
 
@@ -174,11 +177,12 @@ public slots:
   	QwtDoubleRect boundingRect();
 	//! Set the X and Y coordinate intervals
 
-	 //! Min and max values of the matrix.
+	 //! Min and max values in the matrix.
   	void range(double *min, double *max);
-	 //! Set min and max values of the matrix.
+	 //! Set min and max values in the matrix.
   	void setRange(double min, double max);
 
+    // Scroll to row and column
     void goTo(int row,int col);
     //! Scroll to row (row starts with 1)
 	void goToRow(int row);

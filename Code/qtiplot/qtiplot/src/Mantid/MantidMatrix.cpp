@@ -183,6 +183,10 @@ QString MantidMatrix::text(int row, int col)
     return QString::number(activeModel()->data(row, col));
 }
 
+/** Sets new column width in a table view(s). 
+    @param width New column width in pixels. All columns have the same width.
+    @param all If true the change will be applied to all three table views.
+*/
 void MantidMatrix::setColumnsWidth(int width, bool all)
 {
     if (all)
@@ -218,6 +222,10 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
 	emit modifiedWindow(this);
 }
 
+/**  Sets column width to one table view.
+     @param i ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+     @param width New column width in pixels. All columns have the same width.
+*/
 void MantidMatrix::setColumnsWidth(int i,int width)
 {
 
@@ -238,6 +246,10 @@ void MantidMatrix::setColumnsWidth(int i,int width)
 	emit modifiedWindow(this);
 }
 
+/**  Returns the width of a column.
+     @param i ordinal number of the view. 0 - Y, 1 - X, 2 - Error
+     @return The column width in pixels. All columns have the same width.
+*/
 int MantidMatrix::columnsWidth(int i)
 {
     switch(i)
@@ -249,6 +261,8 @@ int MantidMatrix::columnsWidth(int i)
     return activeView()->columnWidth(0);
 }
 
+/**  Return the pointer to the active table view.
+*/
 QTableView *MantidMatrix::activeView()
 {
     switch (m_tabs->currentIndex())
@@ -260,6 +274,8 @@ QTableView *MantidMatrix::activeView()
     return m_table_viewY;
 }
 
+/**  Returns the pointer to the active model.
+*/
 MantidMatrixModel *MantidMatrix::activeModel()
 {
     switch (m_tabs->currentIndex())
@@ -271,6 +287,8 @@ MantidMatrixModel *MantidMatrix::activeModel()
     return m_modelY;
 }
 
+/**  Copies the current selection in the active table view into the system clipboard.
+*/
 void MantidMatrix::copySelection()
 {
     QItemSelectionModel *selModel = activeView()->selectionModel();
@@ -300,6 +318,11 @@ void MantidMatrix::copySelection()
 	QApplication::clipboard()->setText(s.trimmed());
 }
 
+/**  Returns minimum and maximum values in the matrix.
+     If setRange(...) has not been called it returns the true smalles ang largest Y-values in the matrix,
+     otherwise the values set with setRange(...) are returned. These are needed in plotGraph2D to set
+     the range of the third, colour axis.
+*/
 void MantidMatrix::range(double *min, double *max)
 {
     if (!m_are_min_max_set)
@@ -326,6 +349,8 @@ void MantidMatrix::range(double *min, double *max)
     *max = m_max;
 }
 
+/**  Sets new minimum and maximum Y-values which can be displayed in a 2D graph
+*/
 void MantidMatrix::setRange(double min, double max)
 {
     m_min = min;
@@ -587,6 +612,11 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     return plot;
 }
 
+/** Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram.
+
+    @param type The "curve" type.
+    @return Pointer to the created graph.
+*/
 MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -617,6 +647,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
     else
         plot->setYAxisTitle(tr("Spectrum")); 
 
+    // Set the range on the thirs, colour axis
     double minz, maxz;
     range(&minz,&maxz);
 	plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
@@ -795,14 +826,21 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
     }
 }
 
+/**
+     Repaints all 1D and 2D plots attached to this MantidMatrix
+*/
 void MantidMatrix::repaintAll()
 {
     repaint();
+
+    // Repaint 2D plots
     QVector<MultiLayer*>::iterator vEnd  = m_plots2D.end();
     for( QVector<MultiLayer*>::iterator vItr = m_plots2D.begin(); vItr != vEnd; ++vItr )
     {
       (*vItr)->activeGraph()->replot();
     }
+
+    // Updates the 1D plots by modifying the attached tables
     QMap<MultiLayer*,Table*>::iterator mEnd = m_plots1D.end();
     for(QMap<MultiLayer*,Table*>::iterator mItr = m_plots1D.begin(); mItr != mEnd;  ++mItr)
     {

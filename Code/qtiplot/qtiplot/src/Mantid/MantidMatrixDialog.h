@@ -7,6 +7,7 @@ class MantidMatrix;
 class QPushButton;
 class QSpinBox;
 class QComboBox;
+class QLineEdit;
 
 //! Matrix properties dialog
 class MantidMatrixDialog : public QDialog
@@ -37,6 +38,7 @@ private:
 	QPushButton* buttonCancel;
 	QSpinBox* boxColWidth, *boxPrecision;
 	QComboBox *boxFormat, *boxNumericDisplay;
+    QLineEdit *editRangeMin, *editRangeMax;
 };
 
 #endif // MANTIDMATRIXDIALOG_H

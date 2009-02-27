@@ -35,6 +35,7 @@
 
 #include "ApplicationWindow.h"
 #include "Mantid/MantidPlotReleaseDate.h"
+#include "MantidKernel/Logger.h"
 
 // The following stuff is for the doxygen title page
 /*!  \mainpage QtiPlot - Data analysis and scientific plotting - API documentation
@@ -134,9 +135,46 @@ public:
     }
 };
 
+class MyApp:public QApplication
+{
+public:
+    MyApp(int argc, char ** argv ):QApplication(argc,argv){}
+
+    /// Reimplement notify to catch exceptions from event handlers
+    bool notify( QObject * receiver, QEvent * event )
+    {
+        bool res = false;
+        try
+        {
+            res = QApplication::notify(receiver,event);
+        }
+        catch(std::exception& e)
+        {
+            g_log.error()<<"Error in an event handler: "<<e.what()<<"\n";
+            QMessageBox ask;
+            QAbstractButton *terminateButton = ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
+            QAbstractButton *continueButton = ask.addButton(tr("Continue"), QMessageBox::ActionRole);
+            ask.setText("An exception is caught in an event handler:\n\n"+QString::fromStdString(e.what())+
+                "\n\nWould you like to terminate MantidPlot or continue working?");
+            ask.setIcon(QMessageBox::Critical);
+            ask.exec();
+            if (ask.clickedButton() == terminateButton) 
+            {
+                exit(-1);
+            }
+        }
+        return res;
+    }
+private:
+    /// Static reference to the logger class
+    static Mantid::Kernel::Logger& g_log;
+};
+
+Mantid::Kernel::Logger& MyApp::g_log = Mantid::Kernel::Logger::get("MantidPlot");
+
 int main( int argc, char ** argv )
 {
-    QApplication app( argc, argv );
+    MyApp app( argc, argv );
 	QStringList args = app.arguments();
 	args.removeFirst(); // remove application name
 

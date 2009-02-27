@@ -301,8 +301,10 @@ public slots:
 
 private:
 
+    // Execute algorithm asinchronously
     void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
 
+    // Notification handlers and corresponding observers.
     void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
 
@@ -324,6 +326,8 @@ private:
     void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;
 
+    // Private variables
+
     ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
     MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
     AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
@@ -339,7 +343,7 @@ private:
     QAction *actionCopyValues;
 
 	QMenu *mantidMenu;
-    QMenu *menuMantidMatrix;             //  ManteidMatrix specific menu
+    QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 
     ProgressDlg *m_progressDialog;       //< Progress of algorithm running asynchronously
