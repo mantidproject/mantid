@@ -29,7 +29,7 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
 
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_1",lhs);
   alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_2",rhs);
-  
+
   // Have to set a text name for the output workspace even though it will not be used.
   //   This satisfies the validation.
   alg->setPropertyValue("OutputWorkspace","��NotApplicable");
@@ -330,15 +330,18 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
   if ( workspace->isDistribution() == forwards ) return;
 
   const int numberOfSpectra = workspace->getNumberHistograms();
+  const int size = workspace->blocksize();
   for (int i = 0; i < numberOfSpectra; ++i)
   {
-    const int size = workspace->blocksize();
+	  std::vector<double>& X=workspace->dataX(i);
+	  std::vector<double>& Y=workspace->dataY(i);
+	  std::vector<double>& E=workspace->dataE(i);
     for (int j = 0; j < size; ++j)
     {
-      double width = std::abs( workspace->readX(i)[j+1] - workspace->readX(i)[j] );
-      if (!forwards) width = 1.0/width;
-      workspace->dataY(i)[j] /= width;
-      workspace->dataE(i)[j] /= width;
+      double width = std::abs( X[j+1] - X[j] );
+      if (forwards) width = 1.0/width;
+      Y[j] *= width;
+      E[j] *= width;
     }
   }
   workspace->isDistribution(forwards);
@@ -373,7 +376,7 @@ void WorkspaceHelpers::getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS
     {
       indexList.push_back(i);
     }
-  }  
+  }
 }
 
 } // namespace API
