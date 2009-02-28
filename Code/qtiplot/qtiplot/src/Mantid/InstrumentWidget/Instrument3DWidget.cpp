@@ -88,7 +88,7 @@ void Instrument3DWidget::fireDetectorsPicked(const std::vector<GLActor*>& picked
 		}
 	}
 	//convert detector ids to spectra index ids
-	std::vector<int> spectraIndices = getSpectraIndexList(detectorIds);
+	const std::vector<int>& spectraIndices = getSpectraIndexList(detectorIds);
 	if(detectorIds.size()!=0)
 	{
 		if(detectorIds.size()==1)
@@ -136,12 +136,12 @@ void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
 			//convert detector id to spectra index id
 			std::vector<int> idDecVec;
 			idDecVec.push_back(iDec->getID());
-			std::vector<int> indexList = getSpectraIndexList(idDecVec);
+			const std::vector<int>& indexList = getSpectraIndexList(idDecVec);
 			MatrixWorkspace_sptr workspace;
 			workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 			Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
 			int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
-			std::vector<double> outputdata=workspace->readY(indexList[0]);
+			const std::vector<double>& outputdata=workspace->readY(indexList[0]);
 			std::vector<int> histIndexList;
 			std::vector<double> values;
 			histIndexList.push_back(indexList[0]);
@@ -302,7 +302,7 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(const std::vector<int>&
     output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 
 	std::map<int,int> indexMap;
-	const std::vector<int> spectraList = output->spectraMap().getSpectra(idDecVec);
+	const std::vector<int>& spectraList = output->spectraMap().getSpectra(idDecVec);
 
 	// There is no direct way of getting histogram index from the spectra id,
 	// get the spectra axis and convert form index to spectra number and create
@@ -411,8 +411,8 @@ void Instrument3DWidget::CollectIntegralValues(const std::vector<int>& histogram
         if(histogramIndexList[i]!=-1)
 		{
 			double value=0.0;
-			std::vector<double> outputdata=output->readY(histogramIndexList[i]);
-			std::vector<double> binvalues=output->readX(histogramIndexList[i]);
+			const std::vector<double>& outputdata=output->readY(histogramIndexList[i]);
+			const std::vector<double>& binvalues=output->readX(histogramIndexList[i]);
 			for(int timebin=startbin;timebin<endbin;timebin++){
 				if(BinMinValue<=binvalues[timebin]&&BinMaxValue>=binvalues[timebin]){
 					if(timebin<outputdata.size())
