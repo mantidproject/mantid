@@ -23,20 +23,24 @@ void InstrumentTreeWidget::setInstrument(boost::shared_ptr<Mantid::API::IInstrum
 
 void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	Mantid::Geometry::IComponent* selectedComponent=static_cast<Mantid::Geometry::IComponent*>(index.internalPointer());
-	if(!dynamic_cast<Mantid::Geometry::IObjComponent*>(selectedComponent)&&!dynamic_cast<Mantid::Geometry::ICompAssembly*>(selectedComponent))
-		selectedComponent=(boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(mInstrument)).get();
+	//Check whether its instrument
+	boost::shared_ptr<Mantid::Geometry::IComponent> selectedComponent;
+	if(mInstrument->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
+		selectedComponent=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(mInstrument);
+	else
+		selectedComponent=mInstrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));
+
 	//get the bounding box for the component
 	xmax=ymax=zmax=-DBL_MAX;
 	xmin=ymin=zmin=DBL_MAX;
-	std::queue<Mantid::Geometry::IComponent*> CompList;
+	std::queue<boost::shared_ptr<Mantid::Geometry::IComponent> > CompList;
 	CompList.push(selectedComponent);
 	while(!CompList.empty())
 	{
-		Mantid::Geometry::IComponent* tmp = CompList.front();
+		boost::shared_ptr<Mantid::Geometry::IComponent> tmp = CompList.front();
 		CompList.pop();
-		Mantid::Geometry::IObjComponent* tmpObj = dynamic_cast<Mantid::Geometry::IObjComponent*>(tmp);
-		if(tmpObj){
+		boost::shared_ptr<Mantid::Geometry::IObjComponent> tmpObj = boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(tmp);
+		if(tmpObj!=boost::shared_ptr<Mantid::Geometry::IObjComponent>()){
 			try{
 				double txmax,tymax,tzmax,txmin,tymin,tzmin;
 				txmax=tymax=tzmax=-10000;
@@ -48,11 +52,11 @@ void InstrumentTreeWidget::getSelectedBoundingBox(const QModelIndex& index,doubl
 			catch(Mantid::Kernel::Exception::NullPointerException Ex)
 			{
 			}
-		} else if(dynamic_cast<Mantid::Geometry::ICompAssembly*>(tmp)){
-			Mantid::Geometry::ICompAssembly *tmpAssem = dynamic_cast<Mantid::Geometry::ICompAssembly*>(tmp);
+		} else if(boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp)){
+			boost::shared_ptr<Mantid::Geometry::ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(tmp);
 			for(int idx=0;idx<tmpAssem->nelements();idx++)
 			{
-				CompList.push((*tmpAssem)[idx].get());
+				CompList.push((*tmpAssem)[idx]);
 			}
 		} 
 	}
