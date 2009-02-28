@@ -5,7 +5,7 @@
 #include "Poco/Path.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QFrame>	
+#include <QFrame>
 #include <QMenu>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -36,7 +36,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QFrame *frame= new QFrame();
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 	QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
-	
+
 	//Add Tab control panel and Render window
 	mControlsTab = new QTabWidget(0,0);
 	controlPanelLayout->addWidget(mControlsTab);
@@ -45,7 +45,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QFrame* instrumentTree=new QFrame(mControlsTab);
 	mControlsTab->addTab( renderControls, QString("Render Controls"));
 	mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
-	mInstrumentDisplay = new Instrument3DWidget();	
+	mInstrumentDisplay = new Instrument3DWidget();
 	controlPanelLayout->addWidget(mInstrumentDisplay);
 	mainLayout->addWidget(controlPanelLayout);
 	QVBoxLayout* renderControlsLayout=new QVBoxLayout(renderControls);
@@ -92,7 +92,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setColorBarWidth(20);
 	mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
-	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();	
+	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();
 	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
 
 	//Store the path to the default color map
@@ -141,7 +141,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mDetectorGroupPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoGroupAction = new QAction(tr("&Info"), this);
 	connect(infoGroupAction,SIGNAL(triggered()),this,SLOT(spectraGroupInfoDialog()));
-    mDetectorGroupPopupContext->addAction(infoGroupAction);	
+    mDetectorGroupPopupContext->addAction(infoGroupAction);
 	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
     mDetectorGroupPopupContext->addAction(plotGroupAction);
@@ -153,7 +153,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
 /**
  * Mode select button slot.
- */ 
+ */
 void InstrumentWindow::modeSelectButtonClicked()
 {
 	if(mSelectButton->text()=="Pick")
@@ -200,7 +200,7 @@ void InstrumentWindow::changeColormap()
 void InstrumentWindow::changeColormap(const QString & file)
 {
 	QSettings settings;
-	if(file.isEmpty()) return; 
+	if(file.isEmpty()) return;
 	mInstrumentDisplay->setColorMapName(file.toStdString());
 	QFileInfo retfile(file);
 	settings.setValue("Mantid/InstrumentWindow/ColormapFile", retfile.absoluteFilePath());
@@ -228,7 +228,7 @@ void InstrumentWindow::detectorInformation(int value)
 /**
  * This method is a slot for the collection of the spectra index list that was selected
  */
-void InstrumentWindow::spectraListInformation(std::vector<int> result)
+void InstrumentWindow::spectraListInformation(const std::vector<int>& result)
 {
 	mDetectorGroupPopupContext->popup(QCursor::pos());
 	mSpectraIDSelectedList=result;
@@ -236,7 +236,7 @@ void InstrumentWindow::spectraListInformation(std::vector<int> result)
 /**
  * This method is a slot for the collection of the detector list that was selected
  */
-void InstrumentWindow::detectorListInformation(std::vector<int> result)
+void InstrumentWindow::detectorListInformation(const std::vector<int>& result)
 {
 	mDetectorGroupPopupContext->popup(QCursor::pos());
 	mDetectorIDSelectedList=result;
@@ -327,7 +327,7 @@ void InstrumentWindow::showWindow()
 void InstrumentWindow::updateWindow()
 {
   if( mWorkspaceName.empty() ) return;
-  
+
   bool resultError=false;
 
   MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(mWorkspaceName));
@@ -355,7 +355,7 @@ void InstrumentWindow::updateWindow()
 	  QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
 	  mInstrumentDisplay->resetWidget();
 	}
-		
+
     }
   connect(mInstrumentTree->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),this,SLOT(componentSelected(const QItemSelection&, const QItemSelection&)));
 }
@@ -387,7 +387,7 @@ void InstrumentWindow::setColorMapMinValue(double minValue)
   //mInstrumentDisplay->setColorMapMinValue(minValue);
   mMinValueBox->setText(QString::number(minValue));
   minValueChanged();
-  if( this->isVisible() ) 
+  if( this->isVisible() )
   {
     updateColorMapWidget();
     mInstrumentDisplay->update();
@@ -400,7 +400,7 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue)
   //mInstrumentDisplay->setColorMapMinValue(minValue);
   mMaxValueBox->setText(QString::number(maxValue));
   maxValueChanged();
-  if( this->isVisible() ) 
+  if( this->isVisible() )
   {
     updateColorMapWidget();
     mInstrumentDisplay->update();
@@ -431,7 +431,7 @@ void InstrumentWindow::maxValueChanged()
 {
 	QString value=mMaxValueBox->displayText();
 	mInstrumentDisplay->setColorMapMaxValue(value.toDouble());
-	if( this->isVisible() ) 
+	if( this->isVisible() )
 	{
 	  updateColorMapWidget();
 	  mInstrumentDisplay->update();
@@ -498,7 +498,7 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
 {
   QModelIndexList items = selected.indexes();
   if( items.isEmpty() ) return;
-  
+
   double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
   mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
   Mantid::Geometry::V3D pos = mInstrumentTree->getSamplePos();

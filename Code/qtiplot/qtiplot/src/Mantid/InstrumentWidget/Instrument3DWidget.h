@@ -50,12 +50,12 @@ class Instrument3DWidget : public GL3DWidget
 public:
 	Instrument3DWidget(QWidget* parent=0); ///< Constructor
 	virtual ~Instrument3DWidget();         ///< Destructor
-	void setWorkspace(std::string name);
-	std::string getWorkspaceName();
+	void setWorkspace(const std::string& name);
+	std::string getWorkspaceName() const;
 	void setColorMapName(const std::string& name);
 	GLColorMapQwt getColorMap()const;
-	double getDataMinValue();
-	double getDataMaxValue();
+	double getDataMinValue() const;
+	double getDataMaxValue() const;
 	double getBinMinValue() const;
 	double getBinMaxValue() const;
 	void setDataMappingType(DataMappingType);
@@ -65,7 +65,7 @@ public:
 	void setFastRendering();
 	void setSlowRendering();
 public slots:
-	void fireDetectorsPicked(std::vector<GLActor*> );
+	void fireDetectorsPicked(const std::vector<GLActor*>& );
 	void fireDetectorHighligted(GLActor* pickedActor);
 	void setTimeBin(int value);
 	void setColorMapMinValue(double minValue);
@@ -106,8 +106,8 @@ private:
 	double BinMaxValue;
 	void AssignColors();
 	void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);
-	std::vector<int> getDetectorIDList();
-	std::vector<int> getSpectraIndexList(std::vector<int> idDecVec);
+	std::vector<int> getDetectorIDList() const;
+	std::vector<int> getSpectraIndexList(const std::vector<int>& idDecVec) const;
 	void setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colMap);
 	void CollectTimebinValues(int timebin,const std::vector<int>& histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
 	void CollectIntegralValues(const std::vector<int>& historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);

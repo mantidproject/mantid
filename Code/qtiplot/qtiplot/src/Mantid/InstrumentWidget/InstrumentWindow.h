@@ -38,20 +38,20 @@ namespace API
   Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
   This file is part of Mantid.
- 	
+
   Mantid is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation; either version 3 of the License, or
   (at your option) any later version.
-  
+
   Mantid is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  
+
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 class InstrumentWindow : public MdiSubWindow
@@ -62,7 +62,7 @@ public:
 	~InstrumentWindow();
 	void setWorkspaceName(std::string wsName);
         void updateWindow();
-        void showWindow();		 
+        void showWindow();
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -70,15 +70,15 @@ public:
   void setColorMapRange(double minValue, double maxValue);
   void setDataMappingIntegral(double minValue,double maxValue);
   void selectComponent(const QString & name);
-		   
+
 public slots:
 	void modeSelectButtonClicked();
 	void selectBinButtonClicked();
 	void spectraInformation(int);
 	void detectorInformation(int value);
 	void detectorHighlighted(int detectorId,int spectraid,int count);
-	void spectraListInformation(std::vector<int>);
-	void detectorListInformation(std::vector<int>);
+	void spectraListInformation(const std::vector<int>&);
+	void detectorListInformation(const std::vector<int>&);
 	void spectraInfoDialog();
 	void spectraGroupInfoDialog();
 	void changeColormap();
@@ -92,7 +92,7 @@ public slots:
 	void pickBackgroundColor();
 signals:
     void plotSpectra(const QString&,int);
-	void plotSpectraList(const QString&,std::vector<int>);
+	void plotSpectraList(const QString&,const std::vector<int>&);
 private:
 	void updateColorMapWidget();
 	void loadSettings();

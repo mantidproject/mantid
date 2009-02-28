@@ -65,11 +65,11 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction,const Ma
  * signals the ids of the detector and the spectra index(not spectra number).
  * @param pickedActor the input passed by the the signal.
  */
-void Instrument3DWidget::fireDetectorsPicked(std::vector<GLActor*> pickedActor)
+void Instrument3DWidget::fireDetectorsPicked(const std::vector<GLActor*>& pickedActor)
 {
 	std::vector<int> detectorIds;
 
-	for(std::vector<GLActor*>::iterator it=pickedActor.begin();it!=pickedActor.end();it++)
+	for(std::vector<GLActor*>::const_iterator it=pickedActor.begin();it!=pickedActor.end();it++)
 	{
 		boost::shared_ptr<GLObject> tmpGLObject=(*it)->getRepresentation();
 		if(tmpGLObject->type()=="MantidObject")
@@ -166,7 +166,7 @@ void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
  * This method sets the workspace name input to the widget.
  * @param wsName input workspace name
  */
-void Instrument3DWidget::setWorkspace(std::string wsName)
+void Instrument3DWidget::setWorkspace(const std::string& wsName)
 {
 	strWorkspaceName=wsName;
     // Get back the saved workspace
@@ -259,7 +259,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
  * to the actor then -1 is set.
  * @return std::vector<int> list of detector id's
  */
-std::vector<int> Instrument3DWidget::getDetectorIDList()
+std::vector<int> Instrument3DWidget::getDetectorIDList() const
 {
 	std::vector<int> idDecVec;
 	int count=scene->getNumberOfActors();
@@ -295,7 +295,7 @@ std::vector<int> Instrument3DWidget::getDetectorIDList()
  * This method returns the Spectra Index list for the input dectector id list.
  * @param idDecVec is list of detector id's
  */
-std::vector<int> Instrument3DWidget::getSpectraIndexList(std::vector<int> idDecVec)
+std::vector<int> Instrument3DWidget::getSpectraIndexList(const std::vector<int>& idDecVec) const
 {
 	if(strWorkspaceName=="")return std::vector<int>();
 	MatrixWorkspace_sptr output;
@@ -488,7 +488,7 @@ void Instrument3DWidget::setTimeBin(int value)
 /**
  * Returns workspace name
  */
-std::string Instrument3DWidget::getWorkspaceName()
+std::string Instrument3DWidget::getWorkspaceName() const
 {
 	return strWorkspaceName;
 }
@@ -522,7 +522,7 @@ void Instrument3DWidget::setColorMapMaxValue(double maxValue)
 /**
  * This method returns min value. by default will be min value in the current timebin
  */
-double Instrument3DWidget::getDataMinValue()
+double Instrument3DWidget::getDataMinValue() const
 {
 	return this->DataMinValue;
 }
@@ -530,7 +530,7 @@ double Instrument3DWidget::getDataMinValue()
 /**
  * This method returns the max value. by default will be max value in the current timebin
  */
-double Instrument3DWidget::getDataMaxValue()
+double Instrument3DWidget::getDataMaxValue() const
 {
 	return this->DataMaxValue;
 }
