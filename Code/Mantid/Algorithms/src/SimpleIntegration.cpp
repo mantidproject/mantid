@@ -106,7 +106,7 @@ void SimpleIntegration::exec()
     else
     	highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater_equal<double>(),m_MaxRange));
 
-    highit--; // Upper limit is the bin before
+    highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
 
 	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
 	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
