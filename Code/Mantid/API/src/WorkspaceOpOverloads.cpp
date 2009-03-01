@@ -331,18 +331,29 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
 
   const int numberOfSpectra = workspace->getNumberHistograms();
   const int size = workspace->blocksize();
+
+  std::vector<double> widths(size);
+
   for (int i = 0; i < numberOfSpectra; ++i)
   {
-	  std::vector<double>& X=workspace->dataX(i);
+	  const std::vector<double>& X=workspace->dataX(i);
 	  std::vector<double>& Y=workspace->dataY(i);
 	  std::vector<double>& E=workspace->dataE(i);
-    for (int j = 0; j < size; ++j)
-    {
-      double width = std::abs( X[j+1] - X[j] );
-      if (forwards) width = 1.0/width;
-      Y[j] *= width;
-      E[j] *= width;
-    }
+	  std::adjacent_difference(X.begin(),X.end(),widths.begin()); // Calculate bin widths
+
+	  if (X.front()>X.back()) // If not ascending order
+		  std::transform(widths.begin(),widths.end(),widths.begin(),std::negate<double>());
+
+	  if (forwards)
+	  {
+		  std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::divides<double>());
+		  std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::divides<double>());
+	  }
+	  else
+	  {
+		  std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::multiplies<double>());
+		  std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::multiplies<double>());
+	  }
   }
   workspace->isDistribution(forwards);
 }

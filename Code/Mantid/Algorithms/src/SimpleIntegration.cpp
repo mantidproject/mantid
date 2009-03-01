@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -52,7 +53,7 @@ void SimpleIntegration::exec()
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
-  const int YLength = localworkspace->blocksize();
+
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
   {
@@ -78,37 +79,52 @@ void SimpleIntegration::exec()
   if (progress_step == 0) progress_step = 1;
   // Create vectors to hold result
   std::vector<double> XValue(2);
+
+  std::vector<double> widths(0); //
+
+  bool is_distrib=outputWorkspace->isDistribution();
+  if (is_distrib)
+	  widths.resize(localworkspace->blocksize()); // Will contain the bin widths of distribution
+
+  double sumY, sumE;
   // Loop over spectra
-  for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j)
+  for (int i = m_MinSpec, j=0; i <= m_MaxSpec; ++i, ++j)
   {
     // Retrieve the spectrum into a vector
-    const std::vector<double>& XValues = localworkspace->readX(i);
-    const std::vector<double>& YValues = localworkspace->readY(i);
-    const std::vector<double>& YErrors = localworkspace->readE(i);
+    const std::vector<double>& X = localworkspace->readX(i);
+    const std::vector<double>& Y = localworkspace->readY(i);
+    const std::vector<double>& E = localworkspace->readE(i);
 
-    double maxX = m_MaxRange;
-    if (!m_MaxRange) maxX = XValues.back();
+    // Find the range [min,max]
+    std::vector<double>::const_iterator lowit, highit;
+    if (std::abs(m_MinRange)<1e-7)
+    	lowit=X.begin();
+    else
+    	lowit=std::find_if(X.begin(),X.end(),std::bind2nd(std::greater_equal<double>(),m_MinRange));
+    if (std::abs(m_MaxRange)<1e-7)
+    	highit=X.end()-1;
+    else
+    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::less<double>(),m_MaxRange));
 
-    int startBin = -1;
-    int endBin = YLength;
-    double YSum = 0.0;
-    double YError = 0.0;
-    for (int k = 0; k < YLength; ++k)
-    {
-      if (XValues[k] >= m_MinRange && XValues[k+1] <= maxX )
-      {
-        if (startBin == -1) startBin = k;
-        endBin = k+1;
-        YSum += YValues[k];
-        YError += YErrors[k]*YErrors[k];
-      }
-    }
-
-    XValue[0] = XValues[startBin];
-    XValue[1] = XValues[endBin];
+	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
+	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
+	if (!is_distrib) //Sum the Y, and sum the E in quadrature
+	{
+		sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
+		sumE=std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,SumSquares<double>());
+	}
+	else // Sum Y*binwidth and Sum the (E*binwidth)^2.
+	{
+		std::adjacent_difference(lowit,highit,widths.begin());
+		sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
+		sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),TimesSquares<double>());
+	}
+    //Set X-boundaries
+    XValue[0] = *(lowit);
+    XValue[1] = *(highit);
     outputWorkspace->dataX(j) = XValue;
-    outputWorkspace->dataY(j)[0] = YSum;
-    outputWorkspace->dataE(j)[0] = sqrt(YError);
+    outputWorkspace->dataY(j)[0] = sumY;
+    outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
     if (localworkspace->axes() > 1)
     {
       outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);

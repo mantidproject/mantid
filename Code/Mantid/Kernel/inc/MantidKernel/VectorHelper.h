@@ -52,6 +52,15 @@ namespace Mantid
 	  }
   };
 
+  template <class T> struct TimesSquares: public std::binary_function<T,T,T>
+    {
+  	  TimesSquares(){}
+  	  T operator()(const T& l, const T& r) const
+  	  {
+  		  return (r*r*l*l);
+  	  }
+    };
+
   //! Square functor
   template <class T> struct Squares: public std::unary_function<T,T>
   {
