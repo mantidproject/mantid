@@ -1,0 +1,81 @@
+#ifndef MANTID_ALGORITHMS_CREATECALFILEBYNAMES_H_
+#define MANTID_ALGORITHMS_CREATECALFILEBYNAMES_H_
+
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
+
+namespace Mantid
+{
+namespace Algorithms
+{
+/** Create a calibration file for diffraction focussing (*.cal old Ariel format)
+ *  based on list of names of the instrument tree.
+ *  The offsets are all sets to zero and all detectors are selected. Detectors not assigned
+ *  to any group will appear as group 0, i.e. not included when using AlignDetector or
+ *  DiffractionFocussing algorithms.
+ *  The group number is assigned based on a descent in the instrument tree assembly.
+ *  If two assemblies are parented, say Bank1 and module1, and both assembly names
+ *  are given in the GroupNames, they will get assigned different grouping numbers.
+ *  This allows to isolate a particular sub-assembly of a particular leaf of the tree
+
+    Required Properties:
+    <UL>
+    <LI> InstrumentName   - The name of the instrument. Needs to be present in the store</LI>
+    <LI> GroupingFilename - The name of the output file (*.ca extension) .</LI>
+    <LI> GroupNames       - Name of assemblies to condiser (names separated by "/" or ","</LI>
+    </UL>
+
+    @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
+    @date 01/03/2009
+
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
+class DLLExport CreateCalFileByNames : public API::Algorithm
+{
+public:
+  /// (Empty) Constructor
+  CreateCalFileByNames();
+  /// Virtual destructor
+  virtual ~CreateCalFileByNames() {}
+  /// Algorithm's name
+  virtual const std::string name() const { return "CreateCalFileByNames"; }
+  /// Algorithm's version
+  virtual const int version() const { return (1); }
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "Diffraction"; }
+
+private:
+  /// Initialisation code
+  void init();
+  ///Execution code
+  void exec();
+
+  /// Static reference to the logger class
+  static Mantid::Kernel::Logger& g_log;
+  int group_no;
+};
+
+} // namespace Algorithms
+} // namespace Mantid
+
+#endif /*MANTID_ALGORITHMS_CREATECALFILEBYNAMES_H_*/
