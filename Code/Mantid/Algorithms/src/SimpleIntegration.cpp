@@ -104,7 +104,7 @@ void SimpleIntegration::exec()
     if (std::abs(m_MaxRange)<1e-7)
     	highit=X.end()-1;
     else
-    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::less<double>(),m_MaxRange));
+    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::less_equal<double>(),m_MaxRange));
 
 	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
 	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
