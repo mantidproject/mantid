@@ -102,9 +102,11 @@ void SimpleIntegration::exec()
     else
     	lowit=std::find_if(X.begin(),X.end(),std::bind2nd(std::greater_equal<double>(),m_MinRange));
     if (std::abs(m_MaxRange)<1e-7)
-    	highit=X.end()-1;
+    	highit=X.end();
     else
-    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::less_equal<double>(),m_MaxRange));
+    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater_equal<double>(),m_MaxRange));
+
+    highit--; // Upper limit is the bin before
 
 	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
 	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
@@ -120,8 +122,8 @@ void SimpleIntegration::exec()
 		sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),TimesSquares<double>());
 	}
     //Set X-boundaries
-    XValue[0] = *(lowit);
-    XValue[1] = *(highit);
+    XValue[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
+    XValue[1] = *highit;
     outputWorkspace->dataX(j) = XValue;
     outputWorkspace->dataY(j)[0] = sumY;
     outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
