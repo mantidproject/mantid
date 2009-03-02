@@ -55,8 +55,8 @@ namespace Mantid
 		    //Do all the spectra	    
 		    for (int i=0; i < numSpectra; ++i)
 		    {
-			    removeDecay(inputWS->dataX(i), inputWS->dataY(i), outputWS->dataY(i));
-			    outputWS->dataX(i) = inputWS->dataX(i);
+			    removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
+			    outputWS->dataX(i) = inputWS->readX(i);
 			    
 			    //Need to do something about the errors?
 		    }
@@ -68,9 +68,9 @@ namespace Mantid
 			//Copy all the X,Y and E data
 			for (int i=0; i < numSpectra; ++i)
 			{
-			    outputWS->dataX(i) = inputWS->dataX(i);
-			    outputWS->dataY(i) = inputWS->dataY(i);
-			    outputWS->dataE(i) = inputWS->dataE(i);
+			    outputWS->dataX(i) = inputWS->readX(i);
+			    outputWS->dataY(i) = inputWS->readY(i);
+			    outputWS->dataE(i) = inputWS->readE(i);
 			}  
 		    }
 		    
@@ -83,8 +83,8 @@ namespace Mantid
 					throw std::invalid_argument("Spectra size greater than the number of spectra!");
 				}
 			    			    
-			   removeDecay(inputWS->dataX(Spectra[i]), inputWS->dataY(Spectra[i]), outputWS->dataY(Spectra[i]));
-			   outputWS->dataX(Spectra[i]) = inputWS->dataX(Spectra[i]);
+			   removeDecay(inputWS->readX(Spectra[i]), inputWS->readY(Spectra[i]), outputWS->dataY(Spectra[i]));
+			   outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
 			    
 			    //Need to do something about the errors?
 		    }

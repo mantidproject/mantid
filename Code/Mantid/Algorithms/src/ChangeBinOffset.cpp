@@ -41,7 +41,7 @@ namespace Mantid
     void ChangeBinOffset::exec()
     {
 	    //Get input workspace and offset
-	    MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+	    const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 	    double offset = getProperty("Offset");
 	    
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
@@ -52,10 +52,10 @@ namespace Mantid
 	    for (int i=0; i < histnumber; ++i)
 	    {		    
 		    //Do the offsetting
-		    for (int j=0; j <  inputW->dataX(i).size(); ++j)
+		    for (int j=0; j <  inputW->readX(i).size(); ++j)
 		    {
 			    //Change bin value by offset
-			    outputW->dataX(i)[j] = inputW->dataX(i)[j] + offset;
+			    outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;
 		    }
 		    
 		    //Copy y and e data

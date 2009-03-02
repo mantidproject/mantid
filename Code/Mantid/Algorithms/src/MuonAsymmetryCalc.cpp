@@ -50,7 +50,7 @@ namespace Mantid
 	    
 	    //Create a workspace with only one spectra for forward
 	    API::MatrixWorkspace_sptr outputWS 
-		= API::WorkspaceFactory::Instance().create(inputWS, 1, inputWS->dataX(0).size(), inputWS->blocksize());
+					= API::WorkspaceFactory::Instance().create(inputWS, 1, inputWS->readX(0).size(), inputWS->blocksize());
 	    	    
 	    //Calculate asymmetry for each time bin
 	    //F-aB / F+aB
@@ -71,7 +71,7 @@ namespace Mantid
 	    }
 	    
 	    //Copy the imput time bins on to the output
-	    outputWS->dataX(0) = inputWS->dataX(0);
+	    outputWS->dataX(0) = inputWS->readX(0);
    
 	    setProperty("OutputWorkspace", outputWS);
     }
