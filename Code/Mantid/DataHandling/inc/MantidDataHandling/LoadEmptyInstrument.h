@@ -14,9 +14,9 @@ namespace Mantid
   {
     /** @class LoadEmptyInstrument LoadEmptyInstrument.h DataHandling/LoadEmptyInstrument.h
 
-    Loads an instrument definition file into a workspace, with purpose of being
-    able to visualise an instrument directly and without requiring to read in a 
-    ISIS raw datafile first. The name of the algorithm refers to the fact that an instrument
+    Loads an instrument definition file into a workspace, with the purpose of being
+    able to visualise an instrument without requiring to read in a ISIS raw datafile first. 
+    The name of the algorithm refers to the fact that an instrument
     is loaded into a workspace but without any real data - hence the reason for referring to
     it as an 'empty' instrument.
 
@@ -28,8 +28,8 @@ namespace Mantid
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
     <UL>
-    <LI> detector_value  - This value may affect the colour of the detector shapes when visualising the instrument</LI>
-    <LI> monitor_value  - This value may affect the colour of the monitor shapes when visualising the instrument</LI>
+    <LI> detector_value  - This value affect the colour of the detectorss in the instrument display window</LI>
+    <LI> monitor_value  - This value affect the colour of the monitors in the instrument display window</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
