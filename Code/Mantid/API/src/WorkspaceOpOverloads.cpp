@@ -330,17 +330,18 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
   if ( workspace->isDistribution() == forwards ) return;
 
   const int numberOfSpectra = workspace->getNumberHistograms();
-  const int size = workspace->blocksize();
 
-  std::vector<double> widths(size);
+  std::vector<double> widths(workspace->readX(0).size());
 
   for (int i = 0; i < numberOfSpectra; ++i)
   {
-	  const std::vector<double>& X=workspace->dataX(i);
+	  const std::vector<double>& X=workspace->readX(i);
 	  std::vector<double>& Y=workspace->dataY(i);
 	  std::vector<double>& E=workspace->dataE(i);
 	  std::adjacent_difference(X.begin(),X.end(),widths.begin()); // Calculate bin widths
 
+    // RJT: I'll leave this in, but X should never be out of order. 
+    // If it is there'll be problems elsewhere...
 	  if (X.front()>X.back()) // If not ascending order
 		  std::transform(widths.begin(),widths.end(),widths.begin(),std::negate<double>());
 
