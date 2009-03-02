@@ -96,7 +96,7 @@ void MoveInstrumentComponent::exec()
   }
 
   // Then find the corresponding relative position
-  const IComponent* parent = comp->getParent();
+  boost::shared_ptr<const IComponent> parent = comp->getParent();
   if (parent)
   {
       Pos -= parent->getPos();

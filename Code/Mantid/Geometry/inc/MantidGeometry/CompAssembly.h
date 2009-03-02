@@ -44,7 +44,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CompAssembly : public ICompAssembly, public Component
+class DLLExport CompAssembly : public virtual ICompAssembly, public Component
 {
     typedef std::vector< IComponent* >::iterator comp_it;
     typedef std::vector< IComponent* >::const_iterator const_comp_it;

@@ -524,7 +524,7 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
       // Get the parent's absolute position (if the component has a parent)
       if ( comp->getParent() )
       {
-        SphVec parent = m_tempPosHolder[comp->getParent()];
+        SphVec parent = m_tempPosHolder[comp->getParent()->getComponentID()];
         // Add to the current component to get its absolute position
         R     += parent.r;
         theta += parent.theta;

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Detector.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
@@ -43,7 +43,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IInstrument: public virtual Geometry::IComponent
+class DLLExport IInstrument: public virtual Geometry::ICompAssembly
 {
 public:
   ///String description of the type of component

@@ -10,14 +10,6 @@ namespace Mantid
 namespace API
 {
 
-/// An object for constructing a shared_ptr that won't ever delete its pointee
-class NoDeleting
-{
-public:
-  /// Does nothing
-  void operator()(void*){}
-};
-
 Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor

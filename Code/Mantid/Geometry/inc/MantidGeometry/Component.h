@@ -78,7 +78,7 @@ public:
   //! Assign a parent component. Previous parent link is lost
   void setParent(IComponent*);
   //! Return a pointer to the current parent.
-  const IComponent* getParent() const;
+  boost::shared_ptr<const IComponent> getParent() const;
   //! Set the component name
   void setName(const std::string&);
   //! Get the component name

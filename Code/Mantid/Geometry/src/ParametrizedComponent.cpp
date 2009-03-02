@@ -6,7 +6,7 @@ namespace Geometry
 {
 
 ParametrizedComponent::ParametrizedComponent(const IComponent* base,  const ParameterMap* map)
-:m_base(base),m_map(map),m_parent(0)
+:m_base(base),m_map(map)//,m_parent(0)
 {
 }
 
@@ -14,13 +14,13 @@ ParametrizedComponent::ParametrizedComponent(const ParametrizedComponent& comp)
 {
     m_base = comp.m_base;
     m_map = comp.m_map;
-    m_parent = 0;
+    //m_parent = 0;
 }
 
 ParametrizedComponent::~ParametrizedComponent()
 {
     //std::cerr<<"PDeleted\n";
-    if (m_parent) delete m_parent;
+    //if (m_parent) delete m_parent;
 }
 
 /*! Clone method
@@ -51,15 +51,14 @@ void ParametrizedComponent::setParent(IComponent* comp)
 /*! Get a pointer to the parent.
  *  @return this.parent
  */
-const IComponent* ParametrizedComponent::getParent() const
+boost::shared_ptr<const IComponent> ParametrizedComponent::getParent() const
 {
-    const IComponent* parent = m_base->getParent();
+    boost::shared_ptr<const IComponent> parent = m_base->getParent();
     if (parent)
     {
-        m_parent = new ParametrizedComponent(parent,m_map);
-        return m_parent;
+        return boost::shared_ptr<const IComponent>(new ParametrizedComponent(parent.get(),m_map));
     }
-    return 0;
+    return boost::shared_ptr<const IComponent>();
 }
 
 /*! Set the name of the ParametrizedComponent (currently does nothing)
@@ -173,7 +172,7 @@ V3D ParametrizedComponent::getRelativePos() const
  */
 V3D ParametrizedComponent::getPos() const
 {
-  const IComponent *parent = getParent();
+    boost::shared_ptr<const IComponent> parent = getParent();
   if (!parent)
   {
     return getRelativePos();
@@ -208,7 +207,7 @@ const Quat& ParametrizedComponent::getRelativeRot() const
  */
 const Quat ParametrizedComponent::getRotation() const
 {
-  const IComponent* parent = getParent();
+    boost::shared_ptr<const IComponent> parent = getParent();
   if (!parent)
   {
     return getRelativeRot();
@@ -233,16 +232,16 @@ double ParametrizedComponent::getDistance(const IComponent& comp) const
  */
 void ParametrizedComponent::printSelf(std::ostream& os) const
 {
-    const IComponent* parent = getParent();
-  os << "Name : " << getName() << std::endl;
-  os << "Type: " << this->type() << std::endl;
-  if (parent)
-    os << "Parent: " << parent->getName() << std::endl;
-  else
-    os << "Parent: None" << std::endl;
+    boost::shared_ptr<const IComponent> parent = getParent();
+    os << "Name : " << getName() << std::endl;
+    os << "Type: " << this->type() << std::endl;
+    if (parent)
+        os << "Parent: " << parent->getName() << std::endl;
+    else
+        os << "Parent: None" << std::endl;
 
-  os << "Position : " << getPos() << std::endl;
-  os << "Orientation :" << getRelativeRot() << std::endl;
+    os << "Position : " << getPos() << std::endl;
+    os << "Orientation :" << getRelativeRot() << std::endl;
 }
 
 /** Prints a text representation

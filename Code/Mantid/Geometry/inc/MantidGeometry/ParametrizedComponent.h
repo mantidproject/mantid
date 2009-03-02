@@ -63,7 +63,7 @@ public:
      void setParent(IComponent*);
 
     //! Return a pointer to the current parent.
-     const IComponent* getParent() const;
+     boost::shared_ptr<const IComponent> getParent() const;
 
     //! Set the IComponent name
      void setName(const std::string&);
@@ -121,7 +121,7 @@ protected:
     const ParameterMap* m_map;
 
     /// Parent ParametrizedComponent
-    mutable ParametrizedComponent *m_parent;
+    //mutable ParametrizedComponent *m_parent;
 };
 
 } // namespace Geometry

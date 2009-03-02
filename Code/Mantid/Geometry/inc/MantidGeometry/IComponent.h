@@ -9,6 +9,8 @@
 #include "MantidGeometry/Quat.h"
 #include "MantidKernel/System.h"
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
 namespace Geometry
@@ -66,7 +68,7 @@ public:
   //! Assign a parent IComponent. Previous parent link is lost
   virtual void setParent(IComponent*)= 0;
   //! Return a pointer to the current parent.
-  virtual const IComponent* getParent() const = 0;
+  virtual boost::shared_ptr<const IComponent> getParent() const = 0;
   //! Set the IComponent name
   virtual void setName(const std::string&) = 0;
   //! Get the IComponent name
@@ -105,6 +107,16 @@ private:
 DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);
 
 } //Namespace Geometry
+
+/// An object for constructing a shared_ptr that won't ever delete its pointee
+class NoDeleting
+{
+public:
+  /// Does nothing
+  void operator()(void*){}
+  void operator()(const void*){}
+};
+
 } //Namespace Mantid
 
 #endif /*MANTID_GEOMETRY_IComponent_H_*/

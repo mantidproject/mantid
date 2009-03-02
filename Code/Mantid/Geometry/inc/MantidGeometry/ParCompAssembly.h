@@ -40,7 +40,7 @@ class CompAssembly;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ParCompAssembly : public ICompAssembly, public ParametrizedComponent
+class DLLExport ParCompAssembly : public virtual ICompAssembly, public ParametrizedComponent
 {
 public:
   ///String description of the type of component

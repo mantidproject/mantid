@@ -87,9 +87,9 @@ void Component::setParent(IComponent* comp)
 /*! Get a pointer to the parent.
  *  @return this.parent
  */
-const IComponent* Component::getParent() const
+boost::shared_ptr<const IComponent> Component::getParent() const
 {
-  return parent;
+    return boost::shared_ptr<const IComponent>(parent,NoDeleting());
 }
 
 /*! Set the name of the component
