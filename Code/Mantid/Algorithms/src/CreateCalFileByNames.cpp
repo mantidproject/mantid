@@ -66,7 +66,7 @@ void CreateCalFileByNames::exec()
 	// Get the names of groups
 	std::string groupsname=getProperty("GroupNames");
 	std::vector<std::string> groups;
-	boost::split( groups, groupsname, boost::algorithm::detail::is_any_ofF<char>(",/"));
+	boost::split( groups, groupsname, boost::algorithm::detail::is_any_ofF<char>(",/*"));
 	if (groups.empty())
 	{
 		g_log.error("Could not determine group names. Group names should be separated by / or ,");

@@ -23,8 +23,8 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InstrumentName   - The name of the instrument. Needs to be present in the store</LI>
-    <LI> GroupingFilename - The name of the output file (*.ca extension) .</LI>
-    <LI> GroupNames       - Name of assemblies to condiser (names separated by "/" or ","</LI>
+    <LI> GroupingFilename - The name of the output file (*.cal extension) .</LI>
+    <LI> GroupNames       - Name of assemblies to consider (names separated by "/" or "," or "*"</LI>
     </UL>
 
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
