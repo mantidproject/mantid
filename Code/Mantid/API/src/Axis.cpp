@@ -174,7 +174,7 @@ void Axis::getSpectraIndexMap(spec2index_map& map)
 
 	if (nel==0)
 		throw std::runtime_error("getSpectraIndexMap(),  zero elements");
-	map.empty();
+	map.clear();
 	for (int i=nel-1;i>=0;--i)
 	{
 		map.insert(std::make_pair<int,int>(m_spectraValues[i],i));
