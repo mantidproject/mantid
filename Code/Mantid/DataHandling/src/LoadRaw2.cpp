@@ -88,6 +88,8 @@ namespace Mantid
         throw Exception::FileError("Unable to open File:" , m_filename);
       }
       isisRaw->ioRAW(file, true);
+      std::string title(isisRaw->hdr.hd_title);
+      g_log.information("**** Run title: "+title+ "***");
 
       // Read in the number of spectra in the RAW file
       m_numberOfSpectra = isisRaw->t_nsp1;
@@ -330,7 +332,7 @@ namespace Mantid
       {
 	// This is the assumed deployment directory for IDFs, where we need to be relative to the
 	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
+	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
       }
 
       const int stripPath = m_filename.find_last_of("\\/");
