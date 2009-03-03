@@ -23,9 +23,10 @@ echo
 
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../../Third_Party/include \
-            -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+            -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
             -lMantidGeometry -lMantidKernel -lPocoFoundation -lPocoUtil \
-            -lboost_regex -lboost_signals -lgsl -lgslcblas -lGL -lGLU -lgts
+            -lboost_regex -lboost_signals -lgsl -lgslcblas -lGL -lGLU -lgts \
+            -lTKernel -lTKBO -lTKPrim -lTKMesh
 echo
 
 echo "Running the tests..."

@@ -25,11 +25,12 @@ echo "Compiling the test executable..."
 # -lboost_filesystem added for the SaveCSVTest test
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc \
             -I ../../Geometry/inc  -I ../../../Third_Party/include \
-            -L../../debug -L../../Build -L../../../Third_Party/lib/linux64 \
+            -L../../debug -L../../Build -L../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
             -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
             -lPocoFoundation -lPocoUtil \
             -lboost_regex -lboost_signals -lboost_date_time \
-            -lmuparserd -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts
+            -lmuparserd -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts \
+            -lTKernel -lTKBO -lTKPrim -lTKMesh
 echo
 
 

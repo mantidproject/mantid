@@ -100,16 +100,16 @@ void SimpleIntegration::exec()
     if (std::abs(m_MinRange)<1e-7)
     	lowit=X.begin();
     else
-    	lowit=std::find_if(X.begin(),X.end(),std::bind2nd(std::greater_equal<double>(),m_MinRange));
+      lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
     if (std::abs(m_MaxRange)<1e-7)
     	highit=X.end();
     else
-    	highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater_equal<double>(),m_MaxRange));
-
-    //highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
-
+      highit=std::lower_bound(X.begin(),X.end(),m_MaxRange,std::less_equal<double>());
+    highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
+  
 	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
 	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
+
 	if (!is_distrib) //Sum the Y, and sum the E in quadrature
 	{
 		sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);

@@ -24,10 +24,11 @@ echo
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
 	                         -I ../../DataHandling/inc -I ../../../Third_Party/include \
-	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
+	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
 	                         -lMantidCurveFitting -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling \
 	                         -lPocoFoundation -lPocoUtil -lboost_date_time -lboost_regex -lboost_signals \
-	                         -lmuparserd -lgsl -lgslcblas -lGL -lGLU -lgts
+	                         -lmuparserd -lgsl -lgslcblas -lGL -lGLU -lgts \
+                             -lTKernel -lTKBO -lTKPrim -lTKMesh
 echo
 
 echo "Running the tests..."
