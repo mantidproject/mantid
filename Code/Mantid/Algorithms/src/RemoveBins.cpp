@@ -131,6 +131,7 @@ void RemoveBins::exec()
 
   // Assign to the output workspace property
   setProperty("OutputWorkspace",outputWS);
+  m_inputWorkspace.reset();
 }
 
 /// Retrieve the input properties and check that they are valid

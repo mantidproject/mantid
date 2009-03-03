@@ -339,7 +339,7 @@ namespace Mantid
 					tri = facing->Triangles();
 					for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
 						Poly_Triangle trian = tri.Value(i);
-						Standard_Integer index1,index2,index3,M,N;
+						Standard_Integer index1,index2,index3;
 						trian.Get(index1,index2,index3);
 						faces[index*3+0]=maxindex+index1-1;
 						faces[index*3+1]=maxindex+index2-1;

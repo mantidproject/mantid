@@ -125,7 +125,7 @@ namespace Mantid
 					tri = facing->Triangles();
 					for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
 						Poly_Triangle trian = tri.Value(i);
-						Standard_Integer index1,index2,index3,M,N;
+						Standard_Integer index1,index2,index3;
 						trian.Get(index1,index2,index3);
 						gp_Pnt point1=tab.Value(index1);
 						gp_Pnt point2=tab.Value(index2);
@@ -191,7 +191,7 @@ namespace Mantid
 				tri = facing->Triangles();
 				for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
 					Poly_Triangle trian = tri.Value(i);
-					Standard_Integer index1,index2,index3,M,N;
+					Standard_Integer index1,index2,index3;
 					trian.Get(index1,index2,index3);
 					fprintf(fp,"3 %d %d %d\n",maxindex+index1-1,maxindex+index2-1,maxindex+index3-1);
 				}		

@@ -1100,7 +1100,6 @@ namespace Mantid
            //
            return rayTraceSolidAngle(observer);
        }
-	   int nPoints=this->NumberOfPoints();
 	   double* vertices=this->getTriangleVertices();
 	   int *faces=this->getTriangleFaces();
        double sangle=0,sneg=0;
@@ -1176,7 +1175,6 @@ namespace Mantid
            //
            return rayTraceSolidAngle(observer); // so is this
        }
-	   int nPoints=this->NumberOfPoints();
 	   double* vertices=this->getTriangleVertices();
 	   int *faces=this->getTriangleFaces();
        double sangle=0,sneg=0;
@@ -1253,7 +1251,7 @@ namespace Mantid
       triMap[8][0]=3; triMap[8][1]=4; triMap[8][2]=8;triMap[9][0]=8;triMap[9][1]=7;triMap[9][2]=3;
       triMap[10][0]=1; triMap[10][1]=5; triMap[10][2]=8;triMap[11][0]=8;triMap[11][1]=4;triMap[11][2]=1;
       double sangle=0.0;
-      for(int i=0;i<triMap.size();i++)
+      for(unsigned int i=0;i<triMap.size();i++)
       {
           double sa=getTriangleSolidAngle(pts[triMap[i][0]-1],pts[triMap[i][1]-1],pts[triMap[i][2]-1],observer);
           if(sa>0)

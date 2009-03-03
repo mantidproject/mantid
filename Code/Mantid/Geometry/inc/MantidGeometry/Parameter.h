@@ -64,7 +64,7 @@ public:
 
     /// Returns the parameter value of type T if the parameter has type ParameterType<T>
     template<class T>
-    T value();
+    const T& value();
 
     /// Sets the value of type T to the parameter if it has type ParameterType<T>
     /// Throws exception if types are wrong.
@@ -121,7 +121,7 @@ private:
 typedef boost::shared_ptr<Parameter> Parameter_sptr;
 
 template<class T>
-T Parameter::value()
+const T& Parameter::value()
 {
     ParameterType<T> *p = dynamic_cast<ParameterType<T>*>(this);
     if (!p) throw std::runtime_error("Wrong type of parameter.");

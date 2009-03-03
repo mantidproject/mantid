@@ -164,7 +164,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   std::string algebra;  // to hold algebra in a way Mantid can understand
   std::map<std::string,std::string>::iterator iter;
   size_t found;
-  bool howFoundOne = false;
   std::map<size_t,std::string, std::greater<size_t> > allFound;
   for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
   {
@@ -182,7 +181,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
   for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
   {
-    size_t fisse = iter2->first;
     std::string  kuse = iter2->second;
     algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
   }
@@ -209,7 +207,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     NodeList* pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
     if ( pNL_boundingBox->length() != 1)  // should probably throw an error if more than 1 bounding box is defined...
       return retVal;
-    Element* pElemBB = static_cast<Element*>(pNL_boundingBox->item(0)); 
     pNL_boundingBox->release();
 
     double xmin = atof( ((getShapeElement(pElem, "x-min"))->getAttribute("val")).c_str() );

@@ -82,7 +82,7 @@ private:
   ///private pointer to the channel to pass messages onto
 	Channel*        _channel;
   ///The priority used to filter messages
-  unsigned int _priority;
+  int _priority;
   ///A mutex lock to prevent race conditions
 	mutable FastMutex _mutex;
 };
