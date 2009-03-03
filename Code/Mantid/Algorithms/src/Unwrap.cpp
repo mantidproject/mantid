@@ -118,6 +118,7 @@ void Unwrap::exec()
   // Set the correct X unit on the output workspace
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
   setProperty("OutputWorkspace",outputWS);
+  m_inputWS.reset();
 }
 
 /** Gets the primary flightpath (L1)
