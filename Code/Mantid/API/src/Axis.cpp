@@ -161,6 +161,28 @@ int& Axis::spectraNo(const int index)
 
   return m_spectraValues[index];
 }
+/** Get the length of the Axis
+ *
+ */
+int Axis::getLength() const
+{
+	if (m_isSpectra)
+		return m_spectraValues.size();
+	else
+		return m_numericValues.size();
+}
+/** Check if two axis defined as spectra or numeric axis are equivalent
+ * @param axis2 Reference to the axis to compare to
+ */
+bool Axis::operator ==(const Axis& axis2) const
+{
+	if (getLength()!=axis2.getLength())
+		return false;
+	if (m_isSpectra)
+		return std::equal(m_spectraValues.begin(),m_spectraValues.end(),axis2.m_spectraValues.begin());
+	else
+		return std::equal(m_numericValues.begin(),m_numericValues.end(),axis2.m_numericValues.begin());
+}
 /** Returns a map where spectra is the key and index is the value
  * This is used for efficient search of spectra number within a workspace
  *  @param  map Reference to the map
