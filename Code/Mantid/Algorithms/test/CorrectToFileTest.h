@@ -13,7 +13,7 @@ class CorrectToFileTest : public CxxTest::TestSuite
 {
 public:
 
-  CorrectToFileTest() : inputFile("../../../../Test/Data/LOQ sans configuration/DIRECT.041") 
+  CorrectToFileTest() : inputFile("../../../../Test/Data/DIRECT.041") 
   {
   }
 

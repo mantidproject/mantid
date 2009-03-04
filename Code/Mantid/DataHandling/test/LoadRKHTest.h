@@ -14,7 +14,7 @@ class LoadRKHTest : public CxxTest::TestSuite
 public:
 
   // A sample file is in the repository
-  LoadRKHTest() : inputFile("../../../../Test/Data/LOQ sans configuration/DIRECT.041")
+  LoadRKHTest() : inputFile("../../../../Test/Data/DIRECT.041")
   {    
   }
 

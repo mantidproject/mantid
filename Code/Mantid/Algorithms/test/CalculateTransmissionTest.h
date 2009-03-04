@@ -18,7 +18,7 @@ public:
   {
     Mantid::DataHandling::LoadRaw2 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/LOQ trans configuration/LOQ48127.raw");
+    loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48127.raw");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("spectrum_min","2");
     loader.setPropertyValue("spectrum_max","4");
