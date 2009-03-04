@@ -8,19 +8,19 @@ IF "%VCINSTALLDIR%"=="" CALL "%VS80COMNTOOLS%"vsvars32
 SET ROOTDIR=%CD%
 
 :: First, build dialog library
-cd %ROOTDIR%\MantidQt
+cd "%ROOTDIR%\MantidQt"
 qmake
 nmake clean
 nmake
 if errorlevel 1 goto mantidqterr
 
 :: Now build qtiplot
-cd %ROOTDIR%\qtiplot
+cd "%ROOTDIR%\qtiplot"
 nmake clean
 qmake
 nmake
-exit(0)
 if errorlevel 1 goto qtiploterr
+exit(0)
 
 :mantidqterr
 echo "MantidQt build failed"
