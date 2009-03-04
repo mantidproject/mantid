@@ -287,6 +287,10 @@ addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll','../Mantid/Bin/Shared/
 addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/Bin/Shared/MantidKernel.dll',MantidDlls)
 addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shared/MantidPythonAPI.dll',MantidDlls)
 
+# Add qt API  library
+addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../qtiplot/MantidQt/lib/MantidQtAPI.dll',MantidDlls)
+
+
 addAllFiles('toget/MSVCruntime','ms',MantidDlls)
 
 #  these two should go to plugins 
@@ -339,6 +343,9 @@ addFileV('hd421mdll','hd421m.dll','hd421m.dll','../Third_Party/lib/win32/hd421m.
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win32/hdf5dll.dll',Plugins)
 addFileV('hm421mdll','hm421m.dll','hm421m.dll','../Third_Party/lib/win32/hm421m.dll',Plugins)
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win32/libNeXus-0.dll',Plugins)
+
+# Add qt custom dialogs library
+addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../qtiplot/MantidQt/lib/MantidQtCustomDialogs.dll',Plugins)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents','{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}',documentsDir)
