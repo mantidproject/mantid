@@ -104,7 +104,7 @@ if os.name == 'nt':
 	libList.append('TKMesh')
 	libList.append('TKG2d')
 
-	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', gts_path, glib_path, opencascade_path]
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', gts_path, glib_path, opencascade_path, third_party+'/include/muParser']
 	
 	#set up scons to embed manifest files
 	env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
