@@ -722,7 +722,6 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
          
          int ws_index = m->workspaceIndex(i);
          int currentSpec = spectraAxis->spectraNo(ws_index);
-         //Mantid::Geometry::V3D pos;
          int detID = 0;
          double R = 0.;
          double Theta = 0.;
@@ -736,7 +735,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
              pos.getSpherical(R,Theta,Phi);
              // Need to get R & Theta through these methods to be correct for grouped detectors
              R = det->getDistance(*sample);
-             Theta = ws->detectorTwoTheta(det);
+             Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
          }
          catch(...)
          {
