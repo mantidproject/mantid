@@ -56,7 +56,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	//Render Controls
 	mSelectButton = new QPushButton(tr("Pick"));
 	mSelectColormap = new QPushButton(tr("Select ColorMap"));
-	QPushButton* mSelectBin = new QPushButton(tr("Select Bin"));
+	QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
 	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 	mMinValueBox    = new QLineEdit();
@@ -413,7 +413,8 @@ void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue)
   if( this->isVisible() ) mInstrumentDisplay->update();
 }
 
-//void setDataMappingSingleBin(int binNumber);
+//void setDataMappingSingleBin(int binNumber);
+
 
 /**
  *

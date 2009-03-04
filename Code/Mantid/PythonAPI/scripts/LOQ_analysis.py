@@ -14,13 +14,13 @@ def detBlock(startID,wide,high,dim=128):
 #
 #######################
 # Call the LOQScriptInput algorithm to get the input data and parameters
-input = LOQScriptInputDialog("48098","48094","48130","48127","48128",path+"Data/LOQ sans configuration/DIRECT.041","38","419","2.2","10.0","-0.035","0.008","0.28","0.002","324.95","328.02")
+input = LOQScriptInputDialog("48098","48094","48130","48127","48128",path+"Data/DIRECT.041","38","419","2.2","10.0","-0.035","0.008","0.28","0.002","324.95","328.02")
 #,path+"Data/LOQ sans configuration/DIRECT.041")
-data_file = path + "Data/LOQ sans configuration/LOQ" + input.getPropertyValue("SampleWorkspace") + ".raw"
-empty_file = path + "Data/LOQ sans configuration/LOQ" + input.getPropertyValue("EmptyCanWorkspace") + ".raw"
-trans_sample_file = path + "Data/LOQ trans configuration/LOQ" + input.getPropertyValue("TransmissionSampleWorkspace") + ".raw"
-trans_direct_file = path + "Data/LOQ trans configuration/LOQ" + input.getPropertyValue("TransmissionDirectWorkspace") + ".raw"
-trans_empty_file = path + "Data/LOQ trans configuration/LOQ" + input.getPropertyValue("TransmissionEmptyCanWorkspace") + ".raw"
+data_file = path + "Data/LOQ" + input.getPropertyValue("SampleWorkspace") + ".raw"
+empty_file = path + "Data/LOQ" + input.getPropertyValue("EmptyCanWorkspace") + ".raw"
+trans_sample_file = path + "Data/LOQ" + input.getPropertyValue("TransmissionSampleWorkspace") + ".raw"
+trans_direct_file = path + "Data/LOQ" + input.getPropertyValue("TransmissionDirectWorkspace") + ".raw"
+trans_empty_file = path + "Data/LOQ" + input.getPropertyValue("TransmissionEmptyCanWorkspace") + ".raw"
 min_radius = float(input.getPropertyValue("Radius_min"))
 max_radius = float(input.getPropertyValue("Radius_max"))
 wav1 = float(input.getPropertyValue("Wavelength_min"))
@@ -167,7 +167,6 @@ mantid.deleteWorkspace("direct")
 
 # Now do the correction
 Divide(outputWS_cor,"transmission",outputWS_cor)
-mantid.deleteWorkspace("transmission")
 
 #######################
 #Step 7 - Correct for efficiency
