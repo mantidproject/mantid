@@ -77,8 +77,12 @@ public:
 
   const int& spectraNo(const int index) const;
   int& spectraNo(const int index);
-
+  //< Get the length of the axis
+  int getLength() const;
+  //< Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&);
+  //< Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis
+  bool operator==(const Axis&) const;
 
 protected:
   Axis(const Axis& right);
