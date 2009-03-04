@@ -26,7 +26,7 @@ win32 {
    CWD = $$system(cd)
 }
 
-TOPBUILDDIR = $$CWD
+TOPBUILDDIR = "$$CWD"
 
 # Icons
 RESOURCES = $$TOPBUILDDIR/../../../Images/images.qrc
