@@ -29,7 +29,7 @@ win32 {
 TOPBUILDDIR = $$CWD
 
 # Icons
-RESOURCES = $$TOPBUILDDIR/../../../Images/images.qrc
+RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
 MANTIDPATH = $$TOPBUILDDIR/../../Mantid
@@ -58,9 +58,9 @@ win32 {
   LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
 }
 
-MOC_DIR = $$TMPDIR
-OBJECTS_DIR = $$TMPDIR
-SIP_DIR = $$TMPDIR
+MOC_DIR = "$$TMPDIR"
+OBJECTS_DIR = "$$TMPDIR"
+SIP_DIR = "$$TMPDIR"
 
 DESTDIR = "$$TOPBUILDDIR/lib"
 
