@@ -26,7 +26,7 @@ win32 {
    CWD = $$system(cd)
 }
 
-TOPBUILDDIR = "$$CWD"
+TOPBUILDDIR = $$CWD
 
 # Icons
 RESOURCES = $$TOPBUILDDIR/../../../Images/images.qrc
@@ -43,25 +43,25 @@ TMPDIR = $$TOPBUILDDIR/qtbuild/MantidQt
 
 # Qt qmake variables
 
-INCLUDEPATH += $$MANTIDPATH/includes
-INCLUDEPATH += $$MANTIDQTINCLUDES
+INCLUDEPATH += "$$MANTIDPATH/includes"
+INCLUDEPATH += "$$MANTIDQTINCLUDES"
 
 unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
 }
 win32 {
-  INCLUDEPATH += $$THIRDPARTY/include
-  LIBS += $$MANTIDLIBPATH/MantidKernel.lib
-  LIBS += $$MANTIDLIBPATH/MantidGeometry.lib
-  LIBS += $$MANTIDLIBPATH/MantidAPI.lib
-  LIBS += $$THIRDPARTY/lib/win32/PocoFoundation.lib
+  INCLUDEPATH += "$$THIRDPARTY/include"
+  LIBS += "$$MANTIDLIBPATH/MantidKernel.lib"
+  LIBS += "$$MANTIDLIBPATH/MantidGeometry.lib"
+  LIBS += "$$MANTIDLIBPATH/MantidAPI.lib"
+  LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
 }
 
 MOC_DIR = $$TMPDIR
 OBJECTS_DIR = $$TMPDIR
 SIP_DIR = $$TMPDIR
 
-DESTDIR = $$TOPBUILDDIR/lib
+DESTDIR = "$$TOPBUILDDIR/lib"
 
 
