@@ -4,7 +4,7 @@
 #include "MantidDataHandling/XMLlogfile.h"
 #include "MantidGeometry/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <muParser/muParser.h>
+#include <muParser.h>
 #include <ctime>
 #include "MantidDataHandling/LogParser.h"
 
