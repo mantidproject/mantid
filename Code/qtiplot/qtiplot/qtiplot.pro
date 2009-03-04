@@ -35,66 +35,68 @@ CONFIG          += release
 ##################### 3rd PARTY HEADER FILES SECTION ########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
+# Global 
+INCLUDEPATH  += ../../Mantid/includes/
+INCLUDEPATH  += ../3rdparty/liborigin
+INCLUDEPATH  += ../MantidQt/includes
 
-INCLUDEPATH       += ../../Mantid/includes/
-INCLUDEPATH       += ../3rdparty/liborigin
+win32 {
+  INCLUDEPATH       += ../../Third_Party/include/
+  INCLUDEPATH       += ../../Third_Party/include/muparser
+  INCLUDEPATH       += ../../Third_Party/include
+  INCLUDEPATH       += ../../Third_Party/include/zlib123
+  INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
+  INCLUDEPATH       += ../3rdparty/qwt/src
+}
 
-win32:INCLUDEPATH       += ../../Third_Party/include/
-win32:INCLUDEPATH       += ../../Third_Party/include/muparser
-win32:INCLUDEPATH       += ../../Third_Party/include
-win32:INCLUDEPATH       += ../../Third_Party/include/zlib123
-win32:INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
-win32:INCLUDEPATH       += ../3rdparty/qwt/src
-
-unix:INCLUDEPATH       += /usr/include/
-unix:INCLUDEPATH       += /usr/include/qwt/
-unix:INCLUDEPATH       += /usr/include/qwtplot3d/
-
+unix {
+  INCLUDEPATH       += /usr/include/
+  INCLUDEPATH       += /usr/include/qwt/
+  INCLUDEPATH       += /usr/include/qwtplot3d/
+}
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
 
 ##################### Linux (Mac OS X) ######################################
 
-# statically link against libraries in 3rdparty
-#unix:LIBS         += ../3rdparty/muparser/lib/libmuparser.a
-#unix:LIBS         += ../3rdparty/qwtplot3d/lib/libqwtplot3d.a
-#unix:LIBS         += ../3rdparty/qwt/lib/libqwt.a
-#unix:LIBS         += ../3rdparty/gsl/lib/libgsl.a
-#unix:LIBS         += ../3rdparty/gsl/lib/libgslcblas.a
-
 # dynamically link against dependencies if they are installed system-wide
-unix:LIBS         += -lqscintilla2
-unix:LIBS         += -lmuparser
-unix:LIBS         += -L/usr/lib -lqwtplot3d-qt4
-unix:LIBS         += -L/usr/lib/ -lqwt
-unix:LIBS         += -lgsl -lgslcblas
+unix {
+  LIBS         += -lqscintilla2
+  LIBS         += -lmuparser
+  LIBS         += -L/usr/lib -lqwtplot3d-qt4
+  LIBS         += -L/usr/lib/ -lqwt
+  LIBS         += -lgsl -lgslcblas
 
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
-unix:LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
 
-unix:LIBS		+= -L/usr/lib/ -lPocoUtil
-unix:LIBS		+= -L/usr/lib/ -lPocoFoundation
+  LIBS   += -L../MantidQt/lib -lMantidQtAPI
 
+  LIBS		+= -L/usr/lib/ -lPocoUtil
+  LIBS		+= -L/usr/lib/ -lPocoFoundation
+}
 ##################### Windows ###############################################
+win32 {
+  LIBS += -lqscintilla2
+  LIBS += ../../Third_Party/lib/win32/muparser.lib
+  LIBS += ../../Third_Party/lib/win32/qwtplot3d.lib
+  LIBS += ../../Third_Party/lib/win32/qwt.lib
+  LIBS += ../../Third_Party/lib/win32/gsl.lib
+  LIBS += ../../Third_Party/lib/win32/cblas.lib
+  LIBS += ../../Third_Party/lib/win32/zlib1.lib
 
-win32:LIBS        += -lqscintilla2
-win32:LIBS        += ../../Third_Party/lib/win32/muparser.lib
-win32:LIBS        += ../../Third_Party/lib/win32/qwtplot3d.lib
-win32:LIBS        += ../../Third_Party/lib/win32/qwt.lib
-win32:LIBS        += ../../Third_Party/lib/win32/gsl.lib
-win32:LIBS        += ../../Third_Party/lib/win32/cblas.lib
-win32:LIBS        += ../../Third_Party/lib/win32/zlib1.lib
+  LIBS += ../../Mantid/Bin/Shared/MantidAPI.lib
+  LIBS += ../../Mantid/Bin/Shared/MantidGeometry.lib
+  LIBS += ../../Mantid/Bin/Shared/MantidKernel.lib
 
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidAPI.lib
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidGeometry.lib
-win32:LIBS		+= ../../Mantid/Bin/Shared/MantidKernel.lib
+  LIBS += ../MantidQt/lib/MantidQtAPI.lib
 
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoUtil.lib
-win32:LIBS		+= ../../Third_Party/lib/win32/PocoFoundation.lib
-win32:LIBS		+= ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib
-
+  LIBS += ../../Third_Party/lib/win32/PocoUtil.lib
+  LIBS += ../../Third_Party/lib/win32/PocoFoundation.lib
+  LIBS += ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib 
+}
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
 #############################################################################
@@ -682,6 +684,7 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiMantidMatrix.cpp\
              $${SIP_DIR}/sipqtiMantidUI.cpp \
              $${SIP_DIR}/sipqtiInstrumentWindow.cpp
+             
 }
 ###############################################################
 

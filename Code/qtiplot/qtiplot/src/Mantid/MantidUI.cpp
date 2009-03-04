@@ -1,10 +1,17 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
-#include "LoadRawDlg.h"
-#include "LoadDAEDlg.h"
+
 #include "ImportWorkspaceDlg.h"
-#include "ExecuteAlgorithm.h"
+
+// Replaced with separate library
+//#include "ExecuteAlgorithm.h"
+//#include "LoadRawDlg.h"
+
+//#include "InputHistory.h" 
+
+#include "LoadDAEDlg.h"
+
 #include "AlgMonitor.h"
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -14,7 +21,11 @@
 #include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
-#include "InputHistory.h" 
+
+
+#include "MantidQtAPI/DialogManager.h"
+#include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -109,7 +120,7 @@ void MantidUI::init()
     FrameworkManager::Instance();
     MantidLog::connect(this);
  
-    InputHistory::Instance();
+//    InputHistory::Instance();
 
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
 	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
@@ -128,7 +139,8 @@ void MantidUI::init()
 
 MantidUI::~MantidUI()
 {
-  InputHistory::Instance().save();
+//  InputHistory::Instance().save();
+ MantidQt::API::AlgorithmInputHistory::Instance().save();
   if( m_algMonitor ) delete m_algMonitor;
 
 }
@@ -216,21 +228,24 @@ void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceN
 void MantidUI::loadWorkspace()
 {
     
-	loadRawDlg* dlg = new loadRawDlg(m_appWindow);
-	dlg->setModal(true);	
-	dlg->exec();
+	// loadRawDlg* dlg = new loadRawDlg(m_appWindow);
+	// dlg->setModal(true);	
+	// dlg->exec();
 	
-	if (!dlg->getFilename().isEmpty())
-	{	
+	// if (!dlg->getFilename().isEmpty())
+	// {	
 		
-		LoadIsisRawFile(dlg->getFilename(), 
-                        dlg->getWorkspaceName(),
-                        dlg->getSpectrumMin(),
-                        dlg->getSpectrumMax(),
-                        dlg->getSpectrumList(),
-                        dlg->getCacheOption());
-	}
+		// LoadIsisRawFile(dlg->getFilename(), 
+                        // dlg->getWorkspaceName(),
+                        // dlg->getSpectrumMin(),
+                        // dlg->getSpectrumMax(),
+                        // dlg->getSpectrumList(),
+                        // dlg->getCacheOption());
+	// }
 
+  //Just use the generic executeAlgorithm method which now uses specialised dialogs if they are
+  //available
+  executeAlgorithm("LoadRaw", -1);
 }
 
 /**
@@ -266,7 +281,7 @@ void MantidUI::loadDAEWorkspace()
         if ( !dlg->getSpectrumList().isEmpty() )
         {
 	        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
-        }
+     }
 
         DAEstruct dae;
         dae.m_WorkspaceName = dlg->getWorkspaceName();
@@ -279,8 +294,15 @@ void MantidUI::loadDAEWorkspace()
 	    
         alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
         executeAlgorithmAsync(alg);
-
-	}
+  }
+    // Mantid::API::Algorithm *alg = dynamic_cast<Mantid::API::Algorithm*>
+          // (Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadDAE",-1));
+    // if( !alg ) return;
+    
+    // alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
+    // MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, (QWidget*)parent());
+    // if( !dlg ) return;
+		// if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
 }
 
 /**
@@ -813,10 +835,12 @@ void MantidUI::executeAlgorithm(QString algName, int version)
     }
 	if (alg)
 	{		
-		ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
-		dlg->CreateLayout(alg);
-		dlg->setModal(true);
-	
+		// ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
+		// dlg->CreateLayout(alg);
+		// dlg->setModal(true);
+    
+    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, (QWidget*)parent());
+    if( !dlg ) return;
 		if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
 	}
 }
@@ -849,7 +873,7 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialo
 	m_progressDialog->exec();
       }
 
-        InputHistory::Instance().updateAlgorithm(alg);
+//        InputHistory::Instance().updateAlgorithm(alg);
     }
     catch(...)
     {
@@ -1445,10 +1469,8 @@ bool MantidUI::createPropertyInputDialog(const QString & algName, const QString 
   {
     return false;
   }
-  ScriptWindow* sw = appWindow()->scriptWindow;  
-  ExecuteAlgorithm* dlg = new ExecuteAlgorithm(sw, true);
-  dlg->CreateLayout(alg, message);
-  dlg->setModal(true);
+
+  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, 0, true, message);
   return (dlg->exec() == QDialog::Accepted);
 }
 
