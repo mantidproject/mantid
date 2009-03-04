@@ -72,7 +72,7 @@ void LoadRawDialog::initLayout()
   
   //Buttons 
   QPushButton *loadButton = new QPushButton("Load");
-  connect(loadButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+  connect(loadButton, SIGNAL(clicked()), this, SLOT(accept()));
 
   QPushButton *cancelButton = new QPushButton("Cancel");
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));

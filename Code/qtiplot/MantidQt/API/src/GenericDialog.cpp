@@ -70,15 +70,16 @@ void GenericDialog::initLayout()
 
     
     bool fileType = (prop->getValidatorType() == "file");
-
-    if ( !prop->allowedValues().empty() && !fileType )
+    bool boolType(false);
+    if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) boolType = true;
+    if ( boolType || (!prop->allowedValues().empty() && !fileType ) )
     {
 
       //If the property has allowed values then use a combo box.			
       QComboBox *optionsBox = new QComboBox;
       nameLbl->setBuddy(optionsBox);
       
-      if ( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) )
+      if ( boolType )
       {
 	optionsBox->addItem("No");
 	optionsBox->setItemData(0, QString("0"));
@@ -165,7 +166,7 @@ void GenericDialog::initLayout()
   connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
  	
   m_okButton = new QPushButton(tr("OK"));
-  connect(m_okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
+  connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
 	
   m_exitButton = new QPushButton(tr("Cancel"));
   connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));

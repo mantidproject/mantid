@@ -144,7 +144,7 @@ protected:
 protected slots:
   
   /// A default slot that can be used for an OK button.
-  void okClicked();
+  virtual void accept();
 
 private:
   // This is so that it can set the algorithm and initialize the layout.

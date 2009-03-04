@@ -182,12 +182,11 @@ bool AlgorithmDialog::setPropertyValues()
  * A slot that can be used to connect a button that accepts the dialog if
  * all of the properties are valid
  */
-void AlgorithmDialog::okClicked()
+void AlgorithmDialog::accept()
 {
-  
   parseInput();
-
-  if( setPropertyValues() ) accept();
+  
+  if( setPropertyValues() ) QDialog::accept();
   else
   {
     QMessageBox::critical(this, "", 
