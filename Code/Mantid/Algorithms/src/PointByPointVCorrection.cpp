@@ -40,8 +40,8 @@ void PointByPointVCorrection::init()
 void PointByPointVCorrection::exec()
 {
   // Get the input workspace and output workspace
-  MatrixWorkspace_sptr inputWS1 = getProperty("InputW1");
-  MatrixWorkspace_sptr inputWS2 = getProperty("InputW2");
+  MatrixWorkspace_const_sptr inputWS1 = getProperty("InputW1");
+  MatrixWorkspace_const_sptr inputWS2 = getProperty("InputW2");
   MatrixWorkspace_sptr outputWS= getProperty("OutputWorkspace");
 
   // Check that everything is OK.
@@ -110,10 +110,6 @@ void PointByPointVCorrection::exec()
 			  test=0;
 		  error2_factor2+=errors[j]*test/factor2/factor2;
 	  }
-	  std::stringstream mess;
-	  mess << error2_factor1 << " " << error2_factor2;
-	  g_log.information(mess.str());
-	  mess.str("");
 	  double error2_factor=(error2_factor1/factor1/factor1+error2_factor2);
 
 	  //Calculate the normalized Y values
@@ -125,13 +121,12 @@ void PointByPointVCorrection::exec()
 
 
   }
-
   binwidths.clear();
   errors.clear();
   outputWS->setYUnit("Counts normalised to a vanadium");
 }
 
-void PointByPointVCorrection::check_validity(MatrixWorkspace_sptr& w1,MatrixWorkspace_sptr& w2,MatrixWorkspace_sptr& out)
+void PointByPointVCorrection::check_validity(MatrixWorkspace_const_sptr& w1,MatrixWorkspace_const_sptr& w2,MatrixWorkspace_sptr& out)
 {
 //	  if (w1->YUnit()!=w2->YUnit()) //Unit not the same
 //	  {

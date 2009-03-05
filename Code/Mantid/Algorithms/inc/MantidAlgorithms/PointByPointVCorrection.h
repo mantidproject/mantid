@@ -77,8 +77,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void check_validity(Mantid::API::MatrixWorkspace_sptr& w1,
-		  Mantid::API::MatrixWorkspace_sptr& w2,
+  void check_validity(Mantid::API::MatrixWorkspace_const_sptr& w1,
+		  Mantid::API::MatrixWorkspace_const_sptr& w2,
 		  Mantid::API::MatrixWorkspace_sptr& out);
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
