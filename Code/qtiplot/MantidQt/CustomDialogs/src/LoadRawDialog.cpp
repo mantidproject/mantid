@@ -16,17 +16,24 @@
 #include <QFileInfo>
 #include <QDir>
 
-//Add this class to the list of specialised dialogs
-DECLARE_DIALOG(LoadRawDialog)
+//Add this class to the list of specialised dialogs in this namespace
+namespace MantidQt
+{
+namespace CustomDialogs
+{
+  DECLARE_DIALOG(LoadRawDialog)
+}
+}
 
+// Just to save writing this everywhere 
 using namespace MantidQt::CustomDialogs;
 
 //---------------------------------------
 // Public member functions
 //---------------------------------------
 /**
-  * Constructor
-  */
+ * Constructor
+ */
 LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),  m_fileFilter(""), m_oldValues()
 {
 }

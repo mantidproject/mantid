@@ -6,10 +6,23 @@
 #include <QFileInfo>
 #include <QDir>
 
+
+
+//Add this class to the list of specialised dialogs in this namespace
+namespace MantidQt
+{
+namespace CustomDialogs
+{
+  DECLARE_DIALOG(LOQScriptInputDialog);
+}
+}
+
+// Just to save writing this everywhere 
 using namespace MantidQt::CustomDialogs;
 
-// Declare this dialog
-DECLARE_DIALOG(LOQScriptInputDialog);
+//---------------------------------------
+// Public member functions
+//---------------------------------------
 
 /// Constructor
 LOQScriptInputDialog::LOQScriptInputDialog(MantidQt::API::AlgorithmDialog* parent) :
