@@ -31,6 +31,7 @@
 // Qt Forward declarations
 //----------------------------------
 class QLabel;
+class QLineEdit;
 
 //----------------------------------
 // Mantid Forward declarations
@@ -139,8 +140,14 @@ protected:
   bool validateProperties();
 
   /// Set the properties that have been parsed from the dialog
-  bool setPropertyValues();			       
-		      
+  bool setPropertyValues();
+
+  /// Open a file dialog to select an existing file
+  QString openLoadFileDialog(const QString & propName); 
+
+  //  Set old input for line edit field
+  void setOldLineEditInput(const QString & propName, QLineEdit* field);
+	      
 protected slots:
   
   /// A default slot that can be used for an OK button.
@@ -168,6 +175,9 @@ private:
   //@{
   /// The algorithm associated with this dialog
   Mantid::API::Algorithm *m_algorithm;
+
+  ///The name of the algorithm
+  QString m_algName;
 
   /// A map of property <name, value> pairs
   QHash<QString, QString> m_propertyValueMap;

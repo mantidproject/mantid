@@ -84,8 +84,8 @@ private:
   /// The grid widget containing the input boxes
   QGridLayout *m_inputGrid;
 
-  /// A map of QLineEdit pointers to the position of the Property in the vector
-  QHash<QLineEdit*, int> m_editBoxes;
+  /// A map of QLineEdit pointers to the Property names
+  QHash<QLineEdit*, QString> m_editBoxes;
 
   /// An ok button
   QPushButton *m_okButton;

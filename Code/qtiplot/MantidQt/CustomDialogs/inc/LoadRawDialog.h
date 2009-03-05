@@ -93,9 +93,6 @@ private:
   ///Cache combo box 
   void addCacheOptions();
 
-  /// Set old input for text edit field
-  void setOldTextEditInput(const QString & propName, QLineEdit* field);
-
   /// Set old input for combo box
   void setOldComboField(const QString & propName);
   //@}

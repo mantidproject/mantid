@@ -3,7 +3,6 @@
 
 #include "MantidKernel/Property.h"
 
-#include <QFileDialog>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -14,6 +13,8 @@
 #include <QGroupBox>
 #include <QComboBox>
 #include <QFontMetrics>
+#include <QFileInfo>
+#include <QDir>
 
 //Add this class to the list of specialised dialogs
 DECLARE_DIALOG(LoadRawDialog)
@@ -72,6 +73,7 @@ void LoadRawDialog::initLayout()
   
   //Buttons 
   QPushButton *loadButton = new QPushButton("Load");
+  loadButton->setDefault(true);
   connect(loadButton, SIGNAL(clicked()), this, SLOT(accept()));
 
   QPushButton *cancelButton = new QPushButton("Cancel");
@@ -79,8 +81,8 @@ void LoadRawDialog::initLayout()
 
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addStretch();
-  buttonRowLayout->addWidget(cancelButton);
   buttonRowLayout->addWidget(loadButton);
+  buttonRowLayout->addWidget(cancelButton);
   m_mainLayout->addLayout(buttonRowLayout);
   
 }
@@ -111,7 +113,7 @@ void LoadRawDialog::addFilenameInput()
   fileName->setBuddy(m_pathBox);
   m_browseBtn = new QPushButton("Browse");
   connect(m_browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
-  setOldTextEditInput("Filename", m_pathBox);
+  setOldLineEditInput("Filename", m_pathBox);
   
   m_pathBox->setMinimumWidth(m_pathBox->fontMetrics().maxWidth()*13); 
   
@@ -132,8 +134,8 @@ void LoadRawDialog::addOutputWorkspaceInput()
 {
   QLabel *wsName = new QLabel("Enter name for workspace:");
   m_wsBox = new QLineEdit;
-  setOldTextEditInput("OutputWorkspace", m_wsBox);
-  m_wsBox->setMaximumWidth(m_wsBox->fontMetrics().maxWidth()*5); 
+  setOldLineEditInput("OutputWorkspace", m_wsBox);
+  m_wsBox->setMaximumWidth(m_wsBox->fontMetrics().maxWidth()*7); 
 
   QHBoxLayout *wsline = new QHBoxLayout;
   wsline->addWidget(wsName);  
@@ -155,7 +157,7 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *min = new QLabel("Start:");
   m_minSpec = new QLineEdit;
-  setOldTextEditInput("spectrum_min", m_minSpec);
+  setOldLineEditInput("spectrum_min", m_minSpec);
 
   int charWidth = m_minSpec->fontMetrics().maxWidth();
   m_minSpec->setMaximumWidth(charWidth*3);
@@ -166,13 +168,13 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *max = new QLabel("End:");
   m_maxSpec = new QLineEdit;
-  setOldTextEditInput("spectrum_max", m_maxSpec);
+  setOldLineEditInput("spectrum_max", m_maxSpec);
   
   m_maxSpec->setMaximumWidth(charWidth*3);
   
   QLabel *list = new QLabel("List:");
   m_specList = new QLineEdit;
-  setOldTextEditInput("spectrum_list", m_specList);
+  setOldLineEditInput("spectrum_list", m_specList);
   
   m_specList->setMaximumWidth(charWidth*10);
 
@@ -193,14 +195,7 @@ void LoadRawDialog::addSpectraInput()
   
   minmaxLine->addStretch();
     
-  // QHBoxLayout *listLine = new QHBoxLayout;
-  // listLine->addWidget(list);
-  // listLine->addWidget(m_specList);
-  // listLine->addWidget(validlist);
-  //listLine->addStretch();
-
   spectra->addLayout(minmaxLine);
-  //spectra->addLayout(listLine);
   
   groupbox->setLayout(spectra);
   m_mainLayout->addWidget(groupbox);
@@ -228,22 +223,6 @@ void LoadRawDialog::addCacheOptions()
   m_mainLayout->addLayout(cacheline);
 }
 
-/// Set old input for text edit field
-void LoadRawDialog::setOldTextEditInput(const QString & propName, QLineEdit* field)
-{
-  Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
-  if( isForScript() && prop->isValid() && !prop->isDefault() )
-  {
-    field->setText(QString::fromStdString(prop->value()));
-    field->setEnabled(false);
-    if( propName == "Filename" ) m_browseBtn->setEnabled(false);
-  }
-  else
-  {
-    if( m_oldValues.contains(propName) ) field->setText(m_oldValues[propName]);
-  }
-}
-
 /// Set old input for combo box
 void LoadRawDialog::setOldComboField(const QString & propName)
 {
@@ -263,19 +242,13 @@ void LoadRawDialog::setOldComboField(const QString & propName)
   */
 void LoadRawDialog::browseClicked()
 {
-  QString prevdir("");
   if( !m_pathBox->text().isEmpty() )
   {
-    prevdir = QFileInfo(m_pathBox->text()).absoluteDir().path();
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(prevdir);
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_pathBox->text()).absoluteDir().path());
   }  
-   
-  QString filepath = QFileDialog::getOpenFileName(this, tr("Select File"), MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory(), m_fileFilter);
-  if( filepath.isEmpty() ) return;
-  
-  m_pathBox->setText(filepath);
-  prevdir = QFileInfo(m_pathBox->text()).absoluteDir().path();
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(prevdir); 
+
+  QString filepath = this->openLoadFileDialog("Filename");
+  if( !filepath.isEmpty() ) m_pathBox->setText(filepath);
 
   //Add a suggestion for workspace name
   if( m_wsBox->isEnabled() ) m_wsBox->setText(QFileInfo(filepath).baseName());

@@ -14,7 +14,8 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QSignalMapper>
-#include <QFileDialog>
+#include <QFileInfo>
+#include <QDir>
 
 // Dialog stuff is defined here
 using namespace MantidQt::API;
@@ -131,7 +132,7 @@ void GenericDialog::initLayout()
     {
       QLineEdit *textBox = new QLineEdit;
       nameLbl->setBuddy(textBox);
-      m_editBoxes[textBox] = row;
+      m_editBoxes[textBox] = propName;
 
       if( isForScript() && prop->isValid() && !prop->isDefault() )
       {
@@ -230,42 +231,14 @@ void GenericDialog::browseClicked(QWidget* widget)
   //I mapped this to a QLineEdit, so cast it
   QLineEdit *pathBox = qobject_cast<QLineEdit*>(widget);
   
-  int index = m_editBoxes[pathBox];
-  Mantid::Kernel::Property* prop = getAlgorithm()->getProperties()[index];
+  QString propName("");
+  if( m_editBoxes.contains(pathBox) ) propName = m_editBoxes[pathBox];
+  else return;
 
-  //The allowed values in this context are file extensions
-  std::vector<std::string> exts = prop->allowedValues();
-
-  QString filter;
-  if( !exts.empty() )
-  {
-    filter = "Files (";
-		
-    std::vector<std::string>::const_iterator iend = exts.end();
-    for( std::vector<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
-    {
-  	  filter.append("*." + QString::fromStdString(*itr) + " ");
-    }
-		
-    filter.trimmed();
-    filter.append(QString::fromStdString(")"));
-  }
-  else
-    {
-      filter = "All Files (*.*)";
-    }
-
-  QString prevdir("");
   if( !pathBox->text().isEmpty() )
   {
-    prevdir = QFileInfo(pathBox->text()).absoluteDir().path();
-    AlgorithmInputHistory::Instance().setPreviousDirectory(prevdir);
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(pathBox->text()).absoluteDir().path());
   }  
-   
-  QString filepath = QFileDialog::getOpenFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
-  if( filepath.isEmpty() ) return;
-  
+  QString filepath = this->openLoadFileDialog(propName);
   pathBox->setText(filepath);
-  prevdir = QFileInfo(pathBox->text()).absoluteDir().path();
-  AlgorithmInputHistory::Instance().setPreviousDirectory(prevdir);
 }

@@ -54,6 +54,19 @@ bool AlgorithmInputHistoryImpl::hasPreviousInput(const QString & algName, QHash<
 }
 
 /**
+ * Retrieve an old parameter value 
+ * @param algName The name of the algorithm
+ * @param The name of the property
+ */
+QString AlgorithmInputHistoryImpl::previousInput(const QString & algName, const QString & propName) const
+{
+  if( !m_lastInput.contains(algName) ) return "";
+  
+  if( m_lastInput[algName].contains(propName) ) return m_lastInput[algName][propName];
+  else return "";
+}
+
+/**
   * Set the directory that was accessed when the previous open file dialog was used
   * @param lastdir A QString giving the path of the directory that was last accessed with a file dialog
   */

@@ -9,6 +9,9 @@
 #include <QIcon>
 #include <QLabel>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QLineEdit>
 
 using namespace MantidQt::API;
 
@@ -19,8 +22,8 @@ using namespace MantidQt::API;
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
-  QDialog(parent), m_algorithm(NULL), m_propertyValueMap(), m_forScript(false), m_strMessage(""), m_msgAvailable(false), 
-  m_bIsInitialized(false), m_algProperties(),  m_validators()
+  QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_forScript(false), m_strMessage(""), 
+  m_msgAvailable(false), m_bIsInitialized(false), m_algProperties(),  m_validators()
 {
 }
 
@@ -179,6 +182,65 @@ bool AlgorithmDialog::setPropertyValues()
 }
 
 /**
+ * Open a file selection box
+ * @param The property name that this is associated with
+ */
+QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
+{
+  if( propName.isEmpty() ) return "";
+  Mantid::Kernel::Property* prop = getAlgorithmProperty(propName);
+  if( !prop ) return "";
+
+  //The allowed values in this context are file extensions
+  std::vector<std::string> exts = prop->allowedValues();
+  QString filter;
+  if( !exts.empty() )
+  {
+    filter = "Files (";
+		
+    std::vector<std::string>::const_iterator iend = exts.end();
+    for( std::vector<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+    {
+  	  filter.append("*." + QString::fromStdString(*itr) + " ");
+    }
+		
+    filter.trimmed();
+    filter.append(QString::fromStdString(")"));
+  }
+  else
+  {
+    filter = "All Files (*.*)";
+  }
+  
+  QString filepath = 
+    QFileDialog::getOpenFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  
+   if( !filepath.isEmpty() ) AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filepath).absoluteDir().path());
+   return filepath;
+}
+
+/**
+ * Set old input for text edit field
+ * @param propName The name of the property
+ * @param field The QLineEdit field
+ */
+void AlgorithmDialog::setOldLineEditInput(const QString & propName, QLineEdit* field)
+{
+  Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
+  if( !prop ) return;
+  if( isForScript() && prop->isValid() && !prop->isDefault() )
+  {
+    field->setText(QString::fromStdString(prop->value()));
+    field->setEnabled(false);
+  }
+  else
+  {
+    field->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
+  }
+}
+
+
+/**
  * A slot that can be used to connect a button that accepts the dialog if
  * all of the properties are valid
  */
@@ -195,6 +257,8 @@ void AlgorithmDialog::accept()
 }
 
 
+
+
 //------------------------------------------------------
 // Private member functions
 //------------------------------------------------------
@@ -205,6 +269,7 @@ void AlgorithmDialog::accept()
 void AlgorithmDialog::setAlgorithm(Mantid::API::Algorithm* alg)
 {
   m_algorithm = alg;
+  m_algName = QString::fromStdString(alg->name());
   m_algProperties.clear();
   std::vector<Mantid::Kernel::Property*>::const_iterator iend = alg->getProperties().end();
   for( std::vector<Mantid::Kernel::Property*>::const_iterator itr = alg->getProperties().begin(); itr != iend;

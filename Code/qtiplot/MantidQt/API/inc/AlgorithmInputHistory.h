@@ -77,6 +77,9 @@ public:
   /// Retrieve all of the old parameter values for an algorithm
   bool hasPreviousInput(const QString & algName, QHash<QString, QString> & values) const;
 
+  /// Retrieve an old parameter value 
+  QString previousInput(const QString & algName, const QString & propName) const;
+  
   /// Set the directory that was accessed when the previous open file dialog was used
   void setPreviousDirectory(const QString & lastdir);
   
