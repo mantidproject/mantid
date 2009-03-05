@@ -77,16 +77,22 @@ void PointByPointVCorrection::exec()
 	  std::adjacent_difference(X.begin(),X.end(),binwidths.begin()); //Calculate the binwidths
 	  std::transform(Y2.begin(),Y2.end(),binwidths.begin()+1,resultY.begin(),std::divides<double>());
 	  std::replace_if(resultY.begin(),resultY.end(),std::bind2nd(std::equal_to<double>(),0),DBL_MAX); //Make sure we are not dividing by zero
-	  std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::divides<double>()); // Now resultY contains the s_i/v_i*Dlam_i
+	  std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::divides<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
-	  // Calculate the errors squared related to resultY at this point
+	  // Calculate the errors squared related to A_i at this point
+
 	  for (int j=0;j<size-1;j++)
 	  {
-		  r=std::pow(resultY[j],2)*(std::pow(E1[j]/Y1[j],2)+std::pow(E2[j]/Y2[j],2)); //No errors on the Dlam_i
-		  if (r!=r) //Make sure it is a finite number
-			  r=0;
+		  r=0;
+		  if (std::abs(Y1[j])>1e-7)
+			  r+=std::pow(E1[j]/Y1[j],2);
+		  if (std::abs(Y2[j])>1e-7)
+			  r+=std::pow(E2[j]/Y2[j],2);
 		  errors[j]=r; // This are the errors^2 of S_i/v_i*Dlam_i
+		  if (errors[j]>DBL_MAX || errors[j]<-DBL_MAX)
+		  		  errors[j]=0;
 	  }
+
 
 	  // Calculate the normaliser
 	  double factor1=std::accumulate(Y1.begin(),Y1.end(),0.0);
@@ -95,8 +101,20 @@ void PointByPointVCorrection::exec()
 
 	  // Now propagate the error bars due to the normaliser
 	  double error2_factor1=std::inner_product(E1.begin(),E1.end(),E1.begin(),0.0);
-	  double error2_factor2=std::accumulate(errors.begin(),errors.end(),0.0);
-	  double error2_factor=std::pow(factor,2)*(error2_factor1/factor1/factor1+error2_factor2/factor2/factor2);
+	  double error2_factor2=0;
+	  double test;
+	  for (int j=0;j<size;j++)
+	  {
+		  test=std::abs(std::pow(resultY[j],2));
+		  if (test>DBL_MAX)
+			  test=0;
+		  error2_factor2+=errors[j]*test/factor2/factor2;
+	  }
+	  std::stringstream mess;
+	  mess << error2_factor1 << " " << error2_factor2;
+	  g_log.information(mess.str());
+	  mess.str("");
+	  double error2_factor=(error2_factor1/factor1/factor1+error2_factor2);
 
 	  //Calculate the normalized Y values
 	  std::transform(resultY.begin(),resultY.end(),resultY.begin(),std::bind2nd(std::multiplies<double>(),factor)); // Now result is s_i/v_i*Dlam_i*(sum_i s_i)/(sum_i S_i/v_i*Dlam_i)
@@ -104,6 +122,8 @@ void PointByPointVCorrection::exec()
 	  //Finally get the normalized errors
 	  for (int j=0;j<size-1;j++)
 		resultE[j]=resultY[j]*sqrt(errors[j]+error2_factor);
+
+
   }
 
   binwidths.clear();
