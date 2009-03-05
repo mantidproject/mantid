@@ -246,7 +246,8 @@ Product.appendChild(Prop)
 
 # PYTHON25DIR is the path to Python 2.5 
 PyProp = addTo(Product,'Property',{'Id':'PYTHON25DIR'})
-addTo(PyProp,'RegistrySearch',{'Id':'Python25Registry','Type':'raw','Root':'HKLM','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath'})
+addTo(PyProp,'RegistrySearch',{'Id':'Python25Registry1','Type':'raw','Root':'HKLM','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath1'})
+addTo(PyProp,'RegistrySearch',{'Id':'Python25Registry2','Type':'raw','Root':'HKCU','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath'})
 
 Cond = doc.createElement('Condition')
 Cond.setAttribute('Message','Mantid requires Python 2.5 to be installed on your machine. It can be downloaded and installed from http://www.python.org/download/')
