@@ -22,10 +22,16 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
-  $$SRCDIR/LoadRawDialog.cpp
+  $$SRCDIR/LoadRawDialog.cpp \
+  $$SRCDIR/LOQScriptInputDialog.cpp
 
 HEADERS = \
-  $$HEADERDIR/LoadRawDialog.h
+  $$HEADERDIR/LoadRawDialog.h \
+  $$HEADERDIR/LOQScriptInputDialog.h
+  
+UI_DIR = $$HEADERDIR
+
+FORMS = $$HEADERDIR/LOQScriptInputDialog.ui
 
 TARGET = MantidQtCustomDialogs
 
