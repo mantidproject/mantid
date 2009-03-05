@@ -32,6 +32,30 @@ void FrameworkManager::clear()
 }
 
 /**
+ * Clear memory associated with the AlgorithmManager
+ */
+void FrameworkManager::clearAlgorithms()
+{
+  API::FrameworkManager::Instance().clearAlgorithms();
+}
+
+/**
+ * Clear memory associated with the ADS
+ */
+void FrameworkManager::clearData()
+{
+  API::FrameworkManager::Instance().clearData();
+}
+
+/**
+ * Clear memory associated with the IDS
+ */
+void FrameworkManager::clearInstruments()
+{
+  API::FrameworkManager::Instance().clearInstruments();
+}
+
+/**
  * Creates a specified algorithm.
  * \param algName :: The name of the algorithm to execute.
   * \return Pointer to algorithm.

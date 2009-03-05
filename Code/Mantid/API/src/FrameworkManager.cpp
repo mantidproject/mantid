@@ -55,8 +55,32 @@ FrameworkManagerImpl::~FrameworkManagerImpl()
  */
 void FrameworkManagerImpl::clear()
 {
+  clearAlgorithms();
+  clearData();
+  clearInstruments();
+}
+
+/**
+ * Clear memory associated with the AlgorithmManager
+ */
+void FrameworkManagerImpl::clearAlgorithms()
+{
   AlgorithmManager::Instance().clear();
+}
+
+/**
+ * Clear memory associated with the ADS
+ */
+void FrameworkManagerImpl::clearData()
+{
   AnalysisDataService::Instance().clear();
+}
+
+/**
+ * Clear memory associated with the IDS
+ */
+void FrameworkManagerImpl::clearInstruments()
+{
   InstrumentDataService::Instance().clear();
 }
 

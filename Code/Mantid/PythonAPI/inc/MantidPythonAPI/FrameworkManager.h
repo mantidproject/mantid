@@ -63,6 +63,15 @@ public:
 	// Clears all memory associated with the FrameworkManager 
 	void clear();
 
+	/// Clear memory associated with the AlgorithmManager
+	void clearAlgorithms();
+	
+	/// Clear memory associated with the ADS
+	void clearData();
+	
+	/// Clear memory associated with the ADS
+	void clearInstruments();	
+
 	// Creates and instance of an algorithm
 	API::IAlgorithm* createAlgorithm(const std::string& algName);
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version);
