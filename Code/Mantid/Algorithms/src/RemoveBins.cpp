@@ -50,7 +50,7 @@ void RemoveBins::init()
 void RemoveBins::exec()
 {
 	this->checkProperties();
-  
+
   // If the X range has been given in a different unit, or if the workspace isn't square, then we will need
   // to calculate the bin indices to cut out each time.
   const std::string rangeUnit = getProperty("RangeUnit");
@@ -59,7 +59,7 @@ void RemoveBins::exec()
   if (unitChange) m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
   const bool commonBins = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
   const bool recalcRange = ( unitChange || !commonBins);
-  
+
   // If the above evaluates to false, and the range given is at the edge of the workspace, then we can just call
   // CropWorkspace as a subalgorithm and we're done.
   const std::vector<double>& X0 = m_inputWorkspace->readX(0);
@@ -76,57 +76,65 @@ void RemoveBins::exec()
       start = X0.front();
       end = m_startX;
     }
-        
+
     try {
       this->crop(start,end);
       return;
     } catch(...) {}   // If this fails for any reason, just carry on and do it the other way
   }
 
-  // Create the output workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
+
+  MatrixWorkspace_sptr outputWS= getProperty("OutputWorkspace");
+
+  if (m_inputWorkspace!=outputWS) // Create the output workspace onlt if not the same as input
+	  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
 
   // Loop over the spectra
   int start=0,end=0;
   const int blockSize = m_inputWorkspace->readX(0).size();
   const int numHists = m_inputWorkspace->getNumberHistograms();
   for (int i=0; i < numHists; ++i)
-  {        
+  {
     double startX(m_startX),endX(m_endX);
     // Calculate the X limits for this spectrum, if necessary
     if (unitChange)
     {
       this->transformRangeUnit(i,startX,endX);
     }
-    
+
     // Get references to the data and errors
     const std::vector<double>& X = m_inputWorkspace->readX(i);
-    
+
     // Calculate the bin indices corresponding to the X range, if necessary
     if ( recalcRange || !i )
     {
       start = this->findIndex(startX,X);
       end = this->findIndex(endX,X);
     }
-    
+
     // Copy over the data
-    outputWS->dataX(i) = X;
-    std::vector<double>& Y = outputWS->dataY(i) = m_inputWorkspace->readY(i);
-    std::vector<double>& E = outputWS->dataE(i) = m_inputWorkspace->readE(i);
-      
+    std::vector<double>& myX=outputWS->dataX(i);
+    myX = X;
+    const std::vector<double>& Y=m_inputWorkspace->readY(i);
+    std::vector<double>& myY=outputWS->dataY(i);
+    myY=Y;
+    const std::vector<double>& E=m_inputWorkspace->readE(i);
+    std::vector<double>& myE=outputWS->dataE(i);
+    myE=E;
+
     if ( start == 0 || end == blockSize )
     {
       // Remove bins from either end
-      this->RemoveFromEnds(start,end,Y,E);
+      this->RemoveFromEnds(start,end,myY,myE);
     }
     else
-    {    
+    {
       // Remove bins from middle
       const double startFrac = (X[start]-startX)/(X[start]-X[start-1]);
       const double endFrac = (endX-X[end-1])/(X[end]-X[end-1]);
-      this->RemoveFromMiddle(start-1,end,startFrac,endFrac,Y,E);
+      this->RemoveFromMiddle(start-1,end,startFrac,endFrac,myY,myE);
     }
-    
+
   } // Loop over spectra
 
   // Assign to the output workspace property
@@ -139,7 +147,7 @@ void RemoveBins::checkProperties()
 {
   //Get input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
-  
+
   // Both XMin and XMax are mandatory
   Property* XMin = getProperty("XMin");
   Property* XMax = getProperty("XMax");
@@ -152,7 +160,7 @@ void RemoveBins::checkProperties()
   // If that was OK, then we can get their values
   m_startX = getProperty("XMin");
   m_endX = getProperty("XMax");
-      
+
   if (m_startX > m_endX)
   {
     g_log.warning("XMin greater than XMax: the two have been swapped.");
@@ -318,7 +326,7 @@ void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double
   double valPrev = 0;
   double valNext = 0;
   double errPrev = 0;
-  double errNext = 0;  
+  double errNext = 0;
 
   //Values for interpolation
   if (m_interpolate)
@@ -355,6 +363,6 @@ void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double
 
   return;
 }
-    
+
 } // namespace Algorithm
 } // namespace Mantid
