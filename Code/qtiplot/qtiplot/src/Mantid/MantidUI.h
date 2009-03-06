@@ -223,14 +223,14 @@ public slots:
     // Load a workspace from a DAE by running a LoadDAE algorithm with properties supplied through a dialog box.
     void loadDAEWorkspace();
 
-    // Delete workspace selected in the Workspace dock window.
-    void deleteWorkspace();
-
     // Create a MantidMatrix from workspace wsName
     MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
+    
+    // Plot the first spectrum from the workspace selected in the workspace dock window
+    void plotFirstSpectrum();
 
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();

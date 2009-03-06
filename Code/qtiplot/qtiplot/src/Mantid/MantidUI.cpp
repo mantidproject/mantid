@@ -318,16 +318,6 @@ bool MantidUI::deleteWorkspace(const QString& workspaceName)
 }
 
 /**
-     deleteWorkspace
-*/
-void MantidUI::deleteWorkspace()
-{
-    QString wsName = getSelectedWorkspaceName();
-    if (!wsName.size()) return;
-	deleteWorkspace(wsName);
-}
-
-/**
      update
 
      Widgets showing workspaces and algorithms are updated.
@@ -486,6 +476,12 @@ void MantidUI::importWorkspace()
 {
     QString wsName = getSelectedWorkspaceName();
     importWorkspace(wsName);
+}
+
+void MantidUI::plotFirstSpectrum()
+{
+    QString wsName = getSelectedWorkspaceName();
+    plotSpectrum(wsName,0);
 }
 
 void MantidUI::removeWindowFromLists(MdiSubWindow* m)
@@ -775,8 +771,9 @@ bool MantidUI::drop(QDropEvent* e)
 {
     if (e->source() == m_exploreMantid->m_tree) 
     {
-        importWorkspace();
-        return true;
+      QString wsName = getSelectedWorkspaceName();
+      importWorkspace(wsName,false);
+      return true;
     }
 
     return false;

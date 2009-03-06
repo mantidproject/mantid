@@ -21,6 +21,7 @@ public:
     void update();
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
+    void deleteWorkspaces();
 protected slots:
     void popupMenu(const QPoint & pos);
 protected:
@@ -37,12 +38,17 @@ class MantidTreeWidget:public QTreeWidget
 {
     Q_OBJECT
 public:
-    MantidTreeWidget(QWidget *w):QTreeWidget(w){}
+    MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui)
+    {
+      setSelectionMode(QAbstractItemView::ExtendedSelection);
+    }
     void mousePressEvent (QMouseEvent *e);
     void mouseMoveEvent(QMouseEvent *e);
+    void mouseDoubleClickEvent(QMouseEvent *e);
 
 private:
     QPoint m_dragStartPosition;
+    MantidUI *m_mantidUI;
 };
 
 class FindAlgComboBox:public QComboBox

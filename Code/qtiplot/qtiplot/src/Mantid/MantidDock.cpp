@@ -4,10 +4,6 @@
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 
-//#include <MantidDataObjects/Workspace2D.h>
-//#include <MantidDataObjects/ManagedWorkspace2D.h>
-//#include <MantidDataHandling/ManagedRawFileWorkspace2D.h>
-
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QListWidget>
@@ -29,15 +25,15 @@ QDockWidget(w)
 {
     m_mantidUI = mui;
     setWindowTitle(tr("Mantid Workspaces"));
-	setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
-	setMinimumHeight(150);
-	setMinimumWidth(200);
-	w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
+    setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
+    setMinimumHeight(150);
+    setMinimumWidth(200);
+    w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
 
     QFrame *f = new QFrame(this);
     setWidget(f);
 
-    m_tree = new MantidTreeWidget(f);
+    m_tree = new MantidTreeWidget(f,m_mantidUI);
     m_tree->setHeaderLabel("Workspaces");
 
     QHBoxLayout * buttonLayout = new QHBoxLayout();
@@ -62,7 +58,7 @@ QDockWidget(w)
     loadMenu->addAction(loadDAEAction);
     m_loadButton->setMenu(loadMenu);
 
-    connect(m_deleteButton,SIGNAL(clicked()),m_mantidUI,SLOT(deleteWorkspace()));
+    connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
     connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
 
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -99,11 +95,7 @@ void MantidDockWidget::update()
             wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
             s = "Y axis: " + ws->YUnit();
             wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-	    QString WsType = QString::fromStdString(ws->id());
-//             QString WsType = "Workspace";
-//             if (dynamic_cast<Mantid::DataObjects::Workspace2D*>(ws.get())) WsType = "Workspace2D";
-//             if (dynamic_cast<Mantid::DataObjects::ManagedWorkspace2D*>(ws.get())) WsType = "ManagedWorkspace2D";
-//             if (dynamic_cast<Mantid::DataHandling::ManagedRawFileWorkspace2D*>(ws.get())) WsType = "ManagedRawFileWorkspace2D";
+            QString WsType = QString::fromStdString(ws->id());
             wsItem->addChild(new QTreeWidgetItem(QStringList(WsType)));
             wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
         }
@@ -113,6 +105,28 @@ void MantidDockWidget::update()
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem*, int)
 {
+}
+
+/**
+     deleteWorkspaces
+*/
+void MantidDockWidget::deleteWorkspaces()
+{
+  QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+  QList<QTreeWidgetItem*>::const_iterator it;
+  QList<QString> wsNames;
+  // Need two loops because deleting a workspace moves QTreeWidgetItems
+  // First loop over getting workspace names
+  for (it = items.constBegin(); it != items.constEnd(); ++it)
+  {
+    wsNames.push_back((*it)->text(0));
+  }
+  // Now loop over, calling delete for each workspace
+  QList<QString>::const_iterator it2;
+  for (it2 = wsNames.constBegin(); it2 != wsNames.constEnd(); ++it2)
+  {
+    if (!(*it2).isEmpty()) m_mantidUI->deleteWorkspace(*it2);
+  }
 }
 
 void MantidDockWidget::popupMenu(const QPoint & pos)
@@ -138,8 +152,16 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
   //else show instrument, sample logs and delete
   else
   {
-    QAction *action = new QAction("Show instrument",this);
+    QAction *action = new QAction("Show data",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(importWorkspace()));
+    menu->addAction(action);
+
+    action = new QAction("Show instrument",this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
+    menu->addAction(action);
+
+    action = new QAction("Plot spectrum 0",this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(plotFirstSpectrum()));
     menu->addAction(action);
 
     action = new QAction("Sample Logs...", this);
@@ -150,7 +172,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     menu->addSeparator();
 
     action = new QAction("Delete workspace",this);
-    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(deleteWorkspace()));
+    connect(action,SIGNAL(triggered()),this,SLOT(deleteWorkspaces()));
     menu->addAction(action);
   }
 
@@ -187,6 +209,17 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e)
     Qt::DropAction dropAction = drag->exec(Qt::CopyAction | Qt::MoveAction);
 }
 
+void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    QString wsName = m_mantidUI->getSelectedWorkspaceName();
+    if ( ! wsName.isEmpty() )
+    {
+        m_mantidUI->importWorkspace(wsName,false);
+        return;
+    }
+
+    QTreeWidget::mouseDoubleClickEvent(e);
+}
 //-------------------- AlgorithmDockWidget ----------------------//
 
 void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
