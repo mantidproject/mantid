@@ -567,6 +567,27 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
     comp->setPos(Geometry::V3D(x,y,z));
   }
+
+
+  // Rotate coordinate system of this component
+
+  if ( pElem->hasAttribute("rot") )
+  {
+    double rotAngle = atof( (pElem->getAttribute("rot")).c_str() ); // assumed to be in degrees
+
+    double axis_x = 0.0;
+    double axis_y = 0.0;
+    double axis_z = 1.0;
+
+    if ( pElem->hasAttribute("axis-x") )
+      axis_x = atof( (pElem->getAttribute("axis-x")).c_str() );
+    if ( pElem->hasAttribute("axis-y") )
+      axis_y = atof( (pElem->getAttribute("axis-y")).c_str() );
+    if ( pElem->hasAttribute("axis-z") )
+      axis_z = atof( (pElem->getAttribute("axis-z")).c_str() );
+
+    comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));
+  }
 }
 
 
