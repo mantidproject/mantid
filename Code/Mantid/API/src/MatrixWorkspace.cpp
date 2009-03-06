@@ -299,7 +299,7 @@ namespace Kernel
 {
 
 template<> DLLExport
-Mantid::API::MatrixWorkspace_sptr PropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string &name) const
+Mantid::API::MatrixWorkspace_sptr IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>* prop =
                     dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>*>(getPointerToProperty(name));
@@ -315,7 +315,7 @@ Mantid::API::MatrixWorkspace_sptr PropertyManager::getValue<Mantid::API::MatrixW
 }
 
 template<> DLLExport
-Mantid::API::MatrixWorkspace_const_sptr PropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::string &name) const
+Mantid::API::MatrixWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>* prop =
                     dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr>*>(getPointerToProperty(name));

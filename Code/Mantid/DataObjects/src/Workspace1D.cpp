@@ -82,7 +82,7 @@ namespace Mantid
 namespace Kernel
 {
     template<> DLLExport
-      Mantid::DataObjects::Workspace1D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace1D_sptr>(const std::string &name) const
+      Mantid::DataObjects::Workspace1D_sptr IPropertyManager::getValue<Mantid::DataObjects::Workspace1D_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::DataObjects::Workspace1D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace1D_sptr>*>(getPointerToProperty(name));

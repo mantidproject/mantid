@@ -323,7 +323,7 @@ namespace Mantid
   namespace Kernel
   {
     template<> DLLExport
-    Mantid::DataObjects::Workspace2D_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
+    Mantid::DataObjects::Workspace2D_sptr IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));
@@ -339,7 +339,7 @@ namespace Mantid
     }
 
     template<> DLLExport
-    Mantid::DataObjects::Workspace2D_const_sptr PropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const std::string &name) const
+    Mantid::DataObjects::Workspace2D_const_sptr IPropertyManager::getValue<Mantid::DataObjects::Workspace2D_const_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::Workspace2D_sptr>*>(getPointerToProperty(name));

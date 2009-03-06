@@ -48,7 +48,7 @@ namespace Mantid
 namespace Kernel
 {
     template<> DLLExport
-      Mantid::DataObjects::WorkspaceSingleValue_sptr PropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const
+      Mantid::DataObjects::WorkspaceSingleValue_sptr IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const
     {
       PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>* prop =
         dynamic_cast<PropertyWithValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>*>(getPointerToProperty(name));

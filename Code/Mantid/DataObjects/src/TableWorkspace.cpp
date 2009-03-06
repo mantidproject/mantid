@@ -150,7 +150,7 @@ namespace Mantid
   namespace Kernel
   {
     template<> DLLExport
-    DataObjects::TableWorkspace_sptr PropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const
+    DataObjects::TableWorkspace_sptr IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(const std::string &name) const
     {
       PropertyWithValue<DataObjects::TableWorkspace_sptr>* prop =
         dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr>*>(getPointerToProperty(name));

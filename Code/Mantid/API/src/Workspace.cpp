@@ -56,7 +56,7 @@ namespace Mantid
 namespace Kernel
 {
 template<> DLLExport
-Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
+Mantid::API::Workspace_sptr IPropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace_sptr>* prop =
                     dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr>*>(getPointerToProperty(name));
@@ -72,7 +72,7 @@ Mantid::API::Workspace_sptr PropertyManager::getValue<Mantid::API::Workspace_spt
 }
 
 template<> DLLExport
-Mantid::API::Workspace_const_sptr PropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const
+Mantid::API::Workspace_const_sptr IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string &name) const
 {
   PropertyWithValue<Mantid::API::Workspace_sptr>* prop =
                     dynamic_cast<PropertyWithValue<Mantid::API::Workspace_sptr>*>(getPointerToProperty(name));
