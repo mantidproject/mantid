@@ -68,6 +68,7 @@ namespace API
  */
 class Algorithm;
 typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
+class AlgorithmProxyObserver;
 
 class DLLExport AlgorithmProxy : public IAlgorithm, public Kernel::PropertyManagerOwner
 {

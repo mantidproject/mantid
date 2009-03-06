@@ -147,7 +147,6 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver& observer)const
     const Poco::AbstractObserver* obs = &observer;
     if (m_alg) 
     {
-        std::cerr<<"addObservers\n";
         m_alg->addObserver(*obs);
     }
     else
