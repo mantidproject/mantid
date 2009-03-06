@@ -97,30 +97,29 @@ void SimpleIntegration::exec()
 
     // Find the range [min,max]
     std::vector<double>::const_iterator lowit, highit;
-    if (std::abs(m_MinRange)<1e-7)
-    	lowit=X.begin();
-    else
-      lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
-    if (std::abs(m_MaxRange)<1e-7)
-    	highit=X.end();
-    else
-      highit=std::lower_bound(X.begin(),X.end(),m_MaxRange,std::less_equal<double>());
+    if (std::abs(m_MinRange)<1e-7) lowit=X.begin();
+    else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
+
+    if (std::abs(m_MaxRange)<1e-7) highit=X.end();
+    else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
+
     highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
   
-	std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
-	std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
+    std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
+    std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
 
-	if (!is_distrib) //Sum the Y, and sum the E in quadrature
-	{
-		sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
-		sumE=std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,SumSquares<double>());
-	}
-	else // Sum Y*binwidth and Sum the (E*binwidth)^2.
-	{
-		std::adjacent_difference(lowit,highit,widths.begin());
-		sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
-		sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),TimesSquares<double>());
-	}
+    if (!is_distrib) //Sum the Y, and sum the E in quadrature
+    {
+      sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
+      sumE=std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,SumSquares<double>());
+    }
+    else // Sum Y*binwidth and Sum the (E*binwidth)^2.
+    {
+      std::adjacent_difference(lowit,highit,widths.begin());
+      sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
+      sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),TimesSquares<double>());
+    }
+
     //Set X-boundaries
     XValue[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
     XValue[1] = *highit;
