@@ -97,9 +97,9 @@ void GeneralisedSecondDifference::exec()
   	{
   		int out_index=i-spec_min;
   		out->getAxis(1)->spectraNo(out_index)=inputWS->getAxis(1)->spectraNo(i);
-  		const std::vector<double>& refX=inputWS->dataX(i);
-  		const std::vector<double>& refY=inputWS->dataY(i);
-  		const std::vector<double>& refE=inputWS->dataE(i);
+  		const std::vector<double>& refX=inputWS->readX(i);
+  		const std::vector<double>& refY=inputWS->readY(i);
+  		const std::vector<double>& refE=inputWS->readE(i);
   		std::vector<double>& outX=out->dataX(out_index);
   		std::vector<double>& outY=out->dataY(out_index);
   		std::vector<double>& outE=out->dataE(out_index);

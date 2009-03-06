@@ -69,6 +69,7 @@ public:
 
   void testExec()
   {
+
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );

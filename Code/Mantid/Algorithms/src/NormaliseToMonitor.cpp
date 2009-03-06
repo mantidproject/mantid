@@ -133,15 +133,15 @@ const bool NormaliseToMonitor::checkProperties()
       g_log.error("Integration minimum set to larger value than maximum!");
       throw std::runtime_error("Integration minimum set to larger value than maximum!");
     }
-    if ( min->isDefault() || m_integrationMin < inputWS->dataX(0).front() )
+    if ( min->isDefault() || m_integrationMin < inputWS->readX(0).front() )
     {
       g_log.warning() << "Integration range minimum set to workspace min: " << m_integrationMin << std::endl;
-      m_integrationMin = inputWS->dataX(0).front();
+      m_integrationMin = inputWS->readX(0).front();
     }
-    if ( min->isDefault() || m_integrationMax > inputWS->dataX(0).back() )
+    if ( min->isDefault() || m_integrationMax > inputWS->readX(0).back() )
     {
       g_log.warning() << "Integration range maximum set to workspace max: " << m_integrationMax << std::endl;
-      m_integrationMax = inputWS->dataX(0).back();
+      m_integrationMax = inputWS->readX(0).back();
     }
     // Return indicating that these properties should be used
     return true;

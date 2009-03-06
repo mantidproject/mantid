@@ -87,7 +87,9 @@ void RemoveBins::exec()
   MatrixWorkspace_sptr outputWS= getProperty("OutputWorkspace");
 
   if (m_inputWorkspace!=outputWS) // Create the output workspace onlt if not the same as input
-	  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
+	{
+	  outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
+	}
 
   // Loop over the spectra
   int start=0,end=0;

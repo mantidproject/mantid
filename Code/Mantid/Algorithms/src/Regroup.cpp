@@ -91,7 +91,7 @@ void Regroup::exec()
 
   int histnumber = inputW->getNumberHistograms();
   DataObjects::Histogram1D::RCtype XValues_new;
-  const std::vector<double> &XValues_old = inputW->dataX(0);
+  const std::vector<double> &XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old
   // create new output X axis
   int ntcnew = newAxis(rb_params,XValues_old,XValues_new.access(),xoldIndex);
@@ -113,9 +113,9 @@ void Regroup::exec()
     }
 
     // get const references to input Workspace arrays (no copying)
-    const std::vector<double>& XValues = inputW->dataX(hist);
-    const std::vector<double>& YValues = inputW->dataY(hist);
-    const std::vector<double>& YErrors = inputW->dataE(hist);
+    const std::vector<double>& XValues = inputW->readX(hist);
+    const std::vector<double>& YValues = inputW->readY(hist);
+    const std::vector<double>& YErrors = inputW->readE(hist);
 
     //get references to output workspace data (no copying)
     std::vector<double>& YValues_new=outputW->dataY(hist);

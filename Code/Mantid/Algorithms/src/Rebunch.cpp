@@ -56,13 +56,13 @@ namespace Mantid
 			int histnumber = inputW->size()/inputW->blocksize();
 
 			/*
-			const std::vector<double>& Xold = inputW->dataX(0);
-			const std::vector<double>& Yold = inputW->dataY(0);
+			const std::vector<double>& Xold = inputW->readX(0);
+			const std::vector<double>& Yold = inputW->readY(0);
 			int size_x=Xold.size();
 			int size_y=Yold.size();
 			*/
-			int size_x = inputW->dataX(0).size();
-			int size_y = inputW->dataY(0).size();
+			int size_x = inputW->readX(0).size();
+			int size_y = inputW->readY(0).size();
 
 			//signal is the same length for histogram and point data
 			int ny=(size_y/n_bunch);
@@ -92,9 +92,9 @@ namespace Mantid
 
 
 				// get const references to input Workspace arrays (no copying)
-				const std::vector<double>& XValues = inputW->dataX(hist);
-				const std::vector<double>& YValues = inputW->dataY(hist);
-				const std::vector<double>& YErrors = inputW->dataE(hist);
+				const std::vector<double>& XValues = inputW->readX(hist);
+				const std::vector<double>& YValues = inputW->readY(hist);
+				const std::vector<double>& YErrors = inputW->readE(hist);
 
 				//get references to output workspace data (no copying)
 				std::vector<double>& XValues_new=outputW->dataX(hist);

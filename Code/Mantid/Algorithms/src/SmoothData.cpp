@@ -59,7 +59,7 @@ void SmoothData::exec()
   // Next lines enable sharing of the X vector to be carried over to the output workspace if in the input one
   const std::vector<double> *XFirst = &(inputWorkspace->readX(0));
   Histogram1D::RCtype newX;
-  newX.access() = inputWorkspace->dataX(0);
+  newX.access() = inputWorkspace->readX(0);
 
   // Loop over all the spectra in the workspace
   for (int i = 0; i < inputWorkspace->getNumberHistograms(); ++i)

@@ -76,9 +76,9 @@ namespace Mantid
 
 
         // get const references to input Workspace arrays (no copying)
-        const std::vector<double>& XValues = inputW->dataX(hist);
-        const std::vector<double>& YValues = inputW->dataY(hist);
-        const std::vector<double>& YErrors = inputW->dataE(hist);
+        const std::vector<double>& XValues = inputW->readX(hist);
+        const std::vector<double>& YValues = inputW->readY(hist);
+        const std::vector<double>& YErrors = inputW->readE(hist);
 
         //get references to output workspace data (no copying)
         std::vector<double>& YValues_new=outputW->dataY(hist);
