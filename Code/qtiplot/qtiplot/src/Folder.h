@@ -118,9 +118,12 @@ public:
     void setActiveWindow(MdiSubWindow *w){d_active_window = w;};
 
 	QString logInfo(){return d_log_info;};
-	void appendLogInfo(const QString& text){d_log_info += text;};
 	void clearLogInfo(){d_log_info = QString();};
 	
+public slots:
+  ///Mantid: made this a slot for use with script messages when there is no script window
+  void appendLogInfo(const QString& text){d_log_info += text;};
+
 protected:
     QString birthdate, modifDate;
 	QString d_log_info;

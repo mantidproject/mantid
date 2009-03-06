@@ -15101,8 +15101,8 @@ void ApplicationWindow::performCustomAction(QAction *action)
 	setScriptingLanguage("Python");
 
     ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
-    connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(showResults(const QString &)));
-    connect(script, SIGNAL(outputError(const QString &)), this, SLOT(showResults(const QString &)));
+    connect(script, SIGNAL(outputMessage(const QString &)), current_folder, SLOT(appendLogInfo(const QString &)));
+    connect(script, SIGNAL(outputError(const QString &)), current_folder, SLOT(appendLogInfo(const QString &)));
     script->importASCII(action->data().toString());
     d_user_script_running = true;
     script->executeAll();

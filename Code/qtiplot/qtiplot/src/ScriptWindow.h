@@ -73,7 +73,7 @@ public slots:
 
                 void scriptMessage(const QString&);				    
 		void scriptError(const QString&);
-                void insertOutputSeparator();
+
                 void updateWindowTitle();
 
                 void setEditEnabled(bool);

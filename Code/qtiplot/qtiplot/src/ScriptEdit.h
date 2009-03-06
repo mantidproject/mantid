@@ -88,6 +88,7 @@ public slots:
 
   void setEditorActive(bool);
   void setExecuteActionsEnabled(bool);
+  QString outputSeparator();
 
   signals:
   void outputMessage(const QString& text);

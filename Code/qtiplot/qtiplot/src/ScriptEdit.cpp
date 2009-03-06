@@ -48,6 +48,7 @@
 #include "ScriptWindow.h"
 #include <QPrinterInfo>
 #include <cmath>
+#include <QDateTime>
 
 #include <iostream>
 
@@ -195,16 +196,7 @@ void ScriptEdit::insertErrorMsg(const QString &message)
 {
   if( message.isEmpty() ) return;
   setMarkerBackgroundColor(QColor("red"), m_iCodeMarkerHandle);
-//   if( message.contains("SystemExit") )
-//   {
-//     //Alter it to something more meaningful
-//     emit outputError(QString("Information: Script execution has been cancelled.\n"));
-//   }
-//   else
-//   {
-//     emit outputError(message);
-//   }
-  emit outputError(message);
+  emit outputError(outputSeparator() + message + "\n");
   m_bErrorRaised = true;
   setEditorActive(true);
 }
@@ -225,9 +217,16 @@ void ScriptEdit::scriptPrint(const QString &text)
   }
   else
   {
-    emit outputMessage(text);
+    emit outputMessage(outputSeparator() + text + "\n");
   }
 }
+
+QString ScriptEdit::outputSeparator()
+{
+  QString hashes(20, '#');
+  return QString (hashes + " " + QDateTime::currentDateTime().toString() + "  " + hashes + "\n");
+}
+
 
 void ScriptEdit::insertFunction(const QString &fname)
 {
@@ -286,14 +285,14 @@ void ScriptEdit::runScript(const QString & code)
   myScript->setCode(code);
   m_bIsRunning = true;
   m_bErrorRaised = false;
-  emit outputMessage("Script execution started.");
+  scriptPrint("Script execution started.");
   emit ScriptIsActive(true);
 
   myScript->exec();
 
   emit ScriptIsActive(false);
   m_bIsRunning = false;
-  if( !m_bErrorRaised ) emit outputMessage("Script execution completed successfully.");
+  if( !m_bErrorRaised ) scriptPrint("Script execution completed successfully.");
 
   //Reenable editor
   setEditorActive(true);

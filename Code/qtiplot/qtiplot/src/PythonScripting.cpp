@@ -169,7 +169,7 @@ QString PythonScripting::errorMsg()
 	  }
 	  Py_DECREF(traceback);
 	}
-	msg.append("\n");
+	//	msg.append("\n");
 	//----------------------------------------------
 	return msg;
 }

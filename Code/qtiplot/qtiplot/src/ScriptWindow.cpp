@@ -444,15 +444,13 @@ void ScriptWindow::resizeEvent( QResizeEvent* e )
 void ScriptWindow::scriptMessage(const QString& text)
 {
   outputText->setTextColor(Qt::black);
-  insertOutputSeparator();
-  outputText->textCursor().insertText(text + "\n");
+  outputText->textCursor().insertText(text);
   outputText->moveCursor(QTextCursor::End);
 }				    
 
 void ScriptWindow::scriptError(const QString& text)
 {
   outputText->setTextColor(Qt::red);
-  insertOutputSeparator();
   outputText->textCursor().insertText(text);
   outputText->moveCursor(QTextCursor::End);
 }				    
@@ -460,13 +458,6 @@ void ScriptWindow::scriptError(const QString& text)
 void ScriptWindow::viewScriptOutput(bool visible)
 {
   outputWindow->setVisible(visible);
-}
-
-void ScriptWindow::insertOutputSeparator()
-{
-  QString hashes(20, '#');
-  QString separator(hashes + " " + QDateTime::currentDateTime().toString() + "  " + hashes + "\n");
-  outputText->textCursor().insertText(separator);
 }
 
 void ScriptWindow::editChanged()
