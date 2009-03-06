@@ -141,6 +141,9 @@ bool MemoryManagerImpl::ReadMemInfo(Mantid::API::MemoryInfo & mi)
 
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
  and workspace parameters NVectors, XLength,and YLength.
+ @param NVectors the number of vectors
+ @param XLength the size of the X vector
+ @param YLength the size of the Y vector
  */
 bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength)
 {

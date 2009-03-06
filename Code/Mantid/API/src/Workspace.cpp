@@ -92,4 +92,3 @@ Mantid::API::Workspace_const_sptr PropertyManager::getValue<Mantid::API::Workspa
 } // namespace Kernel
 } // namespace Mantid
 
-///\endcond TEMPLATE

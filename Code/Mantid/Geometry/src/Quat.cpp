@@ -26,6 +26,8 @@ Quat::Quat():w(1),a(0),b(0),c(0)
  * v=(src+des)/�src+des�
  * w=v.des
  * (a,b,c)=(v x des)
+ * @param src the source position
+ * @param des the destination position
  */
 Quat::Quat(const V3D& src,const V3D& des)
 {

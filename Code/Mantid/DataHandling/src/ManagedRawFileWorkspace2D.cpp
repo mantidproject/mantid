@@ -224,5 +224,3 @@ namespace Mantid
   } // namespace DataHandling
 } //NamespaceMantid
 
-
-///\endcond TEMPLATE

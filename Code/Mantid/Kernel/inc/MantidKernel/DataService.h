@@ -106,7 +106,6 @@ public:
         /** Constructor.
 
             @param name The name of the replaced object
-            @param obj  The pointer to the old object
             @param new_obj The pointer to the new object
 
             Only new objects are guaranteed to exist when an observer receives the notification.

@@ -302,7 +302,7 @@ void V3D::setX(const double xx)
 
   /**
     Set is y position 
-    \param y The Y coordinate
+    \param yy The Y coordinate
   */
 void V3D::setY(const double yy)
 {

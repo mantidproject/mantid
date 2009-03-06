@@ -17,11 +17,12 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class LoadRaw LoadRaw.h DataHandling/LoadRaw.h
+    /** @class LoadRaw2 LoadRaw2.h DataHandling/LoadRaw2.h
 
     Loads an file in ISIS RAW format and stores it in a 2D workspace
     (Workspace2D class). LoadRaw is an algorithm and as such inherits
     from the Algorithm class and overrides the init() & exec() methods.
+		LoadRaw2 uses less memory by only loading up the datablocks as required.
 
     Required Properties:
     <UL>
