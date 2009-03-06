@@ -229,8 +229,10 @@ protected:
   /// Does nothing otherwise.
   void interruption_point();
 
+	///Observation slot for child algorithm progress notification messages, these are scaled and then signalled for this algorithm.
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
-  Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
+  ///Child algoirthm progress observer
+	Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
 
 private:
 

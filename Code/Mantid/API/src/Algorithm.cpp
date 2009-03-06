@@ -220,6 +220,8 @@ bool Algorithm::isExecuted() const
  *  the framework can take care of all of the necessary book-keeping.
  *
  *  @param name    The concrete algorithm class of the sub algorithm
+ *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
+ *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
  *  @returns Set to point to the newly created algorithm object
  */
 Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double startProgress, double endProgress)
@@ -430,6 +432,7 @@ void Algorithm::setChild(const bool isChild)
   m_isChildAlgorithm = isChild;
 }
 
+
 bool Algorithm::executeAsyncImpl(const int&)
 {
     try
@@ -444,6 +447,9 @@ bool Algorithm::executeAsyncImpl(const int&)
     return false;
 }
 
+/** Handles and rescales child algorithm progress notifications.
+ *  @param pNf The progress notification from the child algorithm.
+ */
 void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
 {
     double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
