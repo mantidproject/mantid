@@ -470,6 +470,11 @@ int MantidMatrix::indexX(double s)const
     return i;
 }
 
+QString MantidMatrix::workspaceName() const
+{
+  return QString::fromStdString(m_strName);
+}
+
 /*void MantidMatrix::copy(Matrix *m)
 {
 	if (!m)

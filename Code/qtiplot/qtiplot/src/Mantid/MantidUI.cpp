@@ -346,14 +346,23 @@ void MantidUI::update()
 QString MantidUI::getSelectedWorkspaceName()
 {
     QList<QTreeWidgetItem*> items = m_exploreMantid->m_tree->selectedItems();
-    QString str;
-    if (!items.size()) str = "";
-    else
+    QString str("");
+    if( !items.empty() )
     {
-        QTreeWidgetItem *item = items[0]->parent()?items[0]->parent():items[0];
-        str = item->text(0);
+      QTreeWidgetItem *item = items[0];
+      if( item->parent() )
+      {
+	item = item->parent();
+      }
+      str = item->text(0);
     }
-    return str;
+    if( !str.isEmpty() ) return str;
+
+    //Check if a mantid matrix is selected
+    MantidMatrix *m = qobject_cast<MantidMatrix*>(appWindow()->activeWindow());
+    if( !m ) return "";
+    
+    return m->workspaceName();
 }
 
 Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()

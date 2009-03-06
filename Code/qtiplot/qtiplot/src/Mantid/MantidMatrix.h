@@ -102,6 +102,7 @@ public:
     int indexX(double s)const;
 
     Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
+    QString workspaceName() const;
 
     const char **matrixIcon(){return m_matrix_icon;}
     //void copy(Matrix *m);
