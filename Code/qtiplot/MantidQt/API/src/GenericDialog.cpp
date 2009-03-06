@@ -166,9 +166,10 @@ void GenericDialog::initLayout()
   //Wire up the signal mapping object
   connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
  	
-  m_okButton = new QPushButton(tr("OK"));
+  m_okButton = new QPushButton(tr("Run"));
   connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
-	
+  m_okButton->setDefault(true);
+
   m_exitButton = new QPushButton(tr("Cancel"));
   connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));
 	
@@ -192,8 +193,8 @@ void GenericDialog::initLayout()
 	
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addStretch();
-  buttonRowLayout->addWidget(m_exitButton);
   buttonRowLayout->addWidget(m_okButton);
+  buttonRowLayout->addWidget(m_exitButton);
   mainLay->addLayout(buttonRowLayout);
   
 }
