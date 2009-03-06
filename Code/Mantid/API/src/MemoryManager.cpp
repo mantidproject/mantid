@@ -28,7 +28,6 @@ namespace API
 MemoryManagerImpl::MemoryManagerImpl() :
   g_log(Kernel::Logger::get("MemoryManager"))
 {
-  std::cerr << "Memory Manager created." << std::endl;
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 

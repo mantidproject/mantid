@@ -39,7 +39,6 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   {
     Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
   }
-  std::cerr << "Framework Manager created." << std::endl;
   g_log.debug() << "FrameworkManager created." << std::endl;
 }
 

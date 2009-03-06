@@ -110,7 +110,7 @@ void TableWorkspaceAlgorithm::exec()
 {
     Workspace_sptr b = getProperty("Table");
     TableWorkspace_sptr t = boost::dynamic_pointer_cast<TableWorkspace>(b);
-    std::cerr<<"OK "<<t->rowCount()<<"\n";
+    //std::cerr<<"OK "<<t->rowCount()<<"\n";
     TableRow r = t->getFirstRow();
     do
     {

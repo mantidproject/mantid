@@ -209,7 +209,7 @@ void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Ge
             else if (o)
                 lst.push_back(Geometry::IObjComponent_sptr(o,NoDeleting()));
             else
-                std::cerr<<"Unknown comp type\n";
+                g_log.error()<<"Unknown comp type\n";
         }
     }
 }

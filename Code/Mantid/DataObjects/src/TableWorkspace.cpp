@@ -30,13 +30,11 @@ namespace Mantid
         if (type.empty())
         {
             g_log.error("Empty string passed as type argument of createColumn.");
-            std::cerr<<"Empty string passed as type argument of createColumn.\n";
             return false;
         }
         if (name.empty())
         {
             g_log.error("Empty string passed as name argument of createColumn.");
-            std::cerr<<"Empty string passed as name argument of createColumn.\n";
             return false;
         }
         // Check that there is no column with the same name.
@@ -44,7 +42,6 @@ namespace Mantid
         if (ci != m_columns.end())
             {
                 g_log.error()<<"Column with name "<<name<<" already exists.\n";
-                std::cerr<<"Column with name "<<name<<" already exists.\n";
                 return false;
             }
         try
@@ -57,8 +54,7 @@ namespace Mantid
         catch(Kernel::Exception::NotFoundError& e)
         {
             g_log.error()<<"Column of type "<<type<<" and name "<<name<<" has not been created.\n";
-            std::cerr<<"Column of type "<<type<<" and name "<<name<<" has not been created.\n";
-            std::cerr<<e.what()<<'\n';
+            g_log.error()<<e.what()<<'\n';
             return false;
         }
         return true;
@@ -95,7 +91,6 @@ namespace Mantid
         {
             if ( !ci->unique() )
             {
-                std::cerr<<"Deleting column in use ("<<name<<").\n";
                 g_log.error()<<"Deleting column in use ("<<name<<").\n";
             }
             m_columns.erase(ci);
@@ -121,7 +116,6 @@ namespace Mantid
         if (index >= rowCount())
         {
             g_log.error()<<"Attempt to delete a non-existing row ("<<index<<")\n";
-            std::cerr<<"Attempt to delete a non-existing row ("<<index<<")\n";
             return;
         }
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)

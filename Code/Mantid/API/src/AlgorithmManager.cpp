@@ -17,7 +17,6 @@ namespace Mantid
     /// Private Constructor for singleton class
     AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")), no_of_alg(0)
     {
-      std::cerr << "Algorithm Manager created." << std::endl;
       g_log.debug() << "Algorithm Manager created." << std::endl;
     }
 
@@ -27,8 +26,7 @@ namespace Mantid
     */
     AlgorithmManagerImpl::~AlgorithmManagerImpl()
     {
-      std::cerr << "Algorithm Manager destroyed." << std::endl;
-      //		g_log.debug() << "Algorithm Manager destroyed." << std::endl;
+      //std::cerr << "Algorithm Manager destroyed." << std::endl;
     }
 
     /** Creates an instance of an algorithm, but does not own that instance

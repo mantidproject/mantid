@@ -14,13 +14,12 @@ namespace Mantid
 			// are constructed so that it is destroyed after us and thus does
 			// not close any loaded DLLs with loaded algorithms in them
 			Mantid::Kernel::LibraryManager::Instance();
-			std::cerr << "Algorithm Factory created." << std::endl;
 			g_log.debug() << "Algorithm Factory created." << std::endl;
 		}
 
 		AlgorithmFactoryImpl::~AlgorithmFactoryImpl()
 		{
-			std::cerr << "Algorithm Factory destroyed." << std::endl;
+			//std::cerr << "Algorithm Factory destroyed." << std::endl;
 		}
 
     /** Creates a mangled name for interal storage

@@ -76,7 +76,6 @@ WorkspaceTracerImpl::WorkspaceTracerImpl() :
   m_strWsName(""), m_vecAlgHistories(), m_algChain(), m_mutex(), m_isRunning(false), 
   m_isSwitchedOn(false)
 {
-  std::cerr << "WorkspaceTracer object created.\n";
   //Check the configure properties to see if we should switch it on
   int isOn(-1);
   int result = Kernel::ConfigService::Instance().getValue("AlgorithmChaining.SwitchedOn", isOn);

@@ -313,8 +313,6 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
                 static_cast<Kernel::TimeSeriesProperty<std::string>*>(logv)->addValue(t1, lasts);
             }
             prev = inter;
-            //std::cerr<<"--"<<*r<<' '<<*c<<'\n'; 
-            //std::cerr<<"Intersection: "<<inter<<' '<<c->begin()<<'\n';
         }
 
     }

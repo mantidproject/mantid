@@ -182,7 +182,7 @@ void Regroup::rebin(const std::vector<double>& xold, const std::vector<double>& 
     int n = xoldIndex[i];// start the group
     int m = xoldIndex[i+1];// end the group
     double width = xold[m] - xold[n]; // width of the group
-    //std::cerr<<n<<'-'<<m<<' '<<xold[n]
+    
     if (width == 0.)
     {
       g_log.error("Zero bin width");
