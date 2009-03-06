@@ -57,24 +57,44 @@ public:
         m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
     {
     }
-    AlgorithmObserver(const Algorithm* alg)
+    AlgorithmObserver(IAlgorithm_const_sptr alg)
         :m_progressObserver(*this,&AlgorithmObserver::_progressHandle),
         m_startObserver(*this,&AlgorithmObserver::_startHandle),
         m_finishObserver(*this,&AlgorithmObserver::_finishHandle),
         m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
     {
-        connect(alg);
+        observeAll(alg);
     }
-    void connect(const Algorithm* alg)
+    void observeAll(IAlgorithm_const_sptr alg)
     {
-        alg->notificationCenter.addObserver(m_progressObserver);
-        alg->notificationCenter.addObserver(m_startObserver);
-        alg->notificationCenter.addObserver(m_finishObserver);
-        alg->notificationCenter.addObserver(m_errorObserver);
+        alg->addObserver(m_progressObserver);
+        alg->addObserver(m_startObserver);
+        alg->addObserver(m_finishObserver);
+        alg->addObserver(m_errorObserver);
+    }
+
+    void observeProgress(IAlgorithm_const_sptr alg)
+    {
+        alg->addObserver(m_progressObserver);
+    }
+
+    void observeStart(IAlgorithm_const_sptr alg)
+    {
+        alg->addObserver(m_startObserver);
+    }
+
+    void observeFinish(IAlgorithm_const_sptr alg)
+    {
+        alg->addObserver(m_finishObserver);
+    }
+
+    void observeError(IAlgorithm_const_sptr alg)
+    {
+        alg->addObserver(m_errorObserver);
     }
 
     // Handling progress notifications
-    virtual void progressHandle(const Algorithm* alg,double p,const std::string& msg)
+    virtual void progressHandle(const IAlgorithm* alg,double p,const std::string& msg)
     {
         std::cerr<<"Progress "<<p<<'\n';
     }
@@ -85,7 +105,7 @@ public:
     Poco::NObserver<AlgorithmObserver, Algorithm::ProgressNotification> m_progressObserver;
 
     // Handling start notifications
-    virtual void startHandle(const Algorithm* alg)
+    virtual void startHandle(const IAlgorithm* alg)
     {
         std::cerr<<"Started "<<'\n';
     }
@@ -96,7 +116,7 @@ public:
     Poco::NObserver<AlgorithmObserver, Algorithm::StartedNotification> m_startObserver;
 
     // Handling finish notifications
-    virtual void finishHandle(const Algorithm* alg)
+    virtual void finishHandle(const IAlgorithm* alg)
     {
         std::cerr<<"Finished "<<'\n';
     }
@@ -107,7 +127,7 @@ public:
     Poco::NObserver<AlgorithmObserver, Algorithm::FinishedNotification> m_finishObserver;
 
     // Handling error notifications
-    virtual void errorHandle(const Algorithm* alg,const std::string& what)
+    virtual void errorHandle(const IAlgorithm* alg,const std::string& what)
     {
         std::cerr<<"Error "<<what<<'\n';
     }

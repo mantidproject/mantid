@@ -180,7 +180,7 @@ void RemoveBins::checkProperties()
 /// Calls CropWorkspace as a sub-algorithm to remove bins from the start or end of a square workspace
 void RemoveBins::crop(const double& start, const double& end)
 {
-  Algorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
   DataObjects::Workspace2D_const_sptr input2D = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_inputWorkspace);
   childAlg->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", boost::const_pointer_cast<DataObjects::Workspace2D>(input2D));
   childAlg->setProperty<double>("XMin", start);

@@ -33,7 +33,7 @@ void CorrectToFile::init()
 void CorrectToFile::exec()
 {
   //First load in rkh file for correction
-  Algorithm_sptr loadRKH = createSubAlgorithm("LoadRKH");
+  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH");
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");

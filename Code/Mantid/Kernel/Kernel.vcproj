@@ -189,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IPropertyManager.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LibraryManager.cpp"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PropertyManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PropertyManagerOwner.cpp"
 				>
 			</File>
 			<File
@@ -339,6 +347,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\IPropertyManager.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\IValidator.h"
 				>
 			</File>
@@ -392,6 +404,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\PropertyManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\PropertyManagerOwner.h"
 				>
 			</File>
 			<File

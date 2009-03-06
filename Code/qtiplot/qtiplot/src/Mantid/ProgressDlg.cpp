@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-ProgressDlg::ProgressDlg(QWidget *parent):QDialog(parent)
+ProgressDlg::ProgressDlg(Mantid::API::IAlgorithm_sptr alg,QWidget *parent):QDialog(parent),m_alg(alg)
 {
     QVBoxLayout *topLayout = new QVBoxLayout;
     QLabel *label = new QLabel("Algorithm progress");
@@ -27,20 +27,42 @@ ProgressDlg::ProgressDlg(QWidget *parent):QDialog(parent)
 	setLayout(layout);
 	setWindowTitle("Mantid - Algorithm progress");
 	setFixedHeight(sizeHint().height());
+
+    observeProgress(m_alg);
+    observeFinish(m_alg);
+    observeError(m_alg);
 }
 
 void ProgressDlg::cancelClicked()
 {
-    emit canceled();
+    //emit canceled();
+    m_alg->cancel();
+    close();
 }
 
 void ProgressDlg::backgroundClicked()
 {
-    emit toBackground();
+    //emit toBackground();
+    close();
 }
 
 void ProgressDlg::setValue(int p,const QString& msg)
 {
     m_progressBar->setValue(p);
     m_message->setText(msg);
+}
+
+void ProgressDlg::progressHandle(const Mantid::API::IAlgorithm* alg,double p,const std::string& msg)
+{
+    setValue(int(p*100),QString::fromStdString(msg)); 
+}
+
+void ProgressDlg::finishHandle(const Mantid::API::IAlgorithm* alg)
+{
+    close();
+}
+
+void ProgressDlg::errorHandle(const Mantid::API::IAlgorithm* alg,const std::string& what)
+{
+    close();
 }

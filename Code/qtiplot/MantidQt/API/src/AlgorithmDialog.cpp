@@ -75,7 +75,7 @@ bool AlgorithmDialog::isInitialized() const
  * Get the algorithm pointer
  * @returns A pointer to the algorithm that is associated with the dialog
  */
-Mantid::API::Algorithm* AlgorithmDialog::getAlgorithm() const
+Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
 {
   return m_algorithm;
 }
@@ -266,7 +266,7 @@ void AlgorithmDialog::accept()
  * Set the algorithm pointer
  * @param alg A pointer to the algorithm
  */
-void AlgorithmDialog::setAlgorithm(Mantid::API::Algorithm* alg)
+void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
 {
   m_algorithm = alg;
   m_algName = QString::fromStdString(alg->name());

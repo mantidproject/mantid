@@ -88,7 +88,7 @@ void DiffractionFocussing::exec()
     std::vector<int> detectorList;
     for(std::multimap<int,int>::const_iterator d = from;d!=to;d++)
       detectorList.push_back(d->second);
-    API::Algorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
+    API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
     DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
     childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
     childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
@@ -166,10 +166,10 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
 
   g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 
-  API::Algorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
+  API::IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertUnits");
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target",CONVERSION_UNIT);
-  childAlg->notificationCenter.addObserver(m_childProgressObserver);
+  childAlg->addObserver(m_childProgressObserver);
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -181,7 +181,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
     g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
     throw;
   }
-  childAlg->notificationCenter.removeObserver(m_childProgressObserver);
+  childAlg->removeObserver(m_childProgressObserver);
 
   if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
 
@@ -205,10 +205,10 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
   g_log.information() << "Rebinning from "<< min << " to " << max <<
                          " in "<< step <<" logaritmic steps.\n";
 
-  API::Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  API::IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("params",paramArray);
-  childAlg->notificationCenter.addObserver(m_childProgressObserver);
+  childAlg->addObserver(m_childProgressObserver);
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -220,7 +220,7 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
     g_log.error("Unable to successfully run Rebinning sub-algorithm");
     throw;
   }
-  childAlg->notificationCenter.removeObserver(m_childProgressObserver);
+  childAlg->removeObserver(m_childProgressObserver);
 
   if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
   else

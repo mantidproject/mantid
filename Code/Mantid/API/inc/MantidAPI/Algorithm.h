@@ -22,7 +22,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
@@ -88,7 +88,7 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManager
+class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner
 {
 public:
 
@@ -97,9 +97,9 @@ public:
     {
     public:
         AlgorithmNotification(Algorithm* alg):Poco::Notification(),m_algorithm(alg){}///< Constructor
-        const Algorithm *algorithm()const{return m_algorithm;}                       ///< The algorithm
+        const IAlgorithm *algorithm()const{return m_algorithm;}                       ///< The algorithm
     private:
-        Algorithm *m_algorithm;///< The algorithm
+        IAlgorithm *m_algorithm;///< The algorithm
     };
 
     /// StartedNotification is sent when the algorithm begins execution.
@@ -174,29 +174,35 @@ public:
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Misc";}
 
+  /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
+  AlgorithmID getAlgorithmID()const{return m_algorithmID;}
+
   // IAlgorithm methods
   void initialize();
   bool execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
   virtual bool isExecuted() const;
-  virtual void setPropertyOrdinal(const int &index, const std::string &value);
-  virtual void setPropertyValue(const std::string &name, const std::string &value);
-  virtual void setProperties(const std::string& propertiesArray);
-  virtual std::string getPropertyValue(const std::string &name) const;
-  virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const;
+  //virtual void setPropertyOrdinal(const int &index, const std::string &value);
+  //virtual void setPropertyValue(const std::string &name, const std::string &value);
+  //virtual void setProperties(const std::string& propertiesArray);
+  //virtual std::string getPropertyValue(const std::string &name) const;
+  //virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const;
   // End of IAlgorithm methods
-  using Kernel::PropertyManager::getProperty;
+  using Kernel::PropertyManagerOwner::getProperty;
 
   /// To query whether algorithm is a child. Default to false
   bool isChild() const;
   void setChild(const bool isChild);
 
   /// Asynchronous execution.
-  /// Usage: Poco::ActiveResult<bool> res = alg->executeAsync();
   Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
-  /// Sends notifications to observers. Observers can subscribe to notificationCenter
-  /// using Poco::NotificationCenter::addObserver(...);
-  mutable Poco::NotificationCenter notificationCenter;
+
+  /// Add an observer for a notification
+  void addObserver(const Poco::AbstractObserver& observer)const;
+
+  /// Remove an observer
+  void removeObserver(const Poco::AbstractObserver& observer)const;
+
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
   void cancel()const;
@@ -213,14 +219,22 @@ protected:
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
 
+  friend class AlgorithmProxy;
+  /// Initialize with properties from an algorithm proxy
+  void initializeFromProxy(const AlgorithmProxy&);
+
   //creates a sub algorithm for use in this algorithm
-  Algorithm_sptr createSubAlgorithm(const std::string& name, double startProgress = -1., double endProgress = -1.);
+  IAlgorithm_sptr createSubAlgorithm(const std::string& name, double startProgress = -1., double endProgress = -1.);
 
   void setInitialized();
   void setExecuted(bool state);
 
   // Make PropertyManager's declareProperty methods protected in Algorithm
-  using Kernel::PropertyManager::declareProperty;
+  using Kernel::PropertyManagerOwner::declareProperty;
+
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...);
+  mutable Poco::NotificationCenter m_notificationCenter;
 
   friend class Progress;
   /// Sends ProgressNotification. p must be between 0 (just started) and 1 (finished)
@@ -264,6 +278,8 @@ private:
 
   double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
   double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
+
+  AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
 };
 
 ///Typedef for a shared pointer to an Algorithm

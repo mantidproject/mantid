@@ -122,7 +122,7 @@ namespace Mantid
     {
       g_log.information() << "Integrating input workspace" << std::endl;
 
-      API::Algorithm_sptr childAlg = createSubAlgorithm("Integration");
+      API::IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
       childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
       childAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
 

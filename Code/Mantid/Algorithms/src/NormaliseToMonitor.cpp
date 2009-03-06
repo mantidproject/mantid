@@ -175,7 +175,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Ma
   // Don't run CropWorkspace algorithm if integrating over full workspace range
   if ( m_integrationMin != inputWorkspace->readX(0).front() || m_integrationMax != inputWorkspace->readX(0).back() )
   {
-    Algorithm_sptr crop = createSubAlgorithm("CropWorkspace");
+    IAlgorithm_sptr crop = createSubAlgorithm("CropWorkspace");
     DataObjects::Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
     crop->setProperty("InputWorkspace", input2D);
     crop->setProperty("XMin",m_integrationMin);
@@ -198,7 +198,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::normaliseByIntegratedCount(API::Ma
   monitor->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();
 
   // Add up all the bins so it's just effectively a single value with an error
-  Algorithm_sptr integrate = createSubAlgorithm("Integration");
+  IAlgorithm_sptr integrate = createSubAlgorithm("Integration");
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitor);
   try {
     integrate->execute();

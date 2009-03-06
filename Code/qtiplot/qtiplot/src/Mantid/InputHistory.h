@@ -2,6 +2,7 @@
 #define INPUTHISTORY_H
 
 #include <MantidKernel/SingletonHolder.h>
+#include <boost/shared_ptr.hpp>
 
 #include <QString>
 #include <QMap>
@@ -13,7 +14,8 @@ namespace Mantid
 {
     namespace API
     {
-        class Algorithm;
+        class IAlgorithm;
+        typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
     }
 }
 
@@ -55,7 +57,7 @@ struct PropertyData
 class InputHistoryImpl
 {
 public:
-    void updateAlgorithm(Mantid::API::Algorithm *alg);
+    void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
     /// The name:value map of non-default properties with which algorithm algName was called last time.
     QMap< QString, QString > algorithmProperties(const QString& algName);
     /// Returns the value of property propNameif it has been recorded for algorithm algName.

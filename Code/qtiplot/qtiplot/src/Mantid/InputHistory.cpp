@@ -69,7 +69,7 @@ void InputHistoryImpl::save()
      Upadates the non-default algorithm properties in the history.
      @param alg Pointer to the algorthm
 */
-void InputHistoryImpl::updateAlgorithm(Mantid::API::Algorithm *alg)
+void InputHistoryImpl::updateAlgorithm(Mantid::API::IAlgorithm_sptr alg)
 {
     const std::vector< Property* >& props = alg->getProperties();
     QList< PropertyData > prop_hist_list;

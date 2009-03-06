@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <iostream>
@@ -18,9 +19,9 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManager(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+  PropertyManagerOwner(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
-  m_progressObserver(*this, &Algorithm::handleChildProgressNotification)
+  m_progressObserver(*this, &Algorithm::handleChildProgressNotification),m_algorithmID(0)
 {}
 
 /// Virtual destructor
@@ -79,7 +80,7 @@ void Algorithm::initialize()
  */
 bool Algorithm::execute()
 {
-  notificationCenter.postNotification(new StartedNotification(this));
+  m_notificationCenter.postNotification(new StartedNotification(this));
   clock_t start,end;
   time_t start_time;
   // Return a failure if the algorithm hasn't been initialized
@@ -143,7 +144,7 @@ bool Algorithm::execute()
           g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
           g_log.error()<< ex.what()<<std::endl;
       }
-      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+      m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false;
     }
     catch(std::logic_error& ex)
@@ -154,7 +155,7 @@ bool Algorithm::execute()
           g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
           g_log.error()<< ex.what()<<std::endl;
       }
-      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+      m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false;
     }
   }
@@ -163,7 +164,7 @@ bool Algorithm::execute()
       m_runningAsync = false;
       m_running = false;
       g_log.error("Execution terminated by user.");
-      notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+      m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
@@ -173,7 +174,7 @@ bool Algorithm::execute()
     m_runningAsync = false;
     m_running = false;
 
-    notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+    m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
     g_log.error(ex.what());
     throw;
   }
@@ -187,7 +188,7 @@ bool Algorithm::execute()
     m_runningAsync = false;
     m_running = false;
 
-    notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
+    m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
     g_log.error("UNKNOWN Exception is caught ");
     throw;
     // Gaudi calls exception service 'handle' method here
@@ -197,7 +198,7 @@ bool Algorithm::execute()
   // and then converts to success if less than the maximum. This is clearly related to
   // having an event loop, and thus we shouldn't want it. This is the only place it's used.
 
-  notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   // Only gets to here if algorithm ended normally
   return isExecuted();
 }
@@ -224,9 +225,9 @@ bool Algorithm::isExecuted() const
  *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
  *  @returns Set to point to the newly created algorithm object
  */
-Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double startProgress, double endProgress)
+IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double startProgress, double endProgress)
 {
-  Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
   //set as a child
   alg->setChild(true);
 
@@ -252,7 +253,7 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double sta
 
   if (startProgress >= 0 && endProgress > startProgress && endProgress <= 1.)
   {
-      alg->notificationCenter.addObserver(m_progressObserver);
+      alg->addObserver(m_progressObserver);
       m_startChildProgress = startProgress;
       m_endChildProgress = endProgress;
   }
@@ -260,32 +261,18 @@ Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double sta
   return alg;
 }
 
-// IAlgorithm property methods. Pull in PropertyManager implementation.
-void Algorithm::setPropertyValue(const std::string &name, const std::string &value)
+/**  Add an observer to a notification
+ */
+void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
 {
-  PropertyManager::setPropertyValue(name, value);
+    m_notificationCenter.addObserver(observer);
 }
 
-// IAlgorithm property methods. Pull in PropertyManager implementation.
-void Algorithm::setProperties(const std::string& propertiesArray)
+/**  Remove an observer
+ */
+void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
 {
-  PropertyManager::setProperties(propertiesArray);
-}
-
-// IAlgorithm property methods. Pull in PropertyManager implementation.
-void Algorithm::setPropertyOrdinal(const int &index, const std::string &value)
-{
-  PropertyManager::setPropertyOrdinal(index, value);
-}
-
-std::string Algorithm::getPropertyValue(const std::string &name) const
-{
-  return PropertyManager::getPropertyValue(name);
-}
-
-const std::vector< Mantid::Kernel::Property* >& Algorithm::getProperties() const
-{
-  return PropertyManager::getProperties();
+    m_notificationCenter.removeObserver(observer);
 }
 
 void Algorithm::cancel()const
@@ -296,6 +283,17 @@ void Algorithm::cancel()const
 //----------------------------------------------------------------------
 // Protected Member Functions
 //----------------------------------------------------------------------
+
+/** Initialize using proxy algorithm.
+    proxy calls this algorithm's init() method and keeps the declared properties.
+    initialize(const AlgorithmProxy*) copies the properties from the proxy to this algorithm.
+  */
+void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
+{
+    copyPropertiesFrom(proxy);
+    setInitialized();
+    m_algorithmID = proxy.getAlgorithmID();
+}
 
 /// Set the Algorithm initialized state
 void Algorithm::setInitialized()
@@ -313,7 +311,7 @@ void Algorithm::setExecuted(bool state)
 
 void Algorithm::progress(double p, const std::string& msg )
 {
-    notificationCenter.postNotification(new ProgressNotification(this,p,msg));
+    m_notificationCenter.postNotification(new ProgressNotification(this,p,msg));
 }
 
 void Algorithm::interruption_point()

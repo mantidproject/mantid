@@ -72,7 +72,7 @@ void FindPeaks1D::exec()
 
 void FindPeaks1D::generalisedSecondDifference()
 {
-	Algorithm_sptr second_diff_alg;
+	IAlgorithm_sptr second_diff_alg;
 	  try
 	  {
 	    second_diff_alg = createSubAlgorithm("GeneralisedSecondDifference");

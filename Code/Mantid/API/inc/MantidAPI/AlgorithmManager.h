@@ -11,16 +11,19 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/IAlgorithm.h"
 
 namespace Mantid
 {
 	namespace API
 	{
 		//Forward declarations
+		class IAlgorithm;
 		class Algorithm;
 
 		///@cond (Don't document here because done elsewhere
 		//Typedef for a shared pointer to an Algorithm
+		typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
 		typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 		///@endcond
 		/** @class AlgorithmManagerImpl AlgorithmManager.h Kernel/AlgorithmManager.h
@@ -57,8 +60,8 @@ namespace Mantid
 		public:
 
 			// Methods to create algorithm instances
-			Algorithm_sptr create( const std::string& algName, const int& version=-1 );
-			Algorithm_sptr createUnmanaged( const std::string& algName, const int& version=-1) const;
+			IAlgorithm_sptr create( const std::string& algName, const int& version=-1 );
+			IAlgorithm_sptr createUnmanaged( const std::string& algName, const int& version=-1) const;
 
 			/// deletes all registered algorithms
 			void clear();
@@ -69,16 +72,17 @@ namespace Mantid
 			int size() const { return regAlg.size(); }
 			
 			const std::vector<std::pair<std::string,std::string> > getNamesAndCategories() const;
-            const std::vector<Algorithm_sptr>& algorithms()const{return regAlg;}
+            const std::vector<IAlgorithm_sptr>& algorithms()const{return regAlg;}
+            IAlgorithm_sptr getAlgorithm(AlgorithmID id)const;
 
 		private:
 			friend struct Mantid::Kernel::CreateUsingNew<AlgorithmManagerImpl>;
 
 			///Class cannot be instantiated by normal means
 			AlgorithmManagerImpl();
-      ///destructor
+            ///destructor
 			~AlgorithmManagerImpl();
-      ///Copy contrstrutor
+            ///Copy contrstrutor
 			AlgorithmManagerImpl(const AlgorithmManagerImpl&);
     
 			/// Standard Assignment operator    
@@ -88,7 +92,7 @@ namespace Mantid
 			Kernel::Logger& g_log;
 
 			int no_of_alg;                       ///< counter of registered algorithms
-			std::vector<Algorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]
+			std::vector<IAlgorithm_sptr> regAlg;     ///<  pointers to registered algorithms [policy???]
 		};
 
 		///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.

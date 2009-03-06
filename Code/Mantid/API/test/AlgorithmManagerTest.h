@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include <stdexcept>
 #include <vector>
@@ -93,8 +94,11 @@ public:
     // Not really much to test
     //AlgorithmManager *tester = AlgorithmManager::Instance();
     //TS_ASSERT_EQUALS( manager, tester);
+
     TS_ASSERT_THROWS_NOTHING( AlgorithmManager::Instance().create("AlgTest") )
-    TS_ASSERT_THROWS(AlgorithmManager::Instance().create("AlgTest",3), std::runtime_error )
+    TS_ASSERT_THROWS(
+    AlgorithmManager::Instance().create("AlgTest",3)
+    , std::runtime_error )
     TS_ASSERT_THROWS(AlgorithmManager::Instance().create("aaaaaa"), std::runtime_error )
   }
 
@@ -129,19 +133,19 @@ public:
     AlgorithmManager::Instance().clear();
 //    AlgorithmFactory::Instance().subscribe<AlgTest>();
 //    AlgorithmFactory::Instance().subscribe<AlgTestSecond>();
-    Algorithm_sptr alg;
+    IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgTest",1) );
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgTest*>(alg.get()),static_cast<AlgTest*>(0));
+    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy*>(alg.get()),static_cast<AlgorithmProxy*>(0));
     TS_ASSERT_THROWS_NOTHING( alg = AlgorithmManager::Instance().create("AlgTestSecond",1) );
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgTestSecond*>(alg.get()),static_cast<AlgTestSecond*>(0));
-    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm*>(alg.get()),static_cast<Algorithm*>(0));
+    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy*>(alg.get()),static_cast<AlgorithmProxy*>(0));
+    TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm*>(alg.get()),static_cast<IAlgorithm*>(0));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),2);   // To check that crea is called on local objects
   }
 
   void testManagedType()
   {
     AlgorithmManager::Instance().clear();
-    Algorithm_sptr Aptr, Bptr;
+    IAlgorithm_sptr Aptr, Bptr;
     Aptr=AlgorithmManager::Instance().create("AlgTest");
     Bptr=AlgorithmManager::Instance().createUnmanaged("AlgTest");
     TS_ASSERT_DIFFERS(Aptr,Bptr);

@@ -31,6 +31,7 @@ struct Algorithm_descriptor
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+  class IAlgorithm;
   class Algorithm;
 /** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
@@ -63,7 +64,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
   {
   public:
 	  ///Creates an instance of an algorithm
-    boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
+    boost::shared_ptr<IAlgorithm> create(const std::string& ,const int& ) const;
 
 	  /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
 	  template <class C>
@@ -73,7 +74,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
       
 		  const int version = extractAlgVersion(tempAlg);
-      const std::string className = extractAlgName(tempAlg);
+          const std::string className = extractAlgName(tempAlg);
 		  delete newI;
 		  typename versionMap::iterator it = _vmap.find(className);
 		  if (!className.empty())
@@ -102,9 +103,9 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 
   /// Extract the name of an algorithm
-  const std::string extractAlgName(const boost::shared_ptr<Algorithm> alg) const;
+  const std::string extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const;
   // Extract the version of an algorithm
-  const int extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const;
+  const int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
 	
 	/// Private Constructor for singleton class
 	AlgorithmFactoryImpl();	

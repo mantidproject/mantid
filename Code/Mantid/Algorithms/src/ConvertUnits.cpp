@@ -319,7 +319,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace)
 {
   // Create a Rebin child algorithm
-  Algorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("params",this->calculateRebinParams(workspace));
 

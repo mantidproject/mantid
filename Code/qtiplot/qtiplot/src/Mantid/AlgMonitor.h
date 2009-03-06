@@ -29,19 +29,18 @@ public:
     /// Destructor
     ~AlgorithmMonitor();
     /// Add algorithm to monitor
-    void add(Algorithm *alg);
+    void add(IAlgorithm_sptr alg);
     /// Removes stopped algorithm
-    void remove(const Algorithm *alg);
+    void remove(const IAlgorithm* alg);
     /// Returns number of running algorithms
     int count(){return m_algorithms.size();}
     /// Returns pointers to running algorithms
-    const QVector<Algorithm*>& algorithms(){return m_algorithms;}
+    const QVector<AlgorithmID>& algorithms(){return m_algorithms;}
     void lock(){s_mutex.lock();}
     void unlock(){s_mutex.unlock();}
-    Algorithm_sptr getShared(const Algorithm *alg);
 signals:
     void countChanged(int);
-    void needUpdateProgress(const Algorithm* alg,int p, const QString& msg);
+    void needUpdateProgress(const IAlgorithm* alg,int p, const QString& msg);
 protected:
 
     /// Algorithm notifiv=cation handlers
@@ -58,12 +57,12 @@ protected:
 public slots:
     void update();
     void showDialog();
-    void cancel(Algorithm*);
-  void cancelAll();
+    void cancel(AlgorithmID);
+    void cancelAll();
 private:
     MantidUI *m_mantidUI;
-    int m_nRunning;                 // number of running algorithms
-    QVector<Algorithm*> m_algorithms; // pointers to running algorithms
+    int m_nRunning;                    // number of running algorithms
+    QVector<AlgorithmID> m_algorithms; // IDs of running algorithms
     MonitorDlg* m_monitorDlg;
     static QMutex s_mutex;
 };
@@ -76,9 +75,9 @@ public:
     ~MonitorDlg();
 public slots:
     void update(int n);
-    void updateProgress(const Algorithm* alg,int p, const QString& msg);
+    void updateProgress(const IAlgorithm* alg,int p, const QString& msg);
 private:
-    QVector<const Algorithm*> m_algorithms;
+    QVector<const IAlgorithm*> m_algorithms;
     AlgorithmMonitor *m_algMonitor;
     QTreeWidget *m_tree;
 };
@@ -87,17 +86,17 @@ class AlgButton:public QPushButton
 {
     Q_OBJECT
 public:
-    AlgButton(const QString& text,Algorithm *alg):
-    QPushButton(text),m_alg(alg)
+    AlgButton(const QString& text,IAlgorithm_sptr alg):
+    QPushButton(text),m_alg(alg->getAlgorithmID())
     {
         connect(this,SIGNAL(clicked()),this,SLOT(sendClicked()));
     }
 private slots:
     void sendClicked(){emit clicked(m_alg);}
 signals:
-    void clicked(Algorithm *);
+    void clicked(AlgorithmID );
 private:
-    Algorithm *m_alg;
+    AlgorithmID m_alg;
 };
 
 #endif /* ALGMONITOR_H */

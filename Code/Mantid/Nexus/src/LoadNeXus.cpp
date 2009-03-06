@@ -108,7 +108,7 @@ namespace NeXus
 
   void LoadNexus::runLoadMuonNexus()
   {
-      Algorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus");
+      IAlgorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus");
       // Pass through the same input filename
       loadMuonNexus->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -168,7 +168,7 @@ namespace NeXus
 
   void LoadNexus::runLoadNexusProcessed()
   {
-      Algorithm_sptr loadNexusPro = createSubAlgorithm("LoadNexusProcessed");
+      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadNexusProcessed");
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property

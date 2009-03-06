@@ -31,7 +31,7 @@ ExecuteAlgorithm::~ExecuteAlgorithm()
 {
 }
 
-void ExecuteAlgorithm::CreateLayout(Mantid::API::Algorithm* alg, const QString & message)
+void ExecuteAlgorithm::CreateLayout(Mantid::API::IAlgorithm_sptr alg, const QString & message)
 {
   m_alg = alg;
   m_props = m_alg->getProperties();

@@ -27,11 +27,11 @@ public:
   
   bool existsProperty( const std::string &name ) const
   {
-    return PropertyManager::existsProperty(name);
+    return PropertyManagerOwner::existsProperty(name);
   }
   const std::vector< Property* >& getProperties() const
   {
-    return PropertyManager::getProperties();
+    return PropertyManagerOwner::getProperties();
   }
 };
 

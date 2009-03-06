@@ -56,7 +56,7 @@ DataObjects::TableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr
 {
   g_log.information("Calling FindPeaks as a sub-algorithm");
 
-  API::Algorithm_sptr findpeaks = createSubAlgorithm("FindPeaks");
+  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks");
   findpeaks->setProperty("InputWorkspace", WS);
 
   // Now execute the sub-algorithm. Catch and log any error

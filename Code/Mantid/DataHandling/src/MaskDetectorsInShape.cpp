@@ -51,7 +51,7 @@ namespace Mantid
     std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(Workspace2D_sptr workspace,
 			const std::string shapeXML, const bool includeMonitors)
     {
-      Algorithm_sptr alg = createSubAlgorithm("FindDetectorsInShape",0,85);
+      IAlgorithm_sptr alg = createSubAlgorithm("FindDetectorsInShape",0,85);
 			alg->setPropertyValue("IncludeMonitors", includeMonitors?"1":"0");
 			alg->setPropertyValue("ShapeXML",shapeXML);
       alg->setProperty<MatrixWorkspace_sptr>("Workspace",workspace);
@@ -74,7 +74,7 @@ namespace Mantid
 
 		void MaskDetectorsInShape::runMaskDetectors(Workspace2D_sptr workspace, const std::vector<int> detectorIds)
     {
-      Algorithm_sptr alg = createSubAlgorithm("MaskDetectors",85,100);
+      IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors",85,100);
 			alg->setProperty<std::vector<int> >("DetectorList", detectorIds);
       alg->setProperty<Workspace2D_sptr>("Workspace",workspace);
       try

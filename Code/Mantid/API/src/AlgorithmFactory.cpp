@@ -40,7 +40,7 @@ namespace Mantid
     * @param version the version of the algroithm to create
     * @returns a shared pointer to the created algorithm
     */
-		boost::shared_ptr<Algorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
+		boost::shared_ptr<IAlgorithm> AlgorithmFactoryImpl::create(const std::string& name,const int& version) const
 		{   
 			int local_version=version;
 			if( version < 0)
@@ -61,7 +61,7 @@ namespace Mantid
 			}
 			try
 			{
-        return(Kernel::DynamicFactory<Algorithm>::create(createName(name,local_version)));
+                return(Kernel::DynamicFactory<Algorithm>::create(createName(name,local_version)));
 			}
 			catch(Kernel::Exception::NotFoundError& ex)
 			{
@@ -81,18 +81,18 @@ namespace Mantid
     * @param alg the Algrorithm to use
     * @returns the name of the algroithm
     */
-    const std::string AlgorithmFactoryImpl::extractAlgName(const boost::shared_ptr<Algorithm> alg) const
+    const std::string AlgorithmFactoryImpl::extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const
     {
-      return alg->name();
+        return alg->name();
     }
 
     /** Extract the version of an algorithm
     * @param alg the Algrorithm to use
     * @returns the version of the algroithm
     */
-    const int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<Algorithm> alg) const
+    const int AlgorithmFactoryImpl::extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const
     {
-      return alg->version();
+        return alg->version();
     }
 
     const std::vector<Algorithm_descriptor> AlgorithmFactoryImpl::getDescriptors() const
@@ -120,7 +120,7 @@ namespace Mantid
             }
             else
                 continue;
-            boost::shared_ptr<Algorithm> alg = create(desc.name,desc.version);
+            boost::shared_ptr<IAlgorithm> alg = create(desc.name,desc.version);
             desc.category = alg->category();
             res.push_back(desc);
         }

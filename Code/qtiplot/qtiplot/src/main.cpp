@@ -137,6 +137,7 @@ public:
 
 class MyApp:public QApplication
 {
+    //Q_OBJECT
 public:
     MyApp(int argc, char ** argv ):QApplication(argc,argv){}
 

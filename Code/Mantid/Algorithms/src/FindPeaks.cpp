@@ -257,7 +257,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
 void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
 {
   g_log.information("Smoothing the input data");
-  Algorithm_sptr smooth = createSubAlgorithm("SmoothData");
+  IAlgorithm_sptr smooth = createSubAlgorithm("SmoothData");
   smooth->setProperty("InputWorkspace", WS);
   // The number of points which contribute to each smoothed point
   smooth->setProperty("NPoints",w);
@@ -328,7 +328,7 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
  */
 void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4)
 {
-  Algorithm_sptr fit;
+  IAlgorithm_sptr fit;
   try
   {
     // Fitting the candidate peaks to a Gaussian

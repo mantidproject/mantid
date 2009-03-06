@@ -23,7 +23,7 @@ namespace API
  */
 static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false)
 {
-  Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName);
   alg->setChild(true);
   alg->initialize();
 

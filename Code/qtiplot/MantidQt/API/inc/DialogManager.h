@@ -21,7 +21,7 @@ namespace Mantid
 {
 namespace API
 {
-  class Algorithm;
+  class IAlgorithm;
 }
 
 namespace Kernel
@@ -76,7 +76,7 @@ class EXPORT_OPT_MANTIDQT_API DialogManagerImpl
 public:
   
   // Create the correct dialog
-  AlgorithmDialog* createDialog(Mantid::API::Algorithm* alg, QWidget* parent = 0,
+  AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
 				bool forScript = false, const QString & msg = QString(""));
 
 

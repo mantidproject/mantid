@@ -4,6 +4,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
@@ -37,9 +38,9 @@ namespace Mantid
     *  @return A pointer to the created algorithm
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     */
-    Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
+    IAlgorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string& algName,const int& version) const
     {
-      return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
+        return AlgorithmFactory::Instance().create(algName,version);                // Throws on fail:
     }
 
     /** Gets the names and categories of all the currently available algorithms
@@ -68,12 +69,13 @@ namespace Mantid
     *  @throw  NotFoundError Thrown if algorithm requested is not registered
     *  @throw  std::runtime_error Thrown if properties string is ill-formed
     */
-    Algorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version)
+    IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string& algName, const int& version)
     {
       try
       {
-        regAlg.push_back(AlgorithmFactory::Instance().create(algName,version));      // Throws on fail:	   
-        regAlg.back()->initialize();
+          IAlgorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
+          regAlg.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
+          regAlg.back()->initialize();
       }
       catch(std::runtime_error& ex)
       {
@@ -91,6 +93,14 @@ namespace Mantid
       regAlg.clear();
       no_of_alg=0;
       return;
+    }
+
+    /// Returns a shared pointer by algorithm id
+    IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id)const
+    {
+        for( std::vector<IAlgorithm_sptr>::const_iterator a = regAlg.begin();a!=regAlg.end();a++)
+            if ((**a).getAlgorithmID() == id) return *a;
+        return IAlgorithm_sptr();
     }
 
   } // namespace API

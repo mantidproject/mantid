@@ -90,9 +90,9 @@ public:
     {
         AsyncAlgorithm alg;
         alg.initialize();
-        alg.notificationCenter.addObserver(m_startedObserver);
-        alg.notificationCenter.addObserver(m_finishedObserver);
-        alg.notificationCenter.addObserver(m_progressObserver);
+        alg.addObserver(m_startedObserver);
+        alg.addObserver(m_finishedObserver);
+        alg.addObserver(m_progressObserver);
         Poco::ActiveResult<bool> result = alg.executeAsync();
         TS_ASSERT( !result.available() )
         result.wait();
@@ -108,9 +108,9 @@ public:
     {
         finishedNotificationReseived = false;
         AsyncAlgorithm alg;
-        alg.notificationCenter.addObserver(m_startedObserver);
-        alg.notificationCenter.addObserver(m_finishedObserver);
-        alg.notificationCenter.addObserver(m_progressObserver);
+        alg.addObserver(m_startedObserver);
+        alg.addObserver(m_finishedObserver);
+        alg.addObserver(m_progressObserver);
         alg.initialize();
         Poco::ActiveResult<bool> result = alg.executeAsync();
         alg.cancel();
@@ -124,10 +124,10 @@ public:
     {
         finishedNotificationReseived = false;
         AsyncAlgorithm alg;
-        alg.notificationCenter.addObserver(m_startedObserver);
-        alg.notificationCenter.addObserver(m_finishedObserver);
-        alg.notificationCenter.addObserver(m_progressObserver);
-        alg.notificationCenter.addObserver(m_errorObserver);
+        alg.addObserver(m_startedObserver);
+        alg.addObserver(m_finishedObserver);
+        alg.addObserver(m_progressObserver);
+        alg.addObserver(m_errorObserver);
         alg.initialize();
         alg.throw_exception = true;
         Poco::ActiveResult<bool> result = alg.executeAsync();

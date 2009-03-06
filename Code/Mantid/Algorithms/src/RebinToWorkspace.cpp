@@ -40,7 +40,7 @@ void RebinToWorkspace::exec()
   std::vector<double> rb_params;
   createRebinParameters(toMatch, rb_params);
 
-  Algorithm_sptr runRebin = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr runRebin = createSubAlgorithm("Rebin");
   
   runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");

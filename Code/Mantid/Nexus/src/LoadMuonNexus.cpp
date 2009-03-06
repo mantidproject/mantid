@@ -319,7 +319,7 @@ namespace Mantid
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
       
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
@@ -349,7 +349,7 @@ namespace Mantid
       g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
         << "the instrument from nexus data file.\n";
 
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
@@ -390,7 +390,7 @@ namespace Mantid
     /// Run the LoadLog sub-algorithm
     void LoadMuonNexus::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      Algorithm_sptr loadLog = createSubAlgorithm("LoadMuonLog");
+      IAlgorithm_sptr loadLog = createSubAlgorithm("LoadMuonLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above

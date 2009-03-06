@@ -153,7 +153,7 @@ namespace Mantid
       }
 
       
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 

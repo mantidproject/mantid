@@ -46,16 +46,12 @@
 using namespace std;
  
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
-m_finishedObserver(*this, &MantidUI::handleAlgorithmFinishedNotification),
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
-m_progressObserver(*this, &MantidUI::handleAlgorithmProgressNotification),
-m_errorObserver(*this, &MantidUI::handleAlgorithmErrorNotification),
 m_addObserver(*this,&MantidUI::handleAddWorkspace),
 m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
-m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
+m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
+m_progressDialog(0)
 { 
-    m_progressDialog = 0;
-    m_algAsync = 0;
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
@@ -92,9 +88,7 @@ m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace)
 	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
     connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
-    connect(this,SIGNAL(needToCloseProgressDialog()),this,SLOT(closeProgressDialog()));
-    connect(this,SIGNAL(needToUpdateProgressDialog(int,const QString&)),this,SLOT(updateProgressDialog(int,const QString&)));
-    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::Algorithm*)));
+    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)));
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
     m_algMonitor = new AlgorithmMonitor(this);
@@ -176,9 +170,9 @@ QStringList MantidUI::getAlgorithmNames()
     @param algName Algorithm's name
     @return Pointer to the created algorithm
 */
-IAlgorithm* MantidUI::CreateAlgorithm(const QString& algName)
+IAlgorithm_sptr MantidUI::CreateAlgorithm(const QString& algName)
 {
-	IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm(algName.toStdString());
+	IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName.toStdString());
 
 	return alg;
 }
@@ -204,7 +198,7 @@ void MantidUI::LoadIsisRawFile(const QString& fileName,const QString& workspaceN
     }
     QStringList ALGS = getAlgorithmNames();
     QString loader = ALGS.contains("LoadRaw2|1")?"LoadRaw2":"LoadRaw";
-	Algorithm* alg = static_cast<Algorithm*>(CreateAlgorithm(loader));
+	IAlgorithm_sptr alg = CreateAlgorithm(loader);
 	alg->setPropertyValue("Filename", fileName.toStdString());
 	alg->setPropertyValue("OutputWorkspace", workspaceName.toStdString());
     if ( !spectrum_min.isEmpty() && !spectrum_max.isEmpty() )
@@ -270,7 +264,7 @@ void MantidUI::loadDAEWorkspace()
             if ( QMessageBox::question(appWindow(),"MantidPlot - Confirm","Workspace "+workspaceName+" already exists. Do you want to replace it?",
                 QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes) return;
         }
-        Mantid::API::Algorithm* alg = dynamic_cast<Mantid::API::Algorithm*>(CreateAlgorithm("LoadDAE"));
+        Mantid::API::IAlgorithm_sptr alg = CreateAlgorithm("LoadDAE");
 	    alg->setPropertyValue("DAEname", dlg->getHostName().toStdString());
 	    alg->setPropertyValue("OutputWorkspace", dlg->getWorkspaceName().toStdString());
         if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
@@ -283,27 +277,12 @@ void MantidUI::loadDAEWorkspace()
 	        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
      }
 
-        DAEstruct dae;
-        dae.m_WorkspaceName = dlg->getWorkspaceName();
-        dae.m_HostName = dlg->getHostName();
-        dae.m_SpectrumMin = dlg->getSpectrumMin();
-        dae.m_SpectrumMax = dlg->getSpectrumMax();
-        dae.m_SpectrumList = dlg->getSpectrumList();
-        dae.m_UpdateInterval = dlg->updateInterval();
-        m_DAE_map[alg] = dae;
+        m_DAE_map[dlg->getWorkspaceName().toStdString()] = dlg->updateInterval();
 	    
-        alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
+        alg->addObserver(m_finishedLoadDAEObserver);
         executeAlgorithmAsync(alg);
   }
-    // Mantid::API::Algorithm *alg = dynamic_cast<Mantid::API::Algorithm*>
-          // (Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadDAE",-1));
-    // if( !alg ) return;
-    
-    // alg->notificationCenter.addObserver(m_finishedLoadDAEObserver);
-    // MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, (QWidget*)parent());
-    // if( !dlg ) return;
-		// if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
-}
+} 
 
 /**
      deleteWorkspace
@@ -827,11 +806,10 @@ void MantidUI::executeAlgorithm()
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
 
-    Mantid::API::Algorithm* alg;
+    Mantid::API::IAlgorithm_sptr alg;
     try
     {
-        alg = dynamic_cast<Mantid::API::Algorithm*>
-          (Mantid::API::FrameworkManager::Instance().createAlgorithm(algName.toStdString(),version));
+        alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
     }
     catch(...)
     {
@@ -840,42 +818,31 @@ void MantidUI::executeAlgorithm(QString algName, int version)
     }
 	if (alg)
 	{		
-		// ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
-		// dlg->CreateLayout(alg);
-		// dlg->setModal(true);
+		 //ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
+		 //dlg->CreateLayout(alg);
+		 //dlg->setModal(true);
     
-    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, (QWidget*)parent());
+    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg.get(), (QWidget*)parent());
     if( !dlg ) return;
 		if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
 	}
 }
 
-void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog)
+void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog)
 {
     if (showDialog)
     {
-        m_progressDialog = new ProgressDlg(appWindow());
-        //m_progressDialog->setWindowModality(Qt::WindowModal);
-        connect(m_progressDialog,SIGNAL(canceled()),this,SLOT(cancelAsyncAlgorithm()));
-        connect(m_progressDialog,SIGNAL(toBackground()),this,SLOT(backgroundAsyncAlgorithm()));
-
-	//M.Gigg - Not sure why this is necessary. It seems to have the effect (on Linux anway)
-	//of trying to close the same dialog twice
-	//        connect(m_progressDialog,SIGNAL(rejected()),this,SLOT(backgroundAsyncAlgorithm()));
-
-        alg->notificationCenter.addObserver(m_progressObserver);
+        m_progressDialog = new ProgressDlg(alg,appWindow());
     }
-    alg->notificationCenter.addObserver(m_finishedObserver);
-    alg->notificationCenter.addObserver(m_errorObserver);
-    m_algAsync = alg;
+
     m_algMonitor->add(alg);
     try
     {
-      Poco::ActiveResult<bool> res = alg->executeAsync();
+      Poco::ActiveResult<bool> res = alg->executeAsync(); 
       if ( !res.tryWait(100) && showDialog)
       {
-	//Use show rather than exec so that control is returned to the caller immediately
-	m_progressDialog->exec();
+          //Use show rather than exec so that control is returned to the caller immediately
+          m_progressDialog->exec();
       }
 
 //        InputHistory::Instance().updateAlgorithm(alg);
@@ -886,81 +853,16 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialo
     }
 }
 
-void MantidUI::cancelAsyncAlgorithm()
-{
-    if (m_algAsync)
-    {
-        m_algAsync->cancel();
-    }
-    m_algAsync = 0;
-    closeProgressDialog();
-}
-
-void MantidUI::backgroundAsyncAlgorithm()
-{
-    closeProgressDialog();
-    m_algAsync = 0;
-}
-
-void MantidUI::tst()
-{
-    QWidget* m = (QWidget*)appWindow()->activeWindow();
-    if (!m) return;
-    if (m->isA("MantidMatrix"))
-        ((MantidMatrix*)m)->tst(); 
-
-}
-
-void MantidUI::tst(MdiSubWindow* w)
-{
-    cerr<<"OK closed\n";
-}
-
-void MantidUI::updateProgressDialog(int ip,const QString& msg)
-{
-    if (m_progressDialog) m_progressDialog->setValue( ip , msg );
-}
-
-void MantidUI::closeProgressDialog()
-{
-    if (m_progressDialog) 
-    {
-        m_progressDialog->close();
-        m_progressDialog = 0;
-    }
-}
-
-void MantidUI::handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
-{
-    if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
-    emit needToUpdateProgressDialog(100,"Algorithm finished.");
-    emit needToCloseProgressDialog();
-    emit needsUpdating();
-}
-
-void MantidUI::handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf)
-{
-
-  if (pNf->algorithm() == m_algAsync) m_algAsync = 0;
-  if (pNf->what != "Algorithm terminated")
-    emit needToShowCritical("Error in algorithm: "+QString::fromStdString(pNf->what));
-
-  //emit needToCloseProgressDialog();
-  emit needsUpdating();
-}
-
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
     emit needsUpdating();
     emit needToCreateLoadDAEMantidMatrix(pNf->algorithm());
 }
 
-void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::Algorithm* alg)
+void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
 {
-    QMap<const Mantid::API::Algorithm*,DAEstruct>::iterator dae = m_DAE_map.find(alg);
-    if (dae == m_DAE_map.end()) return;
-
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(dae->m_WorkspaceName.toStdString());
+    std::string wsName = alg->getProperty("OutputWorkspace");
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
 
     if (ws.use_count() == 0)
     {
@@ -970,31 +872,22 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::Algorithm* alg)
 	    return;
     }
 
-    MantidMatrix *m = importWorkspace(dae->m_WorkspaceName,false, true);
+    MantidMatrix *m = importWorkspace(QString::fromStdString(wsName),false, true);
 
-    if (dae->m_UpdateInterval > 0)
+    int updateInterval = m_DAE_map[wsName];
+    if (updateInterval > 0)
     {
-        Algorithm* updater = dynamic_cast<Algorithm*>(CreateAlgorithm("UpdateDAE"));
-        updater->setPropertyValue("Workspace",dae->m_WorkspaceName.toStdString());
-        updater->setPropertyValue("update_rate",QString::number(dae->m_UpdateInterval).toStdString());
+        IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
+        updater->setPropertyValue("Workspace",wsName);
+        updater->setPropertyValue("update_rate",QString::number(updateInterval).toStdString());
         executeAlgorithmAsync(updater,false);
     }
 
-    m_DAE_map.erase(dae);
-}
-
-void MantidUI::handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
-{
-    if (m_algAsync == pNf->algorithm())
-    {
-        emit needToUpdateProgressDialog( int(pNf->progress*100) ,QString::fromStdString(pNf->message));
-    }
 }
 
 void MantidUI::showCritical(const QString& text)
 {
     QMessageBox::critical(appWindow(),"Mantid - Error",text);
-    closeProgressDialog();
 }
 
 void MantidUI::showAlgMonitor()
@@ -1451,9 +1344,9 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
  */
 bool MantidUI::runAlgorithmAsynchronously(const QString & algName)
 {
-  Mantid::API::Algorithm *alg = findAlgorithmPointer(algName);
+  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(algName);
   if( !alg ) return false;
-  if( m_algMonitor ) m_algMonitor->add(alg);
+  if( m_algMonitor ) m_algMonitor->add(alg); 
   Poco::ActiveResult<bool> result = alg->executeAsync();
   while( !result.available() )
   {
@@ -1469,27 +1362,27 @@ void MantidUI::cancelAllRunningAlgorithms()
 
 bool MantidUI::createPropertyInputDialog(const QString & algName, const QString & message)
 {
-  Mantid::API::Algorithm *alg = findAlgorithmPointer(algName);
+  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(algName);
   if( !alg ) 
   {
     return false;
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg, 0, true, message);
+  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg.get(), 0, true, message);
   return (dlg->exec() == QDialog::Accepted);
 }
 
-Mantid::API::Algorithm* MantidUI::findAlgorithmPointer(const QString & algName)
+Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algName)
 {
-  const vector<Mantid::API::Algorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
-  Mantid::API::Algorithm* alg(NULL);
-  vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
-  for(  vector<Mantid::API::Algorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 
+  const vector<Mantid::API::IAlgorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
+  Mantid::API::IAlgorithm_sptr alg;
+  vector<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
+  for(  vector<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 
 	aIter != aEnd; ++aIter )
   {
     if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )
     {
-      alg = (*aIter).get();
+      alg = (*aIter);
       break;
     }
   }

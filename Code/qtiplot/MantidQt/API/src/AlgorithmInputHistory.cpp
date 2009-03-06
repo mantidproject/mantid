@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <QSettings>
 #include <QStringList>

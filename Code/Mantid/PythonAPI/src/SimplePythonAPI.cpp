@@ -83,7 +83,7 @@ namespace Mantid
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
 	   ++vIter)
       {
-	Algorithm_sptr algm = AlgorithmManager::Instance().createUnmanaged(vIter->first);
+	IAlgorithm_sptr algm = AlgorithmManager::Instance().createUnmanaged(vIter->first);
 	algm->initialize();
 	PropertyVector orderedProperties(algm->getProperties());
 	std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());

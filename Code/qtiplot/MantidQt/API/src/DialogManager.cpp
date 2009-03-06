@@ -9,7 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 
 using namespace MantidQt::API;
@@ -28,7 +28,7 @@ Mantid::Kernel::Logger & DialogManagerImpl::g_log = Mantid::Kernel::Logger::get(
  * @param msg An optional message string to be placed at the top of the dialog
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog* DialogManagerImpl::createDialog(Mantid::API::Algorithm* alg, QWidget* parent,
+AlgorithmDialog* DialogManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
 						 bool forScript, const QString & msg)
 {
   AlgorithmDialog* dlg;

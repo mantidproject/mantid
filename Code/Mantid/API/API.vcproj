@@ -180,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AlgorithmProxy.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AnalysisDataService.cpp"
 				>
 			</File>
@@ -295,6 +299,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\AlgorithmObserver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\AlgorithmProxy.h"
 				>
 			</File>
 			<File

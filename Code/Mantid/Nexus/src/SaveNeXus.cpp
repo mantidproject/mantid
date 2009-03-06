@@ -95,7 +95,7 @@ namespace NeXus
 
   void SaveNexus::runSaveNexusProcessed()
   {
-      Algorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed");
+      IAlgorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed");
       // Pass through the same output filename
       saveNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property

@@ -5,6 +5,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidAPI/IWorkspaceProperty.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>

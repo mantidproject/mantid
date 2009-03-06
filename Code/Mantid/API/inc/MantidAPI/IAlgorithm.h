@@ -8,6 +8,14 @@
 #include <vector>
 #include "MantidKernel/INamedInterface.h"
 #include "MantidKernel/Property.h"
+#include "MantidKernel/IPropertyManager.h"
+
+#include <Poco/ActiveResult.h>
+
+namespace Poco
+{
+    class AbstractObserver;
+}
 
 namespace Mantid
 {
@@ -47,7 +55,14 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.    
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport IAlgorithm : virtual public Kernel::INamedInterface
+
+/**
+     As we have multiple interfaces to the same logical algorithm (Algorithm & AlgorithmProxy)
+     we need a way of uniquely identifying managed algorithms. It can be AlgorithmID.
+ */
+typedef void* AlgorithmID;
+
+class DLLExport IAlgorithm : virtual public Kernel::INamedInterface, virtual public Kernel::IPropertyManager
 {
 public:
   // Retrieve interface ID
@@ -55,6 +70,18 @@ public:
 
   /// Virtual destructor (always needed for abstract classes)
   virtual ~IAlgorithm() {}
+
+  /// function to return a name of the algorithm, must be overridden in all algorithms
+  virtual const std::string name() const = 0;
+
+  /// function to return a version of the algorithm, must be overridden in all algorithms
+  virtual const int version() const = 0;
+  
+  /// function to return a category of the algorithm.
+  virtual const std::string category() const = 0;
+
+  /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
+  virtual AlgorithmID getAlgorithmID()const = 0;
 
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
@@ -66,38 +93,38 @@ public:
   /// System execution. This method invokes the exec() method of a concrete algorithm.
   virtual bool execute() = 0;
 
+  /// Asynchronous execution.
+  virtual Poco::ActiveResult<bool> executeAsync() = 0;
+
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
   /// Check whether the algorithm has already been executed
   virtual bool isExecuted() const = 0;
 
-  /** Set the value of an algorithm property by string
-   *  @param name The name of the property to set
-   *  @param value The value to assign to the property
-   */
-  virtual void setPropertyValue(const std::string& name, const std::string& value) = 0;
+  /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
+  /// and if true terminates the algorithm.
+  virtual void cancel()const = 0;
 
-  /** Set the value of an algorithm properties by string
-   *  @param propertiesArray A separated string containing the properties and their values.
-   */
-  virtual void setProperties(const std::string& propertiesArray) = 0;
+  /// True if the algorithm is running asynchronously.
+  virtual bool isRunningAsync() = 0;
 
-  /** Set the value of an algorithm property by index
-   *  @param index The index of the property to set
-   *  @param value The value to assign to the property
-   */
-  virtual void setPropertyOrdinal(const int& index, const std::string& value) = 0;
+  /// True if the algorithm is running.
+  virtual bool isRunning() = 0;
 
+  /// To query whether algorithm is a child. Default to false
+  virtual bool isChild() const = 0;
+  virtual void setChild(const bool isChild) = 0;
 
-  /** Get the value of a property as a string
-   *  @param name The name of the property
-   *  @return The value of the property
-   */
-  virtual std::string getPropertyValue( const std::string &name ) const = 0;
+  /// Add an observer for a notification
+  virtual void addObserver(const Poco::AbstractObserver& observer)const = 0;
 
-  /// Get the list of propeties associated with an Algorithm 
-  virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const = 0;
+  /// Remove an observer
+  virtual void removeObserver(const Poco::AbstractObserver& observer)const = 0;
+
 };
+
+typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
 
 } // namespace API
 } // namespace Mantid

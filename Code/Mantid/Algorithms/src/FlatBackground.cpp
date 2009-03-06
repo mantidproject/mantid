@@ -112,7 +112,7 @@ void FlatBackground::checkRange(double& startX, double& endX)
 /// Calls Linear as a sub-algorithm to do the fitting
 double FlatBackground::doFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
 {
-  Algorithm_sptr childAlg = createSubAlgorithm("Linear");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("SpectrumIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);

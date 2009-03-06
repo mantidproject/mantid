@@ -95,7 +95,7 @@ public:
     void LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max
                                ,const QString& spectrum_list,const QString& cache);
     // Create an algorithm using Mantid FrameworkManager
-    Mantid::API::IAlgorithm* CreateAlgorithm(const QString& algName);
+    Mantid::API::IAlgorithm_sptr CreateAlgorithm(const QString& algName);
     
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
@@ -182,7 +182,7 @@ signals:
   //A signal to indicate that we want a script to produce a dialog
   void showPropertyInputDialog(const QString & algName);
 private:
-  Mantid::API::Algorithm* findAlgorithmPointer(const QString & algName);
+  Mantid::API::IAlgorithm_sptr findAlgorithmPointer(const QString & algName);
 
   //-----------------------------------
 
@@ -196,13 +196,7 @@ signals:
     // Signals that the UI needs to be updated.
     void needsUpdating();
 
-    // Close the small progress dialog
-    void needToCloseProgressDialog();
-
-    // Update the small progress dialog
-    void needToUpdateProgressDialog(int ip,const QString& msg);
-
-    void needToCreateLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
+    void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
     // Display a critical error dialog box
     void needToShowCritical(const QString&);
@@ -211,8 +205,6 @@ public slots:
 
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
-    void tst();
-    void tst(MdiSubWindow* w);
 
     // Updates Mantid the user interface
     void update();
@@ -232,6 +224,8 @@ public slots:
     // Plot the first spectrum from the workspace selected in the workspace dock window
     void plotFirstSpectrum();
 
+    void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
+
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();
     void copyColumnToTable();
@@ -247,20 +241,6 @@ public slots:
 
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version);
-
-    // Close the small progress dialog
-    void closeProgressDialog();
-
-    // Update the small progress dialog
-    void updateProgressDialog(int ip,const QString& msg);
-
-    // Cancel running algorithm when pressing 'Cancel' button in the small progress dialog
-    void cancelAsyncAlgorithm();
-
-    // Close the small progress dialog without stopping the algorithm
-    void backgroundAsyncAlgorithm();
-
-    void createLoadDAEMantidMatrix(const Mantid::API::Algorithm*);
 
     // Show Qt critical error message box
     void showCritical(const QString&);
@@ -302,23 +282,14 @@ public slots:
 private:
 
     // Execute algorithm asinchronously
-    void executeAlgorithmAsync(Mantid::API::Algorithm* alg, bool showDialog = true);
+    void executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog = true);
 
     // Notification handlers and corresponding observers.
-    void handleAlgorithmFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
-    Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
-
     void handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedLoadDAEObserver;
 
-    void handleAlgorithmProgressNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
-    Poco::NObserver<MantidUI, Mantid::API::Algorithm::ProgressNotification> m_progressObserver;
-
     void handleAddWorkspace(WorkspaceAddNotification_ptr pNf);
     Poco::NObserver<MantidUI, WorkspaceAddNotification> m_addObserver;
-
-    void handleAlgorithmErrorNotification(const Poco::AutoPtr<Mantid::API::Algorithm::ErrorNotification>& pNf);
-    Poco::NObserver<MantidUI, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
     void handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf);
     Poco::NObserver<MantidUI, WorkspaceAfterReplaceNotification> m_replaceObserver;
@@ -347,19 +318,10 @@ private:
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 
     ProgressDlg *m_progressDialog;       //< Progress of algorithm running asynchronously
-    Mantid::API::Algorithm* m_algAsync;  //< asynchronously running algorithm. Zero if there are no running algorithms
 
-    // Structure to hold DAE parameters while LoadDAE is running asynchronously
-    struct DAEstruct
-    {
-        QString m_WorkspaceName;
-        QString m_HostName;
-        QString m_SpectrumMin;
-        QString m_SpectrumMax;
-        QString m_SpectrumList;
-        int m_UpdateInterval;
-    };
-    QMap<const Mantid::API::Algorithm*,DAEstruct> m_DAE_map;
+    // Map of <workspace_name,update_interval> pairs. Positive update_intervals mean
+    // UpdateDAE must be launched after LoadDAE for this workspace
+    QMap<std::string,int> m_DAE_map;
 
 
 };

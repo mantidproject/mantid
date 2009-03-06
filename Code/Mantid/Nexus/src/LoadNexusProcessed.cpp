@@ -253,7 +253,7 @@ namespace NeXus
       std::string instrumentID = m_instrumentxml;
       std::string fullPathIDF = directoryName + "/" + instrumentID;
       
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 

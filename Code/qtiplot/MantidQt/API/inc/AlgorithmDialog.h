@@ -20,7 +20,7 @@
 #include "DllOption.h"
 #include "DialogFactory.h"
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <QDialog>
 #include <QString>
@@ -42,10 +42,10 @@ namespace Kernel
 {
   class Property;
 }
-namespace API
-{
-  class Algorithm;
-}
+//namespace API
+//{
+//  class Algorithm;
+//}
 
 }
 
@@ -116,7 +116,7 @@ protected:
   virtual void parseInput() = 0;
 
   /// Get the algorithm pointer
-  Mantid::API::Algorithm* getAlgorithm() const;
+  Mantid::API::IAlgorithm* getAlgorithm() const;
 
   /// Get the usage boolean value
   bool isForScript() const;
@@ -160,7 +160,7 @@ private:
   friend class DialogManagerImpl;
   
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::Algorithm*);
+  void setAlgorithm(Mantid::API::IAlgorithm*);
   
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
@@ -174,7 +174,7 @@ private:
   /** @name Member variables. */
   //@{
   /// The algorithm associated with this dialog
-  Mantid::API::Algorithm *m_algorithm;
+  Mantid::API::IAlgorithm *m_algorithm;
 
   ///The name of the algorithm
   QString m_algName;

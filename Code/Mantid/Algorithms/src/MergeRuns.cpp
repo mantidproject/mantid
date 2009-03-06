@@ -325,7 +325,7 @@ void MergeRuns::inclusionParams(const std::vector<double>& X1, int& i, const std
 API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params)
 {
   // Create a Rebin child algorithm
-  Algorithm_sptr rebin = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr rebin = createSubAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", workspace);
   rebin->setProperty("params",params);
 

@@ -279,7 +279,7 @@ namespace Mantid
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
@@ -306,7 +306,7 @@ namespace Mantid
       g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
         << "the instrument from raw data file.\n";
 
-      Algorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
@@ -329,7 +329,7 @@ namespace Mantid
     {
       // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
       // There is a small penalty in re-opening the raw file but nothing major.
-      Algorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
+      IAlgorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
       loadmap->setPropertyValue("Filename", m_filename);
       loadmap->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
       try
@@ -347,7 +347,7 @@ namespace Mantid
     /// Run the LoadLog sub-algorithm
     void LoadRaw::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      Algorithm_sptr loadLog = createSubAlgorithm("LoadLog");
+      IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above

@@ -33,7 +33,7 @@ class ExecuteAlgorithm : public QDialog
 public:
   ExecuteAlgorithm(QWidget *parent = 0, bool forScript = false);
 	~ExecuteAlgorithm();
-  void CreateLayout(Mantid::API::Algorithm* alg, const QString & message = "");
+  void CreateLayout(Mantid::API::IAlgorithm_sptr alg, const QString & message = "");
 
 protected:
 	
@@ -43,7 +43,7 @@ private slots:
 	void textChanged();
 
 private:
-	Mantid::API::Algorithm* m_alg;
+	Mantid::API::IAlgorithm_sptr m_alg;
 	std::vector<Mantid::Kernel::Property*> m_props;
 
 	QWidget* m_parent;
