@@ -111,8 +111,10 @@ public:
     }
 
     /// Create or adjust "pos" parameter for a component
-    void addPositionCoordinate(const IComponent* comp,const std::string& name, double value);
+    void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
 
+    /// Create or adjust "rot" parameter for a component
+    void addRotationParam(const IComponent* comp, const double deg);
 
     /// Concrete parameter adding methods.
     void addDouble(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<double>(comp,name,value);}

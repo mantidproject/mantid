@@ -73,7 +73,7 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 
 /// Create or adjust "pos" parameter for a component
 /// Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
-void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::string& name, double value)
+void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::string& name, const double value)
 {
   Parameter_sptr param = get(comp,"pos");
   V3D position;
@@ -108,6 +108,33 @@ void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::strin
     param->set(position);
   else
     addV3D(comp, "pos", position);
+}
+
+/// Create or adjust "rot" parameter for a component
+void ParameterMap::addRotationParam(const IComponent* comp, const double deg)
+{
+  Parameter_sptr param = get(comp,"rot");
+  Quat quat;
+  if (param)
+  {
+    // so "rot" already defined
+    quat = param->value<Quat>();
+  }
+  else
+  {
+    // so "rot" is not defined - therefore get quarternion from component
+    quat = comp->getRelativeRot();
+  }
+
+  // adjust rotation
+  quat.setRotation(deg);
+
+
+  // finally add or update "pos" parameter
+  if (param)
+    param->set(quat);
+  else
+    addQuat(comp, "rot", quat);
 }
 
 

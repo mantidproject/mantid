@@ -492,11 +492,13 @@ namespace Mantid
         {
           double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
 
-          // special case if parameter name is "x", "y" or "z"
+          // special case if parameter name is "x", "y" or "z" and "rot"
 
           std::string paramN = ((*it).second)->m_paramName;
           if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
             paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+          else if ( paramN.compare("rot")==0 )
+            paramMap->addRotationParam(((*it).second)->m_component, value);
           else
             paramMap->addDouble(((*it).second)->m_component, paramN, value);
         }

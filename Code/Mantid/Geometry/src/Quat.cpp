@@ -112,6 +112,15 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	return;
 }
 
+/** Set the rotation (both don't change rotation axis)
+ * \param _deg :: angle of rotation
+ */
+void Quat::setRotation(const double deg)
+{
+	double deg2rad = M_PI/180.0;
+	w = cos(0.5*deg*deg2rad);
+}
+
 /** Sets the quat values from four doubles
  * @param ww the value for w
  * @param aa the value for a

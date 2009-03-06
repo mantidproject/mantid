@@ -72,6 +72,8 @@ namespace Mantid
       void setAngleAxis(const double _deg, const V3D& _axis);
       //void setRotMatrix(const M33&);
       //! Norm of a quaternion
+      /// Set the rotation (both don't change rotation axis)
+      void setRotation(const double deg);
       double len() const;
       //! Norm squared
       double len2() const;
