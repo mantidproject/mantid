@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include <vector>
 #include <functional>
+#include <cmath>
 
 namespace Mantid
 {
@@ -53,15 +54,15 @@ namespace Mantid
   };
 
   template <class T> struct TimesSquares: public std::binary_function<T,T,T>
-    {
-  	  TimesSquares(){}
-  	  T operator()(const T& l, const T& r) const
-  	  {
-  		  return (r*r*l*l);
-  	  }
-    };
+	{
+		TimesSquares(){}
+		T operator()(const T& l, const T& r) const
+		{
+			return (r*r*l*l);
+		}
+	};
 
-  //! Square functor
+  /// Square functor
   template <class T> struct Squares: public std::unary_function<T,T>
   {
     Squares(){}
@@ -70,6 +71,19 @@ namespace Mantid
   	  return (x*x);
     }
   };
+
+  /// Divide functor with result reset to 0 if the denominator is null
+  template <class T> struct DividesNonNull: public std::binary_function<T,T,T>
+	{
+		DividesNonNull(){}
+		T operator()(const T& l, const T& r) const
+		{
+			if (std::fabs(r)<1e-12)
+			return l;
+			return l/r;
+		}
+	};
+
 
   } // namespace Kernel
 } // namespace Mantid

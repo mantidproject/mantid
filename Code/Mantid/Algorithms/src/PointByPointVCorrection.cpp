@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PointByPointVCorrection.h"
+#include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cfloat>
 #include <cmath>
@@ -75,9 +76,8 @@ void PointByPointVCorrection::exec()
 	  // Work on the Y data
 
 	  std::adjacent_difference(X.begin(),X.end(),binwidths.begin()); //Calculate the binwidths
-	  std::transform(Y2.begin(),Y2.end(),binwidths.begin()+1,resultY.begin(),std::divides<double>());
-	  std::replace_if(resultY.begin(),resultY.end(),std::bind2nd(std::equal_to<double>(),0),DBL_MAX); //Make sure we are not dividing by zero
-	  std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::divides<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
+	  std::transform(binwidths.begin()+1,binwidths.end(),Y2.begin(),resultY.begin(),Kernel::DividesNonNull<double>());
+		std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::multiplies<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
 	  // Calculate the errors squared related to A_i at this point
 
@@ -119,11 +119,12 @@ void PointByPointVCorrection::exec()
 	  for (int j=0;j<size-1;j++)
 		resultE[j]=resultY[j]*sqrt(errors[j]+error2_factor);
 
-
+	  progress(static_cast<double>(i)/nHist);
   }
   binwidths.clear();
   errors.clear();
   outputWS->setYUnit("Counts normalised to a vanadium");
+  outputWS->isDistribution(false);
 }
 
 void PointByPointVCorrection::check_validity(MatrixWorkspace_const_sptr& w1,MatrixWorkspace_const_sptr& w2,MatrixWorkspace_sptr& out)
