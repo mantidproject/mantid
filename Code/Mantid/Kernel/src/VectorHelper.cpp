@@ -14,6 +14,8 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
 	  if (size_xold!=static_cast<int>(yold.size()+1) || size_xold!=static_cast<int>(eold.size()+1))
 		  throw std::runtime_error("rebin: x,y, and error vectors should be of same size");
 
+	  ynew.clear();
+	  enew.clear();
 	  ynew.resize(size_xnew); // Make sure y and e vectors are of correct sizes
 	  enew.resize(size_xnew);
 
