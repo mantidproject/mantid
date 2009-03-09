@@ -52,9 +52,11 @@ void CreateCalFileByNames::exec()
 	std::ostringstream mess;
 	// Check that the instrument is in store
 	std::string instname=getProperty("InstrumentName");
+	// Get only the first 3 letters
 	std::string instshort=instname.substr(0,3);
 	std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
 	instshort=instshort+"_Definition.xml";
+	// If instrument not in store, insult the user
 	if (!API::InstrumentDataService::Instance().doesExist(instshort))
 	{
 		g_log.error("Instrument "+instshort+" is not present in data store.");
@@ -65,18 +67,25 @@ void CreateCalFileByNames::exec()
 
 	// Get the names of groups
 	std::string groupsname=getProperty("GroupNames");
-	std::vector<std::string> groups;
-	boost::split( groups, groupsname, boost::algorithm::detail::is_any_ofF<char>(",/*"));
-	if (groups.empty())
+	groups=groupsname;
+
+  // Split the names of the group and insert in a vector, throw if group empty
+	std::vector<std::string> vgroups;
+	boost::split( vgroups, groupsname, boost::algorithm::detail::is_any_ofF<char>(",/*"));
+	if (vgroups.empty())
 	{
 		g_log.error("Could not determine group names. Group names should be separated by / or ,");
 		throw std::runtime_error("Could not determine group names. Group names should be separated by / or ,");
 	}
+
 	// Assign incremental number to each group
 	std::map<std::string,int> group_map;
 	int index=0;
-	for (std::vector<std::string>::const_iterator it=groups.begin();it!=groups.end();it++)
+	for (std::vector<std::string>::const_iterator it=vgroups.begin();it!=vgroups.end();it++)
 		group_map[(*it)]=++index;
+
+	// Not needed anymore
+	vgroups.clear();
 
 	// Find Detectors that belong to groups
 	typedef boost::shared_ptr<Geometry::ICompAssembly> sptr_ICompAss;
@@ -95,13 +104,13 @@ void CreateCalFileByNames::exec()
 		top_group=group_map[current->getName()]; // Return 0 if not in map
 		assemblies.push(std::make_pair<sptr_ICompAss,int>(current,top_group));
 	}
-	std::string filename=getProperty("GroupingFilename");
-	std::ofstream file(filename.c_str());
 
-	file << "# Grouping file for instrument "+instshort+" created by Mantid \n";
-	file << "# Created using grouping assemblies:" << groupsname << "\n";
-	file << "# Format: number  UDET offset  select  group \n";
-	int entries=0;
+	std::string filename=getProperty("GroupingFilename");
+
+	// Check if a template cal file is given
+	bool overwrite=groupingFileDoesExist(filename);
+
+	int number=0;
 	while(!assemblies.empty()) //Travel the tree from the instrument point
 	{
 		current=assemblies.front().first;
@@ -116,7 +125,10 @@ void CreateCalFileByNames::exec()
 				currentDet=boost::dynamic_pointer_cast<Geometry::IDetector>(currentIComp);
 				if (currentDet.get())// Is detector
 				{
-					file << entries++ << " " << currentDet->getID() << " " << "0.00000 " << "1 " << top_group << "\n";
+					if (overwrite) // Map will contains udet as the key
+						instrcalib[currentDet->getID()]=std::make_pair<int,int>(number++,top_group);
+					else          // Map will contains the entry number as the key
+					  instrcalib[number++]=std::make_pair<int,int>(currentDet->getID(),top_group);
 				}
 				else // Is an assembly, push in the queue
 				{
@@ -132,10 +144,121 @@ void CreateCalFileByNames::exec()
 			}
 		}
 	}
+	// Write the results in a file
+	saveGroupingFile(filename,overwrite);
 	return;
 }
 
+bool CreateCalFileByNames::groupingFileDoesExist(const std::string& filename) const
+{
+	std::ifstream file(filename.c_str());
+ // Check if the file already exists
+	if (!file)
+		return false;
+  file.close();
+  std::ostringstream mess;
+  mess << "Calibration file "<< filename << " already exist. Only grouping will be modified";
+  g_log.information(mess.str());
+  return true;
+}
 
+void CreateCalFileByNames::saveGroupingFile(const std::string& filename,bool overwrite) const
+{
+	std::ostringstream message;
+	std::fstream outfile;
+	std::fstream infile;
+	if (!overwrite) // Open the file directly
+	{
+		outfile.open(filename.c_str(), std::ios::out);
+		if (!outfile.is_open())
+		{
+			message << "Can't open Calibration File: " << filename;
+			g_log.error(message.str());
+			throw std::runtime_error(message.str());
+			message.str("");
+		}
+	}
+	else
+	{
+		infile.open(filename.c_str(),std::ios::in);
+		std::string newfilename=filename+"2";
+		outfile.open(newfilename.c_str(), std::ios::out);
+		if (!infile.is_open())
+		{
+			message << "Can't open input Calibration File: " << filename;
+			g_log.error(message.str());
+			throw std::runtime_error(message.str());
+		}
+		if (!outfile.is_open())
+		{
+			message << "Can't open new Calibration File: " << newfilename;
+			g_log.error(message.str());
+			throw std::runtime_error(message.str());
+		}
+	}
+
+	// Write the headers
+	writeHeaders(outfile,filename,overwrite);
+
+	if (overwrite)
+	{
+		int number, udet, select, group;
+		double offset;
+
+		instrcalmap::const_iterator it;
+		std::string str;
+		while(getline(infile,str))
+		{
+			if (str.empty() || str[0]=='#') // Skip the headers
+				continue;
+			std::istringstream istr(str);
+			istr >> number >> udet >> offset >> select >> group;
+			it=instrcalib.find(udet);
+			if (it==instrcalib.end()) // Not found, don't assign a group
+				group=0;
+			group=((*it).second).second; // If found then assign new group
+			writeCalEntry(outfile,number,udet,offset,select,group);
+		}
+	}
+	else //
+	{
+		instrcalmap::const_iterator it=instrcalib.begin();
+		for (;it!=instrcalib.end();it++)
+			writeCalEntry(outfile,(*it).first,((*it).second).first,0.0,1,((*it).second).second);
+	}
+
+	// Closing
+	outfile.close();
+	if (overwrite)
+		infile.close();
+	return;
+}
+
+void CreateCalFileByNames::writeCalEntry(std::ostream& os, int number, int udet, double offset, int select, int group)
+{
+	os << std::fixed << std::setw(9) << number <<
+				std::fixed << std::setw(15) << udet <<
+				std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
+				std::fixed << std::setw(8) << select <<
+				std::fixed << std::setw(8) << group  << "\n";
+	return;
+}
+
+void CreateCalFileByNames::writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const
+{
+	os << "# Diffraction focusing calibration file created by Mantid" <<  "\n";
+	os << "# Detectors have been grouped using assembly names:" << groups <<"\n";
+	if (overwrite)
+	{
+		os << "# Template file " << filename << " has been used" << "\n";
+		os << "# Only grouping has been changed, offset from template file have been copied" << "\n";
+	}
+	else
+		os << "# No template file, all offsets set to 0.0 and select to 1" << "\n";
+
+	os << "#  Number           UDET         offset      select  group" << "\n";
+	return;
+}
 
 } // namespace Algorithm
 } // namespace Mantid

@@ -4,6 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
+// To be compatible with MSVC++ Express Edition that does not have TR1 headers
+#include <vector>
+#include <map>
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid
@@ -65,13 +69,28 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
+	/// Calibration entries map
+	typedef std::map<int,std::pair<int,int> > instrcalmap;
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-
+  /// Determine whether the grouping file already exists.
+  /// @param filename GroupingFilename (extension .cal)
+  bool groupingFileDoesExist(const std::string& filename) const;
+  void saveGroupingFile(const std::string&,bool overwrite) const;
+  static void writeCalEntry(std::ostream& os, int number, int udet, double offset, int select, int group);
+  void writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const;
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
+  std::string groups;
+  ///
+  /// Calibration map used if the *.cal file exist.
+  /// All entries in the *.cal file are registered with
+  /// the udet number as the key and the <Number,Offset,Select,Group> as the
+  /// tuple value.
+  instrcalmap instrcalib;
+  /// Number of groups
   int group_no;
 };
 
