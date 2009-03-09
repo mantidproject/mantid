@@ -19,6 +19,8 @@ ProgressDlg::ProgressDlg(Mantid::API::IAlgorithm_sptr alg,QWidget *parent):QDial
     buttonLayout->addWidget(cancelButton);
     connect(cancelButton,SIGNAL(clicked()),this,SLOT(cancelClicked()));
     connect(backgroundButton,SIGNAL(clicked()),this,SLOT(backgroundClicked()));
+    connect(this,SIGNAL(putValue(int,const QString&)),this,SLOT(setValue(int,const QString&)));
+    connect(this,SIGNAL(done()),this,SLOT(close()));
 
     QVBoxLayout *layout = new QVBoxLayout;
     layout->addLayout(topLayout);
@@ -42,8 +44,7 @@ void ProgressDlg::cancelClicked()
 
 void ProgressDlg::backgroundClicked()
 {
-    //emit toBackground();
-    close();
+    emit done();
 }
 
 void ProgressDlg::setValue(int p,const QString& msg)
@@ -54,15 +55,15 @@ void ProgressDlg::setValue(int p,const QString& msg)
 
 void ProgressDlg::progressHandle(const Mantid::API::IAlgorithm* alg,double p,const std::string& msg)
 {
-    setValue(int(p*100),QString::fromStdString(msg)); 
+    emit putValue(int(p*100),QString::fromStdString(msg)); 
 }
 
 void ProgressDlg::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
-    close();
+    emit done();
 }
 
 void ProgressDlg::errorHandle(const Mantid::API::IAlgorithm* alg,const std::string& what)
 {
-    close();
+    emit done();
 }

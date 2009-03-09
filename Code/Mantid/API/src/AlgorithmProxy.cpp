@@ -23,11 +23,11 @@ class AlgorithmProxyObserver: public AlgorithmObserver
     AlgorithmProxy* m_AlgProxy;
 public:
     AlgorithmProxyObserver(AlgorithmProxy* ap):AlgorithmObserver(),m_AlgProxy(ap){}
-    void finishHandle(const Algorithm* alg)
+    void finishHandle(const IAlgorithm* alg)
     {
         m_AlgProxy->stopped();
     }
-    void errorHandle(const Algorithm* alg)
+    void errorHandle(const IAlgorithm* alg)
     {
         m_AlgProxy->stopped();
     }
@@ -43,6 +43,7 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 /// Constructor
 AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
   PropertyManagerOwner(),m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted()
+      ,m_observer(new AlgorithmProxyObserver(this))
 {
     Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
     if (!a)
@@ -56,7 +57,9 @@ AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
 
 /// Virtual destructor
 AlgorithmProxy::~AlgorithmProxy()
-{}
+{
+    delete m_observer;
+}
 
 /** Initialization method invoked by the framework. This method is responsible
  *  for any bookkeeping of initialization required by the framework itself.
@@ -105,6 +108,8 @@ Poco::ActiveResult<bool> AlgorithmProxy::executeAsync()
     m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
     m_alg->initializeFromProxy(*this);
     addObservers();
+    m_observer->observeFinish(m_alg);
+    m_observer->observeError(m_alg);
     return m_alg->executeAsync();
 }
 
@@ -169,7 +174,7 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 void AlgorithmProxy::stopped()
 {
     m_isExecuted = m_alg->isExecuted();
-    m_alg.reset();
+    //m_alg.reset();
 }
 
 void AlgorithmProxy::addObservers()
