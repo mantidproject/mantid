@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/LibraryManager.h"
 
 using namespace Mantid;
 using namespace Mantid::PythonAPI;
@@ -25,13 +26,13 @@ public:
 	PythonFrameworkTest()
 	{
 		mgr = new Mantid::PythonAPI::FrameworkManager;
+        Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries("../../Debug");
 	}
 
 	void testCreateAlgorithmMethod1()
 	{
 		API::IAlgorithm* alg = mgr->createAlgorithm("HelloWorldAlgorithm");
-		API::Algorithm* temp = dynamic_cast<API::Algorithm*>(alg);
-		TS_ASSERT_EQUALS(temp->name(), "HelloWorldAlgorithm");
+		TS_ASSERT_EQUALS(alg->name(), "HelloWorldAlgorithm");
 	}
 
 	void testCreateAlgorithmNotFoundThrows()
