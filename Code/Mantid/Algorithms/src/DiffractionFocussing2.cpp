@@ -201,7 +201,8 @@ void DiffractionFocussing2::determineRebinParameters()
 		Xmax=((*gpit).second).second;
 		if (Xmax<Xmin) // Should never happen
 		{
-			mess << "Fail to determine X boundaries for group" << (*gpit).first;
+			mess << "Fail to determine X boundaries for group:" << (*gpit).first <<"\n";
+			mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
 			throw std::runtime_error(mess.str());
 		}
 		step=(log(Xmax)-log(Xmin))/(nPoints-1);
