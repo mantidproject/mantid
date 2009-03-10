@@ -75,6 +75,9 @@ public:
   virtual std::string getName() const = 0;
   //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
   virtual void setPos(double, double, double) = 0;
+  /*! Set the position of the component
+  *  The position is with respect to the parent component
+  */
   virtual void setPos(const V3D&) = 0;
   //! Set the orientation quaternion relative to parent (if present) otherwise absolute
   virtual void setRot(const Quat&) = 0;
@@ -98,6 +101,8 @@ public:
   virtual const Quat getRotation() const = 0;
   //! Get the distance to another IComponent
   virtual double getDistance(const IComponent&) const = 0;
+  /** Prints a text representation of itself
+   */
   virtual void printSelf(std::ostream&) const = 0;
 private:
   /// Private, unimplemented copy assignment operator

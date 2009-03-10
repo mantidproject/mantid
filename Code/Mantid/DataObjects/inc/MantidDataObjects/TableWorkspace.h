@@ -45,8 +45,28 @@ public:
 
 /** \class TableWorkspace
 
-     
+     TableWorkspace is an implementation of Workspace in which the data are organised in columns of same size.
+     Elements of a column have the same data type. Columns can be added to the TableWorkspace with
+     ctreateColumn(type,name). name is a name given to the column. type is a symbolic name for the data type of the column. Predefined types are:
+     - "int"    for int
+     - "float"  for float
+     - "double" for double
+     - "bool"   for bool
+     - "str"    for std::string
+     - "V3D"    for Mantid::Geometry::V3D
 
+     User defined types can be used after declaring them with DECLARE_TABLECOLUMN macro: 
+     DECLARE_TABLECOLUMN(typeName, UserDefinedType)
+
+     Ways to access the data:
+       - Using templated cell method. E.g. SomeType var = table.cell<SomeType>(i,j); where j is the column number, i is 
+         the position of the element in the column or the row number. The type of var must match the column's type,
+         otherwise a runtime_error exception will be thrown. The columns are kept in the order of their creation.
+       - Using specialized access methods for the predefined types. E.g. int var = table.Int(i,j);. If j-th column is
+         of the wrong type a runtime_error exception will be thrown. 
+       - Getting the pointer to a column and working with it.
+       - Using getVector or getStdVector.
+       - Creating a TableRow object and working with it.
 
 
     \author Roman Tolchenov
@@ -122,6 +142,7 @@ public:
         TableColumn_ptr<T> c = getColumn(name);
         return c->data();
     }
+    /// Access the column with name \c name trough a ColumnVector object
     TableColumnHelper getVector(const std::string& name){return TableColumnHelper(this,name);}
     template <class T>
     T& getRef(const std::string& name, int index)
@@ -135,6 +156,12 @@ public:
         }
         return *(static_cast<T*>(c->void_pointer(index)));
     }
+    /**  Get pointer to a data element
+         @param name Column name.
+         @param index Element's opsition in the column.
+         @tparam P Pointer type of the data in the column. If it doesn't match the actual type 
+           a runtime_error exception is thrown.
+     */
     template <class P>// P is of the type of a pointer to data
     P getPointer(const std::string& name, int index)
     {
@@ -147,6 +174,13 @@ public:
         }
         return static_cast<P>(c->void_pointer(index));
     }
+
+    /**  Get the reference to the element in row \c row and column \c col.
+         @param row Row number
+         @param col Column number
+         @tparam T Type of the data in the column. If it doesn't match the actual type 
+           a runtime_error exception is thrown.
+     */
     template<class T>
     T& cell(int row,int col)
     {
@@ -154,11 +188,38 @@ public:
         return c->data()[row];
         //return boost::static_pointer_cast<TableColumn<T> >(m_columns[col])->data()[row];
     }
+
+    /**  Get the reference to the element in row \c row and column \c col if its type is \c int.
+         If it doesn't match the actual type of the column a runtime_error exception is thrown.
+         @param row Row number
+         @param col Column number
+     */
     int& Int(int row,int col){return cell<int>(row,col);}
+    /**  Get the reference to the element in row \c row and column \c col if its type is \c double.
+         If it doesn't match the actual type of the column a runtime_error exception is thrown.
+         @param row Row number
+         @param col Column number
+     */
     double& Double(int row,int col){return cell<double>(row,col);}
+    /**  Get the reference to the element in row \c row and column \c col if its type is \c bool.
+         If it doesn't match the actual type of the column a runtime_error exception is thrown.
+         @param row Row number
+         @param col Column number
+     */
     Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
+    /**  Get the reference to the element in row \a row and column \a col if its type is \c std::string.
+         If it doesn't match the actual type of the column a runtime_error exception is thrown.
+         @param row Row number
+         @param col Column number
+     */
     std::string& String(int row,int col){return cell<std::string>(row,col);}
+
+    /**  Creates a TableRow object for row \a row.
+         @param row Row number
+     */
     TableRowHelper getRow(int row){return TableRowHelper(this,row);}
+    /**  Creates a TableRow object for the first row (\c row == 0).
+     */
     TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
 
 

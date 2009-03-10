@@ -60,6 +60,12 @@ public:
   virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
   //! Print information about all children
   virtual void printChildren(std::ostream&) const = 0;
+  /*! Print information about all the elements in the tree to a stream
+   *  Loops through all components in the tree 
+   *  and call printSelf(os). 
+   *
+   * @param os :: output stream 
+   */
   virtual void printTree(std::ostream&) const = 0;
 private:
   /// Private copy assignment operator

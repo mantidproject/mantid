@@ -25,7 +25,10 @@ class TableRowHelper;
 
 /** \class TableRow
 
-
+     TableRow represents a row in a TableWorkspace. The elements in the row can be accessed through
+       a) tmplated cell method
+       b) streaming operators (<< & >>)
+       c) specialized access function: Int(c), Double(c), Bool(c), String(c)
 
 
     \author Roman Tolchenov
@@ -55,12 +58,20 @@ class TableRow_DllExport TableRow
 {
 public:
     TableRow(const TableRowHelper& trh);
+    /// Returns the row number of the TableRow 
     int row()const{return m_row;}
     void row(int i);
     bool next();
     bool prev();
+    /// Sets a new separator character(s) between elements in a text output
     void sep(const std::string& s){m_sep = s;}
 
+    /**  Input streaming operator. Makes TableRow look like a standard input stream.
+         Every << operatr moves an internal pointer to the next element in the row.
+         If the types of the input value and the current element don't match an exception is thrown.
+         @param t Input value
+         @return Self reference
+     */
     template<class T>
     TableRow& operator<<(const T& t)
     {
@@ -69,9 +80,17 @@ public:
         ++m_col;
         return *this;
     }
+    /// Special case of char*
     TableRow& operator<<(const char* t){return operator<<(std::string(t));}
+    /// Special case of bool
     TableRow& operator<<(bool t){return operator<<(Boolean(t));}
 
+    /**  Output streaming operator. Makes TableRow look like a standard output stream.
+         Every >> operatr moves an internal pointer to the next element in the row.
+         If the types of the receiving variable and the current element don't match an exception is thrown.
+         @param t Variable for output
+         @return Self reference
+     */
     template<class T>
     TableRow& operator>>(T& t)
     {
@@ -80,6 +99,7 @@ public:
         ++m_col;
         return *this;
     }
+    /// Special case of bool
     TableRow& operator>>(bool& t)
     {
         Boolean b;
@@ -88,6 +108,9 @@ public:
         return *this;
     }
 
+    /**  Templated method to access the element col in the row. The internal pointer moves to point to the element after col.
+         @param col Element's position in the row
+     */
     template<class T>
     T& cell(int col)
     {
@@ -101,18 +124,37 @@ public:
         return c->data()[m_row];
     }
 
+    /**  Returns a reference to the element in position col if its type is int
+         @param col Position of the element
+         @return Reference to the element
+     */
     int& Int(int col){return cell<int>(col);}
+
+    /**  Returns a reference to the element in position col if its type is double
+         @param col Position of the element
+         @return Reference to the element
+     */
     double& Double(int col){return cell<double>(col);}
+
+    /**  Returns a reference to the element in position col if its type is bool
+         @param col Position of the element
+         @return Reference to the element
+     */
     Boolean& Bool(int col){return cell<Boolean>(col);}
+
+    /**  Returns a reference to the element in position col if its type is std::string
+         @param col Position of the element
+         @return Reference to the element
+     */
     std::string& String(int col){return cell<std::string>(col);}
 
 private:
     friend TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
-    std::vector< boost::shared_ptr<Column> >& m_columns;
-    int m_row;
-    int m_col;
-    int m_nrows;
-    std::string m_sep;
+    std::vector< boost::shared_ptr<Column> >& m_columns;  ///< Pointers to the columns in the TableWorkspace
+    int m_row;          ///< Row number in the TableWorkspace
+    int m_col;          ///< Current column number (for streaming operations)
+    int m_nrows;        ///< Number of rows in the TableWorkspace
+    std::string m_sep;  ///< Separator character(s) between elements in a text output
 };
 
 TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);

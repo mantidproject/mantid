@@ -14,25 +14,6 @@ namespace Mantid
 namespace API
 {
 
-/**  Helper class which observes finish and error notifications from 
-     the asynchronously running algorithm. It in turn notifies the
-     proxy algorithm about the events.
-  */
-class AlgorithmProxyObserver: public AlgorithmObserver
-{
-    AlgorithmProxy* m_AlgProxy;
-public:
-    AlgorithmProxyObserver(AlgorithmProxy* ap):AlgorithmObserver(),m_AlgProxy(ap){}
-    void finishHandle(const IAlgorithm* alg)
-    {
-        m_AlgProxy->stopped();
-    }
-    void errorHandle(const IAlgorithm* alg)
-    {
-        m_AlgProxy->stopped();
-    }
-};
-
 // Get a reference to the logger
 Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy");
 
@@ -42,8 +23,8 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 
 /// Constructor
 AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
-  PropertyManagerOwner(),m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted()
-      ,m_observer(new AlgorithmProxyObserver(this))
+  PropertyManagerOwner(),m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted(),
+      _executeAsync(this,&AlgorithmProxy::executeAsyncImpl)
 {
     Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
     if (!a)
@@ -58,7 +39,6 @@ AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
 /// Virtual destructor
 AlgorithmProxy::~AlgorithmProxy()
 {
-    delete m_observer;
 }
 
 /** Initialization method invoked by the framework. This method is responsible
@@ -102,17 +82,6 @@ bool AlgorithmProxy::execute()
     return m_isExecuted;
 }
 
-/// Execute asynchronously
-Poco::ActiveResult<bool> AlgorithmProxy::executeAsync()
-{
-    m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
-    m_alg->initializeFromProxy(*this);
-    addObservers();
-    m_observer->observeFinish(m_alg);
-    m_observer->observeError(m_alg);
-    return m_alg->executeAsync();
-}
-
 /// True if the algorithm is running asynchronously.
 bool AlgorithmProxy::isRunningAsync()
 {
@@ -143,9 +112,10 @@ void AlgorithmProxy::cancel()const
 }
 
 /** Add an observer for a notification. If the real algorithm is running
-    the observer is added directly sraight away. If the algorithm is not running yet
-    the observers address is added to a buffer to be used later when execute/executeAsync
+    the observer is added directly. If the algorithm is not running yet
+    the observer's address is added to a buffer to be used later when execute/executeAsync
     method is called.
+    @param observer Observer
  */
 void AlgorithmProxy::addObserver(const Poco::AbstractObserver& observer)const
 {
@@ -158,7 +128,9 @@ void AlgorithmProxy::addObserver(const Poco::AbstractObserver& observer)const
         m_externalObservers.push_back(obs);
 }
 
-/// Remove an observer
+/** Remove an observer.
+    @param observer Observer
+ */
 void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 {
     std::vector<const Poco::AbstractObserver*>::iterator o = 
@@ -174,7 +146,6 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 void AlgorithmProxy::stopped()
 {
     m_isExecuted = m_alg->isExecuted();
-    //m_alg.reset();
 }
 
 void AlgorithmProxy::addObservers()
@@ -184,6 +155,17 @@ void AlgorithmProxy::addObservers()
     for(;o != m_externalObservers.rend();o++)
         m_alg->addObserver(**o);
     m_externalObservers.clear();
+}
+
+bool AlgorithmProxy::executeAsyncImpl(const int&)
+{
+    m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
+    m_alg->initializeFromProxy(*this);
+    addObservers();
+    Poco::ActiveResult<bool> res = m_alg->executeAsync();
+    res.wait();
+    m_isExecuted = m_alg->isExecuted();
+    return res.data();
 }
 
 } // namespace API

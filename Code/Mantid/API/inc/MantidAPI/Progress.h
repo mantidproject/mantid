@@ -61,10 +61,25 @@ class Algorithm;
 class DLLExport Progress
 {
 public:
+    /**   Creates a Progress instance
+          @param alg   Algorithm reporting its progress
+          @param start Starting progress
+          @param end   Ending progress
+          @param n     Number of times report(...) method will be called. 
+          @param step  A step with which report(...) method actually sends the notification.
+      */
     Progress(Algorithm* alg,double start,double end, int n, int step=1)
         :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(step),m_dp((end-start)/(n-1)),m_i(0)
     {
     }
+    /**   Creates a Progress instance
+          @param alg    Algorithm reporting its progress
+          @param start  Starting progress
+          @param end    Ending progress
+          @param ifirst Initial value of the loop counter
+          @param n      Upper bound for the loop counter
+          @param step   A step with which report(...) method actually sends the notification.
+      */
     Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
         :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step(step),m_dp((end-start)/(n-1)),m_i(ifirst)
     {
@@ -72,14 +87,14 @@ public:
     void report(const std::string& msg = "");
     void report(int i,const std::string& msg = "");
 private:
-    Algorithm* m_alg;
-    double m_start;
-    double m_end;
-    int m_ifirst;
-    int m_n;
-    int m_step;
-    double m_dp;
-    int m_i;
+    Algorithm* m_alg;  ///< Owning algorithm
+    double m_start;    ///< Starting progress
+    double m_end;      ///< Ending progress
+    int m_ifirst;      ///< Loop counter initial value
+    int m_n;           ///< Loop counter upper bound
+    int m_step;        ///< Frequency of sending the notification (every m_step times)
+    double m_dp;       ///< Progress increment at each loop
+    int m_i;           ///< Loop counter
 };
 
 } // namespace API

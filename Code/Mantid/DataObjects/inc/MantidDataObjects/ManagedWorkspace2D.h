@@ -63,6 +63,7 @@ class DLLExport ManagedWorkspace2D : public Workspace2D
 
     void insert(ManagedDataBlock2D* item);
     void clear();
+    /// Size of the list
     size_t size() const {return il.size();}
 
   private:

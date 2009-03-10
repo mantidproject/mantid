@@ -253,8 +253,6 @@ protected:
 
 private:
 
-  /// Poco::ActiveMethod is used to implement asynchronous execution.
-  Poco::ActiveMethod<bool, int, Algorithm> _executeAsync;
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
@@ -266,6 +264,13 @@ private:
                                std::vector<Workspace_sptr>& outputWorkspaces) const;
   void algorithm_info() const;
 
+  /// Poco::ActiveMethod used to implement asynchronous execution.
+  Poco::ActiveMethod<bool, int, Algorithm> _executeAsync;
+  /** executeAsync() implementation.
+      @param i Unused argument
+   */
+  bool executeAsyncImpl(const int& i);
+
   /// Static refenence to the logger class
   static Kernel::Logger& g_log;
 
@@ -274,7 +279,6 @@ private:
 
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
-  bool executeAsyncImpl(const int&);///< executeAsync implementation.
   mutable bool m_cancel; ///< set to true to stop execution
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running

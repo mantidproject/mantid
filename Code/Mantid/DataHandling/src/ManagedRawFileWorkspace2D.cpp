@@ -178,6 +178,8 @@ namespace Mantid
         return false;
     }
 
+    /**   Opens a temporary file
+      */
     void ManagedRawFileWorkspace2D::openTempFile()
     {
         // Look for the (optional) path from the configuration file
@@ -216,6 +218,8 @@ namespace Mantid
 
     }
 
+    /**   Removes the temporary file
+      */
     void ManagedRawFileWorkspace2D::removeTempFile() const
     {
       if (!m_tempfile.empty()) Poco::File(m_tempfile).remove();

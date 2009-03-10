@@ -65,8 +65,11 @@ public:
     int size()const{return int(m_data.size());}
     /// Reference to the data.
     Type& data(int i){return *m_data[i];}
+    /// Returns typeid for the data in the column
     const std::type_info& get_type_info()const{return typeid(Type);}
+    /// Returns typeid for the pointer type to the data element in the column
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
+    /// Prints
     void print(std::ostream& s, int index)const{s << name() << '_' << index;}
 protected:
     /// Resize.
@@ -88,9 +91,13 @@ protected:
     void insert(int index){m_data.insert(m_data.begin()+index,boost::shared_ptr<Type>(new Type));}
     /// Removes an item.
     void remove(int index){m_data.erase(m_data.begin()+index);}
+    /**  Gets the void pointer to a data element
+         @param index Index of the element
+         @return Pointer to the element
+      */  
     void* void_pointer(int index){return &(*m_data[index]);}
 private:
-    std::vector< boost::shared_ptr<Type> > m_data;
+    std::vector< boost::shared_ptr<Type> > m_data; ///< Vector holding the data
     friend class TableWorkspace;
 };
 

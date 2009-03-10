@@ -82,32 +82,26 @@ private:
     void openTempFile();
     void removeTempFile()const;
 
-    ISISRAW2 *isisRaw;
-    std::string m_filenameRaw;//< RAW file name.
-    FILE* m_fileRaw;          //< RAW file pointer.
-    fpos_t m_data_pos;        //< Position in the file where the data start.
-    mutable int m_readIndex;  //< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
-    boost::shared_ptr< std::vector<double> > m_timeChannels;
+    ISISRAW2 *isisRaw;        ///< Pointer to an ISISRAW2 object
+    std::string m_filenameRaw;///< RAW file name.
+    FILE* m_fileRaw;          ///< RAW file pointer.
+    fpos_t m_data_pos;        ///< Position in the file where the data start.
+    mutable int m_readIndex;  ///< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
+    boost::shared_ptr< std::vector<double> > m_timeChannels; ///< Time bins
     /** For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
         of false if it must be read from the RAW file.
         The block's index = startIndex / m_vectorsPerBlock.
     */
-    std::vector<bool> m_changedBlock;
-    static int g_uniqueID;
-    std::string m_tempfile;
+    std::vector<bool> m_changedBlock;  ///< Flags for modified blocks. Modified blocks are accessed through ManagedWorkspace2D interface
+    static int g_uniqueID;             ///< Counter used to create unique file names
+    std::string m_tempfile;            ///< The temporary file name
     
-    int m_numberOfTimeChannels;  //< The number of time channels (i.e. bins) from the RAW file 
-    int m_numberOfBinBoundaries; //< The number of time bin boundaries == m_numberOfTimeChannels + 1
-    int m_numberOfSpectra;       //< The number of spectra in the raw file
-    int m_numberOfPeriods;       //< The number of periods in the raw file
+    int m_numberOfTimeChannels;  ///< The number of time channels (i.e. bins) from the RAW file 
+    int m_numberOfBinBoundaries; ///< The number of time bin boundaries == m_numberOfTimeChannels + 1
+    int m_numberOfSpectra;       ///< The number of spectra in the raw file
+    int m_numberOfPeriods;       ///< The number of periods in the raw file
 
-    mutable Poco::FastMutex m_mutex;  //< The mutex
-
-    //bool m_list;           //< Has the spectrum_list property been set?
-    //bool m_interval;       //< Have the spectrum_min/max properties been set?
-    //std::vector<int> m_spec_list;//< The value of the spectrum_list property
-    //int m_spec_min;        //< The value of the spectrum_min property
-    //int m_spec_max;        //< The value of the spectrum_max property
+    mutable Poco::FastMutex m_mutex;  ///< The mutex
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

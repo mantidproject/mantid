@@ -110,6 +110,9 @@ template< class T>
 class TableColumn_ptr: public boost::shared_ptr<TableColumn<T> >
 {
 public:
+    /** Constructor
+        @param c Shared pointer to a column
+      */
     TableColumn_ptr(boost::shared_ptr<Column> c):boost::shared_ptr<TableColumn<T> >(boost::dynamic_pointer_cast<TableColumn<T> >(c))
     {
         if (this->get() == NULL)
@@ -139,6 +142,9 @@ template<>
 class TableColumn_ptr<bool>: public TableColumn_ptr<Boolean>
 {
 public:
+    /** Constructor
+        @param c Shared pointer to a column
+      */
     TableColumn_ptr(boost::shared_ptr<Column> c):TableColumn_ptr<Boolean>(c)
     {
         if (this->get() == NULL)

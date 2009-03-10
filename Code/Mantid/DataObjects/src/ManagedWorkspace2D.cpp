@@ -416,8 +416,10 @@ ManagedDataBlock2D* ManagedWorkspace2D::getDataBlock(const int index) const
   return newBlock;
 }
 
-/**  This funcction decides if ManagedDataBlock2D with given startIndex needs to 
+/**  This function decides if ManagedDataBlock2D with given startIndex needs to 
      be loaded from storage and loads it.
+     @param newBlock Returned data block address
+     @param startIndex Starting spectrum index in the block
 */
 void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
 {

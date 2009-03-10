@@ -54,18 +54,33 @@ public:
     //IPropertyManager(){}
     virtual ~IPropertyManager(){}
 
-    // Function to declare properties (i.e. store them)
+    /// Function to declare properties (i.e. store them)
     virtual void declareProperty(Property *p) = 0;
 
-    // Sets all the declared properties from
+    /** Sets all the declared properties from a string.
+        @param propertiesArray A list of name = value pairs separated by a semicolon
+     */
     virtual void setProperties(const std::string &propertiesArray) = 0;
+
+    /** Sets property value from a string
+        @param name Property name
+        @param value New property value
+     */
     virtual void setPropertyValue(const std::string &name, const std::string &value) = 0;
+
+    /// Set the value of a property by an index
     virtual void setPropertyOrdinal(const int &index, const std::string &value) = 0;
 
+    /// Checks whether the named property is already in the list of managed property.
     virtual bool existsProperty(const std::string &name) const = 0;
+
+    /// Validates all the properties in the collection
     virtual bool validateProperties() const = 0;
 
+    /// Get the value of a property as a string
     virtual std::string getPropertyValue(const std::string &name) const = 0;
+
+    /// Get the list of managed properties.
     virtual const std::vector< Property*>& getProperties() const = 0;
 
     /** Templated method to set the value of a PropertyWithValue
@@ -159,7 +174,10 @@ protected:
       declareProperty(name, std::string(value), new NullValidator<std::string>, "", direction);
   }
 
+  /// Get a property by name
   virtual Property* getPointerToProperty(const std::string &name) const = 0;
+
+  /// Get a property by an index
   virtual Property* getPointerToPropertyOrdinal(const int &index) const = 0;
 
   /** Templated method to get the value of a property

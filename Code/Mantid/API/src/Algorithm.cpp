@@ -262,6 +262,7 @@ IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double st
 }
 
 /**  Add an observer to a notification
+     @param observer Reference to the observer to add
  */
 void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
 {
@@ -269,6 +270,7 @@ void Algorithm::addObserver(const Poco::AbstractObserver& observer)const
 }
 
 /**  Remove an observer
+     @param observer Reference to the observer to remove
  */
 void Algorithm::removeObserver(const Poco::AbstractObserver& observer)const
 {
@@ -287,6 +289,7 @@ void Algorithm::cancel()const
 /** Initialize using proxy algorithm.
     proxy calls this algorithm's init() method and keeps the declared properties.
     initialize(const AlgorithmProxy*) copies the properties from the proxy to this algorithm.
+    @param proxy Initialising proxy algorithm
   */
 void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
 {
@@ -301,14 +304,20 @@ void Algorithm::setInitialized()
   m_isInitialized = true;
 }
 
-/// Set the executed flag to the specified state
+/** Set the executed flag to the specified state
 // Public in Gaudi - don't know why and will leave here unless we find a reason otherwise
 //     Also don't know reason for different return type and argument.
+    @param state New executed state
+*/
 void Algorithm::setExecuted(bool state)
 {
   m_isExecuted = state;
 }
 
+/** Sends ProgressNotification. 
+    @param p Reported progress,  must be between 0 (just started) and 1 (finished)
+    @param msg Optional message string
+ */
 void Algorithm::progress(double p, const std::string& msg )
 {
     m_notificationCenter.postNotification(new ProgressNotification(this,p,msg));

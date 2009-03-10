@@ -44,7 +44,7 @@ namespace API
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
  @author Roman Tolchenov, Tessella plc
- @data 03/03/2009
+ @date 03/03/2009
 
  Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -68,7 +68,6 @@ namespace API
  */
 class Algorithm;
 typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
-class AlgorithmProxyObserver;
 
 class DLLExport AlgorithmProxy : public IAlgorithm, public Kernel::PropertyManagerOwner
 {
@@ -98,7 +97,7 @@ public:
   void setChild(const bool isChild){} ///< Do nothing
 
   /// Asynchronous execution.
-  Poco::ActiveResult<bool> executeAsync();
+  Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
 
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
@@ -139,16 +138,21 @@ private:
     /// Add observers stored previously in m_externalObservers
     void addObservers();
 
+  /// Poco::ActiveMethod used to implement asynchronous execution.
+  Poco::ActiveMethod<bool, int, AlgorithmProxy> _executeAsync;
+    /** executeAsync() implementation. Calls Algorithm::executeAsync() and when it has finished
+      deletes the real algorithm.
+      @param i Unused argument
+    */
+    bool executeAsyncImpl(const int& i);
+
     std::string m_name;     ///< name of the real algorithm
     std::string m_category; ///< category of the real algorithm
     int m_version;          ///< version of the real algorithm
 
     Algorithm_sptr m_alg;  ///< Pointer to the real algorithm, only defined when the algorithm is running
-    bool m_isExecuted;
+    bool m_isExecuted;     ///< Executed flag
 
-    friend class AlgorithmProxyObserver;
-    /// Observes finished and error notifications form real running algorithm
-    AlgorithmProxyObserver* m_observer;
     /// Temporary holder of external observers wishing to subscribe
     mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;
 
