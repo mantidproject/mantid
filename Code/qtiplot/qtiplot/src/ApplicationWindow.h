@@ -152,12 +152,11 @@ public:
 
   
   //------ Mantid-------
-        void addUserMenu(const QString & topMenu);  //Mantid
+  void addUserMenu(const QString &);  //Mantid
   void addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData); //Mantid
-        void removeUserMenu(const QString &);  //Mantid
-        void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
-        void addToScriptMap(const QString & menu, const QString & action);  //Mantid
-        const QMap<QString, QStringList> & getScriptMap() const;  //Mantid
+  void removeUserMenu(const QString &);  //Mantid
+  void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
+  const QList<QMenu*> & getCustomMenus() const; //Mantid
   //-------------------
   	//@}
 
@@ -1275,7 +1274,6 @@ private:
 
     QList<QAction *> d_user_actions;
     QList<QMenu* > d_user_menus; //Mantid
-  QMap<QString, QStringList> d_user_menu_map; //Mantid
   bool d_user_script_running;
 
     QUndoView *d_undo_view;

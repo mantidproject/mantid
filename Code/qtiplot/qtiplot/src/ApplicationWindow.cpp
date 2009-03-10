@@ -15154,18 +15154,18 @@ QList<QMenu *> ApplicationWindow::customizableMenusList()
 void ApplicationWindow::addUserMenu(const QString & topMenu)
 {
   if( topMenu.isEmpty() ) return;
-
+  
   foreach(QMenu* menu, d_user_menus)
   {
     if( menu->title() == topMenu ) return;
-  } 
-
-  QMenu* menu = new QMenu(topMenu);
-  menu->setName(topMenu);
-  connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
-  d_user_menus.append(menu);
-  d_user_menu_map.insert(topMenu,QStringList());
-  menuBar()->insertItem(tr(topMenu), menu);
+  }
+  
+  QMenu* customMenu = new QMenu(topMenu);
+  customMenu->setTitle(topMenu);
+  customMenu->setName(topMenu);
+  connect(customMenu, SIGNAL(triggered(QAction*)), this, SLOT(performCustomAction(QAction*)));
+  d_user_menus.append(customMenu);
+  menuBar()->insertItem(tr(topMenu), customMenu);
 }
 
 void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData)
@@ -15177,7 +15177,6 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   } 
   
   if( !topMenu ) return;
-
   foreach(QAction* userAction, topMenu->actions())
   {
     if( userAction->text() == itemName ) return;
@@ -15187,72 +15186,50 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   scriptAction->setData(QFileInfo(itemData).absoluteFilePath()); 
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
-  //Add to map
-  addToScriptMap(parentMenu, itemName);
+
 }
 
 void ApplicationWindow::removeUserMenu(const QString & parentMenu)
 {
-  int i(-1);
-  QMenu *menu(NULL);
+  int i(0);
+  QMenu *menu = NULL;
   foreach(menu, d_user_menus)
   {
-    ++i;
     if( menu->title() == parentMenu ) break;
+    ++i;
   }
-  if( menu ) 
-  {
-    d_user_menu_map.remove(parentMenu);
-    d_user_menus.removeAt(i);
+  if( !menu ) return; 
 
-    menuBar()->removeAction(menu->menuAction());
-    delete menu;
-  }
+  d_user_menus.removeAt(i);
+  menuBar()->removeAction(menu->menuAction());
 }
 
 void ApplicationWindow::removeUserMenuAction(const QString & parentMenu, const QString & userAction)
 {
-  QMenu *menu(NULL);
+  QMenu *menu = NULL;
   foreach(menu, d_user_menus)
   {
     if( menu->title() == parentMenu ) break;
   }
+  if( !menu ) return;
   
-  QAction *action(NULL);
+  QAction *action = NULL;
+  int menu_count(0);
   foreach(action, d_user_actions)
   {
     if( action->text() == userAction ) break;
+    ++menu_count;
   }
-
-  if( menu && action )
-  {
-    QMap<QString, QStringList>::iterator kItr = d_user_menu_map.find(parentMenu);
-    if( kItr == d_user_menu_map.end() ) return;
-    int index = kItr->indexOf(userAction);
-    if( index != -1 ) kItr->removeAt(index);
-    menu->removeAction(action);
-    delete action;
-  }
+  if( !action ) return;
   
+  d_user_actions.removeAt(menu_count);
+  menu->removeAction(action);
 }
 
-
-void ApplicationWindow::addToScriptMap(const QString & menu, const QString & action)
+const QList<QMenu*> & ApplicationWindow::getCustomMenus() const
 {
-  if( d_user_menu_map.contains(menu) )
-  {
-    d_user_menu_map[menu].append(action);
-  }
-  else
-  {
-    d_user_menu_map.insert(menu,QStringList(action));
-  }
-}
-
-const QMap<QString, QStringList> & ApplicationWindow::getScriptMap() const
-{
-  return d_user_menu_map;
-}
+  return d_user_menus;
+} 
 
 QList<QMenu *> ApplicationWindow::menusList()
 {

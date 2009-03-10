@@ -6,15 +6,15 @@
 //----------------------------------
 #include <QDialog>
 #include <QPoint>
+#include <QTreeWidget>
+#include <QMap>
 
 //----------------------------------
 // Forward declarations
 //----------------------------------
 class ApplicationWindow;
-class QTreeWidget;
-class QPushButton;
-class QLineEdit;
-class QComboBox;
+class ActionTreeWidget;
+class QMouseEvent;
 
 /** 
     This class is a replacement for the Qtiplot CustomActionDialog class as there were a lot
@@ -68,41 +68,68 @@ private:
   
 private slots:
 
-    //Adds scripts to the appropriate menus
-  void addActions();
-  //Adds a script to the list and updates menus accordingly
-  void addAction(const QString & menuText);
-  //Removes the script menu item
-  void removeSelectedItem();
-  //Choose a file
-  void chooseFile();
-  //Add a new menu when requested
-  void handleComboSelection(const QString &);
-  //Validate user input
-  bool validUserInput();
+  //Choose file(s)
+  void addFileClicked();
+ //Remove from file(s) from list
+  void removeFileClicked();
+  // Add a menu
+  void addMenuClicked();
+  // Remove a menu
+  void removeMenuClicked();
   //(Re)-populate the tree of scripts based on the current layout of the map stored in the ApplicationWindow
   //object
-  void refreshScriptTree();
+  void refreshMenuTree();
+  /// Add script items to the file tree
+  void addFileItems(const QStringList& fileList);
+
+  ///Import scripts into the selected menu
+  void importSelectedScripts();
+  
+  ///Handle a text change
+  void itemTextChanged(QTreeWidgetItem*);
 
 private:
-  //A tree widget showing the script layout
-  QTreeWidget *m_tree;
+  //A tree widget displaying the state of the current script menus
+  ActionTreeWidget *m_menuTree;
+
+  //A tree view displaying a list of scripts to add to the selected menu
+  ActionTreeWidget *m_fileTree;
+
+  ///A map of model indices to widgets
+  QMap<QTreeWidgetItem*,QObject*> m_widgetMap;
   
-  //Text fields
-  QLineEdit *fileBox;
-  QPushButton *fileBtn;
-
-  //Buttons
-  QPushButton *buttonAdd, *buttonRemove, *buttonCancel;
-
-  //Combo menu box
-  QComboBox *menuList;
-
-  //Stores a string list of files chosen by the the user
-  QStringList m_scriptFiles;
-  
-  //Pointer to the application window
+   //Pointer to the application window
   ApplicationWindow* m_appWindow;
+  
+  //The last directory browsed
+  QString m_lastDirectory;
+};
+
+
+/**
+ * A small, more specialized version of a QTreeWidget that I can use to override
+ * a virtual function
+ */
+class ActionTreeWidget : public QTreeWidget
+{
+  Q_OBJECT
+  
+public:
+  ///Default constructor
+  ActionTreeWidget(QWidget *parent = 0);
+  
+signals:
+  ///New data for an item
+  void textChange(QTreeWidgetItem*);
+
+protected slots:
+
+  /// Data is edited
+  void dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight);
+
+protected:
+  ///Mouse press event
+  void mousePressEvent(QMouseEvent* event);
 };
 
 #endif //MANTIDCUSTOMACTIONDIALOG_H_
