@@ -1374,10 +1374,10 @@ bool MantidUI::createPropertyInputDialog(const QString & algName, const QString 
 
 Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algName)
 {
-  const vector<Mantid::API::IAlgorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
+  const deque<Mantid::API::IAlgorithm_sptr> & algorithms = Mantid::API::AlgorithmManager::Instance().algorithms();
   Mantid::API::IAlgorithm_sptr alg;
-  vector<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
-  for(  vector<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 
+  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aEnd = algorithms.rend();
+  for(  deque<Mantid::API::IAlgorithm_sptr>::const_reverse_iterator aIter = algorithms.rbegin() ; 
 	aIter != aEnd; ++aIter )
   {
     if( !(*aIter)->isExecuted() && (*aIter)->name() == algName.toStdString()  )

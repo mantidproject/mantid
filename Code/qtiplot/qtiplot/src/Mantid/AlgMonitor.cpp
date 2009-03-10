@@ -100,8 +100,8 @@ void AlgorithmMonitor::cancel(AlgorithmID id)
 
 void AlgorithmMonitor::cancelAll()
 {
-    const std::vector<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
-    for(std::vector<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();a++)
+    const std::deque<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
+    for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();a++)
         if ( std::find(m_algorithms.begin(),m_algorithms.end(),(**a).getAlgorithmID()) ) (**a).cancel();
 
 }
