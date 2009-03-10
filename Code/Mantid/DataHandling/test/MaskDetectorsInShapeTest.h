@@ -77,7 +77,6 @@ public:
 
     TS_ASSERT( alg.isExecuted() );
 
-		TS_ASSERT_EQUALS(alg.getPropertyValue("DetectorList"),expectedHits);
 		Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(wsName));
 
 		checkDeadDetectors(outWS, expectedHits);

@@ -17,14 +17,14 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy");
 
-/****************************************************************
- Public methods
-/****************************************************************/
+//----------------------------------------------------------------------
+// Public methods
+//----------------------------------------------------------------------
 
 /// Constructor
 AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
-  PropertyManagerOwner(),m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted(),
-      _executeAsync(this,&AlgorithmProxy::executeAsyncImpl)
+  PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
+  m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted()
 {
     Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
     if (!a)
@@ -139,9 +139,9 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
     if (m_alg) m_alg->removeObserver(observer);
 }
 
-/****************************************************************
- Private methods
-/****************************************************************/
+//----------------------------------------------------------------------
+// Private methods
+//----------------------------------------------------------------------
 
 void AlgorithmProxy::stopped()
 {

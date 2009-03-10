@@ -69,6 +69,9 @@ public:
     {
         observeAll(alg);
     }
+    
+    virtual ~AlgorithmObserver() {}
+    
 
     /**   Connect to algorithm alg and observe all its notifications
           @param alg Algorithm to be observed

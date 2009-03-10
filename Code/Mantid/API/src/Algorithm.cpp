@@ -19,9 +19,10 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManagerOwner(),_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+  PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
+  _executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
-  m_progressObserver(*this, &Algorithm::handleChildProgressNotification),m_algorithmID(0)
+  m_algorithmID(0)
 {}
 
 /// Virtual destructor

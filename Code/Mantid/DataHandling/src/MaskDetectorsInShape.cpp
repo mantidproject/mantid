@@ -29,7 +29,6 @@ namespace Mantid
 			declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut));
 			declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
 			declareProperty("IncludeMonitors",false);
-			declareProperty("DetectorList",std::vector<int>(),Direction::Output);
 		}
 
 		void MaskDetectorsInShape::exec()
@@ -44,7 +43,6 @@ namespace Mantid
 			std::vector<int> foundDets = runFindDetectorsInShape(WS,shapeXML,includeMonitors);
 			runMaskDetectors(WS,foundDets);
 			setProperty("Workspace",WS);
-			setProperty("DetectorList",foundDets);
 		}
 
 		/// Run the FindDetectorsInShape sub-algorithm

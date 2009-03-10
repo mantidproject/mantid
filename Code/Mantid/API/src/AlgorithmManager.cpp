@@ -1,13 +1,9 @@
-#include <iomanip>
-#include <iostream>
-#include <vector>
-
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
-#include "MantidKernel/Exception.h"
-
-using namespace Mantid::Kernel;
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid
 {
@@ -15,8 +11,13 @@ namespace Mantid
   {
 
     /// Private Constructor for singleton class
-    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")), no_of_alg(0)
+    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")),regAlg()
     {
+      if ( ! Kernel::ConfigService::Instance().getValue("algorithms.retained",max_no_algs) || max_no_algs < 1 )
+      {
+        max_no_algs = 100; //Default to keeping 100 algorithms if not specified
+      }
+      
       g_log.debug() << "Algorithm Manager created." << std::endl;
     }
 
@@ -71,34 +72,34 @@ namespace Mantid
     {
       try
       {
-          IAlgorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
-          regAlg.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
-          regAlg.back()->initialize();
+        IAlgorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
+        regAlg.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
+        regAlg.back()->initialize();
+        
+        // If this takes us beyond the maximum size, then remove the oldest one
+        if (regAlg.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(max_no_algs) ) regAlg.pop_front();
       }
       catch(std::runtime_error& ex)
       {
         g_log.error()<<"AlgorithmManager:: Unable to create algorithm "<< algName <<ex.what() << std::endl;  
         throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName); 
       }
-      no_of_alg++;		
       return regAlg.back();
     }
 
     /// deletes all registered algorithms
     void AlgorithmManagerImpl::clear()
     {
-      std::vector<Algorithm_sptr>::iterator vc;
       regAlg.clear();
-      no_of_alg=0;
       return;
     }
 
     /// Returns a shared pointer by algorithm id
-    IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id)const
+    IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
-        for( std::vector<IAlgorithm_sptr>::const_iterator a = regAlg.begin();a!=regAlg.end();a++)
-            if ((**a).getAlgorithmID() == id) return *a;
-        return IAlgorithm_sptr();
+      for( std::deque<IAlgorithm_sptr>::const_iterator a = regAlg.begin();a!=regAlg.end();a++)
+        if ((**a).getAlgorithmID() == id) return *a;
+      return IAlgorithm_sptr();
     }
 
   } // namespace API
