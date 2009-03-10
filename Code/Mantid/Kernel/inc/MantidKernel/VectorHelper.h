@@ -43,6 +43,11 @@ namespace Mantid
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
+  /// Author Laurent Chapon 10/03/2009
+  /// Function to rebin Histogram. This is about
+  void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+          const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool add);
+
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {

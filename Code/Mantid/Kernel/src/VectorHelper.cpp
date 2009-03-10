@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "MantidKernel/VectorHelper.h"
+#include <algorithm>
 
 namespace Mantid{
 	namespace Kernel{
@@ -104,7 +105,94 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
       }
       return; //without problems
     }
+/// New method to rebin Histogram data, should be faster than previous one
+///
+ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+    const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition)
+{
+  int size_xold=xold.size();
+  int size_xnew=xnew.size();
+  if (size_xold!=static_cast<int>(yold.size()+1) || size_xold!=static_cast<int>(eold.size()+1))
+  	  throw std::runtime_error("rebin: x,y, and error vectors should be of same size");
 
 
-	} // End namespace Kernel
+  if (!addition)
+  {
+  	ynew.clear();
+  	enew.clear();
+  	ynew.resize(size_xnew-1); // Make sure y and e vectors are of correct sizes
+  	enew.resize(size_xnew-1);
+  }
+  // First find the first Xpoint that is bigger than xnew[0]
+  std::vector<double>::const_iterator it=std::find_if(xold.begin(),xold.end(),std::bind2nd(std::greater<double>(),xnew[0]));
+  if (it==xold.end())
+  	throw std::runtime_error("No overlap, max of Xold < min of Xnew");
+  int iold=std::distance(xold.begin(),it); // Where we are now
+  int inew=0;
+  double frac, fracE;
+  double width;
+  if (iold==0)
+  {
+  	frac=0;
+  	fracE=0;
+  }
+  else
+  {
+  	width=(xold[iold]-xold[iold-1]);
+  	frac=yold[iold-1]/width;
+  	fracE=std::pow(eold[iold-1],2)/width;
+  }
+  for(;;) //Start the loop here
+  {
+  	if ((iold+1)==size_xold || (inew+1)==size_xnew) // Both will be incremented here
+  		break;
+  	while(xnew[++inew]<xold[iold])
+  	{
+  		if (iold!=0) // If iold==0, then no counts to add
+  		{
+  			width=(xnew[inew]-xnew[inew-1]);
+  			ynew[inew-1]+=frac*width; //Increment this
+  			enew[inew-1]+=fracE*width;
+  		}
+  		if ((inew+1)==size_xnew)
+  			break;
+  	}
+  	if (iold!=0) //Put the remaining counts here
+  	{
+  		width=(xold[iold]-xnew[inew-1]);
+  		ynew[inew-1]+=frac*width;
+  		enew[inew-1]+=fracE*width;
+  	}
+
+  	while(xold[++iold]<=xnew[inew])
+  	{
+  		ynew[inew-1]+=yold[iold-1];
+  		enew[inew-1]+=std::pow(eold[iold-1],2);
+  		if ((iold+1)==size_xold)
+  			break;
+  	}
+  	if (iold!=0)
+		{
+  		width=(xold[iold+1]-xold[iold]);
+			frac=yold[iold]/width; //Dealing with the new xold
+			fracE=std::pow(eold[iold],2)/width;
+		}
+  	width=(xnew[inew]-xold[iold-1]);
+  	ynew[inew-1]+=frac*width;
+  	enew[inew-1]+=fracE*width;
+  }
+
+  if (!addition) //If this used to add at the same time then not necessary.
+  {
+		//Now take the root-square of the errors
+		typedef double (*pf)(double);
+		pf uf=std::sqrt;
+		std::transform(enew.begin(),enew.end(),enew.begin(),uf);
+	}
+		return;
+}
+
+
+
+} // End namespace Kernel
 } // End namespace Mantid

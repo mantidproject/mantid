@@ -63,7 +63,7 @@ void DiffractionFocussing2::exec()
   // Now the real work
   int group;
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
-  std::vector<double> ynew,enew;         // Temp vectors for rebinning
+  std::vector<double> ynew(nPoints-1),enew(nPoints-1);         // Temp vectors for rebinning
 
   for (int i=0;i<nHist;i++)
   {
@@ -90,7 +90,7 @@ void DiffractionFocussing2::exec()
   	std::vector<double>& Eout=out->dataE(static_cast<int>(dif));
   	try
   	{
-  		rebin(Xin,Yin,Ein,Xout,ynew,enew,false);
+  		rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
   	}catch(...)
   	{
   		std::ostringstream mess;
@@ -98,10 +98,6 @@ void DiffractionFocussing2::exec()
   		std::runtime_error(mess.str());
   		mess.str("");
   	}
-  	// Add the new Y and new E for this spectrum to the output group
-  	std::transform(Yout.begin(),Yout.end(),ynew.begin(),Yout.begin(),std::plus<double>());
-  	std::transform(Eout.begin(),Eout.end(),enew.begin(),Eout.begin(),SumSquares<double>());
-  	//
   	progress(static_cast<double>(i)/101.0);
   }
 
