@@ -106,19 +106,4 @@ typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<DialogManagerImp
 }
 }
 
-/**
-  * DialogManager wrapper class
-  */
-// class DialogManagerWrapper
-// {
-  // public:
-  
-  // ///Constructor
-  // DialogManagerWrapper();
-  
-  // ///The number of specialised dialogs available
-  // int numberOfDialogsAvailable() const;
-// };
-
-
 #endif //MANTIDQT_API_DIALOGMANAGER

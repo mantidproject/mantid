@@ -81,37 +81,40 @@ void GenericDialog::initLayout()
       QComboBox *optionsBox = new QComboBox;
       nameLbl->setBuddy(optionsBox);
       
+      QString selectedValue("");
+      if( isForScript() || !oldValues.contains(propName) )
+      {
+	selectedValue = QString::fromStdString(prop->value());
+      }
+      else
+      {
+	selectedValue = oldValues[propName];
+      }
       if ( boolType )
       {
 	optionsBox->addItem("No");
-	optionsBox->setItemData(0, QString("0"));
+	optionsBox->setItemData(0, 0);
 	optionsBox->addItem("Yes");
-	optionsBox->setItemData(1, QString("1"));
+	optionsBox->setItemData(1, 1);
 // 	// Set to show default value. This works because *p returns a boolean and that is then cast to an integer 0/1 and that
 // 	// maps to the correct index
 // 	
-	QString selectedValue("");
-	if( oldValues.contains(propName) ) selectedValue = oldValues[propName];
-	else selectedValue = QString::fromStdString(prop->value());
+//	QString selectedValue("");
+// 	if( oldValues.contains(propName) ) selectedValue = oldValues[propName];
+// 	else selectedValue = QString::fromStdString(prop->value());
 
-	if( selectedValue == "0" ) optionsBox->setCurrentIndex(0);
+// 	if( selectedValue == "No" ) optionsBox->setCurrentIndex(0);
+// 	else optionsBox->setCurrentIndex(1);
+
+	if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
 	else optionsBox->setCurrentIndex(1);
-	
       }
       else
       {
 	std::vector<std::string> items = prop->allowedValues();
 	std::vector<std::string>::const_iterator vend = items.end();
 	
-	QString selectedValue("");
-  if( isForScript() )
-  {
-    selectedValue = QString::fromStdString(prop->value());
-  }
-  else
-  {
-    if( oldValues.contains(propName) ) selectedValue = oldValues[propName];
-  }
+	
   
 	int index(0);
 	for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
@@ -121,10 +124,8 @@ void GenericDialog::initLayout()
 	  optionsBox->setItemData(index, QString::fromStdString(*vitr));
 	  if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
 	}
-	
-	if( isForScript() && prop->isValid() && !prop->isDefault() ) optionsBox->setEnabled(false);
       }
-
+      if( isForScript() && prop->isValid() && !prop->isDefault() ) optionsBox->setEnabled(false);
       m_inputGrid->addWidget(nameLbl, row, 0, 0);
       m_inputGrid->addWidget(optionsBox, row, 1, 0);
       m_inputGrid->addWidget(validLbl, row, 2, 0);
