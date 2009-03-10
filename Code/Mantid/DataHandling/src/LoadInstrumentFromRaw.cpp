@@ -93,13 +93,22 @@ void LoadInstrumentFromRaw::exec()
   const int* const detID = iraw.udet;    // detector IDs
   const float* const r = iraw.len2;      // distance from sample
   const float* const angle = iraw.tthe;  // angle between indicent beam and direction from sample to detector (two-theta)
+   const float* const phi=iraw.ut;
+   // Is ut01 (=phi) present? Sometimes an array is present but has wrong values e.g.all 1.0 or all 2.0
+   bool phiPresent = iraw.i_use>0 && phi[0]!= 1.0 && phi[0] !=2.0; 
+
 
   for (int i = 0; i < numDetector; ++i)
   {
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
     Geometry::Detector *detector = new Geometry::Detector("det",samplepos);
     Geometry::V3D pos;
-    pos.spherical(r[i], angle[i], 0.0);
+
+    if(phiPresent)
+       pos.spherical(r[i], angle[i], phi[i]);
+    else
+       pos.spherical(r[i], angle[i], 0.0 );
+
     detector->setPos(pos);
 
     // set detector ID, add copy to instrument and mark it
