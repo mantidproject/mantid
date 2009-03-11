@@ -64,10 +64,10 @@ private:
   ///Execution code
   void exec();
 
-  //Store the units known to the UnitFactory
+  ///Store the units known to the UnitFactory
   std::set<std::string> m_unitKeys;
 
-  //Store the units added as options for this algorithm
+  ///Store the units added as options for this algorithm
   std::set<std::string> m_RKHKeys;
 
   /// Static reference to the logger class

@@ -14,9 +14,27 @@ namespace Algorithms
 /**
    Required properties:
    <UL>
-   
+   <LI>SampleWorkspace - The sample workspace </LI>
+  <LI>EmptyCanWorkspace - The empty can workspace </LI>
+  <LI>TransmissionSampleWorkspace - The sample workspace for the transmission set up </LI>
+  <LI>TransmissionDirectWorkspace - The direct workspace for the transmission set up </LI>
+  <LI>TransmissionEmptyCanWorkspace - The empty can workspace for the transmission set up </LI>
+  <LI>EfficiencyCorrectionFile - The file to use for the efficiency correction</LI>
    </UL>
-
+   
+    Optional properties:
+   <UL>
+  <LI>Radius_min - The minimum radius</LI>
+  <LI>Radius_max - The maximum radius</LI>
+  <LI>Wavelength_min - the minimum wavelength</LI>
+  <LI>Wavelength_max - The maximum wavelength</LI>
+  <LI>Wavelength_delta - The wavelength binning</LI>
+  <LI>Q_min - The momentum transfer minimum</LI>
+  <LI>Q_max - The momentum transfer maximum</LI>
+  <LI>Q_delta - The momentum trasnfer binning</LI>
+  <LI>Beam_Centre_X - The x position of the beam centre</LI>
+  <LI>Beam_Centre_Y - The y position of the beam centre</LI>
+   </UL>
    @author Martyn Gigg, Tessella Support Services plc
    @date 26/02/2009
      

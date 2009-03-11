@@ -19,8 +19,9 @@ namespace Algorithms
      </UL>
 
      Optional properties:
-     <LI>ErrorValue - An error value</LI>
-
+    <UL>
+    <LI>ErrorValue - An error value</LI>
+    </UL>
      @author Martyn Gigg, Tessella Support Services plc
      @date 28/01/2009
      

@@ -94,10 +94,11 @@ class EXPORT_OPT_MANTID_API WorkspaceTracerImpl
      */
     bool isEmpty() const { return m_Algorithms.empty(); }
 
-    // Execute the algorithm chain
+    // /Execute the algorithm chain
     void executeChain();
         
   private:
+    /// A list of algorithms to rerun
     std::deque<Mantid::API::Algorithm*> m_Algorithms;
   };
 
@@ -109,21 +110,19 @@ public:
    */
   const std::string & getBaseWorkspace() const { return m_strWsName; }
   
-  //Notification handler
+  ///Notification handler
   void handleAfterReplaceNotification(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-  //Notification observer
+  ///Notification observer
   Poco::NObserver<WorkspaceTracerImpl, Mantid::API::WorkspaceAfterReplaceNotification> m_wkspAftReplaceObserver;
 
 private:
-  // Specialisation of the CreateUsingNew structure for this class. Needs to be a friend to access
-  // the private constructor
+  /// Specialisation of the CreateUsingNew structure for this class. Needs to be a friend to access the private constructor
   friend struct Mantid::Kernel::CreateUsingNew<WorkspaceTracerImpl>;
 
-  //------------------------
-  // Poco::Active method for starting a new thread that executes the algorithms
-  //------------------------
+  ///Method to start the trace in a separate thread
   Poco::ActiveMethod<Poco::Void, std::string, WorkspaceTracerImpl> executeTrace;
+  ///The helper member function for the separate thread execution
   Poco::Void executeTraceImpl(const std::string & arg);
  
   /// Private Constructor
@@ -143,30 +142,28 @@ private:
   //---------------------
   // Private utility functions
   //---------------------
-  // Find the list of algorithms to rerun given that the one specifed as an argument
-  // has been refreshed
+  ///Find the list of algorithms to rerun given that the one specifed as an argument has been refreshed
   void createAlgorithmList();
   
-  // Does the property exists in the workspace history
+  /// Does the property exists in the workspace history
   bool propertyExists(const std::string & wsName, const std::string & pvalue, unsigned int dir);
 
-  // Does the property exists in the algorithm history
+  /// Does the property exists in the algorithm history
   bool propertyExists(const AlgorithmHistory & algHist, const std::string & pvalue, unsigned int dir);
 
-  // Get the algorithm history for the refreshed workspace but taking care of 
-  // things like algorithms with the same input/output workspace  
+  /// Get the algorithm history for the refreshed workspace but taking care of things like algorithms with the same input/output workspace  
   void getBaseAlgorithmChain(std::vector<Mantid::API::AlgorithmHistory> & baseChain);
 
-  //Check it algorithm history takes a workspace as input
-  bool hasWorkspaceInput(const Mantid::API::AlgorithmHistory & alg);
+  /// Check it algorithm history takes a workspace as input
+  bool hasWorkspaceInput(const Mantid::API::AlgorithmHistory & algHist);
 
-  // Get or create an algorithm pointer based on the given AlgorithmHistory object
+  /// Get or create an algorithm pointer based on the given AlgorithmHistory object
   Mantid::API::Algorithm* getAlgorithm(const AlgorithmHistory & algHist);
 
-  // Is the property history related to a workspace
+  /// Is the property history related to a workspace
   bool isWorkspaceProperty(const Mantid::Kernel::PropertyHistory & prop);
 
-  // Remake a workspace that has been deleted
+  /// Remake a workspace that has been deleted
   Algorithm* remakeWorkspace(const std::string & wsName);
 
  private:
@@ -174,16 +171,21 @@ private:
   //---------------------
   // Member variables
   //---------------------
+  /// The name of the workspace that was replaced
   std::string m_strWsName;
+  /// The history of algorithms performed on the replaced workspace
   std::vector<AlgorithmHistory> m_vecAlgHistories;
+  /// Stores the chain of algorithms to run and handles popping off things that have finished
   AlgorithmChain m_algChain;
 
+  /// A mutex to ensure serialised data access
   Poco::Mutex m_mutex;
+  /// Is the chain currently running
   bool m_isRunning;
-
+  /// Should we be switched on, based upon the parameter in the Mantid.properties config file
   bool m_isSwitchedOn;
   
-  //A reference to the logger
+  ///A reference to the logger
   static Kernel::Logger& g_log;
 };
 
@@ -193,7 +195,8 @@ private:
   // this breaks new namespace declaraion rules; need to find a better fix
   template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl>;
 #endif /* _WIN32 */
-
+  
+  /// The specialisation of the SingletonHolder for this class
   typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<WorkspaceTracerImpl> WorkspaceTracer;
 
 } // namepace API

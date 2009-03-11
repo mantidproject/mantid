@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 
+/// A debugging define
 #define ARGCHECK   // Also need mwdebug.c for this
 
 #include "mex.h"
@@ -37,32 +38,45 @@
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/*
- * The type  mexfunc_t  and the macro  declare_function()
- * must create the same function signature
+/**
+  * The type  mexfunc_t  and the macro  declare_function()
+ *  must create the same function signature
  */
+typedef int (*mexfunc_t)(int, mxArray**, int nrhs, const mxArray**);
 
-typedef int (*mexfunc_t)(int nlhs, mxArray *plhs[],
-				int nrhs, const mxArray* prhs[]);
-
+/// A struct holding the name of a mex function and the function pointer to call
 typedef struct
 {
+  ///The name of the function
 	const char* name;
+  /// The function pointer
 	mexfunc_t func;
 } mexfunc_s_t;
 
+/// Create a FrameworkManager object
 extern int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Get a workspace
 extern int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Create an algorithm
 extern int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Execute an algorithm
 extern int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Execute an algorithm by giving a list of properties in a semi-colon separated list
 extern int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Get a workspace field
 extern int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Get all fields in a worksace
 extern int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Set a workspace field
 extern int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Create a simple API 
 extern int CreateSimpleAPI(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// List the available workspaces
 extern int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
+/// Delete a workspace
 extern int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]);
 
+/// An array mapping a string function name in Matlab, to one of the above functions
 static mexfunc_s_t mex_functions[] = {
     { "FrameworkManager_Create", CreateFrameworkManager },
     { "FrameworkManager_GetWorkspace", GetWorkspace },
@@ -84,20 +98,32 @@ static mexfunc_s_t mex_functions[] = {
  * From this a FORTRAN function name is created (ixtestclass_plus) which is then called with
  * the rest of the parameters
  */
+/// Maximum bueffer length
 #define BUFFER_LEN	64
+/// Maximum number of arguments
 #define MAX_ARGS	100
 
 #ifdef _WIN32
-#    define compare_nocase stricmp
-#    define mwSize int
-#    define uint64_t UINT64
+  /// The function to use to compare case
+  #define compare_nocase stricmp
+  /// The type of mwSize
+  #define mwSize int
+  /// A 64-bit integer
+  #define uint64_t UINT64
 #else
-#    define compare_nocase strcasecmp
+  /// The function to use to compare case
+  #define compare_nocase strcasecmp
 #endif
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+/**
+  * Unroll a  cell from an array
+  * @param prhs The right-hand side of function call in Matlab
+  * @param new_prhs The new right-hand side after the function is complete
+  * @param new_nrhs The number of parameters on the right-hand side afterwrads
+  */
 static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
 {
 	int j;
@@ -114,6 +140,13 @@ static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_
 	}
 }
 
+/**
+  * The main entry point that is called by Matlab when an external module's function is called
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters on the right-hand side of the equals 
+  * @param prhs The data on the right-hand side of the equals
+  */
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	int i, n, nrhs_2, func_called = 0, errcode = 0;
@@ -212,7 +245,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 }
 
 
-/* create object of given class */
+/**
+  * Create object of given class 
+  * @param class_name The name of the class
+  * @returns An array containing the created object
+  */
 mxArray* ixbcreateclassobject(const char* class_name)
 {
     mxArray* plhs[1] = { NULL };
@@ -226,8 +263,12 @@ mxArray* ixbcreateclassobject(const char* class_name)
     }
 }
 
-/* create array of n objects of given class */
-
+/**
+ * Create array of n objects of given class 
+ * @param class_name The name of the class
+ * @param n The number of objects to create
+ * @returns An array of the created objects
+ */
 mxArray* ixbcreateclassarray(const char* class_name, int* n)
 {
     mxArray* plhs[1] = { NULL };
@@ -244,6 +285,14 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
     }
 }
 
+/**
+  * Create a Framework manager object
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   mwSize dims[2] = {1, 1};
@@ -262,6 +311,14 @@ int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* p
 	}
 }
 
+/**
+  * Get a workspace
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+   * @returns An integer indicating success/failure
+   */
 int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   try
@@ -283,6 +340,14 @@ int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
   }
 }
 
+/**
+  * Delete a workspace
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   std::string wsName("");
@@ -302,6 +367,14 @@ int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 }
 
+/**
+  * Create an algorithm
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+   * @returns An integer indicating success/failure
+   */
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	mwSize dims[2] = { 1, 1 };
@@ -322,6 +395,14 @@ int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 }
 
+/**
+  * Execute an algorithm
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+ * @returns An integer indicating success/failure
+   */
 int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	char buffer[256];
@@ -343,6 +424,14 @@ int RunAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 
 }
 
+/**
+  * Execute an algorithm with a property list
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	char buffer[256];
@@ -391,12 +480,26 @@ int RunAlgorithmPV(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 	}
 }
 
-
+/**
+  * Set a workspace field
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
 	return 0;
 }
 
+/**
+  *  A helper function to retrieve a fileld from a workspace
+  * @param wksptr A pointer to a Mantid MatrixWorkspace
+  * @param field A character indicating the field to return, i.e. x, y or e
+  * @param ispec The spectrum number of the field to return
+ * @returns  An array containing the data
+  */
 static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field, int ispec)
 {
 	mxArray* mptr;
@@ -426,7 +529,14 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
 	return mptr;
 }
 
-
+/**
+  * Get all  workspace fields
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   // char work_name[128];
@@ -447,6 +557,14 @@ int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* pr
 	return 1;
 }
 
+/**
+  * Get a workspace field
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   char buffer[256];
@@ -477,6 +595,7 @@ int WorkspaceGetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 
 namespace
 {
+  /// Order the properties for the simple API
   struct PropertyOrdering
   {
     bool operator()(const Mantid::Kernel::Property * p1, const Mantid::Kernel::Property * p2) const
@@ -501,6 +620,11 @@ namespace
     return value;
   }
 
+/**
+  * A helper function to create the simple API
+  * @param algName A string giving the name of the algorithm
+  * @param path The path to the .m file that we should create
+  */
 void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
 {
   IAlgorithm* alg;
@@ -582,6 +706,12 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
   mfile.close();
 }
 
+/**
+  * Create the simple API
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
 {
 
@@ -646,6 +776,14 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
   return 0;
 }
 
+/**
+  * List the available workspaces
+  * @param nlhs The number of parameters on the left-hand side of the equals 
+  * @param plhs The data on the left-hand side of the equals
+  * @param nrhs The number of parameters in the Matlab function call
+  * @param prhs The data from the Matlab function call
+  * @returns An integer indicating success/failure
+  */
 int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
   std::vector<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();

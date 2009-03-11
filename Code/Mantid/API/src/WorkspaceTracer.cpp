@@ -166,7 +166,7 @@ void WorkspaceTracerImpl::createAlgorithmList()
  * Examine the history of the given workspace and determine whether the property value specified
  * exists in any of the algorithms present with the specified direction can also be specifed
  * @param wsName The workspace to test
- * @param value The property value to search for
+ * @param pvalue The property value to search for
  * @param dir Whether it should be an input or output property
  * @returns bool Indicating whether a match was found
  */
@@ -213,7 +213,7 @@ bool WorkspaceTracerImpl::propertyExists(const AlgorithmHistory & algHist, const
  * checks for things such as workspaces replacing themselves and do not have them in the list
  * @param baseChain A reference for a vector of AlgorithmHistory objects 
  */
-void WorkspaceTracerImpl::getBaseAlgorithmChain(std::vector<AlgorithmHistory> & baseChain)
+void WorkspaceTracerImpl::getBaseAlgorithmChain(std::vector<Mantid::API::AlgorithmHistory> & baseChain)
 {
   Workspace* ws = FrameworkManager::Instance().getWorkspace(getBaseWorkspace());
   std::vector<AlgorithmHistory>::const_iterator aIter = ws->getHistory().getAlgorithmHistories().begin();
