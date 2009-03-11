@@ -39,7 +39,7 @@ int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
 	  
 	//validate inputs
 	Poco::File libPath(filePath);
-	if ( libPath.isDirectory() )
+	if ( libPath.exists() && libPath.isDirectory() )
 	{
 
         DllOpen::addSearchDirectory(filePath);
