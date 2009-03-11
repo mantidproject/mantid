@@ -8,16 +8,19 @@ namespace Geometry
 // Get a reference to the logger
 Kernel::Logger& ParameterMap::g_log = Kernel::Logger::get("ParameterMap");
 
+/// Used in std::find_if as comparison opeartor.
 class equalParameterName
 {
 public:
+    /// Constructor
     equalParameterName(const std::string& str):m_name(str){}
+    /// Comparison operator
     bool operator()(const ParameterMap::pmap::value_type p)
     {
         return p.second->name() == m_name;
     }
 private:
-    std::string m_name;
+    std::string m_name;///< parameter name
 };
 
 Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)const
@@ -71,8 +74,12 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 }
 
 
-/// Create or adjust "pos" parameter for a component
-/// Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
+/** Create or adjust "pos" parameter for a component
+  * Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
+    @param comp Component
+    @param name Parameter name
+    @param value Parameter value
+  */
 void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::string& name, const double value)
 {
   Parameter_sptr param = get(comp,"pos");

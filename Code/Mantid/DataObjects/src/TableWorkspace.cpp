@@ -62,6 +62,7 @@ namespace Mantid
 
     /** If count is greater than the current number of rows extra rows are added to the bottom of the table.
         Otherwise rows at the end are erased to reach the new size.
+        @param count New number of rows.
     */
     void TableWorkspace::setRowCount(int count)
     {

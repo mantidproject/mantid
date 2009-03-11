@@ -7,9 +7,11 @@ namespace Mantid
 namespace Geometry
 {
 
+/// Void deleter for shared pointers
 class NoDeleting
 {
 public:
+    /// deleting operator. Does nothing
     void operator()(void*p){}
 };
 

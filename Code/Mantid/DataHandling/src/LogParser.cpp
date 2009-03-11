@@ -148,17 +148,20 @@ LogParser::LogParser(const std::string& eventFName)
 
 }
 
-//// Class used internally 
+/// Class used internally 
 template<class T>
 struct time_period_contains
 {
-    ptime tim;
+    ptime tim;///< Time to compare with
+    /// Constructor
     time_period_contains(ptime t):tim(t){}
+    /// Comparison operator
     bool operator()(const std::pair<const time_period, T >& p)const{return p.first.contains(tim);}
 };
 
 /**
     Time interval contains a time tim if   begin <= tim < end.
+    @param tim Time
 */
 int LogParser::period(ptime tim)const
 {

@@ -63,8 +63,6 @@ public:
   /*! Print information about all the elements in the tree to a stream
    *  Loops through all components in the tree 
    *  and call printSelf(os). 
-   *
-   * @param os :: output stream 
    */
   virtual void printTree(std::ostream&) const = 0;
 private:

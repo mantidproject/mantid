@@ -24,7 +24,9 @@ namespace DataObjects
 // Forward declaration
 //----------------------------------------------------------------------
   class Column;
-/** The ColumnFactory class is in charge of the creation of concrete
+/** @class ColumnFactoryImpl
+
+    The ColumnFactory class is in charge of the creation of concrete
     instances of columns. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.

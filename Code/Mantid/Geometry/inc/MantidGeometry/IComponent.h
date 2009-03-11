@@ -109,6 +109,8 @@ private:
   IComponent& operator=(const IComponent&);
 };
 
+/** Prints a text representation
+ */
 DLLExport std::ostream& operator<<(std::ostream&, const IComponent&);
 
 } //Namespace Geometry
@@ -119,6 +121,7 @@ class NoDeleting
 public:
   /// Does nothing
   void operator()(void*){}
+  /// Does nothing
   void operator()(const void*){}
 };
 

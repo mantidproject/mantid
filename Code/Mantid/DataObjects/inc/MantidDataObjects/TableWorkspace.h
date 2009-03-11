@@ -27,20 +27,24 @@ namespace Kernel
 namespace DataObjects
 {
 
+/// Helper class used to create ColumnVector
 class TableColumnHelper
 {
 public:
+    /// Constructor
     TableColumnHelper(TableWorkspace *tw,const std::string& name):m_workspace(tw),m_name(name){}
-    TableWorkspace *m_workspace;
-    std::string m_name;
+    TableWorkspace *m_workspace;///< Pointer to the TableWorkspace
+    std::string m_name;///< column namae
 };
 
+/// Helper class used to create TableRow
 class TableRowHelper
 {
 public:
+    /// Constructor
     TableRowHelper(TableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
-    TableWorkspace* m_workspace;
-    int m_row;
+    TableWorkspace* m_workspace;///< Pointer to the TableWorkspace
+    int m_row;///< Row number
 };
 
 /** \class TableWorkspace
@@ -145,6 +149,12 @@ public:
     /// Access the column with name \c name trough a ColumnVector object
     TableColumnHelper getVector(const std::string& name){return TableColumnHelper(this,name);}
     template <class T>
+    /**  Get a reference to a data element
+         @param name Column name.
+         @param index Element's opsition in the column.
+         @tparam T Type of the data in the column. If it doesn't match the actual type 
+           a runtime_error exception is thrown.
+     */
     T& getRef(const std::string& name, int index)
     {
         boost::shared_ptr<Column> c = getColumn(name);
@@ -156,7 +166,7 @@ public:
         }
         return *(static_cast<T*>(c->void_pointer(index)));
     }
-    /**  Get pointer to a data element
+    /**  Get a pointer to a data element
          @param name Column name.
          @param index Element's opsition in the column.
          @tparam P Pointer type of the data in the column. If it doesn't match the actual type 
@@ -222,53 +232,17 @@ public:
      */
     TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
 
-
-    /*/---------------- Tuples ---------------------------//
-    template<typename Tuple>
-    void set_Tuple(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
-    {
-        boost::tuples::get<0>(t) = getRef<typename Tuple::head_type>(names[i],j);
-        if (i == int(names.size()-1)) return;
-        if (typeid(t.get_tail()) != typeid(boost::tuples::null_type))
-        set_Tuple(j,t.get_tail(),names,i+1);
-    }
-
-    void set_Tuple(int j,boost::tuples::null_type t,const std::vector<std::string>& names,int i)
-    {}
-
-    template<typename Tuple>
-    Tuple make_TupleRef(int j,const std::vector<std::string>& names,int i=0)
-    {
-        Tuple t;
-        boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
-        if (i < int(names.size()-1)&& typeid(t.get_tail()) != typeid(boost::tuples::null_type))
-            t.get_tail() = make_TupleRef<typename Tuple::tail_type>(j,names,i+1);
-        return t;
-    }
-
-    boost::tuples::null_type make_TupleRef(int j,const std::vector<std::string>& names,int i)
-    {return boost::tuples::null_type();}
-
-    template<typename Tuple>
-    void set_TupleRef(int j,Tuple& t,const std::vector<std::string>& names,int i=0)
-    {
-      boost::tuples::get<0>(t) = getPointer<typename Tuple::head_type>(names[i],j);
-        if (i < int(names.size()-1)&& typeid(t.get_tail()) != typeid(boost::tuples::null_type))
-            set_TupleRef(j,t.get_tail(),names,i+1);
-    }
-
-    void set_TupleRef(int j,boost::tuples::null_type t,const std::vector<std::string>& names,int i)
-    {}//*/
-
 protected:
 
 private:
-    /// Used in std::find_if algorithm to find a Column with name name.
+    /// Used in std::find_if algorithm to find a Column with name \a name.
     class FindName
     {
-        std::string m_name;
+        std::string m_name;///< Name to find
     public:
+        /// Constructor
         FindName(const std::string& name):m_name(name){}
+        /// Comparison operator
         bool operator()(boost::shared_ptr<Column>& cp)
         {
             return cp->name() == m_name;
@@ -276,7 +250,7 @@ private:
     };
     friend class TableRow;
 
-    typedef std::vector< boost::shared_ptr<Column> >::iterator column_it;
+    typedef std::vector< boost::shared_ptr<Column> >::iterator column_it;///< Column iterator
     /// Logger
     static Kernel::Logger& g_log;
     /// Shared pointers to the columns.
@@ -286,30 +260,49 @@ private:
 
 };
 
-
+/** @class ColumnVector
+     ColumnVector gives access to the column elements without alowing its resizing.
+     Created by TableWorkspace::getVector(...)
+ */
 template< class T>
 class ColumnVector
 {
 public:
+    /// Constructor
     ColumnVector(const TableColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name)){}
+    /** Get the element
+        @param i Element's position
+     */
     T& operator[](size_t i){return m_column->data()[i];}
+    /// Size of the vector
     int size(){return int(m_column->size());}
 private:
-    TableColumn_ptr<T> m_column;
+    TableColumn_ptr<T> m_column;///< Pointer to the underlying column
 };
 
+/** @class ColumnPointerVector
+     ColumnPointerVector gives access to the column elements without alowing its resizing
+     Created by TableWorkspace::getVector(...)
+ */
 template< class T>
 class ColumnPointerVector
 {
 public:
+    /// Constructor
     ColumnPointerVector(const TableColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name)){}
+    /** Get the element
+        @param i Element's position
+     */
     T& operator[](size_t i){return m_column->data(i);}
+    /// Size of the vector
     int size(){return int(m_column->size());}
 private:
-    TablePointerColumn_ptr<T> m_column;
+    TablePointerColumn_ptr<T> m_column;///< Pointer to the underlying column
 };
 
+/// Typedef for a shared pointer to \c TableWorkspace
 typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
+/// Typedef for a shared pointer to \c const \c TableWorkspace
 typedef boost::shared_ptr<const TableWorkspace> TableWorkspace_const_sptr;
 
 

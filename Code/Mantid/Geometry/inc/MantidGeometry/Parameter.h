@@ -53,7 +53,7 @@ public:
     /// Virtual destructor
     virtual ~Parameter(){}
 
-	// Parameter name
+	/// Parameter name
     const std::string& name() const{return m_name;};
 
 	/// Returns the value of the property as a string
@@ -66,19 +66,22 @@ public:
     template<class T>
     const T& value();
 
-    /// Sets the value of type T to the parameter if it has type ParameterType<T>
-    /// Throws exception if types are wrong.
+    /** Sets the value of type T to the parameter if it has type ParameterType<T>
+        Throws an exception if the types don't match.
+        @param t Value to set
+     */ 
     template<class T>
     void set(const T& t);
 
 private:
   /// The name of the property
   const std::string m_name;
-  std::string m_str_value;
+  std::string m_str_value; ///< Parameter value as a string
   /// Private default constructor ?
   Parameter();
 };
 
+/// Templated class for parameters of type \c Type
 template<class Type>
 class DLLExport ParameterType:public Parameter
 {
@@ -100,24 +103,27 @@ public:
         istr >> m_value;
     }
 
-    /// Returns the value of the property
+    /// Returns the value of the parameter
     const Type& value()const{return m_value;}
 
-    /// Set the value of the property
+    /// Set the value of the parameter
     void setValue(const Type& value){ m_value = value; }
 
+    /// Set the value of the parameter
     ParameterType& operator=(const Type& value)
     {
         setValue( value );
         return *this;
     }
 
+    /// Get the value of the parameter
     const Type& operator()()const{return m_value;}
 
 private:
-    Type m_value;
+    Type m_value;///< Value
 };
 
+/// Typedef for the shared pointer
 typedef boost::shared_ptr<Parameter> Parameter_sptr;
 
 template<class T>
@@ -136,13 +142,20 @@ void Parameter::set(const T& t)
     p->ParameterType<T>::setValue(t);
 }
 
+/// Parameter of type int
 typedef DLLExport ParameterType<int> ParameterInt;
+/// Parameter of type double
 typedef DLLExport ParameterType<double> ParameterDouble;
+/// Parameter of type bool
 typedef DLLExport ParameterType<bool> ParameterBool;
+/// Parameter of type std::string
 typedef DLLExport ParameterType<std::string> ParameterString;
+/// Parameter of type V3D
 typedef DLLExport ParameterType<V3D> ParameterV3D;
+/// Parameter of type Quat
 typedef DLLExport ParameterType<Quat> ParameterQuat;
 
+/// Cannot convert from std::string to Geometry::Quat.
 inline std::istream& operator>>(std::istream&,Quat&)
 {
     throw std::runtime_error("Cannot convert from std::string to Geometry::Quat.");

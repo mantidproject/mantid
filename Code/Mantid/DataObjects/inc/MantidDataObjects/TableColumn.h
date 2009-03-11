@@ -125,16 +125,19 @@ public:
     }
 };
 
-/*
+/*  @class Boolean
     As TableColumn stores its data in a std::vector bool type cannot be used 
     in the same way as the other types. Class Boolean is used instead.
 */
 struct Boolean
 {
+    /// Default constructor
     Boolean():value(false){}
+    /// Conversion from bool
     Boolean(bool b):value(b){}
+    /// Returns bool
     operator bool(){return value;}
-    bool value;
+    bool value;///< boolean value
 };
 
 /// Special case of bool
@@ -157,7 +160,8 @@ public:
     }
 };
 
-DLLExport std::ostream& operator<<(std::ostream& s,const Boolean& b);
+/// Printing Boolean to an output stream
+DLLExport std::ostream& operator<<(std::ostream& ,const Boolean& );
 
 } // namespace DataObjects
 } // Namespace Mantid

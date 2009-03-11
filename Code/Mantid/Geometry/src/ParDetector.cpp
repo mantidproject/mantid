@@ -7,8 +7,8 @@ namespace Geometry
 {
 
 /** Constructor
- *  @param name The name of the component
- *  @param parent The parent component
+ *  @param base Pointer to a base instrument detector
+ *  @param map Pointer to a parameter map
  */
 ParDetector::ParDetector(const Detector* base, const ParameterMap* map) :
   ParObjComponent(base,map)

@@ -46,8 +46,8 @@ namespace Geometry
 */
 class DLLExport CompAssembly : public virtual ICompAssembly, public Component
 {
-    typedef std::vector< IComponent* >::iterator comp_it;
-    typedef std::vector< IComponent* >::const_iterator const_comp_it;
+    typedef std::vector< IComponent* >::iterator comp_it;///< Iterator type
+    typedef std::vector< IComponent* >::const_iterator const_comp_it;///< Const iterator type
 public:
   ///String description of the type of component
   virtual std::string type() const { return "CompAssembly";}

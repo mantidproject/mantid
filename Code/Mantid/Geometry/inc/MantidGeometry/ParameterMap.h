@@ -116,26 +116,80 @@ public:
     /// Create or adjust "rot" parameter for a component
     void addRotationParam(const IComponent* comp, const double deg);
 
-    /// Concrete parameter adding methods.
+    // Concrete parameter adding methods.
+    /**  Adds a double value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a string
+     */
     void addDouble(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<double>(comp,name,value);}
+    /**  Adds a double value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a double
+     */
     void addDouble(const IComponent* comp,const std::string& name, double value){addType(comp,name,value);}
 
+    /**  Adds an int value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a string
+     */
     void addInt(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<int>(comp,name,value);}
+    /**  Adds an int value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as an int
+     */
     void addInt(const IComponent* comp,const std::string& name, int value){addType(comp,name,value);}
 
+    /**  Adds a bool value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a string
+     */
     void addBool(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<bool>(comp,name,value);}
+    /**  Adds a bool value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a bool
+     */
     void addBool(const IComponent* comp,const std::string& name, bool value){addType(comp,name,value);}
 
+    /**  Adds a std::string value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value
+     */
     void addString(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<std::string>(comp,name,value);}
 
+    /**  Adds a V3D value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a string
+     */
     void addV3D(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<V3D>(comp,name,value);}
+    /**  Adds a V3D value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a V3D
+     */
     void addV3D(const IComponent* comp,const std::string& name, const V3D& value){addType(comp,name,value);}
 
+    /**  Adds a Quat value to the parameter map.
+         @param comp Component to which the new parameter is related
+         @param name Name for the new parameter
+         @param value Parameter value as a Quat
+     */
     void addQuat(const IComponent* comp,const std::string& name, const Quat& value){addType(comp,name,value);}
 
     /// Return the value of a parameter as a string.
     std::string getString(const IComponent* comp,const std::string& name);
 
+    /**  Get the shared pointer to the parameter with name \a name belonging to component \a comp.
+         @param comp Component
+         @param name Parameter name
+     */
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name)const;
 
     /// Get the values of a given parameter of all the components that have the name: compName
@@ -157,7 +211,16 @@ public:
       return retval;
     }
 
+    /**  Returns a double parameter as vector's first element if exists and an empty vector if it doesn't
+         @param comp Component name
+         @param name Parameter name
+     */
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
+
+    /**  Returns a V3D parameter as vector's first element if exists and an empty vector if it doesn't
+         @param comp Component name
+         @param name Parameter name
+     */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
 
     /// Returns a vector with all parameter names for componenet comp

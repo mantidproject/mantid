@@ -115,7 +115,7 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 }
 
 /** Set the rotation (both don't change rotation axis)
- * \param _deg :: angle of rotation
+ * \param deg :: angle of rotation
  */
 void Quat::setRotation(const double deg)
 {

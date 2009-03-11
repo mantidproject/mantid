@@ -24,9 +24,9 @@ namespace DataObjects
 
 namespace DataObjects
 {
-/** \class IColumn
+/** \class Column
 
-    IColumn is the base class for columns of TableWorkspace.
+    Column is the base class for columns of TableWorkspace.
 
 
     \author Roman Tolchenov
@@ -65,8 +65,11 @@ public:
     void setName(const std::string& str){m_name = str;}
     /// Number of individual elements in the column.
     virtual int size()const = 0;
+    /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const = 0;
+    /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const = 0;
+    /// Prints
     virtual void print(std::ostream& s, int index) const = 0;
 protected:
     /// Sets the new column size.

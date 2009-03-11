@@ -101,10 +101,12 @@ private:
     friend class TableWorkspace;
 };
 
+/// A shared pointer class which checks the correctness of types
 template<class T>
 class TablePointerColumn_ptr: public boost::shared_ptr<TablePointerColumn<T> >
 {
 public:
+    /// Constructor
     TablePointerColumn_ptr(boost::shared_ptr<Column> c):boost::shared_ptr<TablePointerColumn<T> >(boost::dynamic_pointer_cast<TablePointerColumn<T> >(c))
     {
         if (this->get() == NULL)

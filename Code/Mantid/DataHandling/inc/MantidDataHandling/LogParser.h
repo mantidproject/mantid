@@ -78,7 +78,7 @@ class LogParser_DllExport LogParser
 public:
     /// Default constructor
     LogParser():m_nOfPeriods(1),m_unknown(true){}
-    /// 
+    /// Create given the icpevent file name
     LogParser(const std::string& eventFName);
     /// Destructor
     ~LogParser() {}
