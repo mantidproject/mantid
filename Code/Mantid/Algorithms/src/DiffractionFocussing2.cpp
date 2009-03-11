@@ -33,7 +33,10 @@ Logger& DiffractionFocussing2::g_log = Logger::get("DiffractionFocussing2");
  */
 void DiffractionFocussing2::init()
 {
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+	API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
+	wsValidator->add(new API::WorkspaceUnitValidator<>("dSpacing"));
+  wsValidator->add(new API::RawCountValidator<>);
+  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
   declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
