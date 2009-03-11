@@ -29,3 +29,7 @@ mantid = mtd
 createPythonSimpleAPI(True)
 # Import definitions
 from mantidsimple import *
+
+# Import some Qt modules
+from PyQt4 import QtCore
+from PyQt4 import QtGui
