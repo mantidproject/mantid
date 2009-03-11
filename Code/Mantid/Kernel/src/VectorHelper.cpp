@@ -142,44 +142,49 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   	frac=yold[iold-1]/width;
   	fracE=std::pow(eold[iold-1],2)/width;
   }
-  for(;;) //Start the loop here
+  while((inew+1)!=size_xnew) //Start the loop here
   {
-  	if ((iold+1)==size_xold || (inew+1)==size_xnew) // Both will be incremented here
-  		break;
-  	while(xnew[++inew]<xold[iold])
-  	{
-  		if (iold!=0) // If iold==0, then no counts to add
-  		{
-  			width=(xnew[inew]-xnew[inew-1]);
-  			ynew[inew-1]+=frac*width; //Increment this
-  			enew[inew-1]+=fracE*width;
-  		}
-  		if ((inew+1)==size_xnew)
-  			break;
-  	}
-  	if (iold!=0) //Put the remaining counts here
-  	{
-  		width=(xold[iold]-xnew[inew-1]);
-  		ynew[inew-1]+=frac*width;
-  		enew[inew-1]+=fracE*width;
-  	}
-
-  	while(xold[++iold]<=xnew[inew])
-  	{
-  		ynew[inew-1]+=yold[iold-1];
-  		enew[inew-1]+=std::pow(eold[iold-1],2);
-  		if ((iold+1)==size_xold)
-  			break;
-  	}
-  	if (iold!=0)
+	while(xnew[++inew]<xold[iold]) //Upper xlimit of new vector < upper limit of old vector
+	{
+		if (iold!=0) // If iold==0, then no counts to add
 		{
-  		width=(xold[iold+1]-xold[iold]);
-			frac=yold[iold]/width; //Dealing with the new xold
-			fracE=std::pow(eold[iold],2)/width;
+			width=(xnew[inew]-xnew[inew-1]);
+			ynew[inew-1]+=frac*width; //Increment this
+			enew[inew-1]+=fracE*width;
 		}
-  	width=(xnew[inew]-xold[iold-1]);
-  	ynew[inew-1]+=frac*width;
-  	enew[inew-1]+=fracE*width;
+		if ((inew+1)==size_xnew)
+			break;
+	}
+
+	if (iold!=0) // Now upper xlimit of new vector > upper limit of old x vector
+	{
+		width=(xold[iold]-xnew[inew-1]);
+		ynew[inew-1]+=frac*width;
+		enew[inew-1]+=fracE*width;
+	}
+
+	if ((iold+1)==size_xold) //Reached the end of old vector
+			break;
+
+	while(xold[++iold]<=xnew[inew]) // Now increment the upper limit of old vector until it becomes higher than the new one
+	{
+		ynew[inew-1]+=yold[iold-1];
+		enew[inew-1]+=std::pow(eold[iold-1],2);
+		if ((iold+1)==size_xold)
+			break;
+	}
+
+	if (iold!=0)
+	{
+		width=(xold[iold]-xold[iold-1]);
+		frac=yold[iold-1]/width; //Dealing with the new xold
+		fracE=std::pow(eold[iold-1],2)/width;
+	}
+
+	width=(xnew[inew]-xold[iold-1]);
+	ynew[inew-1]+=frac*width;
+	enew[inew-1]+=fracE*width;
+
   }
 
   if (!addition) //If this used to add at the same time then not necessary.
