@@ -81,7 +81,7 @@ public:
     boost::shared_ptr<Detector> ptrDetSp = boost::dynamic_pointer_cast<Detector>(i->getDetector(5));
     TS_ASSERT_EQUALS( ptrDetSp->getID(), 5);
     TS_ASSERT_EQUALS( ptrDetSp->getName(), "det");
-    TS_ASSERT_DELTA( ptrDetSp->getPos().X(), 0.5141,0.01);
+    TS_ASSERT_DELTA( ptrDetSp->getPos().X(), -0.5141,0.01); // using phi values from raw file changes sign of this
     TS_ASSERT_DELTA( ptrDetSp->getPos().Z(), 2.4588,0.01);
     double d = ptrDetSp->getPos().distance(samplepos->getPos());
     TS_ASSERT_DELTA(d, 2.5120, 0.0001);

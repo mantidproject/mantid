@@ -65,7 +65,6 @@ namespace Algorithms
 
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
   {
-      int i;
       std::map<int,Geometry::V3D> posMap;
       std::map<int,Geometry::V3D>::iterator it;
 
@@ -108,7 +107,6 @@ namespace Algorithms
               Geometry::IDetector_const_sptr det = instrument->getDetector(detIndex);
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truPos-detPos;
-              double mag=shift.norm();
               double scale=1.0;
               if(detIdLast==detIndex-1 && detIndex>100) // merlin monitors are <100, dets >100
               {
@@ -159,7 +157,7 @@ void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V
 }
 
 
-void SetScalingPSD::movePos(MatrixWorkspace_sptr WS, std::map<int,Geometry::V3D> posMap)
+void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap)
 {
   // Get the workspace
   /*
