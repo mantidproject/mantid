@@ -67,6 +67,28 @@ public:
     FileValidator file_val;
     TS_ASSERT( !file_val.isValid("") );
   }
+
+  void testPassesOnWildcardExtensions()
+  {
+    std::vector<std::string> exts;
+    exts.push_back("c[a-z][a-z]");
+    exts.push_back("h??");
+    exts.push_back("h*");
+    FileValidator validator(exts, false);
+    TS_ASSERT( validator.isValid("FileValidatorTest.cpp") );
+    TS_ASSERT( validator.isValid("FileValidatorTest.cxx") );
+    TS_ASSERT( validator.isValid("FileValidatorTest.hxx") );
+    TS_ASSERT( validator.isValid("FileValidatorTest.habc") );
+  }
+
+  void testFailsOnWrongWildcardExtensions()
+  {
+    std::vector<std::string> exts;
+    exts.push_back("c[a-z][a-z]");
+    FileValidator validator(exts, false);
+    TS_ASSERT( !validator.isValid("FileValidatorTest.c01") );
+    TS_ASSERT( !validator.isValid("FileValidatorTest.bpp") );
+  }
   
 };
 

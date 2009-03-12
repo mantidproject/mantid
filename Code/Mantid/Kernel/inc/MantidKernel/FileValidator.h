@@ -8,7 +8,55 @@
 #include <set>
 #include <algorithm>
 #include "Poco/File.h"
+#include "Poco/RegularExpression.h"
 
+/// A functor for checking the file extensions against a regular expression
+namespace {
+  /// A struct holding a string to be tested against a regular expression
+  struct RegExMatcher
+  {
+    /// Constructor
+    RegExMatcher(std::string ext) : m_ext(ext) {}
+  
+    /// Operator matches expressions
+    bool operator()(const std::string & test)
+    {
+      Poco::RegularExpression regex(test, Poco::RegularExpression::RE_CASELESS);
+      bool matched = regex.match(m_ext);
+      return matched;
+    }
+  
+  private:
+    /// Private default constructor
+    RegExMatcher();
+    /// The extension to test
+    std::string m_ext;
+  };
+
+  ///Converts a shell-like pattern to a regular expression pattern
+  struct RegExConverter
+  {
+    /// Operator to convert from shell-like patterns to regular expression syntax
+    std::string operator()(const std::string & pattern)
+    {
+      std::string replacement;
+      std::string::const_iterator iend = pattern.end();
+      for( std::string::const_iterator itr = pattern.begin(); itr != iend; ++itr )
+	{
+	  char ch = *itr;
+	  if( ch == '?' ) replacement.append(".");
+	  else if( ch == '*' ) replacement.append(".*");
+	  else replacement.push_back(ch);
+	}
+      return replacement;
+    }
+  };  
+
+}
+
+/**
+ * Mantid namespace
+ */
 namespace Mantid
 {
 namespace Kernel
@@ -42,7 +90,7 @@ class DLLExport FileValidator : public IValidator<std::string>
 {
 public:
   /// Default constructor.
-  FileValidator() : IValidator<std::string>(), m_extensions(), m_fullTest(true)
+  FileValidator() : IValidator<std::string>(), m_extensions(), m_regex_exts(), m_fullTest(true)
   {}
 
   /** Constructor
@@ -52,8 +100,13 @@ public:
   explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true) :
     IValidator<std::string>(),
     m_extensions(extensions),
+    m_regex_exts(m_extensions.size()),
     m_fullTest(testFileExists)
-  {}
+  {
+    // Transform the file extensions to regular expression syntax for matching. This could be done every time
+    // isValid is called but that would create unnecessary work
+    std::transform( m_extensions.begin(), m_extensions.end(), m_regex_exts.begin(), RegExConverter() );
+  }
 
   /// Destructor
   virtual ~FileValidator() {}
@@ -64,17 +117,15 @@ public:
    */
   const bool isValid(const std::string &value) const
   {
-    if (m_extensions.size() > 0)
+    if( !m_regex_exts.empty() )
     {
       //Find extension of value
-      std::size_t found=value.find_last_of(".");
-      std::string ext = value.substr(found+1);
-
-      std::vector<std::string>::const_iterator itr;
-
-      itr = std::find(m_extensions.begin(), m_extensions.end(), ext);
-
-      if (itr == m_extensions.end()) return false;
+      std::string ext = value.substr(value.rfind(".") + 1);
+      //Use a functor to test each allowed extension in turn
+      RegExMatcher matcher(ext); 
+      std::vector<std::string>::const_iterator itr =
+	std::find_if(m_regex_exts.begin(), m_regex_exts.end(), matcher);
+      if( itr == m_regex_exts.end() ) return false;
     }
 
     if ( m_fullTest && ( value.empty() || !Poco::File(value).exists() ) )
@@ -102,6 +153,8 @@ public:
 private:
   /// The list of permitted extensions
   const std::vector<std::string> m_extensions;
+  /// An internal list of extensions that, if necessary, have been transformed into regular expressions
+  std::vector<std::string> m_regex_exts; 
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
 
