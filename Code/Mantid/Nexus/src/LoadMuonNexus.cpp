@@ -181,11 +181,11 @@ namespace Mantid
       
       if (autogroup)
      {
+
           //Get the groupings
           for (int i =0; i < nxload.numDetectors; ++i)
           {
-          m_groupings.push_back(nxload.detectorGroupings[i]);
-		  std::cerr << nxload.detectorGroupings[i] << std::endl;
+                  m_groupings.push_back(nxload.detectorGroupings[i]);
           }
 	  	  
 	    //Create a workspace with only two spectra for forward and back
@@ -193,23 +193,29 @@ namespace Mantid
 		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                  (API::WorkspaceFactory::Instance().create(localWorkspace, 2, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
 	  
+	  int numHists = localWorkspace->getNumberHistograms();
+	  
 	  //Compile the groups
-	    for (int i = 0; i < m_groupings.size(); ++i)
+	    for (int i = 0; i < numHists; ++i)
 	    {    
 		    for (int j = 0; j < localWorkspace->blocksize(); ++j)
 			{
-				groupedWS->dataY(m_groupings[i] -1)[j] = groupedWS->dataY(m_groupings[i] -1)[j] + localWorkspace->dataY(i)[j];
+				groupedWS->dataY(m_groupings[numHists*period + i] -1)[j] = groupedWS->dataY(m_groupings[numHists*period + i] -1)[j] + localWorkspace->dataY(i)[j];
 				
 				//Add the errors in quadrature
-				groupedWS->dataE(m_groupings[i] -1)[j] 
-					= sqrt(pow(groupedWS->dataE(m_groupings[i] -1)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
+				groupedWS->dataE(m_groupings[numHists*period + i] -1)[j] 
+					= sqrt(pow(groupedWS->dataE(m_groupings[numHists*period + i] -1)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
 			}
-			
+						
 			//Copy all the X data
-			groupedWS->dataX(m_groupings[i] -1) = localWorkspace->dataX(i);
+			groupedWS->dataX(m_groupings[numHists*period + i] -1) = localWorkspace->dataX(i);
 	    }
 	    
 	    m_groupings.clear();
+	    
+	    //Copy other information
+	    groupedWS->setInstrument(instrument);
+	    groupedWS->setSample(sample);
 	    	    
 	    // Assign the result to the output workspace property
 	    setProperty(outputWorkspace,groupedWS);
