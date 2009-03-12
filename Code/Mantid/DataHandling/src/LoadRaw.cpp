@@ -36,12 +36,12 @@ namespace Mantid
     /// Initialisation method.
     void LoadRaw::init()
     {
+      // Extension checking is not case sensitive
       std::vector<std::string> exts;
-//      exts.push_back("RAW");
-//      exts.push_back("raw");
-//      exts.push_back("sav");
-//      exts.push_back("SAV");
-      exts.clear();
+      exts.push_back("raw");
+      exts.push_back("sav");
+      exts.push_back("s[0-9][0-9]");
+
       declareProperty("Filename","",new FileValidator(exts));
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
 
