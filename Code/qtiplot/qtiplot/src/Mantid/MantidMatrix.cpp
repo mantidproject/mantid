@@ -819,7 +819,6 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
       QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
       if (i != m_plots1D.end())
 	{
-	  std::cerr << "removing 1d graph " << i.value() << "\n";
 	  if (i.value() != 0) 
                 {
                     i.value()->askOnCloseEvent(false);

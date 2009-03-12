@@ -279,6 +279,9 @@ public slots:
 
 	void importSampleLog(const QString & filename, const QString & data, bool numeric);
 
+  // Clear all Mantid related memory
+  void clearAllMemory();
+
 private:
 
     // Execute algorithm asinchronously

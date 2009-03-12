@@ -99,9 +99,9 @@ m_progressDialog(0)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 
-	mantidMenu = new QMenu(m_appWindow);
-	mantidMenu->setObjectName("mantidMenu");
-	connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
+    mantidMenu = new QMenu(m_appWindow);
+    mantidMenu->setObjectName("mantidMenu");
+    connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
 
     menuMantidMatrix = new QMenu(m_appWindow);
 	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
@@ -1000,11 +1000,33 @@ void MantidUI::mantidMenuAboutToShow()
 	
 	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
+	mantidMenu->insertItem(tr("&Clear All Memory"), this, SLOT(clearAllMemory()) );
 }
 
 void MantidUI::insertMenu()
 {
-	appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);}
+	appWindow()->menuBar()->insertItem(tr("Man&tid"), mantidMenu);
+}
+
+void MantidUI::clearAllMemory()
+{
+  QMessageBox::StandardButton pressed = 
+    QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
+
+  if( pressed != QMessageBox::Ok ) return;
+
+  
+  foreach( MdiSubWindow* sub_win, m_appWindow->windowsList() )
+  {
+    if( qobject_cast<MantidMatrix*>(sub_win) )
+    {
+      sub_win->close();
+    }
+  }
+
+  Mantid::API::FrameworkManager::Instance().clear();
+  update();
+}
 
 /**
   *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
