@@ -4,7 +4,8 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
-#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/FileValidator.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -188,7 +189,8 @@ bool AlgorithmDialog::setPropertyValues()
 QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
 {
   if( propName.isEmpty() ) return "";
-  Mantid::Kernel::Property* prop = getAlgorithmProperty(propName);
+  Mantid::Kernel::PropertyWithValue<std::string>* prop = 
+    dynamic_cast< Mantid::Kernel::PropertyWithValue<std::string>* >( getAlgorithmProperty(propName) );
   if( !prop ) return "";
 
   //The allowed values in this context are file extensions
@@ -212,11 +214,19 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
     filter = "All Files (*.*)";
   }
   
-  QString filepath = 
-    QFileDialog::getOpenFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  QString filepath; 
+  const Mantid::Kernel::FileValidator *file_checker = dynamic_cast<const Mantid::Kernel::FileValidator*>(prop->getValidator());
+  if( file_checker && !file_checker->fileMustExist() )
+  {
+    filepath = QFileDialog::getSaveFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  }
+  else
+  {
+    filepath = QFileDialog::getOpenFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  }
   
-   if( !filepath.isEmpty() ) AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filepath).absoluteDir().path());
-   return filepath;
+  if( !filepath.isEmpty() ) AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filepath).absoluteDir().path());
+  return filepath;
 }
 
 /**

@@ -148,7 +148,23 @@ public:
     return m_extensions;
   }
 
-  IValidator<std::string>* clone() { return new FileValidator(*this); }
+  /** 
+   * Is this validator concerned with whether the file exists or not
+   * @returns A boolean indicating whether this tests for file existence
+   */
+  bool fileMustExist() const
+  {
+    return m_fullTest;
+  }
+
+  /** 
+   * Clone the validator
+   * @returns A pointer to a new validator with the same properties as this one
+   */
+  IValidator<std::string>* clone() 
+  { 
+    return new FileValidator(*this); 
+  }
 
 private:
   /// The list of permitted extensions

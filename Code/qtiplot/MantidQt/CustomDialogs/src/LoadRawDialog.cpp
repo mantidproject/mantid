@@ -255,7 +255,11 @@ void LoadRawDialog::browseClicked()
   }  
 
   QString filepath = this->openLoadFileDialog("Filename");
-  if( !filepath.isEmpty() ) m_pathBox->setText(filepath);
+  if( !filepath.isEmpty() ) 
+  {
+    m_pathBox->clear();
+    m_pathBox->setText(filepath.trimmed());
+  }
 
   //Add a suggestion for workspace name
   if( m_wsBox->isEnabled() ) m_wsBox->setText(QFileInfo(filepath).baseName());

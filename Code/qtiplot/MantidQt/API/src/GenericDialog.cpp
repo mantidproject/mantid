@@ -96,15 +96,6 @@ void GenericDialog::initLayout()
 	optionsBox->setItemData(0, 0);
 	optionsBox->addItem("Yes");
 	optionsBox->setItemData(1, 1);
-// 	// Set to show default value. This works because *p returns a boolean and that is then cast to an integer 0/1 and that
-// 	// maps to the correct index
-// 	
-//	QString selectedValue("");
-// 	if( oldValues.contains(propName) ) selectedValue = oldValues[propName];
-// 	else selectedValue = QString::fromStdString(prop->value());
-
-// 	if( selectedValue == "No" ) optionsBox->setCurrentIndex(0);
-// 	else optionsBox->setCurrentIndex(1);
 
 	if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
 	else optionsBox->setCurrentIndex(1);
@@ -113,9 +104,7 @@ void GenericDialog::initLayout()
       {
 	std::vector<std::string> items = prop->allowedValues();
 	std::vector<std::string>::const_iterator vend = items.end();
-	
-	
-  
+ 
 	int index(0);
 	for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
 	    ++vitr, ++index)
@@ -243,5 +232,9 @@ void GenericDialog::browseClicked(QWidget* widget)
     AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(pathBox->text()).absoluteDir().path());
   }  
   QString filepath = this->openLoadFileDialog(propName);
-  pathBox->setText(filepath);
+  if( !filepath.isEmpty() ) 
+  {
+    pathBox->clear();
+    pathBox->setText(filepath.trimmed());
+  }
 }

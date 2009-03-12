@@ -293,6 +293,15 @@ public:
     return m_validator->getType();
   }
 
+  /**
+   * Returns the validator
+   * @returns A pointer to the IValidator interface
+   */
+  const IValidator<TYPE>* getValidator() const
+  {
+    return m_validator;
+  }
+
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
    */

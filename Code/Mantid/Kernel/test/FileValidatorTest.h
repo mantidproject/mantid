@@ -29,6 +29,23 @@ public:
     TS_ASSERT_EQUALS( v.getType(), "file" )
   }
 
+  void testFileMustExist()
+  {
+    std::vector<std::string> vec;
+    vec.push_back("cpp");
+    FileValidator v(vec);
+    TS_ASSERT( v.fileMustExist() )
+  }
+
+  void testFileDoesNotNeedToExist()
+  {
+    std::vector<std::string> vec;
+    vec.push_back("cpp");
+    FileValidator v(vec, false);
+    TS_ASSERT( !v.fileMustExist() )
+  }
+
+
   void testFailsOnWrongExtension()
   {
     std::vector<std::string> vec;

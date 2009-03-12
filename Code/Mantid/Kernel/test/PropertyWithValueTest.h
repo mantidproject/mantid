@@ -254,6 +254,7 @@ public:
     TS_ASSERT( ! p.setValue("TA") );
     TS_ASSERT_EQUALS(p.value(),"T");
     TS_ASSERT_EQUALS(p.isValid(), true);
+    TS_ASSERT( dynamic_cast<const BoundedValidator<std::string>* >(p.getValidator()) )
   }
 
   void testListValidator()
@@ -275,8 +276,9 @@ public:
     TS_ASSERT_EQUALS( vals.size(), 2 )
     TS_ASSERT_EQUALS( vals[0], "one" )
     TS_ASSERT_EQUALS( vals[1], "two" )
+    TS_ASSERT( dynamic_cast<const ListValidator*>(p.getValidator()) )
   }
-
+  
 private:
   PropertyWithValue<int> *iProp;
   PropertyWithValue<double> *dProp;
