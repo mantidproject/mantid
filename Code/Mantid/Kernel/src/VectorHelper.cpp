@@ -3,6 +3,7 @@
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <iostream>
 
 namespace Mantid{
 	namespace Kernel{
@@ -124,9 +125,9 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   	enew.resize(size_xnew-1);
   }
   // First find the first Xpoint that is bigger than xnew[0]
-  std::vector<double>::const_iterator it=std::find_if(xold.begin(),xold.end(),std::bind2nd(std::greater<double>(),xnew[0]));
+  std::vector<double>::const_iterator it=std::upper_bound(xold.begin(),xold.end(),xnew[0]);
   if (it==xold.end())
-  	throw std::runtime_error("No overlap, max of Xold < min of Xnew");
+  	throw std::runtime_error("No overlap, max of X-old < min of X-new");
   int iold=std::distance(xold.begin(),it); // Where we are now
   int inew=0;
   double frac, fracE;
@@ -166,13 +167,14 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
 	if ((iold+1)==size_xold) //Reached the end of old vector
 			break;
 
-	while(xold[++iold]<=xnew[inew]) // Now increment the upper limit of old vector until it becomes higher than the new one
+	while(xold[++iold]<xnew[inew]) // Now increment the upper limit of old vector until it becomes higher than the new one
 	{
 		ynew[inew-1]+=yold[iold-1];
 		enew[inew-1]+=std::pow(eold[iold-1],2);
 		if ((iold+1)==size_xold)
 			break;
 	}
+
 
 	if (iold!=0)
 	{
