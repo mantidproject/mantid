@@ -125,7 +125,7 @@ public:
     }
 };
 
-/*  @class Boolean
+/**  @class Boolean
     As TableColumn stores its data in a std::vector bool type cannot be used 
     in the same way as the other types. Class Boolean is used instead.
 */

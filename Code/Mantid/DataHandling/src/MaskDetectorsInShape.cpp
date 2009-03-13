@@ -46,7 +46,7 @@ namespace Mantid
 		}
 
 		/// Run the FindDetectorsInShape sub-algorithm
-    std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(Workspace2D_sptr workspace,
+    std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(DataObjects::Workspace2D_sptr workspace,
 			const std::string shapeXML, const bool includeMonitors)
     {
       IAlgorithm_sptr alg = createSubAlgorithm("FindDetectorsInShape",0,85);
@@ -70,7 +70,7 @@ namespace Mantid
 			return alg->getProperty("DetectorList");
     }
 
-		void MaskDetectorsInShape::runMaskDetectors(Workspace2D_sptr workspace, const std::vector<int> detectorIds)
+    void MaskDetectorsInShape::runMaskDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds)
     {
       IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors",85,100);
 			alg->setProperty<std::vector<int> >("DetectorList", detectorIds);

@@ -51,10 +51,10 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
-	  Poco::XML::Document* mDoc;
-	  Poco::XML::Element*  mRoot;
-	  Poco::XML::DOMParser*  pParser;
-	  std::string          mFileName;
+	  Poco::XML::Document* mDoc;         ///< The XML document
+	  Poco::XML::Element*  mRoot;        ///< The root XML element
+	  Poco::XML::DOMParser*  pParser;    ///< The XML parser
+	  std::string          mFileName;    ///< The file name
 	  //Private Methods
 	  void Init();
 	  Poco::XML::Element* getElementByObjectName(std::string name);

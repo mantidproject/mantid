@@ -54,10 +54,10 @@ namespace Mantid
 		}
 		/**
 		 * creates VTK XML header
-		 * <VTKFile type="PolyData" version="1.0" byte_order="LittleEndian">
-		 *    <PolyData>
-		 *    </PolyData>
-		 * >/VTKFile>
+		 * \<VTKFile type="PolyData" version="1.0" byte_order="LittleEndian"\>
+		 *    \<PolyData\>
+		 *    \</PolyData\>
+		 * \</VTKFile\>
 		 */
 		void vtkGeometryCacheWriter::createVTKFileHeader()
 		{
@@ -71,6 +71,7 @@ namespace Mantid
 
 		/**
 		 * Adds the geometry of the Object to the document
+		 * @param obj The object to add
 		 */
 		void vtkGeometryCacheWriter::addObject(Object* obj)
 		{
@@ -154,7 +155,9 @@ namespace Mantid
 			//add this piece to root
 			mRoot->appendChild(pPiece);
 		}
-
+	        /**
+		 * Write the XML to the file
+		 */	  
 		void vtkGeometryCacheWriter::write()
 		{
 			DOMWriter writer;

@@ -66,7 +66,7 @@ void RebinToWorkspace::exec()
  * @param toMatch A shared pointer to the workspace with the desired binning 
  * @param rb_params A vector to hold the rebin parameters once they have been calculated
  */
-void RebinToWorkspace::createRebinParameters(MatrixWorkspace_sptr toMatch, std::vector<double> & rb_params)
+void RebinToWorkspace::createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch, std::vector<double> & rb_params)
 {
   using namespace Mantid::API;
 

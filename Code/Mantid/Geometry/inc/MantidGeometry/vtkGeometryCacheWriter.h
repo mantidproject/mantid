@@ -49,9 +49,9 @@ namespace Mantid
     private:
 
       static Kernel::Logger& PLog;           ///< The official logger
-	  Poco::XML::Document* mDoc;
-	  Poco::XML::Element*  mRoot;
-	  std::string          mFileName;
+	  Poco::XML::Document* mDoc;         ///< The XML document    
+	  Poco::XML::Element*  mRoot;	     ///< The root XML element
+	  std::string          mFileName;    ///< The file name
 	  //Private Methods
 	  void Init();
 	  void createVTKFileHeader();
@@ -59,7 +59,7 @@ namespace Mantid
 		vtkGeometryCacheWriter(std::string);       ///< Constructor
 		~vtkGeometryCacheWriter();      ///< Destructor
 		void addObject(Object* obj);
-		void write();
+		void write();  ///< Write the XML to a file
     };
 
   }   // NAMESPACE Geometry

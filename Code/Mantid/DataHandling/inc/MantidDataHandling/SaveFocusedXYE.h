@@ -66,6 +66,7 @@ private:
   void init();
   ///Execution code
   void exec();
+  ///Write the header information
   void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

@@ -124,7 +124,7 @@ namespace API
       /// Set parameter/logfile info (if any) associated with component
       void setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem);
 
-      /// Holds all the xml elements that have a <parameter> child element.
+      /// Holds all the xml elements that have a \<parameter\> child element.
       /// Added purely for the purpose of computing speed and is used in setLogFile()
       /// for the purpose of quickly accessing if a component have a parameter/logfile
       /// associated with it or not - instead of using the comparatively slow poco
@@ -142,7 +142,7 @@ namespace API
       std::map<std::string, boost::shared_ptr<Geometry::Object> > mapTypeNameToShape;
 
       /// Container to hold all detectors and monitors added to the instrument. Used for
-      /// 'facing' these to component specified under <defaults>
+      /// 'facing' these to component specified under \<defaults\>
       std::vector< Geometry::ObjComponent* > m_facingComponent;
 
       /// Parse position of facing element to V3D

@@ -761,7 +761,7 @@ void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Ge
  *  direction: from the position (as specified 2nd argument) to the component (1st argument).
  *
  *  @param in  Component to be rotated
- *  @param position to face
+ *  @param facingPoint position to face
  */
 void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Geometry::V3D& facingPoint)
 {
@@ -884,7 +884,7 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
 /** Set parameter/logfile info (if any) associated with component
  *
  *  @param comp Some component
- *  @param pElem  Associated Poco::XML element to component that may hold a <parameter> element
+ *  @param pElem  Associated Poco::XML element to component that may hold a \<parameter\> element
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */

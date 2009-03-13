@@ -63,7 +63,7 @@ private:
   ///Execution code
   void exec();
 
-  //Create the rebin paraeters
+  /// Create the rebin paraeters
   void createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch, std::vector<double> & rb_params);
   
   /// Static reference to the logger class
