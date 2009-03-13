@@ -112,7 +112,8 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
 
   // Creates a managed workspace if over the trigger size and a 2D workspace is being requested.
   // Otherwise calls the vanilla create method.
-  if ( MemoryManager::Instance().goForManagedWorkspace(NVectors,XLength,YLength) && !(className.find("2D") == std::string::npos) )
+  bool is2D = className.find("2D") != std::string::npos;
+  if ( MemoryManager::Instance().goForManagedWorkspace(NVectors,XLength,YLength) && is2D )
   {
       // check if there is enough memory for 100 data blocks
       int blockMemory;
@@ -135,8 +136,8 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   }
   else
   {
-      // We can create a ManagedRawFileWorkspace2D only in LoadRaw algorithm
-      if ( className == "ManagedRawFileWorkspace2D" )
+      // No need for a Managed Workspace
+      if ( is2D && className.substr(0,7) == "Managed" )
           ws = this->create("Workspace2D");
       else
           ws = this->create(className);
