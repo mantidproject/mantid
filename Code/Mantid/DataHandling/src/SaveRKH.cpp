@@ -128,4 +128,6 @@ void SaveRKH::exec()
               << std::scientific << std::setprecision(6) << edata[0] << "\n"; 
    }
   }
+  
+  outRKH.close();
 }
