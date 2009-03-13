@@ -37,6 +37,8 @@
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "MantidKernel/Logger.h"
 
+#include "Mantid/MantidApplication.h"
+
 // The following stuff is for the doxygen title page
 /*!  \mainpage QtiPlot - Data analysis and scientific plotting - API documentation
 
@@ -135,89 +137,51 @@ public:
     }
 };
 
-class MyApp:public QApplication
-{
-    //Q_OBJECT
-public:
-    MyApp(int argc, char ** argv ):QApplication(argc,argv){}
-
-    /// Reimplement notify to catch exceptions from event handlers
-    bool notify( QObject * receiver, QEvent * event )
-    {
-        bool res = false;
-        try
-        {
-            res = QApplication::notify(receiver,event);
-        }
-        catch(std::exception& e)
-        {
-            g_log.error()<<"Error in an event handler: "<<e.what()<<"\n";
-            QMessageBox ask;
-            QAbstractButton *terminateButton = ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
-            QAbstractButton *continueButton = ask.addButton(tr("Continue"), QMessageBox::ActionRole);
-            ask.setText("An exception is caught in an event handler:\n\n"+QString::fromStdString(e.what())+
-                "\n\nWould you like to terminate MantidPlot or continue working?");
-            ask.setIcon(QMessageBox::Critical);
-            ask.exec();
-            if (ask.clickedButton() == terminateButton) 
-            {
-                exit(-1);
-            }
-        }
-        return res;
-    }
-private:
-    /// Static reference to the logger class
-    static Mantid::Kernel::Logger& g_log;
-};
-
-Mantid::Kernel::Logger& MyApp::g_log = Mantid::Kernel::Logger::get("MantidPlot");
-
 int main( int argc, char ** argv )
 {
-    MyApp app( argc, argv );
-	QStringList args = app.arguments();
-	args.removeFirst(); // remove application name
+  MantidApplication app( argc, argv );
+  QStringList args = app.arguments();
+  args.removeFirst(); // remove application name
 
-	if( (args.count() == 1) && (args[0] == "-m" || args[0] == "--manual") )
-		ApplicationWindow::showStandAloneHelp();
-	else if ( (args.count() == 1) && (args[0] == "-a" || args[0] == "--about") ) {
-		ApplicationWindow::about();
-		exit(0);
-	} else {
+  if( (args.count() == 1) && (args[0] == "-m" || args[0] == "--manual") )
+    ApplicationWindow::showStandAloneHelp();
+  else if ( (args.count() == 1) && (args[0] == "-a" || args[0] == "--about") ) {
+    ApplicationWindow::about();
+    exit(0);
+  } else {
 
-        WaitThread t;
-        t.start();
-        QPixmap pixmap;
-        if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
-        QSplashScreen splash(pixmap);
-        splash.show();
-        app.processEvents();
-        splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
-        
-        QString path = argv[0];
-        int i = path.lastIndexOf('/');
-        if (i < 0) i = path.lastIndexOf('\\');
-        if (i>=0) 
-        {
-            path.remove(i,1000);
-            QDir::setCurrent(path);
-        }
+    WaitThread t;
+    t.start();
+    QPixmap pixmap;
+    if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
+    QSplashScreen splash(pixmap);
+    splash.show();
+    app.processEvents();
+    splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
+		  
+    QString path = argv[0];
+    int i = path.lastIndexOf('/');
+    if (i < 0) i = path.lastIndexOf('\\');
+    if (i>=0) 
+      {
+	path.remove(i,1000);
+	QDir::setCurrent(path);
+      }
 
-		bool factorySettings = false;
-		if (args.contains("-d") || args.contains("--default-settings"))
-			factorySettings = true;
+    bool factorySettings = false;
+    if (args.contains("-d") || args.contains("--default-settings"))
+      factorySettings = true;
 
-		ApplicationWindow *mw = new ApplicationWindow(factorySettings);
-		mw->restoreApplicationGeometry();
-		/*if (mw->autoSearchUpdates){
-			mw->autoSearchUpdatesRequest = true;
-			mw->searchForUpdates();
-		}*/
-		mw->parseCommandLineArguments(args);
-        t.wait();
-        splash.finish(mw);
-	}
-	app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
-	return app.exec();
+    ApplicationWindow *mw = new ApplicationWindow(factorySettings);
+    mw->restoreApplicationGeometry();
+    /*if (mw->autoSearchUpdates){
+      mw->autoSearchUpdatesRequest = true;
+      mw->searchForUpdates();
+      }*/
+    mw->parseCommandLineArguments(args);
+    t.wait();
+      splash.finish(mw);
+  }
+  app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
+  return app.exec();
 }

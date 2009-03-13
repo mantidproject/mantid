@@ -306,6 +306,7 @@ HEADERS  += src/ApplicationWindow.h \
             src/DoubleSpinBox.h\
             src/MatrixCommand.h  \
             src/UserFunction.h  \
+            src/Mantid/MantidApplication.h \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/LoadDAEDlg.h \
 	    src/Mantid/ExecuteAlgorithm.h \
@@ -464,6 +465,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/DoubleSpinBox.cpp\
             src/MatrixCommand.cpp \
             src/UserFunction.cpp \
+            src/Mantid/MantidApplication.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/LoadDAEDlg.cpp \
 	    src/Mantid/ExecuteAlgorithm.cpp \
