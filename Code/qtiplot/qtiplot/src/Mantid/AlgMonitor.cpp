@@ -113,7 +113,8 @@ MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(par
     m_tree = 0;
     update(0);
     connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)), Qt::QueuedConnection);
-    connect(algMonitor,SIGNAL(needUpdateProgress(const IAlgorithm*,int, const QString&)),SLOT(updateProgress(const IAlgorithm*,int, const QString&)));
+    connect(algMonitor,SIGNAL(needUpdateProgress(const Mantid::API::IAlgorithm*,int, const QString&)),
+	    SLOT(updateProgress(const Mantid::API::IAlgorithm*,int, const QString&)));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     QPushButton *closeButton = new QPushButton("Close");
@@ -179,7 +180,7 @@ void MonitorDlg::update(int)
             algItem->addChild(new QTreeWidgetItem(lstr));
         }
 
-        connect(cancelButton,SIGNAL(clicked(AlgorithmID)),m_algMonitor,SLOT(cancel(AlgorithmID)));
+        connect(cancelButton,SIGNAL(clicked(Mantid::API::AlgorithmID)),m_algMonitor,SLOT(cancel(Mantid::API::AlgorithmID)));
     }
     m_algMonitor->unlock();
 }
