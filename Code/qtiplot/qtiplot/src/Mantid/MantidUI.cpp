@@ -4,12 +4,6 @@
 
 #include "ImportWorkspaceDlg.h"
 
-// Replaced with separate library
-//#include "ExecuteAlgorithm.h"
-//#include "LoadRawDlg.h"
-
-//#include "InputHistory.h" 
-
 #include "LoadDAEDlg.h"
 
 #include "AlgMonitor.h"
@@ -44,6 +38,8 @@
 #include <fstream>
 #include <iostream>
 using namespace std;
+
+using namespace Mantid::API;
  
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),

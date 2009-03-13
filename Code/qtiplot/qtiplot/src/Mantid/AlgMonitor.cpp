@@ -11,6 +11,7 @@
 #include <algorithm>
 
 using namespace std;
+using namespace Mantid::API;
 
 QMutex AlgorithmMonitor::s_mutex;
 

@@ -36,8 +36,6 @@ class MultiLayer;
 class QTabWidget;
 class UpdateDAEThread;
 
-using namespace Mantid::API;
-
 class MantidMatrixFunction: public UserHelperFunction
 {
 public:
@@ -213,11 +211,11 @@ protected:
 
     void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
 
-    void handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf);
-    Poco::NObserver<MantidMatrix, WorkspaceAfterReplaceNotification> m_replaceObserver;
+    void handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-    void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
-    Poco::NObserver<MantidMatrix, WorkspaceDeleteNotification> m_deleteObserver;
+    void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
+    Poco::NObserver<MantidMatrix, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
     ApplicationWindow *m_appWindow;
     Mantid::API::MatrixWorkspace_sptr m_workspace;

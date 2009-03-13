@@ -8,8 +8,6 @@
 #include <QMap>
 #include <QList>
 
-using namespace Mantid::Kernel;
-
 namespace Mantid
 {
     namespace API
