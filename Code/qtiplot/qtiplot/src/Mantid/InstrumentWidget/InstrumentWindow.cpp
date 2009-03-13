@@ -24,7 +24,7 @@
 #include "qwt_scale_div.h"
 #include "qwt_scale_engine.h"
 
-
+using namespace Mantid::API;
 
 /**
  * Contructor, creates the mdi subwindow within mantidplot

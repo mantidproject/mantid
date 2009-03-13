@@ -35,7 +35,6 @@ class AlgorithmDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
 
-using namespace Mantid::API;
 
 /** 
     MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid framework.
@@ -120,11 +119,6 @@ public:
     
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
-
-#ifdef _WIN32
-    // Shows 2D plot of current memory usage.
-    void memoryImage();
-#endif
 
     //  *****      Plotting Methods     *****  //
 
@@ -309,6 +303,13 @@ private slots:
     // Called in response to closedWindow(...) signal from a window with dependecies
     void closeDependents(MdiSubWindow* w);
 
+#ifdef _WIN32
+public: 
+    // Shows 2D plot of current memory usage.
+    void memoryImage();
+#endif
+
+
 private:
 
     // Execute algorithm asinchronously
@@ -318,14 +319,14 @@ private:
     void handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf);
     Poco::NObserver<MantidUI, Mantid::API::Algorithm::FinishedNotification> m_finishedLoadDAEObserver;
 
-    void handleAddWorkspace(WorkspaceAddNotification_ptr pNf);
-    Poco::NObserver<MantidUI, WorkspaceAddNotification> m_addObserver;
+    void handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf);
+    Poco::NObserver<MantidUI, Mantid::API::WorkspaceAddNotification> m_addObserver;
 
-    void handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf);
-    Poco::NObserver<MantidUI, WorkspaceAfterReplaceNotification> m_replaceObserver;
+    void handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+    Poco::NObserver<MantidUI, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-    void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
-    Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;
+    void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
+    Poco::NObserver<MantidUI, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
     // Sets the dependence between sindows: if the first one closes the second must close too.
     void setDependency(MdiSubWindow*,MdiSubWindow*);

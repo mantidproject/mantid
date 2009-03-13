@@ -1104,128 +1104,6 @@ void MantidUI::showLogFileWindow()
   dlg->setFocus();
 }
 
-
-//----------------------------------------------------------------------------------//
-#ifdef _WIN32
-
-struct mem_block
-{
-    int size;
-    int state;
-};
-
-///  Assess the virtual memeory of the current process.
-void countVirtual(vector<mem_block>& mem, int& total)
-{
-
-    MEMORYSTATUSEX memStatus;
-    memStatus.dwLength = sizeof(MEMORYSTATUSEX);
-    GlobalMemoryStatusEx( &memStatus );
-
-    MEMORY_BASIC_INFORMATION info;
-
-    char *addr = 0;
-    size_t free = 0;      // total free space
-    size_t reserved = 0;  // total reserved space
-    size_t committed = 0; // total commited (used) space
-    size_t size = 0;
-    size_t free_max = 0;     // maximum contiguous block of free memory
-    size_t reserved_max = 0; // maximum contiguous block of reserved memory
-    size_t committed_max = 0;// maximum contiguous block of committed memory
-
-    size_t GB2 = memStatus.ullTotalVirtual;// Maximum memeory available to the process
-    total = GB2;
-
-    // Loop over all virtual memory to find out the status of every block.
-    do
-    {
-        VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
-        
-        int state;
-        if (info.State == MEM_FREE)
-        {
-            free += info.RegionSize;
-            if (info.RegionSize > free_max) free_max = info.RegionSize;
-            state = 0;
-        }
-        if (info.State == MEM_RESERVE)
-        {
-            reserved += info.RegionSize;
-            if (info.RegionSize > reserved_max) reserved_max = info.RegionSize;
-            state = 500;
-        }
-        if (info.State == MEM_COMMIT)
-        {
-            committed += info.RegionSize;
-            if (info.RegionSize > committed_max) committed_max = info.RegionSize;
-            state = 1000;
-        }
-
-        addr += info.RegionSize;
-        size += info.RegionSize;
-
-        mem_block b = {info.RegionSize, state};
-        mem.push_back(b);
-
-    /*cerr<<"BaseAddress = "<< info.BaseAddress<<'\n';  
-    cerr<<"AllocationBase = "<< info.AllocationBase<<'\n';  
-    cerr<<"AllocationProtect = "<< info.AllocationProtect<<'\n';  
-    cerr<<"RegionSize = "<< hex << info.RegionSize<<'\n';  
-    cerr<<"State = "<< state_str(info.State)<<'\n';  
-    cerr<<"Protect = "<< hex << info.Protect <<' '<< protect_str(info.Protect)<<'\n';  
-    cerr<<"Type = "<< hex << info.Type<<'\n';*/
-
-    }
-    while(size < GB2);
-
-
-    cerr<<"count FREE = "<<dec<<free/1024<<'\n';
-    cerr<<"count RESERVED = "<<reserved/1024<<'\n';
-    cerr<<"count COMMITTED = "<<committed/1024<<'\n';
-
-    cerr<<"max FREE = "<<dec<<free_max<<'\n';
-    cerr<<"max RESERVED = "<<reserved_max<<'\n';
-    cerr<<"max COMMITTED = "<<committed_max<<'\n';
-    cerr<<'\n';
-}
-
-/// Shows 2D plot of current memory usage.
-/// One point is 1K of memory. One row is 1M.
-/// Red - used memory block, blue - free, green - reserved.
-void MantidUI::memoryImage()
-{
-    //ofstream ofil("memory.txt");
-    vector<mem_block> mem;
-    int total;
-    countVirtual(mem,total);
-    int colNum = 1024;
-    int rowNum = total/1024/colNum;
-    Matrix *m = appWindow()->newMatrix(rowNum,colNum);
-    m->setCoordinates(0,colNum,0,rowNum);
-    int row = 0;
-    int col = 0;
-    for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
-    {
-        int n = b->size/1024;
-        for(int i=0;i<n;i++)
-        {
-            m->setCell(row,col,b->state);
-            //ofil<<b->state<<'\t';
-            col++;
-            if (col >= colNum)
-            {
-                col = 0;
-                row++;
-                //ofil<<'\n';
-            }
-        }
-    }
-    MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
-}
-
-
-
-
     //  *****      Plotting Methods     *****  //
 
 /** Create a Table form specified spectra in a MatrixWorkspace
@@ -1452,6 +1330,7 @@ MultiLayer* MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool errs, bo
 
     return ml;
 }
+
 /** Create a 1d graph form specified spectra in a MatrixWorkspace. The workspace must be in the AnalisysDataService
     under name wsName. The range of the spectra to plot is from i0 to i1 inclusive.
     @param graphName Graph name
@@ -1568,4 +1447,129 @@ MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs,
     return ml;
 }
 
+//=========================================================================
+// 
+// This section defines some stuff that is only used on Windows
+//
+//=========================================================================
+#ifdef _WIN32
+
+struct mem_block
+{
+    int size;
+    int state;
+};
+
+///  Assess the virtual memeory of the current process.
+void countVirtual(vector<mem_block>& mem, int& total)
+{
+
+    MEMORYSTATUSEX memStatus;
+    memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+    GlobalMemoryStatusEx( &memStatus );
+
+    MEMORY_BASIC_INFORMATION info;
+
+    char *addr = 0;
+    size_t free = 0;      // total free space
+    size_t reserved = 0;  // total reserved space
+    size_t committed = 0; // total commited (used) space
+    size_t size = 0;
+    size_t free_max = 0;     // maximum contiguous block of free memory
+    size_t reserved_max = 0; // maximum contiguous block of reserved memory
+    size_t committed_max = 0;// maximum contiguous block of committed memory
+
+    size_t GB2 = memStatus.ullTotalVirtual;// Maximum memeory available to the process
+    total = GB2;
+
+    // Loop over all virtual memory to find out the status of every block.
+    do
+    {
+        VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+        
+        int state;
+        if (info.State == MEM_FREE)
+        {
+            free += info.RegionSize;
+            if (info.RegionSize > free_max) free_max = info.RegionSize;
+            state = 0;
+        }
+        if (info.State == MEM_RESERVE)
+        {
+            reserved += info.RegionSize;
+            if (info.RegionSize > reserved_max) reserved_max = info.RegionSize;
+            state = 500;
+        }
+        if (info.State == MEM_COMMIT)
+        {
+            committed += info.RegionSize;
+            if (info.RegionSize > committed_max) committed_max = info.RegionSize;
+            state = 1000;
+        }
+
+        addr += info.RegionSize;
+        size += info.RegionSize;
+
+        mem_block b = {info.RegionSize, state};
+        mem.push_back(b);
+
+    /*cerr<<"BaseAddress = "<< info.BaseAddress<<'\n';  
+    cerr<<"AllocationBase = "<< info.AllocationBase<<'\n';  
+    cerr<<"AllocationProtect = "<< info.AllocationProtect<<'\n';  
+    cerr<<"RegionSize = "<< hex << info.RegionSize<<'\n';  
+    cerr<<"State = "<< state_str(info.State)<<'\n';  
+    cerr<<"Protect = "<< hex << info.Protect <<' '<< protect_str(info.Protect)<<'\n';  
+    cerr<<"Type = "<< hex << info.Type<<'\n';*/
+
+    }
+    while(size < GB2);
+
+
+    cerr<<"count FREE = "<<dec<<free/1024<<'\n';
+    cerr<<"count RESERVED = "<<reserved/1024<<'\n';
+    cerr<<"count COMMITTED = "<<committed/1024<<'\n';
+
+    cerr<<"max FREE = "<<dec<<free_max<<'\n';
+    cerr<<"max RESERVED = "<<reserved_max<<'\n';
+    cerr<<"max COMMITTED = "<<committed_max<<'\n';
+    cerr<<'\n';
+}
+
+/// Shows 2D plot of current memory usage.
+/// One point is 1K of memory. One row is 1M.
+/// Red - used memory block, blue - free, green - reserved.
+void MantidUI::memoryImage()
+{
+    //ofstream ofil("memory.txt");
+    vector<mem_block> mem;
+    int total;
+    countVirtual(mem,total);
+    int colNum = 1024;
+    int rowNum = total/1024/colNum;
+    Matrix *m = appWindow()->newMatrix(rowNum,colNum);
+    m->setCoordinates(0,colNum,0,rowNum);
+    int row = 0;
+    int col = 0;
+    for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+    {
+        int n = b->size/1024;
+        for(int i=0;i<n;i++)
+        {
+            m->setCell(row,col,b->state);
+            //ofil<<b->state<<'\t';
+            col++;
+            if (col >= colNum)
+            {
+                col = 0;
+                row++;
+                //ofil<<'\n';
+            }
+        }
+    }
+    MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
+}
+
 #endif
+//=======================================================================
+// End of Windows specfic stuff
+//=======================================================================
