@@ -44,11 +44,21 @@ namespace Mantid
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
   /// Author Laurent Chapon 10/03/2009
-  /// Function to rebin Histogram. This is about
+  /// Function to rebin Histogram.
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
           const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool add);
 
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
+
+  template <class T> struct SumGaussError: public std::binary_function<T,T,T>
+  {
+  	SumGaussError(){}
+  		  inline T operator()(const T& l, const T& r) const
+  		  {
+  		  	return sqrt(l*l+r*r);
+  		  }
+  };
+
   template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {
 	  SumSquares(){}
