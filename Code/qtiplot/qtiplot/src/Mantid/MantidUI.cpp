@@ -947,7 +947,8 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMat
   if (!ws.get()) return NULL;
   
   Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, false, false);
-  MultiLayer* ml = createGraphFromTable(t,3);
+  int type = ws->isHistogramData()? 1 : 3;
+  MultiLayer* ml = createGraphFromTable(t,type);
   if (!ml) return NULL;
 
   m->setSpectrumGraph(ml,t);
