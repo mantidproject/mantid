@@ -16,4 +16,4 @@ gridGEM.plotGraph2D(Layer.ColorMap)
 Rebin(InputWorkspace="GEM38370", OutputWorkspace="MyWorkspace", params="0,200,20000")
 
 # Step (5) - Create a 1D plot of a spectrum. In python this automatically creates the corresponding matrix
-plotSpectrum("MyWorkspace", 10)
+plotSpectrum("MyWorkspace", 9)

@@ -1,5 +1,7 @@
+setWorkingDirectory("C:/MantidInstall")
+
 #execute a few algorithms
-mtd.execute("LoadRaw","C:/Mantid/Test/Data/MAR11060.RAW;test",-1)
+mtd.execute("LoadRaw","Data/MAR11060.RAW;test",-1)
 mtd.execute("ConvertUnits","test;converted;dSpacing",-1)
 mtd.execute("Rebin","converted;rebinned;0.1,0.001,5",-1)
 #clear up intermediate workspaces

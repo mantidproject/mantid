@@ -1,7 +1,7 @@
 # Instrument Window test script
 setWorkingDirectory("/home/dmn58364/Mantid/trunk/Test/Data")
 
-LoadRaw("LOQ sans configuration/LOQ48094.raw","LOQTest")
+LoadRaw("LOQ48094.raw","LOQTest")
 
 insView = getInstrumentView("LOQTest")
 
