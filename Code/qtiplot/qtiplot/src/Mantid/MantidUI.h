@@ -91,9 +91,6 @@ public:
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
     
-    // Load a workspace from a raw file.
-    void LoadIsisRawFile(const QString& fileName, const QString& workspaceName,const QString& spectrum_min,const QString& spectrum_max
-                               ,const QString& spectrum_list,const QString& cache);
     // Create an algorithm using Mantid FrameworkManager
     Mantid::API::IAlgorithm_sptr CreateAlgorithm(const QString& algName);
     
@@ -112,20 +109,8 @@ public:
     // Returns the name and version of the algorithm selected in algorithm dock window
     void getSelectedAlgorithm(QString& algName, int& version);
     
-    // Returns the number of bins in a workspace (do we need it?)
-    int getBinNumber(const QString& workspaceName);
-    
-    // Returns the number of histograms in a workspace (do we need it?)
-    int getHistogramNumber(const QString& workspaceName);
-    
     // Adjusts QtiPlot's main menu if a MantidMatrix becomes active (receives focus)
     bool menuAboutToShow(QMdiSubWindow *w);
-    
-    // Creates a 3D plot in QtiPlot if the active window is a MantidMatrix
-    Graph3D *plot3DMatrix(int style);
-    
-    // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
-    MultiLayer *plotSpectrogram(Graph::CurveType type);
     
     // Removes references to MantidMatrix w in QtiPlot (called when matrix closes)
     void removeWindowFromLists(MdiSubWindow* w);
@@ -133,38 +118,75 @@ public:
     // Prepares the contex menu for MantidMatrix
     void showContextMenu(QMenu& cm, MdiSubWindow* w);
     
-    // Copies selected rows from m to Y and errY columns of a new Table. If vis == true the table is visible,
-    // if errs == true errors are copied
-    Table* createTableFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true, bool forPlotting = false);
-
-    // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-    void createGraphFromSelectedRows(MantidMatrix *m, bool vis = true, bool errs = true);
-
-    // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
-    Table* createTableDetectors(MantidMatrix *m);
-
-    // Copies selected columns (time bins) in a MantidMatrix to a Table
-    Table* createTableFromSelectedColumns(MantidMatrix *m, bool visible, bool errs);
-
-    // Shows 1D graphs of selected time bins (columns) in a MantidMatrix
-    void createGraphFromSelectedColumns(MantidMatrix *m, bool vis = true, bool errs = true);
-
-    // Copy to a Table Y-values (and Err-values if errs==true) of spectra with indeces from i0 to i1 (inclusive) from a workspace
-    Table* createTableFromSelectedRows(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool forPlotting=false);
-
-    // Copy to a Table Y-values (and Err-values if errs==true) of spectra with indeces in a std::list from a workspace
-	Table* createTableFromSelectedRowsList(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> index, bool errs=true, bool forPlotting=false);
-
-    // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
-    Table* createTableFromSelectedColumns(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs=true, bool forPlotting=false);
-
-
-  // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
+    // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
+
 #ifdef _WIN32
     // Shows 2D plot of current memory usage.
     void memoryImage();
 #endif
+
+    //  *****      Plotting Methods     *****  //
+
+    // Creates a 3D plot in QtiPlot if the active window is a MantidMatrix
+    Graph3D *plot3DMatrix(int style);
+    
+    // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
+    MultiLayer *plotSpectrogram(Graph::CurveType type);
+
+    /// Create a Table form specified spectra in a MatrixWorkspace
+    Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false);
+    
+
+    // Copies selected rows from MantidMatrix to Y and errY columns of a new Table.
+    Table* createTableFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false);
+
+    // Copy to a Table Y-values (and Err-values if errs==true) of spectra with indeces from i0 to i1 (inclusive) from a workspace
+    Table* createTableFromSpectraRange(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false);
+
+    /// Create a 1d graph form a Table
+    //MultiLayer* createGraphFromTable(Table* t, Graph::CurveType type = Graph::Line);
+    MultiLayer* createGraphFromTable(Table* t, int type = 0);
+
+    /// Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* createGraphFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
+
+    /// Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* createGraphFromSpectraRange(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);
+
+    // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
+    MultiLayer* createGraphFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false, bool tableVisible = false);
+
+    // Set properties of a 1d graph which plots data from a workspace
+    static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
+
+    // Set properties of a 1d graph which plots data from a workspace
+    static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
+
+    // Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* plotSpectraList(const QString& wsName, std::vector<int> indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
+
+    // Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);
+
+
+
+
+    // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
+    Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs=true,int fromRow = -1, int toRow = -1);
+
+    // Copies selected columns (time bins) in a MantidMatrix to a Table
+    Table* createTableFromSelectedColumns(MantidMatrix *m, bool errs);
+
+
+    // Shows 1D graphs of selected time bins (columns) in a MantidMatrix
+    MultiLayer* createGraphFromSelectedColumns(MantidMatrix *m, bool errs = true, bool tableVisible = false);
+
+    // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
+    Table* createTableDetectors(MantidMatrix *m);
+
+    //  *****                            *****  //
+
   /** ---------------------------------
    * Commands purely for python interaction
    */
@@ -206,7 +228,7 @@ public slots:
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
 
-    // Updates Mantid the user interface
+    // Updates Mantid user interface
     void update();
 
     // Load a workspace from a raw file by running a LoadRaw algorithm with properties supplied through a dialog box.
@@ -282,6 +304,11 @@ public slots:
   // Clear all Mantid related memory
   void clearAllMemory();
 
+private slots:
+
+    // Called in response to closedWindow(...) signal from a window with dependecies
+    void closeDependents(MdiSubWindow* w);
+
 private:
 
     // Execute algorithm asinchronously
@@ -299,6 +326,9 @@ private:
 
     void handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidUI, WorkspaceDeleteNotification> m_deleteObserver;
+
+    // Sets the dependence between sindows: if the first one closes the second must close too.
+    void setDependency(MdiSubWindow*,MdiSubWindow*);
 
     // Private variables
 
@@ -326,6 +356,8 @@ private:
     // UpdateDAE must be launched after LoadDAE for this workspace
     QMap<std::string,int> m_DAE_map;
 
+    // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
+    std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
 
 };
 

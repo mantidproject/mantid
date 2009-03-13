@@ -664,18 +664,22 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	return g;
 }
 
-void MantidMatrix::setGraph1D(MultiLayer *ml, Table* t)
+void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
 {
-    Graph* g = ml->activeGraph();
-    g->setTitle(tr("Workspace ")+name());
-    Mantid::API::Axis* ax;
-    ax = m_workspace->getAxis(0);
-    std::string s;
-    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    MantidUI::setUpSpectrumGraph(ml,name(),workspace());
+    connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+    if (t) 
+    {
+        m_plots1D[ml] = t;
+        connect(t, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+    }
     else
-        s = "X axis";
-    g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr(m_workspace->YUnit().c_str()));
+        m_plots2D<<ml;
+}
+
+void MantidMatrix::setBinGraph(MultiLayer *ml, Table* t)
+{
+    MantidUI::setUpBinGraph(ml,name(),workspace());
     connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
     if (t) 
     {
@@ -805,8 +809,8 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
     {
       if( itr.value() == (Table*)w )
       {
-	m_plots1D.erase(itr);
-	break;
+          m_plots1D.erase(itr);
+          break;
       }
     }
   }

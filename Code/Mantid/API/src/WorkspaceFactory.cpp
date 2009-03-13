@@ -135,7 +135,11 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   }
   else
   {
-    ws = this->create(className);
+      // We can create a ManagedRawFileWorkspace2D only in LoadRaw algorithm
+      if ( className == "ManagedRawFileWorkspace2D" )
+          ws = this->create("Workspace2D");
+      else
+          ws = this->create(className);
   }
 
   ws->initialize(NVectors,XLength,YLength);
