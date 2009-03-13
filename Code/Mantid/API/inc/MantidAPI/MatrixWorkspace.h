@@ -18,6 +18,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
+#include <list>
 
 namespace Mantid
 {
@@ -142,6 +143,13 @@ public:
   const bool& isDistribution() const;
   bool& isDistribution(bool newValue);
 
+  // Methods to set and access masked bins
+  void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
+  bool hasMaskedBins(const int& spectrumIndex) const;
+  /// Masked bins for each spectrum are stored as a list of pairs containing <bin index, weight>
+  typedef std::list< std::pair<int,double> > MaskList;
+  const MaskList& maskedBins(const int& spectrumIndex) const;
+  
 protected:
   MatrixWorkspace();
 
@@ -175,6 +183,9 @@ private:
   /// Parameters modifying the base instrument
   boost::shared_ptr<Geometry::ParameterMap> sptr_parmap;
 
+  /// The set of masked bins in a map keyed on spectrum index
+  std::map< int, MaskList > m_masks;
+  
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };

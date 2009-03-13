@@ -72,6 +72,9 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   // Only copy the axes over if new sizes are not given
   if ( !differentSize )
   {
+    // Only copy mask map if same size for now. Later will need to check continued validity.
+    ws->m_masks = parent->m_masks;
+    
     for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
     {
       // Need to delete the existing axis created in init above

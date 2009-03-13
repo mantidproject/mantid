@@ -77,7 +77,6 @@ void SumSpectra::exec()
   for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j)
   {
     // Retrieve the spectrum into a vector
-    const std::vector<double>& XValues = localworkspace->readX(i);
     const std::vector<double>& YValues = localworkspace->readY(i);
     const std::vector<double>& YErrors = localworkspace->readE(i);
 

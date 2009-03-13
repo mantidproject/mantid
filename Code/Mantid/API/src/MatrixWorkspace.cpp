@@ -279,6 +279,56 @@ bool& MatrixWorkspace::isDistribution(bool newValue)
   return m_isDistribution;
 }
 
+/** Masks a single bin. It's value (and error) will be scaled by (1-weight).
+ *  @param spectrumIndex The workspace spectrum index of the bin
+ *  @param binIndex      The index of the bin in the spectrum
+ *  @param weight        'How heavily' the bin is to be masked. =1 for full masking (the default).
+ */
+void MatrixWorkspace::maskBin(const int& spectrumIndex, const int& binIndex, const double& weight)
+{
+  // First check the spectrumIndex is valid
+  if (spectrumIndex < 0 || spectrumIndex >= this->getNumberHistograms() )
+    throw Kernel::Exception::IndexError(spectrumIndex,this->getNumberHistograms(),"MatrixWorkspace::maskBin,spectrumIndex");
+  // Then check the bin index
+  if (binIndex < 0 || binIndex>= this->blocksize() )
+    throw Kernel::Exception::IndexError(binIndex,this->blocksize(),"MatrixWorkspace::maskBin,binIndex");
+  
+  // If a mask for this bin already exists, it would be replaced. But I think that is OK.
+  // First get a reference to the list for this spectrum (or create a new list)
+  MatrixWorkspace::MaskList& specList = m_masks[spectrumIndex];
+  // Add the new value
+  specList.push_back( std::make_pair(binIndex,weight) );
+  // We want to keep each list in order of ascending bin number
+  specList.sort();
+  
+  this->dataY(spectrumIndex)[binIndex] *= (1-weight);
+  // Do we want to scale the error?
+  this->dataE(spectrumIndex)[binIndex] *= (1-weight);
+}
+
+/** Does this spectrum contain any masked bins 
+ *  @param spectrumIndex The workspace spectrum index to test
+ *  @return True if there are masked bins for this spectrum
+ */
+bool MatrixWorkspace::hasMaskedBins(const int& spectrumIndex) const
+{
+  return (m_masks.find(spectrumIndex)==m_masks.end()) ? false : true;
+}
+
+/** Returns the list of masked bins for a spectrum. 
+ *  @param  spectrumIndex
+ *  @return A const reference to the list of masked bins
+ *  @throw  Kernel::Exception::IndexError if there are no bins masked for this spectrum (so call hasMaskedBins first!)
+ */
+const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrumIndex) const
+{
+  std::map<int,MaskList>::const_iterator it = m_masks.find(spectrumIndex);
+  // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
+  if (it==m_masks.end()) throw Kernel::Exception::IndexError(spectrumIndex,0,"MatrixWorkspace::maskedBins");
+  
+  return it->second;
+}
+
 long int MatrixWorkspace::getMemorySize() const
 {
     return 3*size()*sizeof(double)/1024;
