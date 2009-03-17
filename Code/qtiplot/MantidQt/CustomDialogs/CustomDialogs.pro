@@ -27,11 +27,14 @@ SOURCES = \
 
 HEADERS = \
   $$HEADERDIR/LoadRawDialog.h \
-  $$HEADERDIR/LOQScriptInputDialog.h
+  $$HEADERDIR/LOQScriptInputDialog.h 
   
 UI_DIR = $$HEADERDIR
 
-FORMS = $$HEADERDIR/LOQScriptInputDialog.ui
+FORMS = \
+  $$HEADERDIR/LOQScriptInputDialog.ui
+
+UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
 
 TARGET = MantidQtCustomDialogs
 
