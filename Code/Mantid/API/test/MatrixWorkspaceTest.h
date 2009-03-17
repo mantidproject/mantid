@@ -20,14 +20,15 @@ public:
   // Empty overrides of virtual methods
   virtual const int getNumberHistograms() const { return 1;}
   const std::string id() const {return "WorkspaceTester";}
-  void init(const int&, const int&, const int&)
+  void init(const int& i, const int& j, const int& k)
   {
+    vec.resize(j,1.0);
     // Put an 'empty' axis in to test the getAxis method
     m_axes.resize(1);
     m_axes[0] = new Axis(AxisType::Numeric,1);
   }
-  int size() const {return 1;}
-  int blocksize() const {return 1;}
+  int size() const {return vec.size();}
+  int blocksize() const {return vec.size();}
   std::vector<double>& dataX(int const index) {return vec;}
   std::vector<double>& dataY(int const index) {return vec;}
   std::vector<double>& dataE(int const index) {return vec;}
@@ -129,6 +130,47 @@ public:
     TS_ASSERT_EQUALS( ws->YUnit(), "something" )
   }
 
+  void testMasking()
+  {
+    MatrixWorkspace *ws2 = new Mantid::DataObjects::WorkspaceTester;
+    ws2->initialize(1,2,2);
+    TS_ASSERT( !ws2->hasMaskedBins(0) )
+    // Doesn't throw on invalid spectrum index, just returns false
+    TS_ASSERT( !ws2->hasMaskedBins(1) )
+    TS_ASSERT( !ws2->hasMaskedBins(-1) )
+    
+    // Will throw if nothing masked for spectrum
+    TS_ASSERT_THROWS( ws2->maskedBins(0), Mantid::Kernel::Exception::IndexError )
+    // Will throw if attempting to mask invalid spectrum
+    TS_ASSERT_THROWS( ws2->maskBin(-1,1), Mantid::Kernel::Exception::IndexError )
+    TS_ASSERT_THROWS( ws2->maskBin(1,1), Mantid::Kernel::Exception::IndexError )
+    // ...or an invalid bin
+    TS_ASSERT_THROWS( ws2->maskBin(0,-1), Mantid::Kernel::Exception::IndexError )
+    TS_ASSERT_THROWS( ws2->maskBin(0,2), Mantid::Kernel::Exception::IndexError )
+    
+    // Now do a valid masking
+    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,1,0.5) )
+    TS_ASSERT( ws2->hasMaskedBins(0) )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 1 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().first, 1 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().second, 0.5 )
+    // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
+    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
+    
+    // Now mask a bin earlier than above and check it's sorting properly
+    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) )
+    TS_ASSERT( ws2->hasMaskedBins(0) )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 2 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().first, 0 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().second, 1.0 )
+    // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
+    TS_ASSERT_EQUALS( ws2->dataY(0)[0], 0.0 )
+    // Check the previous masking is still OK
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).back().first, 1 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).back().second, 0.5 )
+    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
+  }
+  
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

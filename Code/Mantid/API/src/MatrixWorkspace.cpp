@@ -17,7 +17,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("Workspace");
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
   sptr_instrument(new Instrument), m_spectramap(), sptr_sample(new Sample),
-   m_YUnit("Counts"), m_isDistribution(false),sptr_parmap(new Geometry::ParameterMap)
+  m_YUnit("Counts"), m_isDistribution(false), sptr_parmap(new Geometry::ParameterMap), m_masks()
 {}
 
 /// Destructor
@@ -312,6 +312,8 @@ void MatrixWorkspace::maskBin(const int& spectrumIndex, const int& binIndex, con
  */
 bool MatrixWorkspace::hasMaskedBins(const int& spectrumIndex) const
 {
+  // First check the spectrumIndex is valid. Return false if it isn't (decided against throwing here).
+  if (spectrumIndex < 0 || spectrumIndex >= this->getNumberHistograms() ) return false;
   return (m_masks.find(spectrumIndex)==m_masks.end()) ? false : true;
 }
 
