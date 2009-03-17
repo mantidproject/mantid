@@ -260,6 +260,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SaveFocussedXYE.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveRKH.cpp"
 				>
 			</File>
@@ -427,6 +431,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveCSVTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveFocusedXYE.h"
 				>
 			</File>
 			<File

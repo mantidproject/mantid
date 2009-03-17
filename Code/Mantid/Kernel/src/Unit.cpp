@@ -370,8 +370,15 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = efixed - *it;
-      const double t2 = factor / sqrt(e2);
-      *it = t1 + t2;
+      if (e2<=0.0)
+      {
+        *it = DBL_MAX;
+      }
+      else
+      {
+        const double t2 = factor / sqrt(e2);
+        *it = t1 + t2;
+      }
     }
   }
   else if (emode == 2)
@@ -383,8 +390,15 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = efixed + *it;
-      const double t1 = factor / sqrt(e1);
-      *it = t1 + t2;
+      if (e1<=0.0)
+      {
+        *it = -DBL_MAX;
+      }
+      else
+      {
+        const double t1 = factor / sqrt(e1);
+        *it = t1 + t2;
+      }
     }
   }
   else
@@ -411,8 +425,15 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t2 = *it - t1;
-      const double e2 = factor / (t2 * t2);
-      *it = efixed - e2;
+      if (t2<=0.0)
+      {
+        *it = -DBL_MAX;
+      }
+      else
+      {
+        const double e2 = factor / (t2 * t2);
+        *it = efixed - e2;
+      }
     }
   }
   else if (emode == 2)
@@ -424,8 +445,15 @@ void DeltaE::fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, con
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t1 = *it - t2;
-      const double e1 = factor / (t1 * t1);
-      *it = e1 - efixed;
+      if (t1<=0.0)
+      {
+        *it = DBL_MAX;
+      }
+      else
+      {
+        const double e1 = factor / (t1 * t1);
+        *it = e1 - efixed;
+      }
     }
   }
   else
@@ -459,8 +487,15 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = (efixed - *it) / PhysicalConstants::meVtoWavenumber;
-      const double t2 = factor / sqrt(e2);
-      *it = t1 + t2;
+      if (e2<=0.0)
+      {
+        *it = DBL_MAX;
+      }
+      else
+      {
+        const double t2 = factor / sqrt(e2);
+        *it = t1 + t2;
+      }
     }
   }
   else if (emode == 2)
@@ -472,8 +507,15 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = (efixed + *it) / PhysicalConstants::meVtoWavenumber;
-      const double t1 = factor / sqrt(e1);
-      *it = t1 + t2;
+      if (e1<=0.0)
+      {
+        *it = -DBL_MAX;
+      }
+      else
+      {
+        const double t1 = factor / sqrt(e1);
+        *it = t1 + t2;
+      }
     }
   }
   else
@@ -500,8 +542,15 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t2 = *it - t1;
-      const double e2 = factor / (t2 * t2);
-      *it = (efixed - e2) * PhysicalConstants::meVtoWavenumber;
+      if (t2<=0.0)
+      {
+        *it = -DBL_MAX;
+      }
+      else
+      {
+        const double e2 = factor / (t2 * t2);
+        *it = (efixed - e2) * PhysicalConstants::meVtoWavenumber;
+      }
     }
   }
   else if (emode == 2)
@@ -513,8 +562,15 @@ void DeltaE_inWavenumber::fromTOF(std::vector<double>& xdata, std::vector<double
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double t1 = *it - t2;
-      const double e1 = factor / (t1 * t1);
-      *it = (e1 - efixed) * PhysicalConstants::meVtoWavenumber;
+      if (t1<=0.0)
+      {
+        *it = DBL_MAX;
+      }
+      else
+      {
+        const double e1 = factor / (t1 * t1);
+        *it = (e1 - efixed) * PhysicalConstants::meVtoWavenumber;
+      }
     }
   }
   else

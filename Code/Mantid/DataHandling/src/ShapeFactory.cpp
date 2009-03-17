@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/ShapeFactory.h"
-#include "MantidAPI/Instrument.h"
 
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"

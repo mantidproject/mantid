@@ -66,8 +66,12 @@ void CorrectToFile::exec()
   const std::vector<double> &Ycor = rkhInput->readY(0);
   const std::vector<double> &Ecor = rkhInput->readE(0);
 
-  // Create the output workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(toCorrect);
+  // Only create the output workspace if it's not the same as the input one
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (outputWS != toCorrect)
+  {
+    outputWS = WorkspaceFactory::Instance().create(toCorrect);
+  }
   const bool histogramData = outputWS->isHistogramData();
   const std::string operation = getProperty("WorkspaceOperation");
   const bool divide = (operation == "Divide") ? true : false;
