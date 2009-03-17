@@ -25,7 +25,7 @@ using namespace MantidQt::CustomDialogs;
 //---------------------------------------
 
 /// Constructor
-LOQScriptInputDialog::LOQScriptInputDialog(MantidQt::API::AlgorithmDialog* parent) :
+LOQScriptInputDialog::LOQScriptInputDialog(QWidget* parent) :
   AlgorithmDialog(parent)
 {
 }

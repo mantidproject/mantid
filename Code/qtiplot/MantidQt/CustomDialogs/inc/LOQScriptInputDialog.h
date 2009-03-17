@@ -4,7 +4,7 @@
 //---------------------------
 // Includes
 //--------------------------
-#include "ui_LOQScriptInputDialog.h"
+#include "MantidQtCustomDialogs/ui_LOQScriptInputDialog.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 
 namespace MantidQt
@@ -45,7 +45,7 @@ class LOQScriptInputDialog : public MantidQt::API::AlgorithmDialog
   public:
   
   /// Default constructor
-  LOQScriptInputDialog(MantidQt::API::AlgorithmDialog* parent = 0);
+  LOQScriptInputDialog(QWidget *parent = 0);
 
   private:
 
