@@ -100,60 +100,78 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 
         std::string primitiveName = pE->tagName();  // get name of primitive
 
-        if ( !primitiveName.compare("sphere"))
+        // if there are any error thrown while parsing the XML string for a given shape
+        // write out a warning to the user that this shape is ignored. If all shapes are ignored
+        // this way an empty object is returned to the user.
+        try 
         {
-		  lastElement=pE;
-          idMatching[idFromUser] = parseSphere(pE, primitives, l_id);  
-          numPrimitives++;
+          if ( !primitiveName.compare("sphere"))
+          {
+            lastElement=pE;
+            idMatching[idFromUser] = parseSphere(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("infinite-plane"))
+          {
+            idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("infinite-cylinder"))
+          {
+            idMatching[idFromUser] = parseInfiniteCylinder(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("cylinder"))
+          {
+            lastElement=pE;
+            idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("cuboid"))
+          {
+            lastElement=pE;
+            idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("infinite-cone"))
+          {
+            idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("cone"))
+          {
+            lastElement=pE;
+            idMatching[idFromUser] = parseCone(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("hexahedron"))
+          {
+            idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("torus"))
+          {
+            idMatching[idFromUser] = parseTorus(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else if ( !primitiveName.compare("slice-of-cylinder-ring"))
+          {
+            idMatching[idFromUser] = parseSliceOfCylinderRing(pE, primitives, l_id);  
+            numPrimitives++;
+          }
+          else
+          {
+            g_log.warning(primitiveName + " not a recognised geometric shape. This shape is ignored.");
+          }
         }
-        else if ( !primitiveName.compare("infinite-plane"))
-        {
-          idMatching[idFromUser] = parseInfinitePlane(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("infinite-cylinder"))
-        {
-          idMatching[idFromUser] = parseInfiniteCylinder(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("cylinder"))
-        {
-		  lastElement=pE;
-          idMatching[idFromUser] = parseCylinder(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("cuboid"))
-        {
-		  lastElement=pE;
-          idMatching[idFromUser] = parseCuboid(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("infinite-cone"))
-        {
-          idMatching[idFromUser] = parseInfiniteCone(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("cone"))
-        {
-		  lastElement=pE;
-          idMatching[idFromUser] = parseCone(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("hexahedron"))
-        {
-          idMatching[idFromUser] = parseHexahedron(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("torus"))
-        {
-          idMatching[idFromUser] = parseTorus(pE, primitives, l_id);  
-          numPrimitives++;
-        }
-        else if ( !primitiveName.compare("slice-of-cylinder-ring"))
-        {
-          idMatching[idFromUser] = parseSliceOfCylinderRing(pE, primitives, l_id);  
-          numPrimitives++;
-        }
+		    catch (std::invalid_argument& e)
+		    {
+			    g_log.warning() << e.what() << " <" << primitiveName << "> shape is ignored.";
+		    }
+		    catch (...)
+		    {
+			    g_log.warning() << " Problem with parsing XML string for <" << primitiveName << ">. This shape is ignored.";
+		    }
       }
     }
   }
@@ -240,7 +258,7 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, G
   // create sphere
   Sphere* pSphere = new Sphere;
   pSphere->setCentre(parsePosition(pElemCentre)); 
-  pSphere->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  pSphere->setRadius(getDoubleAttribute(pElemRadius,"val"));
   prim[l_id] = pSphere;
 
   std::stringstream retAlgebraMatch;
@@ -300,7 +318,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
   pCylinder->setNorm(parsePosition(pElemAxis));
   V3D dummy2 = pCylinder->getNormal();
 
-  pCylinder->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  pCylinder->setRadius(getDoubleAttribute(pElemRadius,"val"));
   prim[l_id] = pCylinder;
 
   std::stringstream retAlgebraMatch;
@@ -333,7 +351,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   Cylinder* pCylinder = new Cylinder();
   pCylinder->setCentre(parsePosition(pElemCentre));              
   pCylinder->setNorm(normVec);  
-  pCylinder->setRadius(atof( (pElemRadius->getAttribute("val")).c_str() ));
+  pCylinder->setRadius(getDoubleAttribute(pElemRadius,"val"));
   prim[l_id] = pCylinder;
 
   std::stringstream retAlgebraMatch;
@@ -343,7 +361,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   // add top plane
   Plane* pPlaneTop = new Plane();
   V3D pointInPlane = parsePosition(pElemCentre);
-  double height = atof( (pElemHeight->getAttribute("val")).c_str() );
+  double height = getDoubleAttribute(pElemHeight,"val");
   pointInPlane += (normVec * height); // to get point in top plane
   pPlaneTop->setPlane(pointInPlane, normVec); 
   prim[l_id] = pPlaneTop;
@@ -463,7 +481,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
   Cone* pCone = new Cone();
   pCone->setCentre(parsePosition(pElemTipPoint));              
   pCone->setNorm(normVec);  
-  pCone->setAngle(atof( (pElemAngle->getAttribute("val")).c_str() ));
+  pCone->setAngle(getDoubleAttribute(pElemAngle,"val"));
   prim[l_id] = pCone;
 
   std::stringstream retAlgebraMatch;
@@ -505,7 +523,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geo
   Cone* pCone = new Cone();
   pCone->setCentre(parsePosition(pElemTipPoint));              
   pCone->setNorm(normVec);  
-  pCone->setAngle(atof( (pElemAngle->getAttribute("val")).c_str() ));
+  pCone->setAngle(getDoubleAttribute(pElemAngle,"val"));
   prim[l_id] = pCone;
 
   std::stringstream retAlgebraMatch;
@@ -515,7 +533,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geo
   // Plane to cut off cone from below
   Plane* pPlaneTop = new Plane();
   V3D pointInPlane = parsePosition(pElemTipPoint);
-  double height = atof( (pElemHeight->getAttribute("val")).c_str() );
+  double height = getDoubleAttribute(pElemHeight, "val");
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec); 
   prim[l_id] = pPlaneTop;
@@ -643,8 +661,8 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Ge
   Torus* pTorus = new Torus();
   pTorus->setCentre(parsePosition(pElemCentre));              
   pTorus->setNorm(normVec);  
-  pTorus->setDistanceFromCentreToTube(atof( (pElemRadiusFromCentre->getAttribute("val")).c_str() ));
-  pTorus->setTubeRadius(atof( (pElemRadiusTube->getAttribute("val")).c_str() ));
+  pTorus->setDistanceFromCentreToTube(getDoubleAttribute(pElemRadiusFromCentre,"val"));
+  pTorus->setTubeRadius(getDoubleAttribute(pElemRadiusTube,"val"));
   prim[l_id] = pTorus;
 
   std::stringstream retAlgebraMatch;
@@ -671,8 +689,8 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   Element* pElemOuterRadius = getShapeElement(pElem, "outer-radius");  
   Element* pElemDepth = getShapeElement(pElem, "depth"); 
 
-  double innerRadius = atof( (pElemInnerRadius->getAttribute("val")).c_str() );
-  double outerRadius = atof( (pElemOuterRadius->getAttribute("val")).c_str() );
+  double innerRadius = getDoubleAttribute(pElemInnerRadius,"val");
+  double outerRadius = getDoubleAttribute(pElemOuterRadius,"val");
   double middleRadius = (outerRadius + innerRadius)/2.0;
 
   V3D normVec(0,0,1);
@@ -699,7 +717,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   // add top cutoff plane of infinite cylinder ring
   Plane* pPlaneTop = new Plane();
-  double depth = atof( (pElemDepth->getAttribute("val")).c_str() );
+  double depth = getDoubleAttribute(pElemDepth,"val");
   pPlaneTop->setPlane(V3D(0,0,depth), normVec); 
   prim[l_id] = pPlaneTop;
   retAlgebraMatch << "-" << l_id << " ";
@@ -716,7 +734,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   // the two planes that are going to cut a slice of the cylinder ring
 
-  double arc = (M_PI/180.0) * atof( (pElemArc->getAttribute("val")).c_str() );
+  double arc = (M_PI/180.0) * getDoubleAttribute(pElemArc,"val");
 
   Plane* pPlaneSlice1 = new Plane();
   pPlaneSlice1->setPlane(V3D(-middleRadius,0,0), V3D(cos(arc/2.0+M_PI/2.0),sin(arc/2.0+M_PI/2.0),0)); 
@@ -741,7 +759,7 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
  *  @param name Name of subelement 
  *  @return The subelement
  *
- *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
+ *  @throw std::invalid_argument Thrown if issues with XML string
  */
 Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, const std::string& name)
 {
@@ -749,12 +767,35 @@ Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, con
   NodeList* pNL = pElem->getElementsByTagName(name);
   if ( pNL->length() != 1)
   {
-    throw Kernel::Exception::InstrumentDefinitionError("XML element: " + pElem->tagName() +
-      " must contain exactly subelement with name: " + name + ".");
+    throw std::invalid_argument("XML element: <" + pElem->tagName() +
+      "> must contain exactly one sub-element with name: <" + name + ">.");
   }
   Element* retVal = static_cast<Element*>(pNL->item(0)); 
   pNL->release();
   return retVal;
+}
+
+
+/** Return value of attribute to XML element. It is an extension of poco's getAttribute method, which
+ *  in addition check that this attribute exists and if not throws an error. 
+ *
+ *  @param pElem XML from instrument def. file
+ *  @param name Name of subelement 
+ *  @return Value of attribute
+ *
+ *  @throw std::invalid_argument Thrown if issues with XML string
+ */
+double ShapeFactory::getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name)
+{
+  if ( pElem->hasAttribute(name) )
+  {
+    return atof( (pElem->getAttribute(name)).c_str() );
+  }
+  else
+  {
+    throw std::invalid_argument("XML element: <" + pElem->tagName() +
+      "> does not have the attribute: " + name + ".");  
+  }
 }
 
 

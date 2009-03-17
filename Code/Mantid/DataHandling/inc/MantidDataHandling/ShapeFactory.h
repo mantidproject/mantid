@@ -103,11 +103,14 @@ namespace Mantid
       /// Return a subelement of an XML element, but also checks that there exist exactly one entry of this subelement
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
 
+      /// Return value of attribute to XML element. It is an extension of poco's getAttribute method
+      double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
+
       /// Parse any XML element containing position attributes and return as V3D
       Geometry::V3D parsePosition(Poco::XML::Element* pElem);
 	
-	  /// create a special geometry handler for the known finite primitives
-	  void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Geometry::Object>);
+      /// create a special geometry handler for the known finite primitives
+      void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Geometry::Object>);
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
