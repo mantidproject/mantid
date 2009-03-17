@@ -321,8 +321,4 @@ private:
     int m_prec;       //  Number precision 
 };
 
-/// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
-Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
-Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
-
 #endif

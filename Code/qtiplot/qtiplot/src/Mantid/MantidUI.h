@@ -11,10 +11,9 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/NObserver.h>
 
@@ -62,6 +61,11 @@ class InstrumentWindow;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
+
+/// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
+Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
+Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
+
 
 class MantidUI:public QObject
 {
@@ -211,6 +215,9 @@ signals:
 
     // Signals that the UI needs to be updated.
     void needsUpdating();
+  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
+  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
+    void workspace_removed(const QString &);
 
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 

@@ -5,6 +5,7 @@
 #include <QTreeWidget>
 #include <QComboBox>
 #include <QPoint>
+#include "MantidAPI/Workspace.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -12,18 +13,23 @@ class QLabel;
 class QMenu;
 class QPushButton;
 
+
 class MantidDockWidget: public QDockWidget
 {
     Q_OBJECT
 public:
     MantidDockWidget(QWidget*w):QDockWidget(w){}
     MantidDockWidget(MantidUI *mui, ApplicationWindow *w);
-    void update();
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
     void deleteWorkspaces();
+    void clearWorkspaceTree();			   
 protected slots:
     void popupMenu(const QPoint & pos);
+private slots:
+  void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
+  void removeWorkspaceEntry(const QString &);
+  
 protected:
     QTreeWidget *m_tree;
     friend class MantidUI;

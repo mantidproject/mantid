@@ -88,13 +88,7 @@ m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
  
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-    static bool Workspace_sptr_qRegistered = false;
-    if (!Workspace_sptr_qRegistered)
-    {
-        Workspace_sptr_qRegistered = true;
-        qRegisterMetaType<Mantid::API::Workspace_sptr>();
-        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
-    }
+
     connect(this,SIGNAL(needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr)));
     connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
     connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));

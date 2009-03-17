@@ -13,6 +13,7 @@
 #include <QAction>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QMutexLocker>
 
 #include <map>
 #include <iostream>
@@ -63,44 +64,71 @@ QDockWidget(w)
 
     m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+
+    connect(m_mantidUI, SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)), 
+	    this, SLOT(updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr)));
+    connect(m_mantidUI, SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)), 
+	    this, SLOT(updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr)));
+    connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)), 
+	    this, SLOT(removeWorkspaceEntry(const QString &)));
 }
 
-void MantidDockWidget::update()
+void MantidDockWidget::clearWorkspaceTree()
 {
-    // Populate MantifTreeWidget with workspaces
-    QStringList sl = m_mantidUI->getWorkspaceNames();
-    m_tree->clear();
-    for(int i=0;i<sl.size();i++)
-    {
-        QTreeWidgetItem *wsItem = new QTreeWidgetItem(QStringList(sl[i]));
-        Mantid::API::Workspace_sptr ws0 = m_mantidUI->getWorkspace(sl[i]);
-        if (boost::dynamic_pointer_cast<MatrixWorkspace>(ws0))
-        {
-            MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws0);
-            wsItem->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-            wsItem->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws->getNumberHistograms()))));
-            wsItem->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws->blocksize()))));
-            bool isHistogram = ws->blocksize() && ws->isHistogramData();
-            wsItem->addChild(new QTreeWidgetItem(QStringList(    isHistogram?"Histogram":"Data points"   )));
-            std::string s = "X axis: ";
-            if (ws->axes() > 0 )
-	    {
-	      Mantid::API::Axis *ax = ws->getAxis(0);
-	      if( ax && ax->unit().get() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
-	    }
-            else
-	    {
-                s += "Unknown";
-	    }
-            wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
-            s = "Y axis: " + ws->YUnit();
-            wsItem->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-            QString WsType = QString::fromStdString(ws->id());
-            wsItem->addChild(new QTreeWidgetItem(QStringList(WsType)));
-            wsItem->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws->getMemorySize())+" KB")));
-        }
-        m_tree->addTopLevelItem(wsItem);
-    }
+  m_tree->clear();
+}
+
+
+void MantidDockWidget::updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
+{
+  // This check is here because the signals don't get delivered immediately when the add/replace notification in MantidUI
+  // is recieved. The signal cannot be removed in favour of a direct call because the call is from a separate thread.
+  if( !Mantid::API::AnalysisDataService::Instance().doesExist(ws_name.toStdString()) ) return;
+  QTreeWidgetItem *ws_item = NULL;
+  //This will only ever be of size zero or one
+  QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name, Qt::MatchFixedString);
+  if( name_matches.isEmpty() )
+  {
+    ws_item = new QTreeWidgetItem(QStringList(ws_name));
+  }
+  else
+  {
+    ws_item = name_matches[0];
+    ws_item->takeChildren();
+  }
+  Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  if( ws_ptr )
+  {
+    ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
+    ws_item->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws_ptr->getNumberHistograms()))));
+    ws_item->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws_ptr->blocksize()))));
+    bool isHistogram = ws_ptr->blocksize() && ws_ptr->isHistogramData();
+    ws_item->addChild(new QTreeWidgetItem(QStringList(isHistogram?"Histogram":"Data points")));
+    std::string s = "X axis: ";
+    if (ws_ptr->axes() > 0 )
+      {
+	Mantid::API::Axis *ax = ws_ptr->getAxis(0);
+	if( ax && ax->unit().get() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
+      }
+    else
+      {
+	s += "Unknown";
+      }
+    ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
+    s = "Y axis: " + ws_ptr->YUnit();
+    ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
+    ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(ws_ptr->id()))));
+    ws_item->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws_ptr->getMemorySize())+" KB")));
+  }
+  m_tree->addTopLevelItem(ws_item);
+}
+
+void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
+{
+  //This will only ever be of size zero or one
+  QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name, Qt::MatchExactly);
+  if( name_matches.isEmpty() ) return;
+  m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
 }
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem*, int)

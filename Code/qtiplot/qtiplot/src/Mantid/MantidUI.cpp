@@ -102,6 +102,15 @@ m_progressDialog(0)
     menuMantidMatrix = new QMenu(m_appWindow);
 	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
 
+    // To be able to use them in signals they need to be registered
+    static bool Workspace_sptr_qRegistered = false;
+    if (!Workspace_sptr_qRegistered)
+    {
+        Workspace_sptr_qRegistered = true;
+        qRegisterMetaType<Mantid::API::Workspace_sptr>();
+        qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
+    }
+
 }
 
 // Should it be moved to the constructor?
@@ -244,8 +253,8 @@ bool MantidUI::deleteWorkspace(const QString& workspaceName)
 */
 void MantidUI::update()
 {
-    m_exploreMantid->update();
-    m_exploreAlgorithms->update();
+  //  m_exploreMantid->update();
+  m_exploreAlgorithms->update();
 }
 
 /**
@@ -713,17 +722,20 @@ void MantidUI::showAlgMonitor()
 
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
 {
-    emit needsUpdating();
+  emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
+  emit needsUpdating();
 }
 
 void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
 {
-    emit needsUpdating();
+  emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
+  emit needsUpdating();
 }
 
 void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
 {
-    emit needsUpdating();
+  emit workspace_removed(QString::fromStdString(pNf->object_name()));
+  emit needsUpdating();
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)
@@ -840,7 +852,9 @@ void MantidUI::clearAllMemory()
     }
   }
 
+  // Note that this call does not emit delete notifications
   Mantid::API::FrameworkManager::Instance().clear();
+  m_exploreMantid->clearWorkspaceTree();
   update();
 }
 
