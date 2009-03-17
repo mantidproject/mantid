@@ -146,14 +146,23 @@ bool AlgorithmDialog::validateProperties()
   {
     const Mantid::Kernel::Property *prop = pitr.value();
     QLabel *validator = getValidatorMarker(pitr.key());
-    if( prop->isValid() )
+    std::string mapValue = m_propertyValueMap[QString::fromStdString((**pitr).name())].toStdString();
+    // Have to test against stored values as well since if a valid value had already been set
+    // but an the input was changed, a new invalid value will not be set in the Property object
+    if( prop->isValid() && prop->value() ==  mapValue )
     {
-      if( validator->parent() ) validator->hide();
+      if( validator->parent() ) 
+      {
+	validator->hide();
+      }
     }
     else
     {
       allValid = false;
-      if( validator->parent() ) validator->show();
+      if( validator->parent() ) 
+      {
+	validator->show();
+      }
     }
   }
   return allValid;
@@ -174,8 +183,9 @@ bool AlgorithmDialog::setPropertyValues()
     Mantid::Kernel::Property *prop = pitr.value();
     QString pName = pitr.key();
     QString value = m_propertyValueMap[pName];
-    if( value.isEmpty() ) continue;
     prop->setValue(value.toStdString());
+    if( value.isEmpty() ) continue;
+    
     //Store value for future input
     AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
   }
