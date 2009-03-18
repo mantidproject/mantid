@@ -146,23 +146,15 @@ bool AlgorithmDialog::validateProperties()
   {
     const Mantid::Kernel::Property *prop = pitr.value();
     QLabel *validator = getValidatorMarker(pitr.key());
-    std::string mapValue = m_propertyValueMap[QString::fromStdString((**pitr).name())].toStdString();
-    // Have to test against stored values as well since if a valid value had already been set
-    // but an the input was changed, a new invalid value will not be set in the Property object
-    if( prop->isValid() && prop->value() ==  mapValue )
+    // Here we have a property that was able to be set
+    if( prop->isValid() ) 
     {
-      if( validator->parent() ) 
-      {
-	validator->hide();
-      }
+      validator->hide();
     }
     else
     {
       allValid = false;
-      if( validator->parent() ) 
-      {
-	validator->show();
-      }
+      if( validator->parent() ) validator->show();
     }
   }
   return allValid;
@@ -177,19 +169,32 @@ bool AlgorithmDialog::setPropertyValues()
   QMap<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
   QString algName = QString::fromStdString(getAlgorithm()->name());
   AlgorithmInputHistory::Instance().clearAlgorithmInput(algName);
+  bool allValid(true);
   for( QMap<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
        pitr != pend; ++pitr )
   {
     Mantid::Kernel::Property *prop = pitr.value();
     QString pName = pitr.key();
-    QString value = m_propertyValueMap[pName];
-    prop->setValue(value.toStdString());
-    if( value.isEmpty() ) continue;
-    
-    //Store value for future input
-    AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
+    QString value = m_propertyValueMap.value(pName);
+    QLabel *validator = getValidatorMarker(pitr.key());
+    if( !value.isEmpty() )
+    {
+      prop->setValue(value.toStdString());
+    }
+    if( prop->isValid() )
+    {
+      validator->hide();
+      //Store value for future input
+      AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
+    }
+    else
+    {
+      allValid = false;
+      if( validator->parent() ) validator->show();
+    }
   }
-  return validateProperties();
+  //  return validateProperties();
+  return allValid;
 }
 
 /**
