@@ -140,8 +140,8 @@ void AlgorithmDialog::addPropertyValueToMap(const QString & name, const QString 
 bool AlgorithmDialog::validateProperties()
 {
   bool allValid(true);
-  QMap<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
-  for( QMap<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
+  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
        pitr != pend; ++pitr )
   {
     const Mantid::Kernel::Property *prop = pitr.value();
@@ -166,11 +166,11 @@ bool AlgorithmDialog::validateProperties()
  */
 bool AlgorithmDialog::setPropertyValues()
 {
-  QMap<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
   QString algName = QString::fromStdString(getAlgorithm()->name());
   AlgorithmInputHistory::Instance().clearAlgorithmInput(algName);
   bool allValid(true);
-  for( QMap<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
+  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
        pitr != pend; ++pitr )
   {
     Mantid::Kernel::Property *prop = pitr.value();
@@ -329,8 +329,8 @@ void AlgorithmDialog::setOptionalMessage(const QString & message)
  */ 
 void AlgorithmDialog::createValidatorLabels()
 {
-  QMap<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
-  for( QMap<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
+  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
        pitr != pend; ++pitr )
   {
     QLabel *validLbl = new QLabel("*");

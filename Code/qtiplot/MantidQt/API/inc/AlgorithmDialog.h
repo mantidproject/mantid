@@ -25,7 +25,6 @@
 #include <QDialog>
 #include <QString>
 #include <QHash>
-#include <QMap>
 
 //----------------------------------
 // Qt Forward declarations
@@ -190,7 +189,7 @@ private:
   bool m_bIsInitialized;
 
   /// The properties associated with this algorithm
-  QMap<QString, Mantid::Kernel::Property*> m_algProperties;
+  QHash<QString, Mantid::Kernel::Property*> m_algProperties;
 
   /// A list of labels to use as validation markers
   QHash<QString, QLabel*> m_validators;
