@@ -149,7 +149,7 @@ public:
 
     //create a workspace with some sample data
     wsName = "LoadInstrumentTestGEM";
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().createMatrix("Workspace2D");
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     //put this workspace in the data service
