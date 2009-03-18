@@ -41,6 +41,7 @@ namespace API
 // Forward declarations
 //----------------------------------
 class AlgorithmDialog;
+class UserSubWindow;
 
 /** 
     This class is responsible for creating the correct dialog for an algorithm. If 
@@ -75,10 +76,12 @@ class EXPORT_OPT_MANTIDQT_API InterfaceManagerImpl
 
 public:
   
-  // Create the correct dialog
+  /// Create a new instance of the correct type of UserSubWindow
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
 				bool forScript = false, const QString & msg = QString(""));
 
+  /// Create a new instance of the correct type of UserSubWindow
+  UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<InterfaceManagerImpl>;

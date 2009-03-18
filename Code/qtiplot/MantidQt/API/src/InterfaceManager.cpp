@@ -5,6 +5,7 @@
 #include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/GenericDialog.h"
+#include "MantidQtAPI/UserSubWindow.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
@@ -31,7 +32,7 @@ Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::g
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
 						 bool forScript, const QString & msg)
 {
-  AlgorithmDialog* dlg;
+  AlgorithmDialog* dlg = NULL;
   if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
   {
     g_log.debug() << "Creating a specialised dialog for " << alg->name() << std::endl;
@@ -50,6 +51,33 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
   dlg->setOptionalMessage(msg);
   dlg->initializeLayout();
   return dlg;  
+}
+
+/**
+ * Create a new instance of the correct type of UserSubWindow
+ * @param interface_name The registered name of the interface
+ * @param parent The parent widget
+ */
+UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_name, QWidget* parent)
+{
+  UserSubWindow *user_win = NULL;
+  std::string iname = interface_name.toStdString();
+  if( InterfaceFactory::Instance().exists(iname) )
+  {
+    user_win = dynamic_cast<UserSubWindow*>(InterfaceFactory::Instance().createUnwrapped(iname));
+  }
+  if( user_win )
+  {
+    g_log.debug() << "Created a specialised interface for " << iname << std::endl;
+    user_win->setParent(parent);
+    user_win->setInterfaceName(interface_name);
+    user_win->initializeLayout();    
+  }
+  else 
+  {
+    g_log.debug() << "No specialised interface exists for " << iname << std::endl;
+  }
+  return user_win;
 }
 
 //----------------------------------

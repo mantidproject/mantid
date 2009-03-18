@@ -24,6 +24,7 @@ SOURCES = \
   $$SRCDIR/AlgorithmInputHistory.cpp \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
+  $$SRCDIR/UserSubWindow.cpp
   
 HEADERS = \
   $$HEADERDIR/DllOption.h \
@@ -32,7 +33,7 @@ HEADERS = \
   $$HEADERDIR/AlgorithmInputHistory.h \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \
-  
+  $$HEADERDIR/UserSubWindow.h
   
 #-----------------------------
 # Target and dependancies
