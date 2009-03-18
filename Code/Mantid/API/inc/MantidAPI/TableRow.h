@@ -2,9 +2,11 @@
 #define MANTID_API_TABLEROW_H_
 
 #include "MantidAPI/Column.h"
+#include "MantidKernel/Logger.h"
 
 #include <ostream>
 #include <vector>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -96,6 +98,7 @@ public:
         ++m_col;
         return *this;
     }
+
     /// Special case of char*
     TableRow& operator<<(const char* t){return operator<<(std::string(t));}
     /// Special case of bool
@@ -108,21 +111,16 @@ public:
          @return Self reference
      */
     template<class T>
-    TableRow& operator>>(T& t)
+    const TableRow& operator>>(T& t)const
     {
         Column_sptr c = m_columns[m_col];
         t = c->cell<T>(m_row);
         ++m_col;
         return *this;
     }
+
     /// Special case of bool
-    TableRow& operator>>(bool& t)
-    {
-        Boolean b;
-        operator>>(b);
-        t = b;
-        return *this;
-    }
+    const TableRow& operator>>(bool& t)const;
 
     /**  Templated method to access the element col in the row. The internal pointer moves to point to the element after col.
          @param col Element's position in the row
@@ -169,7 +167,7 @@ private:
     friend TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
     std::vector< Column_sptr > m_columns;  ///< Pointers to the columns in the ITableWorkspace
     int m_row;          ///< Row number in the TableWorkspace
-    int m_col;          ///< Current column number (for streaming operations)
+    mutable int m_col;          ///< Current column number (for streaming operations)
     int m_nrows;        ///< Number of rows in the TableWorkspace
     std::string m_sep;  ///< Separator character(s) between elements in a text output
     /// Logger

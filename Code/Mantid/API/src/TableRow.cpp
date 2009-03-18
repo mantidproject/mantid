@@ -1,6 +1,5 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -60,6 +59,15 @@ bool TableRow::prev()
         return true;
     }
     return false;
+}
+
+/// Special case of bool
+const TableRow& TableRow::operator>>(bool& t)const
+{
+    Boolean b;
+    operator>>(b);
+    t = b;
+    return *this;
 }
 
 /**  Output stream operator

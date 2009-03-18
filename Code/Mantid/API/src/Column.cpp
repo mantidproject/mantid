@@ -1,5 +1,4 @@
 #include "MantidAPI/Column.h"
-#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {

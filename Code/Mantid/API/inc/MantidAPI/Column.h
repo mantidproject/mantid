@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidKernel/Logger.h"
+
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <typeinfo>
