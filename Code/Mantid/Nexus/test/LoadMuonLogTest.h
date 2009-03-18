@@ -57,7 +57,7 @@ public:
     outputSpace = "LoadMuonLogTest-nexusdatafile";
     loaderNexusFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D");
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().createMatrix("Workspace1D");
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));
 
