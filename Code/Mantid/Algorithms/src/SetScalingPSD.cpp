@@ -178,7 +178,7 @@ void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D
   findAll(inst);
 
   // loop over detector (IComps)
-  for(int id=0;id<m_vectDet.size();id++)
+  for(size_t id=0;id<m_vectDet.size();id++)
   {
       V3D Pos,shift;// New relative position
       comp = m_vectDet[id];

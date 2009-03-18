@@ -52,8 +52,8 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
 
   //Horendous code inclusion to satisfy compilers that all code paths return a value
   // in reality the above code should either throw or return successfully.
-  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("Workspace2D");
-  return retVal;
+  //MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("Workspace2D");
+  return MatrixWorkspace_sptr();
 }
 
 /** Creates a temporary single value workspace the error is set to sqrt(value)
@@ -62,7 +62,7 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
  */
 static MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 {
-  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("WorkspaceSingleValue");
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
   retVal->dataY(0)[0]=rhsValue;
 
   return retVal;

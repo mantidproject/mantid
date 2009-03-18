@@ -155,27 +155,6 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   return ws;
 }
 
-/// Create uninitialized MatrixWorkspace
-MatrixWorkspace_sptr WorkspaceFactoryImpl::createMatrix(const std::string& className) const
-{
-    MatrixWorkspace_sptr ws;
-    try
-    {
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));    
-        if (!ws)
-        {
-            g_log.error("Class "+className+" cannot be cast to MatrixWorkspace");
-            throw std::runtime_error("Class "+className+" cannot be cast to MatrixWorkspace");
-        }
-    }
-    catch(Kernel::Exception::NotFoundError& e)
-    {
-        g_log.error(e.what());
-        throw;
-    }
-    return ws;
-}
-
 /// Create a ITableWorkspace
 ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& className) const
 {

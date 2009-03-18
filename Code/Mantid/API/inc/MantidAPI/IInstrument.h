@@ -65,10 +65,10 @@ public:
   virtual boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id) = 0;
 
   /// return reference to detector cache 
-  virtual std::map<int, Geometry::IDetector_sptr> getDetectors() = 0;
+  virtual std::map<int, Geometry::IDetector_sptr> getDetectors() const = 0;
 
   /// Get pointers to plottable components
-  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable()const = 0;
+  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable() const = 0;
 };
 
 /// Shared pointer to IInstrument

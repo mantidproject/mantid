@@ -58,16 +58,10 @@ namespace API
 class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory<Workspace>
 {
 public:
-  // Unhide the inherited create method
-  using Kernel::DynamicFactory<Workspace>::create;
-
   MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr& parent,
                         int NVectors = -1, int XLength = -1, int YLength = -1) const;
   MatrixWorkspace_sptr create(const std::string& className, const int& NVectors,
                                    const int& XLength, const int& YLength) const;
-
-  /// Create uninitialized MatrixWorkspace
-  MatrixWorkspace_sptr createMatrix(const std::string& className) const;
 
   /// Create a ITableWorkspace
   ITableWorkspace_sptr createTable(const std::string& className = "TableWorkspace") const;
@@ -83,6 +77,9 @@ private:
   WorkspaceFactoryImpl& operator = (const WorkspaceFactoryImpl&);
   ///Private Destructor
   virtual ~WorkspaceFactoryImpl();
+
+  // Unhide the inherited create method but make it private
+  using Kernel::DynamicFactory<Workspace>::create;
 
   /// Static reference to the logger class
   Kernel::Logger& g_log;

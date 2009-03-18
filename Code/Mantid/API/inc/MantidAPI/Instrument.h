@@ -85,7 +85,7 @@ public:
   void markAsMonitor(Geometry::IDetector*);
 
   /// return reference to detector cache 
-  std::map<int, Geometry::IDetector_sptr> getDetectors();
+  std::map<int, Geometry::IDetector_sptr> getDetectors() const;
 
   /// Get pointers to plottable components
   std::vector< Geometry::IObjComponent_sptr > getPlottable()const;

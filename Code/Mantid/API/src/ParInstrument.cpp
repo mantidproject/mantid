@@ -24,7 +24,7 @@ ParInstrument::ParInstrument(const boost::shared_ptr<Instrument> instr, const bo
 /**	return reference to detector cache 
 * @returns a reference to the detector cache hold by the ParInstrument
 */
-std::map<int, Geometry::IDetector_sptr> ParInstrument::getDetectors()
+std::map<int, Geometry::IDetector_sptr> ParInstrument::getDetectors() const
 { 
   std::map<int, Geometry::IDetector_sptr> res,dets = m_instr->getDetectors();
   for(std::map<int, Geometry::IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)

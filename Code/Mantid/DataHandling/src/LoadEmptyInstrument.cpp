@@ -30,11 +30,8 @@ namespace Mantid
     Logger& LoadEmptyInstrument::g_log = Logger::get("LoadEmptyInstrument");
 
     /// Empty default constructor
-    LoadEmptyInstrument::LoadEmptyInstrument() : 
-      Algorithm(), m_filename()
-    {
-    }
-
+    LoadEmptyInstrument::LoadEmptyInstrument() : Algorithm()
+    {}
 
     /// Initialisation method.
     void LoadEmptyInstrument::init()
@@ -59,27 +56,23 @@ namespace Mantid
      */
     void LoadEmptyInstrument::exec()
     {
-      // Retrieve the filename from the properties
-      m_filename = getPropertyValue("Filename");
-
       // Get other properties
-      double detector_value = getProperty("detector_value");
-      double monitor_value = getProperty("monitor_value");
-
-      // create the workspace that is going to hold the instrument 
-      DataObjects::Workspace2D_sptr localWorkspace 
-        = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D"));
+      const double detector_value = getProperty("detector_value");
+      const double monitor_value = getProperty("monitor_value");
 
       // load the instrument into this workspace
-      runLoadInstrument(localWorkspace);
-
-      // Get instrument which was loaded into the workspace
-      boost::shared_ptr<IInstrument> instrument = localWorkspace->getInstrument();
+      IInstrument_sptr instrument = this->runLoadInstrument();
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
       const std::map<int, Geometry::IDetector_sptr> detCache = instrument->getDetectors();
-      int number_spectra = static_cast<int>(detCache.size());
+      const int number_spectra = static_cast<int>(detCache.size());
+      
+      // Now create the outputworkspace and copy over the instrument object
+      DataObjects::Workspace2D_sptr localWorkspace = 
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create("Workspace2D",number_spectra,2,1));
+      localWorkspace->setInstrument(instrument);
+      
       int *spec = new int[number_spectra];
       int *udet = new int[number_spectra];
 
@@ -95,24 +88,18 @@ namespace Mantid
 
       localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
 
-      int spectraLength = 1; // put spectra lenght to 1. Since assumes histograms this mean x axis one longer
-      localWorkspace->initialize(number_spectra, spectraLength+1, spectraLength);
-
-      // Not sure this is really necessary - but it should not do any harm
-      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-
       counter = 0;
-      std::vector<double> x; x.push_back(1.0); x.push_back(2.0);
-      std::vector<double> v(1, detector_value);
-      std::vector<double> v_monitor(1, monitor_value);
-      std::vector<double> e(1, detector_value);
+      DataObjects::Histogram1D::RCtype x,v,v_monitor;
+      x.access().resize(2); x.access()[0]=1.0; x.access()[1]=2.0;
+      v.access().resize(1); v.access()[0]=detector_value;
+      v_monitor.access().resize(1); v_monitor.access()[0]=monitor_value;
 
       for ( it = detCache.begin(); it != detCache.end(); ++it )
       {
         if ( (it->second)->isMonitor() )
-          localWorkspace->setData(counter, v_monitor, e);
+          localWorkspace->setData(counter, v_monitor, v_monitor);
         else
-          localWorkspace->setData(counter, v, e);
+          localWorkspace->setData(counter, v, v);
         localWorkspace->setX(counter, x);
         localWorkspace->setErrorHelper(counter,GaussianErrorHelper::Instance());
         localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
@@ -129,33 +116,34 @@ namespace Mantid
 
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
-    void LoadEmptyInstrument::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
+    API::IInstrument_sptr LoadEmptyInstrument::runLoadInstrument()
     {
+      const std::string filename = getPropertyValue("Filename");
       // Determine the search directory for XML instrument definition files (IDFs)
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
       if ( directoryName.empty() )
       {
-	// This is the assumed deployment directory for IDFs, where we need to be relative to the
-	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
+        // This is the assumed deployment directory for IDFs, where we need to be relative to the
+        // directory of the executable, not the current working directory.
+        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
       }
-      const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+      const std::string::size_type stripPath = filename.find_last_of("\\/");
 
       std::string fullPathIDF;
       if (stripPath != std::string::npos)
       {
-        fullPathIDF = m_filename;   // since if path already provided don't modify m_filename
+        fullPathIDF = filename;   // since if path already provided don't modify m_filename
       }
       else
       {
         //std::string instrumentID = m_filename.substr(stripPath+1);
-        fullPathIDF = directoryName + "/" + m_filename;
+        fullPathIDF = directoryName + "/" + filename;
       }
 
-      
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
       loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
+      MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",ws);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -166,6 +154,8 @@ namespace Mantid
       {
         g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
       }
+      
+      return ws->getInstrument();
     }
 
 

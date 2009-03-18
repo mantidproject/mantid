@@ -120,7 +120,7 @@ public:
   {
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("work");
     MatrixWorkspace_sptr space;
-    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().createMatrix("work") );
+    TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("work",1,1,1) );
     TS_ASSERT_THROWS_NOTHING( dynamic_cast<WorkspaceTest*>(space.get()) );
   }
 

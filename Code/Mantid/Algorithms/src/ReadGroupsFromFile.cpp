@@ -61,16 +61,13 @@ void ReadGroupsFromFile::init()
  */
 void ReadGroupsFromFile::exec()
 {
-	// create the workspace that is going to hold the instrument
-	DataObjects::Workspace2D_sptr localWorkspace
-	        = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create("Workspace2D"));
 	// Construct the full filename from the symbol of the instrument (
 	const std::string instname=getProperty("InstrumentName");
 	std::string instshort=instname.substr(0,3);
 	std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
 	instshort=instshort+"_Definition.xml";
 
-	loadEmptyInstrument(instshort,localWorkspace);
+	DataObjects::Workspace2D_sptr localWorkspace = loadEmptyInstrument(instshort);
 
 	const std::string groupfile=getProperty("GroupingFilename");
 
@@ -124,7 +121,7 @@ void ReadGroupsFromFile::exec()
 	return;
 }
 
-void ReadGroupsFromFile::loadEmptyInstrument(const std::string& instrument_xml_name, DataObjects::Workspace2D_sptr& work)
+DataObjects::Workspace2D_sptr ReadGroupsFromFile::loadEmptyInstrument(const std::string& instrument_xml_name)
 {
   // Determine the search directory for XML instrument definition files (IDFs)
 	std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
@@ -136,7 +133,6 @@ void ReadGroupsFromFile::loadEmptyInstrument(const std::string& instrument_xml_n
 	}
 	API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadEmptyInstrument");
 	loadInst->setPropertyValue("Filename", directoryName+'/'+instrument_xml_name);
-	loadInst->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace",work);
 
 	// Now execute the sub-algorithm. Catch and log any error, but don't stop.
 	try
@@ -148,8 +144,7 @@ void ReadGroupsFromFile::loadEmptyInstrument(const std::string& instrument_xml_n
 		g_log.error("Unable to successfully run LoadEmptyInstrument sub-algorithm");
 	}
 	// Get back the output workspace
-	work=loadInst->getProperty("OutputWorkspace");
-	return;
+	return loadInst->getProperty("OutputWorkspace");
 }
 
 void ReadGroupsFromFile::readGroupingFile(const std::string& filename)

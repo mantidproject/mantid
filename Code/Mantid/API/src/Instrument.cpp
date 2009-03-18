@@ -26,7 +26,7 @@ Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
 /**	return reference to detector cache 
 * @returns a map of the detectors hold by the instrument
 */
-std::map<int, Geometry::IDetector_sptr> Instrument::getDetectors()
+std::map<int, Geometry::IDetector_sptr> Instrument::getDetectors() const
 { 
     std::map<int, Geometry::IDetector_sptr> res;
     for(std::map<int, Geometry::IDetector*>::const_iterator it=_detectorCache.begin();it!=_detectorCache.end();it++)

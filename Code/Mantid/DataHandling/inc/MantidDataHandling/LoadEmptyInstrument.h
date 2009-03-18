@@ -12,8 +12,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class LoadEmptyInstrument LoadEmptyInstrument.h DataHandling/LoadEmptyInstrument.h
-
+    /** 
     Loads an instrument definition file into a workspace, with the purpose of being
     able to visualise an instrument without requiring to read in a ISIS raw datafile first. 
     The name of the algorithm refers to the fact that an instrument
@@ -35,7 +34,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 31/10/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -73,10 +72,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-      void runLoadInstrument(DataObjects::Workspace2D_sptr);
-
-      /// The name and path of the input file
-      std::string m_filename;
+      API::IInstrument_sptr runLoadInstrument();
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

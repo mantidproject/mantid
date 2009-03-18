@@ -43,7 +43,7 @@ public:
 
     //create a workspace with some sample data
     wsName = "LoadInstrumentFromRawTest";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
     //put this workspace in the data service

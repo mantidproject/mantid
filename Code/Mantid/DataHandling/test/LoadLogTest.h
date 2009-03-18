@@ -48,7 +48,7 @@ public:
     outputSpace = "LoadLogTest-singleLogFile";
     loader.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
@@ -94,7 +94,7 @@ public:
 
     outputSpace = "LoadLogTestraw-datafile";
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D");
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
     loaderRawFile.setPropertyValue("Workspace", outputSpace);
@@ -163,7 +163,7 @@ public:
     outputSpace = "LoadLogTest-rawdatafile_so_type";
     loaderRawFile.setPropertyValue("Workspace", outputSpace);
     // Create an empty workspace and put it in the AnalysisDataService
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D");
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
