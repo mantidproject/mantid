@@ -1,8 +1,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/DialogManager.h"
-#include "MantidQtAPI/DialogFactory.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/InterfaceFactory.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/GenericDialog.h"
 
@@ -15,7 +15,7 @@
 using namespace MantidQt::API;
 
 //Initialize the logger
-Mantid::Kernel::Logger & DialogManagerImpl::g_log = Mantid::Kernel::Logger::get("DialogManager");
+Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::get("InterfaceManager");
 
 //----------------------------------
 // Public member functions
@@ -28,14 +28,14 @@ Mantid::Kernel::Logger & DialogManagerImpl::g_log = Mantid::Kernel::Logger::get(
  * @param msg An optional message string to be placed at the top of the dialog
  * @returns An AlgorithmDialog object
  */
-AlgorithmDialog* DialogManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
+AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
 						 bool forScript, const QString & msg)
 {
   AlgorithmDialog* dlg;
-  if( DialogFactory::Instance().exists(alg->name() + "Dialog") )
+  if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
   {
     g_log.debug() << "Creating a specialised dialog for " << alg->name() << std::endl;
-    dlg = DialogFactory::Instance().createUnwrapped(alg->name() + "Dialog");
+    dlg = dynamic_cast<AlgorithmDialog*>(InterfaceFactory::Instance().createUnwrapped(alg->name() + "Dialog"));
     }
   else
   {
@@ -56,7 +56,7 @@ AlgorithmDialog* DialogManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, Q
 // Private member functions
 //----------------------------------
 /// Default Constructor
-DialogManagerImpl::DialogManagerImpl()
+InterfaceManagerImpl::InterfaceManagerImpl()
 {
 
   //Attempt to load libraries that may contain custom dialog classes
@@ -77,26 +77,7 @@ DialogManagerImpl::DialogManagerImpl()
 }
 
 /// Destructor
-DialogManagerImpl::~DialogManagerImpl()
+InterfaceManagerImpl::~InterfaceManagerImpl()
 {
 }
-
-//---------------------------------------------------------------------------------------------
-// Wrapper class member definitions
-//---------------------------------------------------------------------------------------------
-/**
-  * Constructor
-  */
-// DialogManagerWrapper::DialogManagerWrapper()
-// {
-  // MantidQt::API::DialogManager::Instance();
-// }
-
-// /**
-  // * The number of dialogs available
-  // */
-// int DialogManagerWrapper::numberOfDialogsAvailable() const
-// {
-  // return static_cast<int>(MantidQt::API::DialogFactory::Instance().getKeys().size());
-// }
 

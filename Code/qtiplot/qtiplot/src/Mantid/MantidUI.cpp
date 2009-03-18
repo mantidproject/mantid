@@ -17,7 +17,7 @@
 #include "InstrumentWidget/InstrumentWindow.h"
 
 
-#include "MantidQtAPI/DialogManager.h"
+#include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
@@ -647,7 +647,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 		 //dlg->CreateLayout(alg);
 		 //dlg->setModal(true);
     
-    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg.get(), (QWidget*)parent());
+    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
     if( !dlg ) return;
 		if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
 	}
@@ -1033,7 +1033,7 @@ bool MantidUI::createPropertyInputDialog(const QString & algName, const QString 
     return false;
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::DialogManager::Instance().createDialog(alg.get(), 0, true, message);
+  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, message);
   return (dlg->exec() == QDialog::Accepted);
 }
 

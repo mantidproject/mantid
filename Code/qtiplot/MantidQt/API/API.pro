@@ -19,16 +19,16 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
-  $$SRCDIR/DialogFactory.cpp \
-  $$SRCDIR/DialogManager.cpp \
+  $$SRCDIR/InterfaceFactory.cpp \
+  $$SRCDIR/InterfaceManager.cpp \
   $$SRCDIR/AlgorithmInputHistory.cpp \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
   
 HEADERS = \
   $$HEADERDIR/DllOption.h \
-  $$HEADERDIR/DialogFactory.h \
-  $$HEADERDIR/DialogManager.h \
+  $$HEADERDIR/InterfaceFactory.h \
+  $$HEADERDIR/InterfaceManager.h \
   $$HEADERDIR/AlgorithmInputHistory.h \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \

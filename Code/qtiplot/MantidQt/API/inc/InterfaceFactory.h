@@ -1,5 +1,5 @@
-#ifndef MANTIDQT_API_DIALOGFACTORY_H_
-#define MANTIDQT_API_DIALOGFACTORY_H_
+#ifndef MANTIDQT_API_INTERFACEFACTORY_H_
+#define MANTIDQT_API_INTERFACEFACTORY_H_
 
 //------------------------
 // Includes
@@ -8,19 +8,20 @@
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
+//------------------------
+// Qt Forward declaration
+//------------------------
+class QWidget;
+
+
 namespace MantidQt
 {
 
 namespace API
 {
 
-//------------------------
-// Forward declaration
-//------------------------
-class AlgorithmDialog;
-
 /** 
-    The DialogFactory is responsible for creating concrete instances of
+    The InterfaceFactory is responsible for creating concrete instances of
     AlgorithmDialog classes. It is implemented as a singleton class.
     
     @author Martyn Gigg, Tessella plc
@@ -45,34 +46,34 @@ class AlgorithmDialog;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class EXPORT_OPT_MANTIDQT_API DialogFactoryImpl : public Mantid::Kernel::DynamicFactory<AlgorithmDialog>
+class EXPORT_OPT_MANTIDQT_API InterfaceFactoryImpl : public Mantid::Kernel::DynamicFactory<QWidget>
 {
 
 public:
   // Unhide the inherited create method
-  using Mantid::Kernel::DynamicFactory<AlgorithmDialog>::createUnwrapped;
+  using Mantid::Kernel::DynamicFactory<QWidget>::createUnwrapped;
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<DialogFactoryImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<InterfaceFactoryImpl>;
 
   /// Private Constructor for singleton class
-  DialogFactoryImpl();
+  InterfaceFactoryImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  DialogFactoryImpl(const DialogFactoryImpl&);
+  InterfaceFactoryImpl(const InterfaceFactoryImpl&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  DialogFactoryImpl& operator = (const DialogFactoryImpl&);
+  InterfaceFactoryImpl& operator = (const InterfaceFactoryImpl&);
   ///Private Destructor
-  virtual ~DialogFactoryImpl();
+  virtual ~InterfaceFactoryImpl();
 };
 
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<DialogFactoryImpl>;
+	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceFactoryImpl>;
 #endif /* _WIN32 */
   /// The specific instantiation of the templated type
-  typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<DialogFactoryImpl> DialogFactory;
+  typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceFactoryImpl> InterfaceFactory;
 
 }
 }
 
-#endif //MANTIDQT_API_DIALOGFACTORY_H_
+#endif //MANTIDQT_API_INTERFACEFACTORY_H_

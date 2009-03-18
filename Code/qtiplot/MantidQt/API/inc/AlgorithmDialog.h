@@ -11,14 +11,14 @@
   namespace { \
     Mantid::Kernel::RegistrationHelper \
     register_dialog_##classname \
-    (((MantidQt::API::DialogFactory::Instance().subscribe<classname>(#classname)), 0)); \
+    (((MantidQt::API::InterfaceFactory::Instance().subscribe<classname>(#classname)), 0)); \
   }
 
 //----------------------------------
 // Includes
 //----------------------------------
 #include "DllOption.h"
-#include "DialogFactory.h"
+#include "InterfaceFactory.h"
 
 #include "MantidAPI/IAlgorithm.h"
 
@@ -42,11 +42,6 @@ namespace Kernel
 {
   class Property;
 }
-//namespace API
-//{
-//  class Algorithm;
-//}
-
 }
 
 //Top-level namespace for this library
@@ -59,7 +54,7 @@ namespace API
 //----------------------------------
 // Forward declarations
 //----------------------------------
-class DialogManagerImpl;
+class InterfaceManagerImpl;
 
 /** 
     This class gives a basic dialog that is not tailored to a particular 
@@ -157,7 +152,7 @@ private:
   // This is so that it can set the algorithm and initialize the layout.
   // I can't pass the algorithm as an argument to the constructor as I am using
   // the DynamicFactory
-  friend class DialogManagerImpl;
+  friend class InterfaceManagerImpl;
   
   /// Set the algorithm associated with this dialog
   void setAlgorithm(Mantid::API::IAlgorithm*);

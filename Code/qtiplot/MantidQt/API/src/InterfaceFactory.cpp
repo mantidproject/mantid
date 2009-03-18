@@ -1,7 +1,7 @@
 //-------------------------------
 // Includes
 //-------------------------------
-#include "MantidQtAPI/DialogFactory.h"
+#include "MantidQtAPI/InterfaceFactory.h"
 
 using namespace MantidQt::API;
 
@@ -11,14 +11,14 @@ using namespace MantidQt::API;
 /**
  * Constructor
  */
-DialogFactoryImpl::DialogFactoryImpl() : Mantid::Kernel::DynamicFactory<AlgorithmDialog>()
+InterfaceFactoryImpl::InterfaceFactoryImpl() : Mantid::Kernel::DynamicFactory<QWidget>()
 {
 }	
 
 /**
  * Destructor
  */
-DialogFactoryImpl::~DialogFactoryImpl()
+InterfaceFactoryImpl::~InterfaceFactoryImpl()
 {
 }	
 

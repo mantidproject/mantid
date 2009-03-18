@@ -70,7 +70,7 @@ class AlgorithmDialog;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API DialogManagerImpl
+class EXPORT_OPT_MANTIDQT_API InterfaceManagerImpl
 {
 
 public:
@@ -81,16 +81,16 @@ public:
 
 
 private:
-  friend struct Mantid::Kernel::CreateUsingNew<DialogManagerImpl>;
+  friend struct Mantid::Kernel::CreateUsingNew<InterfaceManagerImpl>;
   
   ///Private Constructor
-  DialogManagerImpl();
+  InterfaceManagerImpl();
   /// Private copy constructor - NO COPY ALLOWED
-  DialogManagerImpl(const DialogManagerImpl&);
+  InterfaceManagerImpl(const InterfaceManagerImpl&);
   /// Private assignment operator - NO ASSIGNMENT ALLOWED
-  DialogManagerImpl& operator = (const DialogManagerImpl&);
+  InterfaceManagerImpl& operator = (const InterfaceManagerImpl&);
   ///Private Destructor
-  virtual ~DialogManagerImpl();
+  virtual ~InterfaceManagerImpl();
 
   //A static reference to the Logger
   static Mantid::Kernel::Logger & g_log;
@@ -98,10 +98,10 @@ private:
 
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<DialogManagerImpl>;
+	template class EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManagerImpl>;
 #endif /* _WIN32 */
 /// The specific instantiation of the templated type
-typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<DialogManagerImpl> DialogManager;
+typedef EXPORT_OPT_MANTIDQT_API Mantid::Kernel::SingletonHolder<InterfaceManagerImpl> InterfaceManager;
 
 }
 }
