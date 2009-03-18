@@ -1,16 +1,22 @@
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataObjects/TableRow.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
-namespace DataObjects
+namespace API
 {
+
+// Get a reference to the logger
+Kernel::Logger& TableRow::g_log = Kernel::Logger::get("TableRow");
 
 /**   Constructor
       @param trh TableRowHelper returned by TableWorkspace::getRow
   */
-TableRow::TableRow(const TableRowHelper& trh):m_columns(trh.m_workspace->m_columns),m_row(trh.m_row),m_col(0),m_sep(",")
+TableRow::TableRow(const TableRowHelper& trh):m_row(trh.m_row),m_col(0),m_sep(",")
 {
+    for(int i=0;i<trh.m_workspace->columnCount();i++)
+        m_columns.push_back(trh.m_workspace->getColumn(i));
     if (m_columns.size()) m_nrows = int(m_columns[0]->size());
     else
         m_nrows = 0;
@@ -78,6 +84,6 @@ std::ostream& operator<<(std::ostream& s,const TableRow& row)
     return s;
 }
 
-} // namespace DataObjects
+} // namespace API
 } // namespace Mantid
 

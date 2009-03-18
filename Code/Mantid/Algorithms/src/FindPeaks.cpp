@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
-#include "MantidDataObjects/TableRow.h"
+#include "MantidAPI/TableRow.h"
 
 namespace Mantid
 {
@@ -41,12 +41,12 @@ void FindPeaks::init()
   declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PeaksList","",Direction::Output));
   
   // Set up the columns for the TableWorkspace holding the peak information
-  m_peaks->createColumn("int","spectrum");
-  m_peaks->createColumn("double","centre");
-  m_peaks->createColumn("double","width");
-  m_peaks->createColumn("double","height");
-  m_peaks->createColumn("double","backgroundintercept");
-  m_peaks->createColumn("double","backgroundslope");
+  m_peaks->addColumn("int","spectrum");
+  m_peaks->addColumn("double","centre");
+  m_peaks->addColumn("double","width");
+  m_peaks->addColumn("double","height");
+  m_peaks->addColumn("double","backgroundintercept");
+  m_peaks->addColumn("double","backgroundslope");
 }
 
 void FindPeaks::exec()
@@ -394,7 +394,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
       const double bgslope = fit->getProperty("bg1");
       g_log.information() << "Peak Fitted. Centre=" << centre << ", Sigma=" << width << ", Height=" << height 
                     << ", Background slope=" << bgslope << ", Background intercept=" << bgintercept << std::endl;
-      DataObjects::TableRow t = m_peaks->appendRow();
+      API::TableRow t = m_peaks->appendRow();
       t << spectrum << centre << width << height << bgintercept << bgslope;
       break;
     }

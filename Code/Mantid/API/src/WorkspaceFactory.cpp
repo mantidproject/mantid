@@ -15,7 +15,7 @@ namespace API
 
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
-  Mantid::Kernel::DynamicFactory<MatrixWorkspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
+  Mantid::Kernel::DynamicFactory<Workspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
 {
   g_log.debug() << "WorkspaceFactory created." << std::endl;
 }
@@ -134,20 +134,67 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
           throw std::runtime_error("There is not enough memory to allocate the workspace");
       }
 
-      ws = this->create("ManagedWorkspace2D");
+      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("ManagedWorkspace2D"));
       g_log.information("Created a ManagedWorkspace2D");
   }
   else
   {
       // No need for a Managed Workspace
       if ( is2D && className.substr(0,7) == "Managed" )
-          ws = this->create("Workspace2D");
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("Workspace2D"));
       else
-          ws = this->create(className);
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
   }
 
+  if (!ws)
+  {
+      g_log.error("Workspace was not created");
+      throw std::runtime_error("Workspace was not created");
+  }
   ws->initialize(NVectors,XLength,YLength);
   return ws;
+}
+
+/// Create uninitialized MatrixWorkspace
+MatrixWorkspace_sptr WorkspaceFactoryImpl::createMatrix(const std::string& className) const
+{
+    MatrixWorkspace_sptr ws;
+    try
+    {
+        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));    
+        if (!ws)
+        {
+            g_log.error("Class "+className+" cannot be cast to MatrixWorkspace");
+            throw std::runtime_error("Class "+className+" cannot be cast to MatrixWorkspace");
+        }
+    }
+    catch(Kernel::Exception::NotFoundError& e)
+    {
+        g_log.error(e.what());
+        throw;
+    }
+    return ws;
+}
+
+/// Create a ITableWorkspace
+ITableWorkspace_sptr WorkspaceFactoryImpl::createTable(const std::string& className) const
+{
+    ITableWorkspace_sptr ws;
+    try
+    {
+        ws = boost::dynamic_pointer_cast<ITableWorkspace>(this->create(className));    
+        if (!ws)
+        {
+            g_log.error("Class "+className+" cannot be cast to ITableWorkspace");
+            throw std::runtime_error("Class "+className+" cannot be cast to ITableWorkspace");
+        }
+    }
+    catch(Kernel::Exception::NotFoundError& e)
+    {
+        g_log.error(e.what());
+        throw;
+    }
+    return ws;
 }
 
 } // namespace API

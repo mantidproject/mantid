@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidDataObjects/Column.h"
+#include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
 #include <vector>
@@ -29,7 +29,7 @@ class TableVector;
 /** \class TableColumn
 
     Class TableColumn implements abstract class Column for any copyable data type.
-    A TableColumn is created using TableWorkspace::createColumn(type,name).
+    A TableColumn is created using TableWorkspace::addColumn(type,name).
     type is the simbolic name of the data type which must be first declared with
     DECLARE_TABLECOLUMN macro. Predeclared types are:
 
@@ -66,7 +66,7 @@ class TableVector;
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Type>
-class DLLExport TableColumn: public Column
+class DLLExport TableColumn: public API::Column
 {
 public:
 
@@ -75,14 +75,19 @@ public:
     virtual ~TableColumn(){}
     /// Number of individual elements in the column.
     int size()const{return int(m_data.size());}
-    /// Reference to the data.
-    std::vector<Type>& data(){return m_data;}
     /// Type id of the data in the column
     const std::type_info& get_type_info()const{return typeid(Type);}
     /// Type id of the pointer to data in the column
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
     /// Output to an ostream.
     void print(std::ostream& s, int index)const{s << m_data[index];}
+    /// Type check
+    bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
+    /// Memory used by the column
+    long int sizeOfData()const{return m_data.size()*sizeof(Type);}
+
+    /// Reference to the data.
+    std::vector<Type>& data(){return m_data;}
 protected:
     /// Resize.
     void resize(int count){m_data.resize(count);}
@@ -113,7 +118,7 @@ public:
     /** Constructor
         @param c Shared pointer to a column
       */
-    TableColumn_ptr(boost::shared_ptr<Column> c):boost::shared_ptr<TableColumn<T> >(boost::dynamic_pointer_cast<TableColumn<T> >(c))
+    TableColumn_ptr(boost::shared_ptr<API::Column> c):boost::shared_ptr<TableColumn<T> >(boost::dynamic_pointer_cast<TableColumn<T> >(c))
     {
         if (this->get() == NULL)
         {
@@ -125,43 +130,25 @@ public:
     }
 };
 
-/**  @class Boolean
-    As TableColumn stores its data in a std::vector bool type cannot be used 
-    in the same way as the other types. Class Boolean is used instead.
-*/
-struct Boolean
-{
-    /// Default constructor
-    Boolean():value(false){}
-    /// Conversion from bool
-    Boolean(bool b):value(b){}
-    /// Returns bool
-    operator bool(){return value;}
-    bool value;///< boolean value
-};
-
 /// Special case of bool
 template<>
-class TableColumn_ptr<bool>: public TableColumn_ptr<Boolean>
+class TableColumn_ptr<bool>: public TableColumn_ptr<API::Boolean>
 {
 public:
     /** Constructor
         @param c Shared pointer to a column
       */
-    TableColumn_ptr(boost::shared_ptr<Column> c):TableColumn_ptr<Boolean>(c)
+    TableColumn_ptr(boost::shared_ptr<API::Column> c):TableColumn_ptr<API::Boolean>(c)
     {
         if (this->get() == NULL)
         {
             Kernel::Logger& log = Kernel::Logger::get("TableWorkspace");
-            std::string str = "Data type of column "+c->name()+" does not match "+typeid(Boolean).name();
+            std::string str = "Data type of column "+c->name()+" does not match "+typeid(API::Boolean).name();
             log.error(str);
             throw std::runtime_error(str);
         }
     }
 };
-
-/// Printing Boolean to an output stream
-DLLExport std::ostream& operator<<(std::ostream& ,const Boolean& );
 
 } // namespace DataObjects
 } // Namespace Mantid
@@ -174,7 +161,7 @@ DLLExport std::ostream& operator<<(std::ostream& ,const Boolean& );
 #define DECLARE_TABLECOLUMN(DataType,TypeName) \
     namespace{ \
     Mantid::Kernel::RegistrationHelper register_column_##TypeName(  \
-    (Mantid::DataObjects::ColumnFactory::Instance().subscribe< Mantid::DataObjects::TableColumn< DataType > >(#TypeName),0)); \
+    (Mantid::API::ColumnFactory::Instance().subscribe< Mantid::DataObjects::TableColumn< DataType > >(#TypeName),0)); \
     } 
 
 #endif /*MANTID_DATAOBJECTS_TABLECOLUMN_H_*/

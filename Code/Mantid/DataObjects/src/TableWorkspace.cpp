@@ -1,9 +1,12 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidDataObjects/ColumnFactory.h"
+#include "MantidAPI/ColumnFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include <iostream>
+
+DECLARE_WORKSPACE(TableWorkspace)
 
 namespace Mantid
 {
@@ -21,11 +24,22 @@ namespace Mantid
     TableWorkspace::~TableWorkspace()
     {}
 
+    long int TableWorkspace::getMemorySize() const
+    {
+        long int data_size = 0;
+        for(column_const_it c = m_columns.begin();c!=m_columns.end();c++)
+        {
+            data_size += (*c)->sizeOfData();
+
+        }
+        return data_size;
+    }
+
     /** @param type Data type of the column.
         @param name Column name.
         @return True if the column was successfully created.
     */
-    bool TableWorkspace::createColumn(const std::string& type, const std::string& name)
+    bool TableWorkspace::addColumn(const std::string& type, const std::string& name)
     {
         if (type.empty())
         {
@@ -46,10 +60,10 @@ namespace Mantid
             }
         try
         {
-            boost::shared_ptr<Column> c = ColumnFactory::Instance().create(type);
+            API::Column_sptr c = API::ColumnFactory::Instance().create(type);
             m_columns.push_back(c);
             c->setName(name);
-            c->resize(rowCount());
+            resizeColumn(c.get(),rowCount());
         }
         catch(Kernel::Exception::NotFoundError& e)
         {
@@ -68,12 +82,12 @@ namespace Mantid
     {
         if (count == rowCount()) return;
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            (*ci)->resize(count);
+            resizeColumn(ci->get(),count);
         m_rowCount = count;
     }
 
     /// Gets the shared pointer to a column.
-    boost::shared_ptr<Column> TableWorkspace::getColumn(const std::string& name)
+    API::Column_sptr TableWorkspace::getColumn(const std::string& name)
     {
         column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
         if (ci == m_columns.end())
@@ -83,6 +97,18 @@ namespace Mantid
             throw std::runtime_error(str);
         }
         return *ci;
+    }
+
+    /// Gets the shared pointer to a column.
+    API::Column_sptr TableWorkspace::getColumn(int index)
+    {
+        if (index >= columnCount())
+        {
+            std::string str = "Column index is out of range";
+            g_log.error()<<str<<": "<<index<<"("<<columnCount()<<")\n";
+            throw std::range_error(str);
+        }
+        return m_columns[index];
     }
 
     void TableWorkspace::removeColumn( const std::string& name)
@@ -105,7 +131,7 @@ namespace Mantid
     {
         if (index >= rowCount()) index = rowCount();
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            (*ci)->insert(index);
+            insertInColumn(ci->get(),index);
         ++m_rowCount;
         return index;
     }
@@ -120,7 +146,7 @@ namespace Mantid
             return;
         }
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
-            (*ci)->remove(index);
+            removeFromColumn(ci->get(),index);
         --m_rowCount;
     }
 

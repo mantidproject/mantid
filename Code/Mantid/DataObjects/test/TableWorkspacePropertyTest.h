@@ -9,8 +9,8 @@
 #include "MantidDataObjects/TableWorkspace.h" 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Property.h"
-#include "MantidDataObjects/TableRow.h" 
-#include "MantidDataObjects/ColumnFactory.h" 
+#include "MantidAPI/TableRow.h" 
+#include "MantidAPI/ColumnFactory.h" 
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -61,8 +61,8 @@ public:
     TableWorkspacePropertyTest()
     {
         t.reset(new TableWorkspace(10));
-        t->createColumn("str","Name");
-        t->createColumn("int","Nunber");
+        t->addColumn("str","Name");
+        t->addColumn("int","Nunber");
         AnalysisDataService::Instance().add("tst",boost::dynamic_pointer_cast<Workspace>(t));
     }
 

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_COLUMNFACTORY_H_
-#define MANTID_DATAOBJECTS_COLUMNFACTORY_H_
+#ifndef MANTID_API_COLUMNFACTORY_H_
+#define MANTID_API_COLUMNFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -12,18 +12,22 @@
 namespace Mantid
 {
 	
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
 namespace Kernel
 {
   class Logger;
 }
+
+namespace API
+{
+  class Column;
+}
 	
-namespace DataObjects
+namespace API
 {
 
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-  class Column;
 /** @class ColumnFactoryImpl
 
     The ColumnFactory class is in charge of the creation of concrete
@@ -55,7 +59,7 @@ namespace DataObjects
 */
 
 #ifdef _WIN32
-#ifdef IN_MANTID_DATA_OBJECTS
+#ifdef IN_MANTID_API
   #define ColumnFactory_DllExport __declspec( dllexport )
 #else
   #define ColumnFactory_DllExport __declspec( dllimport )
@@ -65,7 +69,7 @@ namespace DataObjects
   #define ColumnFactory_DllImport
 #endif
 
-class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<Column>
+  class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<Column>
   {
   public:
 	  ///Creates an instance of a column
@@ -101,7 +105,7 @@ class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<
 #endif /* _WIN32 */
 	typedef ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
 	
-} // namespace DataObjects
+} // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_DATAOBJECTS_COLUMNFACTORY_H_*/
+#endif /*MANTID_API_COLUMNFACTORY_H_*/

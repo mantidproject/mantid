@@ -111,7 +111,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="3"
 				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="_WIN32;IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 			/>
 			<Tool
@@ -192,6 +192,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Column.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ColumnFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -205,6 +213,10 @@
 			</File>
 			<File
 				RelativePath=".\src\InstrumentDataService.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ITableWorkspace.cpp"
 				>
 			</File>
 			<File
@@ -241,6 +253,10 @@
 			</File>
 			<File
 				RelativePath=".\src\SpectraDetectorMap.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\TableRow.cpp"
 				>
 			</File>
 			<File
@@ -326,6 +342,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\Column.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\ColumnFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\DeclareUserAlg.h"
 				>
 			</File>
@@ -386,6 +410,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\ITableWorkspace.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IWorkspaceProperty.h"
 				>
 			</File>
@@ -439,6 +467,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SpectraDetectorMapTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\TableRow.h"
 				>
 			</File>
 			<File

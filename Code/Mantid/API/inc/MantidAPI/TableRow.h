@@ -1,19 +1,29 @@
-#ifndef MANTID_DATAOBJECTS_TABLEROW_H_
-#define MANTID_DATAOBJECTS_TABLEROW_H_
+#ifndef MANTID_API_TABLEROW_H_
+#define MANTID_API_TABLEROW_H_
 
-#include "MantidDataObjects/TableColumn.h"
+#include "MantidAPI/Column.h"
 
 #include <ostream>
+#include <vector>
 
 namespace Mantid
 {
-namespace DataObjects
+
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+namespace Kernel
+{
+  class Logger;
+}
+
+namespace API
 {
 
 class TableRowHelper;
 
 #ifdef _WIN32
-#ifdef IN_MANTID_DATA_OBJECTS
+#ifdef IN_MANTID_API
   #define TableRow_DllExport __declspec( dllexport )
 #else
   #define TableRow_DllExport __declspec( dllimport )
@@ -75,8 +85,14 @@ public:
     template<class T>
     TableRow& operator<<(const T& t)
     {
-        TableColumn_ptr<T> c = m_columns[m_col];
-        c->data()[m_row] = t;
+        Column_sptr c = m_columns[m_col];
+        if (!c->isType<T>())
+        {
+            std::string str = "Type mismatch. ";
+            g_log.error(str);
+            throw std::runtime_error(str);
+        }
+        c->cell<T>(m_row) = t;
         ++m_col;
         return *this;
     }
@@ -94,8 +110,8 @@ public:
     template<class T>
     TableRow& operator>>(T& t)
     {
-        TableColumn_ptr<T> c = m_columns[m_col];
-        t = c->data()[m_row];
+        Column_sptr c = m_columns[m_col];
+        t = c->cell<T>(m_row);
         ++m_col;
         return *this;
     }
@@ -116,12 +132,13 @@ public:
     {
         if (col < 0 || col >= int(m_columns.size()))
         {
-            throw std::runtime_error("TableRow: column index out of range.");
+            g_log.error("Column index out of range.");
+            throw std::runtime_error("Column index out of range.");
         }
         m_col = col;
-        TableColumn_ptr<T> c = m_columns[m_col];
+        Column_sptr c = m_columns[m_col];
         ++m_col; // Is it right?
-        return c->data()[m_row];
+        return c->cell<T>(m_row);
     }
 
     /**  Returns a reference to the element in position col if its type is int
@@ -150,16 +167,18 @@ public:
 
 private:
     friend TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
-    std::vector< boost::shared_ptr<Column> >& m_columns;  ///< Pointers to the columns in the TableWorkspace
+    std::vector< Column_sptr > m_columns;  ///< Pointers to the columns in the ITableWorkspace
     int m_row;          ///< Row number in the TableWorkspace
     int m_col;          ///< Current column number (for streaming operations)
     int m_nrows;        ///< Number of rows in the TableWorkspace
     std::string m_sep;  ///< Separator character(s) between elements in a text output
+    /// Logger
+    static Kernel::Logger& g_log;
 };
 
 TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
 
-} // namespace DataObjects
+} // namespace API
 } // namespace Mantid
 
-#endif  /*  MANTID_DATAOBJECTS_TABLEROW_H_ */
+#endif  /*  MANTID_API_TABLEROW_H_ */

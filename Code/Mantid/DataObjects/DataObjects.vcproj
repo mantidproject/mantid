@@ -164,10 +164,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\ColumnFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Histogram1D.cpp"
 				>
 			</File>
@@ -181,10 +177,6 @@
 			</File>
 			<File
 				RelativePath=".\src\TableColumn.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\TableRow.cpp"
 				>
 			</File>
 			<File
@@ -209,14 +201,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\inc\MantidDataObjects\Column.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataObjects\ColumnFactory.h"
-				>
-			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\Histogram1D.h"
 				>
@@ -247,10 +231,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\TablePointerColumn.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataObjects\TableRow.h"
 				>
 			</File>
 			<File

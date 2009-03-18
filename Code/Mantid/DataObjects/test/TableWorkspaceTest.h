@@ -7,8 +7,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/TableWorkspace.h" 
-#include "MantidDataObjects/TableRow.h" 
-#include "MantidDataObjects/ColumnFactory.h" 
+#include "MantidAPI/TableRow.h" 
+#include "MantidAPI/ColumnFactory.h" 
 
 class Class
 {
@@ -21,6 +21,7 @@ private:
 
 DECLARE_TABLEPOINTERCOLUMN(Class,Class);
 
+using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace std;
 
@@ -30,24 +31,25 @@ public:
   void testAll()
   {
     TableWorkspace tw(3);
-    tw.createColumn("int","Number");
-    tw.createColumn("str","Name");
-    tw.createColumn("V3D","Position");
-    tw.createColumn("Class","class");
+    tw.addColumn("int","Number");
+    tw.addColumn("str","Name");
+    tw.addColumn("V3D","Position");
+    tw.addColumn("Class","class");
 
     TS_ASSERT_EQUALS(tw.rowCount(),3)
     TS_ASSERT_EQUALS(tw.columnCount(),4)
 
-    vector<int>& stdNumb = tw.getStdVector<int>("Number");
-    TS_ASSERT_EQUALS(stdNumb.size(),3)
-    stdNumb[1] = 17;
+    tw.getRef<int>("Number",1) = 17;
+    tw.cell<std::string>(2,1) = "STRiNG";
+
     ColumnVector<int> cNumb = tw.getVector("Number");
     TS_ASSERT_EQUALS(cNumb[1],17)
 
     ColumnVector<string> str = tw.getVector("Name");
     TS_ASSERT_EQUALS(str.size(),3)
+    TS_ASSERT_EQUALS(str[2],"STRiNG")
 
-    ColumnPointerVector<Class> cl = tw.getVector("class");
+    ColumnVector<Class> cl = tw.getVector("class");
     TS_ASSERT_EQUALS(cl.size(),3)
 
     for(int i=0;i<cNumb.size();i++)
@@ -78,36 +80,15 @@ public:
     names.push_back("Name");
     names.push_back("class");
 
-    /*boost::tuples::tuple<int,string,Class> tup1;
-    tw.set_Tuple(1,tup1,names);
-
-    boost::tuples::tuple<int*,string*,Class*> tup2 =
-        tw.make_TupleRef< boost::tuples::tuple<int*,string*,Class*> >(1,names);
-
-    boost::tuples::tuple<int*,string*,Class*> tup3;
-    tw.set_TupleRef(1,tup3,names);
-
-    *tup2.get<0>() = 200; 
-    *tup2.get<1>() = "End";
-    tup2.get<2>()->d = 222;
-
-    TS_ASSERT_EQUALS(*tup3.get<0>(),200)
-    TS_ASSERT_EQUALS(*tup3.get<1>(),"End")
-    TS_ASSERT_EQUALS(tup3.get<2>()->d,222)
-
-    TS_ASSERT_EQUALS(tup1.get<0>(),2)
-    TS_ASSERT_EQUALS(tup1.get<1>(),"Second")
-    TS_ASSERT_EQUALS(tup1.get<2>().d,22)*/
-
   }
 
   void testRow()
   {
     TableWorkspace tw(2);
-    tw.createColumn("int","Number");
-    tw.createColumn("double","Ratio");
-    tw.createColumn("str","Name");
-    tw.createColumn("bool","OK");
+    tw.addColumn("int","Number");
+    tw.addColumn("double","Ratio");
+    tw.addColumn("str","Name");
+    tw.addColumn("bool","OK");
 
     TableRow row = tw.getFirstRow();
 
@@ -169,8 +150,8 @@ public:
   try
   {
       TableWorkspace tw(10);
-      tw.createColumn("int","Number");
-      tw.createColumn("bool","OK");
+      tw.addColumn("int","Number");
+      tw.addColumn("bool","OK");
 
       TableRow row = tw.getFirstRow();
       do
@@ -182,7 +163,6 @@ public:
 
       TableColumn_ptr<bool> bc = tw.getColumn("OK");
 
-      // std::vector<bool>& bv = tw.getStdVector<bool>("OK"); // doesn't work
       //std::vector<bool>& bv = bc->data();  // doesn't work
       std::vector<Boolean>& bv = bc->data();  // works
       //bool& br = bc->data()[1]; // doesn't work

@@ -52,7 +52,7 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
 
   //Horendous code inclusion to satisfy compilers that all code paths return a value
   // in reality the above code should either throw or return successfully.
-  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("Workspace2D");
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("Workspace2D");
   return retVal;
 }
 
@@ -62,7 +62,7 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
  */
 static MatrixWorkspace_sptr createWorkspaceSingleValue(const double& rhsValue)
 {
-  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().create("WorkspaceSingleValue");
+  MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("WorkspaceSingleValue");
   retVal->dataY(0)[0]=rhsValue;
 
   return retVal;

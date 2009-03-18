@@ -1,12 +1,11 @@
-#ifndef MANTID_DATAOBJECTS_ICOLUMN_H_
-#define MANTID_DATAOBJECTS_ICOLUMN_H_
+#ifndef MANTID_API_ICOLUMN_H_
+#define MANTID_API_ICOLUMN_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/System.h"
-
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <typeinfo>
 
@@ -16,13 +15,17 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
+namespace Kernel
+{
+  class Logger;
+}
 
 namespace DataObjects
 {
     class TableWorkspace;
 }
 
-namespace DataObjects
+namespace API
 {
 /** \class Column
 
@@ -52,25 +55,70 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Column
+#ifdef _WIN32
+#ifdef IN_MANTID_API
+  #define Column_DllExport __declspec( dllexport )
+#else
+  #define Column_DllExport __declspec( dllimport )
+#endif
+#else
+  #define Column_DllExport
+  #define Column_DllImport
+#endif
+
+class Column_DllExport Column
 {
 public:
     /// Virtual destructor
     virtual ~Column() {}
+
     /// Name (caption) of the column.
     const std::string& name()const{return m_name;}
+
     /// Type of the column data.
     const std::string& type()const{return m_type;}
+
     /// Renames the column.
     void setName(const std::string& str){m_name = str;}
+
     /// Number of individual elements in the column.
     virtual int size()const = 0;
+
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const = 0;
+
     /// Returns typeid for the pointer type to the data element in the column
     virtual const std::type_info& get_pointer_type_info()const = 0;
+
     /// Prints
     virtual void print(std::ostream& s, int index) const = 0;
+
+    /// Templated method for returning a value. No type checks are done.
+    template<class T>
+    T& cell(int index)
+    {
+        return *static_cast<T*>(void_pointer(index));
+    }
+
+    /// Templated method for returning a value (const version). No type checks are done.
+    template<class T>
+    const T& cell(int index)const
+    {
+        return *static_cast<T*>(void_pointer(index));
+    }
+
+    /// Type check.
+    template<class T>
+    bool isType()const
+    {
+        return get_type_info() == typeid(T);
+    }
+
+    /// Specialized type check
+    virtual bool isBool()const = 0;
+
+    /// Must return overall memory size taken by the column.
+    virtual long int sizeOfData()const = 0;
 protected:
     /// Sets the new column size.
     virtual void resize(int count) = 0;
@@ -84,9 +132,32 @@ private:
     std::string m_name;///< name
     std::string m_type;///< type
     friend class ColumnFactoryImpl;
-    friend class TableWorkspace;
+    friend class ITableWorkspace;
+    template<class T> friend class ColumnVector;
+    /// Logger
+    static Kernel::Logger& g_log;
 };
 
-} // namespace DataObjects
+/**  @class Boolean
+    As TableColumn stores its data in a std::vector bool type cannot be used 
+    in the same way as the other types. Class Boolean is used instead.
+*/
+struct Column_DllExport Boolean
+{
+    /// Default constructor
+    Boolean():value(false){}
+    /// Conversion from bool
+    Boolean(bool b):value(b){}
+    /// Returns bool
+    operator bool(){return value;}
+    bool value;///< boolean value
+};
+
+/// Printing Boolean to an output stream
+Column_DllExport std::ostream& operator<<(std::ostream& ,const API::Boolean& );
+
+typedef boost::shared_ptr<Column> Column_sptr;
+
+} // namespace API
 } // Namespace Mantid
-#endif /*MANTID_DATAOBJECTS_ICOLUMN_H_*/
+#endif /*MANTID_API_ICOLUMN_H_*/

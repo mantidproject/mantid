@@ -1,6 +1,6 @@
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidDataObjects/TableRow.h"
+#include "MantidAPI/TableRow.h"
 
 namespace Mantid
 {

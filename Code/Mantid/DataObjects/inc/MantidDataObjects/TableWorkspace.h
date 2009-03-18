@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TablePointerColumn.h"
-#include "MantidAPI/Workspace.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -26,27 +26,6 @@ namespace Kernel
 
 namespace DataObjects
 {
-
-/// Helper class used to create ColumnVector
-class TableColumnHelper
-{
-public:
-    /// Constructor
-    TableColumnHelper(TableWorkspace *tw,const std::string& name):m_workspace(tw),m_name(name){}
-    TableWorkspace *m_workspace;///< Pointer to the TableWorkspace
-    std::string m_name;///< column namae
-};
-
-/// Helper class used to create TableRow
-class TableRowHelper
-{
-public:
-    /// Constructor
-    TableRowHelper(TableWorkspace* tw,int row):m_workspace(tw),m_row(row){}
-    TableWorkspace* m_workspace;///< Pointer to the TableWorkspace
-    int m_row;///< Row number
-};
-
 /** \class TableWorkspace
 
      TableWorkspace is an implementation of Workspace in which the data are organised in columns of same size.
@@ -69,7 +48,6 @@ public:
        - Using specialized access methods for the predefined types. E.g. int var = table.Int(i,j);. If j-th column is
          of the wrong type a runtime_error exception will be thrown. 
        - Getting the pointer to a column and working with it.
-       - Using getVector or getStdVector.
        - Creating a TableRow object and working with it.
 
 
@@ -107,7 +85,7 @@ public:
   #define TableWorkspace_DllImport
 #endif
 
-class TableWorkspace_DllExport TableWorkspace: public API::Workspace
+class TableWorkspace_DllExport TableWorkspace: public API::ITableWorkspace
 {
 public:
     /// Constructor.
@@ -117,16 +95,18 @@ public:
     /// Return the workspace typeID
     virtual const std::string id() const{return "TableWorkspace";}
     /// Get the footprint in memory in KB.
-    virtual long int getMemorySize() const{return 0;}
+    virtual long int getMemorySize() const;
 
     /// Creates a new column.
-    bool createColumn(const std::string& type, const std::string& name);
+    bool addColumn(const std::string& type, const std::string& name);
     /// Removes a column.
     void removeColumn( const std::string& name);
     /// Number of columns in the workspace.
     int columnCount() const {return m_columns.size();}
     /// Gets the shared pointer to a column.
-    boost::shared_ptr<Column> getColumn(const std::string& name);
+    API::Column_sptr getColumn(const std::string& name);
+    /// Gets the shared pointer to a column.
+    API::Column_sptr getColumn(int index);
     /// Returns a vector of all column names.
     std::vector<std::string> getColumnNames();
     /// Number of rows in the workspace.
@@ -137,102 +117,6 @@ public:
     int insertRow(int index);
     /// Delets a row if it exists.
     void removeRow(int index);
-    /// Appends a row.
-    TableRowHelper appendRow(){insertRow(rowCount());return getRow(rowCount()-1);}
-    /// Gets the reference to the data vector.
-    template <class T>
-    std::vector<T>& getStdVector(const std::string& name)
-    {
-        TableColumn_ptr<T> c = getColumn(name);
-        return c->data();
-    }
-    /// Access the column with name \c name trough a ColumnVector object
-    TableColumnHelper getVector(const std::string& name){return TableColumnHelper(this,name);}
-    template <class T>
-    /**  Get a reference to a data element
-         @param name Column name.
-         @param index Element's opsition in the column.
-         @tparam T Type of the data in the column. If it doesn't match the actual type 
-           a runtime_error exception is thrown.
-     */
-    T& getRef(const std::string& name, int index)
-    {
-        boost::shared_ptr<Column> c = getColumn(name);
-        if (c->get_type_info() != typeid(T))
-        {
-            std::string str = "getRef: Type mismatch. ";
-            g_log.error(str);
-            throw std::runtime_error(str);
-        }
-        return *(static_cast<T*>(c->void_pointer(index)));
-    }
-    /**  Get a pointer to a data element
-         @param name Column name.
-         @param index Element's opsition in the column.
-         @tparam P Pointer type of the data in the column. If it doesn't match the actual type 
-           a runtime_error exception is thrown.
-     */
-    template <class P>// P is of the type of a pointer to data
-    P getPointer(const std::string& name, int index)
-    {
-        boost::shared_ptr<Column> c = getColumn(name);
-        if (c->get_pointer_type_info() != typeid(P))
-        {
-            std::string str = "getPointer: Type mismatch. ";
-            g_log.error(str);
-            throw std::runtime_error(str);
-        }
-        return static_cast<P>(c->void_pointer(index));
-    }
-
-    /**  Get the reference to the element in row \c row and column \c col.
-         @param row Row number
-         @param col Column number
-         @tparam T Type of the data in the column. If it doesn't match the actual type 
-           a runtime_error exception is thrown.
-     */
-    template<class T>
-    T& cell(int row,int col)
-    {
-        TableColumn_ptr<T> c = m_columns[col];
-        return c->data()[row];
-        //return boost::static_pointer_cast<TableColumn<T> >(m_columns[col])->data()[row];
-    }
-
-    /**  Get the reference to the element in row \c row and column \c col if its type is \c int.
-         If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
-     */
-    int& Int(int row,int col){return cell<int>(row,col);}
-    /**  Get the reference to the element in row \c row and column \c col if its type is \c double.
-         If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
-     */
-    double& Double(int row,int col){return cell<double>(row,col);}
-    /**  Get the reference to the element in row \c row and column \c col if its type is \c bool.
-         If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
-     */
-    Boolean& Bool(int row,int col){return cell<Boolean>(row,col);}
-    /**  Get the reference to the element in row \a row and column \a col if its type is \c std::string.
-         If it doesn't match the actual type of the column a runtime_error exception is thrown.
-         @param row Row number
-         @param col Column number
-     */
-    std::string& String(int row,int col){return cell<std::string>(row,col);}
-
-    /**  Creates a TableRow object for row \a row.
-         @param row Row number
-     */
-    TableRowHelper getRow(int row){return TableRowHelper(this,row);}
-    /**  Creates a TableRow object for the first row (\c row == 0).
-     */
-    TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
-
-protected:
 
 private:
     /// Used in std::find_if algorithm to find a Column with name \a name.
@@ -243,61 +127,21 @@ private:
         /// Constructor
         FindName(const std::string& name):m_name(name){}
         /// Comparison operator
-        bool operator()(boost::shared_ptr<Column>& cp)
+        bool operator()(boost::shared_ptr<API::Column>& cp)
         {
             return cp->name() == m_name;
         }
     };
-    friend class TableRow;
 
-    typedef std::vector< boost::shared_ptr<Column> >::iterator column_it;///< Column iterator
-    /// Logger
-    static Kernel::Logger& g_log;
+    typedef std::vector< boost::shared_ptr<API::Column> >::iterator column_it;///< Column iterator
+    typedef std::vector< boost::shared_ptr<API::Column> >::const_iterator column_const_it;///< Column const iterator
     /// Shared pointers to the columns.
-    std::vector< boost::shared_ptr<Column> > m_columns;
+    std::vector< boost::shared_ptr<API::Column> > m_columns;
     /// row count
     int m_rowCount;
+    /// Logger
+    static Kernel::Logger& g_log;
 
-};
-
-/** @class ColumnVector
-     ColumnVector gives access to the column elements without alowing its resizing.
-     Created by TableWorkspace::getVector(...)
- */
-template< class T>
-class ColumnVector
-{
-public:
-    /// Constructor
-    ColumnVector(const TableColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name)){}
-    /** Get the element
-        @param i Element's position
-     */
-    T& operator[](size_t i){return m_column->data()[i];}
-    /// Size of the vector
-    int size(){return int(m_column->size());}
-private:
-    TableColumn_ptr<T> m_column;///< Pointer to the underlying column
-};
-
-/** @class ColumnPointerVector
-     ColumnPointerVector gives access to the column elements without alowing its resizing
-     Created by TableWorkspace::getVector(...)
- */
-template< class T>
-class ColumnPointerVector
-{
-public:
-    /// Constructor
-    ColumnPointerVector(const TableColumnHelper& th):m_column(th.m_workspace->getColumn(th.m_name)){}
-    /** Get the element
-        @param i Element's position
-     */
-    T& operator[](size_t i){return m_column->data(i);}
-    /// Size of the vector
-    int size(){return int(m_column->size());}
-private:
-    TablePointerColumn_ptr<T> m_column;///< Pointer to the underlying column
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

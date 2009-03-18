@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks1D.h"
-#include "MantidDataObjects/TableRow.h"
+#include "MantidAPI/TableRow.h"
 #include <numeric>
 namespace Mantid
 {
@@ -27,9 +27,9 @@ void FindPeaks1D::init()
   // The found peaks in a table
   declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PeaksList","",Direction::Output));
   // Set up the columns for the TableWorkspace holding the peak information
-  peaks->createColumn("double","centre");
-  peaks->createColumn("double","width");
-  peaks->createColumn("double","height");
+  peaks->addColumn("double","centre");
+  peaks->addColumn("double","width");
+  peaks->addColumn("double","height");
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(0);
   declareProperty("spectrum",0,min);
@@ -152,7 +152,7 @@ void FindPeaks1D::analyseVector()
 		mess << "Find one peak at Pos:" << peak_center << ",A=" <<  peak_amplitude << "W=" << peak_width;
 		g_log.information(mess.str());
 		mess.str("");
-		DataObjects::TableRow newrow = peaks->appendRow();
+		API::TableRow newrow = peaks->appendRow();
 		newrow << peak_center << peak_amplitude << peak_width;
 		left=right;
 		counter++;

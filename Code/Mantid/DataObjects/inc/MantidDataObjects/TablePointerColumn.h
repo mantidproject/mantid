@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidDataObjects/Column.h"
+#include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
 #include <iostream>
@@ -55,7 +55,7 @@ namespace DataObjects
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 template <class Type>
-class DLLExport TablePointerColumn: public Column
+class DLLExport TablePointerColumn: public API::Column
 {
 public:
 
@@ -71,6 +71,10 @@ public:
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
     /// Prints
     void print(std::ostream& s, int index)const{s << name() << '_' << index;}
+    /// Type check
+    bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
+    /// Memory used by the column
+    long int sizeOfData()const{return m_data.size()*sizeof(Type);}
 protected:
     /// Resize.
     void resize(int count)
@@ -107,7 +111,7 @@ class TablePointerColumn_ptr: public boost::shared_ptr<TablePointerColumn<T> >
 {
 public:
     /// Constructor
-    TablePointerColumn_ptr(boost::shared_ptr<Column> c):boost::shared_ptr<TablePointerColumn<T> >(boost::dynamic_pointer_cast<TablePointerColumn<T> >(c))
+    TablePointerColumn_ptr(boost::shared_ptr<API::Column> c):boost::shared_ptr<TablePointerColumn<T> >(boost::dynamic_pointer_cast<TablePointerColumn<T> >(c))
     {
         if (this->get() == NULL)
         {
@@ -131,7 +135,7 @@ TableVector<Type>& TableColumn<Type>::data()
 #define DECLARE_TABLEPOINTERCOLUMN(DataType,TypeName) \
     namespace{ \
     Mantid::Kernel::RegistrationHelper register_pointer_column_##TypeName(  \
-    (Mantid::DataObjects::ColumnFactory::Instance().subscribe< Mantid::DataObjects::TablePointerColumn< DataType > >(#TypeName),0)); \
+    (Mantid::API::ColumnFactory::Instance().subscribe< Mantid::DataObjects::TablePointerColumn< DataType > >(#TypeName),0)); \
     } 
 
 #endif /*MANTID_DATAOBJECTS_TABLEPOINTERCOLUMN_H_*/
