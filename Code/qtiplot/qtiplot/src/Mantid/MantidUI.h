@@ -238,12 +238,18 @@ public slots:
     // Load a workspace from a DAE by running a LoadDAE algorithm with properties supplied through a dialog box.
     void loadDAEWorkspace();
 
-    // Create a MantidMatrix from workspace wsName
-    MantidMatrix *importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
-
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
     
+    // Import a workspace wsName
+    void importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
+
+    // Create a MantidMatrix from workspace wsName
+    MantidMatrix *importMatrixWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
+
+    // Create a MantidMatrix from workspace wsName
+    Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
+
     // Plot the first spectrum from the workspace selected in the workspace dock window
     void plotFirstSpectrum();
 

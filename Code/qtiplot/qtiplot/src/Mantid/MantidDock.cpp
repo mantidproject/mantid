@@ -1,6 +1,7 @@
 #include "MantidDock.h"
 #include "MantidUI.h"
 #include "../ApplicationWindow.h"
+#include "../pixmaps.h"
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 
@@ -96,6 +97,8 @@ void MantidDockWidget::updateWorkspaceEntry(const QString & ws_name, Mantid::API
     ws_item = name_matches[0];
     ws_item->takeChildren();
   }
+  ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(workspace->id()))));
+
   Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
   if( ws_ptr )
   {
@@ -117,9 +120,17 @@ void MantidDockWidget::updateWorkspaceEntry(const QString & ws_name, Mantid::API
     ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
     s = "Y axis: " + ws_ptr->YUnit();
     ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-    ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(ws_ptr->id()))));
     ws_item->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws_ptr->getMemorySize())+" KB")));
   }
+  else
+  {
+      Mantid::API::ITableWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
+      if( ws_ptr )
+      {
+          ws_item->setIcon(0,QIcon(QPixmap(worksheet_xpm)));
+      }
+  }
+
   m_tree->addTopLevelItem(ws_item);
 }
 

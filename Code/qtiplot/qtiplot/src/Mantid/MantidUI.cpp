@@ -15,6 +15,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 
 #include "MantidQtAPI/InterfaceManager.h"
@@ -37,6 +38,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 using namespace std;
 
 using namespace Mantid::API;
@@ -132,7 +134,7 @@ void MantidUI::init()
     appWindow()->view->addAction(actionToggleAlgorithms);
 
     update();
-
+ 
 }
 
 MantidUI::~MantidUI()
@@ -348,7 +350,13 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 
 }
 
-MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
+/**  Import a MatrixWorkspace into a MantidMatrix.
+     @param wsName Workspace name
+     @param showDlg If true show a dialog box to set some import parameters
+     @param makeVisible If true show the created MantidMatrix, hide otherwise.
+     @return A pointer to the new MantidMatrix.
+ */
+MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
     MatrixWorkspace_sptr ws;
   	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -389,10 +397,66 @@ MantidMatrix* MantidUI::importWorkspace(const QString& wsName, bool showDlg, boo
     return w;
 }
 
+/**  Import a Workspace into MantidPlot.
+     @param wsName Workspace name
+     @param showDlg If true show a dialog box to set some import parameters
+     @param makeVisible If true show the created widget, hide otherwise.
+ */
+void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
+{
+    MantidMatrix* mm = importMatrixWorkspace(wsName,showDlg,makeVisible);
+    if (!mm) importTableWorkspace(wsName,showDlg,makeVisible);
+}
+
+/**  Import the selected workspace, if any. Displays the import dialog.
+ */
 void MantidUI::importWorkspace()
 {
     QString wsName = getSelectedWorkspaceName();
-    importWorkspace(wsName);
+    importWorkspace(wsName,true,true);
+}
+
+/**  Create a new Table and fill it with the data from a Tableworkspace
+     @param wsName Workspace name
+     @param showDlg If true show a dialog box to set some import parameters
+     @param makeVisible If true show the created Table, hide otherwise.
+     @return A pointer to the new Table.
+ */
+Table* MantidUI::importTableWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
+{
+    ITableWorkspace_sptr ws;
+  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+	{
+		ws = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+	}
+
+    if (!ws.get()) return 0;
+
+    if (ws->rowCount() == 0 || ws->columnCount() == 0)
+    {
+        showCritical("Cannot create an empty table");
+        return 0;
+    }
+
+    // Create new Table
+    Table* t = new Table(appWindow()->scriptEnv, ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
+    appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+    t->askOnCloseEvent(false);
+    if (makeVisible) t->showNormal();
+
+    for(int i=0;i<ws->columnCount();i++)
+    {
+        Column_sptr c = ws->getColumn(i);
+        t->setColName(i,QString::fromStdString(c->name()));
+        t->setReadOnlyColumn(i);
+        for(int j=0;j<ws->rowCount();j++)
+        {
+            std::ostringstream ostr;
+            c->print(ostr,j);
+            t->setText(j,i,QString::fromStdString(ostr.str()));
+        }
+    }
+
 }
 
 void MantidUI::plotFirstSpectrum()
@@ -697,7 +761,7 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
 	    return;
     }
 
-    MantidMatrix *m = importWorkspace(QString::fromStdString(wsName),false, true);
+    MantidMatrix *m = importMatrixWorkspace(QString::fromStdString(wsName),false, true);
 
     int updateInterval = m_DAE_map[wsName];
     if (updateInterval > 0)
@@ -911,7 +975,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
-    m = importWorkspace(wsName, false, showMatrix);
+    m = importMatrixWorkspace(wsName, false, showMatrix);
   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -947,7 +1011,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMat
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
-    m = importWorkspace(wsName, false, showMatrix);
+    m = importMatrixWorkspace(wsName, false, showMatrix);
   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
