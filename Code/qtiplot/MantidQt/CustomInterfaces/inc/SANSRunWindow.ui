@@ -1,0 +1,905 @@
+<ui version="4.0" >
+ <class>SANSRunWindow</class>
+ <widget class="QWidget" name="SANSRunWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1002</width>
+    <height>581</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>SANS</string>
+  </property>
+  <widget class="QPushButton" name="hideBtn" >
+   <property name="geometry" >
+    <rect>
+     <x>909</x>
+     <y>527</y>
+     <width>80</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>Hide</string>
+   </property>
+   <property name="autoDefault" >
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="tabWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>970</width>
+     <height>472</height>
+    </rect>
+   </property>
+   <property name="autoFillBackground" >
+    <bool>false</bool>
+   </property>
+   <property name="styleSheet" >
+    <string notr="true" />
+   </property>
+   <property name="currentIndex" >
+    <number>0</number>
+   </property>
+   <widget class="QWidget" name="tab" >
+    <attribute name="title" >
+     <string>Run Numbers</string>
+    </attribute>
+    <widget class="QLineEdit" name="userfile_edit" >
+     <property name="geometry" >
+      <rect>
+       <x>710</x>
+       <y>10</y>
+       <width>154</width>
+       <height>28</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="userfileBtn" >
+     <property name="geometry" >
+      <rect>
+       <x>870</x>
+       <y>10</y>
+       <width>80</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Browse ...</string>
+     </property>
+     <property name="autoDefault" >
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="datadir_edit" >
+     <property name="geometry" >
+      <rect>
+       <x>98</x>
+       <y>9</y>
+       <width>154</width>
+       <height>28</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_7" >
+     <property name="geometry" >
+      <rect>
+       <x>14</x>
+       <y>15</y>
+       <width>85</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Data directory</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="data_dirBtn" >
+     <property name="geometry" >
+      <rect>
+       <x>266</x>
+       <y>9</y>
+       <width>80</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Browse ...</string>
+     </property>
+     <property name="autoDefault" >
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11" >
+     <property name="geometry" >
+      <rect>
+       <x>657</x>
+       <y>15</y>
+       <width>52</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>User file</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="geometry" >
+      <rect>
+       <x>30</x>
+       <y>60</y>
+       <width>282</width>
+       <height>214</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Scattering</string>
+     </property>
+     <widget class="QWidget" name="horizontalLayoutWidget_2" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>32</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_2" >
+       <item>
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Sample</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_sample_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_1" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_smp_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="sct_prd_tot1" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>sct_smp_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QLabel" name="label" >
+      <property name="geometry" >
+       <rect>
+        <x>207</x>
+        <y>15</y>
+        <width>42</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Period</string>
+      </property>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_3" >
+      <property name="geometry" >
+       <rect>
+        <x>4</x>
+        <y>86</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_3" >
+       <item>
+        <widget class="QLabel" name="label_12" >
+         <property name="text" >
+          <string>Can      </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_can_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_2" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_can_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="sct_prd_tot2" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>sct_can_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_4" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>141</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4" >
+       <item>
+        <widget class="QLabel" name="label_14" >
+         <property name="text" >
+          <string>Backg'd</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_bkgd_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_3" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="sct_bckd_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="sct_prd_tot3" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>sct_bckd_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_2" >
+     <property name="geometry" >
+      <rect>
+       <x>350</x>
+       <y>60</y>
+       <width>282</width>
+       <height>214</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Transmission</string>
+     </property>
+     <widget class="QWidget" name="horizontalLayoutWidget_5" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>32</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5" >
+       <item>
+        <widget class="QLabel" name="label_4" >
+         <property name="text" >
+          <string>Sample</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_sample_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_4" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_sample_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="tra_prd_tot1" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>tra_sample_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QLabel" name="label_6" >
+      <property name="geometry" >
+       <rect>
+        <x>207</x>
+        <y>15</y>
+        <width>42</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Period</string>
+      </property>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_6" >
+      <property name="geometry" >
+       <rect>
+        <x>4</x>
+        <y>86</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_6" >
+       <item>
+        <widget class="QLabel" name="label_15" >
+         <property name="text" >
+          <string>Can      </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_can_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_5" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_can_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="tra_prd_tot2" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>tra_can_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_7" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>141</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_7" >
+       <item>
+        <widget class="QLabel" name="label_17" >
+         <property name="text" >
+          <string>Backg'd</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_bkgd_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_6" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="tra_bckd_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="tra_prd_tot3" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>tra_bckd_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_3" >
+     <property name="geometry" >
+      <rect>
+       <x>670</x>
+       <y>60</y>
+       <width>282</width>
+       <height>214</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Direct</string>
+     </property>
+     <widget class="QWidget" name="horizontalLayoutWidget_8" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>32</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_8" >
+       <item>
+        <widget class="QLabel" name="label_8" >
+         <property name="text" >
+          <string>Sample</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_sample_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_7" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_smp_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="direct_prd_tot1" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>direct_smp_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QLabel" name="label_10" >
+      <property name="geometry" >
+       <rect>
+        <x>207</x>
+        <y>15</y>
+        <width>42</width>
+        <height>18</height>
+       </rect>
+      </property>
+      <property name="text" >
+       <string>Period</string>
+      </property>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_9" >
+      <property name="geometry" >
+       <rect>
+        <x>4</x>
+        <y>86</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_9" >
+       <item>
+        <widget class="QLabel" name="label_18" >
+         <property name="text" >
+          <string>Can      </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_can_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_8" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_can_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="direct_prd_tot2" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>direct_can_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="horizontalLayoutWidget_10" >
+      <property name="geometry" >
+       <rect>
+        <x>3</x>
+        <y>141</y>
+        <width>275</width>
+        <height>37</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_10" >
+       <item>
+        <widget class="QLabel" name="label_20" >
+         <property name="text" >
+          <string>Backg'd</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_bkgd_edit" >
+         <property name="enabled" >
+          <bool>true</bool>
+         </property>
+         <property name="text" >
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="spacer_9" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="direct_bckd_prd" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize" >
+          <size>
+           <width>60</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="direct_prd_tot3" >
+         <property name="text" >
+          <string>/ ??</string>
+         </property>
+         <property name="buddy" >
+          <cstring>direct_bckd_prd</cstring>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="load_dataBtn" >
+     <property name="geometry" >
+      <rect>
+       <x>30</x>
+       <y>292</y>
+       <width>80</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Load Data</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2" >
+    <attribute name="title" >
+     <string>Instrument Details</string>
+    </attribute>
+   </widget>
+  </widget>
+ </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>datadir_edit</tabstop>
+  <tabstop>data_dirBtn</tabstop>
+  <tabstop>userfile_edit</tabstop>
+  <tabstop>userfileBtn</tabstop>
+  <tabstop>sct_sample_edit</tabstop>
+  <tabstop>sct_smp_prd</tabstop>
+  <tabstop>sct_can_edit</tabstop>
+  <tabstop>sct_can_prd</tabstop>
+  <tabstop>sct_bkgd_edit</tabstop>
+  <tabstop>sct_bckd_prd</tabstop>
+  <tabstop>tra_sample_edit</tabstop>
+  <tabstop>tra_sample_prd</tabstop>
+  <tabstop>tra_can_edit</tabstop>
+  <tabstop>tra_can_prd</tabstop>
+  <tabstop>tra_bkgd_edit</tabstop>
+  <tabstop>tra_bckd_prd</tabstop>
+  <tabstop>direct_sample_edit</tabstop>
+  <tabstop>direct_smp_prd</tabstop>
+  <tabstop>direct_can_edit</tabstop>
+  <tabstop>direct_can_prd</tabstop>
+  <tabstop>direct_bkgd_edit</tabstop>
+  <tabstop>direct_bckd_prd</tabstop>
+  <tabstop>load_dataBtn</tabstop>
+  <tabstop>hideBtn</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>hideBtn</sender>
+   <signal>clicked()</signal>
+   <receiver>SANSRunWindow</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>949</x>
+     <y>453</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>498</x>
+     <y>243</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <designerdata>
+  <property name="gridDeltaX" >
+   <number>10</number>
+  </property>
+  <property name="gridDeltaY" >
+   <number>10</number>
+  </property>
+  <property name="gridSnapX" >
+   <bool>false</bool>
+  </property>
+  <property name="gridSnapY" >
+   <bool>false</bool>
+  </property>
+  <property name="gridVisible" >
+   <bool>true</bool>
+  </property>
+ </designerdata>
+</ui>

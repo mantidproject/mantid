@@ -252,7 +252,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 	   << "\t\tlineno = frame.f_lineno\n"
 	   << "\t\tfilename = frame.f_globals[\"__file__\"]\n"
 	   << "\t\tif os.path.basename(filename) == \"qtiUtil.pyc\":\n"
-	   << "\t\t\tprint \"MTDPYLN:\" + str(lineno),\n"
+	   << "\t\t\tprint \"MTDPYLN:\" + str(lineno)\n"
 	   << "\treturn traceit\n\n"
 	   << "sys.settrace(traceit)\n";
 

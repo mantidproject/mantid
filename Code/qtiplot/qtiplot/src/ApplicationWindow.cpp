@@ -166,6 +166,9 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
 
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/UserSubWindow.h"
+
 using namespace Qwt3D;
 
 extern "C"
@@ -3105,30 +3108,30 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
 
 void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 {	
-	if (!w || (d_active_window && d_active_window == (MdiSubWindow *)w))
-		return;
+  MdiSubWindow *qti_subwin = qobject_cast<MdiSubWindow*>(w);
+  if( !qti_subwin ) return;
 
-	d_active_window = (MdiSubWindow *)w;
+  d_active_window = qti_subwin;
+  if( d_active_window && d_active_window == qti_subwin ) return;
 
-    customToolBars(w);
-	customMenu(w);
-
-	if (d_opening_file)
-		return;
-
-	QList<MdiSubWindow *> windows = current_folder->windowsList();
-	foreach(MdiSubWindow *ow, windows){
-		if (ow != w && ow->status() == MdiSubWindow::Maximized){
-			ow->setNormal();
-			break;
-		}
-	}
-
-	Folder *f = ((MdiSubWindow *)w)->folder();
-	if (f)
-        f->setActiveWindow((MdiSubWindow *)w);
-
-	emit modified();
+  customToolBars(w);
+  customMenu(w);
+  
+  if (d_opening_file) return;
+  
+  QList<MdiSubWindow *> windows = current_folder->windowsList();
+  foreach(MdiSubWindow *ow, windows){
+    if (ow != w && ow->status() == MdiSubWindow::Maximized){
+      ow->setNormal();
+      break;
+    }
+  }
+  
+  Folder *f = qti_subwin->folder();
+  if (f)
+    f->setActiveWindow(qti_subwin);
+  
+  emit modified();
 }
 
 void ApplicationWindow::addErrorBars()
@@ -4894,7 +4897,6 @@ void ApplicationWindow::saveSettings()
 	} 
 	settings.endGroup();
 	//-----------------------------------
-
 }
 
 void ApplicationWindow::exportGraph()
@@ -15095,23 +15097,64 @@ void ApplicationWindow::removeCustomAction(QAction *action)
 
 void ApplicationWindow::performCustomAction(QAction *action)
 {
-	if (!action || !d_user_actions.contains(action))
-		return;
+  if (!action || !d_user_actions.contains(action))
+    return;
 #ifdef SCRIPTING_PYTHON
-	setScriptingLanguage("Python");
-
-    ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
-    connect(script, SIGNAL(outputMessage(const QString &)), current_folder, SLOT(appendLogInfo(const QString &)));
-    connect(script, SIGNAL(outputError(const QString &)), current_folder, SLOT(appendLogInfo(const QString &)));
-    script->importASCII(action->data().toString());
-    d_user_script_running = true;
-    script->executeAll();
-    d_user_script_running = false;
-    delete script;
+  QString action_data = action->data().toString();
+  if( QFileInfo(action_data).exists() )
+  {
+    QFile script_file(action_data);
+    if ( !script_file.open(IO_ReadOnly) )
+    {
+      QMessageBox::information(this, "MantidPlot", "Error: There was a problem reading\n" + action_data);
+      return;
+    }
+    QTextStream stream(&script_file);
+    QString code("");
+    while( !stream.atEnd() )
+    {
+      code.append(stream.readLine() + "\n");
+    }
+    runPythonScript(code);
+  }
+  else
+  {
+    //First search for an existing window
+    foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
+    {
+      if( sub_win->objectName() == action_data )
+      {
+	sub_win->show();
+	return;
+      }
+    }
+    //If we are here the above search failed so create a new interface
+    MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, this);
+    if( user_interface )
+    {
+      connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, SLOT(runPythonScript(const QString&)));
+      d_workspace->addSubWindow(user_interface);
+      user_interface->show();
+    }
+  }
 #else
-    QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
-    tr("MantidPlot was not built with Python scripting support included!"));
+  QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
+			tr("MantidPlot was not built with Python scripting support included!"));
 #endif
+}
+
+void ApplicationWindow::runPythonScript(const QString & code)
+{
+  if( code.isEmpty() ) return;
+  setScriptingLanguage("Python");
+  ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
+  connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(scriptPrint(const QString &)));
+  connect(script, SIGNAL(outputError(const QString &)), this, SLOT(scriptPrint(const QString &)));
+  script->importCodeBlock(code);
+  d_user_script_running = true;
+  script->executeAll();
+  d_user_script_running = false;
+  delete script;
 }
 
 void ApplicationWindow::loadCustomActions()
@@ -15183,7 +15226,7 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   }
 
   QAction* scriptAction = new QAction(tr(itemName), topMenu);
-  scriptAction->setData(QFileInfo(itemData).absoluteFilePath()); 
+  scriptAction->setData(itemData); 
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
 

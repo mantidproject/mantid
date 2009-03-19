@@ -1023,6 +1023,7 @@ private slots:
 
 	void showCustomActionDialog();
 	void performCustomAction(QAction *);
+  void runPythonScript(const QString & code);
 
 	void hideSelectedColumns();
 	void showAllColumns();

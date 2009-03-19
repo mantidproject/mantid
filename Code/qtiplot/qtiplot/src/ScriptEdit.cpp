@@ -376,6 +376,12 @@ void ScriptEdit::print()
   }
 }
 
+void ScriptEdit::importCodeBlock(const QString & code)
+{
+  clear();
+  append(code);
+}
+
 QString ScriptEdit::importASCII(const QString &filename)
 {
 

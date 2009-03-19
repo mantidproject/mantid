@@ -76,6 +76,7 @@ public slots:
 
     void print();
     void exportPDF(const QString& fileName);
+  void importCodeBlock(const QString & code);
     QString exportASCII(const QString &file=QString::null);
     QString importASCII(const QString &file=QString::null);
     void insertFunction(const QString &);

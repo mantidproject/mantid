@@ -194,7 +194,8 @@ void MantidCustomActionDialog::importSelectedScripts()
     menu->addChild(action);
     QString menuName = menu->text(0);
     QString itemName = action->text(0);
-    m_appWindow->addUserMenuAction( menuName, itemName, action->data(0,Qt::UserRole).toString());
+    QString scriptPath = QFileInfo(action->data(0,Qt::UserRole).toString()).absoluteFilePath();
+    m_appWindow->addUserMenuAction( menuName, itemName, scriptPath);
   }
   //Refresh the
   refreshMenuTree();    

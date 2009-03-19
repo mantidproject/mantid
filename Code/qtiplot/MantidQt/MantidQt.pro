@@ -8,7 +8,7 @@ include(mantidqt.pri)
 system(mkdir '"$$MANTIDQTINCLUDES"')
 
 TEMPLATE = subdirs
-SUBDIRS = API CustomDialogs
+SUBDIRS = API CustomDialogs CustomInterfaces
 
 #----------------------------
 # Clean this directory as well

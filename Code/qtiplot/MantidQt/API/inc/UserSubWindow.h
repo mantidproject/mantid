@@ -87,15 +87,25 @@ public:
 
   /// Is this dialog initialized
   bool isInitialized() const;
-  //@}
+
+signals:
+  /// Emitted to start a (generally small) script running
+  void runAsPythonScript(const QString& code);
 
 protected:
   /**@name Virtual Functions */
   //@{
-  /// To be overriddent to set the appropriate layout
+  /// To be overridden to set the appropriate layout
   virtual void initLayout() = 0;
   //@}
-
+  
+  /// Raise a dialog box giving some information
+  void showInformationBox(const QString & message);
+  
+  /// Run a piece of python code and return any output that was written to stdout
+  /// Note that 'code' is not a const & since I have to modify it to redirect the output
+  QString runPythonCode(QString & code, bool no_output = false);
+  
 private:
   // This is so that it can set the name
   // I can't pass anything as an argument to the constructor as I am using
