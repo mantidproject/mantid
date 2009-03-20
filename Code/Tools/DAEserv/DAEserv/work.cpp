@@ -272,6 +272,14 @@ bool read_command(SOCKET s)
             return true;
         }
 
+        if (name == "NAME")
+        {
+            int dim = 7;
+            char instr[] = "DAESERV";
+            int n = isisds_send_command(s, "OK", instr, ISISDSChar, &dim, sv_ndims);
+            return true;
+        }
+
         if (name == "CNT1")
         {
             int dim = (int)workspace.x.size()*workspace.y.size();
