@@ -129,6 +129,14 @@ namespace Mantid
         throw Exception::FileError("Unable to read NTC1 from DAE " , m_daename);
       }
 
+      int mv_dims_array[1],mv_ndims = 1;
+      char* iName = 0;//new char[100];
+      mv_dims_array[0] = 4;
+      int res = IDCAgetparc(dae_handle, "NAME", &iName, mv_dims_array, &mv_ndims);
+      std::cerr<<"Instr name: "<<mv_dims_array[0]<<' '<<mv_ndims<<' '<<res<<'\n';
+      std::cerr<<"Instr name: ("<<iName<<")\n";
+      delete[] iName;
+
       // Read in the time bin boundaries
       const int lengthIn = channelsPerSpectrum + 1;
       float* timeChannels = new float[lengthIn];
@@ -166,8 +174,8 @@ namespace Mantid
 
       // Decide if we can read in all the data at once
       int *allData = 0;
-      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1);
-      if (ndata/1000000*4 < 10) // arbitrary number
+      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1)*4;
+      if (ndata/1000000 < 10) // arbitrary number
       {
           int mv_dims_array[1],mv_ndims = 1;
           mv_dims_array[0] = ndata;
