@@ -74,7 +74,54 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(4.1,2.1,9.1)) );
 	}
 
-	void testCylinderHit()
+	void testTwoSpheres()
+	{
+		//algebra line is essential
+		std::string xmlShape = "<sphere id=\"shape1\"> ";
+		xmlShape +=	"<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> " ;
+  	xmlShape +=	"<radius val=\"3.2\" /> " ;
+  	xmlShape +=	"</sphere>";
+    xmlShape +=	"<sphere id=\"shape2\"> ";
+		xmlShape +=	"<centre x=\"2.1\"  y=\"2.1\" z=\"8.1\" /> " ;
+  	xmlShape +=	"<radius val=\"3.2\" /> " ;
+  	xmlShape +=	"</sphere>";
+    xmlShape +=	"<algebra val=\"shape1 : shape2\" /> ";  
+
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D(4.1,2.1,8.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(47.1,2.1,8.1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(5.1,2.1,8.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(-0.006,0.0,0.00001)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(4.1,2.1,9.1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-0.8,2.1,9.1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(7.1,2.1,9.1)) );
+	}
+
+	void testTwoSpheresNoAlgebraString()
+	{
+		//algebra line is essential
+		std::string xmlShape = "<sphere id=\"shape1\"> ";
+		xmlShape +=	"<centre x=\"4.1\"  y=\"2.1\" z=\"8.1\" /> " ;
+  	xmlShape +=	"<radius val=\"3.2\" /> " ;
+  	xmlShape +=	"</sphere>";
+    xmlShape +=	"<sphere id=\"shape2\"> ";
+		xmlShape +=	"<centre x=\"2.1\"  y=\"2.1\" z=\"8.1\" /> " ;
+  	xmlShape +=	"<radius val=\"3.2\" /> " ;
+  	xmlShape +=	"</sphere>";
+
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D(4.1,2.1,8.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(47.1,2.1,8.1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(5.1,2.1,8.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(-0.006,0.0,0.00001)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(4.1,2.1,9.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(-0.8,2.1,9.1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(7.1,2.1,9.1)) );
+	}
+
+	void testCylinder()
 	{
 		//algebra line is essential
 		std::string xmlShape = "<cylinder id=\"shape\"> ";
@@ -94,7 +141,47 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(0.01,0.01,1)) );
 	}
 
-	void testInfiniteCylinderHit()
+	void testCylinderNoAlgebraString()
+	{
+		//algebra line is essential
+		std::string xmlShape = "<cylinder id=\"shape\"> ";
+		xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+  	xmlShape +=	"<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> " ;
+  	xmlShape +=	"<radius val=\"0.1\" /> " ;
+  	xmlShape +=	"<height val=\"3\" /> " ;
+  	xmlShape +=	"</cylinder>";
+
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.0,1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,10)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.05,1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.15,1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.01,0.01,1)) );
+	}
+
+	void testCylinderTwoAlgebraStrings()
+	{
+		//algebra line is essential
+		std::string xmlShape = "<cylinder id=\"shape\"> ";
+		xmlShape +=	"<centre-of-bottom-base x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+  	xmlShape +=	"<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> " ;
+  	xmlShape +=	"<radius val=\"0.1\" /> " ;
+  	xmlShape +=	"<height val=\"3\" /> " ;
+  	xmlShape +=	"</cylinder>";
+		xmlShape +=	"<algebra val=\"shape\" /> "; 
+		xmlShape +=	"<algebra val=\"shape\" /> "; 
+
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,10)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.05,1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.15,1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.01,0.01,1)) );
+	}
+
+	void testInfiniteCylinder()
 	{
 		//algebra line is essential
 		std::string xmlShape = "<infinite-cylinder id=\"shape\"> ";

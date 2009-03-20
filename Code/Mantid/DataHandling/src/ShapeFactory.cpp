@@ -63,16 +63,29 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     throw std::logic_error( "Argument to function createShape must be a pointer to an XML element with tag name type." );
   }
 
-
   boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+
+  bool defaultAlgebra = false; // if no <algebra> element then use default algebra
 
   // get algebra string
   NodeList* pNL_algebra = pElem->getElementsByTagName("algebra");
-  if ( pNL_algebra->length() != 1)
+  std::string algebraFromUser;
+  if ( pNL_algebra->length() == 0 )
+  {
+    defaultAlgebra = true;
+  }
+  else if ( pNL_algebra->length() == 1 )
+  {
+    Element* pElemAlgebra = static_cast<Element*>(pNL_algebra->item(0)); 
+    algebraFromUser = pElemAlgebra->getAttribute("val");
+  }
+  else
+  {
+    g_log.warning() << "More than one algebra string defined for this shape. "
+                    << "Maximum one allowed. Therefore empty shape is returned.";
     return retVal;
-  Element* pElemAlgebra = static_cast<Element*>(pNL_algebra->item(0)); 
+  }
   pNL_algebra->release();
-  std::string algebraFromUser = pElemAlgebra->getAttribute("val");
 
   std::map<std::string,std::string> idMatching; // match id given to a shape by the user to 
                                                 // id understandable by Mantid code 
@@ -175,33 +188,43 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     }
   }
 
-  // Translate algebra string defined by the user into something Mantid can
-  // understand
-
-  std::string algebra;  // to hold algebra in a way Mantid can understand
-  std::map<std::string,std::string>::iterator iter;
-  size_t found;
-  std::map<size_t,std::string, std::greater<size_t> > allFound;
-  for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
+  if ( defaultAlgebra == false )
   {
-    found = algebraFromUser.find(iter->first);
+    // Translate algebra string defined by the user into something Mantid can
+    // understand
 
-    if (found==std::string::npos)
-      continue;
-    else
+    std::string algebra;  // to hold algebra in a way Mantid can understand
+    std::map<std::string,std::string>::iterator iter;
+    size_t found;
+    std::map<size_t,std::string, std::greater<size_t> > allFound;
+    for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
     {
-      allFound[found] = iter->first;
+      found = algebraFromUser.find(iter->first);
+
+      if (found==std::string::npos)
+        continue;
+      else
+      {
+        allFound[found] = iter->first;
+      }
+    }
+
+    // Here do the actually swapping of strings 
+    std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
+    for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
+    {
+      std::string  kuse = iter2->second;
+      algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
     }
   }
-
-  // Here do the actually swapping of strings 
-  std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
-  for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
+  else
   {
-    std::string  kuse = iter2->second;
-    algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
+    std::map<std::string,std::string>::iterator iter;
+    for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
+    {
+      algebraFromUser.append( iter->second + " " ); // default is intersection
+    }
   }
-
 
   // check to see if there actually were any primitives in 'type' xml element
   // and if yes then return empty Object. Otherwise populate Object with the
