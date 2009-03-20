@@ -4,22 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/LocatedDataRef.h" 
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
-
-#include <algorithm>
-#include <functional>
-#include <iterator>
 
 namespace Mantid
 {
   namespace Algorithms
   {
-
-    /** @class Plus Plus.h Algorithms/Plus.h
-
-
+    /** 
     Plus performs the difference of two input workspaces.
     It inherits from the Algorithm class, and overrides
     the init() & exec() methods.
@@ -34,7 +25,7 @@ namespace Mantid
     @author Dickon Champion, RAL
     @date 12/12/2007
 
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratories
 
     This file is part of Mantid.
 
@@ -53,7 +44,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-
     class DLLExport Plus : public CommutativeBinaryOperation
     {
     public:
@@ -68,21 +58,14 @@ namespace Mantid
 
     private:
       // Overridden BinaryOperation methods
-      void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
-        API::MatrixWorkspace::iterator it_out);
+      void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                  const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
+      void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                  const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
       const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
-
-      /// Internal class providing the binary function
-      class Plus_fn : public BinaryOperation::BinaryOperation_fn
-      {
-      public:
-        /// Constructor
-        Plus_fn(BinaryOperation *op,int count) : BinaryOperation::BinaryOperation_fn(op,count) {}
-        API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
-      };
 
     };
 

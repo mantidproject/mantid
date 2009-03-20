@@ -22,6 +22,9 @@
 
 namespace Mantid
 {
+
+typedef std::vector<double> MantidVec;
+
 namespace API
 {
 //----------------------------------------------------------------------
@@ -103,24 +106,24 @@ public:
   // Methods for getting read-only access to the data. Created for the python interface.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Returns a read-only (i.e. const) reference to the specified X array
-  const std::vector<double>& readX(int const index) const { return dataX(index); }
+  const MantidVec& readX(int const index) const { return dataX(index); }
   /// Returns a read-only (i.e. const) reference to the specified Y array
-  const std::vector<double>& readY(int const index) const { return dataY(index); }
+  const MantidVec& readY(int const index) const { return dataY(index); }
   /// Returns a read-only (i.e. const) reference to the specified E array
-  const std::vector<double>& readE(int const index) const { return dataE(index); }
+  const MantidVec& readE(int const index) const { return dataE(index); }
 
   /// Returns the x data
-  virtual std::vector<double>& dataX(int const index) = 0;
+  virtual MantidVec& dataX(int const index) = 0;
   /// Returns the y data
-  virtual std::vector<double>& dataY(int const index) = 0;
+  virtual MantidVec& dataY(int const index) = 0;
   /// Returns the error data
-  virtual std::vector<double>& dataE(int const index) = 0;
+  virtual MantidVec& dataE(int const index) = 0;
   /// Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const = 0;
+  virtual const MantidVec& dataX(int const index) const = 0;
   /// Returns the y data const
-  virtual const std::vector<double>& dataY(int const index) const = 0;
+  virtual const MantidVec& dataY(int const index) const = 0;
   /// Returns the error const
-  virtual const std::vector<double>& dataE(int const index) const = 0;
+  virtual const MantidVec& dataE(int const index) const = 0;
   //----------------------------------------------------------------------
 
   /// Returns the ErrorHelper applicable for this spectra

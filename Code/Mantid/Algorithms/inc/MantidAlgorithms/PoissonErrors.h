@@ -4,8 +4,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/LocatedDataRef.h" 
 #include "MantidAlgorithms/BinaryOperation.h"
 
 namespace Mantid
@@ -61,10 +59,11 @@ public:
   virtual const std::string category() const { return "SANS";}
 
 private:
-
-// Overridden BinaryOperation methods
-  void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
-    API::MatrixWorkspace::iterator it_out);
+  // Overridden BinaryOperation methods
+  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                              const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
+  void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                              const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
 	virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
   
   /// The name of the first input workspace property for BinaryOperation
@@ -73,15 +72,6 @@ private:
 	virtual const std::string inputPropName2() const { return "CountsWorkspace";}
   /// The name of the output workspace property for BinaryOperation
 	virtual const std::string outputPropName() const { return "OutputWorkspace";}
-
-	/// Internal class providing the binary function
-  class PoissonErrors_fn : public BinaryOperation::BinaryOperation_fn
-  {
-  public:
-    /// Constructor
-    PoissonErrors_fn(BinaryOperation *op,int count) : BinaryOperation::BinaryOperation_fn(op,count) {}
-    API::LocatedDataValue& operator()(const API::ILocatedData&,const API::ILocatedData&);
-  };
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

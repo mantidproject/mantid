@@ -1,9 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
 #include "MantidAlgorithms/PoissonErrors.h"
-#include "MantidAPI/WorkspaceIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -30,33 +28,30 @@ namespace Mantid
       return (lhs->size() == rhs->size());
     }
 
-    /** Performs the binary operation using Iterators and the std::tranform function.
-    * @param it_in1 The const iterator to the lhs data item
-    * @param it_in2 The const iterator to the rhs data item
-    * @param it_out The output iterator to the new workspace
-    */
-    void PoissonErrors::performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
-        API::MatrixWorkspace::iterator it_out)
+    void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                               const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
-      std::transform(it_in1.begin(),it_in1.end(),it_in2.begin(),it_out.begin(),PoissonErrors_fn(this,it_in1.end() - it_in1.begin()));
+      // Just copy over the lhs data
+      YOut = lhsY;
+      // Now make the fractional error the same as it was on the rhs
+      const int bins = lhsE.size();
+      for (int j=0; j<bins; ++j)
+      {
+         const double fractional = rhsY[j] ? rhsE[j]/rhsY[j] : 0.0;
+         EOut[j] = fractional*lhsY[j];
+      }
     }
-
-    /** Performs the copying of the fractional error within the transform function
-    * @param a The LocatedData ref of the first workspace data item
-    * @param b The LocatedData ref of the second workspace data item
-    * @returns A LocatedData ref of the result with Gaussian errors
-    */
-    LocatedDataValue&
-      PoissonErrors::PoissonErrors_fn::operator() (const ILocatedData& a,const ILocatedData& b)
+    
+    void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                               const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
-      //copy the values from lhs
-      result = a;
-      //copy the square root of the error value from the rhs counts
-      const double fractional = b.Y() ? b.E()/b.Y() : 0.0;
-      result.E() = fractional*a.Y();
-
-      if (m_progress++ % m_progress_step == 0) report_progress();
-      return result;
+      assert( lhsX.size() == 1 );
+      // If we get here we've got two single column workspaces so it's easy.
+      YOut[0] = lhsY[0];
+      
+      const double fractional = rhsY ? rhsE/rhsY : 0.0;
+      EOut[0] = fractional*lhsY[0];
     }
+    
   }
 }

@@ -35,11 +35,11 @@ namespace Mantid
     void BinaryOperation::exec()
     {
       // get input workspace, dynamic cast not needed
-      MatrixWorkspace_sptr in_work1 = getProperty(inputPropName1());
-      MatrixWorkspace_sptr in_work2 = getProperty(inputPropName2());
+      MatrixWorkspace_const_sptr lhs = getProperty(inputPropName1());
+      MatrixWorkspace_const_sptr rhs = getProperty(inputPropName2());
 
       // Check that the input workspace are compatible
-      if (!checkCompatibility(in_work1,in_work2))
+      if (!checkCompatibility(lhs,rhs))
       {
         std::ostringstream ostr;
         ostr << "The two workspaces are not compatible for algorithm " << this->name();
@@ -47,36 +47,50 @@ namespace Mantid
         throw std::invalid_argument( ostr.str() );
       }
 
-      MatrixWorkspace::const_iterator ti_in1 = createConstIterator(in_work1,in_work2);
-      MatrixWorkspace::const_iterator ti_in2 = createConstIterator(in_work2,in_work1);
-
+      // Make sure the left hand workspace is the larger (this is fine if we got past the compatibility checks)
+      if ( rhs->size() > lhs->size() )
+      {
+        MatrixWorkspace_const_sptr smaller = lhs;
+        lhs = rhs;
+        rhs = smaller;
+      }
+      
       MatrixWorkspace_sptr out_work = getProperty(outputPropName());
       // We need to create a new workspace for the output if:
       //   (a) the output workspace hasn't been set to one of the input ones, or
       //   (b) it has been, but it's not the correct dimensions
-      if ( out_work == in_work1 )
+      if ( (out_work != lhs && out_work != rhs) || ( out_work == rhs && ( lhs->size() > rhs->size() ) ) )
       {
-        if ( in_work2->size() > in_work1->size() ) out_work = createOutputWorkspace(in_work1,in_work2);
+        out_work = WorkspaceFactory::Instance().create(lhs);
       }
-      else if ( out_work == in_work2 )
-      {
-        if ( in_work1->size() > in_work2->size() ) out_work = createOutputWorkspace(in_work1,in_work2);        
-      }
-      else
-      {
-        out_work = createOutputWorkspace(in_work1,in_work2);
-      }
-      MatrixWorkspace::iterator ti_out(*out_work);
 
-      //perform the operation through an abstract call
-      performBinaryOperation(ti_in1,ti_in2,ti_out);
-
-      // Assign it to the output workspace property
+      // There are now 4 possible scenarios, shown schematically here:
+      // xxx x   xxx xxx   xxx xxx   xxx x
+      // xxx   , xxx xxx , xxx     , xxx x
+      // xxx   , xxx xxx   xxx       xxx x
+      // So work out which one we have and call the appropriate function
+      if ( rhs->size() == 1 ) // Single value workspace
+      {
+        doSingleValue(lhs,rhs,out_work);
+      }
+      else if ( rhs->getNumberHistograms() == 1 ) // Single spectrum on rhs
+      {
+        doSingleSpectrum(lhs,rhs,out_work);
+      }
+      else if ( rhs->blocksize() == 1 ) // Single column on rhs
+      {
+        doSingleColumn(lhs,rhs,out_work);
+      }
+      else // The two are both 2D and should be the same size
+      {
+        do2D(lhs,rhs,out_work);
+      }
+      
+      // Assign the result to the output workspace property
       setProperty(outputPropName(),out_work);
 
       return;
     }
-
 
     const bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
@@ -103,9 +117,8 @@ namespace Mantid
         g_log.error() << ostr.str() << std::endl;
         throw std::invalid_argument( ostr.str() );
       }
-      
-      // Finally, check the X arrays, unless the rhs has horizontal dimension of 1
-      return ( rhs->blocksize() > 1 ? WorkspaceHelpers::matchingBins(lhs,rhs,true) : true );
+
+      return true;
     }
 
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
@@ -127,11 +140,11 @@ namespace Mantid
       // 
       // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
       if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
-      if ( rhs->getNumberHistograms() == 1 && lhs->blocksize() == rhs->blocksize() ) return true;
-      if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() && lhs->blocksize() == rhs->blocksize() )
-        return true;
-      // Otherwise, it's a no go
-      return false;
+      // Past this point, we require the X arrays to match. Note this only checks the first spectrum
+      if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+      
+      const int rhsSpec = rhs->getNumberHistograms();
+      return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
     }
 
     /** Performs a simple check to see if the X arrays of two workspaces are compatible for a binary operation
@@ -161,102 +174,81 @@ namespace Mantid
         return false;
     }
 
-    /** Gets the number of time an iterator over the first workspace would have to loop to perform a full iteration of the second workspace
-    * @param lhs the first workspace to compare
-    * @param rhs the second workspace to compare
-    * @returns Integer division of rhs.size()/lhs.size() with a minimum of 1
-    */
-    const int BinaryOperation::getRelativeLoopCount(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const
+    /** Called when the rhs operand is a single value. 
+     *  Loops over the lhs workspace calling the abstract binary operation function. 
+     *  @param lhs The workspace which is the left hand operand
+     *  @param rhs The workspace which is the right hand operand
+     *  @param out The result workspace
+     */
+    void BinaryOperation::doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
-      int lhsSize = lhs->size();
-      if (lhsSize == 0) return 1;
-      int retVal = rhs->size()/lhsSize;
-      return (retVal == 0)?1:retVal;
+      // Pull out the single value and its error
+      const double rhsY = rhs->readY(0)[0];
+      const double rhsE = rhs->readE(0)[0];
+      
+      // Now loop over the spectra of the left hand side calling the virtual function
+      const int numHists = lhs->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
+      {
+        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+      }
     }
-
-
-
-    /** Creates a suitable output workspace for a binary operatiion based on the two input workspaces
-    * @param lhs the first workspace to compare
-    * @param rhs the second workspace to compare
-    * @returns a pointer to a new zero filled workspace the same type and size as the larger of the two input workspaces.
-    */
-    API::MatrixWorkspace_sptr BinaryOperation::createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const
+   
+    /** Called when the rhs operand is a single spectrum. 
+     *  Loops over the lhs workspace calling the abstract binary operation function. 
+     *  @param lhs The workspace which is the left hand operand
+     *  @param rhs The workspace which is the right hand operand
+     *  @param out The result workspace
+     */
+    void BinaryOperation::doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
-      //get the largest workspace
-      const API::MatrixWorkspace_const_sptr wsLarger = (lhs->size() > rhs->size()) ? lhs : rhs;
-      //create a new workspace
-      API::MatrixWorkspace_sptr retVal = API::WorkspaceFactory::Instance().create(wsLarger);
+      // Pull out the rhs spectrum
+      MantidVec rhsY = rhs->readY(0);
+      MantidVec rhsE = rhs->readE(0);
 
-      return retVal;
+      // Now loop over the spectra of the left hand side calling the virtual function
+      const int numHists = lhs->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
+      {
+        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+      }
     }
-
-    /** Creates a const iterator taking into account loop
-    * @param wsMain The workspace theat the iterator will be created for
-    * @param wsComparison The workspace to be used for axes comparisons
-    * @returns a const iterator to wsMain, with loop count and orientation set appropriately
-    */
-    MatrixWorkspace::const_iterator BinaryOperation::createConstIterator(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const
+    
+    /** Called when the rhs operand is a 2D workspace of single values. 
+     *  Loops over the workspaces calling the abstract binary operation function. 
+     *  @param lhs The workspace which is the left hand operand
+     *  @param rhs The workspace which is the right hand operand
+     *  @param out The result workspace
+     */
+    void BinaryOperation::doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
-     //get loop count
-      unsigned int loopDirection = LoopOrientation::Vertical;
-      int loopCount = getRelativeLoopCount(wsMain,wsComparison);
-      if (loopCount > 1)
+      // Now loop over the spectra of the left hand side pulling out the single value from each rhs 'spectrum'
+      // and then calling the virtual function
+      const int numHists = lhs->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
       {
-        loopDirection = getLoopDirection(wsMain,wsComparison);
+        const double rhsY = rhs->readY(i)[0];
+        const double rhsE = rhs->readE(i)[0];        
+        
+        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
       }
-      else
-      {
-        if (!checkXarrayCompatibility(wsMain,wsComparison))
-        {
-          g_log.error("The x arrays of the workspaces are not identical");
-          throw std::invalid_argument("The x arrays of the workspaces are not identical");
-        }
-      }
-      MatrixWorkspace::const_iterator it(*wsMain,loopCount,loopDirection);
-      return it;
     }
-
-    /** Determines the required loop direction for a looping iterator
-    * @param wsMain The workspace theat the iterator will be created for
-    * @param wsComparison The workspace to be used for axes comparisons
-    * @returns An value describing the orientation of the 1D workspace to be looped
-    * @retval 0 Horizontal - The number and contents of the X axis bins match
-    * @retval 1 Vertical - The number of detector elements match
-    */
-    unsigned int BinaryOperation::getLoopDirection(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const
+    
+    /** Called when the two workspaces are the same size. 
+     *  Loops over the workspaces extracting the appropriate spectra and calling the abstract binary operation function. 
+     *  @param lhs The workspace which is the left hand operand
+     *  @param rhs The workspace which is the right hand operand
+     *  @param out The result workspace
+     */
+    void BinaryOperation::do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
-      unsigned int retVal = LoopOrientation::Horizontal;
-
-      //check if the vertical sizes match
-      int wsMainArraySize = wsMain->size(); //this must be a 1D array for this to work
-      int wsComparisonArraySize = wsComparison->size()/wsComparison->blocksize();
-      if (wsMainArraySize == wsComparisonArraySize)
+      // Loop over the spectra calling the virtual function for each one
+      const int numHists = lhs->getNumberHistograms();
+      for (int i = 0; i < numHists; ++i)
       {
-        retVal = LoopOrientation::Vertical;
-      }
-      //check if Horizontial looping matches in length
-      if (wsMain->blocksize() == wsComparison->blocksize())
-      {
-        //it does, now check if the X arrays are compatible
-        if (!checkXarrayCompatibility(wsMain,wsComparison))
-        {
-          if(retVal == LoopOrientation::Horizontal)
-          {
-            //this is a problem, the lengths only match Horizontally but the data does not match
-            g_log.error("The x arrays of the workspaces are not identical");
-            throw std::invalid_argument("The x arrays of the workspaces are not identical");
-          }
-        }
-        else
-        {
-          //all is good in the world
-          retVal = LoopOrientation::Horizontal;
-        }
-      }
-
-      return retVal;
+        performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
+      }      
     }
-
+    
   }
 }

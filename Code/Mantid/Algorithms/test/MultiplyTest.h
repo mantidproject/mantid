@@ -187,8 +187,8 @@ public:
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     Multiply alg;
 
@@ -206,7 +206,7 @@ public:
     MatrixWorkspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
 
-    checkData(work_in1, work_in2, work_out1);
+    checkData(work_in2, work_in1, work_out1);
 
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);

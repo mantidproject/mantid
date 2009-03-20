@@ -73,29 +73,42 @@ namespace Mantid
       /// The name of the output workspace property
 			virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
-      /** Abstract method to perform the binary operation in the inheriting class.
-      * @param it_in1 The const iterator to the lhs data item
-      * @param it_in2 The const iterator to the rhs data item
-      * @param it_out The output iterator to the new workspace
-      */
-      virtual void performBinaryOperation(API::MatrixWorkspace::const_iterator it_in1, API::MatrixWorkspace::const_iterator it_in2,
-        API::MatrixWorkspace::iterator it_out) =0;
-
       /// Checks the compatibility of the two workspaces
       virtual const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the overall size compatibility of two workspaces
       virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the compatibility the X arrays of two workspaces
       virtual const bool checkXarrayCompatibility(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
-      /// Returns the number of times lhs will have to loop to match the size of rhs
-      virtual const int getRelativeLoopCount(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
-      /// Creates a suitable output workspace for two input workspaces
-      virtual API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
-      /// Creates a const iterator with appropriate looping settings.
-      API::MatrixWorkspace::const_iterator createConstIterator(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const;
-      /// Gets the looping orientation for a looping iterator
-      unsigned int getLoopDirection(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const;
 
+      /** Carries out the binary operation on a single spectrum.
+       *  @param lhsX The X values, made available if required.
+       *  @param lhsY The vector of lhs data values
+       *  @param lhsE The vector of lhs error values
+       *  @param rhsY The vector of rhs data values
+       *  @param rhsE The vector of rhs error values
+       *  @param YOut The vector to hold the data values resulting from the operation
+       *  @param EOut The vector to hold the error values resulting from the operation
+       */
+      virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                          const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+      /** Carries out the binary operation when the right hand operand is a single number.
+       *  @param lhsX The X values, made available if required.
+       *  @param lhsY The vector of lhs data values
+       *  @param lhsE The vector of lhs error values
+       *  @param rhsY The rhs data value
+       *  @param rhsE The rhs error value
+       *  @param YOut The vector to hold the data values resulting from the operation
+       *  @param EOut The vector to hold the error values resulting from the operation
+       */
+      virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
+                                          const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+      
+    private:
+      void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
+      void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
+      void doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
+      void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
+            
       friend class BinaryOperation_fn;
       /// Abstract internal class providing the binary function
       class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
