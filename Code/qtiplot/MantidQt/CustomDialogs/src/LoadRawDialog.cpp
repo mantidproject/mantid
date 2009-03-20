@@ -56,14 +56,15 @@ void LoadRawDialog::initLayout()
  MantidQt::API::AlgorithmInputHistory::Instance().hasPreviousInput(QString::fromStdString(getAlgorithm()->name()),  m_oldValues);
 
   m_mainLayout = new QVBoxLayout(this);
+
   if( isMessageAvailable() )
   {
-    QLabel inputMessage(this);
-    inputMessage.setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    inputMessage.setText(getOptionalMessage());
-    QHBoxLayout msgArea;
-    msgArea.addWidget(&inputMessage);
-    m_mainLayout->addLayout(&msgArea);
+    QLabel *inputMessage = new QLabel(this);
+    inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    inputMessage->setText(getOptionalMessage());
+    QHBoxLayout *msgArea = new QHBoxLayout;
+    msgArea->addWidget(inputMessage);
+    m_mainLayout->addLayout(msgArea);
   }
   
   //Filename boxes
