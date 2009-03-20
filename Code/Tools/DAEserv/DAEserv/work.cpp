@@ -55,7 +55,6 @@ struct Workspace
         alpha = (x_end-x_start)/(numberOfBins+1);
         peakStep = (x_end-x_start)/(numberOfSpectra);
 
-        x.resize(numberOfSpectra);
         y.resize(numberOfSpectra);
         x.resize(numberOfBins+1);
         float dx = alpha;
@@ -203,7 +202,7 @@ DWORD WINAPI startService(LPVOID p)
             double diff = difftime(curr_time,(**t).start_time);
             //ofil<<(**t).ID<<" diff="<<diff<<endl;
             // thread unfinished after 60 seconds is treated as failed and terminated
-            if(diff > 60. && !(**t).done)
+            if(diff > 2. && !(**t).done)
             {
                 cerr<<"Terminate "<<(**t).ID<<endl;
                 TerminateThread((**t).thread,0);
@@ -272,6 +271,22 @@ bool read_command(SOCKET s)
             int n = isisds_send_command(s, "OK", &workspace.x[0], ISISDSReal32, &dim, sv_ndims);
             return true;
         }
+
+        if (name == "CNT1")
+        {
+            int dim = (int)workspace.x.size()*workspace.y.size();
+            int *data = new int[dim];
+            int mv_dims_array[1], mv_ndims = 1;
+            mv_dims_array[0] = dim;
+            int k = 0;
+            for(size_t i=0;i<workspace.y.size();i++)
+                for(size_t j=0;j<workspace.y[i].size();j++)
+                    data[k++] = workspace.y[i][j];
+            isisds_send_command(s, "OK", data, ISISDSInt32, mv_dims_array, mv_ndims);
+            delete[] data;
+            return true;
+        }
+        
     }
     else if (comm.type == ISISDSInt32)
     {
