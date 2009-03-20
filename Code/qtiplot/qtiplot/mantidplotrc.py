@@ -26,7 +26,7 @@ mtd = FrameworkManager()
 # Have an alias
 mantid = mtd
 # Now create simple API (makes mantidsimple.py file in cwd)
-createPythonSimpleAPI(True)
+mantid.createPythonSimpleAPI(True)
 # Import definitions
 from mantidsimple import *
 

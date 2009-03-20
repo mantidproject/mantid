@@ -1,18 +1,21 @@
+//---------------------------------------
+// Includes
+//------------------------------------
+#include "MantidPythonAPI/FrameworkManager.h"
+
 #include <boost/python/handle.hpp>
 
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
-#include "MantidPythonAPI/FrameworkManager.h"
-
+#include "MantidPythonAPI/SimplePythonAPI.h"
+#include "MantidAPI/FrameworkManager.h"
 //#include "MantidDataObjects/TableWorkspace.h"
-
-using namespace Mantid;
 
 namespace Mantid
 {
@@ -152,6 +155,34 @@ bool FrameworkManager::deleteWorkspace(const std::string& wsName)
 	return API::FrameworkManager::Instance().deleteWorkspace(wsName);
 }
 
+/**
+ * Returns the name of all the workspaces.
+ * \return Vector of strings.
+ **/
+std::vector<std::string> FrameworkManager::getWorkspaceNames() const
+{
+  return API::AnalysisDataService::Instance().getObjectNames();
+}
+
+/**
+ * Returns the name of all the algorithms.
+ * \return Vector of strings.
+ **/
+std::vector<std::string> FrameworkManager::getAlgorithmNames() const
+{
+  return API::AlgorithmFactory::Instance().getKeys();
+}
+
+/**
+  * Create the simple Python API module
+  * @param gui Whether the module is being made for use with qtiplot or not
+  **/
+void FrameworkManager::createPythonSimpleAPI(bool gui)
+{
+  //Redirect to static helper class
+  SimplePythonAPI::createModule(gui);
+}
+	
 /**
  * Adds a algorithm created in Python to Mantid's algorithms.
  * Converts the Python object to a C++ object - not sure how, will find out.

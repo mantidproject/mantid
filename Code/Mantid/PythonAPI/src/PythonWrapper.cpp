@@ -7,9 +7,6 @@
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 #include "boost/cstdint.hpp"
 
-
-
-#include "MantidPythonAPI/PythonInterface.h"
 #include "MantidPythonAPI/FrameworkManager.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -497,15 +494,6 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   //Make this namespace available
   using namespace Mantid::PythonAPI;
 
-  /**
-   * @name Namespace Functions
-   */
-  //@{
-   def("getAlgorithmNames", &Mantid::PythonAPI::GetAlgorithmNames);
-   def("getWorkspaceNames", &Mantid::PythonAPI::GetWorkspaceNames);
-   def("createPythonSimpleAPI", &Mantid::PythonAPI::createPythonSimpleAPI);
-  //@}
-
    //IAlgorithm Class
    class_< Mantid::API::IAlgorithm, boost::noncopyable, Mantid_API_IAlgorithm_Wrapper >("IAlgorithm", no_init)
      .def("initialize", pure_virtual(&Mantid::API::IAlgorithm::initialize))
@@ -591,6 +579,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
 //     .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
+     .def("getAlgorithmNames", &Mantid::PythonAPI::FrameworkManager::getAlgorithmNames)
+     .def("getWorkspaceNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceNames)
+     .def("createPythonSimpleAPI", &Mantid::PythonAPI::FrameworkManager::createPythonSimpleAPI)
      .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
      .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
      ;

@@ -7,10 +7,12 @@
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
 #include "MantidPythonAPI/FrameworkManager.h"
+#include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::PythonAPI;
@@ -65,6 +67,39 @@ public:
     TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "8" )
     TS_ASSERT( alg->isExecuted() )
 	}
+
+
+  void testgetWorkspaceNames()
+  {
+    std::vector<std::string> temp = mgr->getWorkspaceNames();
+    TS_ASSERT(temp.empty());
+    
+    Mantid::API::AnalysisDataService::Instance().add("outer",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
+
+    temp = mgr->getWorkspaceNames();
+    TS_ASSERT(!temp.empty());
+    TS_ASSERT_EQUALS( temp[0], "outer" )
+    mgr->deleteWorkspace("outer");
+    temp = mgr->getWorkspaceNames();
+    TS_ASSERT(temp.empty());
+  }
+	
+  void testGetAlgorithmNames()
+  {
+    std::vector<std::string> temp = mgr->getAlgorithmNames();
+
+    TS_ASSERT(!temp.empty());
+  }
+
+  void testCreatePythonSimpleAPI()
+  {
+    mgr->createPythonSimpleAPI(false);
+    Poco::File apimodule(SimplePythonAPI::getModuleName());
+    TS_ASSERT( apimodule.exists() );
+    TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
+    TS_ASSERT( !apimodule.exists() );
+  }
+
 
 };
 

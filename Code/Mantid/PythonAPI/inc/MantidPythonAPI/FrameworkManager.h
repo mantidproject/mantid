@@ -18,11 +18,6 @@ class Algorithm;
 class MatrixWorkspace;
 }
 
-// namespace DataObjects
-// {
-// class TableWorkspace;
-// }
-
 namespace PythonAPI
 {
 
@@ -92,6 +87,15 @@ public:
 
 	// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
+
+	// Return the list of currently registered algorithm names
+	std::vector<std::string> getAlgorithmNames() const;
+	
+	// Return the list of currently available workspace names
+	std::vector<std::string> getWorkspaceNames() const;
+
+	// Create the simple Python API for Mantid
+	void createPythonSimpleAPI(bool);
 	
 	int addPythonAlgorithm(PyObject* pyAlg);
 	void executePythonAlgorithm(std::string algName);
