@@ -18,31 +18,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class DivideOpTest : public Algorithm
-{
-public:
-
-  DivideOpTest() : Algorithm() {}
-  virtual ~DivideOpTest() {}
-  virtual const std::string name() const {return "DivideOpTest";}
-  virtual const int version() const {return(1);}
-
-  void init()
-  {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_1","",Direction::Input));
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace_2","",Direction::Input));
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-  }
-  void exec()
-  {
-    MatrixWorkspace_sptr in_work1 = getProperty("InputWorkspace_1");
-    MatrixWorkspace_sptr in_work2 = getProperty("InputWorkspace_2");
-
-    MatrixWorkspace_sptr out_work = in_work1 / in_work2;
-    setProperty("OutputWorkspace",out_work);
-  }
-};
-
 class DivideTest : public CxxTest::TestSuite
 {
 public:
@@ -146,11 +121,11 @@ public:
     AnalysisDataService::Instance().remove(wsNameOut);
   }
 
-  void testExec1DRand2DVertical()
+  void testExec1DRand2D()
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
     Divide alg;
@@ -169,30 +144,30 @@ public:
     MatrixWorkspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
 
-    checkData(work_in1, work_in2, work_out1,LoopOrientation::Vertical);
+    checkData(work_in1, work_in2, work_out1);
 
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
     AnalysisDataService::Instance().remove(wsNameOut);
   }
 
-  void testExec2D2DbyOperatorOverload()
+  void testExec2D1DVertical()
   {
     int sizex = 10,sizey=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
 
-    DivideOpTest alg;
+    Divide alg;
 
-    std::string wsNameIn1 = "testExec2D2DbyOperatorOverload_in21";
-    std::string wsNameIn2 = "testExec2D2DbyOperatorOverload_in22";
-    std::string wsNameOut = "testExec2D2DbyOperatorOverload_out";
-    AnalysisDataService::Instance().add(wsNameIn1, work_in1);
-    AnalysisDataService::Instance().add(wsNameIn2, work_in2);
+    std::string wsName1 = "test_in2D1Dv1";
+    std::string wsName2 = "test_in2D1Dv2";
+    std::string wsNameOut = "test_out2D1Dv";
+    AnalysisDataService::Instance().add(wsName1, work_in1);
+    AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsNameIn1);
-    alg.setPropertyValue("InputWorkspace_2",wsNameIn2);
+    alg.setPropertyValue("InputWorkspace_1",wsName1);
+    alg.setPropertyValue("InputWorkspace_2",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -201,9 +176,21 @@ public:
 
     checkData(work_in1, work_in2, work_out1);
 
-    AnalysisDataService::Instance().remove(wsNameIn1);
-    AnalysisDataService::Instance().remove(wsNameIn2);
-    AnalysisDataService::Instance().remove(wsNameOut);
+    AnalysisDataService::Instance().remove(wsName1);
+    AnalysisDataService::Instance().remove(wsName2);
+    AnalysisDataService::Instance().remove(wsNameOut);    
+  }
+  
+  void testExec2D2DbyOperatorOverload()
+  {
+    int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+    MatrixWorkspace_sptr work_out1 = work_in1/work_in2;
+
+    checkData(work_in1, work_in2, work_out1);
   }
 
     void testExec1DSingleValue()

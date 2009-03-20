@@ -5,19 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
-#include "MantidAPI/LocatedDataRef.h"
-
-#include <algorithm>
-#include <functional>
-#include <iterator>
 
 namespace Mantid
 {
   namespace Algorithms
   {
-    /** @class CommutativeBinaryOperation CommutativeBinaryOperation.h Algorithms/CommutativeBinaryOperation.h
-
-
+    /** 
     CommutativeBinaryOperation supports commutative binary operations on two input workspaces.
     In Commutative operations it does not matter if the order of the two input workspaces is reversed.
     e.g. a+b is the same as b+a, and a*b is the same as b*a.
@@ -26,7 +19,7 @@ namespace Mantid
     @author Nick Draper
     @date 23/01/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -45,7 +38,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-
     class DLLExport CommutativeBinaryOperation : public BinaryOperation
     {
     public:
@@ -55,12 +47,9 @@ namespace Mantid
       virtual ~CommutativeBinaryOperation() {};
 
     protected:
-      // Overridden BinaryOperation methods
+      // Overridden BinaryOperation method
       /// Checks the overall size compatability of two workspaces
       virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-
-      /// Creates a suitable output workspace for two input workspaces
-      virtual API::MatrixWorkspace_sptr createOutputWorkspace(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
 
     private:
       /// Static reference to the logger class

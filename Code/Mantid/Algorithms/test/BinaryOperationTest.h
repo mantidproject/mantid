@@ -69,7 +69,7 @@ public:
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in4));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
   }
@@ -84,9 +84,9 @@ public:
     Workspace1D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace1D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     BinaryOpHelper helper;
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in4));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
   }
@@ -104,9 +104,9 @@ public:
     BinaryOpHelper helper;
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
     TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in4));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
   }
 
   void testcreateOutputWorkspace1D1D()

@@ -103,8 +103,9 @@ namespace Mantid
         g_log.error() << ostr.str() << std::endl;
         throw std::invalid_argument( ostr.str() );
       }
-
-      return true;
+      
+      // Finally, check the X arrays, unless the rhs has horizontal dimension of 1
+      return ( rhs->blocksize() > 1 ? WorkspaceHelpers::matchingBins(lhs,rhs,true) : true );
     }
 
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
@@ -117,10 +118,20 @@ namespace Mantid
     */
     const bool BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      //in order to be size compatible then the larger workspace
-      //must divide by the size of the smaller workspace leaving no remainder
-      if (rhs->size() ==0) return false;
-      return ((lhs->size() % rhs->size()) == 0);
+      const int lhsSize = lhs->size();
+      const int rhsSize = rhs->size();
+      // A SingleValueWorkspace matches anything
+      if ( rhsSize == 1 ) return true;
+      // The rhs must not be smaller than the lhs
+      if ( lhsSize < rhsSize ) return false;
+      // 
+      // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
+      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+      if ( rhs->getNumberHistograms() == 1 && lhs->blocksize() == rhs->blocksize() ) return true;
+      if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() && lhs->blocksize() == rhs->blocksize() )
+        return true;
+      // Otherwise, it's a no go
+      return false;
     }
 
     /** Performs a simple check to see if the X arrays of two workspaces are compatible for a binary operation

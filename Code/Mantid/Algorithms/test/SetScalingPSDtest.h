@@ -44,6 +44,8 @@ public:
 
     outputSpace = "testWS";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.setPropertyValue("spectrum_min","1");
+    loader.setPropertyValue("spectrum_max","100");
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );

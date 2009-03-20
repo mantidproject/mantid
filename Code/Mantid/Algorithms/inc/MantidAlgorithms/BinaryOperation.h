@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <algorithm>
-#include <functional>
-#include <iterator>
+//#include <algorithm>
+//#include <functional>
+//#include <iterator>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
@@ -15,15 +15,11 @@
 
 namespace Mantid
 {
-
   namespace Algorithms
   {
-    /** @class BinaryOperation BinaryOperation.h Algorithms/BinaryOperation.h
-
-
+    /** 
     BinaryOperation supports the implmentation of a binary operation on two input workspaces.
-    It inherits from the Algorithm class, and overrides
-    the init() & exec() methods.
+    It inherits from the Algorithm class, and overrides the init() & exec() methods.
 
     Required Properties:
     <UL>
@@ -35,7 +31,7 @@ namespace Mantid
     @author Nick Draper
     @date 14/12/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -54,7 +50,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-
     class DLLExport BinaryOperation : public API::Algorithm
     {
     public:
@@ -64,7 +59,7 @@ namespace Mantid
       virtual ~BinaryOperation() {};
 
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "General";}
+      virtual const std::string category() const { return "Arithmetic";}
 
     protected:
       // Overridden Algorithm methods
@@ -101,15 +96,11 @@ namespace Mantid
       /// Gets the looping orientation for a looping iterator
       unsigned int getLoopDirection(const API::MatrixWorkspace_const_sptr wsMain, const API::MatrixWorkspace_const_sptr wsComparison) const;
 
-
       friend class BinaryOperation_fn;
       /// Abstract internal class providing the binary function
       class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
       {
       public:
-        /// Default Constructor
-        BinaryOperation_fn():m_count(0),m_progress(0),m_progress_step(0)
-        { }
         /// Constructor
         BinaryOperation_fn(BinaryOperation* op,int count):m_count(count),m_progress(0),m_progress_step(count/100),m_op(op)
         { if (m_progress_step == 0) m_progress_step = 1; }

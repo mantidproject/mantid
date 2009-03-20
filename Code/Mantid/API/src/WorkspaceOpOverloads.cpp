@@ -52,11 +52,10 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
 
   //Horendous code inclusion to satisfy compilers that all code paths return a value
   // in reality the above code should either throw or return successfully.
-  //MatrixWorkspace_sptr retVal = WorkspaceFactory::Instance().createMatrix("Workspace2D");
   return MatrixWorkspace_sptr();
 }
 
-/** Creates a temporary single value workspace the error is set to sqrt(value)
+/** Creates a temporary single value workspace the error is set to zero
  *  @param rhsValue the value to use
  *  @returns The value in a workspace shared pointer
  */
