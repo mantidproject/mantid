@@ -36,17 +36,25 @@ namespace Mantid
 
     /// load data from the DAE
     static void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
-    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
+    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData = 0)
     {
     	int ndims, dims_array[1];
         ndims = 1;
-	dims_array[0] = lengthIn;
+        dims_array[0] = lengthIn;
 
-      // Read in spectrum number ispec from DAE
-      IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims);
+        int *data = 0;
+
+        if (allData) data = allData + ispec*lengthIn;
+        else
+        {
+            // Read in spectrum number ispec from DAE
+            IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims);
+            data = spectrum;
+        }
+
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
-      std::vector<double> v(spectrum + 1, spectrum + lengthIn);
+      std::vector<double> v(data + 1, data + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
       std::vector<double> e(lengthIn-1);
       std::transform(v.begin(), v.end(), e.begin(), LoadDAE::dblSqrt);
@@ -156,6 +164,23 @@ namespace Mantid
         m_spec_max = m_numberOfSpectra + 1;
       }
 
+      // Decide if we can read in all the data at once
+      int *allData = 0;
+      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1);
+      if (ndata/1000000*4 < 10) // arbitrary number
+      {
+          int mv_dims_array[1],mv_ndims = 1;
+          mv_dims_array[0] = ndata;
+          allData = new int[ ndata ];
+          // and read them in
+          int ret = IDCgetpari(dae_handle, "CNT1", allData, mv_dims_array, &mv_ndims);
+          if (ret < 0)
+          {
+              delete[] allData;
+              allData = 0;
+          }
+      }
+
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
@@ -172,7 +197,7 @@ namespace Mantid
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
-          loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum,localWorkspace );
+          loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum,localWorkspace,allData );
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
           interruption_point();
@@ -182,7 +207,7 @@ namespace Mantid
         {
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum, localWorkspace );
+            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum, localWorkspace,allData );
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();
@@ -218,6 +243,7 @@ namespace Mantid
       // Clean up
       delete[] timeChannels;
       delete[] spectrum;
+      if (allData) delete[] allData;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
