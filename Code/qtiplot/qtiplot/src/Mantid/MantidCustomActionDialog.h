@@ -65,6 +65,9 @@ private:
   
   //Initialize the object
   void init();
+
+  ///Import scripts into the selected menu (does the actual work)
+  void importItems(const QList<QTreeWidgetItem*> & custom_items, bool remove);
   
 private slots:
 
@@ -82,9 +85,15 @@ private slots:
   /// Add script items to the file tree
   void addFileItems(const QStringList& fileList);
 
-  ///Import scripts into the selected menu
-  void importSelectedScripts();
-  
+  /// Import from the script file tree
+  void importFromFileTree();
+
+  /// Import from the custom window tree
+  void importFromCustomTree();
+
+  /// Import all selections
+  void importAllSelected();
+
   ///Handle a text change
   void itemTextChanged(QTreeWidgetItem*);
 
@@ -94,6 +103,9 @@ private:
 
   //A tree view displaying a list of scripts to add to the selected menu
   ActionTreeWidget *m_fileTree;
+
+  //A tree widget displaying a list of available customised user interfaces
+  ActionTreeWidget *m_customUITree;
 
   ///A map of model indices to widgets
   QMap<QTreeWidgetItem*,QObject*> m_widgetMap;

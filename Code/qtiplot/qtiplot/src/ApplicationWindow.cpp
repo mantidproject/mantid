@@ -11016,7 +11016,7 @@ void ApplicationWindow::setPlot3DOptions()
 
 void ApplicationWindow::createActions()
 {
-    actionCustomActionDialog = new QAction(tr("Manage Custom Script Actions..."), this);
+    actionCustomActionDialog = new QAction(tr("Manage Custom Mantid Menus..."), this);
 	connect(actionCustomActionDialog, SIGNAL(activated()), this, SLOT(showCustomActionDialog()));
 
 	actionNewProject = new QAction(QIcon(QPixmap(new_xpm)), tr("New &Project"), this);
@@ -11910,7 +11910,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
 
-	actionCustomActionDialog->setMenuText(tr("Manage Custom Script Actions..."));
+	actionCustomActionDialog->setMenuText(tr("Manage Custom Mantid Menus..."));
 
 	actionAddLayer->setMenuText(tr("Add La&yer"));
 	actionAddLayer->setToolTip(tr("Add Layer"));

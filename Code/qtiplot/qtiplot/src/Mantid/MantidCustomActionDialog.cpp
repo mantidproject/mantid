@@ -3,6 +3,7 @@
 //----------------------------------
 #include "MantidCustomActionDialog.h"
 #include "../ApplicationWindow.h"
+#include "MantidQtAPI/InterfaceManager.h"
 
 #include <QTreeWidgetItem>
 #include <QPushButton>
@@ -31,7 +32,8 @@
 MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags flags) : 
   QDialog(parent, flags), m_lastDirectory("")
 {
-  setWindowTitle(tr("MantidPlot") + " - " + tr("Manage Custom Script Actions"));
+  setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Menus"));
+  resize(555,390);
 
   m_appWindow = static_cast<ApplicationWindow*>(parent);
 
@@ -41,12 +43,24 @@ MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags f
   //Populate the menu list
   refreshMenuTree();
 
+  //Populate the list of customised interfaces
+  QStringList user_windows = MantidQt::API::InterfaceManager::Instance().getUserSubWindowKeys();
+  QStringListIterator itr(user_windows);
+  while( itr.hasNext() )
+  {
+    QString name = itr.next();
+    QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
+    item->setData(0, Qt::UserRole, name);
+    item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable );
+    m_customUITree->addTopLevelItem(item);
+  }
+
 //   m_menuTree->setContextMenuPolicy(Qt::CustomContextMenu);
 //   connect(m_menuTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint&)));
   
   //Use the delete key
- //  QShortcut *accelRemove = new QShortcut(QKeySequence(Qt::Key_Delete), this);
- // connect(accelRemove, SIGNAL(activated()), this, SLOT(removeSelectedItem()));
+//   QShortcut *delete_key = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+//   connect(delete_key, SIGNAL(activated()), this, SLOT(deleteKeyPressed()));
  
 }
 
@@ -58,15 +72,16 @@ MantidCustomActionDialog::MantidCustomActionDialog(QWidget* parent, Qt::WFlags f
  */
 void MantidCustomActionDialog::init()
 {
-  //The menu tree
+  
+  QVBoxLayout *menu_side = new QVBoxLayout;
+  //  menu_side->addStretch();
+  QGroupBox *menuSelection = new QGroupBox("Custom Menus");
   m_menuTree = new ActionTreeWidget;
   m_menuTree->setColumnCount(1);
-  m_menuTree->setHeaderLabel("Available Menus");
+  m_menuTree->setHeaderLabel("Name");
   m_menuTree->setSelectionMode(QAbstractItemView::SingleSelection);
-
-  QGroupBox *menuSelection = new QGroupBox("Custom Menus");
-  QGridLayout *leftLayout = new QGridLayout;
-  leftLayout->addWidget(m_menuTree, 0, 0);
+  QGridLayout *menubox_layout = new QGridLayout;
+  menubox_layout->addWidget(m_menuTree, 0, 0);
 
   QDialogButtonBox *menuButtons = new QDialogButtonBox;
   QPushButton *plusMenu = new QPushButton("+");
@@ -81,30 +96,26 @@ void MantidCustomActionDialog::init()
   menuButtons->addButton(plusMenu, QDialogButtonBox::ActionRole);
   menuButtons->addButton(minusMenu, QDialogButtonBox::ActionRole);
 
-  leftLayout->addWidget(menuButtons, 1, 0, Qt::AlignHCenter);
-  menuSelection->setLayout(leftLayout);
+  menubox_layout->addWidget(menuButtons, 1, 0, Qt::AlignHCenter);
+  menuSelection->setLayout(menubox_layout);
+  menu_side->addWidget(menuSelection);
+  //  menu_side->addStretch();
+
+  //A button to import selections
+  QPushButton *importBtn = new QPushButton(">>");
+  importBtn->setFixedWidth(35);
 
   // The file list
+  QGroupBox *fileSelection = new QGroupBox("Item Selection");
+  QGridLayout *item_box_layout = new QGridLayout;
+
   m_fileTree = new ActionTreeWidget;
   m_fileTree->setColumnCount(1);
   m_fileTree->setColumnWidth(0, 25);
   m_fileTree->setIndentation(10);
-  m_fileTree->setHeaderLabel("File name");
+  m_fileTree->setHeaderLabel("Scripts");
   m_fileTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-  //A button to import selections
-  QPushButton *importBtn = new QPushButton("<<");
-  importBtn->setFixedWidth(35);
-  QHBoxLayout *topRowLayout = new QHBoxLayout;
-  topRowLayout->addWidget(menuSelection);
-  //I have no idea what units this is in, the documentation doesn't specify them
-  topRowLayout->addSpacing(4);
-  topRowLayout->addWidget(importBtn);
-  topRowLayout->addSpacing(4);
-
-  QGroupBox *fileSelection = new QGroupBox("Script Selection");
-  QGridLayout *rightLayout = new QGridLayout;
-  rightLayout->addWidget(m_fileTree, 0, 0);
+  item_box_layout->addWidget(m_fileTree);
 
   QDialogButtonBox *fileButtons = new QDialogButtonBox;
   QPushButton *plusFile = new QPushButton("+");
@@ -118,13 +129,32 @@ void MantidCustomActionDialog::init()
   fileButtons->addButton(plusFile, QDialogButtonBox::ActionRole);
   fileButtons->addButton(minusFile, QDialogButtonBox::ActionRole);
 
-  rightLayout->addWidget(fileButtons, 1, 0, Qt::AlignHCenter);
-  fileSelection->setLayout(rightLayout);
-  topRowLayout->addWidget(fileSelection);
-  
-  //Main layout
+  item_box_layout->addWidget(fileButtons, 1, 0, Qt::AlignHCenter);
+
+  // Custom UI tree
+  m_customUITree = new ActionTreeWidget;
+  m_customUITree->setColumnCount(1);
+  m_customUITree->setColumnWidth(0, 25);
+  m_customUITree->setIndentation(10);
+  m_customUITree->setHeaderLabel("Custom Interfaces");
+  m_customUITree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  item_box_layout->addWidget(m_customUITree, 2, 0);
+
+  fileSelection->setLayout(item_box_layout);
+
+  QHBoxLayout *top_row_layout = new QHBoxLayout;
+  top_row_layout->addWidget(fileSelection);
+  //I have no idea what units this is in, the documentation doesn't specify them
+  top_row_layout->addSpacing(4);
+  top_row_layout->addWidget(importBtn);
+  top_row_layout->addSpacing(4);
+
+  top_row_layout->addLayout(menu_side);
+
+
+   //Main layout
   QVBoxLayout *mainlayout = new QVBoxLayout(this);
-  mainlayout->addLayout(topRowLayout);
+  mainlayout->addLayout(top_row_layout);
 
   QPushButton *buttonCancel = new QPushButton(tr("&Close"));
   QDialogButtonBox *buttonBox = new QDialogButtonBox;
@@ -137,7 +167,7 @@ void MantidCustomActionDialog::init()
   connect(minusFile, SIGNAL(clicked()), this, SLOT(removeFileClicked()));
   
   //Import scripts
-  connect(importBtn, SIGNAL(clicked()), this, SLOT(importSelectedScripts()));
+  connect(importBtn, SIGNAL(clicked()), this, SLOT(importAllSelected()));
   
   //Update menus and actions if a field is edited in the menu tree
   connect(m_menuTree, SIGNAL(textChange(QTreeWidgetItem*)), this, SLOT(itemTextChanged(QTreeWidgetItem*))); 
@@ -149,24 +179,43 @@ void MantidCustomActionDialog::init()
 }
 
 /**
- * Import the selected scripts
+ * Import from the script file tree
  */
-void MantidCustomActionDialog::importSelectedScripts()
+void MantidCustomActionDialog::importFromFileTree()
 {
-  QList<QTreeWidgetItem*> scripts;
-  if( m_fileTree->topLevelItemCount() == 1 )
+  importItems(m_fileTree->selectedItems(), true);
+  m_fileTree->clearSelection();
+}
+
+
+/** 
+ * Import from the custom window tree
+ */
+void MantidCustomActionDialog::importFromCustomTree()
+{
+  importItems(m_customUITree->selectedItems(), false);
+  m_customUITree->clearSelection();
+}
+
+/**
+ * Import all selections
+ */
+void MantidCustomActionDialog::importAllSelected()
+{
+  importFromFileTree();
+  importFromCustomTree();  
+}
+
+/**
+ * Import the selections
+ * @param custom_items The selected items
+ * @param remove Whether to remove it from the list after the import
+ */
+void MantidCustomActionDialog::importItems(const QList<QTreeWidgetItem*> & custom_items, bool remove)
+{
+  if( custom_items.isEmpty() )
   {
-    scripts.append(m_fileTree->topLevelItem(0));
-  }
-  else if( m_fileTree->selectedItems().isEmpty() )
-  {
-    QMessageBox::information(this, "Script import", 
-			     "Cannot import scripts, none have been selected.");
     return;
-  }
-  else
-  {
-    scripts = m_fileTree->selectedItems();
   }
 
   QTreeWidgetItem *menu = NULL;
@@ -176,31 +225,33 @@ void MantidCustomActionDialog::importSelectedScripts()
   }
   else if( m_menuTree->selectedItems().isEmpty() )
   {
-    QMessageBox::information(this, "Script import", 
-			     "Cannot import scripts, no menu has been selected.");
+    QMessageBox::information(this, "Import Selection", 
+			     "Error: No menu has been selected");
     return;
   }
+  //Single selection is the only possibility
   else
   {
     menu = m_menuTree->selectedItems()[0];
   }
+  
+  //If the selected item in the menu tree is a child of a menu then
+  //assume the user means to select the menu
   if( menu->parent() ) menu = menu->parent();
 
-  QTreeWidgetItem *file;
-  foreach(file, scripts)
+  QTreeWidgetItem *custom;
+  foreach(custom, custom_items)
   {
-    QTreeWidgetItem *action = file->clone();
-    delete file;
+    QTreeWidgetItem *action = custom->clone();
+    if( remove ) delete custom;
     menu->addChild(action);
     QString menuName = menu->text(0);
     QString itemName = action->text(0);
-    QString scriptPath = QFileInfo(action->data(0,Qt::UserRole).toString()).absoluteFilePath();
-    m_appWindow->addUserMenuAction( menuName, itemName, scriptPath);
+    QString action_data = action->data(0, Qt::UserRole).toString();
+    m_appWindow->addUserMenuAction( menuName, itemName, action_data);
   }
   //Refresh the
   refreshMenuTree();    
-  m_menuTree->clearSelection();
-  m_fileTree->clearSelection();
 }
 
 /**
@@ -383,7 +434,7 @@ ActionTreeWidget::ActionTreeWidget(QWidget *parent) : QTreeWidget(parent)
 /**
 * Data has changed in the widget
 */
-void ActionTreeWidget::dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight)
+void ActionTreeWidget::dataChanged(const QModelIndex & topLeft, const QModelIndex &)
 {
   QTreeWidgetItem *changedItem = itemFromIndex(topLeft);
   emit textChange(changedItem);

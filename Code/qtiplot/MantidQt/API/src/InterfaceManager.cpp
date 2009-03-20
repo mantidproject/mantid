@@ -13,6 +13,8 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/Exception.h"
 
+#include <QStringList>
+
 using namespace MantidQt::API;
 
 //Initialize the logger
@@ -36,7 +38,7 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
   if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
   {
     g_log.debug() << "Creating a specialised dialog for " << alg->name() << std::endl;
-    dlg = dynamic_cast<AlgorithmDialog*>(InterfaceFactory::Instance().createUnwrapped(alg->name() + "Dialog"));
+    dlg = qobject_cast<AlgorithmDialog*>(InterfaceFactory::Instance().createUnwrapped(alg->name() + "Dialog"));
     }
   else
   {
@@ -64,7 +66,7 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
   std::string iname = interface_name.toStdString();
   if( InterfaceFactory::Instance().exists(iname) )
   {
-    user_win = dynamic_cast<UserSubWindow*>(InterfaceFactory::Instance().createUnwrapped(iname));
+    user_win = qobject_cast<UserSubWindow*>(InterfaceFactory::Instance().createUnwrapped(iname));
   }
   if( user_win )
   {
@@ -78,6 +80,23 @@ UserSubWindow* InterfaceManagerImpl::createSubWindow(const QString & interface_n
     g_log.debug() << "No specialised interface exists for " << iname << std::endl;
   }
   return user_win;
+}
+
+/**
+ * The keys associated with UserSubWindow classes
+ * @returns A QStringList containing the keys from the InterfaceFactory that refer to UserSubWindow classes
+ */
+QStringList InterfaceManagerImpl::getUserSubWindowKeys() const
+{
+  QStringList m_key_list;
+  std::vector<std::string> keys = InterfaceFactory::Instance().getKeys();
+  std::vector<std::string>::const_iterator iend = keys.end();
+  for( std::vector<std::string>::const_iterator itr = keys.begin(); itr != iend; ++itr )
+  {
+    QString key = QString::fromStdString(*itr);
+    if( !key.endsWith("Dialog") ) m_key_list.append(key);
+  }
+  return m_key_list;
 }
 
 //----------------------------------

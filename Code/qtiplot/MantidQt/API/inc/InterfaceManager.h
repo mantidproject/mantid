@@ -76,12 +76,15 @@ class EXPORT_OPT_MANTIDQT_API InterfaceManagerImpl
 
 public:
   
-  /// Create a new instance of the correct type of UserSubWindow
+  /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
 				bool forScript = false, const QString & msg = QString(""));
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
+
+  /// The keys associated with UserSubWindow classes
+  QStringList getUserSubWindowKeys() const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<InterfaceManagerImpl>;
