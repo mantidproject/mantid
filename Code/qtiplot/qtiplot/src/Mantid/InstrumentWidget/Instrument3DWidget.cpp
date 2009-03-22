@@ -24,16 +24,20 @@
 #include <QMessageBox>
 #include <QString>
 #include <iostream>
+#include "MantidGeometry/Object.h"
+#include "MantidGeometry/GeometryHandler.h"
+#include "InstrumentActor.h"
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent),mFastRendering(true)
+static const QRgb BLACK=qRgb(0,0,0);
+Instrument3DWidget::Instrument3DWidget(QWidget* parent):GL3DWidget(parent),mFastRendering(true),mInstrumentActor(0)
 {
 	iTimeBin=0;
 	strWorkspaceName="";
-	connect(this, SIGNAL(actorsPicked(std::vector<GLActor*>)), this, SLOT(fireDetectorsPicked(std::vector<GLActor*>)));
-	connect(this, SIGNAL(actorHighlighted(GLActor*)),this,SLOT(fireDetectorHighligted(GLActor*)));
+	connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
+	connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
 	DataMinValue=-DBL_MAX;
 	DataMaxValue=DBL_MAX;
 	mDataMapping=INTEGRAL;
@@ -65,27 +69,20 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction,const Ma
  * signals the ids of the detector and the spectra index(not spectra number).
  * @param pickedActor the input passed by the the signal.
  */
-void Instrument3DWidget::fireDetectorsPicked(const std::vector<GLActor*>& pickedActor)
+void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 {
 	std::vector<int> detectorIds;
 
-	for(std::vector<GLActor*>::const_iterator it=pickedActor.begin();it!=pickedActor.end();it++)
+	int iDecId;
+	for(std::set<QRgb>::const_iterator it=pickedColors.begin();it!=pickedColors.end();it++)
 	{
-		boost::shared_ptr<GLObject> tmpGLObject=(*it)->getRepresentation();
-		if(tmpGLObject->type()=="MantidObject")
-		{
-			//type cast to the mantid object
-			MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
-			//get the component
-            boost::shared_ptr<IObjComponent> tmpObjComp=tmpMantidObject->getComponent();
-			//check the component type if its detector or not
-            boost::shared_ptr<Mantid::Geometry::IDetector>  iDec=(boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(tmpObjComp));
-			if(iDec.get())
-			{
-				detectorIds.push_back(iDec->getID());
-			}
 
+		iDecId=mInstrumentActor->getDetectorIDFromColor(qRed((*it))*65536+qGreen((*it))*256+qBlue((*it)));
+		if(iDecId!=-1)
+		{
+			detectorIds.push_back(iDecId);
 		}
+
 	}
 	//convert detector ids to spectra index ids
 	const std::vector<int>& spectraIndices = getSpectraIndexList(detectorIds);
@@ -115,51 +112,43 @@ void Instrument3DWidget::fireDetectorsPicked(const std::vector<GLActor*>& picked
  * signals the id of the detector and the spectra index(not spectra number).
  * @param pickedActor the input passed by the the signal.
  */
-void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
+void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 {
-	if(pickedActor==NULL)
+	if(pickedColor==BLACK)
 	{
 		emit actionDetectorHighlighted(-1,-1,-1);
 		return;
 	}
-	boost::shared_ptr<GLObject> tmpGLObject=pickedActor->getRepresentation();
-	if(tmpGLObject->type()=="MantidObject")
-	{
-		//type cast to the mantid object
-		MantidObject* tmpMantidObject=dynamic_cast<MantidObject*>(tmpGLObject.get());
-		//get the component
-		boost::shared_ptr<IObjComponent> tmpObjComp=tmpMantidObject->getComponent();
-		//check the component type if its detector or not
-        boost::shared_ptr<Mantid::Geometry::Detector>  iDec=(boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(tmpObjComp));
-		if(iDec.get())
-		{
-			//convert detector id to spectra index id
-			std::vector<int> idDecVec;
-			idDecVec.push_back(iDec->getID());
-			const std::vector<int>& indexList = getSpectraIndexList(idDecVec);
-			MatrixWorkspace_sptr workspace;
-			workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
-			Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
-			int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
-			const std::vector<double>& outputdata=workspace->readY(indexList[0]);
-			std::vector<int> histIndexList;
-			std::vector<double> values;
-			histIndexList.push_back(indexList[0]);
-			double minval,maxval;
-			switch(mDataMapping)
-			{
-			case SINGLE_BIN:
-				this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
-				break;
-			case INTEGRAL:
-				this->CollectIntegralValues(histIndexList, 0, workspace->blocksize(),minval,maxval,values);
-				break;
-			}
-			//emit the detector id, spectrum number and count
-			emit actionDetectorHighlighted(iDec->getID(),spectrumNumber,values[0]);
-		}
 
+	int iDecId=mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536+qGreen(pickedColor)*256+qBlue(pickedColor));
+	if(iDecId!=-1)
+	{
+		//convert detector id to spectra index id
+		std::vector<int> idDecVec;
+		idDecVec.push_back(iDecId);
+		const std::vector<int>& indexList = getSpectraIndexList(idDecVec);
+		MatrixWorkspace_sptr workspace;
+		workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+		Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
+		int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
+		const std::vector<double>& outputdata=workspace->readY(indexList[0]);
+		std::vector<int> histIndexList;
+		std::vector<double> values;
+		histIndexList.push_back(indexList[0]);
+		double minval,maxval;
+		switch(mDataMapping)
+		{
+		case SINGLE_BIN:
+			this->CollectTimebinValues(this->iTimeBin,histIndexList,minval,maxval,values);
+			break;
+		case INTEGRAL:
+			this->CollectIntegralValues(histIndexList, 0, workspace->blocksize(),minval,maxval,values);
+			break;
+		}
+		//emit the detector id, spectrum number and count
+		emit actionDetectorHighlighted(iDecId,spectrumNumber,values[0]);
 	}
+
 }
 
 /**
@@ -168,6 +157,7 @@ void Instrument3DWidget::fireDetectorHighligted(GLActor* pickedActor)
  */
 void Instrument3DWidget::setWorkspace(const std::string& wsName)
 {
+
 	strWorkspaceName=wsName;
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
@@ -208,48 +198,11 @@ void Instrument3DWidget::setWorkspace(const std::string& wsName)
  */
 void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument> ins)
 {
-	boost::shared_ptr<GLActorCollection> scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection);
 	makeCurrent();
-    std::queue<boost::shared_ptr<IComponent> > CompList;
-    CompList.push(boost::dynamic_pointer_cast<ICompAssembly>(ins));
-	boost::shared_ptr<GLColor> col(new GLColor(1.0,0.5,0.0,1.0));
-	while(!CompList.empty())
-	{
-		boost::shared_ptr<IComponent> tmp = CompList.front();
-		CompList.pop();
-        boost::shared_ptr<IObjComponent> iobj = boost::dynamic_pointer_cast<IObjComponent>(tmp);
-        //std::cerr<<tmp<<'\n';
-        //std::cerr<<" Component: "<<tmp->getName()<<std::endl;
-        //std::cerr<<" Component Type:"<<tmp->type()<<std::endl;
-		if(iobj.get()){
-            boost::shared_ptr<MantidObject> obj(new MantidObject(iobj,mFastRendering));
-			GLActor* actor1=new GLActor();
-			actor1->setRepresentation(obj);
-			actor1->setPos(0.0,0.0,0.0);
-			actor1->setColor(col);
-			scene->addActor(actor1);
-		}
-        else
-        {
-            boost::shared_ptr<ICompAssembly> tmpAssem = boost::dynamic_pointer_cast<ICompAssembly>(tmp);
-			if (tmpAssem.get())
-			for(int idx=0;idx<tmpAssem->nelements();idx++)
-			{
-                boost::shared_ptr<IComponent> o = (*tmpAssem)[idx];
-				CompList.push(o);
-			}
-		}
-	}
-    /*std::vector< boost::shared_ptr<IObjComponent> > plist = ins->getPlottable();
-    for(std::vector< boost::shared_ptr<IObjComponent> >::iterator o = plist.begin();o!=plist.end();o++)
-    {
-        boost::shared_ptr<MantidObject> obj(new MantidObject(*o));
-	    GLActor* actor1=new GLActor();
-	    actor1->setRepresentation(obj);
-	    actor1->setPos(0.0,0.0,0.0);
-	    actor1->setColor(col);
-	    scene->addActor(actor1);
-    }*/
+	boost::shared_ptr<GLActorCollection> scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection);
+	boost::shared_ptr<std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*> > iObjectMap(new std::map<const boost::shared_ptr<const Mantid::Geometry::Object>,MantidObject*>());
+	mInstrumentActor = new InstrumentActor(ins,mFastRendering);
+	scene->addActor(mInstrumentActor);	 
 	this->setActorCollection(scene);
 }
 
@@ -262,32 +215,10 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 std::vector<int> Instrument3DWidget::getDetectorIDList() const
 {
 	std::vector<int> idDecVec;
-	int count=scene->getNumberOfActors();
-	if(count==0 || strWorkspaceName=="")return idDecVec;
-    Workspace_sptr output;
-    output = AnalysisDataService::Instance().retrieve(strWorkspaceName);
-	/* Here we are only filtering the detectors to be passed in the detector list */
-	/* Skipping the monitors because they have high values of neutron count*/
-	for(int i=0;i<count;i++){
-		GLActor* tmpActor=scene->getActor(i);
-		if(tmpActor->getRepresentation()->type()=="MantidObject"){
-			boost::shared_ptr<GLObject> mObj = tmpActor->getRepresentation();
-            boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp = dynamic_cast<MantidObject*>(mObj.get())->getComponent();
-            boost::shared_ptr<Mantid::Geometry::IDetector>  iDec = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>(objComp);
-			if(iDec.get()){
-				if(!iDec->isMonitor())
-                {
-					idDecVec.push_back(iDec->getID());
-                }
-				else
-					idDecVec.push_back(-1);
-			}else{
-				idDecVec.push_back(-1);
-			}
-		}else{
-			idDecVec.push_back(-1);
-		}
-	}
+	if(mInstrumentActor)
+		mInstrumentActor->getDectorIDList(idDecVec);
+	else
+		std::cout<<"mInstrument Not initialized"<<std::endl;
 	return idDecVec;
 }
 
@@ -334,12 +265,10 @@ std::vector<int> Instrument3DWidget::getSpectraIndexList(const std::vector<int>&
  */
 void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colorMap)
 {
-	int count=scene->getNumberOfActors();
+	std::vector<boost::shared_ptr<GLColor> > iColorList;
 	int noOfColors=colorMap.getNumberOfColors();
-	if(count!=values.size())std::cout<<"Error: The detectors "<<count<<" are not equal to values "<<values.size()<<std::endl;
-	for(int i=0;i<count;i++)
+	for(int i=0;i<values.size();i++)
 	{
-		GLActor* tmpActor=scene->getActor(i);
 		int cIndex;
 		if(maxval-minval<0.00000001)
 			cIndex=0;
@@ -353,8 +282,9 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const 
 		{
 			cIndex=(noOfColors-1);
 		}
-		tmpActor->setColor(colorMap.getColor(cIndex));
+		iColorList.push_back(colorMap.getColor(cIndex));
 	} // Looping through the dectors/Actors list
+	mInstrumentActor->setDetectorColors(iColorList);
 }
 
 /**
@@ -457,7 +387,7 @@ void Instrument3DWidget::AssignColors()
 		DataMaxValue=maxval;
 	//std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
 	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
-	scene->refresh();
+	mInstrumentActor->refresh();
 //	updateGL();
 }
 
@@ -711,4 +641,38 @@ void Instrument3DWidget::setView(const V3D& pos,double xmax,double ymax,double z
 	_viewport->setOrtho(xmin,xmax,ymin,ymax,-zmax,-zmin);
 	_viewport->issueGL();
 	update();
+}
+
+/**
+ * This method draws the scene using color id. this method is called in pick mode
+ */
+void Instrument3DWidget::drawSceneUsingColorID()
+{
+	mInstrumentActor->drawUsingColorID();
+}
+
+/**
+ * Draws the scene in low resolution. this method is called in interactive mode for faster response
+ */
+void Instrument3DWidget::setSceneLowResolution()
+{
+	mInstrumentActor->setObjectResolutionToLow();
+}
+
+/**
+ * Draws the scene in high resolution. 
+ */
+void Instrument3DWidget::setSceneHighResolution()
+{
+	mInstrumentActor->setObjectResolutionToHigh();
+}
+
+/**
+ * Returns the boundig box of the scene
+ * @param minBound :: output min point of the bounding box of scene
+ * @param maxBound :: output max point of the bounding box of scene
+ */ 
+void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound)
+{
+	mInstrumentActor->getBoundingBox(minBound,maxBound);
 }

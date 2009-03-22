@@ -340,7 +340,10 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/BinDialog.h	\
 		src/Mantid/InstrumentWidget/GLGroupPickBox.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h \
-		src/Mantid/InstrumentWidget/InstrumentTreeModel.h
+		src/Mantid/InstrumentWidget/InstrumentTreeModel.h \
+		src/Mantid/InstrumentWidget/CompAssemblyActor.h \
+		src/Mantid/InstrumentWidget/ObjComponentActor.h \
+		src/Mantid/InstrumentWidget/InstrumentActor.h
 
 ###################### FORMS ##############################################
 
@@ -498,7 +501,10 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/BinDialog.cpp  \
 		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp \
-		src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
+		src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp \
+		src/Mantid/InstrumentWidget/CompAssemblyActor.cpp	\
+		src/Mantid/InstrumentWidget/ObjComponentActor.cpp	\	
+		src/Mantid/InstrumentWidget/InstrumentActor.cpp
 
 
 ###############################################################

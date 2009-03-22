@@ -1,7 +1,5 @@
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include "GLActorCollection.h"
+#include <exception>
 #include <iostream>
 #include <functional>
 #include <algorithm>
@@ -12,19 +10,16 @@ static int hash(unsigned char r, unsigned char g, unsigned char b)
 	 return r*65536+g*256+b;
 }
 
-GLActorCollection::GLActorCollection():GLObject(false)
+GLActorCollection::GLActorCollection():GLObject(true)
 {
-	referenceColorID[0]=0;referenceColorID[1]=0;referenceColorID[2]=0;
-	_bbmin=Mantid::Geometry::V3D(DBL_MAX,DBL_MAX,DBL_MAX);
-	_bbmax=Mantid::Geometry::V3D(-DBL_MAX,-DBL_MAX,-DBL_MAX);
+	referenceColorID[0]=0;referenceColorID[1]=0;referenceColorID[2]=1;
 }
 
 GLActorCollection::~GLActorCollection()
 {
-	_actors.clear();
-	for(std::vector<GLActor*>::iterator i=_actorsV.begin();i!=_actorsV.end();i++)
+	for(std::vector<GLActor*>::iterator i=mActorsList.begin();i!=mActorsList.end();i++)
 			delete (*i);
-	_actorsV.clear();
+	mActorsList.clear();
 }
 
 /**
@@ -32,16 +27,9 @@ GLActorCollection::~GLActorCollection()
  */
 void GLActorCollection::define()
 {
-    for_each(_actorsV.begin(),_actorsV.end(),std::mem_fun(&GLActor::draw));
+    for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::draw));
 }
 
-/**
- * This method call the bounding box method of the all actors
- */
-void GLActorCollection::defineBoundingBox()
-{
-    for_each(_actorsV.begin(),_actorsV.end(),std::mem_fun(&GLActor::drawBoundingBox));
-}
 
 /**
  * This method addes a new actor to the collection.
@@ -51,30 +39,13 @@ void GLActorCollection::addActor(GLActor* a)
 {
 	if (!a)
 		return;
-	a->setColorID(referenceColorID[0],referenceColorID[1],referenceColorID[2]);
-	int key=hash(referenceColorID[0],referenceColorID[1],referenceColorID[2]);
-    _actors[key]=a;
-    _actorsV.push_back(a);
-
-    referenceColorID[0]++;
-    if (referenceColorID[0]>254)
-	{
-	   referenceColorID[0]=0;
-	   referenceColorID[1]++;
-	   if (referenceColorID[1]>254)
-	   {
-		 referenceColorID[1]=0;
-		 referenceColorID[2]++;
-	   }
-	}
-	Mantid::Geometry::V3D tmin,tmax;
-    a->getBoundingBox(tmin,tmax);
-    if(_bbmin[0]>tmin[0]) _bbmin[0]=tmin[0];
-	if(_bbmin[1]>tmin[1]) _bbmin[1]=tmin[1];
-	if(_bbmin[2]>tmin[2]) _bbmin[2]=tmin[2];
-	if(_bbmax[0]<tmax[0]) _bbmax[0]=tmax[0];
-	if(_bbmax[1]<tmax[1]) _bbmax[1]=tmax[1];
-	if(_bbmax[2]<tmax[2]) _bbmax[2]=tmax[2];
+    mActorsList.push_back(a);
+	int rgb=referenceColorID[0]*65536+referenceColorID[1]*256+referenceColorID[2];
+	int noOfColors=a->setStartingReferenceColor(rgb);
+	rgb+=noOfColors;
+	referenceColorID[0]=rgb/65536;
+	referenceColorID[1]=(rgb%65536)/256;
+	referenceColorID[2]=(rgb%65536)%256;
 }
 
 /**
@@ -83,15 +54,7 @@ void GLActorCollection::addActor(GLActor* a)
  */
 void GLActorCollection::removeActor(GLActor* a)
 {
-//    if (!a) return;
-//	Mantid::Geometry::V3D tmin,tmax;
-//	a->getBoundingBox(tmin,tmax);
-//	bool bRecalculate=false;
-//	if(_bbmin[0]==tmin[0]||_bbmin[1]==tmin[1]||_bbmin[2]==tmin[2]||_bbmax[0]==tmax[0]||_bbmax[1]==tmax[1]||_bbmax[2]==tmax[2]) bRecalculate=true;
-//    std::vector<GLActor*>::iterator i;
-//    i=find(_actors.begin(),_actors.end(),a);
-//    if (i!=_actors.end()) _actors.erase(i);
-//	if(bRecalculate) calculateBoundingBox();
+	throw std::runtime_error("Removing actor not implemented");
 }
 
 /**
@@ -100,7 +63,7 @@ void GLActorCollection::removeActor(GLActor* a)
  */
 int  GLActorCollection::getNumberOfActors()
 {
-	return _actors.size();
+	return mActorsList.size();
 }
 
 /**
@@ -110,8 +73,8 @@ int  GLActorCollection::getNumberOfActors()
  */
 GLActor* GLActorCollection::getActor(int index)
 {
-	if(index<0||index>_actors.size())return NULL;
-	return _actorsV.at(index);
+	if(index<0||index>mActorsList.size())return NULL;
+	return mActorsList.at(index);
 }
 
 /**
@@ -121,39 +84,15 @@ GLActor* GLActorCollection::getActor(int index)
 GLActor* GLActorCollection::findColorID(unsigned char color[3])
 {
 	GLActor* picked=0;
-	int key=hash(color[0],color[1],color[2]);
-	Actormap::const_iterator it=_actors.find(key);
-	if (it!=_actors.end())
-	{
-		picked=(*it).second;
-		picked->markPicked();
-	}
+	throw std::runtime_error("Find colorid not implemented");
+	//int key=hash(color[0],color[1],color[2]);
+	//Actormap::const_iterator it=_actors.find(key);
+	//if (it!=_actors.end())
+	//{
+	//	picked=(*it).second;
+	//	picked->markPicked();
+	//}
 	return picked;
-}
-
-/**
- * This method draws the collection of actors using the color id method of actors
- */
-void GLActorCollection::drawColorID()
-{
-    for_each(_actorsV.begin(),_actorsV.end(),std::mem_fun(&GLActor::drawIDColor));
-}
-
-/**
- * This method returns the points of bounding box that bounds complete actor collection
- * @param minPoint output min point of the bounding box
- * @param maxPoint output max point of the bounding box
- */
-void GLActorCollection::getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint)
-{
-	if(_actors.size()==0)
-	{
-		minPoint=Mantid::Geometry::V3D(-1,-1,-1);
-		maxPoint=Mantid::Geometry::V3D(1,1,1);
-	}else{
-		minPoint=_bbmin;
-		maxPoint=_bbmax;
-	}
 }
 
 /**
@@ -161,26 +100,13 @@ void GLActorCollection::getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::G
  */
 void GLActorCollection::refresh()
 {
-	this->_changed=true;
+	this->mChanged=true;
 }
 
 /**
- * Recalculates the bounding box values. invoked when a actor is removed.
+ * This method calls all the initialisation of the Actors in the collection
  */
-void GLActorCollection::calculateBoundingBox()
+void GLActorCollection::init()
 {
-    std::vector<GLActor*>::iterator i;
-	_bbmin=Mantid::Geometry::V3D(DBL_MAX,DBL_MAX,DBL_MAX);
-	_bbmax=Mantid::Geometry::V3D(-DBL_MAX,-DBL_MAX,-DBL_MAX);
-    for (i=_actorsV.begin();i!=_actorsV.end();i++)
-    {
-		Mantid::Geometry::V3D tmin,tmax;
-        (*i)->getBoundingBox(tmin,tmax);
-        if(_bbmin[0]>tmin[0]) _bbmin[0]=tmin[0];
-		if(_bbmin[1]>tmin[1]) _bbmin[1]=tmin[1];
-		if(_bbmin[2]>tmin[2]) _bbmin[2]=tmin[2];
-		if(_bbmax[0]<tmax[0]) _bbmax[0]=tmax[0];
-		if(_bbmax[1]<tmax[1]) _bbmax[1]=tmax[1];
-		if(_bbmax[2]<tmax[2]) _bbmax[2]=tmax[2];
-    }
+    for_each(mActorsList.begin(),mActorsList.end(),std::mem_fun(&GLActor::init));
 }

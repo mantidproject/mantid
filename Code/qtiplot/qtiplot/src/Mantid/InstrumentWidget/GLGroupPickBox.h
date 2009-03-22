@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <vector>
+#include <set>
 /*!
   \class  GLGroupPickBox
   \brief  class to display and pick group of detectors
@@ -39,9 +40,8 @@ class GLActor;
 class GLGroupPickBox
 {
 public:
-    GLGroupPickBox(GLActorCollection*);  ///< Constructor
+    GLGroupPickBox();  ///< Constructor
     ~GLGroupPickBox();                   ///< Destructor
-	void setActorCollection(GLActorCollection*);
 	void setImages(QImage,QImage);
 	void setDisplayImage(QImage);
 	void setPickImage(QImage);
@@ -50,13 +50,12 @@ public:
 	void mouseMoveEvent ( QMouseEvent * event );
     void mousePressEvent ( QMouseEvent * event );
 	void mouseReleaseEvent ( QMouseEvent * event ); 
-	GLActor* pickPoint(int x, int y);
-	std::vector<GLActor*> getListOfActorsPicked();
+	QRgb pickPoint(int x, int y);
+	std::set<QRgb> getListOfColorsPicked();
 private:
 	QImage mDisplayImage;  ///< This image is used for rendering in the window.
 	QImage mPickImage;     ///< This image is used for picking the objects.
-	GLActorCollection* mActors; ///< Input collection of actors
-	std::vector<GLActor*> mPickedActors;
+	std::set<QRgb> mColorSet;
 	int    mBoxStartPtX; ///< X-dim value of start point in Rectangular Box for the pick selection
 	int    mBoxEndPtX; ///< X-dim value of end point in Rectangular Box for the pick selection
 	int    mBoxStartPtY; ///< Y-dim value of start point in Rectangular Box for the pick selection

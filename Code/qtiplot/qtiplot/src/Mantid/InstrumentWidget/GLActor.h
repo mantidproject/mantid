@@ -47,38 +47,28 @@
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class GLActor
+class GLActor : public GLObject
 {
 public:
-	GLActor(char* name=0);          ///< Constructor with name of actor as input string
+	GLActor(bool withDisplayList);          ///< Constructor with name of actor as input string
 	GLActor(const GLActor&);        ///< Constructor with another actor as input
 	virtual ~GLActor();             ///< Virtual destructor
-    //! This the base function to draw.
-    void draw();
-    void drawBoundingBox();
-	void getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint);
-    void drawIDColor();
-    void setPos(double, double, double);
-    void translate(double,double,double);
-    void setColorID(unsigned char, unsigned char, unsigned char);
     void setColor(boost::shared_ptr<GLColor>);
-    void setRepresentation(boost::shared_ptr<GLObject>);
-	boost::shared_ptr<GLObject> getRepresentation();
+	const boost::shared_ptr<GLColor> getColor(){return mColor;}
     void markPicked();
     void markUnPicked();
+	void setVisibility(bool);
+	bool getVisibility();
+	virtual int  setStartingReferenceColor(int){return 1;}
     friend std::ostream& operator<<(std::ostream& os,const GLActor& a)
     {
-        os << "Actor Name:" << a._name << std::endl;
+        os << "Actor Name:" << a.type() << std::endl;
         return os;
     } ///< Printing Actor object
 protected:
-	boost::shared_ptr<GLObject> _representation; ///< A place holder for the geometry object
-	Mantid::Geometry::V3D* _pos;     ///< Position of the geometry object
-private:
-    boost::shared_ptr<GLColor> _color;           ///< Color of the geometry object
-    char* _name;                     ///< Name given to the actor
-    bool  _picked;                   ///< Flag Whether the actor is picked by mouse click or not
-	unsigned char _colorID[3];		 ///< ColorID for picking. This is assigned by a collection.
+    boost::shared_ptr<GLColor> mColor;           ///< Color of the geometry object
+    bool  mPicked;                   ///< Flag Whether the actor is picked by mouse click or not
+	bool  mVisible;					 ///< Flag whether the actor is visible or not
 };
 
 #endif /*GLACTOR_H_*/

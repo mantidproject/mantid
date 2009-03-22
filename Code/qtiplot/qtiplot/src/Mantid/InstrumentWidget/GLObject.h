@@ -1,8 +1,12 @@
 #ifndef GLOBJECT_H_
 #define GLOBJECT_H_
-#include <GL/glu.h>
 #include "MantidGeometry/V3D.h"
 #include "GLColor.h"
+#ifdef WIN32
+#include <windows.h>
+#endif
+#include <GL/gl.h>
+#include <GL/glu.h>
 /*!
   \class  GLObject
   \brief  Interface for OpenGL object stored in a display list
@@ -40,15 +44,12 @@ public:
 	virtual ~GLObject();                   ///< Destructor
 	virtual std::string type()const {return "GLObject";} ///< Type of the GL object
     void draw();
-    void drawBoundingBox();
-	void getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint);
     virtual void define();
-	virtual void defineBoundingBox();
-    void construct();
+	virtual void init();
 protected:
-    GLuint _displaylist;                   ///< OpengGL Display list id
-    bool _changed;                         ///< Flag holding the change in the object
-	Mantid::Geometry::V3D _bbmin,_bbmax;   ///< Bounding box min and max values
+    void construct();
+    GLuint mDisplayListId;                   ///< OpengGL Display list id
+    bool mChanged;                         ///< Flag holding the change in the object
 };
 #endif /*GLOBJECT_H_*/
 

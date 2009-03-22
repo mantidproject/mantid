@@ -40,9 +40,9 @@ namespace Mantid{
 		class IInstrument;
 	}
 }
-
+class InstrumentActor;
 class Instrument3DWidget : public GL3DWidget
-{
+{ 
 	Q_OBJECT
 	enum DataMappingType { SINGLE_BIN, INTEGRAL };
 	enum Handedness { LEFT, RIGHT };
@@ -65,8 +65,8 @@ public:
 	void setFastRendering();
 	void setSlowRendering();
 public slots:
-	void fireDetectorsPicked(const std::vector<GLActor*>& );
-	void fireDetectorHighligted(GLActor* pickedActor);
+	void fireDetectorsPicked(const std::set<QRgb>& );
+	void fireDetectorHighligted(QRgb);
 	void setTimeBin(int value);
 	void setColorMapMinValue(double minValue);
 	void setColorMapMaxValue(double maxValue);
@@ -98,6 +98,7 @@ private:
 	int iTimeBin;
 	DataMappingType mDataMapping;
 	GLColorMapQwt mColorMap;
+	InstrumentActor* mInstrumentActor;
 	Mantid::Geometry::V3D mAxisDirection;
 	Mantid::Geometry::V3D mAxisUpVector;
 	double DataMinValue;
@@ -111,6 +112,10 @@ private:
 	void setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colMap);
 	void CollectTimebinValues(int timebin,const std::vector<int>& histogramIndexList, double& minval,double& maxval, std::vector<double>& valuesList);
 	void CollectIntegralValues(const std::vector<int>& historgramIndexList, int startbin,int endbin,double& minval,double& maxval, std::vector<double>& valuesList);
+	void drawSceneUsingColorID();
+	void setSceneLowResolution();
+	void setSceneHighResolution();
+	void getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound);
 	std::string strWorkspaceName;
 	bool mHaveBinMaxMin;
 

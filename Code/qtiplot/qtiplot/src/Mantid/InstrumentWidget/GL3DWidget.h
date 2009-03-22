@@ -55,8 +55,8 @@ public:
 	void setViewDirection(AxisDirection);
 	void setBackgroundColor(QColor);
 signals:
-	void actorsPicked(const std::vector<GLActor*>& );
-	void actorHighlighted( GLActor* );
+	void actorsPicked(const std::set<QRgb>& );
+	void actorHighlighted( QRgb );
 protected:
 	void initializeGL();
 	void resetWidget();
@@ -70,6 +70,10 @@ protected:
 	void keyPressEvent(QKeyEvent *);
 	void keyReleaseEvent(QKeyEvent *);
 	void defaultProjection();
+	virtual void drawSceneUsingColorID()=0;
+	virtual void setSceneLowResolution()=0;
+	virtual void setSceneHighResolution()=0;
+	virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
 	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
     GLTrackball* _trackball;       ///< Trackball for user interaction
     GLViewport* _viewport;         ///< Opengl View port [World -> Window]

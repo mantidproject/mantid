@@ -8,11 +8,9 @@
 #include "MantidObject.h"
 #include "GLActorCollection.h"
 #include <QMessageBox>
-#include <set>
 
-GLGroupPickBox::GLGroupPickBox(GLActorCollection* col)
+GLGroupPickBox::GLGroupPickBox()
 {
-	mActors=col;
 	mBoxStartPtX=0;
 	mBoxStartPtY=0;
 	mBoxEndPtX=0;
@@ -22,17 +20,8 @@ GLGroupPickBox::GLGroupPickBox(GLActorCollection* col)
 
 GLGroupPickBox::~GLGroupPickBox()
 {
-	mActors=NULL;
 }
 
-/**
- * This method sets the actor collection. used for looking up which actors are picked.
- * @param col: input Actor collection.
- */
-void GLGroupPickBox::setActorCollection(GLActorCollection* col)
-{
-	mActors=col;
-}
 
 /**
  * This methods sets the display image and picker image. display image is used for displaying on the render
@@ -149,38 +138,16 @@ void GLGroupPickBox::mouseReleaseEvent ( QMouseEvent * event )
 				colorSet.insert(colorVal);
 			}
 		}
-		//Look for the actor and add to the list
-		std::vector<GLActor*> actorsList;
-		//QMessageBox msg;
-		//std::stringstream str;
-		//str<<"Image HeightxWidth:"<<selectedImage.height()<<"x"<<selectedImage.width()<<std::endl;
-		//str<<"Size:"<<colorSet.size()<<std::endl;
-		//str<<"Size Index:"<<colorSetIndex.size()<<std::endl;
-		for(std::set<QRgb>::iterator it=colorSet.begin(); it!=colorSet.end();it++){
-			unsigned char pixel[6];
-			pixel[0]=qRed(*it);
-			pixel[1]=qGreen(*it);
-			pixel[2]=qBlue(*it);
-			GLActor* result=mActors->findColorID(pixel);
-			if(result!=NULL)
-				actorsList.push_back(result);
-		}
-		//for(int count=0;count<actorsList.size();count++){
-		//	str<<" "<<((MantidObject*)(actorsList[count]->getRepresentation().get()))->getComponent()->getName()<<std::endl;
-		//}
-		//msg.setText(QString(str.str().c_str()));
-		//msg.exec();
-		//if list is not empty then emit the list
-		mPickedActors=actorsList;
+		mColorSet=colorSet;
 	}
 }
 
 /**
- * Returns the list of actors picked
+ * Returns the list of colors picked
  */
-std::vector<GLActor*> GLGroupPickBox::getListOfActorsPicked()
+std::set<QRgb> GLGroupPickBox::getListOfColorsPicked()
 {
-	return mPickedActors;
+	return mColorSet;
 }
 
 /**
@@ -188,17 +155,9 @@ std::vector<GLActor*> GLGroupPickBox::getListOfActorsPicked()
  * @param x input x-dim value of the point
  * @param y input y-dim value of the point
  */
-GLActor* GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate of (x,y)
+QRgb GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate of (x,y)
 {
-      GLActor* picked=NULL;
-      if (!mActors) return 0;
-      unsigned char pixel[6];
-	  QRgb pixelRGB=mPickImage.pixel(x,y);
-	  pixel[0]=qRed(pixelRGB);
-	  pixel[1]=qGreen(pixelRGB);
-	  pixel[2]=qBlue(pixelRGB);
-      picked=mActors->findColorID(pixel);
-      return picked;
+	  return mPickImage.pixel(x,y);
 }
 
 /**

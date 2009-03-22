@@ -1,14 +1,14 @@
-#ifndef MANTIDOBJECT_H_
-#define MANTIDOBJECT_H_
-#include "GLObject.h"
+#ifndef OBJCOMPONENT_ACTOR_H_
+#define OBJCOMPONENT_ACTOR_H_
+#include "GLActor.h"
 /*!
-  \class  MantidObject
-  \brief  Mantid Objent wrapper class for rendering in OpenGL
+  \class  ObjComponentActor
+  \brief  ObjComponentActor is an actor class for rendering ObjComponents.
   \author Srikanth Nagella
   \date   March 2009
   \version 1.0
 
-   This class has the implementation for rendering OpenGL object and it inherits from the GLObject
+   This class has the implementation for rendering ObjComponents in OpenGL and it inherits from the GLActor
 
   Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
@@ -31,25 +31,25 @@
 */
 namespace Mantid{
 	namespace Geometry{
-		class Object;
+		class IObjComponent;
+		class V3D;
 	}
 }
+class MantidObject;
 
-class MantidObject : public GLObject
+class ObjComponentActor : public GLActor
 {
 private:
-    boost::shared_ptr<const Mantid::Geometry::Object> Obj; ///< Holder for Object
-	bool mHighResolution;
+	MantidObject *mObject;
+	boost::shared_ptr<Mantid::Geometry::IObjComponent> mObjComp;
 public:
-	MantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList=true); ///< Default Constructor
-	~MantidObject();								   ///< Destructor
-	virtual std::string type()const {return "MantidObject";} ///< Type of the GL object
+	ObjComponentActor(MantidObject *obj,boost::shared_ptr<Mantid::Geometry::IObjComponent> objComp,bool withDisplayList=true); ///< Default Constructor
+	~ObjComponentActor();								   ///< Destructor
+	virtual std::string type()const {return "ObjComponentActor";} ///< Type of the GL object
     void define();  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
-	const boost::shared_ptr<const Mantid::Geometry::Object> getObject(); ///< Returns the objcomponent held in this object
-	void defineBoundingBox();
-	void setResolutionToHigh();
-	void setResolutionToLow();
+	const boost::shared_ptr<Mantid::Geometry::IObjComponent> getObjComponent() const{return mObjComp;}
+	void  getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound);
 };
 
-#endif /*GLTRIANGLE_H_*/
+#endif /*OBJCOMPONENT_ACTOR_H_*/
 

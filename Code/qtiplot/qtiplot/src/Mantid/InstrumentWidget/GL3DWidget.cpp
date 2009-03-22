@@ -31,7 +31,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
 	mPickedActor=NULL;
 	mPickingDraw=false;
 	iInteractionMode=0;
-	mPickBox=new GLGroupPickBox(scene.get());
+	mPickBox=new GLGroupPickBox();
 	setFocusPolicy(Qt::StrongFocus);
     setAutoFillBackground(false);
 	bgColor=QColor(0,0,0,1);
@@ -111,7 +111,8 @@ void GL3DWidget::drawDisplayScene()
 	glPushMatrix();
 	if(isKeyPressed){
 		glDisable(GL_LIGHTING);
-		scene->drawBoundingBox();
+		scene->draw();
+		//scene->drawBoundingBox();
 	}
 	else
 	{
@@ -146,7 +147,7 @@ void GL3DWidget::drawPickingScene()
 	// Issue the rotation, translation and zooming of the trackball to the object
 	_trackball->IssueRotation();
 	glPushMatrix();
-	scene->drawColorID();
+	drawSceneUsingColorID();
 	glPopMatrix();
 }
 
@@ -236,18 +237,21 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
 		setCursor(Qt::SizeVerCursor);
 		_trackball->initZoomFrom(event->x(),event->y());
 		isKeyPressed=true;
+		setSceneLowResolution();
 	}
 	else if (event->buttons() & Qt::LeftButton)
 	{
 		setCursor(Qt::OpenHandCursor);
 		_trackball->initRotationFrom(event->x(),event->y());
 		isKeyPressed=true;
+		setSceneLowResolution();
 	}
 	else if(event->buttons() & Qt::RightButton)
 	{
 		setCursor(Qt::CrossCursor);
 		_trackball->initTranslateFrom(event->x(),event->y());
 		isKeyPressed=true;
+		setSceneLowResolution();
 	}
 }
 
@@ -264,8 +268,8 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	if(iInteractionMode==1){
 		setCursor(Qt::CrossCursor);
-		GLActor* tmpActor=mPickBox->pickPoint(event->x(),event->y());
-		emit actorHighlighted(tmpActor);
+		QRgb tmpColor=mPickBox->pickPoint(event->x(),event->y());
+		emit actorHighlighted(tmpColor);
 		mPickBox->mouseMoveEvent(event);
 		update();
 	}else{
@@ -297,10 +301,11 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
 	setCursor(Qt::PointingHandCursor);
 	isKeyPressed=false;
+	setSceneHighResolution();
 	if(iInteractionMode==1)
 	{
 		mPickBox->mouseReleaseEvent(event);
-		std::vector<GLActor*> result=mPickBox->getListOfActorsPicked();
+		std::set<QRgb> result=mPickBox->getListOfColorsPicked();
 		if(result.size()!=0)
 			emit actorsPicked(result);
 	}
@@ -459,7 +464,6 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
 {
 	scene=col;
-	mPickBox->setActorCollection(scene.get());
 	int width,height;
 	_viewport->getViewport(&width,&height);
 	resizeGL(width,height);
@@ -492,7 +496,7 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
 {
 	Mantid::Geometry::V3D minPoint,maxPoint;
 	double minValue,maxValue,_bbmin[3],_bbmax[3];
-	scene->getBoundingBox(minPoint,maxPoint);
+	getBoundingBox(minPoint,maxPoint);
 	Mantid::Geometry::V3D centre=(maxPoint+minPoint)/2.0;
 	defaultProjection();
 	_viewport->getProjection(_bbmin[0],_bbmax[0],_bbmin[1],_bbmax[1],_bbmin[2],_bbmax[2]);
@@ -542,7 +546,7 @@ void GL3DWidget::defaultProjection()
 	// Its a simplified version of placing the object completly in screen with same
 	// min and max values in all directions.
 	Mantid::Geometry::V3D minPoint,maxPoint;
-	scene->getBoundingBox(minPoint,maxPoint);
+	getBoundingBox(minPoint,maxPoint);
 	if(minPoint[0]==DBL_MAX||minPoint[1]==DBL_MAX||minPoint[2]==DBL_MAX||maxPoint[0]==-DBL_MAX||maxPoint[1]==-DBL_MAX||maxPoint[2]==-DBL_MAX)
 	{
 		minPoint=Mantid::Geometry::V3D(-1.0,-1.0,-1.0);

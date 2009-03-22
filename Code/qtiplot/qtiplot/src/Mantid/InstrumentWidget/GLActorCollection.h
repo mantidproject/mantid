@@ -47,28 +47,18 @@
 class GLActorCollection: public GLObject
 {
 public:
-	#ifndef HAS_UNORDERED_MAP_H
-	typedef std::map<int,GLActor*> Actormap;
-	#else
-	typedef std::tr1::unordered_map<int,GLActor*> Actormap;
-	#endif
 	GLActorCollection(); ///< Default Constructor
 	virtual ~GLActorCollection(); ///< Destructor
     void addActor(GLActor*);
     void removeActor(GLActor*);
 	int  getNumberOfActors();
 	GLActor* getActor(int index);
-	void refresh();
     void define();
-	void defineBoundingBox();
     GLActor* findColorID(unsigned char[3]);
-    void drawColorID();
-	void getBoundingBox(Mantid::Geometry::V3D& minPoint,Mantid::Geometry::V3D& maxPoint);
+	void refresh();
 private:
-    Actormap _actors;                  ///< Map of GLActors where the key is the hashed rgb color
-    std::vector<GLActor*> _actorsV;    ///< Vector of GLActors for fast access.
-	Mantid::Geometry::V3D _bbmin,_bmax;       ///< Bounding box min and max points
-	void calculateBoundingBox();
+	void init();
+    std::vector<GLActor*> mActorsList;    ///< Vector of GLActors for fast access.
 	unsigned char referenceColorID[3];
 };
 
