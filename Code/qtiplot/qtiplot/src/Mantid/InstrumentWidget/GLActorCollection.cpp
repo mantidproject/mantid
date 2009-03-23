@@ -1,5 +1,5 @@
 #include "GLActorCollection.h"
-#include <exception>
+#include <stdexcept>
 #include <iostream>
 #include <functional>
 #include <algorithm>
