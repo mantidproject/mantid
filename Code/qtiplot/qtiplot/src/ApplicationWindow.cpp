@@ -3111,9 +3111,9 @@ void ApplicationWindow::windowActivated(QMdiSubWindow *w)
   MdiSubWindow *qti_subwin = qobject_cast<MdiSubWindow*>(w);
   if( !qti_subwin ) return;
 
-  d_active_window = qti_subwin;
   if( d_active_window && d_active_window == qti_subwin ) return;
 
+  d_active_window = qti_subwin;
   customToolBars(w);
   customMenu(w);
   
@@ -8074,7 +8074,7 @@ void ApplicationWindow::editMenuAboutToShow()
 		actionRedo->setEnabled(false);
 	}
 	
-	//reloadCustomActions();
+	reloadCustomActions();
 }
 
 void ApplicationWindow::windowsMenuAboutToShow()
