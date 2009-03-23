@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "MantidAPI/Algorithm.h"
+
 #include <set>
 #include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Sphere.h"

@@ -764,6 +764,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ShapeFactoryTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\Simulation.h"
 				>
 			</File>

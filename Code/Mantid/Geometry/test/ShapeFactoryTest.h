@@ -3,18 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/ShapeFactory.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/ShapeFactory.h"
 #include <vector>
 
 #include "Poco/DOM/DOMParser.h"
@@ -26,11 +15,8 @@ using Poco::XML::Document;
 using Poco::XML::Element;
 
 
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace Mantid::DataHandling;
-using namespace Mantid::DataObjects;
 
 class ShapeFactoryTest : public CxxTest::TestSuite
 {

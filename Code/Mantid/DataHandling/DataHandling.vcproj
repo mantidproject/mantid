@@ -450,10 +450,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\ShapeFactoryTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidDataHandling\UpdateDAE.h"
 				>
 			</File>

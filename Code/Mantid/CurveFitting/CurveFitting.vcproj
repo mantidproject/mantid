@@ -218,6 +218,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\Fit1D.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\Gaussian.h"
 				>
 			</File>
