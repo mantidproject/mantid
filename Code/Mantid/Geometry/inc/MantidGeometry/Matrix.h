@@ -2,6 +2,7 @@
 #define Geometry_Matrix_h
 
 #include "MantidKernel/System.h"
+#include <vector>
 namespace Mantid
 {
 

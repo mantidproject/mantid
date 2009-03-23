@@ -13,6 +13,8 @@ namespace Geometry
 
   class BaseVisit;
   class V3D;
+  template<class T>
+  class Matrix;
 /*!
   \class  Surface
   \brief Holds a basic quadratic surface
@@ -68,8 +70,8 @@ class DLLExport Surface
   virtual void acceptVisitor(BaseVisit& A) const
   {  A.Accept(*this); }
 
-  //  virtual double lineIntersect(const Geometry::Vec3D&,
-  //			       const Geometry::Vec3D&) const;
+  //  virtual double lineIntersect(const Vec3D&,
+  //			       const Vec3D&) const;
 
   void setName(int const N) { Name=N; }            ///< Set Name
   int getName() const { return Name; }             ///< Get Name
@@ -77,20 +79,20 @@ class DLLExport Surface
 
   /// Sets the surface based on a string input in MCNPX format
   virtual int setSurface(const std::string&) =0; 
-  virtual int side(const Geometry::V3D&) const;
+  virtual int side(const V3D&) const;
 
   /// is point valid on surface 
-  virtual int onSurface(const Geometry::V3D&) const =0;
+  virtual int onSurface(const V3D&) const =0;
 
   /// returns the minimum distance to the surface
-  virtual double distance(const Geometry::V3D&) const =0; 
+  virtual double distance(const V3D&) const =0; 
   /// returns the normal to the closest point on the surface
-  virtual Geometry::V3D surfaceNormal(const Geometry::V3D&) const =0;
+  virtual V3D surfaceNormal(const V3D&) const =0;
 
   ///translates the surface
-  virtual void displace(const Geometry::V3D&)  =0;
+  virtual void displace(const V3D&)  =0;
   ///rotates the surface
-  virtual void rotate(const Geometry::Matrix<double>&) =0;
+  virtual void rotate(const Matrix<double>&) =0;
 
   void writeHeader(std::ostream&) const;
   virtual void write(std::ostream&) const;

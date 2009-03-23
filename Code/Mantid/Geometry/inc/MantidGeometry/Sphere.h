@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Surface.h"
+#include "MantidGeometry/V3D.h"
 
 namespace Mantid
 {
@@ -45,7 +46,7 @@ namespace Mantid
 
       static Kernel::Logger& PLog;           ///< The official logger  
 
-      Geometry::V3D Centre;        ///< Point for centre
+      V3D Centre;        ///< Point for centre
       double Radius;                 ///< Radius of sphere
 
       void rotate(const Geometry::Matrix<double>&);

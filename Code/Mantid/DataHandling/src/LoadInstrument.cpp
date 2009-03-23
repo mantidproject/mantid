@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/ShapeFactory.h"
+#include "MantidGeometry/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Detector.h"
@@ -121,7 +121,7 @@ void LoadInstrument::exec()
   }
 
   // create maps: isTypeAssembly and mapTypeNameToShape
-  ShapeFactory shapeCreator;
+  Geometry::ShapeFactory shapeCreator;
 
   NodeList* pNL_type = pRootElem->getElementsByTagName("type");
 

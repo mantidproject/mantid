@@ -1,7 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/ShapeFactory.h"
+#include "MantidGeometry/Matrix.h"
+#include "MantidGeometry/ShapeFactory.h"
 
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/CompAssembly.h"
@@ -31,11 +32,10 @@ using Poco::XML::NodeFilter;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace Geometry
 {
 
 using namespace Kernel;
-using namespace API;
 using namespace Geometry;
 
 Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
@@ -272,7 +272,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemCentre = getShapeElement(pElem, "centre"); 
   Element* pElemRadius = getShapeElement(pElem, "radius"); 
@@ -299,7 +299,7 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, G
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemPip = getShapeElement(pElem, "point-in-plane"); 
   Element* pElemNormal = getShapeElement(pElem, "normal-to-plane"); 
@@ -325,7 +325,7 @@ std::string ShapeFactory::parseInfinitePlane(Poco::XML::Element* pElem, std::map
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemCentre = getShapeElement(pElem, "centre");  
   Element* pElemAxis = getShapeElement(pElem, "axis");   
@@ -359,7 +359,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base"); 
   Element* pElemAxis = getShapeElement(pElem, "axis"); 
@@ -410,7 +410,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point"); 
   Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
@@ -490,7 +490,7 @@ std::string ShapeFactory::parseCuboid(Poco::XML::Element* pElem, std::map<int, G
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
   Element* pElemAxis = getShapeElement(pElem, "axis"); 
@@ -531,7 +531,7 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
   Element* pElemAxis = getShapeElement(pElem, "axis");  
@@ -582,7 +582,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Geo
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElem_lfb = getShapeElement(pElem, "left-front-bottom-point");
   Element* pElem_lft = getShapeElement(pElem, "left-front-top-point"); 
@@ -669,7 +669,7 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemCentre = getShapeElement(pElem, "centre"); 
   Element* pElemAxis = getShapeElement(pElem, "axis");  
@@ -704,7 +704,7 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Ge
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id)
+std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
   Element* pElemArc = getShapeElement(pElem, "arc"); 
   Element* pElemInnerRadius = getShapeElement(pElem, "inner-radius");  

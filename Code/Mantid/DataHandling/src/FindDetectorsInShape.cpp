@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/FindDetectorsInShape.h"
-#include "MantidDataHandling/ShapeFactory.h"
+#include "MantidGeometry/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -68,7 +68,7 @@ namespace Mantid
 			Element* pRootElem = pDoc->documentElement();
 
 			//convert into a Geometry object
-			ShapeFactory sFactory;
+			Geometry::ShapeFactory sFactory;
 			boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(pRootElem);
 			pDoc->release();
 

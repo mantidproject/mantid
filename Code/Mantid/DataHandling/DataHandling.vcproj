@@ -272,10 +272,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\ShapeFactory.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\UpdateDAE.cpp"
 				>
 			</File>
@@ -451,10 +447,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveVTK.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\ShapeFactory.h"
 				>
 			</File>
 			<File

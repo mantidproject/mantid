@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+//#include "MantidAPI/Algorithm.h"
 #include <set>
 #include "MantidGeometry/Quadratic.h"
 #include "MantidGeometry/Sphere.h"
@@ -26,7 +26,7 @@ namespace XML {
 
 namespace Mantid
 {	
-  namespace DataHandling
+  namespace Geometry
   {
     /** @class ShapeFactory ShapeFactory.h DataHandling/ShapeFactory.h
 
@@ -66,39 +66,39 @@ namespace Mantid
       ~ShapeFactory() {}
 
       /// Creates a geometric object as specified in an instrument definition file
-      boost::shared_ptr<Geometry::Object> createShape(Poco::XML::Element* pElem);
+      boost::shared_ptr<Object> createShape(Poco::XML::Element* pElem);
 
     private:
 
       /// Parse XML 'sphere' element
-      std::string parseSphere(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseSphere(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'infinite-plane' element
-      std::string parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseInfinitePlane(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'infinite-cylinder' element
-      std::string parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseInfiniteCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'cylinder' element
-      std::string parseCylinder(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'cuboid' element
-      std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseCuboid(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'infinite-cone' element
-      std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseInfiniteCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'cone' element
-      std::string parseCone(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseCone(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'hexahedron' element
-      std::string parseHexahedron(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseHexahedron(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'torus' element
-      std::string parseTorus(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseTorus(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Parse XML 'slice-of-cylinder-ring' element
-      std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Geometry::Surface*>& prim, int& l_id);
+      std::string parseSliceOfCylinderRing(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id);
 
       /// Return a subelement of an XML element, but also checks that there exist exactly one entry of this subelement
       Poco::XML::Element* getShapeElement(Poco::XML::Element* pElem, const std::string& name);
@@ -107,10 +107,10 @@ namespace Mantid
       double getDoubleAttribute(Poco::XML::Element* pElem, const std::string& name);
 
       /// Parse any XML element containing position attributes and return as V3D
-      Geometry::V3D parsePosition(Poco::XML::Element* pElem);
+      V3D parsePosition(Poco::XML::Element* pElem);
 	
       /// create a special geometry handler for the known finite primitives
-      void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Geometry::Object>);
+      void createGeometryHandler(Poco::XML::Element*,boost::shared_ptr<Object>);
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;
