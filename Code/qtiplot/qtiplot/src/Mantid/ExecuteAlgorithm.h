@@ -13,7 +13,6 @@ class QString;
 class QComboBox;
 class QStringList;
 
-#include "MantidPythonAPI/PythonInterface.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Property.h"
 #include "MantidAPI/Algorithm.h"
