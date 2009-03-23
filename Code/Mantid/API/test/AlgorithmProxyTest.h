@@ -27,20 +27,23 @@ public:
   { 
       declareProperty("prop1","value");
       declareProperty("prop2",1);   
+      declareProperty("out",8,Direction::Output);
   }
   void exec() 
   {
+      std::string p1 = getProperty("prop1");
+      int p2 = getProperty("prop2");
+
       Poco::Thread::current()->sleep(200);
       progress(0.333,"Running");
       interruption_point();
       Algorithm* alg = dynamic_cast<Algorithm*>( this );
       TS_ASSERT( alg )
       
-      std::string p1 = getProperty("prop1");
-      int p2 = getProperty("prop2");
-
       TS_ASSERT_EQUALS( p1, "stuff" )
       TS_ASSERT_EQUALS( p2, 17 )
+
+      setProperty("out",28);
   }
   
 };
@@ -90,6 +93,8 @@ public:
         alg->setProperty("prop2",17);
         TS_ASSERT_THROWS_NOTHING( alg->execute() )
         TS_ASSERT( alg->isExecuted() )
+        int out = alg->getProperty("out");
+        TS_ASSERT_EQUALS(out,28)
     }
     void testRunning()
     {
@@ -114,11 +119,11 @@ public:
         Poco::ActiveResult<bool> res = alg->executeAsync();
         res.tryWait(100);
         alg->cancel();
-        res.tryWait(200);
-        TS_ASSERT( !alg->isRunning() )
-        TS_ASSERT( !alg->isRunningAsync() )
+        res.wait();
         TS_ASSERT( !alg->isExecuted() )
         TS_ASSERT( !res.data() )
+        int out = alg->getProperty("out");
+        TS_ASSERT_EQUALS(out,8)
     }
     void testAddObserver()
     {
@@ -134,6 +139,5 @@ public:
         TS_ASSERT( obs.finish )
     }
 };
- 
 
 #endif /*ALGORITHMPROXYTEST_H_*/
