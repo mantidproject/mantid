@@ -11,16 +11,15 @@
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    /** @class VectorHelper VectorHelper.h Kernel/VectorHelper.h
-
-
+namespace Kernel
+{
+/*
+    A collection of functions for use with vectors
 
     @author Laurent C Chapon, Rutherford Appleton Laboratory
     @date 16/12/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -39,38 +38,42 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
+ */
+  
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
-  /// Author Laurent Chapon 10/03/2009
-  /// Function to rebin Histogram.
+  // New method to rebin Histogram data, should be faster than previous one
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
           const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool add);
 
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
-
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {
   	SumGaussError(){}
-  		  inline T operator()(const T& l, const T& r) const
-  		  {
-  		  	return sqrt(l*l+r*r);
-  		  }
+  	/// Sums the arguments in quadrature
+  	inline T operator()(const T& l, const T& r) const
+  	{
+  	  return sqrt(l*l+r*r);
+  	}
   };
 
+  /// Functor to accumulate a sum of squares
   template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {
 	  SumSquares(){}
+	  /// Adds the square of the right-hand argument to the left hand one
 	  T operator()(const T& r, const T& x) const
 	  {
 		  return (r+x*x);
 	  }
   };
 
+  /// Functor giving the product of the squares of the arguments
   template <class T> struct TimesSquares: public std::binary_function<T,T,T>
 	{
 		TimesSquares(){}
+		/// Multiplies the squares of the arguments
 		T operator()(const T& l, const T& r) const
 		{
 			return (r*r*l*l);
@@ -81,6 +84,7 @@ namespace Mantid
   template <class T> struct Squares: public std::unary_function<T,T>
   {
     Squares(){}
+    /// Returns the square of the argument
     T operator()(const T& x) const
     {
   	  return (x*x);
@@ -91,16 +95,15 @@ namespace Mantid
   template <class T> struct DividesNonNull: public std::binary_function<T,T,T>
 	{
 		DividesNonNull(){}
+		/// Returns l/r if r is non-zero, otherwise returns l.
 		T operator()(const T& l, const T& r) const
 		{
-			if (std::fabs(r)<1e-12)
-			return l;
+			if (std::fabs(r)<1e-12) return l;
 			return l/r;
 		}
 	};
 
-
-  } // namespace Kernel
+} // namespace Kernel
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_VECTORHELPER_H_*/

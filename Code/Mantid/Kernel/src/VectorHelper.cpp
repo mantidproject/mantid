@@ -6,8 +6,20 @@
 #include <iostream>
 
 namespace Mantid{
-	namespace Kernel{
+namespace Kernel{
 
+/** Rebins data according to a new output X array
+ *
+ * @param xold - old x array of data
+ * @param xnew - new x array of data
+ * @param yold - old y array of data
+ * @param ynew - new y array of data
+ * @param eold - old error array of data
+ * @param enew - new error array of data
+ * @param distribution - flag defining if distribution data (1) or not (0)
+ * @throw runtime_error Thrown if algorithm cannot execute
+ * @throw invalid_argument Thrown if input to function is incorrect
+ **/
 void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
       const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
 {
@@ -106,9 +118,20 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
       }
       return; //without problems
     }
-/// New method to rebin Histogram data, should be faster than previous one
-///
- void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+
+/** Rebins histogram data according to a new output X array. Should be faster than previous one.
+ *  @author Laurent Chapon 10/03/2009
+ *
+ * @param xold - old x array of data
+ * @param xnew - new x array of data
+ * @param yold - old y array of data
+ * @param ynew - new y array of data
+ * @param eold - old error array of data
+ * @param enew - new error array of data
+ * @param addition - if true, rebinned values are added to the existing ynew/enew vectors
+ * @throw runtime_error Thrown if algorithm cannot execute
+ **/
+void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
     const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition)
 {
   int size_xold=xold.size();
@@ -198,8 +221,6 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
 	}
 		return;
 }
-
-
 
 } // End namespace Kernel
 } // End namespace Mantid

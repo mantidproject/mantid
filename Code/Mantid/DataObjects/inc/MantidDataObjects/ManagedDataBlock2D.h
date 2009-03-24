@@ -81,10 +81,6 @@ public:
   const std::vector<double>& dataY(const int index) const;
   const std::vector<double>& dataE(const int index) const;
   
-  const API::IErrorHelper* errorHelper(int const index) const;
-  void setErrorHelper(int const index,API::IErrorHelper* errorHelper);
-  void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
-  
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed
   /// Private copy constructor

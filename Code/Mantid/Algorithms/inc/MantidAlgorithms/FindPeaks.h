@@ -75,9 +75,6 @@ private:
 
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4);
 
-  /// Strip peaks method - living here until I can pass TableWorkspace as property
-  API::MatrixWorkspace_sptr removePeaks(const API::MatrixWorkspace_const_sptr &input);
-
   /// The number of smoothing iterations
   static int g_z;
   

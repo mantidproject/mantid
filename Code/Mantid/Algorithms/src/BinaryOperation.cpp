@@ -17,6 +17,13 @@ namespace Mantid
     // Get a reference to the logger
     Logger& BinaryOperation::g_log = Logger::get("BinaryOperation");
 
+    BinaryOperation::BinaryOperation() : API::Algorithm(), m_progress(NULL) {}
+    
+    BinaryOperation::~BinaryOperation()
+    {
+      if (m_progress) delete m_progress;
+    }
+    
     /** Initialisation method.
     * Defines input and output workspaces
     *
@@ -64,6 +71,9 @@ namespace Mantid
         out_work = WorkspaceFactory::Instance().create(lhs);
       }
 
+      // Initialise the progress reporting object
+      m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms(),100);
+      
       // There are now 4 possible scenarios, shown schematically here:
       // xxx x   xxx xxx   xxx xxx   xxx x
       // xxx   , xxx xxx , xxx     , xxx x
@@ -191,6 +201,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+        m_progress->report();
       }
     }
    
@@ -211,6 +222,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+        m_progress->report();
       }
     }
     
@@ -231,6 +243,7 @@ namespace Mantid
         const double rhsE = rhs->readE(i)[0];        
         
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
+        m_progress->report();
       }
     }
     
@@ -247,6 +260,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
+        m_progress->report();
       }      
     }
     

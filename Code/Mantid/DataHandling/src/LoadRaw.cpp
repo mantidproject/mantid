@@ -256,7 +256,6 @@ namespace Mantid
 
       localWorkspace->setX(hist, tcbs);
 
-      localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
       // NOTE: Raw numbers go straight into the workspace
       //     - no account taken of bin widths/units etc.

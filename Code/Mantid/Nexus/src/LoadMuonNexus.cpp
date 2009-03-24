@@ -303,7 +303,6 @@ namespace Mantid
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setData(hist, v, e);
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->setErrorHelper(hist,GaussianErrorHelper::Instance());
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
     }
 

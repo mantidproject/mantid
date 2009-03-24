@@ -4,7 +4,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/GaussianErrorHelper.h"
 #include "boost/shared_ptr.hpp"
 #include "MantidAPI/WorkspaceFactory.h"
 
@@ -35,13 +34,6 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual const std::vector<double>& dataE(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
-    ///Returns the ErrorHelper applicable for this spectra
-    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,IErrorHelper* errorHelper) {}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
-
 
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
@@ -77,13 +69,6 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual const std::vector<double>& dataE(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
-    ///Returns the ErrorHelper applicable for this spectra
-    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,IErrorHelper* errorHelper) {}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
-
 
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const

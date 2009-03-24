@@ -402,53 +402,5 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
 
 }
 
-/// Method copied temporarily from StripPeaks until I am able to pass the list of peaks out of this algorithm
-API::MatrixWorkspace_sptr FindPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input)
-{
-  g_log.information("Subtracting peaks");
-  // Create an output workspace - same size a input one
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
-  // Copy the data over from the input to the output workspace
-  const int hists = input->getNumberHistograms();
-  for (int k = 0; k < hists; ++k)
-  {
-    outputWS->dataX(k) = input->readX(k);
-    outputWS->dataY(k) = input->readY(k);
-    outputWS->dataE(k) = input->readE(k);
-  }
-
-  const bool isHistogramData = outputWS->isHistogramData();
-  // Loop over the list of peaks
-  for (int i = 0; i < m_peaks->rowCount(); ++i)
-  {
-    g_log.debug() << "Subtracting peak from spectrum " << m_peaks->getRef<int>("spectrum",i) << std::endl;
-    // Get references to the data
-    const std::vector<double> &X = outputWS->readX(m_peaks->getRef<int>("spectrum",i));
-    std::vector<double> &Y = outputWS->dataY(m_peaks->getRef<int>("spectrum",i));
-    // Get back the gaussian parameters
-    const double height = m_peaks->getRef<double>("height",i);
-    const double centre = m_peaks->getRef<double>("centre",i);
-    const double width = m_peaks->getRef<double>("width",i);
-    // Loop over the spectrum elements
-    const int spectrumLength = Y.size();
-    for (int j = 0; j < spectrumLength; ++j)
-    {
-      // If this is histogram data, we want to use the bin's central value
-      double x;
-      if (isHistogramData) x = 0.5*(X[j]+X[j+1]);
-        else x = X[j];
-      // Skip if not anywhere near this peak
-      if ( x < centre-3.0*width ) continue;
-      if ( x > centre+3.0*width ) break;
-      // Calculate the value of the Gaussian function at this point
-      const double funcVal = height*exp(-0.5*pow((x-centre)/width,2));
-      // Subtract the calculated value from the data
-      Y[j] -= funcVal;
-    }
-  }
-
-  return outputWS;
-}
-
 } // namespace Algorithms
 } // namespace Mantid

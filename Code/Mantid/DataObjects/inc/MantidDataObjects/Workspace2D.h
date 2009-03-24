@@ -96,13 +96,6 @@ public:
   /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const;
 
-  ///Returns the ErrorHelper applicable for this spectra
-  virtual const API::IErrorHelper* errorHelper(int const index) const;
-  ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper);
-  ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper);
-
 protected:
   /// The number of vectors in the workspace
   int m_noVectors;

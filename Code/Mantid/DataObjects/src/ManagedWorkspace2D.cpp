@@ -357,33 +357,6 @@ const std::vector<double>& ManagedWorkspace2D::dataE(const int index) const
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
 }
 
-///Returns the ErrorHelper applicable for this spectra
-const API::IErrorHelper* ManagedWorkspace2D::errorHelper(const int index) const
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::errorHelper, histogram number out of range");
-
-  return getDataBlock(index)->errorHelper(index);
-}
-
-///Sets the ErrorHelper for this spectra
-void ManagedWorkspace2D::setErrorHelper(const int index,API::IErrorHelper* errorHelper)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setErrorHelper, histogram number out of range");
-
-  getDataBlock(index)->setErrorHelper(index,errorHelper);
-}
-
-///Sets the ErrorHelper for this spectra
-void ManagedWorkspace2D::setErrorHelper(const int index,const API::IErrorHelper* errorHelper)
-{
-  if ( index<0 || index>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setErrorHelper, histogram number out of range");
-
-  getDataBlock(index)->setErrorHelper(index,errorHelper);
-}
-
 /** Returns the number of histograms.
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
 	  being virtual so it now just calls this private (and virtual) method which does the work.

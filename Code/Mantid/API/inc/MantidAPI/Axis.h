@@ -54,9 +54,9 @@ class DLLExport Axis
 {
 public:
 	#ifndef HAS_UNORDERED_MAP_H
-	typedef std::map<int,int> spec2index_map;
+    typedef std::map<int,int> spec2index_map; ///< The storage for the spectrum number to index map
 	#else
-	typedef std::tr1::unordered_map<int,int> spec2index_map;
+    typedef std::tr1::unordered_map<int,int> spec2index_map;
 	#endif
   Axis(const bool type, const int length);
   virtual ~Axis();
@@ -77,11 +77,11 @@ public:
 
   const int& spectraNo(const int index) const;
   int& spectraNo(const int index);
-  //< Get the length of the axis
+  /// Get the length of the axis
   int getLength() const;
-  //< Get a map that contains the spectra index as the key and the index in the array as teh value
+  /// Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&);
-  //< Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis
+  /// Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis
   bool operator==(const Axis&) const;
 
 protected:

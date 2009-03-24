@@ -92,8 +92,6 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../Algorithms/inc/MantidAlgorithms \
                          ../Algorithms/src \
                          ../UserAlgorithms \
-                         ../Services/inc \
-                         ../Services/src \
                          ../Geometry/inc/MantidGeometry \
                          ../Geometry/src \
                          ../CurveFitting/inc/MantidCurveFitting \

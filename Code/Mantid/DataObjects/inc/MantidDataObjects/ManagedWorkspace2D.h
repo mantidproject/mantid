@@ -133,10 +133,6 @@ public:
   virtual const std::vector<double>& dataY(int const index) const;
   virtual const std::vector<double>& dataE(int const index) const;
 
-  virtual const API::IErrorHelper* errorHelper(const int index) const;
-  virtual void setErrorHelper(const int index,API::IErrorHelper* errorHelper);
-  virtual void setErrorHelper(const int index,const API::IErrorHelper* errorHelper);
-
   long int getMemorySize() const;
 
 protected:

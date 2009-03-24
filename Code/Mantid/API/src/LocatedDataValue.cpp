@@ -1,5 +1,4 @@
 #include "MantidAPI/LocatedDataValue.h"
-#include "MantidAPI/IErrorHelper.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
@@ -14,7 +13,7 @@ namespace Mantid
     */
     LocatedDataValue::LocatedDataValue(const LocatedDataValue& A) : ILocatedData(),
       xValue(A.xValue),yValue(A.yValue),eValue(A.eValue),
-      errorHelper(A.errorHelper),x2Value(A.x2Value),_isHistogram(A._isHistogram)
+      x2Value(A.x2Value),_isHistogram(A._isHistogram)
     {}
 
     /*!
@@ -23,7 +22,6 @@ namespace Mantid
     */
     LocatedDataValue::LocatedDataValue(const ILocatedData& A) : ILocatedData(),
       xValue(A.X()),yValue(A.Y()),eValue(A.E()),
-      errorHelper(A.ErrorHelper()),
       x2Value(0),_isHistogram(A.isHistogram())
     {
       if (isHistogram())
@@ -34,8 +32,7 @@ namespace Mantid
 
     /// Default constructor
     LocatedDataValue::LocatedDataValue(): ILocatedData(),
-      xValue(0),yValue(0),eValue(0),
-      errorHelper(0),x2Value(0),_isHistogram(false)
+      xValue(0),yValue(0),eValue(0)
     {}
 
     /*!
@@ -51,7 +48,6 @@ namespace Mantid
         x2Value= A.x2Value;
         yValue= A.yValue;
         eValue= A.eValue;
-        errorHelper = A.errorHelper;
         _isHistogram = A._isHistogram;
       }
       return *this;
@@ -75,7 +71,6 @@ namespace Mantid
 
         yValue= A.Y();
         eValue= A.E();
-        errorHelper = A.ErrorHelper();
       }
       return *this;
     }
@@ -178,14 +173,6 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError("X2 value is not set, check isHistogram() before accessing X2","X2");
       }
-    }
-
-    /** Const Accessor for ErrorHelper class
-    @return Pointer to the ErrorHelper class
-    */
-    const IErrorHelper* LocatedDataValue::ErrorHelper() const
-    {
-      return errorHelper; 
     }
 
     /** Const Accessor for X value

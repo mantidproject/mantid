@@ -1,12 +1,11 @@
-#ifndef MANTID_KERNEL_ALGORITHM_H_
-#define MANTID_KERNEL_ALGORITHM_H_
+#ifndef MANTID_API_ALGORITHM_H_
+#define MANTID_API_ALGORITHM_H_
 
 /* Used to register classes into the factory. creates a global object in an
 * anonymous namespace. The object itself does nothing, but the comma operator
 * is used in the call to its constructor to effect a call to the factory's
 * subscribe method.
 */
-
 #define DECLARE_ALGORITHM(classname) \
 	namespace { \
 	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
@@ -46,8 +45,12 @@ namespace Mantid
 {
 namespace API
 {
-/** @class Algorithm Algorithm.h Kernel/Algorithm.h
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
+class AlgorithmProxy;
 
+/** 
  Base class from which all concrete algorithm classes should be derived.
  In order for a concrete algorithm class to do anything
  useful the methods init() & exec()  should be overridden.
@@ -68,7 +71,7 @@ namespace API
  @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 12/09/2007
 
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+ Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -88,9 +91,6 @@ namespace API
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
-class AlgorithmProxy;
-
 class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner
 {
 public:
@@ -99,17 +99,17 @@ public:
     class AlgorithmNotification: public Poco::Notification
     {
     public:
-        AlgorithmNotification(Algorithm* alg):Poco::Notification(),m_algorithm(alg){}///< Constructor
-        const IAlgorithm *algorithm()const{return m_algorithm;}                       ///< The algorithm
+        AlgorithmNotification(const Algorithm* const alg):Poco::Notification(),m_algorithm(alg){}///< Constructor
+        const IAlgorithm* algorithm() const {return m_algorithm;}                       ///< The algorithm
     private:
-        IAlgorithm *m_algorithm;///< The algorithm
+        const IAlgorithm* const m_algorithm;///< The algorithm
     };
 
     /// StartedNotification is sent when the algorithm begins execution.
     class StartedNotification: public AlgorithmNotification
     {
     public:
-        StartedNotification(Algorithm* alg):AlgorithmNotification(alg){}///< Constructor
+        StartedNotification(const Algorithm* const alg):AlgorithmNotification(alg){}///< Constructor
         virtual std::string name() const{return "StartedNotification";}///< class name
     };
 
@@ -117,7 +117,7 @@ public:
     class FinishedNotification: public AlgorithmNotification
     {
     public:
-        FinishedNotification(Algorithm* alg, bool res):AlgorithmNotification(alg),success(res){}///< Constructor
+        FinishedNotification(const Algorithm* const alg, bool res):AlgorithmNotification(alg),success(res){}///< Constructor
         virtual std::string name() const{return "FinishedNotification";}///< class name
         bool success;///< true if the finished algorithm was successful or false if it failed.
     };
@@ -127,7 +127,7 @@ public:
     class ProgressNotification: public AlgorithmNotification
     {
     public:
-        ProgressNotification(Algorithm* alg, double p,const std::string& msg):AlgorithmNotification(alg),progress(p),message(msg){}///< Constructor
+        ProgressNotification(const Algorithm* const alg, double p,const std::string& msg):AlgorithmNotification(alg),progress(p),message(msg){}///< Constructor
         virtual std::string name() const{return "ProgressNotification";}///< class name
         double progress;///< Current progress. Value must be between 0 and 1.
         std::string message;///< Message sent with notification
@@ -138,7 +138,7 @@ public:
     {
     public:
         /// Constructor
-        ErrorNotification(Algorithm* alg, const std::string& str):AlgorithmNotification(alg),what(str){}
+        ErrorNotification(const Algorithm* const alg, const std::string& str):AlgorithmNotification(alg),what(str){}
         virtual std::string name() const{return "ErrorNotification";}///< class name
         std::string what;///< message string
     };
@@ -185,11 +185,6 @@ public:
   bool execute();
   virtual bool isInitialized() const; // Protected in Gaudi version
   virtual bool isExecuted() const;
-  //virtual void setPropertyOrdinal(const int &index, const std::string &value);
-  //virtual void setPropertyValue(const std::string &name, const std::string &value);
-  //virtual void setProperties(const std::string& propertiesArray);
-  //virtual std::string getPropertyValue(const std::string &name) const;
-  //virtual const std::vector< Mantid::Kernel::Property* >& getProperties() const;
   // End of IAlgorithm methods
   using Kernel::PropertyManagerOwner::getProperty;
 
@@ -198,7 +193,7 @@ public:
   void setChild(const bool isChild);
 
   /// Asynchronous execution.
-  Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
+  Poco::ActiveResult<bool> executeAsync(){return m_executeAsync(0);}
 
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
@@ -248,7 +243,7 @@ protected:
 
 	///Observation slot for child algorithm progress notification messages, these are scaled and then signalled for this algorithm.
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
-  ///Child algoirthm progress observer
+  ///Child algorithm progress observer
 	Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
 
 private:
@@ -265,7 +260,7 @@ private:
   void algorithm_info() const;
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
-  Poco::ActiveMethod<bool, int, Algorithm> _executeAsync;
+  Poco::ActiveMethod<bool, int, Algorithm> m_executeAsync;
   /** executeAsync() implementation.
       @param i Unused argument
    */
@@ -295,4 +290,4 @@ typedef boost::shared_ptr<Algorithm> Algorithm_sptr;
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_ALGORITHM_H_*/
+#endif /*MANTID_API_ALGORITHM_H_*/

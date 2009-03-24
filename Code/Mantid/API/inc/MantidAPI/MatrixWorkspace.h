@@ -9,8 +9,6 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/IErrorHelper.h"
-#include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/ParameterMap.h"
 #include "MantidKernel/System.h"
@@ -22,7 +20,7 @@
 
 namespace Mantid
 {
-
+/// typedef for the data storage used in Mantid matrix workspaces
 typedef std::vector<double> MantidVec;
 
 namespace API
@@ -125,13 +123,6 @@ public:
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const = 0;
   //----------------------------------------------------------------------
-
-  /// Returns the ErrorHelper applicable for this spectra
-  virtual const IErrorHelper* errorHelper(int const index) const = 0;
-  /// Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) = 0;
-  /// Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) = 0;
 
   const int axes() const;
   Axis* const getAxis(const int axisIndex) const;

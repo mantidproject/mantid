@@ -6,13 +6,8 @@
 
 namespace Mantid
 {
-
 namespace API
 {
-
-  //forward declaration
-  class IErrorHelper;
-
 /**
   Interface ILocatedData describes a single data item of a point data dataset.
 

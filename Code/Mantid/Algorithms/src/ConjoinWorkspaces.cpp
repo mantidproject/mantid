@@ -70,7 +70,6 @@ void ConjoinWorkspaces::exec()
     output2D->dataY(outIndex) = ws1->readY(i);
     output2D->dataE(outIndex) = ws1->readE(i);
     outAxis->spectraNo(outIndex) = axis1->spectraNo(i);
-    output2D->setErrorHelper(outIndex,ws1->errorHelper(i));
   }
   const int& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
@@ -80,7 +79,6 @@ void ConjoinWorkspaces::exec()
     output2D->dataY(outIndex) = ws2->readY(j);
     output2D->dataE(outIndex) = ws2->readE(j);
     outAxis->spectraNo(outIndex) = axis2->spectraNo(j);
-    output2D->setErrorHelper(outIndex,ws2->errorHelper(j));
   }
 
   // Delete the input workspaces from the ADS

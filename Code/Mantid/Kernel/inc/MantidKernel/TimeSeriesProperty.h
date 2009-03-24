@@ -87,7 +87,7 @@ public:
     return ins.str();
 	}
 
-  /*  New method to return time series value pairs as std::vector<std::string>
+  /**  New method to return time series value pairs as std::vector<std::string>
    *
    * @return time series property values as a string vector "<time_t> value"
    */
@@ -108,7 +108,7 @@ public:
     return values;
   }
 
-  /*  Return the time series as a C++ map<dateAndTime, TYPE>
+  /**  Return the time series as a C++ map<dateAndTime, TYPE>
    *
    * @return time series property values as map
    */

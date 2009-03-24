@@ -101,7 +101,6 @@ namespace Mantid
         else
           localWorkspace->setData(counter, v, v);
         localWorkspace->setX(counter, x);
-        localWorkspace->setErrorHelper(counter,GaussianErrorHelper::Instance());
         localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
         ++counter;
       }

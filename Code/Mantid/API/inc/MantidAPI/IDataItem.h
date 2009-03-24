@@ -5,15 +5,10 @@
 
 namespace Mantid
 {
-
 namespace API
 {
-
-  //forward declaration
-  class IErrorHelper;
-
 /**
-  Interface IDataItem of a Y and error value, together with a pointer to an ErrorHelper.
+  Interface IDataItem of a Y and error value.
 
   \author N. Draper
     
@@ -41,7 +36,6 @@ class DLLExport IDataItem
   public:
   virtual const double& Y() const =0;                   ///< Returns the Y value
   virtual const double& E() const =0;                   ///< Returns the E value
-  virtual const IErrorHelper* ErrorHelper() const =0;   ///< Returns a pointer to the errorhelper
   
   virtual double& Y() =0;                               ///< Returns the Y value
   virtual double& E() =0;                               ///< Returns the E value

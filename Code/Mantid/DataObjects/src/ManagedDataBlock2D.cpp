@@ -289,37 +289,6 @@ const std::vector<double>& ManagedDataBlock2D::dataE(const int index) const
   return m_data[index-m_minIndex].dataE();
 }
 
-///Returns the ErrorHelper applicable for this spectra
-const API::IErrorHelper* ManagedDataBlock2D::errorHelper(int const index) const
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::errorHelper, histogram number out of range");
-
-  return m_data[index-m_minIndex].errorHelper();
-}
-
-///Sets the ErrorHelper for this spectra
-void ManagedDataBlock2D::setErrorHelper(int const index,API::IErrorHelper* errorHelper)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setErrorHelper, histogram number out of range");
-
-  m_data[index-m_minIndex].setErrorHelper(errorHelper);
-}
-
-///Sets the ErrorHelper for this spectra
-void ManagedDataBlock2D::setErrorHelper(int const index,const API::IErrorHelper* errorHelper)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setErrorHelper, histogram number out of range");
-
-  m_data[index-m_minIndex].setErrorHelper(errorHelper);
-}
-
-
 /** Output file stream operator.
  *  @param fs The stream to write to
  *  @param data The object to write to file

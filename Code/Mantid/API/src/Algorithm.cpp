@@ -20,7 +20,7 @@ Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
-  _executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+  m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
   m_algorithmID(0)
 {}
@@ -319,7 +319,7 @@ void Algorithm::setExecuted(bool state)
     @param p Reported progress,  must be between 0 (just started) and 1 (finished)
     @param msg Optional message string
  */
-void Algorithm::progress(double p, const std::string& msg )
+void Algorithm::progress(double p, const std::string& msg)
 {
     m_notificationCenter.postNotification(new ProgressNotification(this,p,msg));
 }

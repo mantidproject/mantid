@@ -1,5 +1,4 @@
 #include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/IErrorHelper.h"
 #include "MantidKernel/Exception.h"
 namespace Mantid
 {
@@ -12,14 +11,12 @@ namespace Mantid
     \param A :: LocatedDataRef Item to copy
     */
     LocatedDataRef::LocatedDataRef(const LocatedDataRef& A) : ILocatedData(),
-      xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer),
-      errorHelper(A.errorHelper)
+      xPointer(A.xPointer),x2Pointer(A.x2Pointer),yPointer(A.yPointer),ePointer(A.ePointer)
     {}
 
     /// Default constructor
     LocatedDataRef::LocatedDataRef(): ILocatedData(),
-      xPointer(0),x2Pointer(0),yPointer(0),ePointer(0),
-      errorHelper(0)
+      xPointer(0),x2Pointer(0),yPointer(0),ePointer(0)
     {}
 
     /*!
@@ -38,7 +35,6 @@ namespace Mantid
         {
           *x2Pointer= *A.x2Pointer;
         }
-        errorHelper = A.errorHelper;
       }
       return *this;
     }
@@ -59,7 +55,6 @@ namespace Mantid
         {
           *x2Pointer= A.X2();
         }
-        errorHelper = A.ErrorHelper();
       }
       return *this;
     }
@@ -129,14 +124,6 @@ namespace Mantid
     int LocatedDataRef::operator>(const LocatedDataRef& A) const
     {
       return !(this->operator<(A));
-    }
-
-    /** Const Accessor for ErrorHelper class
-    @return Pointer to the ErrorHelper class
-    */
-    const IErrorHelper* LocatedDataRef::ErrorHelper() const
-    {
-      return errorHelper; 
     }
 
     /** Const Accessor for X value

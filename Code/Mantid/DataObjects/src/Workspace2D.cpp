@@ -277,33 +277,6 @@ namespace Mantid
       return static_cast<const int>(data.size());
     }
 
-    ///Returns the ErrorHelper applicable for this spectra
-    const API::IErrorHelper* Workspace2D::errorHelper(int const index) const
-    {
-      if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::errorHelper, histogram number out of range");
-
-      return data[index].errorHelper();
-    }
-
-    ///Sets the ErrorHelper for this spectra
-    void Workspace2D::setErrorHelper(int const index,API::IErrorHelper* errorHelper)
-    {
-      if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::setErrorHelper, histogram number out of range");
-
-      data[index].setErrorHelper(errorHelper);
-    }
-
-    ///Sets the ErrorHelper for this spectra
-    void Workspace2D::setErrorHelper(int const index,const API::IErrorHelper* errorHelper)
-    {
-      if (index<0 || index>=m_noVectors)
-        throw std::range_error("Workspace2D::setErrorHelper, histogram number out of range");
-
-      data[index].setErrorHelper(errorHelper);
-    }
-
   } // namespace DataObjects
 } //NamespaceMantid
 

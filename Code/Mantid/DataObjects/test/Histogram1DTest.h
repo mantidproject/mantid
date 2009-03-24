@@ -6,7 +6,6 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/GaussianErrorHelper.h" 
 #include "MantidDataObjects/Histogram1D.h" 
 
 using Mantid::DataObjects::Histogram1D;
@@ -132,17 +131,6 @@ public:
     //pb=RCtype::(new std::vector<double>(nel+1));
     //TS_ASSERT_THROWS(h.setData(pa,pb),const std::invalid_argument&);
   }
-
-  void testErrorHelper()
-  {
-    //default should be Gaussian
-    TS_ASSERT_EQUALS(h.errorHelper(),Mantid::API::GaussianErrorHelper::Instance());
-    Mantid::API::IErrorHelper* newPtr = 0;
-    h.setErrorHelper(newPtr);
-    TS_ASSERT_EQUALS(h.errorHelper(),newPtr);
-  }
-
-
 
 };
 #endif /*TESTHISTOGRAM1D_*/

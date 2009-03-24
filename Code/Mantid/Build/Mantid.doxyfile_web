@@ -525,8 +525,6 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../Nexus/src \
                          ../Algorithms/inc/MantidAlgorithms \
                          ../Algorithms/src \
-                         ../Services/inc \
-                         ../Services/src \
                          ../Geometry/inc/MantidGeometry \
                          ../Geometry/src \
                          ../CurveFitting/inc/MantidCurveFitting \

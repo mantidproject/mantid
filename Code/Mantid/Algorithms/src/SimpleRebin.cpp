@@ -67,14 +67,6 @@ namespace Mantid
       if (progress_step == 0) progress_step = 1;
       for (int hist=0; hist <  histnumber;++hist)
       {
-        const API::IErrorHelper* e_ptr= inputW->errorHelper(hist);
-        if(dynamic_cast<const API::GaussianErrorHelper*>(e_ptr) ==0)
-        {
-          g_log.error("Can only rebin Gaussian data");
-          throw std::invalid_argument("Invalid input Workspace");
-        }
-
-
         // get const references to input Workspace arrays (no copying)
         const std::vector<double>& XValues = inputW->readX(hist);
         const std::vector<double>& YValues = inputW->readY(hist);
@@ -101,7 +93,6 @@ namespace Mantid
         } catch (Exception::IndexError) {
           // OK, so this isn't a Workspace2D
         }
-        outputW->setErrorHelper(hist,inputW->errorHelper(hist));
         if (hist % progress_step == 0)
         {
             progress(double(hist)/histnumber);

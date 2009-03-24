@@ -54,9 +54,9 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      BinaryOperation() : API::Algorithm() {};
+      BinaryOperation();
       /// Destructor
-      virtual ~BinaryOperation() {};
+      virtual ~BinaryOperation();
 
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Arithmetic";}
@@ -109,42 +109,9 @@ namespace Mantid
       void doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
             
-      friend class BinaryOperation_fn;
-      /// Abstract internal class providing the binary function
-      class BinaryOperation_fn : public std::binary_function<API::LocatedDataRef,API::LocatedDataRef,API::LocatedDataRef >
-      {
-      public:
-        /// Constructor
-        BinaryOperation_fn(BinaryOperation* op,int count):m_count(count),m_progress(0),m_progress_step(count/100),m_op(op)
-        { if (m_progress_step == 0) m_progress_step = 1; }
-        /// Virtual destructor
-        virtual ~BinaryOperation_fn()
-        { }
-        /** Abstract function that performs each element of the binary function
-        * @param a The lhs data element
-        * @param b The rhs data element
-        * @returns The result data element
-        */
-        virtual API::LocatedDataValue& operator()(const API::ILocatedData& a,const API::ILocatedData& b) = 0;
-      protected:
-        /**Temporary cache of the Histogram Result.
-        This save creating a new object for each iteration and removes lifetime issues.
-        */
-        API::LocatedDataValue result;
-        int m_count;         ///< Total number of individual operations.
-        int m_progress;      ///< Number of performed operations;
-        int m_progress_step; ///< Call progerss(...) every m_progress_step operations.
-        BinaryOperation *m_op; ///< BinaryOperation
-        /// Reports algorithm progress from operator()
-        void report_progress(){m_op->report_progress(double(m_progress)/m_count);}
-      };
-      /// Gives access to Algorithm's protected methods
-      void report_progress(double p)
-      {
-          progress(p);
-          interruption_point();
-      }
-    private:
+      /// Progress reporting
+      API::Progress* m_progress;
+      
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };

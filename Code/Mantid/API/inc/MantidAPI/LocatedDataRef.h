@@ -6,13 +6,8 @@
 
 namespace Mantid
 {
-
 namespace API
 {
-
-  //forward declaration
-  class IErrorHelper;
-
 /**
   The LocatedDataRef class holds references to all of the data required to describe a single data item of a point dataset.
   All of the data items are held as pointers to data owned by classes other than itself.  
@@ -44,7 +39,6 @@ namespace API
   public:
   const double& X() const;
   const double& E() const;
-  const IErrorHelper* ErrorHelper() const;
 
   double& X();
   double& E();
@@ -57,12 +51,10 @@ namespace API
 
   const bool isHistogram() const; ///<Returns true if the data point is hastogram data and therefore has an X2.
 
-
   double* xPointer;        ///< Pointer to the value of X
   double* x2Pointer;        ///< Pointer to the value of X
   double* yPointer;        ///< Pointer to the value of Y
   double* ePointer;        ///< Pointer to the value of E
-  const IErrorHelper* errorHelper;  ///< Pointer to the relevant ErrorHelper
 
   LocatedDataRef* clone() const;
 

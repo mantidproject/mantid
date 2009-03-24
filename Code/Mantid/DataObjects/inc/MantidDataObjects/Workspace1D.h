@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_WORKSPACE1D_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IErrorHelper.h"
 #include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
@@ -92,13 +91,6 @@ public:
   virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
-
-  ///Returns the ErrorHelper applicable for this detector
-  virtual const API::IErrorHelper* errorHelper(int const index) const { return Histogram1D::errorHelper(); }
-  ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
-   ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) { Histogram1D::setErrorHelper(errorHelper); }
 
 private:
   /// Private copy constructor. NO COPY ALLOWED

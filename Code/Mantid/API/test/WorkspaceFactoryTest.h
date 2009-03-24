@@ -7,7 +7,6 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/GaussianErrorHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MemoryManager.h"
 
@@ -20,7 +19,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class WorkspaceTest: public MatrixWorkspace
   {
   public:
-	virtual const int getNumberHistograms() const { return 1;}
+    virtual const int getNumberHistograms() const { return 1;}
 
     WorkspaceTest() : data(std::vector<double>(1,1)) {}
     virtual const std::string id() const {return "WorkspaceTest";}
@@ -40,22 +39,13 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual const std::vector<double>& dataE(int const index)const {return data;}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
-    ///Returns the ErrorHelper applicable for this spectra
-    virtual const IErrorHelper* errorHelper(int const index) const { return GaussianErrorHelper::Instance();}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,IErrorHelper* errorHelper) {}
-    ///Sets the ErrorHelper for this spectra
-    virtual void setErrorHelper(int const index,const IErrorHelper* errorHelper) {}
-
-
-  //Methods for getting data via python. Do not use for anything else!
-  ///Returns the x data const
-  virtual const std::vector<double>& getX(int const index) const {return data;}
-  ///Returns the y data const
-  virtual const std::vector<double>& getY(int const index) const {return data;}
-  ///Returns the error const
-  virtual const std::vector<double>& getE(int const index) const {return data;}
-
+    //Methods for getting data via python. Do not use for anything else!
+    ///Returns the x data const
+    virtual const std::vector<double>& getX(int const index) const {return data;}
+    ///Returns the y data const
+    virtual const std::vector<double>& getY(int const index) const {return data;}
+    ///Returns the error const
+    virtual const std::vector<double>& getE(int const index) const {return data;}
 
   private:
     std::vector<double> data;

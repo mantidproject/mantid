@@ -35,9 +35,6 @@ public:
   const std::vector<double>& dataX(int const index) const {return vec;}
   const std::vector<double>& dataY(int const index) const {return vec;}
   const std::vector<double>& dataE(int const index) const {return vec;}
-  const IErrorHelper* errorHelper(int const index) const {return NULL;}
-  void setErrorHelper(int const,IErrorHelper*) {}
-  void setErrorHelper(int const,const IErrorHelper*) {}
 
 private:
   std::vector<double> vec;

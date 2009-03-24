@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IErrorHelper.h"
 
 namespace Mantid
 {
@@ -101,19 +100,6 @@ public:
   /// Returns the error data const
   virtual const std::vector<double>& dataE() const { return _E; }
 
-  ///Returns the ErrorHelper applicable for this detector
-  virtual const API::IErrorHelper* errorHelper(int const index) const { return _ErrorHelper; }
-  ///Returns the ErrorHelper applicable for this detector
-  virtual const API::IErrorHelper* errorHelper() const { return _ErrorHelper; }
-  ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,API::IErrorHelper* errorHelper) { _ErrorHelper=errorHelper; }
-   ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(int const index,const API::IErrorHelper* errorHelper) { _ErrorHelper=const_cast<API::IErrorHelper*>(errorHelper); }
-  ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(API::IErrorHelper* errorHelper) { _ErrorHelper=errorHelper; }
-   ///Sets the ErrorHelper for this spectra
-  virtual void setErrorHelper(const API::IErrorHelper* errorHelper) { _ErrorHelper=const_cast<API::IErrorHelper*>(errorHelper); }
-
 private:
   /// Private copy constructor. NO COPY ALLOWED
   WorkspaceSingleValue(const WorkspaceSingleValue&);
@@ -129,9 +115,6 @@ private:
   std::vector<double> _Y;
   ///Internal cache of E data
   std::vector<double> _E;
-
-  ///Internal cache of applicable errorhelper
-  API::IErrorHelper* _ErrorHelper;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

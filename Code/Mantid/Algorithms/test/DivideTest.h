@@ -314,7 +314,6 @@ private:
       double err1 = work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double err2 = work_in2->dataE(ws2Index/work_in2->blocksize())[ws2Index%work_in2->blocksize()];
       double err3(sig3 * sqrt(((err1/sig1)*(err1/sig1)) + ((err2/sig2)*(err2/sig2))));
-      if ( err1 < 1.0e-7 ) err3 = 0.0;
       TS_ASSERT_DELTA(err3, work_out1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()], 0.0001);
   }
 

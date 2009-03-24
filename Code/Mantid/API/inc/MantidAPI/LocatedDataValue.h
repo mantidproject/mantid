@@ -6,13 +6,8 @@
 
 namespace Mantid
 {
-
   namespace API
   {
-
-    //forward declaration
-    class IErrorHelper;
-
     /**
     IDataItem of a Y and error value, together with a pointer to an ErrorHelper.
     
@@ -43,7 +38,6 @@ namespace Mantid
 
       const double& X() const;
       const double& E() const;
-      const IErrorHelper* ErrorHelper() const;
 
       double& X();
       double& E();
@@ -54,7 +48,6 @@ namespace Mantid
       double xValue;        ///< value of X
       double yValue;        ///< value of Y
       double eValue;        ///< value of E
-      const IErrorHelper* errorHelper; ///< Pointer to the approriate error helper
 
       const double& X2() const;
       double& X2();

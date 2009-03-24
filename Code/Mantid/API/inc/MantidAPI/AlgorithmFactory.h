@@ -97,6 +97,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 	  
     void addPyAlgorithm(Algorithm* pyAlg);
     void executePythonAlg(std::string algName);
+    /// Gives the number of registered Python algorithms
     int numPythonAlgs() const { return pythonAlgs.size();}
 
   private:

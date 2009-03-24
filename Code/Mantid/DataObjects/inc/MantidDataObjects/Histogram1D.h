@@ -8,12 +8,6 @@
 
 namespace Mantid
 {
-	
-namespace API
-{
-	class IErrorHelper;
-}
-	
 namespace DataObjects
 {
 /**
@@ -55,7 +49,6 @@ private:
   RCtype refX;   ///< RefCounted X
   RCtype refY;   ///< RefCounted Y
   RCtype refE;   ///< RefCounted Error
-  const API::IErrorHelper* _errorHelper; ///<pointer to the error helper class for this spectra
 
 public:
   Histogram1D();
@@ -116,14 +109,6 @@ public:
   /// Gets the memory size of the histogram
   long int getMemorySize() const 
     { return (refX->size()+refY->size()+refE->size())*sizeof(double); }
-
-  ///sets the ErrorHelper applicable for this detector
-  void setErrorHelper(const API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
-  ///sets the ErrorHelper applicable for this detector
-  void setErrorHelper(API::IErrorHelper* errorHelper) { _errorHelper = errorHelper; }
-  ///Returns the ErrorHelper applicable for this detector
-  const API::IErrorHelper* errorHelper() const { return _errorHelper; }
-
 };
 
 } // namespace DataObjects
