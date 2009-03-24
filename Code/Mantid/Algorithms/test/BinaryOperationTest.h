@@ -39,8 +39,6 @@ private:
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                               const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
   {}
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 class BinaryOperationTest : public CxxTest::TestSuite
@@ -97,23 +95,6 @@ public:
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
     TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
-  }
-
-  void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
-  {
-    int targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
-    TS_ASSERT_EQUALS(ws->size(),targetsize);
-    //check they arre all 0
-    for(MatrixWorkspace::iterator ti(*ws); ti != ti.end(); ++ti)
-    {
-      TS_ASSERT_THROWS_NOTHING
-      (
-        LocatedDataRef tr = *ti;
-        TS_ASSERT_DELTA(tr.X(),0,0.0001);
-        TS_ASSERT_DELTA(tr.Y(),0,0.0001);
-        TS_ASSERT_DELTA(tr.E(),0,0.0001);
-      )
-    }
   }
 
 };

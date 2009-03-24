@@ -1,9 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
-#include "MantidAPI/WorkspaceIterator.h"
 
 namespace Mantid
 {

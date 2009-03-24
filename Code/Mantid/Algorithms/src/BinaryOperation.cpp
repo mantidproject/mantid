@@ -1,11 +1,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <cmath>
-#include <sstream>
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceIterator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

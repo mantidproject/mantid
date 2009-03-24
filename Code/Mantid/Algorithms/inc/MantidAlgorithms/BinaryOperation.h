@@ -4,28 +4,22 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include <algorithm>
-//#include <functional>
-//#include <iterator>
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/LocatedDataValue.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
     /** 
-    BinaryOperation supports the implmentation of a binary operation on two input workspaces.
+    BinaryOperation supports the implementation of a binary operation on two input workspaces.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace1 - The name of the workspace </LI>
-    <LI> InputWorkspace2 - The name of the workspace </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the difference data </LI>
+    <LI> InputWorkspace1 - The name of the workspace forming the left hand operand</LI>
+    <LI> InputWorkspace2 - The name of the workspace forming the right hand operand </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     </UL>
 
     @author Nick Draper
