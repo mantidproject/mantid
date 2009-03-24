@@ -31,6 +31,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
 {
 }
 
+///Destructor
 SANSRunWindow::~SANSRunWindow()
 {
   saveSettings();
@@ -107,7 +108,6 @@ void SANSRunWindow::readSettings()
  */
 void SANSRunWindow::saveSettings()
 {
-  std::cerr << "saveSettings called\n";
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces");
   value_store.beginGroup("SANSRunWindow");

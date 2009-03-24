@@ -182,7 +182,6 @@ void SANSPlotDialog::plotButtonClicked()
       }
     }
   }
-  QMessageBox::information(this, "", py_code);
   if( !py_code.isEmpty() ) 
   {
     emit pythonCodeConstructed(py_code);

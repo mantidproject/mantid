@@ -19,5 +19,5 @@ QMAKE_CLEAN += ./lib/* $$MANTIDQTINCLUDES/MantidQtAPI/*.h \
 }
 win32 {
 QMAKE_CLEAN += lib\*.lib lib\*.dll lib\*.dll.manifest "$$MANTIDQTINCLUDES"\MantidQtAPI\*.h \
-               "$$MANTIDQTINCLUDES"\MantidQtCustomDialogs\*.h qtbuild\MantidQt\sip*
+               "$$MANTIDQTINCLUDES"\MantidQtCustomDialogs\*.h "$$MANTIDQTINCLUDES"\MantidQtCustomInterfaces\*.h qtbuild\MantidQt\sip*
 }

@@ -845,7 +845,7 @@
        <x>7</x>
        <y>8</y>
        <width>485</width>
-       <height>194</height>
+       <height>170</height>
       </rect>
      </property>
      <property name="title" >
@@ -907,16 +907,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="0" column="1" >
-       <widget class="QLabel" name="label_13" >
-        <property name="text" >
-         <string>Min</string>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
       </item>
       <item row="0" column="2" >
        <spacer name="horizontalSpacer_3" >
@@ -1035,7 +1025,42 @@
         </item>
        </widget>
       </item>
+      <item row="0" column="1" >
+       <widget class="QLabel" name="label_13" >
+        <property name="text" >
+         <string>Min</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
      </layout>
+     <zorder>label_3</zorder>
+     <zorder>label_16</zorder>
+     <zorder>label_19</zorder>
+     <zorder>label_21</zorder>
+     <zorder>rad_min</zorder>
+     <zorder>wav_min</zorder>
+     <zorder>q_min</zorder>
+     <zorder>qy_min</zorder>
+     <zorder>rad_max</zorder>
+     <zorder>label_23</zorder>
+     <zorder>wav_max</zorder>
+     <zorder>q_max</zorder>
+     <zorder>qy_max</zorder>
+     <zorder>rad_step_lbl</zorder>
+     <zorder>wav_step_lbl</zorder>
+     <zorder>q_step_lbl</zorder>
+     <zorder>qy_step_lbl</zorder>
+     <zorder>rad_dr</zorder>
+     <zorder>wav_dw</zorder>
+     <zorder>q_dq</zorder>
+     <zorder>qy_dqy</zorder>
+     <zorder>wav_dw_opt</zorder>
+     <zorder>q_dq_opt</zorder>
+     <zorder>qy_dqy_opt</zorder>
+     <zorder>label_13</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox_5" >
      <property name="geometry" >
@@ -1146,8 +1171,8 @@
     <widget class="QGroupBox" name="groupBox_7" >
      <property name="geometry" >
       <rect>
-       <x>55</x>
-       <y>217</y>
+       <x>58</x>
+       <y>196</y>
        <width>128</width>
        <height>74</height>
       </rect>
@@ -1203,8 +1228,8 @@
     <widget class="QGroupBox" name="groupBox_8" >
      <property name="geometry" >
       <rect>
-       <x>211</x>
-       <y>217</y>
+       <x>255</x>
+       <y>197</y>
        <width>147</width>
        <height>75</height>
       </rect>
