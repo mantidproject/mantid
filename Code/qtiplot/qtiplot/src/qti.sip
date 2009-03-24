@@ -1743,7 +1743,7 @@ sipTypeDef *t;
 %End
 
 public:  
-  MultiLayer* plotSpectrum(const QString&,int,bool = false);
+  MultiLayer* plotSpectrum(const QString&,int,bool = true,bool = false);
   MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotTimeBin(const QString&,int,bool = false);  
   MantidMatrix* newMantidMatrix(const QString&, int=-1, int=-1);

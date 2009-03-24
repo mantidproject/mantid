@@ -456,7 +456,7 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool showDlg, bool 
             t->setText(j,i,QString::fromStdString(ostr.str()));
         }
     }
-
+    return t;
 }
 
 void MantidUI::plotFirstSpectrum()
@@ -1006,7 +1006,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
 // In Python scripts we don't click and import a matrix so that we can plot
 // spectra from it so this command does an import of a workspace and then plots
 // the requested spectrum
-MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMatrix)
+MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlot, bool showMatrix)
 {
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
@@ -1026,7 +1026,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showMat
   if (!ml) return NULL;
 
   m->setSpectrumGraph(ml,t);
-
+  if( !showPlot ) ml->setVisible(false);
   return ml;
 }
 

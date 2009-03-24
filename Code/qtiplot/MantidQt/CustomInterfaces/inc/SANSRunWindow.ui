@@ -5,36 +5,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1002</width>
-    <height>581</height>
+    <width>806</width>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>SANS</string>
   </property>
-  <widget class="QPushButton" name="hideBtn" >
-   <property name="geometry" >
-    <rect>
-     <x>909</x>
-     <y>527</y>
-     <width>80</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Hide</string>
-   </property>
-   <property name="autoDefault" >
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QTabWidget" name="tabWidget" >
    <property name="geometry" >
     <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>970</width>
-     <height>472</height>
+     <x>12</x>
+     <y>33</y>
+     <width>781</width>
+     <height>346</height>
     </rect>
    </property>
    <property name="autoFillBackground" >
@@ -46,6 +30,12 @@
    <property name="currentIndex" >
     <number>0</number>
    </property>
+   <property name="elideMode" >
+    <enum>Qt::ElideNone</enum>
+   </property>
+   <property name="usesScrollButtons" >
+    <bool>true</bool>
+   </property>
    <widget class="QWidget" name="tab" >
     <attribute name="title" >
      <string>Run Numbers</string>
@@ -53,9 +43,9 @@
     <widget class="QLineEdit" name="userfile_edit" >
      <property name="geometry" >
       <rect>
-       <x>710</x>
-       <y>10</y>
-       <width>154</width>
+       <x>468</x>
+       <y>11</y>
+       <width>204</width>
        <height>28</height>
       </rect>
      </property>
@@ -63,8 +53,8 @@
     <widget class="QPushButton" name="userfileBtn" >
      <property name="geometry" >
       <rect>
-       <x>870</x>
-       <y>10</y>
+       <x>680</x>
+       <y>11</y>
        <width>80</width>
        <height>28</height>
       </rect>
@@ -81,7 +71,7 @@
       <rect>
        <x>98</x>
        <y>9</y>
-       <width>154</width>
+       <width>183</width>
        <height>28</height>
       </rect>
      </property>
@@ -102,7 +92,7 @@
     <widget class="QPushButton" name="data_dirBtn" >
      <property name="geometry" >
       <rect>
-       <x>266</x>
+       <x>288</x>
        <y>9</y>
        <width>80</width>
        <height>28</height>
@@ -118,8 +108,8 @@
     <widget class="QLabel" name="label_11" >
      <property name="geometry" >
       <rect>
-       <x>657</x>
-       <y>15</y>
+       <x>419</x>
+       <y>17</y>
        <width>52</width>
        <height>18</height>
       </rect>
@@ -131,10 +121,10 @@
     <widget class="QGroupBox" name="groupBox" >
      <property name="geometry" >
       <rect>
-       <x>30</x>
-       <y>60</y>
-       <width>282</width>
-       <height>214</height>
+       <x>20</x>
+       <y>61</y>
+       <width>228</width>
+       <height>191</height>
       </rect>
      </property>
      <property name="title" >
@@ -145,7 +135,7 @@
        <rect>
         <x>3</x>
         <y>32</y>
-        <width>275</width>
+        <width>215</width>
         <height>37</height>
        </rect>
       </property>
@@ -211,8 +201,8 @@
      <widget class="QLabel" name="label" >
       <property name="geometry" >
        <rect>
-        <x>207</x>
-        <y>15</y>
+        <x>159</x>
+        <y>13</y>
         <width>42</width>
         <height>18</height>
        </rect>
@@ -226,7 +216,7 @@
        <rect>
         <x>4</x>
         <y>86</y>
-        <width>275</width>
+        <width>215</width>
         <height>37</height>
        </rect>
       </property>
@@ -294,7 +284,7 @@
        <rect>
         <x>3</x>
         <y>141</y>
-        <width>275</width>
+        <width>216</width>
         <height>37</height>
        </rect>
       </property>
@@ -361,10 +351,10 @@
     <widget class="QGroupBox" name="groupBox_2" >
      <property name="geometry" >
       <rect>
-       <x>350</x>
+       <x>271</x>
        <y>60</y>
-       <width>282</width>
-       <height>214</height>
+       <width>224</width>
+       <height>190</height>
       </rect>
      </property>
      <property name="title" >
@@ -375,7 +365,7 @@
        <rect>
         <x>3</x>
         <y>32</y>
-        <width>275</width>
+        <width>210</width>
         <height>37</height>
        </rect>
       </property>
@@ -441,8 +431,8 @@
      <widget class="QLabel" name="label_6" >
       <property name="geometry" >
        <rect>
-        <x>207</x>
-        <y>15</y>
+        <x>154</x>
+        <y>12</y>
         <width>42</width>
         <height>18</height>
        </rect>
@@ -456,7 +446,7 @@
        <rect>
         <x>4</x>
         <y>86</y>
-        <width>275</width>
+        <width>210</width>
         <height>37</height>
        </rect>
       </property>
@@ -524,7 +514,7 @@
        <rect>
         <x>3</x>
         <y>141</y>
-        <width>275</width>
+        <width>211</width>
         <height>37</height>
        </rect>
       </property>
@@ -591,10 +581,10 @@
     <widget class="QGroupBox" name="groupBox_3" >
      <property name="geometry" >
       <rect>
-       <x>670</x>
+       <x>522</x>
        <y>60</y>
-       <width>282</width>
-       <height>214</height>
+       <width>232</width>
+       <height>191</height>
       </rect>
      </property>
      <property name="title" >
@@ -605,7 +595,7 @@
        <rect>
         <x>3</x>
         <y>32</y>
-        <width>275</width>
+        <width>216</width>
         <height>37</height>
        </rect>
       </property>
@@ -671,8 +661,8 @@
      <widget class="QLabel" name="label_10" >
       <property name="geometry" >
        <rect>
-        <x>207</x>
-        <y>15</y>
+        <x>160</x>
+        <y>14</y>
         <width>42</width>
         <height>18</height>
        </rect>
@@ -686,7 +676,7 @@
        <rect>
         <x>4</x>
         <y>86</y>
-        <width>275</width>
+        <width>215</width>
         <height>37</height>
        </rect>
       </property>
@@ -754,7 +744,7 @@
        <rect>
         <x>3</x>
         <y>141</y>
-        <width>275</width>
+        <width>218</width>
         <height>37</height>
        </rect>
       </property>
@@ -818,25 +808,461 @@
       </layout>
      </widget>
     </widget>
-    <widget class="QPushButton" name="load_dataBtn" >
+    <widget class="QWidget" name="gridLayoutWidget" >
      <property name="geometry" >
       <rect>
-       <x>30</x>
-       <y>292</y>
-       <width>80</width>
-       <height>28</height>
+       <x>24</x>
+       <y>271</y>
+       <width>168</width>
+       <height>33</height>
       </rect>
      </property>
-     <property name="text" >
-      <string>Load Data</string>
-     </property>
+     <layout class="QGridLayout" name="gridLayout" >
+      <item row="0" column="0" >
+       <widget class="QPushButton" name="load_dataBtn" >
+        <property name="text" >
+         <string>Load Data</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QPushButton" name="plotBtn" >
+        <property name="text" >
+         <string>Plot</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2" >
     <attribute name="title" >
      <string>Instrument Details</string>
     </attribute>
+    <widget class="QGroupBox" name="groupBox_4" >
+     <property name="geometry" >
+      <rect>
+       <x>7</x>
+       <y>8</y>
+       <width>485</width>
+       <height>194</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Limits</string>
+     </property>
+     <property name="checkable" >
+      <bool>false</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4" >
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_3" >
+        <property name="text" >
+         <string>Radius(mm)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="label_16" >
+        <property name="text" >
+         <string>Wavelength(Angstroms)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QLabel" name="label_19" >
+        <property name="text" >
+         <string>Q(Angstroms^-1)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" >
+       <widget class="QLabel" name="label_21" >
+        <property name="text" >
+         <string>Qy(Angstroms^-1)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="rad_min" />
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="wav_min" />
+      </item>
+      <item row="3" column="1" >
+       <widget class="QLineEdit" name="q_min" />
+      </item>
+      <item row="4" column="1" >
+       <widget class="QLineEdit" name="qy_min" />
+      </item>
+      <item row="0" column="0" >
+       <spacer name="horizontalSpacer_2" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLabel" name="label_13" >
+        <property name="text" >
+         <string>Min</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <spacer name="horizontalSpacer_3" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="3" >
+       <widget class="QLineEdit" name="rad_max" />
+      </item>
+      <item row="0" column="3" >
+       <widget class="QLabel" name="label_23" >
+        <property name="text" >
+         <string>Max</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3" >
+       <widget class="QLineEdit" name="wav_max" />
+      </item>
+      <item row="3" column="3" >
+       <widget class="QLineEdit" name="q_max" />
+      </item>
+      <item row="4" column="3" >
+       <widget class="QLineEdit" name="qy_max" />
+      </item>
+      <item row="1" column="4" >
+       <widget class="QLabel" name="rad_step_lbl" >
+        <property name="text" >
+         <string>stepping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4" >
+       <widget class="QLabel" name="wav_step_lbl" >
+        <property name="text" >
+         <string>stepping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="4" >
+       <widget class="QLabel" name="q_step_lbl" >
+        <property name="text" >
+         <string>stepping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="4" >
+       <widget class="QLabel" name="qy_step_lbl" >
+        <property name="text" >
+         <string>stepping</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="5" >
+       <widget class="QLineEdit" name="rad_dr" />
+      </item>
+      <item row="2" column="5" >
+       <widget class="QLineEdit" name="wav_dw" />
+      </item>
+      <item row="3" column="5" >
+       <widget class="QLineEdit" name="q_dq" />
+      </item>
+      <item row="4" column="5" >
+       <widget class="QLineEdit" name="qy_dqy" />
+      </item>
+      <item row="2" column="6" >
+       <widget class="QComboBox" name="wav_dw_opt" >
+        <item>
+         <property name="text" >
+          <string>Linear</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Logarithmic</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="6" >
+       <widget class="QComboBox" name="q_dq_opt" >
+        <item>
+         <property name="text" >
+          <string>Linear</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Logarithmic</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="6" >
+       <widget class="QComboBox" name="qy_dqy_opt" >
+        <item>
+         <property name="text" >
+          <string>Linear</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Logarithmic</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_5" >
+     <property name="geometry" >
+      <rect>
+       <x>515</x>
+       <y>14</y>
+       <width>222</width>
+       <height>122</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Spectra Details</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3" >
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="spec_min" />
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLabel" name="label_5" >
+        <property name="text" >
+         <string>Min</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2" >
+       <widget class="QLabel" name="label_9" >
+        <property name="text" >
+         <string>Max</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" >
+       <widget class="QLineEdit" name="spec_max" />
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_22" >
+        <property name="text" >
+         <string>Spectra Nos</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="label_24" >
+        <property name="text" >
+         <string>T-O-F</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="tof_min" />
+      </item>
+      <item row="2" column="2" >
+       <widget class="QLineEdit" name="tof_max" />
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_6" >
+     <property name="geometry" >
+      <rect>
+       <x>506</x>
+       <y>158</y>
+       <width>264</width>
+       <height>142</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Efficiency correction</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2" >
+      <item row="0" column="1" >
+       <widget class="QLineEdit" name="direct_file" />
+      </item>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="label_27" >
+        <property name="text" >
+         <string>Direct</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="label_28" >
+        <property name="text" >
+         <string>HAB</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="label_29" >
+        <property name="text" >
+         <string>Flat</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QLineEdit" name="flat_file" />
+      </item>
+      <item row="1" column="1" >
+       <widget class="QLineEdit" name="hab_file" />
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_7" >
+     <property name="geometry" >
+      <rect>
+       <x>55</x>
+       <y>217</y>
+       <width>128</width>
+       <height>74</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Beam Centre</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout" >
+      <item>
+       <widget class="QLabel" name="label_30" >
+        <property name="font" >
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text" >
+         <string>(</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_18" />
+      </item>
+      <item>
+       <widget class="QLabel" name="label_31" >
+        <property name="font" >
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text" >
+         <string>,</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEdit_19" />
+      </item>
+      <item>
+       <widget class="QLabel" name="label_32" >
+        <property name="font" >
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text" >
+         <string>)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_8" >
+     <property name="geometry" >
+      <rect>
+       <x>211</x>
+       <y>217</y>
+       <width>147</width>
+       <height>75</height>
+      </rect>
+     </property>
+     <property name="title" >
+      <string>Phi</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_5" >
+      <item row="0" column="0" >
+       <widget class="QLineEdit" name="lineEdit_4" />
+      </item>
+      <item row="0" column="2" >
+       <widget class="QLineEdit" name="lineEdit_7" />
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLabel" name="label_33" >
+        <property name="text" >
+         <string>to</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
+  </widget>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>13</x>
+     <y>399</y>
+     <width>781</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_11" >
+    <item>
+     <spacer name="horizontalSpacer" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0" >
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton" >
+      <property name="text" >
+       <string>Hide</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+   <zorder>pushButton</zorder>
+   <zorder>horizontalSpacer</zorder>
   </widget>
  </widget>
  <tabstops>
@@ -863,24 +1289,22 @@
   <tabstop>direct_can_prd</tabstop>
   <tabstop>direct_bkgd_edit</tabstop>
   <tabstop>direct_bckd_prd</tabstop>
-  <tabstop>load_dataBtn</tabstop>
-  <tabstop>hideBtn</tabstop>
  </tabstops>
  <resources/>
  <connections>
   <connection>
-   <sender>hideBtn</sender>
+   <sender>pushButton</sender>
    <signal>clicked()</signal>
    <receiver>SANSRunWindow</receiver>
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel" >
-     <x>949</x>
-     <y>453</y>
+     <x>405</x>
+     <y>403</y>
     </hint>
     <hint type="destinationlabel" >
-     <x>498</x>
-     <y>243</y>
+     <x>413</x>
+     <y>225</y>
     </hint>
    </hints>
   </connection>

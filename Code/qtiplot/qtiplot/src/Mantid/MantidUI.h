@@ -188,7 +188,7 @@ public:
   /** ---------------------------------
    * Commands purely for python interaction
    */
-  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showMatrix = false);
+  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showPlot = true, bool showMatrix = false);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);

@@ -22,10 +22,12 @@ HEADERDIR = inc
 SRCDIR = src
 
 SOURCES = \
-  $$SRCDIR/SANSRunWindow.cpp
+  $$SRCDIR/SANSRunWindow.cpp \
+  $$SRCDIR/SANSUtilityDialogs.cpp
 
 HEADERS = \
-  $$HEADERDIR/SANSRunWindow.h
+  $$HEADERDIR/SANSRunWindow.h \
+  $$HEADERDIR/SANSUtilityDialogs.h
   
 UI_DIR = $$HEADERDIR
 
