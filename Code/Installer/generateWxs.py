@@ -347,6 +347,8 @@ addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win3
 
 # Add qt custom dialogs library
 addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../qtiplot/MantidQt/lib/MantidQtCustomDialogs.dll',Plugins)
+# Add qt custom interfaces library
+addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll','../qtiplot/MantidQt/lib/MantidQtCustomInterfaces.dll',Plugins)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents','{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}',documentsDir)
