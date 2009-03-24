@@ -29,10 +29,11 @@ Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::g
  * @param parent An optional parent widget
  * @param forScript A boolean indicating if this dialog is to be use for from a script or not
  * @param msg An optional message string to be placed at the top of the dialog
+ * @param suggestions An optional set of suggested values
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
-						 bool forScript, const QString & msg)
+						 bool forScript, const QString & msg, const QString & suggestions)
 {
   AlgorithmDialog* dlg = NULL;
   if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
@@ -49,6 +50,7 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
   
   dlg->setParent(parent);
   dlg->setAlgorithm(alg);
+  dlg->setSuggestedValues(suggestions);
   dlg->isForScript(forScript);
   dlg->setOptionalMessage(msg);
   dlg->initializeLayout();

@@ -1751,7 +1751,7 @@ public:
   sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
 %End
   bool runAlgorithmAsynchronously(const QString &);
-  bool createPropertyInputDialog(const QString &, const QString &);
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &);
   private:

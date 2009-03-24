@@ -193,7 +193,7 @@ public:
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
   bool runAlgorithmAsynchronously(const QString & algName);
-  bool createPropertyInputDialog(const QString & algName, const QString & message);
+  bool createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues);
 
 public slots:
   void cancelAllRunningAlgorithms();

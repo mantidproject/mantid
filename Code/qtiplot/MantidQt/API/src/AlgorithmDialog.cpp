@@ -124,7 +124,7 @@ Mantid::Kernel::Property* AlgorithmDialog::getAlgorithmProperty(const QString & 
  */
 QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname) const
 {
-  return m_validators[propname];
+  return m_validators.value(propname);
 }
 
 /**
@@ -183,18 +183,26 @@ bool AlgorithmDialog::setPropertyValues()
     }
     if( prop->isValid() )
     {
-      validator->hide();
+      if( validator ) validator->hide();
       //Store value for future input
       AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
     }
     else
     {
       allValid = false;
-      if( validator->parent() ) validator->show();
+      if( validator && validator->parent() ) validator->show();
     }
   }
   //  return validateProperties();
   return allValid;
+}
+
+/**
+ * Is the value a suggested value
+ */
+bool AlgorithmDialog::isValueSuggested(const QString & propName) const
+{
+  return m_suggestedValues.contains(propName);
 }
 
 /**
@@ -253,7 +261,7 @@ void AlgorithmDialog::setOldLineEditInput(const QString & propName, QLineEdit* f
 {
   Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
   if( !prop ) return;
-  if( isForScript() && prop->isValid() && !prop->isDefault() )
+  if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
   {
     field->setText(QString::fromStdString(prop->value()));
     field->setEnabled(false);
@@ -302,6 +310,33 @@ void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
   {
     m_algProperties.insert(QString::fromStdString((*itr)->name()), *itr); 
   }
+}
+
+/**
+  * Set a list of suggested values for the properties
+  * @param suggestedValues A string containing a list of "name=value" pairs with each separated by an '|' character
+  */
+void AlgorithmDialog::setSuggestedValues(const QString & suggestedValues)
+{
+  if( suggestedValues.isEmpty() ) return;
+  QStringList suggestions = suggestedValues.split('|', QString::SkipEmptyParts);
+  QStringListIterator itr(suggestions);
+  m_suggestedValues.clear();
+  while( itr.hasNext() )
+  {
+    QString namevalue = itr.next();
+    QString name = namevalue.section('=', 0, 0);
+    // Simplified removes trims from start and end and replaces all n counts of whitespace with a single whitespace
+    QString value = namevalue.section('=', 1, 1).simplified();
+    if( value.startsWith('?') )
+    {
+      value.remove(0, 1);
+      m_suggestedValues.append(name);
+    }
+    addPropertyValueToMap(name, value.trimmed());
+  }
+  setPropertyValues();
+  m_propertyValueMap.clear();
 }
 
 /**

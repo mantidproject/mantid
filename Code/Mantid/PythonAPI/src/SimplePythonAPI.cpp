@@ -183,27 +183,41 @@ namespace Mantid
       }
       os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
 
-      if( gui ) os << "\tnset = 0\n";
+      if( gui ) os << "\tvalues = ''\n";
 
       pIter = properties.begin();
       iarg = 0;
       for( ; pIter != pEnd; ++pIter, ++iarg )
       {
-
-	if( !gui && iarg < iMand )
-	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
-	else {
-	  os << "\tif " << sanitizedNames[iarg] << " != -1:\n"
-	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
-	  if( gui )  os << "\t\tnset += 1\n";
-
+	std::string pvalue = sanitizedNames[iarg];
+	if( gui )
+	{
+	  os << "\tif " << pvalue << " != -1:\n"
+	     << "\t\tvalues += '" << (*pIter)->name() << "=' + " << pvalue << " + '|'\n";
 	}
+	else
+	{
+	  if( iarg < iMand )
+	  {
+	    os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << pvalue << ".lstrip('? '))\n";
+	  }
+	  else
+	  {
+	    os << "\tif " << pvalue << " != -1:\n"
+	       << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << pvalue << ".lstrip('? '))\n";
+	  }
+	}
+// 	if( !gui && iarg < iMand )
+// 	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
+// 	else {
+// 	  os << "\tif " << sanitizedNames[iarg] << " != -1:\n"
+// 	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
       }
+
 
       if( gui )
       {
-	os << "\tif nset != " << iarg + 1 << ":\n"
-	   << "\t\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\" , message)\n"
+	os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\" , message, values)\n"
 	   << "\tif dialog == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\telse:\n"

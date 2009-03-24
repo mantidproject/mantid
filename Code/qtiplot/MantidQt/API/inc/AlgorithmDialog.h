@@ -136,6 +136,9 @@ protected:
   /// Set the properties that have been parsed from the dialog
   bool setPropertyValues();
 
+  /// Is the value a suggested value
+  bool isValueSuggested(const QString & propName) const;
+
   /// Open a file dialog to select an existing file
   QString openLoadFileDialog(const QString & propName); 
 
@@ -156,6 +159,9 @@ private:
   /// Set the algorithm associated with this dialog
   void setAlgorithm(Mantid::API::IAlgorithm*);
   
+  /// Set a list of suggested values  
+  void setSuggestedValues(const QString & suggestedValues);
+  
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
 
@@ -173,10 +179,13 @@ private:
   ///The name of the algorithm
   QString m_algName;
 
-  /// A map of property <name, value> pairs
+  /// A map of property <name, value> pairs that have been taken from the dialog
   QHash<QString, QString> m_propertyValueMap;
-
-  /// A boolean indicating whether this is for a sciprt or not
+  
+  /// A Hash of property names to suggested values
+  QList<QString> m_suggestedValues;
+  
+  /// A boolean indicating whether this is for a script or not
   bool m_forScript;
 
   /// The message string to be displayed at the top of the widget; if it exists.

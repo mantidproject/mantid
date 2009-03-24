@@ -114,7 +114,10 @@ void GenericDialog::initLayout()
 	  if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
 	}
       }
-      if( isForScript() && prop->isValid() && !prop->isDefault() ) optionsBox->setEnabled(false);
+      if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName)) 
+      {
+	optionsBox->setEnabled(false);
+      }
       m_inputGrid->addWidget(nameLbl, row, 0, 0);
       m_inputGrid->addWidget(optionsBox, row, 1, 0);
       m_inputGrid->addWidget(validLbl, row, 2, 0);
@@ -125,15 +128,7 @@ void GenericDialog::initLayout()
       nameLbl->setBuddy(textBox);
       m_editBoxes[textBox] = propName;
 
-      if( isForScript() && prop->isValid() && !prop->isDefault() )
-      {
-	textBox->setText(QString::fromStdString(prop->value()));
-	textBox->setEnabled(false);
-      }
-      else
-      {
-	if( oldValues.contains(propName) ) textBox->setText(oldValues[propName]);
-      }
+      setOldLineEditInput(propName, textBox);
 
       //Add the widgets to the grid
       m_inputGrid->addWidget(nameLbl, row, 0, 0);
@@ -148,7 +143,10 @@ void GenericDialog::initLayout()
 	
 	m_inputGrid->addWidget(browseBtn, row, 3, 0);
 	
-	if( isForScript() && prop->isValid() && !prop->isDefault() ) browseBtn->setEnabled(false);
+	if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
+	{ 
+	  browseBtn->setEnabled(false);
+	}
       }
       
     }

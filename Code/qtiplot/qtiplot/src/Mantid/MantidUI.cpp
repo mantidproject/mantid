@@ -1089,7 +1089,7 @@ void MantidUI::cancelAllRunningAlgorithms()
   if( m_algMonitor ) m_algMonitor->cancelAll();
 }
 
-bool MantidUI::createPropertyInputDialog(const QString & algName, const QString & message)
+bool MantidUI::createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues)
 {
   Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(algName);
   if( !alg ) 
@@ -1097,7 +1097,7 @@ bool MantidUI::createPropertyInputDialog(const QString & algName, const QString 
     return false;
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, message);
+  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, message, suggestedValues);
   return (dlg->exec() == QDialog::Accepted);
 }
 

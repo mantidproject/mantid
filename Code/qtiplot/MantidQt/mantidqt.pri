@@ -49,7 +49,9 @@ INCLUDEPATH += "$$MANTIDQTINCLUDES"
 unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
+  LIBS += -L/usr/lib/ -lPocoFoundation
 }
+
 win32 {
   INCLUDEPATH += "$$THIRDPARTY/include"
   LIBS += "$$MANTIDLIBPATH/MantidKernel.lib"
