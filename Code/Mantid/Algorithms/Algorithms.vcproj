@@ -202,6 +202,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CreateCalFileByNames.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CreateSingleValuedWorkspace.cpp"
 				>
 			</File>
@@ -222,7 +226,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DiffractionFocussing2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Divide.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ExponentialCorrection.cpp"
 				>
 			</File>
 			<File
@@ -278,11 +290,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\OneMinusExponentialCor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Plus.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\src\PointByPointVCorrection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PoissonErrors.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\PolynomialCorrection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ReadGroupsFromFile.cpp"
 				>
 			</File>
 			<File
@@ -331,6 +359,10 @@
 			</File>
 			<File
 				RelativePath=".\src\SumSpectra.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\UnaryOperation.cpp"
 				>
 			</File>
 			<File
@@ -420,6 +452,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\CreateCalFileByNames.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CreateSingleValuedWorkspace.h"
 				>
 			</File>
@@ -452,6 +488,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\DiffractionFocussing2.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\DiffractionFocussingTest.h"
 				>
 			</File>
@@ -461,6 +501,10 @@
 			</File>
 			<File
 				RelativePath=".\test\DivideTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ExponentialCorrection.h"
 				>
 			</File>
 			<File
@@ -556,6 +600,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\OneMinusExponentialCor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Plus.h"
 				>
 			</File>
@@ -564,11 +612,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\PointByPointVCorrection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\PoissonErrors.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\PoissonErrorsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\PolynomialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ReadGroupsFromFile.h"
 				>
 			</File>
 			<File
@@ -661,6 +721,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SumSpectraTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\UnaryOperation.h"
 				>
 			</File>
 			<File

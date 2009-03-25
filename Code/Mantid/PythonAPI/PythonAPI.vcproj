@@ -193,10 +193,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidPythonAPI\PythonInterface.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidPythonAPI\SimplePythonAPI.h"
 				>
 			</File>

@@ -37,7 +37,7 @@ namespace Mantid
     
     const bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      if ( lhs->YUnit() != rhs->YUnit() )
+      if ( lhs->size() > 1 && rhs->size() > 1 && lhs->YUnit() != rhs->YUnit() )
       {
         g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
         return false;

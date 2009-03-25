@@ -83,7 +83,7 @@ public:
     {
       for (int j = 0; j < 3; ++j)
       {
-        double factor = 2.0*exp(j+1.0);
+        double factor = 2.0*exp(-1.0*(j+1.0));
         TS_ASSERT_EQUALS( result->dataX(i)[j], inputWS->dataX(i)[j] )
         TS_ASSERT_DELTA( result->dataY(i)[j], inputWS->dataY(i)[j]/factor, 0.0001 )
         TS_ASSERT_DELTA( result->dataE(i)[j], inputWS->dataE(i)[j]/factor, 0.0001 )
@@ -118,7 +118,7 @@ public:
     {
       for (int j = 0; j < 3; ++j)
       {
-        double factor = 2.0*exp(j+1.0);
+        double factor = 2.0*exp(-1.0*(j+1.0));
         TS_ASSERT_EQUALS( result->dataX(i)[j], inputWS->dataX(i)[j] )
         TS_ASSERT_DELTA( result->dataY(i)[j], inputWS->dataY(i)[j]*factor, 0.0001 )
         TS_ASSERT_DELTA( result->dataE(i)[j], inputWS->dataE(i)[j]*factor, 0.0001 )
