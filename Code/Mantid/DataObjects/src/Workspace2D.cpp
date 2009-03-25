@@ -178,6 +178,18 @@ namespace Mantid
       return;
     }
 
+    /** Sets all the X vectors to point to the one given
+     *  @param X A pointer to the X vector to set the workspace's to
+     */
+    void Workspace2D::setX(const Histogram1D::RCtype& X)
+    {
+      // Loop over all histograms, setting each to point to X
+      for (int i = 0; i < this->getNumberHistograms(); ++i)
+      {
+        this->setX(i,X);
+      }
+    }
+    
     /** Gets the number of histograms
     \return Integer
     */

@@ -86,7 +86,9 @@ public:
   virtual const std::vector<double>& dataY(int const index) const {return _Y;}
   /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const {return _E;}
-
+  /// Sets the x data
+  virtual void setX(const Kernel::cow_ptr<MantidVec>& X) { _X = *X; }
+  
   ///Returns non-const vector of the x data
   virtual std::vector<double>& dataX() { return _X; }
   ///Returns non-const vector of the y data

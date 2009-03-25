@@ -3,10 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidKernel/ConfigService.h"
-
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid
 {
@@ -34,7 +34,8 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  those; otherwise it will be initialised to the same size as the parent.
  *  This method should be used when you want to carry over the Workspace data members
  *  relating to the Instrument, Spectra-Detector Map, Sample & Axes to the new workspace.
- *  Note that the axes are NOT copied when the size parameters are given.
+ *  If the workspace is the same size as its parent, then the X data, axes and mask list are
+ *  copied. If its a different size then they are not.
  *  @param  parent    A shared pointer to the parent workspace
  *  @param  NVectors  (Optional) The number of vectors/histograms/detectors in the workspace
  *  @param  XLength   (Optional) The number of X data points/bin boundaries in each vector (must all be the same)
@@ -73,10 +74,17 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   if ( !differentSize )
   {
     // Copy X values over if same size as parent. 99% of the time, this will be what we want
-    for (int j = 0; j < NVectors; ++j)
+    // If common X values, make sure they are shared...
+    if ( WorkspaceHelpers::commonBoundaries(parent) )
     {
-      // Later, preserve or restore sharing.
-      ws->dataX(j) = parent->readX(j);
+      Kernel::cow_ptr<MantidVec> XVals;
+      XVals.access() = parent->readX(0);
+      ws->setX(XVals);
+    }
+    // ... otherwise copy over each vector separately
+    else
+    {
+      for (int j = 0; j < NVectors; ++j) ws->dataX(j) = parent->readX(j);
     }
     
     // Only copy mask map if same size for now. Later will need to check continued validity.

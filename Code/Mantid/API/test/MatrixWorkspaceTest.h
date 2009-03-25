@@ -35,6 +35,7 @@ public:
   const std::vector<double>& dataX(int const index) const {return vec;}
   const std::vector<double>& dataY(int const index) const {return vec;}
   const std::vector<double>& dataE(int const index) const {return vec;}
+  void setX(const Kernel::cow_ptr<MantidVec>&) {}
 
 private:
   std::vector<double> vec;

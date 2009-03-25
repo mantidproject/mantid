@@ -122,6 +122,9 @@ public:
   virtual const MantidVec& dataY(int const index) const = 0;
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const = 0;
+  
+  /// Sets all X vectors to the vector given
+  virtual void setX(const Kernel::cow_ptr<MantidVec>& X) = 0;
   //----------------------------------------------------------------------
 
   const int axes() const;

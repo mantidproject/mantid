@@ -79,6 +79,11 @@ public:
   /// Returns the error const
   virtual const std::vector<double>& dataE(int const index) const {return dataE();}
 
+  // This is the MatrixWorkspace::setX method
+  virtual void setX(const Histogram1D::RCtype& X) { Histogram1D::setX(X); }
+  // Need to unhide the other Histogram1D::setX methods
+  using Histogram1D::setX;
+  
   ///Returns non-const vector of the x data
   virtual std::vector<double>& dataX() { return Histogram1D::dataX(); }
   ///Returns non-const vector of the y data
