@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_POLYNOMIALCORRECTION_H_
-#define MANTID_ALGORITHMS_POLYNOMIALCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_ONEMINUSEXPONENTIALCOR_H_
+#define MANTID_ALGORITHMS_ONEMINUSEXPONENTIALCOR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,15 +11,16 @@ namespace Mantid
   namespace Algorithms
   {
     /** 
-    Corrects the data and error values on a workspace by the value of a polynomial function
-    which is evaluated at the X value of each data point. The data and error values are multiplied
-    by the value of this function.
+    Corrects the data and error values on a workspace by one minums the value of an exponential function
+    which is evaluated at the X value of each data point: 1-exp(-c*x). 
+    The data and error values are either divided or multiplied by the value of this function.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace  - The name of the workspace to correct</LI>
     <LI> OutputWorkspace - The name of the corrected workspace (can be the same as the input one)</LI>
-    <LI> Coefficients    - The coefficients of the polynomial correction function in ascending powers of X</LI>
+    <LI> c               - The positive value by which the entire exponent calculation is multiplied (see above)</LI>
+    <LI> Operation       - Whether to divide (the default) or multiply the data by the correction function</LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
@@ -44,15 +45,15 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport PolynomialCorrection : public UnaryOperation
+    class DLLExport OneMinusExponentialCor : public UnaryOperation
     {
     public:
       /// Default constructor
-      PolynomialCorrection() : UnaryOperation() {};
+      OneMinusExponentialCor() : UnaryOperation() {};
       /// Destructor
-      virtual ~PolynomialCorrection() {};
+      virtual ~OneMinusExponentialCor() {};
       /// Algorithm's name for identification
-      virtual const std::string name() const { return "PolynomialCorrection";}
+      virtual const std::string name() const { return "OneMinusExponentialCor";}
       /// Algorithm's version for identification
       virtual const int version() const { return 1;}
 
@@ -62,8 +63,8 @@ namespace Mantid
       void retrieveProperties();
       void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
 
-      std::vector<double> m_coeffs;              ///< Holds the coefficients for the polynomial correction function
-      std::vector<double>::size_type m_polySize; ///< The order of the polynomial
+      double m_c;    ///< The constant term in the exponent
+      bool m_divide; ///< Whether the data should be divided by the correction (true) or multiplied by it (false)
       
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
@@ -72,4 +73,4 @@ namespace Mantid
   } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_POLYNOMIALCORRECTION_H_*/
+#endif /*MANTID_ALGORITHMS_ONEMINUSEXPONENTIALCOR_H_*/

@@ -1,0 +1,49 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidAlgorithms/OneMinusExponentialCor.h"
+
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+namespace Mantid
+{
+namespace Algorithms
+{
+  // Register the class into the algorithm factory
+  DECLARE_ALGORITHM(OneMinusExponentialCor)
+
+  // Get a reference to the logger
+  Logger& OneMinusExponentialCor::g_log = Logger::get("OneMinusExponentialCor");
+
+  void OneMinusExponentialCor::defineProperties()
+  {
+    BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+    mustBePositive->setLower(0.0);
+    declareProperty("c",1.0,mustBePositive);
+    
+    std::vector<std::string> operations(2);
+    operations[0] = "Multiply";
+    operations[1] = "Divide";
+    declareProperty("Operation", "Divide", new Kernel::ListValidator(operations)); 
+  }
+  
+  void OneMinusExponentialCor::retrieveProperties()
+  {
+    m_c = getProperty("c");
+    std::string op = getProperty("Operation");
+    m_divide = ( op == "Divide" ) ? true : false;
+  }
+  
+  void OneMinusExponentialCor::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+  {
+    double factor = 1.0 - exp(-1.0*m_c*XIn);
+    if (m_divide) factor = 1.0/factor;
+    
+    // Multiply the data and error by the correction factor
+    YOut = YIn*factor;
+    EOut = EIn*factor;
+  }
+
+} // namespace Algorithms
+} // namespace Mantid

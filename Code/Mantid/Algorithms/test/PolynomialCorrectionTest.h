@@ -26,7 +26,7 @@ public:
   
   void testCategory()
   {
-    TS_ASSERT_EQUALS( poly.category(), "Arithmetic" )
+    TS_ASSERT_EQUALS( poly.category(), "CorrectionFunctions" )
   }
   
   void testInit()
