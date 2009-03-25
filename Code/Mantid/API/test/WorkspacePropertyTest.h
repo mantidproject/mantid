@@ -33,7 +33,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const std::vector<double>& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const std::vector<double>& dataE(int const index)const {return data;}
-    void setX(const Kernel::cow_ptr<MantidVec>&) {}
+    void setX(const cow_ptr<Mantid::MantidVec>&) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
     //Methods for getting data via python. Do not use for anything else!
@@ -69,7 +69,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const std::vector<double>& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const std::vector<double>& dataE(int const index)const {return data;}
-    void setX(const Kernel::cow_ptr<MantidVec>&) {}
+    void setX(const cow_ptr<Mantid::MantidVec>&) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
     //Methods for getting data via python. Do not use for anything else!
