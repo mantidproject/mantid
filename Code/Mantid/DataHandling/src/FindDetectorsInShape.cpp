@@ -49,28 +49,10 @@ namespace Mantid
 			bool includeMonitors = getProperty("IncludeMonitors");
 
 			std::string shapeXML = getProperty("ShapeXML");
-			//wrap in a type tag
-			shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
-
-			// Set up the DOM parser and parse xml string
-			DOMParser pParser;
-			Document* pDoc;
-			try
-			{
-				pDoc = pParser.parseString(shapeXML);
-			}
-			catch(...)
-			{
-				g_log.error("Unable to parse ShapeXML " + shapeXML);
-				throw Kernel::Exception::InstrumentDefinitionError("Unable to parse ShapeXML" , shapeXML);
-			}
-			// Get pointer to root element
-			Element* pRootElem = pDoc->documentElement();
 
 			//convert into a Geometry object
 			Geometry::ShapeFactory sFactory;
-			boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(pRootElem);
-			pDoc->release();
+			boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
 
 			//get the instrument out of the workspace
 			IInstrument_sptr instrument_sptr = WS->getInstrument();
