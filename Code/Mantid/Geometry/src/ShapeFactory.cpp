@@ -45,14 +45,48 @@ ShapeFactory::ShapeFactory()
 {}
 
 
-/** Creates a geometric object as specified in an instrument definition file
+/** Creates a geometric object directly from a XML shape string
+ *
+ *  @param shapeXML XML shape string
+ *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
+ */
+boost::shared_ptr<Object> ShapeFactory::createShape(std::string &shapeXML)
+{
+	//wrap in a type tag
+	shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
+
+	// Set up the DOM parser and parse xml string
+	DOMParser pParser;
+	Document* pDoc;
+	try
+	{
+		pDoc = pParser.parseString(shapeXML);
+	}
+	catch(...)
+	{
+		g_log.warning("Unable to parse XML string " + shapeXML + " . Empty geometry Object is returned.");
+    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    return retVal;
+	}
+	// Get pointer to root element
+	Element* pRootElem = pDoc->documentElement();
+
+	//convert into a Geometry object
+	boost::shared_ptr<Object> retVal = createShape(pRootElem);
+	pDoc->release();
+
+  return retVal;
+}
+
+
+/** Creates a geometric object from a DOM-element-node pointing to a <type> element
+ *  containing shape information. If no shape information an empty Object is returned
  *
  *  @param pElem XML element from instrument def. file which may specify a geometric shape
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
  *
  *  @throw logic_error Thrown if argument is not a pointer to a 'type' XML element
  */
-
 boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 {
   // check if pElem is an element with tag name 'type'

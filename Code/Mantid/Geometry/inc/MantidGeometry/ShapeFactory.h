@@ -30,9 +30,13 @@ namespace Mantid
   {
     /** @class ShapeFactory ShapeFactory.h DataHandling/ShapeFactory.h
 
-    Class intended to be used with the DataHandling 'LoadInstrument' algorithm.
-    In that algorithm it is used for creating shared pointers to the geometric 
-    shapes described in the XML instrument definition file.
+    Class originally intended to be used with the DataHandling 'LoadInstrument' algorithm.
+    In that algorithm it is used for creating shared pointers to the geometric shapes 
+    described in the XML instrument definition file.
+
+    This class is now also use elsewhere, and in addition to create geometric shapes
+    from an DOM-element-node pointing to a <type> element with shape information, shapes
+    can also be created directly from a XML shape string. 
 
     @author Anders Markvardsen, ISIS, RAL
     @date 6/8/2008
@@ -65,9 +69,12 @@ namespace Mantid
       /// Destructor
       ~ShapeFactory() {}
 
-      /// Creates a geometric object as specified in an instrument definition file
+      /// Creates a geometric object from a DOM-element-node pointing to a <type> element
+      /// containing shape information. If no shape information an empty Object is returned
       boost::shared_ptr<Object> createShape(Poco::XML::Element* pElem);
 
+      /// Creates a geometric object directly from a XML shape string
+      boost::shared_ptr<Object> createShape(std::string &shapeXML);
     private:
 
       /// Parse XML 'sphere' element

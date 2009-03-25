@@ -171,10 +171,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PythonInterface.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PythonWrapper.cpp"
 				>
 			</File>

@@ -206,6 +206,27 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(0.01,0.01,-1)) );
 	}
 
+	void testConeUseDirectStringArgument()
+	{
+		//algebra line is essential
+		std::string xmlShape = "<cone id=\"shape\"> ";
+		xmlShape +=	"<tip-point x=\"0.0\" y=\"0.0\" z=\"0.0\" /> " ; 
+  	xmlShape +=	"<axis x=\"0.0\" y=\"0.0\" z=\"1\" /> " ;
+  	xmlShape +=	"<angle val=\"8.1\" /> " ;
+  	xmlShape +=	"<height val=\"4\" /> " ;
+  	xmlShape +=	"</cone>";
+		xmlShape +=	"<algebra val=\"shape\" /> ";  
+
+		ShapeFactory sFactory;
+		boost::shared_ptr<Object> shape_sptr = sFactory.createShape(xmlShape);
+
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.0,-1)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.001,1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.001,-1)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.01,0.01,-1)) );
+	}
+
 	void testNoneExistingShape()
 	{
 		//algebra line is essential

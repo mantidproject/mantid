@@ -204,10 +204,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\GaussianErrorHelper.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Instrument.cpp"
 				>
 			</File>
