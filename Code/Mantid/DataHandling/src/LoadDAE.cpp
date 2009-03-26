@@ -128,12 +128,9 @@ namespace Mantid
         throw Exception::FileError("Unable to read NTC1 from DAE " , m_daename);
       }
 
-      int mv_dims_array[1],mv_ndims = 1;
-      char* iName = 0;//new char[100];
-      mv_dims_array[0] = 4;
-      int res = IDCAgetparc(dae_handle, "NAME", &iName, mv_dims_array, &mv_ndims);
-      std::cerr<<"Instr name: "<<mv_dims_array[0]<<' '<<mv_ndims<<' '<<res<<'\n';
-      std::cerr<<"Instr name: ("<<iName<<")\n";
+      char* iName = 0;
+      dims_array[0] = 4;
+      int res = IDCAgetparc(dae_handle, "NAME", &iName, dims_array, &sv_ndims);
       delete[] iName;
 
       // Read in the time bin boundaries
@@ -173,14 +170,13 @@ namespace Mantid
 
       // Decide if we can read in all the data at once
       int *allData = 0;
-      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1)*4;
+      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1)*m_numberOfPeriods*4;
       if (ndata/1000000 < 10) // arbitrary number
       {
-          int mv_dims_array[1],mv_ndims = 1;
-          mv_dims_array[0] = ndata;
+          dims_array[0] = ndata;
           allData = new int[ ndata ];
           // and read them in
-          int ret = IDCgetpari(dae_handle, "CNT1", allData, mv_dims_array, &mv_ndims);
+          int ret = IDCgetpari(dae_handle, "CNT1", allData, dims_array, &sv_ndims);
           if (ret < 0)
           {
               delete[] allData;
