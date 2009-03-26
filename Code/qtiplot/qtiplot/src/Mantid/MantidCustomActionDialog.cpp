@@ -101,10 +101,6 @@ void MantidCustomActionDialog::init()
   menu_side->addWidget(menuSelection);
   //  menu_side->addStretch();
 
-  //A button to import selections
-  QPushButton *importBtn = new QPushButton(">>");
-  importBtn->setFixedWidth(35);
-
   // The file list
   QGroupBox *fileSelection = new QGroupBox("Item Selection");
   QGridLayout *item_box_layout = new QGridLayout;
@@ -144,21 +140,21 @@ void MantidCustomActionDialog::init()
 
   QHBoxLayout *top_row_layout = new QHBoxLayout;
   top_row_layout->addWidget(fileSelection);
+  top_row_layout->addStretch();
   //I have no idea what units this is in, the documentation doesn't specify them
-  top_row_layout->addSpacing(4);
-  top_row_layout->addWidget(importBtn);
-  top_row_layout->addSpacing(4);
-
   top_row_layout->addLayout(menu_side);
 
-
-   //Main layout
+  //Main layout
   QVBoxLayout *mainlayout = new QVBoxLayout(this);
   mainlayout->addLayout(top_row_layout);
 
   QPushButton *buttonCancel = new QPushButton(tr("&Close"));
+  //A button to import selections
+  QPushButton *importBtn = new QPushButton("Add to Menu");
+
   QDialogButtonBox *buttonBox = new QDialogButtonBox;
-  buttonBox->addButton(buttonCancel, QDialogButtonBox::DestructiveRole);
+  buttonBox->addButton(importBtn, QDialogButtonBox::ActionRole);
+    buttonBox->addButton(buttonCancel, QDialogButtonBox::DestructiveRole);
  
   //Connections for buttons
   connect(plusMenu, SIGNAL(clicked()), this, SLOT(addMenuClicked()));
