@@ -77,11 +77,7 @@ void ConvertUnits::exec()
   }
 
   // If input and output workspaces are not the same, create a new workspace for the output
-  if (outputWS != inputWS )
-  {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
-    setProperty("OutputWorkspace",outputWS);
-  }
+  if (outputWS != inputWS ) outputWS = WorkspaceFactory::Instance().create(inputWS);
 
   // Set the final unit that our output workspace will have
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
@@ -114,7 +110,6 @@ void ConvertUnits::exec()
       outputWS->dataE(i) = inputWS->dataE(i);
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
-    outputWS->dataX(i) = inputWS->dataX(i);
     if ( i % iprogress_step == 0)
     {
         progress( double(i)/numberOfSpectra/2 );
@@ -142,13 +137,15 @@ void ConvertUnits::exec()
     this->reverse(outputWS);
   }
 
+  // Need to lop bins off if converting to energy transfer
+  /* This is an ugly test - could be made more general by testing for DBL_MAX
+     values at the ends of all spectra, but that would be less efficient */
+  if (targetUnit.find("Delta")==0) outputWS = this->removeUnphysicalBins(outputWS);
+
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
-  if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS))
-  {
+  if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS)) 
     outputWS = this->alignBins(outputWS);
-    setProperty("OutputWorkspace",outputWS);
-  }
 
   // If appropriate, put back the bin width division into Y/E.
   if (distribution)
@@ -164,6 +161,8 @@ void ConvertUnits::exec()
     }
   }
 
+  setProperty("OutputWorkspace",outputWS);
+  return;
 }
 
 /** Convert the workspace units according to a simple output = a * (input^b) relationship
@@ -273,11 +272,13 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         // The scattering angle for this detector (in radians).
         twoTheta = outputWS->detectorTwoTheta(det);
       }
-      else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+      else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
       {
         l2 = det->getDistance(*source);
-        l2 = l2 - l1;
+        l2 = l2-l1;
         twoTheta = 0.0;
+        // Energy transfer is meaningless for a monitor, so set l2 to 0.
+        if (outputUnit->unitID().find("Delta")==0) l2 = 0.0;
       }
       if (failedDetectorIndex != notFailed)
       {
@@ -410,6 +411,100 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
       if ( j % 100 == 0) interruption_point();
     }
   }
+}
+
+/** Unwieldy method which removes bins which lie in a physically inaccessible region.
+ *  This presently only occurs in conversions to energy transfer, where the initial
+ *  unit conversion sets them to +/-DBL_MAX. This method removes those bins, leading
+ *  to a workspace which is smaller than the input one.
+ *  As presently implemented, it unfortunately requires testing for and knowledge of
+ *  aspects of the particular units conversion instead of keeping all that in the
+ *  units class. It could be made more general, but that would be less efficient.
+ *  @param workspace The workspace after initial unit conversion
+ *  @return The workspace after bins have been removed
+ */
+API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::MatrixWorkspace_const_sptr workspace)
+{
+  MatrixWorkspace_sptr result;
+  // If this is a Workspace2D, get the spectra axes for copying in the spectraNo later
+  Axis *specAxis = NULL, *outAxis = NULL;
+  if (workspace->axes() > 1) specAxis = workspace->getAxis(1);
+
+  const int numSpec = workspace->getNumberHistograms();
+  const int emode = getProperty("Emode");
+  if (emode==1)
+  {
+    // First the easy case of direct instruments, where all spectra will need the
+    // same number of bins removed
+    const MantidVec& X0 = workspace->readX(0);
+    MantidVec::const_iterator start = std::lower_bound(X0.begin(),X0.end(),-1.0e-10*DBL_MAX);
+    MantidVec::difference_type bins = X0.end() - start;
+    MantidVec::difference_type first = start - X0.begin();
+
+    result = WorkspaceFactory::Instance().create(workspace,numSpec,bins,bins-1);
+    if (specAxis) outAxis = result->getAxis(1);
+
+    for (int i = 0; i < numSpec; ++i)
+    {
+      const MantidVec& X = workspace->readX(i);
+      const MantidVec& Y = workspace->readY(i);
+      const MantidVec& E = workspace->readE(i);
+      result->dataX(i).assign(X.begin()+first,X.end());
+      result->dataY(i).assign(Y.begin()+first,Y.end());
+      result->dataE(i).assign(E.begin()+first,E.end());
+      if (specAxis) outAxis->spectraNo(i) = specAxis->spectraNo(i);
+    }
+  }
+  else if (emode==2) 
+  {
+    // Now the indirect instruments. In this case we could want to keep a different
+    // number of bins in each spectrum because, in general L2 is different for each
+    // one.
+    // This, we first need to loop to find largest 'good' range
+    std::vector<MantidVec::difference_type> lastBins(numSpec);
+    int maxBins = 0;
+    for (int i = 0; i < numSpec; ++i)
+    {
+      const MantidVec& X = workspace->readX(i);
+      MantidVec::const_iterator end = std::lower_bound(X.begin(),X.end(),1.0e-10*DBL_MAX);
+      MantidVec::difference_type bins = end - X.begin();
+      lastBins[i] = bins;
+      if (bins > maxBins) maxBins = bins;
+    }
+    g_log.error() << maxBins << std::endl;
+    // Now create an output workspace large enough for the longest 'good' range
+    result = WorkspaceFactory::Instance().create(workspace,numSpec,maxBins,maxBins-1);
+    if (specAxis) outAxis = result->getAxis(1);
+    // Next, loop again copying in the correct range for each spectrum
+    for (int j = 0; j < numSpec; ++j)
+    {
+      const MantidVec& X = workspace->readX(j);
+      const MantidVec& Y = workspace->readY(j);
+      const MantidVec& E = workspace->readE(j);
+      MantidVec& Xnew = result->dataX(j);
+      MantidVec& Ynew = result->dataY(j);
+      MantidVec& Enew = result->dataE(j);
+      int k;
+      for (k = 0; k < lastBins[j]-1; ++k)
+      {
+        Xnew[k] = X[k];
+        Ynew[k] = Y[k];
+        Enew[k] = E[k];
+      }
+      Xnew[k++] = X[k];
+      // If necessary, add on some fake values to the end of the X array (Y&E will be zero)
+      if (k < maxBins)
+      {
+        for (int l=k; l < maxBins; ++l)
+        {
+          Xnew[l] = X[k]+1+l-k;
+        }
+      }
+      if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(j);
+    }
+  }
+
+  return result;
 }
 
 } // namespace Algorithm

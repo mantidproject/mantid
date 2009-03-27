@@ -370,7 +370,7 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = efixed - *it;
-      if (e2<=0.0)
+      if (e2<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
       {
         *it = DBL_MAX;
       }
@@ -390,7 +390,7 @@ void DeltaE::toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = efixed + *it;
-      if (e1<=0.0)
+      if (e1<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
       {
         *it = -DBL_MAX;
       }
@@ -487,7 +487,7 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e2 = (efixed - *it) / PhysicalConstants::meVtoWavenumber;
-      if (e2<=0.0)
+      if (e2<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
       {
         *it = DBL_MAX;
       }
@@ -507,7 +507,7 @@ void DeltaE_inWavenumber::toTOF(std::vector<double>& xdata, std::vector<double>&
     for (it = xdata.begin(); it != xdata.end(); ++it)
     {
       const double e1 = (efixed + *it) / PhysicalConstants::meVtoWavenumber;
-      if (e1<=0.0)
+      if (e1<=0.0)  // This shouldn't ever happen (unless the efixed value is wrong)
       {
         *it = -DBL_MAX;
       }

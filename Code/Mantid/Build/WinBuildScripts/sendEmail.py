@@ -138,6 +138,10 @@ if m:
     doxyWarnings = False
 move(filedoxy,archiveDir)
 
+lastDoxy = int(open('prevDoxy','r').read())
+currentDoxy = open('prevDoxy','w')
+currentDoxy.write(str(warnCount))
+
 #Construct Message
 httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
@@ -150,7 +154,12 @@ if failCount>0:
 message += str(testCount) + " tests)\n"
 message += "Code Documentation Passed: " + str(doxyWarnings)
 if warnCount>0:
-  message += " ("+str(warnCount) +" doxygen warnings)\n"
+  message += " ("+str(warnCount) +" doxygen warnings"
+  if (warnCount > lastDoxy):
+    message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
+  if (lastDoxy > warnCount):
+    message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
+  message += ")\n"
 else:
   message += "\n"
 message += "\n"

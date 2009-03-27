@@ -33,7 +33,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -83,6 +83,9 @@ private:
 
   /// Reverses the workspace if X values are in descending order
   void reverse(API::MatrixWorkspace_sptr workspace);
+
+  /// For conversions to energy transfer, removes bins corresponding to inaccessible values
+  API::MatrixWorkspace_sptr removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
