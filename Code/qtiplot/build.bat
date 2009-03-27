@@ -24,8 +24,8 @@ exit(0)
 
 :mantidqterr
 echo "MantidQt build failed"
-exit(1)
+REM exit(1)
 
 :qtiploterr
 echo "MantidPlot build failed"
-exit(1)
+REM exit(1)

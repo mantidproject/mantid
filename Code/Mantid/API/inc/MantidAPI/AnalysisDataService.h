@@ -48,7 +48,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
+class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;

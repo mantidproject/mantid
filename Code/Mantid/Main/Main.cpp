@@ -25,8 +25,8 @@ int main()
 //  UserAlgorithmTest userTest;
  // userTest.RunAllTests();
   
- // Benchmark b;
- // b.RunPlusTest();
+  Benchmark b;
+  b.RunPlusTest();
 
 #if defined _DEBUG
   //NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!

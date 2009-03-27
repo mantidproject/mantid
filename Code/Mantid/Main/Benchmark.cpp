@@ -107,7 +107,8 @@ An identical fortran operation using LIBISIS takes ~0.7 seconds
 void Benchmark::RunPlusTest()
 {
 //  RunPlusTest(2800,41476);
-  RunPlusTest(2584,2000);
+//  RunPlusTest(2584,2000);
+  RunPlusTest(12584,2000);
 }
 
 
