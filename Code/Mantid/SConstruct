@@ -118,20 +118,19 @@ else:
 		for ln in f:
 			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
-			fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
+			#fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 		f.close()
 		python_path = '/usr/local/python2.5'
-		opencascade_path= '/opt/OpenCASCADE'
 	else:
 		boost_path=''
 		poco_path=''
 		fortran_type=''
 		third_party=''
 		python_path = ''
-		opencascade_path = ''
 		boost_append = ''
 		
+	opencascade_path= '/opt/OpenCASCADE'
 	#Find the boost_path and the boost append
 	startPath = '/usr/local/include/'
 	dirpath=os.listdir(startPath)
