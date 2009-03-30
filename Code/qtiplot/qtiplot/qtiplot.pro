@@ -76,6 +76,9 @@ unix {
 
   LIBS		+= -L/usr/lib/ -lPocoUtil
   LIBS		+= -L/usr/lib/ -lPocoFoundation
+
+  LIBS 		+= -Wl,-rpath-link,/opt/OpenCASCADE/lib64
+  LIBS 		+= -Wl,-rpath-link,/opt/OpenCASCADE/lib
 }
 ##################### Windows ###############################################
 win32 {
