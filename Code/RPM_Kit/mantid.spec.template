@@ -1,0 +1,103 @@
+Name:		Mantid
+Summary:	Data Analysis For ISIS
+Version:	MANTID_VERSION
+Release:	MANTID_RELEASE%{?dist}
+URL:		http://www.mantidproject.org/
+License:	GPLv2+
+Group:		Applications/Libraries
+Source0:  	http://download.mantidproject.org/kits/%{name}-%{version}.tar.gz
+Prefix: 	/usr/local
+Vendor:		STFC ISIS Facility
+BuildRoot:	%{_tmppath}/mantid
+
+BuildRequires:  python >= 2.3
+BuildRequires:  scons >= 0.97
+BuildRequires:  boost-devel >= 1.34.1
+BuildRequires:  glibc-devel
+BuildRequires:  gsl-devel
+#required for mantidplot
+BuildRequires:	qt4-devel >= 4.2 
+BuildRequires:	qwt-devel
+BuildRequires:	qwtplot3d-qt4-devel
+BuildRequires:	muParser-devel
+BuildRequires:	PyQt4-devel
+BuildRequires: 	gts-devel
+BuildRequires: 	nexus
+BuildRequires: 	sip-devel
+BuildRequires: 	qscintilla-devel
+BuildRequires: 	OpenCASCADE-devel
+
+Requires: 	boost >= 1.34.1
+Requires: 	qt4 >= 4.2
+Requires: 	gts
+Requires: 	nexus
+Requires: 	qscintilla
+Requires:	sip
+Requires:	qwt
+Requires:	gsl
+Requires:	glibc
+Requires:	qwtplot3d-qt4
+Requires:	PyQt4
+Requires:	OpenCASCADE
+Requires:	muParser
+
+
+%description
+Mantid
+
+%prep
+%setup -q
+rm -f Mantid/src/Build/Tests/*
+cd Mantid/src
+sed -i "s!rpmBuild = False!rpmBuild = True!" SConstruct
+sed -i "s!USRLOCALINCLUDE = '/usr/local/include'!USRLOCALINCLUDE = '/usr/local/include'!" SConstruct
+sed -i "s!USRINCLUDE = '/usr/include'!USRINCLUDE = '%{_includedir}'!" SConstruct
+sed -i "s!USRLIB = '/usr/lib'!USRLIB = '%{_libdir}'!" SConstruct
+
+%build
+cd Mantid/src
+scons skiptest=1
+sed -i "s!rpmBuild = True!rpmBuild = False!" SConstruct
+cd ../MantidPlot/
+python release_date.py
+cd MantidQt
+qmake-qt4
+make
+cd ../qtiplot
+#sed -i "s!../../../Images/images.qrc!../../images/images.qrc!" qtiplot.pro
+#sed -i "s!INCLUDEPATH       += ../../Mantid/includes/!INCLUDEPATH       += ../../../Mantid/include/!" qtiplot.pro
+#sed -i "s!-L../../Mantid/Bin/Shared!-L../../bin!" qtiplot.pro
+qmake-qt4
+make
+#sed -i "s!../../images/images.qrc!../../../Images/images.qrc!" qtiplot.pro
+#sed -i "s!INCLUDEPATH       += ../../../Mantid/include/!INCLUDEPATH       += ../../Mantid/includes/!" qtiplot.pro
+#sed -i "s!-L../../bin!-L../../Mantid/Bin/Shared!" qtiplot.pro
+
+%install
+python Mantid/src/Build/LinuxBuildScripts/cleanup.py
+cp -rf Mantid $RPM_BUILD_ROOT/$RPM_INSTALL_PREFIX
+
+%clean
+#if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
+
+%files
+%defattr(-, root, root)
+/usr/local/Mantid
+
+%post
+if [ "$RPM_INSTALL_PREFIX" != "" ]; then
+    INSTALL_PREFIX=$RPM_INSTALL_PREFIX
+else
+    INSTALL_PREFIX=/usr/local
+fi
+if test `whoami` = root; then ldconfig; fi
+
+%postun
+if test `whoami` = root; then ldconfig; fi
+
+%changelog
+* Mon Mar 30 2009 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.1
+- Reorder build system, add changelog and move to mantid.spec.template
+- Fix dependencies and build issues with Qt and OpenCASCADE
+* Thu Sep 18 2008 Matt Clarke <matt.clarke@stfc.ac.uk> - 1.0.0
+- Original mantid.spec

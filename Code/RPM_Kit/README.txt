@@ -1,14 +1,25 @@
 Making a RPM
-----------------
+------------
 
-1) Copy the latest version of the Mantid source code in to Mantid-X.X/Mantid/src
-2) Copy the contents of the Mantid/Images folder in to the Mantid-X.X/Mantid/images directory
-3) Copy the latest version of the Mantidplot code in to Mantid-X.X/Mantid/MantidPlot
-4) Archive Mantid-X.X using:
-	tar -pczf Mantid-X.X.tar.gz Mantid-X.X
-5) Copy the tar.gz to /usr/src/redhat/SOURCES/
-6) Update the mantid.spec to have the correct version number
-7) Run rpmbuild like so:
-	rpmbuild -ba mantid.spec
+Unless you plan to build the rpm files as root you will need to do the
+following:
 
-	
+(1) Create a   ~/.rpmmacros   file with a line similar to the following
+
+%_topdir	/home/freddie/mybuilds
+
+(note: that is a tab separating the two parts)
+
+(2) create the corresponding RPM build directories
+
+    cd /home/freddie/mybuilds
+    mkdir BUILD RPMS SOURCES SPECS SRPMS
+    cd RPMS
+    mkdir i386 i486 i586 i686 x86_64
+
+(i.e. this should look like the default build area /usr/src/redhat)
+
+(3) Now you should be able to run the  make_rpm  script - this
+    will generate a Mantid-*.tar.gz via a subversion export 
+    and then build src and binary rpms in the "mybuilds" area
+
