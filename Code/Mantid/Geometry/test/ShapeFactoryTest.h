@@ -227,6 +227,33 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(0.01,0.01,-1)) );
 	}
 
+  void testComplement()
+  {
+    std::string xmlShape = "<cylinder id=\"stick\"> ";
+    xmlShape +=	"<centre-of-bottom-base x=\"-0.5\" y=\"0.0\" z=\"0.0\" />";
+    xmlShape +=	"<axis x=\"1.0\" y=\"0.0\" z=\"0.0\" />"; 
+    xmlShape +=	"<radius val=\"0.05\" />";
+    xmlShape +=	"<height val=\"1.0\" />";
+    xmlShape +=	"</cylinder>";
+    xmlShape +=	"<sphere id=\"some-sphere\">";
+    xmlShape +=	"<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" />";
+    xmlShape +=	"<radius val=\"0.5\" />";
+    xmlShape +=	"</sphere>";     
+    xmlShape +=	"<algebra val=\"some-sphere # stick\" />";    
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,-0.04)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.0,-0.06)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.04,0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.06,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.06,0.0,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.51,0.0,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.51,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,0.0,0.51)) );
+  }
+
 	void testNoneExistingShape()
 	{
 		//algebra line is essential
