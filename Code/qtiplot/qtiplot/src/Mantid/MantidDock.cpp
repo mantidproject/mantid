@@ -199,7 +199,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showMantidInstrumentSelected()));
     menu->addAction(action);
 
-    action = new QAction("Plot spectrum 0",this);
+    action = new QAction("Plot first spectrum",this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(plotFirstSpectrum()));
     menu->addAction(action);
 
