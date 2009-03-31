@@ -49,6 +49,12 @@ V3D ParDetector::getPos() const
   return ParObjComponent::getPos();
 }
 
+/// Does the point given lie within this object component?
+bool ParDetector::isValid(const V3D& point) const
+{
+  return ParObjComponent::isValid(point);
+}
+
 double ParDetector::getDistance(const IComponent& comp) const
 {
   return ParObjComponent::getDistance(comp);

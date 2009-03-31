@@ -112,6 +112,9 @@ public:
      /// Returns the address of the base component
      const IComponent* base()const{return m_base;}
 
+     /// Returns the ScaleFactor
+     V3D getScaleFactorP() const;
+
 protected:
 
     /// The base component 

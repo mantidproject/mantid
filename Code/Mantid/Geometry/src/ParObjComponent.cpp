@@ -28,7 +28,8 @@ bool ParObjComponent::isValid(const V3D& point) const
   // If the form of this component is not defined, just treat as a point
   if (!Shape()) return (this->getPos() == point);
   // Otherwise pass through the shifted point to the Object::isValid method
-  return Shape()->isValid( factorOutComponentPosition(point) );
+  V3D scaleFactor=this->getScaleFactorP();
+  return Shape()->isValid( factorOutComponentPosition(point) / scaleFactor );
 }
 
 /// Does the point given lie on the surface of this object component?
@@ -37,7 +38,8 @@ bool ParObjComponent::isOnSide(const V3D& point) const
   // If the form of this component is not defined, just treat as a point
   if (!Shape()) return (this->getPos() == point);
   // Otherwise pass through the shifted point to the Object::isOnSide method
-  return Shape()->isOnSide( factorOutComponentPosition(point) );
+  V3D scaleFactor=this->getScaleFactorP();
+  return Shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor );
 }
 
 /** Checks whether the track given will pass through this Component.
@@ -50,8 +52,9 @@ int ParObjComponent::interceptSurface(Track& track) const
   // If the form of this component is not defined, throw NullPointerException
   if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::interceptSurface","shape");
 
-  V3D trkStart = factorOutComponentPosition(track.getInit());
-  V3D trkDirection = takeOutRotation(track.getUVec());
+  V3D scaleFactor=this->getScaleFactorP();
+  V3D trkStart = factorOutComponentPosition(track.getInit()) / scaleFactor;
+  V3D trkDirection = takeOutRotation(track.getUVec()) / scaleFactor;
 
   Track probeTrack(trkStart, trkDirection);
   int intercepts = Shape()->interceptSurface(probeTrack);
@@ -61,9 +64,15 @@ int ParObjComponent::interceptSurface(Track& track) const
   {
     V3D in = it->PtA;
     this->getRotation().rotate(in);
+    //use the scale factor
+    in *= scaleFactor;
+    //
     in += this->getPos();
     V3D out = it->PtB;
     this->getRotation().rotate(out);
+    //use the scale factor
+    out *= scaleFactor;
+    //
     out += this->getPos();
     track.addTUnit(Shape()->getName(),in,out,it->Dist);
   }
@@ -81,7 +90,11 @@ double ParObjComponent::solidAngle(const V3D& observer) const
   // If the form of this component is not defined, throw NullPointerException
   if (!Shape()) throw Kernel::Exception::NullPointerException("ParObjComponent::solidAngle","shape");
   // Otherwise pass through the shifted point to the Object::solidAngle method
-  return Shape()->solidAngle( factorOutComponentPosition(observer) );
+  V3D scaleFactor=this->getScaleFactorP();
+  if((scaleFactor-V3D(1.0,1.0,1.0)).norm()<1e-12)
+      return Shape()->solidAngle( factorOutComponentPosition(observer) );
+  else
+      return Shape()->solidAngle( factorOutComponentPosition(observer), scaleFactor );
 }
 
 /**
@@ -122,6 +135,11 @@ void ParObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, d
   }
   // pass bounds to getBoundingBox
   Shape()->getBoundingBox(maxT[0],maxT[1],maxT[2],minT[0],minT[1],minT[2]);
+  //Apply scale factor
+  V3D scaleFactor=this->getScaleFactorP();
+  maxT*=scaleFactor;
+  minT*=scaleFactor;
+  //
   // transform result back and find new bounds by transforming all corner points and finding min/max box
   Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
                 v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
@@ -160,6 +178,9 @@ int ParObjComponent::getPointInObject(V3D& point) const
   // transform point back to component space
   if(result)
   {
+    //Scale up
+    V3D scaleFactor=this->getScaleFactorP();
+    point*=scaleFactor;
     Quat Rotate = this->getRotation();
     Rotate.rotate(point);
     point+=this->getPos();
@@ -183,6 +204,11 @@ const V3D ParObjComponent::takeOutRotation(V3D point) const
   unRotate.inverse();
   // Now rotate our point by the angle calculated above
   unRotate.rotate(point);
+
+  // Can not Consider scaling factor here as this transform used by solidAngle as well
+  // as IsValid etc. While this would work for latter, breaks former
+  //V3D scaleFactor=this->getScaleFactorP();
+  //point/=scaleFactor;
 
   return point;
 }

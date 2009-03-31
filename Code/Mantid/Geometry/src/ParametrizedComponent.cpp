@@ -167,6 +167,19 @@ V3D ParametrizedComponent::getRelativePos() const
     return m_base->getRelativePos();
 }
 
+/** Get ScaleFactor of detector
+ * @returns A vector of the scale factors (1,1,1) if not set
+ */
+V3D ParametrizedComponent::getScaleFactorP() const
+{
+    Parameter_sptr par = m_map->get(m_base,"sca");
+    if (par)
+    {
+        return par->value<V3D>();
+    }
+    return V3D(1,1,1);
+}
+
 /** Gets the absolute position of the ParametrizedComponent
  * @returns A vector of the absolute position
  */

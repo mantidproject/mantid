@@ -11,6 +11,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidGeometry/ParObjComponent.h"
 #include <stdexcept>
 
 
@@ -57,16 +58,11 @@ public:
     //Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
    }
 
-  void testLoadScalingFile()
+  void testInitProperties()
   {
-    //loader.initialize();
-    //loader.setPropertyValue("ScalingFilename", "./scalingtest.sca");
-    //loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    //TS_ASSERT_THROWS_NOTHING( loader.execute() );
-    //TS_ASSERT_EQUALS(loader.isExecuted(),true);
-
-    //alg.setPropertyValue("ScalingFileName", "merlin.sca");
-    alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/merlin_detector.sca");
+    // for testing we only use a small part of the full scaling file as it takes too long
+    //alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/merlin_detector.sca");
+    alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/merlin_detector_partial.sca");
     alg.setPropertyValue("Workspace", "testWS");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
@@ -75,14 +71,31 @@ public:
 
   void testExecute()
   {
-    try 
-    {
-      TS_ASSERT_EQUALS(alg.execute(),true);
-    }
-    catch(std::runtime_error e)
-    {
-      TS_FAIL(e.what());
-    }
+      IInstrument_sptr inst0 = output->getInstrument();
+      // get pointer to the first detector in bank 2
+      boost::shared_ptr<IComponent> 
+          comp0 = (*boost::dynamic_pointer_cast<ICompAssembly>(
+          (*boost::dynamic_pointer_cast<ICompAssembly>(
+          (*boost::dynamic_pointer_cast<ICompAssembly>(
+          (*boost::dynamic_pointer_cast<ICompAssembly>(inst0))[3]))[0]))[0]))[0];
+
+      boost::shared_ptr<IDetector> det0 = boost::dynamic_pointer_cast<IDetector>(comp0);
+      int id0=det0->getID();
+      TS_ASSERT_EQUALS(2110001,id0);
+      V3D pos0 = det0->getPos();
+      V3D expectedPos0 = V3D(-1.03884,-1.4635669,2.275678);
+      TS_ASSERT_DELTA((pos0-expectedPos0).norm(),0.0,1e-5)
+      double sa0=det0->solidAngle(V3D(0,0,0));
+      TS_ASSERT_DELTA(sa0,7.4785e-6,1e-10)
+
+      try 
+      {
+          TS_ASSERT_EQUALS(alg.execute(),true);
+      }
+      catch(std::runtime_error e)
+      {
+          TS_FAIL(e.what());
+      }
 
       IInstrument_sptr inst = output->getInstrument();
       // get pointer to the first detector in bank 2
@@ -98,6 +111,29 @@ public:
       V3D pos = det->getPos();
       V3D expectedPos = V3D(-1.000004,-1.5145256,2.291291);
       TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
+      double sa=det->solidAngle(V3D(0,0,0));
+      TS_ASSERT_DELTA(sa,7.68027e-6,1e-10)
+      
+      // check that points lie on correct side of the scaled object
+      boost::shared_ptr<ParObjComponent> pdet= boost::dynamic_pointer_cast<ParObjComponent>(comp);
+      double yHW=0.00143;
+      TS_ASSERT( pdet->isValid(expectedPos) )
+      TS_ASSERT( pdet->isValid(expectedPos+V3D(0,0.99*yHW,0)) )
+      TS_ASSERT( pdet->isValid(expectedPos-V3D(0,0.99*yHW,0)) )
+      TS_ASSERT( pdet->isValid(expectedPos+V3D(0,1.05*yHW,0)) )
+      TS_ASSERT( pdet->isValid(expectedPos-V3D(0,1.05*yHW,0)) )
+      TS_ASSERT( ! pdet->isValid(expectedPos+V3D(0,1.06*yHW,0)) )
+      TS_ASSERT( ! pdet->isValid(expectedPos-V3D(0,1.06*yHW,0)) )
+      // check track behaves correctly
+      Track track(V3D(0,0,0),expectedPos/expectedPos.norm());
+      TS_ASSERT_EQUALS(pdet->interceptSurface(track),1)
+      Track::LType::const_iterator it=track.begin();
+      TS_ASSERT(it != track.end())
+      // lenght of track is not correct under scaling at present
+      //TS_ASSERT_DELTA( it->Dist,2.92297968+0.5e-5,2e-6 )
+      //TS_ASSERT_DELTA( it->Length, 1e-5, 1e-7 )
+      //std::cout << "sa new=" << sa << " sa ori=" << sa0 << "  ratio=" << sa/sa0
+      //    << " distance ratio=" << pos.norm()/pos0.norm() << std::endl ;
   }
 
 private:

@@ -65,8 +65,15 @@ namespace Algorithms
 
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
   {
+      // Read the scaling information from a file (e.g. merlin_detector.sca)
+      // This is really corrected positions as (r,theta,phi) for each detector
+      // Compare these with the instrument values to determine the change in position and the scaling
+      // which may be necessary for each pixel if in a tube.
+      // movePos is used to updated positions
       std::map<int,Geometry::V3D> posMap;
       std::map<int,Geometry::V3D>::iterator it;
+      std::map<int,double> scaleMap;
+      std::map<int,double>::iterator its;
 
       IInstrument_const_sptr instrument = m_workspace->getInstrument();
       if(scalingFile.find(".sca") || scalingFile.find(".SCA"))
@@ -114,6 +121,14 @@ namespace Algorithms
                   Geometry::V3D diffT=truPos-truPosLast;
                   scale=diffT.norm()/diffI.norm();
                   Geometry::V3D scaleDir=diffT/diffT.norm();
+                  double tol=1e-4;
+                  int mDir=abs(scaleDir.masterDir(tol));
+                  scaleMap[detIndex]=scale;
+                  its=scaleMap.find(detIndex-1);
+                  if(its==scaleMap.end())
+                     scaleMap[detIndex-1]=scale;
+                  else
+                     its->second=0.5*(its->second+scale);
                   //std::cout << detIndex << scale << scaleDir << std::endl;
               }
               detIdLast=detIndex;
@@ -127,12 +142,14 @@ namespace Algorithms
       {
           // read from raw TODO
       }
-      movePos( m_workspace, posMap);
+      movePos( m_workspace, posMap, scaleMap);
       return true;
   }
 
 void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift)
 {
+   // This was used initially to move each detector using MoveInstrumentComponent alg
+   // but is too slow on a large instrument like Merlin.
    IAlgorithm_sptr moveInstruComp = createSubAlgorithm("MoveInstrumentComponent");
    moveInstruComp->setProperty<MatrixWorkspace_sptr>("Workspace",m_workspace); //?
    std::ostringstream tmpstmd,tmpstmx,tmpstmy,tmpstmz;
@@ -157,23 +174,17 @@ void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V
 }
 
 
-void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap)
+void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
+                            std::map<int,double>& scaleMap)
 {
-  // Get the workspace
-  /*
-  MatrixWorkspace_sptr WS = getProperty("Workspace");
-  const std::string ComponentName = getProperty("ComponentName");
-  const int DetID = getProperty("DetectorID");
-  const double X = getProperty("X");
-  const double Y = getProperty("Y");
-  const double Z = getProperty("Z");
-  const bool RelativePosition = getProperty("RelativePosition");
-  */
+  // Move all the detectors to their actual positions, as stored in posMap
   std::map<int,Geometry::V3D>::iterator iter = posMap.begin();
   boost::shared_ptr<IInstrument> inst = WS->getInstrument();
   boost::shared_ptr<IComponent> comp;
 
-  // Find the component to move
+  // Want to get all the detectors to move, but don't want to do this one at a time
+  // since the search (based on MoveInstrument findBy methods) is going to be too slow
+  // Hence findAll gets a vector of IComponent for all detectors, as m_vectDet.
   m_vectDet.reserve(posMap.size());
   findAll(inst);
 
@@ -183,13 +194,13 @@ void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D
       V3D Pos,shift;// New relative position
       comp = m_vectDet[id];
       boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
-      int idet;
+      int idet=0;
       if (det) idet=det->getID();
 
       iter=posMap.find(idet); // check if we have a shift
       if(iter==posMap.end()) continue;
       shift=iter->second;
-      // First set it to the new absolute position
+      // First set it to the new absolute position (code from MoveInstrument)
       Pos = comp->getPos() + shift;
     
       // Then find the corresponding relative position
@@ -220,6 +231,24 @@ void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D
       if (par) par->set(Pos);
       else
           pmap->addV3D(baseComp,"pos",Pos);
+
+      // Set the "sca" instrument parameter
+      std::map<int,double>::iterator it=scaleMap.find(idet);
+      ObjComponent* baseObjComp = dynamic_cast<ObjComponent*>(comp.get());
+      if(it!=scaleMap.end())
+      {
+          par = pmap->get(baseComp,"sca");
+          if (par) par->set(V3D(1.0,it->second,1.0));
+          else
+              pmap->addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
+      }
+      //
+      // scale the object, for now just in the IObjComponent, not in the pmap
+      //
+      //if(it!=scaleMap.end())
+      //{
+      //   baseObjComp->setScaleFactor(1.0,it->second,1.0);
+      //}
   }
 
   return;
@@ -243,32 +272,6 @@ void SetScalingPSD::findAll(boost::shared_ptr<IComponent> comp)
     return;
 }
 
-/*
-void SetScalePSD::calculateDetectorShifts(std::vector<Geometry::V3D> truepos)
-{
-  // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = m_workspace->getInstrument();
-  // Get the distance between the source and the sample (assume in metres)
-  //Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  //l1 = instrument->getSource()->getDistance(*sample);
-  Geometry::IDetector_const_sptr det = m_workspace->getDetector(index);
-  //Geometry::V3D detPos = det->getPos();
-  // Get the sample-detector distance for this detector (in metres)
-  if ( ! det->isMonitor() )
-  {
-    l2 = det->getDistance(*sample);
-    // The scattering angle for this detector (in radians).
-    twoTheta = m_inputWorkspace->detectorTwoTheta(det);
-  }
-  else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
-  {
-    l2 = det->getDistance(*(instrument->getSource()));
-    l2 = l2 - l1;
-    twoTheta = 0.0;
-  }
-  return;
-}
-*/
 
 } // namespace Algorithm
 } // namespace Mantid

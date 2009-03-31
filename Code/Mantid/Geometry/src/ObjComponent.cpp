@@ -188,17 +188,15 @@ int ObjComponent::getPointInObject(V3D& point) const
 {
   // If the form of this component is not defined, throw NullPointerException
   if (!shape) throw Kernel::Exception::NullPointerException("ObjComponent::getPointInObject","shape");
-  //Apply scale down
-  point/=m_ScaleFactor;
   // Call the Object::getPointInObject method, which may give a point in Object coordinates
   int result= shape->getPointInObject( point );
   // transform point back to component space
   if(result)
   {
+    //Scale up
+    point*=m_ScaleFactor;
     Quat Rotate = this->getRotation();
     Rotate.rotate(point);
-	//Scale up
-	point*=m_ScaleFactor;
     point+=this->getPos();
   }
   else // scale back the point

@@ -863,8 +863,8 @@ namespace Mantid
       \retval -1 :: Exit Point
       */
     {
-      const Geometry::V3D testA(Pt-uVec*Surface::getSurfaceTolerance()*25.0);
-      const Geometry::V3D testB(Pt+uVec*Surface::getSurfaceTolerance()*25.0);
+      const Geometry::V3D testA(Pt-uVec*Surface::getSurfaceTolerance()*10.0);
+      const Geometry::V3D testB(Pt+uVec*Surface::getSurfaceTolerance()*10.0);
       const int flagA=isValid(testA);
       const int flagB=isValid(testB);
       if (!(flagA ^ flagB)) return 0;
@@ -1118,14 +1118,14 @@ namespace Mantid
        }
        return(0.5*(sangle-sneg));
     }
-	/**
-	 * Find solid angle of object from point "observer" using the
-	 * OC triangluation of the object, if it exists. This method expects a
+    /**
+     * Find solid angle of object from point "observer" using the
+     * OC triangluation of the object, if it exists. This method expects a
      * scaling vector scaleFactor that scales the three axes.
-	 *
-	 * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
+     *
+     * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
      * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
-	 */
+    */
 	double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const
     {
        //
@@ -1164,7 +1164,7 @@ namespace Mantid
            this->GetObjectGeom( type, vectors, radius, height);
            if(type==1)
            {
-               for(int i=0;i<6;i++)
+               for(int i=0;i<vectors.size();i++)
                    vectors[i] *= scaleFactor;
                return CuboidSolidAngle(observer,vectors);
            }

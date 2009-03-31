@@ -86,9 +86,8 @@ namespace Mantid
       /// the vector of shared pointers
       std::vector<boost::shared_ptr<Geometry::IComponent> > m_vectDet;
       /// apply the shifts in posMap to the detectors in WS
-      void movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap);
-
-
+      void movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
+                            std::map<int,double>& scaleMap);
     };
 
   } // namespace Algorithms

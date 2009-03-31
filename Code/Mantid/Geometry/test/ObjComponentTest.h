@@ -280,6 +280,20 @@ void testgetPointInObject()
 	TS_ASSERT_EQUALS(itscale->Dist, 8.9);
 	TS_ASSERT_EQUALS(itscale->PtA, V3D(-6.4,0.0,0.0));
 	TS_ASSERT_EQUALS(itscale->PtB, V3D( 2.4,0.0,0.0));
+
+    Track trackScaleY(V3D(-6.0,-1,0),V3D(0,1.0,0));
+    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleY), 1 );
+    Track::LType::const_iterator itscaleY=trackScaleY.begin();
+    TS_ASSERT_EQUALS(itscaleY->Dist, 1.5);
+    TS_ASSERT_EQUALS(itscaleY->PtA, V3D(-6.0,-0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleY->PtB, V3D(-6.0, 0.5,0.0));
+
+    Track trackScaleW(V3D(-6.0,-1.5,0),V3D(1.0,1.0,0));
+    TS_ASSERT_EQUALS( ocyl.interceptSurface(trackScaleW), 1 );
+    Track::LType::const_iterator itscaleW=trackScaleW.begin();
+    TS_ASSERT_DELTA(itscaleW->Dist, 2.828427, 1e-6);
+    TS_ASSERT_EQUALS(itscaleW->PtA, V3D(-5.0,-0.5,0.0));
+    TS_ASSERT_EQUALS(itscaleW->PtB, V3D(-4.0, 0.5,0.0));
   }
 
   void testBoundingBoxWithScaleFactor()
@@ -305,6 +319,19 @@ void testgetPointInObject()
 	TS_ASSERT_DELTA(scalept.X(),0.0,1e-6);
 	TS_ASSERT_DELTA(scalept.Y(),0.0,1e-6);
 	TS_ASSERT_DELTA(scalept.Z(),0.0,1e-6);
+  }
+
+  void testPointInObjectWithScaleFactor2()
+  {
+    ObjComponent A("ocyl", createCappedCylinder2());
+    //set the scale factor
+    V3D scalept;
+    A.setRot(Quat(90.0,V3D(0,0,1)));
+    A.setScaleFactor(2.0,1.0,1.0);
+    TS_ASSERT_EQUALS(A.getPointInObject(scalept),1);
+    TS_ASSERT_DELTA(scalept.X(), 0.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Y(),-2.0,1e-6);
+    TS_ASSERT_DELTA(scalept.Z(), 0.0,1e-6);
   }
 
   void testSolidAngleCappedCylinderWithScaleFactor()
@@ -346,6 +373,36 @@ private:
     std::string C31="cx 0.5";         // cylinder x-axis radius 0.5
     std::string C32="px 1.2";
     std::string C33="px -3.2";
+
+    // First create some surfaces
+    std::map<int,Surface*> CylSurMap;
+    CylSurMap[31]=new Cylinder();
+    CylSurMap[32]=new Plane();
+    CylSurMap[33]=new Plane();
+
+    CylSurMap[31]->setSurface(C31);
+    CylSurMap[32]->setSurface(C32);
+    CylSurMap[33]->setSurface(C33);
+    CylSurMap[31]->setName(31);
+    CylSurMap[32]->setName(32);
+    CylSurMap[33]->setName(33);
+
+    // Capped cylinder (id 21)
+    // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
+    std::string ObjCapCylinder="-31 -32 33";
+
+    boost::shared_ptr<Object> retVal = boost::shared_ptr<Object>(new Object);
+    retVal->setObject(21,ObjCapCylinder);
+    retVal->populate(CylSurMap);
+
+    return retVal;
+  }
+
+  boost::shared_ptr<Object> createCappedCylinder2()
+  {
+    std::string C31="cx 0.5";         // cylinder x-axis radius 0.5
+    std::string C32="px -1.0";
+    std::string C33="px -3.0";
 
     // First create some surfaces
     std::map<int,Surface*> CylSurMap;

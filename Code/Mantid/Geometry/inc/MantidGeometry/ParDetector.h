@@ -59,6 +59,7 @@ public:
   double solidAngle(const V3D& observer) const; 
 	bool isMasked() const;
 	bool isMonitor() const;
+  bool isValid(const V3D& point) const;
 	// end IDetector methods
 
 	void markAsMonitor(const bool flag = true);
