@@ -9,7 +9,11 @@ from socket import gethostname
 
 import MantidBuild
 
-rpmBuild = False
+if ARGUMENTS.get('rpmbuild',0) == 0 :
+    rpmBuild = False
+else :
+    rpmBuild = True
+
 USRLOCALINCLUDE = '/usr/local/include'
 USRLOCALLIB = '/usr/local/lib'
 USRINCLUDE = '/usr/include'
@@ -356,33 +360,31 @@ if int(bigshared) :
     big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
     env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
 
-if not rpmBuild:
-
-	#User Algs
-	ret = SConscript(['UserAlgorithms/SConscript'])
-	env.Install('Bin/Plugins', ret['shared'])
+# User Algs
+ret = SConscript(['UserAlgorithms/SConscript'])
+env.Install('Bin/Plugins', ret['shared'])
     
-	# matlab interface
-	if int(matlab) :
-    	    ret = SConscript(['MatlabAPI/SConscript'])
-    	    env.Install('Bin/Shared', ret['shared'])
+# matlab interface
+if int(matlab) :
+       ret = SConscript(['MatlabAPI/SConscript'])
+       env.Install('Bin/Shared', ret['shared'])
 
-	# main program
-	ret = SConscript(['Main/SConscript'])
-	env.Install('Bin/Shared', ret['shared'])
+# main program
+ret = SConscript(['Main/SConscript'])
+env.Install('Bin/Shared', ret['shared'])
 
-	skiptest=ARGUMENTS.get('skiptest',0)
-	if not int(skiptest):
-		print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
+skiptest=ARGUMENTS.get('skiptest',0)
+if not int(skiptest):
+	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
 		# tests
-		if os.name == 'nt':
-			ret = SConscript(['Build/Tests/SConscript'])
-		else:
-			cxxtestgen = env.WhereIs('cxxtestgen.py')
-			if cxxtestgen != None :
-				ret = SConscript(['Build/Tests/SConscript'])
-			else :
-				print 'CXXTESTGEN is not installed - tests will not be built'
+	if os.name == 'nt':
+		ret = SConscript(['Build/Tests/SConscript'])
 	else:
-		print "Not Building Tests."
+		cxxtestgen = env.WhereIs('cxxtestgen.py')
+		if cxxtestgen != None :
+			ret = SConscript(['Build/Tests/SConscript'])
+		else :
+			print 'CXXTESTGEN is not installed - tests will not be built'
+else:
+	print "Not Building Tests."
 
