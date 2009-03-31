@@ -50,10 +50,11 @@ namespace Kernel
         //attempt to load the default properties file that resides in the directory of the executable
 	loadConfig( getBaseDir() + "Mantid.properties");
 
-    //Fill the list of possible relative path keys that may require conversion to absolute paths
+	//Fill the list of possible relative path keys that may require conversion to absolute paths
 	m_vConfigPaths.clear();
 	m_vConfigPaths.push_back("plugins.directory");
 	m_vConfigPaths.push_back("instrumentDefinition.directory");
+	m_vConfigPaths.push_back("pythonscripts.directory");
 	m_vConfigPaths.push_back("ManagedWorkspace.FilePath");
 	
 	convertRelativePaths();

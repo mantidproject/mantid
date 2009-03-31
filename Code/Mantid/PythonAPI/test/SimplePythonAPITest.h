@@ -31,15 +31,21 @@ public:
 
     //does it contain what we expect
     std::ifstream is(apimodule.path().c_str());
-    //first line should import main Python API
+
+    std::string line;
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "import sys");
+    //skip 3 lines
+    for( int i = 0; i < 3; ++i ) { getline(is, line); }
+
+    //Next should import main Python API
     std::string modline("");
 #ifdef _WIN32
     modline = "from MantidPythonAPI import *";
 #else
     modline = "from libMantidPythonAPI import *";
 #endif
-    
-    std::string line;
+        
     getline( is, line );
     TS_ASSERT_EQUALS(line, modline);
     
