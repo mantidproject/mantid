@@ -246,7 +246,7 @@ bool PythonScript::exec()
 		pyret = PyObject_Call(PyCode,empty_tuple,localDict);
 		Py_DECREF(empty_tuple);
 	} else {
-		pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
+		pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
 		//pyret = PyRun_String(Code, 0, env()->globalDict(), localDict);
 	}
 	

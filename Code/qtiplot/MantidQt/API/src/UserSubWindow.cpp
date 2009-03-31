@@ -112,13 +112,7 @@ QString UserSubWindow::runPythonCode(QString & code, bool no_output)
    tmpstring.clear();
    while( !stream.atEnd() )
    {
-     QString line = stream.readLine();
-     //This bizarre line is here because in qtiplot I use a Python trace function
-     //to print the current line number and then capture this and adjust the arrow in the
-     //script window accordingly. Unfortunately this means lines such as MTDPYLN: # appear everywhere
-     //in the redirected output
-     if( line.contains("MTDPYLN") ) continue;
-     tmpstring.append(line.trimmed() + "\n");
+     tmpstring.append(stream.readLine().trimmed() + "\n");
    }
    return tmpstring;
 }

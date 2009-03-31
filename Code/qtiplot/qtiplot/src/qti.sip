@@ -914,6 +914,7 @@ public:
   MantidUI* mantidUI;
   void addUserMenu(const QString &);
   void addUserMenuAction(const QString &, const QString &, const QString &);
+  void scriptingInformation(int) const;
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);

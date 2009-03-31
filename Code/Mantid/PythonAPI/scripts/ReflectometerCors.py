@@ -1,3 +1,5 @@
+from mantidsimple import *
+
 def heliumDetectorEff(workspace):
   ''' 	Calculate the corrected Helium detector values. '''
   
@@ -10,7 +12,7 @@ def heliumDetectorEff(workspace):
   
   gn= ac*gp/vm			# Number density of gas
   sgn= gn*gsig0*gt/lam0	        # Exponential term for gas
-  
+
   OneMinusExponentialCor(workspace,workspace,str(sgn))
   
   wt= 60.014			# Molecular weight Ni-Cu g mol-1
@@ -44,13 +46,21 @@ def monitor2Eff(workspace):
   shift = (1.0/unt)-1.0
   CreateSingleValuedWorkspace("shift",str(shift),"0.0")
   Plus(workspace,"shift",workspace)
-  mantid.deleteWorkspace("shift")
+  mtd.deleteWorkspace("shift")
   OneMinusExponentialCor(workspace,workspace,str(c1))
 
   return
 
-LoadRawDialog(OutputWorkspace="ws",spectrummin="1",spectrummax="1")
-ConvertUnits("ws","ws","Wavelength",AlignBins="1")
-heliumDetectorEff("ws")
-monitor2Eff("ws")
-print "Done!"
+
+def main():
+  '''This main routine. It is executed on if the script is run directly, not if it is imported.''' 
+  LoadRawDialog(OutputWorkspace="ws",spectrummin="1",spectrummax="1")
+  ConvertUnits("ws","ws","Wavelength",AlignBins="1")
+  heliumDetectorEff("ws")
+  monitor2Eff("ws")
+  print "Done!"
+
+
+if __name__ == '__main__':
+  main()
+

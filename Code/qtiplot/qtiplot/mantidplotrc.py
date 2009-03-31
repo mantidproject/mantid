@@ -1,4 +1,4 @@
-#----------------------------------
+#------------------------------------------------
 # mantidplotrc.py
 #
 # Load Mantid python API into qtiplot
@@ -6,7 +6,20 @@
 #
 # Author Martyn Gigg, Tessella Support Services
 #
-#----------------------------------
+#----------------------------------------------
+# A tracing function to report the currently executing line number  
+#
+def traceit(frame, event, arg):
+    if event == 'line' and frame.f_globals['__name__'] == '__main__':
+        lineno = frame.f_lineno
+        qti.app.scriptingInformation(lineno)
+    return traceit
+
+# Set the trace function
+sys.settrace(traceit)
+
+## Make these functions available globally 
+# (i.e. so that the qti.qpp.mantidUI prefix is not needed)
 MantidUIImports = ['newMantidMatrix','plotSpectrum','plotTimeBin','getMantidMatrix',
                    'getInstrumentView', 'getSelectedWorkspaceName']
 
@@ -14,22 +27,13 @@ for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))
 
 import os
-
-## Check OS
+## Linux shared libraries have the 'lib' prefix
 if os.name == 'nt':
-    from MantidPythonAPI import *
+    from MantidPythonAPI import FrameworkManager
 else:
-    from libMantidPythonAPI import *
+    from libMantidPythonAPI import FrameworkManager
 
-# Ensure all algorithm libraries are loaded and get the FrameworkManager object
-mtd = FrameworkManager()
-# Have an alias
-mantid = mtd
-# Now create simple API (makes mantidsimple.py file in cwd)
-mantid.createPythonSimpleAPI(True)
-# Import definitions
+# Create simple API (makes mantidsimple.py file in cwd)
+FrameworkManager().createPythonSimpleAPI(True)
+# Import definitions to global symbol table
 from mantidsimple import *
-
-# Import some Qt modules
-from PyQt4 import QtCore
-from PyQt4 import QtGui

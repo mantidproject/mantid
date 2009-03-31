@@ -4078,7 +4078,7 @@ void ApplicationWindow::scriptError(const QString &message, const QString &, int
 void ApplicationWindow::scriptPrint(const QString &text)
 {
 #ifdef SCRIPTING_CONSOLE
-	if(!text.stripWhiteSpace().isEmpty() && !text.contains("MTDPYLN") ) console->append(text);
+	if(!text.stripWhiteSpace().isEmpty() ) console->append(text);
 #else
 	printf(text.ascii());
 #endif
@@ -15150,6 +15150,7 @@ void ApplicationWindow::runPythonScript(const QString & code)
   ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
   connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(scriptPrint(const QString &)));
   connect(script, SIGNAL(outputError(const QString &)), this, SLOT(scriptPrint(const QString &)));
+  connect(this, SIGNAL(scriptingLineChange(int)), script, SLOT(updateLineMarker(int)));
   script->importCodeBlock(code);
   d_user_script_running = true;
   script->executeAll();
@@ -15287,6 +15288,13 @@ QList<QMenu *> ApplicationWindow::menusList()
 
 // End of a section of Mantid custom functions
 //-------------------------------------------
+
+// Mantid
+void ApplicationWindow::scriptingInformation(int linenumber)
+{
+  emit scriptingLineChange(linenumber);
+}
+
 
 QList<QToolBar *> ApplicationWindow::toolBarsList()
 {

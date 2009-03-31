@@ -34,9 +34,9 @@ public:
     //first line should import main Python API
     std::string modline("");
 #ifdef _WIN32
-    modline = "from MantidPythonAPI import FrameworkManager";
+    modline = "from MantidPythonAPI import *";
 #else
-    modline = "from libMantidPythonAPI import FrameworkManager";
+    modline = "from libMantidPythonAPI import *";
 #endif
     
     std::string line;
@@ -54,6 +54,17 @@ public:
     getline( is, line );
 
     TS_ASSERT_EQUALS(line, std::string("PYTHONAPIINMANTIDPLOT = False"));
+
+    //next non-blank line should be API objects
+    //eat blank lines
+    while( getline(is, line) && ( line.empty() || line[0] == '#' ) )
+    {
+    }
+    
+    TS_ASSERT_EQUALS(line, "mantid = FrameworkManager()");
+    getline(is, line);
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "mtd = mantid");
 
     //next non-blank line should be setWorkingDirectory()
     //eat blank lines

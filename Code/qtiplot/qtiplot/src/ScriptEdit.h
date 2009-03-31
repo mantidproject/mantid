@@ -90,6 +90,7 @@ public slots:
   void setEditorActive(bool);
   void setExecuteActionsEnabled(bool);
   QString outputSeparator();
+  void updateLineMarker(int);
 
   signals:
   void outputMessage(const QString& text);

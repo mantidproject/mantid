@@ -46,9 +46,9 @@ namespace Mantid
 
       // Need to import definitions from main Python API
 #ifdef _WIN32
-      module << "from MantidPythonAPI import FrameworkManager\n";
+      module << "from MantidPythonAPI import *\n";
 #else
-      module << "from libMantidPythonAPI import FrameworkManager\n";
+      module << "from libMantidPythonAPI import *\n";
 #endif
 
       //If in gui mode also need sys and qti module
@@ -64,6 +64,12 @@ namespace Mantid
       //In GUI need to define a global variable to tell if we are using it or not
       if( gui )	module << "PYTHONAPIINMANTIDPLOT = True\n\n";
       else module << "PYTHONAPIINMANTIDPLOT = False\n\n";
+
+      //Make the FrameworkManager object available
+      module << "# The main API object\n"
+	     << "mantid = FrameworkManager()\n"
+	     << "# An alias\n"
+	     << "mtd = mantid\n\n";
 
       //First a simple function to change the working directory
       module << "# A wrapper for changing the directory\n"

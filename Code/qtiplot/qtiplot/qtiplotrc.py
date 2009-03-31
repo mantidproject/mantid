@@ -11,6 +11,8 @@ def import_to_global(modname, attrs=None, math=False):
 		mod = getattr(mod, submod)
 	if attrs==None: attrs=dir(mod)
 	for name in attrs:
+		if name == '__name__':
+			continue
 		f = getattr(mod, name)
 		setattr(__main__, name, f)
 		# make functions available in QtiPlot's math function list
@@ -226,7 +228,6 @@ from PyQt4 import QtCore
 
 # import QtiPlot's classes to the global namespace (particularly useful for fits)
 from qti import *
-
 
 # import selected methods of ApplicationWindow into the global namespace
 appImports = (

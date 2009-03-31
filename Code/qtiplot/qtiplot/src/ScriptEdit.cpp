@@ -50,8 +50,6 @@
 #include <cmath>
 #include <QDateTime>
 
-#include <iostream>
-
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
   : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0), 
     m_bIsRunning(false), m_bErrorRaised(false) //Mantid
@@ -203,22 +201,9 @@ void ScriptEdit::insertErrorMsg(const QString &message)
 
 void ScriptEdit::scriptPrint(const QString &text)
 {
-  if( text.isEmpty() || text.contains(QRegExp("^\\s$")) ) return;
+  if( text.stripWhiteSpace().isEmpty() ) return;
 
-  //If the text contains the current line number, mark the line instead of 
-  //outputting
-  if( text.contains("MTDPYLN:") ) 
-  {
-    int lineNumber = text.section(':',1, 1).toInt();
-    lineNumber += m_iFirstLineNumber - 1;
-    ensureLineVisible(lineNumber);
-    markerDeleteAll();
-    markerAdd(lineNumber, m_iCodeMarkerHandle);
-  }
-  else
-  {
-    emit outputMessage(outputSeparator() + text + "\n");
-  }
+  emit outputMessage(outputSeparator() + text + "\n");
 }
 
 QString ScriptEdit::outputSeparator()
@@ -226,7 +211,6 @@ QString ScriptEdit::outputSeparator()
   QString hashes(20, '#');
   return QString (hashes + " " + QDateTime::currentDateTime().toString() + "  " + hashes + "\n");
 }
-
 
 void ScriptEdit::insertFunction(const QString &fname)
 {
@@ -289,13 +273,21 @@ void ScriptEdit::runScript(const QString & code)
   emit ScriptIsActive(true);
 
   myScript->exec();
-
+  
   emit ScriptIsActive(false);
   m_bIsRunning = false;
   if( !m_bErrorRaised ) scriptPrint("Script execution completed successfully.");
 
   //Reenable editor
   setEditorActive(true);
+}
+
+void ScriptEdit::updateLineMarker(int number)
+{
+  int lineNumber = number + m_iFirstLineNumber - 1;
+  ensureLineVisible(lineNumber);
+  markerDeleteAll();
+  markerAdd(lineNumber, m_iCodeMarkerHandle);
 }
 
 void ScriptEdit::evaluate()

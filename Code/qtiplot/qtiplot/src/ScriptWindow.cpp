@@ -86,7 +86,7 @@ ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
 	connect(te, SIGNAL(textChanged()), this, SLOT(editChanged()));
 	connect(te, SIGNAL(abortExecution()), static_cast<QObject*>(d_app->mantidUI), SLOT(cancelAllRunningAlgorithms()));
 	connect(te, SIGNAL(ScriptIsActive(bool)), this, SLOT(executionStateChange(bool)));
-
+	connect(d_app, SIGNAL(scriptingLineChange(int)), te, SLOT(updateLineMarker(int)));
 	setCentralWidget(te);
 
 	initMenu();
@@ -490,6 +490,9 @@ void ScriptWindow::setEditEnabled(bool toggle)
   }
 }
 
+//-----------------------------------------------------
+// OutputTextArea class
+//-----------------------------------------------------
 OutputTextArea::OutputTextArea(QWidget * parent, const char * name) : QTextEdit(parent, name)
 {
   setReadOnly(true);

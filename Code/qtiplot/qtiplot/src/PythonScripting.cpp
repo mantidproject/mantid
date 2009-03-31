@@ -121,8 +121,8 @@ bool PythonScripting::exec (const QString &code, PyObject *argDict, const char *
 	PyObject *co = Py_CompileString(code.ascii(), name, Py_file_input);
 	if (co)
 	{
-		tmp = PyEval_EvalCode((PyCodeObject*)co, globals, args);
-		Py_DECREF(co);
+	  tmp = PyEval_EvalCode((PyCodeObject*)co, globals, args);
+	  Py_DECREF(co);
 	}
 	Py_DECREF(args);
 	if (!tmp) return false;
@@ -227,7 +227,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 	{
 		PyDict_SetItemString(globals, "qti", qtimod);
 		PyObject *qtiDict = PyModule_GetDict(qtimod);
-		setQObject(d_parent, "app", qtiDict);//      problem here
+		setQObject(d_parent, "app", qtiDict);
 		PyDict_SetItemString(qtiDict, "mathFunctions", math);
 		Py_DECREF(qtimod);
 	} else
@@ -243,22 +243,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 
 //	PyEval_ReleaseLock();
 	d_initialized = true;
-  
- 	std::ostringstream os;
-	os << "import sys\n"
-     << "import os.path\n\n"
-	   << "def traceit(frame, event, arg):\n"
-	   << "\tif event == \"line\":\n"
-	   << "\t\tlineno = frame.f_lineno\n"
-	   << "\t\tfilename = frame.f_globals[\"__file__\"]\n"
-	   << "\t\tif os.path.basename(filename) == \"qtiUtil.pyc\":\n"
-	   << "\t\t\tprint \"MTDPYLN:\" + str(lineno)\n"
-	   << "\treturn traceit\n\n"
-	   << "sys.settrace(traceit)\n";
-
-	PyRun_SimpleString(os.str().c_str());
-
-
+	
 }
 
 bool PythonScripting::initialize()
@@ -272,6 +257,7 @@ bool PythonScripting::initialize()
 	setQObject(this, "stdout", sys);
 	setQObject(this, "stderr", sys);
 
+
 	// Changed initialization to include a script which also loads the 
 	// MantidPythonAPI - M. Gigg
 	bool initglob = loadInitFile(d_parent->d_python_config_folder + "/qtiplotrc");
@@ -282,9 +268,9 @@ bool PythonScripting::initialize()
 	if(!initmtd)
 	  initmtd = loadInitFile("./mantidplotrc");
 
+//	PyEval_ReleaseLock();
     return (initglob && initmtd);
 
-//	PyEval_ReleaseLock();
 }
 
 PythonScripting::~PythonScripting()
@@ -352,39 +338,21 @@ bool PythonScripting::isRunning() const
 
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {
-	if(!val) return false;
-	PyObject *pyobj=NULL;
-	sipTypeDef *t;
-    for (int i=0; i<sipModuleAPI_qti.em_nrtypes; i++){
-			// Note that the SIP API is a bit confusing here.
-			// sipTypeDef.td_cname holds the C++ class name, but is NULL if that's the same as the Python class name.
-			// sipTypeDef.td_name OTOH always holds the Python class name, but prepended by the module name ("qti.")
-			if (((t=sipModuleAPI_qti.em_types[i]->type)->td_cname && !strcmp(val->className(),t->td_cname)) ||
-					(!t->td_cname && !strcmp(val->className(),t->td_name+4)))
-			{
-                pyobj=sipConvertFromInstance(val,sipModuleAPI_qti.em_types[i],NULL);
-				if (!pyobj) return false;
-				break;
-			}
-    }
-	if (!pyobj) {
-		for (int i=0; i<sipModuleAPI_qti_QtCore->em_nrtypes; i++)
-				if (((t=sipModuleAPI_qti_QtCore->em_types[i]->type)->td_cname && !strcmp(val->className(),t->td_cname)) ||
-						(!t->td_cname && !strcmp(val->className(),t->td_name+3)))
-				{
-					pyobj=sipConvertFromInstance(val,sipModuleAPI_qti_QtCore->em_types[i],NULL);
-					if (!pyobj) return false;
-					break;
-				}
-	}
-	if (!pyobj) return false;
-
-	if (dict)
-		PyDict_SetItemString(dict,name,pyobj);
-	else
-		PyDict_SetItemString(globals,name,pyobj);
-	Py_DECREF(pyobj);
-	return true;
+  if(!val) return false;
+  PyObject *pyobj=NULL;
+  
+  sipWrapperType *klass = sipFindClass(val->className());
+  if ( !klass ) return false;
+  pyobj = sipConvertFromInstance(val, klass, NULL);
+  
+  if (!pyobj) return false;
+  
+  if (dict)
+    PyDict_SetItemString(dict,name,pyobj);
+  else
+    PyDict_SetItemString(globals,name,pyobj);
+  Py_DECREF(pyobj);
+  return true;
 }
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
