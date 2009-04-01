@@ -4,11 +4,11 @@ Version:	MANTID_VERSION
 Release:	MANTID_RELEASE%{?dist}
 URL:		http://www.mantidproject.org/
 License:	GPLv2+
-Group:		Applications/Libraries
+Group:		Development/Libraries
 Source0:  	http://download.mantidproject.org/kits/%{name}-%{version}.tar.gz
-Prefix: 	/usr/local
+#Prefix: 	/usr
 Vendor:		STFC ISIS Facility
-BuildRoot:	%{_tmppath}/mantid
+BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 BuildRequires:  python >= 2.3
 BuildRequires:  scons >= 0.97
@@ -41,29 +41,25 @@ Requires:	PyQt4
 Requires:	OpenCASCADE
 Requires:	muParser
 
+%define mantidlibdir	%{_libdir}/Mantid
+%define mantidbindir	%{_bindir}
 
 %description
 Mantid
 
 %prep
 %setup -q
-rm -f Mantid/src/Build/Tests/*
-cd Mantid/src
-sed -i "s!rpmBuild = False!rpmBuild = True!" SConstruct
-sed -i "s!USRLOCALINCLUDE = '/usr/local/include'!USRLOCALINCLUDE = '/usr/local/include'!" SConstruct
-sed -i "s!USRINCLUDE = '/usr/include'!USRINCLUDE = '%{_includedir}'!" SConstruct
-sed -i "s!USRLIB = '/usr/lib'!USRLIB = '%{_libdir}'!" SConstruct
+cd Code/Mantid
+sed -i -e "s!USRLOCALINCLUDE = .*'!USRLOCALINCLUDE = '/usr/local/include'!" SConstruct
+sed -i -e "s!USRINCLUDE = .*!USRINCLUDE = '%{_includedir}'!" SConstruct
+sed -i -e "s!USRLIB = .*'!USRLIB = '%{usrlibdir}'!" SConstruct
+sed -i -e "s!MANTIDLIB = .*'!MANTIDLIB = '%{mantidlibdir}'!" SConstruct
 
 %build
-cd Mantid/src
-scons skiptest=1
-sed -i "s!rpmBuild = True!rpmBuild = False!" SConstruct
-cd ../MantidPlot/
+cd Code/Mantid
+scons rpmbuild=1 skiptest=1 debug=0
+cd ../qtiplot
 python release_date.py
-for i in MantidQt/MantidQt.pro MantidQt/mantidqt.pri qtiplot/qtiplot.pro; do \
-    sed -i "s!../../../Images!../../images!" $i; \
-    sed -i "s!-L../../Mantid/Bin/Shared!-L../../bin!" $i; \
-done
 cd MantidQt
 qmake-qt4
 make
@@ -72,22 +68,26 @@ qmake-qt4
 make
 
 %install
-python Mantid/src/Build/LinuxBuildScripts/cleanup.py
-cp -rf Mantid $RPM_BUILD_ROOT/$RPM_INSTALL_PREFIX
+if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
+mkdir -p $RPM_BUILD_ROOT/%{mantidlibdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}
+mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
+install -m755 Code/Mantid/Bin/Shared/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/Mantid/Bin/Plugins/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/qtiplot/MantidQt/lib/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/qtiplot/qtiplot/qtiplot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+echo %{mantidlibdir} > $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
 
 %clean
-#if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
+if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
 
 %files
 %defattr(-, root, root)
-/usr/local/Mantid
+%{mantidlibdir}
+%{mantidbindir}/*
+/etc/ld.so.conf.d
 
 %post
-if [ "$RPM_INSTALL_PREFIX" != "" ]; then
-    INSTALL_PREFIX=$RPM_INSTALL_PREFIX
-else
-    INSTALL_PREFIX=/usr/local
-fi
 if test `whoami` = root; then ldconfig; fi
 
 %postun

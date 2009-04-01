@@ -17,8 +17,8 @@ else :
 USRLOCALINCLUDE = '/usr/local/include'
 USRLOCALLIB = '/usr/local/lib'
 USRINCLUDE = '/usr/include'
-USRLIB = '/usr/lib'
-MANTIDLIB = '/usr/lib/Mantid'
+USRLIB = '%{usrlibdir}'
+MANTIDLIB = '/usr/lib64/Mantid'
   
 opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
@@ -293,6 +293,8 @@ MantidBuild.collectIncludes('.', 'includes')
 libDirList.append(os.path.abspath('./Bin/Shared'))
 
 if os.name != 'nt':	
+    lpts.append('-Wl,-rpath,'+opencascade_path + '/lib64')
+    lpts.append('-Wl,-rpath,'+opencascade_path + '/lib')
     if rpmBuild :
 	lpts.append('-Wl,-rpath,'+MANTIDLIB)
     else :

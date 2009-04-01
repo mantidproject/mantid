@@ -23,3 +23,8 @@ following:
     will generate a Mantid-*.tar.gz via a subversion export 
     and then build src and binary rpms in the "mybuilds" area
 
+    type      
+
+           sh make_rpm.sh -h
+
+    for more information
