@@ -12,6 +12,9 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
+#include "Poco/DirectoryIterator.h"
+#include "Poco/Path.h"
+#include "Poco/File.h"
 
 namespace Mantid
 {
@@ -46,14 +49,30 @@ namespace Mantid
       std::ofstream module(getModuleName().c_str());
       // Append the current directory and the scripts directory to the path to make importing
       // other Mantid things easier
+      module << 
+	"import sys\n"
+	"if '.' in sys.path == False:\n"
+	"\tsys.path.append('.')\n";
+
       std::string scripts_dir = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory");
-      if( !scripts_dir.empty() )
+      //If there isn't one assume one relative to the executable directory
+      if( scripts_dir.empty() ) 
       {
-	module << 
-	  "import sys\n"
-	  "if '.' in sys.path == False:\n"
-	  "\tsys.path.append('.')\n"
-	  "sys.path.append('" << scripts_dir << "')\n";
+	scripts_dir = Mantid::Kernel::ConfigService::Instance().getBaseDir() + "../scripts";
+      }
+      Poco::File attr_test(scripts_dir);
+      if( attr_test.exists() && attr_test.isDirectory() )
+      {
+	//Also append scripts directory and all sub directories
+	Poco::DirectoryIterator iend;
+	for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
+	{
+	  Poco::File entry(itr->path());
+	  if( entry.isDirectory() )
+	  {
+	    module << "sys.path.append('" << itr->path() << "')\n";
+	  }
+	}
       }
       
       // Need to import definitions from main Python API

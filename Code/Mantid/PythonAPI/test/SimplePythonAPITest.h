@@ -35,8 +35,11 @@ public:
     std::string line;
     getline(is, line);
     TS_ASSERT_EQUALS(line, "import sys");
-    //skip 3 lines
-    for( int i = 0; i < 3; ++i ) { getline(is, line); }
+    //skip lines containing append commands
+    //This will leave line containing the next either non-blank or sys cmd line
+    while( getline(is, line) && (line.empty() || line.find("sys") != std::string::npos) )
+    {
+    }
 
     //Next should import main Python API
     std::string modline("");
@@ -46,7 +49,6 @@ public:
     modline = "from libMantidPythonAPI import *";
 #endif
         
-    getline( is, line );
     TS_ASSERT_EQUALS(line, modline);
     
     //next line should be os import
