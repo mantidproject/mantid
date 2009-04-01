@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SetScalingPSD.h"
+#include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
