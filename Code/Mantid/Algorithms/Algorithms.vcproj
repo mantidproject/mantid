@@ -343,10 +343,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\SetScalingPSD.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
 				>
 			</File>
@@ -678,10 +674,6 @@
 			</File>
 			<File
 				RelativePath=".\test\RemoveBinsTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\SetScalingPSD.h"
 				>
 			</File>
 			<File
