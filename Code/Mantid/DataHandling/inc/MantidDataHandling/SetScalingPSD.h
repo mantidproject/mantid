@@ -88,6 +88,8 @@ namespace Mantid
       /// apply the shifts in posMap to the detectors in WS
       void movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
                             std::map<int,double>& scaleMap);
+      /// read the positions of detectors defined in the raw file
+      void getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos);
     };
 
   } // namespace Algorithms

@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
 #include <fstream>
+#include "LoadRaw/isisraw.h"
 
 
 namespace Mantid
@@ -76,7 +77,7 @@ namespace Algorithms
       std::map<int,double>::iterator its;
 
       IInstrument_const_sptr instrument = m_workspace->getInstrument();
-      if(scalingFile.find(".sca") || scalingFile.find(".SCA"))
+      if(scalingFile.find(".sca")!=std::string::npos || scalingFile.find(".SCA")!=std::string::npos)
       {
           std::ifstream sFile(scalingFile.c_str());
           if (!sFile)
@@ -126,9 +127,9 @@ namespace Algorithms
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
-                     scaleMap[detIndex-1]=scale;
+                      scaleMap[detIndex-1]=scale;
                   else
-                     its->second=0.5*(its->second+scale);
+                      its->second=0.5*(its->second+scale);
                   //std::cout << detIndex << scale << scaleDir << std::endl;
               }
               detIdLast=detIndex;
@@ -138,10 +139,51 @@ namespace Algorithms
               //runMoveInstrumentComp(detIndex,shift);
           }
       }
-      else if(scalingFile.find(".raw") || scalingFile.find(".RAW"))
+      else if(scalingFile.find(".raw")!=std::string::npos || scalingFile.find(".RAW")!=std::string::npos )
       {
-          // read from raw TODO
-      }
+          std::vector<int> detID;
+          std::vector<Geometry::V3D> truepos;
+          getDetPositionsFromRaw(scalingFile,detID,truepos);
+          //
+          int detectorCount=detID.size();
+          if(detectorCount<1)
+          {
+              g_log.error("Failed to read any detectors from RAW file");
+              throw std::runtime_error("Failed to read any detectors from RAW file");
+          }
+          int detIdLast=-10;
+          Geometry:: V3D truPosLast,detPosLast;
+          for(int i=0;i<detectorCount;i++)
+          {
+              int detIndex=detID[i],code;
+              double l2,theta,phi,offset;
+              Geometry::IDetector_const_sptr det = instrument->getDetector(detID[i]);
+              Geometry::V3D detPos = det->getPos();
+              Geometry::V3D shift=truepos[i]-detPos;
+              double scale;
+              if(detIdLast==detIndex-1 && detIndex>100) // merlin monitors are <100, dets >100
+              {
+                  Geometry::V3D diffI=detPos-detPosLast;
+                  Geometry::V3D diffT=truepos[i]-truPosLast;
+                  scale=diffT.norm()/diffI.norm();
+                  Geometry::V3D scaleDir=diffT/diffT.norm();
+                  double tol=1e-4;
+                  int mDir=abs(scaleDir.masterDir(tol));
+                  scaleMap[detIndex]=scale;
+                  its=scaleMap.find(detIndex-1);
+                  if(its==scaleMap.end())
+                      scaleMap[detIndex-1]=scale;
+                  else
+                      its->second=0.5*(its->second+scale);
+                  //std::cout << detIndex << scale << scaleDir << std::endl;
+              }
+              detIdLast=detID[i];
+              detPosLast=detPos;
+              truPosLast=truepos[i];
+              posMap[detIndex]=shift;
+              // read from raw TODO
+          }
+      }    
       movePos( m_workspace, posMap, scaleMap);
       return true;
   }
@@ -270,6 +312,38 @@ void SetScalingPSD::findAll(boost::shared_ptr<IComponent> comp)
             findAll((*asmb)[i]);
         }
     return;
+}
+
+void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,std::vector<int>& detID, std::vector<Geometry::V3D>& pos)
+{
+    // open raw file
+    ISISRAW iraw(NULL);
+    if (iraw.readFromFile(m_filename.c_str(),false) != 0)
+    {
+      g_log.error("Unable to open file " + m_filename);
+      throw Exception::FileError("Unable to open File:" , m_filename);
+    }
+    // get detector information
+    const int numDetector = iraw.i_det;    // number of detectors
+    const int* const rawDetID = iraw.udet;    // detector IDs
+    const float* const r = iraw.len2;      // distance from sample
+    const float* const angle = iraw.tthe;  // angle between indicent beam and direction from sample to detector (two-theta)
+    const float* const phi=iraw.ut;
+    // Is ut01 (=phi) present? Sometimes an array is present but has wrong values e.g.all 1.0 or all 2.0
+    bool phiPresent = iraw.i_use>0 && phi[0]!= 1.0 && phi[0] !=2.0;
+    if( ! phiPresent )
+    {
+         g_log.error("Unable to get Phi values from the raw file");
+    }
+    detID.reserve(numDetector);
+    pos.reserve(numDetector);
+    Geometry::V3D point;
+    for (int i = 0; i < numDetector; ++i)
+    {
+       point.spherical(r[i], angle[i], phi[i]);
+       pos.push_back(point);
+       detID.push_back(rawDetID[i]);
+    }
 }
 
 
