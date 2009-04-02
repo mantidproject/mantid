@@ -103,8 +103,7 @@ protected:
   void showInformationBox(const QString & message);
   
   /// Run a piece of python code and return any output that was written to stdout
-  /// Note that 'code' is not a const & since I have to modify it to redirect the output
-  QString runPythonCode(QString & code, bool no_output = false);
+  QString runPythonCode(const QString & code, bool no_output = false);
   
 private:
   // This is so that it can set the name

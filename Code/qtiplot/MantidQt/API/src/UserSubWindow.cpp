@@ -81,7 +81,7 @@ void UserSubWindow::showInformationBox(const QString & message)
  * @param no_output An optional flag to specify that no output is needed. If running only small commands enable this
  * as it should be faster. The default value is false
  */
-QString UserSubWindow::runPythonCode(QString & code, bool no_output)
+QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
 {
   if( no_output )
   {
@@ -101,10 +101,8 @@ QString UserSubWindow::runPythonCode(QString & code, bool no_output)
   //The file name is only valid when the file is open
    QString tmpstring = tmp_file.fileName();
    tmp_file.close();
-   code.prepend("import sys; sys.stdout = open('" + tmpstring + "', 'w')\n");
-
-   //   showInformationBox(code);
-   emit runAsPythonScript(code);
+   QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
+   emit runAsPythonScript(code_to_run);
 
    //Now get the output
    tmp_file.open();
