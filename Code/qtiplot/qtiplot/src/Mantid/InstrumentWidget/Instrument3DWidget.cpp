@@ -131,7 +131,7 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 		workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 		Axis *spectraAxis = workspace->getAxis(1);    // Careful, will throw if a Workspace1D!
 		int spectrumNumber = spectraAxis->spectraNo(indexList[0]);
-		const std::vector<double>& outputdata=workspace->readY(indexList[0]);
+		//		const std::vector<double>& outputdata=workspace->readY(indexList[0]);
 		std::vector<int> histIndexList;
 		std::vector<double> values;
 		histIndexList.push_back(indexList[0]);
@@ -267,20 +267,25 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const 
 {
 	std::vector<boost::shared_ptr<GLColor> > iColorList;
 	int noOfColors=colorMap.getNumberOfColors();
-	for(int i=0;i<values.size();i++)
+	std::vector<double>::size_type nvals = values.size();
+	for(std::vector<double>::size_type i = 0; i < nvals; i++)
 	{
 		int cIndex;
 		if(maxval-minval<0.00000001)
-			cIndex=0;
+		{
+		  cIndex = 0;
+		}
 		else
-			cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
+		{
+		  cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
+		}
 		if(cIndex<0)
 		{
-			cIndex=0;
+		  cIndex=0;
 		}
 		else if(cIndex>(noOfColors-1))
 		{
-			cIndex=(noOfColors-1);
+		  cIndex=(noOfColors-1);
 		}
 		iColorList.push_back(colorMap.getColor(cIndex));
 	} // Looping through the dectors/Actors list

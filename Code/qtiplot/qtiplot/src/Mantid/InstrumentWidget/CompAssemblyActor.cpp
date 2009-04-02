@@ -3,6 +3,7 @@
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Exception.h"
 #include "MantidObject.h"
 #include "CompAssemblyActor.h"
@@ -207,17 +208,22 @@ using namespace Geometry;
 	 */
 	void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 	{
-		for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
+		for(std::vector<ObjComponentActor*>::const_iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end(); ++iObjComp)
 		{
-			//check the component type if its detector or not
-		    const boost::shared_ptr<Mantid::Geometry::Detector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::Detector>((*iObjComp)->getObjComponent());
-			if(iDec!=boost::shared_ptr<Mantid::Geometry::Detector>())
-			{
-				idList.push_back(iDec->getID());
-			}
+		  //check the component type if its detector or not
+		  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
+		  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
+		  {
+		    idList.push_back(detector->getID());
+		    continue;
+		  }
+		  
 		}
-		for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
-			(*iAssem)->appendObjCompID(idList);
+
+		for(std::vector<CompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
+		{
+		  (*iAssem)->appendObjCompID(idList);
+		}
 	}
 
 	/**
@@ -230,20 +236,20 @@ using namespace Geometry;
 		int count=0;
 		for(std::vector<ObjComponentActor*>::iterator iObjComp=mChildObjCompActors.begin();iObjComp!=mChildObjCompActors.end();iObjComp++)
 		{
-			//check the component type if its detector or not
-		    boost::shared_ptr<Mantid::Geometry::Detector>  iDec=(boost::dynamic_pointer_cast<Mantid::Geometry::Detector>((*iObjComp)->getObjComponent()));
-			if(iDec!=boost::shared_ptr<Mantid::Geometry::Detector>())
-			{
-				(*iObjComp)->setColor((*list));
-				count++;
-				list++;
-			}
+		  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
+		  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
+		  {
+		    (*iObjComp)->setColor((*list));
+		    count++;
+		    list++;
+		    continue;
+		  }
 		}
 		for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
 		{
-			int num=(*iAssem)->setInternalDetectorColors(list);
-			list+=num;
-			count+=num;
+		  int num=(*iAssem)->setInternalDetectorColors(list);
+		  list+=num;
+		  count+=num;
 
 		}
 		return count;
@@ -270,8 +276,8 @@ using namespace Geometry;
 	{
 		if(rgb<mChildObjCompActors.size())
 		{
-			const boost::shared_ptr<Mantid::Geometry::Detector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::Detector>((mChildObjCompActors[rgb])->getObjComponent());
-			if(iDec!=boost::shared_ptr<Mantid::Geometry::Detector>())
+			const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb])->getObjComponent());
+			if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
 				return iDec->getID();
 			std::cout<<"Error:::: non detector is drawn"<<std::endl;
 		}
