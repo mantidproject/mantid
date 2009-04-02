@@ -178,7 +178,7 @@ public:
   {
     bool result = false;
 
-    if ( this->direction() == Kernel::Direction::Output )
+    if ( this->direction() ) // Output or InOut
     {
       // Check that workspace exists
       if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");

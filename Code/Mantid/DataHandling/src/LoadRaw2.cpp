@@ -88,7 +88,7 @@ namespace Mantid
         throw Exception::FileError("Unable to open File:" , m_filename);
       }
       isisRaw->ioRAW(file, true);
-      std::string title(isisRaw->hdr.hd_title);
+      const std::string title(isisRaw->hdr.hd_title);
       g_log.information("**** Run title: "+title+ "***");
 
       // Read in the number of spectra in the RAW file
@@ -160,6 +160,7 @@ namespace Mantid
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+      localWorkspace->setTitle(title);
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
       //if (dhdr.d_comp == 0) throw std::runtime_error("Oops..");

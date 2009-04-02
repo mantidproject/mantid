@@ -111,16 +111,16 @@ public:
 class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace
 {
 public:
-    /// Constructor.
-    //ITableWorkspace(int nrows=0)
     /// Virtual destructor.
     virtual ~ITableWorkspace(){}
     /// Return the workspace typeID
     virtual const std::string id() const{return "ITableWorkspace";}
-    /// Get the footprint in memory in KB.
-    //virtual long int getMemorySize() const{return 0;}
 
-    /// Creates a new column.
+    /** Creates a new column
+     * @param type The datatype of the column
+     * @param name The name to assign to the column
+     * @return True if the column was successfully added
+     */
     virtual bool addColumn(const std::string& type, const std::string& name) = 0;
 
     /// Creates n new columns of the same type.
