@@ -17,7 +17,7 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-UserSubWindow::UserSubWindow(QWidget* parent) :  QMdiSubWindow(parent), m_bIsInitialized(false), m_ifacename("")
+UserSubWindow::UserSubWindow(QWidget* parent) :  QWidget(parent), m_bIsInitialized(false), m_ifacename("")
 {
 }
 
@@ -40,7 +40,6 @@ void UserSubWindow::initializeLayout()
 
   //Se the object name to the interface name
   setObjectName(m_ifacename);
-  setOption(QMdiSubWindow::RubberBandResize);
 
   //Set the icon
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));

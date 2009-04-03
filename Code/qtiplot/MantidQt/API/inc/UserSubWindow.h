@@ -20,7 +20,7 @@
 #include "DllOption.h"
 #include "InterfaceFactory.h"
 
-#include <QMdiSubWindow>
+#include <QWidget>
 
 //----------------------------------
 // Qt Forward declarations
@@ -69,7 +69,7 @@ class InterfaceManagerImpl;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QMdiSubWindow
+class EXPORT_OPT_MANTIDQT_API UserSubWindow : public QWidget
 {
   
   Q_OBJECT
