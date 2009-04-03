@@ -28,8 +28,8 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
-#CONFIG          += release
-CONFIG          += debug
+CONFIG          += release
+#CONFIG          += debug
 #win32: CONFIG   += console
 
 ##################### 3rd PARTY HEADER FILES SECTION ########################
@@ -51,9 +51,8 @@ win32 {
 
 unix {
   INCLUDEPATH       += /usr/include/
-  INCLUDEPATH       += /usr/include/muParser
-  INCLUDEPATH       += /usr/include/qwt-qt4
-  INCLUDEPATH       += /usr/include/qwtplot3d-qt4
+  INCLUDEPATH       += /usr/include/qwt/
+  INCLUDEPATH       += /usr/include/qwtplot3d/
 }
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -66,7 +65,7 @@ unix {
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
   LIBS         += -L/usr/lib -lqwtplot3d-qt4
-  LIBS         += -L/usr/lib/ -lqwt-qt4
+  LIBS         += -L/usr/lib/ -lqwt
   LIBS         += -lgsl -lgslcblas
 
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
