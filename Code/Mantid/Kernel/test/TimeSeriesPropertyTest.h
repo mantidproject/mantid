@@ -22,17 +22,17 @@ public:
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") )
     TS_ASSERT( ! iProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<std::time_t, int> ) == *iProp->type_info()  )
+    TS_ASSERT( typeid( std::multimap<std::time_t, int> ) == *iProp->type_info()  )
     TS_ASSERT( iProp->isDefault() )
     
     TS_ASSERT( ! dProp->name().compare("doubleProp") )
     TS_ASSERT( ! dProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<std::time_t, double> ) == *dProp->type_info()  )
+    TS_ASSERT( typeid( std::multimap<std::time_t, double> ) == *dProp->type_info()  )
     TS_ASSERT( dProp->isDefault() )
     
     TS_ASSERT( ! sProp->name().compare("stringProp") )
     TS_ASSERT( ! sProp->documentation().compare("") )
-    TS_ASSERT( typeid( std::map<std::time_t, std::string> ) == *sProp->type_info()  )
+    TS_ASSERT( typeid( std::multimap<std::time_t, std::string> ) == *sProp->type_info()  )
     TS_ASSERT( sProp->isDefault() )
 	}
   

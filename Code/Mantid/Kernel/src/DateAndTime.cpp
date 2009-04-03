@@ -15,8 +15,8 @@ TimeInterval::TimeInterval(const dateAndTime& from, const dateAndTime& to)
 
 /**  Returns an intersection of this interval with \a ti
      @param ti Time interval 
-     @retrun A valid time interval if this interval intersects with \a ti or 
-     an empty interval otherwise.
+     @return A valid time interval if this interval intersects with \a ti or 
+             an empty interval otherwise.
  */
 TimeInterval TimeInterval::intersection(const TimeInterval& ti)const
 {
