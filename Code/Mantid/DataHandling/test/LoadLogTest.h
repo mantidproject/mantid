@@ -75,8 +75,10 @@ public:
 
     std::string timeSeriesString = l_timeSeries->value();
 
+    //std::cerr<<timeSeriesString<<'\n';
+
     // test that log file read in ok
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:32:38   BEG" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
   }
 
 
@@ -128,22 +130,22 @@ public:
     l_property = sample->getLogData( std::string("cphs_6") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:19:13  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
     l_property = sample->getLogData( std::string("PROP3") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:19:13  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
 
     l_property = sample->getLogData( std::string("SE_He_Level") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2007-Nov-13 15:19:13  -1" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2007-Nov-13 15:17:08  -1" );
 
     l_property = sample->getLogData( std::string("TEMP1") );
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:19:13  0" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
   }
   
 
@@ -190,7 +192,7 @@ public:
     Property *l_property = sample->getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
-    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:32:38   BEG" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
   }
 
   
