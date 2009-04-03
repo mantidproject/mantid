@@ -1000,6 +1000,7 @@ void ApplicationWindow::initMainMenu()
 	plot3DMenu->insertSeparator();
     plot3DMenu->addAction(actionImagePlot);
 	plot3DMenu->addAction(actionColorMap);
+	plot3DMenu->addAction(actionNoContourColorMap);
 	plot3DMenu->addAction(actionContourMap);
 	plot3DMenu->addAction(actionGrayMap);
 	plot3DMenu->insertSeparator();
@@ -11591,6 +11592,9 @@ void ApplicationWindow::createActions()
 	actionGrayMap = new QAction(QIcon(QPixmap(gray_map_xpm)), tr("&Gray Scale Map"), this);
 	connect(actionGrayMap, SIGNAL(activated()), this, SLOT(plotGrayScale()));
 
+	actionNoContourColorMap = new QAction(QIcon(QPixmap(color_map_xpm)), tr("Color &Fill"), this);
+	connect(actionNoContourColorMap, SIGNAL(activated()), this, SLOT(plotNoContourColorMap()));
+
 	actionSortTable = new QAction(tr("Sort Ta&ble"), this);
 	connect(actionSortTable, SIGNAL(activated()), this, SLOT(sortActiveTable()));
 
@@ -12039,6 +12043,9 @@ void ApplicationWindow::translateActionsStrings()
 	actionColorMap->setMenuText(tr("Contour + &Color Fill"));
 	actionColorMap->setToolTip(tr("Contour Lines + Color Fill"));
 
+	actionNoContourColorMap->setMenuText(tr("Color &Fill"));
+	actionNoContourColorMap->setToolTip(tr("Color Fill (No contours)"));
+
 	actionContourMap->setMenuText(tr("Contour &Lines"));
 	actionContourMap->setToolTip(tr("Contour Lines"));
 
@@ -12457,50 +12464,99 @@ MultiLayer* ApplicationWindow::plotContour(Matrix *m)
 
 MultiLayer* ApplicationWindow::plotColorMap(Matrix *m)
 {
-	if (!m) {
-        //Mantid
-        MultiLayer* plot = mantidUI->plotSpectrogram(Graph::ColorMap);
-        if (plot) return plot;
-		m = (Matrix*)activeWindow(MatrixWindow);
-		if (!m)
-			return 0;
-	}
+  if (!m) {
+    //Mantid
+    MultiLayer* plot = mantidUI->plotSpectrogram(Graph::ColorMap);
+    if (plot) return plot;
+    m = (Matrix*)activeWindow(MatrixWindow);
+    if (!m)
+      return 0;
+  }
+  
+  return plotSpectrogram(m, Graph::ColorMap);
+}
 
-	return plotSpectrogram(m, Graph::ColorMap);
+MultiLayer* ApplicationWindow::plotNoContourColorMap(Matrix *m)
+{
+  MultiLayer* ml = NULL;
+  if( !m )
+  {
+    m = qobject_cast<Matrix*>(activeWindow(MatrixWindow));
+  }
+  if( m )
+  {
+    ml = plotSpectrogram(m, Graph::ColorMap);
+  }
+  else
+  {
+    ml =  mantidUI->plotSpectrogram(Graph::ColorMap);
+  }
+  if( !ml ) 
+  {
+    QApplication::restoreOverrideCursor();
+    return 0;
+  }
+
+  Spectrogram *spgrm = dynamic_cast<Spectrogram*>(ml->activeGraph()->plotItem(0));
+  if( spgrm )
+  {
+    //1 = ImageMode
+    spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+    spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+  }
+  return ml;
 }
 
 MultiLayer* ApplicationWindow::plotImage(Matrix *m)
 {
-    if (!m) {
-		m = (Matrix*)activeWindow(MatrixWindow);
-		if (!m)
-			return 0;
-	}
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    MultiLayer* g = multilayerPlot(generateUniqueName(tr("Graph")));
-	Graph* plot = g->activeGraph();
-	setPreferences(plot);
-
-	Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
-	if (!s)
-		return 0;
-
-	s->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
-	plot->enableAxis(QwtPlot::xTop, true);
-	plot->setScale(QwtPlot::xTop, QMIN(m->xStart(), m->xEnd()), QMAX(m->xStart(), m->xEnd()));
-	plot->enableAxis(QwtPlot::xBottom, false);
-	plot->enableAxis(QwtPlot::yRight, false);
-	plot->setScale(QwtPlot::yLeft, QMIN(m->yStart(), m->yEnd()), QMAX(m->yStart(), m->yEnd()),
-					0.0, 5, 5, Graph::Linear, true);
-	plot->setAxisTitle(QwtPlot::yLeft, QString::null);
-	plot->setAxisTitle(QwtPlot::xTop, QString::null);
-	plot->setTitle(QString::null);
-
-	emit modified();
-	QApplication::restoreOverrideCursor();
-	return g;
+  MultiLayer *g = NULL;
+  Graph *plot = NULL;
+  if( !m )
+  {
+    m = qobject_cast<Matrix*>(activeWindow(MatrixWindow));
+  }
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  if( m )
+  {
+    g = multilayerPlot(generateUniqueName(tr("Graph")));
+    plot = g->activeGraph();
+    setPreferences(plot);
+    
+    Spectrogram *s = plot->plotSpectrogram(m, Graph::GrayScale);
+    if( !s ) 
+    {
+      QApplication::restoreOverrideCursor();
+      return 0;
+    }
+    s->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
+    plot->setScale(QwtPlot::xTop, QMIN(m->xStart(), m->xEnd()), QMAX(m->xStart(), m->xEnd()));
+    plot->setScale(QwtPlot::yLeft, QMIN(m->yStart(), m->yEnd()), QMAX(m->yStart(), m->yEnd()),
+		   0.0, 5, 5, Graph::Linear, true);
+  }
+  else
+  {
+    g =  mantidUI->plotSpectrogram(Graph::GrayScale);
+    if( !g ) 
+    {
+      QApplication::restoreOverrideCursor();
+      return 0;
+    }
+    plot = g->activeGraph();
+    setPreferences(plot);
+    if( plot->plotItem(0) )plot->plotItem(0)->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
+  }
+  
+  plot->enableAxis(QwtPlot::xTop, true);
+  
+  plot->enableAxis(QwtPlot::xBottom, false);
+  plot->enableAxis(QwtPlot::yRight, false);
+  plot->setAxisTitle(QwtPlot::yLeft, QString::null);
+  plot->setAxisTitle(QwtPlot::xTop, QString::null);
+  plot->setTitle(QString::null);
+  
+  emit modified();
+  QApplication::restoreOverrideCursor();
+  return g;
 }
 
 MultiLayer* ApplicationWindow::plotSpectrogram(Matrix *m, Graph::CurveType type)

@@ -250,6 +250,7 @@ public slots:
   	MultiLayer* plotContour(Matrix *m = 0);
   	MultiLayer* plotColorMap(Matrix *m = 0);
   	MultiLayer* plotImage(Matrix *m = 0);
+  	MultiLayer* plotNoContourColorMap(Matrix *m = 0);
 
 	//! Rearrange the layersin order to fit to the size of the plot window
   	void autoArrangeLayers();
@@ -1241,7 +1242,7 @@ private:
 	QAction *actionMatrixDeterminant, *actionSetMatrixProperties, *actionConvertMatrixXYZ, *actionConvertMatrixYXZ;
 	QAction *actionSetMatrixDimensions, *actionConvertMatrixDirect, *actionSetMatrixValues, *actionTransposeMatrix, *actionInvertMatrix;
 	QAction *actionPlot3DWireFrame, *actionPlot3DHiddenLine, *actionPlot3DPolygons, *actionPlot3DWireSurface;
-	QAction *actionColorMap, *actionContourMap, *actionGrayMap;
+  QAction *actionColorMap, *actionContourMap, *actionGrayMap, *actionNoContourColorMap;
 	QAction *actionDeleteFitTables, *actionShowGridDialog, *actionTimeStamp;
 	QAction *actionSmoothSavGol, *actionSmoothFFT, *actionSmoothAverage, *actionFFT;
 	QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter, *actionBandBlockFilter;
