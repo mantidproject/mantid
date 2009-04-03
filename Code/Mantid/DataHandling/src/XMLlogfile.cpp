@@ -57,7 +57,7 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
     int position;
     extractPosition >> dummy >> position;
 
-    extractedValue = nthValue(logData, position);
+    extractedValue = logData->nthValue(position);
   }
   else
   {

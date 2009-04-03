@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "Poco/File.h"
@@ -186,72 +187,6 @@ void LoadLog::exec()
       }
     } 
 
-
-
-    /*/ reset random access to beginning
-
-    inLogFile.seekg(0, std::ios::beg);
-
-
-    // Read log file into Property which is then stored in Sample object
-
-    TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(*file);
-    TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(*file);
-
-    // read in the log file
-
-    bool l_JumpToNextLogFile = false;
-
-    while ( std::getline(inLogFile, aLine, '\n') )
-    {
-      if ( !isDateTimeString(aLine) )
-      {
-        g_log.warning("File" + (*file) + " is not a standard ISIS log file. Expected to be two a column file.");
-        l_JumpToNextLogFile = true;
-        inLogFile.close();
-        break; // break out of while look
-      }
-
-      std::istringstream ins(aLine);
-
-      ins >> dateAndTime;
-
-
-      // Store log file line in Property
-
-      if ( l_kind == LoadLog::number )
-      {
-        double readNumber;
-
-        ins >> readNumber;
-
-        l_PropertyDouble->addValue(dateAndTime, readNumber);
-      }
-      else
-      {
-        l_PropertyString->addValue(dateAndTime, aLine.erase(0,19));
-      }
-
-    } // end while
-
-    if ( l_JumpToNextLogFile )
-    {
-      continue; // jump to next log file
-    }
-
-    // store Property in Sample object
-
-    if ( l_kind == LoadLog::number )
-    {
-      sample->addLogData(l_PropertyDouble);
-      delete l_PropertyString;
-    }
-    else
-    {
-      sample->addLogData(l_PropertyString);
-      delete l_PropertyDouble;
-    }//*/
-
     inLogFile.close();
   } // end for
 
@@ -273,8 +208,17 @@ void LoadLog::exec()
   }
 
   LogParser parser(icpevent_file_name);
-  //  int nPeriods = parser.nPeriods();
 
+  // Add mantid-created logs
+  Property* log = parser.createPeriodLog(Period);
+  if (log)
+  {
+      sample->addLogData(log);
+  }
+  sample->addLogData(parser.createAllPeriodsLog());
+  sample->addLogData(parser.createRunningLog());
+
+  // Add log data from the files
   for(size_t i=0;i<potentialLogFiles.size();i++)
   {
     // Make the property name by removing the workspce name and file extension from the log filename
@@ -287,7 +231,7 @@ void LoadLog::exec()
       if (j != std::string::npos)
           log_name.erase(j);
 
-      Property* log = parser.createLogProperty(potentialLogFiles[i],stringToLower(log_name),Period);
+      Property* log = parser.createLogProperty(potentialLogFiles[i],stringToLower(log_name));
       if (log)
           sample->addLogData(log);
   }

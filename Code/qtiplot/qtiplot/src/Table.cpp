@@ -1055,6 +1055,21 @@ void Table::insertRow()
 	}
 }
 
+void Table::insertRow(int row)
+{
+	if (row < numRows())
+	{
+		d_table->insertRows(row, 1);
+		emit modifiedWindow(this);
+	}
+}
+
+void Table::addRows(int num)//Mantid
+{
+    d_table->insertRows(numRows(), num);
+    emit modifiedWindow(this);
+}
+
 void Table::addCol(PlotDesignation pd)
 {
 	d_table->clearSelection();

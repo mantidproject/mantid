@@ -13,14 +13,17 @@
 #include "../ScriptWindow.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidDataObjects/TableWorkspace.h"
-
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+
+//#include "MemoryImage.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -31,6 +34,8 @@
 #include <QToolBar>
 #include <QMenu>
 #include <QInputDialog>
+
+#include <qwt_plot_curve.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -134,7 +139,13 @@ void MantidUI::init()
     appWindow()->view->addAction(actionToggleAlgorithms);
 
     update();
- 
+  
+	//MultiLayer* ml = new MultiLayer(appWindow());
+	//QString label = "caption";
+	//appWindow()->initMultilayerPlot(ml, label.replace(QRegExp("_"), "-"));
+ //   Graph *g = ml->activeGraph();
+ //   MantidCurve* tc = new MemoryImage;
+ //   g->insertPlotItem(tc,1);
 }
 
 MantidUI::~MantidUI()
@@ -1161,11 +1172,182 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   ml->setAttribute(Qt::WA_DeleteOnClose);
   
   Graph* g = ml->activeGraph();
+  g->setCurveStyle(0,3);
   g->setXAxisTitle(t->colLabel(0));
   g->setYAxisTitle(t->colLabel(1).section(".",0,0));
   g->setTitle(label.section("-",0, 0));
  
   ml->showNormal();
+}
+
+/**  Import a numeric log data. It will be shown in a graph and copied into a table
+     @param wsName The workspace name which log data will be imported
+     @param logname The name of the log property to import
+     @param filter Filter flag telling how to filter the log data. 
+                - 0 means no filtering
+                - 1 filter by running status
+                - 2 filter by period
+                - 3 filter by status & period
+ */
+void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname, int filter)
+{
+//#define DBG
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
+    if (!ws) return;
+    
+    Mantid::Kernel::Property * logData = ws->getSample()->getLogData(logname.toStdString());
+    if (!logData) return;
+
+    Mantid::Kernel::LogFilter flt(logData); 
+
+    int rowcount = flt.data()->size();
+    Table* t = new Table(appWindow()->scriptEnv, rowcount, 2, "", appWindow(), 0);
+    if( !t ) return;
+    t->askOnCloseEvent(false);
+    //Have to replace "_" since the legend widget uses them to separate things
+    QString label = logname;
+    label.replace("_","-");
+
+    appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+    t->setColName(0, "Time");
+#ifndef DBG
+    t->setColumnType(0, Table::Date);
+    t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 0, false);
+#endif
+    t->setColName(1, label.section("-",1));
+
+    int iValueCurve = 0;
+    int iFilterCurve = 1;
+
+    // Applying filters
+    if (filter > 0)
+    {
+        Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
+        if (filter == 1 || filter ==3)
+        {
+            f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->getSample()->getLogData("running"));
+            if (f) flt.addFilter(f);
+        }
+
+        if (filter == 2 || filter ==3)
+        {
+            std::vector<Mantid::Kernel::Property*> ps = ws->getSample()->getLogData();
+            for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
+                if ((*it)->name().find("period ") == 0)
+                {
+                    f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
+                    flt.addFilter(f);
+                    break;
+                }
+        }
+
+        //std::cerr<<flt.filter()->value()<<'\n';
+
+        t->addColumns(2);
+        t->setColName(2, "FTime");
+#ifndef DBG
+        t->setColumnType(2, Table::Date);
+        t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false);
+#endif
+        t->setColPlotDesignation(2,Table::X);
+        t->setColName(3, "Filter");
+
+        if (flt.filter()->size() > rowcount)
+        {
+            t->addRows(flt.filter()->size() - rowcount);
+        }
+        
+        for(int i=0;i<flt.filter()->size();i++)
+        {
+#ifdef DBG
+            t->setCell(i,2,int(flt.filter()->nthInterval(i).begin())-1223815000);
+#else
+            t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
+#endif
+            t->setCell(i,3,!flt.filter()->nthValue(i));
+        }
+
+        iValueCurve = 1;
+        iFilterCurve = 0;
+    }
+
+    // Show unfiltered data
+    //flt.clear();
+
+    Mantid::Kernel::dateAndTime lastTime;
+    double lastValue;
+    for(int i=0;i<flt.data()->size();i++)
+    {
+        lastTime = flt.data()->nthInterval(i).begin();
+        lastValue = flt.data()->nthValue(i);
+#ifdef DBG
+        t->setCell(i,0,int(flt.data()->nthInterval(i).begin())-1223815000);
+#else
+        t->setText(i,0,QString::fromStdString(flt.data()->nthInterval(i).begin_str()));
+#endif
+        t->setCell(i,1,lastValue);
+    }
+
+    if (filter && lastTime < flt.filter()->lastTime())
+    {
+        rowcount = flt.data()->size();
+        if (rowcount == t->numRows()) t->addRows(1);
+        t->setText(rowcount,0,QDateTime::fromTime_t(flt.filter()->lastTime()).toString("yyyy-MMM-dd HH:mm:ss"));
+        //t->setText(rowcount,0,QString::fromStdString(flt.filter()->nthInterval(flt.filter()->size()-1).end_str()));
+        t->setCell(rowcount,1,lastValue);
+    }
+
+  //Show table 
+
+  t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
+	    (QMIN(10,t->numRows())+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+  t->askOnCloseEvent(false);
+  t->setAttribute(Qt::WA_DeleteOnClose);
+  t->showNormal(); 
+  
+  QStringList colNames;
+  colNames << t->colName(3)<<t->colName(1);
+  MultiLayer *ml = appWindow()->multilayerPlot(t,colNames,Graph::Line);
+  ml->askOnCloseEvent(false);
+  ml->setAttribute(Qt::WA_DeleteOnClose);
+  
+  Graph* g = ml->activeGraph();
+
+#ifndef DBG
+  // Set x-axis label format
+  QDateTime dt = QDateTime::fromTime_t(flt.data()->nthInterval(0).begin());
+  QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
+  g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
+#endif
+
+  // Set style #3 (HorizontalSteps) for curve iValueCurve
+  g->setCurveStyle(iValueCurve,3);
+  QPen pn = QPen(Qt::black);
+  g->setCurvePen(iValueCurve, pn);
+
+  if (filter)
+  {
+      QwtPlotCurve *c = g->curve(iFilterCurve);
+      // Set the right axis as Y axis for the filter curve.
+      c->setAxis(2,1);
+      // Set style #3 (HorizontalSteps) for curve 1
+      g->setCurveStyle(iFilterCurve,3);
+      // Set scale of right Y-axis (#3) from 0 to 1
+      g->setScale(3,0,1);
+      // Fill area under the curve with a pattern
+      QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
+      g->setCurveBrush(iFilterCurve, br);
+      // Set line colour
+      QPen pn = QPen(Qt::gray);
+      g->setCurvePen(iFilterCurve, pn);
+  }
+  g->setXAxisTitle(t->colLabel(0));
+  g->setYAxisTitle(t->colLabel(1).section(".",0,0));
+  g->setTitle(label.section("-",0, 0));
+  g->setAutoScale();
+ 
+  ml->showNormal();
+
 }
 
 void MantidUI::showLogFileWindow()
@@ -1237,7 +1419,8 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
          }
          if (isHistogram)
          {
-             int iRow = numRows - 1;
+             int iRow = numRows;
+             t->addRows(1);
              if (i == 0) t->setCell(iRow,0,dataX[iRow]);
              t->setCell(iRow,kY,0); 
              if (errs) t->setCell(iRow,kErr,0);

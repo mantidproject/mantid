@@ -224,6 +224,8 @@ public slots:
 	void deleteSelectedRows();
 	void deleteRows(int startRow, int endRow);
 	void insertRow();
+	void insertRow(int row);//Mantid
+	void addRows(int num);//Mantid
 	//@}
 
 	//! Selection Operations

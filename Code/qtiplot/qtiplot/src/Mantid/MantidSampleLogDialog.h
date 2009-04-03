@@ -13,6 +13,7 @@
 class QTreeWidgetItem;
 class QTreeWidget;
 class QPushButton;
+class QRadioButton;
 class MantidUI;
 
 /** 
@@ -72,6 +73,9 @@ private:
 
   //Buttons to do things  
   QPushButton *buttonPlot, *buttonClose;
+
+  // Filter radio buttons
+  QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
   
   //A pointer to the MantidUI object
   MantidUI* m_mantidUI;

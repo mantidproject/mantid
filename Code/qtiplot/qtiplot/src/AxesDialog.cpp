@@ -1992,6 +1992,7 @@ void AxesDialog::showAxisFormatOptions(int format)
             boxFormat->insertItem("dd.MM.yyyy");
             boxFormat->insertItem("ddd MMMM d yy");
             boxFormat->insertItem("dd/MM/yyyy");
+            boxFormat->insertItem("HH:mm:ss");
         }
         break;
 

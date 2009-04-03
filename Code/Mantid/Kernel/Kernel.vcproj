@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DateAndTime.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DllOpen.cpp"
 				>
 			</File>
@@ -206,6 +210,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LibraryWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LogFilter.cpp"
 				>
 			</File>
 			<File
@@ -307,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\DateAndTime.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\DllExport.h"
 				>
 			</File>
@@ -376,6 +388,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\ListValidator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\LogFilter.h"
 				>
 			</File>
 			<File

@@ -5,15 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/gregorian/gregorian.hpp>
 #include <map>
 #include <vector>
 #include <ctime>
 #include <cmath>
-
-using namespace boost::posix_time;
-using namespace boost::gregorian;
 
 #ifdef WIN32
 #define isNaN(x) _isnan(x)
@@ -76,36 +71,37 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class LogParser_DllExport LogParser
 {
 public:
-    /// Default constructor
-    LogParser():m_nOfPeriods(1),m_unknown(true){}
     /// Create given the icpevent file name
     LogParser(const std::string& eventFName);
     /// Destructor
-    ~LogParser() {}
-
-    /// Returns the period if the instrument was running at the moment tim or 0 otherwise.
-    int period(ptime tim)const;
+    ~LogParser();
 
     /// Number of periods
     int nPeriods()const{return m_nOfPeriods;}
 
-    /// Returns time intervals for a period
-    std::vector<time_period> getTimes(int p)const;
-
     /// Creates a TimeSeriesProperty of either double or string type depending on the log data
     /// Returns a pointer to the created property
-    Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name, int period = 1);
+    Kernel::Property* createLogProperty(const std::string& logFName, const std::string& name)const;
+
+    /// Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active
+    Kernel::Property* createPeriodLog(int period)const;
+
+    /// Ctreates a TimeSeriesProperty<int> with all data periods
+    Kernel::Property* createAllPeriodsLog()const;
+
+    /// Ctreates a TimeSeriesProperty<bool> with running status
+    Kernel::Property* createRunningLog()const;
 
 private:
 
-    /// Time intervals when the instrument was running and the corresponding data period.
-    std::map<time_period,int> m_periods;
+    /// TimeSeriesProperty<int> containing data periods. Created by LogParser
+    Kernel::Property* m_periods;
+
+    /// TimeSeriesProperty<bool> containing running status. Created by LogParser
+    Kernel::Property* m_status;
 
     /// Number of periods
     int m_nOfPeriods;
-
-    /// Flag set if running time are unknown (icpevent file was not found)
-    bool m_unknown;
 
     /// static reference to the logger class
     static Kernel::Logger& g_log;
@@ -114,21 +110,6 @@ private:
 /// Returns the mean value if the property is TimeSeriesProperty<double>
 double LogParser_DllExport timeMean(const Kernel::Property* p);
 
-/// Returns the first value in the time series (if nimeric).
-/// Throws runtime_error if empty
-double LogParser_DllExport firstValue(const Kernel::Property* p);
-
-/// Returns the second value in the time series (if nimeric).
-/// Throws runtime_error if empty or has only single value
-double LogParser_DllExport secondValue(const Kernel::Property* p);
-
-/// Returns the last value in the time series (if nimeric).
-/// Throws runtime_error if empty
-double LogParser_DllExport lastValue(const Kernel::Property* p);
-
-/// Returns the n-th value in the numeric time series
-/// Throws runtime_error if empty
-double LogParser_DllExport nthValue(const Kernel::Property* p, int i);
 
 } // namespace DataHandling
 } // namespace Mantid
