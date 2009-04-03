@@ -56,13 +56,6 @@ void SANSRunWindow::initLayout()
 {
     m_uiForm.setupUi(this);
 
-    this->layout()->addWidget(m_uiForm.tabWidget);
-    
-    QHBoxLayout *bottom_row = new QHBoxLayout;
-    bottom_row->addStretch();
-    bottom_row->addWidget(m_uiForm.hideBtn);
-    this->layout()->addItem(bottom_row);
-
     //Button connections
     connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
     connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
@@ -507,7 +500,7 @@ void SANSRunWindow::selectUserFile()
   {
     QString start_dir = m_last_dir;
     if( QDir(m_uiForm.datadir_edit->text()).exists() ) start_dir = m_uiForm.datadir_edit->text();
-    file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_dir, "LOQ Mask File (*.com);;AllFiles (*.*)");    
+    file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_dir, "AllFiles (*.*)");    
     if( QFileInfo(file_path).isDir() ) return;
     m_uiForm.userfile_edit->setText(file_path);
   }
@@ -649,7 +642,7 @@ void SANSRunWindow::handleReduceButtonClick()
   //  py_code.replace("<WORKINGDIR>", m_data_dir);
   py_code.replace("<INSTRUMENTPATH>", m_ins_defdir);
   py_code.replace("<SCATTERSAMPLE>", m_uiForm.sct_sample_edit->text() + "_sans");
-  py_code.replace("<CANSAMPLE>", m_uiForm.sct_can_edit->text() + "_sans");
+  py_code.replace("<SCATTERCAN>", m_uiForm.sct_can_edit->text() + "_sans");
   py_code.replace("<TRANSMISSIONSAMPLE>", m_uiForm.tra_sample_edit->text() + "_trans");
   py_code.replace("<DIRECTSAMPLE>", m_uiForm.direct_sample_edit->text() + "_trans");
 
@@ -677,6 +670,7 @@ void SANSRunWindow::handleReduceButtonClick()
   }
   py_code.replace("<QDELTA>", step_prefix  + m_uiForm.q_dq->text());
   py_code.replace("<DIRECTFILE>", m_uiForm.direct_file->text());
+  py_code.replace("<FLATFILE>", m_uiForm.flat_file->text());
   
   py_code.replace("<SCALEFACTOR>", m_uiForm.scale_lbl->text());
 

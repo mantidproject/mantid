@@ -19,6 +19,7 @@ using namespace MantidQt::API;
  */
 UserSubWindow::UserSubWindow(QWidget* parent) :  QWidget(parent), m_bIsInitialized(false), m_ifacename("")
 {
+  setAttribute(Qt::WA_DeleteOnClose, false);
 }
 
 /**

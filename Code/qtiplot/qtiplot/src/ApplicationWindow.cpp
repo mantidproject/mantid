@@ -15178,19 +15178,26 @@ void ApplicationWindow::performCustomAction(QAction *action)
     //First search for an existing window
     foreach( QMdiSubWindow* sub_win, d_workspace->subWindowList() )
     {
-      if( sub_win->objectName() == action_data )
+      if( sub_win->widget()->objectName() == action_data )
       {
-	sub_win->show();
+	sub_win->widget()->show();
 	return;
       }
     }
     //If we are here the above search failed so create a new interface
-    MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, this);
+    QMdiSubWindow* usr_win = new QMdiSubWindow;
+    usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+    MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
     if( user_interface )
     {
+      usr_win->setWidget(user_interface);
       connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, SLOT(runPythonScript(const QString&)));
-      d_workspace->addSubWindow(user_interface);
-      user_interface->show();
+      d_workspace->addSubWindow(usr_win);
+      usr_win->show();
+    }
+    else
+    { 
+      delete usr_win;
     }
   }
 #else
