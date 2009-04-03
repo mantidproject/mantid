@@ -399,7 +399,7 @@ public:
     if (pmap.size() == 0)
       return;
     TYPE val = pmap.begin()->second;
-    typename timeMap::const_iterator it = pmap.begin();
+    typename std::map<dateAndTime, TYPE>::const_iterator it = pmap.begin();
     addValue(it->first, it->second);
     for (; it != pmap.end(); it++)
     {
