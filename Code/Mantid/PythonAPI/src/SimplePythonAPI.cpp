@@ -64,7 +64,8 @@ namespace Mantid
       if( attr_test.exists() && attr_test.isDirectory() )
       {
 	//Also append scripts directory and all sub directories
-	Poco::DirectoryIterator iend;
+	  module << "sys.path.append('" << scripts_dir << "')\n";
+    Poco::DirectoryIterator iend;
 	for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
 	{
 	  Poco::File entry(itr->path());
