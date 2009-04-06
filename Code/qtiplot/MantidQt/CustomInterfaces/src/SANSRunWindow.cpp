@@ -62,7 +62,7 @@ void SANSRunWindow::initLayout()
 
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
-    m_uiForm.plotBtn->setEnabled(false);
+    //    m_uiForm.plotBtn->setEnabled(false);
 
     connect(m_uiForm.reduceBtn, SIGNAL(clicked()), this, SLOT(handleReduceButtonClick()));
     //This cannot do anything at the moment
@@ -408,6 +408,21 @@ bool SANSRunWindow::workspaceExists(const QString & ws_name) const
 }
 
 /**
+ * @returns A list of the currently available workspaces
+ */
+QStringList SANSRunWindow::currentWorkspaceList() const
+{
+  std::vector<std::string> ws_list = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  std::vector<std::string>::const_iterator iend = ws_list.end();
+  QStringList current_list;
+  for( std::vector<std::string>::const_iterator itr = ws_list.begin(); itr != iend; ++itr )
+  {
+    current_list.append(QString::fromStdString(*itr));
+  }
+  return current_list;
+}
+
+/**
  * Is the user file loaded
  * @returns A boolean indicating whether the user file has been parsed in to the details tab
  */
@@ -494,16 +509,23 @@ void SANSRunWindow::selectDataDir()
  */
 void SANSRunWindow::selectUserFile()
 {
-  QString file_path = m_uiForm.userfile_edit->text();
-  
-  if( file_path.isEmpty() || QFileInfo(file_path).isDir() )
+  QString box_text = m_uiForm.userfile_edit->text();
+  QString start_path = box_text;
+  if( box_text.isEmpty() )
   {
-    QString start_dir = m_last_dir;
-    if( QDir(m_uiForm.datadir_edit->text()).exists() ) start_dir = m_uiForm.datadir_edit->text();
-    file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_dir, "AllFiles (*.*)");    
-    if( QFileInfo(file_path).isDir() ) return;
-    m_uiForm.userfile_edit->setText(file_path);
+    start_path = m_last_dir;
   }
+  
+  //  QString file_path = m_uiForm.userfile_edit->text();
+  
+//   if( file_path.isEmpty() || QFileInfo(file_path).isDir() )
+//   {
+//     QString start_dir = m_last_dir;
+//     if( QDir(m_uiForm.datadir_edit->text()).exists() ) start_dir = m_uiForm.datadir_edit->text();
+//   }
+  QString file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_path, "AllFiles (*.*)");    
+  if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return;
+  m_uiForm.userfile_edit->setText(file_path);
   
   loadUserFile();
   //path() returns the directory
@@ -689,7 +711,7 @@ void SANSRunWindow::handleReduceButtonClick()
 void SANSRunWindow::handlePlotButtonClick()
 {
   SANSPlotDialog dialog(this);
-  //  dialog.setAvailableData(m_unique_runs);
+  dialog.setAvailableData(currentWorkspaceList());
   connect(&dialog, SIGNAL(pythonCodeConstructed(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
   dialog.exec();
 }

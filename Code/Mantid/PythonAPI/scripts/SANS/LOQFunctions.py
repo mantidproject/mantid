@@ -79,7 +79,7 @@ def GetMainBank(inputWS, startid, endid, outputWS):
 # Setup the data to process
 def SetupSmallAngle(inputWS, outputWS, firstsmall, lastsmall, rmin, rmax, maskstring, xshift, yshift):
     # Get the monitor
-    GetMonitor(inputWS, "Monitor")
+    GetMonitor(inputWS, "Monitor-" + inputWS)
     # Get the small angle banks
     GetMainBank(inputWS, firstsmall, lastsmall, outputWS)
     # Mask beam stop

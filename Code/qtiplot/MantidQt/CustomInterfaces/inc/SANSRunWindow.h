@@ -68,6 +68,9 @@ private:
   ///Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString & ws_name) const;
 
+  ///Construct a QStringList of the currently loaded workspaces
+  QStringList currentWorkspaceList() const;
+
   ///Is the user file loaded
   bool isUserFileLoaded() const;
 

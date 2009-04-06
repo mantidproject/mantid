@@ -11,7 +11,7 @@ import LOQFunctions
 
 # Sort out the input. The tags get replaced by information in the LOQ GUI
 scatter_sample = '<SCATTERSAMPLE>'
-scatter_can = '<SCATTERSAMPLE>'
+scatter_can = '<SCATTERCAN>'
 trans_sample = '<TRANSMISSIONSAMPLE>'
 direct_sample = '<DIRECTSAMPLE>'
 maskstring = '<MASKSTRING>'
@@ -31,129 +31,112 @@ rescale = <SCALEFACTOR>*100.0
 direct_beam_file = '<DIRECTFILE>'
 
 ### Main correction function ###
-def Correct(inputWS, outputWS):
-	'''Performs the data reduction steps '''
+def Correct(inputWS):
+	'''Performs the data reduction steps'''
+	monitorWS = "Monitor-" + inputWS
+	wavname = "_" + str(int(wav1)) + "_" + str(int(wav2))
+	resultWS = "SmallAngle-" + inputWS + wavname
+	# Get the monitor
+	LOQFunctions.GetMonitor(inputWS, monitorWS)
+	# Get small angle banks
 	firstsmall = 130
 	lastsmall = 16130
-	LOQFunctions.SetupSmallAngle(inputWS, outputWS, firstsmall, lastsmall, rmin, rmax, maskstring, xshift, yshift)
+	# Get the small angle banks
+	LOQFunctions.GetMainBank(inputWS, firstsmall, lastsmall, resultWS)
+	# Mask beam stop
+	LOQFunctions.MaskInsideCylinder(resultWS, rmin)
+	# Mask corners
+	LOQFunctions.MaskOutsideCylinder(resultWS, rmax)
+	# Mask others that are defined
+	detlist = LOQFunctions.ConvertToDetList(maskstring)
+	LOQFunctions.MaskByDetNumber(resultWS, detlist)
+	MoveInstrumentComponent(resultWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
 
 	# Convert all of the files to wavelength and rebin
 	# ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
 	wavbin = str(wav1) + "," + str(dwav) + "," + str(wav2)
-	wavname = "_" + str(int(wav1)) + "_" + str(int(wav2))
 
-	ConvertUnits("Monitor","Monitor","Wavelength")
-	Rebin("Monitor","Monitor",wavbin)
-	ConvertUnits(outputWS,outputWS,"Wavelength")
-	Rebin(outputWS,outputWS,wavbin)
-
-# ConvertUnits("High_Angle","High_Angle","Wavelength")
-# Rebin("High_Angle","High_Angle",wavbin)
+	ConvertUnits(monitorWS, monitorWS, "Wavelength")
+	Rebin(monitorWS, monitorWS,wavbin)
+	ConvertUnits(resultWS,resultWS,"Wavelength")
+	Rebin(resultWS,resultWS,wavbin)
+	      
+	# ConvertUnits("High_Angle","High_Angle","Wavelength")
+	# Rebin("High_Angle","High_Angle",wavbin)
 	
-# FROM NOW ON JUST LOOKING AT MAIN DETECTOR DATA.....
-	
-# step 2.5 remove unwanted Wavelength bins
-# Remove non edge bins and linear interpolate #373
-# RemoveBins("High_Angle","High_Angle","3.00","3.50",Interpolation="Linear")
-# Future Missing - add cubic interpolation
-
-
-# Step 3 - Flat cell correction
-
-# OPTION 1
-# calculate from raw flood source file
-# maybe later!
-
-# OPTION 2
-# LoadRKH with scalar value for wavelength ranges
-# data/flat(wavelength)
-# LoadRKH(path+"Data/LOQ sans configuration/FLAT_CELL.061","flat","SpectraNumber")
-# CropWorkspace("flat","flat",StartSpectrum=str(firstsmall),EndSpectrum=str(lastsmall))
-# optional correct for diffrernt detector positions
-# SolidAngle("flat","flatsolidangle")
-# SolidAngle(outputWS,"solidangle")
-# Divide("flatsolidangle","solidangle","SAcorrection")
-# Divide("flat","SAcorrection","flat")
-# RETRY
-# Divide(outputWS,"flat",outputWS)
-
-# OPTION 3
-# Correction using instrument geometry
-# SolidAngle(outputWS,"solidangle")
-# Divide(outputWS,"solidangle","Small_Angle corrected by solidangle")
-
 	# Step 4 - Correct by incident beam monitor
 	# At this point need to fork off workspace name to keep a workspace containing raw counts
-	outputWS_cor = outputWS + "_tmp"
-	Divide(outputWS, "Monitor",outputWS_cor)
+	# outputWS_cor = outputWS + "_tmp"
+	tmpWS = "temporary_workspace"
+	Divide(resultWS, monitorWS, tmpWS)
 
-# 	# Step 6 - Correct by transmission
-# 	# Need to remove prompt spike and, later, flat background
+ 	# Step 6 - Correct by transmission
+ 	# Need to remove prompt spike and, later, flat background
 	trans_tmp_out = LOQFunctions.SetupTransmissionData(trans_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
 	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-	trans_ws = "transmission" + wavname
+	trans_ws = "transmission-" + inputWS + wavname
 	CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)
 	# Apply the correction
-	Divide(outputWS_cor, trans_ws, outputWS_cor)
+	Divide(tmpWS, trans_ws, tmpWS)
 	
 	# Step 7 - Correct for efficiency
-	CorrectToFile(outputWS_cor, direct_beam_file, outputWS_cor, "Wavelength", "Divide")
+	CorrectToFile(tmpWS, direct_beam_file, tmpWS, "Wavelength", "Divide")
 
 	# Step 11 - Convert to Q
 	# Convert units to Q (MomentumTransfer)
-	ConvertUnits(outputWS_cor,outputWS_cor,"MomentumTransfer")
-	ConvertUnits(outputWS,outputWS,"MomentumTransfer")
+	ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
+	ConvertUnits(resultWS,resultWS,"MomentumTransfer")
 	
 	# Need to mark the workspace as a distribution at this point to get next rebin right
-	ws = mantid.getMatrixWorkspace(outputWS_cor)
+	ws = mantid.getMatrixWorkspace(tmpWS)
 	ws.isDistribution(True)
 
 	# Calculate the solid angle corrections
-	SolidAngle(outputWS_cor,"solidangle")
+	SolidAngle(tmpWS,"solidangle")
 
 	# Rebin to desired Q bins
 	q_bins = str(q1) + "," + str(dq) + "," + str(q2)
-	Rebin(outputWS,outputWS,q_bins)
-	Rebin(outputWS_cor,outputWS_cor,q_bins)
-	RebinPreserveValue("solidangle","solidangle",q_bins)
+	Rebin(resultWS, resultWS, q_bins)
+	Rebin(tmpWS, tmpWS, q_bins)
+	RebinPreserveValue("solidangle", "solidangle", q_bins)
 
 	# Sum all spectra
-	SumSpectra(outputWS,outputWS)
-	SumSpectra(outputWS_cor,outputWS_cor)
+	SumSpectra(resultWS,resultWS)
+	SumSpectra(tmpWS,tmpWS)
 	SumSpectra("solidangle","solidangle")
 	
 	# Correct for solidangle
-	Divide(outputWS_cor,"solidangle",outputWS_cor)
+	Divide(tmpWS,"solidangle",tmpWS)
 	mantid.deleteWorkspace("solidangle")
 
 	# Now put back the fractional error from the raw count workspace into the result
-	PoissonErrors(outputWS_cor, outputWS, outputWS + wavname)
-	mantid.deleteWorkspace(outputWS_cor)
-	mantid.deleteWorkspace(outputWS)
+	PoissonErrors(tmpWS, resultWS, resultWS)
+	mantid.deleteWorkspace(tmpWS)
 
 	# Correct for sample/Can volume
-	LOQFunctions.ScaleByVolume(outputWS + wavname, rescale);
+	LOQFunctions.ScaleByVolume(resultWS, rescale);
 
-	return outputWS + wavname
+	return resultWS
 
 ### End of Correct function ###
 
 # Cross section (remove can scattering)
-# Perform correction for the sample and can and result = sample - can
+# Perform correction for the sample and can.
+# result = sample - can
 
 # Final workspace containing the output of the sample correction
-sample_correction = Correct(scatter_sample, "Small_Angle_sample")
-#can_correction = Correct(scatter_can, "Small_Angle_can")
+sample_correction = Correct(scatter_sample)
+can_correction = Correct(scatter_can)
 
-#Minus(sample_correction, can_correction, sample_correction)
-
+Minus(sample_correction, can_correction, sample_correction + "-corrected")
 #######################
 
 
 #######################
 #step 12 - Save 1D data
 # this writes to the /bin directory - why ?
-#SaveRKH(outputWS+wavname,Filename=outputWS+wavname+".Q",FirstColumnValue="MomentumTransfer")
+# Want to be able to write out to new XML format
+#SaveRKH(resultWS+wavname,Filename=resultWS+wavname+".Q",FirstColumnValue="MomentumTransfer")
 

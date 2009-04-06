@@ -747,17 +747,17 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
-         <widget class="QPushButton" name="plotBtn" >
-          <property name="text" >
-           <string>Plot</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1" >
          <widget class="QPushButton" name="reduceBtn" >
           <property name="text" >
            <string>Reduce Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QPushButton" name="plotBtn" >
+          <property name="text" >
+           <string>Plot</string>
           </property>
          </widget>
         </item>
@@ -768,7 +768,7 @@
         <rect>
          <x>21</x>
          <y>14</y>
-         <width>733</width>
+         <width>741</width>
          <height>42</height>
         </rect>
        </property>
@@ -1351,6 +1351,7 @@
     </widget>
    </item>
   </layout>
+  <zorder>tabWidget</zorder>
  </widget>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -1378,7 +1379,6 @@
   <tabstop>direct_bckd_prd</tabstop>
   <tabstop>load_dataBtn</tabstop>
   <tabstop>reduceBtn</tabstop>
-  <tabstop>plotBtn</tabstop>
   <tabstop>rad_min</tabstop>
   <tabstop>rad_max</tabstop>
   <tabstop>rad_dr</tabstop>
