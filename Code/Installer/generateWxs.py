@@ -271,6 +271,8 @@ for line in prop_file:
         prop_file_ins.write('ManagedWorkspace.LowerMemoryLimit = 40\n')
     elif line.find('plugins.directory') >= 0:
         prop_file_ins.write('plugins.directory = ../plugins\n')
+    elif line.find('pythonscripts.directory') >= 0:
+        prop_file_ins.write('pythonscripts.directory = ../scripts\n')
     elif line.find('instrumentDefinition.directory') >= 0:
         prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
     else:
