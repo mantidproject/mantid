@@ -97,6 +97,36 @@ public:
     std::string instrumentPath = ConfigService::Instance().getString("instrumentDefinition.directory");
     TS_ASSERT( Poco::Path(instrumentPath).isAbsolute() );
   } 
+
+	void TestAppendProperties()
+	{
+
+		//This should clear out all old properties
+		ConfigService::Instance().loadConfig("MantidTest.properties");
+		//this should return an empty string
+		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
+    //this should pass
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.legs"), "6");
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
+
+		//This should append a new properties file properties
+		ConfigService::Instance().loadConfig("MantidTest.user.properties",true);
+		//this should now be valid
+		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "5");
+    //this should have been overridden
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.legs"), "76");
+		//this should have been left alone
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
+
+		//This should clear out all old properties
+		ConfigService::Instance().loadConfig("MantidTest.properties");
+		//this should return an empty string
+		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
+    //this should pass
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.legs"), "6");
+	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
+
+	}
  
 private:
 	ConfigService *configSvc;

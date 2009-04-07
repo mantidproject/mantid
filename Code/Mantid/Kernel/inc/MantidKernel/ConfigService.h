@@ -115,7 +115,7 @@ class Logger;
 	  
 	public:	
 		// Loads a config file
-		void loadConfig(const std::string& filename);
+		void loadConfig(const std::string& filename, const bool append=false);
 		
 		// Searches for a configuration property
 		std::string getString(const std::string& keyName);
@@ -146,10 +146,17 @@ class Logger;
 	    
 		virtual ~ConfigServiceImpl();
 
+		// Loads a config file
+		const std::string defaultConfig() const;
+
     /// the POCO file config object
 		WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
 		/// the POCO system Config Object
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
+
+		///The configuration properties in string format
+		std::string* m_pPropertyString;
+
 
 		/// Convert any relative paths to absolute ones and store them locally so that
 		/// if the working directory is altered the paths will not be affected

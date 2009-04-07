@@ -264,7 +264,7 @@ addTo(MantidDlls,'Registry',{'Id':'RegInstallDir','Root':'HKLM','Key':'Software\
 addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Software\Mantid','Name':'Version','Action':'write','Type':'string','Value':MantidVersion})
 addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
 # Modify Mantid.properties to set directories right
-prop_file = open('../Mantid/release/Mantid.properties','r')
+prop_file = open('../Mantid/Properties/Mantid.properties','r')
 prop_file_ins = open('Mantid.properties','w')
 for line in prop_file:
     if line.find('ManagedWorkspace.LowerMemoryLimit') >= 0:
