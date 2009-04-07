@@ -1,4 +1,0 @@
-RJT, 15/11/07
-=============
-
-Haven't included concept of ownership, which is in Gaudi version.

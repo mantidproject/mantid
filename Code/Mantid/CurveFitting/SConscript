@@ -15,6 +15,5 @@ listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidCurveFitting', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidCurveFitting.pdb')
-static = myenv.StaticLibrary('libstatic/MantidCurveFitting', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='libstatic/MantidCurveFitting.pdb')
-retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidCurveFitting' ] }
+retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidCurveFitting' ] }
 Return('retval')

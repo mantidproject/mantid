@@ -13,6 +13,5 @@ listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
 shared = myenv.SharedLibrary('lib/MantidNexus', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidNexus.pdb')
-static = myenv.StaticLibrary('libstatic/MantidNexus', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'],PDB='libstatic/MantidNexus.pdb')
-retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': ['MantidNexus'] }
+retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': ['MantidNexus'] }
 Return('retval')

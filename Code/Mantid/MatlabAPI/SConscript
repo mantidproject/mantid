@@ -31,7 +31,6 @@ shared_sources=listCpps[:]
 shared_sources.append('linkoptions.def')
 shared_sources.append('src/mwdebug.c')
 shared = myenv.SharedLibrary('lib/MantidMatlabAPI', shared_sources, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidMatlabAPI.pdb')
-static = myenv.StaticLibrary('libstatic/MantidMatlabAPI', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='libstatic/MantidMatlabAPI.pdb')
-retval = { 'shared': shared, 'static': static, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidMatlabAPI' ] }
+retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidMatlabAPI' ] }
 Clean(shared, 'src/mwdebug.c')
 Return('retval')

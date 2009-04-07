@@ -1,4 +1,0 @@
-RJT, 19/09/07
-=============
-
-Essentially identical to the Gaudi v19.4 version.

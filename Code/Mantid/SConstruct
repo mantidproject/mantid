@@ -340,10 +340,8 @@ f=open('libs.txt', 'w')
 for subproj in subProjs:
 	ret = SConscript([subproj+'/SConscript'])
 	env.Install('Bin/Shared', ret['shared'])
-	#env.Install('Bin/Static', ret['static'])
 	f.write(str( ret['shared'][0]) + '\n')
 	shared_libraries.insert(0,ret['shared'])
-	static_libraries.insert(0,ret['static'])
 	shared_objects = shared_objects + ret['sharedobjs']
 	lib_list.insert(0,ret['libs'])
 	env.Replace(MYLIBLIST=orig_libs + lib_list)
@@ -351,7 +349,6 @@ for subproj in subProjs:
 f.close()
 
 env.Replace(SHARED_LIST=shared_libraries)
-#env.Replace(STATIC_LIST=static_libraries)
 
 #
 # Correct bug in windows scons - OBJSUFFIX is not substituted for some reason
