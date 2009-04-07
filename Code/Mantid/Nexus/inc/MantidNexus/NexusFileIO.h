@@ -126,6 +126,8 @@ namespace Mantid
       bool checkEntryAtLevel(const std::string& item) const;
       /// check if given attribute name is in currently opened entry
       bool checkAttributeName(const std::string& target) const;
+      /// Look for entry with given attribute (eg "signal")
+      bool checkEntryAtLevelByAttribute(const std::string& attribute, std::string& entry) const;
       /// write test field
       int writeNexusTextField( const NXhandle& h, const std::string& name, const std::string& value);
       /// search for exisiting MantidWorkpace_n entries in opened file

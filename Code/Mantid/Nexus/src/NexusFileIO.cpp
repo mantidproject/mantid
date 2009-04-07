@@ -858,10 +858,20 @@ namespace NeXus
    status=NXopengroup(fileID,"workspace","NXdata");
    if(status==NX_ERROR)
        return(1);
-   // open "values" data
-   status=NXopendata(fileID, "values");
-   if(status==NX_ERROR)
+   // open "values" data which is identified by attribute "signal", if it exists
+   std::string entry;
+   if(checkEntryAtLevelByAttribute("signal", entry))
+       status=NXopendata(fileID, entry.c_str());
+   else
+   {
+       status=NXclosegroup(fileID);
        return(2);
+   }
+   if(status==NX_ERROR)
+   {
+       status=NXclosegroup(fileID);
+       return(2);
+   }
    // read workspace data size
    int rank,dim[2],type;
    status=NXgetinfo(fileID, &rank, dim, &type);
@@ -978,11 +988,23 @@ namespace NeXus
    status=NXopengroup(fileID,"workspace","NXdata");
    if(status==NX_ERROR)
        return(1);
-
-   // read values
-   status=NXopendata(fileID,"values");
-   if(status==NX_ERROR)
+   std::string entry;
+   if(checkEntryAtLevelByAttribute("signal", entry))
+       status=NXopendata(fileID, entry.c_str());
+   else
+   {
+       status=NXclosegroup(fileID);
        return(2);
+   }
+   if(status==NX_ERROR)
+   {
+       status=NXclosegroup(fileID);
+       return(2);
+   }
+   // read values
+   //status=NXopendata(fileID,"values");
+   //if(status==NX_ERROR)
+   //    return(2);
    status=NXgetinfo(fileID, &rank, dim, &type);
    // get buffer and block size
    double *buffer=new double[dim[1]];
@@ -1091,6 +1113,38 @@ namespace NeXus
    delete[] nxname;
    delete[] nxclass;
    return(false);
+  }
+  
+
+  bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string& attribute, std::string& entry) const
+  {
+   // Search the currently open level for a section with "attribute" and return entry name
+   NXstatus status;
+   char *nxname,*nxclass;
+   int nxdatatype;
+   nxname= new char[NX_MAXNAMELEN];
+   nxclass = new char[NX_MAXNAMELEN];
+   //
+   // read nexus fields at this level
+   status=NXinitgroupdir(fileID); // just in case
+   while( (status=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   {
+      std::string nxName=nxname;
+      status=NXopendata(fileID,nxname);
+      if(checkAttributeName("signal"))
+      {
+         entry=nxname;
+         delete[] nxname;
+         delete[] nxclass;
+         status=NXclosedata(fileID);
+         return(true);
+      }
+      status=NXclosedata(fileID);
+   }
+   delete[] nxname;
+   delete[] nxclass;
+   return(false);
+
   }
   
 
