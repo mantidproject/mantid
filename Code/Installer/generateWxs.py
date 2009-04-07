@@ -394,10 +394,6 @@ includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','Man
 IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI','{052A15D4-97A0-4ce5-A872-E6871485E734}',includeMantidPythonAPIDir)
 addAllFiles('../Mantid/includes/MantidPythonAPI','papi',IncludeMantidPythonAPI)
 
-includeMantidServicesDir = addDirectory('IncludeMantidServicesDir','SERV','MantidServices',includeDir)
-IncludeMantidServices = addComponent('IncludeMantidServices','{7EC9AF3A-3907-42bf-8542-DCBFFD9ECFE5}',includeMantidServicesDir)
-addAllFiles('../Mantid/includes/MantidServices','serv',IncludeMantidServices)
-
 boostList = addCompList('boost','../Third_Party/include/boost','boost',includeDir)
 pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)
 #-------------------  end of Includes ---------------------------------------
