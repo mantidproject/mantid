@@ -6,7 +6,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/SignalChannel.h"
-#include "MantidKernel/exception.h"
+#include "MantidKernel/Exception.h"
 #include "Poco/Util/LoggingConfigurator.h"
 #include "Poco/Util/SystemConfiguration.h"
 #include "Poco/Util/PropertyFileConfiguration.h"
@@ -161,7 +161,7 @@ namespace Mantid
 
 				//slurp in entire file - extremely unlikely delimter used as an alternate to \n
 				std::string temp; 
-				getline(propFile,temp,'¿');
+				getline(propFile,temp,'¬');
 				propFile.close();
  
 				if ((!good) || (temp==""))
