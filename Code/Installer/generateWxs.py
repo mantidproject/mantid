@@ -546,7 +546,6 @@ addCRef('IncludeMantidGeometry',Includes)
 addCRef('IncludeMantidKernel',Includes)
 addCRef('IncludeMantidNexus',Includes)
 addCRef('IncludeMantidPythonAPI',Includes)
-addCRef('IncludeMantidServices',Includes)
 addCRefs(boostList,Includes)
 addCRefs(pocoList,Includes)
 
