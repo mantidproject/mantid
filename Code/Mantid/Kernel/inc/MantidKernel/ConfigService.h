@@ -114,6 +114,12 @@ class Logger;
 	  // Back to the ConfigService class itself...
 	  
 	public:	
+		/// The filename of the Mantid properties file
+		static const std::string PROPERTIES_FILE_NAME;
+		/// The filename of the Mantid user properties file
+		static const std::string USER_PROPERTIES_FILE_NAME;
+
+
 		// Loads a config file
 		void loadConfig(const std::string& filename, const bool append=false);
 		
@@ -146,17 +152,16 @@ class Logger;
 	    
 		virtual ~ConfigServiceImpl();
 
-		// Loads a config file
+		/// Provies a string of a default configuration
 		const std::string defaultConfig() const;
+
+		/// Writes out a fresh user properties file
+		void createUserPropertiesFile() const;
 
     /// the POCO file config object
 		WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
 		/// the POCO system Config Object
 		WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
-
-		///The configuration properties in string format
-		std::string* m_pPropertyString;
-
 
 		/// Convert any relative paths to absolute ones and store them locally so that
 		/// if the working directory is altered the paths will not be affected
@@ -173,6 +178,9 @@ class Logger;
 
     /// The directory that is considered to be the base directory
     std::string m_strBaseDir;
+
+		///The configuration properties in string format
+		std::string m_PropertyString;
 	};
 	
 	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

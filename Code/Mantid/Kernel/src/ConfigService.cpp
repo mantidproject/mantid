@@ -22,6 +22,11 @@ namespace Mantid
 	namespace Kernel
 	{
 
+		/// The filename of the Mantid properties file
+		const std::string ConfigServiceImpl::PROPERTIES_FILE_NAME = "Mantid.properties";
+		/// The filename of the Mantid user properties file
+		const std::string ConfigServiceImpl::USER_PROPERTIES_FILE_NAME = "Mantid.user.properties";
+
 		//-------------------------------
 		// Private member functions
 		//-------------------------------
@@ -32,7 +37,6 @@ namespace Mantid
 			//getting at system details
 			m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
 			m_pConf = 0;
-			m_pPropertyString = 0;
 
 			//Register the FilterChannel with the Poco logging factory
 			Poco::LoggingFactory::defaultFactory().registerChannelClass("FilterChannel",new Poco::Instantiator<Poco::FilterChannel, Poco::Channel>);
@@ -51,9 +55,9 @@ namespace Mantid
 			}
 
 			//attempt to load the default properties file that resides in the directory of the executable
-			loadConfig( getBaseDir() + "Mantid.properties");
+			loadConfig( getBaseDir() + PROPERTIES_FILE_NAME);
 			//and then append the user properties
-			loadConfig( getBaseDir() + "Mantid.user.properties", true);
+			loadConfig( getBaseDir() + USER_PROPERTIES_FILE_NAME, true);
 
 			//Fill the list of possible relative path keys that may require conversion to absolute paths
 			m_vConfigPaths.clear();
@@ -81,7 +85,6 @@ namespace Mantid
 		{
 			delete m_pSysConfig;
 			delete m_pConf;                // potential double delete???
-			delete m_pPropertyString;
 			//		g_log.debug() << "ConfigService destroyed." << std::endl;
 		}
 
@@ -109,27 +112,67 @@ namespace Mantid
 		}
 
 		/**
+		* writes a basic placeholder user.properties file to disk
+		* any errors are caught and logged, but not propagated
+		*/
+		void ConfigServiceImpl::createUserPropertiesFile() const
+		{
+			try
+			{
+				std::fstream filestr ((m_strBaseDir + USER_PROPERTIES_FILE_NAME).c_str(), std::fstream::out);
+
+				filestr << "# This file can be used to override any properties for this installation." << std::endl;
+				filestr << "# Any properties found in this file will override any that are found in the Mantid.Properties file" << std::endl;
+				filestr << "# As this file will not be replaced with futher installations of Mantid it is a safe place to put " << std::endl;
+				filestr << "# properties that suit your particular installation." << std::endl;
+				filestr << "" << std::endl;
+				filestr << "#for example" << std::endl;
+				filestr << "#uncommenting the line below will set the number of algorithms to retain interim results for to be 90" << std::endl;
+				filestr << "#overriding any value set in the Mantid.properties file" << std::endl;
+				filestr << "#algorithms.retained = 90" << std::endl;
+
+				filestr.close();
+			}
+			catch (std::runtime_error ex)
+			{
+				g_log.error()<<"Unable to write out user.properties file to " << m_strBaseDir + USER_PROPERTIES_FILE_NAME
+					<< " error: " << ex.what() << std::endl;
+			}
+
+		}
+
+		/**
 		* Provides a default Configuration string to use if the config file cannot be loaded.
+		* @returns The string value of default properties
 		*/
 		const std::string ConfigServiceImpl::defaultConfig() const
 		{
 				std::string propFile = 
-					"logging.loggers.root.level = debug\n"
-					"logging.loggers.root.channel.class = SplitterChannel\n"
-					"logging.loggers.root.channel.channel1 = consoleChannelFilter\n"
-					"logging.loggers.root.channel.channel2 = fileChannel\n"
-					"logging.channels.consoleChannelFilter.class = FilterChannel\n"
-					"logging.channels.consoleChannelFilter.channel = ConsoleChannel\n"
-					"logging.channels.consoleChannelFilter.level = information\n"
-					"logging.channels.consoleChannel.class = ConsoleChannel\n"
-					"logging.channels.consoleChannel.formatter = f1\n"
-					"logging.channels.fileChannel.class = FileChannel\n"
-					"logging.channels.fileChannel.path = mantid.log\n"
-					"logging.channels.fileChannel.formatter.class = PatternFormatter\n"
-					"logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t\n"
-					"logging.formatters.f1.class = PatternFormatter\n"
-					"logging.formatters.f1.pattern = %s-[%p] %t\n"
-					"logging.formatters.f1.times = UTC\n";
+					"# logging configuration"
+					"# root level message filter (drop to debug for more messages)"
+					"logging.loggers.root.level = debug"
+					"# splitting the messages to many logging channels"
+					"logging.loggers.root.channel.class = SplitterChannel"
+					"logging.loggers.root.channel.channel1 = consoleChannel"
+					"logging.loggers.root.channel.channel2 = fileFilterChannel"
+					"logging.loggers.root.channel.channel3 = signalChannel"
+					"# output to the console - primarily for console based apps"
+					"logging.channels.consoleChannel.class = ConsoleChannel"
+					"logging.channels.consoleChannel.formatter = f1"
+					"# specfic filter for the file channel raising the level to warning (drop to debug for debugging)"
+					"logging.channels.fileFilterChannel.class= FilterChannel"
+					"logging.channels.fileFilterChannel.channel= fileChannel"
+					"logging.channels.fileFilterChannel.level= warning"
+					"# output to a file (For error capturing and debugging)"
+					"logging.channels.fileChannel.class = debug"
+					"logging.channels.fileChannel.path = ../logs/mantid.log"
+					"logging.channels.fileChannel.formatter.class = PatternFormatter"
+					"logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t"
+					"logging.formatters.f1.class = PatternFormatter"
+					"logging.formatters.f1.pattern = %s-[%p] %t"
+					"logging.formatters.f1.times = UTC;"
+					"# SignalChannel - Passes messages to the MantidPlot User interface"
+					"logging.channels.signalChannel.class = SignalChannel";
 				return propFile;
 		}
 
@@ -150,8 +193,7 @@ namespace Mantid
 			if (!append)
 			{
 				//remove the previous property string
-				delete m_pPropertyString;
-				m_pPropertyString = 0;
+				m_PropertyString = "";
 			}
    
 			try
@@ -164,23 +206,30 @@ namespace Mantid
 				getline(propFile,temp,'¬');
 				propFile.close();
  
+				// check if we have failed to open the file
 				if ((!good) || (temp==""))
 				{
-					throw Exception::FileError("Cannot open file",filename);
+					if (filename == m_strBaseDir + USER_PROPERTIES_FILE_NAME)
+					{
+						//write out a fresh file
+						createUserPropertiesFile();
+					}
+					else
+					{
+						throw Exception::FileError("Cannot open file",filename);
+					}
 				}
 
 				//store the property string
-				if((append) && (m_pPropertyString!=0))
+				if((append) && (m_PropertyString!=""))
 				{
-					m_pPropertyString = new std::string(*m_pPropertyString + "\n" + temp);
+					m_PropertyString = m_PropertyString + "\n" + temp;
 				}
 				else
 				{
-					m_pPropertyString = new std::string(temp);
+					m_PropertyString = temp;
 				}
 
-
-				//m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(filename);
 			}
 			catch (std::exception& e)
 			{
@@ -190,11 +239,12 @@ namespace Mantid
 				if(!append)
 				{
 					// if we have no property values then take the default
-					m_pPropertyString = new std::string(defaultConfig());
+					m_PropertyString = defaultConfig();
 				}
 			}
+
 			//use the cached property string to initialise the POCO property file
-			std::istringstream istr(*m_pPropertyString);
+			std::istringstream istr(m_PropertyString);
 			m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
 
 			try
