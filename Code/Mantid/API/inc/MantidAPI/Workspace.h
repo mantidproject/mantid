@@ -62,6 +62,12 @@ public:
     /// Get the footprint in memory in KB.
     virtual long int getMemorySize() const = 0;
 
+		/** Marks the workspace as safe for multiple threads to edit data simutaneously.
+		* Workspace creation is always considered to be a single threaded operation.
+		* @return true if the workspace is suitable for multithreaded operations, otherwise false.
+		*/
+		virtual bool threadSafe() const { return true; }
+
     /// Returns a reference to the WorkspaceHistory
     WorkspaceHistory& history() { return m_history; }
     /// Returns a reference to the WorkspaceHistory const

@@ -26,7 +26,9 @@ int main()
  // userTest.RunAllTests();
   
   Benchmark b;
-  b.RunPlusTest();
+  b.RunPlusTest(10584,2000);
+  //b.RunPlusTest(15584,2000);
+  //b.RunPlusTest(2584,2000);
 
 #if defined _DEBUG
   //NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!

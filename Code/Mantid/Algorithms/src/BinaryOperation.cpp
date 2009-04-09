@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -195,6 +196,8 @@ namespace Mantid
       
       // Now loop over the spectra of the left hand side calling the virtual function
       const int numHists = lhs->getNumberHistograms();
+
+			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
@@ -216,6 +219,8 @@ namespace Mantid
 
       // Now loop over the spectra of the left hand side calling the virtual function
       const int numHists = lhs->getNumberHistograms();
+
+			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
@@ -234,6 +239,8 @@ namespace Mantid
       // Now loop over the spectra of the left hand side pulling out the single value from each rhs 'spectrum'
       // and then calling the virtual function
       const int numHists = lhs->getNumberHistograms();
+
+			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         const double rhsY = rhs->readY(i)[0];
@@ -254,6 +261,8 @@ namespace Mantid
     {
       // Loop over the spectra calling the virtual function for each one
       const int numHists = lhs->getNumberHistograms();
+
+			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));

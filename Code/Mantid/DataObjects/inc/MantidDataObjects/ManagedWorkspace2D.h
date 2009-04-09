@@ -46,7 +46,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ManagedWorkspace2D : public Workspace2D
+	class DLLExport ManagedWorkspace2D : public Workspace2D
 {
 
   /** An MRU (most recently used) list keeps record of the last n
@@ -134,6 +134,7 @@ public:
   virtual const std::vector<double>& dataE(int const index) const;
 
   long int getMemorySize() const;
+	virtual bool threadSafe() const { return false; }
 
 protected:
 

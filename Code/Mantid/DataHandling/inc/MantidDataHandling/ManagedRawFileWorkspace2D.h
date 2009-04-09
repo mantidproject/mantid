@@ -52,7 +52,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ManagedRawFileWorkspace2D : public DataObjects::ManagedWorkspace2D
+	class DLLExport ManagedRawFileWorkspace2D : public DataObjects::ManagedWorkspace2D
 {
 public:
   /**

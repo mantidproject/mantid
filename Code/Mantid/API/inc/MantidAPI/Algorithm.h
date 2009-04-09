@@ -13,6 +13,7 @@
 	, 0)); \
   }
 
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -26,6 +27,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/Progress.h"
 
 #include <boost/shared_ptr.hpp>

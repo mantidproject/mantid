@@ -179,7 +179,7 @@ if os.name == 'nt':
 			cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
 			cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
 		else :
-			cflags = ['/Ox', '/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
+			cflags = ['/Ox', '/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
 			cflags.extend(['/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500'])
 			cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
 			cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
@@ -236,9 +236,9 @@ else :
 	libList.append('TKG2d')
 
 	if int(debug) :
-	    cflags.append(['-g','-O0','-Wall'])
+	    cflags.append(['-g','-O0','-Wall','-fopenmp'])
 	else :
-	    cflags.append(['-g','-O3','-Wall'])
+	    cflags.append(['-g','-O3','-Wall','-fopenmp'])
 
 	env.Append(LINKFLAGS=['-g'])
 	f=os.popen('gsl-config --cflags')

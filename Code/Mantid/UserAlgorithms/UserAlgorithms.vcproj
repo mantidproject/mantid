@@ -27,7 +27,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				CommandLine="copy $(OutDir)\$(SolutionName)$(ProjectName).dll $(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll /Y&#x0D;&#x0A;"
-				Outputs="$(SolutionDir)/Bin/Plugins/$(SolutionName)$(ProjectName).dll"
+				Outputs="$(SolutionDir)\debug\Mantid.properties"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -100,6 +100,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="copy $(SolutionDir)\Properties\*properties $(SolutionDir)\release /Y"
+				Outputs="$(SolutionDir)\release\Mantid.properties"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

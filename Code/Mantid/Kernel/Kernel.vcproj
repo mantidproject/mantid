@@ -26,6 +26,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				Description="Performing Custom Build Step - copying properties file to debug"
+				CommandLine="copy $(SolutionDir)\Properties\*properties $(SolutionDir)\debug /Y"
+				Outputs="$(SolutionDir)\Properties\Mantid.properties"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -404,6 +407,10 @@
 			</File>
 			<File
 				RelativePath=".\test\MandatoryValidatorTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\MultiThreaded.h"
 				>
 			</File>
 			<File

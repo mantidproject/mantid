@@ -89,24 +89,9 @@ Workspace2D_sptr Benchmark::Create2DWorkspace154Hist(int xlen, int ylen)
   return retVal;
 }  
 
-/*
-This code runs on jdmc windows workstation (4Gb, AMD Athlon X2 Dual Core Processor 3800+ 1.99Ghz) 
 
-release configuration
----------------------
-using full iterator method  : ~8 seconds
-using handcrafted looping without use of iterators: ~1.5 seconds
-
-debug configuration
--------------------
-using full iterator method  : ~52 seconds
-
-An identical fortran operation using LIBISIS takes ~0.7 seconds
-
-*/
 void Benchmark::RunPlusTest()
 {
-//  RunPlusTest(2800,41476);
 //  RunPlusTest(2584,2000);
   RunPlusTest(12584,2000);
 }
