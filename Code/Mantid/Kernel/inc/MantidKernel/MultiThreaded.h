@@ -8,7 +8,7 @@
 #ifdef _MSC_VER 
 #define PRAGMA __pragma
 #else //_MSC_VER 
-#define PRAGMA _Pragma
+#define PRAGMA(x) _Pragma(#x)
 #endif //_MSC_VER 
 
 #include <omp.h>
@@ -36,7 +36,7 @@
 *	 All three workspaces are checked to ensure they suitable for multithreaded access.
 */
 #define PARALLEL_FOR3(workspace1, workspace2, workspace3) \
-		PRAGMA(omp parallel for if (workspace1->threadSafe() && workspace2->threadSafe() && workspace3->threadSafe()))
+                PRAGMA(omp parallel for if (workspace1->threadSafe() && workspace2->threadSafe() && workspace3->threadSafe()))
 
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP

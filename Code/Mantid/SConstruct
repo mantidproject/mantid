@@ -235,6 +235,9 @@ else :
 	libList.append('TKMesh')
 	libList.append('TKG2d')
 
+	# OpenMP support library which doesn't get linked by default for some reason
+	libList.append('gomp')
+
 	if int(debug) :
 	    cflags.append(['-g','-O0','-Wall','-fopenmp'])
 	else :
