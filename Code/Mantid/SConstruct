@@ -18,7 +18,7 @@ USRLOCALINCLUDE = '/usr/local/include'
 USRLOCALLIB = '/usr/local/lib'
 USRINCLUDE = '/usr/include'
 USRLIB = '%{usrlibdir}'
-MANTIDLIB = '/usr/lib64/Mantid'
+MANTIDLIB = '/opt/Mantid/bin'
   
 opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)

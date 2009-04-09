@@ -43,8 +43,14 @@ Requires:	PyQt4
 Requires:	OpenCASCADE
 Requires:	muParser
 
-%define mantidlibdir	%{_libdir}/Mantid
-%define mantidbindir	%{_bindir}
+%define mantiddir		/opt/%{name}
+%define mantidlibdir		%{mantiddir}/bin
+%define mantidbindir		%{mantiddir}/bin
+%define mantidpluginsdir		%{mantiddir}/plugins
+%define mantidscriptsdir	%{mantiddir}/scripts
+%define mantidincludesdir	%{mantiddir}/include
+%define mantidimagesdir		%{mantiddir}/images
+%define mantidinstrumentdir	%{mantiddir}/instrument
 
 %description
 Mantid
@@ -73,21 +79,37 @@ make
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
 mkdir -p $RPM_BUILD_ROOT/%{mantidlibdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidpluginsdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidscriptsdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidimagesdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidinstrumentdir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidincludesdir}
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
-install -m755 Code/Mantid/Bin/Shared/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/Bin/Plugins/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/qtiplot/MantidQt/lib/*.so* $RPM_BUILD_ROOT/%{mantidlibdir}
+mkdir -p $RPM_BUILD_ROOT/etc/profile.d
+install -m755 Code/Mantid/Bin/Shared/*.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/Mantid/Bin/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+install -m755 Code/qtiplot/MantidQt/lib/*.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/qtiplot/qtiplot/qtiplot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
+cp -r Code/Mantid/PythonAPI/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
+cp -r Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
+cp -r Code/Mantid/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
+sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.sh > $RPM_BUILD_ROOT/etc/profile.d/mantid.sh
+sed -e "s!MANTIDBINDIR!%{mantidbindir}!" < utils/mantid.csh > $RPM_BUILD_ROOT/etc/profile.d/mantid.csh
 echo %{mantidlibdir} > $RPM_BUILD_ROOT/etc/ld.so.conf.d/Mantid-%{_arch}.conf
+install -m644 Code/Mantid/Properties/Mantid.properties $RPM_BUILD_ROOT/%{mantidbindir}
+sed -i -e "s!plugins\.directory.*!plugins.directory = %{mantidpluginsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscriptsdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 
 %clean
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
 
 %files
 %defattr(-, root, root)
-%{mantidlibdir}
-%{mantidbindir}/*
-/etc/ld.so.conf.d
+%{mantiddir}
+/etc/ld.so.conf.d/*
+/etc/profile.d/*
 
 %post
 if test `whoami` = root; then ldconfig; fi
