@@ -20,7 +20,7 @@ void CreateSingleValuedWorkspace::init()
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty("DataValue", .0);
+  declareProperty("DataValue", 0.0);
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
   declareProperty("ErrorValue", 0.0, mustBePositive);

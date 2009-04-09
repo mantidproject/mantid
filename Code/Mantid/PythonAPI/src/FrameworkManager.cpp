@@ -135,11 +135,11 @@ API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& ws
   return dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
 }
 
-/**
- * Returns a specified TableWorkspace.
- * \param wsName :: The name of the workspace to retrieve.
- * \return Shared pointer to workspace.
- **/
+///**
+// * Returns a specified TableWorkspace.
+// * \param wsName :: The name of the workspace to retrieve.
+// * \return Shared pointer to workspace.
+// **/
 // DataObjects::TableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
 // {
   // return dynamic_cast<DataObjects::TableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );

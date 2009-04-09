@@ -32,8 +32,7 @@ echo
 
 
 echo "Running the tests..."
-ln ../../Build/Tests/Mantid.properties
-ln ../../Build/Tests/UseManagedWS.properties
+ln ../../Build/Tests/*.properties .
 ./runner.exe
 echo
 
