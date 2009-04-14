@@ -173,6 +173,8 @@ void readFile(const wchar_t* ws,const wchar_t* fn,const string& lfn)
                           WINHTTP_NO_PROXY_NAME, 
                           WINHTTP_NO_PROXY_BYPASS, 0 );
 
+  WinHttpSetTimeouts(hSession,1000,1000,1000,1000);
+
   // Specify an HTTP server.
   if( hSession )
   {
