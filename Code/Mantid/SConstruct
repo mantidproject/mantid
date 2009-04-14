@@ -236,7 +236,12 @@ else :
 	libList.append('TKG2d')
 
 	# OpenMP support library which doesn't get linked by default for some reason
-	libList.append('gomp')
+	# Add the library if it is available on the system
+	conf = Configure(env)
+	if conf.CheckLib('gomp'):
+	   print 'Found OpenMP runtime library, adding to linker list'
+	   libList.append('gomp')
+	conf.Finish()
 
 	if int(debug) :
 	    cflags.append(['-g','-O0','-Wall','-fopenmp'])
