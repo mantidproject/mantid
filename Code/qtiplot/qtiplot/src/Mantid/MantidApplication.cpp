@@ -23,18 +23,20 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   }
   catch(std::exception& e)
   {
-    g_log.error()<<"Error in an event handler: "<<e.what()<<"\n";
+    g_log.fatal()<<"Unexpected exception: "<<e.what()<<"\n";
     QMessageBox ask;
     QAbstractButton *terminateButton = ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
     ask.addButton(tr("Continue"), QMessageBox::ActionRole);
-    ask.setText("An exception is caught in an event handler:\n\n"+QString::fromStdString(e.what())+
-		"\n\nWould you like to terminate MantidPlot or continue working?");
+    ask.setText("Sorry, MantidPlot has caught an unexpected exception:\n\n"+QString::fromStdString(e.what())+
+		"\n\nWould you like to terminate MantidPlot or try to continue working?\nIf you choose to continue it is advisable to save your data and restart the application.");
     ask.setIcon(QMessageBox::Critical);
     ask.exec();
     if (ask.clickedButton() == terminateButton)
     {
-      exit(-1);
+        g_log.fatal("Terminated by user.");
+        exit(-1);
     }
+    g_log.fatal("Continue working.");
   }
   return res;
 }
