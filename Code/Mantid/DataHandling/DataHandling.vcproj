@@ -181,6 +181,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CreateSampleShape.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindDetectorsInShape.cpp"
 				>
 			</File>
@@ -308,6 +312,14 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\CreateSampleShape.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CreateSampleShapeTest.h"
 				>
 			</File>
 			<File
