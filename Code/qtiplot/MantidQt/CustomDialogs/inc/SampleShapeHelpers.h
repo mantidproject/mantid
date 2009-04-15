@@ -61,6 +61,22 @@ private:
 
 
 /**
+ * A struct describing a binary operation
+ * Note: The constructor takes an integer where 0 = intersection, 1 = union and 2 = difference
+ */
+struct Operation
+{
+  /// Default constructor
+  Operation(int op = 0) : binaryop(op) {}
+  
+  /// Return the string that represnts the result of this operation
+  QString toString(QString left, QString right) const;
+  
+  /// The stored operation
+  int binaryop;
+};
+
+/**
  * The base class for the details widgets
  */
 class ShapeDetails : public QWidget
@@ -154,6 +170,74 @@ private:
   /// Centre and axis point boxes
   PointGroupBox *m_lower_centre, *m_axis;
 };
+
+/**
+ * A widget to define an infinite cylinder 
+ */
+class InfiniteCylinderDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_ninfcyls;
+
+public:
+  ///Default constructor
+  InfiniteCylinderDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~InfiniteCylinderDetails() { --g_ninfcyls; }
+
+  //Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Line edits to enter values
+  QLineEdit *m_radius_box;
+  //Unit choice boxes
+  QComboBox *m_runits;
+  /// Centre and axis point boxes
+  PointGroupBox *m_centre, *m_axis;
+};
+
+/**
+ * Base instantiator to store in a map
+ */
+struct BaseInstantiator
+{
+  /// Default constructor
+  BaseInstantiator() {}
+  ///Create an instance
+  virtual ShapeDetails* createInstance() const = 0;
+private:
+  /// Private copy constructor
+  BaseInstantiator(const BaseInstantiator&);
+  /// Private assignment operator
+  BaseInstantiator& operator =(const BaseInstantiator&);
+};
+
+/**
+ * A structure used for holding the type of a details widget
+ */
+template<class T>
+struct ShapeDetailsInstantiator : public BaseInstantiator
+{
+  /// Default constructor
+  ShapeDetailsInstantiator() {}
+  ///Create an instance of this type
+  ShapeDetails* createInstance() const
+  {
+    return static_cast<ShapeDetails*>(new T);
+  }
+
+private:
+  /// Private copy constructor
+  ShapeDetailsInstantiator(const ShapeDetailsInstantiator&);
+  /// Private assignment operator
+  ShapeDetailsInstantiator& operator =(const ShapeDetailsInstantiator&);
+};
+
 
 }
 }

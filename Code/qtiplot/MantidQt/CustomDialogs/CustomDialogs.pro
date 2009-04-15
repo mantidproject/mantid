@@ -23,16 +23,21 @@ SRCDIR = src
 
 SOURCES = \
   $$SRCDIR/LoadRawDialog.cpp \
-  $$SRCDIR/LOQScriptInputDialog.cpp
+  $$SRCDIR/LOQScriptInputDialog.cpp \
+  $$SRCDIR/CreateSampleShapeDialog.cpp \
+  $$SRCDIR/SampleShapeHelpers.cpp
 
 HEADERS = \
   $$HEADERDIR/LoadRawDialog.h \
-  $$HEADERDIR/LOQScriptInputDialog.h 
+  $$HEADERDIR/LOQScriptInputDialog.h \
+  $$HEADERDIR/CreateSampleShapeDialog.h \
+  $$HEADERDIR/SampleShapeHelpers.h
   
 UI_DIR = $$HEADERDIR
 
 FORMS = \
-  $$HEADERDIR/LOQScriptInputDialog.ui
+  $$HEADERDIR/LOQScriptInputDialog.ui \
+  $$HEADERDIR/CreateSampleShapeDialog.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
 

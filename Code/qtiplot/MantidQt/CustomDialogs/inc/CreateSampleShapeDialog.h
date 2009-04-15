@@ -17,6 +17,7 @@
 //-----------------------------------
 // Qt Forward declarations
 //---------------------------------
+class QCloseEvent;
 
 namespace MantidQt
 {
@@ -26,6 +27,8 @@ namespace CustomDialogs
 class BinaryTreeWidget;
 class BinaryTreeWidgetItem;
 class ShapeDetails;
+class BaseInstantiator;
+class Operation;
 
 /** 
     This class gives specialised dialog for the sample shape definition
@@ -62,49 +65,47 @@ public:
   
   /// Default constructor
   CreateSampleShapeDialog(QWidget *parent = 0);
+
   /// Destructor
   ~CreateSampleShapeDialog();
 
-public slots:
-  ///Context menu request
+private slots:
+  /// Context menu request
   void handleTreeContextMenuRequest(const QPoint & pos);
-
-  ///Add a new child shape
-  void addChildShape(QAction *shape);
-
-  // Setup the details box based currently selected item
+  /// Add a new shape
+  void addShape(QAction *shape);
+  /// Add operation node based on menu action
+  void addOperation(QAction *shape);
+  /// Connects to the delete slot
+  void handleDeleteRequest();
+  /// Remove an item from the tree (recursive)
+  void removeItem(BinaryTreeWidgetItem* item);
+  /// Setup the details box based currently selected item
   void setupDetailsBox();
+  ///  Change item data
+  void changeTreeData(BinaryTreeWidgetItem* item, int data);
 
 private:
-
   /// Initialize the layout
   virtual void initLayout();
-  
   /// Get the input out of the dialog
   virtual void parseInput();
-
-  /**@name Details setup functions */
-  //@{
-  /// Setup the box for a sphere
-  ShapeDetails* setupSphereDetails() const;
-
-  /// Setup the box for a cylinder
-  ShapeDetails* setupCylinderDetails() const;
-  //@}
+  /// Find the parent
+  BinaryTreeWidgetItem* getSelectedItem();
+  /// Create a details widget based upon the shape name given
+  ShapeDetails* createDetailsWidget(const QString & shapename) const;
 
 private:
   /// The form generated with Qt Designer
   Ui::CreateSampleShapeDialog m_uiForm;
-
   /// A pointer to the model for the shape tree
   BinaryTreeWidget *m_shapeTree;
-
-  /// A map of shape names to function pointers
-  typedef ShapeDetails* (CreateSampleShapeDialog::*MemFuncGetter)() const;
-  QHash<QString, MemFuncGetter> m_setup_functions;
-
+  /// A map of shape names to instantiator objects
+  QHash<QString, BaseInstantiator*> m_setup_map;
   ///A map of QTreeWidgetItem objects to their details objects
   QMap<BinaryTreeWidgetItem*, ShapeDetails*> m_details_map;
+  ///A map of QTreeWidgetItem objects to their operation objects
+  QMap<BinaryTreeWidgetItem*, Operation*> m_ops_map;
 };
 
 /**
@@ -153,8 +154,15 @@ public:
   //Return the root of the binary tree
   BinaryTreeWidgetItem* root() const;
 
-  /// Recurse through the tree in a pre-order
-  void traverseByPreorder(BinaryTreeWidgetItem* node);
+  /// Recurse through the tree in a post-order
+  void traverseInPostOrder(BinaryTreeWidgetItem* node, QList<BinaryTreeWidgetItem*> & expression);
+
+  /// Called when the data in the model is changed
+  void dataChanged(const QModelIndex & topLeft, const QModelIndex & bottomRight );
+
+signals:
+  /// Emitted when data has changed
+  void treeDataChange(BinaryTreeWidgetItem* item, int data);
 };
 
 /**
@@ -167,19 +175,16 @@ class ComboBoxDelegate : public QItemDelegate
 public:
   /// Default constructor
   ComboBoxDelegate(QWidget *parent = 0);
-
+  /// Create an editor for the item
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
 			const QModelIndex &index) const;
-  
+  ///Set the data for the editor when it has been created
   void setEditorData(QWidget *editor, const QModelIndex &index) const;
-  void setModelData(QWidget *editor, QAbstractItemModel *model,
-		    const QModelIndex &index) const;
-  
-  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-
-private:
-  /// A custom data role
-  static int g_idata_role;
+  ///Set the data for the model when editing has finished
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+  /// Ensure that the editor has the correct geometry when it is created
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, 
+			    const QModelIndex &index) const;
 };
 
 }

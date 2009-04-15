@@ -716,16 +716,20 @@ void MantidUI::executeAlgorithm(QString algName, int version)
         QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
         return;
     }
-	if (alg)
-	{		
-		 //ExecuteAlgorithm* dlg = new ExecuteAlgorithm(appWindow());
-		 //dlg->CreateLayout(alg);
-		 //dlg->setModal(true);
-    
-    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
-    if( !dlg ) return;
-		if ( dlg->exec() == QDialog::Accepted) executeAlgorithmAsync(alg);
-	}
+    if (alg)
+    {		
+      MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
+      if( !dlg ) return;
+      if ( dlg->exec() == QDialog::Accepted) 
+      { 
+	delete dlg;
+	executeAlgorithmAsync(alg); 
+      }
+      else
+      {
+	delete dlg;
+      }
+    }
 }
 
 void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog)

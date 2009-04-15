@@ -11,9 +11,10 @@
 
 using namespace MantidQt::CustomDialogs;
 
-//-----------------------------------------//
+//--------------------------------------------------------//
 //         PointGroupBox helper class
-//----------------------------------------//
+//--------------------------------------------------------//
+
 PointGroupBox::PointGroupBox(QWidget* parent) : QGroupBox(parent), m_icoord(0)
 {
   QGridLayout *grid = new QGridLayout;
@@ -139,6 +140,38 @@ QString PointGroupBox::write3DElement(const QString & elem_name) const
 }
 
 //----------------------------------------------------//
+//         Operation class member function
+//---------------------------------------------------//
+/**
+ * Take the arguments given and form a string using the
+ * current algebra
+ * @param Left-hand side of binary operation
+ * @param Right-hand side of binary operation
+ * @returns A string representing the result of the operation on the arguments
+ */
+QString Operation::toString(QString left, QString right) const
+{
+  QString result;
+  switch( binaryop )
+  {
+  // union
+  case 1:
+   result = left + ":" + right;
+    break;
+  // difference (intersection of the complement)
+  case 2:
+    result = left + " (# " + right + ")";
+    break;
+  // intersection
+  case 0: 
+  default:
+    result = left + " " + right;
+    break;
+  }
+  return "(" + result + ")";
+}
+
+//----------------------------------------------------//
 //         Base ShapeDetails
 //---------------------------------------------------//
 /**
@@ -186,7 +219,7 @@ SphereDetails::SphereDetails(QWidget *parent) : ShapeDetails(parent)
 {
   //Update number of sphere objects and the set the ID of this one
   ++g_nspheres;
-  m_idvalue = "sphere-" + QString::number(g_nspheres);
+  m_idvalue = "sphere_" + QString::number(g_nspheres);
 
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   //radius
@@ -215,15 +248,15 @@ QString SphereDetails::writeXML() const
     valr = convertToMetres(m_radius_box->text(), ShapeDetails::Unit(m_runits->currentIndex()));
   }
   QString xmldef = 
-    "<sphere id=\"" + m_idvalue + "\" />\n" + m_centre->write3DElement("centre") +
+    "<sphere id=\"" + m_idvalue + "\">\n" + m_centre->write3DElement("centre") +
     "<radius val=\"" + valr + "\" />\n"
     "</sphere>\n";
   return xmldef;
 }
 
-//-----------------------------------------//
+//--------------------------------------------------------//
 //                Cylinder
-//-----------------------------------------//
+//--------------------------------------------------------//
 /// Static counter
 int CylinderDetails::g_ncylinders = 0;
 
@@ -232,7 +265,7 @@ CylinderDetails::CylinderDetails(QWidget *parent) : ShapeDetails(parent)
 {
   /// Update number of sphere objects and the set the ID of this one
   ++g_ncylinders;
-  m_idvalue = "cylinder-" + QString::number(g_ncylinders);
+  m_idvalue = "cylinder_" + QString::number(g_ncylinders);
 
   QVBoxLayout *main_layout = new QVBoxLayout(this);
   //radius
@@ -279,7 +312,7 @@ QString CylinderDetails::writeXML() const
     valh = convertToMetres(m_height_box->text(), ShapeDetails::Unit(m_hunits->currentIndex()));
   }
   QString xmldef = 
-    "<cylinder id=\"" + m_idvalue + "\" />\n"
+    "<cylinder id=\"" + m_idvalue + "\" >\n"
     "<radius val=\"" + valr + "\" />\n"
     "<height val=\"" + valh + "\" />\n" + 
     m_lower_centre->write3DElement("centre-of-bottom-base") +
@@ -287,3 +320,57 @@ QString CylinderDetails::writeXML() const
     "</cylinder>\n";
   return xmldef;
 }
+
+//--------------------------------------------------------//
+//                InfiniteCylinder
+//--------------------------------------------------------//
+/// Static counter
+int InfiniteCylinderDetails::g_ninfcyls = 0;
+
+/// Default constructor
+InfiniteCylinderDetails::InfiniteCylinderDetails(QWidget *parent) : ShapeDetails(parent)
+{
+  /// Update number of sphere objects and the set the ID of this one
+  ++g_ninfcyls;
+  m_idvalue = "infcyl_" + QString::number(g_ninfcyls);
+
+  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  //radius
+  m_radius_box = new QLineEdit;
+  m_runits = createLengthUnitsCombo();
+  QHBoxLayout *rad_layout = new QHBoxLayout;
+  rad_layout->addWidget(new QLabel("Radius: "));
+  rad_layout->addWidget(m_radius_box);
+  rad_layout->addWidget(m_runits);
+
+  //Point boxes
+  m_centre = new PointGroupBox;
+  m_centre->setTitle("Centre");
+
+  m_axis = new PointGroupBox;
+  m_axis->setTitle("Axis");
+  
+  main_layout->addLayout(rad_layout);
+  main_layout->addWidget(m_centre);
+  main_layout->addWidget(m_axis);
+}
+
+/**
+ * Write the XML definition
+ */
+QString InfiniteCylinderDetails::writeXML() const
+{
+  QString valr("0.0");
+  if( !m_radius_box->text().isEmpty() )
+  {
+    valr = convertToMetres(m_radius_box->text(), ShapeDetails::Unit(m_runits->currentIndex()));
+  }
+  QString xmldef = 
+    "<infinite-cylinder id=\"" + m_idvalue + "\" >\n"
+    "<radius val=\"" + valr + "\" />\n" +
+    m_centre->write3DElement("centre") +
+    m_axis->write3DElement("axis") +
+    "</cylinder>\n";
+  return xmldef;
+}
+

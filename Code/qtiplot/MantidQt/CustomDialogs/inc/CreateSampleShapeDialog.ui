@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>866</width>
-    <height>360</height>
+    <width>566</width>
+    <height>354</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -26,7 +26,6 @@
        <property name="title" >
         <string>Object Tree</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3" />
       </widget>
      </item>
      <item>
@@ -57,8 +56,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>256</width>
-             <height>264</height>
+             <width>248</width>
+             <height>258</height>
             </rect>
            </property>
           </widget>
@@ -67,23 +66,20 @@
        </layout>
       </widget>
      </item>
-     <item>
-      <widget class="QGroupBox" name="three_d_box" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="title" >
-        <string>3D View</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+    <layout class="QHBoxLayout" name="bottomlayout" >
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Workspace</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="wksp_opt" />
+     </item>
      <item>
       <spacer name="horizontalSpacer" >
        <property name="orientation" >
