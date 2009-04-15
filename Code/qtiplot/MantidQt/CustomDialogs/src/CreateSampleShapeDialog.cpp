@@ -71,11 +71,19 @@ void CreateSampleShapeDialog::initLayout()
   //The main setup function
   m_uiForm.setupUi(this);
   
+  // Create the map of instantiators. The keys defined here are used to generate the shape 
+  // menu items
   m_setup_map.clear();
   m_setup_map["sphere"] = new ShapeDetailsInstantiator<SphereDetails>;
   m_setup_map["cylinder"] = new ShapeDetailsInstantiator<CylinderDetails>;
   m_setup_map["infinite cylinder"] = new ShapeDetailsInstantiator<InfiniteCylinderDetails>();
-
+  m_setup_map["cylinder ring slice"] = new ShapeDetailsInstantiator<SliceOfCylinderRingDetails>();
+  m_setup_map["cone"] = new ShapeDetailsInstantiator<ConeDetails>();
+  m_setup_map["infinite cone"] = new ShapeDetailsInstantiator<InfiniteConeDetails>();
+  m_setup_map["infinite plane"] = new ShapeDetailsInstantiator<InfinitePlaneDetails>();
+  m_setup_map["cuboid"] = new ShapeDetailsInstantiator<CuboidDetails>();
+  m_setup_map["hexahedron"] = new ShapeDetailsInstantiator<HexahedronDetails>();
+  m_setup_map["torus"] = new ShapeDetailsInstantiator<TorusDetails>();
 
   //The binary tree
   m_shapeTree = new BinaryTreeWidget(this);

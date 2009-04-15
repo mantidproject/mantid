@@ -76,6 +76,46 @@ struct Operation
   int binaryop;
 };
 
+// Forward declartion
+class ShapeDetails;
+
+/**
+ * Base instantiator to store in a map
+ */
+struct BaseInstantiator
+{
+  /// Default constructor
+  BaseInstantiator() {}
+  ///Create an instance
+  virtual ShapeDetails* createInstance() const = 0;
+private:
+  /// Private copy constructor
+  BaseInstantiator(const BaseInstantiator&);
+  /// Private assignment operator
+  BaseInstantiator& operator =(const BaseInstantiator&);
+};
+
+/**
+ * A structure used for holding the type of a details widget
+ */
+template<class T>
+struct ShapeDetailsInstantiator : public BaseInstantiator
+{
+  /// Default constructor
+  ShapeDetailsInstantiator() {}
+  ///Create an instance of this type
+  ShapeDetails* createInstance() const
+  {
+    return static_cast<ShapeDetails*>(new T);
+  }
+
+private:
+  /// Private copy constructor
+  ShapeDetailsInstantiator(const ShapeDetailsInstantiator&);
+  /// Private assignment operator
+  ShapeDetailsInstantiator& operator =(const ShapeDetailsInstantiator&);
+};
+
 /**
  * The base class for the details widgets
  */
@@ -202,41 +242,200 @@ private:
 };
 
 /**
- * Base instantiator to store in a map
+ * A widget to define an infinite cylinder 
  */
-struct BaseInstantiator
+class SliceOfCylinderRingDetails : public ShapeDetails
 {
-  /// Default constructor
-  BaseInstantiator() {}
-  ///Create an instance
-  virtual ShapeDetails* createInstance() const = 0;
+  Q_OBJECT
+
 private:
-  /// Private copy constructor
-  BaseInstantiator(const BaseInstantiator&);
-  /// Private assignment operator
-  BaseInstantiator& operator =(const BaseInstantiator&);
+  /// The number of objects that currently exist
+  static int g_ncylrings;
+
+public:
+  ///Default constructor
+  SliceOfCylinderRingDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~SliceOfCylinderRingDetails() { --g_ncylrings; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Line edits to enter values
+  QLineEdit *m_rinner_box, *m_router_box, *m_depth_box, *m_arc_box;
+  //Unit choice boxes
+  QComboBox *m_iunits, *m_ounits, *m_dunits;
 };
 
 /**
- * A structure used for holding the type of a details widget
+ * A widget to define a cone
  */
-template<class T>
-struct ShapeDetailsInstantiator : public BaseInstantiator
+class ConeDetails : public ShapeDetails
 {
-  /// Default constructor
-  ShapeDetailsInstantiator() {}
-  ///Create an instance of this type
-  ShapeDetails* createInstance() const
-  {
-    return static_cast<ShapeDetails*>(new T);
-  }
+  Q_OBJECT
 
 private:
-  /// Private copy constructor
-  ShapeDetailsInstantiator(const ShapeDetailsInstantiator&);
-  /// Private assignment operator
-  ShapeDetailsInstantiator& operator =(const ShapeDetailsInstantiator&);
+  /// The number of objects that currently exist
+  static int g_ncones;
+
+public:
+  ///Default constructor
+  ConeDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~ConeDetails() { --g_ncones; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Line edits to enter values
+  QLineEdit *m_height_box, *m_angle_box;
+  //Unit choice boxes
+  QComboBox *m_hunits;
+  /// Centre and axis point boxes
+  PointGroupBox *m_tippoint, *m_axis;
 };
+
+/**
+ * A widget to define an infinite cone
+ */
+class InfiniteConeDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_ninfcones;
+
+public:
+  ///Default constructor
+  InfiniteConeDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~InfiniteConeDetails() { --g_ninfcones; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Line edits to enter values
+  QLineEdit *m_angle_box;
+  /// Centre and axis point boxes
+  PointGroupBox *m_tippoint, *m_axis;
+};
+
+/**
+ * A widget to define an infinite plane
+ */
+class InfinitePlaneDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_ninfplanes;
+
+public:
+  ///Default constructor
+  InfinitePlaneDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~InfinitePlaneDetails() { --g_ninfplanes; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Centre and axis point boxes
+  PointGroupBox *m_plane, *m_normal;
+};
+
+/**
+ * A widget to define an infinite plane
+ */
+class CuboidDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_ncuboids;
+
+public:
+  ///Default constructor
+  CuboidDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~CuboidDetails() { --g_ncuboids; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Corner points
+  PointGroupBox *m_left_frt_bot, *m_left_frt_top, *m_left_bck_bot, *m_right_frt_bot;
+};
+
+/**
+ * A widget to define a hexahedron
+ */
+class HexahedronDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_nhexahedrons;
+
+public:
+  ///Default constructor
+  HexahedronDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~HexahedronDetails() { --g_nhexahedrons; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Corner points
+  PointGroupBox *m_left_bck_bot, *m_left_frt_bot, *m_right_frt_bot, *m_right_bck_bot,
+    *m_left_bck_top, *m_left_frt_top, *m_right_frt_top, *m_right_bck_top;
+};
+
+/**
+ * A widget to define a torus
+ */
+class TorusDetails : public ShapeDetails
+{
+  Q_OBJECT
+
+private:
+  /// The number of objects that currently exist
+  static int g_ntori;
+
+public:
+  ///Default constructor
+  TorusDetails(QWidget *parent = 0);
+
+  ///Default destructor 
+  ~TorusDetails() { --g_ntori; }
+
+  /// Write the XML definition of a sphere
+  QString writeXML() const;
+
+private:
+  /// Radius values
+  QLineEdit *m_tube_rad, *m_inner_rad;
+  //Unit choice boxes
+  QComboBox *m_tunits, *m_iunits;
+  /// Corner points
+  PointGroupBox *m_centre, *m_axis;
+};
+
 
 
 }
