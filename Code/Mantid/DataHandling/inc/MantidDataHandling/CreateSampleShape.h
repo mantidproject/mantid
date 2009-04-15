@@ -38,7 +38,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class CreateSampleShape : public Mantid::API::Algorithm
+class DLLExport CreateSampleShape : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
