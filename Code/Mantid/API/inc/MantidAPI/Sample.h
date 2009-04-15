@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/Object.h"
 
 namespace Mantid
 {
@@ -53,6 +54,9 @@ public:
   void setProtonCharge( const double &charge);
   const double& getProtonCharge() const;
 
+  void setGeometry(boost::shared_ptr<Geometry::Object> sample_shape);
+  boost::shared_ptr<Geometry::Object> getGeometry() const;
+
 private:
   /// Private copy constructor. NO COPY ALLOWED!
   Sample(const Sample&);
@@ -65,6 +69,8 @@ private:
   Kernel::PropertyManager m_manager;
   /// The good proton charge for this run in uA.hour
   double m_protonCharge;
+  /// The sample shape object
+  boost::shared_ptr<Geometry::Object> m_sample_shape;
 };
 
 } // namespace API

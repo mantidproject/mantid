@@ -10,7 +10,7 @@ namespace API
 
 /// Constructor
 Sample::Sample() :
-  m_name(), m_manager(), m_protonCharge(0.0)
+  m_name(), m_manager(), m_protonCharge(0.0), m_sample_shape()
 {
 }
 
@@ -76,6 +76,25 @@ const double& Sample::getProtonCharge() const
 {
   return m_protonCharge;
 }
+
+/**
+ * Set the object that describes the sample shape
+ * @param sample_shape The shape object
+ */
+void Sample::setGeometry(boost::shared_ptr<Geometry::Object> sample_shape)
+{
+  m_sample_shape = sample_shape;
+}
+
+/**
+ * Get a pointer to the sample shape object
+ * @returns A shared pointer to the sample object
+ */
+boost::shared_ptr<Geometry::Object> Sample::getGeometry() const
+{
+  return m_sample_shape;
+}
+
 
 } // namespace API
 } // namespace Mantid

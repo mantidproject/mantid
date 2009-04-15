@@ -4,22 +4,22 @@
 #include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
   // Register the algorithm into the AlgorithmFactory
-  //  DECLARE_ALGORITHM(CreateSampleShape)
+  DECLARE_ALGORITHM(CreateSampleShape)
 }
 }
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::API;
 
 // Get a reference to the logger. It is used to print out information, warning and error messages
 Mantid::Kernel::Logger& CreateSampleShape::g_log = Mantid::Kernel::Logger::get("CreateSampleShape");
-
-
 
 /**
  * Initialize the algorithm
@@ -27,8 +27,7 @@ Mantid::Kernel::Logger& CreateSampleShape::g_log = Mantid::Kernel::Logger::get("
 void CreateSampleShape::init()
 {
   using namespace Mantid::Kernel;
-  using namespace Mantid::API;
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
   declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
 }
 
@@ -36,7 +35,14 @@ void CreateSampleShape::init()
  * Execute the algorithm
  */
 void CreateSampleShape::exec()
-{
-  
+{  
+  // Get the input workspace
+  const MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
+  // Get the XML definition
+  std::string shapeXML = getProperty("ShapeXML");
+  Geometry::ShapeFactory sFactory;
+  boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
+
+  workspace->getSample()->setGeometry(shape_sptr);
 }
 
