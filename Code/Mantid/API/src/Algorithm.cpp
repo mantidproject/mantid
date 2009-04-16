@@ -294,6 +294,7 @@ void Algorithm::cancel()const
   */
 void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
 {
+    init();
     copyPropertiesFrom(proxy);
     setInitialized();
     m_algorithmID = proxy.getAlgorithmID();

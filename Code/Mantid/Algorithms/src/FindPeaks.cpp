@@ -348,11 +348,12 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   for (int width = 2; width <= 10; width +=2)
   {
     // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
-    unsigned int i_min = i0 - 5*width;
+    unsigned int i_min = 1;
+    if (i0 > 5*width) i_min = i0 - 5*width;
     unsigned int i_max = i0 + 5*width;
     // Bounds checks
     if (i_min<1) i_min=1;
-    if (i_max>=Y.size()) i_max=Y.size()-2;
+    if (i_max>=Y.size()-1) i_max=Y.size()-2;
     const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
     const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
 
@@ -360,7 +361,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     const double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0*(i_max-i_min+1));
     const double in_height = Y[i4] - in_bg0;
     const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
-    const double in_sigma = X[i0+width] - X[i0];
+    const double in_sigma = (i0+width < X.size())? X[i0+width] - X[i0] : 0.;
   
     fit->setProperty("bg0",in_bg0);
     fit->setProperty("bg1",in_bg1);
