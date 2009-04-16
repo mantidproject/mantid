@@ -22,7 +22,7 @@ Logger& FindPeaks::g_log = Logger::get("FindPeaks");
 int FindPeaks::g_z = 5;
 
 /// Constructor
-FindPeaks::FindPeaks() : API::Algorithm(), m_peaks(new DataObjects::TableWorkspace) {}
+FindPeaks::FindPeaks() : API::Algorithm() {}
 
 void FindPeaks::init()
 {
@@ -38,9 +38,10 @@ void FindPeaks::init()
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
 
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PeaksList","",Direction::Output));
+  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output));
   
   // Set up the columns for the TableWorkspace holding the peak information
+  m_peaks = WorkspaceFactory::Instance().createTable("TableWorkspace");
   m_peaks->addColumn("int","spectrum");
   m_peaks->addColumn("double","centre");
   m_peaks->addColumn("double","width");
@@ -345,11 +346,11 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const std::vector<double> &X = input->readX(spectrum);
   const std::vector<double> &Y = input->readY(spectrum);
   
-  for (int width = 2; width <= 10; width +=2)
+  for (unsigned int width = 2; width <= 10; width +=2)
   {
     // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
     unsigned int i_min = 1;
-    if (i0 > 5*width) i_min = i0 - 5*width;
+    if (i0 > static_cast<int>(5*width)) i_min = i0 - 5*width;
     unsigned int i_max = i0 + 5*width;
     // Bounds checks
     if (i_min<1) i_min=1;

@@ -21,18 +21,15 @@ namespace Mantid
 {
 	namespace Kernel
 	{
-
-		/// The filename of the Mantid properties file
-		const std::string ConfigServiceImpl::PROPERTIES_FILE_NAME = "Mantid.properties";
-		/// The filename of the Mantid user properties file
-		const std::string ConfigServiceImpl::USER_PROPERTIES_FILE_NAME = "Mantid.user.properties";
-
 		//-------------------------------
 		// Private member functions
 		//-------------------------------
 
 		/// Private constructor for singleton class
-		ConfigServiceImpl::ConfigServiceImpl() : g_log(Logger::get("ConfigService"))
+		ConfigServiceImpl::ConfigServiceImpl() : 
+		  g_log(Logger::get("ConfigService")), 
+		  m_properties_file_name("Mantid.properties"),
+		  m_user_properties_file_name("Mantid.user.properties")
 		{
 			//getting at system details
 			m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -55,9 +52,9 @@ namespace Mantid
 			}
 
 			//attempt to load the default properties file that resides in the directory of the executable
-			loadConfig( getBaseDir() + PROPERTIES_FILE_NAME);
+			loadConfig( getBaseDir() + m_properties_file_name);
 			//and then append the user properties
-			loadConfig( getBaseDir() + USER_PROPERTIES_FILE_NAME, true);
+			loadConfig( getBaseDir() + m_user_properties_file_name, true);
 
 			//Fill the list of possible relative path keys that may require conversion to absolute paths
 			m_vConfigPaths.clear();
@@ -119,7 +116,7 @@ namespace Mantid
 		{
 			try
 			{
-				std::fstream filestr ((m_strBaseDir + USER_PROPERTIES_FILE_NAME).c_str(), std::fstream::out);
+				std::fstream filestr ((m_strBaseDir + m_user_properties_file_name).c_str(), std::fstream::out);
 
 				filestr << "# This file can be used to override any properties for this installation." << std::endl;
 				filestr << "# Any properties found in this file will override any that are found in the Mantid.Properties file" << std::endl;
@@ -135,7 +132,7 @@ namespace Mantid
 			}
 			catch (std::runtime_error ex)
 			{
-				g_log.error()<<"Unable to write out user.properties file to " << m_strBaseDir + USER_PROPERTIES_FILE_NAME
+				g_log.error()<<"Unable to write out user.properties file to " << m_strBaseDir << m_user_properties_file_name
 					<< " error: " << ex.what() << std::endl;
 			}
 
@@ -209,7 +206,7 @@ namespace Mantid
 				// check if we have failed to open the file
 				if ((!good) || (temp==""))
 				{
-					if (filename == m_strBaseDir + USER_PROPERTIES_FILE_NAME)
+					if (filename == m_strBaseDir + m_user_properties_file_name)
 					{
 						//write out a fresh file
 						createUserPropertiesFile();

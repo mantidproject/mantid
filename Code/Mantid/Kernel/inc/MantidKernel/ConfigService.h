@@ -114,12 +114,6 @@ class Logger;
 	  // Back to the ConfigService class itself...
 	  
 	public:	
-		/// The filename of the Mantid properties file
-		static const std::string PROPERTIES_FILE_NAME;
-		/// The filename of the Mantid user properties file
-		static const std::string USER_PROPERTIES_FILE_NAME;
-
-
 		// Loads a config file
 		void loadConfig(const std::string& filename, const bool append=false);
 		
@@ -181,6 +175,11 @@ class Logger;
 
 		///The configuration properties in string format
 		std::string m_PropertyString;
+		
+    /// The filename of the Mantid properties file
+    const std::string m_properties_file_name;
+    /// The filename of the Mantid user properties file
+    const std::string m_user_properties_file_name;
 	};
 	
 	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

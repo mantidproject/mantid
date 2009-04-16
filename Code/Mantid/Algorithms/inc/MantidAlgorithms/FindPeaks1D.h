@@ -84,7 +84,7 @@ private:
   int smooth_npts;
   int smooth_iter;
   double threashold;
-  boost::shared_ptr<DataObjects::TableWorkspace> peaks; //> Table Workspace to store peaks
+  API::ITableWorkspace_sptr peaks; //> Table Workspace to store peaks
 
 };
 

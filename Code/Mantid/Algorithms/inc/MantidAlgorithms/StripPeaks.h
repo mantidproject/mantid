@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -65,8 +65,8 @@ private:
   ///Execution code
   void exec();
 
-  DataObjects::TableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
-  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input, DataObjects::TableWorkspace_sptr peakslist);
+  API::ITableWorkspace_sptr findPeaks(API::MatrixWorkspace_sptr WS);
+  API::MatrixWorkspace_sptr removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist);
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

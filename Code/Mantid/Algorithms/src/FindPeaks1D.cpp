@@ -19,14 +19,15 @@ using namespace API;
 Logger& FindPeaks1D::g_log = Logger::get("FindPeaks1D");
 
 /// Constructor
-FindPeaks1D::FindPeaks1D() : API::Algorithm(), peaks(new DataObjects::TableWorkspace) {}
+FindPeaks1D::FindPeaks1D() : API::Algorithm() {}
 
 void FindPeaks1D::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<DataObjects::TableWorkspace>("PeaksList","",Direction::Output));
+  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output));
   // Set up the columns for the TableWorkspace holding the peak information
+  peaks = WorkspaceFactory::Instance().createTable("TableWorkspace");
   peaks->addColumn("double","centre");
   peaks->addColumn("double","width");
   peaks->addColumn("double","height");

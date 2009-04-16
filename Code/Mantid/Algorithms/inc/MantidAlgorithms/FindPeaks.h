@@ -79,7 +79,7 @@ private:
   static int g_z;
   
   /// Storage of the peak data
-  boost::shared_ptr<DataObjects::TableWorkspace> m_peaks;
+  API::ITableWorkspace_sptr m_peaks;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

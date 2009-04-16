@@ -30,7 +30,7 @@ void StripPeaks::exec()
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Call FindPeaks as a sub-algorithm
-  DataObjects::TableWorkspace_sptr peakslist = this->findPeaks(inputWS);
+  ITableWorkspace_sptr peakslist = this->findPeaks(inputWS);
 
   MatrixWorkspace_sptr outputWS;
   if ( peakslist->rowCount() > 0 )
@@ -52,7 +52,7 @@ void StripPeaks::exec()
 /** Calls FindPeaks as a sub-algorithm.
  *  @param WS The workspace to search
  */
-DataObjects::TableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
+API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Calling FindPeaks as a sub-algorithm");
 
@@ -82,7 +82,7 @@ DataObjects::TableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr
  *  @param peakslist The succesfully fitted peaks
  *  @return A workspace containing the peak-subtracted data
  */
-API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, DataObjects::TableWorkspace_sptr peakslist)
+API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input, API::ITableWorkspace_sptr peakslist)
 {
   g_log.information("Subtracting peaks");
   // Create an output workspace - same size as input one
