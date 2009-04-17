@@ -269,7 +269,7 @@ addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\
 prop_file = open('../Mantid/Properties/Mantid.properties','r')
 prop_file_ins = open('Mantid.properties','w')
 for line in prop_file:
-    elif line.find('plugins.directory') >= 0:
+    if line.find('plugins.directory') >= 0:
         prop_file_ins.write('plugins.directory = ../plugins\n')
     elif line.find('pythonscripts.directory') >= 0:
         prop_file_ins.write('pythonscripts.directory = ../scripts\n')
