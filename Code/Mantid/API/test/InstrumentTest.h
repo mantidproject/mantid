@@ -117,6 +117,15 @@ public:
 
   }
 
+  void testGetByName()
+  {
+    Instrument *i = new Instrument;
+    i->setName("TestInstrument");
+    
+    TS_ASSERT( i->getComponentByName("TestInstrument").get() )
+    delete i;
+  }
+
 private:
   Instrument instrument;
   boost::shared_ptr<Detector> det, det2, det3;
