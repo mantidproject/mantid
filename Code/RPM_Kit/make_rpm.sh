@@ -38,7 +38,9 @@ done
 shift $(($OPTIND - 1))
 #
 mantid_version="1.0"
-mantid_release="0.`date +%Y%m%d`svn"
+svn_version=`svnversion --no-newline`
+#mantid_release="0.`date +%Y%m%d`svnR$svn_version"
+mantid_release="0.svnR${svn_version}.`date +%Y%m%d`"
 #
 mantid_svn="http://svn.mantidproject.org/mantid/trunk"
 rm -f Mantid-$mantid_version.tar.gz
