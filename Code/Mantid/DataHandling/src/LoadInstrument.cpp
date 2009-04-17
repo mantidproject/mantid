@@ -588,6 +588,34 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
     comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));
   }
+
+  // loop recursively to see if location element containes (further) rotation instructions
+  bool stillRotationElement = true;
+  while ( stillRotationElement )
+  {
+    Element* rotElement = pElem->getChildElement("rot");
+    if (rotElement) 
+    {
+      double rotAngle = atof( (rotElement->getAttribute("val")).c_str() ); // assumed to be in degrees
+
+      double axis_x = 0.0;
+      double axis_y = 0.0;
+      double axis_z = 1.0;
+
+      if ( rotElement->hasAttribute("axis-x") )
+        axis_x = atof( (rotElement->getAttribute("axis-x")).c_str() );
+      if ( rotElement->hasAttribute("axis-y") )
+        axis_y = atof( (rotElement->getAttribute("axis-y")).c_str() );
+      if ( rotElement->hasAttribute("axis-z") )
+        axis_z = atof( (rotElement->getAttribute("axis-z")).c_str() );
+
+      comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
+
+      pElem = rotElement; // for recursive action
+    }
+    else
+      stillRotationElement = false;
+  }
 }
 
 
