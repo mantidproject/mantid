@@ -21,7 +21,8 @@ print('Mantid version '+MantidVersion)
 
 #product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'
 #product_uuid = '{83F7E727-C069-4d45-A3F9-F47797F7970F}'
-product_uuid='{EC1C2D8E-4214-4776-B07F-FB11F98845D1}'
+#product_uuid='{EC1C2D8E-4214-4776-B07F-FB11F98845D1}'
+product_uuid='{1ba91460-2b2a-11de-8c30-0800200c9a66}'
 
 MantidInstallDir = 'MantidInstall'
 
