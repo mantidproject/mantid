@@ -18,8 +18,8 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48098.raw");
     loader.setPropertyValue("OutputWorkspace",inputWS);
-    //loader.setPropertyValue("spectrum_min","2");
-    //loader.setPropertyValue("spectrum_max","4");
+    loader.setPropertyValue("spectrum_min","30");
+    loader.setPropertyValue("spectrum_max","130");
     loader.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
