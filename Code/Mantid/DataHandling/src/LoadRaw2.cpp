@@ -35,14 +35,10 @@ namespace Mantid
     /// Empty default constructor
     LoadRaw2::LoadRaw2() :
       Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
-    {
-        isisRaw = new ISISRAW2;
-    }
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0), isisRaw(new ISISRAW2)
+    {}
     LoadRaw2::~LoadRaw2()
-    {
-        delete isisRaw;
-    }
+    {}
 
     /// Initialisation method.
     void LoadRaw2::init()
@@ -102,7 +98,6 @@ namespace Mantid
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
-
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
@@ -336,6 +331,12 @@ namespace Mantid
 
       const int stripPath = m_filename.find_last_of("\\/");
       std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
+      
+       
+      //std::string instrumentID = isisRaw->i_inst; // get the instrument name
+      //size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
+      //if (i != std::string::npos) instrumentID.erase(i);
+
       // force ID to upper case
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";

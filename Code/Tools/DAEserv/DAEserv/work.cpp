@@ -295,6 +295,22 @@ bool read_command(SOCKET s)
             return true;
         }
         
+        if (name == "RRPB")
+        {
+            int dim = 32;
+            float rpb[32];
+            rpb[8] = 0.1;
+            int n = isisds_send_command(s, "OK", rpb, ISISDSReal32, &dim, sv_ndims);
+            return true;
+        }
+
+        if (name == "NDET")
+        {
+            int ndet = 100;
+            isisds_send_command(s, "OK", &ndet, ISISDSInt32, sv_dims_array, sv_ndims);
+            return true;
+        }
+        
     }
     else if (comm.type == ISISDSInt32)
     {

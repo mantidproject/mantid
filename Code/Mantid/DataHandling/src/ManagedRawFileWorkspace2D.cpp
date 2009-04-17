@@ -38,7 +38,6 @@ namespace Mantid
     ///Destructor
     ManagedRawFileWorkspace2D::~ManagedRawFileWorkspace2D()
     {
-        delete isisRaw;
         if (m_fileRaw) fclose(m_fileRaw);
         removeTempFile();
     }
@@ -160,22 +159,7 @@ namespace Mantid
         if (opt == 1) return true;
         if (opt == 2) return false;
 
-        FILE * ff = fopen(m_filenameRaw.c_str(),"rb");
-        if (ff)
-        {
-            size_t n = 100000;
-            char *buf = new char[n];
-            boost::timer tim;
-            size_t i = fread(buf,sizeof(char),n,ff);
-            double elapsed = tim.elapsed();
-            fclose(ff);
-            delete[] buf;
-            if (i > 0)
-            {
-                return elapsed > 0.01;
-            }
-        }
-        return false;
+        return Kernel::isNetworkDrive(m_filenameRaw);
     }
 
     /**   Opens a temporary file

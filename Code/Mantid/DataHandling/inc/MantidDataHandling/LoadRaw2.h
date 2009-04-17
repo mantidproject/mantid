@@ -89,8 +89,8 @@ namespace Mantid
       void runLoadLog(DataObjects::Workspace2D_sptr,int period=1);
       void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
 
-      /// ISISRAW class instance which does raw file reading
-      ISISRAW2 *isisRaw;
+      /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
+      boost::shared_ptr<ISISRAW2> isisRaw;
       /// The name and path of the input file
       std::string m_filename;
 

@@ -321,6 +321,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Qxy.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ReadGroupsFromFile.cpp"
 				>
 			</File>
@@ -632,6 +636,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\PolynomialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Qxy.h"
 				>
 			</File>
 			<File

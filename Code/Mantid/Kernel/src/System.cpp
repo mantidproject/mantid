@@ -47,3 +47,28 @@ std::string Mantid::Kernel::getPathToExecutable()
   }
   return execpath;
 }
+
+/**
+ * Check if the path is on a network drive
+ * @param path The path to be checked
+ * @return True if the path is on a network drive.
+ */
+bool Mantid::Kernel::isNetworkDrive(const std::string path)
+{
+#ifdef _WIN32
+    // if path is relative get the full one
+    char buff[MAX_PATH];
+    GetFullPathName(path.c_str(),MAX_PATH,buff,NULL);
+    std::string fullName(buff);
+    size_t i = fullName.find(':');
+
+    // if the full path doesn't contain a drive letter assume it's on the network
+    if (i == std::string::npos) return true;
+
+    fullName.erase(i+1);
+    fullName += '\\';  // make sure the name has the trailing backslash
+    UINT type = GetDriveType(fullName.c_str());
+    return DRIVE_REMOTE == type;
+#endif
+    return false;
+}

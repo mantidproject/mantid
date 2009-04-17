@@ -82,7 +82,7 @@ private:
     void openTempFile();
     void removeTempFile()const;
 
-    ISISRAW2 *isisRaw;        ///< Pointer to an ISISRAW2 object
+    boost::shared_ptr<ISISRAW2> isisRaw;        ///< Pointer to an ISISRAW2 object
     std::string m_filenameRaw;///< RAW file name.
     FILE* m_fileRaw;          ///< RAW file pointer.
     fpos_t m_data_pos;        ///< Position in the file where the data start.
