@@ -189,7 +189,7 @@ def addCompList(Id,location,name,parent):
             fileLongName = fil
             addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
     return lst
-
+		
 def addCRefs(lstId,parent):
     for Id in lstId:
         e = doc.createElement('ComponentRef')
@@ -472,10 +472,8 @@ addAllFiles('toget/sip','sip',Sip)
 PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
 
-#-------------------------- Scripts ------------------------------------
-ScriptsDir = addDirectory('ScriptsDir','scripts','scripts',InstallDir)
-Scripts = addComponent('Scripts','{E21432EE-368D-4670-A778-23F5C8DC8F2F}',ScriptsDir)
-addAllFiles('../Mantid/PythonAPI/scripts','scr',Scripts)
+#-------------------------- Scripts directory and all sub-directories ------------------------------------
+scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",InstallDir)
 #-----------------------------------------------------------------------
 
 #-------------------------- Colormaps ------------------------------------
@@ -529,7 +527,7 @@ addCRef('Plugins',MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)
 addCRef('Logs',MantidExec)
-addCRef('Scripts',MantidExec)
+addCRefs(scriptsList,MantidExec)
 addCRef('Colormaps',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
