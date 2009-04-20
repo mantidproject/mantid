@@ -69,7 +69,7 @@ void MoveInstrumentComponent::exec()
   }
   else if (!ComponentName.empty())
   {
-      comp = findByName(inst,ComponentName);
+      comp = inst->getComponentByName(ComponentName);
       if (comp == 0)
       {
           std::ostringstream mess;
