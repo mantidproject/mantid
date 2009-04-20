@@ -242,7 +242,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_bckd_prd" >
+          <widget class="QLineEdit" name="sct_bkgd_prd" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
@@ -263,7 +263,7 @@
             <string>/ ??</string>
            </property>
            <property name="buddy" >
-            <cstring>sct_bckd_prd</cstring>
+            <cstring>sct_bkgd_prd</cstring>
            </property>
           </widget>
          </item>
@@ -735,7 +735,7 @@
         <rect>
          <x>22</x>
          <y>281</y>
-         <width>254</width>
+         <width>261</width>
          <height>33</height>
         </rect>
        </property>
@@ -748,13 +748,13 @@
          </widget>
         </item>
         <item row="0" column="1" >
-         <widget class="QPushButton" name="reduceBtn" >
+         <widget class="QPushButton" name="oneDBtn" >
           <property name="text" >
-           <string>Reduce Data</string>
+           <string>1D Reduce</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
+        <item row="0" column="3" >
          <widget class="QPushButton" name="plotBtn" >
           <property name="text" >
            <string>Plot</string>
@@ -842,18 +842,85 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget_11" >
+       <property name="geometry" >
+        <rect>
+         <x>484</x>
+         <y>278</y>
+         <width>283</width>
+         <height>34</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_12" >
+        <item>
+         <widget class="QLabel" name="label_34" >
+          <property name="text" >
+           <string>Instrument:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="inst_opt" >
+          <item>
+           <property name="text" >
+            <string>LOQ</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>SANS2D</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_26" >
+          <property name="text" >
+           <string>File type:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="file_opt" >
+          <item>
+           <property name="text" >
+            <string>raw</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>nexus</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_2" >
       <attribute name="title" >
-       <string>Instrument Details</string>
+       <string>Analysis Details</string>
       </attribute>
       <widget class="QGroupBox" name="groupBox_4" >
        <property name="geometry" >
         <rect>
-         <x>7</x>
-         <y>8</y>
+         <x>11</x>
+         <y>6</y>
          <width>485</width>
-         <height>170</height>
+         <height>176</height>
         </rect>
        </property>
        <property name="title" >
@@ -1050,8 +1117,8 @@
         <rect>
          <x>515</x>
          <y>9</y>
-         <width>222</width>
-         <height>122</height>
+         <width>266</width>
+         <height>118</height>
         </rect>
        </property>
        <property name="title" >
@@ -1109,10 +1176,10 @@
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>514</x>
-         <y>168</y>
-         <width>264</width>
-         <height>153</height>
+         <x>520</x>
+         <y>149</y>
+         <width>241</width>
+         <height>142</height>
         </rect>
        </property>
        <property name="title" >
@@ -1154,8 +1221,8 @@
       <widget class="QGroupBox" name="groupBox_7" >
        <property name="geometry" >
         <rect>
-         <x>8</x>
-         <y>184</y>
+         <x>192</x>
+         <y>210</y>
          <width>157</width>
          <height>74</height>
         </rect>
@@ -1218,9 +1285,9 @@
       <widget class="QGroupBox" name="groupBox_8" >
        <property name="geometry" >
         <rect>
-         <x>201</x>
-         <y>183</y>
-         <width>156</width>
+         <x>13</x>
+         <y>209</y>
+         <width>142</width>
          <height>75</height>
         </rect>
        </property>
@@ -1246,36 +1313,221 @@
       <widget class="QGroupBox" name="groupBox_9" >
        <property name="geometry" >
         <rect>
-         <x>38</x>
-         <y>274</y>
-         <width>100</width>
-         <height>40</height>
+         <x>383</x>
+         <y>211</y>
+         <width>92</width>
+         <height>75</height>
         </rect>
        </property>
        <property name="title" >
         <string>Scaling Factor</string>
        </property>
-       <widget class="QLabel" name="scale_lbl" >
-        <property name="geometry" >
-         <rect>
-          <x>11</x>
-          <y>18</y>
-          <width>78</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-        <property name="alignment" >
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_13" >
+        <item>
+         <widget class="QLineEdit" name="scale_factor" >
+          <property name="enabled" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="QWidget" name="tab_4" >
+      <attribute name="title" >
+       <string>Geometry</string>
+      </attribute>
+      <widget class="QGroupBox" name="groupBox_12" >
+       <property name="geometry" >
+        <rect>
+         <x>19</x>
+         <y>10</y>
+         <width>314</width>
+         <height>119</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Component Distances (m)</string>
+       </property>
+       <property name="checkable" >
+        <bool>false</bool>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_6" >
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_35" >
+          <property name="text" >
+           <string>Sample</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLabel" name="label_36" >
+          <property name="text" >
+           <string>Can</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" >
+         <spacer name="horizontalSpacer_5" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_37" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text" >
+           <string>moderator - sample</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_38" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text" >
+           <string>sample - detector bank 1</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLabel" name="dist_sample_ms" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QLabel" name="dist_can_ms" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2" >
+         <widget class="QLabel" name="dist_can_sd1" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QLabel" name="dist_sample_sd1" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_39" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text" >
+           <string>sample - detector bank 2</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" >
+         <widget class="QLabel" name="dist_sample_sd2" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2" >
+         <widget class="QLabel" name="dist_can_sd2" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" >
+         <widget class="QLabel" name="label_40" >
+          <property name="text" >
+           <string>Bkgrd</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3" >
+         <widget class="QLabel" name="dist_bkgd_ms" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3" >
+         <widget class="QLabel" name="dist_bkgd_sd1" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3" >
+         <widget class="QLabel" name="dist_bkgd_sd2" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_3" >
       <attribute name="title" >
-       <string>Mask</string>
+       <string>Masking</string>
       </attribute>
       <widget class="QGroupBox" name="groupBox_10" >
        <property name="geometry" >
@@ -1351,10 +1603,8 @@
     </widget>
    </item>
   </layout>
-  <zorder>tabWidget</zorder>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>datadir_edit</tabstop>
   <tabstop>data_dirBtn</tabstop>
   <tabstop>userfile_edit</tabstop>
@@ -1364,7 +1614,7 @@
   <tabstop>sct_can_edit</tabstop>
   <tabstop>sct_can_prd</tabstop>
   <tabstop>sct_bkgd_edit</tabstop>
-  <tabstop>sct_bckd_prd</tabstop>
+  <tabstop>sct_bkgd_prd</tabstop>
   <tabstop>tra_sample_edit</tabstop>
   <tabstop>tra_sample_prd</tabstop>
   <tabstop>tra_can_edit</tabstop>
@@ -1378,7 +1628,7 @@
   <tabstop>direct_bkgd_edit</tabstop>
   <tabstop>direct_bckd_prd</tabstop>
   <tabstop>load_dataBtn</tabstop>
-  <tabstop>reduceBtn</tabstop>
+  <tabstop>oneDBtn</tabstop>
   <tabstop>rad_min</tabstop>
   <tabstop>rad_max</tabstop>
   <tabstop>rad_dr</tabstop>

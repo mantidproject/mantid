@@ -2,6 +2,8 @@
 // Includes
 //-----------------------------
 #include "MantidQtCustomInterfaces/SANSUtilityDialogs.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
@@ -45,6 +47,7 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
   
   grid->addWidget(new QLabel("Spectra"), 1, 0);
   m_spec_list = new QLineEdit;
+  m_spec_list->setText("0");
   grid->addWidget(m_spec_list, 1, 1);
 
   grid->addWidget(new QLabel("Plot"), 2, 0);
@@ -69,6 +72,8 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
   connect(close, SIGNAL(clicked()), this, SLOT(close()));  
 
   QHBoxLayout *bottom = new QHBoxLayout;
+  m_info_lbl = new QLabel("");
+  bottom->addWidget(m_info_lbl);
   bottom->addStretch();
   bottom->addWidget(plot);
   bottom->addWidget(close);
@@ -113,13 +118,16 @@ void SANSPlotDialog::addNewPlot()
 
   QString name = m_plots->currentText();
   QList<QTreeWidgetItem *> searchlist = m_opt_input->findItems(name, Qt::MatchExactly);
+  QString ws = m_data_sets->currentText();
   if( searchlist.isEmpty() )
   {
     QTreeWidgetItem *topitem = new QTreeWidgetItem(m_opt_input, QStringList(name));
     //Add new set as a child
     QTreeWidgetItem *dataset = new QTreeWidgetItem(topitem);
-    dataset->setText(0, m_data_sets->currentText());
-    dataset->setText(1, m_spec_list->text());
+    dataset->setText(0, ws);
+    QString spec_nums = checkSpectraList(ws, m_spec_list->text());
+    if( spec_nums.isEmpty() ) return;
+    dataset->setText(1, spec_nums);
   }
   else 
   {
@@ -128,7 +136,7 @@ void SANSPlotDialog::addNewPlot()
     QTreeWidgetItem *dataset = NULL;
     for( int index = 0; index < child_count; ++index )
     {
-      if( topitem->child(index)->text(0) == m_data_sets->currentText() )
+      if( topitem->child(index)->text(0) == ws )
       {
 	dataset = topitem->child(index);
 	break;
@@ -136,13 +144,18 @@ void SANSPlotDialog::addNewPlot()
     }
     if( dataset )
     {
-      dataset->setText(1, dataset->text(1) + "," + m_spec_list->text());
+      QString allnums = dataset->text(1) + "," +  m_spec_list->text();
+      QString spec_nums = checkSpectraList(ws, allnums);
+      if( spec_nums.isEmpty() ) return;
+      dataset->setText(1, spec_nums);
     }
     else
     {
       QTreeWidgetItem *dataset = new QTreeWidgetItem(topitem);
-      dataset->setText(0, m_data_sets->currentText());
-      dataset->setText(1, m_spec_list->text());
+      dataset->setText(0, ws);
+      QString spec_nums = checkSpectraList(ws, m_spec_list->text());
+      if( spec_nums.isEmpty() ) return;
+      dataset->setText(1, spec_nums);
     }
   }
   m_spec_list->clear();
@@ -178,7 +191,11 @@ void SANSPlotDialog::plotButtonClicked()
       }
       while( itr.hasNext() )
       {
-	py_code += "plot" + QString::number(p) + ".insertCurve(" + writePlotCmd(data, itr.next(), false) + ", 0)\n";
+	QString plotcmd = writePlotCmd(data, itr.next(), false);
+	if( !plotcmd.isEmpty() )
+	{
+	  py_code += "plot" + QString::number(p) + ".insertCurve(" + plotcmd + ", 0)\n";
+	}
       }
     }
   }
@@ -203,7 +220,7 @@ void SANSPlotDialog::plotOptionClicked(const QString & item_text)
 }
 
 /**
- * Write a Python plot command
+ * Write a Python plot command (this assumes the input has already been checked)
  * @param workspace The workspace name
  * @param spec_num The spectrum number
  * @param show_plot Whether to make the plot visibl or not
@@ -217,6 +234,43 @@ QString SANSPlotDialog::writePlotCmd(const QString & workspace, const QString & 
   }
   py_code += ")";
   return py_code;
+}
+
+/**
+ * Check the current spectra list
+ * @param workspace The workspace to check
+ * @param speclist The list of spectra to check
+ * @returns A valid list of spectra from the box
+ */
+QString SANSPlotDialog::checkSpectraList(const QString & workspace, const QString & speclist )
+{
+  // Check that the spectrum is within a valid range
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+    (Mantid::API::AnalysisDataService::Instance().retrieve(workspace.toStdString()));
+  if( ws == boost::shared_ptr<Mantid::API::MatrixWorkspace>() ) return QString("");
+
+  int nhist = ws->getNumberHistograms();
+  QStringList spectra = speclist.split(',', QString::SkipEmptyParts);
+  QStringListIterator itr(spectra);
+  QString validlist("");
+  bool allvalid(true);
+  while( itr.hasNext() )
+  {
+    QString entry = itr.next();
+    if( validlist.contains(entry) ) continue;
+    int spec = entry.toInt();
+    if( spec < 0 || spec >= nhist ) 
+    {
+      allvalid = false;
+      continue;
+    }
+    validlist += entry + ",";
+  }
+  if( allvalid ) m_info_lbl->setText("");
+  else m_info_lbl->setText("An invalid spectra number was given");
+
+  if( validlist.endsWith(',') ) validlist.truncate(validlist.count() - 1);
+  return validlist;
 }
 
 /**

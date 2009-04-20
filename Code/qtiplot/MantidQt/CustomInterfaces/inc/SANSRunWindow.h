@@ -46,37 +46,28 @@ private:
   //@{
   ///Read previous settings
   void readSettings();
-
   ///Save settings
   void saveSettings();
-
   /// Read the Python template that will perform the data reduction
   bool readPyReductionTemplate();
-
   /// Read the Python template that allows a view of the current mask
   bool readPyViewMaskTemplate();
-  
   /// Load the user file specified in the text field
   bool loadUserFile();
-
   /// Read a limit line from the user file
   void readLimits(const QString & com_line);
-  
+  /// Get the component distances
+  void componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
   void setProcessingState(bool running);
-  
   ///Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString & ws_name) const;
-
   ///Construct a QStringList of the currently loaded workspaces
   QStringList currentWorkspaceList() const;
-
   ///Is the user file loaded
   bool isUserFileLoaded() const;
-
   ///Does the raw file exist
-  QString getRawFilePath(const QString & data_dir, const QString & prefix, const QString & run_no) const;
-
+  QString getRawFilePath(const QString & data_dir, const QString & run_no) const;
   /// Create a mask string
   QString createMaskString() const;
   //@}
@@ -84,9 +75,9 @@ private:
   /**@name Python code utility commands */
   //@{
   /// Construct a LoadRaw Python command
-  QString writeLoadRawCmd(const QString & filename, const QString & workspace, const QString & spec_min = QString(), 
-			  const QString & spec_max = QString(), const QString & spec_list = QString(), 
-			  const QString & cache_opt = QString());
+  QString writeLoadRawCmd(const QString & filename, const QString & workspace, 
+			  const QString & spec_min = QString(), const QString & spec_max = QString(), 
+			  const QString & spec_list = QString(), const QString & cache_opt = QString());
   //@}
 			   
 private slots:

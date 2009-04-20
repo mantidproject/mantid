@@ -49,6 +49,7 @@ INCLUDEPATH += "$$MANTIDQTINCLUDES"
 unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
+  LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
   LIBS += -L/usr/lib/ -lPocoFoundation
 }
 

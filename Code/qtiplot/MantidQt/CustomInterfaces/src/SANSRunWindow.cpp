@@ -6,6 +6,10 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IInstrument.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/V3D.h"
 
 #include <QLineEdit>
 #include <QFileDialog>
@@ -35,8 +39,7 @@ using namespace MantidQt::CustomInterfaces;
 //----------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), m_period_lbls(), 
-  m_pycode_loqreduce("")
+  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), m_period_lbls(), m_pycode_loqreduce("")
 {
 }
 
@@ -64,14 +67,18 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
     //    m_uiForm.plotBtn->setEnabled(false);
 
-    connect(m_uiForm.reduceBtn, SIGNAL(clicked()), this, SLOT(handleReduceButtonClick()));
+    connect(m_uiForm.oneDBtn, SIGNAL(clicked()), this, SLOT(handleReduceButtonClick()));
     //This cannot do anything at the moment
-    m_uiForm.reduceBtn->setEnabled(false);
     connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-    m_uiForm.showMaskBtn->setEnabled(false);
 
-    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.reduceBtn, SLOT(setEnabled(bool)));
+    // Disable most things so that load is the only thing that can be done
+    m_uiForm.oneDBtn->setEnabled(false);
+    for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
+    {
+      m_uiForm.tabWidget->setTabEnabled(index, false);
+    }
 
+    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.oneDBtn, SLOT(setEnabled(bool)));
 
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
@@ -102,6 +109,10 @@ void SANSRunWindow::initLayout()
 	    SLOT(handleStepComboChange(int)));
     connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
 	    SLOT(handleStepComboChange(int)));
+
+    // file extensions
+    m_uiForm.file_opt->setItemData(0, ".raw");
+    m_uiForm.file_opt->setItemData(1, ".nxs");
 
     readSettings();
 }    
@@ -256,7 +267,7 @@ bool SANSRunWindow::loadUserFile()
     }
     else if( com_line.startsWith("set scales") )
     {
-      m_uiForm.scale_lbl->setText(com_line.section(' ', 2, 2));
+      m_uiForm.scale_factor->setText(com_line.section(' ', 2, 2));
     }
     else if( com_line.startsWith("mask", Qt::CaseInsensitive) )
     {
@@ -288,13 +299,13 @@ bool SANSRunWindow::loadUserFile()
   }
   user_file.close();
 
-  //Phi values default to -90 and 90
+  // Phi values default to -90 and 90
   m_uiForm.phi_min->setText("-90");
   m_uiForm.phi_max->setText("90");
   
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
-  m_uiForm.showMaskBtn->setEnabled(true);
+  m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
   return true;
 }
 
@@ -378,6 +389,44 @@ void SANSRunWindow::readLimits(const QString & com_line)
 }
 
 /**
+ * Retrieve and set the component distances
+ * @param wsname The name of the workspace
+ * @param lms The result of the moderator-sample distance
+ * @param lsda The result of the sample-detector bank 1 distance
+ * @param lsdb The result of the sample-detector bank 2 distance
+ */
+void SANSRunWindow::componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb)
+{
+  if( !workspaceExists(wsname) ) return;
+  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+    (Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+
+  Mantid::API::IInstrument_sptr instr = ws->getInstrument();
+  if( instr == boost::shared_ptr<Mantid::API::IInstrument>() ) return;
+
+  Mantid::Geometry::IObjComponent_sptr source =  instr->getSource();
+  if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
+  Mantid::Geometry::IObjComponent_sptr sample =  instr->getSample();
+  if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
+
+  lms = source->getPos().distance(sample->getPos());
+   
+  //Find the main detector bank
+  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName("main-detector-bank");
+  if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
+  {
+    lsda = sample->getPos().distance(comp->getPos());
+  }
+
+  comp = instr->getComponentByName("HAB");
+  if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
+  {
+    lsdb = sample->getPos().distance(comp->getPos());
+  }
+
+}
+
+/**
  * Set the state of processing.
  * @param running If we are processing then some interaction is disabled
  */
@@ -385,14 +434,14 @@ void SANSRunWindow::setProcessingState(bool running)
 {
   if( running )
   {
-    m_uiForm.reduceBtn->setText("Running ...");
-    m_uiForm.reduceBtn->setEnabled(false);
+    m_uiForm.oneDBtn->setText("Running ...");
+    m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.load_dataBtn->setEnabled(false);
   }
   else
   {
-    m_uiForm.reduceBtn->setText("Reduce Data");
-    m_uiForm.reduceBtn->setEnabled(true);
+    m_uiForm.oneDBtn->setText("Reduce Data");
+    m_uiForm.oneDBtn->setEnabled(true);
     m_uiForm.load_dataBtn->setEnabled(true);
   }
 }
@@ -434,14 +483,15 @@ bool SANSRunWindow::isUserFileLoaded() const
 /**
  * Get the path the the raw file indicated by the run number.This checks the given directory for the number 
  * given. Left-padding of zeroes is done as required.
- * @param data_dir The directory of the data files
  * @param run_no The run number to search for
  */
-QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & prefix, const QString & run_no) const
+QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & run_no) const
 {
   //Do a quick check for the existence of the file with these exact credentials
   QDir directory(data_dir);
-  QString filename = directory.absoluteFilePath(prefix + run_no + ".raw");
+  QString prefix = m_uiForm.inst_opt->currentText();
+  QString ext = m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString();
+  QString filename = directory.absoluteFilePath(prefix + run_no + ext);
   if( QFileInfo(filename).exists() ) return filename;
   
   //Otherwise check entries with padded
@@ -516,13 +566,6 @@ void SANSRunWindow::selectUserFile()
     start_path = m_last_dir;
   }
   
-  //  QString file_path = m_uiForm.userfile_edit->text();
-  
-//   if( file_path.isEmpty() || QFileInfo(file_path).isDir() )
-//   {
-//     QString start_dir = m_last_dir;
-//     if( QDir(m_uiForm.datadir_edit->text()).exists() ) start_dir = m_uiForm.datadir_edit->text();
-//   }
   QString file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_path, "AllFiles (*.*)");    
   if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return;
   m_uiForm.userfile_edit->setText(file_path);
@@ -569,14 +612,20 @@ void SANSRunWindow::handleLoadButtonClick()
     
     if( workspaceExists(ws_name) ) continue;
     //Check for the correct number of digits
-    QString filepath = getRawFilePath(work_dir, "LOQ", run_no);
+    QString filepath = getRawFilePath(work_dir, run_no);
     if( filepath.isEmpty() ) continue;
     //Load the file
     runPythonCode(writeLoadRawCmd(filepath, ws_name), true);
     data_loaded = true;
   }
 
-  if( !data_loaded ) return;
+  if( !data_loaded ) 
+  {
+    showInformationBox("Warning: No data could be loaded for " + m_uiForm.inst_opt->currentText() + 
+		       " with a " + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() +
+		       " file extension.");
+    return;
+  }
 
   //We need to sort out the number of periods in each data set
   QString code = "wksp_dict = {}\n"
@@ -595,11 +644,7 @@ void SANSRunWindow::handleLoadButtonClick()
     "print 'X:MAX:' + str(wksp.readX(0)[len(wksp.readX(0))-1])\n";
 
   QString results = runPythonCode(code);
-  if( results.isEmpty() ) 
-  {
-    showInformationBox("No data could be loaded.");
-    return;
-  }
+  if( results.isEmpty() ) return;
   
   QStringList output_lines = results.split("\n");
   QStringListIterator sitr(output_lines);
@@ -641,9 +686,44 @@ void SANSRunWindow::handleLoadButtonClick()
     if( !userentry ) continue;
 
     userentry->setText("1");
+
   }
 
+  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans";
+  if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
+  
+  // Set up distance information
+  double lms(0.0), lsda(0.0), lsdb(0.0);
+  componentDistances(wsname, lms, lsda, lsdb);
+  const char format('f');
+  const int prec(4);
+  m_uiForm.dist_sample_ms->setText(QString::number(lms, format, prec));
+  m_uiForm.dist_sample_sd1->setText(QString::number(lsda, format, prec));
+  m_uiForm.dist_sample_sd2->setText(QString::number(lsdb, format, prec));
+
+  wsname = m_uiForm.sct_can_edit->text() + "_sans";
+  if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
+
+  lms = 0.0; lsda = 0.0; lsdb = 0.0;
+  componentDistances(wsname, lms, lsda, lsdb);
+  m_uiForm.dist_can_ms->setText(QString::number(lms, format, prec));
+  m_uiForm.dist_can_sd1->setText(QString::number(lsda, format, prec));
+  m_uiForm.dist_can_sd2->setText(QString::number(lsdb, format, prec));
+
+  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans";
+  if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
+
+  lms = 0.0; lsda = 0.0; lsdb = 0.0;
+  componentDistances(wsname, lms, lsda, lsdb);
+  m_uiForm.dist_bkgd_ms->setText(QString::number(lms, format, prec));
+  m_uiForm.dist_bkgd_sd1->setText(QString::number(lsda, format, prec));
+  m_uiForm.dist_bkgd_sd2->setText(QString::number(lsdb, format, prec));
+  
   //We can now process some data
+  for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
+  {
+    m_uiForm.tabWidget->setTabEnabled(index, true);
+  }
   emit dataReadyToProcess(true);
 }
 
@@ -656,17 +736,31 @@ void SANSRunWindow::handleReduceButtonClick()
 
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
 
+  QStringList wslist(m_uiForm.sct_sample_edit->text() + "_sans");
+  wslist << m_uiForm.sct_can_edit->text() + "_sans" <<  m_uiForm.tra_sample_edit->text() + "_trans"
+	 << m_uiForm.direct_sample_edit->text() + "_trans";
+  QStringListIterator itr(wslist);
+  while( itr.hasNext() )
+  {
+    // Quick check that the workspaces we need actually exist
+    QString testws = itr.next();
+    if( !workspaceExists(testws) )
+    {
+      showInformationBox("Error: " + testws + " does not exist. Please check that the relevant data has been loaded.");
+      return;
+    }
+  }
+
   //Disable stuff
   setProcessingState(true);
-
+  
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
-  //  py_code.replace("<WORKINGDIR>", m_data_dir);
   py_code.replace("<INSTRUMENTPATH>", m_ins_defdir);
-  py_code.replace("<SCATTERSAMPLE>", m_uiForm.sct_sample_edit->text() + "_sans");
-  py_code.replace("<SCATTERCAN>", m_uiForm.sct_can_edit->text() + "_sans");
-  py_code.replace("<TRANSMISSIONSAMPLE>", m_uiForm.tra_sample_edit->text() + "_trans");
-  py_code.replace("<DIRECTSAMPLE>", m_uiForm.direct_sample_edit->text() + "_trans");
+  py_code.replace("<SCATTERSAMPLE>", wslist.at(0));
+  py_code.replace("<SCATTERCAN>", wslist.at(1));
+  py_code.replace("<TRANSMISSIONSAMPLE>", wslist.at(2));
+  py_code.replace("<DIRECTSAMPLE>", wslist.at(3));
 
   //Limit replacement
   py_code.replace("<RADIUSMIN>", m_uiForm.rad_min->text());
@@ -694,7 +788,7 @@ void SANSRunWindow::handleReduceButtonClick()
   py_code.replace("<DIRECTFILE>", m_uiForm.direct_file->text());
   py_code.replace("<FLATFILE>", m_uiForm.flat_file->text());
   
-  py_code.replace("<SCALEFACTOR>", m_uiForm.scale_lbl->text());
+  py_code.replace("<SCALEFACTOR>", m_uiForm.scale_factor->text());
 
   py_code.replace("<MASKSTRING>", createMaskString());
     
