@@ -190,9 +190,9 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
   std::transform(month.begin(), month.end(), month.begin(), toupper);
   outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << "\n";
   // The units that the data is in
-  outRKH << "  6 Q (\A\u-1\d)\n";
-  outRKH << "  6 Q (\A\u-1\d)\n";
-  outRKH << "  0 Cross section (cm\u-1\d)\n";
+  outRKH << "  6 Q (\\A\\u-1\\d)\n";
+  outRKH << "  6 Q (\\A\\u-1\\d)\n";
+  outRKH << "  0 Cross section (cm\\u-1\\d)\n";
   outRKH << "  0\n";
   // Now the axis values
   const MantidVec& X = result->readX(0);
