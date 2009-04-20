@@ -122,7 +122,26 @@ public:
     Instrument *i = new Instrument;
     i->setName("TestInstrument");
     
-    TS_ASSERT( i->getComponentByName("TestInstrument").get() )
+    CompAssembly *bank = new CompAssembly("bank");
+    bank->setPos(1.,0,1.);
+    Quat q(0.9,0,0,0.2);
+    q.normalize();
+    bank->setRot(q);
+    i->add(bank);
+
+    Detector *det = new Detector("det1",0);
+    det->setID(1);
+    det->setPos(1.0,0.0,0.0);
+    bank->add(det);
+    i->markAsDetector(det);
+
+    // Instrument name
+    TS_ASSERT( i->getComponentByName("TestInstrument").get() );
+    // Bank
+    TS_ASSERT( i->getComponentByName("bank").get() );
+    //Det 1
+    TS_ASSERT( i->getComponentByName("det1").get() );
+
     delete i;
   }
 
