@@ -38,14 +38,12 @@ done
 shift $(($OPTIND - 1))
 #
 mantid_version="1.0"
-svn_version=`svnversion --no-newline`
-#mantid_release="0.`date +%Y%m%d`svnR$svn_version"
-mantid_release="0.svnR${svn_version}.`date +%Y%m%d`"
 #
 mantid_svn="http://svn.mantidproject.org/mantid/trunk"
 rm -f Mantid-$mantid_version.tar.gz
 rm -fr Mantid-$mantid_version
 if $do_local; then
+    svn_version=`svnversion --no-newline`
     echo "Linking to local Mantid version ..."
     cp -r Mantid Mantid-$mantid_version
     cd Mantid-$mantid_version
@@ -58,6 +56,7 @@ if $do_local; then
     ln -s `pwd`/../../../Mantid .
     cd ../..
 else
+    svn_version="$svn_rev"
     echo "Exporing mantid source revision $svn_rev from subversion ..."
     echo "Directory structure ..."
     svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/RPM_Kit/Mantid Mantid-$mantid_version 
@@ -73,9 +72,11 @@ else
     svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Test/Instrument instrument
     cd ..
 fi
+#mantid_release="0.`date +%Y%m%d`svnR$svn_version"
+mantid_release="0.svnR${svn_version}.`date +%Y%m%d`"
 echo "Exporting complete - making spec file for version $mantid_version release $mantid_release"
 #
-sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" < mantid.spec.template > Mantid.spec
+sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" < mantid.spec.template > Mantid.spec
 echo "Buliding tar file Mantid-$mantid_version.tar.gz"
 tar -cpzf Mantid-$mantid_version.tar.gz Mantid-$mantid_version
 topdir=`rpm --showrc|grep topdir| awk '{print $3}' | tail -1`

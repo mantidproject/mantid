@@ -73,7 +73,7 @@ sed -i -e "s!MANTIDLIB = .*'!MANTIDLIB = '%{mantidlibdir}'!" SConstruct
 cd Code/Mantid
 scons rpmbuild=1 skiptest=1 debug=0
 cd ../qtiplot
-python release_date.py
+python release_date.py %{version} SVN_VERSION
 cd MantidQt
 qmake-qt4
 make
