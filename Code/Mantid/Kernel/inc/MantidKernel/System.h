@@ -74,7 +74,7 @@ namespace Kernel
   DLLExport std::string getPathToExecutable();
 
   //Check if the path is on a network drive
-  DLLExport bool isNetworkDrive(const std::string path);
+  DLLExport bool isNetworkDrive(const std::string & path);
 
 } // namespace Kernel
 } // namespace Mantid
