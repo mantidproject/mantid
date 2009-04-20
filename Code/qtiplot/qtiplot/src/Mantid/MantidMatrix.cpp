@@ -39,10 +39,11 @@
 using namespace Mantid::API;
 
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-: MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),m_min(0),m_max(0),m_are_min_max_set(false),
-m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
-m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
-m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
+: MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),
+  y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),
+  m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
+  m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
+  m_rowBegin(-1), m_rowEnd(-1), m_colBegin(-1), m_colEnd(-1)
 {
     m_appWindow = parent;
     m_strName = name.toStdString();
@@ -129,9 +130,14 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
     if (ws->readX(0).size() != ws->readY(0).size()) x_end = ws->readX(0)[ws->blocksize()];
     else
         x_end = ws->readX(0)[ws->blocksize()-1];
-    // What if y is not a spectrum number?
-    y_start = double(m_startRow);
-    y_end = double(m_endRow);
+        
+    // This is only meaningful if a 2D (or greater) workspace
+    if (ws->axes() > 1)
+    {
+      const Mantid::API::Axis* const ax = ws->getAxis(1);
+      y_start = (*ax)(m_startRow);
+      y_end   = (*ax)(m_endRow);
+    }
 
     m_bk_color = QColor(128, 255, 255);
     m_matrix_icon = mantid_matrix_xpm;
@@ -586,23 +592,26 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     
 	plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
 	
-    Mantid::API::Axis* ax = m_workspace->getAxis(0);
+    const Mantid::API::Axis* ax = m_workspace->getAxis(0);
     std::string s;
-    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
     else
         s = "X Axis";
     plot->setXAxisLabel(tr(s.c_str()));
     
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric()) 
+    if ( m_workspace->axes() > 1 )
     {
-        if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+      ax = m_workspace->getAxis(1);
+      if (ax->isNumeric()) 
+      {
+        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
         else
-            s = "Y Axis";
+          s = "Y Axis";
         plot->setYAxisLabel(tr(s.c_str())); 
+      }
+      else
+        plot->setYAxisLabel(tr("Spectrum"));
     }
-    else
-        plot->setYAxisLabel(tr("Spectrum")); 
 
     plot->setZAxisLabel(tr(m_workspace->YUnit().c_str())); 
 
@@ -630,28 +639,31 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
     Graph* plot = g->activeGraph();
 	a->setPreferences(plot);
     plot->setTitle(tr("Workspace ") + name());
-    Mantid::API::Axis* ax;
+    const Mantid::API::Axis* ax;
     ax = m_workspace->getAxis(0);
     std::string s;
     if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
     else
         s = "X axis";
     plot->setXAxisTitle(tr(s.c_str()));
-    ax = m_workspace->getAxis(1);
-    if (ax->isNumeric()) 
+    if ( m_workspace->axes() > 1 )
     {
-        if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+      ax = m_workspace->getAxis(1);
+      if (ax->isNumeric()) 
+      {
+        if ( ax->unit() ) s = ax->unit()->caption() + " / " + ax->unit()->label();
         else
-            s = "Y axis";
+          s = "Y Axis";
         plot->setYAxisTitle(tr(s.c_str())); 
+      }
+      else
+        plot->setYAxisTitle(tr("Spectrum"));
     }
-    else
-        plot->setYAxisTitle(tr("Spectrum")); 
 
     // Set the range on the thirs, colour axis
     double minz, maxz;
     range(&minz,&maxz);
-	plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
+    plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
 
     plot->setAutoScale();
     g->askOnCloseEvent(false);

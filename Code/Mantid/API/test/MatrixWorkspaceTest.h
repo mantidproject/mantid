@@ -106,12 +106,28 @@ public:
     TS_ASSERT_THROWS_NOTHING( const WorkspaceHistory& hh = wsc.getHistory() )
   }
 
+  void testAxes()
+  {
+    TS_ASSERT_EQUALS( ws->axes(), 1 )
+  }
+
   void testGetAxis()
   {
     TS_ASSERT_THROWS( ws->getAxis(-1), Exception::IndexError )
     TS_ASSERT_THROWS_NOTHING( ws->getAxis(0) )
     TS_ASSERT( ws->getAxis(0) )
+    TS_ASSERT( ws->getAxis(0)->isNumeric() )
     TS_ASSERT_THROWS( ws->getAxis(1), Exception::IndexError )
+  }
+
+  void testReplaceAxis()
+  {
+    Axis* axBad = new Axis(AxisType::Spectra,5);
+    TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error )
+    Axis* ax = new Axis(AxisType::Spectra,1);
+    TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError )
+    TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) )
+    TS_ASSERT( ws->getAxis(0)->isSpectra() )
   }
 
   void testIsDistribution()

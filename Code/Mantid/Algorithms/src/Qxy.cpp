@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/Qxy.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 #include "Poco/Timestamp.h"
 #include "Poco/DateTimeFormatter.h"
 
@@ -134,16 +135,33 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",bins,bins+1,bins);
   
+  // Create a numeric axis to replace the vertical one
+  Axis* verticalAxis = new Axis(AxisType::Numeric,bins);
+  outputWorkspace->replaceAxis(1,verticalAxis);
+
   // Build up the X values
   Kernel::cow_ptr<MantidVec> axis;
-  MantidVec& axisRef = axis.access();
-  axisRef.resize(bins+1);
-  for (int i = 0; i < bins+1; ++i)
+  MantidVec& horizontalAxisRef = axis.access();
+  horizontalAxisRef.resize(bins+1);
+  for (int i = 0; i < bins; ++i)
   {
-    axisRef[i] = startVal + i*delta;
+    const double currentVal = startVal + i*delta;
+    // Set the X value
+    horizontalAxisRef[i] = currentVal;
+    // Set the value on the new axis to the mid-point of the bin
+    // Later may want vertical axis to properly model bins, but since this is presently
+    // just for display purposes, it doesn't really matter
+    verticalAxis->setValue(i,currentVal+(delta/2.0));
   }
+  // One extra value for the X vector
+  horizontalAxisRef[bins] = startVal + bins*delta;
   outputWorkspace->setX(axis);
-  
+
+  // Set the axis units
+  outputWorkspace->getAxis(1)->unit() = outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+  // Set the 'Y' unit (gets confusing here...this is probably a Z axis in this case)
+  outputWorkspace->setYUnit("Cross Section");
+
   setProperty("OutputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWorkspace));
   return outputWorkspace;
 }
@@ -163,7 +181,7 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
     throw std::runtime_error("An error occurred while trying to open the output file for writing");
   }
 
-  outRKH <<  "LOQ ";
+  outRKH <<  " LOQ ";
   Poco::Timestamp timestamp;
   //The sample file has the format of the data/time as in this example Thu 28-OCT-2004 12:23
   outRKH << Poco::DateTimeFormatter::format(timestamp, std::string("%w")) << " " << Poco::DateTimeFormatter::format(timestamp, std::string("%d")) 
@@ -172,22 +190,22 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
   std::transform(month.begin(), month.end(), month.begin(), toupper);
   outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << "\n";
   // The units that the data is in
-  outRKH << "6 Q (Ang-1)\n";
-  outRKH << "6 Q (Ang-1)\n";
-  outRKH << "0 Cross section (cm-1)\n";
-  outRKH << "0\n";
+  outRKH << "  6 Q (\A\u-1\d)\n";
+  outRKH << "  6 Q (\A\u-1\d)\n";
+  outRKH << "  0 Cross section (cm\u-1\d)\n";
+  outRKH << "  0\n";
   // Now the axis values
   const MantidVec& X = result->readX(0);
   const size_t bins = X.size(); 
-  outRKH << bins << std::endl;
+  outRKH << "  " << bins << std::endl;
   for (size_t i = 0; i < bins; ++i) outRKH << std::scientific << std::setprecision(6) << X[i] << " ";
   outRKH << std::endl;
-  outRKH << bins << std::endl;
+  outRKH << "  " << bins << std::endl;
   for (size_t i = 0; i < bins; ++i) outRKH << std::scientific << std::setprecision(6) << X[i] << " ";
   outRKH << std::endl;
   const int xSize = result->blocksize();
   const int ySize = result->getNumberHistograms();
-  outRKH << xSize << " " << ySize << " " 
+  outRKH << "   " << xSize << "   " << ySize << "  " 
          << std::scientific << std::setprecision(12) << 1.0 << std::endl;
   const int iflag = 3;
   outRKH << iflag << "(8E12.4)" << std::endl;

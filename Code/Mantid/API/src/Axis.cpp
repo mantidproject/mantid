@@ -10,7 +10,7 @@ namespace API
 {
 
 /// Constructor
-Axis::Axis(const bool type, const int length) :
+Axis::Axis(const bool& type, const int& length) :
   m_size(length), m_title(), m_unit(Kernel::Unit_sptr()),
   m_isSpectra(type), m_spectraValues(), m_numericValues()
 {
@@ -89,7 +89,7 @@ const bool Axis::isNumeric() const
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const double Axis::operator()(const int index, const int verticalIndex) const
+double Axis::operator()(const int& index, const int& verticalIndex) const
 {
   if (index < 0 || index >= m_size)
   {
@@ -111,7 +111,7 @@ const double Axis::operator()(const int index, const int verticalIndex) const
  *  @param value The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void Axis::setValue(const int index, const double value)
+void Axis::setValue(const int& index, const double& value)
 {
   if (index < 0 || index >= m_size)
   {
@@ -134,7 +134,7 @@ void Axis::setValue(const int index, const double value)
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const int& Axis::spectraNo(const int index) const
+const int& Axis::spectraNo(const int& index) const
 {
   if (!m_isSpectra) throw std::domain_error("Cannot call spectraNo() on numeric axes");
   if (index < 0 || index >= m_size)
@@ -151,7 +151,7 @@ const int& Axis::spectraNo(const int index) const
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-int& Axis::spectraNo(const int index)
+int& Axis::spectraNo(const int& index)
 {
   if (!m_isSpectra) throw std::domain_error("Cannot call spectraNo() on numeric axes");
   if (index < 0 || index >= m_size)
@@ -161,30 +161,33 @@ int& Axis::spectraNo(const int index)
 
   return m_spectraValues[index];
 }
+
 /** Get the length of the Axis
  *
  */
-int Axis::getLength() const
+int Axis::length() const
 {
 	if (m_isSpectra)
 		return m_spectraValues.size();
 	else
 		return m_numericValues.size();
 }
+
 /** Check if two axis defined as spectra or numeric axis are equivalent
- * @param axis2 Reference to the axis to compare to
+ *  @param axis2 Reference to the axis to compare to
  */
-bool Axis::operator ==(const Axis& axis2) const
+bool Axis::operator==(const Axis& axis2) const
 {
-	if (getLength()!=axis2.getLength())
+	if (length()!=axis2.length())
 		return false;
 	if (m_isSpectra)
 		return std::equal(m_spectraValues.begin(),m_spectraValues.end(),axis2.m_spectraValues.begin());
 	else
 		return std::equal(m_numericValues.begin(),m_numericValues.end(),axis2.m_numericValues.begin());
 }
+
 /** Returns a map where spectra is the key and index is the value
- * This is used for efficient search of spectra number within a workspace
+ *  This is used for efficient search of spectra number within a workspace
  *  @param  map Reference to the map
  */
 void Axis::getSpectraIndexMap(spec2index_map& map)

@@ -42,13 +42,13 @@ namespace API
 class DLLExport RefAxis : public Axis
 {
 public:
-	RefAxis(const int length, const MatrixWorkspace* const parentWorkspace);
+	RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace);
 	virtual ~RefAxis();
 
 	Axis* clone(const MatrixWorkspace* const parentWorkspace);
 	
-  virtual const double operator()(const int index, const int verticalIndex) const;
-  virtual void setValue(const int index, const double value);
+  virtual double operator()(const int& index, const int& verticalIndex) const;
+  virtual void setValue(const int& index, const double& value);
 
 private:
   RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace);

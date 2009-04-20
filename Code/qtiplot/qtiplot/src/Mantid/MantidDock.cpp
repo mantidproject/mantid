@@ -158,7 +158,8 @@ void MantidDockWidget::deleteWorkspaces()
   // First loop over getting workspace names
   for (it = items.constBegin(); it != items.constEnd(); ++it)
   {
-    wsNames.push_back((*it)->text(0));
+    // Only want the top-level items (the workspace name), not the child info
+    if ( (*it)->parent() == NULL ) wsNames.push_back((*it)->text(0));
   }
   // Now loop over, calling delete for each workspace
   QList<QString>::const_iterator it2;

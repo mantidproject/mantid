@@ -213,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IInstrument.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Instrument.cpp"
 				>
 			</File>

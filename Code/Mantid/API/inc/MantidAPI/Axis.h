@@ -58,7 +58,7 @@ public:
 	#else
     typedef std::tr1::unordered_map<int,int> spec2index_map;
 	#endif
-  Axis(const bool type, const int length);
+  Axis(const bool& type, const int& length);
   virtual ~Axis();
 
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
@@ -72,13 +72,13 @@ public:
   const bool isSpectra() const;
   const bool isNumeric() const;
 
-  virtual const double operator()(const int index, const int verticalIndex = 0) const;
-  virtual void setValue(const int index, const double value);
+  virtual double operator()(const int& index, const int& verticalIndex = 0) const;
+  virtual void setValue(const int& index, const double& value);
 
-  const int& spectraNo(const int index) const;
-  int& spectraNo(const int index);
+  const int& spectraNo(const int& index) const;
+  int& spectraNo(const int& index);
   /// Get the length of the axis
-  int getLength() const;
+  int length() const;
   /// Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&);
   /// Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis

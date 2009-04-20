@@ -780,22 +780,24 @@ namespace NeXus
    }
    int signal=1;
    status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
+   // Set the axis labels and values
    Mantid::API::Axis *xAxis=localworkspace->getAxis(0);
    Mantid::API::Axis *sAxis=localworkspace->getAxis(1);
    std::string xLabel,sLabel;
-   if(xAxis->isSpectra())
-	   xLabel="spectraNumber";
+   if ( xAxis->isSpectra() ) xLabel = "spectraNumber";
    else
-	   xLabel=xAxis->unit()->unitID();
-   std::vector<double> histNumber;
-   if(sAxis->isSpectra())
    {
-	   sLabel="spectraNumber";
-	   for(int i=m_spec_min;i<=m_spec_max;i++)
-	       histNumber.push_back((double)sAxis->spectraNo(i));
+     if ( xAxis->unit() ) xLabel = xAxis->unit()->unitID();
+     else xLabel = "unknown";
    }
+   if ( sAxis->isSpectra() ) sLabel = "spectraNumber";
    else
-	   sLabel=sAxis->unit()->unitID();
+   {
+     if ( sAxis->unit() ) sLabel = sAxis->unit()->unitID();
+     else sLabel = "unknown";
+   }
+   std::vector<double> histNumber;
+	 for(int i=m_spec_min;i<=m_spec_max;i++) histNumber.push_back((*sAxis)(i));
    const std::string axesNames=xLabel+":"+sLabel;
    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
    std::string yUnits=localworkspace->YUnit();

@@ -72,7 +72,7 @@ void SaveRKH::exec()
       g_log.error() << "The input workspace is incompatible with the SaveRKH algorithm and the selected FirstColumnValue.\n";
       throw std::runtime_error("The input workspace does not have the correct form to be saved in an RKH format");
     }
-    outRKH <<  "LOQ ";
+    outRKH <<  " LOQ ";
     Poco::Timestamp timestamp;
     //The sample file has the format of the data/time as in this example Thu 28-OCT-2004 12:23
     outRKH << Poco::DateTimeFormatter::format(timestamp, std::string("%w")) << " " << Poco::DateTimeFormatter::format(timestamp, std::string("%d")) 
@@ -81,8 +81,8 @@ void SaveRKH::exec()
     std::transform(month.begin(), month.end(), month.begin(), toupper);
     outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << " W 26  INST_DIRECT_BEAM\n"
            << " rwr50 standard, new mon2, 800v\n"
-           << noDataPoints << " 0    0    0    1     " << noDataPoints << "    0\n"
-           << " 0         0         0         0\n"
+           << "  " << noDataPoints << " 0    0    0    1     " << noDataPoints << "    0\n"
+           << "      0         0         0         0\n"
            << " 3 (F12.5,2E16.6)\n";
 
     //Now the data (The x data is bin edged so convert to bin centered

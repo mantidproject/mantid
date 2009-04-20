@@ -69,21 +69,20 @@ void MatrixWorkspace::initialize(const int &NVectors, const int &XLength, const 
  */
 void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
 {
-    boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
+  boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
+  if (tmp)
+  {
+    sptr_instrument=tmp;
+  }
+  else
+  {
+    boost::shared_ptr<ParInstrument> tmp = boost::dynamic_pointer_cast<ParInstrument>(instr);
     if (tmp)
     {
-        sptr_instrument=tmp;
+      sptr_instrument = tmp->baseInstrument();
+      sptr_parmap = tmp->getParameterMap();
     }
-    else
-    {
-        boost::shared_ptr<ParInstrument> tmp = boost::dynamic_pointer_cast<ParInstrument>(instr);
-        if (tmp)
-        {
-            sptr_instrument = tmp->baseInstrument();
-            sptr_parmap = tmp->getParameterMap();
-        }
-    }
-        
+  }
 }
 
 /** Set the sample
@@ -173,11 +172,11 @@ double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) con
  */
 IInstrument_sptr MatrixWorkspace::getInstrument()const
 {
-    if ( sptr_parmap->size() == 0 )  return sptr_instrument;
-    ParInstrument* pi = new ParInstrument(sptr_instrument,sptr_parmap);
-    IInstrument* ii = static_cast<IInstrument*>(pi);
-    boost::shared_ptr<IInstrument> tmp(ii);
-    return (tmp);
+  if ( sptr_parmap->size() == 0 )  return sptr_instrument;
+  ParInstrument* pi = new ParInstrument(sptr_instrument,sptr_parmap);
+  IInstrument* ii = static_cast<IInstrument*>(pi);
+  boost::shared_ptr<IInstrument> tmp(ii);
+  return (tmp);
 }
 
 /** Get a shared pointer to the instrument associated with this workspace
@@ -205,11 +204,11 @@ boost::shared_ptr<Sample> MatrixWorkspace::getSample() const
  */
 void MatrixWorkspace::newSample() 
 {
-    boost::shared_ptr<Sample> old_sample = sptr_sample;
-    sptr_sample.reset(new Sample);
-    sptr_sample->setProtonCharge(old_sample->getProtonCharge());
-    sptr_sample->setName(old_sample->getName());
-    sptr_sample->setGeometry(old_sample->getGeometry());
+  boost::shared_ptr<Sample> old_sample = sptr_sample;
+  sptr_sample.reset(new Sample);
+  sptr_sample->setProtonCharge(old_sample->getProtonCharge());
+  sptr_sample->setName(old_sample->getName());
+  sptr_sample->setGeometry(old_sample->getGeometry());
 }
 
 /** Create new empty instrument parameter map
@@ -231,7 +230,7 @@ const int MatrixWorkspace::axes() const
  *  @param axisIndex The index of the axis required
  *  @throw IndexError If the argument given is outside the range of axes held by this workspace
  */
-Axis* const MatrixWorkspace::getAxis(const int axisIndex) const
+Axis* const MatrixWorkspace::getAxis(const int& axisIndex) const
 {
   if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
   {
@@ -240,6 +239,33 @@ Axis* const MatrixWorkspace::getAxis(const int axisIndex) const
   }
 
   return m_axes[axisIndex];
+}
+
+/** Replaces one of the workspace's axes with the new one provided.
+ *  @param axisIndex The index of the axis to replace
+ *  @param newAxis A pointer to the new axis. The class will take ownership.
+ *  @throw IndexError If the axisIndex given is outside the range of axes held by this workspace
+ *  @throw std::runtime_error If the new axis is not of the correct length (the same as the old one)
+ */
+void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
+{
+  // First check that axisIndex is in range
+  if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
+  {
+    g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
+    throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
+  }
+  // Now check that the new axis is of the correct length
+  // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
+  if ( newAxis->length() != m_axes[axisIndex]->length() )
+  {
+    g_log.error("replaceAxis: The new index is not of the correct length");
+    throw std::runtime_error("replaceAxis: The new index is not of the correct length");
+  }
+
+  // If we're OK, then delete the old axis and set the pointer to the new one
+  delete m_axes[axisIndex];
+  m_axes[axisIndex] = newAxis;
 }
 
 /// Returns true if the workspace contains data in histogram form, false if it's point-like
@@ -334,7 +360,7 @@ const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrum
 
 long int MatrixWorkspace::getMemorySize() const
 {
-    return 3*size()*sizeof(double)/1024;
+  return 3*size()*sizeof(double)/1024;
 }
 
 
