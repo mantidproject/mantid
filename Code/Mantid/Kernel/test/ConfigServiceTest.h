@@ -127,9 +127,7 @@ public:
 	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
 	}
- 
-private:
-	ConfigService *configSvc;
+
 };
 
 #endif /*MANTID_CONFIGSERVICETEST_H_*/

@@ -101,10 +101,16 @@ namespace Mantid
 				if( !m_pConf->hasProperty(*sitr) ) continue;
 
 				std::string value(m_pConf->getString(*sitr));
-				if( Poco::Path(value).isRelative() )
-				{
-					m_mAbsolutePaths.insert(std::make_pair(*sitr, Poco::Path(execdir).resolve(value).toString()));
-				}
+        try {
+          if( Poco::Path(value).isRelative() )
+          {
+            m_mAbsolutePaths.insert(std::make_pair(*sitr, Poco::Path(execdir).resolve(value).toString()));
+          }
+        }
+        catch (Poco::PathSyntaxException &ex)
+        {
+          g_log.error() << ex.what() << " in .properties file: " << value << std::endl;
+        }
 			}
 		}
 
