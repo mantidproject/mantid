@@ -926,17 +926,17 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
     QModelIndexList indexList = oldSelModel->selectedIndexes();
     QModelIndex curIndex = activeView()->currentIndex();
     
-    setup(ws,m_startRow,m_endRow);
+    setup(ws,-1,-1);
     
-    delete m_modelY;
+    //delete m_modelY;
     m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
     connectTableView(m_table_viewY,m_modelY);
 
-    delete m_modelX;
+    //delete m_modelX;
     m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     connectTableView(m_table_viewX,m_modelX);
 
-    delete m_modelE;
+    //delete m_modelE;
     m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
     connectTableView(m_table_viewE,m_modelE);
 
