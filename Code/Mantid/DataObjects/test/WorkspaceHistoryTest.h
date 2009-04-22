@@ -219,10 +219,10 @@ public:
     TS_ASSERT_LESS_THAN( 1200, i )
     // Check first line
     s.seekp(0);
-    char c[21];
-    s.getline(c,21);
+    char c[30];
+    s.getline(c,30);
     std::string ss(c);
-    TS_ASSERT( ! ss.compare("Framework Version: 1") )
+    TS_ASSERT( ! ss.substr(0,20).compare("Framework Version: 1") )
   }
 };
 
