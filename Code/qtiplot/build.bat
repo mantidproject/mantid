@@ -1,6 +1,8 @@
 @echo off
 svn update
-python release_date.py
+echo 1.0 > vers.txt
+svnversion >> vers.txt
+python release_version.py
 
 IF "%VCINSTALLDIR%"=="" CALL "%VS80COMNTOOLS%"vsvars32
 
