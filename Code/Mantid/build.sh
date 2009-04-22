@@ -6,6 +6,5 @@
 #
 #sc=`which scons 2>/dev/null`
 echo 1.0 > vers.txt
-svnversion >> vers.txt
+svnversion . >> vers.txt
 python release_version.py
-python ../Third_Party/src/scons-local/scons.py $*
