@@ -4,6 +4,10 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
 
+// This file is created automatically by Mantid/Code/Mantid/build.bat(sh)
+// and defines MANTID_VERSION
+#include "MantidKernel/MantidVersion.h"
+
 namespace Mantid
 {
 namespace Kernel
@@ -11,7 +15,7 @@ namespace Kernel
 /// Default Constructor
 /// @todo Populate the Framework Version & User fields with something meaningful
 EnvironmentHistory::EnvironmentHistory() :
-  m_version("1"),
+  m_version(MANTID_VERSION),
   m_osName(ConfigService::Instance().getOSName()),
   m_osVersion(ConfigService::Instance().getOSVersion()),
   m_userName()

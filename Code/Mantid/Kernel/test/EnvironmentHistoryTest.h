@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/EnvironmentHistory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MantidVersion.h"
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -14,7 +15,7 @@ public:
 
   void testPopulate()
   {
-    std::string correctOutput = "Framework Version: 1\n";
+    std::string correctOutput = "Framework Version: "+std::string(MANTID_VERSION)+"\n";
     correctOutput = correctOutput + "OS name: " + ConfigService::Instance().getOSName() + "\n";
     correctOutput = correctOutput + "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
     correctOutput = correctOutput + "username: \n";
