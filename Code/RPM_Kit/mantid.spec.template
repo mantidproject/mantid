@@ -52,7 +52,7 @@ Requires:	muParser
 %define mantiddir		/opt/%{name}
 %define mantidlibdir		%{mantiddir}/bin
 %define mantidbindir		%{mantiddir}/bin
-%define mantidpluginsdir		%{mantiddir}/plugins
+%define mantidpluginsdir	%{mantiddir}/plugins
 %define mantidscriptsdir	%{mantiddir}/scripts
 %define mantidincludesdir	%{mantiddir}/include
 %define mantidimagesdir		%{mantiddir}/images
@@ -71,7 +71,7 @@ sed -i -e "s!MANTIDLIB = .*'!MANTIDLIB = '%{mantidlibdir}'!" SConstruct
 
 %build
 cd Code/Mantid
-scons rpmbuild=1 skiptest=1 debug=0
+sh build.sh rpmbuild=1 skiptest=1 debug=0
 cd ../qtiplot
 python release_date.py %{version} SVN_VERSION
 cd MantidQt
@@ -96,6 +96,9 @@ install -m755 Code/Mantid/Bin/Shared/*.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/Mantid/Bin/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 install -m755 Code/qtiplot/MantidQt/lib/*.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/qtiplot/qtiplot/qtiplot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+for i in qtiplotrc.py qtiUtil.py mantidplotrc.py; do
+    install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
+done
 cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 cp -r Code/Mantid/PythonAPI/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
 cp -r Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
