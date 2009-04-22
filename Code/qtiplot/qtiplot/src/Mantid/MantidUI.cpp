@@ -1036,7 +1036,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlo
   if (!ws.get()) return NULL;
   
   Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, false, false);
-  int type = ws->isHistogramData()? 1 : 3;
+  int type = ws->isHistogramData() ? 3 : 1;  // Type 3 is steps, 1 is a line
   MultiLayer* ml = createGraphFromTable(t,type);
   if (!ml) return NULL;
 

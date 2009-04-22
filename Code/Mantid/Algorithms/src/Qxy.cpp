@@ -197,30 +197,43 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
   // Now the axis values
   const MantidVec& X = result->readX(0);
   const size_t bins = X.size(); 
-  outRKH << "  " << bins << std::endl;
-  for (size_t i = 0; i < bins; ++i) outRKH << std::scientific << std::setprecision(6) << X[i] << " ";
-  outRKH << std::endl;
-  outRKH << "  " << bins << std::endl;
-  for (size_t i = 0; i < bins; ++i) outRKH << std::scientific << std::setprecision(6) << X[i] << " ";
-  outRKH << std::endl;
+  outRKH << "  " << bins << "\n";
+  for (size_t i = 0; i < bins; ++i) 
+  {
+    outRKH << " " << std::scientific << std::setprecision(6) << X[i];
+    if ((i+1)%8 == 0) outRKH << "\n";
+  }
+  outRKH << "\n  " << bins << std::endl;
+  // This just uses the X vector for both axes, so relies on them being the same
+  for (size_t i = 0; i < bins; ++i) 
+  {
+    outRKH << " " << std::scientific << std::setprecision(6) << X[i];
+    if ((i+1)%8 == 0) outRKH << "\n";
+  }
   const int xSize = result->blocksize();
   const int ySize = result->getNumberHistograms();
-  outRKH << "   " << xSize << "   " << ySize << "  " 
-         << std::scientific << std::setprecision(12) << 1.0 << std::endl;
+  outRKH << "\n   " << xSize << "   " << ySize << "  " 
+         << std::scientific << std::setprecision(12) << 1.0 << "\n";
   const int iflag = 3;
-  outRKH << iflag << "(8E12.4)" << std::endl;
+  // Windows puts 3 figures in the exponent, Linux only two and as far as I can tell there's no way of changing it
+#ifdef _WIN32
+  outRKH << "  " << iflag << "(8E13.4)\n";
+#else
+  outRKH << "  " << iflag << "(8E12.4)\n";
+#endif
   // Question over whether I have X & Y swapped over compared to what they're expecting
   int emptyBins = 0;
   for (int i = 0; i < ySize; ++i)
   {
     const MantidVec& Y = result->readY(i);
+    std::cout.scientific;
     for (int j = 0; j < xSize; ++j) 
     {
-      outRKH << std::scientific << std::setprecision(4) << Y[j] << " ";
+      outRKH << (Y[j]<0 ? " " : "  ") << std::setprecision(4) << Y[j];
+      if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
       // Count the empty bins for logging
       if (Y[j] < 1.0e-12) ++emptyBins;
     }
-    outRKH << std::endl;
   }
   // Log the number of empty bins
   g_log.information() << "There are a total of " << emptyBins << " (" 
@@ -228,8 +241,11 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
   for (int i = 0; i < ySize; ++i)
   {
     const MantidVec& E = result->readE(i);
-    for (int j = 0; j < xSize; ++j) outRKH << std::scientific << std::setprecision(4) << E[j] << " ";
-    outRKH << std::endl;
+    for (int j = 0; j < xSize; ++j) 
+    {
+      outRKH << (E[j]<0 ? " " : "  ") << std::setprecision(4) << E[j];
+      if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
+    }
   }
   
   outRKH.close();

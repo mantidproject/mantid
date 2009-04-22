@@ -109,14 +109,15 @@ void MantidDockWidget::updateWorkspaceEntry(const QString & ws_name, Mantid::API
     ws_item->addChild(new QTreeWidgetItem(QStringList(isHistogram?"Histogram":"Data points")));
     std::string s = "X axis: ";
     if (ws_ptr->axes() > 0 )
-      {
-	Mantid::API::Axis *ax = ws_ptr->getAxis(0);
-	if( ax && ax->unit().get() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
-      }
+    {
+	    Mantid::API::Axis *ax = ws_ptr->getAxis(0);
+	    if ( ax && ax->unit() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
+	    else s += "Not set";
+    }
     else
-      {
-	s += "Unknown";
-      }
+    {
+	    s += "N/A";
+    }
     ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s)))); 
     s = "Y axis: " + ws_ptr->YUnit();
     ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
