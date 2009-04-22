@@ -4,8 +4,15 @@
 #
 # Also Passes through command line arguments to Scons.
 #
-#sc=`which scons 2>/dev/null`
 echo 1.0 > vers.txt
 svnversion . >> vers.txt
 python release_version.py
-python ../Third_Party/src/scons-local/scons.py $*
+#
+# Third_Party is not part of rpm distribution, so look for local scons
+#
+sc=`which scons 2>/dev/null`
+if test x$sc = x; then
+    python ../Third_Party/src/scons-local/scons.py $*
+else
+    $sc $*
+fi
