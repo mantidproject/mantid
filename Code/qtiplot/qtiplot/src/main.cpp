@@ -161,7 +161,7 @@ int main( int argc, char ** argv )
 		  
     QString path = argv[0];
     int i = path.lastIndexOf('/');
-    if (i < 0) i = path.lastIndexOf('\\');
+    if (i < 0) i = path.lastIndexOf('\\'); 
     if (i>=0) 
       {
 	path.remove(i,1000);

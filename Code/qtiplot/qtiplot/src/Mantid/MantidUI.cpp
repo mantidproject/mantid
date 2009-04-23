@@ -24,6 +24,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
 //#include "MemoryImage.h"
+#include "MemoryImage.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -140,12 +141,13 @@ void MantidUI::init()
 
     update();
   
-	//MultiLayer* ml = new MultiLayer(appWindow());
-	//QString label = "caption";
-	//appWindow()->initMultilayerPlot(ml, label.replace(QRegExp("_"), "-"));
- //   Graph *g = ml->activeGraph();
- //   MantidCurve* tc = new MemoryImage;
- //   g->insertPlotItem(tc,1);
+	MultiLayer* ml = new MultiLayer(appWindow());
+	QString label = "caption";
+	appWindow()->initMultilayerPlot(ml, label.replace(QRegExp("_"), "-"));
+    Graph *g = ml->activeGraph();
+    MantidCurve* tc = new MemoryImage;
+    g->insertPlotItem(tc,1);
+
 }
 
 MantidUI::~MantidUI()
@@ -1158,7 +1160,13 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
     QStringList ts = (*sItr).split(QRegExp("\\s+"));
     t->setText(row, 0, ts[1]);
     if( numeric ) t->setCell(row, 1, ts[2].toDouble());
-    else t->setText(row, 1, ts[2]);
+    else 
+    {
+        QStringList ds(ts);
+        ds.removeFirst();// remove date
+        ds.removeFirst();// and time
+        t->setText(row, 1, ds.join(" "));
+    }
   }
 
   //Show table

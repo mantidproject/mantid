@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "LoadDAE/idc.h"
+
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -82,8 +84,14 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
-      
+      void runLoadInstrument(DataObjects::Workspace2D_sptr, const char* iName);
 
+      /// Populate spectra-detector map
+      void loadSpectraMap(idc_handle_t dae_handle, DataObjects::Workspace2D_sptr ws);
+
+      /// load data from the DAE
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
+    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData = 0);
 
       /// The host name of the DAE
       std::string m_daename;
@@ -92,6 +100,8 @@ namespace Mantid
       int m_numberOfSpectra;
       /// The number of periods in the DAE
       int m_numberOfPeriods;
+      /// The number of chanels per spectrum
+      int m_channelsPerSpectrum;
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
@@ -102,6 +112,8 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
+      /// Good proton charge
+      float m_proton_charge;
       
       ///static reference to the logger class
       static Kernel::Logger& g_log;

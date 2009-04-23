@@ -12,6 +12,7 @@
 #include <map>
 #include <sstream>
 #include <stdlib.h>
+#include <cctype>
 
 namespace Mantid
 {
@@ -432,9 +433,33 @@ public:
     }
   }
 
+  /**  Check if str has the right time format 
+   *   @param str The string to check
+   *   @return True if the format is correct, false otherwise.
+   */
+  static bool isTimeString(const std::string &str)
+  {
+      if (str.size() < 19) return false;
+      if (!isdigit(str[0])) return false;
+      if (!isdigit(str[1])) return false;
+      if (!isdigit(str[2])) return false;
+      if (!isdigit(str[3])) return false;
+      if (!isdigit(str[5])) return false;
+      if (!isdigit(str[6])) return false;
+      if (!isdigit(str[8])) return false;
+      if (!isdigit(str[9])) return false;
+      if (!isdigit(str[11])) return false;
+      if (!isdigit(str[12])) return false;
+      if (!isdigit(str[14])) return false;
+      if (!isdigit(str[15])) return false;
+      if (!isdigit(str[17])) return false;
+      if (!isdigit(str[18])) return false;
+      return true;
+  }
+
 private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
-  std::time_t createTime_t_FromString(const std::string &str)
+  static std::time_t createTime_t_FromString(const std::string &str)
   {
     std::tm time_since_1900;
     time_since_1900.tm_isdst = -1;

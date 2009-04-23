@@ -221,19 +221,26 @@ void LoadLog::exec()
   // Add log data from the files
   for(size_t i=0;i<potentialLogFiles.size();i++)
   {
-    // Make the property name by removing the workspce name and file extension from the log filename
-    std::string log_name = Poco::Path(potentialLogFiles[i]).getFileName();
+      try
+      {
+          // Make the property name by removing the workspce name and file extension from the log filename
+          std::string log_name = Poco::Path(potentialLogFiles[i]).getFileName();
 
-      if (rawFile)
-          log_name.erase(0,ws_name.size());
+          if (rawFile)
+              log_name.erase(0,ws_name.size());
 
-      size_t j = log_name.find_last_of('.');
-      if (j != std::string::npos)
-          log_name.erase(j);
+          size_t j = log_name.find_last_of('.');
+          if (j != std::string::npos)
+              log_name.erase(j);
 
-      Property* log = parser.createLogProperty(potentialLogFiles[i],stringToLower(log_name));
-      if (log)
-          sample->addLogData(log);
+          Property* log = parser.createLogProperty(potentialLogFiles[i],stringToLower(log_name));
+          if (log)
+              sample->addLogData(log);
+      }
+      catch(...)
+      {
+          continue;
+      }
   }
 
   // operation was a success and ended normally

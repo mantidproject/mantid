@@ -23,6 +23,7 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
   }
   catch(std::exception& e)
   {
+      g_log.fatal()<<receiver->objectName().toStdString()<<'\n';
     g_log.fatal()<<"Unexpected exception: "<<e.what()<<"\n";
     QMessageBox ask;
     QAbstractButton *terminateButton = ask.addButton(tr("Terminate"), QMessageBox::ActionRole);
@@ -34,9 +35,9 @@ bool MantidApplication::notify( QObject * receiver, QEvent * event )
     if (ask.clickedButton() == terminateButton)
     {
         g_log.fatal("Terminated by user.");
-        exit(-1);
-    }
-    g_log.fatal("Continue working.");
+        quit();
+    }else
+        g_log.fatal("Continue working.");
   }
   return res;
 }

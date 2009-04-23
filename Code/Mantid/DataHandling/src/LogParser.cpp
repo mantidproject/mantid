@@ -118,18 +118,38 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     // Read in the data and determin if it is numeric
     std::string str,old_data;
     bool isNumeric(false);
+    std::string stime,sdata;
     while(std::getline(file,str))
     {
-        std::string stime,sdata;
+        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
+        {
+            //if the line doesn't start with a time treat it as a continuation of the previous data
+            if (change_times.size() == 0 || isNumeric)
+            {// if there are no previous data
+                std::string mess = "Cannot parse log file "+logFName+". Line:"+str;
+                g_log.error(mess);
+                throw std::logic_error(mess);
+            }
+            change_times[stime] += std::string(" ") + str;
+            continue;
+        }
         stime = str.substr(0,19);
         sdata = str.substr(19);
+
         if (sdata == old_data) continue;// looking for a change in the data
+
+        //check if the data is numeric
         std::istringstream istr(sdata);
         double tmp;
         istr >> tmp;
         isNumeric = !istr.fail();
         old_data = sdata;
-        change_times[stime] = sdata;
+
+        //if time is repeated and the data aren't numeric append the new string to the old one
+        if (!isNumeric && change_times[stime].size() > 0)
+            change_times[stime] += std::string(" ") + sdata;
+        else
+            change_times[stime] = sdata;
     }
 
     if (change_times.size() == 0) return 0;
