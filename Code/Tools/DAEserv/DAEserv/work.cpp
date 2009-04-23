@@ -77,7 +77,7 @@ struct Workspace
         spec.resize(ndet);
         for(int i=0;i<ndet;i++)
         {
-            udet[i] = i+1;
+            udet[i] = 1000 + i + 1;
             spec[i] = i+1;
         }
     }
@@ -322,13 +322,15 @@ bool read_command(SOCKET s)
 
         if (name == "UDET")
         {
-            isisds_send_command(s, "OK", &workspace.udet, ISISDSInt32, sv_dims_array, sv_ndims);
+            int dim = workspace.ndet;
+            isisds_send_command(s, "OK", &workspace.udet[0], ISISDSInt32,&dim, sv_ndims);
             return true;
         }
         
         if (name == "SPEC")
         {
-            isisds_send_command(s, "OK", &workspace.udet, ISISDSInt32, sv_dims_array, sv_ndims);
+            int dim = workspace.ndet;
+            isisds_send_command(s, "OK", &workspace.spec[0], ISISDSInt32, &dim, sv_ndims);
             return true;
         }
         

@@ -8,9 +8,11 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
+#include "Poco/Path.h"
 
 #include "LoadDAE/idc.h"
 
@@ -35,8 +37,8 @@ namespace Mantid
 
 
     /// load data from the DAE
-    static void loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
-    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData = 0)
+    void LoadDAE::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
+    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData)
     {
     	int ndims, dims_array[1];
         ndims = 1;
@@ -48,7 +50,11 @@ namespace Mantid
         else
         {
             // Read in spectrum number ispec from DAE
-            IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims);
+            if (IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims) != 0)
+            {
+                g_log.error("Unable to read DATA from DAE " + m_daename);
+                throw Exception::FileError("Unable to read DATA from DAE " , m_daename);
+            };
             data = spectrum;
         }
 
@@ -121,33 +127,47 @@ namespace Mantid
       checkOptionalProperties();
 
       // Read the number of time channels (i.e. bins) from the RAW file
-      int channelsPerSpectrum;
-      if (IDCgetpari(dae_handle, "NTC1", &channelsPerSpectrum, sv_dims_array, &sv_ndims) != 0)
+      if (IDCgetpari(dae_handle, "NTC1", &m_channelsPerSpectrum, sv_dims_array, &sv_ndims) != 0)
       {
         g_log.error("Unable to read NTC1 from DAE " + m_daename);
         throw Exception::FileError("Unable to read NTC1 from DAE " , m_daename);
       }
 
-      char* iName = 0;
-      dims_array[0] = 4;
-      int res = IDCAgetparc(dae_handle, "NAME", &iName, dims_array, &sv_ndims);
-      delete[] iName;
-
       // Read in the time bin boundaries
-      const int lengthIn = channelsPerSpectrum + 1;
-      float* timeChannels = new float[lengthIn];
+      const int lengthIn = m_channelsPerSpectrum + 1;
+      boost::shared_ptr<float> timeChannels(new float[lengthIn]);
 
       dims_array[0] = lengthIn;
-      if (IDCgetparr(dae_handle, "RTCB1", timeChannels, dims_array, &sv_ndims) != 0)
+      if (IDCgetparr(dae_handle, "RTCB1", timeChannels.get(), dims_array, &sv_ndims) != 0)
       {
         g_log.error("Unable to read RTCB1 from DAE " + m_daename);
         throw Exception::FileError("Unable to read RTCB1 from DAE " , m_daename);
       }
       // Put the read in array into a vector (inside a shared pointer)
       boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
+                          (new std::vector<double>(timeChannels.get(), timeChannels.get() + lengthIn));
       // Create an array to hold the read-in data
-      int* spectrum = new int[lengthIn];
+      boost::shared_ptr<int> spectrum(new int[lengthIn]);
+
+      // Read the instrument name
+      char* iName = 0;
+      dims_array[0] = 4;
+      if (IDCAgetparc(dae_handle, "NAME", &iName, dims_array, &sv_ndims) != 0)
+      {
+          g_log.error("Unable to read NAME from DAE " + m_daename);
+          throw Exception::FileError("Unable to read NAME from DAE " , m_daename);
+      };
+      std::cerr<<"Instr name: ("<<iName<<")\n";
+
+      // Read the proton charge
+      float rpb[32];
+      dims_array[0] = 32;
+      if (IDCgetparr(dae_handle, "RRPB", rpb, dims_array, &sv_ndims) != 0)
+      {
+          g_log.error("Unable to read RRPB from DAE " + m_daename);
+          throw Exception::FileError("Unable to read RRPB from DAE " , m_daename);
+      };
+      m_proton_charge = rpb[8];
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
@@ -169,38 +189,48 @@ namespace Mantid
       }
 
       // Decide if we can read in all the data at once
-      int *allData = 0;
-      int ndata = (m_numberOfSpectra+1)*(channelsPerSpectrum+1)*m_numberOfPeriods*4;
+      boost::shared_ptr<int> allData;
+      int ndata = (m_numberOfSpectra+1)*(m_channelsPerSpectrum+1)*m_numberOfPeriods*4;
       if (ndata/1000000 < 10) // arbitrary number
       {
           dims_array[0] = ndata;
-          allData = new int[ ndata ];
+          allData.reset(new int[ ndata ]);
           // and read them in
-          int ret = IDCgetpari(dae_handle, "CNT1", allData, dims_array, &sv_ndims);
+          int ret = IDCgetpari(dae_handle, "CNT1", allData.get(), dims_array, &sv_ndims);
           if (ret < 0)
           {
-              delete[] allData;
-              allData = 0;
+              allData.reset();
+              throw std::runtime_error("");
           }
       }
+
+      // Create the 2D workspace for the output
+      DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+               (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+      // Set the unit on the workspace to TOF
+      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+      loadSpectraMap(dae_handle, localWorkspace);
 
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
 
-        // Create the 2D workspace for the output
-        DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-                 (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
-        // Set the unit on the workspace to TOF
-        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+        if ( period > 0 )
+        {
+            localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                (WorkspaceFactory::Instance().create(localWorkspace));
+            localWorkspace->newSample();
+            localWorkspace->newInstrumentParameters();
+        }
 
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
-          loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum,localWorkspace,allData );
+          loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum.get(),localWorkspace,allData.get() );
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
           interruption_point();
@@ -210,16 +240,25 @@ namespace Mantid
         {
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum, localWorkspace,allData );
+            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();
           }
         }
+
         // Just a sanity check
         assert(counter == total_specs);
 
         std::string outputWorkspace = "OutputWorkspace";
+        if (period == 0)
+        {
+          // Only run the sub-algorithms once
+          runLoadInstrument(localWorkspace, iName);
+          //runLoadLog(localWorkspace );
+          // Set the total proton charge for this run
+          localWorkspace->getSample()->setProtonCharge(m_proton_charge);
+        }
         if (period != 0)
         {
           // Create a WorkspaceProperty for the new workspace of a higher period
@@ -244,9 +283,7 @@ namespace Mantid
         throw Exception::FileError("Unable to close DAE:" , m_daename);
       }
       // Clean up
-      delete[] timeChannels;
-      delete[] spectrum;
-      if (allData) delete[] allData;
+      if (iName) delete[] iName;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
@@ -296,6 +333,84 @@ namespace Mantid
       }
     }
 
+
+    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    void LoadDAE::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace, const char* iName)
+    {
+      // Determine the search directory for XML instrument definition files (IDFs)
+      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+      if ( directoryName.empty() )
+      {
+          // This is the assumed deployment directory for IDFs, where we need to be relative to the
+          // directory of the executable, not the current working directory.
+          directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
+      }
+
+      std::string instrumentID = iName; // get the instrument name
+      size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
+      if (i != std::string::npos) instrumentID.erase(i);
+      // force ID to upper case
+      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      loadInst->setPropertyValue("Filename", fullPathIDF);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadInst->execute();
+      }
+      catch (std::runtime_error& err)
+      {
+        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+      }
+
+      // If loading instrument definition file fails, run LoadInstrumentFromRaw instead
+      if ( ! loadInst->isExecuted() )
+      {
+        //runLoadInstrumentFromRaw(localWorkspace);
+      }
+    }
+
+    /** Populate spectra-detector map
+        @param dae_handle The internal DAE identifier
+        @param localWorkspace The workspace
+     */
+    void LoadDAE::loadSpectraMap(idc_handle_t dae_handle, DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      // Read in the number of detectors
+      int ndet, dims_array[1],sv_ndims = 1;
+      dims_array[0] = 1;
+      if (IDCgetpari(dae_handle, "NDET", &ndet, dims_array, &sv_ndims) != 0)
+      {
+          g_log.error("Unable to read NDET from DAE " + m_daename);
+          throw Exception::FileError("Unable to read NDET from DAE " , m_daename);
+      };
+
+      boost::shared_ptr<int> udet(new int[ndet]);
+      //int* udet= new int[ndet];
+      dims_array[0] = ndet;
+      sv_ndims = 1;
+      int res = 0;
+      if ((res = IDCgetpari(dae_handle, "UDET", udet.get(), dims_array, &sv_ndims)) != 0)
+      {
+          g_log.error("Unable to read UDET from DAE " + m_daename);
+          //throw Exception::FileError("Unable to read UDET from DAE " , m_daename);
+      }
+      else
+      {
+          boost::shared_ptr<int> spec(new int[ndet]);
+          if (IDCgetpari(dae_handle, "SPEC", spec.get(), dims_array, &sv_ndims) != 0)
+          {
+              g_log.error("Unable to read SPEC from DAE " + m_daename);
+              throw Exception::FileError("Unable to read SPEC from DAE " , m_daename);
+          }
+          localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+      }
+
+    }
 
     double LoadDAE::dblSqrt(double in)
     {
