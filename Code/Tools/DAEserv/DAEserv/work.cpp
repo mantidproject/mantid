@@ -72,12 +72,22 @@ struct Workspace
                 y[i][j] = peakFun(i,x[j],0,peakStep);
             }
         }
+        ndet = numberOfSpectra;
+        udet.resize(ndet);
+        spec.resize(ndet);
+        for(int i=0;i<ndet;i++)
+        {
+            udet[i] = i+1;
+            spec[i] = i+1;
+        }
     }
     valarray< real_t > x;
     vector< valarray<int> > y; 
     int numberOfSpectra;
     int numberOfPeriods;
     int numberOfBins;
+    int ndet;
+    valarray<int> udet,spec;
     float x_start;
     float x_end;
     float alpha;
@@ -306,8 +316,19 @@ bool read_command(SOCKET s)
 
         if (name == "NDET")
         {
-            int ndet = 100;
-            isisds_send_command(s, "OK", &ndet, ISISDSInt32, sv_dims_array, sv_ndims);
+            isisds_send_command(s, "OK", &workspace.ndet, ISISDSInt32, sv_dims_array, sv_ndims);
+            return true;
+        }
+
+        if (name == "UDET")
+        {
+            isisds_send_command(s, "OK", &workspace.udet, ISISDSInt32, sv_dims_array, sv_ndims);
+            return true;
+        }
+        
+        if (name == "SPEC")
+        {
+            isisds_send_command(s, "OK", &workspace.udet, ISISDSInt32, sv_dims_array, sv_ndims);
             return true;
         }
         
