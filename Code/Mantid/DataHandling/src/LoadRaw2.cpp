@@ -329,13 +329,12 @@ namespace Mantid
 	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();
       }
 
-      const int stripPath = m_filename.find_last_of("\\/");
-      std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
+      //const int stripPath = m_filename.find_last_of("\\/");
+      //std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
       
-       
-      //std::string instrumentID = isisRaw->i_inst; // get the instrument name
-      //size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
-      //if (i != std::string::npos) instrumentID.erase(i);
+      std::string instrumentID = isisRaw->i_inst; // get the instrument name
+      size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
+      if (i != std::string::npos) instrumentID.erase(i);
 
       // force ID to upper case
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);

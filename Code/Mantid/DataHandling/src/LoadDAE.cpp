@@ -396,16 +396,15 @@ namespace Mantid
       int res = 0;
       if ((res = IDCgetpari(dae_handle, "UDET", udet.get(), dims_array, &sv_ndims)) != 0)
       {
-          g_log.error("Unable to read UDET from DAE " + m_daename);
-          //throw Exception::FileError("Unable to read UDET from DAE " , m_daename);
+          g_log.error("Unable to read detector information (UDET) from DAE " + m_daename);
       }
       else
       {
           boost::shared_ptr<int> spec(new int[ndet]);
           if (IDCgetpari(dae_handle, "SPEC", spec.get(), dims_array, &sv_ndims) != 0)
           {
-              g_log.error("Unable to read SPEC from DAE " + m_daename);
-              throw Exception::FileError("Unable to read SPEC from DAE " , m_daename);
+              g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
+              throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
           }
           localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
       }
