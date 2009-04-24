@@ -20,8 +20,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-typedef time_t dateAndTime;
-
+typedef time_t dateTime;
+using namespace std;
 class AlgHistoryTreeWidget:public QTreeWidget
 {
     Q_OBJECT
@@ -46,7 +46,7 @@ public:
 	AlgExecSummaryGrpBox(QWidget*w):QGroupBox(w){}
 	//AlgExecSummaryGrpBox(QString,AlgorithmHistoryWindow *w);
 	AlgExecSummaryGrpBox(QString,QWidget*w);
-	void setData(const double execDuration,const dateAndTime execDate);
+	void setData(const double execDuration,const dateTime execDate);
 private:
 	QLineEdit* getAlgExecDuration()const {return m_execDurationEdit;}
 	QLineEdit* getAlgExecDate() const{ return m_execDateTimeEdit;}
