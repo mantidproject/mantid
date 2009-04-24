@@ -29,6 +29,11 @@ const std::vector<AlgorithmHistory>& WorkspaceHistory::getAlgorithmHistories() c
 {
   return m_algorithms;
 }
+/// Returns a const reference to the EnvironmentHistory
+  const Kernel::EnvironmentHistory& WorkspaceHistory::getEnvironmentHistory() const
+  {
+	  return m_environment;
+  }
 
 /// Copy the algorithm history from another WorkspaceHistory into this one
 void WorkspaceHistory::copyAlgorithmHistory(const WorkspaceHistory& otherHistory)

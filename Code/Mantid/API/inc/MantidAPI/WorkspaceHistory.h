@@ -47,6 +47,9 @@ public:
   WorkspaceHistory(const WorkspaceHistory&);
 
   const std::vector<AlgorithmHistory>& getAlgorithmHistories() const;
+
+  const Kernel::EnvironmentHistory& getEnvironmentHistory() const;
+  ////
   void copyAlgorithmHistory(const WorkspaceHistory& otherHistory);
   void addAlgorithmHistory(const AlgorithmHistory& algHistory);
 
@@ -60,6 +63,7 @@ private:
   const Kernel::EnvironmentHistory m_environment;
   /// The algorithms which have been called on the workspace
   std::vector<AlgorithmHistory> m_algorithms;
+  
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const WorkspaceHistory&);

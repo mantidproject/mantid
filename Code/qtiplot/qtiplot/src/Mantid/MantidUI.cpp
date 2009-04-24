@@ -22,6 +22,8 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidKernel/EnvironmentHistory.h"
+#include "AlgorithmHistoryWindow.h"
 
 //#include "MemoryImage.h"
 
@@ -428,6 +430,24 @@ void MantidUI::importWorkspace()
     importWorkspace(wsName,true,true);
 }
 
+/** #539: For adding Workspace History display to MantidPlot
+	Show Algorithm History Details in a window .
+ */
+void MantidUI::showAlgorithmHistory()
+{ 	
+	QString wsName=getSelectedWorkspaceName();
+	Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
+	WorkspaceHistory wsHistory= wsptr->getHistory();
+	std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
+	
+	EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory(); 
+	
+	//create a new window to display Algorithmic History
+	AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
+	if(palgHist)palgHist->show();
+			    
+ }
+
 /**  Create a new Table and fill it with the data from a Tableworkspace
      @param wsName Workspace name
      @param showDlg If true show a dialog box to set some import parameters
@@ -711,6 +731,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
     try
     {
         alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+		
     }
     catch(...)
     {

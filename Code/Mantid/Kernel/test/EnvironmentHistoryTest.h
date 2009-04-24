@@ -13,6 +13,22 @@ class EnvironmentHistoryTest : public CxxTest::TestSuite
 {
 public:
 
+ void testframeworkVersion()
+ {
+	 EnvironmentHistory EH;
+	 TS_ASSERT_EQUALS(EH.frameworkVersion(),MANTID_VERSION);
+ }
+void testosName()
+ {
+	 EnvironmentHistory EH;
+	 TS_ASSERT_EQUALS(EH.osName(),ConfigService::Instance().getOSName());
+ }
+  void testosVersion()
+ {
+	 EnvironmentHistory EH;
+	 TS_ASSERT_EQUALS(EH.osVersion(),ConfigService::Instance().getOSVersion());
+ }
+  
   void testPopulate()
   {
     std::string correctOutput = "Framework Version: "+std::string(MANTID_VERSION)+"\n";

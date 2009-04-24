@@ -45,7 +45,11 @@ public:
   virtual ~EnvironmentHistory();
   /// print contents of object
   void printSelf(std::ostream&, const int indent = 0)const;
-
+  const std::string& frameworkVersion()  const{ return m_version;}
+  const std::string& osName()const {return m_osName;}
+  const std::string& osVersion()const {return m_osVersion;} 
+  const std::string& userName()const {return m_userName;}
+ 
 private:
   /// Private, unimplemented copy assignment operator
   EnvironmentHistory& operator=(const EnvironmentHistory& );

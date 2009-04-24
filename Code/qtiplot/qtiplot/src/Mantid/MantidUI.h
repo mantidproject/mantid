@@ -81,7 +81,7 @@ public:
     
     // Initialization
     void init();
-    
+   
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
     
@@ -194,7 +194,6 @@ public:
   MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
   bool runAlgorithmAsynchronously(const QString & algName);
   bool createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues);
-
 public slots:
   void cancelAllRunningAlgorithms();
 
@@ -240,6 +239,8 @@ public slots:
 
     // Import the workspace selected in the Workspace dock window
     void importWorkspace();
+	// #539: For adding Workspace History display to MantidPlot
+	void showAlgorithmHistory();
     
     // Import a workspace wsName
     void importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
@@ -373,7 +374,6 @@ private:
 
     // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
-
 };
 
 static const char * mantid_matrix_xpm[] = { 

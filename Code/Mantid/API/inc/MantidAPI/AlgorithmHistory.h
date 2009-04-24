@@ -58,6 +58,11 @@ public:
   const std::string& name() const {return m_name;}
   /// get version number of algorithm in history const
   const int& version() const {return m_version;}
+  // get execution duration in hist const
+  double executionDuration() const { return m_executionDuration;}
+  // get execution date in hist const
+  dateAndTime executionDate() const {return m_executionDate;}
+
   /// get parameter list of algorithm in history const
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// print contents of object
