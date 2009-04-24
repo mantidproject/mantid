@@ -33,7 +33,7 @@ m_algexecDuration(NULL)
 	}
 	setGeometry (5,210,210,200);
 }
-void AlgExecSummaryGrpBox::setData(const double execDuration,const dateTime execDate)
+void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kernel::dateAndTime execDate)
 {
 	QString dur;
 	dur.setNum(execDuration,'g',6);
@@ -186,7 +186,7 @@ void AlgorithmHistoryWindow::fillExecutionSummaryGroupBox()
 	{
 		double duration=0;
 		duration=(*ralgHistory_Iter).executionDuration();
-		dateTime date=(*ralgHistory_Iter).executionDate();
+		Mantid::Kernel::dateAndTime date=(*ralgHistory_Iter).executionDate();
 		if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
 	}
 }
@@ -233,7 +233,7 @@ void AlgorithmHistoryWindow::updateExecutionSummaryGroupBox(const QString& algNa
 	}//end of algorithm history for loop
 	double duration=0;
 	duration=(*ralgHistory_Iter).executionDuration();
-	dateTime date=(*ralgHistory_Iter).executionDate();
+	Mantid::Kernel::dateAndTime date=(*ralgHistory_Iter).executionDate();
 	if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
 }
 

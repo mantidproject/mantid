@@ -15,12 +15,13 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EnvironmentHistory.h"
 #include "../ApplicationWindow.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-typedef time_t dateTime;
+//typedef time_t dateTime;
 using namespace std;
 class AlgHistoryTreeWidget:public QTreeWidget
 {
@@ -46,7 +47,7 @@ public:
 	AlgExecSummaryGrpBox(QWidget*w):QGroupBox(w){}
 	//AlgExecSummaryGrpBox(QString,AlgorithmHistoryWindow *w);
 	AlgExecSummaryGrpBox(QString,QWidget*w);
-	void setData(const double execDuration,const dateTime execDate);
+	void setData(const double execDuration,const Mantid::Kernel::dateAndTime execDate);
 private:
 	QLineEdit* getAlgExecDuration()const {return m_execDurationEdit;}
 	QLineEdit* getAlgExecDate() const{ return m_execDateTimeEdit;}
