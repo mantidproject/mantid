@@ -1,4 +1,5 @@
 #include "AlgorithmHistoryWindow.h"
+#include "QMessageBox"
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w):QGroupBox(title,w),
 m_execDurationlabel(NULL),m_execDurationEdit(NULL),m_Datelabel(NULL),m_execDateTimeEdit(NULL),
@@ -41,16 +42,24 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
 	QLineEdit* execDurationEdit=getAlgExecDuration();
 	execDurationEdit->setText(dur);
 
-	struct tm  t;errno_t err;
+	std::tm*  t;
+	/*errno_t err;
 	err = _localtime64_s( &t, &execDate );
 	QTime qt(t.tm_hour,t.tm_min,t.tm_sec);
 	QDate qd(t.tm_year+1900,t.tm_mon+1,t.tm_mday);
 	QDateTime datetime(qd,qt,Qt::LocalTime );
+	QMessageBox msgbox;
+	msgbox.setText(str);
+	msgbox.exec();
+	*/
+	t=localtime(&execDate);
+	QTime qt(t->tm_hour,t->tm_min,t->tm_sec);
+	QDate qd(t->tm_year+1900,t->tm_mon+1,t->tm_mday);
+	QDateTime datetime(qd,qt,Qt::LocalTime );
+	
 	QString str;
 	str=datetime.toString("dd/MM/yyyy hh:mm:ss");
-	/*QMessageBox msgbox;
-	msgbox.setText(str);
-	msgbox.exec();*/
+	
 	QLineEdit* datetimeEdit=getAlgExecDate();
 	datetimeEdit->setText(str);
 
