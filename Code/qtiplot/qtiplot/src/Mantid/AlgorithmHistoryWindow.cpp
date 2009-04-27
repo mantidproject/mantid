@@ -42,8 +42,9 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
 	QLineEdit* execDurationEdit=getAlgExecDuration();
 	execDurationEdit->setText(dur);
 
-	std::tm*  t;
-	/*errno_t err;
+	
+	/*
+	 std:: tm t;errno_t err;
 	err = _localtime64_s( &t, &execDate );
 	QTime qt(t.tm_hour,t.tm_min,t.tm_sec);
 	QDate qd(t.tm_year+1900,t.tm_mon+1,t.tm_mday);
@@ -52,6 +53,7 @@ void AlgExecSummaryGrpBox::setData(const double execDuration,const Mantid::Kerne
 	msgbox.setText(str);
 	msgbox.exec();
 	*/
+	std::tm*  t;
 	t=localtime(&execDate);
 	QTime qt(t->tm_hour,t->tm_min,t->tm_sec);
 	QDate qd(t->tm_year+1900,t->tm_mon+1,t->tm_mday);
