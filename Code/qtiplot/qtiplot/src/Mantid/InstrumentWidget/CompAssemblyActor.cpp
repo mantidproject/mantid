@@ -214,8 +214,14 @@ using namespace Geometry;
 		  const boost::shared_ptr<Mantid::Geometry::IDetector>  detector = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*iObjComp)->getObjComponent());
 		  if( detector != boost::shared_ptr<Mantid::Geometry::IDetector>() )
 		  {
-		    idList.push_back(detector->getID());
-		    continue;
+        if( !detector->isMonitor() )
+        {
+		      idList.push_back(detector->getID());
+        }
+        else
+        {
+          idList.push_back(-1);
+        }
 		  }
 		  
 		}

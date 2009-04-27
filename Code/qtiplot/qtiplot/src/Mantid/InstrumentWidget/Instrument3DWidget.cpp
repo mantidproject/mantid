@@ -268,7 +268,7 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const 
 	std::vector<boost::shared_ptr<GLColor> > iColorList;
 	int noOfColors=colorMap.getNumberOfColors();
 	std::vector<double>::size_type nvals = values.size();
-	for(std::vector<double>::size_type i = 0; i < nvals; i++)
+  for(std::vector<double>::size_type i = 0; i < nvals; i++)
 	{
 		int cIndex;
 		if(maxval-minval<0.00000001)
@@ -281,7 +281,7 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const 
 		}
 		if(cIndex<0)
 		{
-		  cIndex=0;
+		  cIndex = noOfColors - 1;
 		}
 		else if(cIndex>(noOfColors-1))
 		{
