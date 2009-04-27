@@ -49,11 +49,6 @@ void ModifyData::exec()
     // make output Workspace the same type and size as the input one
     Workspace2D_sptr outputW = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(inputW));
 
-    // Create vectors to hold result
-    std::vector<double> newX;
-    std::vector<double> newY;
-    std::vector<double> newE;
-
     bool useVectors = getProperty("UseVectors");
 
     if ( useVectors )
@@ -64,29 +59,23 @@ void ModifyData::exec()
         // Loop over spectra
         for (int i = 0; i < histogramCount; ++i)
         {
-
             // Retrieve the data into a vector
-            const std::vector<double>& XValues = inputW->dataX(i);
-            const std::vector<double>& YValues = inputW->dataY(i);
-            const std::vector<double>& EValues = outputW->dataE(i);
-
-            newX.clear();
-            newY.clear();
-            newE.clear();
+            const MantidVec& XValues = inputW->readX(i);
+            const MantidVec& YValues = inputW->readY(i);
+            const MantidVec& EValues = inputW->readE(i);
+            MantidVec& newX = outputW->dataX(i);
+            MantidVec& newY = outputW->dataY(i);
+            MantidVec& newE = outputW->dataE(i);
 
             // Iterate over i-th spectrum and modify the data
             for(int j=0;j<inputW->blocksize();j++)
             {
                 g_log.information() << "Spectrum " << i << " Point " << j << " values: "
                     << XValues[j] << ' ' << YValues[j] << ' ' << EValues[j] << std::endl;
-                newX.push_back(XValues[j] + i + j);
-                newY.push_back(YValues[j]*(2. + 0.1*j));
-                newE.push_back(EValues[j]+0.1);
+                newX[j] = XValues[j] + i + j;
+                newY[j] = YValues[j]*(2. + 0.1*j);
+                newE[j] = EValues[j]+0.1;
             }
-
-            // Populate the new workspace
-            outputW->setX(i,newX);
-            outputW->setData(i,newY, newE);
         }
     }
     else
@@ -94,7 +83,8 @@ void ModifyData::exec()
         g_log.information() << "Option 2. Original values:" << std::endl;
         // Iterate over the workspace and modify the data
         int count = 0;
-        for(Workspace2D::const_iterator ti(*inputW); ti != ti.end(); ++ti)
+        Workspace2D::iterator ti_out(*outputW);
+        for(Workspace2D::const_iterator ti(*inputW); ti != ti.end(); ++ti,++ti_out)
         {
             // get the spectrum number
             int i = count / inputW->blocksize();
@@ -102,21 +92,13 @@ void ModifyData::exec()
             int j = count % inputW->blocksize();
             // Get the reference to a data point
             LocatedDataRef tr = *ti;
+            LocatedDataRef tr_out = *ti_out;
             g_log.information() << "Spectrum " << i << " Point " << j << " values: "
                 << tr.X() << ' ' << tr.Y() << ' ' << tr.E() << std::endl;
-            newX.push_back(tr.X() + count);
-            newY.push_back(tr.Y()*2);
-            newE.push_back(tr.E()+0.1);
+            tr_out.X() = tr.X() + count;
+            tr_out.Y() = tr.Y()*2;
+            tr_out.E() = tr.E()+0.1;
 
-            // Populate the new workspace
-            if ( j == inputW->blocksize() - 1)
-            {
-                outputW->setX(i,newX);
-                outputW->setData(i,newY, newE);
-                newX.clear();
-                newY.clear();
-                newE.clear();
-            }
             count++;
         }
 
