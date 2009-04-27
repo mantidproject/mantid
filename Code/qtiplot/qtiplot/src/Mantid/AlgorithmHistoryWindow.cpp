@@ -128,7 +128,7 @@ QDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_env
 
 	std::string algrithmName=(*m_algHist.rbegin( )).name();
 	if(!m_histPropWindow)
-	{m_histPropWindow=CreateAlgHistoryPropertiesWindow(algrithmName.c_str());
+	{m_histPropWindow=CreateAlgHistoryPropertiesWindow();
 	 m_histPropWindow->displayAlgHistoryProperties(algrithmName.c_str());
 	}
 	connect(m_Historytree,SIGNAL(updateAlgorithmHistoryWindow(QString)),this,SLOT(updateData(QString)));
@@ -146,18 +146,19 @@ AlgExecSummaryGrpBox* AlgorithmHistoryWindow::CreateExecSummaryGroupBox()
 AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::CreateEnvHistoryGroupBox()
 {	return(new  AlgEnvHistoryGrpBox("Environment History",this) );
 }
-AlgHistoryProperties* AlgorithmHistoryWindow::CreateAlgHistoryPropertiesWindow(const QString& algrithmName)
-{	return(new AlgHistoryProperties(this,m_algHist,algrithmName));
+AlgHistoryProperties* AlgorithmHistoryWindow::CreateAlgHistoryPropertiesWindow()
+{	return(new AlgHistoryProperties(this,m_algHist));
 }
 void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 {
 	std::vector <AlgorithmHistory>::reverse_iterator ralgHistory_Iter=m_algHist.rbegin( );
 	std::string algrithmName;
 	algrithmName=(*ralgHistory_Iter).name();
+	QString algName=algrithmName.c_str();
 	int nAlgVersion=(*ralgHistory_Iter).version();
-	getAlgNamewithVersion(algrithmName,nAlgVersion);
+	getAlgNamewithVersion(algName,nAlgVersion);
 	
-	QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algrithmName.c_str()),QTreeWidgetItem::Type);
+	QTreeWidgetItem * item= new	QTreeWidgetItem(QStringList(algName),QTreeWidgetItem::Type);
 	if(m_Historytree)m_Historytree->addTopLevelItem(item);
 	
 	ralgHistory_Iter++;
@@ -165,15 +166,16 @@ void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 	{
 		algrithmName=(*ralgHistory_Iter).name();
 		nAlgVersion=(*ralgHistory_Iter).version();
-		getAlgNamewithVersion(algrithmName,nAlgVersion);
-		QTreeWidgetItem * subitem= new	QTreeWidgetItem(QStringList(QStringList(algrithmName.c_str())));
+		algName=algrithmName.c_str();
+		getAlgNamewithVersion(algName,nAlgVersion);
+		QTreeWidgetItem * subitem= new	QTreeWidgetItem(QStringList(algName));
 		if(item)item->addChild(subitem);
 	}
 	
 }
-void AlgorithmHistoryWindow::getAlgNamewithVersion(std::string& algName,const int version)
+void AlgorithmHistoryWindow::getAlgNamewithVersion( QString& algName,const int version)
 {
-	algName+=" v.";
+	algName= algName+" v.";
 	QString algVersion;
 	algVersion.setNum(version,10);
 	algName+=algVersion;
@@ -237,7 +239,7 @@ void AlgorithmHistoryWindow::updateExecutionSummaryGroupBox(const QString& algNa
 	if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
 }
 
-AlgHistoryProperties::AlgHistoryProperties(AlgorithmHistoryWindow *w,const std::vector<AlgorithmHistory> &algHist,const QString& algName):
+AlgHistoryProperties::AlgHistoryProperties(AlgorithmHistoryWindow *w,const std::vector<AlgorithmHistory> &algHist):
 m_algHist(algHist)
 {
 	QStringList hList;
@@ -307,12 +309,11 @@ void AlgHistoryProperties::displayAlgHistoryProperties(const QString& algName)
 void AlgHistoryTreeWidget::treeSelectionChanged()
 {	
 	QString algName;
-	int nversion;
-	getAlgorithmName(algName,nversion);
+	getAlgorithmName(algName);
 	emit updateAlgorithmHistoryWindow(algName);
 }
 
-void AlgHistoryTreeWidget::getAlgorithmName(QString& algName, int& version)
+void AlgHistoryTreeWidget::getAlgorithmName(QString& algName)
 {	
 	QList<QTreeWidgetItem*> items = selectedItems();
 	QString str;
@@ -329,8 +330,7 @@ void AlgHistoryTreeWidget::getAlgorithmName(QString& algName, int& version)
 void AlgHistoryTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 {		
 	QString algName;
-	int nversion;
-	getAlgorithmName(algName,nversion);
+	getAlgorithmName(algName);
 	emit updateAlgorithmHistoryWindow(algName);
 	QTreeWidget::mouseDoubleClickEvent(e);
 }

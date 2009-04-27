@@ -23,6 +23,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 //typedef time_t dateTime;
 using namespace std;
+
 class AlgHistoryTreeWidget:public QTreeWidget
 {
     Q_OBJECT
@@ -36,7 +37,7 @@ public:
 	}
 private:
     void mouseDoubleClickEvent(QMouseEvent *e);
-	void getAlgorithmName(QString& algName, int& version);
+	void getAlgorithmName(QString& algName);
 public slots:
 	void treeSelectionChanged();
 };
@@ -96,12 +97,12 @@ public slots:
 private:
 	AlgExecSummaryGrpBox* CreateExecSummaryGroupBox();
 	AlgEnvHistoryGrpBox* CreateEnvHistoryGroupBox();
-	AlgHistoryProperties * CreateAlgHistoryPropertiesWindow(const QString&);
+	AlgHistoryProperties * CreateAlgHistoryPropertiesWindow();
 	void populateAlgHistoryTreeWidget();
 	void fillExecutionSummaryGroupBox();
 	void fillEnvHistoryGroupBox(const EnvironmentHistory& envHist);
 	void updateExecutionSummaryGroupBox(const QString& algName);
-	void getAlgNamewithVersion(std::string& algName,const int version);
+	void getAlgNamewithVersion(QString& algName,const int version);
 private:
 	std::vector<Mantid::API::AlgorithmHistory>m_algHist;
 	//ApplicationWindow * m_appWindow;
@@ -118,8 +119,7 @@ class AlgHistoryProperties: public QObject// public QMainWindow //QDockWidget
 public:
    // AlgHistoryProperties(QWidget*w):QMainWindow(w){}
     AlgHistoryProperties(AlgorithmHistoryWindow *w,
-		const std::vector<Mantid::API::AlgorithmHistory> &,
-		const QString&);
+		const std::vector<Mantid::API::AlgorithmHistory> &);
 	void displayAlgHistoryProperties(const QString&);
 	void clearData();
 protected:

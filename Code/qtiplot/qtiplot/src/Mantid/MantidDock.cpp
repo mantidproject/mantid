@@ -208,6 +208,10 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     action = new QAction("Sample Logs...", this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
     menu->addAction(action);
+
+	action = new QAction("Show History", this);
+    connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(showAlgorithmHistory()));
+    menu->addAction(action);
   
     //separate delete
     menu->addSeparator();
