@@ -12,29 +12,19 @@ public:
   ManagedDataBlock2DTest()
     : data(0,2,4,3)
   {
-    std::vector<double> x(4);
-    std::vector<double> xx(4);
     for (int i = 0; i < 4; ++i)
     {
-      x[i] = i;
-      xx[i] = i+4;
+      data.dataX(0)[i] = i;
+      data.dataX(1)[i] = i+4;
     }
-    data.setX(0,x);
-    data.setX(1,xx);
     
-    std::vector<double> y(3);
-    std::vector<double> e(3);
-    std::vector<double> yy(3);
-    std::vector<double> ee(3);
     for (int i = 0; i < 3; ++i)
     {
-      y[i] = i*10;
-      e[i] = sqrt(y[i]);
-      yy[i] = i*100;
-      ee[i] = sqrt(yy[i]);     
+      data.dataY(0)[i] = i*10;
+      data.dataE(0)[i] = sqrt(data.dataY(0)[i]);
+      data.dataY(1)[i] = i*100;
+      data.dataE(1)[i] = sqrt(data.dataY(1)[i]);     
     }
-    data.setData(0,y,e);
-    data.setData(1,yy,ee);
   }
   
   void testConstructor()
@@ -54,7 +44,7 @@ public:
   {
     ManagedDataBlock2D aBlock(0,1,1,1);
     double aNumber = 5.5;
-    std::vector<double> v(1, aNumber);
+    boost::shared_ptr<std::vector<double> > v( new std::vector<double>(1, aNumber) );
     TS_ASSERT_THROWS_NOTHING( aBlock.setX(0,v) )
     TS_ASSERT_EQUALS( aBlock.dataX(0)[0], aNumber )
     TS_ASSERT_THROWS( aBlock.setX(-1,v), std::range_error )
@@ -66,16 +56,16 @@ public:
   {
     ManagedDataBlock2D aBlock(0,1,1,1);
     double aNumber = 9.9;
-    std::vector<double> v(1, aNumber);
+    boost::shared_ptr<std::vector<double> > v( new std::vector<double>(1, aNumber) );
     double anotherNumber = 3.3;
-    std::vector<double> w(1, anotherNumber);
-    TS_ASSERT_THROWS_NOTHING( aBlock.setData(0,v) )
+    boost::shared_ptr<std::vector<double> > w( new std::vector<double>(1, anotherNumber) );
+    TS_ASSERT_THROWS_NOTHING( aBlock.setData(0,v,v) )
     TS_ASSERT_EQUALS( aBlock.dataY(0)[0], aNumber )    
-    TS_ASSERT_THROWS( aBlock.setData(-1,v), std::range_error )
-    TS_ASSERT_THROWS( aBlock.setData(1,v), std::range_error )
+    TS_ASSERT_THROWS( aBlock.setData(-1,v,v), std::range_error )
+    TS_ASSERT_THROWS( aBlock.setData(1,v,v), std::range_error )
     
     double yetAnotherNumber = 2.25;
-    v[0] = yetAnotherNumber;
+    (*v)[0] = yetAnotherNumber;
     TS_ASSERT_THROWS_NOTHING( aBlock.setData(0,v,w) )
     TS_ASSERT_EQUALS( aBlock.dataY(0)[0], yetAnotherNumber )
     TS_ASSERT_EQUALS( aBlock.dataE(0)[0], anotherNumber )

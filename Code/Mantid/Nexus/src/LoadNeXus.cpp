@@ -100,8 +100,8 @@ namespace NeXus
     }
     else
     {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);
+        g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
+        throw Exception::FileError("Unable to read File:" , m_filename);
     }
     return;
   }

@@ -32,11 +32,12 @@ namespace Mantid
     // Initialise the logger
     Logger& LoadRaw2::g_log = Logger::get("LoadRaw2");
 
-    /// Empty default constructor
+    /// Constructor
     LoadRaw2::LoadRaw2() :
-      Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0), isisRaw(new ISISRAW2)
+      Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
     {}
+    
     LoadRaw2::~LoadRaw2()
     {}
 
@@ -179,14 +180,14 @@ namespace Mantid
                 (m_list && find(m_spec_list.begin(),m_spec_list.end(),i) != m_spec_list.end()))
             {
                 isisRaw->readData(histToRead);
-                // Put it into a vector, discarding the 1st entry, which is rubbish
+                // Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
                 // But note that the last (overflow) bin is kept
-                std::vector<double> v(isisRaw->dat1 + 1, isisRaw->dat1 + lengthIn);
-                // Create and fill another vector for the errors, containing sqrt(count)
-                std::vector<double> e(lengthIn-1);
-                std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
-                // Populate the workspace. Loop starts from 1, hence i-1
-                localWorkspace->setData(counter, v, e);
+                MantidVec& Y = localWorkspace->dataY(counter);
+                Y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + lengthIn);
+                // Fill the vector for the errors, containing sqrt(count)
+                MantidVec& E = localWorkspace->dataE(counter);
+                std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+                // Set the X vector pointer and spectrum number
                 localWorkspace->setX(counter, timeChannelsVec);
                 localWorkspace->getAxis(1)->spectraNo(counter)= i;
                 // NOTE: Raw numbers go straight into the workspace
@@ -288,33 +289,6 @@ namespace Mantid
           throw std::invalid_argument("Inconsistent properties defined");
         }
       }
-    }
-
-    /** Read in a single spectrum from the raw file
-     *  @param tcbs     The vector containing the time bin boundaries
-     *  @param hist     The workspace index
-     *  @param i        The spectrum number
-     *  @param lengthIn The number of elements in a spectrum
-     *  @param spectrum Pointer to the array into which the spectrum will be read
-     *  @param localWorkspace A pointer to the workspace in which the data will be stored
-     */
-    void LoadRaw2::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
-    {
-      // Read in a spectrum
-//      memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));
-      memcpy(spectrum, isisRaw->dat1 + i * lengthIn, lengthIn * sizeof(int));
-      // Put it into a vector, discarding the 1st entry, which is rubbish
-      // But note that the last (overflow) bin is kept
-      std::vector<double> v(spectrum + 1, spectrum + lengthIn);
-      // Create and fill another vector for the errors, containing sqrt(count)
-      std::vector<double> e(lengthIn-1);
-      std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
-      // Populate the workspace. Loop starts from 1, hence i-1
-      localWorkspace->setData(hist, v, e);
-      localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= i;
-      // NOTE: Raw numbers go straight into the workspace
-      //     - no account taken of bin widths/units etc.
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)

@@ -39,7 +39,7 @@ echo
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-rm -rf runner.*
+#rm -rf runner.*
 rm -f *.properties
 rm -f *.log
 echo "Done."

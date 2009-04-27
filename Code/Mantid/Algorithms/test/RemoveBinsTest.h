@@ -189,31 +189,31 @@ public:
 		testWorkspace->setTitle("input2D");
 		testWorkspace->initialize(2,5,4);
 
-		std::vector<double> X;
-		std::vector<double> Y;
+		boost::shared_ptr<Mantid::MantidVec> X(new Mantid::MantidVec);
+    boost::shared_ptr<Mantid::MantidVec> Y(new Mantid::MantidVec);
 
 		for (int i =0; i < 4; ++i)
 		{
-			X.push_back(10*i);
+			X->push_back(10*i);
 			
 			if (i == 2)
 			{
-				Y.push_back(2.0*i + 1);
+				Y->push_back(2.0*i + 1);
 			}
 			else
 			{
-				Y.push_back(2.0*i);
+				Y->push_back(2.0*i);
 			}
 		}
-		X.push_back(40);	// X is one bigger
+		X->push_back(40);	// X is one bigger
 		
 		//0   10   20   30   40   X
 		//   0     2     5     6       Y
 
 		testWorkspace->setX(0, X);
 		testWorkspace->setX(1, X);
-		testWorkspace->setData(0, Y);
-		testWorkspace->setData(1, Y);
+		testWorkspace->setData(0, Y, Y);
+		testWorkspace->setData(1, Y, Y);
 
 		testWorkspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 

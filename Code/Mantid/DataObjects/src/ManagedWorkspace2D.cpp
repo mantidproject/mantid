@@ -177,19 +177,6 @@ int ManagedWorkspace2D::blocksize() const
 
 /** Set the x values
  *  @param histnumber Index of the histogram to be set
- *  @param Vec The data to enter
- */
-void ManagedWorkspace2D::setX(const int histnumber, const std::vector<double>& Vec)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
-
-  getDataBlock(histnumber)->setX(histnumber, Vec);
-  return;
-}
-
-/** Set the x values
- *  @param histnumber Index of the histogram to be set
  *  @param PA The data to enter
  */
 void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype& PA)
@@ -211,34 +198,6 @@ void ManagedWorkspace2D::setX(const int histnumber, const Histogram1D::RCtype::p
     throw std::range_error("ManagedWorkspace2D::setX, histogram number out of range");
 
   getDataBlock(histnumber)->setX(histnumber, Vec);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param Vec The data to enter
- */
-void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setDAta, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, Vec);
-  return;
-}
-
-/** Set the data values
- *  @param histnumber Index of the histogram to be set
- *  @param Vec The data to enter
- *  @param VecErr The corresponding errors
- */
-void ManagedWorkspace2D::setData(const int histnumber, const std::vector<double>& Vec,
-                                 const std::vector<double>& VecErr)
-{
-  if ( histnumber<0 || histnumber>=m_noVectors )
-    throw std::range_error("ManagedWorkspace2D::setData, histogram number out of range");
-
-  getDataBlock(histnumber)->setData(histnumber, Vec, VecErr);
   return;
 }
 
@@ -289,7 +248,7 @@ void ManagedWorkspace2D::setData(const int histnumber, const Histogram1D::RCtype
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the x data
  */
-std::vector<double>& ManagedWorkspace2D::dataX(const int index)
+MantidVec& ManagedWorkspace2D::dataX(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
@@ -301,7 +260,7 @@ std::vector<double>& ManagedWorkspace2D::dataX(const int index)
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the y data
  */
-std::vector<double>& ManagedWorkspace2D::dataY(const int index)
+MantidVec& ManagedWorkspace2D::dataY(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
@@ -313,7 +272,7 @@ std::vector<double>& ManagedWorkspace2D::dataY(const int index)
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the error data
  */
-std::vector<double>& ManagedWorkspace2D::dataE(const int index)
+MantidVec& ManagedWorkspace2D::dataE(const int index)
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");
@@ -325,7 +284,7 @@ std::vector<double>& ManagedWorkspace2D::dataE(const int index)
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the x data
  */
-const std::vector<double>& ManagedWorkspace2D::dataX(const int index) const
+const MantidVec& ManagedWorkspace2D::dataX(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
@@ -337,7 +296,7 @@ const std::vector<double>& ManagedWorkspace2D::dataX(const int index) const
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the y data
  */
-const std::vector<double>& ManagedWorkspace2D::dataY(const int index) const
+const MantidVec& ManagedWorkspace2D::dataY(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataY, histogram number out of range");
@@ -349,7 +308,7 @@ const std::vector<double>& ManagedWorkspace2D::dataY(const int index) const
  *  @param index The number of the histogram
  *  @return A vector of doubles containing the error data
  */
-const std::vector<double>& ManagedWorkspace2D::dataE(const int index) const
+const MantidVec& ManagedWorkspace2D::dataE(const int index) const
 {
   if ( index<0 || index>=m_noVectors )
     throw std::range_error("ManagedWorkspace2D::dataE, histogram number out of range");

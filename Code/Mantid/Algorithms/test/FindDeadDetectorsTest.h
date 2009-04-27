@@ -42,7 +42,7 @@ public:
     Workspace2D_sptr work_in = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey,1);
     int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
     //set some dead detectors
-    std::vector<double> yDead(sizex,0);
+    boost::shared_ptr<Mantid::MantidVec> yDead(new Mantid::MantidVec(sizex,0));
     for (int i=0; i< sizey; i++)
     {
       if (i%2==0)

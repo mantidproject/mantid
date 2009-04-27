@@ -113,7 +113,7 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     for (int j = 0; j < spectrumLength; ++j)
     {
       // If this is histogram data, we want to use the bin's central value
-      double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : x = X[j]);
+      double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : X[j]);
       // Skip if not anywhere near this peak
       if ( x < centre-3.0*width ) continue;
       if ( x > centre+3.0*width ) break;

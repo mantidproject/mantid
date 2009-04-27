@@ -134,11 +134,11 @@ namespace Mantid
         for(int index = startIndex;index<endIndex;index++,m_readIndex++)
         {
             isisRaw->readData(m_readIndex+1);
-            std::vector<double> y(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);       
-            std::vector<double> e(m_numberOfBinBoundaries-1);
+            MantidVec& y = newBlock->dataY(index);
+            y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
+            MantidVec& e = newBlock->dataE(index);
             std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
             newBlock->setX(index,m_timeChannels);
-            newBlock->setData(index,y,e);
         }
         newBlock->hasChanges(false);
     }

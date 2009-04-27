@@ -26,8 +26,9 @@ public:
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",5,6,5);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    std::vector<double> x(6,10.0);
-    std::vector<double>  vec(5,1.0);
+    Histogram1D::RCtype x,vec;
+    x.access().resize(6,10.0);
+    vec.access().resize(5,1.0);
     int forSpecDetMap[5];
     for (int j = 0; j < 5; ++j)
     {

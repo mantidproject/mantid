@@ -16,7 +16,6 @@ namespace Mantid
 namespace Kernel
 {
   class Logger;
-//  class Axis;
 }
 
 namespace DataObjects
@@ -30,7 +29,7 @@ namespace DataObjects
     \author Laurent C Chapon, ISIS, RAL
     \date 26/09/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,9 +66,6 @@ public:
   Workspace2D();
   virtual ~Workspace2D();
 
-  virtual void setX(int const, const std::vector<double>&);
-  virtual void setData(int const, const std::vector<double>&);
-  virtual void setData(int const, const std::vector<double>&, const std::vector<double>&);
   virtual void setX(int const, const Histogram1D::RCtype&);
   virtual void setX(int const, const Histogram1D::RCtype::ptr_type&);
   virtual void setData(int const, const Histogram1D::RCtype&);
@@ -85,17 +81,17 @@ public:
   virtual int blocksize() const;
 
   /// Returns the x data
-  virtual std::vector<double>& dataX(int const index);
+  virtual MantidVec& dataX(int const index);
   /// Returns the y data
-  virtual std::vector<double>& dataY(int const index);
+  virtual MantidVec& dataY(int const index);
   /// Returns the error data
-  virtual std::vector<double>& dataE(int const index);
+  virtual MantidVec& dataE(int const index);
   /// Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const;
+  virtual const MantidVec& dataX(int const index) const;
   /// Returns the y data const
-  virtual const std::vector<double>& dataY(int const index) const;
+  virtual const MantidVec& dataY(int const index) const;
   /// Returns the error const
-  virtual const std::vector<double>& dataE(int const index) const;
+  virtual const MantidVec& dataE(int const index) const;
 
 protected:
   /// The number of vectors in the workspace

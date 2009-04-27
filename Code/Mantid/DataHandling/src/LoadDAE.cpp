@@ -40,32 +40,32 @@ namespace Mantid
     void LoadDAE::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
     		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData)
     {
-    	int ndims, dims_array[1];
-        ndims = 1;
-        dims_array[0] = lengthIn;
+      int ndims, dims_array[1];
+      ndims = 1;
+      dims_array[0] = lengthIn;
 
-        int *data = 0;
+      int *data = 0;
 
-        if (allData) data = allData + ispec*lengthIn;
-        else
+      if (allData) data = allData + ispec*lengthIn;
+      else
+      {
+        // Read in spectrum number ispec from DAE
+        if (IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims) != 0)
         {
-            // Read in spectrum number ispec from DAE
-            if (IDCgetdat(dae_handle, ispec, 1, spectrum, dims_array, &ndims) != 0)
-            {
-                g_log.error("Unable to read DATA from DAE " + m_daename);
-                throw Exception::FileError("Unable to read DATA from DAE " , m_daename);
-            };
-            data = spectrum;
+          g_log.error("Unable to read DATA from DAE " + m_daename);
+          throw Exception::FileError("Unable to read DATA from DAE " , m_daename);
         }
+        data = spectrum;
+      }
 
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
-      std::vector<double> v(data + 1, data + lengthIn);
+      MantidVec& Y = localWorkspace->dataY(hist);
+      Y.assign(data + 1, data + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
-      std::vector<double> e(lengthIn-1);
-      std::transform(v.begin(), v.end(), e.begin(), LoadDAE::dblSqrt);
+      MantidVec& E = localWorkspace->dataE(hist);
+      std::transform(Y.begin(), Y.end(), E.begin(), LoadDAE::dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-      localWorkspace->setData(hist, v, e);
       localWorkspace->setX(hist, tcbs);
       localWorkspace->getAxis(1)->spectraNo(hist)= ispec;
       // NOTE: Raw numbers go straight into the workspace
@@ -85,10 +85,14 @@ namespace Mantid
       declareProperty(new ArrayProperty<int>("spectrum_list"));
     }
 
-    /// Function called by IDC routines to report an error
+    /** Function called by IDC routines to report an error. Passes the error through to the logger
+     * @param status  The status code of the error (disregarded)
+     * @param code    The error code (disregarded)
+     * @param message The error message - passed to the logger at error level
+     */
     void LoadDAE::IDCReporter(int status, int code, const char* message)
     {
-	g_log.error(message);
+      g_log.error(message);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

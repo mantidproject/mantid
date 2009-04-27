@@ -89,7 +89,9 @@ private:
   }
   Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
   {
-    std::vector<double> x1(xlen,0.0),y1(xlen-1,3.0),e1(xlen-1,sqrt(3.0));
+    boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
+    boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(xlen-1,3.0));
+    boost::shared_ptr<Mantid::MantidVec> e1(new Mantid::MantidVec(xlen-1,sqrt(3.0)));
 
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen,xlen,xlen-1);
@@ -97,7 +99,7 @@ private:
 
     for (int i=0; i<xlen; i++)
     {
-      x1[i]=j*0.5;
+      (*x1)[i]=j*0.5;
       j+=1.5;
     }
 

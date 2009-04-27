@@ -126,19 +126,11 @@ public:
 		testWorkspace->setTitle("input2D");
 		testWorkspace->initialize(2,2,2);
 
-		std::vector<double> X;
-		std::vector<double> Y;
-
 		for (int i =0; i < 2; ++i)
 		{
-			X.push_back(1.0*i);
-			Y.push_back(2.0*i);
+		  testWorkspace->dataX(1)[i] = testWorkspace->dataX(0)[i] = 1.0*i;
+		  testWorkspace->dataY(1)[i] = testWorkspace->dataY(0)[i] = 2.0*i;
 		}
-
-		testWorkspace->setX(0, X);
-		testWorkspace->setX(1, X);
-		testWorkspace->setData(0, Y);
-		testWorkspace->setData(1, Y);
 
 		return testWorkspace;
 	}

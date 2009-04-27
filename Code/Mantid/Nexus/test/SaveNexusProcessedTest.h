@@ -39,19 +39,17 @@ public:
     //clearfiles=true;
     //
 
-
-
     // create dummy 2D-workspace
-
-    std::vector<double> lVecX; for(double d=0.0; d<0.95; d=d+0.1) lVecX.push_back(d);
-    std::vector<double> lVecY; for(double d=0.0; d<0.95; d=d+0.1) lVecY.push_back(d);
-    std::vector<double> lVecE; for(double d=0.0; d<0.95; d=d+0.1) lVecE.push_back(d);
-
     Workspace2D_sptr localWorkspace2D = boost::dynamic_pointer_cast<Workspace2D>
                  (WorkspaceFactory::Instance().create("Workspace2D",1,10,10));
     localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    localWorkspace2D->setX(0,lVecX);
-    localWorkspace2D->setData(0,lVecY, lVecE);
+    double d = 0.0;
+    for(int i = 0; i<10; ++i,d+=0.1)
+    {
+      localWorkspace2D->dataX(0)[i] = d;
+      localWorkspace2D->dataY(0)[i] = d;
+      localWorkspace2D->dataE(0)[i] = d;      
+    }
 
     AnalysisDataService::Instance().add("testSpace", localWorkspace2D);
 }

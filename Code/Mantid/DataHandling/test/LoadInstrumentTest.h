@@ -51,16 +51,16 @@ public:
     //loop to create data
     for (int i = 0; i < histogramNumber; i++)
     {
-      std::vector<double> timeChannelsVec(timechannels);
-      std::vector<double> v(timechannels);
-      // Create and fill another vector for the errors
-      std::vector<double> e(timechannels);
+      boost::shared_ptr<Mantid::MantidVec> timeChannelsVec(new Mantid::MantidVec),v(new Mantid::MantidVec),e(new Mantid::MantidVec);
+      timeChannelsVec->resize(timechannels);
+      v->resize(timechannels);
+      e->resize(timechannels);
       //timechannels
       for (int j = 0; j < timechannels; j++)
       {
-        timeChannelsVec[j] = j*100;
-        v[j] = (i+j)%256;
-        e[j] = (i+j)%78;
+        (*timeChannelsVec)[j] = j*100;
+        (*v)[j] = (i+j)%256;
+        (*e)[j] = (i+j)%78;
       }
       // Populate the workspace.
       ws2D->setX(i, timeChannelsVec);

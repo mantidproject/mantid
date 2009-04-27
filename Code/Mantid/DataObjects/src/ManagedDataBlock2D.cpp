@@ -69,22 +69,6 @@ void ManagedDataBlock2D::hasChanges(bool has)
 
 /**
  Set the x values
- @param index Index to the histogram to set
- @param vec Vector to set
- */
-void ManagedDataBlock2D::setX(const int index, const std::vector<double>& vec)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
-
-  m_data[index-m_minIndex].dataX()=vec;
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Set the x values
  @param index :: Index to the histogram
  @param vec :: Shared ptr base object
  */
@@ -111,41 +95,6 @@ void ManagedDataBlock2D::setX(const int index, const Histogram1D::RCtype& PA)
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
   m_data[index-m_minIndex].setX(PA);
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Sets the data in the workspace
- @param index The histogram to be set
- @param vec A vector containing the data 
- */
-void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].dataY()=vec;
-  m_hasChanges = true;
-  return;
-}
-
-/**
- Sets the data in the workspace (including errors)
- @param index The histogram to be set
- @param vec A vector containing the data 
- @param vecErr A vector containing the corresponding errors
- */
-void ManagedDataBlock2D::setData(const int index, const std::vector<double>& vec,
-    const std::vector<double>& vecErr)
-{
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
-    throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
-
-  m_data[index-m_minIndex].dataY()=vec;
-  m_data[index-m_minIndex].dataE()=vecErr;
   m_hasChanges = true;
   return;
 }
@@ -207,7 +156,7 @@ void ManagedDataBlock2D::setData(const int index, const Histogram1D::RCtype::ptr
   @param index The number of the histogram
   @return A vector of doubles containing the x data
 */
-std::vector<double>& ManagedDataBlock2D::dataX(const int index)
+Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -222,7 +171,7 @@ std::vector<double>& ManagedDataBlock2D::dataX(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the y data
 */
-std::vector<double>& ManagedDataBlock2D::dataY(const int index)
+Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -237,7 +186,7 @@ std::vector<double>& ManagedDataBlock2D::dataY(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the error data
 */
-std::vector<double>& ManagedDataBlock2D::dataE(const int index)
+Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -252,7 +201,7 @@ std::vector<double>& ManagedDataBlock2D::dataE(const int index)
   @param index The number of the histogram
   @return A vector of doubles containing the x data
 */
-const std::vector<double>& ManagedDataBlock2D::dataX(const int index) const
+const Histogram1D::StorageType& ManagedDataBlock2D::dataX(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -266,7 +215,7 @@ const std::vector<double>& ManagedDataBlock2D::dataX(const int index) const
   @param index The number of the histogram
   @return A vector of doubles containing the y data
 */
-const std::vector<double>& ManagedDataBlock2D::dataY(const int index) const
+const Histogram1D::StorageType& ManagedDataBlock2D::dataY(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -280,7 +229,7 @@ const std::vector<double>& ManagedDataBlock2D::dataY(const int index) const
   @param index The number of the histogram
   @return A vector of doubles containing the error data
 */
-const std::vector<double>& ManagedDataBlock2D::dataE(const int index) const
+const Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index) const
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )

@@ -247,13 +247,12 @@ namespace Mantid
       memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
-      std::vector<double> v(spectrum + 1, spectrum + lengthIn);
+      MantidVec& Y = localWorkspace->dataY(hist);
+      Y.assign(spectrum + 1, spectrum + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
-      std::vector<double> e(lengthIn-1);
-      std::transform(v.begin(), v.end(), e.begin(), dblSqrt);
+      MantidVec& E = localWorkspace->dataE(hist);
+      std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
-      localWorkspace->setData(hist, v, e);
-
       localWorkspace->setX(hist, tcbs);
 
       localWorkspace->getAxis(1)->spectraNo(hist)= i;
@@ -268,9 +267,9 @@ namespace Mantid
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
       if ( directoryName.empty() )
       {
-	// This is the assumed deployment directory for IDFs, where we need to be relative to the
-	// directory of the executable, not the current working directory.
-	directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
+        // This is the assumed deployment directory for IDFs, where we need to be relative to the
+        // directory of the executable, not the current working directory.
+        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
       }
       const int stripPath = m_filename.find_last_of("\\/");
       std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part

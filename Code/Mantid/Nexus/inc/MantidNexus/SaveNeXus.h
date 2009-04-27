@@ -10,8 +10,7 @@ namespace Mantid
 {
   namespace NeXus
   {
-    /** @class SaveNeXus SaveNeXus.h MantidDataHandling/SaveNeXus.h
-
+    /**
     Loads a file in NeXus format and stores it in a 2D workspace 
     (Workspace2D class). LoadNeXus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides

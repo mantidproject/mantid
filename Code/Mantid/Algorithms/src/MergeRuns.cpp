@@ -97,9 +97,9 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces) const
 {
   std::list<MatrixWorkspace_sptr> inWS;
-  int numSpec;
+  int numSpec(0);
   Unit_sptr unit;
-  bool dist;
+  bool dist(false);
   // Going to check that name of instrument matches - think that's the best possible at the moment
   //   because if instrument is created from raw file it'll be a different object
   std::string instrument;

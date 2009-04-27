@@ -29,17 +29,17 @@ public:
 		//Nhist = 144;
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",Nhist,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    std::vector<double> x(11);
+    boost::shared_ptr<Mantid::MantidVec> x(new Mantid::MantidVec(11));
     for (int i = 0; i < 11; ++i)
     {
-      x[i]=i*1000;
+      (*x)[i]=i*1000;
     }
-    std::vector<double> a(10);
-    std::vector<double> e(10);
+    boost::shared_ptr<Mantid::MantidVec> a(new Mantid::MantidVec(10));
+    boost::shared_ptr<Mantid::MantidVec> e(new Mantid::MantidVec(10));
     for (int i = 0; i < 10; ++i)
     {
-      a[i]=i;
-      e[i]=sqrt(double(i));
+      (*a)[i]=i;
+      (*e)[i]=sqrt(double(i));
     }
     int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j) {

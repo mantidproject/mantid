@@ -113,11 +113,8 @@ public:
 
   virtual const std::string id() const {return "ManagedWorkspace2D";}
 
-  virtual void setX(const int histnumber, const std::vector<double>&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype&);
   virtual void setX(const int histnumber, const Histogram1D::RCtype::ptr_type&);
-  virtual void setData(const int histnumber, const std::vector<double>&);
-  virtual void setData(const int histnumber, const std::vector<double>&, const std::vector<double>&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
   virtual void setData(int const histnumber, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
@@ -126,12 +123,12 @@ public:
   virtual int size() const;
   virtual int blocksize() const;
 
-  virtual std::vector<double>& dataX(const int index);
-  virtual std::vector<double>& dataY(const int index);
-  virtual std::vector<double>& dataE(const int index);
-  virtual const std::vector<double>& dataX(int const index) const;
-  virtual const std::vector<double>& dataY(int const index) const;
-  virtual const std::vector<double>& dataE(int const index) const;
+  virtual MantidVec& dataX(const int index);
+  virtual MantidVec& dataY(const int index);
+  virtual MantidVec& dataE(const int index);
+  virtual const MantidVec& dataX(int const index) const;
+  virtual const MantidVec& dataY(int const index) const;
+  virtual const MantidVec& dataE(int const index) const;
 
   long int getMemorySize() const;
 	virtual bool threadSafe() const { return false; }

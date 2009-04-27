@@ -21,11 +21,6 @@ using namespace Mantid::DataHandling;
 class GaussianTest : public CxxTest::TestSuite
 {
 public:
-
-  //GaussianTest()
-  //{
-  //}
-
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -82,9 +77,8 @@ public:
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    std::vector<double> timeChannelsVec(timechannels); // x-values
-    for (int i = 0; i < 20; i++) timeChannelsVec[i] = i+1;
-    std::vector<double> y(timechannels); // y-values (counts)
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
     y[0] =   3.56811123;
     y[1] =   3.25921675;
     y[2] =   2.69444562;
@@ -105,7 +99,7 @@ public:
     y[17] =   3.70180447;
     y[18] =   2.77832668;
     y[19] =   2.29507565;
-    std::vector<double> e(timechannels); // error values of counts
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     e[0] =   1.72776328;
     e[1] =   1.74157482;
     e[2] =   1.73451042;
@@ -126,9 +120,6 @@ public:
     e[17] =   1.73116711;
     e[18] =   1.71790285;
     e[19] =   1.72734254;
-    // Populate the workspace.
-    ws2D->setX(0, timeChannelsVec);
-    ws2D->setData(0, y, e);
 
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));

@@ -379,9 +379,9 @@ namespace NeXus
   {
    NXstatus status;
    int dimensions[2];
-   int maxlen=0;
+   size_t maxlen=0;
    dimensions[0]=values.size();
-   for(int i=0;i<values.size();i++)
+   for(size_t i=0;i<values.size();i++)
        if(values[i].size()>maxlen) maxlen=values[i].size();
    dimensions[1]=maxlen;
    status=NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
@@ -390,7 +390,7 @@ namespace NeXus
    for(unsigned int it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
    char* strs=new char[values.size()*maxlen];
-   for(int i=0;i<values.size();i++)
+   for(size_t i=0;i<values.size();i++)
    {
        strncpy(&strs[i*maxlen],values[i].c_str(),maxlen);
        //strs[i]=static_cast<char*> values[i].c_str();
@@ -568,7 +568,7 @@ namespace NeXus
    std::vector<double> times;
    time_t t0; // ,time;
    bool first=true;
-   for(int i=0;i<dV.size();i++)
+   for(size_t i=0;i<dV.size();i++)
    {
        std::stringstream ins;
        double val;
@@ -623,9 +623,9 @@ namespace NeXus
    std::vector<std::string> dV=s_timeSeries->time_tValue();
    std::vector<std::string> values;
    std::vector<double> times;
-   time_t t0,time;
+   time_t t0;
    bool first=true;
-   for(int i=0;i<dV.size();i++)
+   for(size_t i=0;i<dV.size();i++)
    {
        std::stringstream ins;
        std::string val;
@@ -959,8 +959,6 @@ namespace NeXus
        nx=dim[1];
    else
        nx=dim[0];
-   //double *buffer=new double[dim[0]];
-   xValues.resize(nx,-1.0);
    if(rank==1)
    {
        status=NXgetdata(fileID,&xValues[0]);
@@ -971,8 +969,6 @@ namespace NeXus
        int  size[2]={1,dim[1]};
        status=NXgetslab(fileID,&xValues[0],start,size);
    }
-   //for(int i=1;i<=nx;i++) xValues.push_back(buffer[i-1]);
-   //delete[] buffer;
    status=NXclosedata(fileID);
    status=NXclosegroup(fileID);
    return(0);
@@ -1013,7 +1009,7 @@ namespace NeXus
    int start[2]={spectra-1,0};
    int  size[2]={1,dim[1]};
    status=NXgetslab(fileID,(void*)buffer,start,size);
-   for(int i=1;i<=dim[1];i++) values.push_back(buffer[i-1]);
+   for(int i=1;i<=dim[1];i++) values[i-1] = buffer[i-1];//  values.push_back(buffer[i-1]);
    status=NXclosedata(fileID);
 
    // read errors
@@ -1024,7 +1020,7 @@ namespace NeXus
    // set block size;
    size[1]=dim[1];
    status=NXgetslab(fileID,(void*)buffer,start,size);
-   for(int i=1;i<=dim[1];i++) errors.push_back(buffer[i-1]);
+   for(int i=1;i<=dim[1];i++) errors[i-1] = buffer[i-1];//errors.push_back(buffer[i-1]);
    status=NXclosedata(fileID);
 
    status=NXclosegroup(fileID);

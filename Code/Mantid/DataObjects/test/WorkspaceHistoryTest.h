@@ -41,7 +41,9 @@ public:
     double signal = getProperty("signal");
     double error = getProperty("error");
 
-    std::vector<double> x1(xlen,1), y1(xlen,signal), e1(xlen,error);
+    boost::shared_ptr<std::vector<double> > x1( new std::vector<double>(xlen,1));
+    boost::shared_ptr<std::vector<double> > y1( new std::vector<double>(xlen,signal));
+    boost::shared_ptr<std::vector<double> > e1( new std::vector<double>(xlen,error));
     Workspace2D_sptr outWS(new Workspace2D);
     outWS->initialize(ylen,xlen,xlen);
     for (int i=0; i< ylen; i++)

@@ -82,7 +82,6 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, const int& , int*, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);

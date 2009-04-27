@@ -14,25 +14,19 @@ public:
   {
     smallWorkspace.setTitle("smallWorkspace");
     smallWorkspace.initialize(2,4,3);
-    std::vector<double> x(4), xx(4);
     for (int i = 0; i < 4; ++i)
     {
-      x[i] = i;
-      xx[i] = i+4;
+      smallWorkspace.dataX(0)[i] = i;
+      smallWorkspace.dataX(1)[i] = i+4;
     }
-    smallWorkspace.setX(0,x);
-    smallWorkspace.setX(1,xx);
     
-    std::vector<double> y(3), e(3), yy(3), ee(3);
     for (int i = 0; i < 3; ++i)
     {
-      y[i] = i*10;
-      e[i] = sqrt(y[i]);
-      yy[i] = i*100;
-      ee[i] = sqrt(yy[i]);     
+      smallWorkspace.dataY(0)[i] = i*10;
+      smallWorkspace.dataE(0)[i] = sqrt(smallWorkspace.dataY(0)[i]);
+      smallWorkspace.dataY(1)[i] = i*100;
+      smallWorkspace.dataE(1)[i] = sqrt(smallWorkspace.dataY(1)[i]);     
     }
-    smallWorkspace.setData(0,y,e);
-    smallWorkspace.setData(1,yy,ee);
     
     bigWorkspace.setTitle("bigWorkspace");
     int nVec = 1250;
@@ -40,7 +34,9 @@ public:
     bigWorkspace.initialize(nVec, vecLength, vecLength);
     for (int i=0; i< nVec; i++)
     {
-      std::vector<double> x1(vecLength,1+i),y1(vecLength,5+i),e1(vecLength,4+i);
+      boost::shared_ptr<std::vector<double> > x1(new std::vector<double>(vecLength,1+i) );
+      boost::shared_ptr<std::vector<double> > y1(new std::vector<double>(vecLength,5+i) );
+      boost::shared_ptr<std::vector<double> > e1(new std::vector<double>(vecLength,4+i) );
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
     }
@@ -99,14 +95,14 @@ public:
     ws.setTitle("testSetX");
     ws.initialize(1,1,1);
     double aNumber = 5.5;
-    std::vector<double> v(1, aNumber);
+    boost::shared_ptr<std::vector<double> > v(new std::vector<double>(1, aNumber));
     TS_ASSERT_THROWS_NOTHING( ws.setX(0,v) )
     TS_ASSERT_EQUALS( ws.dataX(0)[0], aNumber )
     TS_ASSERT_THROWS( ws.setX(-1,v), std::range_error )
     TS_ASSERT_THROWS( ws.setX(1,v), std::range_error )
     
     double anotherNumber = 9.99;
-    std::vector<double> vec(25, anotherNumber );
+    boost::shared_ptr<std::vector<double> > vec(new std::vector<double>(25, anotherNumber));
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.setX(10, vec) )
     TS_ASSERT_EQUALS( bigWorkspace.dataX(10)[7], anotherNumber )
     TS_ASSERT_EQUALS( bigWorkspace.dataX(10)[22], anotherNumber )
@@ -118,16 +114,16 @@ public:
     ws.setTitle("testSetData");
     ws.initialize(1,1,1);
     double aNumber = 9.9;
-    std::vector<double> v(1, aNumber);
+    boost::shared_ptr<std::vector<double> > v(new std::vector<double>(1, aNumber));
     double anotherNumber = 3.3;
-    std::vector<double> w(1, anotherNumber);
-    TS_ASSERT_THROWS_NOTHING( ws.setData(0,v) )
+    boost::shared_ptr<std::vector<double> > w(new std::vector<double>(1, anotherNumber));
+    TS_ASSERT_THROWS_NOTHING( ws.setData(0,v,v) )
     TS_ASSERT_EQUALS( ws.dataY(0)[0], aNumber )    
-    TS_ASSERT_THROWS( ws.setData(-1,v), std::range_error )
-    TS_ASSERT_THROWS( ws.setData(1,v), std::range_error )
+    TS_ASSERT_THROWS( ws.setData(-1,v,v), std::range_error )
+    TS_ASSERT_THROWS( ws.setData(1,v,v), std::range_error )
     
     double yetAnotherNumber = 2.25;
-    v[0] = yetAnotherNumber;
+    (*v)[0] = yetAnotherNumber;
     TS_ASSERT_THROWS_NOTHING( ws.setData(0,v,w) )
     TS_ASSERT_EQUALS( ws.dataY(0)[0], yetAnotherNumber )
     TS_ASSERT_EQUALS( ws.dataE(0)[0], anotherNumber )
@@ -135,7 +131,7 @@ public:
     TS_ASSERT_THROWS( ws.setData(1,v,w), std::range_error )
     
     double oneMoreNumber = 8478.6728;
-    std::vector<double> vec(25, oneMoreNumber);
+    boost::shared_ptr<std::vector<double> > vec(new std::vector<double>(25, oneMoreNumber));
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.setData(49, vec, vec) )
     TS_ASSERT_EQUALS( bigWorkspace.dataY(49)[0], oneMoreNumber )
     TS_ASSERT_EQUALS( bigWorkspace.dataE(49)[9], oneMoreNumber )

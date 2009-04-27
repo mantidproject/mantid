@@ -27,14 +27,15 @@ Workspace2D_sptr UserAlgorithmTest::Create2DWorkspace(int xlen, int ylen)
   retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
   {
+    Mantid::MantidVec& x1 = retVal->dataX(i);
+    Mantid::MantidVec& y1 = retVal->dataY(i);
+    Mantid::MantidVec& e1 = retVal->dataE(i);
     for(int j=0;j<xlen;j++)
     {
         x1[j] = double(i)+0.1*j;
         y1[j] = x1[j]*10;
         e1[j] = x1[j]/10;
     }
-    retVal->setX(i,x1);     
-    retVal->setData(i,y1,e1);
   }
 
   return retVal;

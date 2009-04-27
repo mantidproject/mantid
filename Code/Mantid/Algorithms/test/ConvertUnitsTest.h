@@ -27,17 +27,17 @@ public:
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",256,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    std::vector<double> x(11);
+    boost::shared_ptr<Mantid::MantidVec> x(new Mantid::MantidVec(11));
     for (int i = 0; i < 11; ++i)
     {
-      x[i]=i*1000;
+      (*x)[i]=i*1000;
     }
-    std::vector<double> a(10);
-    std::vector<double> e(10);
+    boost::shared_ptr<Mantid::MantidVec> a(new Mantid::MantidVec(10));
+    boost::shared_ptr<Mantid::MantidVec> e(new Mantid::MantidVec(10));
     for (int i = 0; i < 10; ++i)
     {
-      a[i]=i;
-      e[i]=sqrt(double(i));
+      (*a)[i]=i;
+      (*e)[i]=sqrt(double(i));
     }
     int forSpecDetMap[256];
     for (int j = 0; j < 256; ++j) {
@@ -116,8 +116,8 @@ public:
     // Check that the data has truly been copied (i.e. isn't a reference to the same
     //    vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
-    std::vector<double> tester(test, test+10);
-    output2D->setData(111, tester);
+    boost::shared_ptr<std::vector<double> > tester(new std::vector<double>(test, test+10));
+    output2D->setData(111, tester, tester);
     y = output2D->dataY(111);
     TS_ASSERT_EQUALS( y[3], 44.0);
     yIn = input2D->dataY(111);

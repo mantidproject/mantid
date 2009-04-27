@@ -30,13 +30,12 @@ public:
 
   static Workspace1D_sptr Create1DWorkspaceRand(int size)
   {
-    std::vector<double> x1(size,1),y1,e1;
-    //   x1.resize(size);
-    //   std::generate(x1.begin(),x1.end(),rand);
-    y1.resize(size);
-    std::generate(y1.begin(),y1.end(),rand);
-    e1.resize(size);
-    std::generate(e1.begin(),e1.end(),rand);
+    Histogram1D::RCtype x1,y1,e1;
+    x1.access().resize(size,1);
+    y1.access().resize(size);
+    std::generate(y1.access().begin(),y1.access().end(),rand);
+    e1.access().resize(size);
+    std::generate(e1.access().begin(),e1.access().end(),rand);
     Workspace1D_sptr retVal(new Workspace1D);
     retVal->initialize(1,size,size);
     retVal->setX(x1);
@@ -46,12 +45,11 @@ public:
 
   static Workspace1D_sptr Create1DWorkspaceFib(int size)
   {
-    std::vector<double> x1(size,1),y1,e1;
-    //   x1.resize(size);
-    //   std::generate(x1.begin(),x1.end(),rand);
-    y1.resize(size);
-    std::generate(y1.begin(),y1.end(),FibSeries<double>());
-    e1.resize(size);
+    Histogram1D::RCtype x1,y1,e1;
+    x1.access().resize(size,1);
+    y1.access().resize(size);
+    std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
+    e1.access().resize(size);
     Workspace1D_sptr retVal(new Workspace1D);
     retVal->initialize(1,size,size);
     retVal->setX(x1);
@@ -65,7 +63,10 @@ public:
 
   static Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0)
   {
-    std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,2),e1(xlen,3);
+    Histogram1D::RCtype x1,y1,e1;
+    x1.access().resize(isHist?xlen+1:xlen,1);
+    y1.access().resize(xlen,2);
+    e1.access().resize(xlen,3);
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
@@ -79,7 +80,10 @@ public:
 
   static Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0)
   {
-    std::vector<double> x1(isHist?xlen+1:xlen,1),y1(xlen,5),e1(xlen,4);
+    Histogram1D::RCtype x1,y1,e1;
+    x1.access().resize(isHist?xlen+1:xlen,1);
+    y1.access().resize(xlen,5);
+    e1.access().resize(xlen,4);
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
     for (int i=0; i< ylen; i++)
@@ -93,10 +97,13 @@ public:
 
   static Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0, double deltax = 1.0)
   {
-    std::vector<double> x(nbins+1),y(nbins,2),e(nbins,sqrt(2.0));
-    for (unsigned int i =0; i < x.size(); ++i)
+    Histogram1D::RCtype x,y,e;
+    x.access().resize(nbins+1);
+    y.access().resize(nbins,2);
+    e.access().resize(nbins,sqrt(2.0));
+    for (unsigned int i =0; i < nbins+1; ++i)
     {
-      x[i] = x0+i*deltax;
+      x.access()[i] = x0+i*deltax;
     }
     Workspace2D_sptr retVal(new Workspace2D);
     retVal->initialize(nhist,nbins+1,nbins);

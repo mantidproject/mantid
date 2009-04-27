@@ -23,9 +23,10 @@ Workspace1D_sptr Benchmark::Create1DWorkspaceFib(int size)
 }
 Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 {
-  std::vector<double> x1(xlen,1),y1(xlen,2),e1(xlen,3);
-//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-//  retVal->setTitle("ws123");
+  Histogram1D::RCtype x1,y1,e1;
+  x1.access().resize(xlen,1);
+  y1.access().resize(xlen,2);
+  e1.access().resize(xlen,3);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
@@ -39,9 +40,10 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123(int xlen, int ylen)
 
 Workspace2D_sptr Benchmark::Create2DWorkspace154(int xlen, int ylen)
 {
-  std::vector<double> x1(xlen,1),y1(xlen,5),e1(xlen,4);
-//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-//  retVal->setTitle("ws154");
+  Histogram1D::RCtype x1,y1,e1;
+  x1.access().resize(xlen,1);
+  y1.access().resize(xlen,5);
+  e1.access().resize(xlen,4);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(ylen,xlen,xlen);
   for (int i=0; i< ylen; i++)
@@ -58,10 +60,10 @@ Workspace2D_sptr Benchmark::Create2DWorkspace(int xlen, int ylen)
 }
 Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
 {
-  std::vector<double> x1(xlen+1,1);
-  std::vector<double> y1(xlen,2),e1(xlen,3);
-//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-//  retVal->setTitle("ws154");
+  Histogram1D::RCtype x1,y1,e1;
+  x1.access().resize(xlen+1,1);
+  y1.access().resize(xlen,2);
+  e1.access().resize(xlen,3);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(ylen,xlen+1,xlen);
   for (int i=0; i< ylen; i++)
@@ -74,10 +76,10 @@ Workspace2D_sptr Benchmark::Create2DWorkspace123Hist(int xlen, int ylen)
 }  
 Workspace2D_sptr Benchmark::Create2DWorkspace154Hist(int xlen, int ylen)
 {
-  std::vector<double> x1(xlen+1,1);
-  std::vector<double> y1(xlen,5),e1(xlen,4);
-//  Workspace2D_sptr retVal(new ManagedWorkspace2D);
-//  retVal->setTitle("ws154");
+  Histogram1D::RCtype x1,y1,e1;
+  x1.access().resize(xlen+1,1);
+  y1.access().resize(xlen,5);
+  e1.access().resize(xlen,4);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(ylen,xlen+1,xlen);
   for (int i=0; i< ylen; i++)
