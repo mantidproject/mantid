@@ -147,10 +147,10 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   for (int j = 0; j < nhist2; ++j)
   {
     const int spectrum = axis2->spectraNo(j);
-    if ( spectra.find(spectrum) != spectra.end() )
+    if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
     {
-      g_log.error("The input workspaces overlap");
-      throw std::invalid_argument("The input workspaces overlap");
+      g_log.error("The input workspaces have overlapping spectrum numbers");
+      throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
     }
     std::vector<int> dets = specmap2.getDetectors(spectrum);
     std::vector<int>::const_iterator it;
