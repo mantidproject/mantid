@@ -34,7 +34,7 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
   m_opt_input = new QTreeWidget;
   m_opt_input->setColumnCount(2);
   QStringList headers("Name");
-  headers << "Spectra";
+  headers << "Details";
   m_opt_input->setHeaderLabels(headers);
     
   QHBoxLayout *top_layout = new QHBoxLayout;
@@ -45,24 +45,28 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
   m_data_sets = new QComboBox;
   grid->addWidget(m_data_sets, 0, 1);
   
-  grid->addWidget(new QLabel("Spectra"), 1, 0);
-  m_spec_list = new QLineEdit;
-  m_spec_list->setText("0");
-  grid->addWidget(m_spec_list, 1, 1);
 
-  grid->addWidget(new QLabel("Plot"), 2, 0);
+  grid->addWidget(new QLabel("Plot"), 1, 0);
   m_plots = new QComboBox;
   m_plots->addItem("New Plot ...");
   m_plots->addItem("Plot 1");
   m_plots->setCurrentIndex(1);
   connect(m_plots, SIGNAL(activated(const QString &)), this, SLOT(plotOptionClicked(const QString&)));
-  grid->addWidget(m_plots, 2, 1);
+  grid->addWidget(m_plots, 1, 1);
   top_layout->addLayout(grid);
 
-  QPushButton *addToList = new QPushButton("Add to plot");
-  connect(addToList, SIGNAL(clicked()), this, SLOT(addNewPlot()));
-  grid->addWidget(addToList, 3, 0, 1, 2, Qt::AlignHCenter);
+  QPushButton *add1D = new QPushButton("Add 1D");
+  connect(add1D, SIGNAL(clicked()), this, SLOT(add1DPlot()));
+  m_spec_list = new QLineEdit;
+  m_spec_list->setText("0");
+  m_spec_list->setToolTip("A comma-separated list of workspace indexes");
+  grid->addWidget(add1D, 2,0);
+  grid->addWidget(m_spec_list, 2, 1);
 
+  QPushButton *add2D = new QPushButton("Add 2D");
+  connect(add2D, SIGNAL(clicked()), this, SLOT(add2DPlot()));
+  grid->addWidget(add2D, 3, 0, Qt::AlignHCenter);
+  
   QVBoxLayout *main_layout = new QVBoxLayout;
   main_layout->addLayout(top_layout);
   QPushButton *plot = new QPushButton("Plot", this);
@@ -100,7 +104,7 @@ void SANSPlotDialog::setAvailableData(const QStringList & workspaces)
 /**
  * Add a new plot to the list
  */
-void SANSPlotDialog::addNewPlot()
+void SANSPlotDialog::add1DPlot()
 {
   if( m_data_sets->count() == 0 )
   {
@@ -158,8 +162,20 @@ void SANSPlotDialog::addNewPlot()
       dataset->setText(1, spec_nums);
     }
   }
-  m_spec_list->clear();
+  m_spec_list->setText("0");
   m_opt_input->expandAll();
+}
+
+/**
+ * Add a 2D plot to the list
+ */
+void SANSPlotDialog::add2DPlot()
+{
+  QString ws = m_data_sets->currentText();
+  QTreeWidgetItem *plot2D =  new QTreeWidgetItem(QStringList(ws));
+  plot2D->setData(0, Qt::UserRole, 100);
+  plot2D->setText(1, "Color map plot");
+  m_opt_input->addTopLevelItem(plot2D);
 }
 
 /**
@@ -174,27 +190,37 @@ void SANSPlotDialog::plotButtonClicked()
   {
     //top-level item, i.e. plot name
     QTreeWidgetItem *top_item = root->child(p);
-    py_code += QString("plot") + QString::number(p) + "= ";
-    int no_child = top_item->childCount();
-    bool first_curve(true);
-    for( int c = 0; c < no_child; ++c )
+    //Check for 2D plot
+    if( top_item->data(0, Qt::UserRole).toInt() == 100 )
     {
-      QTreeWidgetItem *item = top_item->child(c);
-      QString data = item->text(0);
-      QStringList spectra = item->text(1).split(',', QString::SkipEmptyParts);
-      QStringListIterator itr(spectra);
-      //The very first curve is special as it creates the referece to the plot that is needed to add the others
-      if( first_curve )
+      py_code += "m = newMantidMatrix('" + top_item->text(0) + "')\n"
+	"m.plotGraph2D()\n"
+	"m.hide()\n";
+    }
+    else
+    {
+      py_code += QString("plot") + QString::number(p) + "= ";
+      int no_child = top_item->childCount();
+      bool first_curve(true);
+      for( int c = 0; c < no_child; ++c )
       {
-	py_code += writePlotCmd(data, itr.next(), true) + "\n";
-	first_curve = false;
-      }
-      while( itr.hasNext() )
-      {
-	QString plotcmd = writePlotCmd(data, itr.next(), false);
-	if( !plotcmd.isEmpty() )
+	QTreeWidgetItem *item = top_item->child(c);
+	QString data = item->text(0);
+	QStringList spectra = item->text(1).split(',', QString::SkipEmptyParts);
+	QStringListIterator itr(spectra);
+	//The very first curve is special as it creates the referece to the plot that is needed to add the others
+	if( first_curve )
 	{
-	  py_code += "plot" + QString::number(p) + ".insertCurve(" + plotcmd + ", 0)\n";
+	  py_code += writePlotCmd(data, itr.next(), true) + "\n";
+	  first_curve = false;
+	}
+	while( itr.hasNext() )
+	{
+	  QString plotcmd = writePlotCmd(data, itr.next(), false);
+	  if( !plotcmd.isEmpty() )
+	  {
+	    py_code += "plot" + QString::number(p) + ".insertCurve(" + plotcmd + ", 0)\n";
+	  }
 	}
       }
     }
@@ -204,6 +230,7 @@ void SANSPlotDialog::plotButtonClicked()
     emit pythonCodeConstructed(py_code);
   }
   m_opt_input->clear();
+  m_opt_input->reset();
 }
 
 /**

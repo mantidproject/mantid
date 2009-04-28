@@ -14,6 +14,7 @@
 // Qt Forward Declarations
 //---------------------------
 class QLineEdit;
+class QSignalMapper;
 
 namespace MantidQt
 {
@@ -59,7 +60,7 @@ private:
   /// Get the component distances
   void componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
-  void setProcessingState(bool running);
+  void setProcessingState(bool running, int type);
   ///Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString & ws_name) const;
   ///Construct a QStringList of the currently loaded workspaces
@@ -91,7 +92,7 @@ private slots:
   void handleLoadButtonClick();
 
   /// Reduce button clicked
-  void handleReduceButtonClick();
+  void handleReduceButtonClick(const QString & type);
 
   /// Plot button has been clicked
   void handlePlotButtonClick();
@@ -129,6 +130,9 @@ private:
 
   // The template to view the current mask
   QString m_pycode_viewmask;
+
+  // A signal mapper to pick up various button clicks
+  QSignalMapper *m_reducemapper;
 };
 
 }

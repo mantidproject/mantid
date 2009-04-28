@@ -36,8 +36,10 @@ signals:
   void pythonCodeConstructed(const QString&);
 
 private slots:
-  /// Add a new plot to the list based on the current options
-  void addNewPlot();
+  /// Add a new 1D plot to the list based on the current options
+  void add1DPlot();
+  /// Add a new 2D plot to the list
+  void add2DPlot();
   /// A combo option is clicked
   void plotOptionClicked(const QString & item_text);
   /// The plot button has been clicked

@@ -10,17 +10,17 @@
 import LOQFunctions
 
 topLayer = 'CurrentMask'
-LoadEmptyInstrument('<INSTRUMENTPATH>/LOQ_Definition.xml',topLayer)
+LoadEmptyInstrument('|INSTRUMENTPATH|/LOQ_Definition.xml',topLayer)
 
-rmin = <RADIUSMIN>/1000.0
+rmin = |RADIUSMIN|/1000.0
 LOQFunctions.MaskInsideCylinder(topLayer, rmin)
 
-rmax = <RADIUSMAX>/1000.0
+rmax = |RADIUSMAX|/1000.0
 LOQFunctions.MaskOutsideCylinder(topLayer, rmax)
 
 # Masking other spectra
 # This assumes a list of comma separated values
-maskstring = '<MASKLIST>'
+maskstring = '|MASKLIST|'
 detlist = LOQFunctions.ConvertToDetList(maskstring);
 LOQFunctions.MaskByDetNumber(topLayer, detlist)
 

@@ -1,7 +1,7 @@
 ###########################################################################
 # This is the template analysis script for reducing the LOQ data.         #
 # It has place holders so that the appropriate data can be filled in at   #
-# run-time by the SANS GUI                                                #
+# run time by the SANS GUI                                                #
 #                                                                         #
 #  Authors: Russell Taylor, Tessella plc (Original script)                #
 #           Martyn Gigg, Tessella plc (Adapted to GUI use)                #
@@ -10,39 +10,44 @@
 import LOQFunctions
 
 # Sort out the input. The tags get replaced by information in the LOQ GUI
-scatter_sample = '<SCATTERSAMPLE>'
-scatter_can = '<SCATTERCAN>'
-trans_sample = '<TRANSMISSIONSAMPLE>'
-direct_sample = '<DIRECTSAMPLE>'
-maskstring = '<MASKSTRING>'
-instr_dir = '<INSTRUMENTPATH>'
-rmin = <RADIUSMIN>/1000.0
-rmax = <RADIUSMAX>/1000.0
-xshift = str( (317.5 - <XBEAM>)/1000.0 )
-yshift = str( (317.5 - <YBEAM>)/1000.0 )
-wav1 = <WAVMIN>
-wav2 = <WAVMAX>
-dwav = <WAVDELTA>
-q1 = <QMIN>
-q2 = <QMAX>
-dq = <QDELTA>
-rescale = <SCALEFACTOR>*100.0
+scatter_sample = '|SCATTERSAMPLE|'
+scatter_can = '|SCATTERCAN|'
+trans_sample = '|TRANSMISSIONSAMPLE|'
+trans_can = '|TRANSMISSIONCAN|'
+direct_sample = '|DIRECTSAMPLE|'
+maskstring = '|MASKSTRING|'
+instr_dir = '|INSTRUMENTPATH|'
+rmin = |RADIUSMIN|/1000.0
+rmax = |RADIUSMAX|/1000.0
+xshift = str( (317.5 - |XBEAM|)/1000.0 )
+yshift = str( (317.5 - |YBEAM|)/1000.0 )
+wav1 = |WAVMIN|
+wav2 = |WAVMAX|
+dwav = |WAVDELTA|
+q1 = |QMIN|
+q2 = |QMAX|
+dq = |QDELTA|
+qxy2 = |QXYMAX|
+dqxy = |QXYDELTA|
+rescale = |SCALEFACTOR|*100.0
 
-direct_beam_file = '<DIRECTFILE>'
+direct_beam_file = '|DIRECTFILE|'
+
+# This indicates whether a 1D or a 2D analysis is performed
+CORRECTIONTYPE = '|ANALYSISTYPE|'
 
 ### Main correction function ###
-def Correct(inputWS):
+def Correct(sampleWS, transWS, suffix):
 	'''Performs the data reduction steps'''
-	monitorWS = "Monitor-" + inputWS
-	wavname = "_" + str(int(wav1)) + "_" + str(int(wav2))
-	resultWS = "SmallAngle-" + inputWS + wavname
+	monitorWS = "Monitor"
+	resultWS = "Small_Angle_" + suffix
 	# Get the monitor
-	LOQFunctions.GetMonitor(inputWS, monitorWS)
+	LOQFunctions.GetMonitor(sampleWS, monitorWS)
 	# Get small angle banks
 	firstsmall = 130
 	lastsmall = 16130
 	# Get the small angle banks
-	LOQFunctions.GetMainBank(inputWS, firstsmall, lastsmall, resultWS)
+	LOQFunctions.GetMainBank(sampleWS, firstsmall, lastsmall, resultWS)
 	# Mask beam stop
 	LOQFunctions.MaskInsideCylinder(resultWS, rmin)
 	# Mask corners
@@ -64,60 +69,65 @@ def Correct(inputWS):
 	# ConvertUnits("High_Angle","High_Angle","Wavelength")
 	# Rebin("High_Angle","High_Angle",wavbin)
 	
-	# Step 4 - Correct by incident beam monitor
+	# Correct by incident beam monitor
 	# At this point need to fork off workspace name to keep a workspace containing raw counts
-	# outputWS_cor = outputWS + "_tmp"
 	tmpWS = "temporary_workspace"
 	Divide(resultWS, monitorWS, tmpWS)
+	mantid.deleteWorkspace(monitorWS)
 
- 	# Step 6 - Correct by transmission
+ 	# Correct by transmission
  	# Need to remove prompt spike and, later, flat background
-	trans_tmp_out = LOQFunctions.SetupTransmissionData(trans_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
+	trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
 	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-	trans_ws = "transmission-" + inputWS + wavname
+	trans_ws = "transmission_" + suffix
 	CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)
 	# Apply the correction
 	Divide(tmpWS, trans_ws, tmpWS)
 	
-	# Step 7 - Correct for efficiency
+	# Correct for efficiency
 	CorrectToFile(tmpWS, direct_beam_file, tmpWS, "Wavelength", "Divide")
 
-	# Step 11 - Convert to Q
-	# Convert units to Q (MomentumTransfer)
-	ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
-	ConvertUnits(resultWS,resultWS,"MomentumTransfer")
+	# Steps differ here depending on type
+	if CORRECTIONTYPE == '1D':
+		# Convert to Q
+		ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
+		ConvertUnits(resultWS,resultWS,"MomentumTransfer")
+		
+		# Need to mark the workspace as a distribution at this point to get next rebin right
+		ws = mantid.getMatrixWorkspace(tmpWS)
+		ws.isDistribution(True)
+		
+		# Calculate the solid angle corrections
+		SolidAngle(tmpWS,"solidangle")
+
+		# Rebin to desired Q bins
+		q_bins = str(q1) + "," + str(dq) + "," + str(q2)
+		Rebin(resultWS, resultWS, q_bins)
+		Rebin(tmpWS, tmpWS, q_bins)
+		RebinPreserveValue("solidangle", "solidangle", q_bins)
+
+		# Sum all spectra
+		SumSpectra(resultWS,resultWS)
+		SumSpectra(tmpWS,tmpWS)
+		SumSpectra("solidangle","solidangle")
 	
-	# Need to mark the workspace as a distribution at this point to get next rebin right
-	ws = mantid.getMatrixWorkspace(tmpWS)
-	ws.isDistribution(True)
+		# Correct for solidangle
+		Divide(tmpWS,"solidangle",tmpWS)
+		mantid.deleteWorkspace("solidangle")
 
-	# Calculate the solid angle corrections
-	SolidAngle(tmpWS,"solidangle")
-
-	# Rebin to desired Q bins
-	q_bins = str(q1) + "," + str(dq) + "," + str(q2)
-	Rebin(resultWS, resultWS, q_bins)
-	Rebin(tmpWS, tmpWS, q_bins)
-	RebinPreserveValue("solidangle", "solidangle", q_bins)
-
-	# Sum all spectra
-	SumSpectra(resultWS,resultWS)
-	SumSpectra(tmpWS,tmpWS)
-	SumSpectra("solidangle","solidangle")
-	
-	# Correct for solidangle
-	Divide(tmpWS,"solidangle",tmpWS)
-	mantid.deleteWorkspace("solidangle")
-
-	# Now put back the fractional error from the raw count workspace into the result
-	PoissonErrors(tmpWS, resultWS, resultWS)
+		# Now put back the fractional error from the raw count workspace into the result
+		PoissonErrors(tmpWS, resultWS, resultWS)
+		
+	else:
+		# Run 2D algorithm
+		Qxy(tmpWS, resultWS, "small_angle2D.Q", str(qxy2), str(dqxy))
+		
 	mantid.deleteWorkspace(tmpWS)
-
 	# Correct for sample/Can volume
 	LOQFunctions.ScaleByVolume(resultWS, rescale);
-
+		
 	return resultWS
 
 ### End of Correct function ###
@@ -125,16 +135,13 @@ def Correct(inputWS):
 # Cross section (remove can scattering)
 # Perform correction for the sample and can.
 # result = sample - can
-
 # Final workspace containing the output of the sample correction
-sample_correction = Correct(scatter_sample)
-can_correction = Correct(scatter_can)
+sample_correction = Correct(scatter_sample, trans_sample, "sample")
+can_correction = Correct(scatter_can, trans_can, "can")
+Minus(sample_correction, can_correction, "Small_Angle_" + CORRECTIONTYPE)
+mantid.deleteWorkspace(sample_correction)
+mantid.deleteWorkspace(can_correction)
 
-Minus(sample_correction, can_correction, sample_correction + "-corrected")
-#######################
-
-
-#######################
 #step 12 - Save 1D data
 # this writes to the /bin directory - why ?
 # Want to be able to write out to new XML format

@@ -22,6 +22,7 @@
 #include <QInputDialog>
 #include <QRegExp>
 #include <QRegExpValidator>
+#include <QSignalMapper>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -41,6 +42,7 @@ using namespace MantidQt::CustomInterfaces;
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), m_period_lbls(), m_pycode_loqreduce("")
 {
+  m_reducemapper = new QSignalMapper(this);
 }
 
 ///Destructor
@@ -67,18 +69,24 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
     //    m_uiForm.plotBtn->setEnabled(false);
 
-    connect(m_uiForm.oneDBtn, SIGNAL(clicked()), this, SLOT(handleReduceButtonClick()));
-    //This cannot do anything at the moment
-    connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
+    m_uiForm.twoDBtn->setEnabled(false);
     for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
     {
       m_uiForm.tabWidget->setTabEnabled(index, false);
     }
-
+    
+    // Reduction buttons
+    connect(m_uiForm.oneDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
+    m_reducemapper->setMapping(m_uiForm.oneDBtn, "1D");
+    connect(m_uiForm.twoDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
+    m_reducemapper->setMapping(m_uiForm.twoDBtn, "2D");
+    connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
+    
+    connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
     connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.oneDBtn, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.twoDBtn, SLOT(setEnabled(bool)));
 
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
@@ -377,7 +385,6 @@ void SANSRunWindow::readLimits(const QString & com_line)
     }
     else if( quantity == "QXY" )
     {
-      m_uiForm.qy_min->setText(min);
       m_uiForm.qy_max->setText(max);
       m_uiForm.qy_dqy->setText(step);
       m_uiForm.qy_dqy_opt->setCurrentIndex(opt_index);
@@ -429,19 +436,30 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
 /**
  * Set the state of processing.
  * @param running If we are processing then some interaction is disabled
+ * @param type The reduction type, 0 = 1D and 1 = 2D
  */
-void SANSRunWindow::setProcessingState(bool running)
+void SANSRunWindow::setProcessingState(bool running, int type)
 {
   if( running )
   {
-    m_uiForm.oneDBtn->setText("Running ...");
-    m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.load_dataBtn->setEnabled(false);
+    if( type == 0 )
+    {   
+      m_uiForm.oneDBtn->setText("Running ...");
+    }
+    else 
+    {
+      m_uiForm.twoDBtn->setText("Running ...");
+    }
+    m_uiForm.oneDBtn->setEnabled(false);
+    m_uiForm.twoDBtn->setEnabled(false);
   }
   else
   {
-    m_uiForm.oneDBtn->setText("Reduce Data");
+    m_uiForm.oneDBtn->setText("1D Reduce");
+    m_uiForm.twoDBtn->setText("2D Reduce");
     m_uiForm.oneDBtn->setEnabled(true);
+    m_uiForm.twoDBtn->setEnabled(true);
     m_uiForm.load_dataBtn->setEnabled(true);
   }
 }
@@ -729,8 +747,9 @@ void SANSRunWindow::handleLoadButtonClick()
 
 /**
  * Run the LOQ analysis script
+ * @param type The data reduction type, 1D or 2D
  */
-void SANSRunWindow::handleReduceButtonClick()
+void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
   if( !readPyReductionTemplate() ) return;
 
@@ -738,7 +757,7 @@ void SANSRunWindow::handleReduceButtonClick()
 
   QStringList wslist(m_uiForm.sct_sample_edit->text() + "_sans");
   wslist << m_uiForm.sct_can_edit->text() + "_sans" <<  m_uiForm.tra_sample_edit->text() + "_trans"
-	 << m_uiForm.direct_sample_edit->text() + "_trans";
+	 << m_uiForm.tra_can_edit->text() + "_trans" << m_uiForm.direct_sample_edit->text() + "_trans";
   QStringListIterator itr(wslist);
   while( itr.hasNext() )
   {
@@ -751,24 +770,28 @@ void SANSRunWindow::handleReduceButtonClick()
     }
   }
 
-  //Disable stuff
-  setProcessingState(true);
+  int idtype(0);
+  if( type.startsWith("2") ) idtype = 1;
+
+  //Disable buttons so that interaction is limited while processing data
+  setProcessingState(true, idtype);
   
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
-  py_code.replace("<INSTRUMENTPATH>", m_ins_defdir);
-  py_code.replace("<SCATTERSAMPLE>", wslist.at(0));
-  py_code.replace("<SCATTERCAN>", wslist.at(1));
-  py_code.replace("<TRANSMISSIONSAMPLE>", wslist.at(2));
-  py_code.replace("<DIRECTSAMPLE>", wslist.at(3));
+  py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
+  py_code.replace("|SCATTERSAMPLE|", wslist.at(0));
+  py_code.replace("|SCATTERCAN|", wslist.at(1));
+  py_code.replace("|TRANSMISSIONSAMPLE|", wslist.at(2));
+  py_code.replace("|TRANSMISSIONCAN|", wslist.at(3));
+  py_code.replace("|DIRECTSAMPLE|", wslist.at(4));
 
   //Limit replacement
-  py_code.replace("<RADIUSMIN>", m_uiForm.rad_min->text());
-  py_code.replace("<RADIUSMAX>", m_uiForm.rad_max->text());
-  py_code.replace("<XBEAM>", m_uiForm.beam_x->text());
-  py_code.replace("<YBEAM>", m_uiForm.beam_y->text());
-  py_code.replace("<WAVMIN>", m_uiForm.wav_min->text());
-  py_code.replace("<WAVMAX>", m_uiForm.wav_max->text());
+  py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
+  py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());
+  py_code.replace("|XBEAM|", m_uiForm.beam_x->text());
+  py_code.replace("|YBEAM|", m_uiForm.beam_y->text());
+  py_code.replace("|WAVMIN|", m_uiForm.wav_min->text());
+  py_code.replace("|WAVMAX|", m_uiForm.wav_max->text());
   //Need to check for linear/log steps. If log then need to prepend a '-' to 
   //the front so that the Rebin algorithm recognises this
   QString step_prefix("");
@@ -776,27 +799,38 @@ void SANSRunWindow::handleReduceButtonClick()
   {
     step_prefix = "-";
   }
-  py_code.replace("<WAVDELTA>", step_prefix + m_uiForm.wav_dw->text());
-  py_code.replace("<QMIN>", m_uiForm.q_min->text());
-  py_code.replace("<QMAX>", m_uiForm.q_max->text());
-  step_prefix = "";
-  if( m_uiForm.q_dq_opt->currentIndex() == 1 ) 
-  {
-    step_prefix = "-";
-  }
-  py_code.replace("<QDELTA>", step_prefix  + m_uiForm.q_dq->text());
-  py_code.replace("<DIRECTFILE>", m_uiForm.direct_file->text());
-  py_code.replace("<FLATFILE>", m_uiForm.flat_file->text());
-  
-  py_code.replace("<SCALEFACTOR>", m_uiForm.scale_factor->text());
-
-  py_code.replace("<MASKSTRING>", createMaskString());
+  py_code.replace("|WAVDELTA|", step_prefix + m_uiForm.wav_dw->text());
     
+  step_prefix = "";
+  if( idtype == 0 )
+  {
+    if( m_uiForm.q_dq_opt->currentIndex() == 1 ) step_prefix = "-";
+    py_code.replace("|QMIN|", m_uiForm.q_min->text());
+    py_code.replace("|QMAX|", m_uiForm.q_max->text());
+    py_code.replace("|QDELTA|", step_prefix  + m_uiForm.q_dq->text());
+    py_code.replace("|QXYMAX|", "0");
+    py_code.replace("|QXYDELTA|", "0");
+  }
+  else
+  {
+    if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
+    py_code.replace("|QMIN|", "0");
+    py_code.replace("|QMAX|", "0");
+    py_code.replace("|QDELTA|", "0");
+    py_code.replace("|QXYMAX|", m_uiForm.qy_max->text());
+    py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
+  }
+  py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
+  py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
+  
+  py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
+  py_code.replace("|MASKSTRING|", createMaskString());
+  py_code.replace("|ANALYSISTYPE|", type);
+  
   //Execute the code
   runPythonCode(py_code);
-
   //Reenable stuff
-  setProcessingState(false);
+  setProcessingState(false, idtype);
 }
 
 /**
@@ -845,14 +879,13 @@ void SANSRunWindow::handleShowMaskButtonClick()
   if( !readPyViewMaskTemplate() ) return;
 
   QString py_code = m_pycode_viewmask;
-  py_code.replace("<INSTRUMENTPATH>", m_ins_defdir);
+  py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   //Shape mask defaults
-  py_code.replace("<RADIUSMIN>", m_uiForm.rad_min->text());
-  py_code.replace("<RADIUSMAX>", m_uiForm.rad_max->text());
+  py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
+  py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());
 
   //Other masks
-  py_code.replace("<MASKLIST>", createMaskString());
-  
+  py_code.replace("|MASKLIST|", createMaskString());
   runPythonCode(py_code);
 }
 
