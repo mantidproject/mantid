@@ -126,7 +126,7 @@ using namespace Mantid::Kernel;
   */
 static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_nrhs)
 {
-	int j;
+	size_t j;
 	if (mxIsCell(prhs))
 	{
 		for(j=0; j < mxGetNumberOfElements(prhs); j++)
@@ -217,7 +217,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 		mexWarnMsgTxt("MANTIDEXC: Possible attempt to make re-entrant call");
 		mexWarnMsgTxt("MANTIDEXC: This is often caused by a matlab class constructor not checking for nargin > 0");
 	}
-	for(i=0; i< (sizeof(mex_functions) / sizeof(mexfunc_s_t)) && !func_called; i++)
+	for(i=0; i< static_cast<int>(sizeof(mex_functions) / sizeof(mexfunc_s_t)) && !func_called; i++)
 	{
 		if ( (mex_functions[i].name != NULL) && !compare_nocase(funcname, mex_functions[i].name))
 		{

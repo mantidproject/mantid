@@ -179,7 +179,7 @@ void LoadNexusProcessed::exec()
   // get any spectraMap info
   boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
   SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
-  nexusFile->readNexusProcessedSpectraMap(spectraMap, localWorkspace, m_spec_min, m_spec_max);
+  nexusFile->readNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
   // Assign the result to the output workspace property
   std::string outputWorkspace = "OutputWorkspace";
   setProperty(outputWorkspace, localWorkspace);

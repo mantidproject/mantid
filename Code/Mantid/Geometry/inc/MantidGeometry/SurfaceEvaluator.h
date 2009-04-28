@@ -38,6 +38,7 @@ namespace Mantid
 		class SurfaceEvaluator
 		{
 		public:
+		  virtual ~SurfaceEvaluator() {}        ///< (Empty) Virtual destructor
 			virtual double evaluate(V3D point)=0; ///< Evaluate the surface value at input point
 		};
 	}

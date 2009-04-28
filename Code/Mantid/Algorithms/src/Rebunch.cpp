@@ -143,16 +143,16 @@ namespace Mantid
 		* @throw invalid_argument Thrown if input to function is incorrect
 		**/
 		void Rebunch::rebunch_hist(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch, const bool distribution)
+			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const size_t n_bunch, const bool distribution)
 		{
-			int i,j;
+			size_t i,j;
 			double width;
-			int size_x=xold.size();
-			int size_y=yold.size();
+			size_t size_x=xold.size();
+			size_t size_y=yold.size();
 			double ysum,esum;
-			int hi_index=size_x-1;
-			int wbins=size_y/n_bunch;
-			int rem=size_y%n_bunch;
+			size_t hi_index=size_x-1;
+			size_t wbins=size_y/n_bunch;
+			size_t rem=size_y%n_bunch;
 
 
 			int i_in=0;

@@ -116,7 +116,7 @@ bool MemoryManagerImpl::ReadMemInfo(Mantid::API::MemoryInfo & mi)
     else if (tag == "Cached:")
     {
       ++values_found;
-      mi.availMemory += value * 0.8;
+      mi.availMemory += (8*value/10);
       g_log.debug() << "Linux - Cached memory reported: " << value
           << " KB. Note: Using 80% of this value as additional free memory.\n";
     }

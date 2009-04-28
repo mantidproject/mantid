@@ -316,7 +316,7 @@ void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,
     //boost::posix_time::ptime pt=boost::posix_time::time_from_string(startTime);
 	//std::time_t atime=to_time_t(pt);
 	//atime+=time;
-	logTime=time+startTime_time_t;
+	logTime=static_cast<std::time_t>(time)+startTime_time_t;
 	//dateAndTime="2008-08-12T09:00:01"; //test
 	value=logValues[logNumber][logSequence];
 }

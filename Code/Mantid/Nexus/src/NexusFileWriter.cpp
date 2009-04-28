@@ -188,7 +188,7 @@ namespace NeXus
    status=NXmakedata(fileID, name.c_str(), NX_CHAR, 1, dimensions);
    if(status==NX_ERROR) return(false);
    status=NXopendata(fileID, name.c_str());
-   for(int it=0; it<attributes.size(); ++it)
+   for(size_t it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size(), NX_CHAR);
    status=NXputdata(fileID, (void*)value.c_str());
    status=NXclosedata(fileID);
@@ -206,7 +206,7 @@ namespace NeXus
    status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
    if(status==NX_ERROR) return(false);
    status=NXopendata(fileID, name.c_str());
-   for(int it=0; it<attributes.size(); ++it)
+   for(size_t it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size(), NX_CHAR);
    status=NXputdata(fileID, (void*)&value);
    status=NXclosedata(fileID);

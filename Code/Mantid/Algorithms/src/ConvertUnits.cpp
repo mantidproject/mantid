@@ -492,7 +492,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
         Ynew[k] = Y[k];
         Enew[k] = E[k];
       }
-      Xnew[k++] = X[k];
+      ++k;
+      Xnew[k] = X[k];
       // If necessary, add on some fake values to the end of the X array (Y&E will be zero)
       if (k < maxBins)
       {

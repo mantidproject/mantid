@@ -64,6 +64,7 @@ namespace Algorithms
     return;
   }
 
+  /// Read the scaling information from a file (e.g. merlin_detector.sca)
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
   {
       // Read the scaling information from a file (e.g. merlin_detector.sca)
@@ -122,8 +123,6 @@ namespace Algorithms
                   Geometry::V3D diffT=truPos-truPosLast;
                   scale=diffT.norm()/diffI.norm();
                   Geometry::V3D scaleDir=diffT/diffT.norm();
-                  double tol=1e-4;
-                  int mDir=abs(scaleDir.masterDir(tol));
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
@@ -155,8 +154,7 @@ namespace Algorithms
           Geometry:: V3D truPosLast,detPosLast;
           for(int i=0;i<detectorCount;i++)
           {
-              int detIndex=detID[i],code;
-              double l2,theta,phi,offset;
+              int detIndex=detID[i];
               Geometry::IDetector_const_sptr det = instrument->getDetector(detID[i]);
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truepos[i]-detPos;
@@ -167,8 +165,6 @@ namespace Algorithms
                   Geometry::V3D diffT=truepos[i]-truPosLast;
                   scale=diffT.norm()/diffI.norm();
                   Geometry::V3D scaleDir=diffT/diffT.norm();
-                  double tol=1e-4;
-                  int mDir=abs(scaleDir.masterDir(tol));
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
@@ -188,10 +184,13 @@ namespace Algorithms
       return true;
   }
 
+/** This was used initially to move each detector using MoveInstrumentComponent alg
+ *  but is too slow on a large instrument like Merlin.
+ *  @param detIndex The detector ID to move
+ *  @param shift    The vector to move the detector by
+ */
 void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift)
 {
-   // This was used initially to move each detector using MoveInstrumentComponent alg
-   // but is too slow on a large instrument like Merlin.
    IAlgorithm_sptr moveInstruComp = createSubAlgorithm("MoveInstrumentComponent");
    moveInstruComp->setProperty<MatrixWorkspace_sptr>("Workspace",m_workspace); //?
    std::ostringstream tmpstmd,tmpstmx,tmpstmy,tmpstmz;
@@ -216,7 +215,7 @@ void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V
 }
 
 
-void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
+void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
                             std::map<int,double>& scaleMap)
 {
   // Move all the detectors to their actual positions, as stored in posMap
@@ -276,7 +275,6 @@ void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D
 
       // Set the "sca" instrument parameter
       std::map<int,double>::iterator it=scaleMap.find(idet);
-      ObjComponent* baseObjComp = dynamic_cast<ObjComponent*>(comp.get());
       if(it!=scaleMap.end())
       {
           par = pmap->get(baseComp,"sca");
@@ -296,8 +294,10 @@ void SetScalingPSD::movePos(MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D
   return;
 }
 
-void SetScalingPSD::findAll(boost::shared_ptr<IComponent> comp)
-/// find all detectors in the comp and push the IComp pointers onto m_vectDet
+/** Find all detectors in the comp and push the IComp pointers onto m_vectDet
+ * @param comp The component to search
+ */
+void SetScalingPSD::findAll(boost::shared_ptr<Geometry::IComponent> comp)
 {
     boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
     if (det)

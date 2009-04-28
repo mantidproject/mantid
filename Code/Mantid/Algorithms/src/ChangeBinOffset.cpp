@@ -52,7 +52,7 @@ namespace Mantid
 	    for (int i=0; i < histnumber; ++i)
 	    {		    
 		    //Do the offsetting
-		    for (int j=0; j <  inputW->readX(i).size(); ++j)
+		    for (size_t j=0; j <  inputW->readX(i).size(); ++j)
 		    {
 			    //Change bin value by offset
 			    outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;

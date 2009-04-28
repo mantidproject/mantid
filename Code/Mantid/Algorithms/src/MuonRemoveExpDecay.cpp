@@ -75,7 +75,7 @@ namespace Mantid
 		    }
 		    
 		    //Do the specified spectra only
-		    for (int i=0; i < Spectra.size(); ++i)
+		    for (size_t i=0; i < Spectra.size(); ++i)
 		    {
 			    if (Spectra[i] > numSpectra)
 				{
@@ -94,13 +94,16 @@ namespace Mantid
     }
     
      /** This method corrects the data for one spectra.
-     *	   The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than 0.0000022.
-     *     This is because the data is in microseconds.
+     *	 The muon lifetime is in microseconds not seconds, i.e. 2.2 rather than 0.0000022.
+     *   This is because the data is in microseconds.
+     *   @param inX  The X vector
+     *   @param inY  The input data vector
+     *   @param outY The output data vector
      */
     void MuonRemoveExpDecay::removeDecay(const std::vector<double>& inX, const std::vector<double>& inY, std::vector<double>& outY)
     {
 	    //Do the removal
-	    for (int i=0; i < inY.size(); ++i)
+	    for (size_t i=0; i < inY.size(); ++i)
 	    {
 			outY[i] = inY[i] * exp(inX[i] / (Mantid::PhysicalConstants::MuonLifetime * 1000000.0));
 	    }	

@@ -153,19 +153,19 @@ namespace NeXus
    // Loop through all entries looking for the definition section in each (or analysis for MuonV1)
    //
    std::vector<std::string> entryList;
-   while( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) == NX_OK )
+   while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
    {
        std::string nxc(nxclass);
        if(nxc.compare("NXentry")==0)
            entryList.push_back(nxname);
    }
    // for each entry found, look for "analysis" or "definition" text data fields and return value plus entry name
-   for(int i=0;i<entryList.size();i++)
+   for(size_t i=0;i<entryList.size();i++)
    {
        //
        stat=NXopengroup(fileH,entryList[i].c_str(),"NXentry");
        // loop through field names in this entry
-       while( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) == NX_OK )
+       while( ( stat=NXgetnextentry(fileH,nxname,nxclass,&nxdatatype) ) == NX_OK )
        {
            std::string nxc(nxclass),nxn(nxname);
            // if a data field

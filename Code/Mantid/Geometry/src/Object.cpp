@@ -1164,7 +1164,7 @@ namespace Mantid
            this->GetObjectGeom( type, vectors, radius, height);
            if(type==1)
            {
-               for(int i=0;i<vectors.size();i++)
+               for(size_t i=0;i<vectors.size();i++)
                    vectors[i] *= scaleFactor;
                return CuboidSolidAngle(observer,vectors);
            }
