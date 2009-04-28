@@ -116,7 +116,7 @@ namespace NeXus
       if( !(title->isDefault()) )
          saveNexusPro->setPropertyValue("title",getPropertyValue("title"));
       Property *entryNumber = getProperty("EntryNumber");
-      if( !(title->isDefault()) )
+      if( !(entryNumber->isDefault()) )
          saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.

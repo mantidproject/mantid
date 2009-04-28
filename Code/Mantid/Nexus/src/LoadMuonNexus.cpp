@@ -95,10 +95,8 @@ namespace Mantid
       float* timeChannels = new float[lengthIn];
       nxload.getTimeChannels(timeChannels, lengthIn);
       // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
-      // Create an array to hold the read-in data
-      int* spectrum = new int[lengthIn];
+      boost::shared_ptr<MantidVec> timeChannelsVec
+                          (new MantidVec(timeChannels, timeChannels + lengthIn));
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
@@ -133,7 +131,7 @@ namespace Mantid
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
-          loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,spectrum,localWorkspace ); // added -1 for NeXus
+          loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
           counter++;
         }
         // Read in the spectra in the optional list parameter, if set
@@ -141,7 +139,7 @@ namespace Mantid
         {
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1,spectrum, localWorkspace );
+            loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1, localWorkspace );
             counter++;
           }
         }
@@ -230,7 +228,6 @@ namespace Mantid
       
       // Clean up
       delete[] timeChannels;
-      delete[] spectrum;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
@@ -289,15 +286,15 @@ namespace Mantid
      *  @param spectrum Pointer to the array into which the spectrum will be read
      *  @param localWorkspace A pointer to the workspace in which the data will be stored
      */
-    void LoadMuonNexus::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i, MuonNexusReader& nxload, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadMuonNexus::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i,
+               MuonNexusReader& nxload, const int& lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
-      memcpy(spectrum, nxload.counts + i * lengthIn, lengthIn * sizeof(int));
       // Put it into a vector, discarding the 1st entry, which is rubbish
       // But note that the last (overflow) bin is kept
       // For Nexus, not sure if above is the case, hence give all data for now
       MantidVec& Y = localWorkspace->dataY(hist);
-      Y.assign(spectrum, spectrum + lengthIn);
+      Y.assign(nxload.counts + i * lengthIn, nxload.counts + i * lengthIn + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
       MantidVec& E = localWorkspace->dataE(hist);
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);

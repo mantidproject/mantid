@@ -161,7 +161,6 @@ namespace Mantid
           g_log.error("Unable to read NAME from DAE " + m_daename);
           throw Exception::FileError("Unable to read NAME from DAE " , m_daename);
       };
-      std::cerr<<"Instr name: ("<<iName<<")\n";
 
       // Read the proton charge
       float rpb[32];

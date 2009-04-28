@@ -999,17 +999,11 @@ namespace NeXus
        status=NXclosegroup(fileID);
        return(2);
    }
-   // read values
-   //status=NXopendata(fileID,"values");
-   //if(status==NX_ERROR)
-   //    return(2);
    status=NXgetinfo(fileID, &rank, dim, &type);
    // get buffer and block size
-   double *buffer=new double[dim[1]];
    int start[2]={spectra-1,0};
    int  size[2]={1,dim[1]};
-   status=NXgetslab(fileID,(void*)buffer,start,size);
-   for(int i=1;i<=dim[1];i++) values[i-1] = buffer[i-1];//  values.push_back(buffer[i-1]);
+   status=NXgetslab(fileID,&values[0],start,size);
    status=NXclosedata(fileID);
 
    // read errors
@@ -1019,12 +1013,11 @@ namespace NeXus
    status=NXgetinfo(fileID, &rank, dim, &type);
    // set block size;
    size[1]=dim[1];
-   status=NXgetslab(fileID,(void*)buffer,start,size);
-   for(int i=1;i<=dim[1];i++) errors[i-1] = buffer[i-1];//errors.push_back(buffer[i-1]);
+   status=NXgetslab(fileID,&errors[0],start,size);
    status=NXclosedata(fileID);
 
    status=NXclosegroup(fileID);
-   delete[] buffer;
+   
    return(0);
   }
 

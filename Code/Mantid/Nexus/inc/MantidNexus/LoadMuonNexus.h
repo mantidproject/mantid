@@ -42,7 +42,7 @@ namespace Mantid
     
     Based on LoadRaw by Russell Taylor, Tessella Support Services plc
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -83,7 +83,7 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int& , int*, DataObjects::Workspace2D_sptr );
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int&, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
  //     void runLoadMappingTable(DataObjects::Workspace2D_sptr);
