@@ -71,14 +71,12 @@ public:
 
   W1D Create1DWorkspaceFib(int size)
   {
-    std::vector<double> x1,y1,e1;
-    x1.resize(size);
-    std::generate(x1.begin(),x1.end(),rand);
-    y1.resize(size);
-    std::generate(y1.begin(),y1.end(),FibSeries<double>());
-    e1.resize(size);
+    Histogram1D::RCtype x1,y1,e1;
+    y1.access().resize(size);
+    std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
+    e1.access().resize(size);
     W1D retVal = W1D(new Workspace1D);
-    retVal->setX(x1);
+    retVal->setX(CreateRandomArray(size));
     retVal->setData(y1,e1);
     return retVal;
   }

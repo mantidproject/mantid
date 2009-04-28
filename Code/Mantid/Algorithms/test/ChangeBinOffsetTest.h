@@ -104,17 +104,11 @@ public:
 		testWorkspace->setTitle("input1D");
 		testWorkspace->initialize(1,2,2);
 
-		std::vector<double> X;
-		std::vector<double> Y;
-
 		for (int i =0; i < 2; ++i)
 		{
-			X.push_back(1.0*i);
-			Y.push_back(2.0*i);
+		  testWorkspace->dataX()[i] = 1.0*i;
+		  testWorkspace->dataY()[i] = 2.0*i;
 		}
-
-		testWorkspace->setX(X);
-		testWorkspace->setData(Y);
 
 		return testWorkspace;
 	}

@@ -30,16 +30,17 @@ public:
   SaveCSVTest()
   {
     // create dummy 1D-workspace
-    
-    std::vector<double> lVecX; for(double d=0.0; d<0.95; d=d+0.1) lVecX.push_back(d);
-    std::vector<double> lVecY; for(double d=0.0; d<0.95; d=d+0.1) lVecY.push_back(d);
-    std::vector<double> lVecE; for(double d=0.0; d<0.95; d=d+0.1) lVecE.push_back(d);
-    
-    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
+    Workspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace1D",1,10,10);
     Workspace1D_sptr localWorkspace1D = boost::dynamic_pointer_cast<Workspace1D>(localWorkspace);
 
-    localWorkspace1D->setX(lVecX);
-    localWorkspace1D->setData(lVecY, lVecE);
+    double d = 0.0;
+    for (int i=0; i<10; ++i,d+=0.1)
+    {
+      localWorkspace1D->dataX()[i] = d;
+      localWorkspace1D->dataY()[i] = d;
+      localWorkspace1D->dataE()[i] = d;
+    }
+    
     AnalysisDataService::Instance().add("SAVECSVTEST-testSpace", localWorkspace);
   }
   

@@ -148,45 +148,41 @@ public:
 private:
   Workspace1D_sptr Create1DWorkspaceHist(int size)
   {
-    std::vector<double> x1(size,0.0),y1(size-1,0.0),e1(size-1,0.0),e2(size-1,0);
     Workspace1D_sptr retVal(new Workspace1D);
     retVal->initialize(1,size,size-1);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      x1[i]=j*0.5;
+      retVal->dataX()[i]=j*0.5;
       j+=1.5;
     }
     j=1.0;
     for (int i=0; i<size-1; i++)
     {
-      y1[i]=j;
-	  e1[i]=sqrt(j);
+      retVal->dataY()[i]=j;
+      retVal->dataE()[i]=sqrt(j);
       j+=1;
     }
-    retVal->setX(x1);
-    retVal->setData(y1,e1);
 
     return retVal;
   }
-   Workspace1D_sptr Create1DWorkspacePnt(int size)
+  
+  Workspace1D_sptr Create1DWorkspacePnt(int size)
   {
-    std::vector<double> x1(size,0.0),y1(size,0.0),e1(size,0.0),e2(size,0);
     Workspace1D_sptr retVal(new Workspace1D);
     retVal->initialize(1,size,size);
     double j=1.0;
     for (int i=0; i<size; i++)
     {
-      x1[i]=j*0.5;
-	  y1[i]=j;
-	  e1[i]=sqrt(j);
+      retVal->dataX()[i]=j*0.5;
+      retVal->dataY()[i]=j;
+      retVal->dataE()[i]=sqrt(j);
       j+=1.0;
     }
-    retVal->setX(x1);
-    retVal->setData(y1,e1);
 
     return retVal;
   }
+   
   Workspace2D_sptr Create2DWorkspaceHist(int xlen, int ylen)
   {
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
@@ -220,6 +216,7 @@ private:
 
     return retVal;
   }
+  
   Workspace2D_sptr Create2DWorkspacePnt(int xlen, int ylen)
   {
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
