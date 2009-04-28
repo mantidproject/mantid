@@ -73,20 +73,6 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   // Only copy the axes over if new sizes are not given
   if ( !differentSize )
   {
-    // Copy X values over if same size as parent. 99% of the time, this will be what we want
-    // If common X values, make sure they are shared...
-    if ( WorkspaceHelpers::commonBoundaries(parent) )
-    {
-      Kernel::cow_ptr<MantidVec> XVals;
-      XVals.access() = parent->readX(0);
-      ws->setX(XVals);
-    }
-    // ... otherwise copy over each vector separately
-    else
-    {
-      for (int j = 0; j < NVectors; ++j) ws->dataX(j) = parent->readX(j);
-    }
-    
     // Only copy mask map if same size for now. Later will need to check continued validity.
     ws->m_masks = parent->m_masks;
     

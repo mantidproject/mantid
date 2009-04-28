@@ -110,6 +110,7 @@ void ConvertUnits::exec()
       outputWS->dataE(i) = inputWS->dataE(i);
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
+    outputWS->dataX(i) = inputWS->readX(i);
     if ( i % iprogress_step == 0)
     {
         progress( double(i)/numberOfSpectra/2 );

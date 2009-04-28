@@ -23,7 +23,7 @@ namespace DataObjects
     @author Nicholas Draper
     @date 19/05/2008
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -75,32 +75,30 @@ public:
 
   //inheritance redirections
   ///Returns the x data
-  virtual std::vector<double>& dataX(int const index) { return _X; }
+  virtual MantidVec& dataX(int const index) { return _X; }
   ///Returns the y data
-  virtual std::vector<double>& dataY(int const index) { return _Y; }
+  virtual MantidVec& dataY(int const index) { return _Y; }
   ///Returns the error data
-  virtual std::vector<double>& dataE(int const index) { return _E; }
+  virtual MantidVec& dataE(int const index) { return _E; }
   /// Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const {return _X;}
+  virtual const MantidVec& dataX(int const index) const {return _X;}
   /// Returns the y data const
-  virtual const std::vector<double>& dataY(int const index) const {return _Y;}
+  virtual const MantidVec& dataY(int const index) const {return _Y;}
   /// Returns the error const
-  virtual const std::vector<double>& dataE(int const index) const {return _E;}
-  /// Sets the x data
-  virtual void setX(const Kernel::cow_ptr<MantidVec>& X) { _X = *X; }
+  virtual const MantidVec& dataE(int const index) const {return _E;}
   
   ///Returns non-const vector of the x data
-  virtual std::vector<double>& dataX() { return _X; }
+  virtual MantidVec& dataX() { return _X; }
   ///Returns non-const vector of the y data
-  virtual std::vector<double>& dataY() { return _Y; }
+  virtual MantidVec& dataY() { return _Y; }
   ///Returns non-const vector of the error data
-  virtual std::vector<double>& dataE() { return _E; }
+  virtual MantidVec& dataE() { return _E; }
   /// Returns the x data const
-  virtual const std::vector<double>& dataX() const { return _X; }
+  virtual const MantidVec& dataX() const { return _X; }
   /// Returns the y data const
-  virtual const std::vector<double>& dataY() const { return _Y; }
+  virtual const MantidVec& dataY() const { return _Y; }
   /// Returns the error data const
-  virtual const std::vector<double>& dataE() const { return _E; }
+  virtual const MantidVec& dataE() const { return _E; }
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -112,11 +110,11 @@ private:
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   ///Internal cache of X data
-  std::vector<double> _X;
+  MantidVec _X;
   ///Internal cache of Y data
-  std::vector<double> _Y;
+  MantidVec _Y;
   ///Internal cache of E data
-  std::vector<double> _E;
+  MantidVec _E;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

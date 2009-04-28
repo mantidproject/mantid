@@ -200,6 +200,7 @@ namespace Mantid
 			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
+        out->dataX(i) = lhs->readX(i);
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
       }
@@ -223,6 +224,7 @@ namespace Mantid
 			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
+        out->dataX(i) = lhs->readX(i);
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
       }
@@ -246,6 +248,7 @@ namespace Mantid
         const double rhsY = rhs->readY(i)[0];
         const double rhsE = rhs->readE(i)[0];        
         
+        out->dataX(i) = lhs->readX(i);
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
       }
@@ -265,6 +268,7 @@ namespace Mantid
 			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
+        out->dataX(i) = lhs->readX(i);
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
         m_progress->report();
       }      

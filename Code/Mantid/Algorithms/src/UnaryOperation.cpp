@@ -57,6 +57,8 @@ namespace Mantid
       // Loop over every cell in the workspace, calling the abstract correction function
       for (int i = 0; i < numSpec; ++i)
       {
+        // Copy the X values over
+        out_work->dataX(i) = in_work->readX(i);
         // Get references to the data
         const MantidVec& X = in_work->readX(i);
         const MantidVec& Y = in_work->readY(i);

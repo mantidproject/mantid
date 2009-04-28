@@ -18,7 +18,7 @@ namespace DataObjects
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,35 +67,30 @@ public:
 
   //inheritance redirections
   ///Returns the x data
-  virtual std::vector<double>& dataX(int const index) { return Histogram1D::dataX(); }
+  virtual MantidVec& dataX(int const index) { return Histogram1D::dataX(); }
   ///Returns the y data
-  virtual std::vector<double>& dataY(int const index) { return Histogram1D::dataY(); }
+  virtual MantidVec& dataY(int const index) { return Histogram1D::dataY(); }
   ///Returns the error data
-  virtual std::vector<double>& dataE(int const index) { return Histogram1D::dataE(); }
+  virtual MantidVec& dataE(int const index) { return Histogram1D::dataE(); }
   /// Returns the x data const
-  virtual const std::vector<double>& dataX(int const index) const {return dataX();}
+  virtual const MantidVec& dataX(int const index) const {return dataX();}
   /// Returns the y data const
-  virtual const std::vector<double>& dataY(int const index) const {return dataY();}
+  virtual const MantidVec& dataY(int const index) const {return dataY();}
   /// Returns the error const
-  virtual const std::vector<double>& dataE(int const index) const {return dataE();}
+  virtual const MantidVec& dataE(int const index) const {return dataE();}
 
-  // This is the MatrixWorkspace::setX method
-  virtual void setX(const Histogram1D::RCtype& X) { Histogram1D::setX(X); }
-  // Need to unhide the other Histogram1D::setX methods
-  using Histogram1D::setX;
-  
   ///Returns non-const vector of the x data
-  virtual std::vector<double>& dataX() { return Histogram1D::dataX(); }
+  virtual MantidVec& dataX() { return Histogram1D::dataX(); }
   ///Returns non-const vector of the y data
-  virtual std::vector<double>& dataY() { return Histogram1D::dataY(); }
+  virtual MantidVec& dataY() { return Histogram1D::dataY(); }
   ///Returns non-const vector of the error data
-  virtual std::vector<double>& dataE() { return Histogram1D::dataE(); }
+  virtual MantidVec& dataE() { return Histogram1D::dataE(); }
   /// Returns the x data const
-  virtual const std::vector<double>& dataX() const { return Histogram1D::dataX(); }
+  virtual const MantidVec& dataX() const { return Histogram1D::dataX(); }
   /// Returns the y data const
-  virtual const std::vector<double>& dataY() const { return Histogram1D::dataY(); }
+  virtual const MantidVec& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
-  virtual const std::vector<double>& dataE() const { return Histogram1D::dataE(); }
+  virtual const MantidVec& dataE() const { return Histogram1D::dataE(); }
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -110,11 +105,12 @@ private:
   static Kernel::Logger &g_log;
 };
 
-  ///shared pointer to the Workspace1D class
-  typedef boost::shared_ptr<Workspace1D> Workspace1D_sptr;
+///shared pointer to the Workspace1D class
+typedef boost::shared_ptr<Workspace1D> Workspace1D_sptr;
+///shared pointer to the Workspace1D class (const version)
+typedef boost::shared_ptr<const Workspace1D> Workspace1D_const_sptr;
 
 } // namespace DataObjects
-
 } // namespace Mantid
 
 #endif /*MANTID_DATAOBJECTS_WORKSPACE1D_H_*/

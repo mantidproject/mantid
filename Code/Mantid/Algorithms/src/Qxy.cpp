@@ -50,7 +50,12 @@ void Qxy::exec()
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
   // Will also need an identically-sized workspace to hold the solid angles
   MatrixWorkspace_sptr solidAngles = WorkspaceFactory::Instance().create(outputWorkspace);
-
+  // Copy the X values from the output workspace to the solidAngles one
+  DataObjects::Histogram1D::RCtype axis;
+  axis.access() = outputWorkspace->readX(0);
+  DataObjects::Workspace2D_sptr solidAngles2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(solidAngles);
+  for ( int i = 0; i < solidAngles->getNumberHistograms(); ++i ) solidAngles2D->setX(i,axis);
+  
   const int numSpec = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
   
@@ -155,14 +160,20 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   }
   // One extra value for the X vector
   horizontalAxisRef[bins] = startVal + bins*delta;
-  outputWorkspace->setX(axis);
+  
+  // Fill the X vectors in the output workspace
+  DataObjects::Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWorkspace);
+  for (int i=0; i < bins; ++i)
+  {
+    ws2D->setX(i,axis);
+  }
 
   // Set the axis units
   outputWorkspace->getAxis(1)->unit() = outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   // Set the 'Y' unit (gets confusing here...this is probably a Z axis in this case)
   outputWorkspace->setYUnit("Cross Section");
 
-  setProperty("OutputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWorkspace));
+  setProperty("OutputWorkspace",ws2D);
   return outputWorkspace;
 }
 
@@ -226,10 +237,9 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
   for (int i = 0; i < ySize; ++i)
   {
     const MantidVec& Y = result->readY(i);
-    std::cout.scientific;
     for (int j = 0; j < xSize; ++j) 
     {
-      outRKH << (Y[j]<0 ? " " : "  ") << std::setprecision(4) << Y[j];
+      outRKH << (Y[j]<0 ? " " : "  ") << std::scientific << std::setprecision(4) << Y[j];
       if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
       // Count the empty bins for logging
       if (Y[j] < 1.0e-12) ++emptyBins;
@@ -243,7 +253,7 @@ void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
     const MantidVec& E = result->readE(i);
     for (int j = 0; j < xSize; ++j) 
     {
-      outRKH << (E[j]<0 ? " " : "  ") << std::setprecision(4) << E[j];
+      outRKH << (E[j]<0 ? " " : "  ") << std::scientific << std::setprecision(4) << E[j];
       if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
     }
   }

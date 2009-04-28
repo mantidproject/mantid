@@ -50,23 +50,6 @@ namespace Mantid
       }
     }
 
-//    /**
-//    Set the x values
-//    \param histnumber :: Index to the histogram
-//    \param Vec :: Vec to set [Should be typedef]
-//    */
-//    void
-//      Workspace2D::setX(const int histnumber, const std::vector<double>& Vec)
-//    {
-//    
-//      if (histnumber<0 || histnumber>=m_noVectors)
-//        throw std::range_error("Workspace2D::setX, histogram number out of range");
-//
-//      data[histnumber].dataX()=Vec;
-// 
-//      return;
-//    }
-
     /**
     Set the x values
     \param histnumber :: Index to the histogram
@@ -146,18 +129,6 @@ namespace Mantid
       return;
     }
 
-    /** Sets all the X vectors to point to the one given
-     *  @param X A pointer to the X vector to set the workspace's to
-     */
-    void Workspace2D::setX(const Histogram1D::RCtype& X)
-    {
-      // Loop over all histograms, setting each to point to X
-      for (int i = 0; i < this->getNumberHistograms(); ++i)
-      {
-        this->setX(i,X);
-      }
-    }
-    
     /** Gets the number of histograms
     \return Integer
     */
