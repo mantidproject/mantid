@@ -13,7 +13,7 @@ namespace Mantid
 //----------------------------------------------------------------------
   namespace DataObjects
   {
-      Workspace2D;
+      class Workspace2D;
   }
 
   namespace Algorithms

@@ -125,7 +125,7 @@ namespace Mantid
                     DataObjects::Workspace2D_sptr ws = loadNexus->getProperty(wsProp);
                     //AnalysisDataService::Instance().add(wsName,ws);
                     TimeSeriesProperty<double>* logp = dynamic_cast<TimeSeriesProperty<double>*>(ws->getSample()->getLogData(logName));
-                    double Y,X,E; 
+                    double Y,E; 
                     calcIntAsymmetry(ws,Y,E);
                     outWS->dataY(0)[i-is] = Y;
                     outWS->dataX(0)[i-is] = logp->lastValue();
