@@ -438,6 +438,7 @@ namespace Mantid
     /**
      * Windows style backslash paths seems to cause problems sometimes. This function
      * converts all '\' characters for '/' ones
+     * @param path The path string to check
      */
     std::string SimplePythonAPI::sanitizePath(const std::string & path)
     {
