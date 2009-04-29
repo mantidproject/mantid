@@ -64,14 +64,14 @@ namespace Mantid
       if( attr_test.exists() && attr_test.isDirectory() )
       {
 	//Also append scripts directory and all sub directories
-	  module << "sys.path.append('" << scripts_dir << "')\n";
+	  module << "sys.path.append('" << sanitizePath(scripts_dir) << "')\n";
     Poco::DirectoryIterator iend;
 	for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
 	{
 	  Poco::File entry(itr->path());
 	  if( entry.isDirectory() )
 	  {
-	    module << "sys.path.append('" << itr->path() << "')\n";
+	    module << "sys.path.append('" << sanitizePath(itr->path()) << "')\n";
 	  }
 	}
       }
@@ -425,16 +425,38 @@ namespace Mantid
       std::string::const_iterator sEnd = name.end();
       for( ; sIter != sEnd; ++sIter )
       {
-	int letter = (int)(*sIter);
-	if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
-	    (letter >= 65 && letter <= 90) )
-	{
-	  arg.push_back(*sIter);
-	}
+	      int letter = (int)(*sIter);
+	      if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
+	          (letter >= 65 && letter <= 90) )
+	      {
+	        arg.push_back(*sIter);
+	      }
       }
       return arg;
     }
 
+    /**
+     * Windows style backslash paths seems to cause problems sometimes. This function
+     * converts all '\' characters for '/' ones
+     */
+    std::string SimplePythonAPI::sanitizePath(const std::string & path)
+    {
+      size_t nchars = path.size();
+      std::string retvalue;
+      for( size_t i = 0; i < nchars; ++i )
+      {
+        char symbol = path.at(i);
+        if( symbol == '\\' )
+        {
+          retvalue += '/';
+        }
+        else
+        {
+          retvalue += symbol;
+        }
+      }
+      return retvalue;
+    }
   } //namespace PythonAPI
 
 } //namespace Mantid

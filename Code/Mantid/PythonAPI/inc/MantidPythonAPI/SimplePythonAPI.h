@@ -73,6 +73,7 @@ class DLLExport SimplePythonAPI
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
   static std::string sanitizePropertyValue(const std::string & value);
   static std::string sanitizePropertyName(const std::string & name);
+  static std::string sanitizePath(const std::string & path);
 
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first
