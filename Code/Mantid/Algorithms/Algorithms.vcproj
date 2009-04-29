@@ -305,6 +305,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PlotAsymmetryByLogValue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Plus.cpp"
 				>
 			</File>
@@ -612,6 +616,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\OneMinusExponentialCor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\PlotAsymmetryByLogValue.h"
 				>
 			</File>
 			<File

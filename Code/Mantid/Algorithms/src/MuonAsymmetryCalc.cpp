@@ -59,13 +59,13 @@ namespace Mantid
 		    double numerator = inputWS->dataY(forward)[j] - alpha * inputWS->dataY(backward)[j];
 		    double denominator = (inputWS->dataY(forward)[j] + alpha * inputWS->dataY(backward)[j]);
 		    
-		    outputWS->dataY(0)[j] = numerator/denominator;
+            outputWS->dataY(0)[j] = denominator? numerator/denominator : 0.;
 
 		    //Work out the errors	
 		    // Note: the error for F-aB = the error for F+aB
 		    double quadrature = sqrt( pow(inputWS->dataE(forward)[j], 2) + pow(inputWS->dataE(backward)[j], 2));
 		    
-		    double ratio = sqrt( pow(quadrature/numerator, 2) + pow(quadrature/denominator, 2));
+            double ratio = numerator && denominator? sqrt( pow(quadrature/numerator, 2) + pow(quadrature/denominator, 2)) : 0.;
 		    
 		    outputWS->dataE(0)[j] =  ratio * outputWS->dataY(0)[j];
 	    }
