@@ -707,41 +707,65 @@ void SANSRunWindow::handleLoadButtonClick()
 
   }
 
-  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans";
-  if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
-  
-  // Set up distance information
-  double lms(0.0), lsda(0.0), lsdb(0.0);
-  componentDistances(wsname, lms, lsda, lsdb);
-  const char format('f');
-  const int prec(4);
-  m_uiForm.dist_sample_ms->setText(QString::number(lms, format, prec));
-  m_uiForm.dist_sample_sd1->setText(QString::number(lsda, format, prec));
-  m_uiForm.dist_sample_sd2->setText(QString::number(lsdb, format, prec));
-
-  wsname = m_uiForm.sct_can_edit->text() + "_sans";
-  if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
-
-  lms = 0.0; lsda = 0.0; lsdb = 0.0;
-  componentDistances(wsname, lms, lsda, lsdb);
-  m_uiForm.dist_can_ms->setText(QString::number(lms, format, prec));
-  m_uiForm.dist_can_sd1->setText(QString::number(lsda, format, prec));
-  m_uiForm.dist_can_sd2->setText(QString::number(lsdb, format, prec));
-
-  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans";
-  if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
-
-  lms = 0.0; lsda = 0.0; lsdb = 0.0;
-  componentDistances(wsname, lms, lsda, lsdb);
-  m_uiForm.dist_bkgd_ms->setText(QString::number(lms, format, prec));
-  m_uiForm.dist_bkgd_sd1->setText(QString::number(lsda, format, prec));
-  m_uiForm.dist_bkgd_sd2->setText(QString::number(lsdb, format, prec));
-  
-  //We can now process some data
   for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
   {
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
+
+  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans";
+  if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
+    // Set up distance information
+  double dist_ms_smp(0.0), dist_sd1_smp(0.0), dist_sd2_smp(0.0);
+  componentDistances(wsname, dist_ms_smp, dist_sd1_smp, dist_sd2_smp);
+  const char format('f');
+  const int prec(4);
+  m_uiForm.dist_sample_ms->setText(QString::number(dist_ms_smp, format, prec));
+  m_uiForm.dist_sample_sd1->setText(QString::number(dist_sd1_smp, format, prec));
+  m_uiForm.dist_sample_sd2->setText(QString::number(dist_sd2_smp, format, prec));
+  
+  wsname = m_uiForm.sct_can_edit->text() + "_sans";
+  if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
+
+  double dist_ms_can(0.0), dist_sd1_can(0.0), dist_sd2_can(0.0);
+  componentDistances(wsname, dist_ms_can, dist_sd1_can, dist_sd2_can);
+  
+  m_uiForm.dist_can_ms->setText(QString::number(dist_ms_can, format, prec));
+  m_uiForm.dist_can_sd1->setText(QString::number(dist_sd1_can, format, prec));
+  m_uiForm.dist_can_sd2->setText(QString::number(dist_sd2_can, format, prec));
+  bool warn_user(false);  
+  if( dist_ms_can > 0.0 && abs(dist_ms_can - dist_ms_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_ms->setText("<font color='red'>" + m_uiForm.dist_sample_ms->text() + "</font>");
+    m_uiForm.dist_can_ms->setText("<font color='red'>" + m_uiForm.dist_can_ms->text() + "</font>");
+  }
+  if( dist_sd1_can > 0.0  && abs(dist_sd1_can - dist_sd1_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_sd1->setText("<font color='red'>" + m_uiForm.dist_sample_sd1->text() + "</font>");
+    m_uiForm.dist_can_sd1->setText("<font color='red'>" + m_uiForm.dist_can_sd1->text() + "</font>");
+  }
+  if( dist_sd2_can > 0.0 && abs(dist_sd2_can - dist_sd2_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_sd2->setText("<font color='red'>" + m_uiForm.dist_sample_sd2->text() + "</font>");
+    m_uiForm.dist_can_sd2->setText("<font color='red'>" + m_uiForm.dist_can_sd2->text() + "</font>");
+  }
+  
+  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans";
+  if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
+
+  double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
+  componentDistances(wsname, dist_ms_bckd, dist_sd1_bckd, dist_sd2_bckd);
+  m_uiForm.dist_bkgd_ms->setText(QString::number(dist_ms_bckd, format, prec));
+  m_uiForm.dist_bkgd_sd1->setText(QString::number(dist_sd1_bckd, format, prec));
+  m_uiForm.dist_bkgd_sd2->setText(QString::number(dist_sd2_bckd, format, prec));
+
+  if( warn_user )
+  {
+    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details");
+  } 
+  //We can now process some data
   emit dataReadyToProcess(true);
 }
 
