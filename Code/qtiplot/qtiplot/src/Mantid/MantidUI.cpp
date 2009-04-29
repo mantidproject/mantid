@@ -25,7 +25,7 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "AlgorithmHistoryWindow.h"
 
-//#include "MemoryImage.h"
+#include "MemoryImage.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -1569,7 +1569,7 @@ MultiLayer* MantidUI::createGraphFromSpectraList(const QString& graphName, Manti
     if (tableVisible) t->showNormal();
 
     //Graph::CurveType type = binCentres? Graph::Line : Graph::HorizontalSteps;
-    int type = binCentres? 1 : 3;
+    int type = binCentres || !workspace->isHistogramData()? 1 : 3;
     MultiLayer* ml = createGraphFromTable(t,type);
     setUpSpectrumGraph(ml,graphName,workspace);
     setDependency(ml,t);
@@ -1613,7 +1613,7 @@ MultiLayer* MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool errs, bo
     if (tableVisible) t->showNormal();
 
     //Graph::CurveType type = binCentres? Graph::Line : Graph::HorizontalSteps;
-    int type = binCentres? 1 : 3;
+    int type = binCentres || !m->workspace()->isHistogramData()? 1 : 3;
     MultiLayer* ml = createGraphFromTable(t,type);
     m->setSpectrumGraph(ml,t);
 

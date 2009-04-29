@@ -214,8 +214,8 @@ signals:
 
     // Signals that the UI needs to be updated.
     void needsUpdating();
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
+    void workspace_added(const QString &, Mantid::API::Workspace_sptr);
+    void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
     void workspace_removed(const QString &);
 
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);

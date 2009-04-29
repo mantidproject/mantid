@@ -161,6 +161,10 @@ using namespace Geometry;
 	 */
 	MantidObject*	CompAssemblyActor::getMantidObject(const boost::shared_ptr<const Mantid::Geometry::Object> obj,bool withDisplayList)
 	{
+        if (!obj)
+        {
+            throw std::runtime_error("An instrument component does not have a shape.");
+        }
 		std::map<const boost::shared_ptr<const Object>,MantidObject*>::iterator iObj=mObjects->find(obj);
 		if(iObj==mObjects->end()) //create an new Mantid Object
 		{

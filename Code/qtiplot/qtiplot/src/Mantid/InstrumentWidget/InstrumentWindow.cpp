@@ -320,8 +320,16 @@ void InstrumentWindow::setWorkspaceName(std::string wsName)
 
 void InstrumentWindow::showWindow()
 {
-  updateWindow();
-  show();
+    try
+    {
+        updateWindow();
+        show();
+    }
+    catch(std::exception& e)
+    {
+        QMessageBox::critical(this,"MantidPlot - Error","Instrument Window failed to initialize due to the error:\n\n"+
+            QString::fromStdString(e.what()));
+    }
 }
 
 void InstrumentWindow::updateWindow()
