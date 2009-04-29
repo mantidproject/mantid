@@ -631,18 +631,19 @@ void SANSRunWindow::handleLoadButtonClick()
     if( workspaceExists(ws_name) ) continue;
     //Check for the correct number of digits
     QString filepath = getRawFilePath(work_dir, run_no);
-    if( filepath.isEmpty() ) continue;
+    if( filepath.isEmpty() )
+    {
+      showInformationBox("Warning: Cannot load a file with run number " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
+      continue;
+    }
     //Load the file
     runPythonCode(writeLoadRawCmd(filepath, ws_name), true);
     data_loaded = true;
   }
-
+  // Cannot do anything if nothing was loaded
   if( !data_loaded ) 
   {
-    showInformationBox("Warning: No data could be loaded for " + m_uiForm.inst_opt->currentText() + 
-		       " with a " + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() +
-		       " file extension.");
-    return;
+   return;
   }
 
   //We need to sort out the number of periods in each data set
