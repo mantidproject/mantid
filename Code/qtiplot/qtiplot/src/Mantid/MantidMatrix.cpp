@@ -4,7 +4,6 @@
 #include "../ApplicationWindow.h"
 #include "../Spectrogram.h"
 #include "MantidMatrixDialog.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "Preferences.h"
 #include <QtGlobal>
 #include <QTextStream>

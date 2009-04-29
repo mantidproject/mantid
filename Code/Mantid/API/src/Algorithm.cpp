@@ -237,7 +237,7 @@ IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double st
   {
     alg->initialize();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
   }
@@ -416,7 +416,7 @@ void Algorithm::store()
       {
         wsProp->store();
       }
-      catch (std::runtime_error& e)
+      catch (std::runtime_error&)
       {
         g_log.error("Error storing output workspace in AnalysisDataService");
         throw;

@@ -85,8 +85,11 @@ public:
     return *this;
   }
 
-  // Unhide the base class assignment operator
-  using Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=;
+  // Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
+  virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
+  {
+    return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
+  }
 
   /// Virtual destructor
   virtual ~WorkspaceProperty()

@@ -154,7 +154,7 @@ Workspace* FrameworkManagerImpl::getWorkspace(const std::string& wsName)
   {
     space = AnalysisDataService::Instance().retrieve(wsName).get();
   }
-  catch (Kernel::Exception::NotFoundError& ex)
+  catch (Kernel::Exception::NotFoundError&)
   {
     throw Kernel::Exception::NotFoundError("Unable to retrieve workspace",wsName);
   }
@@ -176,7 +176,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
     AnalysisDataService::Instance().remove(wsName);
     retVal = true;
   }
-  catch (Kernel::Exception::NotFoundError& ex)
+  catch (Kernel::Exception::NotFoundError&)
   {
     //workspace was not found
     g_log.error()<<"Workspace "<<wsName<<" could not be found."<<std::endl;

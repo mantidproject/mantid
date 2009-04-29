@@ -62,7 +62,7 @@ namespace Mantid
 			{
                 return(Kernel::DynamicFactory<Algorithm>::create(createName(name,local_version)));
 			}
-			catch(Kernel::Exception::NotFoundError& ex)
+			catch(Kernel::Exception::NotFoundError&)
 			{
 				versionMap::const_iterator it = _vmap.find(name);
 				if(it == _vmap.end() )			  
