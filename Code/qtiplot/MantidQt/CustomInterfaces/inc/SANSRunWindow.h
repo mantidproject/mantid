@@ -75,10 +75,8 @@ private:
 
   /**@name Python code utility commands */
   //@{
-  /// Construct a LoadRaw Python command
-  QString writeLoadRawCmd(const QString & filename, const QString & workspace, 
-			  const QString & spec_min = QString(), const QString & spec_max = QString(), 
-			  const QString & spec_list = QString(), const QString & cache_opt = QString());
+  /// Construct a Python command to load the data
+  QString writeLoadCmd(const QString & work_dir, const QString & run_no, const QString & workspace);
   //@}
 			   
 private slots:

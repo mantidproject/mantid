@@ -629,15 +629,11 @@ void SANSRunWindow::handleLoadButtonClick()
     else ws_name = run_no + "_trans";
     
     if( workspaceExists(ws_name) ) continue;
-    //Check for the correct number of digits
-    QString filepath = getRawFilePath(work_dir, run_no);
-    if( filepath.isEmpty() )
-    {
-      showInformationBox("Warning: Cannot load a file with run number " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
-      continue;
-    }
-    //Load the file
-    runPythonCode(writeLoadRawCmd(filepath, ws_name), true);
+    //Load the file. This checks for required padding of zeros etc
+    QString code = writeLoadCmd(work_dir, run_no, ws_name);
+    if( code.isEmpty() ) continue;
+
+    runPythonCode(code, true);
     data_loaded = true;
     if( itr.key() == 0 && workspaceExists(ws_name) )
     {
@@ -682,22 +678,7 @@ void SANSRunWindow::handleLoadButtonClick()
   while( sitr.hasNext() )
   {
     QString line = sitr.next();
- //   if( line.startsWith("X:") )
- //   {
- //     QString value = line.section(':', 2, 2);
- //     if( line.section(':', 1, 1) == "MIN" )
- //     {
-	//m_uiForm.tof_min->setText(value);
- //     }
- //     else
- //     {
-	//m_uiForm.tof_max->setText(value);
- //     }
- //   }
- //   else
- //   {
-      period_nos.insert(line.section(":", 0, 0), line.section(":",1, 1).toInt());
- //   }
+    period_nos.insert(line.section(":", 0, 0), line.section(":",1, 1).toInt());
   }
 
   //Now update the relevant boxes
@@ -931,33 +912,22 @@ void SANSRunWindow::handleShowMaskButtonClick()
  * Write a Python LoadRaw command. This assumes that the filename has already been validated
  * @param filename The Filename property value
  * @param workspace The OutputWorkspace property value
- * @param spec_min The spectrum_min property value (optional)
- * @param spec_max The spectrum_max property value (optional)
- * @param spec_list The spectrum_list property value (optional)
- * @param cache_opt The cache option (optional)
  */
-QString SANSRunWindow::writeLoadRawCmd(const QString & filename, const QString & workspace, 
-				       const QString & spec_min, const QString & spec_max,
-				       const QString & spec_list, const QString & cache_opt)
+QString SANSRunWindow::writeLoadCmd(const QString & work_dir, const QString & run_no, const QString & workspace)  
 {
-  QString command = "LoadRaw(Filename = '" + filename + "', OutputWorkspace = '" + workspace + "'";
-  //Now the optional properties
-  if( !spec_min.isEmpty() )
+  QString filepath = getRawFilePath(work_dir, run_no);
+  if( filepath.isEmpty() )
   {
-    command += ", spectrum_min = '" + spec_min + "'";
+    showInformationBox("Warning: Cannot load a file with run number " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
+    return QString();
   }
-  if( !spec_max.isEmpty() )
+  if( m_uiForm.file_opt->currentIndex() == 0 )
   {
-    command += ", spectrum_max = '" + spec_max + "'";
+    return "LoadRaw(Filename = '" + filepath+ "', OutputWorkspace = '" + workspace + "')\n";
   }
-  if( !spec_list.isEmpty() )
+  else
   {
-    command += ", spectrum_list = '" + spec_list + "'";
+    showInformationBox("Error: Loading from Nexus has not been implemented yet.");
+    return QString();
   }
-  if( !cache_opt.isEmpty() )
-  {
-    command += ", Cache = '" + cache_opt + "'";
-  }
-  command += ")\n";
-  return command;
 }
