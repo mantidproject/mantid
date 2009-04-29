@@ -639,6 +639,18 @@ void SANSRunWindow::handleLoadButtonClick()
     //Load the file
     runPythonCode(writeLoadRawCmd(filepath, ws_name), true);
     data_loaded = true;
+    if( itr.key() == 0 && workspaceExists(ws_name) )
+    {
+      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+       (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
+      if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
+      {
+        double xbeg = ws->readX(0).front();
+        m_uiForm.tof_min->setText(QString::number(xbeg)); 
+        double xend = ws->readX(0).back();
+        m_uiForm.tof_max->setText(QString::number(xend));
+      }
+    }
   }
   // Cannot do anything if nothing was loaded
   if( !data_loaded ) 
@@ -657,11 +669,10 @@ void SANSRunWindow::handleLoadButtonClick()
     "for k,v in wksp_dict.iteritems():\n"
     "\tprint k + ':' + str(v)\n";
 
-  // Get the min and max X values
-  code += "\nwksp = mtd.getMatrixWorkspace(mtd.getWorkspaceNames()[0])\n"
-    "print 'X:MIN:' + str(wksp.readX(0)[0])\n"
-    "print 'X:MAX:' + str(wksp.readX(0)[len(wksp.readX(0))-1])\n";
-
+  //// Get the min and max X values
+  //code += "\nwksp = mtd.getMatrixWorkspace(mtd.getWorkspaceNames()[0])\n"
+  //  "print 'X:MIN:' + str(wksp.readX(0)[0])\n"
+  //  "print 'X:MAX:' + str(wksp.readX(0)[len(wksp.readX(0))-1])\n";
   QString results = runPythonCode(code);
   if( results.isEmpty() ) return;
   
@@ -671,22 +682,22 @@ void SANSRunWindow::handleLoadButtonClick()
   while( sitr.hasNext() )
   {
     QString line = sitr.next();
-    if( line.startsWith("X:") )
-    {
-      QString value = line.section(':', 2, 2);
-      if( line.section(':', 1, 1) == "MIN" )
-      {
-	m_uiForm.tof_min->setText(value);
-      }
-      else
-      {
-	m_uiForm.tof_max->setText(value);
-      }
-    }
-    else
-    {
+ //   if( line.startsWith("X:") )
+ //   {
+ //     QString value = line.section(':', 2, 2);
+ //     if( line.section(':', 1, 1) == "MIN" )
+ //     {
+	//m_uiForm.tof_min->setText(value);
+ //     }
+ //     else
+ //     {
+	//m_uiForm.tof_max->setText(value);
+ //     }
+ //   }
+ //   else
+ //   {
       period_nos.insert(line.section(":", 0, 0), line.section(":",1, 1).toInt());
-    }
+ //   }
   }
 
   //Now update the relevant boxes
@@ -705,9 +716,8 @@ void SANSRunWindow::handleLoadButtonClick()
     if( !userentry ) continue;
 
     userentry->setText("1");
-
   }
-
+  
   for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
   {
     m_uiForm.tabWidget->setTabEnabled(index, true);
