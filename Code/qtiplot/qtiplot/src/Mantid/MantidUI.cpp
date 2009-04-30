@@ -16,7 +16,6 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
@@ -25,7 +24,7 @@
 #include "MantidKernel/EnvironmentHistory.h"
 #include "AlgorithmHistoryWindow.h"
 
-#include "MemoryImage.h"
+//#include "MemoryImage.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
