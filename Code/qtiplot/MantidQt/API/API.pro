@@ -24,7 +24,8 @@ SOURCES = \
   $$SRCDIR/AlgorithmInputHistory.cpp \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
-  $$SRCDIR/UserSubWindow.cpp
+  $$SRCDIR/UserSubWindow.cpp \
+  $$SRCDIR/MantidQtDialog.cpp
   
 HEADERS = \
   $$HEADERDIR/DllOption.h \
@@ -33,7 +34,8 @@ HEADERS = \
   $$HEADERDIR/AlgorithmInputHistory.h \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \
-  $$HEADERDIR/UserSubWindow.h
+  $$HEADERDIR/UserSubWindow.h \
+  $$HEADERDIR/MantidQtDialog.h
   
 #-----------------------------
 # Target and dependancies

@@ -27,7 +27,7 @@ using namespace MantidQt::CustomInterfaces;
  * Default constructor
  */
 SANSPlotDialog::SANSPlotDialog(QWidget *parent) : 
-  QDialog(parent), m_workspaces()
+  API::MantidQtDialog(parent), m_workspaces()
 {
   setWindowTitle("SANS - Plot Dialog");
 
@@ -125,12 +125,13 @@ void SANSPlotDialog::add1DPlot()
   QString ws = m_data_sets->currentText();
   if( searchlist.isEmpty() )
   {
+    //Check spectra before any items are added
+    QString spec_nums = checkSpectraList(ws, m_spec_list->text());
+    if( spec_nums.isEmpty() ) return;
     QTreeWidgetItem *topitem = new QTreeWidgetItem(m_opt_input, QStringList(name));
     //Add new set as a child
     QTreeWidgetItem *dataset = new QTreeWidgetItem(topitem);
     dataset->setText(0, ws);
-    QString spec_nums = checkSpectraList(ws, m_spec_list->text());
-    if( spec_nums.isEmpty() ) return;
     dataset->setText(1, spec_nums);
   }
   else 
@@ -183,6 +184,7 @@ void SANSPlotDialog::add2DPlot()
  */
 void SANSPlotDialog::plotButtonClicked()
 {
+    //throw std::runtime_error("Hello!");
   QString py_code;
   QTreeWidgetItem *root = m_opt_input->invisibleRootItem();
   int toplevel_count = root->childCount();

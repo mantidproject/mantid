@@ -4,6 +4,8 @@
 //------------------------------
 // Includes
 //------------------------------
+#include "MantidQtAPI/MantidQtDialog.h"
+
 #include <QDialog>
 #include <QStringList>
 
@@ -20,7 +22,7 @@ namespace MantidQt
 namespace CustomInterfaces
 {
 
-class SANSPlotDialog : public QDialog
+class SANSPlotDialog : public API::MantidQtDialog
 {
   Q_OBJECT
   
