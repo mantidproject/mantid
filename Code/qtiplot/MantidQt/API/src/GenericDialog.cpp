@@ -27,7 +27,7 @@ using namespace MantidQt::API;
 /**
  * Default Constructor
  */
-GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent)
+GenericDialog::GenericDialog(QWidget* parent) : AlgorithmDialog(parent),m_inputGrid(NULL)
 {
   m_signalMapper = new QSignalMapper(this);
 }
@@ -47,169 +47,174 @@ GenericDialog::~GenericDialog()
  */
 void GenericDialog::initLayout()
 {
-  //Put the property boxes in a grid
-   m_inputGrid = new QGridLayout;
+    //Put everything in a vertical box
+    // Making the dialog a parent of the layout automatically sets mainLay as the top-level layout
+    QVBoxLayout *mainLay = new QVBoxLayout(this);
 
-   //See if we have any previous input for this algorithm
-   QHash<QString, QString> oldValues;
-   AlgorithmInputHistory::Instance().hasPreviousInput(QString::fromStdString(getAlgorithm()->name()), oldValues);
-
-  //Each property is on its own row
-  int row(0);
-  std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = getAlgorithm()->getProperties().end();
-  for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = getAlgorithm()->getProperties().begin();
-	pIter != pEnd; ++pIter, ++row )
-  {
-    Mantid::Kernel::Property* prop = *pIter;
-    QString propName = QString::fromStdString(prop->name());
-    // Only produce allow input for output properties or workspace properties
-    if ( prop->direction() == Mantid::Kernel::Direction::Output &&
-	 !dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop)) continue;
-
-    // The name and valid label
-    QLabel *nameLbl = new QLabel(propName);
-    QLabel *validLbl = getValidatorMarker(propName);
-
-    
-    bool fileType = (prop->getValidatorType() == "file");
-    bool boolType(false);
-    if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) boolType = true;
-    if ( boolType || (!prop->allowedValues().empty() && !fileType ) )
+    // We need m_inputGrid only if the algorithm has any properties
+    if (getAlgorithm()->getProperties().size() != 0)
     {
+        //Put the property boxes in a grid
+        m_inputGrid = new QGridLayout;
 
-      //If the property has allowed values then use a combo box.			
-      QComboBox *optionsBox = new QComboBox;
-      nameLbl->setBuddy(optionsBox);
-      
-      QString selectedValue("");
-      if( isForScript() || !oldValues.contains(propName) )
-      {
-	selectedValue = QString::fromStdString(prop->value());
-      }
-      else
-      {
-	selectedValue = oldValues[propName];
-      }
-      if ( boolType )
-      {
-	optionsBox->addItem("No");
-	optionsBox->setItemData(0, 0);
-	optionsBox->addItem("Yes");
-	optionsBox->setItemData(1, 1);
+        //See if we have any previous input for this algorithm
+        QHash<QString, QString> oldValues;
+        AlgorithmInputHistory::Instance().hasPreviousInput(QString::fromStdString(getAlgorithm()->name()), oldValues);
 
-	if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
-	else optionsBox->setCurrentIndex(1);
-      }
-      else
-      {
-	std::vector<std::string> items = prop->allowedValues();
-	std::vector<std::string>::const_iterator vend = items.end();
- 
-	int index(0);
-	for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
-	    ++vitr, ++index)
-	{
-	  optionsBox->addItem(QString::fromStdString(*vitr));
-	  optionsBox->setItemData(index, QString::fromStdString(*vitr));
-	  if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
-	}
-      }
-      if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName)) 
-      {
-	optionsBox->setEnabled(false);
-      }
-      m_inputGrid->addWidget(nameLbl, row, 0, 0);
-      m_inputGrid->addWidget(optionsBox, row, 1, 0);
-      m_inputGrid->addWidget(validLbl, row, 2, 0);
+        //Each property is on its own row
+        int row(0);
+        std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = getAlgorithm()->getProperties().end();
+        for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = getAlgorithm()->getProperties().begin();
+            pIter != pEnd; ++pIter, ++row )
+        {
+            Mantid::Kernel::Property* prop = *pIter;
+            QString propName = QString::fromStdString(prop->name());
+            // Only produce allow input for output properties or workspace properties
+            if ( prop->direction() == Mantid::Kernel::Direction::Output &&
+                !dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop)) continue;
+
+            // The name and valid label
+            QLabel *nameLbl = new QLabel(propName);
+            QLabel *validLbl = getValidatorMarker(propName);
+
+
+            bool fileType = (prop->getValidatorType() == "file");
+            bool boolType(false);
+            if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) boolType = true;
+            if ( boolType || (!prop->allowedValues().empty() && !fileType ) )
+            {
+
+                //If the property has allowed values then use a combo box.			
+                QComboBox *optionsBox = new QComboBox;
+                nameLbl->setBuddy(optionsBox);
+
+                QString selectedValue("");
+                if( isForScript() || !oldValues.contains(propName) )
+                {
+                    selectedValue = QString::fromStdString(prop->value());
+                }
+                else
+                {
+                    selectedValue = oldValues[propName];
+                }
+                if ( boolType )
+                {
+                    optionsBox->addItem("No");
+                    optionsBox->setItemData(0, 0);
+                    optionsBox->addItem("Yes");
+                    optionsBox->setItemData(1, 1);
+
+                    if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
+                    else optionsBox->setCurrentIndex(1);
+                }
+                else
+                {
+                    std::vector<std::string> items = prop->allowedValues();
+                    std::vector<std::string>::const_iterator vend = items.end();
+
+                    int index(0);
+                    for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+                        ++vitr, ++index)
+                    {
+                        optionsBox->addItem(QString::fromStdString(*vitr));
+                        optionsBox->setItemData(index, QString::fromStdString(*vitr));
+                        if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
+                    }
+                }
+                if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName)) 
+                {
+                    optionsBox->setEnabled(false);
+                }
+                m_inputGrid->addWidget(nameLbl, row, 0, 0);
+                m_inputGrid->addWidget(optionsBox, row, 1, 0);
+                m_inputGrid->addWidget(validLbl, row, 2, 0);
+            }
+            else 
+            {
+                QLineEdit *textBox = new QLineEdit;
+                nameLbl->setBuddy(textBox);
+                m_editBoxes[textBox] = propName;
+
+                setOldLineEditInput(propName, textBox);
+
+                //Add the widgets to the grid
+                m_inputGrid->addWidget(nameLbl, row, 0, 0);
+                m_inputGrid->addWidget(textBox, row, 1, 0);
+                m_inputGrid->addWidget(validLbl, row, 2, 0);
+
+                if( fileType )
+                {
+                    QPushButton *browseBtn = new QPushButton(tr("Browse"));
+                    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
+                    m_signalMapper->setMapping(browseBtn, textBox);
+
+                    m_inputGrid->addWidget(browseBtn, row, 3, 0);
+
+                    if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
+                    { 
+                        browseBtn->setEnabled(false);
+                    }
+                }
+
+            }
+        }
+
+        //Wire up the signal mapping object
+        connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
+
+        if( isMessageAvailable() )
+        {
+            QLabel *inputMessage = new QLabel(this);
+            inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+            inputMessage->setText(getOptionalMessage());
+            QHBoxLayout *msgArea = new QHBoxLayout;
+            msgArea->addWidget(inputMessage);
+            mainLay->addLayout(msgArea);
+        }
+
+        //The property boxes
+        mainLay->addLayout(m_inputGrid);
+
     }
-    else 
-    {
-      QLineEdit *textBox = new QLineEdit;
-      nameLbl->setBuddy(textBox);
-      m_editBoxes[textBox] = propName;
 
-      setOldLineEditInput(propName, textBox);
+    m_okButton = new QPushButton(tr("Run"));
+    connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
+    m_okButton->setDefault(true);
 
-      //Add the widgets to the grid
-      m_inputGrid->addWidget(nameLbl, row, 0, 0);
-      m_inputGrid->addWidget(textBox, row, 1, 0);
-      m_inputGrid->addWidget(validLbl, row, 2, 0);
+    m_exitButton = new QPushButton(tr("Cancel"));
+    connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));
 
-      if( fileType )
-      {
-	QPushButton *browseBtn = new QPushButton(tr("Browse"));
-	connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
-	m_signalMapper->setMapping(browseBtn, textBox);
-	
-	m_inputGrid->addWidget(browseBtn, row, 3, 0);
-	
-	if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
-	{ 
-	  browseBtn->setEnabled(false);
-	}
-      }
-      
-    }
-  }
+    QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+    buttonRowLayout->addStretch();
+    buttonRowLayout->addWidget(m_okButton);
+    buttonRowLayout->addWidget(m_exitButton);
+    mainLay->addLayout(buttonRowLayout);
 
-  //Wire up the signal mapping object
-  connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
- 	
-  m_okButton = new QPushButton(tr("Run"));
-  connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
-  m_okButton->setDefault(true);
-
-  m_exitButton = new QPushButton(tr("Cancel"));
-  connect(m_exitButton, SIGNAL(clicked()), this, SLOT(close()));
-	
-
-  //Put everything in a vertical box
-  // Making the dialog a parent of the layout automatically sets mainLay as the top-level layout
-  QVBoxLayout *mainLay = new QVBoxLayout(this);
- 
-  if( isMessageAvailable() )
-  {
-    QLabel *inputMessage = new QLabel(this);
-    inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    inputMessage->setText(getOptionalMessage());
-    QHBoxLayout *msgArea = new QHBoxLayout;
-    msgArea->addWidget(inputMessage);
-    mainLay->addLayout(msgArea);
-  }
-
-  //The property boxes
-  mainLay->addLayout(m_inputGrid);
-	
-  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
-  buttonRowLayout->addStretch();
-  buttonRowLayout->addWidget(m_okButton);
-  buttonRowLayout->addWidget(m_exitButton);
-  mainLay->addLayout(buttonRowLayout);
-  
 }
 
 /**
- * Parses the input from the box and adds the propery (name, value) pairs to 
- * the map stored in the base class
- */
+* Parses the input from the box and adds the propery (name, value) pairs to 
+* the map stored in the base class
+*/
 void GenericDialog::parseInput()
 {
-  int nRows = m_inputGrid->rowCount();
-  for( int row = 0; row < nRows; ++row )
-  {
-    QLabel *propName = static_cast<QLabel*>(m_inputGrid->itemAtPosition(row, 0)->widget());
-    QWidget *buddy = propName->buddy();
+    if (!m_inputGrid) return; // algorithm dont have properties
+    int nRows = m_inputGrid->rowCount();
+    for( int row = 0; row < nRows; ++row )
+    {
+        QLabel *propName = static_cast<QLabel*>(m_inputGrid->itemAtPosition(row, 0)->widget());
+        QWidget *buddy = propName->buddy();
 
-    if( qobject_cast<QLineEdit*>(buddy) )
-    {
-      addPropertyValueToMap(propName->text(), qobject_cast<QLineEdit*>(buddy)->text());
+        if( qobject_cast<QLineEdit*>(buddy) )
+        {
+            addPropertyValueToMap(propName->text(), qobject_cast<QLineEdit*>(buddy)->text());
+        }
+        else
+        {
+            QComboBox *box = qobject_cast<QComboBox*>(buddy);
+            addPropertyValueToMap(propName->text(), box->itemData(box->currentIndex()).toString());
+        }
     }
-    else
-    {
-      QComboBox *box = qobject_cast<QComboBox*>(buddy);
-      addPropertyValueToMap(propName->text(), box->itemData(box->currentIndex()).toString());
-    }
-  }
 }
 
 /**
