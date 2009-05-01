@@ -2,7 +2,7 @@
 //MantidApplciation definitions
 //==============================
 #include "MantidApplication.h"
-//#include "MantidQtAPI/MantidQtDialog.h"
+#include "MantidQtAPI/MantidQtDialog.h"
 
 #include <QMessageBox>
 #include <QPushButton>
