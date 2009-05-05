@@ -249,7 +249,7 @@ namespace MapSupport
 	  return vc->second;
 	}
     };
-};
+}
 
 
 #endif

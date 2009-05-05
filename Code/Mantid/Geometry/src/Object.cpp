@@ -1087,7 +1087,7 @@ namespace Mantid
        //
        if(nTri==0)
        {
-           double height,radius;
+           double height=0.0,radius;
            int type;
            std::vector<Geometry::V3D> vectors;
            this->GetObjectGeom( type, vectors, radius, height);
@@ -1158,7 +1158,7 @@ namespace Mantid
        //
        if(nTri==0)
        {
-           double height,radius;
+           double height=0.0,radius;
            int type;
            std::vector<Geometry::V3D> vectors;
            this->GetObjectGeom( type, vectors, radius, height);

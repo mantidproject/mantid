@@ -98,7 +98,7 @@ void SingletonHolder<T>::DestroySingleton()
 	CreateUsingNew<T>::Destroy(pInstance);
 	pInstance = 0;
 	destroyed = true;
-};
+}
 
 /// global variable holding pointer to singleton instance
 template <typename T>
