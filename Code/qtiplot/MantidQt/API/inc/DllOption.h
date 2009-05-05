@@ -5,6 +5,9 @@
   #ifdef _WIN32
     #define DLLExport __declspec( dllexport )
     #define DLLImport __declspec( dllimport )
+  #else
+    #define DLLExport
+    #define DLLImport
   #endif
 #endif
 
