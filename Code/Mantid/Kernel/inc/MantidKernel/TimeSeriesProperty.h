@@ -275,7 +275,7 @@ public:
           return TimeInterval(it->first, it1->first);
         else
         {
-          long int d = (m_propertySeries.rbegin()->first - m_propertySeries.begin()->first) / 10;
+          dateAndTime d = (m_propertySeries.rbegin()->first - m_propertySeries.begin()->first) / 10;
           if (d == 0)
             d = 1;
           dateAndTime endTime = it->first + d;

@@ -282,7 +282,7 @@ namespace Mantid
 			{
 				retVal = m_pConf->getString(keyName);
 			}
-			catch(Poco::NotFoundException& ex)
+			catch(Poco::NotFoundException&)
 			{
 				g_log.debug()<<"Unable to find " << keyName << " in the properties file" << std::endl;
 				retVal = "";

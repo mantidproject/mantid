@@ -27,7 +27,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Performing Custom Build Step - copying properties file to debug"
-				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\debug&quot; /Y"
+				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\debug&quot; /Y&#x0D;&#x0A;"
 				Outputs="&quot;$(SolutionDir)\Properties\Mantid.properties&quot;"
 			/>
 			<Tool
@@ -121,6 +121,8 @@
 				AdditionalIncludeDirectories="inc;../Kernel/inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
+				WarningLevel="3"
+				DisableSpecificWarnings="4275"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

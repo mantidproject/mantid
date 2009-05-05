@@ -52,7 +52,7 @@ public:
     /// True if the interval is not empty
     bool isValid()const{return m_end > m_begin;}
     /// Interval length (in seconds?)
-    long int length()const{return m_end - m_begin;}
+    dateAndTime length()const{return m_end - m_begin;}
     /// True if the interval contains \a t.
     bool contains(const dateAndTime& t)const{return t >= begin() && t < end();}
     /// Returns an intersection of two intervals
