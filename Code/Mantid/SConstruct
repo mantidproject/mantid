@@ -19,6 +19,7 @@ USRLOCALLIB = '/usr/local/lib'
 USRINCLUDE = '/usr/include'
 USRLIB = '%{usrlibdir}'
 MANTIDLIB = '/opt/Mantid/bin'
+MANTIDPLUGINS = '/opt/Mantid/plugins'
   
 opts = Options('scons_options.py')
 opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
@@ -305,6 +306,7 @@ if os.name != 'nt':
     lpts.append('-Wl,-rpath,'+opencascade_path + '/lib')
     if rpmBuild :
 	lpts.append('-Wl,-rpath,'+MANTIDLIB)
+	lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
     else :
 	##
 	## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
