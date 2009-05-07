@@ -4,6 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #include "MantidKernel/IValidator.h"
 
 namespace Mantid
