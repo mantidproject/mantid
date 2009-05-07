@@ -50,7 +50,7 @@ namespace API
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/
+*/	
 template <typename TYPE = MatrixWorkspace>
 class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, public IWorkspaceProperty
 {
@@ -107,6 +107,7 @@ public:
   /** Set the name of the workspace.
    *  Also tries to retrieve it from the AnalysisDataService.
    *  @param value The new name for the workspace
+   *  @return 
    */
   virtual bool setValue( const std::string& value )
   {
@@ -125,30 +126,31 @@ public:
     return true;
   }
 
-  /** Checks whether the property is valid.
+   /** Checks whether the entered workspace is valid.
    *  To be valid, in addition to satisfying the conditions of any validators,
    *  an output property must not have an empty name and an input one must point to
    *  a workspace of the correct type.
-   *  @returns True if the property is valid, otherwise false.
+   *  @returns A user level description of the problem or "" if it is valid.
    */
-  virtual const bool isValid() const
+  std::string isValid() const 
   {
-    // If an output workspace it must have a name set.
-    if ( this->direction() == Kernel::Direction::Output && this->value().empty()) return false;
+	// If an output workspace it must have a name set.
+    if ( ( this->direction() == Kernel::Direction::Output ) && this->value().empty() ) 
+	{
+		return "Enter a name for the workspace";
+	}
 
+	std::string error = "";
     // If an input (or inout) workspace, must point to something
     if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
     {
-      if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) return false;
-      // Check the workspace is of the correct type
-      if (!boost::dynamic_pointer_cast<TYPE>(Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value))
-      {
-        return false;
-      }
+      if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) 
+	  {
+		  return "Choose an existing workspace of the correct type";//we could output from this->type() or std::string( typeid(TYPE).name() ) by they are comilier dependent
+	  }
     }
-
     // Call superclass method to access any attached validators
-    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
+	return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
   }
 
   /** Returns the current contents of the AnalysisDataService for input workspaces.

@@ -47,13 +47,13 @@ public:
 
   /** Checks the value based on the validator's rules
    * 
-   *  @param value The value to test
+   *  @returns An error message to display to users or an empty string on no error
    */
-  virtual const bool isValid(const TYPE &value) const = 0;
+  virtual std::string isValid(const TYPE &) const = 0;
 
   /** Gets the type of the validator as a string
    * 
-   *  \return String describing the type
+   *  @returns String describing the type
    */	  
   virtual const std::string getType() const = 0;
 

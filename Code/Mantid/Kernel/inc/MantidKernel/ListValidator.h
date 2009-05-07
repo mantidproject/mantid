@@ -56,19 +56,23 @@ public:
 	/// Destructor
 	virtual ~ListValidator() {}
 	
-  /** Checks whether the value provided is on the list of 'allowed' values
+  /** Checks if the string passed is in the list
    *  @param value The value to test
-   *  @return True if the value is on the list, false otherwise
+   *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
    */
-  const bool isValid(const std::string &value) const
+  std::string isValid(const std::string &value) const
   {
-    if ( m_allowedValues.count(value) )
+    if ( value.empty() )
+	{
+	  return "Select a value";
+	}
+	if ( m_allowedValues.count(value) )
     {
-      return true;
+      return "";
     }
     else
     {
-      return false;
+      return "The value \"" + value + "\" is not in the list of allowed values";
     }
   }
 

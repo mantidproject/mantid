@@ -45,13 +45,21 @@ class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
 
-  /** Checks the value based on the validators rules
+  /** Checks if the string is empty
    *
-   *  @param value The value to test
+   *  @param value the string to test
+   *  @return "A value must be entered for this parameter" if empty or ""
    */
-  const bool isValid(const TYPE& value) const { return !(value.empty()); }
+  std::string isValid(const TYPE& value) const
+  {
+	  if ( value.empty() ) return "A value must be entered for this parameter";
+	  else return "";
+  }
 
-   ///Return the type of the validator
+   /** Gets the type name of the validator
+   *
+   *  @return validator type
+   */
   const std::string getType() const
   {
 	  return "mandatory";

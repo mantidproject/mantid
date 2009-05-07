@@ -79,14 +79,14 @@ const std::string Property::type() const
   return m_typeinfo->name();
 }
 
-/** Checks whether the property has a valid value.
- *  Note: always returns true unless overridden
- *  @return True if the property's value is a valid one
+/** Overridden functions checks whether the property has a valid value.
+ *  
+ *  @return empty string ""
  */
-const bool Property::isValid() const
+std::string Property::isValid() const
 {
-  // Always true at present
-  return true;
+  // the no error condition
+  return "";
 }
 
 /** Returns the type of the validator as a string

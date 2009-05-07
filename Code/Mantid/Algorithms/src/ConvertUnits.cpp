@@ -177,7 +177,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
   CommonBinsValidator<> sameBins;
-  if ( sameBins.isValid(outputWS) )
+  if ( sameBins.isValid(outputWS) == "" )
   {
     // Only do the full check if the quick one passes
     if ( WorkspaceHelpers::commonBoundaries(outputWS) )

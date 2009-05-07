@@ -83,8 +83,9 @@ class DLLExport SimplePythonAPI
     bool operator()(const Mantid::Kernel::Property * p1, 
 		    const Mantid::Kernel::Property * p2) const
     {
-      return p1->isValid() < p2->isValid();
-    }
+		//this is false, unless p1 is valid (i.e. == "") and p2 is not valid
+		return ( p2->isValid() != "" ) && ( p1->isValid() == "" );
+	}
     
   };
   

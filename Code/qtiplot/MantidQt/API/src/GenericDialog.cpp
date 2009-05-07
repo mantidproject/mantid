@@ -121,14 +121,17 @@ void GenericDialog::initLayout()
                         if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
                     }
                 }
-                if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName)) 
-                {
-                    optionsBox->setEnabled(false);
-                }
+                if( isForScript() && ( prop->isValid() == "" ) )
+				{
+					if ( !prop->isDefault() && !isValueSuggested(propName) ) 
+					{
+						optionsBox->setEnabled(false);
+					}
+				}
                 m_inputGrid->addWidget(nameLbl, row, 0, 0);
                 m_inputGrid->addWidget(optionsBox, row, 1, 0);
                 m_inputGrid->addWidget(validLbl, row, 2, 0);
-            }
+			}
             else 
             {
                 QLineEdit *textBox = new QLineEdit;
@@ -150,13 +153,15 @@ void GenericDialog::initLayout()
 
                     m_inputGrid->addWidget(browseBtn, row, 3, 0);
 
-                    if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
-                    { 
-                        browseBtn->setEnabled(false);
-                    }
+                    if( isForScript() && ( prop->isValid() == "") )
+					{
+						if ( !prop->isDefault() && !isValueSuggested(propName) )
+						{ 
+							browseBtn->setEnabled(false);
+						}
+					}
                 }
-
-            }
+			}
         }
 
         //Wire up the signal mapping object

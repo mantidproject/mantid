@@ -42,18 +42,22 @@ class DLLExport NullValidator : public IValidator<TYPE>
 {
 public:
 
-  /** Checks the value based on the validators rules
+   /** Returns an empty string
    * 
-   *  @param value The value to test
+   *  @param value not used
+   *  @returns an empty string
    */
-  const bool isValid(const TYPE &value) const { return true; }
-  
-    ///Return the type of the validator
+   std::string isValid( const TYPE &value ) const { return ""; }
+
+   /** Returns the string "null"
+   *
+   *  @returns the string "null"
+   */
   const std::string getType() const
   {
 	  return "null";
   }
-  
+
   IValidator<TYPE>* clone() { return new NullValidator(*this); }
 };
 

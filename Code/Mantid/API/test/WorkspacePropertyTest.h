@@ -18,6 +18,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   {
   public:
     virtual const int getNumberHistograms() const { return 1;}
+    //  static std::string WSTYPE;
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
@@ -48,12 +49,13 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     std::vector<double> data;
     int dummy;
   };
-
+  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest";
   // Second, identical private test class - used for testing check on workspace type in isValid()
   class WorkspaceTest2 : public MatrixWorkspace
   {
   public:
-     virtual const int getNumberHistograms() const { return 1;}
+    virtual const int getNumberHistograms() const { return 1;}
+    //  static std::string WSTYPE;
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
@@ -84,6 +86,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     std::vector<double> data;
     int dummy;
   };
+  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest2";
 
 public:
   WorkspacePropertyTest()
@@ -122,31 +125,35 @@ public:
   }
 
   void testIsValid()
-  {
-    TS_ASSERT( ! wsp1->isValid() )
-    TS_ASSERT( ! wsp2->isValid() )
-    TS_ASSERT( ! wsp3->isValid() )
+  {  
+    TS_ASSERT_EQUALS( wsp1->isValid(), "Choose an existing workspace of the correct type" )
+    TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the workspace" )
+    TS_ASSERT_EQUALS( wsp3->isValid(), "Choose an existing workspace of the correct type" )
 
     // Setting the workspace name should make wsp2 (an output workspace) valid
     TS_ASSERT( wsp2->setValue("ws2") )
-    TS_ASSERT( wsp2->isValid() )
+    TS_ASSERT_EQUALS( wsp2->isValid(), "" )
 
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
     WorkspaceFactory::Instance().subscribe<WorkspaceTest2>("WorkspacePropertyTest2");
 
-    // The other two need the input workspace to exist in the ADS
+	// The other two need the input workspace to exist in the ADS
     Workspace_sptr space;
     TS_ASSERT_THROWS_NOTHING(space = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws1", space) );
-    //TS_ASSERT( wsp1->isValid() )
+    wsp1->setValue("ws1");
+    TS_ASSERT_EQUALS( wsp1->isValid(), "" )
 
     // Put workspace of wrong type and check validation fails
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
-    TS_ASSERT( ! wsp3->isValid() )
+	wsp3->setValue("ws3");
+    TS_ASSERT_EQUALS( wsp3->isValid(),
+	  "Choose an existing workspace of the correct type" )
     // Now put correct type in and check it passes
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2",1,1,1) )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
-    //TS_ASSERT( wsp3->isValid() )
+	wsp3->setValue("ws3");
+	TS_ASSERT_EQUALS( wsp3->isValid(), "")
   }
 
   void testAllowedValues()
@@ -182,7 +189,7 @@ public:
     PropertyHistory history3 = wsp3->createHistory();
     TS_ASSERT_EQUALS( history3.name(), "workspace3" )
     TS_ASSERT_EQUALS( history3.value(), "ws3" )
-    TS_ASSERT( history3.isDefault() )
+    TS_ASSERT( ! history3.isDefault() )
     TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
     TS_ASSERT_EQUALS( history3.direction(), 2 )
 
@@ -206,7 +213,7 @@ public:
     TS_ASSERT( ! storedspace->id().compare("WorkspacePropTest") )
 
     // This one should pass
-    //TS_ASSERT( wsp3->store() )
+    TS_ASSERT( wsp3->store() )
 
     //Should be cleared as part of store so these should be empty
     TS_ASSERT( ! wsp1->operator()() )

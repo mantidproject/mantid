@@ -146,16 +146,21 @@ bool AlgorithmDialog::validateProperties()
   {
     const Mantid::Kernel::Property *prop = pitr.value();
     QLabel *validator = getValidatorMarker(pitr.key());
-    // Here we have a property that was able to be set
-    if( prop->isValid() ) 
-    {
-      validator->hide();
-    }
-    else
-    {
-      allValid = false;
-      if( validator->parent() ) validator->show();
-    }
+    std::string error = prop->isValid();
+	// "" is the no error, continue condition
+	if( error == "" ) 
+	{
+		validator->hide();
+	}
+	else
+	{
+		allValid = false;
+		if( validator->parent() )
+		{
+		validator->setToolTip(  QString::fromStdString(error) );
+		validator->show();
+		}
+	}
   }
   return allValid;
 }
@@ -181,7 +186,7 @@ bool AlgorithmDialog::setPropertyValues()
     {
       prop->setValue(value.toStdString());
     }
-    if( prop->isValid() )
+    if( prop->isValid() == "" )
     {
       if( validator ) validator->hide();
       //Store value for future input
@@ -261,7 +266,8 @@ void AlgorithmDialog::setOldLineEditInput(const QString & propName, QLineEdit* f
 {
   Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
   if( !prop ) return;
-  if( isForScript() && prop->isValid() && !prop->isDefault() && !isValueSuggested(propName))
+  if( isForScript() && ( prop->isValid() == "" ) &&
+	  !prop->isDefault() && !isValueSuggested(propName))
   {
     field->setText(QString::fromStdString(prop->value()));
     field->setEnabled(false);

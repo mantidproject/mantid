@@ -58,31 +58,31 @@ public:
   void testMandatoryValidator()
   {
     MandatoryValidator<std::string> p;
-    TS_ASSERT_EQUALS(p.isValid("AZ"), true);
-    TS_ASSERT_EQUALS(p.isValid("B"), true);
-    TS_ASSERT_EQUALS(p.isValid(""), false);
-    TS_ASSERT_EQUALS(p.isValid("ta"), true);
+    TS_ASSERT_EQUALS(p.isValid("AZ"), "");
+    TS_ASSERT_EQUALS(p.isValid("B"), "");
+    TS_ASSERT_EQUALS(p.isValid(""), "A value must be entered for this parameter");
+    TS_ASSERT_EQUALS(p.isValid("ta"), "" );
 
     MandatoryValidator<std::vector<int> > i;
     std::vector<int> ivec;
     TS_ASSERT( ivec.empty() )
-    TS_ASSERT( ! i.isValid(ivec) )
+    TS_ASSERT_EQUALS( i.isValid(ivec), "A value must be entered for this parameter" )
     ivec.push_back(1);
-    TS_ASSERT( i.isValid(ivec) )
+    TS_ASSERT_EQUALS( i.isValid(ivec), "")
 
     MandatoryValidator<std::vector<double> > d;
     std::vector<double> dvec;
     TS_ASSERT( dvec.empty() )
-    TS_ASSERT( ! d.isValid(dvec) )
+    TS_ASSERT_EQUALS( d.isValid(dvec), "A value must be entered for this parameter" )
     dvec.push_back(1.1);
-    TS_ASSERT( d.isValid(dvec) )
+    TS_ASSERT_EQUALS( d.isValid(dvec), "")
 
     MandatoryValidator<std::vector<std::string> > s;
     std::vector<std::string> svec;
     TS_ASSERT( svec.empty() )
-    TS_ASSERT( ! s.isValid(svec) )
+    TS_ASSERT_EQUALS( s.isValid(svec), "A value must be entered for this parameter" )
     svec.push_back("OK");
-    TS_ASSERT( s.isValid(svec) )
+    TS_ASSERT_EQUALS( s.isValid(svec), "" )
   }
 
 };

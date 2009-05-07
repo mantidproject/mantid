@@ -22,7 +22,8 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual const int getNumberHistograms() const { return 1;}
 
     WorkspaceTest() : data(std::vector<double>(1,1)) {}
-    virtual const std::string id() const {return "WorkspaceTest";}
+   	//  static std::string WSTYPE;
+	virtual const std::string id() const {return "WorkspaceTest";}
     //section required to support iteration
     virtual int size() const {return 1000000;}
     virtual int blocksize() const  {return 10000;}
@@ -57,12 +58,14 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   {
   public:
     const int getNumberHistograms() const { return 1;}
+    //  static std::string WSTYPE;
     const std::string id() const {return "Workspace1DTest";}
   };
 
   class Workspace2DTest: public WorkspaceTest
   {
   public:
+  	//  static std::string WSTYPE;
     const std::string id() const {return "Workspace2DTest";}
     const int getNumberHistograms() const { return 2;}
 
@@ -78,6 +81,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class ManagedWorkspace2DTest: public Workspace2DTest
   {
   public:
+  	//  static std::string WSTYPE;
     const std::string id() const {return "ManagedWorkspace2D";}
     const int getNumberHistograms() const { return 2;}
   };
@@ -85,6 +89,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class NotInFactory : public WorkspaceTest
   {
   public:
+	//  static std::string WSTYPE;
     const std::string id() const {return "NotInFactory";}
   };
 
@@ -106,6 +111,12 @@ public:
       // in reality we do so need catch the error from trying to subscribe again
     }
   }
+
+  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest";
+  //std::string NotInFactory::WSTYPE = "NotInFactory";
+  //std::string Workspace1DTest::WSTYPE = "Workspace1DTest";
+  //std::string Workspace2DTest::WSTYPE = "Workspace2DTest";
+  //std::string Workspace2DTest::WSTYPE = "ManagedWorkspace2D";
 
   void testReturnType()
   {

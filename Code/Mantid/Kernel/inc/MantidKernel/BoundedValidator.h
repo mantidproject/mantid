@@ -73,15 +73,28 @@ public:
 	  return "bounded";
   }
 
-  /** Check if the value is within bounds.
-   *  Checks the value based on the validator's rules
+   /** Checks that the value is within any upper and lower limits
    * 
    *  @param value The value to test
+   *  @returns An error message to display to users or an empty string on no error
    */
-  const bool isValid( const TYPE &value ) const { 
-    return (( m_hasLowerBound && ( value < m_lowerBound ) ) ? false : true ) 
-              && (( m_hasUpperBound && ( value > m_upperBound ) ) ? false : true );
-  }
+  std::string isValid(const TYPE &value) const
+{
+	//declare a class that can do conversions to string
+	std::ostringstream error;
+	//load in the "no error" condition
+	error << "";
+	//it is allowed not to have a lower bound, if not then you don't need to check
+	if ( m_hasLowerBound && ( value < m_lowerBound ) )
+	{
+		  error << "Selected value " << value << " is < the lower bound (" << m_lowerBound << ")";
+	}
+	if ( m_hasUpperBound && ( value > m_upperBound ) )
+	{
+		error << "Selected value " << value << " is > the upper bound (" << m_upperBound << ")";
+	}
+	return error.str();
+}
 
   /// Return if it has a lower bound
   bool        hasLower() const { return m_hasLowerBound; }

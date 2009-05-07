@@ -250,7 +250,7 @@ public:
   {
     TYPE oldValue = m_value;
     m_value = value;
-    if ( this->isValid() )
+    if ( this->isValid() == "" )
     {
       m_isDefault = false;
       return m_value;
@@ -262,7 +262,9 @@ public:
     }
   }
 
-  /// Allows you to get the value of the property via an expression like myProperty()
+  /** Allows you to get the value of the property via an expression like myProperty()
+   *  @returns the value of the property
+   */
   virtual const TYPE& operator() () const
   {
     return m_value;
@@ -276,17 +278,16 @@ public:
     return m_value;
   }
 
-  /** Checks if the value is valid for this property.
-   *  @returns true if the value is valid, otherwise false.
+  /** Checks the validity of the value chosen for the property
+   *  @returns "" if the value is valid or a discription of the problem
    */
-  virtual const bool isValid() const
+  virtual std::string isValid() const
   {
-    //if (direction() == Direction::Output && ! isDefault()) return false;
-    return m_validator->isValid(m_value);
+	return m_validator->isValid(m_value);
   }
 
   /** Returns the type of the validator as a string
-   *  \returns String describing the type of the validator
+   *  @returns String describing the type of the validator
    */
   virtual const std::string getValidatorType() const
   {

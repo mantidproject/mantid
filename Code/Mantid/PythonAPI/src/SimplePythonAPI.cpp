@@ -204,7 +204,8 @@ namespace Mantid
 	}
 	else
 	{
-	  if( !(*pIter)->isValid() ) ++iMand;
+	  //properties are optional unless their current value results in an error (isValid != ""
+	  if( (*pIter)->isValid() != "" ) ++iMand;
 	  else os  << " = -1";
 	  if( ++pIter != pEnd ) os << ", ";
 	}
@@ -315,6 +316,7 @@ namespace Mantid
      * @param algm The name of the algorithm
      * @param properties The list of properties
      * @param dialog A boolean indicating whether this is a dialog function or not
+	 * @return A help string for users
      */
     std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
     {
@@ -337,7 +339,10 @@ namespace Mantid
       {
 	Mantid::Kernel::Property* prop = *pIter;
 	os << "\t\thelpmsg += \"\\tName: " << sanitizePropertyName((*pIter)->name()) << ", Optional: ";  
-	if( prop->isValid() ) os << "Yes, Default value: " << sanitizePropertyValue(prop->value());
+	if( prop->isValid() == "")
+	{
+		os << "Yes, Default value: " << sanitizePropertyValue(prop->value());
+	}
 	else os << "No";
 	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
 	StringVector allowed = prop->allowedValues();

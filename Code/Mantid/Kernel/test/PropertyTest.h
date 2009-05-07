@@ -49,9 +49,9 @@ public:
 #endif
   }
 
-  void testIsValid()
+  void testisValid()
   {
-    TS_ASSERT( p->isValid() )
+    TS_ASSERT_EQUALS( p->isValid(), "" )
   }
 
   void testIsDefault()

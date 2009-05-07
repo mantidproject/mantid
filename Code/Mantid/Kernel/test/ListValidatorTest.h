@@ -29,10 +29,19 @@ public:
   void testIsValid()
   {
     ListValidator v;
+    TS_ASSERT_EQUALS( v.isValid(""), "Select a value" )
+
+    TS_ASSERT_EQUALS( v.isValid("b"),
+	  "The value \"b\" is not in the list of allowed values")
+
     v.addAllowedValue("a");
-    TS_ASSERT( v.isValid("a") )
-    TS_ASSERT( ! v.isValid("b") )
-    TS_ASSERT( ! v.isValid("A") )
+    TS_ASSERT_EQUALS( v.isValid(""),
+	  "Select a value" )
+    TS_ASSERT_EQUALS( v.isValid("a"), "" )
+    TS_ASSERT_EQUALS( v.isValid("b"),
+	  "The value \"b\" is not in the list of allowed values")
+    TS_ASSERT_EQUALS( v.isValid("A"),
+	  "The value \"A\" is not in the list of allowed values")
   }
 
   void testAllowedValues()
@@ -54,11 +63,11 @@ public:
     TS_ASSERT( v.allowedValues().empty() )
     TS_ASSERT_THROWS_NOTHING( v.addAllowedValue("x") )
     TS_ASSERT_EQUALS( v.allowedValues().size(), 1 )
-    TS_ASSERT( v.isValid("x") )
+    TS_ASSERT_EQUALS( v.isValid("x"), "" )
     // Try adding again just to make sure the instruction is ignored, but doesn't throw
     TS_ASSERT_THROWS_NOTHING( v.addAllowedValue("x") )
     TS_ASSERT_EQUALS( v.allowedValues().size(), 1 )
-    TS_ASSERT( v.isValid("x") )
+    TS_ASSERT_EQUALS( v.isValid("x"), "" )
   }
 
   void testClone()

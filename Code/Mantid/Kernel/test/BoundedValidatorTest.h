@@ -130,55 +130,66 @@ public:
 
   }
 
-  void testIntBoundedValidator()
+  void testBoundedValidator()
   {
-    BoundedValidator<int> p(1, 10);
-    TS_ASSERT_EQUALS(p.isValid(0), false);
-    TS_ASSERT_EQUALS(p.isValid(1), true);
-    TS_ASSERT_EQUALS(p.isValid(10), true);
-    TS_ASSERT_EQUALS(p.isValid(11), false);
+	  std::string start("Selected value "), end(")");
+    std::string greaterThan(" is > the upper bound (");
+	std::string lessThan(" is < the lower bound (");
+	  
+	  //int tests
+	  BoundedValidator<int> pi(1, 10);
+	  TS_ASSERT_EQUALS(pi.isValid(0),
+		  start + "0" + lessThan + "1" + end);
+	  TS_ASSERT_EQUALS(pi.isValid(1), "");
+	  TS_ASSERT_EQUALS(pi.isValid(10), "");
+	  TS_ASSERT_EQUALS(pi.isValid(11),
+		  start + "11" + greaterThan + "10" + end);
+	  
+	  pi.clearLower();
+	  TS_ASSERT_EQUALS(pi.isValid(0), "");
+	  TS_ASSERT_EQUALS(pi.isValid(-1), "");
+	  TS_ASSERT_EQUALS(pi.isValid(10), "");
+	  TS_ASSERT_EQUALS(pi.isValid(11),
+		  start + "11" + greaterThan + "10" + end);
+	  pi.clearUpper();
+	  TS_ASSERT_EQUALS(pi.isValid(11), "");
+	  
+	  //double tests
+	  BoundedValidator<double> pd(1.0, 10.0);
+	  TS_ASSERT_EQUALS(pd.isValid(0.9),
+		  start + "0.9" + lessThan + "1" + end);
+	  TS_ASSERT_EQUALS(pd.isValid(1.0), "");
+	  TS_ASSERT_EQUALS(pd.isValid(10.0), "");
+	  TS_ASSERT_EQUALS(pd.isValid(10.1),
+		  start + "10.1" + greaterThan + "10" + end);
+	  
+	  pd.clearUpper();
+	  TS_ASSERT_EQUALS(pd.isValid(0.9),
+		  start + "0.9" + lessThan + "1" + end);
+	  TS_ASSERT_EQUALS(pd.isValid(-1.0),
+		  start + "-1" + lessThan + "1" + end);
+	  TS_ASSERT_EQUALS(pd.isValid(10), "");
+	  TS_ASSERT_EQUALS(pd.isValid(10.1), "");
+	  pd.clearLower();
+	  TS_ASSERT_EQUALS(pd.isValid(-2.0), "");
 
-    p.clearLower();
-    TS_ASSERT_EQUALS(p.isValid(0), true);
-    TS_ASSERT_EQUALS(p.isValid(-1), true);
-    TS_ASSERT_EQUALS(p.isValid(10), true);
-    TS_ASSERT_EQUALS(p.isValid(11), false);
-    p.clearUpper();
-    TS_ASSERT_EQUALS(p.isValid(11), true);
-  }
+	  //string tests
+	  BoundedValidator<std::string> ps("B", "T");
+	  TS_ASSERT_EQUALS(ps.isValid("AZ"),
+		  start + "AZ" + lessThan + "B" + end);
+	  TS_ASSERT_EQUALS(ps.isValid("B"), "");
+	  TS_ASSERT_EQUALS(ps.isValid("T"), "");
+	  TS_ASSERT_EQUALS(ps.isValid("TA"),
+		  start + "TA" + greaterThan + "T" + end);
 
-  void testDoubleBoundedValidator()
-  {
-    BoundedValidator<double> p(1.0, 10.0);
-    TS_ASSERT_EQUALS(p.isValid(0.9), false);
-    TS_ASSERT_EQUALS(p.isValid(1.0), true);
-    TS_ASSERT_EQUALS(p.isValid(10.0), true);
-    TS_ASSERT_EQUALS(p.isValid(10.1), false);
-
-    p.clearLower();
-    TS_ASSERT_EQUALS(p.isValid(0.9), true);
-    TS_ASSERT_EQUALS(p.isValid(-1.0), true);
-    TS_ASSERT_EQUALS(p.isValid(10), true);
-    TS_ASSERT_EQUALS(p.isValid(10.1), false);
-    p.clearUpper();
-    TS_ASSERT_EQUALS(p.isValid(10.1), true);
-  }
-
-  void testStringBoundedValidator()
-  {
-    BoundedValidator<std::string> p("B", "T");
-    TS_ASSERT_EQUALS(p.isValid("AZ"), false);
-    TS_ASSERT_EQUALS(p.isValid("B"), true);
-    TS_ASSERT_EQUALS(p.isValid("T"), true);
-    TS_ASSERT_EQUALS(p.isValid("TA"), false);
-
-    p.clearLower();
-    TS_ASSERT_EQUALS(p.isValid("AZ"), true);
-    TS_ASSERT_EQUALS(p.isValid("B"), true);
-    TS_ASSERT_EQUALS(p.isValid("T"), true);
-    TS_ASSERT_EQUALS(p.isValid("TA"), false);
-    p.clearUpper();
-    TS_ASSERT_EQUALS(p.isValid("TA"), true);
+    ps.clearLower();
+    TS_ASSERT_EQUALS(ps.isValid("AZ"), "");
+    TS_ASSERT_EQUALS(ps.isValid("B"), "");
+    TS_ASSERT_EQUALS(ps.isValid("T"), "");
+    TS_ASSERT_EQUALS(ps.isValid("TA"),
+		start + "TA" + greaterThan + "T" + end);
+    ps.clearUpper();
+    TS_ASSERT_EQUALS(ps.isValid("TA"), "");
   }
 
 };

@@ -147,9 +147,11 @@ namespace Mantid
       bool allValid = true;
       for ( PropertyMap::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it )
       {
-        if ( ! (it->second->isValid()) )
+        //check for errors in each property, "" means no error
+		if ( it->second->isValid() != "" )
         {
-          g_log.error() << "Property \"" << it->first << "\" is not set to a valid value." << std::endl;
+			g_log.error() << "Property \"" << it->first << "\" is not set to a valid value: \"" <<
+			  it->second->isValid() << "\"." << std::endl;
           allValid=false;
         }
       }

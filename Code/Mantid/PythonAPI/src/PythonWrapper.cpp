@@ -227,11 +227,11 @@ namespace PythonAPI
   /// A wrapper for Property
   struct Mantid_Kernel_Property_Wrapper: Mantid::Kernel::Property
   {
-    const bool isValid() const {
-      return call_method< const bool >(py_self, "isValid");
+	  std::string isValid() const {
+	  return call_method< std::string >(py_self, "isValid");
     }
 
-    const bool default_isValid() const {
+	  std::string default_isValid() const {
       return Mantid::Kernel::Property::isValid();
     }
 

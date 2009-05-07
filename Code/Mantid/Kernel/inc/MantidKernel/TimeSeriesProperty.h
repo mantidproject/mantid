@@ -456,6 +456,12 @@ public:
       if (!isdigit(str[18])) return false;
       return true;
   }
+  
+  /** This doesn't check anything -we assume these are always valid
+   * 
+   *  @returns an empty string ""
+   */
+  std::string isValid() const { return ""; }
 
 private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string

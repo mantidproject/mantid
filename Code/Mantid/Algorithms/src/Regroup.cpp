@@ -28,21 +28,35 @@ public:
   virtual ~RegroupParamsValidator() {}
 
   const std::string getType() const { return ""; }
-  const bool isValid( const std::vector<double> &value ) const
-  {
-    if (value.empty()) return false;
-    if (value.size()/2*2 == value.size() && value.size() == 1) return false;
-    double previous = value[0];
-    for(int i=2;i<int(value.size());i+=2)
-    {
-      if (value[i] <= previous) return false;
-      else previous = value[i];
-    }
-    return true;
-  }
+  ///Quick check on the inputed bin boundaries and widths
+  std::string isValid( const std::vector<double> &value ) const;
 
   Kernel::IValidator<std::vector<double> >* clone() { return new RegroupParamsValidator(*this); }
 };
+
+  /** Quick check on the inputed bin boundaries and widths, returns a user level description of problems or "" for no error.  Note, note error doesn't mean that the values will work
+   *  @param value The vector of doubles to check
+   *  @return A user level description of any problem or "" if there is no problem
+   */
+std::string RegroupParamsValidator::isValid( const std::vector<double> &value ) const
+{
+  if ( value.empty() ) return "Enter values for this property";
+  if ( ( value.size()%2 == 0 ) || ( value.size() == 1 ) )
+  {
+    return "The number of bin boundaries must be even";
+  }
+
+  double previous = value[0];
+  for(size_t i=2; i < value.size(); i+=2)
+  {
+    if (value[i] <= previous)
+	{
+	  return "Bin boundary values must be given in order of increasing value";
+	}
+	else previous = value[i];
+  }
+  return "";
+}
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)

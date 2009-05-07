@@ -111,30 +111,8 @@ public:
   /// Destructor
   virtual ~FileValidator() {}
 
-  /** Checks whether the value provided is a valid filepath.
-   *  @param value The value to test
-   *  @return True if the value is valid, false otherwise
-   */
-  const bool isValid(const std::string &value) const
-  {
-    if( !m_regex_exts.empty() )
-    {
-      //Find extension of value
-      std::string ext = value.substr(value.rfind(".") + 1);
-      //Use a functor to test each allowed extension in turn
-      RegExMatcher matcher(ext); 
-      std::vector<std::string>::const_iterator itr =
-	std::find_if(m_regex_exts.begin(), m_regex_exts.end(), matcher);
-      if( itr == m_regex_exts.end() ) return false;
-    }
-
-    if ( m_fullTest && ( value.empty() || !Poco::File(value).exists() ) )
-    {
-      return false;
-    }
-
-    return true;
-  }
+  /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
+  std::string isValid(const std::string &value) const;
 
    ///Return the type of the validator
   const std::string getType() const
@@ -165,7 +143,8 @@ public:
   { 
     return new FileValidator(*this); 
   }
-
+  ///The maximum number of file extensions to report in error messages defined to stop error messages from becoming too long
+  static const int MAX_NUM_EXTENSIONS = 20;
 private:
   /// The list of permitted extensions
   const std::vector<std::string> m_extensions;

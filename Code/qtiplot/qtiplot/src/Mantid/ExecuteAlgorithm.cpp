@@ -414,7 +414,7 @@ bool ExecuteAlgorithm::validateProperty(const std::string& name)
 	{
 		if ((*propItr)->name() == name)
 		{
-			return (*propItr)->isValid();
+			return (*propItr)->isValid() == "";
 		}
 	}
 	

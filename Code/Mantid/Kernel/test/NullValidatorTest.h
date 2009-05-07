@@ -41,28 +41,28 @@ public:
   void testIntNullValidator()
   {
     NullValidator<int> p;
-    TS_ASSERT_EQUALS(p.isValid(0), true);
-    TS_ASSERT_EQUALS(p.isValid(1), true);
-    TS_ASSERT_EQUALS(p.isValid(10), true);
-    TS_ASSERT_EQUALS(p.isValid(-11), true);
+    TS_ASSERT_EQUALS(p.isValid(0), "");
+    TS_ASSERT_EQUALS(p.isValid(1), "");
+    TS_ASSERT_EQUALS(p.isValid(10), "");
+    TS_ASSERT_EQUALS(p.isValid(-11), "");
   }
 
   void testDoubleNullValidator()
   {
     NullValidator<double> p;
-    TS_ASSERT_EQUALS(p.isValid(0.0), true);
-    TS_ASSERT_EQUALS(p.isValid(1.0), true);
-    TS_ASSERT_EQUALS(p.isValid(10.0), true);
-    TS_ASSERT_EQUALS(p.isValid(-10.1), true);
+    TS_ASSERT_EQUALS(p.isValid(0.0), "");
+    TS_ASSERT_EQUALS(p.isValid(1.0), "");
+    TS_ASSERT_EQUALS(p.isValid(10.0), "");
+    TS_ASSERT_EQUALS(p.isValid(-10.1), "");
   }
 
   void testStringNullValidator()
   {
     NullValidator<std::string> p;
-    TS_ASSERT_EQUALS(p.isValid("AZ"), true);
-    TS_ASSERT_EQUALS(p.isValid("B"), true);
-    TS_ASSERT_EQUALS(p.isValid(""), true);
-    TS_ASSERT_EQUALS(p.isValid("ta"), true);
+    TS_ASSERT_EQUALS(p.isValid("AZ"), "");
+    TS_ASSERT_EQUALS(p.isValid("B"), "");
+    TS_ASSERT_EQUALS(p.isValid(""), "");
+    TS_ASSERT_EQUALS(p.isValid("ta"), "");
   }
 
 };
