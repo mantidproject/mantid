@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskBins.h"
+#include <limits>
 #include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
