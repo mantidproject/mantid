@@ -391,12 +391,12 @@ public:
 	int writeToFile(const char* filename);
 	int printInfo(std::ostream& os);
 	int getTimeChannels(float* rtcb1, int n);
-    void skipData(int i);
-    void readData(int i);
+	void skipData(int i);
+	void readData(int i);
 //private:
-    char* outbuff;
-    FILE* m_file;
-    int ndes;
+  FILE* m_file;
+	char* outbuff;
+	int ndes;
 };
 
 

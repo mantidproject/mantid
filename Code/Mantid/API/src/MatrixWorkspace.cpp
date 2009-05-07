@@ -12,7 +12,7 @@ namespace Mantid
 namespace API
 {
 
-Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("Workspace");
+Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
@@ -353,7 +353,11 @@ const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrum
 {
   std::map<int,MaskList>::const_iterator it = m_masks.find(spectrumIndex);
   // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
-  if (it==m_masks.end()) throw Kernel::Exception::IndexError(spectrumIndex,0,"MatrixWorkspace::maskedBins");
+  if (it==m_masks.end())
+  {
+    g_log.error() << "There are no masked bins for spectrum index " << spectrumIndex << std::endl;
+    throw Kernel::Exception::IndexError(spectrumIndex,0,"MatrixWorkspace::maskedBins");
+  }
   
   return it->second;
 }
