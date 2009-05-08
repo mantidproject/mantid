@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/MaskBins.h"
 #include <cfloat>
 #include "MantidAPI/WorkspaceValidators.h"
+#include <limits>
 
 namespace Mantid
 {
@@ -27,7 +28,8 @@ void MaskBins::init()
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but MandatoryValidator is already taken!
   BoundedValidator<double> *required = new BoundedValidator<double>();
-  required->setUpper(DBL_MAX*0.99);
+  //required->setUpper(DBL_MAX*0.99);
+  required->setUpper(std::numeric_limits<double>::max()*0.99);
   declareProperty("XMin",DBL_MAX,required);
   declareProperty("XMax",DBL_MAX,required->clone());
 }

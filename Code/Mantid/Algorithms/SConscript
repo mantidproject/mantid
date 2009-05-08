@@ -10,7 +10,7 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 #Import environment
 Import('env')
 myenv = env.Clone()
-myenv.Append(CPPDEFINES=[('IN_MANTID_ALGORITHMS',1)])
+myenv.Append(CPPDEFINES=[('IN_MANTID_ALGORITHMS',1),'NOMINMAX'])
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
