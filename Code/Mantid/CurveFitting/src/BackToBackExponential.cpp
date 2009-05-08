@@ -133,7 +133,7 @@ void BackToBackExponential::exec()
   {
     g_log.warning("EndX out of range! Set to end of frame");
     endX = XValues.back();
-    m_maxX = YValues.size();
+    m_maxX = YValues.size()-1;
   }
   else
   {

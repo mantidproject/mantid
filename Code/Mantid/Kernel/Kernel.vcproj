@@ -100,6 +100,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				Description="Performing Custom Build Step - copying properties files"
+				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\release&quot; /Y&#x0D;&#x0A;"
+				Outputs="&quot;$(SolutionDir)\Properties\Mantid.properties&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

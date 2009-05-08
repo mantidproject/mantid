@@ -111,7 +111,7 @@ namespace Mantid
             int spectra = found != dsMap.end()? found->second : 0;
             spectraList.push_back(spectra);
         }
-        catch (std::runtime_error& ex)
+        catch (std::runtime_error&)
         {
           //spectra was not found enter 0
           spectraList.push_back(0);

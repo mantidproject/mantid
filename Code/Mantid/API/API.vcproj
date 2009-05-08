@@ -134,7 +134,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(SolutionName)kernel.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
-				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32;c:\Python25\libs"
+				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				OptimizeForWindows98="1"
