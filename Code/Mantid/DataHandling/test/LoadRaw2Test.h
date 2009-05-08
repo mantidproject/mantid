@@ -220,10 +220,9 @@ public:
   {
     LoadRaw2 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP78173.raw");
+    loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod2");
-    // Set these properties to check they're ignored
-    //loader5.setPropertyValue("spectrum_list", "998,999,1000");
+    loader5.setPropertyValue("spectrum_list", "10,50,100,195");
     //loader5.setPropertyValue("spectrum_min", "1");
     //loader5.setPropertyValue("spectrum_max", "2");
 
@@ -249,24 +248,6 @@ public:
     MatrixWorkspace_sptr output6;
     TS_ASSERT_THROWS_NOTHING( output6 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_6")) );
     TS_ASSERT_EQUALS( output6->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output7;
-    TS_ASSERT_THROWS_NOTHING( output7 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_7")) );
-    TS_ASSERT_EQUALS( output7->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output8;
-    TS_ASSERT_THROWS_NOTHING( output8 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_8")) );
-    TS_ASSERT_EQUALS( output8->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output9;
-    TS_ASSERT_THROWS_NOTHING( output9 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_9")) );
-    TS_ASSERT_EQUALS( output9->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output10;
-    TS_ASSERT_THROWS_NOTHING( output10 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_10")) );
-    TS_ASSERT_EQUALS( output10->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output11;
-    TS_ASSERT_THROWS_NOTHING( output11 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_11")) );
-    TS_ASSERT_EQUALS( output11->getNumberHistograms(), 4 )
-    MatrixWorkspace_sptr output12;
-    TS_ASSERT_THROWS_NOTHING( output12 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("multiperiod2_12")) );
-    TS_ASSERT_EQUALS( output12->getNumberHistograms(), 4 )
 
     // The histogram bins should be the same
     TS_ASSERT_EQUALS( output1->dataX(0), output2->dataX(0) )
@@ -274,35 +255,20 @@ public:
     TS_ASSERT_EQUALS( output1->dataX(0), output4->dataX(0) )
     TS_ASSERT_EQUALS( output1->dataX(1), output5->dataX(1) )
     TS_ASSERT_EQUALS( output1->dataX(1), output6->dataX(1) )
-    TS_ASSERT_EQUALS( output1->dataX(1), output7->dataX(1) )
-    TS_ASSERT_EQUALS( output1->dataX(2), output8->dataX(2) )
-    TS_ASSERT_EQUALS( output1->dataX(2), output9->dataX(2) )
-    TS_ASSERT_EQUALS( output1->dataX(2), output10->dataX(2) )
-    TS_ASSERT_EQUALS( output1->dataX(3), output11->dataX(3) )
-    TS_ASSERT_EQUALS( output1->dataX(3), output12->dataX(3) )
     // But the data should be different
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output2->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output3->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output4->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output5->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output6->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output7->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output8->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output9->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output10->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output11->dataY(1)[555] )
-//    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output12->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output2->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output3->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output4->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output5->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( output1->dataY(1)[555], output6->dataY(1)[555] )
 
     // Check these are the same
-    TS_ASSERT_DIFFERS( output1->getInstrument(), output2->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
     TS_ASSERT_DIFFERS( output1->getSample(), output2->getSample() )
-    TS_ASSERT_DIFFERS( output1->getInstrument(), output6->getInstrument() )
+    TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
     TS_ASSERT_DIFFERS( output1->getSample(), output6->getSample() )
-    TS_ASSERT_DIFFERS( output1->getInstrument(), output12->getInstrument() )
-    TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output12->spectraMap()) )
-    TS_ASSERT_DIFFERS( output1->getSample(), output12->getSample() )
   }
 
   void testWithManagedWorkspace()
