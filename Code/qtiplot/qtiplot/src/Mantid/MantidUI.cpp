@@ -436,15 +436,23 @@ void MantidUI::showAlgorithmHistory()
 { 	
 	QString wsName=getSelectedWorkspaceName();
 	Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
-	WorkspaceHistory wsHistory= wsptr->getHistory();
-	std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
-	
-	EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory(); 
-	
-	//create a new window to display Algorithmic History
-	AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
-	if(palgHist)palgHist->show();
-			    
+	if(wsptr)
+	{		
+		WorkspaceHistory wsHistory= wsptr->getHistory();
+		std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
+		EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory(); 
+		//create a  window to display Algorithmic History
+		if(!algHistory.empty())
+		{
+			AlgorithmHistoryWindow *palgHist= new AlgorithmHistoryWindow(m_appWindow,algHistory,envHistory);
+			if(palgHist)palgHist->show();
+		}
+	}
+	else
+	{
+		QMessageBox::information(appWindow(),"Mantid","Invalid WorkSpace");
+		return;
+	}
  }
 
 /**  Create a new Table and fill it with the data from a Tableworkspace
