@@ -28,7 +28,7 @@
 				Name="VCCustomBuildTool"
 				Description="Performing Custom Build Step - copying properties file to debug"
 				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\debug&quot; /Y&#x0D;&#x0A;"
-				Outputs="&quot;$(SolutionDir)\Properties\Mantid.properties&quot;"
+				Outputs="&quot;$(SolutionDir)\debug\Mantid.properties&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -102,7 +102,7 @@
 				Name="VCCustomBuildTool"
 				Description="Performing Custom Build Step - copying properties files"
 				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\release&quot; /Y&#x0D;&#x0A;"
-				Outputs="&quot;$(SolutionDir)\Properties\Mantid.properties&quot;"
+				Outputs="&quot;$(SolutionDir)\release\Mantid.properties&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
