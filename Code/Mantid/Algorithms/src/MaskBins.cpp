@@ -2,9 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MaskBins.h"
-#include <cfloat>
-#include "MantidAPI/WorkspaceValidators.h"
 #include <limits>
+#include "MantidAPI/WorkspaceValidators.h"
 
 namespace Mantid
 {
@@ -20,6 +19,8 @@ using namespace API;
 // Get a reference to the logger. It is used to print out information, warning and error messages
 Logger& MaskBins::g_log = Logger::get("MaskBins");
 
+MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
+
 void MaskBins::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
@@ -28,10 +29,9 @@ void MaskBins::init()
   // This validator effectively makes these properties mandatory
   // Would be nice to have an explicit validator for this, but MandatoryValidator is already taken!
   BoundedValidator<double> *required = new BoundedValidator<double>();
-  //required->setUpper(DBL_MAX*0.99);
   required->setUpper(std::numeric_limits<double>::max()*0.99);
-  declareProperty("XMin",DBL_MAX,required);
-  declareProperty("XMax",DBL_MAX,required->clone());
+  declareProperty("XMin",std::numeric_limits<double>::max(),required);
+  declareProperty("XMax",std::numeric_limits<double>::max(),required->clone());
 }
 
 void MaskBins::exec()

@@ -49,8 +49,8 @@ namespace Algorithms
 class DLLExport MaskBins : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
-  MaskBins() : API::Algorithm() {}
+  /// Constructor
+  MaskBins();
   /// Virtual destructor
   virtual ~MaskBins() {}
   /// Algorithm's name

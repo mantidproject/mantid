@@ -140,8 +140,7 @@ public:
   { 
     return new FileValidator(*this); 
   }
-  ///The maximum number of file extensions to report in error messages defined to stop error messages from becoming too long
-  static const int MAX_NUM_EXTENSIONS = 20;
+  
 private:
   /// The list of permitted extensions
   const std::vector<std::string> m_extensions;
@@ -150,6 +149,9 @@ private:
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
 
+  /// The maximum number of file extensions to report in error messages defined to stop error messages from becoming too long
+  static const int MAX_NUM_EXTENSIONS = 20;
+  
   /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
   std::string checkValidity(const std::string &value) const;
 

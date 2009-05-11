@@ -32,7 +32,7 @@ public:
     TS_ASSERT( masker.isInitialized() )
   }
   
-  void testExec()
+  void testCommonBins()
   {
     if (!masker.isInitialized()) masker.initialize();
     
@@ -60,6 +60,30 @@ public:
     for (int i = 0; i < outputWS->getNumberHistograms(); ++i)
     {
       TS_ASSERT( outputWS->hasMaskedBins(i) )
+      const MatrixWorkspace::MaskList& mask = outputWS->maskedBins(i);
+      TS_ASSERT_EQUALS( mask.size(), 3 )
+      MatrixWorkspace::MaskList::const_iterator it;
+      int k = 20;
+      for (it = mask.begin(); it != mask.end(); ++it,++k)
+      {
+        TS_ASSERT_EQUALS( (*it).first, k )
+        TS_ASSERT_EQUALS( (*it).second, 1.0 )
+      }
+      
+      for (int j = 0; j < outputWS->blocksize(); ++j)
+      {
+        if ( j >= 20 && j < 23 )
+        {
+          TS_ASSERT_EQUALS( outputWS->readY(i)[j], 0.0 )
+          TS_ASSERT_EQUALS( outputWS->readE(i)[j], 0.0 )
+        }
+        else
+        {
+          TS_ASSERT_EQUALS( outputWS->readY(i)[j], 2.0 )
+          TS_ASSERT_DELTA( outputWS->readE(i)[j], sqrt(2.0), 0.0001 )
+        }
+        TS_ASSERT_EQUALS( outputWS->readX(i)[j], j )     
+      }
     }
     
     // Clean up
@@ -67,6 +91,50 @@ public:
     ads.remove(resultWorkspaceName);
   }
 
+  void testRaggedBins()
+  {
+    Mantid::Algorithms::MaskBins masker2;
+    masker2.initialize();
+    
+    // Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(3,10,0.0);
+    // Now change one set of bin boundaries so that the don't match the others
+    Mantid::MantidVec& X = WS->dataX(1);
+    std::transform(X.begin(),X.end(),X.begin(),std::bind2nd(std::minus<double>(),10.0));
+    
+    AnalysisDataService::Instance().add(workspaceName,WS);
+    
+    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("InputWorkspace",workspaceName) )
+    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("OutputWorkspace",workspaceName) )
+    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMin","-11.0") )
+    TS_ASSERT_THROWS_NOTHING( masker2.setPropertyValue("XMax","-8.5") )
+    
+    TS_ASSERT_THROWS_NOTHING( masker2.execute() )
+    TS_ASSERT( masker2.isExecuted() )
+    
+    TS_ASSERT( ! WS->hasMaskedBins(0) )
+    TS_ASSERT( WS->hasMaskedBins(1) )
+    TS_ASSERT( ! WS->hasMaskedBins(2) )
+    
+    const MatrixWorkspace::MaskList& mask = WS->maskedBins(1);
+    TS_ASSERT_EQUALS( mask.size(), 2 )
+    const Mantid::MantidVec& Y = WS->readY(1);
+    const Mantid::MantidVec& E = WS->readE(1);
+    MatrixWorkspace::MaskList::const_iterator it;
+    int k = 0;
+    for (it = mask.begin(); it != mask.end(); ++it,++k)
+    {
+      TS_ASSERT_EQUALS( (*it).first, k )
+      TS_ASSERT_EQUALS( (*it).second, 1.0 )
+      TS_ASSERT_EQUALS( Y[k], 0.0 )
+      TS_ASSERT_EQUALS( E[k], 0.0 )
+    }
+       
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+  
+  
 private:
   Mantid::Algorithms::MaskBins masker;
 };

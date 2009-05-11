@@ -156,7 +156,7 @@ public:
         error = "Choose an existing workspace of the correct type";
         //the log has more detail, note that type() calls uses type_info which is implementation dependent
         g_log.debug() << "Problem validating workspace: " << error << ".  \""
-          << m_workspaceName << "\" is not of type " << typeid(TYPE).name() << std::endl;
+            << m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
         //return only the user message
         return error;
       }
