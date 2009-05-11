@@ -290,9 +290,9 @@ void LoadISISNexus::openNexusGroup(const std::string& name, const std::string& n
         throw std::runtime_error("Cannot open group "+name+" of class "+nx_class);
     }
 
-    char* nxname= new char[NX_MAXNAMELEN];
-    char* nxclass = new char[NX_MAXNAMELEN];
-    int nxdatatype;
+    //boost::shared_array<char> nxname( new char[NX_MAXNAMELEN] );
+    //boost::shared_array<char> nxclass( new char[NX_MAXNAMELEN] );
+    //int nxdatatype;
 
     //int stat = NX_OK;
     //while(stat != NX_EOD)

@@ -51,7 +51,7 @@ public:
    *  @param value The value to be checked
    *  @returns An error message to display to users or an empty string on no error
    */
-  std::string isValid(const TYPE &value)
+  std::string isValid(const TYPE &value)const
   {
     std::string failure = checkValidity(value);
     if ( failure != "" )
