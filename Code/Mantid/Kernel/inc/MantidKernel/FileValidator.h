@@ -151,7 +151,7 @@ private:
   const bool m_fullTest;
 
   /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
-  std::string FileValidator::checkValidity(const std::string &value) const;
+  std::string checkValidity(const std::string &value) const;
 
 };
 
