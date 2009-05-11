@@ -33,8 +33,8 @@ Logger& DiffractionFocussing2::g_log = Logger::get("DiffractionFocussing2");
  */
 void DiffractionFocussing2::init()
 {
-	API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
-	wsValidator->add(new API::WorkspaceUnitValidator<>("dSpacing"));
+  API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
+  wsValidator->add(new API::WorkspaceUnitValidator<>("dSpacing"));
   wsValidator->add(new API::RawCountValidator<>);
   declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
@@ -70,38 +70,38 @@ void DiffractionFocussing2::exec()
 
   for (int i=0;i<nHist;i++)
   {
-  	//Check whether this spectra is in a valid group
-  	group=spectra_group[i];
-  	if (group==-1) // Not in a group
-  		continue;
-  	//Get reference to its old X,Y,and E.
-  	const std::vector<double>& Xin=inputW->readX(i);
-  	const std::vector<double>& Yin=inputW->readY(i);
-  	const std::vector<double>& Ein=inputW->readE(i);
-  	// Get the group
-  	group2xvectormap::iterator it=group2xvector.find(group);
-  	group2xvectormap::difference_type dif=std::distance(group2xvector.begin(),it);
-  	const std::vector<double>& Xout=((*it).second);
-  	// Assign the new X axis only once (i.e when this group is encountered the first time
-  	if (flags[dif])
-  	{
-  		out->dataX(static_cast<int>(dif))=Xout;
-  		flags[dif]=false;
-  	}
-  	// Get the references to Y and E output and rebin
-  	std::vector<double>& Yout=out->dataY(static_cast<int>(dif));
-  	std::vector<double>& Eout=out->dataE(static_cast<int>(dif));
-  	try
-  	{
-  		rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
-  	}catch(...)
-  	{
-  		std::ostringstream mess;
-  		mess << "Error in rebinning process for spectrum:" << i;
-  		std::runtime_error(mess.str());
-  		mess.str("");
-  	}
-  	progress(static_cast<double>(i)/101.0);
+    //Check whether this spectra is in a valid group
+    group=spectra_group[i];
+    if (group==-1) // Not in a group
+      continue;
+    //Get reference to its old X,Y,and E.
+    const std::vector<double>& Xin=inputW->readX(i);
+    const std::vector<double>& Yin=inputW->readY(i);
+    const std::vector<double>& Ein=inputW->readE(i);
+    // Get the group
+    group2xvectormap::iterator it=group2xvector.find(group);
+    group2xvectormap::difference_type dif=std::distance(group2xvector.begin(),it);
+    const std::vector<double>& Xout=((*it).second);
+    // Assign the new X axis only once (i.e when this group is encountered the first time
+    if (flags[dif])
+    {
+      out->dataX(static_cast<int>(dif))=Xout;
+      flags[dif]=false;
+    }
+    // Get the references to Y and E output and rebin
+    std::vector<double>& Yout=out->dataY(static_cast<int>(dif));
+    std::vector<double>& Eout=out->dataE(static_cast<int>(dif));
+    try
+    {
+      rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
+    }catch(...)
+    {
+      std::ostringstream mess;
+      mess << "Error in rebinning process for spectrum:" << i;
+      std::runtime_error(mess.str());
+      mess.str("");
+    }
+    progress(static_cast<double>(i)/101.0);
   }
 
   // Now propagate the errors.
@@ -110,8 +110,8 @@ void DiffractionFocussing2::exec()
   uf rs=std::sqrt;
   for (int i=0;i<nGroups;i++)
   {
-  	std::vector<double>& Eout=out->dataE(i);
-  	std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
+    std::vector<double>& Eout=out->dataE(i);
+    std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
   }
 
   progress(1.0);
@@ -125,7 +125,7 @@ void DiffractionFocussing2::exec()
 }
 
 /// Reads in the file with the grouping information
-/// @param groupingFilename The file that contains the group information
+/// @param groupingFileName The file that contains the group information
 ///
 void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName)
 {
@@ -140,7 +140,7 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
   std::string str;
   while(getline(grFile,str))
   {
-	//Comment
+    //Comment
     if (str.empty() || str[0] == '#') continue;
     std::istringstream istr(str);
     int n,udet,sel,group;
@@ -148,81 +148,77 @@ void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName
     istr >> n >> udet >> offset >> sel >> group;
     if ((sel) && (group>0))
     {
-    	udet2group[udet]=group; //Register this udet
-    	groups.insert(group);   //Register this group
+      udet2group[udet]=group; //Register this udet
     }
   }
-  nGroups=groups.size(); // Number of unique groups
   grFile.close();
 
   return;
 }
+
 /// Determine the rebinning parameters, i.e Xmin, Xmax and logarithmic step for each group
-///
 void DiffractionFocussing2::determineRebinParameters()
 {
+  std::ostringstream mess;
 
-	std::ostringstream mess;
+  group2minmaxmap::iterator gpit;
 
-	udet2groupmap::iterator udetit;
-	group2minmaxmap::iterator gpit;
-	// Register all groups
-	std::set<int>::iterator it=groups.begin();
-	for (;it!=groups.end();it++)
-		group2minmax[(*it)]=std::make_pair<double,double>(1e14,-1e14);
+  spectra_group.resize(nHist);
+  API::Axis* spectra_Axis = inputW->getAxis(1);
 
-	spectra_group.resize(nHist);
-	API::Axis* spectra_Axis=inputW->getAxis(1);
-	int group;
+  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
+  {
+    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
+    spectra_group[i] = group;
+    if (group == -1)
+      continue;
+    gpit = group2minmax.find(group);
+    // Create the group range in the map if it isn't already there
+    if (gpit == group2minmax.end())
+    {
+      gpit = group2minmax.insert(std::make_pair(group,std::make_pair(1.0e14,-1.0e14))).first;
+    }
+    const double min = ((*gpit).second).first;
+    const double max = ((*gpit).second).second;
+    const std::vector<double>& X = inputW->readX(i);
+    if (X.front() < (min)) //New Xmin found
+      ((*gpit).second).first = X.front();
+    if (X.back() > (max)) //New Xmax found
+      ((*gpit).second).second = X.back();
+  }
 
-	for (int i=0;i<nHist;i++) //  Iterate over all histograms to find X boundaries for each group
-	{
-		group=validateSpectrumInGroup(spectra_Axis->spectraNo(i));
-		spectra_group[i]=group;
-		if (group==-1)
-			continue;
-		gpit=group2minmax.find(group);
-		double min=((*gpit).second).first;
-		double max=((*gpit).second).second;
-		const std::vector<double>& X=inputW->readX(i);
-		if (X.front()< (min)) //New Xmin found
-			((*gpit).second).first=X.front();
-		if (X.back()> (max))  //New Xmax found
-			((*gpit).second).second=X.back();
-	}
+  nGroups=group2minmax.size(); // Number of unique groups
 
-	double Xmin,Xmax,step;
+  double Xmin, Xmax, step;
 
-	//Iterator over all groups to create the new X vectors
-	for (gpit=group2minmax.begin();gpit!=group2minmax.end();gpit++)
-	{
-		Xmin=((*gpit).second).first;
-		Xmax=((*gpit).second).second;
-		if (Xmax<Xmin) // Should never happen
-		{
-			mess << "Fail to determine X boundaries for group:" << (*gpit).first <<"\n";
-			mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
-			throw std::runtime_error(mess.str());
-		}
-		step=(log(Xmax)-log(Xmin))/(nPoints-1);
-		mess << "Found Group:" << ((*gpit).first)
-					<< "(Xmin,Xmax,log step):" << ((*gpit).second).first
-					<< "," << ((*gpit).second).second << "," <<	step;
-		g_log.information(mess.str());
-		mess.str("");
-		std::vector<double> xnew(nPoints); //New X vector
-		xnew[0]=Xmin;
-		for (int j=1;j<nPoints;j++)
-		{
-			xnew[j]=Xmin*(1.0+step);
-			Xmin=xnew[j];
-		}
-		group2xvector[(*gpit).first]=xnew; //Register this vector in the map
-	}
-		// Not needed anymore
-		udet2group.clear();
-		groups.clear();
-		return;
+  //Iterator over all groups to create the new X vectors
+  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++)
+  {
+    Xmin = ((*gpit).second).first;
+    Xmax = ((*gpit).second).second;
+    if (Xmax < Xmin) // Should never happen
+    {
+      mess << "Fail to determine X boundaries for group:" << (*gpit).first << "\n";
+      mess << "The boundaries are (Xmin,Xmax):" << Xmin << " " << Xmax;
+      throw std::runtime_error(mess.str());
+    }
+    step = (log(Xmax) - log(Xmin)) / (nPoints - 1);
+    mess << "Found Group:" << ((*gpit).first) << "(Xmin,Xmax,log step):" << ((*gpit).second).first
+        << "," << ((*gpit).second).second << "," << step;
+    g_log.information(mess.str());
+    mess.str("");
+    std::vector<double> xnew(nPoints); //New X vector
+    xnew[0] = Xmin;
+    for (int j = 1; j < nPoints; j++)
+    {
+      xnew[j] = Xmin * (1.0 + step);
+      Xmin = xnew[j];
+    }
+    group2xvector[(*gpit).first] = xnew; //Register this vector in the map
+  }
+  // Not needed anymore
+  udet2group.clear();
+  return;
 }
 
 ///Verify that all the contributing detectors to a spectrum belongs to the same group
@@ -230,30 +226,29 @@ void DiffractionFocussing2::determineRebinParameters()
 /// @return Group number if successful otherwise return -1
 int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
 {
-	// Get the spectra to detector map
-	const API::SpectraDetectorMap& spectramap=inputW->spectraMap();
-	std::vector<int> dets=spectramap.getDetectors(spectrum_number);
-	if (dets.empty()) // Not in group
-		return -1;
+  // Get the spectra to detector map
+  const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
+  std::vector<int> dets = spectramap.getDetectors(spectrum_number);
+  if (dets.empty()) // Not in group
+    return -1;
 
-	std::vector<int>::const_iterator it=dets.begin();
-	udet2groupmap::const_iterator mapit=udet2group.find((*it)); //Find the first udet
-	if (mapit==udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
-		return -1;
-	int group=(*mapit).second;
-	int new_group;
-	for (it+1;it!=dets.end();it++) // Loop other all other udets
-	{
-		mapit=udet2group.find((*it));
-		if (mapit==udet2group.end())	// Group not assigned
-			return -1;
-		new_group=(*mapit).second;
-		if (new_group!=group)         // At least one udet does not belong to the same group
-			return -1;
-	}
-	return group;
+  std::vector<int>::const_iterator it = dets.begin();
+  udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
+  if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
+    return -1;
+  int group = (*mapit).second;
+  int new_group;
+  for (it + 1; it != dets.end(); it++) // Loop other all other udets
+  {
+    mapit = udet2group.find((*it));
+    if (mapit == udet2group.end()) // Group not assigned
+      return -1;
+    new_group = (*mapit).second;
+    if (new_group != group) // At least one udet does not belong to the same group
+      return -1;
+  }
+  return group;
 }
-
 
 } // namespace Algorithm
 } // namespace Mantid
