@@ -121,20 +121,37 @@ void LoadISISNexus::exec()
     // Set the unit on the workspace to TOF
     localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
-
-
     // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
     for (int period = 0; period < m_numberOfPeriods; ++period) {
 
-        openNexusGroup("detector_1","NXdata");
-
-        if ( period > 0 )
+        if (period == 0)
+        {
+            // Only run the sub-algorithms once
+            runLoadInstrument(localWorkspace );
+            loadMappingTable(localWorkspace );
+            loadProtonCharge(localWorkspace);
+//            runLoadLog(localWorkspace );
+        }
+        else   // We are working on a higher period of a multiperiod file
         {
             localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create(localWorkspace));
             localWorkspace->newSample();
             localWorkspace->newInstrumentParameters();
+
+            // Create a WorkspaceProperty for the new workspace of a higher period
+            // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
+            //                (for all but the first period, which has no suffix)
+            std::stringstream suffix;
+            suffix << (period+1);
+            outputWorkspace += suffix.str();
+            std::string WSName = localWSName + "_" + suffix.str();
+            declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
+            g_log.information() << "Workspace " << WSName << " created. \n";
+//            runLoadLog(localWorkspace );
         }
+
+        openNexusGroup("detector_1","NXdata");
 
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
@@ -156,29 +173,6 @@ void LoadISISNexus::exec()
 
         // Just a sanity check
         assert(counter == total_specs);
-
-        std::string outputWorkspace = "OutputWorkspace";
-        if (period == 0)
-        {
-            // Only run the sub-algorithms once
-            runLoadInstrument(localWorkspace );
-            loadMappingTable(localWorkspace );
-            loadProtonCharge(localWorkspace);
-//            runLoadLog(localWorkspace );
-        }
-        else   // We are working on a higher period of a multiperiod raw file
-        {
-            // Create a WorkspaceProperty for the new workspace of a higher period
-            // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
-            //                (for all but the first period, which has no suffix)
-            std::stringstream suffix;
-            suffix << (period+1);
-            outputWorkspace += suffix.str();
-            std::string WSName = localWSName + "_" + suffix.str();
-            declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-            g_log.information() << "Workspace " << WSName << " created. \n";
-//            runLoadLog(localWorkspace );
-        }
 
         // Assign the result to the output workspace property
         setProperty(outputWorkspace,localWorkspace);
@@ -362,7 +356,8 @@ void LoadISISNexus::getTimeChannels()
     NXclosedata(m_fileID);
 }
 
-/** Group /raw_data_1/detector_1 must be open to call this function
+/** Group /raw_data_1/detector_1 must be open to call this function.
+ *  loadMappingTable() must be done before any calls to this method.
  */
 void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspace2D_sptr localWorkspace)
 {
@@ -397,6 +392,7 @@ void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspac
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
     // Populate the workspace. Loop starts from 1, hence i-1
     localWorkspace->setX(hist, m_timeChannelsVec);
+    localWorkspace->getAxis(1)->spectraNo(hist)= m_spec[i];
 
     NXclosedata(m_fileID);
 }
@@ -490,9 +486,9 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
         throw std::runtime_error("Cannot open load spectra-detector map: data sizes do not match.");
     }
 
-    boost::shared_array<int> spec(new int[ndet]);
+    m_spec.reset(new int[ndet]);
 
-    if (NX_ERROR == NXgetdata(m_fileID,spec.get()))
+    if (NX_ERROR == NXgetdata(m_fileID,m_spec.get()))
     {
         g_log.error("Error reading spectrum_index");
         throw std::runtime_error("Error reading spectrum_index");
@@ -501,13 +497,8 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
     NXclosedata(m_fileID); // spectrum_index
     closeNexusGroup(); // detector_1
 
-    for(int i=0;i<ndet;i++)
-    {
-        ws->getAxis(1)->spectraNo(i)= spec[i];
-    }
-
     //Populate the Spectra Map with parameters
-    ws->mutableSpectraMap().populate(spec.get(),udet.get(),ndet);
+    ws->mutableSpectraMap().populate(m_spec.get(),udet.get(),ndet);
 
 }
 

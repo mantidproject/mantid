@@ -121,6 +121,8 @@ namespace Mantid
       boost::shared_array<int> m_data;
       /// Proton charge
       double m_proton_charge;
+      /// Spectra numbers
+      boost::shared_array<int> m_spec;
 
       /// Nexus file id
       NXhandle m_fileID;
