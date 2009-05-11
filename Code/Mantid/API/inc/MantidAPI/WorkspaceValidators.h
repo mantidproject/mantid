@@ -64,7 +64,7 @@ public:
    *  @param value The workspace to test
    *  @return A user level description of the first problem it finds otherwise ""
    */
-  std::string isValid( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
 	//Go though all the validators
 	for (unsigned int i=0; i < m_children.size(); ++i)
@@ -129,7 +129,7 @@ public:
    *  @param value The workspace to test
    *  @return A user level description of the error or "" for no error
    */
-  std::string isValid( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
     Kernel::Unit_const_sptr unit = value->getAxis(0)->unit();
     // If m_unitID is empty it means that the workspace must have units, which can be anything
@@ -181,7 +181,7 @@ public:
    *  @param value The workspace to test
    *  @return A user level description if a problem exists or ""
    */
-  std::string isValid( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
 	  if (m_mustBeHistogram)
 	  {
@@ -226,7 +226,7 @@ public:
    *  @param value The workspace to test
    *  @return A user level description of any problem that exists or "" no problem
    */
-  std::string isValid( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
 	  if (m_mustNotBeDistribution)
 	  {
@@ -273,7 +273,7 @@ public:
    *  @param value The workspace to test
    *  @return A message for users saying that bins are different, otherwise ""
    */
-  std::string isValid( const boost::shared_ptr<TYPE>& value ) const
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
 	if ( !value ) return "Enter an existing workspace"; 
    //there being only one or zero histograms is accepted as not being an error

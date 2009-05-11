@@ -250,7 +250,8 @@ public:
   {
     TYPE oldValue = m_value;
     m_value = value;
-    if ( this->isValid() == "" )
+	std::string problem = this->isValid();
+    if ( problem == "" )
     {
       m_isDefault = false;
       return m_value;
@@ -258,7 +259,7 @@ public:
     else
     {
       m_value = oldValue;
-      throw std::invalid_argument("Attempt to set property to an invalid value");
+	  throw std::invalid_argument("Attempt to set property " + name() + ": " + problem);
     }
   }
 
@@ -278,12 +279,14 @@ public:
     return m_value;
   }
 
-  /** Checks the validity of the value chosen for the property
+  /** Check the value chosen for the property is OK, unless overidden it just calls the validator's isValid()
+   *  N.B. Problems found in validator are written to the log
+   *  if you override this function to do checking outside a validator may want to do more logging
    *  @returns "" if the value is valid or a discription of the problem
    */
   virtual std::string isValid() const
   {
-	return m_validator->isValid(m_value);
+	  return m_validator->isValid(m_value);
   }
 
   /** Returns the type of the validator as a string
@@ -337,14 +340,14 @@ private:
   IValidator<TYPE> *m_validator;
 
   /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  static Logger& g_log;
 
   /// Private default constructor
   PropertyWithValue();
 };
 
 template <typename TYPE>
-Kernel::Logger& PropertyWithValue<TYPE>::g_log = Kernel::Logger::get("PropertyWithValue");
+Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
 
 } // namespace Kernel
 } // namespace Mantid

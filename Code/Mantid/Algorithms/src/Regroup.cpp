@@ -27,18 +27,19 @@ public:
   RegroupParamsValidator() {}
   virtual ~RegroupParamsValidator() {}
 
-  const std::string getType() const { return ""; }
-  ///Quick check on the inputed bin boundaries and widths
-  std::string isValid( const std::vector<double> &value ) const;
+  const std::string getType() const { return "regroup"; }
 
   Kernel::IValidator<std::vector<double> >* clone() { return new RegroupParamsValidator(*this); }
+private:
+  ///Quick check on the inputed bin boundaries and widths
+  std::string checkValidity( const std::vector<double> &value ) const;
 };
 
   /** Quick check on the inputed bin boundaries and widths, returns a user level description of problems or "" for no error.  Note, note error doesn't mean that the values will work
    *  @param value The vector of doubles to check
    *  @return A user level description of any problem or "" if there is no problem
    */
-std::string RegroupParamsValidator::isValid( const std::vector<double> &value ) const
+std::string RegroupParamsValidator::checkValidity( const std::vector<double> &value ) const
 {
   if ( value.empty() ) return "Enter values for this property";
   if ( ( value.size()%2 == 0 ) || ( value.size() == 1 ) )

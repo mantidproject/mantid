@@ -365,6 +365,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FileValidatorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\FilterChannel.h"
 				>
 			</File>
@@ -405,6 +409,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ListValidatorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\LogFilter.h"
 				>
 			</File>
@@ -418,6 +426,10 @@
 			</File>
 			<File
 				RelativePath=".\test\MandatoryValidatorTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\MantidVersion.h"
 				>
 			</File>
 			<File

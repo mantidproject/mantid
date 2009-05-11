@@ -8,6 +8,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <iostream>
@@ -134,23 +135,34 @@ public:
    */
   std::string isValid() const 
   {
-	// If an output workspace it must have a name set.
-    if ( ( this->direction() == Kernel::Direction::Output ) && this->value().empty() ) 
-	{
-		return "Enter a name for the workspace";
-	}
+    //start with the no error condition
+    std::string error = "";
+    // If an output workspace it must have a name set.
+    if ( ( this->direction() == Kernel::Direction::Output ) && this->value().empty() )
+    {
+      //This is the error for users
+      error = "Enter a name for the workspace";
+      //the debug message has more detail to put it in context
+      g_log.debug() << "Problem validating workspace: " << error << std::endl;
+      return error;
+    }
 
-	std::string error = "";
     // If an input (or inout) workspace, must point to something
     if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
     {
       if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) 
-	  {
-		  return "Choose an existing workspace of the correct type";//we could output from this->type() or std::string( typeid(TYPE).name() ) by they are comilier dependent
-	  }
+      {
+        //This user message is quite generic but we had problems storing and retrieving names in the workspace classes
+        error = "Choose an existing workspace of the correct type";
+        //the log has more detail, note that type() calls uses type_info which is implementation dependent
+        g_log.debug() << "Problem validating workspace: " << error << ".  \""
+          << m_workspaceName << "\" is not of type " << type() << std::endl;
+        //return only the user message
+        return error;
+      }
     }
-    // Call superclass method to access any attached validators
-	return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
+    // Call superclass method to access any attached validators (which do their own logging)
+    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
   }
 
   /** Returns the current contents of the AnalysisDataService for input workspaces.
@@ -211,7 +223,13 @@ private:
 
   /// The name of the workspace (as used by the AnalysisDataService)
   std::string m_workspaceName;
+
+  /// for access to logging streams
+  static Kernel::Logger& g_log;
 };
+
+template <typename TYPE>
+Kernel::Logger& WorkspaceProperty<TYPE>::g_log = Kernel::Logger::get("WorkspaceProperty");
 
 } // namespace API
 } // namespace Mantid

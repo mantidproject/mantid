@@ -111,9 +111,6 @@ public:
   /// Destructor
   virtual ~FileValidator() {}
 
-  /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
-  std::string isValid(const std::string &value) const;
-
    ///Return the type of the validator
   const std::string getType() const
   {
@@ -152,6 +149,9 @@ private:
   std::vector<std::string> m_regex_exts; 
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
+
+  /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
+  std::string FileValidator::checkValidity(const std::string &value) const;
 
 };
 

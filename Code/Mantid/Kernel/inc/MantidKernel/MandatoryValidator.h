@@ -45,17 +45,6 @@ class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
 
-  /** Checks if the string is empty
-   *
-   *  @param value the string to test
-   *  @return "A value must be entered for this parameter" if empty or ""
-   */
-  std::string isValid(const TYPE& value) const
-  {
-	  if ( value.empty() ) return "A value must be entered for this parameter";
-	  else return "";
-  }
-
    /** Gets the type name of the validator
    *
    *  @return validator type
@@ -66,6 +55,18 @@ public:
   }
 
   IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }
+
+private:
+  /** Checks if the string is empty
+  *
+  *  @param value the string to test
+  *  @return "A value must be entered for this parameter" if empty or ""
+  */
+  std::string checkValidity(const TYPE& value) const
+  {
+	  if ( value.empty() ) return "A value must be entered for this parameter";
+	  else return "";
+  }
 };
 
 } // namespace Kernel

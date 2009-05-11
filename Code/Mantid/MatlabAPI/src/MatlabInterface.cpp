@@ -600,8 +600,8 @@ namespace
   {
     bool operator()(const Mantid::Kernel::Property * p1, const Mantid::Kernel::Property * p2) const
     {
-      //this is false, unless p1 is valid (i.e. == "") but p2 is not
-		return ( p2->isValid() != "" ) && ( p1->isValid() == "" );
+  		//this is false, unless p1 is not valid and p2 is valid
+	  	return ( p1->isValid() != "" ) && ( p2->isValid() == "" );
     }
   };
 }

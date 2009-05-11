@@ -77,29 +77,6 @@ public:
 	  return "bounded";
   }
 
-   /** Checks that the value is within any upper and lower limits
-   * 
-   *  @param value The value to test
-   *  @returns An error message to display to users or an empty string on no error
-   */
-  std::string isValid(const TYPE &value) const
-{
-	//declare a class that can do conversions to string
-	std::ostringstream error;
-	//load in the "no error" condition
-	error << "";
-	//it is allowed not to have a lower bound, if not then you don't need to check
-	if ( m_hasLowerBound && ( value < m_lowerBound ) )
-	{
-		  error << "Selected value " << value << " is < the lower bound (" << m_lowerBound << ")";
-	}
-	if ( m_hasUpperBound && ( value > m_upperBound ) )
-	{
-		error << "Selected value " << value << " is > the upper bound (" << m_upperBound << ")";
-	}
-	return error.str();
-}
-
   /// Return if it has a lower bound
   bool        hasLower() const { return m_hasLowerBound; }
   /// Return if it has a lower bound
@@ -145,6 +122,30 @@ private:
   TYPE     m_lowerBound;
   ///the upper bound
   TYPE     m_upperBound;
+
+  
+   /** Checks that the value is within any upper and lower limits
+   * 
+   *  @param value The value to test
+   *  @returns An error message to display to users or an empty string on no error
+   */
+  std::string checkValidity(const TYPE &value) const
+  {
+    //declare a class that can do conversions to string
+    std::ostringstream error;
+    //load in the "no error" condition
+    error << "";
+    //it is allowed not to have a lower bound, if not then you don't need to check
+    if ( m_hasLowerBound && ( value < m_lowerBound ) )
+    {
+		  error << "Selected value " << value << " is < the lower bound (" << m_lowerBound << ")";
+    }
+    if ( m_hasUpperBound && ( value > m_upperBound ) )
+    {
+      error << "Selected value " << value << " is > the upper bound (" << m_upperBound << ")";
+    }
+    return error.str();
+  }
 };
 
 } // namespace Kernel

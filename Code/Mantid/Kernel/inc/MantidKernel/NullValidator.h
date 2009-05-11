@@ -41,14 +41,6 @@ template <typename TYPE>
 class DLLExport NullValidator : public IValidator<TYPE>
 {
 public:
-
-   /** Returns an empty string
-   * 
-   *  @param value not used
-   *  @returns an empty string
-   */
-   std::string isValid( const TYPE &value ) const { return ""; }
-
    /** Returns the string "null"
    *
    *  @returns the string "null"
@@ -59,6 +51,13 @@ public:
   }
 
   IValidator<TYPE>* clone() { return new NullValidator(*this); }
+private:
+   /** Returns an empty string
+   * 
+   *  @param value not used
+   *  @returns an empty string
+   */
+   std::string checkValidity( const TYPE &value ) const { return ""; }
 };
 
 } // namespace Kernel

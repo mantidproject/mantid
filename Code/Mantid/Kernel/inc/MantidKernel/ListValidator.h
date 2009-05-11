@@ -55,26 +55,6 @@ public:
   
 	/// Destructor
 	virtual ~ListValidator() {}
-	
-  /** Checks if the string passed is in the list
-   *  @param value The value to test
-   *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
-   */
-  std::string isValid(const std::string &value) const
-  {
-    if ( value.empty() )
-	{
-	  return "Select a value";
-	}
-	if ( m_allowedValues.count(value) )
-    {
-      return "";
-    }
-    else
-    {
-      return "The value \"" + value + "\" is not in the list of allowed values";
-    }
-  }
 
   /// Returns the set of valid values
   const std::set<std::string>& allowedValues() const
@@ -99,6 +79,27 @@ public:
 private:
   /// The set of valid values
   std::set<std::string> m_allowedValues;
+
+  /** Checks if the string passed is in the list
+  *  @param value The value to test
+  *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
+  */
+  std::string checkValidity(const std::string &value) const
+  {
+    if ( value.empty() )
+    {
+      return "Select a value";
+    }
+    if ( m_allowedValues.count(value) )
+    {
+      return "";
+    }
+    else
+    {
+      return "The value \"" + value + "\" is not in the list of allowed values";
+    }
+  }
+
 };
 
 } // namespace Kernel

@@ -270,6 +270,10 @@
 				RelativePath=".\test\WorkspaceSingleValueTest.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\WorkspaceValidatorsTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
