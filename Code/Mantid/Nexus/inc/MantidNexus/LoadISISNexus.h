@@ -87,6 +87,7 @@ namespace Mantid
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
  //     void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void loadMappingTable(DataObjects::Workspace2D_sptr);
+      void loadProtonCharge(DataObjects::Workspace2D_sptr);
  //     void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
@@ -118,6 +119,8 @@ namespace Mantid
       boost::shared_ptr<MantidVec> m_timeChannelsVec;
       /// Counts buffer
       boost::shared_array<int> m_data;
+      /// Proton charge
+      double m_proton_charge;
 
       /// Nexus file id
       NXhandle m_fileID;

@@ -163,6 +163,7 @@ void LoadISISNexus::exec()
             // Only run the sub-algorithms once
             runLoadInstrument(localWorkspace );
             loadMappingTable(localWorkspace );
+            loadProtonCharge(localWorkspace);
 //            runLoadLog(localWorkspace );
         }
         else   // We are working on a higher period of a multiperiod raw file
@@ -396,7 +397,6 @@ void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspac
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
     // Populate the workspace. Loop starts from 1, hence i-1
     localWorkspace->setX(hist, m_timeChannelsVec);
-    localWorkspace->getAxis(1)->spectraNo(hist)= i; //??????
 
     NXclosedata(m_fileID);
 }
@@ -471,8 +471,8 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
         throw std::runtime_error("Error reading UDET");
     };
 
-    NXclosedata(m_fileID);
-    closeNexusGroup();
+    NXclosedata(m_fileID);  // UDET
+    closeNexusGroup(); // isis_vms_compat
 
     openNexusGroup("detector_1","NXdata");
 
@@ -498,12 +498,39 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
         throw std::runtime_error("Error reading spectrum_index");
     };
 
-    NXclosedata(m_fileID);
-    closeNexusGroup();
+    NXclosedata(m_fileID); // spectrum_index
+    closeNexusGroup(); // detector_1
+
+    for(int i=0;i<ndet;i++)
+    {
+        ws->getAxis(1)->spectraNo(i)= spec[i];
+    }
 
     //Populate the Spectra Map with parameters
     ws->mutableSpectraMap().populate(spec.get(),udet.get(),ndet);
 
+}
+
+/**  Loag the proton charge from the file.
+ *   Group /raw_data_1 must be open.
+ */
+void LoadISISNexus::loadProtonCharge(DataObjects::Workspace2D_sptr ws)
+{
+    if (NX_ERROR == NXopendata(m_fileID,"proton_charge"))
+    {
+        g_log.error("Cannot open proton_charge");
+        throw std::runtime_error("Cannot open proton_charge");
+    };
+
+    if (NX_ERROR == NXgetdata(m_fileID,&m_proton_charge))
+    {
+        g_log.error("Error reading proton_charge");
+        throw std::runtime_error("Error reading proton_charge");
+    };
+
+    ws->getSample()->setProtonCharge(m_proton_charge);
+
+    NXclosedata(m_fileID);
 }
 
 double LoadISISNexus::dblSqrt(double in)
