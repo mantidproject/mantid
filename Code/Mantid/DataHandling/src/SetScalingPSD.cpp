@@ -196,15 +196,24 @@ namespace Algorithms
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
+                  {
                       scaleMap[detIndex-1]=scale;
+                  }
                   else
                   {
                       if(m_scalingOption==0)
                           its->second=0.5*(its->second+scale); //average of two 
                       else if(m_scalingOption==1)
-                          its->second=max(its->second,scale); // max
+                      {
+                          if(its->second < scale)
+                              its->second=scale; //max
+                      }
                       else if(m_scalingOption==2)
-                          its->second=1.05*max(its->second,scale); // max+5%
+                      {
+                          if(its->second < scale)
+                              its->second=scale;
+                          its->second *= 1.05;  // max+5%
+                      }
                       else
                           its->second=3.0; // crazy test value
                   }
