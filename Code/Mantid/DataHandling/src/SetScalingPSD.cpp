@@ -45,6 +45,9 @@ namespace Algorithms
     declareProperty("ScalingFilename","",new FileValidator(exts));
     //declareProperty(new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator));
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut));
+    BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+    mustBePositive->setLower(0);
+    declareProperty("scalingOption",0, mustBePositive);
   }
 
   /** Executes the algorithm.
@@ -57,6 +60,7 @@ namespace Algorithms
     m_filename = getPropertyValue("ScalingFilename");
     //m_workspace = getPropertyValue("Workspace");
     m_workspace = getProperty("Workspace");
+    m_scalingOption = getProperty("scalingOption");
     std::vector<Geometry::V3D> truepos;
     processScalingFile(m_filename,truepos);
     //calculateDetectorShifts(truepos);
@@ -194,7 +198,16 @@ namespace Algorithms
                   if(its==scaleMap.end())
                       scaleMap[detIndex-1]=scale;
                   else
-                      its->second=0.5*(its->second+scale);
+                  {
+                      if(m_scalingOption==0)
+                          its->second=0.5*(its->second+scale); //average of two 
+                      else if(m_scalingOption==1)
+                          its->second=max(its->second,scale); // max
+                      else if(m_scalingOption==2)
+                          its->second=1.05*max(its->second,scale); // max+5%
+                      else
+                          its->second=3.0; // crazy test value
+                  }
                   //std::cout << detIndex << scale << scaleDir << std::endl;
               }
               detIdLast=detID[i];

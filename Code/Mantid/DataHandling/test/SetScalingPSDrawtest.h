@@ -61,6 +61,7 @@ public:
     // get scaling from raw file
     alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/MER02257.raw");
     alg.setPropertyValue("Workspace", "testWS");
+       alg.setPropertyValue("scalingOption", "2");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare("testWS"));
@@ -144,6 +145,22 @@ public:
          std::cout << "id=" << id1 << " pos=" << pos1 << std::endl;
       }
 */
+      // get pointer to the second detector in bank 2
+      boost::shared_ptr<IComponent> 
+             comp2 = (*boost::dynamic_pointer_cast<ICompAssembly>(
+                       (*boost::dynamic_pointer_cast<ICompAssembly>(
+                          (*boost::dynamic_pointer_cast<ICompAssembly>(
+                                (*boost::dynamic_pointer_cast<ICompAssembly>(inst))[3]))[0]))[0]))[1];
+
+      boost::shared_ptr<IDetector> det2 = boost::dynamic_pointer_cast<IDetector>(comp2);
+      id=det2->getID();
+      TS_ASSERT_EQUALS(2110002,id);
+      pos = det2->getPos();
+      expectedPos = V3D(-1.00000628,-1.5105951,2.291297);
+      TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
+      sa=det2->solidAngle(V3D(0,0,0));
+      //TS_ASSERT_DELTA(sa,2.188361e-5,1e-10)
+      TS_ASSERT_DELTA(sa,7.833662e-6,1e-10)
   }
 
 private:
