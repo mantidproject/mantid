@@ -63,7 +63,7 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "General";}
+      virtual const std::string category() const { return "DataHandling\\Detectors";}
 
     private:
 
@@ -77,7 +77,7 @@ namespace Mantid
       std::string m_filename;
       bool processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truePos);
       API::MatrixWorkspace_sptr m_workspace; ///< Pointer to the workspace
-      void runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift);
+      //void runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift);
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

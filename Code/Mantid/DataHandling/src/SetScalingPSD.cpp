@@ -64,10 +64,10 @@ namespace Algorithms
     return;
   }
 
-  /// Read the scaling information from a file (e.g. merlin_detector.sca)
+  /// Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
   bool SetScalingPSD::processScalingFile(const std::string& scalingFile, std::vector<Geometry::V3D>& truepos)
   {
-      // Read the scaling information from a file (e.g. merlin_detector.sca)
+      // Read the scaling information from a text file (.sca extension) or from a raw file (.raw)
       // This is really corrected positions as (r,theta,phi) for each detector
       // Compare these with the instrument values to determine the change in position and the scaling
       // which may be necessary for each pixel if in a tube.
@@ -80,6 +80,9 @@ namespace Algorithms
       IInstrument_const_sptr instrument = m_workspace->getInstrument();
       if(scalingFile.find(".sca")!=std::string::npos || scalingFile.find(".SCA")!=std::string::npos)
       {
+          // read a .sca text format file
+          // format consists of a short header followed by one line per detector
+
           std::ifstream sFile(scalingFile.c_str());
           if (!sFile)
           {
@@ -101,28 +104,46 @@ namespace Algorithms
           getline(sFile,str); // skip title line
           int detIdLast=-10;
           Geometry:: V3D truPosLast,detPosLast;
+
+          // Now loop through lines, one for each detector/monitor. The latter are ignored.
+
           while(getline(sFile,str))
           {
               if (str.empty() || str[0] == '#') continue;
               std::istringstream istr(str);
+
+              // read 6 values from the line to get the 3 (l2,theta,phi) of interest
               int detIndex,code;
               double l2,theta,phi,offset;
               istr >> detIndex >> offset >> l2 >> code >> theta >> phi;
+
+              // sanity check on angles - l2 should be +ve but sample file has a few -ve values
+              // on monitors
+              if(theta > 181.0 || theta < -1 || phi < -181 || phi > 181)
+              {
+                  g_log.error("Position angle data out of range in .sca file");
+                  throw std::runtime_error("Position angle data out of range in .sca file"); 
+              }
               Geometry::V3D truPos;
               // use abs as correction file has -ve l2 for first few detectors
               truPos.spherical(fabs(l2),theta,phi);
               truepos.push_back(truPos);
-              //Geometry::IDetector_const_sptr det = m_workspace->getDetector(detIndex);
+              //
               Geometry::IDetector_const_sptr det = instrument->getDetector(detIndex);
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truPos-detPos;
               double scale=1.0;
-              if(detIdLast==detIndex-1 && detIndex>100) // merlin monitors are <100, dets >100
+
+              // scaling applied to dets that are not monitors and have sequential IDs
+              if(detIdLast==detIndex-1 && !det->isMonitor())
               {
                   Geometry::V3D diffI=detPos-detPosLast;
                   Geometry::V3D diffT=truPos-truPosLast;
                   scale=diffT.norm()/diffI.norm();
                   Geometry::V3D scaleDir=diffT/diffT.norm();
+                  // Wish to store the scaling in a map, if we already have a scaling
+                  // for this detector (i.e. from the other side) we average the two
+                  // values. End of tube detectors only have one scaling estimate.
                   scaleMap[detIndex]=scale;
                   its=scaleMap.find(detIndex-1);
                   if(its==scaleMap.end())
@@ -135,7 +156,7 @@ namespace Algorithms
               detPosLast=detPos;
               truPosLast=truPos;
               posMap[detIndex]=shift;
-              //runMoveInstrumentComp(detIndex,shift);
+              //
           }
       }
       else if(scalingFile.find(".raw")!=std::string::npos || scalingFile.find(".RAW")!=std::string::npos )
@@ -177,9 +198,9 @@ namespace Algorithms
               detPosLast=detPos;
               truPosLast=truepos[i];
               posMap[detIndex]=shift;
-              // read from raw TODO
+              //
           }
-      }    
+      }
       movePos( m_workspace, posMap, scaleMap);
       return true;
   }
@@ -188,7 +209,7 @@ namespace Algorithms
  *  but is too slow on a large instrument like Merlin.
  *  @param detIndex The detector ID to move
  *  @param shift    The vector to move the detector by
- */
+ 
 void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift)
 {
    IAlgorithm_sptr moveInstruComp = createSubAlgorithm("MoveInstrumentComponent");
@@ -213,6 +234,7 @@ void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V
       g_log.information("Unable to successfully run moveIntrumentComp sub-algorithm");
    }
 }
+*/
 
 
 void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,
@@ -229,6 +251,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
   m_vectDet.reserve(posMap.size());
   findAll(inst);
 
+  double scale,maxScale=-1e6,minScale=1e6,aveScale=0.0;
+  int scaleCount=0;
   // loop over detector (IComps)
   for(size_t id=0;id<m_vectDet.size();id++)
   {
@@ -277,20 +301,20 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
       std::map<int,double>::iterator it=scaleMap.find(idet);
       if(it!=scaleMap.end())
       {
+          scale=it->second;
+          if(minScale>scale) minScale=scale;
+          if(maxScale<scale) maxScale=scale;
+          aveScale+=fabs(1.0-scale);
+          scaleCount++;
           par = pmap->get(baseComp,"sca");
           if (par) par->set(V3D(1.0,it->second,1.0));
           else
               pmap->addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
       }
       //
-      // scale the object, for now just in the IObjComponent, not in the pmap
-      //
-      //if(it!=scaleMap.end())
-      //{
-      //   baseObjComp->setScaleFactor(1.0,it->second,1.0);
-      //}
   }
-
+  g_log.debug() << "Range of scaling factors is " << minScale << " to " << maxScale << "\n"
+                << "Average abs scaling fraction is " << aveScale/scaleCount << "\n";
   return;
 }
 
