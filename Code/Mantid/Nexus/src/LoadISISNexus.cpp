@@ -8,11 +8,14 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/LogParser.h"
 
 #include "Poco/Path.h"
 
 #include <cmath>
 #include <sstream>
+#include <cctype>
 
 namespace Mantid
 {
@@ -121,6 +124,7 @@ void LoadISISNexus::exec()
     // Set the unit on the workspace to TOF
     localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
+    Progress prog(this,0.,1.,total_specs*m_numberOfPeriods);
     // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
     for (int period = 0; period < m_numberOfPeriods; ++period) {
 
@@ -130,7 +134,7 @@ void LoadISISNexus::exec()
             runLoadInstrument(localWorkspace );
             loadMappingTable(localWorkspace );
             loadProtonCharge(localWorkspace);
-//            runLoadLog(localWorkspace );
+            loadLogs(localWorkspace );
         }
         else   // We are working on a higher period of a multiperiod file
         {
@@ -148,7 +152,7 @@ void LoadISISNexus::exec()
             std::string WSName = localWSName + "_" + suffix.str();
             declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
             g_log.information() << "Workspace " << WSName << " created. \n";
-//            runLoadLog(localWorkspace );
+            loadLogs(localWorkspace ,period);
         }
 
         openNexusGroup("detector_1","NXdata");
@@ -158,6 +162,7 @@ void LoadISISNexus::exec()
         {
             loadData(period, counter,i,localWorkspace ); // added -1 for NeXus
             counter++;
+            prog.report();
         }
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
@@ -166,6 +171,7 @@ void LoadISISNexus::exec()
             {
                 loadData(period, counter,m_spec_list[i],localWorkspace );
                 counter++;
+                prog.report();
             }
         }
 
@@ -292,8 +298,8 @@ void LoadISISNexus::openNexusGroup(const std::string& name, const std::string& n
     //int stat = NX_OK;
     //while(stat != NX_EOD)
     //{
-    //    stat=NXgetnextentry(m_fileID,nxname,nxclass,&nxdatatype);
-    //    std::cerr<<nxname<<"  "<<nxclass<<"  "<<nxdatatype<<"\n";
+    //    stat=NXgetnextentry(m_fileID,nxname.get(),nxclass.get(),&nxdatatype);
+    //    std::cerr<<nxname.get()<<"  "<<nxclass.get()<<"  "<<nxdatatype<<"\n";
     //}
     //std::cerr<<'\n';
 }
@@ -304,15 +310,46 @@ void LoadISISNexus::closeNexusGroup()const
     NXclosegroup(m_fileID);
 }
 
+/// Opens a Nexus data set
+void LoadISISNexus::openNexusData(const std::string& name)
+{
+    if (NX_ERROR == NXopendata(m_fileID,name.c_str()))
+    {
+        g_log.error("Cannot open "+name);
+        throw std::runtime_error("Cannot open "+name);
+    };
+}
+
+/// Close a Nexus data set
+void LoadISISNexus::closeNexusData()
+{
+    NXclosedata(m_fileID);
+}
+
+/// Get the data from Nexus
+void LoadISISNexus::getNexusData(void* p)
+{
+    if (NX_ERROR == NXgetdata(m_fileID,p))
+    {
+        g_log.error("Error reading data");
+        throw std::runtime_error("Error reading data");
+    };
+}
+
+/// Get info for the open data set
+NexusInfo LoadISISNexus::getNexusInfo()
+{
+    NexusInfo info;
+    NXgetinfo(m_fileID,&info.rank,info.dims,&info.type);
+    return info;
+}
+
 /** Group /raw_data_1/detector_1 must be open to call this function
  */
 void LoadISISNexus::readDataDimensions()
 {
-    if (NX_ERROR == NXopendata(m_fileID,"counts"))
-    {
-        g_log.error("Cannot open data counts");
-        throw std::runtime_error("Cannot open data counts");
-    };
+    openNexusData("counts");
+
     int rank,type,dims[4];
     NXgetinfo(m_fileID,&rank,dims,&type);
 
@@ -324,18 +361,15 @@ void LoadISISNexus::readDataDimensions()
     // Allocate memory for the counts buffer
     m_data.reset( new int[m_numberOfChannels] );
 
-    NXclosedata(m_fileID);
+    closeNexusData();
 }
 
 void LoadISISNexus::getTimeChannels()
 {
     boost::shared_array<float> timeChannels( new float[m_numberOfChannels + 1] );
 
-    if (NX_ERROR == NXopendata(m_fileID,"time_of_flight"))
-    {
-        g_log.error("Cannot open data time_of_flight");
-        throw std::runtime_error("Cannot open data time_of_flight");
-    };
+    openNexusData("time_of_flight");
+
     int rank,type,dims[4];
     NXgetinfo(m_fileID,&rank,dims,&type);
 
@@ -353,26 +387,25 @@ void LoadISISNexus::getTimeChannels()
 
     m_timeChannelsVec.reset(new MantidVec(timeChannels.get(), timeChannels.get() + m_numberOfChannels + 1));
 
-    NXclosedata(m_fileID);
+    closeNexusData();
 }
 
 /** Group /raw_data_1/detector_1 must be open to call this function.
  *  loadMappingTable() must be done before any calls to this method.
+ *  @param period The data period
+ *  @param hist The index of the histogram in the workspace
+ *  @param i The index of the histogram in the file
  */
 void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspace2D_sptr localWorkspace)
 {
-    if (NX_ERROR == NXopendata(m_fileID,"counts"))
-    {
-        g_log.error("Cannot open data counts");
-        throw std::runtime_error("Cannot open data counts");
-    };
+    openNexusData("counts");
 
     int rank,type,dims[4];
     NXgetinfo(m_fileID,&rank,dims,&type);
 
     int start[3], size[3];
     start[0] = period;
-    start[1] = hist;
+    start[1] = i;
     start[2] = 0;
 
     size[0] = 1;
@@ -394,7 +427,7 @@ void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspac
     localWorkspace->setX(hist, m_timeChannelsVec);
     localWorkspace->getAxis(1)->spectraNo(hist)= m_spec[i];
 
-    NXclosedata(m_fileID);
+    closeNexusData();
 }
 
 /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
@@ -448,11 +481,7 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
     // Read in detector ids from isis compatibility section
     openNexusGroup("isis_vms_compat","IXvms");
 
-    if (NX_ERROR == NXopendata(m_fileID,"UDET"))
-    {
-        g_log.error("Cannot open UDET");
-        throw std::runtime_error("Cannot open UDET");
-    };
+    openNexusData("UDET");
 
     int rank,type,dims[4];
     NXgetinfo(m_fileID,&rank,dims,&type);
@@ -461,22 +490,15 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
 
     boost::shared_array<int> udet(new int[ndet]);
 
-    if (NX_ERROR == NXgetdata(m_fileID,udet.get()))
-    {
-        g_log.error("Error reading UDET");
-        throw std::runtime_error("Error reading UDET");
-    };
+    getNexusData(udet.get());
 
-    NXclosedata(m_fileID);  // UDET
+    closeNexusData();  // UDET
+
     closeNexusGroup(); // isis_vms_compat
 
     openNexusGroup("detector_1","NXdata");
 
-    if (NX_ERROR == NXopendata(m_fileID,"spectrum_index"))
-    {
-        g_log.error("Cannot open spectrum_index");
-        throw std::runtime_error("Cannot open spectrum_index");
-    };
+    openNexusData("spectrum_index");
 
     NXgetinfo(m_fileID,&rank,dims,&type);
 
@@ -488,13 +510,9 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
 
     m_spec.reset(new int[ndet]);
 
-    if (NX_ERROR == NXgetdata(m_fileID,m_spec.get()))
-    {
-        g_log.error("Error reading spectrum_index");
-        throw std::runtime_error("Error reading spectrum_index");
-    };
+    getNexusData(m_spec.get());
 
-    NXclosedata(m_fileID); // spectrum_index
+    closeNexusData(); // spectrum_index
     closeNexusGroup(); // detector_1
 
     //Populate the Spectra Map with parameters
@@ -507,21 +525,131 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
  */
 void LoadISISNexus::loadProtonCharge(DataObjects::Workspace2D_sptr ws)
 {
-    if (NX_ERROR == NXopendata(m_fileID,"proton_charge"))
+    openNexusData("proton_charge");
     {
-        g_log.error("Cannot open proton_charge");
-        throw std::runtime_error("Cannot open proton_charge");
-    };
+        getNexusData(&m_proton_charge);
+        ws->getSample()->setProtonCharge(m_proton_charge);
+    }
+    closeNexusData();
 
-    if (NX_ERROR == NXgetdata(m_fileID,&m_proton_charge))
+    openNexusGroup("sample","NXsample");
+    std::string sample_name = getNexusString("name");
+    ws->getSample()->setName(sample_name);
+    closeNexusGroup();
+}
+
+/**  Load logs from Nexus file. Logs are expected to be in
+ *   /raw_data_1/runlog group of the file. Call to this method must be done
+ *   within /raw_data_1 group.
+ *   @param ws The workspace to load the logs to.
+ *   @period The period of this workspace
+ */
+void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
+{
+
+    std::string stime = getNexusString("start_time");
+    time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(stime);
+
+    openNexusGroup("runlog","IXrunlog"); // open group - collection of logs
+
+    boost::shared_array<char> nxname( new char[NX_MAXNAMELEN] );
+    boost::shared_array<char> nxclass( new char[NX_MAXNAMELEN] );
+    int nxdatatype;
+
+    int stat = NX_OK;
+    while(stat != NX_EOD)
     {
-        g_log.error("Error reading proton_charge");
-        throw std::runtime_error("Error reading proton_charge");
-    };
+        stat=NXgetnextentry(m_fileID,nxname.get(),nxclass.get(),&nxdatatype);
 
-    ws->getSample()->setProtonCharge(m_proton_charge);
+        openNexusGroup(nxname.get(),nxclass.get()); // open a log group 
+        {
+            try
+            {
+                NexusInfo tinfo;
+                boost::shared_array<float> times;
 
-    NXclosedata(m_fileID);
+                openNexusData("time");
+                {
+                    tinfo = getNexusInfo();
+                    if (tinfo.dims[0] < 0) throw std::runtime_error(""); // goto the next log
+                    times.reset(new float[tinfo.dims[0]]);
+                    getNexusData(times.get());
+                }
+                closeNexusData();
+
+                openNexusData("value");
+                {
+                    NexusInfo vinfo = getNexusInfo();
+                    if (vinfo.dims[0] != tinfo.dims[0]) throw std::runtime_error(""); // goto the next log
+
+                    if (vinfo.type == NX_CHAR)
+                    {
+                        Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(nxname.get());
+                        boost::shared_array<char> value(new char[vinfo.dims[0] * vinfo.dims[1]]);
+                        getNexusData(value.get());
+                        for(int i=0;i<vinfo.dims[0];i++)
+                        {
+                            time_t t = start_t + int(times[i]);
+                            for(int j=0;j<vinfo.dims[1];j++)
+                            {
+                                char* c = value.get()+i*vinfo.dims[1] + j;
+                                if (!isprint(*c)) *c = ' ';
+                            }
+                            *(value.get()+(i+1)*vinfo.dims[1]-1) = 0; // ensure the terminating zero
+                            logv->addValue(t,std::string(value.get()+i*vinfo.dims[1]));
+                        }
+                        ws->getSample()->addLogData(logv);
+                        if (std::string(nxname.get()) == "icp_event")
+                        {
+                            LogParser parser(logv);
+                            ws->getSample()->addLogData(parser.createPeriodLog(period));
+                            ws->getSample()->addLogData(parser.createAllPeriodsLog());
+                            ws->getSample()->addLogData(parser.createRunningLog());
+                        }
+                    }
+                    else if (vinfo.type == NX_FLOAT32)
+                    {
+                        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(nxname.get());
+                        boost::shared_array<float> value(new float[vinfo.dims[0]]);
+                        getNexusData(value.get());
+                        for(int i=0;i<vinfo.dims[0];i++)
+                        {
+                            time_t t = start_t + int(times[i]);
+                            logv->addValue(t,value[i]);
+                        }
+                        ws->getSample()->addLogData(logv);
+                    }
+                    else if (vinfo.type == NX_INT32)
+                    {
+                        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(nxname.get());
+                        boost::shared_array<int> value(new int[vinfo.dims[0]]);
+                        getNexusData(value.get());
+                        for(int i=0;i<vinfo.dims[0];i++)
+                        {
+                            time_t t = start_t + int(times[i]);
+                            logv->addValue(t,value[i]);
+                        }
+                        ws->getSample()->addLogData(logv);
+                    }
+                    else
+                    {
+                        g_log.error()<<"Cannot read log data of this type ("<<vinfo.type<<")\n";
+                        throw std::runtime_error("Cannot read log data of this type");
+                    }
+
+
+                }
+                closeNexusData();  // value
+            }
+            catch(...)
+            {
+                closeNexusData();
+            }
+        }
+        closeNexusGroup();
+    } // loop over logs
+
+    closeNexusGroup();
 }
 
 double LoadISISNexus::dblSqrt(double in)

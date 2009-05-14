@@ -241,6 +241,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LogParser.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MatrixWorkspace.cpp"
 				>
 			</File>
@@ -428,6 +432,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\LocatedDataValue.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\LogParser.h"
 				>
 			</File>
 			<File

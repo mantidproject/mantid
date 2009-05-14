@@ -64,11 +64,11 @@ public:
       @param start Starting progress
       @param end   Ending progress
       @param n     Number of times report(...) method will be called. 
-      @param step  A step with which report(...) method actually sends the notification.
+      @param step  The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int n, int step=1)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(step),m_dp((end-start)/(n-1)),m_i(0)
-  {}
+    :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(n*step/100/(end-start)),m_dp((end-start)/(n-1)),m_i(0)
+  {if (m_step <= 0) m_step = 1;}
   
   /** Creates a Progress instance
       @param alg    Algorithm reporting its progress
@@ -76,11 +76,11 @@ public:
       @param end    Ending progress
       @param ifirst Initial value of the loop counter
       @param n      Upper bound for the loop counter
-      @param step   A step with which report(...) method actually sends the notification.
+      @param step   The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step(step),m_dp((end-start)/(n-1)),m_i(ifirst)
-  {}
+    :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step((n-ifirst)*step/100/(end-start)),m_dp((end-start)/(n-1)),m_i(ifirst)
+  {if (m_step <= 0) m_step = 1;}
   
   void report(const std::string& msg = "");
   void report(int i,const std::string& msg = "");
@@ -91,7 +91,7 @@ private:
   const double m_end;      ///< Ending progress
   const int m_ifirst;      ///< Loop counter initial value
   const int m_n;           ///< Loop counter upper bound
-  const int m_step;        ///< Frequency of sending the notification (every m_step times)
+  int m_step;        ///< Frequency of sending the notification (every m_step times)
   const double m_dp;       ///< Progress increment at each loop
   int m_i;           ///< Loop counter
 };

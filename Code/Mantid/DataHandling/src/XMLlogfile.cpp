@@ -6,7 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muParser.h>
 #include <ctime>
-#include "MantidDataHandling/LogParser.h"
+#include "MantidAPI/LogParser.h"
 
 namespace Mantid
 {

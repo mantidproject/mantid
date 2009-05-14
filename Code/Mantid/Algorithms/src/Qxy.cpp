@@ -61,7 +61,7 @@ void Qxy::exec()
   
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
   // Set up the progress reporting object
-  Progress progress(this,0.0,1.0,numSpec,100);
+  Progress progress(this,0.0,1.0,numSpec);
   
   for (int i = 0; i < numSpec; ++i)
   {

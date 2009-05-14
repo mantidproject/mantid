@@ -463,7 +463,6 @@ public:
    */
   std::string isValid() const { return ""; }
 
-private:
   /// Create time_t instance from a ISO 8601 yyyy-mm-ddThh:mm:ss input string
   static std::time_t createTime_t_FromString(const std::string &str)
   {

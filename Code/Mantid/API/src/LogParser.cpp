@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LogParser.h"
+#include "MantidAPI/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <fstream>  // used to get ifstream
@@ -11,7 +11,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace API
 {
 
 Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
@@ -97,6 +97,73 @@ LogParser::LogParser(const std::string& eventFName)
     if (status->size() == 0) status->addValue(start_time,true);
 
 }
+
+/// Create given the icpevent log property
+LogParser::LogParser(const Kernel::Property* log)
+:m_nOfPeriods(1)
+{
+    Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> ("periods");
+    Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> ("running");
+    m_periods = periods;
+    m_status = status;
+
+    const Kernel::TimeSeriesProperty<std::string>* icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string>*>(log);
+    if (!icpLog || icpLog->size() == 0)
+    {
+        periods->addValue(Kernel::dateAndTime(),1);
+        status->addValue(Kernel::dateAndTime(),true);
+        g_log.warning()<<"Cannot process ICPevent log. Period 1 assumed for all data.\n";
+        return;
+    }
+
+    /// Command map. BEGIN means start recording, END is stop recording, CHANGE_PERIOD - the period changed
+    std::map<std::string,commands> command_map;
+    command_map["BEGIN"] = BEGIN;
+    command_map["RESUME"] = BEGIN;
+    command_map["END_SE_WAIT"] = BEGIN;
+    command_map["PAUSE"] = END;
+    command_map["END"] = END;
+    command_map["ABORT"] = END;
+    command_map["UPDATE"] = END;
+    command_map["START_SE_WAIT"] = END;
+    command_map["CHANGE"] = CHANGE_PERIOD;
+
+    m_nOfPeriods = 1;
+
+    std::map<Kernel::dateAndTime, std::string> logm = icpLog->valueAsMap();
+    std::map<Kernel::dateAndTime, std::string>::const_iterator it = logm.begin();
+    
+    for(;it!=logm.end();it++)
+    {
+        std::string scom;
+        std::istringstream idata(it->second);
+        idata >> scom;
+        commands com = command_map[scom];
+        if (com == CHANGE_PERIOD)
+        {
+            int ip = -1;
+            std::string s;
+            idata >> s >> ip;
+            if (ip > 0 && s == "PERIOD")
+            {
+                if (ip > m_nOfPeriods) m_nOfPeriods = ip;
+                periods->addValue(it->first,ip);
+            }
+        }
+        else if (com == BEGIN)
+        {
+            status->addValue(it->first,true);
+        }
+        else if (com == END)
+        {
+            status->addValue(it->first,false);
+        }
+    };
+
+    if (periods->size() == 0) periods->addValue(icpLog->firstTime(),1);
+    if (status->size() == 0) status->addValue(icpLog->firstTime(),true);
+}
+
 
 /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
      @param logFName The name of the log file

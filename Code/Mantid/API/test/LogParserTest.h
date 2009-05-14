@@ -6,13 +6,13 @@
 #include <iostream>
 #include <fstream>
 
-#include "MantidDataHandling/LogParser.h"
+#include "MantidAPI/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "Poco/File.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
+using namespace Mantid::API;
 
 class LogParserTest : public CxxTest::TestSuite
 {

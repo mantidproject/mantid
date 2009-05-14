@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include <map>
 #include <vector>
@@ -24,9 +25,9 @@ namespace Kernel
     class Property;
 }
 
-namespace DataHandling
+namespace API
 {
-/** @class LogParser LogParser.h DataHandling/LogParser.h
+/** @class LogParser LogParser.h API/LogParser.h
 
 LogParser parses the instrument log files to select records corresponding
 to 'RUNNING' instrument status. It determines the values of the logged variables
@@ -57,22 +58,24 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#ifdef _WIN32
-#ifdef IN_MANTID_DATA_HANDLING
-  #define LogParser_DllExport __declspec( dllexport )
-#else
-  #define LogParser_DllExport __declspec( dllimport )
-#endif
-#else
-  #define LogParser_DllExport
-  #define LogParser_DllImport
-#endif
+//#ifdef _WIN32
+//#ifdef IN_MANTID_DATA_HANDLING
+//  #define LogParser_DllExport __declspec( dllexport )
+//#else
+//  #define LogParser_DllExport __declspec( dllimport )
+//#endif
+//#else
+//  #define LogParser_DllExport
+//  #define LogParser_DllImport
+//#endif
 
-class LogParser_DllExport LogParser
+class DLLExport LogParser
 {
 public:
     /// Create given the icpevent file name
     LogParser(const std::string& eventFName);
+    /// Create given the icpevent log property
+    LogParser(const Kernel::Property* log);
     /// Destructor
     ~LogParser();
 
@@ -108,10 +111,10 @@ private:
 };
 
 /// Returns the mean value if the property is TimeSeriesProperty<double>
-double LogParser_DllExport timeMean(const Kernel::Property* p);
+double DLLExport timeMean(const Kernel::Property* p);
 
 
-} // namespace DataHandling
+} // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_API_LOGPARSER_H_*/

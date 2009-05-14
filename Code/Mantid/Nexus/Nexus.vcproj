@@ -232,6 +232,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadISISNexusTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidNexus\LoadMuonLog.h"
 				>
 			</File>

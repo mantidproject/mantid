@@ -70,7 +70,7 @@ namespace Mantid
       }
 
       // Initialise the progress reporting object
-      m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms(),100);
+      m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());
       
       // There are now 4 possible scenarios, shown schematically here:
       // xxx x   xxx xxx   xxx xxx   xxx x

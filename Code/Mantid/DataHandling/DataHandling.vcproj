@@ -249,10 +249,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LogParser.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ManagedRawFileWorkspace2D.cpp"
 				>
 			</File>
@@ -412,10 +408,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRKH.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidDataHandling\LogParser.h"
 				>
 			</File>
 			<File

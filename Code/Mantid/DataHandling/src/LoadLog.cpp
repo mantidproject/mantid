@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/LogParser.h"
+#include "MantidAPI/LogParser.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -207,7 +207,7 @@ void LoadLog::exec()
       }
   }
 
-  LogParser parser(icpevent_file_name);
+  API::LogParser parser(icpevent_file_name);
 
   // Add mantid-created logs
   Property* log = parser.createPeriodLog(Period);
