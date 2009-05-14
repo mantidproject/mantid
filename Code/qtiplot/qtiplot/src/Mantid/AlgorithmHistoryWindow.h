@@ -25,6 +25,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/MantidQtDialog.h"
 #include "../ApplicationWindow.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -137,8 +138,10 @@ private:
 	const QString& getAlgorithmName() const;
 	void setAlgorithmVersion(const int& version);
 	const int& getAlgorithmVersion()const;
+	static Mantid::Kernel::Logger& g_log;
+	
 private:
-	std::vector<Mantid::API::AlgorithmHistory>m_algHist;
+	vector<AlgorithmHistory>m_algHist;
 	QPushButton *m_scriptButton;
 	AlgHistoryTreeWidget *m_Historytree;
 	AlgHistoryProperties * m_histPropWindow; 

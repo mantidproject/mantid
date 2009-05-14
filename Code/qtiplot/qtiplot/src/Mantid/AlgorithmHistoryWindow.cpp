@@ -1,5 +1,7 @@
 #include "AlgorithmHistoryWindow.h"
 #include "QMessageBox"
+// Get a reference to the logger
+Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w):QGroupBox(title,w),
 m_execDurationlabel(NULL),m_execDurationEdit(NULL),m_Datelabel(NULL),m_execDateTimeEdit(NULL),
@@ -268,72 +270,92 @@ void AlgorithmHistoryWindow::handleException( const exception& e )
 }
 void AlgorithmHistoryWindow::generateScript()
 {	
-	QString algName("");
 	string algParam("");
+	//QString tempScript("");
+	string tempScript("");
 	QString script("");
 	int nVersion=-1;
 	vector<Property*> algPropUnmngd;
 	vector<Property*>::const_iterator itUmnngd;
 	vector<PropertyHistory>algHistProp;
-	if(m_Historytree)
+	IAlgorithm_sptr  ialg_Sptr;
+	
+	typedef map <unsigned int,string> orderedHistMap;
+	orderedHistMap ordMap;
+	
+	//getting the properties from the algorithmhistory
+	for (vector <AlgorithmHistory>::const_iterator algHistIter=m_algHist.begin( );
+		algHistIter!=m_algHist.end();algHistIter++)
 	{
-		algName=getAlgorithmName();
-		nVersion=getAlgorithmVersion();
-	}
-	//creating an unmanaged instance of the selected algorithm
-	//this is bcoz algorith history is giving dynamically generated workspaces for some 
-	//algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
-	//To eliminate the dynamically generated parameters unmanged instances created and compared with it.
-	IAlgorithm_sptr  ialg_Sptr= AlgorithmManager::Instance().createUnmanaged(algName.toStdString(),nVersion);
-	if(ialg_Sptr)
-	{	ialg_Sptr->initialize();
-		algPropUnmngd= ialg_Sptr->getProperties();
-		itUmnngd=algPropUnmngd.begin();
-	}
-	//getting the properties for the selected algorithm from the algorithhistory
-	for (vector <AlgorithmHistory>::reverse_iterator ralgHistIter=m_algHist.rbegin( );
-		ralgHistIter!=m_algHist.rend();ralgHistIter++)
-	{
-		algHistProp=(*ralgHistIter).getProperties();
-		string name=(*ralgHistIter).name();
-		if(name==algName.toStdString()&&nVersion==(*ralgHistIter).version())
-			break;  
+		algHistProp=(*algHistIter).getProperties();
+		string name=(*algHistIter).name();
+		int nVersion=(*algHistIter).version();
+		int nexecCount=(*algHistIter).execCount();
+		g_log.error() << "mantid Plot" <<" " << name <<nexecCount << " " << std::endl;
+		//creating an unmanaged instance of the selected algorithm
+		//this is bcoz algorith history is giving dynamically generated workspaces for some 
+		//algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
+		//To eliminate the dynamically generated parameters unmanged instances created and compared with it.
+						
+			ialg_Sptr= AlgorithmManager::Instance().createUnmanaged(name,nVersion);
+			if(ialg_Sptr)
+			{	
+				ialg_Sptr->initialize();
+				algPropUnmngd= ialg_Sptr->getProperties();
+				itUmnngd=algPropUnmngd.begin();
+			}
+			//iterating through the properties
+			for (vector<PropertyHistory>::const_iterator propIter = algHistProp.begin();
+				propIter != algHistProp.end(); ++propIter )
+			{ 
+				string name= (*propIter).name();
+				string value=(*propIter).value();
+				bool bdefault=(*propIter).isDefault();
+				//if it's not a default property  add it to 
+				//algorithm parameters to form the script
+				if(!bdefault)
+				{
+					//if the property name obtained by unmanaged instance of the algorithm
+					//is same as the algorithm history property add it to algParam string
+					//to generate script
+					if (name==(*itUmnngd)->name())
+					{
+						string sanitisedname=sanitizePropertyName(name);
+						algParam+=sanitisedname;
+						algParam+="=\"";
+						algParam+=value;
+						algParam+="\",";
+					}
+				}
+
+				itUmnngd++;
+				if(itUmnngd==algPropUnmngd.end())
+					break;
+			} //end of properties loop
+
+			//erasing the last "," from the parameter list
+			//as concatenation is done in loop last "," is erasing 
+			int nIndex=algParam.find_last_of(",");
+			if(string::npos!=nIndex)
+				algParam=algParam.erase(nIndex);
+			//script string
+			tempScript=tempScript+name+"(";
+			tempScript=tempScript+algParam+")";
+			tempScript+="\n";
+			//string str=tempScript.toStdString();
+           // writing to map for ordering by execution count
+            ordMap.insert(orderedHistMap::value_type(nexecCount,tempScript));
+			tempScript.clear();
+			algParam.clear();
+				
 	}//end of algorithm history for loop
 
-	//iterating through the properties
-	for (vector<PropertyHistory>::const_iterator propIter = algHistProp.begin();
-		propIter != algHistProp.end(); ++propIter )
-	{
-		string name= (*propIter).name();
-		string value=(*propIter).value();
-		bool bdefault=(*propIter).isDefault();
-		//if it's not a default property  add it to 
-		//algorithm parameters to form the script
-		if(!bdefault)
-		{
-			//if the property name obtained by unmanaged instance of the algorithm
-			//is same as the algorithm history property add it to script string
-			if (name==(*itUmnngd)->name())
-			{
-				string sanitisedname=sanitizePropertyName(name);
-				algParam+=sanitisedname;
-				algParam+="=\"";
-				algParam+=value;
-				algParam+="\",";
-			}
-		}
-		//int direction=(*propIter).direction();
-		itUmnngd++;
-		if(itUmnngd==algPropUnmngd.end())
-			break;
-	}
-	//erasing the last "," from the parameter list
-	//as concatenation is done in loop last "," has to be erased
-	int nIndex=algParam.find_last_of(",");
-	if(string::npos!=nIndex)
-		algParam=algParam.erase(nIndex);
-	//script string
-	script=algName+"("+algParam.c_str()+")";
+	map <unsigned int,string>::iterator m3_pIter;
+   for (m3_pIter=ordMap.begin( );m3_pIter!=ordMap.end( );m3_pIter++)
+   {
+	   QString qtemp=QString::fromStdString(m3_pIter->second);
+	   script+=qtemp;
+   }
 	writeToScriptFile(script);
 }
 void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
@@ -347,6 +369,7 @@ void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
 	else{scriptPath=prevdir;}//last opened path
 	//setting the script filename in dialog to 
 	//selected algorithm name&version  by default
+	/*QString algName=getAlgorithmName();
 	QString algName=getAlgorithmName();
 	int nVer=getAlgorithmVersion();
 	algName+="v";
@@ -354,6 +377,7 @@ void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
 	algName=algName+".py";
 	scriptPath+="\\";
 	scriptPath+=algName;
+	*/
 
 	QString filePath=QFileDialog::getSaveFileName(this,tr("Save Script As "),scriptPath,tr("Script files (*.py)"));
 	QFile scriptfile(filePath);
@@ -421,6 +445,7 @@ void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 		QTreeWidgetItem * subitem= new	QTreeWidgetItem(QStringList(algName));
 		if(item)item->addChild(subitem);
 	}
+		
 }
 void AlgorithmHistoryWindow::concatVersionwithName( QString& algName,const int version)
 {
