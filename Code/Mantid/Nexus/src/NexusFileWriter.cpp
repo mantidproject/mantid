@@ -177,8 +177,7 @@ namespace NeXus
 
    status=NXclosegroup(fileID);
 
-   return((status==NX_ERROR)?3:0);
-      return(true);
+   return ((status==NX_ERROR)? true : false);
   }
 //
 // write an NXdata entry with char values

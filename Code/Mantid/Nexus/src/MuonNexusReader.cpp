@@ -157,10 +157,10 @@ int MuonNexusReader::getTimeChannels(float* timebnds, const int& nbnds) const
 {
    int i;
    // assume constant time bin width given by difference of first two values
-   float binHalfWidth=(corrected_times[1]-corrected_times[0])/2.0;
+   float binHalfWidth=(corrected_times[1]-corrected_times[0])/float(2.0);
    for(i=0;i<nbnds-1;i++)
       timebnds[i]=corrected_times[i]-binHalfWidth;
-   timebnds[nbnds-1]=timebnds[nbnds-2]+2.0*binHalfWidth;
+   timebnds[nbnds-1]=timebnds[nbnds-2]+float(2.0)*binHalfWidth;
    return(0);
 }
 

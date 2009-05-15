@@ -123,18 +123,16 @@ bool Algorithm::execute()
       if (!m_isChildAlgorithm) m_running = true;
       time(&start_time);
       start = clock();
-	  ++Algorithm::g_execCount; 
-	  g_log.error() << Algorithm::g_execCount << " " << this->name() << std::endl;
+      //count used to know how many times an algorithm executed
+      ++Algorithm::g_execCount; 
       // Call the concrete algorithm's exec method
       this->exec();
       end = clock();
-	  //count used to know how many times an algorithm executed
-	  //++Algorithm::g_execCount;
       // need it to throw before trying to run fillhistory() on an algorithm which has failed
       // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
       if (!isChild())
       {
-		fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC,Algorithm::g_execCount);
+        fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC,Algorithm::g_execCount);
         this->store();
       }
 
