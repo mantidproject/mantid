@@ -135,7 +135,7 @@ void CrossCorrelate::exec()
 
    	// Calculate the mean value of the reference spectrum and associated error squared
 	double refMean=std::accumulate(refY.begin(),refY.end(),0.0);
-	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,SumSquares<double>());
+	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,VectorHelper::SumSquares<double>());
 	refMean/=static_cast<double>(nY);
 	refMeanE2/=static_cast<double>(nY*nY);
     mess.str("");
@@ -185,11 +185,11 @@ void CrossCorrelate::exec()
    		const std::vector<double>&  iE=inputWS->dataE(spec_index);
    		// Copy Y,E data of spec(i) to temp vector
    		// Now rebin on the grid of reference spectrum
-   		rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
+   		VectorHelper::rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
    		// Calculate the mean value of tempY
    		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0.0);
    		tempMean/=static_cast<double>(nY);
-   		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,SumSquares<double>());
+   		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,VectorHelper::SumSquares<double>());
    		tempMeanE2/=static_cast<double>(nY*nY);
    		//
    		itY=tempY.begin();

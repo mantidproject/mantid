@@ -145,7 +145,7 @@ void GeneralisedSecondDifference::computePrefactors()
 		Cij.resize(3);
 		std::copy(previous.begin(),previous.end(),Cij.begin());
 		Cij2.resize(3);
-		std::transform(Cij.begin(),Cij.end(),Cij2.begin(),Squares<double>());
+		std::transform(Cij.begin(),Cij.end(),Cij2.begin(),VectorHelper::Squares<double>());
 		return;
 	}
 	std::vector<double> next;
@@ -177,7 +177,7 @@ void GeneralisedSecondDifference::computePrefactors()
 	Cij.resize(2*z*m+3);
 	std::copy(previous.begin(),previous.end(),Cij.begin());
 	Cij2.resize(2*z*m+3);
-	std::transform(Cij.begin(),Cij.end(),Cij2.begin(),Squares<double>());
+	std::transform(Cij.begin(),Cij.end(),Cij2.begin(),VectorHelper::Squares<double>());
 	return;
 }
 

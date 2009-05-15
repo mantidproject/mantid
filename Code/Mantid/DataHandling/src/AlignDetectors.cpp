@@ -40,7 +40,6 @@ void AlignDetectors::init()
 }
 
 /** Executes the algorithm
- *  @throw Exception::NotImplementedError If the workspace is not TOF, with raw counts for data
  *  @throw Exception::FileError If the calibration file cannot be opened and read successfully
  *  @throw Exception::InstrumentDefinitionError If unable to obtain the source-sample distance
  */
@@ -89,6 +88,10 @@ void AlignDetectors::exec()
 
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
+
+  // Initialise the progress reporting object
+  Progress progress(this,0.0,1.0,numberOfSpectra,100);
+  
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
@@ -115,8 +118,8 @@ void AlignDetectors::exec()
       // Now average the factor
       factor = factor / ndets;
       // Get a reference to the x data
-      const std::vector<double>& xIn = inputWS->dataX(i);
-      std::vector<double>& xOut = outputWS->dataX(i);
+      const MantidVec& xIn = inputWS->dataX(i);
+      MantidVec& xOut = outputWS->dataX(i);
       std::transform( xIn.begin(), xIn.end(), xOut.begin(), std::bind2nd(std::multiplies<double>(), factor) );
       // Copy the Y&E data
       outputWS->dataY(i) = inputWS->dataY(i);
@@ -128,6 +131,8 @@ void AlignDetectors::exec()
       outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
+    
+    progress.report();
   }
 }
 

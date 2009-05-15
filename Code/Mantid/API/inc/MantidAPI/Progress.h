@@ -67,7 +67,8 @@ public:
       @param step  The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int n, int step=1)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(n*step/100/(end-start)),m_dp((end-start)/(n-1)),m_i(0)
+    :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(n*step/100/static_cast<int>(end-start)),
+    m_dp((end-start)/(n-1)),m_i(0)
   {if (m_step <= 0) m_step = 1;}
   
   /** Creates a Progress instance
@@ -79,7 +80,8 @@ public:
       @param step   The frequency in % with which report(...) actually sends the notification.
   */
   Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step((n-ifirst)*step/100/(end-start)),m_dp((end-start)/(n-1)),m_i(ifirst)
+    :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step((n-ifirst)*step/100/static_cast<int>(end-start)),
+    m_dp((end-start)/(n-1)),m_i(ifirst)
   {if (m_step <= 0) m_step = 1;}
   
   void report(const std::string& msg = "");

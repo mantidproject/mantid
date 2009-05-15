@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
@@ -74,8 +73,6 @@ private:
   void init();
   void exec();
   
-  void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew);
   int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
 
   /// Static reference to the logger class

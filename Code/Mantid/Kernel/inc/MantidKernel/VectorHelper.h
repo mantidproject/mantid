@@ -39,13 +39,18 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+namespace VectorHelper
+{
   
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 
   // New method to rebin Histogram data, should be faster than previous one
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-          const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool add);
+          const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
+
+  void DLLExport rebinNonDispersive(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
+    const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
 
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
@@ -103,6 +108,7 @@ namespace Kernel
 		}
 	};
 
+} // namespace VectorHelper
 } // namespace Kernel
 } // namespace Mantid
 

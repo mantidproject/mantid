@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
@@ -15,8 +14,8 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The name of the Workspace2D to take as input </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> InputWorkspace  - The name of the workspace to take as input. Must contain histogram data. </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result. </LI>
     <LI> RebinParameters - The new bin boundaries in the form X1,deltaX1,X2,deltaX2,X3,... </LI>
     </UL>
 
@@ -67,17 +66,13 @@ private:
   void init();
   void exec();
   
-  void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
-  int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
+ int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
 };
 
-
-
-  } // namespace Algorithms
+} // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHMS_SIMPLEREBIN_H_*/

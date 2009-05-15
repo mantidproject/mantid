@@ -21,7 +21,7 @@ namespace Mantid
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       std::transform(lhsY.begin(),lhsY.end(),rhsY.begin(),YOut.begin(),std::minus<double>());
-      std::transform(lhsE.begin(),lhsE.end(),rhsE.begin(),EOut.begin(),SumGaussError<double>());
+      std::transform(lhsE.begin(),lhsE.end(),rhsE.begin(),EOut.begin(),VectorHelper::SumGaussError<double>());
     }
 
     void Minus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
@@ -30,7 +30,7 @@ namespace Mantid
       std::transform(lhsY.begin(),lhsY.end(),YOut.begin(),std::bind2nd(std::minus<double>(),rhsY));
       // Only do E if non-zero, otherwise just copy
       if (rhsE > 1.0e-12)
-        std::transform(lhsE.begin(),lhsE.end(),EOut.begin(),std::bind2nd(SumGaussError<double>(),rhsE));
+        std::transform(lhsE.begin(),lhsE.end(),EOut.begin(),std::bind2nd(VectorHelper::SumGaussError<double>(),rhsE));
       else
         EOut = lhsE;
     }

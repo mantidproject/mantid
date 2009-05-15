@@ -84,7 +84,11 @@ void FlatBackground::exec()
   setProperty("OutputWorkspace",outputWS);
 }
 
-/// Checks that the range parameters have been set correctly
+/** Checks that the range parameters have been set correctly
+ *  @param startX The starting point
+ *  @param endX   The ending point
+ *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less than XMin
+ */
 void FlatBackground::checkRange(double& startX, double& endX)
 {
   // Both XMin and XMax are mandatory
@@ -102,10 +106,9 @@ void FlatBackground::checkRange(double& startX, double& endX)
       
   if (startX > endX)
   {
-    g_log.warning("StartX greater than EndX: the two have been swapped.");
-    const double temp = startX;
-    startX = endX;
-    endX = temp;
+    const std::string failure("XMax must be greater than XMin.");
+    g_log.error(failure);
+    throw std::invalid_argument(failure);
   }
 }
 

@@ -76,7 +76,7 @@ void PointByPointVCorrection::exec()
 	  // Work on the Y data
 
 	  std::adjacent_difference(X.begin(),X.end(),binwidths.begin()); //Calculate the binwidths
-	  std::transform(binwidths.begin()+1,binwidths.end(),Y2.begin(),resultY.begin(),Kernel::DividesNonNull<double>());
+	  std::transform(binwidths.begin()+1,binwidths.end(),Y2.begin(),resultY.begin(),Kernel::VectorHelper::DividesNonNull<double>());
 		std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::multiplies<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
 	  // Calculate the errors squared related to A_i at this point
@@ -127,7 +127,13 @@ void PointByPointVCorrection::exec()
   outputWS->isDistribution(false);
 }
 
-void PointByPointVCorrection::check_validity(MatrixWorkspace_const_sptr& w1,MatrixWorkspace_const_sptr& w2,MatrixWorkspace_sptr& out)
+/** Checks that the axes of the input workspaces match and creates the output workspace if necessary
+ *  @param w1  The first input workspace
+ *  @param w2  The second input workspace
+ *  @param out Pointer to the output workspace
+ */
+void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr& w1,API::MatrixWorkspace_const_sptr& w2,
+    API::MatrixWorkspace_sptr& out)
 {
 //	  if (w1->YUnit()!=w2->YUnit()) //Unit not the same
 //	  {

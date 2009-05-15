@@ -21,7 +21,6 @@ namespace Algorithms
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace;
 
@@ -36,8 +35,8 @@ void DiffractionFocussing2::init()
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   wsValidator->add(new API::WorkspaceUnitValidator<>("dSpacing"));
   wsValidator->add(new API::RawCountValidator<>);
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new API::WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
+  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
 }
@@ -45,7 +44,7 @@ void DiffractionFocussing2::init()
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
- *  @throw runtime_error If unable to run one of the sub-algorithms successfully
+ *  @throw std::runtime_error If the rebinning process fails
  */
 void DiffractionFocussing2::exec()
 {
@@ -64,61 +63,118 @@ void DiffractionFocussing2::exec()
   MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints,nPoints-1);
 
   // Now the real work
-  int group;
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
-  std::vector<double> ynew(nPoints-1),enew(nPoints-1);         // Temp vectors for rebinning
+  MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0);  // Vectors for use with the masking stuff
 
   for (int i=0;i<nHist;i++)
   {
     //Check whether this spectra is in a valid group
-    group=spectra_group[i];
+    const int group=spectra_group[i];
     if (group==-1) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
-    const std::vector<double>& Xin=inputW->readX(i);
-    const std::vector<double>& Yin=inputW->readY(i);
-    const std::vector<double>& Ein=inputW->readE(i);
+    const MantidVec& Xin=inputW->readX(i);
+    const MantidVec& Yin=inputW->readY(i);
+    const MantidVec& Ein=inputW->readE(i);
     // Get the group
-    group2xvectormap::iterator it=group2xvector.find(group);
-    group2xvectormap::difference_type dif=std::distance(group2xvector.begin(),it);
-    const std::vector<double>& Xout=((*it).second);
-    // Assign the new X axis only once (i.e when this group is encountered the first time
+    group2vectormap::iterator it=group2xvector.find(group);
+    group2vectormap::difference_type dif=std::distance(group2xvector.begin(),it);
+    const MantidVec& Xout = *((*it).second);
+    // Assign the new X axis only once (i.e when this group is encountered the first time)
     if (flags[dif])
     {
       out->dataX(static_cast<int>(dif))=Xout;
       flags[dif]=false;
+      // Initialize the group's weight vector here too
+      group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints-1,0.0));
     }
+    
     // Get the references to Y and E output and rebin
-    std::vector<double>& Yout=out->dataY(static_cast<int>(dif));
-    std::vector<double>& Eout=out->dataE(static_cast<int>(dif));
+    MantidVec& Yout=out->dataY(static_cast<int>(dif));
+    MantidVec& Eout=out->dataE(static_cast<int>(dif));
     try
     {
-      rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
+      VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
     }catch(...)
     {
+      // Should never happen because Xout is constructed to envelop all of the Xin vectors
       std::ostringstream mess;
       mess << "Error in rebinning process for spectrum:" << i;
-      std::runtime_error(mess.str());
-      mess.str("");
+      throw std::runtime_error(mess.str());
     }
+    
+    // Get a reference to the summed weights vector for this group
+    MantidVec& groupWgt = *group2wgtvector[group];
+    // Check for masked bins in this spectrum
+    if ( inputW->hasMaskedBins(i) )
+    {
+      MantidVec weight_bins,weights;
+      weight_bins.push_back(Xin.front());
+      // If there are masked bins, get a reference to the list of them
+      const MatrixWorkspace::MaskList& mask = inputW->maskedBins(i);
+      // Now iterate over the list, adjusting the weights for the affected bins
+      for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+      {
+        const double currentX = Xin[(*it).first];
+        // Add an intermediate bin with full weight if masked bins aren't consecutive
+        if (weight_bins.back() != currentX) 
+        {
+          weights.push_back(1.0);
+          weight_bins.push_back(currentX);
+        }
+        // The weight for this masked bin is 1 - the degree to which this bin is masked
+        weights.push_back(1.0-(*it).second);
+        weight_bins.push_back(Xin[(*it).first + 1]);
+      }
+      // Add on a final bin with full weight if masking doesn't go up to the end
+      if (weight_bins.back() != Xin.back()) 
+      {
+        weights.push_back(1.0);
+        weight_bins.push_back(Xin.back());
+      }
+      
+      // Create a zero vector for the errors because we don't care about them here
+      const MantidVec zeroes(weights.size(),0.0);
+      // Add weights for this spectrum to the output weights vector
+      VectorHelper::rebinNonDispersive(weight_bins,weights,zeroes,Xout,groupWgt,groupWgt,true);
+    }
+    else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
+    {
+      limits[0] = Xin.front();
+      limits[1] = Xin.back();
+      VectorHelper::rebinNonDispersive(limits,weights_default,emptyVec,Xout,groupWgt,groupWgt,true);
+    }
+        
     progress(static_cast<double>(i)/101.0);
   }
-
+  
   // Now propagate the errors.
   // Pointer to sqrt function
   typedef double (*uf)(double);
   uf rs=std::sqrt;
-  for (int i=0;i<nGroups;i++)
+  
+  group2vectormap::const_iterator wit = group2wgtvector.begin();
+  
+  for (int i=0; i < nGroups; ++i,++wit)
   {
-    std::vector<double>& Eout=out->dataE(i);
+    MantidVec& Eout=out->dataE(i);
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),rs);
-  }
 
+    // Now need to normalise the data (and errors) by the weights
+    MantidVec& Yout=out->dataY(i);
+    const MantidVec& wgt = *(*wit).second;
+    std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
+    std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
+    // Now multiply by the number of spectra in the group
+    const int groupSize = std::count(spectra_group.begin(),spectra_group.end(),(*wit).first);
+    std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
+    std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
+  }
+  
   progress(1.0);
-  //Do some cleanup because destructor not called.
+  //Do some cleanup
   spectra_group.clear();
   group2xvector.clear();
-  group2minmax.clear();
 
   setProperty("OutputWorkspace",out);
   return;
@@ -161,6 +217,10 @@ void DiffractionFocussing2::determineRebinParameters()
 {
   std::ostringstream mess;
 
+  // typedef for the storage of the group ranges
+  typedef std::map<int, std::pair<double, double> > group2minmaxmap;
+  // Map from group number to its associated range parameters <Xmin,Xmax,step>
+  group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
 
   spectra_group.resize(nHist);
@@ -180,7 +240,7 @@ void DiffractionFocussing2::determineRebinParameters()
     }
     const double min = ((*gpit).second).first;
     const double max = ((*gpit).second).second;
-    const std::vector<double>& X = inputW->readX(i);
+    const MantidVec& X = inputW->readX(i);
     if (X.front() < (min)) //New Xmin found
       ((*gpit).second).first = X.front();
     if (X.back() > (max)) //New Xmax found
@@ -207,12 +267,12 @@ void DiffractionFocussing2::determineRebinParameters()
         << "," << ((*gpit).second).second << "," << step;
     g_log.information(mess.str());
     mess.str("");
-    std::vector<double> xnew(nPoints); //New X vector
-    xnew[0] = Xmin;
+    boost::shared_ptr<MantidVec> xnew = boost::shared_ptr<MantidVec>(new MantidVec(nPoints)); //New X vector
+    (*xnew)[0] = Xmin;
     for (int j = 1; j < nPoints; j++)
     {
-      xnew[j] = Xmin * (1.0 + step);
-      Xmin = xnew[j];
+      (*xnew)[j] = Xmin * (1.0 + step);
+      Xmin = (*xnew)[j];
     }
     group2xvector[(*gpit).first] = xnew; //Register this vector in the map
   }

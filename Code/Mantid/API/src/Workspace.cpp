@@ -50,11 +50,12 @@ const std::string& Workspace::getComment() const
 } // namespace API
 } // Namespace Mantid
 
-
+///\cond TEMPLATE
 namespace Mantid
 {
 namespace Kernel
 {
+
 template<> DLLExport
 Mantid::API::Workspace_sptr IPropertyManager::getValue<Mantid::API::Workspace_sptr>(const std::string &name) const
 {
@@ -87,8 +88,7 @@ Mantid::API::Workspace_const_sptr IPropertyManager::getValue<Mantid::API::Worksp
   }
 }
 
-
-
 } // namespace Kernel
 } // namespace Mantid
+///\endcond TEMPLATE
 

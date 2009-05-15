@@ -34,6 +34,9 @@ void MaskBins::init()
   declareProperty("XMax",std::numeric_limits<double>::max(),required->clone());
 }
 
+/** Execution code.
+ *  @throw std::invalid_argument If XMax is less than XMin
+ */
 void MaskBins::exec()
 {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -44,10 +47,9 @@ void MaskBins::exec()
 
   if (m_startX > m_endX)
   {
-    g_log.warning("XMin greater than XMax: the two have been swapped.");
-    const double temp = m_startX;
-    m_startX = m_endX;
-    m_endX = temp;
+    const std::string failure("XMax must be greater than XMin.");
+    g_log.error(failure);
+    throw std::invalid_argument(failure);
   }
   
   // If the binning is the same throughout, we only need to find the index limits once

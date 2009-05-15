@@ -58,6 +58,7 @@ class DLLExport CrossCorrelate : public API::Algorithm
 {
 public:
 	#ifndef HAS_UNORDERED_MAP_H
+  /// typedef for the storage of the spectrum number to worspace index map
 	typedef std::map<int,int> spec2index_map;
 	#else
 	typedef std::tr1::unordered_map<int,int> spec2index_map;
@@ -82,6 +83,7 @@ private:
   static Mantid::Kernel::Logger& g_log;
   /// Spectra to index map
   spec2index_map index_map;
+  /// Iterator for the spectra to index map
   spec2index_map::iterator index_map_it;
 };
 

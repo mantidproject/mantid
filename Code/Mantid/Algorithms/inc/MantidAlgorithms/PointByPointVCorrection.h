@@ -10,38 +10,12 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Normalises a 2D workspace by a specified monitor spectrum. By default ,the
-    normalisation is done bin-by-bin following this formula:
-    Norm(s_i)=(s_i/m_i)*Dlam_i*Sum(m_i)/Sum(Dlam_i)
-    where s_i is the signal in bin i, m_i the count in the corresponding monitor bin,
-    Dlam_i the width of the bin, Sum(m_i) is the integrated monitor count and
-    Sum(Dlam_i) the sum of all bin widths (the full range).
+/** First attempt at spectrum by spectrum division for vanadium normalisation correction.
 
-    Optionally, can instead normalise by the integrated monitor count over a specified
-    range in X. In this case, the range of the output workspace will have its limits
-    at the closest bins within the range values given (i.e. bins may be removed with
-    respect to the start and end of the input workspace, but the bin boundaries will
-    remain the same). No bin width correction takes place in this case.
+    @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
+    @date 04/03/2009
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace  - The name of the input Workspace2D. Must be a histogram with
-              common bins and not a distribution.</LI>
-    <LI> OutputWorkspace - The name of the output Workspace2D. </LI>
-    <LI> MonitorSpectrum - The spectrum number for the monitor to normalise with </LI>
-    </UL>
-
-    Optional Properties:
-    These should be set to normalise by an integrated monitor count over the range given
-    <UL>
-    <LI> IntegrationRangeMin - The lower bound of the range to use </LI>
-    <LI> IntegrationRangeMax - The upper bound of the range to use </LI>
-    </UL>
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 30/09/2008
-
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -77,9 +51,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void check_validity(Mantid::API::MatrixWorkspace_const_sptr& w1,
-		  Mantid::API::MatrixWorkspace_const_sptr& w2,
-		  Mantid::API::MatrixWorkspace_sptr& out);
+  void check_validity(API::MatrixWorkspace_const_sptr& w1,
+		  API::MatrixWorkspace_const_sptr& w2,API::MatrixWorkspace_sptr& out);
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
 };

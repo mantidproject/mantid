@@ -1,17 +1,19 @@
-#ifndef DIFFRACTIONFOCUSSINGTEST_H_
-#define DIFFRACTIONFOCUSSINGTEST_H_
+#ifndef DIFFRACTIONFOCUSSING2TEST_H_
+#define DIFFRACTIONFOCUSSING2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/DiffractionFocussing.h"
+#include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/AlignDetectors.h"
+#include "MantidAlgorithms/MaskBins.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class DiffractionFocussingTest : public CxxTest::TestSuite
+class DiffractionFocussing2Test : public CxxTest::TestSuite
 {
 public:
 	void testName()
@@ -21,7 +23,7 @@ public:
 
 	void testVersion()
 	{
-	  TS_ASSERT_EQUALS( focus.version(), 1 )
+	  TS_ASSERT_EQUALS( focus.version(), 2 )
 	}
 
 	void testCategory()
@@ -37,16 +39,25 @@ public:
 
 	void testExec()
 	{
-    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
-    loader->initialize();
-    loader->setPropertyValue("Filename", "../../../../Test/Data/HRP38692.RAW");
+    Mantid::DataHandling::LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "../../../../Test/Data/HRP38692.RAW");
 
     std::string outputSpace = "tofocus";
-    loader->setPropertyValue("OutputWorkspace", outputSpace);
-    loader->setPropertyValue("spectrum_min","50");
-    loader->setPropertyValue("spectrum_max","100");
-    TS_ASSERT_THROWS_NOTHING( loader->execute() )
-    TS_ASSERT( loader->isExecuted() )
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.setPropertyValue("spectrum_min","50");
+    loader.setPropertyValue("spectrum_max","100");
+    TS_ASSERT_THROWS_NOTHING( loader.execute() )
+    TS_ASSERT( loader.isExecuted() )
+    
+    // Have to align because diffraction focussing wants d-spacing
+    Mantid::DataHandling::AlignDetectors align;
+    align.initialize();
+    align.setPropertyValue("InputWorkspace",outputSpace);
+    align.setPropertyValue("OutputWorkspace",outputSpace);
+    align.setPropertyValue("CalibrationFile","../../../../Test/Data/hrpd_new_072_01.cal");
+    TS_ASSERT_THROWS_NOTHING( align.execute() )
+    TS_ASSERT( align.isExecuted() )
 
     focus.setPropertyValue("InputWorkspace", outputSpace);
     focus.setPropertyValue("OutputWorkspace", "focusedWS" );
@@ -66,7 +77,7 @@ public:
 	}
 
 private:
-  DiffractionFocussing focus;
+  DiffractionFocussing2 focus;
 };
 
-#endif /*DIFFRACTIONFOCUSSINGTEST_H_*/
+#endif /*DIFFRACTIONFOCUSSING2TEST_H_*/

@@ -2,14 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RebinPreserveValue.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
-
-#include <sstream>
-#include <numeric>
-#include <math.h>
+#include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
 {
@@ -83,7 +79,7 @@ namespace Mantid
         std::vector<double>& YErrors_new=outputW->dataE(hist);
 
         // output data arrays are implicitly filled by function
-        rebin(XValues,YValues,YErrors,XValues_new,YValues_new,YErrors_new);
+        VectorHelper::rebinNonDispersive(XValues,YValues,YErrors,*XValues_new,YValues_new,YErrors_new,false);
         // Populate the output workspace X values
         if (outputW_2D)
         {
@@ -122,72 +118,6 @@ namespace Mantid
       setProperty("OutputWorkspace",outputW);
 
       return;
-    }
-
-    /** Rebins the data according to new output X array
-    *
-    * @param xold - old x array of data
-    * @param xnew - new x array of data
-    * @param yold - old y array of data
-    * @param ynew - new y array of data
-    * @param eold - old error array of data
-    * @param enew - new error array of data
-    **/
-    void RebinPreserveValue::rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const DataObjects::Histogram1D::RCtype& xnew, std::vector<double>& ynew, std::vector<double>& enew)
-
-    {
-      int iold = 0,inew = 0;
-      double xo_low, xo_high, xn_low, xn_high;
-      int size_yold=yold.size();
-      int size_ynew=ynew.size();
-
-      while((inew < size_ynew) && (iold < size_yold))
-      {
-        xo_low = xold[iold];
-        xo_high = xold[iold+1];
-        xn_low = (*xnew)[inew];
-        xn_high = (*xnew)[inew+1];
-        if ( xn_high <= xo_low )
-        {
-          inew++;		/* old and new bins do not overlap */
-        }
-        else if ( xo_high <= xn_low )
-        {
-          iold++;		/* old and new bins do not overlap */
-        }
-        else if ( xn_low < xo_low && xo_low < xn_high )
-        {
-          // If the new bin is partially overlapped by the old then scale the value
-          const double delta = (xn_high-xo_low)/(xn_high-xn_low);
-          ynew[inew] = yold[iold]*delta;
-          enew[inew] = eold[iold]*delta;
-          ++inew;
-        }
-        else if ( xn_low < xo_high && xo_high < xn_high )
-        {
-          // If the new bin is partially overlapped by the old then scale the value
-          const double delta = (xo_high-xn_low)/(xn_high-xn_low);
-          ynew[inew] = yold[iold]*delta;
-          enew[inew] = eold[iold]*delta;
-          ++iold;
-        }
-        else
-        {
-          // Other wise the new bin is entirely within the old one and we just copy the value
-          ynew[inew] = yold[iold];
-          enew[inew] = eold[iold];
-
-          if ( xn_high > xo_high )
-          {
-            iold++;
-          }
-          
-          inew++;
-        }
-      }
-
-      return; //without problems
     }
 
     /** Creates a new  output X array  according to specific boundary defnitions

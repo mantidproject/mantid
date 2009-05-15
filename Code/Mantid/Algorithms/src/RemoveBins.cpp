@@ -144,7 +144,9 @@ void RemoveBins::exec()
   m_inputWorkspace.reset();
 }
 
-/// Retrieve the input properties and check that they are valid
+/** Retrieve the input properties and check that they are valid
+ *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less than XMin
+ */
 void RemoveBins::checkProperties()
 {
   //Get input workspace
@@ -165,10 +167,9 @@ void RemoveBins::checkProperties()
 
   if (m_startX > m_endX)
   {
-    g_log.warning("XMin greater than XMax: the two have been swapped.");
-    const double temp = m_startX;
-    m_startX = m_endX;
-    m_endX = temp;
+    const std::string failure("XMax must be greater than XMin.");
+    g_log.error(failure);
+    throw std::invalid_argument(failure);
   }
 
   const std::string interpolation = getProperty("Interpolation");

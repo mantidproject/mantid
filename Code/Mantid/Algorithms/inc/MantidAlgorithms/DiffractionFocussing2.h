@@ -110,18 +110,16 @@ private:
   typedef std::tr1::unordered_map<int,int> udet2groupmap;
 #endif
   // This map needs to be ordered to process the groups in order.
-  /// typedef for the storage of the group ranges
-  typedef std::map<int, std::pair<double, double> > group2minmaxmap;
   /// typedef for the storage of each group's X vector
-  typedef std::map<int, std::vector<double> > group2xvectormap;
+  typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
   /// Map from udet to group
   udet2groupmap udet2group;
-  /// Map from group number to its associated range parameters <Xmin,Xmax,step>
-  group2minmaxmap group2minmax;
   /// The list of group numbers
   std::vector<int> spectra_group;
   /// Map from the group number to the group's X vector
-  group2xvectormap group2xvector;
+  group2vectormap group2xvector;
+  /// Map from the group number to the group's summed weight vector
+  group2vectormap group2wgtvector;
   /// The number of groups
   int nGroups;
   /// Number of histograms

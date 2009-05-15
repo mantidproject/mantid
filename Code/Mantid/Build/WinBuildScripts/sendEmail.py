@@ -61,7 +61,12 @@ move(fileScons,archiveDir)
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
-	
+
+# Count compilation warnings
+reWarnCount = re.compile(": warning")
+wc = reWarnCount.findall(mssgScons)
+compilerWarnCount = len(wc)
+
 fileSconsErr = logDir+'sconsErr.log'
 mssgSconsErr = open(fileSconsErr,'r').read()
 move(fileSconsErr,archiveDir)
@@ -145,7 +150,10 @@ currentDoxy.write(str(warnCount))
 #Construct Message
 httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
-message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
+message += 'Framework Build Passed: ' + str(buildSuccess)
+if compilerWarnCount>0:
+  message += " (" + str(compilerWarnCount) + " compiler warnings)"
+message += '\n'
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) 
 message += ' (' 

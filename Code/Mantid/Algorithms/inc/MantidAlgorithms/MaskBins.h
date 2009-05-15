@@ -1,5 +1,5 @@
 #ifndef MANTID_ALGORITHMS_MASKBINS_H_
-#define MANTID_ALGORITHMSMASKBINS_H_
+#define MANTID_ALGORITHMS_MASKBINS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -23,7 +23,7 @@ namespace Algorithms
     <LI> XMax - The value to end masking at.</LI>
     </UL>
       
-    @author Russell Taylor
+    @author Russell Taylor, Tessella plc
     @date 29/04/2009
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
