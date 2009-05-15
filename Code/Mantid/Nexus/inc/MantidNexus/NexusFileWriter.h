@@ -9,6 +9,7 @@ namespace Mantid
     /** @class NexusFileWriter NexusFileWriter.h NeXus/NexusFileWriter.h
 
     Utility method for saving NeXus format of Mantid Workspace
+    THIS CODE IS NOT USED - replaced by NexusFileIO
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 

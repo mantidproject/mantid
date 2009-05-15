@@ -74,8 +74,6 @@ void testExecOnLoadraw()
     //
     if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 
-    // temp test
-    //output2D->setYUnit("Counts per aardvark");
     //
     saveNexusP.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to

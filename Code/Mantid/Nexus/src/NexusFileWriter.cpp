@@ -1,5 +1,9 @@
 // NexusFileWriter
 // @author Ronald Fowler
+//
+// This code is not used anywhere now, so should be deleted
+// Replaced by NexusFileIO clas
+//
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------

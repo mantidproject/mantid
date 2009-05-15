@@ -206,17 +206,17 @@ void testExecOnLoadraw()
 
 
     //
-    // This fails at present
+    // Testing log data - this was failing at one time as internal format of log data changed, but now OK again
     //
-    //TS_ASSERT_EQUALS( timeSeriesString.substr(0,30), "2008-Jun-17 11:10:44  -0.86526" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,30), "2008-Jun-17 11:10:44  -0.86526" );
 
     l_property = sample->getLogData( std::string("ICPevent") );
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     timeSeriesString = l_timeSeriesString->value();
     //
-    // This also fails
+    // Testing log data - this was failing at one time as internal format of log data changed, but now OK again
     //
-    //TS_ASSERT_EQUALS( timeSeriesString.substr(0,38), "2008-Jun-17 11:11:13  CHANGE PERIOD 12" );
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,38), "2008-Jun-17 11:11:13  CHANGE PERIOD 12" );
 
     remove(outputFile.c_str());
 

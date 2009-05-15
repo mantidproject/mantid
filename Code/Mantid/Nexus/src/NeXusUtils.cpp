@@ -18,6 +18,8 @@ namespace NeXus
 {
   //
   // Some utility routines, now made into a class
+  // This is currently only used by LoadNexus.cpp to determine the type of Nexus file to decide
+  // if it is Muon or Processed or something else.
   //
   using namespace Kernel;
   using namespace API;

@@ -14,6 +14,10 @@ namespace Mantid
     /** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
 
     Utility method for saving NeXus format of Mantid Workspace
+    This class interfaces to the C Nexus API. This is written for use by
+    Save and Load NexusProcessed classes, though it could be extended to
+    other Nexus formats. It might be replaced in future by methods using
+    the new Nexus C++ API.
 
     Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
@@ -63,7 +67,7 @@ namespace Mantid
                bool& uniformBounds, std::string& axesNames, std::string& yUnits );
       /// read X values for one (or the generic if uniform) spectra
       int getXValues(std::vector<double>& xValues, const int& spectra);
-      /// read values and erros for spectra
+      /// read values and errors for spectra
       int getSpectra(std::vector<double>& values, std::vector<double>& errors, const int& spectra);
 
       /// read the Nexus Processed Data
@@ -134,16 +138,16 @@ namespace Mantid
       /// convert posix time to time_t
       std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
       {
-			/*!
-			Take the input Posix time, subtract the unix epoch, and return the seconds
-			as a std::time_t value.
-			@param t :: time of interest as ptime
-			@return :: time_t value of t
-			*/
+            /*!
+            Take the input Posix time, subtract the unix epoch, and return the seconds
+            as a std::time_t value.
+            @param t :: time of interest as ptime
+            @return :: time_t value of t
+            */
             if( t == boost::posix_time::neg_infin )
-             return 0;
+               return 0;
             else if( t == boost::posix_time::pos_infin )
-             return LONG_MAX;
+               return LONG_MAX;
             boost::posix_time::ptime start(boost::gregorian::date(1970,1,1));
             return (t-start).total_seconds();
        } 

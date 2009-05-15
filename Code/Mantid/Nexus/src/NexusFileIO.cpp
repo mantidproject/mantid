@@ -1,4 +1,4 @@
-// NexusFileWriter
+// NexusFileIO
 // @author Ronald Fowler
 //----------------------------------------------------------------------
 // Includes
@@ -84,6 +84,10 @@ namespace NeXus
    std::string className="NXentry";
    std::string mantidEntryName;
    m_filename=fileName;
+   //
+   // If file to write exists, then open as is else see if the extension is xml, if so open as xml
+   // format otherwise as compressed hdf5
+   //
    if(Poco::File(m_filename).exists())
        mode = NXACC_RDWR;
    else
@@ -103,6 +107,10 @@ namespace NeXus
        g_log.error("Unable to open file " + fileName);
        throw Exception::FileError("Unable to open File:" , fileName);	  
    }
+   //
+   // for existing files, search for any current mantid_workspace_<n> entries and set the
+   // new name to be n+1 so that we do not over-write by default. This may need changing.
+   //
    if(mode==NXACC_RDWR)
    {
        int count=findMantidWSEntries();
@@ -110,6 +118,10 @@ namespace NeXus
        suffix << (count+1);
        mantidEntryName="mantid_workspace_"+suffix.str();
    }
+   //
+   // make and open the new mantid_workspace_<n> group
+   // file remains open until explict close
+   //
    status=NXmakegroup(fileID,mantidEntryName.c_str(),className.c_str());
    if(status==NX_ERROR)
        return(2);
@@ -151,6 +163,9 @@ namespace NeXus
        g_log.error("File contains no mantid_workspace_ entries " + fileName);
        throw Exception::FileError("File contains no mantid_workspace_ entries: " , fileName);
    }
+   //
+   // if workspaceNumber==0 then take highest existing workspace, else look for given number
+   //
    if( workspaceNumber>0 )
    {
        if( workspaceNumber<=count )
@@ -177,10 +192,13 @@ namespace NeXus
    status=NXclose(&fileID);
    return(0);
   }
+
   int NexusFileIO::writeNexusProcessedHeader( const std::string& title)
   {
    // Write Nexus mantid workspace header fields for the NXentry/IXmantid/NXprocessed field.
-   // The URLs are not correct
+   // The URLs are not correct as they do not exist presently, but follow the format for other
+   // Nexus specs.
+   //
    std::string className="Mantid Processed Workspace";
    std::vector<std::string> attributes,avalues;
    if( ! writeNxText("title", title, attributes, avalues) )
@@ -203,6 +221,10 @@ namespace NeXus
   bool NexusFileIO::writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
       const std::string& version)
   {
+      //
+      // The name used for the instrument XML definition is stored as part of the file, rather than
+      // the actual instrument data.
+      //
       std::vector<std::string> attributes,avalues;
       if(date != "")
       {
