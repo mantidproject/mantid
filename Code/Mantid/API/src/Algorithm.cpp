@@ -9,6 +9,7 @@
 
 using namespace Mantid::Kernel;
 
+
 namespace Mantid
 {
 namespace API
@@ -16,6 +17,8 @@ namespace API
 
 // Get a reference to the logger
 Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
+
+unsigned int Algorithm::g_execCount=0;
 
 /// Constructor
 Algorithm::Algorithm() :
@@ -120,14 +123,18 @@ bool Algorithm::execute()
       if (!m_isChildAlgorithm) m_running = true;
       time(&start_time);
       start = clock();
+	  ++Algorithm::g_execCount; 
+	  g_log.error() << Algorithm::g_execCount << " " << this->name() << std::endl;
       // Call the concrete algorithm's exec method
       this->exec();
       end = clock();
+	  //count used to know how many times an algorithm executed
+	  //++Algorithm::g_execCount;
       // need it to throw before trying to run fillhistory() on an algorithm which has failed
       // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
       if (!isChild())
       {
-        fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC);
+		fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC,Algorithm::g_execCount);
         this->store();
       }
 
@@ -338,14 +345,14 @@ void Algorithm::interruption_point()
  *  @param start a date and time defnining the start time of the algorithm
  *  @param duration a double defining the length of duration of the algorithm
  */
-void Algorithm::fillHistory(AlgorithmHistory::dateAndTime start,double duration)
+void Algorithm::fillHistory(AlgorithmHistory::dateAndTime start,double duration,unsigned int uexecCount)
 {
   // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
   std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
   findWorkspaceProperties(inputWorkspaces,outputWorkspaces);
 
   // Create the history object for this algorithm
-  AlgorithmHistory algHistory(this,start,duration);
+  AlgorithmHistory algHistory(this,start,duration,uexecCount);
 
   std::vector<Workspace_sptr>::iterator outWS;
   std::vector<Workspace_sptr>::const_iterator inWS;

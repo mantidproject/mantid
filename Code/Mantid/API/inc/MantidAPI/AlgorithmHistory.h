@@ -46,7 +46,7 @@ public:
   /// The date-and-time will be stored as the ctime time_t type
   typedef time_t dateAndTime;
 
-  explicit AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start = 0, const double& duration = -1);
+  explicit AlgorithmHistory(const Algorithm* const alg,const dateAndTime& start = 0, const double& duration = -1,unsigned int uexeccount=0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
@@ -62,6 +62,7 @@ public:
   double executionDuration() const { return m_executionDuration;}
   // get execution date in hist const
   dateAndTime executionDate() const {return m_executionDate;}
+  const int& execCount() const {return m_execCount;}
 
   /// get parameter list of algorithm in history const
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
@@ -90,6 +91,7 @@ private:
   double m_executionDuration;
   /// The PropertyHistory's defined for the algorithm
   std::vector<Kernel::PropertyHistory> m_properties;
+  int m_execCount;
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);

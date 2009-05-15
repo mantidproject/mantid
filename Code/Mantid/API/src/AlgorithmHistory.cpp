@@ -16,8 +16,8 @@ using Kernel::Property;
  *  @param start    The start time of the algorithm execution (optional)
  *  @param duration The time (in seconds) that it took to run this algorithm (optional)
  */
-AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start, const double& duration) :
-  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration)
+AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start, const double& duration,unsigned int uexeccount) :
+  m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.
   const std::vector<Property*>& properties = alg->getProperties();
@@ -38,7 +38,7 @@ AlgorithmHistory::~AlgorithmHistory()
  */
 AlgorithmHistory::AlgorithmHistory(const AlgorithmHistory& A) :
   m_name(A.m_name),m_version(A.m_version),m_executionDate(A.m_executionDate),
-  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties)
+  m_executionDuration(A.m_executionDuration),m_properties(A.m_properties),m_execCount(A.m_execCount)
 {
 }
 

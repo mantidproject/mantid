@@ -256,7 +256,7 @@ private:
   Algorithm& operator=(const Algorithm&);
 
   void store();
-  void fillHistory(AlgorithmHistory::dateAndTime, double);
+  void fillHistory(AlgorithmHistory::dateAndTime, double,unsigned int);
   void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
                                std::vector<Workspace_sptr>& outputWorkspaces) const;
   void algorithm_info() const;
@@ -284,6 +284,7 @@ private:
   double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
 
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
+  static unsigned int g_execCount;
 };
 
 ///Typedef for a shared pointer to an Algorithm
