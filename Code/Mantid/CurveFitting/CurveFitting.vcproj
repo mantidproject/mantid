@@ -199,7 +199,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Fit1D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Gaussian.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Gaussian1D.cpp"
 				>
 			</File>
 			<File
@@ -226,6 +234,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\Gaussian.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Gaussian1D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\Gaussian1DTest.h"
 				>
 			</File>
 			<File
