@@ -39,12 +39,12 @@ f.close()
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
 
-# Count compilation warnings
-reWarnCount = re.compile(": warning")
-wc = reWarnCount.findall(mssgScons)
-compilerWarnCount = len(wc)
-
 mssgSconsErr = open('../../../../logs/sconsErr.log','r').read()
+
+# Count compilation warnings
+reWarnCount = re.compile("warning")
+wc = reWarnCount.findall(mssgSconsErr)
+compilerWarnCount = len(wc)
 
 #Get tests scons result and errors
 f = open('../../../../logs/testsBuild.log','r')

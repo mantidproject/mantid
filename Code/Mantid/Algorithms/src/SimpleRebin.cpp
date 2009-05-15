@@ -64,13 +64,13 @@ namespace Mantid
       for (int hist=0; hist <  histnumber;++hist)
       {
         // get const references to input Workspace arrays (no copying)
-        const std::vector<double>& XValues = inputW->readX(hist);
-        const std::vector<double>& YValues = inputW->readY(hist);
-        const std::vector<double>& YErrors = inputW->readE(hist);
+        const MantidVec& XValues = inputW->readX(hist);
+        const MantidVec& YValues = inputW->readY(hist);
+        const MantidVec& YErrors = inputW->readE(hist);
 
         //get references to output workspace data (no copying)
-        std::vector<double>& YValues_new=outputW->dataY(hist);
-        std::vector<double>& YErrors_new=outputW->dataE(hist);
+        MantidVec& YValues_new=outputW->dataY(hist);
+        MantidVec& YErrors_new=outputW->dataE(hist);
 
         // output data arrays are implicitly filled by function
         try {
@@ -80,6 +80,7 @@ namespace Mantid
           g_log.error() << "Error in rebin function: " << ex.what() << std::endl;
           throw ex;
         }
+        
         // Populate the output workspace X values
         if (outputW_2D)
         {
@@ -95,6 +96,13 @@ namespace Mantid
         } catch (Exception::IndexError) {
           // OK, so this isn't a Workspace2D
         }
+        
+        // Now propagate any masking correctly to the output workspace
+        if ( inputW->hasMaskedBins(hist) )  // Does the current spectrum have any masked bins?
+        {
+          this->propagateMasks(inputW,outputW,hist);
+        }
+        
         if (hist % progress_step == 0)
         {
           progress(double(hist)/histnumber);
@@ -163,5 +171,54 @@ namespace Mantid
       return inew;
     }
 
+    /** Takes the masks in the input workspace and apportions the weights into the new bins that overlap
+     *  with a masked bin. These bins are then masked with the calculated weight.
+     * 
+     *  @param inputW  The input workspace
+     *  @param outputW The output workspace
+     *  @param hist    The index of the current histogram
+     */
+    void SimpleRebin::propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist)
+    {
+      // Not too happy with the efficiency of this way of doing it, but it's a lot simpler to use the
+      // existing rebin algorithm to distribute the weights than to re-implement it for this
+      
+      MantidVec masked_bins,weights;
+      // Get a reference to the list of masked bins for this spectrum
+      const MatrixWorkspace::MaskList& mask = inputW->maskedBins(hist);
+      // Now iterate over the list, building up a vector of the masked bins
+      MatrixWorkspace::MaskList::const_iterator it = mask.begin();
+      const MantidVec& XValues = inputW->readX(hist);
+      masked_bins.push_back(XValues[(*it).first]);
+      weights.push_back((*it).second);
+      masked_bins.push_back(XValues[(*it).first + 1]);
+      for (++it; it!= mask.end(); ++it)
+      {
+        const double currentX = XValues[(*it).first];
+        // Add an intermediate bin with zero weight if masked bins aren't consecutive
+        if (masked_bins.back() != currentX) 
+        {
+          weights.push_back(0.0);
+          masked_bins.push_back(currentX);
+        }
+        weights.push_back((*it).second);
+        masked_bins.push_back(XValues[(*it).first + 1]);
+      }
+      
+      // Create a zero vector for the errors because we don't care about them here
+      const MantidVec zeroes(weights.size(),0.0);
+      // Create a vector to hold the redistributed weights
+      const MantidVec& XValues_new = outputW->readX(hist);
+      MantidVec newWeights(XValues_new.size()-1),zeroes2(XValues_new.size()-1);
+      // Use rebin function to redistribute the weights. Note that distribution flag is set
+      VectorHelper::rebin(masked_bins,weights,zeroes,XValues_new,newWeights,zeroes2,true);
+      
+      // Now process the output vector and fill the new masking list
+      for (size_t index = 0; index < newWeights.size(); ++index)
+      {
+        if ( newWeights[index] > 0.0 ) outputW->maskBin(hist,index,newWeights[index]);
+      }
+    }
+    
   } // namespace Algorithm
 } // namespace Mantid

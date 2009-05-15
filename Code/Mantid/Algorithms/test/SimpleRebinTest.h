@@ -131,6 +131,10 @@ public:
     Workspace2D_sptr test_in2D = Create2DWorkspace(50,20);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
+    // Mask a couple of bins for a test
+    test_in2D->maskBin(10,4);
+    test_in2D->maskBin(10,5);
+    
     SimpleRebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace","test_in2D");
@@ -153,6 +157,17 @@ public:
     TS_ASSERT_DELTA(outE[17],sqrt(4.0)  ,0.000001);
     bool dist=rebindata->isDistribution();
     TS_ASSERT(!dist);
+
+    // Test that the masking was propagated correctly
+    TS_ASSERT( test_in2D->hasMaskedBins(10) )
+    TS_ASSERT( rebindata->hasMaskedBins(10) )
+    TS_ASSERT_THROWS_NOTHING (
+      const MatrixWorkspace::MaskList& masks = rebindata->maskedBins(10);
+      TS_ASSERT_EQUALS( masks.size(),1 )
+      TS_ASSERT_EQUALS( masks.front().first, 1 )
+      TS_ASSERT_EQUALS( masks.front().second, 0.75 )
+    )
+    
     AnalysisDataService::Instance().remove("test_in2D");
     AnalysisDataService::Instance().remove("test_out");
   }

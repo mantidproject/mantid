@@ -66,7 +66,8 @@ private:
   void init();
   void exec();
   
- int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
+  int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
+  void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

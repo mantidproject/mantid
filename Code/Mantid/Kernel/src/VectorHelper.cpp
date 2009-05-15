@@ -141,92 +141,92 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
     const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition)
 {
   // Make sure y and e vectors are of correct sizes
-  const size_t size_xold=xold.size();
-  if (size_xold != (yold.size()+1) || size_xold != (eold.size()+1))
+  const size_t size_xold = xold.size();
+  if (size_xold != (yold.size() + 1) || size_xold != (eold.size() + 1))
     throw std::runtime_error("rebin: y and error vectors should be of same size & 1 longer than x");
-  const size_t size_xnew=xnew.size();
-  if (size_xnew != (ynew.size()+1) || size_xnew != (enew.size()+1))
+  const size_t size_xnew = xnew.size();
+  if (size_xnew != (ynew.size() + 1) || size_xnew != (enew.size() + 1))
     throw std::runtime_error("rebin: y and error vectors should be of same size & 1 longer than x");
-  
+
   // If not adding to existing vectors, make sure ynew & enew contain zeroes
   if (!addition)
   {
-    ynew.assign(size_xnew-1,0.0);
-    enew.assign(size_xnew-1,0.0);
+    ynew.assign(size_xnew - 1, 0.0);
+    enew.assign(size_xnew - 1, 0.0);
   }
-  
+
   // First find the first Xpoint that is bigger than xnew[0]
-  std::vector<double>::const_iterator it=std::upper_bound(xold.begin(),xold.end(),xnew[0]);
-  if (it==xold.end())
-  	throw std::runtime_error("No overlap, max of X-old < min of X-new");
-  size_t iold=std::distance(xold.begin(),it); // Where we are now
-  size_t inew=0;
+  std::vector<double>::const_iterator it = std::upper_bound(xold.begin(), xold.end(), xnew[0]);
+  if (it == xold.end())
+    throw std::runtime_error("No overlap, max of X-old < min of X-new");
+  size_t iold = std::distance(xold.begin(), it); // Where we are now
+  size_t inew = 0;
   double frac, fracE;
   double width;
-  if (iold==0)
+  if (iold == 0)
   {
-  	frac=0;
-  	fracE=0;
+    frac = 0;
+    fracE = 0;
   }
   else
   {
-  	width=(xold[iold]-xold[iold-1]);
-  	frac=yold[iold-1]/width;
-  	fracE=std::pow(eold[iold-1],2)/width;
+    width = (xold[iold] - xold[iold - 1]);
+    frac = yold[iold - 1] / width;
+    fracE = std::pow(eold[iold - 1], 2) / width;
   }
-  while((inew+1)!=size_xnew) //Start the loop here
+  while ((inew + 1) != size_xnew) //Start the loop here
   {
-	while(xnew[++inew]<xold[iold]) //Upper xlimit of new vector < upper limit of old vector
-	{
-		if (iold!=0) // If iold==0, then no counts to add
-		{
-			width=(xnew[inew]-xnew[inew-1]);
-			ynew[inew-1]+=frac*width; //Increment this
-			enew[inew-1]+=fracE*width;
-		}
-		if ((inew+1)==size_xnew)
-			break;
-	}
+    while (xnew[++inew] < xold[iold]) //Upper xlimit of new vector < upper limit of old vector
+    {
+      if (iold != 0) // If iold==0, then no counts to add
+      {
+        width = (xnew[inew] - xnew[inew - 1]);
+        ynew[inew - 1] += frac * width; //Increment this
+        enew[inew - 1] += fracE * width;
+      }
+      if ((inew + 1) == size_xnew)
+        break;
+    }
 
-	if (iold!=0) // Now upper xlimit of new vector > upper limit of old x vector
-	{
-		width=(xold[iold]-xnew[inew-1]);
-		ynew[inew-1]+=frac*width;
-		enew[inew-1]+=fracE*width;
-	}
+    if (iold != 0) // Now upper xlimit of new vector > upper limit of old x vector
+    {
+      width = (xold[iold] - xnew[inew - 1]);
+      ynew[inew - 1] += frac * width;
+      enew[inew - 1] += fracE * width;
+    }
 
-	if ((iold+1)==size_xold) //Reached the end of old vector
-			break;
+    if ((iold + 1) == size_xold) //Reached the end of old vector
+      break;
 
-	while(xold[++iold]<xnew[inew]) // Now increment the upper limit of old vector until it becomes higher than the new one
-	{
-		ynew[inew-1]+=yold[iold-1];
-		enew[inew-1]+=std::pow(eold[iold-1],2);
-		if ((iold+1)==size_xold)
-			break;
-	}
+    while (xold[++iold] < xnew[inew]) // Now increment the upper limit of old vector until it becomes higher than the new one
+    {
+      ynew[inew - 1] += yold[iold - 1];
+      enew[inew - 1] += std::pow(eold[iold - 1], 2);
+      if ((iold + 1) == size_xold)
+        break;
+    }
 
+    if (iold != 0)
+    {
+      width = (xold[iold] - xold[iold - 1]);
+      frac = yold[iold - 1] / width; //Dealing with the new xold
+      fracE = std::pow(eold[iold - 1], 2) / width;
+    }
 
-	if (iold!=0)
-	{
-		width=(xold[iold]-xold[iold-1]);
-		frac=yold[iold-1]/width; //Dealing with the new xold
-		fracE=std::pow(eold[iold-1],2)/width;
-	}
-
-	width=(xnew[inew]-xold[iold-1]);
-	ynew[inew-1]+=frac*width;
-	enew[inew-1]+=fracE*width;
+    width = (xnew[inew] - xold[iold - 1]);
+    ynew[inew - 1] += frac * width;
+    enew[inew - 1] += fracE * width;
 
   }
 
   if (!addition) //If this used to add at the same time then not necessary.
   {
-		//Now take the root-square of the errors
-		typedef double (*pf)(double);
-		pf uf=std::sqrt;
-		std::transform(enew.begin(),enew.end(),enew.begin(),uf);
-	}
+    //Now take the root-square of the errors
+    typedef double (*pf)(double);
+    pf uf = std::sqrt;
+    std::transform(enew.begin(), enew.end(), enew.begin(), uf);
+  }
+  
   return;
 }
 
