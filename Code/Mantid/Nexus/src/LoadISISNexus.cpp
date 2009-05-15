@@ -457,7 +457,7 @@ void LoadISISNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspa
     {
         loadInst->execute();
     }
-    catch (std::runtime_error& err)
+    catch (std::runtime_error&)
     {
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
     }

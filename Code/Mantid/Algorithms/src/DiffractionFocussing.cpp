@@ -176,7 +176,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
     throw;
@@ -215,7 +215,7 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run Rebinning sub-algorithm");
     throw;

@@ -286,7 +286,7 @@ namespace Mantid
       {
         loadInst->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
       }
@@ -314,7 +314,7 @@ namespace Mantid
       {
         loadInst->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
       }
@@ -334,7 +334,7 @@ namespace Mantid
       {
         loadmap->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
     	  g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
       }
@@ -356,7 +356,7 @@ namespace Mantid
       {
         loadLog->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run LoadLog sub-algorithm");
       }

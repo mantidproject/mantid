@@ -64,7 +64,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
   }
 
 
-  m_vectorsPerBlock = blockMemory / m_vectorSize;
+  m_vectorsPerBlock = blockMemory / static_cast<int>(m_vectorSize);
   // Should this ever come out to be zero, then actually set it to 1
   if ( m_vectorsPerBlock == 0 ) m_vectorsPerBlock = 1;
   
@@ -75,7 +75,7 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
 
 
   // Calculate the number of blocks that will go into a file
-  m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * m_vectorSize);
+  m_blocksPerFile = std::numeric_limits<int>::max() / (m_vectorsPerBlock * static_cast<int>(m_vectorSize));
   if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile; 
 
   // Now work out the number of files needed
@@ -367,7 +367,9 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startInd
       ++fileIndex;
     }
 
-    m_datafile[fileIndex]->seekg(seekPoint, std::ios::beg);
+    // Safe to cast seekPoint to int because the while loop above guarantees that 
+    // it'll be in range by this point.
+    m_datafile[fileIndex]->seekg(static_cast<int>(seekPoint), std::ios::beg);
     *m_datafile[fileIndex] >> *newBlock;
   }
 
@@ -411,7 +413,9 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite)
           ++fileIndex;
         }
 
-          m_datafile[fileIndex]->seekp(seekPoint, std::ios::beg);
+        // Safe to cast seekPoint to int because the while loop above guarantees that 
+        // it'll be in range by this point.
+        m_datafile[fileIndex]->seekp(static_cast<int>(seekPoint), std::ios::beg);
       }
 
       *m_datafile[fileIndex] << *toWrite;

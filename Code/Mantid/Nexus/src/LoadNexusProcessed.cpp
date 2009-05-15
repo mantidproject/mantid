@@ -130,7 +130,7 @@ void LoadNexusProcessed::exec()
     try
     {
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0, colon));
-    } catch (std::runtime_error& err)
+    } catch (std::runtime_error&)
     {
       g_log.warning("Unable to set Axis(0) units");
     }
@@ -265,7 +265,7 @@ void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWo
   try
   {
     loadInst->execute();
-  } catch (std::runtime_error& err)
+  } catch (std::runtime_error&)
   {
     g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
   }

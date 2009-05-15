@@ -298,12 +298,12 @@ double timeMean(const Kernel::Property* p)
     }
     
     double res = 0.;
-    long total = 0;
+    Kernel::dateAndTime total = 0;
 
     for(int i=0;i<dp->size();i++)
     {
         Kernel::TimeInterval t = dp->nthInterval(i);
-        long dt = t.length();
+        Kernel::dateAndTime dt = t.length();
         total += dt;
         res += dp->nthValue(i) * dt;
     }

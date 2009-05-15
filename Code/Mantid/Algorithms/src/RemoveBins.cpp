@@ -192,7 +192,7 @@ void RemoveBins::crop(const double& start, const double& end)
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run sub-algorithm");
     throw;

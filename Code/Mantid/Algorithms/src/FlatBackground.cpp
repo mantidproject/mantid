@@ -126,7 +126,7 @@ double FlatBackground::doFit(API::MatrixWorkspace_sptr WS, int spectrum, double 
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run Linear fit sub-algorithm");
     throw;

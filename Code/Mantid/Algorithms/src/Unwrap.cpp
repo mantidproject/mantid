@@ -348,7 +348,7 @@ API::MatrixWorkspace_sptr Unwrap::rebin(const API::MatrixWorkspace_sptr& workspa
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run Rebinning sub-algorithm");
     throw;

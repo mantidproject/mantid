@@ -121,7 +121,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run sub-algorithm");
     throw;
@@ -156,7 +156,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   {
     childAlg->execute();
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     g_log.error("Unable to successfully run Linear fit sub-algorithm");
     throw;

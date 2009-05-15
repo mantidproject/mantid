@@ -60,7 +60,7 @@ namespace Mantid
 					throw std::runtime_error("FindDetectorsInShape sub-algorithm has not executed successfully\n");
 				}
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
     	  g_log.error("Unable to successfully execute FindDetectorsInShape sub-algorithm");
 				throw;
@@ -82,7 +82,7 @@ namespace Mantid
 					throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully\n");
 				}
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
     	  g_log.error("Unable to successfully execute MaskDetectors sub-algorithm");
 				throw;

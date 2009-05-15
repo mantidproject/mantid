@@ -1,3 +1,4 @@
+import re
 import smtplib
 from time import strftime
 
@@ -37,7 +38,12 @@ f.close()
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
-	
+
+# Count compilation warnings
+reWarnCount = re.compile(": warning")
+wc = reWarnCount.findall(mssgScons)
+compilerWarnCount = len(wc)
+
 mssgSconsErr = open('../../../../logs/sconsErr.log','r').read()
 
 #Get tests scons result and errors
@@ -102,7 +108,10 @@ mssgDoxy = open('../../../../logs/doxy.log','r').read()
 #Construct Message
 
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
-message += 'Framework Build Passed: ' + str(buildSuccess) + "\n"
+message += 'Framework Build Passed: ' + str(buildSuccess)
+if compilerWarnCount>0:
+  message += " (" + str(compilerWarnCount) + " compiler warnings)"
+message += '\n'
 message += 'Tests Build Passed: ' + str(testsBuildSuccess) + "\n"
 message += 'Units Tests Passed: ' + str(testsPass) + "\n\n"
 #~ message += 'Python Tests Passed: ' + str(pythonPass) + "\n\n"

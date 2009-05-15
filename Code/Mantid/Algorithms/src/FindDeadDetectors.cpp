@@ -131,7 +131,7 @@ namespace Mantid
       {
         childAlg->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run Integration sub-algorithm");
         throw;

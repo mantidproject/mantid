@@ -131,7 +131,7 @@ namespace NeXus
       {
         loadMuonNexus->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       }
@@ -191,7 +191,7 @@ namespace NeXus
       {
         loadNexusPro->execute();
       }
-      catch (std::runtime_error& err)
+      catch (std::runtime_error&)
       {
         g_log.error("Unable to successfully run LoadNexusprocessed sub-algorithm");
       }

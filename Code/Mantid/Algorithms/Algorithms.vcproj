@@ -43,8 +43,9 @@
 				PreprocessorDefinitions="_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX"
 				RuntimeLibrary="3"
 				OpenMP="true"
+				WarningLevel="3"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
+				DisableSpecificWarnings="4275; 4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -121,7 +122,8 @@
 				PreprocessorDefinitions="_USE_MATH_DEFINES;WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL;NOMINMAX"
 				RuntimeLibrary="2"
 				OpenMP="true"
-				DisableSpecificWarnings="4996"
+				WarningLevel="3"
+				DisableSpecificWarnings="4275; 4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
