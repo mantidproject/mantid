@@ -22,6 +22,14 @@ void StripPeaks::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+
+  BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
+  // The estimated width of a peak in terms of number of channels
+  declareProperty("fwhm",7,range);
+  // The tolerance allowed in meeting the conditions
+  BoundedValidator<int> *min = new BoundedValidator<int>();
+  min->setLower(1);
+  declareProperty("Tolerance",4,min);
 }
 
 void StripPeaks::exec()
@@ -58,6 +66,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 
   API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks");
   findpeaks->setProperty("InputWorkspace", WS);
+  findpeaks->setProperty<int>("fwhm",getProperty("fwhm"));
+  findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -108,6 +118,10 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     const double height = peakslist->getRef<double>("height",i);
     const double centre = peakslist->getRef<double>("centre",i);
     const double width = peakslist->getRef<double>("width",i);
+    // These are some heuristic rules to discard bad fits.
+    // Hope to be able to remove them when we have better fitting routine
+    if ( height < 0 ) continue;              // Height must be positive
+
     // Loop over the spectrum elements
     const int spectrumLength = Y.size();
     for (int j = 0; j < spectrumLength; ++j)

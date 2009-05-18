@@ -27,12 +27,13 @@ FindPeaks::FindPeaks() : API::Algorithm() {}
 void FindPeaks::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+  BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
+  // The estimated width of a peak in terms of number of channels
+  declareProperty("fwhm",7,range);
+  // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
-  // The estimated width of a peak in terms of number of channels
-  declareProperty("fwhm",7,min);
-  // The tolerance allowed in meeting the conditions
-  declareProperty("Tolerance",4,min->clone());
+  declareProperty("Tolerance",4,min);
   
   // Temporary so that I can look at the smoothed data
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
