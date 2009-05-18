@@ -22,9 +22,6 @@ namespace Algorithms
 DECLARE_ALGORITHM(CreateCalFileByNames)
 
 using namespace Kernel;
-using API::WorkspaceProperty;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
 
 // Get a reference to the logger
 Logger& CreateCalFileByNames::g_log = Logger::get("CreateCalFileByNames");
@@ -162,6 +159,7 @@ bool CreateCalFileByNames::groupingFileDoesExist(const std::string& filename) co
   return true;
 }
 
+/// Creates and saves the output file
 void CreateCalFileByNames::saveGroupingFile(const std::string& filename,bool overwrite) const
 {
 	std::ostringstream message;
@@ -234,6 +232,7 @@ void CreateCalFileByNames::saveGroupingFile(const std::string& filename,bool ove
 	return;
 }
 
+/// Writes a single calibration line to the output file
 void CreateCalFileByNames::writeCalEntry(std::ostream& os, int number, int udet, double offset, int select, int group)
 {
 	os << std::fixed << std::setw(9) << number <<
@@ -244,6 +243,7 @@ void CreateCalFileByNames::writeCalEntry(std::ostream& os, int number, int udet,
 	return;
 }
 
+/// Writes out the header to the output file
 void CreateCalFileByNames::writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const
 {
 	os << "# Diffraction focusing calibration file created by Mantid" <<  "\n";

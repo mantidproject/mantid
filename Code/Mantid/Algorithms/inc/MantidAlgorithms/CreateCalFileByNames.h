@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
-#include <vector>
 #include <map>
 #include "MantidAPI/Algorithm.h"
 
@@ -34,7 +33,7 @@ namespace Algorithms
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 01/03/2009
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -83,8 +82,8 @@ private:
   void writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const;
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
+  /// The names of the groups
   std::string groups;
-  ///
   /// Calibration map used if the *.cal file exist.
   /// All entries in the *.cal file are registered with
   /// the udet number as the key and the <Number,Offset,Select,Group> as the

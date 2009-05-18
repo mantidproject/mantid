@@ -67,18 +67,29 @@ void CropWorkspace::exec()
   }
 
   DataObjects::Histogram1D::RCtype newX;
-  const std::vector<double> &oldX = m_inputWorkspace->readX(m_minSpec);
+  const MantidVec& oldX = m_inputWorkspace->readX(m_minSpec);
   newX.access().assign(oldX.begin()+m_minX,oldX.begin()+m_maxX);
 
   // Loop over the required spectra, copying in the desired bins
   for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
   {
     output2D->setX(j,newX);
-    const std::vector<double> &oldY = m_inputWorkspace->readY(i);
+    const MantidVec& oldY = m_inputWorkspace->readY(i);
     outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+(m_maxX-histogram));
-    const std::vector<double> &oldE = m_inputWorkspace->readE(i);
+    const MantidVec& oldE = m_inputWorkspace->readE(i);
     outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+(m_maxX-histogram));
     if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(i);
+    
+    // Propagate bin masking if there is any
+    if ( m_inputWorkspace->hasMaskedBins(i) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = m_inputWorkspace->maskedBins(i);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        outputWorkspace->maskBin(j,(*it).first - m_minX,(*it).second);
+      }
+    }
   }
 
   setProperty("OutputWorkspace", outputWorkspace);
@@ -88,10 +99,18 @@ void CropWorkspace::exec()
 
 /** Retrieves the optional input properties and checks that they have valid values.
  *  Assigns to the defaults if any property has not been set.
+ *  @throw std::invalid_argument If the input workspace does not have common binning
  *  @throw std::out_of_range If a property is set to an invalid value for the input workspace
  */
 void CropWorkspace::checkProperties()
 {
+  // Do the full check on common workspace binning
+  if ( ! WorkspaceHelpers::commonBoundaries(m_inputWorkspace) )
+  {
+    g_log.error("The input workspace must have common X values across all spectra");
+    throw std::invalid_argument("The input workspace must have common X values across all spectra");
+  }
+  
   this->getXMin();
   this->getXMax();
 
@@ -143,15 +162,13 @@ void CropWorkspace::getXMin()
   else
   {
     const double minX_val = getProperty("XMin");
-    const std::vector<double> &X = m_inputWorkspace->readX(0);
-    for (unsigned int i = 0; i < X.size(); ++i)
+    const MantidVec& X = m_inputWorkspace->readX(0);
+    if ( minX_val > X.back() )
     {
-      if ( X[i] >= minX_val )
-      {
-        m_minX = i;
-        break;
-      }
+      g_log.error("XMin is greater than the largest X value");
+      throw std::out_of_range("XMin is greater than the largest X value");
     }
+    m_minX = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
   }
 }
 
@@ -160,7 +177,7 @@ void CropWorkspace::getXMin()
  */
 void CropWorkspace::getXMax()
 {
-  const std::vector<double> &X = m_inputWorkspace->readX(0);
+  const MantidVec& X = m_inputWorkspace->readX(0);
   Property *maxX = getProperty("XMax");
   if ( maxX->isDefault() )
   {
@@ -169,16 +186,12 @@ void CropWorkspace::getXMax()
   else
   {
     const double maxX_val = getProperty("XMax");
-    for (int i = X.size()-1; i >= 0; --i)
+    if ( maxX_val < X.front() )
     {
-      if ( X[i] <= maxX_val )
-      {
-        m_maxX = i;
-        break;
-      }
+      g_log.error("XMax is less than the smallest X value");
+      throw std::out_of_range("XMax is less than the smallest X value");
     }
-    // Increment because it should be one-past-the-end
-    ++m_maxX;
+    m_maxX = std::upper_bound(X.begin(),X.end(),maxX_val) - X.begin();
   }
 }
 

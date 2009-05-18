@@ -17,9 +17,6 @@ DECLARE_ALGORITHM(PointByPointVCorrection)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D_const_sptr;
 
 // Get a reference to the logger
 Logger& PointByPointVCorrection::g_log = Logger::get("PointByPointVCorrection");
@@ -49,34 +46,33 @@ void PointByPointVCorrection::exec()
   check_validity(inputWS1,inputWS2,outputWS);
 
   // Now do the normalisation
-  typedef std::vector<double> Vector;
   const int size=inputWS1->readX(0).size();
-  Vector binwidths(size); //Vector for bin widths
-  Vector errors(size-1); //Vector for temporary errors
+  MantidVec binwidths(size); //MantidVec for bin widths
+  MantidVec errors(size-1); //MantidVec for temporary errors
 
   double r=0;
 
   const int nHist=inputWS1->getNumberHistograms();
 
-  for (int i=0;i<nHist;i++) //Looping on all histograms
+  for (unsigned int i=0;i<nHist;i++) //Looping on all histograms
   {
-	  const Vector& X=inputWS1->readX(i);
+	  const MantidVec& X=inputWS1->readX(i);
 
-	  Vector& Xresult=outputWS->dataX(i); //Copy the Xs
+	  MantidVec& Xresult=outputWS->dataX(i); //Copy the Xs
 	  Xresult=X;
 
-	  const Vector& Y1=inputWS1->readY(i);
-	  const Vector& Y2=inputWS2->readY(i);
-	  const Vector& E1=inputWS1->readE(i);
-	  const Vector& E2=inputWS2->readE(i);
-	  Vector& resultY=outputWS->dataY(i);
-	  Vector& resultE=outputWS->dataE(i);
+	  const MantidVec& Y1=inputWS1->readY(i);
+	  const MantidVec& Y2=inputWS2->readY(i);
+	  const MantidVec& E1=inputWS1->readE(i);
+	  const MantidVec& E2=inputWS2->readE(i);
+	  MantidVec& resultY=outputWS->dataY(i);
+	  MantidVec& resultE=outputWS->dataE(i);
 
 
 	  // Work on the Y data
 
 	  std::adjacent_difference(X.begin(),X.end(),binwidths.begin()); //Calculate the binwidths
-	  std::transform(binwidths.begin()+1,binwidths.end(),Y2.begin(),resultY.begin(),Kernel::VectorHelper::DividesNonNull<double>());
+	  std::transform(binwidths.begin()+1,binwidths.end(),Y2.begin(),resultY.begin(),VectorHelper::DividesNonNull<double>());
 		std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::multiplies<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
 	  // Calculate the errors squared related to A_i at this point

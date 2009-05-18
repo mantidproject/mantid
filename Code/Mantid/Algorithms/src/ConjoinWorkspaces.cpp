@@ -69,7 +69,18 @@ void ConjoinWorkspaces::exec()
     output2D->setX(outIndex,XValues);
     output2D->dataY(outIndex) = ws1->readY(i);
     output2D->dataE(outIndex) = ws1->readE(i);
+    // Copy the spectrum number
     outAxis->spectraNo(outIndex) = axis1->spectraNo(i);
+    // Propagate masking, if needed
+    if ( ws1->hasMaskedBins(i) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = ws1->maskedBins(i);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        output->maskBin(outIndex,(*it).first,(*it).second);
+      }
+    }    
   }
   const int& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
@@ -78,7 +89,18 @@ void ConjoinWorkspaces::exec()
     output2D->setX(outIndex,XValues);
     output2D->dataY(outIndex) = ws2->readY(j);
     output2D->dataE(outIndex) = ws2->readE(j);
+    // Copy the spectrum number
     outAxis->spectraNo(outIndex) = axis2->spectraNo(j);
+    // Propagate masking, if needed
+    if ( ws2->hasMaskedBins(j) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = ws2->maskedBins(j);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        output->maskBin(outIndex,(*it).first,(*it).second);
+      }
+    }    
   }
 
   // Delete the input workspaces from the ADS

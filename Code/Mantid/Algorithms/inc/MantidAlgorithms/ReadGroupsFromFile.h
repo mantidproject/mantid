@@ -46,7 +46,7 @@ namespace Algorithms
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -93,7 +93,7 @@ private:
   /// Execution code
   void exec();
   /// Read a grouping file and construct the calibration map
-  /// @param GroupingFilename (filename extension .cal, including path)
+  /// @param groupingFileName (filename extension .cal, including path)
   void readGroupingFile(const std::string& groupingFileName);
   /// Sub-algorithm to Load the associated empty instrument
   /// @param instrument_xml_name The instrument xml name including extension(.xml or .XML) but no path
