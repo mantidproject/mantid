@@ -54,7 +54,7 @@ void PointByPointVCorrection::exec()
 
   const int nHist=inputWS1->getNumberHistograms();
 
-  for (unsigned int i=0;i<nHist;i++) //Looping on all histograms
+  for (int i=0;i<nHist;i++) //Looping on all histograms
   {
 	  const MantidVec& X=inputWS1->readX(i);
 

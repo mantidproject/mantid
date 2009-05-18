@@ -56,8 +56,9 @@ void Unwrap::exec()
 {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  // Need a new workspace. Will just be used temporarily until the data is rebinned.
-  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS);
+  // Get the number of spectra in this workspace
+  const int numberOfSpectra = m_inputWS->getNumberHistograms();
+  g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra << std::endl;
 
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
@@ -70,9 +71,8 @@ void Unwrap::exec()
   // Retrieve the source-sample distance
   const double L1 = this->getPrimaryFlightpath();
 
-  // Get the number of spectra in this workspace
-  const int numberOfSpectra = m_inputWS->getNumberHistograms();
-  g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra << std::endl;
+  // Need a new workspace. Will just be used temporarily until the data is rebinned.
+  MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS,numberOfSpectra,m_XSize,m_XSize-1);
 
   // This will be used later to store the maximum number of bin BOUNDARIES for the rebinning
   unsigned int max_bins = 0;
@@ -298,6 +298,17 @@ void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spe
     // Copy in the upper range
     Y.assign( YIn.begin()+rangeBounds[2], YIn.end() );
     E.assign( EIn.begin()+rangeBounds[2], EIn.end() );
+    // Propagate masking, if necessary
+    if ( m_inputWS->hasMaskedBins(spectrum) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = m_inputWS->maskedBins(spectrum);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        if ( (*it).first >= rangeBounds[2] )
+          tempWS->maskBin(spectrum,(*it).first-rangeBounds[2],(*it).second);
+      }
+    }
   }
   else
   {
@@ -312,6 +323,18 @@ void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spe
     std::vector<double>::const_iterator EStart = EIn.begin();
     Y.insert( Y.end(), YStart+rangeBounds[0], YStart+rangeBounds[1] );
     E.insert( E.end(), EStart+rangeBounds[0], EStart+rangeBounds[1] );
+    // Propagate masking, if necessary
+    if ( m_inputWS->hasMaskedBins(spectrum) )
+    {
+      const MatrixWorkspace::MaskList& inputMasks = m_inputWS->maskedBins(spectrum);
+      MatrixWorkspace::MaskList::const_iterator it;
+      for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
+      {
+        const int maskIndex = (*it).first;
+        if ( maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1] )
+          tempWS->maskBin(spectrum,maskIndex-rangeBounds[0],(*it).second);
+      }
+    }
   }
 }
 

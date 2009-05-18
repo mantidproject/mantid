@@ -87,7 +87,9 @@ void CropWorkspace::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        outputWorkspace->maskBin(j,(*it).first - m_minX,(*it).second);
+        const int maskIndex = (*it).first;
+        if ( maskIndex >= m_minX && maskIndex < m_maxX-histogram )
+          outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
       }
     }
   }
