@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/XMLlogfile.h"
+#include "MantidAPI/XMLlogfile.h"
 #include "MantidGeometry/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muParser.h>
@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace API
 {
 
 using namespace Kernel;
@@ -113,5 +113,5 @@ double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
 
 
 
-} // namespace DataHandling
+} // namespace API
 } // namespace Mantid

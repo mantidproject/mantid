@@ -15,13 +15,11 @@
 namespace Mantid
 {
 
-namespace DataHandling
-{
-  class XMLlogfile;
-}
-
 namespace API
 {
+
+    class XMLlogfile;
+
 /** @class Instrument Instrument.h
 
  	  Base Instrument Class.
@@ -98,7 +96,7 @@ public:
   boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
 
   /// Get information about the parameters described in the instrument definition file
-  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& getLogfileCache() {return _logfileCache;}
+  std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
 
 private:
     friend class ParInstrument;
@@ -125,7 +123,7 @@ private:
 
   /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs,
   /// which equals logfile filename minus the run number and file extension
-  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> > _logfileCache;
+  std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
 };
 
 } // namespace API

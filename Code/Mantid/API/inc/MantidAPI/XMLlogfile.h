@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_XMLLOGFILE_H_
-#define MANTID_DATAHANDLING_XMLLOGFILE_H_
+#ifndef MANTID_API_XMLLOGFILE_H_
+#define MANTID_API_XMLLOGFILE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -19,11 +19,11 @@ namespace Mantid
     class Component;
   }
 
-  namespace DataHandling
+  namespace API
   {
-    /** @class XMLlogfile XMLlogfile.h DataHandling/XMLlogfile.h
+    /** @class XMLlogfile XMLlogfile.h API/XMLlogfile.h
 
-    Class intended to be used by the DataHandling LoadInstrument and 
+    Class intended to be used by the API LoadInstrument and 
     LoadRaw algorithms to link up parameters defined in instrument 
     definition files with data in ISIS logfiles.
 
@@ -79,8 +79,8 @@ namespace Mantid
 
     };
 
-  } // namespace DataHandling
+  } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_XMLLOGFILE_H_*/
+#endif /*MANTID_API_XMLLOGFILE_H_*/
 

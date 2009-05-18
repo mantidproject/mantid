@@ -5,11 +5,11 @@
 #include "MantidGeometry/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/XMLlogfile.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/vtkGeometryCacheReader.h"
 #include "MantidGeometry/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidDataHandling/XMLlogfile.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -927,7 +927,7 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
   unsigned int numberParam = pNL->length();
 
   // Get logfile-cache from instrument
-  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
+  std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
 
   for (unsigned int i = 0; i < numberParam; i++)
   {

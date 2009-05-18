@@ -100,6 +100,7 @@ namespace Mantid
             void loadMappingTable(DataObjects::Workspace2D_sptr);
             void loadProtonCharge(DataObjects::Workspace2D_sptr);
             void loadLogs(DataObjects::Workspace2D_sptr,int period = 1);
+            void populateInstrumentParameters(DataObjects::Workspace2D_sptr localWorkspace);
 
             /// The name and path of the input file
             std::string m_filename;

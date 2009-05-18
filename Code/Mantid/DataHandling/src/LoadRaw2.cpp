@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
-#include "MantidDataHandling/XMLlogfile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
@@ -431,14 +431,14 @@ namespace Mantid
       // the parameters that my be specified in the instrument definition file (IDF)
 
       boost::shared_ptr<Geometry::ParameterMap> paramMap = localWorkspace->InstrumentParameters();
-      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
+      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
 
 
       // iterator to browse throw the multimap: paramInfoFromIDF
 
-      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> > :: const_iterator it;
-      std::pair<std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator,
-        std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator> ret;
+      std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> > :: const_iterator it;
+      std::pair<std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator,
+        std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator> ret;
 
 
       // loop over all logfiles and see if any of these are associated with parameters in the

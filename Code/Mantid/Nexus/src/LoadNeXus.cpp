@@ -98,6 +98,10 @@ namespace NeXus
     {
         runLoadNexusProcessed();
     }
+    else if( entryName[0]=="raw_data_1" )
+    {
+        runLoadIsisNexus();
+    }
     else
     {
         g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
@@ -204,6 +208,66 @@ namespace NeXus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
       // until name not found.
       // At moment do not expect LoadNexusProcessed to return multiperiod data.
+      //
+      int period=0;
+      bool noError=true;
+      while(noError)
+      {
+          std::stringstream suffix;
+          period++;
+          suffix << (period+1);
+          std::string opWS = outputWorkspace + suffix.str();
+          std::string WSName = m_workspace + "_" + suffix.str();
+          try
+          {
+              m_localWorkspace=loadNexusPro->getProperty(opWS); 
+              declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
+              setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+          }
+          catch (Exception::NotFoundError)
+          {
+              noError=false;
+          }
+      }
+  }
+
+  void LoadNexus::runLoadIsisNexus()
+  {
+      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadISISNexus");
+      // Pass through the same input filename
+      loadNexusPro->setPropertyValue("Filename",m_filename);
+      // Set the workspace property
+      std::string outputWorkspace="OutputWorkspace";
+      loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
+      //
+      Property *specList = getProperty("spectrum_list");
+      if( !(specList->isDefault()) )
+         loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+      //
+      Property *specMax = getProperty("spectrum_max");
+      if( !(specMax->isDefault()) )
+      {
+         loadNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
+         loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+      }
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadNexusPro->execute();
+      }
+      catch (std::runtime_error&)
+      {
+        g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
+      }
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
+      // Get pointer to the workspace created
+      m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
+      setProperty<Workspace2D_sptr>(outputWorkspace,m_localWorkspace);
+      //
+      // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
+      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
+      // until name not found.
       //
       int period=0;
       bool noError=true;
