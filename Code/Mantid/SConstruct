@@ -64,6 +64,7 @@ third_party=''
 gts_path = ''
 glib_path = ''
 opencascade_path = ''
+python_path = ''
 
 #Get paths
 if os.name == 'nt': 
@@ -124,10 +125,10 @@ else:
 		for ln in f:
 			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
+			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
 			#fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 		f.close()
-		python_path = '/usr/local/python2.5'
 	else:
 		boost_path=''
 		poco_path=''
