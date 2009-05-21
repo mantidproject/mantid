@@ -58,7 +58,7 @@ class DLLExport SimplePythonAPI
 
   ///Public methods
   static void createModule(bool gui);
-  static const std::string & getModuleName(); 
+  static std::string getModuleName(); 
   
   private:
   ///private constructor

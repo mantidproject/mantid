@@ -12,6 +12,7 @@
 #include "Poco/Util/PropertyFileConfiguration.h"
 #include "Poco/LoggingFactory.h"
 #include "Poco/Path.h"
+#include "Poco/File.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -54,7 +55,7 @@ namespace Mantid
 			//attempt to load the default properties file that resides in the directory of the executable
 			loadConfig( getBaseDir() + m_properties_file_name);
 			//and then append the user properties
-			loadConfig( getBaseDir() + m_user_properties_file_name, true);
+			loadConfig( getOutputDir() + m_user_properties_file_name, true);
 
 			//Fill the list of possible relative path keys that may require conversion to absolute paths
 			m_vConfigPaths.clear();
@@ -122,7 +123,7 @@ namespace Mantid
 		{
 			try
 			{
-				std::fstream filestr ((m_strBaseDir + m_user_properties_file_name).c_str(), std::fstream::out);
+			        std::fstream filestr ((getOutputDir() + m_user_properties_file_name).c_str(), std::fstream::out);
 
 				filestr << "# This file can be used to override any properties for this installation." << std::endl;
 				filestr << "# Any properties found in this file will override any that are found in the Mantid.Properties file" << std::endl;
@@ -138,7 +139,7 @@ namespace Mantid
 			}
 			catch (std::runtime_error ex)
 			{
-				g_log.error()<<"Unable to write out user.properties file to " << m_strBaseDir << m_user_properties_file_name
+				g_log.error()<<"Unable to write out user.properties file to " << getOutputDir() << m_user_properties_file_name
 					<< " error: " << ex.what() << std::endl;
 			}
 
@@ -212,7 +213,7 @@ namespace Mantid
 				// check if we have failed to open the file
 				if ((!good) || (temp==""))
 				{
-					if (filename == m_strBaseDir + m_user_properties_file_name)
+				  if (filename == getOutputDir() + m_user_properties_file_name)
 					{
 						//write out a fresh file
 						createUserPropertiesFile();
@@ -252,6 +253,14 @@ namespace Mantid
 
 			try
 			{
+			        //Ensure that the logging directory exists
+			        Poco::Path logpath(getString("logging.channels.fileChannel.path"));
+				//make this path point to the parent directory and create it if it does not exist
+				logpath.makeParent();
+				if( !logpath.toString().empty() )
+				{
+				  Poco::File(logpath).createDirectory();
+				}
 				//configure the logging framework
 				Poco::Util::LoggingConfigurator configurator;
 				configurator.configure(m_pConf);
@@ -376,11 +385,27 @@ namespace Mantid
 		* running through Python on the command line
 		* @returns The directory to consider as the base directory, including a trailing slash
 		*/
-		std::string ConfigServiceImpl::getBaseDir()
+		std::string ConfigServiceImpl::getBaseDir() const
 		{
 			return m_strBaseDir;
 		}
-
+	        
+	        /**
+		 * Return the directory that Mantid should use for writing files. A trailing slash is appended
+		 * so that filenames can more easily be concatenated with this
+		 */
+	        std::string ConfigServiceImpl::getOutputDir() const
+		{
+             #ifdef _WIN32 
+		  return m_strBaseDir;
+             #else
+		  Poco::Path datadir(m_pSysConfig->getString("system.homeDir"));
+		  datadir.append(".mantid");
+		  // Create the directory if it doesn't already exist
+		  Poco::File(datadir).createDirectory();
+		  return datadir.toString() + "/";
+             #endif
+		}
 
 		/// \cond TEMPLATE 
 

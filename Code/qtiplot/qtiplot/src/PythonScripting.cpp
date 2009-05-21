@@ -287,11 +287,16 @@ bool PythonScripting::loadInitFile(const QString &path)
 	if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
 		// if we have a recent pycFile, use it
 		FILE *f = fopen(pycFile.filePath(), "rb");
-		success = PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0;
+		success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
 		fclose(f);
-	} else if (pyFile.isReadable() && pyFile.exists()) {
-		// try to compile pyFile to pycFile
-		PyObject *compileModule = PyImport_ImportModule("py_compile");
+	} 
+	else if (pyFile.isReadable() && pyFile.exists()) {
+		// try to compile pyFile to pycFile if the current location is writable
+	  QString testfile(QFileInfo(path).absoluteDir().absoluteFilePath("UNLIKELYFILENAME"));
+	  QFile tester(testfile);
+	  if( tester.open(QIODevice::WriteOnly) )
+	  {
+	        PyObject *compileModule = PyImport_ImportModule("py_compile");
 		if (compileModule) {
 			PyObject *compile = PyDict_GetItemString(PyModule_GetDict(compileModule), "compile");
 			if (compile) {
@@ -309,23 +314,27 @@ bool PythonScripting::loadInitFile(const QString &path)
 		} else
 			PyErr_Print();
 		pycFile.refresh();
-		if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
-			// run the newly compiled pycFile
-			FILE *f = fopen(pycFile.filePath(), "rb");
-			success = PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0;
-			fclose(f);
-		} else {
-			// fallback: just run pyFile
-			/*FILE *f = fopen(pyFile.filePath(), "r");
-			success = PyRun_SimpleFileEx(f, pyFile.filePath(), false) == 0;
-			fclose(f);*/
-			//TODO: code above crashes on Windows - bug in Python?
-			QFile f(pyFile.filePath());
-			if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-				QByteArray data = f.readAll();
-				success = PyRun_SimpleString(data.data());
-				f.close();
-			}
+	  }
+	  QFile::remove(testfile);
+	    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
+		// run the newly compiled pycFile
+		FILE *f = fopen(pycFile.filePath(), "rb");
+		success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
+		fclose(f);
+	      } 
+	      else 
+		{
+		  // fallback: just run pyFile
+		  /*FILE *f = fopen(pyFile.filePath(), "r");
+		    success = PyRun_SimpleFileEx(f, pyFile.filePath(), false) == 0;
+		    fclose(f);*/
+		  //TODO: code above crashes on Windows - bug in Python?
+		  QFile f(pyFile.filePath());
+		  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+		    QByteArray data = f.readAll();
+		    success = (PyRun_SimpleString(data.data()) == 0);
+		    f.close();
+		  }
 		}
 	}
 	return success;

@@ -87,12 +87,15 @@ void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int
 
   // Look for the (optional) path from the configuration file
   std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
-  if ( !path.empty() )
+  if( path.empty() || !Poco::File(path).exists() || !Poco::File(path).canWrite() )
   {
-    if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
-    {
-      path.push_back('/');
-    }
+    path = Kernel::ConfigService::Instance().getOutputDir();
+    g_log.debug() << "Temporary file written to " << path << std::endl;
+  }
+  // Append a slash if necessary
+  if( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
+  {
+    path.push_back('/');
   }
 
   std::stringstream filestem;

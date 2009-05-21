@@ -32,9 +32,9 @@ namespace Mantid
      * Return the name of the Python module to be created
      * @returns A string containing the name of the module file
      */
-    const std::string & SimplePythonAPI::getModuleName()
+    std::string SimplePythonAPI::getModuleName()
     {
-      return g_strFilename;
+      return Poco::Path(Mantid::Kernel::ConfigService::Instance().getOutputDir()).append(Poco::Path(g_strFilename)).toString(); 
     }
 
     /**
@@ -46,7 +46,8 @@ namespace Mantid
     void SimplePythonAPI::createModule(bool gui)
     {
       //open file
-      std::ofstream module(getModuleName().c_str());
+      std::string filepath = getModuleName();	
+      std::ofstream module(filepath.c_str());
       // Append the current directory and the scripts directory to the path to make importing
       // other Mantid things easier
       module << 

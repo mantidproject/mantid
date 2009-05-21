@@ -134,7 +134,8 @@ class Logger;
 		std::string getOSVersion();	
 		std::string getCurrentDir();
 		std::string getTempDir();
-    std::string getBaseDir();
+		std::string getBaseDir() const;
+		std::string getOutputDir() const;
 
 	private:
 		friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;

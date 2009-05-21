@@ -168,22 +168,14 @@ namespace Mantid
     {
         // Look for the (optional) path from the configuration file
         std::string path = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
-        if ( !path.empty() )
-        {
-            if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
-            {
-                path.push_back('/');
-            }
-        }
-	
-	if( !Poco::File(path).exists() )
+	if( path.empty() || !Poco::File(path).exists() || !Poco::File(path).canWrite() )
 	{
 	  path = Mantid::Kernel::ConfigService::Instance().getBaseDir();
+	  g_log.debug() << "Temporary file written to " << path << std::endl;
 	}
-
-	if( !Poco::File(path).canWrite() )
+	if ( ( *(path.rbegin()) != '/' ) && ( *(path.rbegin()) != '\\' ) )
 	{
-	  throw std::runtime_error(std::string("Temporary file path '") + path + "' is not writable");
+	  path.push_back('/');
 	}
 
         std::stringstream filename;
