@@ -40,7 +40,7 @@ CORRECTIONTYPE = '|ANALYSISTYPE|'
 def Correct(sampleWS, transWS, suffix):
 	'''Performs the data reduction steps'''
 	monitorWS = "Monitor"
-	resultWS = "Small_Angle_" + suffix
+	resultWS = "_" + suffix
 	# Get the monitor
 	LOQFunctions.GetMonitor(sampleWS, monitorWS)
 	# Get small angle banks
@@ -79,7 +79,7 @@ def Correct(sampleWS, transWS, suffix):
  	# Need to remove prompt spike and, later, flat background
 	trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
 	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-	trans_ws = "transmission_" + suffix
+	trans_ws = transWS.split('_')[0] + "_trans_" + suffix
 	CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)
@@ -138,7 +138,7 @@ def Correct(sampleWS, transWS, suffix):
 # Final workspace containing the output of the sample correction
 sample_correction = Correct(scatter_sample, trans_sample, "sample")
 can_correction = Correct(scatter_can, trans_can, "can")
-Minus(sample_correction, can_correction, "Small_Angle_" + CORRECTIONTYPE)
+Minus(sample_correction, can_correction, scatter_sample.split('_')[0] + '_' + CORRECTIONTYPE)
 mantid.deleteWorkspace(sample_correction)
 mantid.deleteWorkspace(can_correction)
 

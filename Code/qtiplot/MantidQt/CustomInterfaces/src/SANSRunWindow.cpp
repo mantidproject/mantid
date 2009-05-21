@@ -625,8 +625,8 @@ void SANSRunWindow::handleLoadButtonClick()
     if( run_no.isEmpty() ) continue;
 
     QString ws_name;
-    if( itr.key() < 3 ) ws_name = run_no + "_sans";
-    else ws_name = run_no + "_trans";
+    if( itr.key() < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
+    else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
     
     if( workspaceExists(ws_name) ) continue;
     //Load the file. This checks for required padding of zeros etc
@@ -704,7 +704,7 @@ void SANSRunWindow::handleLoadButtonClick()
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
 
-  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans";
+  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();;
   if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
     // Set up distance information
   double dist_ms_smp(0.0), dist_sd1_smp(0.0), dist_sd2_smp(0.0);
@@ -715,7 +715,7 @@ void SANSRunWindow::handleLoadButtonClick()
   m_uiForm.dist_sample_sd1->setText(QString::number(dist_sd1_smp, format, prec));
   m_uiForm.dist_sample_sd2->setText(QString::number(dist_sd2_smp, format, prec));
   
-  wsname = m_uiForm.sct_can_edit->text() + "_sans";
+  wsname = m_uiForm.sct_can_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();
   if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
 
   double dist_ms_can(0.0), dist_sd1_can(0.0), dist_sd2_can(0.0);
@@ -744,7 +744,7 @@ void SANSRunWindow::handleLoadButtonClick()
     m_uiForm.dist_can_sd2->setText("<font color='red'>" + m_uiForm.dist_can_sd2->text() + "</font>");
   }
   
-  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans";
+  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();
   if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
 
   double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
@@ -771,9 +771,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
 
-  QStringList wslist(m_uiForm.sct_sample_edit->text() + "_sans");
-  wslist << m_uiForm.sct_can_edit->text() + "_sans" <<  m_uiForm.tra_sample_edit->text() + "_trans"
-	 << m_uiForm.tra_can_edit->text() + "_trans" << m_uiForm.direct_sample_edit->text() + "_trans";
+  QStringList wslist(m_uiForm.sct_sample_edit->text() + "_sans_" + m_uiForm.file_opt->currentText()); 
+  wslist << m_uiForm.sct_can_edit->text() + "_sans_" + m_uiForm.file_opt->currentText() 
+	 <<  m_uiForm.tra_sample_edit->text() + "_trans_" + m_uiForm.file_opt->currentText()
+	 << m_uiForm.tra_can_edit->text() + "_trans_" + m_uiForm.file_opt->currentText() 
+	 << m_uiForm.direct_sample_edit->text() + "_trans_" + m_uiForm.file_opt->currentText();
   QStringListIterator itr(wslist);
   while( itr.hasNext() )
   {
