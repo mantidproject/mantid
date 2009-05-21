@@ -57,6 +57,7 @@ typedef struct _traceback {
 #include <QCoreApplication>
 
 #include <Qsci/qscilexerpython.h> //Mantid
+#include "MantidKernel/ConfigService.h"
 #include <sstream>
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
@@ -257,12 +258,19 @@ bool PythonScripting::initialize()
 	setQObject(this, "stdout", sys);
 	setQObject(this, "stderr", sys);
 
-
 	// Changed initialization to include a script which also loads the 
 	// MantidPythonAPI - M. Gigg
 	bool initglob = loadInitFile(d_parent->d_python_config_folder + "/qtiplotrc");
 	if(!initglob)
 		initglob = loadInitFile("./qtiplotrc");
+
+	// Add to the module search path the location of mantid output files
+	std::string mantidoutput = Mantid::Kernel::ConfigService::Instance().getOutputDir();
+	if( mantidoutput != Mantid::Kernel::ConfigService::Instance().getBaseDir() )
+	{
+	  std::string pycode = "sys.path.append('" + mantidoutput + "')";
+	  PyRun_SimpleString(pycode.c_str());
+	}
 
 	bool initmtd = loadInitFile(d_parent->d_python_config_folder + "/mantidplotrc");
 	if(!initmtd)
