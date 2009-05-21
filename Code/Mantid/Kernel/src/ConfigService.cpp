@@ -255,6 +255,12 @@ namespace Mantid
 			{
 			        //Ensure that the logging directory exists
 			        Poco::Path logpath(getString("logging.channels.fileChannel.path"));
+				if( logpath.toString().empty() || getOutputDir() != getBaseDir() )
+				{
+				  std::string logfile = getOutputDir() + "mantid.log";
+				  logpath.assign(logfile);
+				  m_pConf->setString("logging.channels.fileChannel.path", logfile);
+				}
 				//make this path point to the parent directory and create it if it does not exist
 				logpath.makeParent();
 				if( !logpath.toString().empty() )
