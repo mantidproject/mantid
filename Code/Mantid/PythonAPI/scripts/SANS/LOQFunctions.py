@@ -43,15 +43,25 @@ def ConvertToDetList(maskstring):
     masklist = maskstring.split(',')
     detlist = ''
     for x in masklist:
+        x = x.lower()
         if '>' in x:
             pieces = x.split('>')
-            low = int(pieces[0].lstrip('h'))
-            upp = int(pieces[1].lstrip('h'))
-            nstrips = abs(upp - low) + 1
-            detlist += detBlock(2 + low + 1,nstrips,128) + ','
+            low = int(pieces[0].lstrip('hv'))
+            upp = int(pieces[1].lstrip('hv'))
+            if 'h' in pieces[0]:
+                nstrips = abs(upp - low) + 1
+                detlist += detBlock(2 + low + 1,nstrips,128) + ','
+            elif 'v' in pieces[0]:
+                nstrips = abs(upp - low) + 1
+                detlist += detBlock(2 + low*128,128,nstrips) + ','
+            else:
+                for i in range(low, upp + 1):
+                    detlist += str(i) + ','
         elif 'h' in x:
-            low = int(x.lstrip('h'))
-            detlist += detBlock(2 + low + 1, 1, 128) + ','
+            detlist += detBlock(2 + int(x.lstrip('h')) + 1, 1, 128) + ','
+        elif 'v' in x:
+            low = int(x.lstrip('v'))
+            detlist += detBlock(2 + low*128,128, 1) + ','
         else:
             detlist += x + ','
     
