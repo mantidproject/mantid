@@ -1,0 +1,96 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidCurveFitting/GaussianLinearBG1D.h"
+
+namespace Mantid
+{
+namespace CurveFitting
+{
+
+// Register the class into the algorithm factory
+DECLARE_ALGORITHM(GaussianLinearBG1D)
+
+using namespace Kernel;
+
+// Get a reference to the logger
+Logger& GaussianLinearBG1D::g_log = Logger::get("Gaussian1D");
+
+
+void GaussianLinearBG1D::declareParameters()
+{
+  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  declareProperty("bg0",0.0, Direction::InOut);
+  declareProperty("bg1",0.0, Direction::InOut);
+  declareProperty("height",0.0, positiveDouble, "", Direction::InOut);
+  declareProperty("peakCentre",0.0, Direction::InOut);
+  declareProperty("sigma",1.0, positiveDouble->clone(), "", Direction::InOut);
+}
+
+void GaussianLinearBG1D::modifyStartOfRange(double& startX) 
+{
+  const double peak_val = getProperty("peakCentre");
+  const double sigma = getProperty("sigma");
+
+  startX = peak_val-(6*sigma);
+}
+
+void GaussianLinearBG1D::modifyEndOfRange(double& endX) 
+{
+  const double peak_val = getProperty("peakCentre");
+  const double sigma = getProperty("sigma");
+
+  endX = peak_val+(6*sigma);
+}
+
+void GaussianLinearBG1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter)
+{
+  const double sigma = getProperty("sigma");
+
+  fittedParameter[4] = 1/(sigma*sigma);  // the fitting is actually done on 1/sigma^2, also referred to as the weight
+}
+
+void GaussianLinearBG1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter) 
+{
+  double weight = fittedParameter[4];
+
+  fittedParameter[4] = sqrt(1/weight); // to convert back to sigma
+}
+
+
+void GaussianLinearBG1D::function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+{
+    double bg0 = in[0];
+    double bg1 = in[1];
+    double height = in[2];
+    double peakCentre = in[3];
+    double weight = in[4];
+
+    for (size_t i = 0; i < nData; i++) {
+        double diff=xValues[i]-peakCentre;
+        double Yi = height*exp(-0.5*diff*diff*weight)+bg0+bg1*xValues[i];
+        out[i] = (Yi - yValues[i])/yErrors[i];
+    }
+}
+
+void GaussianLinearBG1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+{
+    double height = in[2];
+    double peakCentre = in[3];
+    double weight = in[4];
+
+    int nParam = m_parameterNames.size();
+    for (size_t i = 0; i < nData; i++) {
+        double s = yErrors[i];
+        double diff = xValues[i]-peakCentre;
+        double e = exp(-0.5*diff*diff*weight)/s;
+        out[i*nParam + 0] = 1/s;
+        out[i*nParam + 1] = xValues[i]/s;
+        out[i*nParam + 2] = e;
+        out[i*nParam + 3] = diff*height*e*weight;
+        out[i*nParam + 4] = -0.5*diff*diff*height*e;
+    }
+}
+
+} // namespace CurveFitting
+} // namespace Mantid

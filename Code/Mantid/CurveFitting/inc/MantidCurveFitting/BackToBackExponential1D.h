@@ -1,12 +1,10 @@
-#ifndef MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
-#define MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
+#ifndef MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL1D_H_
+#define MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL1D_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-
-#include <gsl/gsl_matrix.h>
+#include "MantidCurveFitting/Fit1D.h"
 
 
 namespace Mantid
@@ -41,7 +39,7 @@ namespace Mantid
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 22/7/2008
+    @date 21/5/2009
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -63,42 +61,30 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport BackToBackExponential : public API::Algorithm
+    class DLLExport BackToBackExponential1D : public Fit1D
     {
     public:
-      /// Default constructor
-      BackToBackExponential() : API::Algorithm() {};
       /// Destructor
-      virtual ~BackToBackExponential() {};
+      virtual ~BackToBackExponential1D() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "BackToBackExponential";}
+      virtual const std::string name() const { return "BackToBackExponential1D";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
     private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-
-      /// The X bin to start the fitting from
-      int m_minX;
-      /// The X bin to finish the fitting at
-      int m_maxX;
+      // Overridden Fit1D methods
+      void declareParameters();
+      void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
 
-    /// Gaussian function and derivative function in GSL format
-    // defined as friend do get access to function pointers
-    int bTbExpo_fdf (const gsl_vector * x, void *params, gsl_vector * f, gsl_matrix * J);
-    int bTbExpo_df (const gsl_vector * x, void *params, gsl_matrix * J);
-    int bTbExpo_f (const gsl_vector * x, void *params,gsl_vector * f);
-
 
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_*/
+#endif /*MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL1D_H_*/

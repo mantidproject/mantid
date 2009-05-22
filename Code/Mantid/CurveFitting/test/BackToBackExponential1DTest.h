@@ -1,9 +1,9 @@
-#ifndef BACKTOBACKEXPONENTIALTEST_H_
-#define BACKTOBACKEXPONENTIALTEST_H_
+#ifndef BACKTOBACKEXPONENTIAL1DTEST_H_
+#define BACKTOBACKEXPONENTIAL1DTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/BackToBackExponential.h"
+#include "MantidCurveFitting/BackToBackExponential1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -13,15 +13,15 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::BackToBackExponential;
+using Mantid::CurveFitting::BackToBackExponential1D;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
-class BackToBackExponentialTest : public CxxTest::TestSuite
+class BackToBackExponential1DTest : public CxxTest::TestSuite
 {
 public:
 
-  BackToBackExponentialTest()
+  BackToBackExponential1DTest()
   {
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
 
@@ -63,9 +63,9 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 9.02,0.1);
+    TS_ASSERT_DELTA( dummy, 9.15,0.1);
     dummy = alg.getProperty("I");
-    TS_ASSERT_DELTA( dummy, 294.72 ,0.1);
+    TS_ASSERT_DELTA( dummy, 294.37 ,0.1);
     dummy = alg.getProperty("a");
     TS_ASSERT_DELTA( dummy, 2.38 ,0.1);
     dummy = alg.getProperty("b");
@@ -80,9 +80,9 @@ public:
 
 
 private:
-  BackToBackExponential alg;
+  BackToBackExponential1D alg;
   std::string inputSpace;
   std::string outputSpace;
 };
 
-#endif /*BACKTOBACKEXPONENTIALTEST_H_*/
+#endif /*BACKTOBACKEXPONENTIAL1DTEST_H_*/

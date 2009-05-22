@@ -195,7 +195,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\BackToBackExponential.cpp"
+				RelativePath=".\src\BackToBackExponential1D.cpp"
 				>
 			</File>
 			<File
@@ -203,15 +203,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Gaussian.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Gaussian1D.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GaussianLinearBG.cpp"
+				RelativePath=".\src\GaussianLinearBG1D.cpp"
 				>
 			</File>
 			<File
@@ -225,15 +221,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential.h"
+				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential1D.h"
 				>
 			</File>
 			<File
-				RelativePath=".\test\BackToBackExponentialTest.h"
+				RelativePath=".\test\BackToBackExponential1DTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\Gaussian.h"
+				RelativePath=".\inc\MantidCurveFitting\Fit1D.h"
 				>
 			</File>
 			<File
@@ -245,11 +241,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\GaussianLinearBG.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\GaussianTest.h"
+				RelativePath=".\inc\MantidCurveFitting\GaussianLinearBG1D.h"
 				>
 			</File>
 			<File

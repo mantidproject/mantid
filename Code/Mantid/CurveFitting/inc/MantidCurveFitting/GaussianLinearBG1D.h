@@ -1,23 +1,23 @@
-#ifndef MANTID_CURVEFITTING_GAUSSIAN_H_
-#define MANTID_CURVEFITTING_GAUSSIAN_H_
+#ifndef MANTID_CURVEFITTING_GAUSSIAN1D2_H_
+#define MANTID_CURVEFITTING_GAUSSIAN1D2_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include <gsl/gsl_matrix.h>
+#include "MantidCurveFitting/Fit1D.h"
 
 namespace Mantid
 {
   namespace CurveFitting
   {
     /**
-    Takes a histogram in a 2D workspace and fit it to a Gaussian atop a flat background.
-    i.e. the function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
+    Takes a histogram in a 2D workspace and fit it to a Gaussian on top of
+    a linear background.
+    i.e. a function: height*exp(-0.5*((x-peakCentre)/sigma)^2) + bg0 + bg1*x
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the input Workspace </LI>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
     </UL>
 
     Optional Properties (assume that you count from zero):
@@ -27,7 +27,8 @@ namespace Mantid
     <LI> peakCentre - centre of peak (default 0.0)</LI>
     <LI> sigma - standard deviation (default 1.0)</LI>
     <LI> height - height of peak (default 0.0)</LI>
-    <LI> bg0 - constant background value (default 0.0)</LI>
+    <LI> bg0 - background intercept value (default 0.0)</LI>
+    <LI> bg1 - background slope value (default 0.0)</LI>
 
     <LI> StartX - X value to start fitting from (default to -6*sigma away from the peakCentre)</LI>
     <LI> EndX - last X value to include in fitting range (default to +6*sigma away from the peakCentre)</LI>
@@ -39,9 +40,9 @@ namespace Mantid
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 04/7/2008
+    @date 21/5/2009
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -61,33 +62,27 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Gaussian : public API::Algorithm
+    class DLLExport GaussianLinearBG1D : public Fit1D
     {
     public:
-      /// Default constructor
-      Gaussian() : API::Algorithm() {};
       /// Destructor
-      virtual ~Gaussian() {};
+      virtual ~GaussianLinearBG1D() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Gaussian";}
+      virtual const std::string name() const { return "Gaussian1D";}
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return (1);}
+      virtual const int version() const { return (2);}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
     private:
-      // Overridden Algorithm methods
-      void init();
-      void exec();
-
-      /// The X bin to start the fitting from
-      int m_minX;
-      /// The X bin to finish the fitting at
-      int m_maxX;
-
-      // function which guesses initial parameter values
-      // This method need further work done to it.
-      //void guessInitialValues(const FitData& data, gsl_vector* param_init);
+      // Overridden Fit1D methods
+      void declareParameters();
+      void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      void modifyStartOfRange(double& startX);
+      void modifyEndOfRange(double& endX);
+      void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
+      void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
@@ -96,4 +91,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GAUSSIAN_H_*/
+#endif /*MANTID_CURVEFITTING_GAUSSIANLINEARBG1Dl1D2_H_*/

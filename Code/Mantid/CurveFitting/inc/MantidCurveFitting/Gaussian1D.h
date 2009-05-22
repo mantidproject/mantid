@@ -63,8 +63,6 @@ namespace Mantid
     class DLLExport Gaussian1D : public Fit1D
     {
     public:
-      /// Default constructor
-      //Gaussian1D() : API::Algorithm() {};
       /// Destructor
       virtual ~Gaussian1D() {};
       /// Algorithm's name for identification overriding a virtual method

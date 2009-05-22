@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 namespace Mantid
 {
@@ -334,7 +335,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   try
   {
     // Fitting the candidate peaks to a Gaussian
-    fit = createSubAlgorithm("Gaussian");
+    fit = createSubAlgorithm("Gaussian1D");
   }
   catch (Exception::NotFoundError)
   {
