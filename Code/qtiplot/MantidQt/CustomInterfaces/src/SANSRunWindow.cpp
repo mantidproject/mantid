@@ -929,7 +929,6 @@ QString SANSRunWindow::writeLoadCmd(const QString & work_dir, const QString & ru
   }
   else
   {
-    showInformationBox("Error: Loading from Nexus has not been implemented yet.");
-    return QString();
+    return "LoadISISNexus(Filename = '" + filepath+ "', OutputWorkspace = '" + workspace + "')\n";
   }
 }
