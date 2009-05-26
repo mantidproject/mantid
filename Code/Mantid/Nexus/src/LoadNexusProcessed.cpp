@@ -11,6 +11,7 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Progress.h"
 #include "MantidNexus/NexusFileIO.h"
 
 #include "Poco/Path.h"
@@ -131,7 +132,7 @@ void LoadNexusProcessed::exec()
     {
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0, colon));
     } catch (std::runtime_error&)
-    {
+    { 
       g_log.warning("Unable to set Axis(0) units");
     }
   }
@@ -144,6 +145,7 @@ void LoadNexusProcessed::exec()
   if (m_uniformbounds)
     nexusFile->getXValues(xValues.access(), 0);
   int counter = 0;
+  API::Progress progress(this,0.,1.,m_numberofspectra);
   for (int i = 1; i <= m_numberofspectra; ++i)
   {
     //int histToRead = i + period*(m_numberOfSpectra+1);
@@ -161,8 +163,7 @@ void LoadNexusProcessed::exec()
       localWorkspace->getAxis(1)->spectraNo(counter) = i;
       //
       ++counter;
-      //if (++histCurrent % 100 == 0) progress(double(histCurrent)/total_specs); dont understand setting of histCurrent
-      interruption_point();
+      progress.report();
     }
   }
 
@@ -180,6 +181,7 @@ void LoadNexusProcessed::exec()
   boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
   SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
   nexusFile->readNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
+  nexusFile->readNexusParameterMap(localWorkspace);
   // Assign the result to the output workspace property
   std::string outputWorkspace = "OutputWorkspace";
   setProperty(outputWorkspace, localWorkspace);

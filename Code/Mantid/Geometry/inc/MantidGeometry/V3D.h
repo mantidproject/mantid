@@ -105,6 +105,7 @@ namespace Mantid
       double angle(const V3D&) const;
       // Send to a stream
       void printSelf(std::ostream&) const;
+      void readPrinted(std::istream&);
       void read(std::istream&);
       void write(std::ostream&) const;
 

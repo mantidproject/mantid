@@ -15,6 +15,13 @@
 
 namespace Mantid
 {
+
+namespace Kernel
+{
+template <class C, class Base>
+class Instantiator;
+}
+
 namespace Geometry
 {
 
@@ -49,10 +56,11 @@ class DLLExport Parameter
 {
 public:
     /// Constructor
-    Parameter( const std::string& name):m_name(name){}
+    ///Parameter( const std::string& name):m_name(name){}
     /// Virtual destructor
     virtual ~Parameter(){}
 
+    const std::string& type() const{return m_type;};
 	/// Parameter name
     const std::string& name() const{return m_name;};
 
@@ -73,12 +81,16 @@ public:
     template<class T>
     void set(const T& t);
 
+protected:
+    friend class ParameterFactory;
+    /// Constructor
+    Parameter():m_name(""){}
 private:
+  /// The type of the property
+    std::string m_type;
   /// The name of the property
-  const std::string m_name;
+  std::string m_name;
   std::string m_str_value; ///< Parameter value as a string
-  /// Private default constructor ?
-  Parameter();
 };
 
 /// Templated class for parameters of type \c Type
@@ -86,8 +98,6 @@ template<class Type>
 class DLLExport ParameterType:public Parameter
 {
 public:
-    /// Constructor
-    ParameterType(const std::string& name):Parameter(name){}
 	/// Returns the value of the property as a string
     std::string asString() const
     {
@@ -119,6 +129,10 @@ public:
     /// Get the value of the parameter
     const Type& operator()()const{return m_value;}
 
+protected:
+    friend class Kernel::Instantiator<ParameterType<Type>,Parameter>;
+    /// Constructor
+    ParameterType():Parameter(){}
 private:
     Type m_value;///< Value
 };
@@ -155,13 +169,14 @@ typedef DLLExport ParameterType<V3D> ParameterV3D;
 /// Parameter of type Quat
 typedef DLLExport ParameterType<Quat> ParameterQuat;
 
-/// Cannot convert from std::string to Geometry::Quat.
-inline std::istream& operator>>(std::istream&,Quat&)
-{
-    throw std::runtime_error("Cannot convert from std::string to Geometry::Quat.");
-}
-
 } // namespace Geometry
 } // namespace Mantid
+
+#define DECLARE_PARAMETER(classname,classtype) \
+	namespace { \
+	Mantid::Kernel::RegistrationHelper register_par_##classname( \
+    ((Mantid::Geometry::ParameterFactory::subscribe< Mantid::Geometry::ParameterType<classtype> >(#classname)) \
+	, 0)); \
+  }
 
 #endif /*MANTID_GEOMETRY_PARAMETER_H_*/

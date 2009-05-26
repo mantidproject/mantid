@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/Parameter.h"
+#include "MantidGeometry/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
 
 #ifndef HAS_UNORDERED_MAP_H
@@ -74,32 +75,38 @@ public:
     int size() const {return m_map.size();}
     ///Copy Contructor
     ParameterMap(const ParameterMap& copy);
+    /// Clears the map
+    void clear(){m_map.clear();}
 
-    /// Templated method for adding a parameter providing its value as a string
-    template<class T>
-    void addTypeString(const IComponent* comp,const std::string& name, const std::string& value)
+    /// Method for adding a parameter providing its value as a string
+    void add(const std::string& type,const IComponent* comp,const std::string& name, const std::string& value)
     {
-        ParameterType<T> *param = new ParameterType<T>(name);
+        Parameter* param = ParameterFactory::create(type,name);
         param->fromString(value);
         m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
-    /// Templated method for adding a parameter providing its value of a particular type
+    /// Method for adding a parameter providing its value of a particular type
     template<class T>
-    void addType(const IComponent* comp,const std::string& name, const T& value)
+    void add(const std::string& type,const IComponent* comp,const std::string& name, const T& value)
     {
-        ParameterType<T> *param = new ParameterType<T>(name);
+        ParameterType<T> *param = dynamic_cast<ParameterType<T> *>(ParameterFactory::create(type,name));
+        if (!param) 
+        {
+            reportError("Error in adding parameter: incompatible types");
+            throw std::runtime_error("Error in adding parameter: incompatible types");
+        }
         param->setValue(value);
         m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     }
 
     /// Method is provided to add a parameter of any custom type which must be created with 'new' operator.
     /// ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"comp","name","value");
-    void add(Parameter* param,const IComponent* comp,const std::string& name, const std::string& value)
-    {
-        param->fromString(value);
-        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
-    }
+    //void add(Parameter* param,const IComponent* comp,const std::string& name, const std::string& value)
+    //{
+    //    param->fromString(value);
+    //    m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
+    //}
 
     /// The same as above except that the caller is resposible for setting the parameter's value.
     /// e.g. CustomParameter* param = new CustomParameter;
@@ -122,66 +129,66 @@ public:
          @param name Name for the new parameter
          @param value Parameter value as a string
      */
-    void addDouble(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<double>(comp,name,value);}
+    void addDouble(const IComponent* comp,const std::string& name, const std::string& value){add("double",comp,name,value);}
     /**  Adds a double value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a double
      */
-    void addDouble(const IComponent* comp,const std::string& name, double value){addType(comp,name,value);}
+    void addDouble(const IComponent* comp,const std::string& name, double value){add("double",comp,name,value);}
 
     /**  Adds an int value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a string
      */
-    void addInt(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<int>(comp,name,value);}
+    void addInt(const IComponent* comp,const std::string& name, const std::string& value){add("int",comp,name,value);}
     /**  Adds an int value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as an int
      */
-    void addInt(const IComponent* comp,const std::string& name, int value){addType(comp,name,value);}
+    void addInt(const IComponent* comp,const std::string& name, int value){add("int",comp,name,value);}
 
     /**  Adds a bool value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a string
      */
-    void addBool(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<bool>(comp,name,value);}
+    void addBool(const IComponent* comp,const std::string& name, const std::string& value){add("bool",comp,name,value);}
     /**  Adds a bool value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a bool
      */
-    void addBool(const IComponent* comp,const std::string& name, bool value){addType(comp,name,value);}
+    void addBool(const IComponent* comp,const std::string& name, bool value){add("bool",comp,name,value);}
 
     /**  Adds a std::string value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value
      */
-    void addString(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<std::string>(comp,name,value);}
+    void addString(const IComponent* comp,const std::string& name, const std::string& value){add<std::string>("string",comp,name,value);}
 
     /**  Adds a V3D value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a string
      */
-    void addV3D(const IComponent* comp,const std::string& name, const std::string& value){addTypeString<V3D>(comp,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const std::string& value){add("V3D",comp,name,value);}
     /**  Adds a V3D value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a V3D
      */
-    void addV3D(const IComponent* comp,const std::string& name, const V3D& value){addType(comp,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const V3D& value){add("V3D",comp,name,value);}
 
     /**  Adds a Quat value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a Quat
      */
-    void addQuat(const IComponent* comp,const std::string& name, const Quat& value){addType(comp,name,value);}
+    void addQuat(const IComponent* comp,const std::string& name, const Quat& value){add("Quat",comp,name,value);}
 
     /// Return the value of a parameter as a string.
     std::string getString(const IComponent* comp,const std::string& name);
@@ -226,9 +233,18 @@ public:
     /// Returns a vector with all parameter names for componenet comp
     std::vector<std::string> nameList(const IComponent* comp)const;
 
+    /// Returns a string with all component names, parameter names and values
+    std::string asString()const;
+
+    /** Populates the map from a string containing triplets of <comp name>,<param name>,<param value> separated by 
+        semicolons, e.g. "monitor1,pos,V3D,[0,0,1.0];detector_bank2,pos,V3D,[1,2,0]"
+     */
+    void fromString(const std::string& str);
+
 private:
   ///Assignment operator
   ParameterMap& operator=(const ParameterMap& rhs);
+  void reportError(const std::string& str);
   /// insternal parameter map instance
   pmap m_map;
 

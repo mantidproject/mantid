@@ -101,6 +101,8 @@ namespace NeXus
     boost::shared_ptr<IInstrument> instrument = m_inputWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
 
+    nexusFile->writeNexusParameterMap(m_inputWorkspace);
+
     // write XML source file name, if it exists - otherwise write "NoNameAvailable"
     std::string instrumentName=instrument->getName();
     if(instrumentName != "")

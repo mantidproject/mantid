@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidGeometry/Detector.h"
+#include "MantidAPI/Progress.h"
 
 #include "Poco/Path.h"
 
@@ -117,6 +118,7 @@ namespace Mantid
         m_spec_max = m_numberOfSpectra;  // was +1?
       }
 
+      API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
         
@@ -133,6 +135,7 @@ namespace Mantid
           int histToRead = i + period*total_specs;
           loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
           counter++;
+          progress.report();
         }
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
@@ -141,6 +144,7 @@ namespace Mantid
           {
             loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1, localWorkspace );
             counter++;
+            progress.report();
           }
         }
         // Just a sanity check

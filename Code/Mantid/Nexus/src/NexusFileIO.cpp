@@ -20,6 +20,7 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
+#include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
 #include "Poco/File.h"
 
@@ -1319,5 +1320,67 @@ namespace NeXus
    status=NXclosegroup(fileID); // close instrument group
    return(true);
   }
+
+
+  bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_sptr ws)
+  {
+   /*! Writes the instrument parameter map if not empty. Must be called inside NXentry group.
+       @param ws The workspace
+       @return true for OK, false for error
+   */
+
+      boost::shared_ptr<Geometry::ParameterMap> params = ws->InstrumentParameters();
+      std::string str = params->asString();
+      return writeNxNote("instrument_parameter_map","","","",str);
+   
+  }
+
+  bool NexusFileIO::readNexusParameterMap(API::MatrixWorkspace_sptr ws)
+  {
+   /*! Reads the instrument parameter map from the data string in "instrument_parameter_map" group (NXnote).
+       Must be called inside NXentry group.
+       @param ws The workspace
+       @return true for OK, false for error
+   */
+
+      if (NX_ERROR == NXopengroup(fileID,"instrument_parameter_map","NXnote")) return false;
+      //
+      std::string value;
+      std::vector<std::string> avalues,attributes;
+
+      if( ! readNxText( "data", value, attributes, avalues) )
+          return(false);
+
+      boost::shared_ptr<Geometry::ParameterMap> params = ws->InstrumentParameters();
+      params->clear();
+      IInstrument_sptr instr = ws->getBaseInstrument();
+
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+      boost::char_separator<char> sep("|");
+      tokenizer parTok(value, sep);
+      int index=0;
+      // Iterate over the properties
+      for (tokenizer::iterator it = parTok.begin(); it != parTok.end(); ++it)
+      {
+          if ( ! it->empty() )
+          {
+              tokenizer itemTok(*it,boost::char_separator<char>(";"));
+              tokenizer::iterator i = itemTok.begin();
+              std::string compName = *i++;
+              std::string type = *i++;
+              std::string name = *i++;
+              std::string val = *i;
+              Geometry::IComponent* comp = instr->getComponentByName(compName).get();
+              if (!comp) continue;
+              params->add(type,comp,name,val);
+          }
+      }
+
+      NXclosegroup(fileID);
+      return(true);
+   
+  }
+
 } // namespace NeXus
 } // namespace Mantid

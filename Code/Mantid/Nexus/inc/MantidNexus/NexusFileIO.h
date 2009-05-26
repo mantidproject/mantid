@@ -88,6 +88,10 @@ namespace Mantid
                             const int& m_spec_min, const int& m_spec_max);
       /// read spectra map information
       bool readNexusProcessedSpectraMap(API::SpectraDetectorMap& spectraMap, const int& m_spec_min, const int& m_spec_max);
+      /// write instrument parameters
+      bool writeNexusParameterMap(API::MatrixWorkspace_sptr ws);
+      /// read instrument parameters
+      bool readNexusParameterMap(API::MatrixWorkspace_sptr ws);
       /// close the nexus file
       int closeNexusFile();
 

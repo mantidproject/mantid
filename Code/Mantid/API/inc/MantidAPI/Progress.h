@@ -5,24 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-//#include "MantidAPI/IAlgorithm.h"
-//#include "MantidAPI/AlgorithmManager.h"
-//#include "MantidAPI/WorkspaceFactory.h"
-//#include "MantidAPI/WorkspaceOpOverloads.h"
-//#include "MantidKernel/PropertyManager.h"
-//#include "MantidKernel/Property.h"
-//#include "MantidAPI/WorkspaceProperty.h"
-//#include "MantidKernel/Logger.h"
-//#include "MantidKernel/Exception.h"
-
-//#include <boost/shared_ptr.hpp>
-//#include <Poco/ActiveMethod.h>
-//#include <Poco/NotificationCenter.h>
-//#include <Poco/Notification.h>
-//#include <Poco/NObserver.h>
-//#include <string>
-//#include <vector>
-//#include <map>
 
 namespace Mantid
 {

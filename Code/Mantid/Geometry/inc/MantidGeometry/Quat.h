@@ -105,6 +105,7 @@ namespace Mantid
       const double& operator[](int) const;
       double& operator[](int);
       void printSelf(std::ostream&) const;
+      void readPrinted(std::istream&);
     private:
       /// Internal value
       double w;
@@ -117,6 +118,8 @@ namespace Mantid
     };
 
     DLLExport std::ostream& operator<<(std::ostream&, const Quat&);
+    DLLExport std::istream& operator>>(std::istream&,Quat& q);
+
 
   } // Namespace Mantid
 

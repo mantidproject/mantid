@@ -441,6 +441,33 @@ void Quat::printSelf(std::ostream& os) const
 
 }
 
+/**  Read data from a stream in the format returned by printSelf ("[w,a,b,c]").
+ *   @param IX :: Input Stream
+ *   @throw std::runtime_error if the input is of wrong format
+*/
+void Quat::readPrinted(std::istream& IX)
+{
+    std::string in;
+    std::getline(IX,in);
+    size_t i = in.find_first_of('[');
+    if (i == std::string::npos) throw std::runtime_error("Wrong format for Quat input: "+in);
+    size_t j = in.find_last_of(']');
+    if (j == std::string::npos || j < i + 8) throw std::runtime_error("Wrong format for Quat input: "+in);
+
+    size_t c1 = in.find_first_of(',');
+    size_t c2 = in.find_first_of(',',c1+1);
+    size_t c3 = in.find_first_of(',',c2+1);
+    if (c1 == std::string::npos || c2 == std::string::npos || c3 == std::string::npos) 
+        throw std::runtime_error("Wrong format for Quat input: ["+in+"]");
+
+    w = atof(in.substr(i+1,c1-i-1).c_str());
+    a = atof(in.substr(c1+1,c2-c1-1).c_str());
+    b = atof(in.substr(c2+1,c3-c2-1).c_str());
+    c = atof(in.substr(c3+1,j-c3-1).c_str());
+
+    return;
+}
+
 /** Prints a string representation
  * @param os the stream to output to
  * @param q the quat to output
@@ -450,6 +477,12 @@ std::ostream& operator<<(std::ostream& os,const Quat& q)
 {
 	q.printSelf(os);
 	return os;
+}
+
+std::istream& operator>>(std::istream& ins,Quat& q)
+{
+    q.readPrinted(ins);
+    return ins;
 }
 
 } // Namespace Geometry

@@ -597,7 +597,7 @@ V3D::write(std::ostream& OX) const
 }
 
   /**
-    Prints a text representation of itself
+    Prints a text representation of itself in format "[x,y,z]"
     \param os the Stream to output to
   */
 void
@@ -605,6 +605,32 @@ V3D::printSelf(std::ostream& os) const
 {
   os << "[" << x << "," << y << "," << z << "]";
   return;
+}
+
+/*!
+  Read data from a stream in the format returned by printSelf ("[x,y,z]").
+  \param IX :: Input Stream
+  \throw std::runtime_error if the input is of wrong format
+*/
+void
+V3D::readPrinted(std::istream& IX)
+{
+    std::string in;
+    std::getline(IX,in);
+    size_t i = in.find_first_of('[');
+    if (i == std::string::npos) throw std::runtime_error("Wrong format for V3D input: "+in);
+    size_t j = in.find_last_of(']');
+    if (j == std::string::npos || j < i + 6) throw std::runtime_error("Wrong format for V3D input: "+in);
+
+    size_t c1 = in.find_first_of(',');
+    size_t c2 = in.find_first_of(',',c1+1);
+    if (c1 == std::string::npos || c2 == std::string::npos) throw std::runtime_error("Wrong format for V3D input: ["+in+"]");
+
+    x = atof(in.substr(i+1,c1-i-1).c_str());
+    y = atof(in.substr(c1+1,c2-c1-1).c_str());
+    z = atof(in.substr(c2+1,j-c2-1).c_str());
+
+    return;
 }
 
   /**
@@ -629,7 +655,7 @@ operator>>(std::istream& IX,V3D& A)
     \return Current state of stream
   */
 {
-  A.read(IX);
+  A.readPrinted(IX);
   return IX;
 }
 

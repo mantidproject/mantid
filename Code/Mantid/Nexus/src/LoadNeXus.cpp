@@ -112,7 +112,7 @@ namespace NeXus
 
   void LoadNexus::runLoadMuonNexus()
   {
-      IAlgorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus");
+      IAlgorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus",0.,1.);
       // Pass through the same input filename
       loadMuonNexus->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -172,7 +172,7 @@ namespace NeXus
 
   void LoadNexus::runLoadNexusProcessed()
   {
-      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadNexusProcessed");
+      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadNexusProcessed",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property
@@ -233,7 +233,7 @@ namespace NeXus
 
   void LoadNexus::runLoadIsisNexus()
   {
-      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadISISNexus");
+      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadISISNexus",0.,1.);
       // Pass through the same input filename
       loadNexusPro->setPropertyValue("Filename",m_filename);
       // Set the workspace property

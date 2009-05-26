@@ -73,6 +73,20 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 
 }
 
+std::string ParameterMap::asString()const
+{
+    std::stringstream out;
+    for(pmap_it it=m_map.begin();it!=m_map.end();it++)
+    {
+        boost::shared_ptr<Parameter> p = it->second;
+        if (p)
+        {
+            out << (it->first)->getName() << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
+        }
+    }
+    return out.str();
+}
+
 
 /** Create or adjust "pos" parameter for a component
   * Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter
@@ -144,6 +158,15 @@ void ParameterMap::addRotationParam(const IComponent* comp, const double deg)
     addQuat(comp, "rot", quat);
 }
 
+void ParameterMap::reportError(const std::string& str)
+{
+    g_log.error(str);
+}
+
+void ParameterMap::fromString(const std::string& str)
+{
+
+}
 
 } // Namespace Geometry
 
