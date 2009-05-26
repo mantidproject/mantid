@@ -3,6 +3,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/FileValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Timestamp.h"
 #include "Poco/DateTimeFormatter.h"
@@ -27,12 +28,11 @@ Mantid::Kernel::Logger& SaveFocusedXYE::g_log = Mantid::Kernel::Logger::get("Sav
 void SaveFocusedXYE::init()
 {
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input));
-  declareProperty("Filename","",Kernel::Direction::Input);
-
+  declareProperty("Filename","", new Mantid::Kernel::FileValidator(std::vector<std::string>(), false), "", Kernel::Direction::Input);
   std::vector<std::string> Split(2);
-  Split.push_back("True");Split.push_back("False");
+  Split[0] = "True";
+  Split[1] = "False";
   declareProperty("SplitFiles","True",new Kernel::ListValidator(Split));
-
 }
 
 /**
@@ -43,9 +43,8 @@ void SaveFocusedXYE::exec()
   using namespace Mantid::API;
   //Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-
   const int nHist=inputWS->getNumberHistograms();
+  const bool isHistogram = inputWS->isHistogramData();
   std::string filename = getProperty("Filename");
   std::size_t pos=filename.find_first_of(".");
   std::string ext;
@@ -58,8 +57,7 @@ void SaveFocusedXYE::exec()
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-  const int size=inputWS->readX(0).size();
-
+  
 	for (int i=0;i<nHist;i++)
 	{
 		const std::vector<double>& X=inputWS->readX(i);
@@ -77,7 +75,8 @@ void SaveFocusedXYE::exec()
 			number.str("");
 			writeHeaders(out,inputWS);
 		}
-		{
+
+		{ // New scope
 		if (!out.is_open())
 		{
 			g_log.information("Could not open filename: "+filename);
@@ -85,17 +84,34 @@ void SaveFocusedXYE::exec()
 		}
 		out << "# Data for spectra :"<< i << std::endl;
 		out << "# " << inputWS->getAxis(0)->unit()->caption() << "              Y                 E" <<std::endl;
-		for (int j=0;j<size;j++)
-			out << std::fixed << std::setprecision(5) << std::setw(15) << X[j]
-			    << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]
-			    << std::fixed << std::setprecision(8) << std::setw(18) << E[j] << "\n";
-		}
-		if (split=="True") //Close at each iteration
-			out.close();
-	}
+    const int datasize = Y.size();
+    for (int j = 0; j < datasize; j++)
+    {
+      double xvalue(0.0);
+      if( isHistogram )
+      {
+        xvalue = (X[j] + X[j+1])/2.0;
+      }
+      else
+      {
+        xvalue = X[j];
+      }
+      out << std::fixed << std::setprecision(5) << std::setw(15) << xvalue
+	        << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]
+		      << std::fixed << std::setprecision(8) << std::setw(18) << E[j] << "\n";
+    }
+    } // End separate scope
+    //Close at each iteration
+  	if (split=="True")
+    {	
+      out.close();
+    }
+  }
 	// Close if single file
 	if (split=="False")
+  {
 		out.close();
+  }
 	return;
 }
 
