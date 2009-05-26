@@ -2,6 +2,7 @@
 //#include <stdexcept>
 #include <cmath>
 #include <vector>
+#include <cstdlib>
 
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <boost/test/floating_point_comparison.hpp>
 #include <stdexcept>
+#include <cstdlib>
 
 
 namespace Mantid
