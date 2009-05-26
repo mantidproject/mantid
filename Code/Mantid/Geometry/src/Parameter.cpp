@@ -21,12 +21,20 @@ namespace Geometry
         p->m_type = className;
         return p;
     }
+
+    void ParameterV3D::fromString(const std::string &value)
+    {
+        std::istringstream istr(value);
+        m_value.readPrinted(istr);
+    }
+
 } // Namespace Geometry
 
 } // Namespace Mantid
 
 DECLARE_PARAMETER(int,int)
 DECLARE_PARAMETER(double,double)
+DECLARE_PARAMETER(bool,bool)
 DECLARE_PARAMETER(str,std::string)
 DECLARE_PARAMETER(V3D,Mantid::Geometry::V3D)
 DECLARE_PARAMETER(Quat,Mantid::Geometry::Quat)
