@@ -169,6 +169,12 @@ typedef DLLExport ParameterType<V3D> ParameterV3D;
 /// Parameter of type Quat
 typedef DLLExport ParameterType<Quat> ParameterQuat;
 
+void ParameterType<V3D>::fromString(const std::string &value)
+{
+    std::istringstream istr(value);
+    m_value.readPrinted(istr);
+}
+
 } // namespace Geometry
 } // namespace Mantid
 

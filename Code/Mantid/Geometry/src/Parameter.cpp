@@ -22,12 +22,6 @@ namespace Geometry
         return p;
     }
 
-    void ParameterV3D::fromString(const std::string &value)
-    {
-        std::istringstream istr(value);
-        m_value.readPrinted(istr);
-    }
-
 } // Namespace Geometry
 
 } // Namespace Mantid
