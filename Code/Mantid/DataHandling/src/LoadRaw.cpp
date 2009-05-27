@@ -42,15 +42,15 @@ namespace Mantid
       exts.push_back("sav");
       exts.push_back("s[0-9][0-9]");
 
-      declareProperty("Filename","",new FileValidator(exts));
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+      declareProperty("Filename", "", new FileValidator(exts), "The name of the RAW file to read, including its full or relative path.\nThe file extension must be .raw or .RAW (N.B. case sensitive if running on Linux).");
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the Analysis Data Service.\nIf the input RAW file contains multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("spectrum_min",1, mustBePositive);
-      declareProperty("spectrum_max",1, mustBePositive->clone());
+      declareProperty("spectrum_min",1, mustBePositive, "The number of the first spectrum to read.\nOnly used if spectrum_max is set.");
+      declareProperty("spectrum_max",1, mustBePositive->clone(), "The number of the last spectrum to read.\nOnly used if explicitly set.");
 
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
+      declareProperty(new ArrayProperty<int>("spectrum_list"), "A comma-separated list of individual spectra to read.\nOnly used if explicitly set.");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

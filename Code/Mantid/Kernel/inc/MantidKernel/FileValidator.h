@@ -104,7 +104,7 @@ public:
     m_fullTest(testFileExists)
   {
     // Transform the file extensions to regular expression syntax for matching. This could be done every time
-    // isValid is called but that would create unnecessary work
+    // checkValidity() is called but that would create unnecessary work
     std::transform( m_extensions.begin(), m_extensions.end(), m_regex_exts.begin(), RegExConverter() );
   }
 
@@ -148,9 +148,6 @@ private:
   std::vector<std::string> m_regex_exts; 
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
-
-  /// The maximum number of file extensions to report in error messages defined to stop error messages from becoming too long
-  static const unsigned int MAX_NUM_EXTENSIONS = 20;
   
   /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
   std::string checkValidity(const std::string &value) const;

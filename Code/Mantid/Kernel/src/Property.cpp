@@ -12,7 +12,6 @@ namespace Kernel
  *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
  */
 Property::Property( const std::string &name, const std::type_info &type, const unsigned int direction ) :
-  m_isDefault( true ),
   m_name( name ),
   m_documentation( "" ),
   m_typeinfo( &type ),
@@ -25,7 +24,6 @@ Property::Property( const std::string &name, const std::type_info &type, const u
 
 /// Copy constructor
 Property::Property( const Property& right ) :
-  m_isDefault( right.m_isDefault ),
   m_name( right.m_name ),
   m_documentation( right.m_documentation ),
   m_typeinfo( right.m_typeinfo ),
@@ -89,21 +87,13 @@ std::string Property::isValid() const
   return "";
 }
 
-/** Returns the type of the validator as a string
+  /** Returns the type of the validator as a string
    *  \returns Returns ""
    */
  const std::string Property::getValidatorType() const
   {
     return "";
   }
-
-/** Returns true if the property has not been changed since initialisation
- *  @return True if the property still has its default value
- */
-const bool Property::isDefault() const
-{
-  return m_isDefault;
-}
 
 /** Sets the property's (optional) documentation string
  *  @param documentation The string containing the descriptive comment

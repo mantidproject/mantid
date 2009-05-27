@@ -52,12 +52,11 @@ public:
 
   IValidator<TYPE>* clone() { return new NullValidator(*this); }
 private:
-   /** Returns an empty string
+   /** Always returns valid, that is ""
    * 
-   *  @param value not used
    *  @returns an empty string
    */
-   std::string checkValidity( const TYPE &value ) const { return ""; }
+   std::string checkValidity( const TYPE &) const { return ""; }
 };
 
 } // namespace Kernel

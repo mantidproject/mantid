@@ -75,7 +75,7 @@ public:
                 IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
     PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator)
   {
-    if ( ! setValue( values ) )
+    if ( !setValue( values ).empty() )
     {
       throw std::invalid_argument("Invalid values string passed to constructor.");
     }
@@ -108,7 +108,7 @@ public:
    *  @param value The values to assign to the property, given as a comma-separated list
    *  @return True if the assignment was successful
    */
-  bool setValue( const std::string& value )
+  std::string setValue( const std::string& value )
   {
     // Implemented this method for documentation reasons. Just calls base class method.
     return PropertyWithValue< std::vector<T> >::setValue(value);

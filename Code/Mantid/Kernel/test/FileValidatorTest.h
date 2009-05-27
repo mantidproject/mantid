@@ -61,19 +61,6 @@ void testFailsOnWrongExtension()
   FileValidator v2(vec);
   TS_ASSERT_EQUALS( v2.isValid(testFile),
       "The file must have one of these extensions: raw, RAW" )
-
-  //the validator will not print lots of lots of extensions, check the limit
-  for (unsigned short i = 2; i <= 20; i++)
-  {
-    char a[3];
-    a[0] = '.';
-    a[1] = 'n';
-    a[2] = char(i);
-    vec.push_back( std::string(a, 3) );
-  }
-  FileValidator v3(vec);
-  TS_ASSERT_EQUALS( v3.isValid(testFile),
-      "The file \"" + testFile + "\" has the wrong extension")
 }
 
 void testPassesOnRightExtension()

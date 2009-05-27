@@ -18,7 +18,7 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   {
   public:
     virtual const int getNumberHistograms() const { return 1;}
-    //  static std::string WSTYPE;
+
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
@@ -49,13 +49,13 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     std::vector<double> data;
     int dummy;
   };
-  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest";
+
   // Second, identical private test class - used for testing check on workspace type in isValid()
   class WorkspaceTest2 : public MatrixWorkspace
   {
   public:
     virtual const int getNumberHistograms() const { return 1;}
-    //  static std::string WSTYPE;
+
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
     virtual int size() const {return 0;}
@@ -86,7 +86,6 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     std::vector<double> data;
     int dummy;
   };
-  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest2";
 
 public:
   WorkspacePropertyTest()
@@ -110,28 +109,31 @@ public:
 
   void testValue()
   {
-    TS_ASSERT( ! wsp1->value().compare("ws1") )
-    TS_ASSERT( ! wsp2->value().compare("") )
-    TS_ASSERT( ! wsp3->value().compare("ws3") )
+    TS_ASSERT_EQUALS( wsp1->value(), "ws1" )
+    TS_ASSERT_EQUALS( wsp2->value(), "" )
+    TS_ASSERT_EQUALS( wsp3->value(), "ws3" )
   }
 
   void testSetValue()
   {
-    //TS_ASSERT( ! wsp1->setValue("") )
-    //TS_ASSERT( ! wsp1->value().compare("ws1") )
-    TS_ASSERT( wsp1->setValue("newValue") )
-    TS_ASSERT( ! wsp1->value().compare("newValue") )
-    TS_ASSERT( wsp1->setValue("ws1") )
+    TS_ASSERT_EQUALS( wsp1->setValue(""),
+      "Enter a name for the workspace" )
+    TS_ASSERT_EQUALS( wsp1->value(), "" )
+    TS_ASSERT_EQUALS( wsp1->setValue("newValue"),
+      "Workspace \"newValue\" is not found in the Analysis Data Service" )
+
+    TS_ASSERT_EQUALS( wsp1->value(), "newValue" )
+    wsp1->setValue("ws1");
   }
 
   void testIsValid()
   {  
-    TS_ASSERT_EQUALS( wsp1->isValid(), "Choose an existing workspace of the correct type" )
+    TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" is not found in the Analysis Data Service" )
     TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the workspace" )
-    TS_ASSERT_EQUALS( wsp3->isValid(), "Choose an existing workspace of the correct type" )
+    TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" is not found in the Analysis Data Service" )
 
     // Setting the workspace name should make wsp2 (an output workspace) valid
-    TS_ASSERT( wsp2->setValue("ws2") )
+    TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" )
     TS_ASSERT_EQUALS( wsp2->isValid(), "" )
 
     WorkspaceFactory::Instance().subscribe<WorkspaceTest>("WorkspacePropertyTest");
@@ -148,7 +150,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
 	wsp3->setValue("ws3");
     TS_ASSERT_EQUALS( wsp3->isValid(),
-	  "Choose an existing workspace of the correct type" )
+	  "Workspace ws3 is not of the correct type" );
     // Now put correct type in and check it passes
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2",1,1,1) )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
@@ -156,6 +158,15 @@ public:
 	TS_ASSERT_EQUALS( wsp3->isValid(), "")
   }
 
+  void testIsDefault()
+  {
+    wsp2->setValue("ws2");
+    //The constructor set wsp2 = "" so this should fail
+    TS_ASSERT( !wsp2->isDefault() )
+    wsp2->setValue("");
+    TS_ASSERT( wsp2->isDefault() )
+  }
+  
   void testAllowedValues()
   {
     std::vector<std::string> vals;
@@ -175,10 +186,12 @@ public:
     PropertyHistory history = wsp1->createHistory();
     TS_ASSERT_EQUALS( history.name(), "workspace1" )
     TS_ASSERT_EQUALS( history.value(), "ws1" )
-    TS_ASSERT( ! history.isDefault() )
+    TS_ASSERT( history.isDefault() )
     TS_ASSERT_EQUALS( history.type(), wsp1->type() )
     TS_ASSERT_EQUALS( history.direction(), 0 )
 
+    //change the name back to ws2 to cehck that isDefault() fails
+    wsp2->setValue("ws2");
     PropertyHistory history2 = wsp2->createHistory();
     TS_ASSERT_EQUALS( history2.name(), "workspace2" )
     TS_ASSERT_EQUALS( history2.value(), "ws2" )
@@ -189,7 +202,7 @@ public:
     PropertyHistory history3 = wsp3->createHistory();
     TS_ASSERT_EQUALS( history3.name(), "workspace3" )
     TS_ASSERT_EQUALS( history3.value(), "ws3" )
-    TS_ASSERT( ! history3.isDefault() )
+    TS_ASSERT( history3.isDefault() )
     TS_ASSERT_EQUALS( history3.type(), wsp3->type() )
     TS_ASSERT_EQUALS( history3.direction(), 2 )
 

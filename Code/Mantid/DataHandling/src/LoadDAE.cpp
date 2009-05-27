@@ -75,14 +75,14 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      declareProperty("DAEname","", new MandatoryValidator<std::string>());
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+      declareProperty("DAEname","", new MandatoryValidator<std::string>(), "The name of and path to the input DAE host.");
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the Analysis Data Service.\nIf the input data contain multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("spectrum_min",0, mustBePositive);
-      declareProperty("spectrum_max",0, mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
+      declareProperty("spectrum_min",0, mustBePositive, "The number of the first spectrum to read.\nOnly used if spectrum_max is set.\nNot available for multiperiod data files.");
+      declareProperty("spectrum_max",0, mustBePositive->clone(), "The number of the last spectrum to read.\nOnly used if explicitly set.\nNot available for multiperiod data files. ");
+      declareProperty(new ArrayProperty<int>("spectrum_list"), "A comma-separated list of individual spectra to read.\nOnly used if explicitly set.\nNot available for multiperiod data files.");
     }
 
     /** Function called by IDC routines to report an error. Passes the error through to the logger

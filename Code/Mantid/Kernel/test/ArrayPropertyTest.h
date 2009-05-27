@@ -114,55 +114,73 @@ public:
     TS_ASSERT( ! sp.value().compare("yyy,yyy") )
   }
 
-  void testSetValue()
+  void testSetValueAndIsDefault()
   {
-    TS_ASSERT( ! iProp->setValue("1.1,2,2") )
+    std::string couldnt = "Could not set property ", cant = ". Can not convert \"";
+
+    TS_ASSERT_EQUALS( iProp->setValue("1.1,2,2"),
+      couldnt + iProp->name() + cant + "1.1,2,2\" to " + iProp->type() )
     TS_ASSERT( iProp->operator()().empty() )
-    TS_ASSERT( ! iProp->setValue("aaa,bbb") )
+    TS_ASSERT( iProp->isDefault() )
+    TS_ASSERT_EQUALS( iProp->setValue("aaa,bbb"), 
+      couldnt + iProp->name() + cant + "aaa,bbb\" to " + iProp->type() )
     TS_ASSERT( iProp->operator()().empty() )
-    TS_ASSERT( iProp->setValue("1,2,3,4") )
+    TS_ASSERT( iProp->isDefault() )
+    TS_ASSERT_EQUALS( iProp->setValue("1,2,3,4"), "" )
     TS_ASSERT_EQUALS( iProp->operator()().size(), 4 )
     for ( int i=0; i < 4; ++i )
     {
       TS_ASSERT_EQUALS( iProp->operator()()[i], i+1 )
     }
-    TS_ASSERT( iProp->setValue("") )
+    TS_ASSERT( !iProp->isDefault() )
+    TS_ASSERT_EQUALS( iProp->setValue(""), "" )
     TS_ASSERT( iProp->operator()().empty() )
-    TS_ASSERT( ! iProp->isDefault() )
+    TS_ASSERT( iProp->isDefault() )
     
-    TS_ASSERT( ! dProp->setValue("aaa,bbb") )
+    TS_ASSERT_EQUALS( dProp->setValue("aaa,bbb"),
+      couldnt + dProp->name() + cant + "aaa,bbb\" to " + dProp->type() )
     TS_ASSERT( dProp->operator()().empty() )
-    TS_ASSERT( dProp->setValue("1,2") )
+    TS_ASSERT( dProp->isDefault() )
+    TS_ASSERT_EQUALS( dProp->setValue("1,2"), "" )
     TS_ASSERT_EQUALS( dProp->operator()()[1], 2 )
-    TS_ASSERT( dProp->setValue("1.11,2.22,3.33,4.44"))
+    TS_ASSERT( !dProp->isDefault() )
+    TS_ASSERT_EQUALS( dProp->setValue("1.11,2.22,3.33,4.44"), "" )
     TS_ASSERT_EQUALS( dProp->operator()()[0], 1.11 )
-    TS_ASSERT( dProp->setValue("") )
+    TS_ASSERT( !dProp->isDefault() )
+    TS_ASSERT_EQUALS( dProp->setValue(""), "" )
     TS_ASSERT( dProp->operator()().empty() )
-    TS_ASSERT( ! dProp->isDefault() )
+    TS_ASSERT( dProp->isDefault() )
     
-    TS_ASSERT( sProp->setValue("This,is,a,test") )
+    TS_ASSERT_EQUALS( sProp->setValue("This,is,a,test"), "" )
     TS_ASSERT_EQUALS( sProp->operator()()[2], "a" )
-    TS_ASSERT( sProp->setValue("") )
+    TS_ASSERT( !sProp->isDefault() )
+    TS_ASSERT_EQUALS( sProp->setValue(""), "" )
     TS_ASSERT( sProp->operator()().empty() )
-    TS_ASSERT( ! sProp->isDefault() )    
+    TS_ASSERT( sProp->isDefault() )    
   }
 
   void testAssignmentOperator()
   {
     ArrayProperty<int> i("i");
+    TS_ASSERT( i.isDefault() )
     std::vector<int> ii(3,4);
     TS_ASSERT_EQUALS( i = ii, ii )
     TS_ASSERT_EQUALS( i.operator()()[1], 4 )
+    TS_ASSERT( !i.isDefault() )
 
     ArrayProperty<double> d("d");
+    TS_ASSERT( d.isDefault() )
     std::vector<double> dd(5,9.99);
     TS_ASSERT_EQUALS( d = dd, dd )
     TS_ASSERT_EQUALS( d.operator()()[3], 9.99 )
+    TS_ASSERT( !d.isDefault() )
 
     ArrayProperty<std::string> s("s");
+    TS_ASSERT( s.isDefault() )
     std::vector<std::string> ss(2,"zzz");
     TS_ASSERT_EQUALS( s = ss, ss )
-    TS_ASSERT_EQUALS( s.operator()()[0], "zzz" )    
+    TS_ASSERT_EQUALS( s.operator()()[0], "zzz" )
+    TS_ASSERT( !s.isDefault() )
   }
   
   void testOperatorBrackets()

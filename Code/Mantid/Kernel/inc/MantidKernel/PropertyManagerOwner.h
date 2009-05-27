@@ -56,7 +56,7 @@ public:
     virtual ~PropertyManagerOwner(){}
 
     // Function to declare properties (i.e. store them)
-    void declareProperty(Property *p);
+    void declareProperty( Property *p, const std::string &doc="" );
 
     using IPropertyManager::declareProperty;
 

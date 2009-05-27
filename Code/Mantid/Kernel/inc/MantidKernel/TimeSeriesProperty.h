@@ -136,11 +136,10 @@ public:
     return asMap;
   }
 
-  /** Overwrite Property method.
-   *  @param value The new value
+  /** Not implemented in this class
    *  @throws Exception::NotImplementedError Not yet implemented
    */
-  bool setValue(const std::string& value)
+  std::string setValue(const std::string&)
   {
     throw Exception::NotImplementedError("Not yet");
   }
@@ -480,6 +479,16 @@ public:
 
     return std::mktime(&time_since_1900);
   }
+  /* Not implemented in this class
+   * @throws Exception::NotImplementedError Not yet implemented
+   */
+  std::string getDefault() const
+  {
+    throw Exception::NotImplementedError("TimeSeries properties don't have defaults");
+  }
+
+  ///Not used in this class and always returns false
+  bool isDefault() const { return false; }
 
   /// static reference to the logger class
   //static Kernel::Logger& g_log;

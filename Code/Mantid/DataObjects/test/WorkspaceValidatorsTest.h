@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -26,7 +27,7 @@ private:
 public:
   WorkspaceValidatorsTest()
   {
-	wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");
+	  wavUnitVal = new WorkspaceUnitValidator<>("Wavelength");
     anyUnitVal = new WorkspaceUnitValidator<>("");
     histVal = new HistogramValidator<>();
     rawVal = new RawCountValidator<>();
@@ -70,7 +71,7 @@ public:
 
   void testWorkspaceUnitValidator_isValid()
   {
-	TS_ASSERT_EQUALS( wavUnitVal->isValid(ws1), "The workspace must have units of Wavelength" )
+	  TS_ASSERT_EQUALS( wavUnitVal->isValid(ws1), "The workspace must have units of Wavelength" )
     TS_ASSERT_EQUALS( wavUnitVal->isValid(ws2), "" )
     TS_ASSERT_EQUALS( anyUnitVal->isValid(ws1), "The workspace must have units" )
     TS_ASSERT_EQUALS( anyUnitVal->isValid(ws2), "" )
@@ -200,6 +201,26 @@ public:
 	  "The workspace must have units of Wavelength")
     TS_ASSERT_EQUALS( compVal3->isValid(ws2), "" )
     delete compVal3;
+  }
+
+  void testWSPropertyandValidator()
+  {
+      
+    WorkspaceProperty<MatrixWorkspace> wsp1("workspace1","ws1",Direction::Input,wavUnitVal->clone());
+    //test property validation    
+    TS_ASSERT_EQUALS( wsp1.isValid(), "Workspace \"ws1\" is not found in the Analysis Data Service" );
+    
+    TS_ASSERT_EQUALS( wsp1.setValue(""),  "Enter a name for the workspace" )
+    
+    //fine and correct unit
+    wsp1 = ws2;
+    TS_ASSERT_EQUALS( wsp1.isValid(), "" );
+
+    //fine and no unit
+    TS_ASSERT_THROWS( wsp1 = ws1, const std::invalid_argument);
+
+    TS_ASSERT_EQUALS( wsp1.setValue(""),  "Enter a name for the workspace" )
+    TS_ASSERT_EQUALS( wsp1.isValid(), "Enter a name for the workspace" )
   }
 
 };

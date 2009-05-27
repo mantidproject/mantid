@@ -13,7 +13,9 @@ class PropertyHelper : public Property
 public:
   PropertyHelper() : Property( "Test", typeid( int ) ) {}
   std::string value() const { return "Nothing"; }
-  bool setValue( const std::string& value ) { return true; }
+  std::string setValue( const std::string& value ) { return ""; }
+  bool isDefault() const { return true; }
+  std::string getDefault() const { return "Is not implemented in this class, should be overriden"; }
 };
 
 class PropertyTest : public CxxTest::TestSuite

@@ -60,7 +60,7 @@ public:
   virtual ~PropertyManager();
 
   // Function to declare properties (i.e. store them)
-  void declareProperty(Property *p);
+  void declareProperty( Property *p, const std::string &doc="" );
 
   // Sets all the declared properties from
   void setProperties(const std::string &propertiesArray);

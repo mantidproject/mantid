@@ -65,7 +65,8 @@ public:
     // Not really much to test
     Algorithm *alg = new testalg;
     alg->initialize();
-    alg->setPropertyValue("arg1_param","20");
+    TS_ASSERT_THROWS( alg->setPropertyValue("arg1_param","20"),
+      std::invalid_argument )
 
     AlgorithmHistory AH(alg,execTime,14.0);
     //dump output to sting

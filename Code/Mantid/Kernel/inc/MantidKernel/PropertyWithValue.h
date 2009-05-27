@@ -157,33 +157,38 @@ private:
 public:
   /** Constructor
    *  @param name The name to assign to the property
-   *  @param value The initial value to assign to the property
+   *  @param defaultValue Is stored initial default value of the property
    *  @param validator The validator to use for this property (this class will take ownership of the validator)
    *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
-  PropertyWithValue( const std::string &name, const TYPE& value, IValidator<TYPE> *validator = new NullValidator<TYPE>, const unsigned int direction = Direction::Input ) :
+  PropertyWithValue( const std::string &name, const TYPE& defaultValue, IValidator<TYPE> *validator = new NullValidator<TYPE>, const unsigned int direction = Direction::Input ) :
     Property( name, typeid( TYPE ), direction ),
-    m_value( value ),
+    m_value( defaultValue ),
+    m_initialValue( defaultValue ),
     m_validator( validator )
   {
   }
 
   /** Constructor
    *  @param name The name to assign to the property
-   *  @param value The initial value to assign to the property
+   *  @param defaultValue Is stored initial default value of the property
    *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) property
    */
-  PropertyWithValue( const std::string &name, const TYPE& value, const unsigned int direction) :
+  PropertyWithValue( const std::string &name, const TYPE& defaultValue, const unsigned int direction) :
     Property( name, typeid( TYPE ), direction ),
-    m_value( value ),
+    m_value( defaultValue ),
+    m_initialValue( defaultValue ),
     m_validator( new NullValidator<TYPE> )
   {
   }
-
-  /// Copy constructor
+   
+  /**Copy constructor
+  *  Note the default value of the copied object is the initial value of original
+  */
   PropertyWithValue( const PropertyWithValue& right ) :
     Property( right ),
     m_value( right.m_value ),
+    m_initialValue( right.m_initialValue ),               //the default is the initial value of the original object
     m_validator( right.m_validator->clone() )
   {
   }
@@ -203,40 +208,52 @@ public:
     return helper.value(m_value);
   }
 
+  /** Get the value the property was initialised with -its default value
+   *  @return The default value
+   */
+  virtual std::string getDefault() const
+  {
+    PropertyUtility<TYPE> helper;
+    return helper.value(m_initialValue);
+  }
+
   /** Set the value of the property from a string representation.
    *  Note that "1" & "0" must be used for bool properties rather than true/false.
    *  @param value The value to assign to the property
-   *  @return True if the assignment was successful
+   *  @return Returns "" if the assignment was successful or a user level description of the problem
    */
-  virtual bool setValue( const std::string& value )
+  virtual std::string setValue( const std::string& value )
   {
     try
     {
       PropertyUtility<TYPE> helper;
       TYPE result = m_value;
       helper.setValue(value, result);
-      // Use the assignment operator defined below
+      //Uses the assignment operator defined below which runs isValid() and throws based on the result
       *this = result;
-      return true;
+      return "";
     }
     catch ( boost::bad_lexical_cast )
     {
-      return false;
+      std::string error = "Could not set property " + name() +
+        ". Can not convert \"" + value + "\" to " + type();
+      g_log.debug() << error;
+      return error;
     }
-    catch ( std::invalid_argument )
+    catch ( std::invalid_argument& except)
     {
-      return false;
+      g_log.debug() << except.what();
+      return except.what();
     }
   }
 
-  /// Copy assignment operator. Only assigns the value.
+  ///Copy assignment operator assigns only the value and the validator not the name, default (initial) value, etc.
   PropertyWithValue& operator=( const PropertyWithValue& right )
   {
     if ( &right == this ) return *this;
     // Chain the base class assignment operator for clarity (although it does nothing)
     Property::operator=( right );
     m_value = right.m_value;
-    m_isDefault = false;
     m_validator = right.m_validator->clone();
     return *this;
   }
@@ -250,16 +267,15 @@ public:
   {
     TYPE oldValue = m_value;
     m_value = value;
-	std::string problem = this->isValid();
+    std::string problem = this->isValid();
     if ( problem == "" )
     {
-      m_isDefault = false;
       return m_value;
     }
     else
     {
       m_value = oldValue;
-	  throw std::invalid_argument("Attempt to set property " + name() + ": " + problem);
+      throw std::invalid_argument("Could not set property " + name() + ": " + problem);
     }
   }
 
@@ -287,6 +303,15 @@ public:
   virtual std::string isValid() const
   {
 	  return m_validator->isValid(m_value);
+  }
+
+  /** Indicates if the property's value is the same as it was when it was set
+  *  N.B. Uses an unsafe comparison in the case of doubles, consider overriding if the value is a pointer or floating point type
+  *  @return true if the value is the same as the initial value or false otherwise
+  */
+  virtual bool isDefault() const
+  {
+    return  m_initialValue == m_value;
   }
 
   /** Returns the type of the validator as a string
@@ -334,8 +359,11 @@ public:
 protected:
   /// The value of the property
   TYPE m_value;
+  ///the property's default value which is also its initial value
+  const TYPE m_initialValue;
 
 private:
+
   /// Visitor validator class
   IValidator<TYPE> *m_validator;
 

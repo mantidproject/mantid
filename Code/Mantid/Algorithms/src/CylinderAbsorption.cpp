@@ -35,15 +35,15 @@ void CylinderAbsorption::init()
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("CylinderSampleHeight",-1.0,mustBePositive);
-  declareProperty("CylinderSampleRadius",-1.0,mustBePositive->clone());
-  declareProperty("AttenuationXSection",-1.0,mustBePositive->clone());
-  declareProperty("ScatteringXSection",-1.0,mustBePositive->clone());
-  declareProperty("SampleNumberDensity",-1.0,mustBePositive->clone());
+  declareProperty("CylinderSampleHeight",-1.0,mustBePositive, "The height of the cylindrical sample in centimetres.");
+  declareProperty("CylinderSampleRadius",-1.0,mustBePositive->clone(), "The radius of the cylindrical sample in centimetres.");
+  declareProperty("AttenuationXSection",-1.0,mustBePositive->clone(), "The attenuation cross-section for the sample material in barns.");
+  declareProperty("ScatteringXSection",-1.0,mustBePositive->clone(), "The scattering cross-section for the sample material in barns.");
+  declareProperty("SampleNumberDensity",-1.0,mustBePositive->clone(), "The number density of the sample in number per cubic ångström.");
   BoundedValidator<int> *positiveInt = new BoundedValidator<int>();
   positiveInt->setLower(1);
-  declareProperty("NumberOfSlices",1,positiveInt);
-  declareProperty("NumberOfAnnuli",1,positiveInt->clone());
+  declareProperty("NumberOfSlices",1,positiveInt, "The number of slices into which the cylinder is divided for the calculation.");
+  declareProperty("NumberOfAnnuli",1,positiveInt->clone(), "The number of annuli into which each slice is divided for the calculation.");
   declareProperty("NumberOfWavelengthPoints",1,positiveInt->clone());
 
   exp_options.push_back("Normal");

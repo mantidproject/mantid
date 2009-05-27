@@ -14,6 +14,7 @@ public:
 
   using PropertyManager::declareProperty;
   using PropertyManager::setProperty;
+  using PropertyManager::getPointerToProperty;
 };
 
 class PropertyManagerTest : public CxxTest::TestSuite
@@ -44,6 +45,8 @@ public:
 
 		TS_ASSERT_THROWS( mgr.declareProperty(p), Exception::ExistsError )
 		TS_ASSERT_THROWS( mgr.declareProperty(new PropertyWithValue<int>("",0)), std::invalid_argument )
+    mgr.declareProperty(new PropertyWithValue<int>("GoodIntProp",1), "Test doc"); 
+    TS_ASSERT_EQUALS( mgr.getPointerToProperty("GoodIntProp")->documentation(), "Test doc" )
 	}
 
 	void testdeclareProperty_int()
@@ -61,7 +64,9 @@ public:
     PropertyManagerHelper mgr;
     BoundedValidator<double> *v = new BoundedValidator<double>(1,5);
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", 9.99, v) )
-    TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("9.99") )
+    TS_ASSERT_EQUALS( mgr.getPropertyValue("myProp"), "9.99" )
+    TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("withDoc", 4.4, v->clone(), "Test doc doub") )
+    TS_ASSERT_EQUALS( mgr.getPointerToProperty("withDoc")->documentation(), "Test doc doub" )
 
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", 5.5), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", 5.5), std::invalid_argument )
@@ -71,10 +76,10 @@ public:
 	{
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator<std::string>, "hello") )
-    TS_ASSERT( ! mgr.getPropertyValue("myProp").compare("theValue") )
+    TS_ASSERT_EQUALS( mgr.getPropertyValue("myProp"), "theValue" )
     Property *p;
     TS_ASSERT_THROWS_NOTHING( p = mgr.getProperty("myProp") )
-    TS_ASSERT( ! p->documentation().compare("hello") )
+    TS_ASSERT_EQUALS(p->documentation(),"hello");
 
     TS_ASSERT_THROWS( mgr.declareProperty("MYPROP", "aValue"), Exception::ExistsError )
     TS_ASSERT_THROWS( mgr.declareProperty("", "aValue"), std::invalid_argument )

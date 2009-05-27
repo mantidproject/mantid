@@ -22,13 +22,7 @@ DLLExport std::string FileValidator::checkValidity(const std::string &value) con
     std::vector<std::string>::const_iterator itr = 
       std::find_if(m_regex_exts.begin(), m_regex_exts.end(), matcher);
     if( itr == m_regex_exts.end() )
-    {//We have found that the extension doesn't match
-      //check if the allowed extension list is too long to display easily
-      if (m_extensions.size() > MAX_NUM_EXTENSIONS)
-      {
-        return "The file \"" + value + "\" has the wrong extension";
-      }
-      //go through the list of possible extensions
+    {//the extension doesn't match, go through the list of possible extensions
       //using a different form if it is a list of one
       if (m_extensions.size() == 1) 
       {

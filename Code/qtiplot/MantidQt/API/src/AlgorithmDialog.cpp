@@ -49,12 +49,12 @@ void AlgorithmDialog::initializeLayout()
 
   createValidatorLabels();
   
-  //Calls the derived class function
+  //This derived class function adds buttons and dialogboxes loaded with default values
   this->initLayout();
-   
-  //Check which properties are already valid. This also hides the validation marker
-  //if a property is valid.
-  validateProperties();
+  //we want those default values
+  this->parseInput();
+  //because we will set properties to those values, which will do the validation, which will show users what needs chang
+  setPropertyValues();
 
   m_bIsInitialized = true;
 }
@@ -137,34 +137,6 @@ void AlgorithmDialog::addPropertyValueToMap(const QString & name, const QString 
   m_propertyValueMap.insert(name, value);
 }
 
-bool AlgorithmDialog::validateProperties()
-{
-  bool allValid(true);
-  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
-  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
-       pitr != pend; ++pitr )
-  {
-    const Mantid::Kernel::Property *prop = pitr.value();
-    QLabel *validator = getValidatorMarker(pitr.key());
-    std::string error = prop->isValid();
-	// "" is the no error, continue condition
-	if( error == "" ) 
-	{
-		validator->hide();
-	}
-	else
-	{
-		allValid = false;
-		if( validator->parent() )
-		{
-		validator->setToolTip(  QString::fromStdString(error) );
-		validator->show();
-		}
-	}
-  }
-  return allValid;
-}
-
 /**
  * Set the properties that have been parsed from the dialog.
  * @returns A boolean that indicates if the validation was successful.
@@ -182,23 +154,34 @@ bool AlgorithmDialog::setPropertyValues()
     QString pName = pitr.key();
     QString value = m_propertyValueMap.value(pName);
     QLabel *validator = getValidatorMarker(pitr.key());
-    if( !value.isEmpty() )
-    {
-      prop->setValue(value.toStdString());
+
+    std::string error = "";
+    if ( !value.isEmpty() )
+    {//if there something in the box then use it
+      error = prop->setValue(value.toStdString());
     }
-    if( prop->isValid() == "" )
-    {
+    else
+    {//else use the default with may or may not be a valid property value
+      error = prop->setValue(prop->getDefault());
+    }
+
+    if( error == "" )
+    {//no error
       if( validator ) validator->hide();
       //Store value for future input
       AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
     }
     else
-    {
+    {//the property could not be set
       allValid = false;
-      if( validator && validator->parent() ) validator->show();
+      if( validator && validator->parent() )
+      {
+        //a description of the problem will be visible to users if they linger their mouse over validator star mark
+        validator->setToolTip(  QString::fromStdString(error) );
+        validator->show();
+      }
     }
   }
-  //  return validateProperties();
   return allValid;
 }
 

@@ -77,91 +77,97 @@ void GenericDialog::initLayout()
             QLabel *nameLbl = new QLabel(propName);
             QLabel *validLbl = getValidatorMarker(propName);
 
-
+            //check if there are only certain allowed values for the property
             bool fileType = (prop->getValidatorType() == "file");
             bool boolType(false);
             if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) boolType = true;
             if ( boolType || (!prop->allowedValues().empty() && !fileType ) )
             {
+              //It is a choice of certain allowed values and can use a combination box
+              QComboBox *optionsBox = new QComboBox;
+              nameLbl->setBuddy(optionsBox);
 
-                //If the property has allowed values then use a combo box.			
-                QComboBox *optionsBox = new QComboBox;
-                nameLbl->setBuddy(optionsBox);
+              QString selectedValue("");
+              if( isForScript() || !oldValues.contains(propName) )
+              {
+                selectedValue = QString::fromStdString(prop->value());
+              }
+              else
+              {
+                selectedValue = oldValues[propName];
+              }
+              if ( boolType )
+              {
+                optionsBox->addItem("No");
+                optionsBox->setItemData(0, 0);
+                optionsBox->addItem("Yes");
+                optionsBox->setItemData(1, 1);
 
-                QString selectedValue("");
-                if( isForScript() || !oldValues.contains(propName) )
-                {
-                    selectedValue = QString::fromStdString(prop->value());
-                }
-                else
-                {
-                    selectedValue = oldValues[propName];
-                }
-                if ( boolType )
-                {
-                    optionsBox->addItem("No");
-                    optionsBox->setItemData(0, 0);
-                    optionsBox->addItem("Yes");
-                    optionsBox->setItemData(1, 1);
+                if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
+                else optionsBox->setCurrentIndex(1);
+              }
+              else
+              {
+                std::vector<std::string> items = prop->allowedValues();
+                std::vector<std::string>::const_iterator vend = items.end();
 
-                    if( selectedValue == "0" || selectedValue == "No" ) optionsBox->setCurrentIndex(0);
-                    else optionsBox->setCurrentIndex(1);
-                }
-                else
+                int index(0);
+                for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+                  ++vitr, ++index)
                 {
-                    std::vector<std::string> items = prop->allowedValues();
-                    std::vector<std::string>::const_iterator vend = items.end();
-
-                    int index(0);
-                    for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
-                        ++vitr, ++index)
-                    {
-                        optionsBox->addItem(QString::fromStdString(*vitr));
-                        optionsBox->setItemData(index, QString::fromStdString(*vitr));
-                        if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
-                    }
+                  optionsBox->addItem(QString::fromStdString(*vitr));
+                  optionsBox->setItemData(index, QString::fromStdString(*vitr));
+                  if( QString::fromStdString(*vitr) == selectedValue ) optionsBox->setCurrentIndex(index);
                 }
-                if( isForScript() && ( prop->isValid() == "" ) )
-				{
-					if ( !prop->isDefault() && !isValueSuggested(propName) ) 
-					{
-						optionsBox->setEnabled(false);
-					}
-				}
-                m_inputGrid->addWidget(nameLbl, row, 0, 0);
-                m_inputGrid->addWidget(optionsBox, row, 1, 0);
-                m_inputGrid->addWidget(validLbl, row, 2, 0);
-			}
+              }
+              if( isForScript() && ( prop->isValid() == "" ) )
+              {
+                if ( !prop->isDefault() && !isValueSuggested(propName) ) 
+                {
+                  optionsBox->setEnabled(false);
+                }
+              }
+              m_inputGrid->addWidget(nameLbl, row, 0, 0);
+              m_inputGrid->addWidget(optionsBox, row, 1, 0);
+              m_inputGrid->addWidget(validLbl, row, 2, 0);
+              
+              nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
+              optionsBox->setToolTip(  QString::fromStdString(prop->documentation()) );
+            }
             else 
             {
-                QLineEdit *textBox = new QLineEdit;
-                nameLbl->setBuddy(textBox);
-                m_editBoxes[textBox] = propName;
+              QLineEdit *textBox = new QLineEdit;
+              nameLbl->setBuddy(textBox);
+              m_editBoxes[textBox] = propName;
 
-                setOldLineEditInput(propName, textBox);
+              setOldLineEditInput(propName, textBox);
 
-                //Add the widgets to the grid
-                m_inputGrid->addWidget(nameLbl, row, 0, 0);
-                m_inputGrid->addWidget(textBox, row, 1, 0);
-                m_inputGrid->addWidget(validLbl, row, 2, 0);
+              //Add the widgets to the grid
+              m_inputGrid->addWidget(nameLbl, row, 0, 0);
+              m_inputGrid->addWidget(textBox, row, 1, 0);
+              m_inputGrid->addWidget(validLbl, row, 2, 0);
 
-                if( fileType )
+              nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
+              textBox->setToolTip(  QString::fromStdString(prop->documentation()) );
+
+              if( fileType )
+              {
+                QPushButton *browseBtn = new QPushButton(tr("Browse"));
+                connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
+                m_signalMapper->setMapping(browseBtn, textBox);
+
+                m_inputGrid->addWidget(browseBtn, row, 3, 0);
+
+                if( isForScript() && ( prop->isValid() == "") )
                 {
-                    QPushButton *browseBtn = new QPushButton(tr("Browse"));
-                    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
-                    m_signalMapper->setMapping(browseBtn, textBox);
-
-                    m_inputGrid->addWidget(browseBtn, row, 3, 0);
-
-                    if( isForScript() && ( prop->isValid() == "") )
-					{
-						if ( !prop->isDefault() && !isValueSuggested(propName) )
-						{ 
-							browseBtn->setEnabled(false);
-						}
-					}
+                  if ( !prop->isDefault() && !isValueSuggested(propName) )
+                  {
+                    browseBtn->setEnabled(false);
+                  }
                 }
-			}
+              }
+            }//end combo box/dialog box decision
+
         }
 
         //Wire up the signal mapping object

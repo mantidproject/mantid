@@ -82,17 +82,22 @@ public:
 	
 	///Overridden function that checks whether the property, if not overriden returns ""
 	virtual std::string isValid() const;
-
+  ///Overriden to return the name of the property type or "" if not overridden
 	virtual const std::string getValidatorType() const;
-	const bool isDefault() const;
+  ///Overriden function that returns if property has the same value that it was initialised with, if applicable
+  virtual bool isDefault() const = 0;
 
-	// Setter
+  /**Sets the user level description of the property
+  *  @param documentation The string that the user will see
+  */
 	void setDocumentation( const std::string& documentation );
 
 	/// Returns the value of the property as a string
 	virtual std::string value() const = 0;
-	/// Set the value of the property via a string
-	virtual bool setValue( const std::string& value ) = 0;
+	/// Set the value of the property via a string.  If the value is unacceptable the value is not changed but a string is returned
+  virtual std::string setValue( const std::string& ) = 0;
+  /// Get the default value for the property which is the value the property was initialised with
+  virtual std::string getDefault() const = 0; 
 
 	virtual const std::vector<std::string> allowedValues() const;
 
@@ -111,8 +116,7 @@ protected:
   Property( const Property& right );
   /// Copy assignment operator
   virtual Property& operator=( const Property& right );
-  /// Whether the property has been changed since initialisation
-  bool m_isDefault;
+
 
 private:
   /// The name of the property

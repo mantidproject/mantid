@@ -134,7 +134,7 @@ public:
   {
 	  std::string start("Selected value "), end(")");
     std::string greaterThan(" is > the upper bound (");
-	std::string lessThan(" is < the lower bound (");
+    std::string lessThan(" is < the lower bound (");
 	  
 	  //int tests
 	  BoundedValidator<int> pi(1, 10);

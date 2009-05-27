@@ -31,10 +31,11 @@ namespace Mantid
 
     /** Add a property to the list of managed properties
     *  @param p The property object to add
+    *  @param doc A description of the property that may be displayed to users
     *  @throw Exception::ExistsError if a property with the given name already exists
     *  @throw std::invalid_argument  if the property declared has an empty name.
     */
-    void PropertyManager::declareProperty( Property *p )
+    void PropertyManager::declareProperty( Property *p, const std::string &doc )
     {
       // Get the name of the property and don't permit empty names
       std::string key = p->name();
@@ -54,6 +55,7 @@ namespace Mantid
         //    delete p;
         throw Exception::ExistsError("Property with given name already exists", p->name() );
       }
+      p->setDocumentation(doc);
     }
 
     /** Set the ordered list of properties by one string of values.
@@ -104,8 +106,13 @@ namespace Mantid
     void PropertyManager::setPropertyValue( const std::string &name, const std::string &value )
     {
       Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
-      bool success = p->setValue(value);
-      if ( !success ) throw std::invalid_argument("Invalid value for this property");
+      std::string errorMsg = p->setValue(value);
+      if ( !errorMsg.empty() ) 
+      {
+        errorMsg = "Invalid value for property " + p->type() + " \"" + value
+          + "\": " + errorMsg;
+        throw std::invalid_argument(errorMsg);
+      }
     }
 
     /** Set the value of a property by an index
@@ -117,10 +124,14 @@ namespace Mantid
     void PropertyManager::setPropertyOrdinal( const int& index, const std::string &value )
     {
       Property *p = getPointerToPropertyOrdinal(index);   // throws runtime_error if property not in vector
-      bool success = p->setValue(value);
-      if ( !success ) throw std::runtime_error("Invalid value for this property");
+      std::string errorMsg = p->setValue(value);
+      if ( !errorMsg.empty() ) 
+      {
+        errorMsg = "Invalid value for property " + p->type() + " \"" + value
+          + "\" : " + errorMsg;
+        throw std::runtime_error(errorMsg);
+      }
     }
-
 
     /** Checks whether the named property is already in the list of managed property.
     *  @param name The name of the property (case insensitive)
@@ -147,11 +158,13 @@ namespace Mantid
       bool allValid = true;
       for ( PropertyMap::const_iterator it = m_properties.begin(); it != m_properties.end(); ++it )
       {
-        //check for errors in each property, "" means no error
-		if ( it->second->isValid() != "" )
+        //check for errors in each property
+        std::string error = it->second->isValid();
+        //"" means no error
+        if ( !error.empty() )
         {
-			g_log.error() << "Property \"" << it->first << "\" is not set to a valid value: \"" <<
-			  it->second->isValid() << "\"." << std::endl;
+          g_log.error() << "Property \"" << it->first << "\" is not set to a valid value: \"" <<
+            error << "\"." << std::endl;
           allValid=false;
         }
       }

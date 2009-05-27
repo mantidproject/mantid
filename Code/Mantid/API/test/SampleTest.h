@@ -15,8 +15,10 @@ class ConcreteProperty : public Property
 {
 public:
   ConcreteProperty() : Property( "Test", typeid( int ) ) {}
+  bool isDefault() const { return true; }
+  std::string getDefault() const { return "getDefault() is not implemented in this class"; }
   std::string value() const { return "Nothing"; }
-  bool setValue( const std::string& value ) { return true; }
+  std::string setValue( const std::string& value ) { return ""; }
 };
 
 class SampleTest : public CxxTest::TestSuite

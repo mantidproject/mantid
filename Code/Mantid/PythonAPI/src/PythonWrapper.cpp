@@ -247,8 +247,8 @@ namespace PythonAPI
       return call_method< std::string >(py_self, "value");
     }
 
-    bool setValue(const std::string& p0) {
-      return call_method< bool >(py_self, "setValue", p0);
+    std::string setValue(const std::string& p0) {
+      return call_method< std::string >(py_self, "setValue", p0);
     }
 
     const std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >,std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > allowedValues() const {

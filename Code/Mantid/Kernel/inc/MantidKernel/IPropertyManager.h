@@ -55,7 +55,7 @@ public:
     virtual ~IPropertyManager(){}
 
     /// Function to declare properties (i.e. store them)
-    virtual void declareProperty(Property *p) = 0;
+    virtual void declareProperty(Property *p, const std::string &doc="" ) = 0;
 
     /** Sets all the declared properties from a string.
         @param propertiesArray A list of name = value pairs separated by a semicolon
@@ -125,8 +125,7 @@ protected:
       IValidator<T> *validator = new NullValidator<T>, const std::string &doc="", const unsigned int direction = Direction::Input)
     {
         Property *p = new PropertyWithValue<T>(name, value, validator, direction);
-        p->setDocumentation(doc);
-        declareProperty(p);
+        declareProperty(p, doc);
     }
 
     /** Add a property of the template type to the list of managed properties
@@ -140,7 +139,6 @@ protected:
     void declareProperty(const std::string &name, T value, const unsigned int direction)
     {
         Property *p = new PropertyWithValue<T>(name, value, new NullValidator<T>, direction);
-        p->setDocumentation("");
         declareProperty(p);
     }
 
