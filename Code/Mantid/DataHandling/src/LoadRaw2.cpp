@@ -7,6 +7,7 @@
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -150,8 +151,7 @@ namespace Mantid
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
 
-      int histTotal = total_specs * m_numberOfPeriods;
-      int histCurrent = -1;
+      Progress pr(this,0.,1.,total_specs * m_numberOfPeriods);
 
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
@@ -193,8 +193,7 @@ namespace Mantid
                 // NOTE: Raw numbers go straight into the workspace
                 //     - no account taken of bin widths/units etc.
                 ++counter;
-                if (++histCurrent % 100 == 0) progress(double(histCurrent)/histTotal);
-                interruption_point();
+                pr.report();
             }
             else
             {
@@ -268,12 +267,19 @@ namespace Mantid
       {
         m_list = true;
         m_spec_list = getProperty("spectrum_list");
-        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
-        if ( maxlist > m_numberOfSpectra || minlist <= 0)
+        if (m_spec_list.size() == 0)
         {
-          g_log.error("Invalid list of spectra");
-          throw std::invalid_argument("Inconsistent properties defined");
+            m_list = false;
+        }
+        else
+        {
+            const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+            const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+            if ( maxlist > m_numberOfSpectra || minlist <= 0)
+            {
+                g_log.error("Invalid list of spectra");
+                throw std::invalid_argument("Inconsistent properties defined");
+            }
         }
       }
 
