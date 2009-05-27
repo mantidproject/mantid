@@ -1331,7 +1331,8 @@ namespace NeXus
 
       boost::shared_ptr<Geometry::ParameterMap> params = ws->InstrumentParameters();
       std::string str = params->asString();
-      return writeNxNote("instrument_parameter_map","","","",str);
+      if (str.empty()) str = " ";
+      return writeNxNote("instrument_parameter_map"," "," "," ",str);
    
   }
 
