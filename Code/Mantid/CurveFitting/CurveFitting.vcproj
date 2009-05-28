@@ -214,6 +214,10 @@
 				RelativePath=".\src\Linear.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\Lorentzian1D.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -246,6 +250,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\Linear.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Lorentzian1D.h"
 				>
 			</File>
 		</Filter>
