@@ -51,10 +51,6 @@ void BackToBackExponential1D::function(double* in, double* out, double* xValues,
 
 void BackToBackExponential1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
 {
-    double height = in[1];
-    double peakCentre = in[2];
-    double weight = in[3];
-
     double I = in[0];
     double a = in[1];
     double b = in[2];

@@ -14,22 +14,21 @@ namespace Mantid
     Takes a histogram in a 2D workspace and fit it to a gaussian on top of a flat background.
     i.e. the function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
 
-    Required Properties:
-    <UL>
-    <LI> InputWorkspace - The name of the input Workspace </LI>
-    </UL>
+    This function actually performs the fitting on 1/sigma^2 rather than sigma
+    for stability reasons.
 
-    Optional Properties (assume that you count from zero):
+    Properties:
     <UL>
+    <LI> InputWorkspace - The name of the Workspace to take as input </LI>
+
     <LI> SpectrumIndex - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
-
-    <LI> peakCentre - centre of peak (default 0.0)</LI>
-    <LI> sigma - standard deviation (default 1.0)</LI>
-    <LI> height - height of peak (default 0.0)</LI>
-    <LI> bg0 - constant background value (default 0.0)</LI>
-
     <LI> StartX - X value to start fitting from (default to -6*sigma away from the peakCentre)</LI>
     <LI> EndX - last X value to include in fitting range (default to +6*sigma away from the peakCentre)</LI>
+
+    <LI> bg0 - background intercept value (default 0.0)</LI>
+    <LI> height - height of peak (default 0.0)</LI>
+    <LI> peakCentre - centre of peak (default 0.0)</LI>
+    <LI> sigma - standard deviation (default 1.0)</LI>
 
     <LI> MaxIterations - Max iterations (default 500)</LI>
 

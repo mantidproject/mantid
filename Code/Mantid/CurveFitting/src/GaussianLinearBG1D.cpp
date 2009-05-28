@@ -22,9 +22,9 @@ void GaussianLinearBG1D::declareParameters()
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   declareProperty("bg0",0.0, Direction::InOut);
   declareProperty("bg1",0.0, Direction::InOut);
-  declareProperty("height",0.0, positiveDouble, "", Direction::InOut);
+  declareProperty("height",0.0, Direction::InOut);
   declareProperty("peakCentre",0.0, Direction::InOut);
-  declareProperty("sigma",1.0, positiveDouble->clone(), "", Direction::InOut);
+  declareProperty("sigma",1.0, positiveDouble, "", Direction::InOut);
 }
 
 void GaussianLinearBG1D::modifyStartOfRange(double& startX) 

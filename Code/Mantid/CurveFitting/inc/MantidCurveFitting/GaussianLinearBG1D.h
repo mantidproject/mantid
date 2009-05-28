@@ -15,23 +15,22 @@ namespace Mantid
     a linear background.
     i.e. a function: height*exp(-0.5*((x-peakCentre)/sigma)^2) + bg0 + bg1*x
 
-    Required Properties:
+    This function actually performs the fitting on 1/sigma^2 rather than sigma
+    for stability reasons.
+
+    Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace to take as input </LI>
-    </UL>
 
-    Optional Properties (assume that you count from zero):
-    <UL>
     <LI> SpectrumIndex - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
-
-    <LI> peakCentre - centre of peak (default 0.0)</LI>
-    <LI> sigma - standard deviation (default 1.0)</LI>
-    <LI> height - height of peak (default 0.0)</LI>
-    <LI> bg0 - background intercept value (default 0.0)</LI>
-    <LI> bg1 - background slope value (default 0.0)</LI>
-
     <LI> StartX - X value to start fitting from (default to -6*sigma away from the peakCentre)</LI>
     <LI> EndX - last X value to include in fitting range (default to +6*sigma away from the peakCentre)</LI>
+
+    <LI> bg0 - background intercept value (default 0.0)</LI>
+    <LI> bg1 - background slope value (default 0.0)</LI>
+    <LI> height - height of peak (default 0.0)</LI>
+    <LI> peakCentre - centre of peak (default 0.0)</LI>
+    <LI> sigma - standard deviation (default 1.0)</LI>
 
     <LI> MaxIterations - Max iterations (default 500)</LI>
 
