@@ -83,6 +83,15 @@ public:
     TS_ASSERT_EQUALS( s.isValid(svec), "A value must be entered for this parameter" )
     svec.push_back("OK");
     TS_ASSERT_EQUALS( s.isValid(svec), "" )
+
+    MandatoryValidator<int> validate_int;
+    TS_ASSERT_EQUALS( validate_int.isValid(5), "" );
+    TS_ASSERT_EQUALS( validate_int.isValid(-10000), "" );
+
+    MandatoryValidator<double> validate_dbl;
+    TS_ASSERT_EQUALS( validate_dbl.isValid(5.0), "" );
+    TS_ASSERT_EQUALS( validate_dbl.isValid(-250.0), "" );
+
   }
 
 };

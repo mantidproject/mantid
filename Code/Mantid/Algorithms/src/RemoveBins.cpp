@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -33,8 +34,9 @@ void RemoveBins::init()
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty("XMin",0.0);
-  declareProperty("XMax",0.0);
+  MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
+  declareProperty("XMin",Mantid::EMPTY_DBL(), mustHaveValue);
+  declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue->clone());
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(),"AsInput");
   declareProperty("RangeUnit","AsInput",new ListValidator(units) );
@@ -151,15 +153,6 @@ void RemoveBins::checkProperties()
 {
   //Get input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
-
-  // Both XMin and XMax are mandatory
-  Property* XMin = getProperty("XMin");
-  Property* XMax = getProperty("XMax");
-  if ( XMin->isDefault() || XMax->isDefault() )
-  {
-    g_log.error("This algorithm requires that both XMin and XMax are set");
-    throw std::invalid_argument("This algorithm requires that both XMin and XMax are set");
-  }
 
   // If that was OK, then we can get their values
   m_startX = getProperty("XMin");

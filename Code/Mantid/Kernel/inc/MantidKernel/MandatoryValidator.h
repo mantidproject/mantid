@@ -67,7 +67,21 @@ private:
 	  if ( value.empty() ) return "A value must be entered for this parameter";
 	  else return "";
   }
+
 };
+
+
+// Member function specializations for ints and doubles. The defintions are in the
+// cpp file so that multiple symbol errors do not occur in the linking stage.
+// 
+/// A member function specialization for integers
+template<>
+std::string MandatoryValidator<int>::checkValidity(const int& value) const;
+
+/// A member function specialization for doubles
+template<>
+std::string MandatoryValidator<double>::checkValidity(const double& value) const;
+
 
 } // namespace Kernel
 } // namespace Mantid

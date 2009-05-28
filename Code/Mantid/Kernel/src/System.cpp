@@ -3,6 +3,8 @@
 //-----------------------------
 #include "MantidKernel/System.h"
 #include "Poco/Path.h"
+#include <climits>
+#include <cfloat>
 
 // Need OS defined functions
 #ifdef _WIN32
@@ -15,6 +17,22 @@
   #include <iomanip>
   #include <iostream>
 #endif
+
+/**
+ * Return what we consider to be an empty integer
+ */
+int Mantid::EMPTY_INT()
+{
+  return INT_MIN;
+}
+
+/**
+ * Return what we consider to be an empty double
+ */
+double Mantid::EMPTY_DBL()
+{
+  return -DBL_MAX;
+}
 
 /**
  * Get the directory containing the program executable
