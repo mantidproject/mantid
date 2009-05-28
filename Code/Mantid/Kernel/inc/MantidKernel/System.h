@@ -50,10 +50,10 @@ namespace Mantid
 {
 
   /// Return what we consider to be an empty integer, -INT_MAX
-  int EMPTY_INT();
+  DLLExport int EMPTY_INT();
 
   /// Return what we consider to be an empty double, -DBL_MAX
-  double EMPTY_DBL();  
+  DLLExport double EMPTY_DBL();  
 
 namespace Kernel
 {
