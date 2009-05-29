@@ -129,6 +129,16 @@ def addFeature(Id,title,description,level,parent,absent='allow',allowAdvertise='
     parent.appendChild(e)
     return e
 
+def addHiddenFeature(Id,parent):
+    e = doc.createElement('Feature')
+    e.setAttribute('Id',Id)
+    e.setAttribute('Level','1')
+    e.setAttribute('Display','hidden')
+    e.setAttribute('Absent','allow')
+    e.setAttribute('AllowAdvertise','no')
+    parent.appendChild(e)
+    return e
+
 def addRootFeature(Id,title,description,level,parent):
     e = doc.createElement('Feature')
     e.setAttribute('Id',Id)
@@ -198,6 +208,19 @@ def addCRefs(lstId,parent):
         e.setAttribute('Id',Id)
         parent.appendChild(e)
  
+def addModules(location,parent):
+    global globalFileCount
+    global TargetDir
+    sfiles = os.listdir(location);
+    for fil in sfiles:
+        #print fil
+        fn = fil.replace('.','_')
+        if (fil.find('.svn') < 0 and os.path.isfile(location+'/'+fil)):
+            Id = 'Module'+str(globalFileCount)
+            addTo(TargetDir,'Merge',{'Id':Id,'SourceFile':location+'/'+fil,'DiskId':'1','Language':'1033'})
+            addTo(Redist,'MergeRef',{'Id':Id})
+            globalFileCount = globalFileCount + 1
+            
 doc = xml.dom.minidom.Document()
 #doc.encoding('Windows-1252')
 wix = doc.createElement('Wix')
@@ -292,13 +315,6 @@ addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shar
 
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../qtiplot/MantidQt/lib/MantidQtAPI.dll',MantidDlls)
-
-
-addAllFiles('toget/MSVCruntime','ms',MantidDlls)
-
-#  these two should go to plugins 
-#addFileV('MantidDataHandling_tmp','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',MantidDlls)
-#addFileV('MantidDataObjects_tmp','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',MantidDlls)
 
 addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
 addDlls('../Third_Party/lib/win32','3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
@@ -534,6 +550,9 @@ addCRef('Data',MantidExec)
 addCRefs(Matlab,MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
+
+Redist = addHiddenFeature('Redist',Complete)
+addModules('toget/VCRedist',Redist)
 
 Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
