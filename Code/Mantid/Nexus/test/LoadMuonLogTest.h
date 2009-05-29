@@ -55,7 +55,7 @@ public:
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";
-    loaderNexusFile.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS( loaderNexusFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument )
     // Create an empty workspace and put it in the AnalysisDataService
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
 

@@ -25,7 +25,9 @@ Logger& NormaliseToMonitor::g_log = Logger::get("NormaliseToMonitor");
 
 /// Default constructor
 NormaliseToMonitor::NormaliseToMonitor() :
-  Algorithm(), m_monitorIndex(-1), m_integrationMin(0.0), m_integrationMax(0.0)
+  Algorithm(),                                                //base class constructor
+  m_monitorIndex(-1), m_integrationMin( EMPTY_DBL() ),//EMPTY_DBL() is a tag to say that the value hasn't been set
+  m_integrationMax( EMPTY_DBL() )
 {}
 
 // Destructor
@@ -38,24 +40,37 @@ void NormaliseToMonitor::init()
   val->add(new CommonBinsValidator<Workspace2D>);
   val->add(new RawCountValidator<Workspace2D>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val),
+    "Name of the input workspace");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "Name to use for the output workspace");
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("MonitorSpectrum",-1,mustBePositive);
+  declareProperty( "MonitorSpectrum", -1, mustBePositive,
+    "Enter the spectrum number of the monitor spectrum" );
 
-  // Now the optional properties to normalise by an integrated count instead of bin-by-bin
-  declareProperty("IntegrationRangeMin",0.0);
-  declareProperty("IntegrationRangeMax",0.0);
+  //If users set either of these optional properties two things happen
+  //1) normalisation is by an integrated count instead of bin-by-bin
+  //2) if the value is within the range of X's in the spectrum it crops the spectrum
+  declareProperty( "IntegrationRangeMin", EMPTY_DBL()/*TO BE CONTINUED STEVE,
+    "Entering a value here will cause normalisation by integrated count\n" +
+    "mode to be used and crop the spectrum removing any of the spectrum at\n" +
+    "lower X values" */);
+  declareProperty( "IntegrationRangeMax", EMPTY_DBL()/*TO BE CONTINUED STEVE,
+    "Entering a value here will cause normalisation by integrated count\n" +
+    "mode to be used and crop the spectrum removing any of the spectrum at\n" +
+    "higher X values" */);
 }
 
 void NormaliseToMonitor::exec()
 {
-  // First check the inputs
-  const bool integrate = this->checkProperties();
-
-  // Get the input workspace
+  // First check the inputs, throws std::runtime_error if a property is invalid
+  this->checkProperties();
+  //see if the normalisation with integration properties are set, throws std::runtime_error if a property is invalid
+  const bool integrate = setIntegrateProps();
+  
+    // Get the input workspace
   const Workspace2D_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS;
   // Get the workspace index relating to the spectrum number given
@@ -96,10 +111,9 @@ void NormaliseToMonitor::exec()
 }
 
 /** Makes sure that the input properties are set correctly
- *  @return True if the optional properties have been set
  *  @throw std::runtime_error If a property is invalid
  */
-const bool NormaliseToMonitor::checkProperties()
+void NormaliseToMonitor::checkProperties() const
 {
   // Get the input workspace
   const Workspace2D_const_sptr inputWS = getProperty("InputWorkspace");
@@ -120,34 +134,50 @@ const bool NormaliseToMonitor::checkProperties()
     g_log.error("MonitorSpectrum does not refer to a monitor spectrum");
     throw std::runtime_error("MonitorSpectrum does not refer to a monitor spectrum");
   }
+}
 
-  // Check the optional 'integration' properties
-  Property* min = getProperty("IntegrationRangeMin");
-  Property* max = getProperty("IntegrationRangeMax");
-  if ( !min->isDefault() || !max->isDefault() )
+/** Sets the maximum and minimum X values of the monitor spectrum to use for integration
+* @return True if the maximum or minimum values are set
+* @throw std::runtime_error If the minimum was set higher than the maximum
+*/
+bool NormaliseToMonitor::setIntegrateProps()
+{
+  //get the values if set the default values of the m_inter*s and the properties are EMPTY_DBL()
+  m_integrationMin = getProperty("IntegrationRangeMin");
+  m_integrationMax = getProperty("IntegrationRangeMax");
+
+  //check if neither of these have been changed using the function in the MandatoryValidator
+  if ( isEmpty(m_integrationMin) && isEmpty(m_integrationMax) )
   {
-    m_integrationMin = getProperty("IntegrationRangeMin");
-    m_integrationMax = getProperty("IntegrationRangeMax");
-    if ( !min->isDefault() && !max->isDefault() && m_integrationMin > m_integrationMax )
+    //nothing has been set so the user doesn't want to use integration so let's move on
+    return false;
+  }
+  //yes integration is going to be used
+
+  //There is only one set of values that is unacceptable let's check for that
+  if ( !isEmpty(m_integrationMin) && !isEmpty(m_integrationMax) )
+  {
+    if ( m_integrationMin > m_integrationMax )
     {
       g_log.error("Integration minimum set to larger value than maximum!");
       throw std::runtime_error("Integration minimum set to larger value than maximum!");
     }
-    if ( min->isDefault() || m_integrationMin < inputWS->readX(0).front() )
-    {
-      g_log.warning() << "Integration range minimum set to workspace min: " << m_integrationMin << std::endl;
-      m_integrationMin = inputWS->readX(0).front();
-    }
-    if ( min->isDefault() || m_integrationMax > inputWS->readX(0).back() )
-    {
-      g_log.warning() << "Integration range maximum set to workspace max: " << m_integrationMax << std::endl;
-      m_integrationMax = inputWS->readX(0).back();
-    }
-    // Return indicating that these properties should be used
-    return true;
   }
 
-  return false;
+  //now set the end X values are within the X value range of the workspace
+  const Workspace2D_const_sptr inputWS = getProperty("InputWorkspace");
+  if ( isEmpty(m_integrationMin) || m_integrationMin < inputWS->readX(0).front() )
+  {
+    g_log.warning() << "Integration range minimum set to workspace min: " << m_integrationMin << std::endl;
+    m_integrationMin = inputWS->readX(0).front();
+  }
+  if ( isEmpty(m_integrationMax) || m_integrationMax > inputWS->readX(0).back() )
+  {
+    g_log.warning() << "Integration range maximum set to workspace max: " << m_integrationMax << std::endl;
+    m_integrationMax = inputWS->readX(0).back();
+  }
+  //Return indicating that these properties should be used
+  return true;
 }
 
 /// Finds the workspace index of the monitor from the spectrum number

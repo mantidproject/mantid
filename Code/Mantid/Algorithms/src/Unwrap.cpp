@@ -353,7 +353,6 @@ API::MatrixWorkspace_sptr Unwrap::rebin(const API::MatrixWorkspace_sptr& workspa
 
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
-  childAlg->setPropertyValue("InputWorkspace", "Anonymous");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 

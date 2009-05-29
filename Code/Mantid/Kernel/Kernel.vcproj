@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MandatoryValidator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Property.cpp"
 				>
 			</File>

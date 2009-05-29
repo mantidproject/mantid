@@ -135,7 +135,10 @@ public:
     alg2.setPropertyValue("sigma", "1.1");
 
     // execute fit
-    TS_ASSERT_THROWS_NOTHING( alg2.execute());
+   TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect

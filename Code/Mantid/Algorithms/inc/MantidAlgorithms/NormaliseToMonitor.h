@@ -78,7 +78,10 @@ private:
   void init();
   void exec();
 
-  const bool checkProperties();
+  // called by init()
+  void checkProperties() const;
+  bool setIntegrateProps();
+
   void findMonitorIndex(API::MatrixWorkspace_const_sptr inputWorkspace);
   API::MatrixWorkspace_sptr normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace);
 

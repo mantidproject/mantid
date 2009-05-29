@@ -34,12 +34,10 @@ public:
     PoissonErrors alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    TS_ASSERT_THROWS_NOTHING(
-    alg.setPropertyValue(inputProp1,"test_in21");
-    alg.setPropertyValue(inputProp2,"test_in22");    
-    alg.setPropertyValue(outputProp,"test_out2");
-    );
-
+    //Setting properties to input workspaces that don't exist throws
+    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp1,"test_in21"), std::invalid_argument )
+    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp2,"test_in22"), std::invalid_argument )    
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out2") )
   }
 
   void testExec1D1D()
@@ -54,9 +52,9 @@ public:
     PoissonErrors alg;
 
     alg.initialize();
-    alg.setPropertyValue(inputProp1,"test_in11");
-    alg.setPropertyValue(inputProp2,"test_in12");    
-    alg.setPropertyValue(outputProp,"test_out1");
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp1,"test_in11") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp2,"test_in12") )    
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out1") )
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;

@@ -43,10 +43,10 @@ public:
 
 	  // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HRP37129_ICPevent.txt";
-    loader.setPropertyValue("Filename", inputFile);
-
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile) )
+    
     outputSpace = "LoadLogTest-singleLogFile";
-    loader.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
     // Create an empty workspace and put it in the AnalysisDataService
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
 
@@ -160,10 +160,10 @@ public:
 
 	  // Path to test input file assumes Test directory checked out from SVN
     inputFile = "../../../../Test/Data/HRP37129.S02";
-    loaderRawFile.setPropertyValue("Filename", inputFile);
+    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", inputFile) )
 
     outputSpace = "LoadLogTest-rawdatafile_so_type";
-    loaderRawFile.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS( loaderRawFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
     // Create an empty workspace and put it in the AnalysisDataService
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace1D",1,1,1);
 

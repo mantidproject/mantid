@@ -65,7 +65,7 @@ public:
     unwrap.setPropertyValue("OutputWorkspace", "unwrappedWS" );
     unwrap.setPropertyValue("LRef","36.0");
 
-    TS_ASSERT_THROWS_NOTHING( unwrap.execute() )
+    TS_ASSERT_THROWS_NOTHING( TS_ASSERT(unwrap.execute()) )
     TS_ASSERT( unwrap.isExecuted() )
 
     boost::shared_ptr<MatrixWorkspace> inWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));

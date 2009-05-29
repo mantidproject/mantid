@@ -32,18 +32,27 @@ void RemoveBins::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);
   wsValidator->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
+    "Name of the input workspace");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "Name of the output workspace");
+
   MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
-  declareProperty("XMin",Mantid::EMPTY_DBL(), mustHaveValue);
-  declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue->clone());
+  declareProperty("XMin",Mantid::EMPTY_DBL(), mustHaveValue,
+    "The lower bound of the region to be removed");
+  declareProperty("XMax",Mantid::EMPTY_DBL(), mustHaveValue->clone(),
+    "The upper bound of the region to be removed");
+
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(),"AsInput");
-  declareProperty("RangeUnit","AsInput",new ListValidator(units) );
+  declareProperty( "RangeUnit", "AsInput", new ListValidator(units),
+    "The units of XMin and XMax" );
+
   std::vector<std::string> propOptions;
   propOptions.push_back("None");
   propOptions.push_back("Linear");
-  declareProperty("Interpolation", "None", new ListValidator(propOptions) );
+  declareProperty("Interpolation", "None", new ListValidator(propOptions),
+    "Used when the region to be removed is within a bin. Linear scales the value in that bin by the proportion of it that is outside the region to be removed and none sets it to zero" );
 }
 
 /** Executes the algorithm

@@ -74,12 +74,12 @@ private:
 // Member function specializations for ints and doubles. The defintions are in the
 // cpp file so that multiple symbol errors do not occur in the linking stage.
 // 
-/// A member function specialization for integers
 template<>
+/// A member function specialization for integers
 std::string MandatoryValidator<int>::checkValidity(const int& value) const;
 
-/// A member function specialization for doubles
 template<>
+/// A member function specialization for doubles
 std::string MandatoryValidator<double>::checkValidity(const double& value) const;
 
 

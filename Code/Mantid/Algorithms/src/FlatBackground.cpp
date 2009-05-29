@@ -20,12 +20,12 @@ Logger& FlatBackground::g_log = Logger::get("FlatBackground");
 
 void FlatBackground::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-
-  declareProperty(new ArrayProperty<int>("SpectrumIndexList", new MandatoryValidator<std::vector<int> >));
-  declareProperty("StartX",0.0);
-  declareProperty("EndX",0.0);
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input ), "Name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ), "Name to use for the output workspace.");
+  declareProperty(new ArrayProperty<int>("SpectrumIndexList", new MandatoryValidator<std::vector<int> > ), "Indices of the spectra that will have their background removed");
+  MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
+  declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue, "The X value at which to start the background fit");
+  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(), "The X value at which to end the background fit");
 }
 
 void FlatBackground::exec()
@@ -91,16 +91,7 @@ void FlatBackground::exec()
  */
 void FlatBackground::checkRange(double& startX, double& endX)
 {
-  // Both XMin and XMax are mandatory
-  Property* XMin = getProperty("StartX");
-  Property* XMax = getProperty("EndX");
-  if ( XMin->isDefault() || XMax->isDefault() )
-  {
-    g_log.error("This algorithm requires that both XMin and XMax are set");
-    throw std::invalid_argument("This algorithm requires that both XMin and XMax are set");
-  }
-
-  // If that was OK, then we can get their values
+  //use the overloaded operator =() to get the X value stored in each property
   startX = getProperty("StartX");
   endX = getProperty("EndX");
       

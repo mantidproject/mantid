@@ -76,8 +76,9 @@ public:
     Regroup regroup;
     regroup.initialize();
     regroup.setChild(true);
-    regroup.setPropertyValue("InputWorkspace","test_in1D");
-    regroup.setPropertyValue("OutputWorkspace","test_out");
+    //Setting properties to input workspaces that don't exist throws
+    TS_ASSERT_THROWS( regroup.setPropertyValue("InputWorkspace","test_in1D"), std::invalid_argument )
+    TS_ASSERT_THROWS_NOTHING( regroup.setPropertyValue("OutputWorkspace","test_out") )
 
 	//no global scope for the RegroupParamsValidator
 	//use run the validator through the property

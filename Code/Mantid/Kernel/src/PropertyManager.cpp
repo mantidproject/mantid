@@ -109,7 +109,7 @@ namespace Mantid
       std::string errorMsg = p->setValue(value);
       if ( !errorMsg.empty() ) 
       {
-        errorMsg = "Invalid value for property " + p->type() + " \"" + value
+        errorMsg = "Invalid value for property " + p->name() + " (" +p->type() + ") \"" + value
           + "\": " + errorMsg;
         throw std::invalid_argument(errorMsg);
       }
@@ -120,6 +120,7 @@ namespace Mantid
     *  @param index The index of the property to assign
     *  @param value The value to assign to the property
     *  @throw std::runtime_error if the property index is too high
+    *  @throw std::invalid_argument If the value is not valid for the property given
     */
     void PropertyManager::setPropertyOrdinal( const int& index, const std::string &value )
     {
@@ -127,9 +128,9 @@ namespace Mantid
       std::string errorMsg = p->setValue(value);
       if ( !errorMsg.empty() ) 
       {
-        errorMsg = "Invalid value for property " + p->type() + " \"" + value
+        errorMsg = "Invalid value for property " + p->name() + " (" +p->type() + ") \"" + value
           + "\" : " + errorMsg;
-        throw std::runtime_error(errorMsg);
+        throw std::invalid_argument(errorMsg);
       }
     }
 

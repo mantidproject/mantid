@@ -98,13 +98,14 @@ static int gsl_fdf(const gsl_vector * x, void *params,
  */
 void Fit1D::init()
 {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumIndex",0, mustBePositive);
-  declareProperty("StartX",0.0);
-  declareProperty("EndX",0.0);
+  declareProperty("SpectrumIndex",0, mustBePositive,
+    "The spectrum to fit, using the workspace numbering of the spectra (default 0)");
+  declareProperty("StartX", EMPTY_DBL(), "X value to start fitting from");
+  declareProperty("EndX", EMPTY_DBL(), "last X value to include in fitting range");
 
   // declare parameters specific to a given fitting function
   declareParameters();
@@ -116,7 +117,8 @@ void Fit1D::init()
     m_parameterNames.push_back(props[i]->name());
   }
 
-  declareProperty("MaxIterations",500, mustBePositive->clone());
+  declareProperty("MaxIterations",500, mustBePositive->clone(),
+    "Stop after this number of iterations if a good fit is not found" );
   declareProperty("Output Status","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
 
@@ -153,25 +155,24 @@ void Fit1D::exec()
   const std::vector<double>& YErrors = localworkspace->readE(histNumber);
 
   // Set the fitting range
-  Property* startProp = getProperty("StartX");
-  Property* endProp = getProperty("EndX");
-  double startX, endX; 
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX"); 
 
-  if ( ! startProp->isDefault() ) 
-    startX = getProperty("StartX");  
-  else
-  {
+  if ( isEmpty( startX ) )
+  {//the value hasn't been set by the user, use defaults
     startX = XValues.front();
-    modifyStartOfRange(startX); // does nothing by default but derived class may previde a more intelligent value
+    modifyStartOfRange(startX); // does nothing by default but derived class may provide a more intelligent value
   }
+  else//the user has entered a value, let's use it
+    startX = getProperty("StartX");  
 
-  if ( ! endProp->isDefault() ) 
-    endX = getProperty("EndX");
-  else 
-  {
+  if ( isEmpty( endX ) ) 
+  {//load defaults values
     endX = XValues.back();
     modifyEndOfRange(endX); // does nothing by default but derived class may previde a more intelligent value
   }
+  else//use wht the use entered
+    endX = getProperty("EndX");
 
   
   int m_minX; // The X bin to start the fitting from

@@ -20,7 +20,9 @@ using DataObjects::Workspace2D;
 Logger& CropWorkspace::g_log = Logger::get("CropWorkspace");
 
 /// Default constructor
-CropWorkspace::CropWorkspace() : Algorithm(), m_minX(0), m_maxX(0), m_minSpec(0), m_maxSpec(0)
+CropWorkspace::CropWorkspace() : 
+  Algorithm(),                                                //call the parent constructor
+  m_minX(0), m_maxX(EMPTY_INT()), m_minSpec(0), m_maxSpec(EMPTY_INT())//EMPTY_DBL() is a flag to say that the value hasn't been set 0 is the default value for the two minimum quantities
 {}
 
 /// Destructor
@@ -28,17 +30,25 @@ CropWorkspace::~CropWorkspace() {}
 
 void CropWorkspace::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new CommonBinsValidator<Workspace2D>));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new CommonBinsValidator<Workspace2D>),
+    "The input workspace must have common bins" );
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "Name of the output workspace" );
 
-  declareProperty("XMin",0.0);
-  declareProperty("XMax",0.0);
+  declareProperty("XMin",0.0,
+    "The X value to start the cropped workspace at (= 0 if not set)");
+  declareProperty("XMax",0.0,
+    "The X value to end the cropped workspace at (= max X in workspace if not set)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive);
+  declareProperty("StartSpectrum",0, mustBePositive/*TO BE CONTINUED STEVE   ,
+    "The index number of the first spectrum in the series that will be cropped\n" +
+    "(default 0)" */);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum",0, mustBePositive->clone());
+  declareProperty("EndSpectrum",0, mustBePositive->clone()/*TO BE CONTINUED STEVE   ,
+    "The index number of the last spectrum in the series that will be cropped\n" +
+    "default (the last spectrum)"*/ );
 }
 
 /** Executes the algorithm
