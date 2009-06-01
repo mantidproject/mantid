@@ -44,7 +44,7 @@ void CylinderAbsorption::init()
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices",1,positiveInt, "The number of slices into which the cylinder is divided for the calculation.");
   declareProperty("NumberOfAnnuli",1,positiveInt->clone(), "The number of annuli into which each slice is divided for the calculation.");
-  declareProperty("NumberOfWavelengthPoints",1,positiveInt->clone());
+  declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt->clone());
 
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
@@ -150,8 +150,8 @@ void CylinderAbsorption::retrieveProperties()
   m_refAtten = -sigma_atten*rho/1.798;
   m_scattering = -sigma_s*rho;
   
-  Property *numPoints = getProperty("NumberOfWavelengthPoints");
-  if ( !numPoints->isDefault() ) n_lambda=getProperty("NumberOfWavelengthPoints");
+  n_lambda = getProperty("NumberOfWavelengthPoints");
+  if ( isEmpty(n_lambda) ) n_lambda = 1;
 
   std::string exp_string=getProperty("ExpMethod");
 

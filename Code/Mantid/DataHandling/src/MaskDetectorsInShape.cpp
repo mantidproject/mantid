@@ -41,6 +41,11 @@ namespace Mantid
 
 
 			std::vector<int> foundDets = runFindDetectorsInShape(WS,shapeXML,includeMonitors);
+      if ( foundDets.empty() )
+      {
+        g_log.information("No detectors were found in the shape, nothing was masked");
+        return;
+      }
 			runMaskDetectors(WS,foundDets);
 			setProperty("Workspace",WS);
 		}

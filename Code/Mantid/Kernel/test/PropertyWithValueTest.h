@@ -249,7 +249,9 @@ public:
     TS_ASSERT_EQUALS( pi.setValue("11"), couldnt + start + "11" + greaterThan + "10" + end )
     TS_ASSERT_EQUALS(pi.value(),"10");
     TS_ASSERT_EQUALS(pi.isValid(), "")
-    TS_ASSERT_EQUALS( pi.setValue(""), "Could not set property test. Can not convert \"\" to int" )
+    std::string errorMsg = pi.setValue("");
+    //when the string can't be converted to the correct type we get a system dependent meassage that in this case should look like the string below
+    TS_ASSERT_EQUALS( errorMsg.find("Could not set property test. Can not convert \"\" to ",0), 0)
   
 	//double tests
     PropertyWithValue<double> pd("test", 11.0, new BoundedValidator<double>(1.0,10.0));

@@ -249,7 +249,7 @@ protected:
 	Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
 
   ///checks that the value was not set by users, uses the value in EMPTY_DBL()
-  static bool isEmpty(double toCheck) { return   abs( (toCheck - EMPTY_DBL())/(toCheck + EMPTY_DBL()) ) < 1e-8  ;}
+  static bool isEmpty(double toCheck) { return   abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
 
 private:
 

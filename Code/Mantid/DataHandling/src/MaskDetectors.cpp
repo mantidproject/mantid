@@ -44,28 +44,24 @@ void MaskDetectors::exec()
   // Get the size of the vectors
   const int vectorSize = WS->blocksize();
 
-  Property *wil = getProperty("WorkspaceIndexList");
-  Property *sl = getProperty("SpectraList");
-  Property *dl = getProperty("DetectorList");
-
-  // Could create a Validator to replace the below
-  if ( wil->isDefault() && sl->isDefault() && dl->isDefault() )
-  {
-    g_log.error("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
-    throw std::invalid_argument("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
-  }
-
   std::vector<int> indexList = getProperty("WorkspaceIndexList");
+  std::vector<int> spectraList = getProperty("SpectraList");
   const std::vector<int> detectorList = getProperty("DetectorList");
+
+  //each one of these values is optional but the user can't leave all three blank
+  if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
+  {
+    g_log.information(name() + ": There is nothing to mask, the index, spectra and detector lists are all empty");
+      return;
+  }
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
   // appropriate spectra number and adding the indices they are linked to the list to be processed
-  if ( ! sl->isDefault() )
+  if ( ! spectraList.empty() )
   {
-    std::vector<int> spectraList = getProperty("SpectraList");
     fillIndexListFromSpectra(indexList,spectraList,WS);
   }// End dealing with spectraList
-  else if ( ! dl->isDefault() )
+  else if ( ! detectorList.empty() )
   {// Dealing with DetectorList
     //convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);

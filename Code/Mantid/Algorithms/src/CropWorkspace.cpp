@@ -22,7 +22,7 @@ Logger& CropWorkspace::g_log = Logger::get("CropWorkspace");
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
   Algorithm(),                                                //call the parent constructor
-  m_minX(0), m_maxX(EMPTY_INT()), m_minSpec(0), m_maxSpec(EMPTY_INT())//EMPTY_DBL() is a flag to say that the value hasn't been set 0 is the default value for the two minimum quantities
+  m_minX(EMPTY_INT()), m_maxX(EMPTY_INT()), m_minSpec(0), m_maxSpec(EMPTY_INT())//EMPTY_INT() is a flag to say that the value hasn't been set
 {}
 
 /// Destructor
@@ -37,7 +37,7 @@ void CropWorkspace::init()
 
   declareProperty("XMin",0.0,
     "The X value to start the cropped workspace at (= 0 if not set)");
-  declareProperty("XMax",0.0,
+  declareProperty("XMax", EMPTY_INT(),
     "The X value to end the cropped workspace at (= max X in workspace if not set)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
@@ -139,9 +139,8 @@ void CropWorkspace::checkProperties()
 
   m_minSpec = getProperty("StartSpectrum");
   const int numberOfSpectra = m_inputWorkspace->getNumberHistograms();
-  Property *p = getProperty("EndSpectrum");
-  if ( p->isDefault() ) m_maxSpec = numberOfSpectra-1;
-    else m_maxSpec = getProperty("EndSpectrum");
+  m_maxSpec = getProperty("EndSpectrum");
+  if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_minSpec > numberOfSpectra-1 )
@@ -166,14 +165,14 @@ void CropWorkspace::checkProperties()
  */
 void CropWorkspace::getXMin()
 {
-  Property *minX = getProperty("XMin");
-  if ( minX->isDefault() )
-  {
+  //get the value that the user entered if they entered one at all
+  const double minX_val = getProperty("XMin");
+  if ( isEmpty(minX_val) )
+  {//A user value wasn't picked up so lets use the default
     m_minX = 0;
   }
   else
-  {
-    const double minX_val = getProperty("XMin");
+  {//we have a user value, check it and maybe store it
     const MantidVec& X = m_inputWorkspace->readX(0);
     if ( minX_val > X.back() )
     {
@@ -189,15 +188,15 @@ void CropWorkspace::getXMin()
  */
 void CropWorkspace::getXMax()
 {
+  //get the value that the user entered if they entered one at all
   const MantidVec& X = m_inputWorkspace->readX(0);
-  Property *maxX = getProperty("XMax");
-  if ( maxX->isDefault() )
-  {
+    const double maxX_val = getProperty("XMax");
+  if ( isEmpty(maxX_val) )
+  {//A user value wasn't picked up so lets use the default
     m_maxX = X.size();
   }
   else
-  {
-    const double maxX_val = getProperty("XMax");
+  {//we have a user value, check it and maybe store it
     if ( maxX_val < X.front() )
     {
       g_log.error("XMax is less than the smallest X value");
