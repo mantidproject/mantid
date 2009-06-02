@@ -1264,8 +1264,21 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
         Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
         if (filter == 1 || filter ==3)
         {
-            f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->getSample()->getLogData("running"));
-            if (f) flt.addFilter(f);
+            try
+            {
+                f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->getSample()->getLogData("running"));
+                if (f) flt.addFilter(f);
+                else
+                {
+                    importNumSampleLog(wsName,logname,0);
+                    return;
+                }
+            }
+            catch(...)
+            {
+                importNumSampleLog(wsName,logname,0);
+                return;
+            }
         }
 
         if (filter == 2 || filter ==3)
@@ -1274,8 +1287,22 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
             for(std::vector<Mantid::Kernel::Property*>::const_iterator it=ps.begin();it!=ps.end();it++)
                 if ((*it)->name().find("period ") == 0)
                 {
-                    f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
-                    flt.addFilter(f);
+                    try
+                    {
+                        f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
+                        if (f) flt.addFilter(f);
+                        else
+                        {
+                            importNumSampleLog(wsName,logname,0);
+                            return;
+                        }
+                    }
+                    catch(...)
+                    {
+                        importNumSampleLog(wsName,logname,0);
+                        return;
+                    }
+                    
                     break;
                 }
         }

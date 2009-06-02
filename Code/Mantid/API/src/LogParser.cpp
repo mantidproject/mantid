@@ -20,8 +20,6 @@ enum commands {NONE = 0,BEGIN,END,CHANGE_PERIOD};
 
 LogParser::~LogParser()
 {
-    delete m_periods;
-    delete m_status;
 }
 
 /**  Constructor.
@@ -33,8 +31,8 @@ LogParser::LogParser(const std::string& eventFName)
 {
     Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> ("periods");
     Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> ("running");
-    m_periods = periods;
-    m_status = status;
+    m_periods.reset( periods );
+    m_status.reset( status );
 
     std::ifstream file(eventFName.c_str());
     if (!file)
@@ -104,8 +102,8 @@ LogParser::LogParser(const Kernel::Property* log)
 {
     Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> ("periods");
     Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> ("running");
-    m_periods = periods;
-    m_status = status;
+    m_periods.reset( periods );
+    m_status.reset( status );
 
     const Kernel::TimeSeriesProperty<std::string>* icpLog = dynamic_cast<const Kernel::TimeSeriesProperty<std::string>*>(log);
     if (!icpLog || icpLog->size() == 0)
@@ -252,7 +250,7 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
 /// Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active
 Kernel::Property* LogParser::createPeriodLog(int period)const
 {
-    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods);
+    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
     std::ostringstream ostr;
     ostr<<period;
     Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
@@ -270,7 +268,7 @@ Kernel::Property* LogParser::createPeriodLog(int period)const
 Kernel::Property* LogParser::createAllPeriodsLog()const
 {
     Kernel::TimeSeriesProperty<int>* p = new Kernel::TimeSeriesProperty<int> ("periods");
-    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods);
+    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
     std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
     std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
     for(;it!=pMap.end();it++)
@@ -281,7 +279,7 @@ Kernel::Property* LogParser::createAllPeriodsLog()const
 /// Ctreates a TimeSeriesProperty<bool> with running status
 Kernel::Property* LogParser::createRunningLog()const
 {
-    return dynamic_cast<Kernel::TimeSeriesProperty<bool>*>(m_status)->clone();
+    return dynamic_cast<Kernel::TimeSeriesProperty<bool>*>(m_status.get())->clone();
 }
 
 

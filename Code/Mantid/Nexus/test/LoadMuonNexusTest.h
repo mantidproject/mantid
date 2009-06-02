@@ -210,7 +210,6 @@ public:
     sample = output->getSample();
     sample2 = output2->getSample();
     TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-    TS_ASSERT_EQUALS(sample, sample2)
     TS_ASSERT_EQUALS(sample->getName(), "ptfe test")    
   }
 

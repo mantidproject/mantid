@@ -9,12 +9,14 @@
 #include "MantidKernel/FileValidator.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 #include "Poco/Path.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
+#include "MantidNexus/NexusClasses.h"
 
 namespace Mantid
 {
@@ -62,176 +64,185 @@ namespace Mantid
      */
     void LoadMuonNexus::exec()
     {
-      // Retrieve the filename from the properties
-      m_filename = getPropertyValue("Filename");
+        // Retrieve the filename from the properties
+        m_filename = getPropertyValue("Filename");
 
-      MuonNexusReader nxload;
-      if (nxload.readFromFile(m_filename) != 0)
-      {
-        g_log.error("Unable to open file " + m_filename);
-        throw Exception::FileError("Unable to open File:" , m_filename);  
-      }
-
-      // Read in the instrument name from the Nexus file
-      m_instrument_name = nxload.getInstrumentName();
-      // Read in the number of spectra in the Nexus file
-      m_numberOfSpectra = nxload.t_nsp1;
-      // Read the number of periods in this file
-      m_numberOfPeriods = nxload.t_nper;
-      // Need to extract the user-defined output workspace name
-      Property *ws = getProperty("OutputWorkspace");
-      std::string localWSName = ws->value();
-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
-      boost::shared_ptr<IInstrument> instrument;
-//-      boost::shared_ptr<SpectraDetectorMap> specMap;
-      boost::shared_ptr<Sample> sample;
-      
-      // Call private method to validate the optional parameters, if set
-      checkOptionalProperties();
-           
-      // Read the number of time channels (i.e. bins) from the Nexus file
-      const int channelsPerSpectrum = nxload.t_ntc1;
-      // Read in the time bin boundaries 
-      const int lengthIn = channelsPerSpectrum + 1;
-      float* timeChannels = new float[lengthIn];
-      nxload.getTimeChannels(timeChannels, lengthIn);
-      // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<MantidVec> timeChannelsVec
-                          (new MantidVec(timeChannels, timeChannels + lengthIn));
-
-      // Calculate the size of a workspace, given its number of periods & spectra to read
-      int total_specs;
-      if( m_interval || m_list)
-      {
-        total_specs = m_spec_list.size();
-        if (m_interval)
+        MuonNexusReader nxload;
+        if (nxload.readFromFile(m_filename) != 0)
         {
-          total_specs += (m_spec_max-m_spec_min+1);
-          m_spec_max += 1;
+            g_log.error("Unable to open file " + m_filename);
+            throw Exception::FileError("Unable to open File:" , m_filename);  
         }
-      }
-      else
-      {
-        total_specs = m_numberOfSpectra;
-        // for nexus return all spectra
-        m_spec_min = 0; // changed to 0 for NeXus, was 1 for Raw
-        m_spec_max = m_numberOfSpectra;  // was +1?
-      }
 
-      API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
-      // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
-      for (int period = 0; period < m_numberOfPeriods; ++period) {
-        
+        // Read in the instrument name from the Nexus file
+        m_instrument_name = nxload.getInstrumentName();
+        // Read in the number of spectra in the Nexus file
+        m_numberOfSpectra = nxload.t_nsp1;
+        // Read the number of periods in this file
+        m_numberOfPeriods = nxload.t_nper;
+        // Need to extract the user-defined output workspace name
+        Property *ws = getProperty("OutputWorkspace");
+        std::string localWSName = ws->value();
+        // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
+        boost::shared_ptr<IInstrument> instrument;
+        //-      boost::shared_ptr<SpectraDetectorMap> specMap;
+        boost::shared_ptr<Sample> sample;
+
+        // Call private method to validate the optional parameters, if set
+        checkOptionalProperties();
+
+        // Read the number of time channels (i.e. bins) from the Nexus file
+        const int channelsPerSpectrum = nxload.t_ntc1;
+        // Read in the time bin boundaries 
+        const int lengthIn = channelsPerSpectrum + 1;
+        float* timeChannels = new float[lengthIn];
+        nxload.getTimeChannels(timeChannels, lengthIn);
+        // Put the read in array into a vector (inside a shared pointer)
+        boost::shared_ptr<MantidVec> timeChannelsVec
+            (new MantidVec(timeChannels, timeChannels + lengthIn));
+
+        // Calculate the size of a workspace, given its number of periods & spectra to read
+        int total_specs;
+        if( m_interval || m_list)
+        {
+            total_specs = m_spec_list.size();
+            if (m_interval)
+            {
+                total_specs += (m_spec_max-m_spec_min+1);
+                m_spec_max += 1;
+            }
+        }
+        else
+        {
+            total_specs = m_numberOfSpectra;
+            // for nexus return all spectra
+            m_spec_min = 0; // changed to 0 for NeXus, was 1 for Raw
+            m_spec_max = m_numberOfSpectra;  // was +1?
+        }
+
         // Create the 2D workspace for the output
         DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-                 (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+            (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
         // Set the unit on the workspace to TOF
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
- 
-        int counter = 0;
-        for (int i = m_spec_min; i < m_spec_max; ++i)
-        {
-          // Shift the histogram to read if we're not in the first period
-          int histToRead = i + period*total_specs;
-          loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
-          counter++;
-          progress.report();
-        }
-        // Read in the spectra in the optional list parameter, if set
-        if (m_list)
-        {
-          for(unsigned int i=0; i < m_spec_list.size(); ++i)
-          {
-            loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1, localWorkspace );
-            counter++;
-            progress.report();
-          }
-        }
-        // Just a sanity check
-        assert(counter == total_specs);
-      
-        std::string outputWorkspace = "OutputWorkspace";
-        if (period == 0)
-        {
-          // Only run the sub-algorithms once
-          runLoadInstrument(localWorkspace );
-//-          runLoadMappingTable(localWorkspace );
-          runLoadLog(localWorkspace );
-          // Cache these for copying to workspaces for later periods
-          instrument = localWorkspace->getInstrument();
-//-          specMap = localWorkspace->getSpectraMap();
-          sample = localWorkspace->getSample();
-        }
-        else   // We are working on a higher period of a multiperiod raw file
-        {
-          // Create a WorkspaceProperty for the new workspace of a higher period
-          // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
-          //                (for all but the first period, which has no suffix)
-          std::stringstream suffix;
-          suffix << (period+1);
-          outputWorkspace += suffix.str();
-          std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-          g_log.information() << "Workspace " << WSName << " created. \n";
-          // Copy the shared instrument, sample & spectramap onto the workspace for this period
-          localWorkspace->setInstrument(instrument);
-//-          localWorkspace->setSpectraMap(specMap);
-          localWorkspace->setSample(sample);
-        }
-        
-      bool autogroup = getProperty("auto_group");
-      
-      if (autogroup)
-     {
 
-          //Get the groupings
-          for (int i =0; i < nxload.numDetectors; ++i)
-          {
-                  m_groupings.push_back(nxload.detectorGroupings[i]);
-          }
-	  	  
-	    //Create a workspace with only two spectra for forward and back
-	    DataObjects::Workspace2D_sptr  groupedWS 
-		= boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-                 (API::WorkspaceFactory::Instance().create(localWorkspace, 2, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
-	  
-	  int numHists = localWorkspace->getNumberHistograms();
-	  
-	  //Compile the groups
-	    for (int i = 0; i < numHists; ++i)
-	    {    
-		    for (int j = 0; j < localWorkspace->blocksize(); ++j)
-			{
-				groupedWS->dataY(m_groupings[numHists*period + i] -1)[j] = groupedWS->dataY(m_groupings[numHists*period + i] -1)[j] + localWorkspace->dataY(i)[j];
-				
-				//Add the errors in quadrature
-				groupedWS->dataE(m_groupings[numHists*period + i] -1)[j] 
-					= sqrt(pow(groupedWS->dataE(m_groupings[numHists*period + i] -1)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
-			}
-						
-			//Copy all the X data
-			groupedWS->dataX(m_groupings[numHists*period + i] -1) = localWorkspace->dataX(i);
-	    }
-	    
-	    m_groupings.clear();
-	    
-	    //Copy other information
-	    groupedWS->setInstrument(instrument);
-	    groupedWS->setSample(sample);
-	    	    
-	    // Assign the result to the output workspace property
-	    setProperty(outputWorkspace,groupedWS);
-      }
-      else
-      {
-         // Assign the result to the output workspace property
-        setProperty(outputWorkspace,localWorkspace);
-      }
-      
-      } // loop over periods
-      
-      // Clean up
-      delete[] timeChannels;
+        API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
+        // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
+        for (int period = 0; period < m_numberOfPeriods; ++period) {
+
+
+            std::string outputWorkspace = "OutputWorkspace";
+            if (period == 0)
+            {
+                // Only run the sub-algorithms once
+                runLoadInstrument(localWorkspace );
+                runLoadMappingTable(localWorkspace );
+                runLoadLog(localWorkspace );
+            }
+            else   // We are working on a higher period of a multiperiod raw file
+            {
+                localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                    (WorkspaceFactory::Instance().create(localWorkspace));
+                localWorkspace->newSample();
+                localWorkspace->newInstrumentParameters();
+
+                // Create a WorkspaceProperty for the new workspace of a higher period
+                // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
+                //                (for all but the first period, which has no suffix)
+                std::stringstream suffix;
+                suffix << (period+1);
+                outputWorkspace += suffix.str();
+                std::string WSName = localWSName + "_" + suffix.str();
+                declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
+                g_log.information() << "Workspace " << WSName << " created. \n";
+                runLoadLog(localWorkspace );
+            }
+
+            int counter = 0;
+            for (int i = m_spec_min; i < m_spec_max; ++i)
+            {
+                // Shift the histogram to read if we're not in the first period
+                int histToRead = i + period*total_specs;
+                loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
+                counter++;
+                progress.report();
+            }
+            // Read in the spectra in the optional list parameter, if set
+            if (m_list)
+            {
+                for(unsigned int i=0; i < m_spec_list.size(); ++i)
+                {
+                    loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1, localWorkspace );
+                    counter++;
+                    progress.report();
+                }
+            }
+            // Just a sanity check
+            assert(counter == total_specs);
+
+            bool autogroup = getProperty("auto_group");
+
+            if (autogroup)
+            {
+
+                //Get the groupings
+                for (int i =0; i < nxload.numDetectors; ++i)
+                {
+                    m_groupings.push_back(nxload.detectorGroupings[i]);
+                }
+
+                //Create a workspace with only two spectra for forward and back
+                DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+                    (API::WorkspaceFactory::Instance().create(localWorkspace, 2, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
+
+                int numHists = localWorkspace->getNumberHistograms();
+
+                boost::shared_array<int> spec(new int[numHists]);
+                boost::shared_array<int> dets(new int[numHists]);
+
+                //Compile the groups
+                for (int i = 0; i < numHists; ++i)
+                {    
+                    int k = m_groupings[numHists*period + i] - 1;
+                    if (k > 1)
+                        throw std::runtime_error("Grouping error: cannot make more than two groups");
+                    for (int j = 0; j < localWorkspace->blocksize(); ++j)
+                    {
+                        groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
+
+                        //Add the errors in quadrature
+                        groupedWS->dataE(k)[j] 
+                        = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
+                    }
+
+                    //Copy all the X data
+                    groupedWS->dataX(k) = localWorkspace->dataX(i);
+                    spec[i] = k + 1;
+                    dets[i] = i + 1;
+                }
+
+                m_groupings.clear();
+
+                // All two spectra
+                groupedWS->getAxis(1)->spectraNo(0)= 1;
+                groupedWS->getAxis(1)->spectraNo(1)= 2;
+
+                groupedWS->mutableSpectraMap().populate(spec.get(),dets.get(),numHists);
+
+                // Assign the result to the output workspace property
+                setProperty(outputWorkspace,groupedWS);
+
+            }
+            else
+            {
+                // Assign the result to the output workspace property
+                setProperty(outputWorkspace,localWorkspace);
+            }
+
+        } // loop over periods
+
+        // Clean up
+        delete[] timeChannels;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
@@ -303,7 +314,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= i;
+      localWorkspace->getAxis(1)->spectraNo(hist)= hist + 1;
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
@@ -371,26 +382,19 @@ namespace Mantid
 
       if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");      
     }
-//-    
-//-    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
-//-    void LoadMuonNexus::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
-//-    {
-//-      // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
-//-      // There is a small penalty in re-opening the raw file but nothing major. 
-//-      Algorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
-//-      loadmap->setPropertyValue("Filename", m_filename);
-//-      loadmap->setProperty<Workspace_sptr>("Workspace",localWorkspace);
-//-      try
-//-      {
-//-        loadmap->execute();  
-//-      }
-//-      catch (std::runtime_error& err)
-//-      {
-//-          g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
-//-      }
-//-      
-//-      if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
-//-    }
+    
+    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+    void LoadMuonNexus::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+        NXRoot root(m_filename);
+        NXInt number = root.openNXInt("run/instrument/detector/number");
+        number.load();
+        int ndet = number[0]/m_numberOfPeriods;
+        boost::shared_array<int> det(new int[ndet]);
+        for(int i=0;i<ndet;i++)
+            det[i] = i + 1;
+        localWorkspace->mutableSpectraMap().populate(det.get(),det.get(),ndet);
+    }
 
     /// Run the LoadLog sub-algorithm
     void LoadMuonNexus::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)

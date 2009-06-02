@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
 #include <ctime>
@@ -98,10 +99,10 @@ public:
 private:
 
     /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-    Kernel::Property* m_periods;
+    boost::shared_ptr<Kernel::Property> m_periods;
 
     /// TimeSeriesProperty<bool> containing running status. Created by LogParser
-    Kernel::Property* m_status;
+    boost::shared_ptr<Kernel::Property> m_status;
 
     /// Number of periods
     int m_nOfPeriods;

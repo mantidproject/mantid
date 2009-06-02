@@ -86,7 +86,7 @@ namespace Mantid
       void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int&, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
- //     void runLoadMappingTable(DataObjects::Workspace2D_sptr);
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file

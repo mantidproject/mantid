@@ -5,6 +5,7 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/LogParser.h"
 
 #include <ctime>
 
