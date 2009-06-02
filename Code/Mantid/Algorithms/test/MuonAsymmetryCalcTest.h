@@ -48,12 +48,12 @@ public:
     //Create the forward and backward groups
     group1.initialize();
     group1.setPropertyValue("Workspace","EMU6473");
-    group1.setPropertyValue("SpectraList", "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15");
+    group1.setPropertyValue("SpectraList", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
     TS_ASSERT_THROWS_NOTHING( group1.execute() );
     TS_ASSERT_EQUALS(group1.isExecuted(),true);
 	  
     group2.initialize();
-    group2.setPropertyValue("SpectraList", "16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31");
+    group2.setPropertyValue("SpectraList", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
     group2.setPropertyValue("Workspace","EMU6473");
     TS_ASSERT_THROWS_NOTHING( group2.execute() );
     TS_ASSERT_EQUALS(group2.isExecuted(),true);
