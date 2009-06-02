@@ -7,6 +7,9 @@ TEMPLATE = lib
 # Import the global config file
 include(../mantidqt.pri)
 
+CONFIG += qt
+QT += opengl
+
 unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtCustomDialogs"')
 win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtCustomDialogs"')
 
@@ -25,14 +28,16 @@ SOURCES = \
   $$SRCDIR/LoadRawDialog.cpp \
   $$SRCDIR/LOQScriptInputDialog.cpp \
   $$SRCDIR/CreateSampleShapeDialog.cpp \
-  $$SRCDIR/SampleShapeHelpers.cpp
+  $$SRCDIR/SampleShapeHelpers.cpp \
+  $$SRCDIR/MantidGLWidget.cpp
 
 HEADERS = \
   $$HEADERDIR/LoadRawDialog.h \
   $$HEADERDIR/LOQScriptInputDialog.h \
   $$HEADERDIR/CreateSampleShapeDialog.h \
-  $$HEADERDIR/SampleShapeHelpers.h
-  
+  $$HEADERDIR/SampleShapeHelpers.h \
+  $$HEADERDIR/MantidGLWidget.h
+
 UI_DIR = $$HEADERDIR
 
 FORMS = \

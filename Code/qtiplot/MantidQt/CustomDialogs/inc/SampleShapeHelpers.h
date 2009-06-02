@@ -125,7 +125,7 @@ class ShapeDetails : public QWidget
 
 public:
   ///Constructor
-  ShapeDetails(QWidget *parent = 0) : QWidget(parent) {}
+  ShapeDetails(QWidget *parent = 0) : QWidget(parent), m_idvalue(0), m_isComplement(false) {}
   ///Constructor
   virtual ~ShapeDetails() {}
 
@@ -145,9 +145,18 @@ public:
   // Convert a string value from the given unit to metres
   static QString convertToMetres(const QString & value, Unit start_unit);
 
+  /// Set the complement flag
+  void setComplementFlag(bool flag);
+  /// Get complement flag
+  bool getComplementFlag() const;
+  
 protected:
   /// ID string of this object
   QString m_idvalue;
+
+private:
+  /// Take the complement of the shape
+  bool m_isComplement;
 
 };
 
@@ -406,35 +415,35 @@ private:
     *m_left_bck_top, *m_left_frt_top, *m_right_frt_top, *m_right_bck_top;
 };
 
-/**
- * A widget to define a torus
- */
-class TorusDetails : public ShapeDetails
-{
-  Q_OBJECT
+// /**
+//  * A widget to define a torus
+//  */
+// class TorusDetails : public ShapeDetails
+// {
+//   Q_OBJECT
 
-private:
-  /// The number of objects that currently exist
-  static int g_ntori;
+// private:
+//   /// The number of objects that currently exist
+//   static int g_ntori;
 
-public:
-  ///Default constructor
-  TorusDetails(QWidget *parent = 0);
+// public:
+//   ///Default constructor
+//   TorusDetails(QWidget *parent = 0);
 
-  ///Default destructor 
-  ~TorusDetails() { --g_ntori; }
+//   ///Default destructor 
+//   ~TorusDetails() { --g_ntori; }
 
-  /// Write the XML definition of a sphere
-  QString writeXML() const;
+//   /// Write the XML definition of a sphere
+//   QString writeXML() const;
 
-private:
-  /// Radius values
-  QLineEdit *m_tube_rad, *m_inner_rad;
-  //Unit choice boxes
-  QComboBox *m_tunits, *m_iunits;
-  /// Corner points
-  PointGroupBox *m_centre, *m_axis;
-};
+// private:
+//   /// Radius values
+//   QLineEdit *m_tube_rad, *m_inner_rad;
+//   //Unit choice boxes
+//   QComboBox *m_tunits, *m_iunits;
+//   /// Corner points
+//   PointGroupBox *m_centre, *m_axis;
+// };
 
 
 

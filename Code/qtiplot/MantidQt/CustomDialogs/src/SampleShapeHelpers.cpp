@@ -212,6 +212,24 @@ QString ShapeDetails::convertToMetres(const QString & value, Unit start_unit)
   return converted;
 }
 
+/**
+ * Set the complement flag
+ * @param flag The value of the flag
+ */
+void ShapeDetails::setComplementFlag(bool flag)
+{
+  m_isComplement = flag;
+}
+
+/**
+ * Get the complement flag
+ * @returns The value of the complement flag
+ */
+bool ShapeDetails::getComplementFlag() const
+{
+  return m_isComplement;
+}
+
 //--------------------------------------------//
 //                Sphere 
 //--------------------------------------------//
@@ -374,7 +392,7 @@ QString InfiniteCylinderDetails::writeXML() const
     "<radius val=\"" + valr + "\" />\n" +
     m_centre->write3DElement("centre") +
     m_axis->write3DElement("axis") +
-    "</cylinder>\n";
+    "</infinite-cylinder>\n";
   return xmldef;
 }
 
@@ -496,7 +514,7 @@ ConeDetails::ConeDetails(QWidget *parent) : ShapeDetails(parent)
   m_tippoint->setTitle("Tip point");
 
   m_axis = new PointGroupBox;
-  m_axis->setTitle("Axis");
+  m_axis->setTitle("Base-to-Tip Axis");
 
   main_layout->addLayout(hgt_layout);
   main_layout->addLayout(ang_layout);
@@ -556,7 +574,7 @@ InfiniteConeDetails::InfiniteConeDetails(QWidget *parent) : ShapeDetails(parent)
   m_tippoint->setTitle("Tip point");
 
   m_axis = new PointGroupBox;
-  m_axis->setTitle("Axis");
+  m_axis->setTitle("Base-to-Tip Axis");
 
   main_layout->addLayout(ang_layout);
   main_layout->addWidget(m_tippoint);
@@ -744,69 +762,71 @@ QString HexahedronDetails::writeXML() const
   return xmldef;
 }
 
+// This is not implemented in OpenCascade yet 
+
 //--------------------------------------------------------//
 //                Torus
 //--------------------------------------------------------//
 /// Static counter
-int TorusDetails::g_ntori = 0;
+// int TorusDetails::g_ntori = 0;
 
-/// Default constructor
-TorusDetails::TorusDetails(QWidget *parent) : ShapeDetails(parent)
-{
-  /// Update number of sphere objects and the set the ID of this one
-  ++g_ntori;
-  m_idvalue = "torus_" + QString::number(g_ntori);
+// /// Default constructor
+// TorusDetails::TorusDetails(QWidget *parent) : ShapeDetails(parent)
+// {
+//   /// Update number of sphere objects and the set the ID of this one
+//   ++g_ntori;
+//   m_idvalue = "torus_" + QString::number(g_ntori);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+//   QVBoxLayout *main_layout = new QVBoxLayout(this);
 
-  //Radi
-  m_tube_rad = new QLineEdit;
-  m_tunits = createLengthUnitsCombo();
-  QHBoxLayout *tub_layout = new QHBoxLayout;
-  tub_layout->addWidget(new QLabel("Tube radius: "));
-  tub_layout->addWidget(m_tube_rad);
-  tub_layout->addWidget(m_tunits);
+//   //Radi
+//   m_tube_rad = new QLineEdit;
+//   m_tunits = createLengthUnitsCombo();
+//   QHBoxLayout *tub_layout = new QHBoxLayout;
+//   tub_layout->addWidget(new QLabel("Tube radius: "));
+//   tub_layout->addWidget(m_tube_rad);
+//   tub_layout->addWidget(m_tunits);
 
-  m_inner_rad = new QLineEdit;
-  m_iunits = createLengthUnitsCombo();
-  QHBoxLayout *hol_layout = new QHBoxLayout;
-  hol_layout->addWidget(new QLabel("Hole radius: "));
-  hol_layout->addWidget(m_inner_rad);
-  hol_layout->addWidget(m_iunits);
+//   m_inner_rad = new QLineEdit;
+//   m_iunits = createLengthUnitsCombo();
+//   QHBoxLayout *hol_layout = new QHBoxLayout;
+//   hol_layout->addWidget(new QLabel("Hole radius: "));
+//   hol_layout->addWidget(m_inner_rad);
+//   hol_layout->addWidget(m_iunits);
   
-  //Point boxes
-  m_centre = new PointGroupBox;
-  m_centre->setTitle("Centre");
+//   //Point boxes
+//   m_centre = new PointGroupBox;
+//   m_centre->setTitle("Centre");
 
-  m_axis = new PointGroupBox;
-  m_axis->setTitle("Axis");
+//   m_axis = new PointGroupBox;
+//   m_axis->setTitle("Axis");
 
-  main_layout->addLayout(tub_layout);
-  main_layout->addLayout(hol_layout);
-  main_layout->addWidget(m_centre);
-  main_layout->addWidget(m_axis);
-}
+//   main_layout->addLayout(tub_layout);
+//   main_layout->addLayout(hol_layout);
+//   main_layout->addWidget(m_centre);
+//   main_layout->addWidget(m_axis);
+// }
 
-/**
- * Write the XML definition
- */
-QString TorusDetails::writeXML() const
-{
-  QString valt("0.0"), vali("0.0");
-  if( !m_tube_rad->text().isEmpty() )
-  {
-    valt = convertToMetres(m_tube_rad->text(), ShapeDetails::Unit(m_tunits->currentIndex()));
-  }
-  if( !m_inner_rad->text().isEmpty() )
-  {
-    vali = convertToMetres(m_inner_rad->text(), ShapeDetails::Unit(m_iunits->currentIndex())); 
-  }
-  QString xmldef = 
-    "<torus id=\"" + m_idvalue + "\" >\n"
-    "<radius-tube val=\"" + valt + "\" />\n"
-    "<radius-from-centre-to-tube val=\"" + vali + "\" />\n" +
-    m_centre->write3DElement("centre") +
-    m_axis->write3DElement("axis") +
-    "</torus>\n";
-  return xmldef;
-}
+// /**
+//  * Write the XML definition
+//  */
+// QString TorusDetails::writeXML() const
+// {
+//   QString valt("0.0"), vali("0.0");
+//   if( !m_tube_rad->text().isEmpty() )
+//   {
+//     valt = convertToMetres(m_tube_rad->text(), ShapeDetails::Unit(m_tunits->currentIndex()));
+//   }
+//   if( !m_inner_rad->text().isEmpty() )
+//   {
+//     vali = convertToMetres(m_inner_rad->text(), ShapeDetails::Unit(m_iunits->currentIndex())); 
+//   }
+//   QString xmldef = 
+//     "<torus id=\"" + m_idvalue + "\" >\n"
+//     "<radius-tube val=\"" + valt + "\" />\n"
+//     "<radius-from-centre-to-tube val=\"" + vali + "\" />\n" +
+//     m_centre->write3DElement("centre") +
+//     m_axis->write3DElement("axis") +
+//     "</torus>\n";
+//   return xmldef;
+// }

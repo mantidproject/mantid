@@ -4,6 +4,9 @@
 #include "MantidQtCustomDialogs/CreateSampleShapeDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtCustomDialogs/SampleShapeHelpers.h"
+#include "MantidQtCustomDialogs/MantidGLWidget.h"
+
+#include "MantidGeometry/ShapeFactory.h"
 
 #include <QMenu>
 #include <QLabel>
@@ -36,6 +39,7 @@ using namespace MantidQt::CustomDialogs;
 CreateSampleShapeDialog::CreateSampleShapeDialog(QWidget *parent) :
   AlgorithmDialog(parent), m_setup_map(), m_details_map(), m_ops_map()
 {
+  m_object_viewer = new MantidGLWidget;
 }
 
 /**
@@ -83,7 +87,7 @@ void CreateSampleShapeDialog::initLayout()
   m_setup_map["infinite plane"] = new ShapeDetailsInstantiator<InfinitePlaneDetails>();
   m_setup_map["cuboid"] = new ShapeDetailsInstantiator<CuboidDetails>();
   m_setup_map["hexahedron"] = new ShapeDetailsInstantiator<HexahedronDetails>();
-  m_setup_map["torus"] = new ShapeDetailsInstantiator<TorusDetails>();
+  //  m_setup_map["torus"] = new ShapeDetailsInstantiator<TorusDetails>();
 
   //The binary tree
   m_shapeTree = new BinaryTreeWidget(this);
@@ -98,28 +102,10 @@ void CreateSampleShapeDialog::initLayout()
   connect(m_shapeTree, SIGNAL(treeDataChange(BinaryTreeWidgetItem*, int)), this, 
 	  SLOT(changeTreeData(BinaryTreeWidgetItem*, int)));
 
-  QPushButton *add_btn = new QPushButton("Add");
-  QMenu *add_menu = new QMenu(add_btn);
-  QMenu *add_op = new QMenu("Operation");
-  add_op->addAction(new QAction("intersection", add_op));
-  add_op->addAction(new QAction("union", add_op));
-  add_op->addAction(new QAction("difference", add_op));
-  connect(add_op, SIGNAL(triggered(QAction*)), this, SLOT(addOperation(QAction*)));
-  add_menu->addMenu(add_op);
-    
-  QMenu *add_shape = new QMenu("Child Shape");
-  QStringList shapes = m_setup_map.keys();
-  QStringListIterator itr(shapes);
-  while( itr.hasNext() )
-  {
-    add_shape->addAction(new QAction(itr.next(), add_shape));
-  }
-  connect(add_shape, SIGNAL(triggered(QAction*)), this, SLOT(addShape(QAction*)));
-  add_menu->addMenu(add_shape);
-  add_btn->setMenu(add_menu);
-
+  QPushButton *view_shape_btn = new QPushButton("Update 3D view");
+  connect(view_shape_btn, SIGNAL(clicked()), this, SLOT(update3DView()));
   QHBoxLayout *bottom = new QHBoxLayout;
-  bottom->addWidget(add_btn);
+  bottom->addWidget(view_shape_btn);
   bottom->addStretch();
 
   //Shape box layout
@@ -131,6 +117,13 @@ void CreateSampleShapeDialog::initLayout()
   QShortcut *delete_key = new QShortcut(QKeySequence(Qt::Key_Delete), this);
   connect(delete_key, SIGNAL(activated()), this, SLOT(handleDeleteRequest()));
 
+  QVBoxLayout *view_box_layout = new QVBoxLayout;
+  view_box_layout->addWidget(m_object_viewer);
+  m_uiForm.view_box->setLayout(view_box_layout);
+
+  //  connect(m_uiForm.tempBtn, SIGNAL(clicked()), this, SLOT(update3DView()));
+
+  
   // Check input workspace property. If there are available workspaces then
   // these have been set as allowed values
   std::vector<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
@@ -138,7 +131,6 @@ void CreateSampleShapeDialog::initLayout()
   {
     m_uiForm.wksp_opt->addItem(QString::fromStdString(*itr));
   }
-
   QLabel *validlbl = getValidatorMarker("InputWorkspace");
   m_uiForm.bottomlayout->insertWidget(2, validlbl);
 }
@@ -148,91 +140,161 @@ void CreateSampleShapeDialog::initLayout()
  */
 void CreateSampleShapeDialog::parseInput()
 {
-  QString shapexml;
-  // First construct the XML that builds each separately defined shape
-  QMapIterator<BinaryTreeWidgetItem*, ShapeDetails*> detitr(m_details_map);
-  while( detitr.hasNext() )
+  QString xml = constructShapeXML();
+  if( m_shapeTree->topLevelItemCount() > 0 && xml.isEmpty() )
   {
-    detitr.next();
-    shapexml += detitr.value()->writeXML() + "\n";
+    QMessageBox::information(this, "CreateSampleShapeDialog", 
+			     "An error occurred while parsing the shape tree.\n"
+			     "Please check that each node has two children and the lowest elements are primitive shapes.");
+    return;
   }
-  
-  QList<BinaryTreeWidgetItem*> postfix_exp;
-  //Build expression list
-  m_shapeTree->traverseInPostOrder(m_shapeTree->root(), postfix_exp);
 
-  QListIterator<BinaryTreeWidgetItem*> expitr(postfix_exp);
-  QStringList inter_results;
-  while( expitr.hasNext() )
-  {
-    BinaryTreeWidgetItem* item = expitr.next();
-    if( m_details_map.contains(item) )
-    {
-      inter_results.append(m_details_map.value(item)->getShapeID());
-    }
-    else if( m_ops_map.contains(item) )
-    {
-      int rcount = inter_results.count();
-      QString left = inter_results.at(rcount - 2);
-      QString right = inter_results.at(rcount - 1);
-      QString result = m_ops_map.value(item)->toString(left, right);
-      // Remove left result and replace the right with the result
-      inter_results.removeAt(rcount - 2);
-      //List has now been reduced in size by 1
-      inter_results.replace(rcount - 2, result);
-    }
-    else
-    {
-      shapexml = "";
-      break;
-    }
-  }
-  
-  if( shapexml.isEmpty() ) return;
-  assert( inter_results.size() == 1 );
-  //  std::cerr << inter_results.at(0).toStdString() << "\n";
 
-  shapexml += "<algebra val=\"" + inter_results.at(0) + "\" />";
-  addPropertyValueToMap("ShapeXML", shapexml);
-  
+  addPropertyValueToMap("ShapeXML", xml);
+    
   // Get workspace value
   addPropertyValueToMap("InputWorkspace", m_uiForm.wksp_opt->currentText());
 }
 
 /**
+ * Update the 3D widget with a new object 
+ */
+void CreateSampleShapeDialog::update3DView()
+{
+  std::string shapexml = constructShapeXML().toStdString();
+  if( m_shapeTree->topLevelItemCount() > 0 && shapexml.empty() )
+  {
+    QMessageBox::information(this, "CreateSampleShapeDialog", 
+			     "An error occurred while parsing the shape tree.\n"
+			     "Please check that each node has two children and the lowest elements are primitive shapes.");
+    return;
+    
+  }
+
+  // Testing a predefined complex shape PLEASE LEAVE FOR THE MOMENT
+//   std::string shapexml = "<cuboid id=\"cuboid_1\" >\n"
+//     "<left-front-bottom-point x=\"-0.02\" y=\"-0.02\" z= \"0.0\" />\n"
+//     "<left-front-top-point x=\"-0.02\" y=\"0.05\" z= \"0.0\" />\n"
+//     "<left-back-bottom-point x=\"-0.02\" y=\"-0.02\" z= \"0.07\" />\n"
+//     "<right-front-bottom-point x=\"0.05\" y=\"-0.02\" z= \"0.0\" />\n"
+//     "</cuboid>\n"
+//     "<infinite-cylinder id=\"infcyl_1\" >"
+//     "<radius val=\"0.025\" />"
+//     "<centre x=\"0.015\" y=\"0.015\" z= \"0.07\" />"
+//     "<axis x=\"0.0\" y=\"0.0\" z= \"-0.001\" />"
+//     "</infinite-cylinder>\n"
+//     "<sphere id=\"sphere_1\">"
+//     "<centre x=\"0.015\" y=\"0.015\" z= \"0.035\" />"
+//     "<radius val=\"0.04\" />"
+//     "</sphere>\n"
+//     "<infinite-cylinder id=\"infcyl_3\" >"
+//     "<radius val=\"0.025\" />"
+//     "<centre x=\"0.015\" y=\"-0.02\" z= \"0.035\" />"
+//     "<axis x=\"0.0\" y=\"0.001\" z= \"0.0\" />"
+//     "</infinite-cylinder>\n"
+//     "<infinite-cylinder id=\"infcyl_2\" >"
+//     "<radius val=\"0.025\" />"
+//     "<centre x=\"-0.02\" y=\"0.015\" z= \"0.035\" />"
+//     "<axis x=\"0.001\" y=\"0.0\" z= \"0.0\" />"
+//     "</infinite-cylinder>\n"
+//     "<algebra val=\"((cuboid_1 sphere_1) (# (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
+
+
+  Mantid::Geometry::ShapeFactory sFactory;
+  boost::shared_ptr<Mantid::Geometry::Object> shape_sptr = sFactory.createShape(shapexml);
+  //  std::cerr << "\n--------- XML String -----------\n" << shapexml << "\n---------------------\n";
+  if( shape_sptr == boost::shared_ptr<Mantid::Geometry::Object>() ) return;
+  try 
+  {
+    shape_sptr->initDraw();
+  }
+  catch( ... )
+  {
+    QMessageBox::information(this,"Create sample shape", 
+			     QString("An error occurred while attempting to initialize the shape.\n") +
+			     "Please check that all objects intersect each other.");
+    return;
+  }
+
+  m_object_viewer->setDisplayObject(shape_sptr);
+}
+
+/**
  * This slot is called when a context menu is requested inside the tree widget
+ * @param pos The position of the mouse pointer when the menu was requested
  */
 void CreateSampleShapeDialog::handleTreeContextMenuRequest(const QPoint & pos)
 {
   QMenu *context_menu = new QMenu(m_shapeTree);
-  //pos is in widget coordinates
-  //  QTreeWidgetItem *item = m_shapeTree->itemAt(pos);
-  //  if( !item ) return;
+
+  QTreeWidgetItem *item = m_shapeTree->itemAt(pos);
+  QString op_text = "Insert child operation";
+  bool is_shape(false);
+  if( item )
+  {
+    QString displayText = item->text(0);
+    if( !displayText.startsWith("inter") && !displayText.startsWith("uni") && 
+	!displayText.startsWith("diff") )
+    {  
+      is_shape = true;
+      //For a shape we need the option to mark it as a complement shape
+      QAction *complement = new QAction("Complement", context_menu);
+      complement->setCheckable(true);
+      bool isChecked = m_details_map.value(getSelectedItem())->getComplementFlag();
+      complement->setChecked(isChecked);
+      connect(complement, SIGNAL(toggled(bool)), this, SLOT(toggleShapeComplement(bool)));
+      context_menu->addAction(complement);
+      context_menu->addSeparator();
+
+      op_text = "Insert operation above";
+    }
+
+  }
   
-  QMenu *add_op = new QMenu("Add operation");
+  QMenu *add_op = new QMenu(op_text);
   add_op->addAction(new QAction("intersection", add_op));
   add_op->addAction(new QAction("union", add_op));
   add_op->addAction(new QAction("difference", add_op));
   connect(add_op, SIGNAL(triggered(QAction*)), this, SLOT(addOperation(QAction*)));
   context_menu->addMenu(add_op);
 
-  QMenu *submenu = new QMenu("Add child shape");
-  QStringList shapes = m_setup_map.keys();
-  QStringListIterator itr(shapes);
-  while( itr.hasNext() )
+  if( !is_shape || m_shapeTree->topLevelItemCount() == 0 )
   {
-    submenu->addAction(new QAction(itr.next(), submenu));
+    QMenu *submenu = new QMenu("Insert child shape");
+    QStringList shapes = m_setup_map.keys();
+    QStringListIterator itr(shapes);
+    while( itr.hasNext() )
+    {
+      submenu->addAction(new QAction(itr.next(), submenu));
+    }
+    connect(submenu, SIGNAL(triggered(QAction*)), this, SLOT(addShape(QAction*)));
+    context_menu->addMenu(submenu);
   }
-  connect(submenu, SIGNAL(triggered(QAction*)), this, SLOT(addShape(QAction*)));
-  
-  context_menu->addMenu(submenu);
-  context_menu->addSeparator();
 
+  context_menu->addSeparator();
   QAction *remove = new QAction("Delete", context_menu);
   connect(remove, SIGNAL(triggered()), this, SLOT(handleDeleteRequest()));
   context_menu->addAction(remove);
 
   context_menu->popup(QCursor::pos());
+}
+
+void CreateSampleShapeDialog::toggleShapeComplement(bool state)
+{
+  BinaryTreeWidgetItem *selected = getSelectedItem();
+  if( m_details_map.contains(selected) )
+  {
+    m_details_map.value(selected)->setComplementFlag(state);
+  }
+  if( state )
+  {
+    selected->setText(0, QString("# ") + selected->text(0));
+  }
+  else
+  {
+    selected->setText(0, selected->text(0).section('#', 1).trimmed());
+  }
+
 }
 
 void CreateSampleShapeDialog::changeTreeData(BinaryTreeWidgetItem* item, int data)
@@ -297,40 +359,50 @@ void CreateSampleShapeDialog::addShape(QAction *shape)
 void CreateSampleShapeDialog::addOperation(QAction *opt)
 {
   //Get the selected item
-  BinaryTreeWidgetItem *parent = getSelectedItem();
-  if( parent && parent->childCount() == 2 ) return;
+  BinaryTreeWidgetItem *selected = getSelectedItem();
+  if( selected && selected->childCount() == 2 ) return;
 
-//   if( !m_ops_map.contains(parent) )
-//   {
-//     QMessageBox::information(this, "CreateSampleShape", "An operation must be the child of an operation.");  
-//     return;
-//   }
-  
-  BinaryTreeWidgetItem *child = new BinaryTreeWidgetItem;
-  QFont font = child->font(0);
+  BinaryTreeWidgetItem *operation = new BinaryTreeWidgetItem;
+  QFont font = operation->font(0);
   font.setBold(true);
-  child->setFont(0, font);
-  child->setData(0, Qt::DisplayRole, opt->text());
+  operation->setFont(0, font);
+  operation->setData(0, Qt::DisplayRole, opt->text());
   int opcode(0);
   if( opt->text().startsWith("u") ) opcode = 1;
   else if( opt->text().startsWith("d") ) opcode = 2;
   else opcode = 0;
 
-  child->setData(0, Qt::UserRole, opcode);
-  child->setFlags(child->flags() | Qt::ItemIsEditable);
+  operation->setData(0, Qt::UserRole, opcode);
+  operation->setFlags(operation->flags() | Qt::ItemIsEditable);
   
   if( m_shapeTree->topLevelItemCount() == 0 )
   {
-    m_shapeTree->insertTopLevelItem(0, child);
+    m_shapeTree->insertTopLevelItem(0, operation);
   }
   else
-  {
-    parent->addChildItem(child);
+  { 
+    if( m_ops_map.contains(selected) )
+    {
+      selected->addChildItem(operation);
+    }
+    else if( selected->parent() )
+    {
+      int index  = selected->parent()->indexOfChild(selected);
+      selected->parent()->insertChild(index, operation);
+      selected->parent()->removeChild(selected);
+      operation->addChildItem(selected);
+    }
+    else
+    {
+      m_shapeTree->takeTopLevelItem(m_shapeTree->indexOfTopLevelItem(selected));
+      m_shapeTree->insertTopLevelItem(0, operation);
+      operation->addChildItem(selected);
+    }
   }
 
-  m_ops_map.insert(child, new Operation(opcode));
+  m_ops_map.insert(operation, new Operation(opcode));
   // This calls setupDetails if necessary
-  m_shapeTree->setCurrentItem(child);
+  m_shapeTree->setCurrentItem(operation);
   m_shapeTree->expandAll();
   
 }
@@ -428,6 +500,75 @@ ShapeDetails* CreateSampleShapeDialog::createDetailsWidget(const QString & shape
   }
   return NULL;
 }
+
+/**
+ * Construct the XML from the current tree
+ */
+QString CreateSampleShapeDialog::constructShapeXML() const
+{
+  if( m_shapeTree->topLevelItemCount() == 0 || m_details_map.isEmpty() ) return QString();
+  
+  QString shapexml;
+  // First construct the XML that builds each separately defined shape
+  QMapIterator<BinaryTreeWidgetItem*, ShapeDetails*> detitr(m_details_map);
+  while( detitr.hasNext() )
+  {
+    detitr.next();
+    shapexml += detitr.value()->writeXML() + "\n";
+  }
+  
+  QList<BinaryTreeWidgetItem*> postfix_exp;
+  //Build expression list
+  m_shapeTree->traverseInPostOrder(m_shapeTree->root(), postfix_exp);
+
+  QListIterator<BinaryTreeWidgetItem*> expitr(postfix_exp);
+  QStringList inter_results;
+  while( expitr.hasNext() )
+  {
+    BinaryTreeWidgetItem* item = expitr.next();
+    if( m_details_map.contains(item) )
+    {
+      ShapeDetails *shape = m_details_map.value(item);
+      QString shapeID = shape->getShapeID();
+      if( shape->getComplementFlag() )
+      {
+	shapeID = QString("#(") + shapeID + QString(")");
+      }
+      inter_results.append(shapeID);
+    }
+    else if( m_ops_map.contains(item) )
+    {
+      int rcount = inter_results.count();
+      if( inter_results.count() < 2 ) 
+      {
+	shapexml = "";
+	break;
+      }
+      QString left = inter_results.at(rcount - 2);
+      QString right = inter_results.at(rcount - 1);
+      QString result = m_ops_map.value(item)->toString(left, right);
+      // Remove left result and replace the right with the result
+      inter_results.removeAt(rcount - 2);
+      //List has now been reduced in size by 1
+      inter_results.replace(rcount - 2, result);
+    }
+    else
+    {
+      shapexml = "";
+      break;
+    }
+  }
+  
+  // Something went wrong if the list hasn't compacted down to one entry
+  if( inter_results.size() != 1 || shapexml.isEmpty() ) 
+  {
+    return QString();
+  }
+
+  shapexml += "<algebra val=\"" + inter_results.at(0) + "\" />";
+  return shapexml;
+}
+
 
 //=================================================================
 //=================================================================

@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>566</width>
+    <width>796</width>
     <height>354</height>
    </rect>
   </property>
@@ -56,7 +56,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>248</width>
+             <width>232</width>
              <height>258</height>
             </rect>
            </property>
@@ -64,6 +64,19 @@
          </widget>
         </item>
        </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="view_box" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title" >
+        <string>3D View</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -96,7 +109,7 @@
      <item>
       <widget class="QPushButton" name="createBtn" >
        <property name="text" >
-        <string>Create</string>
+        <string>Create Shape</string>
        </property>
        <property name="default" >
         <bool>true</bool>

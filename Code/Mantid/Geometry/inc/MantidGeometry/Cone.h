@@ -58,6 +58,9 @@ class DLLExport Cone : public Quadratic
 
  public:
 
+  /// Public identifer
+  virtual std::string className() const { return "Cone"; }  
+
   Cone();
   Cone(const Cone&);
   Cone* clone() const;

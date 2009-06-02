@@ -936,7 +936,8 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
 		V3D normVec = parsePosition(pElemAxis);
 		normVec.normalize();
 		((GluGeometryHandler*)(handler.get()))->setCylinder(parsePosition(pElemCentre),normVec,atof( (pElemRadius->getAttribute("val")).c_str() ),atof( (pElemHeight->getAttribute("val")).c_str() ));
-	}else if(pElem->tagName()=="cone"){
+ 	}
+	else if(pElem->tagName()=="cone"){
 		boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
 		Obj->setGeometryHandler(handler);
 		Element* pElemTipPoint = getShapeElement(pElem, "tip-point"); 
@@ -947,10 +948,10 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
 		V3D normVec = parsePosition(pElemAxis);
 		normVec.normalize();
 		double height=atof( (pElemHeight->getAttribute("val")).c_str() );
-		double radius=height*tan(atof( (pElemAngle->getAttribute("val")).c_str() ));
+		double radius=height*tan(M_PI*atof( (pElemAngle->getAttribute("val")).c_str() )/180.0 );
 		((GluGeometryHandler*)(handler.get()))->setCone(parsePosition(pElemTipPoint),normVec,radius,height);
 	}
-	
+
 }
 
 

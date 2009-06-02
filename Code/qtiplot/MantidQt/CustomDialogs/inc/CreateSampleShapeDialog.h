@@ -29,6 +29,7 @@ class BinaryTreeWidgetItem;
 class ShapeDetails;
 class BaseInstantiator;
 class Operation;
+class MantidGLWidget;
 
 /** 
     This class gives specialised dialog for the sample shape definition
@@ -72,6 +73,8 @@ public:
 private slots:
   /// Context menu request
   void handleTreeContextMenuRequest(const QPoint & pos);
+  /// Toggle the flag on 
+  void toggleShapeComplement(bool state);
   /// Add a new shape
   void addShape(QAction *shape);
   /// Add operation node based on menu action
@@ -84,6 +87,8 @@ private slots:
   void setupDetailsBox();
   ///  Change item data
   void changeTreeData(BinaryTreeWidgetItem* item, int data);
+  /// Update the object within the 3D widget
+  void update3DView();
 
 private:
   /// Initialize the layout
@@ -94,6 +99,8 @@ private:
   BinaryTreeWidgetItem* getSelectedItem();
   /// Create a details widget based upon the shape name given
   ShapeDetails* createDetailsWidget(const QString & shapename) const;
+  /// Construct the XML from the current tree
+  QString constructShapeXML() const;
 
 private:
   /// The form generated with Qt Designer
@@ -106,6 +113,8 @@ private:
   QMap<BinaryTreeWidgetItem*, ShapeDetails*> m_details_map;
   ///A map of QTreeWidgetItem objects to their operation objects
   QMap<BinaryTreeWidgetItem*, Operation*> m_ops_map;
+  ///The 3D object viewer
+  MantidGLWidget *m_object_viewer;
 };
 
 /**
@@ -147,9 +156,6 @@ class BinaryTreeWidget : public QTreeWidget
 public:
   /// Default constructor
   BinaryTreeWidget(QWidget *parent = 0);
-
-  /// Check that we have a full binary tree
-  bool isFullTree() const;
 
   //Return the root of the binary tree
   BinaryTreeWidgetItem* root() const;
