@@ -132,7 +132,7 @@ QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname) const
  */
 void AlgorithmDialog::addPropertyValueToMap(const QString & name, const QString & value)
 {
-  if( name.isEmpty() || value.isEmpty() ) return;
+  if( name.isEmpty() /*|| value.isEmpty()*/ ) return;
   
   m_propertyValueMap.insert(name, value);
 }
