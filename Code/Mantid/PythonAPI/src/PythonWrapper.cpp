@@ -1,27 +1,38 @@
 //------------------------
 // Includes
 //------------------------
+// std
 #include <vector>
 
+// Boost
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 #include "boost/cstdint.hpp"
 
-#include "MantidPythonAPI/FrameworkManager.h"
-#include "MantidPythonAPI/PyAlgorithm.h"
+// Kernel
+#include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/PropertyManager.h"
+
+// API
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
-#include "MantidKernel/EnvironmentHistory.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/PropertyManager.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/IInstrument.h"
 
-//Given the frequent use, this makes things more readable
+// Geometry
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Component.h"
+
+// PythonAPI
+#include "MantidPythonAPI/FrameworkManager.h"
+#include "MantidPythonAPI/PyAlgorithm.h"
+
+//Given its frequent use, this makes things more readable
 using namespace boost::python;
 
 namespace Mantid 
@@ -349,31 +360,56 @@ namespace PythonAPI
     PyObject* py_self;
   };
   
-  ///A wrapper for IDetector
-  struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
+  /// A wrapper for IInstrument
+  struct Mantid_API_IInstrument_Wrapper : Mantid::API::IInstrument
   {
-    Mantid_Geometry_IDetector_Wrapper(PyObject* py_self_, const Mantid::Geometry::IDetector& p0):
-      Mantid::Geometry::IDetector(p0), py_self(py_self_) {}
-
-    Mantid_Geometry_IDetector_Wrapper(PyObject* py_self_):
-      Mantid::Geometry::IDetector(), py_self(py_self_) {}
-
-    int getID() const {
-      return call_method< int >(py_self, "getID");
-    }
-
-    bool isDead() const {
-      return call_method< bool >(py_self, "isDead");
-    }
-
-    void markDead() {
-      call_method< void >(py_self, "markDead");
+    Mantid::Geometry::IObjComponent_sptr getSample() const
+    {
+      return call_method<Mantid::Geometry::IObjComponent_sptr>(py_self, "getSample");
     }
 
     PyObject* py_self;
   };
 
-    ///A wrapper for PyAlgorithm
+  /// A wrapper for IObjComponent
+  struct Mantid_Geometry_IObjComponent_Wrapper : Mantid::Geometry::IObjComponent
+  {
+    Mantid::Geometry::V3D getPos() const
+    {
+      return call_method<Mantid::Geometry::V3D>(py_self, "getPos");
+    }
+
+    PyObject* py_self;
+  };
+
+  ///A wrapper for IDetector
+  struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
+  {
+    int getID() const {
+      return call_method< int >(py_self, "getID");
+    }
+
+    bool isMasked() const {
+      return call_method< bool >(py_self, "isMasked");
+    }
+
+    bool isMonitor() const {
+      return call_method< bool >(py_self, "isMonitor");
+    }
+    
+    double solidAngle(const Mantid::Geometry::V3D& observer) const {
+       return call_method<double>(py_self, "solidAngle");
+    }
+
+    double getDistance(const Mantid::Geometry::IComponent& comp) const
+    {
+      return call_method<double>(py_self, "getDistance");
+    }
+
+    PyObject* py_self;
+  };
+
+  ///A wrapper for PyAlgorithm
   struct Mantid_PythonAPI_PyAlgorithm_Wrapper: Mantid::PythonAPI::PyAlgorithm
   {
     Mantid_PythonAPI_PyAlgorithm_Wrapper(PyObject* py_self_, std::string p0):
@@ -435,10 +471,20 @@ namespace PythonAPI
 #define REGISTER_VECTOR_WITH_PYTHON(classname, pythonname) \
   class_< std::vector<classname> >( pythonname ) \
   .def( vector_indexing_suite<std::vector<classname> >() ) \
-  .def("size", &std::vector<classname>::size) \
+  .def("__len__", &std::vector<classname>::size) \
   .def("push_back", &std::vector<classname>::push_back) \
   ;
 
+/**
+ * A macro to register shared pointers to Python. It registers
+ * both const and non-const versions
+ */
+#define REGISTER_SHAREDPTR_WITH_PYTHON(type) \
+  register_ptr_to_python< boost::shared_ptr<type> >();
+
+// Cannot register this for some reason
+//   register_ptr_to_python< const boost::shared_ptr<const type> >();
+  
 /**
  * The actual module definition begins here. The names are different for
  * Windows and Linux due to the difference in library names
@@ -469,21 +515,27 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   //@}
 
   /**
-   * Expose some pointers in Python
+   * Expose some pointers to Python
    * @name Mantid pointers
    */
   //@{
   /// A pointer to a MatrixWorkspace object
-  register_ptr_to_python< boost::shared_ptr<Mantid::API::MatrixWorkspace> >();
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::MatrixWorkspace )
 
   /// A pointer to a TableWorkspace object
-  register_ptr_to_python< boost::shared_ptr<Mantid::API::ITableWorkspace> >();
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::ITableWorkspace )
 
   /// A pointer to a Unit object
-  register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Kernel::Unit )
 
-  /// A pointer to a SpectraDetectorMap object
-  register_ptr_to_python< boost::shared_ptr<Mantid::API::SpectraDetectorMap> >();
+  /// A pointer to an IDetector object
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IDetector )
+
+  /// A pointer to an IInstrument object
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::IInstrument )
+
+  /// A pointer to an IObjComponent
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IObjComponent )
   //@}
   
   //Make this namespace available
@@ -543,10 +595,12 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getTitle", &Mantid::API::MatrixWorkspace::getTitle, return_value_policy< copy_const_reference >())
      //.def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_const_reference >())
      .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_non_const_reference >())
-     .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readX), return_value_policy< reference_existing_object >())
-     .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readY), return_value_policy< reference_existing_object >())
-     .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readE), return_value_policy< reference_existing_object >())
+     .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy< reference_existing_object >())
+     .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy< reference_existing_object >())
+     .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy< reference_existing_object >())
      .def("getHistory", &Mantid::API::MatrixWorkspace::getHistory, return_value_policy< copy_const_reference >())
+     .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
+     .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
      ;
 
    // TableWorkspace class
@@ -628,21 +682,41 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
     
      ;
 
+   //V3D class
+   class_< Mantid::Geometry::V3D >("V3D", init<double, double, double>())
+     .def("getX", &Mantid::Geometry::V3D::X, return_value_policy< copy_const_reference >())
+     .def("getY", &Mantid::Geometry::V3D::Y, return_value_policy< copy_const_reference >())
+     .def("getZ", &Mantid::Geometry::V3D::Z, return_value_policy< copy_const_reference >())
+     .def("distance", &Mantid::Geometry::V3D::distance)
+     .def("angle", &Mantid::Geometry::V3D::angle)
+     .def("zenith", &Mantid::Geometry::V3D::zenith)
+     .def("scalar_prod", &Mantid::Geometry::V3D::scalar_prod)
+     .def("cross_prod", &Mantid::Geometry::V3D::scalar_prod)
+     .def("norm", &Mantid::Geometry::V3D::norm)
+     .def("norm2", &Mantid::Geometry::V3D::norm2)
+     ;
+
+   //IObjComponent class
+   class_< Mantid::Geometry::IObjComponent, boost::noncopyable, Mantid_Geometry_IObjComponent_Wrapper>("IObjComponent", no_init)
+     .def("getPos", pure_virtual(&Mantid::Geometry::IObjComponent::getPos))
+     ;
+
    //IDetector Class
    class_< Mantid::Geometry::IDetector, boost::noncopyable, Mantid_Geometry_IDetector_Wrapper >("IDetector", no_init)
      .def("getID", pure_virtual(&Mantid::Geometry::IDetector::getID))
      .def("isMasked", pure_virtual(&Mantid::Geometry::IDetector::isMasked))
+     .def("isMonitor", pure_virtual(&Mantid::Geometry::IDetector::isMonitor))
+     .def("solidAngle", pure_virtual(&Mantid::Geometry::IDetector::solidAngle))
+     .def("getDistance", pure_virtual(&Mantid::Geometry::IDetector::getDistance))
      ;
-
-   //SpectraDetectorMap Class
-   class_< Mantid::API::SpectraDetectorMap, boost::noncopyable >("SpectraDetectorMap", no_init)
-     .def("remap", &Mantid::API::SpectraDetectorMap::remap)
-     .def("ndet", &Mantid::API::SpectraDetectorMap::ndet)
-     .def("getDetectors", &Mantid::API::SpectraDetectorMap::getDetectors)
-     .def("getSpectra", &Mantid::API::SpectraDetectorMap::getSpectra)
-     .def("nElements", &Mantid::API::SpectraDetectorMap::nElements)
+   
+   //IInstrument class
+class_< Mantid::API::IInstrument, boost::noncopyable, Mantid_API_IInstrument_Wrapper>("IInstrument", no_init)
+     .def("getSample", pure_virtual(&Mantid::API::IInstrument::getSample))
+//      .def("getSource", pure_virtual(&Mantid::API::IInstrument::getSource))
+//      .def("getDetector", pure_virtual(&Mantid::API::IInstrument::getDetector))
      ;
-
+   
    //PyAlgorithm Class
    class_< Mantid::PythonAPI::PyAlgorithm, boost::noncopyable, Mantid_PythonAPI_PyAlgorithm_Wrapper >("PyAlgorithm", init< std::string >())
      .def("name", &Mantid::PythonAPI::PyAlgorithm::name, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_name)
