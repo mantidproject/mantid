@@ -188,7 +188,8 @@ public:
         boost::shared_ptr<Column> c = getColumn(name);
         if (!c->isType<T>())
         {
-            std::string str = "getRef: Type mismatch. ";
+	  std::string str = std::string("getRef: Type mismatch. ") + 
+	    typeid(T).name() + " != " + c->get_type_info().name() + '\n';
             g_log.error(str);
             throw std::runtime_error(str);
         }

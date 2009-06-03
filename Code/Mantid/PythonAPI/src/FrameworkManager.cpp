@@ -9,13 +9,13 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
-//#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
@@ -135,15 +135,15 @@ API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& ws
   return dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
 }
 
-///**
-// * Returns a specified TableWorkspace.
-// * \param wsName :: The name of the workspace to retrieve.
-// * \return Shared pointer to workspace.
-// **/
-// DataObjects::TableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
-// {
-  // return dynamic_cast<DataObjects::TableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
-// }
+/**
+* Returns a specified TableWorkspace.
+* @param wsName :: The name of the workspace to retrieve.
+* @return Shared pointer to workspace.
+**/
+API::ITableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
+{
+  return dynamic_cast<API::ITableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+}
 
 /**
  * Deletes a specified workspace.

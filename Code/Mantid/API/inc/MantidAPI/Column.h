@@ -22,11 +22,6 @@ namespace Kernel
   class Logger;
 }
 
-namespace DataObjects
-{
-    class TableWorkspace;
-}
-
 namespace API
 {
 /** \class Column

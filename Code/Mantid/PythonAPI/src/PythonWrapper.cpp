@@ -12,6 +12,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
@@ -19,13 +20,6 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-
-/**
-  * For the moment we cannot use TableWorkspace as there is no API and 
-  * if we link it directly to DataObjects then if the MantidDataObjects library is not in the same directory the loading will 
-  * fail. We should only use things through their API classes
-  */
-//#include "MantidDataObjects/TableWorkspace.h"
 
 //Given the frequent use, this makes things more readable
 using namespace boost::python;
@@ -136,30 +130,29 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
-  // /// An wrapper for TableWorkspace
-  // struct Mantid_DataObjects_TableWorkspace_Wrapper: Mantid::DataObjects::TableWorkspace
-  // {
-   
-    // int columnCount() const {
-      // return call_method<int>(py_self, "columnCount");
-    // }
-    
-    // std::vector<std::string> getColumnNames() {
-      // return call_method<std::vector<std::string> >(py_self, "getColumnNames");
-    // }
-    
-    // int rowCount() const {
-      // return call_method<int>(py_self, "rowCount");
-    // }
+  /// A wrapper for ITableWorkspace
+//   struct Mantid_API_ITableWorkspace_Wrapper: Mantid::API::ITableWorkspace
+//   {
+//     int& getCell(const std::string& name, int index, int dummy = -1)
+//     {
+//       return Mantid::API::ITableWorkspace::getRef<int>(name, index);
+//     }
 
-    // PyObject* py_self;
-  // };
+//     double& getCell(const std::string& name, int index, int dummy1 = -1, int dummy2 = -1)
+//     {
+//       return Mantid::API::ITableWorkspace::getRef<double>(name, index);
+//     }
 
-  /// Some function pointers since MSVC can't figure out the function to call when placing this directlyin the .def functions below
-  // std::vector<int>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetIntegerColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<int>;
-  // std::vector<double>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetDoubleColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<double>;
-  // std::vector<std::string>& (Mantid::DataObjects::TableWorkspace::*TableWorkspace_GetStringColumn)(const std::string&) = &Mantid::DataObjects::TableWorkspace::getStdVector<std::string>;
-  
+//     PyObject* py_self;
+//   };
+
+  // Some function pointers since MSVC can't figure out the function to call when placing this directly in the .def functions below
+  /// A function pointer to retrieve a integer from a name column and index
+  int& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetInteger)(const std::string &, int) = &Mantid::API::ITableWorkspace::getRef<int>;
+  /// A function pointer to retrieve a double from a name column and index
+  double& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetDouble)(const std::string &, int) = &Mantid::API::ITableWorkspace::getRef<double>;
+  /// A function pointer to retrieve a string from a name column and index
+  std::string& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetString)(const std::string &, int) = &Mantid::API::ITableWorkspace::getRef<std::string>;
   
   /// An wrapper for PropertyManager
   struct Mantid_Kernel_PropertyManager_Wrapper: Mantid::Kernel::PropertyManager
@@ -427,6 +420,8 @@ namespace PythonAPI
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2, execute, 3, 3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_WorkspaceHistory_printSelf_overloads_1_2, printSelf, 1, 2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_PropertyHistory_printSelf_overloads_1_2, printSelf, 1, 2)
+//   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_ITableWorkspace_Wrapper_overloads_1, getCell, 3, 3)
+//   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_ITableWorkspace_Wrapper_overloads_2, getCell, 4, 4)
 //@}
 
 } //PythonAPI namespace
@@ -482,7 +477,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   register_ptr_to_python< boost::shared_ptr<Mantid::API::MatrixWorkspace> >();
 
   /// A pointer to a TableWorkspace object
-  // register_ptr_to_python< boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >();
+  register_ptr_to_python< boost::shared_ptr<Mantid::API::ITableWorkspace> >();
 
   /// A pointer to a Unit object
   register_ptr_to_python< boost::shared_ptr<Mantid::Kernel::Unit> >();
@@ -547,25 +542,35 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getComment", &Mantid::API::MatrixWorkspace::getComment, return_value_policy< copy_const_reference >())
      .def("getTitle", &Mantid::API::MatrixWorkspace::getTitle, return_value_policy< copy_const_reference >())
      //.def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_const_reference >())
-     .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, return_self<>())
-     .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readX), return_value_policy< reference_existing_object >())
-     .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readY), return_value_policy< reference_existing_object >())
-     .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >* (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readE), return_value_policy< reference_existing_object >())
+     .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_non_const_reference >())
+     .def("readX", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readX), return_value_policy< reference_existing_object >())
+     .def("readY", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readY), return_value_policy< reference_existing_object >())
+     .def("readE", pure_virtual((const std::vector<double,std::allocator<double> >& (Mantid::API::MatrixWorkspace::*)(const int) const)&Mantid::API::MatrixWorkspace::readE), return_value_policy< reference_existing_object >())
      .def("getHistory", &Mantid::API::MatrixWorkspace::getHistory, return_value_policy< copy_const_reference >())
      ;
 
-   // //TableWorkspace class
-   // class_< Mantid::DataObjects::TableWorkspace, boost::noncopyable, Mantid_DataObjects_TableWorkspace_Wrapper >("TableWorkspace", no_init)
-     // .def("columnCount", &Mantid::DataObjects::TableWorkspace::columnCount)
-     // .def("getColumnNames",&Mantid::DataObjects::TableWorkspace::getColumnNames)
-     // .def("rowCount", &Mantid::DataObjects::TableWorkspace::rowCount)
-     // .def("getIntColumn", Mantid::PythonAPI::TableWorkspace_GetIntegerColumn, return_value_policy<reference_existing_object>() )
-     // .def("getDoubleColumn", Mantid::PythonAPI::TableWorkspace_GetDoubleColumn, return_value_policy<reference_existing_object>() )
-     // .def("getStringColumn", Mantid::PythonAPI::TableWorkspace_GetStringColumn, return_value_policy<reference_existing_object>() )
-     // ;
+   // TableWorkspace class
+   class_< Mantid::API::ITableWorkspace, boost::noncopyable >("ITableWorkspace", no_init)
+     .def("getColumnCount", &Mantid::API::ITableWorkspace::columnCount)
+     .def("getRowCount", &Mantid::API::ITableWorkspace::rowCount)
+     .def("getColumnNames",&Mantid::API::ITableWorkspace::getColumnNames)
+     .def("getInt", Mantid::PythonAPI::ITableWorkspace_GetInteger, return_value_policy< copy_non_const_reference >())
+     .def("getDouble", Mantid::PythonAPI::ITableWorkspace_GetDouble, return_value_policy< copy_non_const_reference >())
+     .def("getString", Mantid::PythonAPI::ITableWorkspace_GetString, return_value_policy< copy_non_const_reference >())
+     ;
+
+//    //TableWorkspace class
+//    class_< Mantid::API::ITableWorkspace, boost::noncopyable, Mantid_API_ITableWorkspace_Wrapper >("TableWorkspace", no_init)
+//      .def("getColumnCount", &Mantid::API::ITableWorkspace::columnCount)
+//      .def("getRowCount", &Mantid::API::ITableWorkspace::rowCount)
+//      .def("getColumnNames",&Mantid::API::ITableWorkspace::getColumnNames)
+//      .def("getCell", (int& (Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::*)(const std::string&, int, int))&Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::getCell, return_value_policy< copy_non_const_reference >(), Mantid_API_ITableWorkspace_Wrapper_overloads_1())
+//      .def("getCell", (double& (Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::*)(const std::string&, int, int, int))&Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::getCell, return_value_policy< copy_non_const_reference >(), Mantid_API_ITableWorkspace_Wrapper_overloads_2())
+//      ;
+
 
    //Framework Class
-   class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable >("FrameworkManager", init<  >())
+   class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable  >("FrameworkManager", init<  >())
      .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
      .def("clearAlgorithms", &Mantid::PythonAPI::FrameworkManager::clearAlgorithms)
      .def("clearData", &Mantid::PythonAPI::FrameworkManager::clearData)
@@ -577,7 +582,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
      .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
-//     .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
+     .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
      .def("getAlgorithmNames", &Mantid::PythonAPI::FrameworkManager::getAlgorithmNames)
      .def("getWorkspaceNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceNames)
