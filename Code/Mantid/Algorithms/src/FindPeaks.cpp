@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 namespace Mantid
 {
