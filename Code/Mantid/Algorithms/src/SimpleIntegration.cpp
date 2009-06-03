@@ -77,10 +77,8 @@ void SimpleIntegration::exec()
 
   int progress_step = (m_MaxSpec-m_MinSpec+1) / 100;
   if (progress_step == 0) progress_step = 1;
-  // Create vectors to hold result
-  std::vector<double> XValue(2);
 
-  std::vector<double> widths(0); //
+  std::vector<double> widths(0);
 
   bool is_distrib=outputWorkspace->isDistribution();
   if (is_distrib)
@@ -90,13 +88,21 @@ void SimpleIntegration::exec()
   // Loop over spectra
   for (int i = m_MinSpec, j=0; i <= m_MaxSpec; ++i, ++j)
   {
+    if (localworkspace->axes() > 1)
+    {
+      outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
+    }
+
     // Retrieve the spectrum into a vector
-    const std::vector<double>& X = localworkspace->readX(i);
-    const std::vector<double>& Y = localworkspace->readY(i);
-    const std::vector<double>& E = localworkspace->readE(i);
+    const MantidVec& X = localworkspace->readX(i);
+    const MantidVec& Y = localworkspace->readY(i);
+    const MantidVec& E = localworkspace->readE(i);
+
+    // If range specified doesn't overlap with this spectrum then bail out
+    if ( m_MinRange > X.back() || m_MaxRange < X.front() ) continue;
 
     // Find the range [min,max]
-    std::vector<double>::const_iterator lowit, highit;
+    MantidVec::const_iterator lowit, highit;
     if (std::abs(m_MinRange)<1e-7) lowit=X.begin();
     else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
 
@@ -105,8 +111,8 @@ void SimpleIntegration::exec()
 
     highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
   
-    std::vector<double>::difference_type distmin=std::distance(X.begin(),lowit);
-    std::vector<double>::difference_type distmax=std::distance(X.begin(),highit);
+    MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
+    MantidVec::difference_type distmax=std::distance(X.begin(),highit);
 
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
@@ -121,15 +127,11 @@ void SimpleIntegration::exec()
     }
 
     //Set X-boundaries
-    XValue[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
-    XValue[1] = *highit;
-    outputWorkspace->dataX(j) = XValue;
+    outputWorkspace->dataX(j)[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
+    outputWorkspace->dataX(j)[1] = *highit;
     outputWorkspace->dataY(j)[0] = sumY;
     outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
-    if (localworkspace->axes() > 1)
-    {
-      outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
-    }
+
     if (j % progress_step == 0)
     {
         interruption_point();
