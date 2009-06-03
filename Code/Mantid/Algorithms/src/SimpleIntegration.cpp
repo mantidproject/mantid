@@ -98,9 +98,6 @@ void SimpleIntegration::exec()
     const MantidVec& Y = localworkspace->readY(i);
     const MantidVec& E = localworkspace->readE(i);
 
-    // If range specified doesn't overlap with this spectrum then bail out
-    if ( m_MinRange > X.back() || m_MaxRange < X.front() ) continue;
-
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
     if (std::abs(m_MinRange)<1e-7) lowit=X.begin();
@@ -109,6 +106,9 @@ void SimpleIntegration::exec()
     if (std::abs(m_MaxRange)<1e-7) highit=X.end();
     else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
 
+    // If range specified doesn't overlap with this spectrum then bail out
+    if ( lowit == X.end() || highit == X.begin() ) continue;
+    
     highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
   
     MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
