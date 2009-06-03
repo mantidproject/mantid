@@ -31,7 +31,7 @@ int Mantid::EMPTY_INT()
  */
 double Mantid::EMPTY_DBL()
 {
-  return -DBL_MAX;
+  return /*  -  */  DBL_MAX/2;
 }
 
 /**

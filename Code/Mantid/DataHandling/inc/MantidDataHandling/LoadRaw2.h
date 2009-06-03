@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include <climits>
 //#include "isisraw2.h"
 
 //----------------------------------------------------------------------

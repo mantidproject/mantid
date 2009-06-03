@@ -242,7 +242,7 @@ public:
     }
     catch ( std::invalid_argument& except)
     {
-      g_log.debug() << except.what();
+      g_log.debug() << "Could not set property " << name() << ": " << except.what();
       return except.what();
     }
   }
@@ -275,7 +275,7 @@ public:
     else
     {
       m_value = oldValue;
-      throw std::invalid_argument("Could not set property " + name() + ": " + problem);
+      throw std::invalid_argument(problem);
     }
   }
 

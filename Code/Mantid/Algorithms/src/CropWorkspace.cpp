@@ -41,14 +41,13 @@ void CropWorkspace::init()
     "An X value that is in the highest X value bin to be retained (default highest X\nin the workspace)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive/*TO BE CONTINUED STEVE   ,
-    "The index number of the first spectrum in the series that will be cropped\n" +
-    "(default 0)" */);
+  declareProperty("StartSpectrum",0, mustBePositive,
+    "The index number of the first spectrum in the series that will be cropped\n(default 0)");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum", unSetInt, mustBePositive->clone()/*TO BE CONTINUED STEVE   ,
-    "The index number of the last spectrum in the series that will be cropped\n" +
-    "default (the last spectrum)"*/ );
+  declareProperty("EndSpectrum", unSetInt, mustBePositive->clone(),
+    "The index number of the last spectrum in the series that will be cropped\n"
+    "default (the last spectrum)");
 }
 
 /** Executes the algorithm
