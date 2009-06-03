@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::StripPeaks;
