@@ -225,7 +225,7 @@ public:
     TS_ASSERT_EQUALS( p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS( p.setValue("I'm here"), "" );
     TS_ASSERT_EQUALS(p.isValid(), "" )
-    TS_ASSERT_EQUALS( p.setValue(""), "Could not set property test: A value must be entered for this parameter" )
+    TS_ASSERT_EQUALS( p.setValue(""), "A value must be entered for this parameter" )
     TS_ASSERT_EQUALS(p.value(),"I'm here");
   }
 
@@ -233,20 +233,19 @@ public:
   {
     std::string start("Selected value "), end(")"),
       greaterThan(" is > the upper bound ("),
-      lessThan(" is < the lower bound ("),
-      couldnt("Could not set property test: ");
+      lessThan(" is < the lower bound (");
 
 	//int tests
 	PropertyWithValue<int> pi("test", 11, new BoundedValidator<int>(1,10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS( pi.setValue("0"), couldnt + start + "0" + lessThan + "1" + end );
+    TS_ASSERT_EQUALS( pi.setValue("0"), start + "0" + lessThan + "1" + end );
     TS_ASSERT_EQUALS(pi.value(),"11");
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end );
     TS_ASSERT_EQUALS( pi.setValue("1"), "" );
     TS_ASSERT_EQUALS(pi.isValid(), "");
     TS_ASSERT_EQUALS( pi.setValue("10"), "" );
     TS_ASSERT_EQUALS(pi.isValid(), "");
-    TS_ASSERT_EQUALS( pi.setValue("11"), couldnt + start + "11" + greaterThan + "10" + end )
+    TS_ASSERT_EQUALS( pi.setValue("11"), start + "11" + greaterThan + "10" + end )
     TS_ASSERT_EQUALS(pi.value(),"10");
     TS_ASSERT_EQUALS(pi.isValid(), "")
     std::string errorMsg = pi.setValue("");
@@ -256,28 +255,28 @@ public:
 	//double tests
     PropertyWithValue<double> pd("test", 11.0, new BoundedValidator<double>(1.0,10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
-    TS_ASSERT_EQUALS( pd.setValue("0.9"), couldnt + start + "0.9" + lessThan + "1" + end );
+    TS_ASSERT_EQUALS( pd.setValue("0.9"), start + "0.9" + lessThan + "1" + end );
     TS_ASSERT_EQUALS(pd.value(),"11");
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end )
     TS_ASSERT_EQUALS( pd.setValue("1"), "" );
     TS_ASSERT_EQUALS(pd.isValid(), "");
     TS_ASSERT_EQUALS( pd.setValue("10"), "" );
     TS_ASSERT_EQUALS(pd.isValid(), "");
-    TS_ASSERT_EQUALS( pd.setValue("10.1"), couldnt + start + "10.1" + greaterThan + "10" + end );
+    TS_ASSERT_EQUALS( pd.setValue("10.1"), start + "10.1" + greaterThan + "10" + end );
     TS_ASSERT_EQUALS(pd.value(),"10");
     TS_ASSERT_EQUALS(pd.isValid(), "");
 
 	//string tests
     PropertyWithValue<std::string> ps("test", "", new BoundedValidator<std::string>("B","T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
-    TS_ASSERT_EQUALS( ps.setValue("AZ"), couldnt + start + "AZ" + lessThan + "B" + end )
+    TS_ASSERT_EQUALS( ps.setValue("AZ"), start + "AZ" + lessThan + "B" + end )
     TS_ASSERT_EQUALS(ps.value(),"");
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT_EQUALS( ps.setValue("B"), "" );
     TS_ASSERT_EQUALS(ps.isValid(), "");
     TS_ASSERT_EQUALS( ps.setValue("T"), "" );
     TS_ASSERT_EQUALS(ps.isValid(), "");
-    TS_ASSERT_EQUALS( ps.setValue("TA"), couldnt + start + "TA" + greaterThan + "T" + end);
+    TS_ASSERT_EQUALS( ps.setValue("TA"), start + "TA" + greaterThan + "T" + end);
     TS_ASSERT_EQUALS(ps.value(),"T");
     TS_ASSERT_EQUALS(ps.isValid(), "");
     TS_ASSERT( dynamic_cast<const BoundedValidator<std::string>* >(ps.getValidator()) )
@@ -299,7 +298,7 @@ public:
     TS_ASSERT_EQUALS( p.isValid(), "" )
     TS_ASSERT_EQUALS( p.setValue("two"), "" )
     TS_ASSERT_EQUALS( p.isValid(), "" )
-    TS_ASSERT_EQUALS( p.setValue("three"), "Could not set property test: The value \"three\" is not in the list of allowed values" )
+    TS_ASSERT_EQUALS( p.setValue("three"), "The value \"three\" is not in the list of allowed values" )
     TS_ASSERT_EQUALS( p.value(), "two" )
     TS_ASSERT_EQUALS( p.isValid(), "" )
     std::vector<std::string> vals;
