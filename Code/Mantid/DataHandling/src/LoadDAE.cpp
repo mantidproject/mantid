@@ -32,7 +32,7 @@ namespace Mantid
     /// Empty default constructor
     LoadDAE::LoadDAE() :
       Algorithm(), m_daename(""), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
 
 
@@ -75,14 +75,20 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      declareProperty("DAEname","", new MandatoryValidator<std::string>(), "The name of and path to the input DAE host.");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), "The name of the workspace that will be created, filled with the read-in data and stored in the Analysis Data Service.\nIf the input data contain multiple periods higher periods will be stored in separate workspaces called OutputWorkspace_PeriodNo.");
+      declareProperty("DAEname","", new MandatoryValidator<std::string>(),
+        "The name of and path to the input DAE host.");
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace",
+        "",Direction::Output),
+        "The name of the workspace that will be created, filled with the\nread-in data and stored in the Analysis Data Service.  If the input\ndata contain multiple periods higher periods will be stored in\nseparate workspaces called OutputWorkspace_PeriodNo.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("spectrum_min",0, mustBePositive, "The number of the first spectrum to read.\nOnly used if spectrum_max is set.\nNot available for multiperiod data files.");
-      declareProperty("spectrum_max",0, mustBePositive->clone(), "The number of the last spectrum to read.\nOnly used if explicitly set.\nNot available for multiperiod data files. ");
-      declareProperty(new ArrayProperty<int>("spectrum_list"), "A comma-separated list of individual spectra to read.\nOnly used if explicitly set.\nNot available for multiperiod data files.");
+      declareProperty("spectrum_min", 0, mustBePositive,
+        "The number of the first spectrum to read (default 0).  Only used\nif spectrum_max is set and is not available for multiperiod data\nfiles.");
+      declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+        "The number of the last spectrum to read.  Only used if explicitly\nset and is not available for multiperiod data files. ");
+      declareProperty(new ArrayProperty<int>("spectrum_list"),
+        "A comma-separated list of individual spectra to read.  Only used\nif explicitly set.\nNot available for multiperiod data files.");
     }
 
     /** Function called by IDC routines to report an error. Passes the error through to the logger
@@ -292,10 +298,14 @@ namespace Mantid
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadDAE::checkOptionalProperties()
     {
-      Property *specList = getProperty("spectrum_list");
-      m_list = !(specList->isDefault());
-      Property *specMax = getProperty("spectrum_max");
-      m_interval = !(specMax->isDefault());
+      //read in the data supplied to the algorithm
+      m_spec_list = getProperty("spectrum_list");
+      m_spec_min = getProperty("spectrum_min");
+      m_spec_max = getProperty("spectrum_max");
+      //check that data
+      m_list = !m_spec_list.empty();
+      m_interval = !(m_spec_max == unSetInt);
+      if ( m_spec_max == unSetInt ) m_spec_max = m_spec_min;
 
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
@@ -326,8 +336,6 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

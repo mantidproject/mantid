@@ -22,7 +22,7 @@ Logger& CropWorkspace::g_log = Logger::get("CropWorkspace");
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
   Algorithm(),                                                //call the parent constructor
-  m_minX(EMPTY_INT()), m_maxX(EMPTY_INT()), m_minSpec(0), m_maxSpec(EMPTY_INT())//EMPTY_INT() is a flag to say that the value hasn't been set
+  m_minX(0), m_maxX(0), m_minSpec(0), m_maxSpec(unSetInt)
 {}
 
 /// Destructor
@@ -36,9 +36,9 @@ void CropWorkspace::init()
     "Name of the output workspace" );
 
   declareProperty("XMin",0.0,
-    "The X value to start the cropped workspace at (= 0 if not set)");
-  declareProperty("XMax", EMPTY_INT(),
-    "The X value to end the cropped workspace at (= max X in workspace if not set)");
+    "An X value that is within the first, lowest X value, bin that will be retained\n(default 0)");
+  declareProperty("XMax", EMPTY_DBL(),
+    "An X value that is in the highest X value bin to be retained (default highest X\nin the workspace)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartSpectrum",0, mustBePositive/*TO BE CONTINUED STEVE   ,
@@ -46,7 +46,7 @@ void CropWorkspace::init()
     "(default 0)" */);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum",0, mustBePositive->clone()/*TO BE CONTINUED STEVE   ,
+  declareProperty("EndSpectrum", unSetInt, mustBePositive->clone()/*TO BE CONTINUED STEVE   ,
     "The index number of the last spectrum in the series that will be cropped\n" +
     "default (the last spectrum)"*/ );
 }
@@ -140,7 +140,7 @@ void CropWorkspace::checkProperties()
   m_minSpec = getProperty("StartSpectrum");
   const int numberOfSpectra = m_inputWorkspace->getNumberHistograms();
   m_maxSpec = getProperty("EndSpectrum");
-  if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
+  if ( m_maxSpec == unSetInt ) m_maxSpec = numberOfSpectra-1;
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_minSpec > numberOfSpectra-1 )
@@ -165,14 +165,10 @@ void CropWorkspace::checkProperties()
  */
 void CropWorkspace::getXMin()
 {
-  //get the value that the user entered if they entered one at all
-  const double minX_val = getProperty("XMin");
-  if ( isEmpty(minX_val) )
-  {//A user value wasn't picked up so lets use the default
-    m_minX = 0;
-  }
-  else
-  {//we have a user value, check it and maybe store it
+  Property *minX = getProperty("XMin");
+  if ( !minX->isDefault() )
+  {//A value has been passed to the algorithm, check it and maybe store it
+    const double minX_val = getProperty("XMin");
     const MantidVec& X = m_inputWorkspace->readX(0);
     if ( minX_val > X.back() )
     {
@@ -188,9 +184,9 @@ void CropWorkspace::getXMin()
  */
 void CropWorkspace::getXMax()
 {
-  //get the value that the user entered if they entered one at all
   const MantidVec& X = m_inputWorkspace->readX(0);
-    const double maxX_val = getProperty("XMax");
+  //get the value that the user entered if they entered one at all
+  const double maxX_val = getProperty("XMax");
   if ( isEmpty(maxX_val) )
   {//A user value wasn't picked up so lets use the default
     m_maxX = X.size();

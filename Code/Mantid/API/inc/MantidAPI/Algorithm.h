@@ -250,6 +250,8 @@ protected:
 
   ///checks that the value was not set by users, uses the value in EMPTY_DBL()
   static bool isEmpty(double toCheck) { return   abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
+  ///checks that the value was not set by users, uses the value in EMPTY_INT()
+  static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
 
 private:
 

@@ -24,19 +24,31 @@ Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0)
 
 void Linear::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    "Workspace with the spectrum to fit");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "Name of the workspace that will contain the result");
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumIndex",0, mustBePositive);
-  declareProperty("StartX",0.0);
-  declareProperty("EndX",0.0);
-  
-  declareProperty("FitStatus","", Direction::Output);
-  declareProperty("FitIntercept",0.0,Direction::Output);
-  declareProperty("FitSlope",0.0,Direction::Output);
-  declareProperty("Chi^2",0.0, Direction::Output);
+  declareProperty("SpectrumIndex",0, mustBePositive,
+    "Index number of the spectrum to fit");
+  declareProperty("StartX", EMPTY_DBL(),
+    "An X value in the first bin to include in the fit (default is the lowest value of X)");
+  declareProperty("EndX", EMPTY_DBL(),
+    "An X value in the last bin to be included in the range (default the high X value");
+  declareProperty("FitStatus", "", 
+//add this STEVE    "Empty if the fit succeeded, otherwise contains the gsl error message",
+    Direction::Output);
+  declareProperty("FitIntercept", 0.0,
+//add this STEVE            "The intercept with the ordinate of the fitted line. c0 in the equation below",
+    Direction::Output);
+  declareProperty("FitSlope",0.0,
+//add this STEVE    "The slope of the fitted line. c1 in the equation below",
+    Direction::Output);
+  declareProperty("Chi^2",0.0,
+    //add this STEVE        "The goodness of the fit",
+    Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
@@ -149,15 +161,13 @@ void Linear::exec()
 /// Retrieve and check the Start/EndX parameters, if set
 void Linear::setRange(const std::vector<double>& X, const std::vector<double>& Y)
 {
-  Property* start = getProperty("StartX");
-  double startX;
-  // If startX or endX has not been set, make it 6*sigma away from the centre point initial guess
-  if ( ! start->isDefault() ) startX = getProperty("StartX");
-  else startX = X.front();
-  Property* end = getProperty("EndX");
-  double endX;
-  if ( ! end->isDefault() ) endX = getProperty("EndX");
-  else endX = X.back();
+  //read in the values that the user selected
+  double startX = getProperty("StartX");
+  double endX = getProperty("EndX");
+  //If the user didn't a start default to the start of the data
+  if ( isEmpty(startX) ) startX = X.front();
+  //the default for the end is the end of the data
+  if ( isEmpty(endX) ) endX = X.back();
 
   // Check the validity of startX
   if ( startX < X.front() )

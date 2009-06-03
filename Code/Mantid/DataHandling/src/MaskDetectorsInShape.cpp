@@ -26,9 +26,12 @@ namespace Mantid
 
 		void MaskDetectorsInShape::init()
 		{
-			declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut));
-			declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
-			declareProperty("IncludeMonitors",false);
+			declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut),
+        "The input workspace");
+			declareProperty("ShapeXML","",new MandatoryValidator<std::string>(),
+        "XML definition of the user defined shape");
+			declareProperty("IncludeMonitors", false,
+        "Whether to include monitors if they are contained in the shape (default false)");
 		}
 
 		void MaskDetectorsInShape::exec()

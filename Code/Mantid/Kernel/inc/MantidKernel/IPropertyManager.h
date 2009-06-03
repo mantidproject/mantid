@@ -178,6 +178,24 @@ protected:
         declareProperty(name, std::string(value), validator, doc, direction);
     }
 
+    /** Specialised version of declareProperty template method to prevent the creation of a
+    *  PropertyWithValue of type const char* if an argument in quotes is passed (it will be
+    *  converted to a string). The validator, if provided, needs to be a string validator.
+    *  @param name The name to assign to the property
+    *  @param value The initial value to assign to the property
+    *  @param doc The (optional) documentation string
+    *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
+    *  @param direction The (optional) direction of the property, in, out or inout
+    *  @throw Exception::ExistsError if a property with the given name already exists
+    *  @throw std::invalid_argument  if the name argument is empty
+    */
+    void declareProperty( const std::string &name, const char* value,
+      const std::string &doc, IValidator<std::string> *validator = new NullValidator<std::string>, const unsigned int direction = Direction::Input )
+    {
+        // Simply call templated method, converting character array to a string
+        declareProperty(name, std::string(value), validator, doc, direction);
+    }
+
    /** Add a property of string type to the list of managed properties
    *  @param name The name to assign to the property
    *  @param value The initial value to assign to the property

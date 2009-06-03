@@ -106,7 +106,7 @@ public:
     marker.setPropertyValue("Workspace","testSpace");
 
     TS_ASSERT_THROWS_NOTHING( marker.execute());
-    TS_ASSERT( !marker.isExecuted() );
+    TS_ASSERT( marker.isExecuted() );
 
     marker.setPropertyValue("WorkspaceIndexList","0,3");
     TS_ASSERT_THROWS_NOTHING( marker.execute());

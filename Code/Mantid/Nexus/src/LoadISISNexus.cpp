@@ -34,7 +34,7 @@ Logger& LoadISISNexus::g_log = Logger::get("LoadISISNexus");
 /// Empty default constructor
 LoadISISNexus::LoadISISNexus() : 
 Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-    m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
+    m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
 {}
 
 /// Initialisation method.
@@ -48,8 +48,8 @@ void LoadISISNexus::init()
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min",0, mustBePositive);
-    declareProperty("spectrum_max",0, mustBePositive->clone());
+    declareProperty("spectrum_min", 0, mustBePositive);
+    declareProperty("spectrum_max", unSetInt, mustBePositive->clone());
     declareProperty(new ArrayProperty<int>("spectrum_list"));
 }
 
@@ -193,10 +193,14 @@ void LoadISISNexus::exec()
 /// Validates the optional 'spectra to read' properties, if they have been set
 void LoadISISNexus::checkOptionalProperties()
 {
-    Property *specList = getProperty("spectrum_list");
-    m_list = !(specList->isDefault());
-    Property *specMax = getProperty("spectrum_max");
-    m_interval = !(specMax->isDefault());
+    //read in the data supplied to the algorithm
+    m_spec_list = getProperty("spectrum_list");
+    m_spec_min = getProperty("spectrum_min");
+    m_spec_max = getProperty("spectrum_max");
+    //now check that data
+    m_interval = !( m_spec_max == unSetInt );
+    if ( m_spec_max == unSetInt ) m_spec_max = 0;
+    m_list = !m_spec_list.empty();
 
     // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
     if ( m_numberOfPeriods > 1)
@@ -213,7 +217,6 @@ void LoadISISNexus::checkOptionalProperties()
     if ( m_list )
     {
         m_list = true;
-        m_spec_list = getProperty("spectrum_list");
         const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
         const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
@@ -227,8 +230,6 @@ void LoadISISNexus::checkOptionalProperties()
     if ( m_interval )
     {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
             g_log.error("Invalid Spectrum min/max properties");

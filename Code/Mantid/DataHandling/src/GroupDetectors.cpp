@@ -33,11 +33,17 @@ GroupDetectors::~GroupDetectors() {}
 void GroupDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,
-                  new CommonBinsValidator<Workspace2D>));
-  declareProperty(new ArrayProperty<int>("SpectraList"));
-  declareProperty(new ArrayProperty<int>("DetectorList"));
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
-  declareProperty("ResultIndex",-1, Direction::Output);
+    new CommonBinsValidator<Workspace2D>),
+    "The name of the workspace on which to perform the algorithm");
+  declareProperty(new ArrayProperty<int>("SpectraList"),
+    "An array containing a list of the indexes of the spectra to combine");
+  declareProperty(new ArrayProperty<int>("DetectorList"), 
+    "An array of detector ID's");
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+    "An array of workspace indices to combine");
+  declareProperty("ResultIndex", -1,
+//add this STEVE        "The workspace index of the summed spectrum", 
+    Direction::Output);
 }
 
 void GroupDetectors::exec()
@@ -45,15 +51,16 @@ void GroupDetectors::exec()
   // Get the input workspace
   const Workspace2D_sptr WS = getProperty("Workspace");
 
-  Property *wil = getProperty("WorkspaceIndexList");
-  Property *sl = getProperty("SpectraList");
-  Property *dl = getProperty("DetectorList");
+  std::vector<int> indexList = getProperty("WorkspaceIndexList");
+  std::vector<int> spectraList = getProperty("SpectraList");
+  const std::vector<int> detectorList = getProperty("DetectorList");
 
   // Could create a Validator to replace the below
-  if ( wil->isDefault() && sl->isDefault() && dl->isDefault() )
+  if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
   {
-    g_log.error("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
-    throw std::invalid_argument("WorkspaceIndexList, SpectraList, and DetectorList properties are empty");
+    g_log.information(name() +
+      ": WorkspaceIndexList, SpectraList, and DetectorList properties are all empty, no grouping done");
+    return;
   }
 
   // Bin boundaries need to be the same, so check if they actually are
@@ -63,20 +70,17 @@ void GroupDetectors::exec()
     throw std::runtime_error("Can only group if the histograms have common bin boundaries");
   }
 
-  std::vector<int> indexList = getProperty("WorkspaceIndexList");
   // Get hold of the axis that holds the spectrum numbers
   Axis *spectraAxis = WS->getAxis(1);
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
   // appropriate spectra number and adding the indices they are linked to the list to be processed
-  if ( ! sl->isDefault() )
+  if ( ! spectraList.empty() )
   {
-    std::vector<int> spectraList = getProperty("SpectraList");
     WorkspaceHelpers::getIndicesFromSpectra(WS,spectraList,indexList);
   }// End dealing with spectraList
-  else if ( ! dl->isDefault() )
+  else if ( ! detectorList.empty() )
   {// Dealing with DetectorList
-    const std::vector<int> detectorList = getProperty("DetectorList");
     //convert from detectors to spectra numbers
     std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices

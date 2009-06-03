@@ -46,16 +46,20 @@ namespace NeXus
     exts.push_back("nx5");
     exts.push_back("XML");
     exts.push_back("xml");
-    declareProperty("Filename","",new FileValidator(exts));
-    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output));
+    declareProperty("Filename","",new FileValidator(exts),
+      "Name of the Nexus file to read, as a full or relative path");
+    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), 
+      "The name of the workspace to be created as the output. For\nmultiperiod files, one workspace will be generated for\neach period");
 
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min",0, mustBePositive);
-    declareProperty("spectrum_max",0, mustBePositive->clone());
-  
-    declareProperty(new ArrayProperty<int>("spectrum_list"));
+    declareProperty("spectrum_min",0, mustBePositive,
+      "Index number of first spectrum to read, only for single period data.");
+    declareProperty("spectrum_max",0, mustBePositive->clone(),
+      "Index number of last spectrum to read, only for single period data.");
+    declareProperty(new ArrayProperty<int>("spectrum_list"),
+      "A comma seperated or array with the list of index number to read" );
 
     declareProperty("EntryNumber",0, mustBePositive->clone());
   }

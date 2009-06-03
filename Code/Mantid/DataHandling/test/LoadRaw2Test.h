@@ -225,7 +225,6 @@ public:
     loader5.setPropertyValue("spectrum_list", "10,50,100,195");
     //loader5.setPropertyValue("spectrum_min", "1");
     //loader5.setPropertyValue("spectrum_max", "2");
-
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
 

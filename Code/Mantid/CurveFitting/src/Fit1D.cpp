@@ -154,27 +154,21 @@ void Fit1D::exec()
   const std::vector<double>& YValues = localworkspace->readY(histNumber);
   const std::vector<double>& YErrors = localworkspace->readE(histNumber);
 
-  // Set the fitting range
+  //Read in the fitting range data that we were sent
   double startX = getProperty("StartX");
   double endX = getProperty("EndX"); 
-
+  //check if the values had been set, otherwise use defaults
   if ( isEmpty( startX ) )
-  {//the value hasn't been set by the user, use defaults
+  {
     startX = XValues.front();
     modifyStartOfRange(startX); // does nothing by default but derived class may provide a more intelligent value
   }
-  else//the user has entered a value, let's use it
-    startX = getProperty("StartX");  
-
   if ( isEmpty( endX ) ) 
-  {//load defaults values
+  {
     endX = XValues.back();
     modifyEndOfRange(endX); // does nothing by default but derived class may previde a more intelligent value
   }
-  else//use wht the use entered
-    endX = getProperty("EndX");
 
-  
   int m_minX; // The X bin to start the fitting from
   int m_maxX; // The X bin to finish the fitting at
 

@@ -103,6 +103,9 @@ namespace Mantid
       int m_spec_min;
       /// The value of the spectrum_max property
       int m_spec_max;
+      
+      ///a flag int value to indicate that the value wasn't set by users
+      static const int unSetInt = INT_MAX-15;
 
       ///static reference to the logger class
       static Kernel::Logger& g_log;

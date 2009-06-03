@@ -36,7 +36,7 @@ namespace Mantid
     /// Constructor
     LoadRaw2::LoadRaw2() :
       Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(1), m_spec_max(unSetInt)
     {}
     
     LoadRaw2::~LoadRaw2()
@@ -56,8 +56,8 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("spectrum_min",1, mustBePositive);
-      declareProperty("spectrum_max",1, mustBePositive->clone());
+      declareProperty("spectrum_min", 1, mustBePositive);
+      declareProperty("spectrum_max", unSetInt, mustBePositive->clone());
 
       declareProperty(new ArrayProperty<int>("spectrum_list"));
       m_cache_options.push_back("If slow");
@@ -246,27 +246,19 @@ namespace Mantid
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadRaw2::checkOptionalProperties()
     {
-      Property *specList = getProperty("spectrum_list");
-      m_list = !(specList->isDefault());
-      Property *specMax = getProperty("spectrum_max");
-      m_interval = !(specMax->isDefault());
+      //read in the user settings passed to the algorithm
+      m_spec_list = getProperty("spectrum_list");
+      m_spec_min = getProperty("spectrum_min");
+      m_spec_max = getProperty("spectrum_max");
 
-      /*/ If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-      if ( m_numberOfPeriods > 1)
-      {
-        if ( m_list || m_interval )
-        {
-          m_list = false;
-          m_interval = false;
-          g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-        }
-      }//*/
+      m_list = !m_spec_list.empty();
+      m_interval = !( m_spec_max == unSetInt );
+      if ( m_spec_max == unSetInt ) m_spec_max = 1; 
 
       // Check validity of spectra list property, if set
       if ( m_list )
       {
         m_list = true;
-        m_spec_list = getProperty("spectrum_list");
         if (m_spec_list.size() == 0)
         {
             m_list = false;
@@ -287,8 +279,6 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

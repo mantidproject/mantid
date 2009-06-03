@@ -112,7 +112,7 @@ public:
 
     grouper.setPropertyValue("Workspace","GroupTestWS");
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
-    TS_ASSERT( !grouper.isExecuted() );
+    TS_ASSERT( grouper.isExecuted() );
 
     grouper.setPropertyValue("WorkspaceIndexList","0,2");
     TS_ASSERT_THROWS_NOTHING( grouper.execute());

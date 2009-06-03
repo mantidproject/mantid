@@ -52,7 +52,7 @@ void MaskDetectors::exec()
   if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
   {
     g_log.information(name() + ": There is nothing to mask, the index, spectra and detector lists are all empty");
-      return;
+    return;
   }
 
   // If the spectraList property has been set, need to loop over the workspace looking for the
