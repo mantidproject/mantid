@@ -4,6 +4,7 @@
 #include "MantidPythonAPI/FrameworkManager.h"
 
 #include <boost/python/handle.hpp>
+#include <boost/python/extract.hpp>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"

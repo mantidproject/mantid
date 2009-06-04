@@ -5,7 +5,15 @@
 #include <vector>
 
 // Boost
-#include "boost/python.hpp"
+#include "boost/python/class.hpp"
+#include "boost/python/call_method.hpp"
+#include "boost/python/overloads.hpp"
+#include "boost/python/module.hpp"
+#include "boost/python/pure_virtual.hpp"
+#include "boost/python/reference_existing_object.hpp"
+#include "boost/python/copy_const_reference.hpp"
+#include "boost/python/copy_non_const_reference.hpp"
+#include "boost/python/operators.hpp"
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 #include "boost/cstdint.hpp"
 
@@ -22,6 +30,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IInstrument.h"
+#include "MantidAPI/Sample.h"
 
 // Geometry
 #include "MantidGeometry/IDetector.h"
@@ -140,22 +149,6 @@ namespace PythonAPI
 
     PyObject* py_self;
   };
-
-  /// A wrapper for ITableWorkspace
-//   struct Mantid_API_ITableWorkspace_Wrapper: Mantid::API::ITableWorkspace
-//   {
-//     int& getCell(const std::string& name, int index, int dummy = -1)
-//     {
-//       return Mantid::API::ITableWorkspace::getRef<int>(name, index);
-//     }
-
-//     double& getCell(const std::string& name, int index, int dummy1 = -1, int dummy2 = -1)
-//     {
-//       return Mantid::API::ITableWorkspace::getRef<double>(name, index);
-//     }
-
-//     PyObject* py_self;
-//   };
 
   // Some function pointers since MSVC can't figure out the function to call when placing this directly in the .def functions below
   /// A function pointer to retrieve a integer from a name column and index
@@ -401,6 +394,11 @@ namespace PythonAPI
        return call_method<double>(py_self, "solidAngle");
     }
 
+    Mantid::Geometry::V3D getPos() const
+    {
+      return call_method<Mantid::Geometry::V3D>(py_self, "getPos");
+    }
+
     double getDistance(const Mantid::Geometry::IComponent& comp) const
     {
       return call_method<double>(py_self, "getDistance");
@@ -456,8 +454,10 @@ namespace PythonAPI
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_PythonAPI_FrameworkManager_execute_overloads_2, execute, 3, 3)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_WorkspaceHistory_printSelf_overloads_1_2, printSelf, 1, 2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_PropertyHistory_printSelf_overloads_1_2, printSelf, 1, 2)
-//   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_ITableWorkspace_Wrapper_overloads_1, getCell, 3, 3)
-//   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_ITableWorkspace_Wrapper_overloads_2, getCell, 4, 4)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_MatrixWorkspace_isDistribution_overloads_1, isDistribution, 0, 0)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_MatrixWorkspace_isDistribution_overloads_2, isDistribution, 1, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_Sample_getLogData_overloads_1, getLogData, 0, 0)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Mantid_API_Sample_getLogData_overloads_2, getLogData, 1, 1)
 //@}
 
 } //PythonAPI namespace
@@ -515,8 +515,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   //@}
 
   /**
-   * Expose some pointers to Python
-   * @name Mantid pointers
+   * Register shared pointers with Python
+   * @name Mantid shared pointers
    */
   //@{
   /// A pointer to a MatrixWorkspace object
@@ -525,14 +525,17 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   /// A pointer to a TableWorkspace object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::ITableWorkspace )
 
+  /// A pointer to an IInstrument object
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::IInstrument )
+    
+  /// A pointer to an Sample
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::Sample )
+    
   /// A pointer to a Unit object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Kernel::Unit )
 
   /// A pointer to an IDetector object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IDetector )
-
-  /// A pointer to an IInstrument object
-  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::IInstrument )
 
   /// A pointer to an IObjComponent
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IObjComponent )
@@ -593,14 +596,17 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getNumberHistograms", pure_virtual(&Mantid::API::MatrixWorkspace::getNumberHistograms))
      .def("getComment", &Mantid::API::MatrixWorkspace::getComment, return_value_policy< copy_const_reference >())
      .def("getTitle", &Mantid::API::MatrixWorkspace::getTitle, return_value_policy< copy_const_reference >())
-     //.def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_const_reference >())
-     .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_non_const_reference >())
-     .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy< reference_existing_object >())
-     .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy< reference_existing_object >())
-     .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy< reference_existing_object >())
+     .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_const_reference >(), 
+	  Mantid_API_MatrixWorkspace_isDistribution_overloads_1())
+     .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, return_value_policy< copy_non_const_reference >(),
+	  Mantid_API_MatrixWorkspace_isDistribution_overloads_2())
+     .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy< copy_const_reference >())
+     .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy< copy_const_reference >())
+     .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy< copy_const_reference >())
      .def("getHistory", &Mantid::API::MatrixWorkspace::getHistory, return_value_policy< copy_const_reference >())
      .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
      .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
+     .def("getSampleDetails", &Mantid::API::MatrixWorkspace::getSample)
      ;
 
    // TableWorkspace class
@@ -613,28 +619,24 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getString", Mantid::PythonAPI::ITableWorkspace_GetString, return_value_policy< copy_non_const_reference >())
      ;
 
-//    //TableWorkspace class
-//    class_< Mantid::API::ITableWorkspace, boost::noncopyable, Mantid_API_ITableWorkspace_Wrapper >("TableWorkspace", no_init)
-//      .def("getColumnCount", &Mantid::API::ITableWorkspace::columnCount)
-//      .def("getRowCount", &Mantid::API::ITableWorkspace::rowCount)
-//      .def("getColumnNames",&Mantid::API::ITableWorkspace::getColumnNames)
-//      .def("getCell", (int& (Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::*)(const std::string&, int, int))&Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::getCell, return_value_policy< copy_non_const_reference >(), Mantid_API_ITableWorkspace_Wrapper_overloads_1())
-//      .def("getCell", (double& (Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::*)(const std::string&, int, int, int))&Mantid::PythonAPI::Mantid_API_ITableWorkspace_Wrapper::getCell, return_value_policy< copy_non_const_reference >(), Mantid_API_ITableWorkspace_Wrapper_overloads_2())
-//      ;
-
-
    //Framework Class
    class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable  >("FrameworkManager", init<  >())
      .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
      .def("clearAlgorithms", &Mantid::PythonAPI::FrameworkManager::clearAlgorithms)
      .def("clearData", &Mantid::PythonAPI::FrameworkManager::clearData)
      .def("clearInstruments", &Mantid::PythonAPI::FrameworkManager::clearInstruments)
-     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1())
-     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2())
-     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_3())
-     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_4())
-     .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
-     .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
+     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_1())
+     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_2())
+     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_3())
+     .def("createAlgorithm", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) )&Mantid::PythonAPI::FrameworkManager::createAlgorithm, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_createAlgorithm_overloads_4())
+     .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&) )&Mantid::PythonAPI::FrameworkManager::execute, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_1())
+     .def("execute", (Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*)(const std::string&, const std::string&, const int&) ) &Mantid::PythonAPI::FrameworkManager::execute, 
+	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
      .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
@@ -678,8 +680,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
    //WorkspaceHistory Class
    class_< Mantid::API::WorkspaceHistory >("WorkspaceHistory", no_init)
-     .def("getAlgorithmHistories", (const std::vector<Mantid::API::AlgorithmHistory,std::allocator<Mantid::API::AlgorithmHistory> >& (Mantid::API::WorkspaceHistory::*)() const)&Mantid::API::WorkspaceHistory::getAlgorithmHistories, return_value_policy< copy_const_reference >())
-    
+     .def("getAlgorithmHistories", &Mantid::API::WorkspaceHistory::getAlgorithmHistories, return_value_policy< copy_const_reference >())
      ;
 
    //V3D class
@@ -694,6 +695,21 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("cross_prod", &Mantid::Geometry::V3D::scalar_prod)
      .def("norm", &Mantid::Geometry::V3D::norm)
      .def("norm2", &Mantid::Geometry::V3D::norm2)
+     .def(self + self)
+     .def(self += self)
+     .def(self - self)
+     .def(self -= self)
+     .def(self * self)
+     .def(self *= self)
+     .def(self / self)
+     .def(self /= self)
+     .def(self * int())
+     .def(self *= int())
+     .def(self * double())
+     .def(self *= double())
+     .def(self < self)
+     .def(self == self)
+     .def(self_ns::str(self))
      ;
 
    //IObjComponent class
@@ -707,14 +723,20 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("isMasked", pure_virtual(&Mantid::Geometry::IDetector::isMasked))
      .def("isMonitor", pure_virtual(&Mantid::Geometry::IDetector::isMonitor))
      .def("solidAngle", pure_virtual(&Mantid::Geometry::IDetector::solidAngle))
+     .def("getPos", pure_virtual(&Mantid::Geometry::IDetector::getPos))
      .def("getDistance", pure_virtual(&Mantid::Geometry::IDetector::getDistance))
      ;
    
    //IInstrument class
-class_< Mantid::API::IInstrument, boost::noncopyable, Mantid_API_IInstrument_Wrapper>("IInstrument", no_init)
+   class_< Mantid::API::IInstrument, boost::noncopyable, Mantid_API_IInstrument_Wrapper>("IInstrument", no_init)
      .def("getSample", pure_virtual(&Mantid::API::IInstrument::getSample))
-//      .def("getSource", pure_virtual(&Mantid::API::IInstrument::getSource))
-//      .def("getDetector", pure_virtual(&Mantid::API::IInstrument::getDetector))
+     ;
+   
+   class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
+     .def("getLogData", (const std::vector<Mantid::Kernel::Property*>& (Mantid::API::Sample::*)() const)&Mantid::API::Sample::getLogData, return_value_policy<copy_const_reference>(),
+	  Mantid_API_Sample_getLogData_overloads_1())
+     .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)&Mantid::API::Sample::getLogData, return_value_policy< reference_existing_object>(),
+	  Mantid_API_Sample_getLogData_overloads_2())
      ;
    
    //PyAlgorithm Class

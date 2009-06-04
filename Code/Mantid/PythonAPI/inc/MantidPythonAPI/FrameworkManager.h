@@ -1,22 +1,27 @@
 #ifndef MANTID_PYTHONAPI_FRAMEWORKMANAGER_H_
 #define MANTID_PYTHONAPI_FRAMEWORKMANAGER_H_
 
+//----------------------------------
+// Includes
+//----------------------------------
 #include <string>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <boost/python.hpp>
-
 #include "MantidKernel/System.h"
+#include <Python.h>
 
+//-------------------------------
+// Mantid forward declarations
+//--------------------------------
 namespace Mantid
 {
 
 namespace API
 {
-class IAlgorithm;
-class Algorithm;
-class MatrixWorkspace;
-class ITableWorkspace;
+  class IAlgorithm;
+  class Algorithm;
+  class MatrixWorkspace;
+  class ITableWorkspace;
 }
 
 namespace PythonAPI
