@@ -29,10 +29,13 @@ namespace Mantid
     */
     void ChangeBinOffset::init()
     {
-        declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-        declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-	BoundedValidator<double> *isDouble = new BoundedValidator<double>();
-	declareProperty("Offset",0.0,isDouble);
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace");
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output workspace");
+      BoundedValidator<double> *isDouble = new BoundedValidator<double>();
+      declareProperty("Offset", 0.0, isDouble,
+        "The amount to change each time bin by");
     }
 
     /** Executes the algorithm

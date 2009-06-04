@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Property.h"
+#include <climits>
 
 namespace Mantid
 {

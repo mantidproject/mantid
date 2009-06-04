@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidNexus/MuonNexusReader.h"
+#include <climits>
 
 //----------------------------------------------------------------------
 // Forward declaration
