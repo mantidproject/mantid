@@ -42,7 +42,7 @@ void ReadGroupsFromFile::init()
 	// The name of the instrument
   declareProperty("InstrumentName","");
   // The calibration file that contains the grouping information
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal"),false));
+  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal"),true));
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select;
   select.push_back("True");
