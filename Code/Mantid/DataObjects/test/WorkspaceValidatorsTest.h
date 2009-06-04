@@ -208,7 +208,7 @@ public:
       
     WorkspaceProperty<MatrixWorkspace> wsp1("workspace1","ws1",Direction::Input,wavUnitVal->clone());
     //test property validation    
-    TS_ASSERT_EQUALS( wsp1.isValid(), "Workspace \"ws1\" is not found in the Analysis Data Service" );
+    TS_ASSERT_EQUALS( wsp1.isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" );
     
     TS_ASSERT_EQUALS( wsp1.setValue(""),  "Enter a name for the workspace" )
     

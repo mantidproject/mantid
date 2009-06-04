@@ -33,8 +33,9 @@ namespace Mantid
 
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 
-      Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
+      Algorithm(),
+      m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
+      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
 
     /// Initialisation method.
@@ -43,17 +44,30 @@ namespace Mantid
       std::vector<std::string> exts;
       exts.push_back("NXS");
       exts.push_back("nxs");
-      declareProperty("Filename","",new FileValidator(exts));
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+      declareProperty( "Filename", "", new FileValidator(exts),
+        "Name of the Nexus file to read, as a full or relative path");
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the\n"
+        "algorithm. For multiperiod files, one workspace will be\n"
+        "generated for each period");
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("spectrum_min",0, mustBePositive);
-      declareProperty("spectrum_max",0, mustBePositive->clone());
+      declareProperty( "spectrum_min",0, mustBePositive,
+        "Index number of the first spectrum to read, only used if\n"
+        "spectrum_max is set and only for single period data\n"
+        "(default 0)" );
+      declareProperty( "spectrum_max", unSetInt, mustBePositive->clone(),
+        "Index of last spectrum to read, only for single period data\n"
+        "(default the last spectrum)");
 	    
-      declareProperty("auto_group",false);
-  
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
+      declareProperty(new ArrayProperty<int>("spectrum_list"), 
+        "Array, or comma separated list, of indexes of spectra to\n"
+        "load");
+      declareProperty("auto_group",false,
+        "Determines whether the spectra are automatically grouped\n"
+        "together based on the groupings in the NeXus file, only\n"
+        "for single period data (default no)");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -248,11 +262,14 @@ namespace Mantid
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadMuonNexus::checkOptionalProperties()
     {
-      Property *specList = getProperty("spectrum_list");
-      m_list = !(specList->isDefault());
-      Property *specMax = getProperty("spectrum_max");
-      m_interval = !(specMax->isDefault());
-      
+      //read in the settings passed to the algorithm
+      m_spec_list = getProperty("spectrum_list");
+      m_spec_max = getProperty("spectrum_max");
+      //Are we using a list of spectra or all the spectra in a range?
+      m_list = !m_spec_list.empty();
+      m_interval = (m_spec_max != unSetInt);
+      if ( m_spec_max == unSetInt ) m_spec_max = 0;
+
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
       {
@@ -268,7 +285,6 @@ namespace Mantid
       if ( m_list )
       {
         m_list = true;
-        m_spec_list = getProperty("spectrum_list");
         const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
         const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
@@ -283,7 +299,6 @@ namespace Mantid
       {
         m_interval = true;
         m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

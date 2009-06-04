@@ -36,7 +36,7 @@ namespace Mantid
     /// Constructor
     LoadRaw2::LoadRaw2() :
       Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(1), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
     
     LoadRaw2::~LoadRaw2()
@@ -246,13 +246,12 @@ namespace Mantid
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadRaw2::checkOptionalProperties()
     {
-      //read in the user settings passed to the algorithm
+      //read in the settings passed to the algorithm
       m_spec_list = getProperty("spectrum_list");
-      m_spec_min = getProperty("spectrum_min");
       m_spec_max = getProperty("spectrum_max");
 
       m_list = !m_spec_list.empty();
-      m_interval = !( m_spec_max == unSetInt );
+      m_interval = m_spec_max != unSetInt;
       if ( m_spec_max == unSetInt ) m_spec_max = 1; 
 
       // Check validity of spectra list property, if set
@@ -279,6 +278,7 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
+        m_spec_min = getProperty("spectrum_min");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

@@ -195,7 +195,7 @@ public:
             g_log.debug() << "Problem validating workspace: " << error << std::endl;
             return error;
           }
-          error = "Workspace \"" + this->value() + "\" is not found in the Analysis Data Service";
+          error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
           //the log has more detail, note that type() calls uses type_info which is implementation dependent
           g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
         }

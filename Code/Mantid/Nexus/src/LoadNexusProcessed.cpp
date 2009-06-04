@@ -35,8 +35,9 @@ Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
 
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() :
-  Algorithm(), m_filename(), m_entrynumber(0), m_list(false), m_interval(false), m_spec_list(),
-      m_spec_min(0), m_spec_max(0)
+  Algorithm(),                                    //call the constructor for the base class
+  m_filename(), m_entrynumber(0), m_list(false), m_interval(false),
+  m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
 {
   nexusFile = new NexusFileIO();
 }
@@ -60,16 +61,30 @@ void LoadNexusProcessed::init()
   exts.push_back("xml");
   exts.push_back("XML");
   // required
-  declareProperty("FileName", "", new FileValidator(exts));
+  declareProperty("FileName", "", new FileValidator(exts),
+    "Name of the Nexus file to read, as a full or relative path");
   declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> ("OutputWorkspace", "",
-      Direction::Output));
+      Direction::Output),
+      "The name of the workspace to be created as the output of the\n"
+      "algorithm. For multiperiod files, one workspace may be\n"
+      "generated for each period. Currently only one workspace can\n"
+      "be saved at a time so multiperiod Mantid files are not\n"
+      "generated");
   // optional
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
   mustBePositive->setLower(0);
-  declareProperty("spectrum_min", 0, mustBePositive);
-  declareProperty("spectrum_max", 0, mustBePositive->clone());
-  declareProperty("EntryNumber", 0, mustBePositive->clone());
-  declareProperty(new ArrayProperty<int> ("spectrum_list"));
+  declareProperty("spectrum_min", 0, mustBePositive,
+    "Index number of the first spectrum to read, only used if\n"
+    "spectrum_max is set and only for single period data, not\n"
+    " yet implemented (default 0)");
+  declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+    "Index of last spectrum to read, only for single period data,\n"
+    " not yet implemented (default the last spectrum).");
+  declareProperty(new ArrayProperty<int> ("spectrum_list"),
+    "Array, or comma separated list, of indexes of spectra to\n"
+    "load. Not yet implemented.");
+  declareProperty("EntryNumber", 0, mustBePositive->clone(),
+    "Index number of the workspace to load");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -193,30 +208,18 @@ void LoadNexusProcessed::exec()
 /// Validates the optional 'spectra to read' properties, if they have been set
 void LoadNexusProcessed::checkOptionalProperties()
 {
-  // from Loadraw2
-  Property *specList = getProperty("spectrum_list");
-  m_list = !(specList->isDefault());
-  Property *specMax = getProperty("spectrum_max");
-  m_interval = !(specMax->isDefault());
-
-  // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-  /*
-   if ( m_numberOfPeriods > 1)
-   {
-   if ( m_list || m_interval )
-   {
-   m_list = false;
-   m_interval = false;
-   g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-   }
-   }
-   */
-
+  //read in the settings passed to the algorithm
+  m_spec_list = getProperty("spectrum_list");
+  m_spec_max = getProperty("spectrum_max");
+  //Are we using a list of spectra or all the spectra in a range?
+  m_list = !m_spec_list.empty();
+  m_interval = (m_spec_max != unSetInt);
+  if ( m_spec_max == unSetInt ) m_spec_max = 0;
+  
   // Check validity of spectra list property, if set
   if (m_list)
   {
     m_list = true;
-    m_spec_list = getProperty("spectrum_list");
     const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
     const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
     if (maxlist > m_numberofspectra || minlist == 0)
@@ -231,7 +234,6 @@ void LoadNexusProcessed::checkOptionalProperties()
   {
     m_interval = true;
     m_spec_min = getProperty("spectrum_min");
-    m_spec_max = getProperty("spectrum_max");
     if (m_spec_max < m_spec_min || m_spec_max > m_numberofspectra)
     {
       g_log.error("Invalid Spectrum min/max properties");

@@ -45,8 +45,10 @@ namespace NeXus
     exts.push_back("NX5");
     exts.push_back("xml");
     exts.push_back("XML");
-    declareProperty("FileName","",new FileValidator(exts,false));  
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+    declareProperty("FileName","",new FileValidator(exts,false),
+      "The name of the Nexus file to write, as a full or relative path" );  
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+      "Name of the workspace to be saved");
     //
     // Declare optional input parameters
     // These are:
@@ -58,13 +60,20 @@ namespace NeXus
     // spectrum_min, spectrum_max - range of "spectra" numbers to write
     // spectrum_list            list of spectra values to write
     //
-    declareProperty("Title","",new NullValidator<std::string>);
+    declareProperty("Title", "", new NullValidator<std::string>,
+      "A title to describe the saved workspace" );
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("EntryNumber",0,mustBePositive);
-    declareProperty("spectrum_min",0, mustBePositive->clone());
-    declareProperty("spectrum_max",0, mustBePositive->clone());
-    declareProperty(new ArrayProperty<int>("spectrum_list"));
+    declareProperty("EntryNumber", unSetInt, mustBePositive );
+    declareProperty("spectrum_min", 0, mustBePositive->clone(),
+      "Number of first spectrum to read, only for single period data.\n"
+      "Not yet implemented");
+    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+      "Number of last spectrum to read, only for single period data.\n"
+      "Not yet implemented.");
+    declareProperty(new ArrayProperty<int>("spectrum_list"),
+      "List of spectrum numbers to read, only for single period data.\n"
+      "Not yet implemented");
     // option which might be required in future - should be a choice e.g. MantidProcessed/Muon1
     // declareProperty("Filetype","",new NullValidator<std::string>);
   }
@@ -102,21 +111,21 @@ namespace NeXus
       std::string inputWorkspace="inputWorkspace";
       saveNexusPro->setPropertyValue(inputWorkspace,m_inputWorkspace);
       //
-      Property *specList = getProperty("spectrum_list");
-      if( !(specList->isDefault()) )
+      std::vector<int> specList = getProperty("spectrum_list");
+      if( !specList.empty() )
          saveNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
       //
-      Property *specMax = getProperty("spectrum_max");
-      if( !(specMax->isDefault()) )
+      int specMax = getProperty("spectrum_max");
+      if( specMax != unSetInt )
       {
          saveNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
          saveNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
       }
-      Property *title = getProperty("title");
-      if( !(title->isDefault()) )
+      std::string title = getProperty("title");
+      if( !title.empty() )
          saveNexusPro->setPropertyValue("title",getPropertyValue("title"));
-      Property *entryNumber = getProperty("EntryNumber");
-      if( !(entryNumber->isDefault()) )
+      int entryNum = getProperty("EntryNumber");
+      if( entryNum != unSetInt )
          saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.

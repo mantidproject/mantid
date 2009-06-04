@@ -113,6 +113,9 @@ namespace Mantid
       /// The group which each detector belongs to in order
       std::vector<int> m_groupings;
 
+      ///a flag int value that indicates a value that wasn't set
+      static const int unSetInt = INT_MAX-15;
+
       ///static reference to the logger class
       static Kernel::Logger& g_log;
 

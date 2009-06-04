@@ -32,7 +32,9 @@ namespace NeXus
   Logger& SaveNexusProcessed::g_log = Logger::get("SaveNexusProcessed");
 
   /// Empty default constructor
-  SaveNexusProcessed::SaveNexusProcessed():Algorithm()
+  SaveNexusProcessed::SaveNexusProcessed() :
+    Algorithm(),
+    m_spec_list(), m_spec_max(unSetInt)
   {
   }
 
@@ -41,7 +43,8 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+      "Name of the workspace to be saved");
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
     exts.push_back("NXS");
@@ -50,17 +53,24 @@ namespace NeXus
     exts.push_back("NX5");
     exts.push_back("xml");
     exts.push_back("XML");
-    declareProperty("FileName","",new FileValidator(exts,false));
-    //declareProperty("FileName","",new MandatoryValidator<std::string>);
-
+    declareProperty("FileName","",new FileValidator(exts,false),
+      "The name of the Nexus file to write, as a full or relative\n"
+      "path");
     // Declare optional parameters (title now optional, was mandatory)
-    declareProperty("Title","",new NullValidator<std::string>);
+    declareProperty("Title", "", new NullValidator<std::string>,
+      "A title to describe the saved workspace");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("EntryNumber",0,mustBePositive);
-    declareProperty("spectrum_min",0, mustBePositive->clone());
-    declareProperty("spectrum_max",0, mustBePositive->clone());
-    declareProperty(new ArrayProperty<int>("spectrum_list"));
+    declareProperty("spectrum_min", 0, mustBePositive->clone(), 
+      "Index number of first spectrum to read, only for single\n"
+      "period data. Not yet implemented");
+    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+      "Index of last spectrum to read, only for single period\n"
+      "data. Not yet implemented");
+    declareProperty(new ArrayProperty<int>("spectrum_list"),
+      "List of spectrum numbers to read, only for single period\n"
+      "data. Not yet implemented");
+    declareProperty("EntryNumber", 0, mustBePositive);
   }
 
   /** Executes the algorithm. Reading in the file and creating and populating
@@ -76,10 +86,12 @@ namespace NeXus
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
 
-    Property *specList = getProperty("spectrum_list");
-    m_list = !(specList->isDefault());
-    Property *specMax = getProperty("spectrum_max");
-    m_interval = !(specMax->isDefault());
+    m_spec_list = getProperty("spectrum_list");
+    m_spec_max = getProperty("spectrum_max");
+    m_list = !m_spec_list.empty();
+    m_interval = (m_spec_max != unSetInt);
+    if ( m_spec_max == unSetInt ) m_spec_max = 0;
+
     const std::string workspaceID = m_inputWorkspace->id();
     if (workspaceID.find("Workspace2D") == std::string::npos )
         throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");

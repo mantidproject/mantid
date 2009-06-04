@@ -30,7 +30,7 @@ namespace Mantid
     /// Empty default constructor
     LoadRaw::LoadRaw() :
       Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(1), m_spec_max(unSetInt)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
 
     /// Initialisation method.
@@ -43,19 +43,27 @@ namespace Mantid
       exts.push_back("s[0-9][0-9]");
 
       declareProperty("Filename", "", new FileValidator(exts),
-        "The name of the RAW file to read, including its full or relative\npath.  The file extension must be .raw or .RAW (N.B. case sensitive\nif running on Linux).");
+        "The name of the RAW file to read, including its full or relative\n"
+        "path.  The file extension must be .raw or .RAW (N.B. case sensitive\n"
+        "if running on Linux).");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
-        "The name of the workspace that will be created, filled with the\nread-in data and stored in the Analysis Data Service.  If the input\nRAW file contains multiple periods higher periods will be stored in\nseparate workspaces called OutputWorkspace_PeriodNo.");
+        "The name of the workspace that will be created, filled with the\n"
+        "read-in data and stored in the Analysis Data Service.  If the input\n"
+        "RAW file contains multiple periods higher periods will be stored in\n"
+        "separate workspaces called OutputWorkspace_PeriodNo.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
       declareProperty("spectrum_min", 1, mustBePositive,
-        "The number of the first spectrum to read.  Only used if\nspectrum_max is set.");
+        "The index number of the first spectrum to read.  Only used if\n"
+        "spectrum_max is set.");
       declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
-        "The number of the last spectrum to read. Only used if explicitly\nset.");
+        "The number of the last spectrum to read. Only used if explicitly\n"
+        "set.");
 
       declareProperty(new ArrayProperty<int>("spectrum_list"),
-        "A comma-separated list of individual spectra to read.  Only used if\nexplicitly set.");
+        "A comma-separated list of individual spectra to read.  Only used if\n"
+        "explicitly set.");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -195,12 +203,11 @@ namespace Mantid
     {
       //read in the data supplied to the algorithm
       m_spec_list = getProperty("spectrum_list");
-      m_spec_min = getProperty("spectrum_min");
       m_spec_max = getProperty("spectrum_max");
       //check that data
       m_list = !(m_spec_list.empty());
       m_interval = !(m_spec_max == unSetInt);
-      if ( m_spec_max == unSetInt ) m_spec_max = m_spec_min;
+      if ( m_spec_max == unSetInt ) m_spec_max = 0;
 
       // Check validity of spectra list property, if set
       if ( m_list )
@@ -219,6 +226,7 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
+        m_spec_min = getProperty("spectrum_min");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

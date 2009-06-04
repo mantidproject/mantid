@@ -46,7 +46,7 @@ void CylinderAbsorption::init()
   declareProperty("ScatteringXSection", -1.0, mustBePositive->clone(),
       "The scattering cross-section for the sample material in barns.");
   declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
-      "The number density of the sample in number per cubic �ngstr�m.");
+      "The number density of the sample in number per cubic angstrom.");
   BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices", 1, positiveInt,

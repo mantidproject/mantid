@@ -53,14 +53,14 @@ void NormaliseToMonitor::init()
   //If users set either of these optional properties two things happen
   //1) normalisation is by an integrated count instead of bin-by-bin
   //2) if the value is within the range of X's in the spectrum it crops the spectrum
-  declareProperty( "IntegrationRangeMin", EMPTY_DBL()/*TO BE CONTINUED STEVE,
-    "Entering a value here will cause normalisation by integrated count\n" +
-    "mode to be used and crop the spectrum removing any of the spectrum at\n" +
-    "lower X values" */);
-  declareProperty( "IntegrationRangeMax", EMPTY_DBL()/*TO BE CONTINUED STEVE,
-    "Entering a value here will cause normalisation by integrated count\n" +
-    "mode to be used and crop the spectrum removing any of the spectrum at\n" +
-    "higher X values" */);
+  declareProperty( "IntegrationRangeMin", EMPTY_DBL(),
+    "Entering a value here will cause normalisation by integrated count\n"
+    "mode to be used and crop the spectrum removing any of the spectrum at\n"
+    "lower X values" );
+  declareProperty( "IntegrationRangeMax", EMPTY_DBL(),
+    "Entering a value here will cause normalisation by integrated count\n"
+    "mode to be used and crop the spectrum removing any of the spectrum at\n"
+    "higher X values");
 }
 
 void NormaliseToMonitor::exec()

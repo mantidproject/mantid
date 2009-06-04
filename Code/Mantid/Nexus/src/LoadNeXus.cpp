@@ -49,14 +49,15 @@ namespace NeXus
     declareProperty("Filename","",new FileValidator(exts),
       "Name of the Nexus file to read, as a full or relative path");
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), 
-      "The name of the workspace to be created as the output. For\nmultiperiod files, one workspace will be generated for\neach period");
+      "The name of the workspace to be created as the output. For\n"
+      "multiperiod files, one workspace will be generated for\neach period");
 
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("spectrum_min",0, mustBePositive,
       "Index number of first spectrum to read, only for single period data.");
-    declareProperty("spectrum_max",0, mustBePositive->clone(),
+    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
       "Index number of last spectrum to read, only for single period data.");
     declareProperty(new ArrayProperty<int>("spectrum_list"),
       "A comma seperated or array with the list of index number to read" );
@@ -122,13 +123,13 @@ namespace NeXus
       // Set the workspace property
       std::string outputWorkspace="OutputWorkspace";
       loadMuonNexus->setPropertyValue(outputWorkspace,m_workspace);
-      //
-      Property *specList = getProperty("spectrum_list");
-      if( !(specList->isDefault()) )
+      //Get the array passed in the spectrum_list, if an empty array was passed use the default 
+      std::vector<int> specList = getProperty("spectrum_list");
+      if ( !specList.empty() )
          loadMuonNexus->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
       //
-      Property *specMax = getProperty("spectrum_max");
-      if( !(specMax->isDefault()) )
+      int specMax = getProperty("spectrum_max");
+      if( specMax != unSetInt )
       {
          loadMuonNexus->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
          loadMuonNexus->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
@@ -182,13 +183,13 @@ namespace NeXus
       // Set the workspace property
       std::string outputWorkspace="OutputWorkspace";
       loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
-      //
-      Property *specList = getProperty("spectrum_list");
-      if( !(specList->isDefault()) )
+      //Get the array passed in the spectrum_list, if an empty array was passed use the default 
+      std::vector<int> specList = getProperty("spectrum_list");
+      if ( !specList.empty() )
          loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
       //
-      Property *specMax = getProperty("spectrum_max");
-      if( !(specMax->isDefault()) )
+      int specMax = getProperty("spectrum_max");
+      if ( specMax != unSetInt )
       {
          loadNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
          loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
@@ -243,13 +244,13 @@ namespace NeXus
       // Set the workspace property
       std::string outputWorkspace="OutputWorkspace";
       loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
+      //Get the array passed in the spectrum_list, if an empty array was passed use the default 
+      std::vector<int> specList = getProperty("spectrum_list");
+      if ( !specList.empty() )
+        loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
       //
-      Property *specList = getProperty("spectrum_list");
-      if( !(specList->isDefault()) )
-         loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
-      //
-      Property *specMax = getProperty("spectrum_max");
-      if( !(specMax->isDefault()) )
+      int specMax = getProperty("spectrum_max");
+      if ( specMax != unSetInt )
       {
          loadNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
          loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));

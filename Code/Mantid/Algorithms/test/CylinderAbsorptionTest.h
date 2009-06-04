@@ -51,13 +51,6 @@ public:
     TS_ASSERT( atten.isInitialized() )
   }
 
-  void testDoc()
-  {
-    //just a test to see if the string ångström is recognised on some systems, if it is we could get rid of the test
-    Mantid::Kernel::Property *pProp = atten.getProperty("SampleNumberDensity");
-    TS_ASSERT_EQUALS( pProp->documentation().size(), 62 )
-  }
-
   void testExec()
   {
     if ( !atten.isInitialized() ) atten.initialize();

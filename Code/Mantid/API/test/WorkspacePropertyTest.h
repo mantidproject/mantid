@@ -120,7 +120,7 @@ public:
       "Enter a name for the workspace" )
     TS_ASSERT_EQUALS( wsp1->value(), "" )
     TS_ASSERT_EQUALS( wsp1->setValue("newValue"),
-      "Workspace \"newValue\" is not found in the Analysis Data Service" )
+      "Workspace \"newValue\" was not found in the Analysis Data Service" )
 
     TS_ASSERT_EQUALS( wsp1->value(), "newValue" )
     wsp1->setValue("ws1");
@@ -128,9 +128,9 @@ public:
 
   void testIsValid()
   {  
-    TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" is not found in the Analysis Data Service" )
+    TS_ASSERT_EQUALS( wsp1->isValid(), "Workspace \"ws1\" was not found in the Analysis Data Service" )
     TS_ASSERT_EQUALS( wsp2->isValid(), "Enter a name for the workspace" )
-    TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" is not found in the Analysis Data Service" )
+    TS_ASSERT_EQUALS( wsp3->isValid(), "Workspace \"ws3\" was not found in the Analysis Data Service" )
 
     // Setting the workspace name should make wsp2 (an output workspace) valid
     TS_ASSERT_EQUALS( wsp2->setValue("ws2"), "" )

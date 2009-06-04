@@ -20,12 +20,17 @@ Logger& FlatBackground::g_log = Logger::get("FlatBackground");
 
 void FlatBackground::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input ), "Name of the input workspace.");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ), "Name to use for the output workspace.");
-  declareProperty(new ArrayProperty<int>("SpectrumIndexList", new MandatoryValidator<std::vector<int> > ), "Indices of the spectra that will have their background removed");
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input ),
+    "Name of the input workspace.");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ),
+    "Name to use for the output workspace.");
+  declareProperty(new ArrayProperty<int>("SpectrumIndexList", new MandatoryValidator<std::vector<int> > ),
+    "Indices of the spectra that will have their background removed");
   MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
-  declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue, "The X value at which to start the background fit");
-  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(), "The X value at which to end the background fit");
+  declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
+    "The X value at which to start the background fit");
+  declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
+    "The X value at which to end the background fit");
 }
 
 void FlatBackground::exec()

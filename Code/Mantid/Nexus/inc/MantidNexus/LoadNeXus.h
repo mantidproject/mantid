@@ -97,9 +97,9 @@ namespace Mantid
 	  /// run LoadNexusProcessed
 	  void runLoadNexusProcessed();
 
-
+      ///a flag int value that indicates a value that wasn't set
+      static const int unSetInt = INT_MAX-15;
     };
-
   } // namespace NeXus
 } // namespace Mantid
 
