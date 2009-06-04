@@ -117,6 +117,7 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
         return;
     }
 
+    m_workspace = ws;
     m_workspaceTotalHist = ws->getNumberHistograms();
     m_startRow = (start<0 || start>=m_workspaceTotalHist)?0:start;
     m_endRow   = (end<0 || end>=m_workspaceTotalHist || end < start)? m_workspaceTotalHist - 1 : end;
@@ -911,7 +912,6 @@ void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::Da
   if( pNf->object_name() != m_strName || !pNf->object().get() ) return;
   
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
-  m_workspace = new_workspace;
   emit needChangeWorkspace( new_workspace );
   
 }
