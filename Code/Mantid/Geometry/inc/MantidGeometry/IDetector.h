@@ -67,6 +67,9 @@ public:
    */
   virtual double getTwoTheta(const V3D& observer, const V3D& axis) const = 0;
 
+  /// Gives the phi of this detector object
+  virtual double getPhi() const = 0;
+  
   /** Gives the approximate angle subtended by the detector
    *  @param observer The point from which the detector is being viewed
    *  @return The solid angle in steradians
@@ -89,7 +92,7 @@ public:
 /// Shared pointer to IDetector
 typedef boost::shared_ptr<Mantid::Geometry::IDetector> IDetector_sptr;
 /// Shared pointer to IDetector (const version)
-typedef const boost::shared_ptr<const Mantid::Geometry::IDetector> IDetector_const_sptr;
+typedef boost::shared_ptr<const Mantid::Geometry::IDetector> IDetector_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

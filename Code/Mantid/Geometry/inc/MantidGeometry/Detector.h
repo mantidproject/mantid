@@ -56,6 +56,7 @@ public:
 	V3D getPos() const;
 	double getDistance(const IComponent& comp) const;
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
+  double getPhi() const;
   double solidAngle(const V3D& observer) const;	
 	bool isMasked() const;
 	bool isMonitor() const;

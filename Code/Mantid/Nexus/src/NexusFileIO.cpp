@@ -1360,7 +1360,6 @@ namespace NeXus
 
       boost::char_separator<char> sep("|");
       tokenizer parTok(value, sep);
-      int index=0;
       // Iterate over the properties
       for (tokenizer::iterator it = parTok.begin(); it != parTok.end(); ++it)
       {

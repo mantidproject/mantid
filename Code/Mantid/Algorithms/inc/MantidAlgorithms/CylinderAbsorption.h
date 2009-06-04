@@ -11,8 +11,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Calculates attenuation due to absorption and
-    scattering in a cylindrical sample.
+/** Calculates attenuation due to absorption and scattering in a cylindrical sample.
 
     Properties:
     <UL>
@@ -39,6 +38,9 @@ namespace Algorithms
 
     Path lengths through the sample are then calculated for the centre-point of each element and a numerical
     integration is carried out using these path lengths over the volume elements.
+
+    This algorithm assumes that the beam comes along the Z axis, that Y (the sample cylinder axis) is up
+    and that the sample is at the origin.
 
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008
@@ -78,7 +80,6 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
-
   /// Initialisation code
   void init();
   ///Execution code
@@ -86,9 +87,9 @@ private:
 
   void retrieveProperties();
   void constructCylinderSample();
-  void calculateDistances(const Geometry::V3D& detectorPos);
+  void calculateDistances(const Geometry::IDetector_const_sptr& detector);
   inline double doIntegration(const double& lambda) const;
-  void interpolate(const std::vector<double>& x, std::vector<double>& y, bool is_histogram);
+  void interpolate(const MantidVec& x, MantidVec& y, bool is_histogram);
   
   /// Sample object. Keeping separate from the full instrument geometry for now.
   Geometry::Object m_cylinderSample;

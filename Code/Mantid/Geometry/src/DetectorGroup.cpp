@@ -108,6 +108,21 @@ double DetectorGroup::getTwoTheta(const V3D& observer, const V3D& axis) const
   return result/m_detectors.size();
 }
 
+/// Gives the average phi of the constituent detectors
+double DetectorGroup::getPhi() const
+{
+  double result = 0.0;
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    V3D detPos = (*it).second->getPos();
+    double phi = 0.0, dummy;
+    detPos.getSpherical(dummy,dummy,phi);
+    result += phi;
+  }
+  return result/m_detectors.size();  
+}
+
 /** Gives the total solid angle subtended by a group of detectors by summing the
  *  contributions from the individual detectors.
  *  @param observer The point from which the detector is being viewed

@@ -71,6 +71,13 @@ double Detector::getTwoTheta(const V3D& observer, const V3D& axis) const
   return sampleDetVec.angle(axis);
 }
 
+double Detector::getPhi() const
+{
+  double phi = 0.0, dummy;
+  this->getPos().getSpherical(dummy,dummy,phi);
+  return phi;
+}
+
 double Detector::solidAngle(const V3D& observer) const
 {
 	return ObjComponent::solidAngle(observer);
