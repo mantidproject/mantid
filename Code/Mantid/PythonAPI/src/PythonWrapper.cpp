@@ -6,6 +6,7 @@
 
 // Boost
 #include "boost/python/class.hpp"
+#include "boost/python/bases.hpp"
 #include "boost/python/call_method.hpp"
 #include "boost/python/overloads.hpp"
 #include "boost/python/module.hpp"
@@ -35,7 +36,7 @@
 // Geometry
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/IComponent.h"
 
 // PythonAPI
 #include "MantidPythonAPI/FrameworkManager.h"
@@ -361,11 +362,16 @@ namespace PythonAPI
       return call_method<Mantid::Geometry::IObjComponent_sptr>(py_self, "getSample");
     }
 
+    Mantid::Geometry::IObjComponent_sptr getSource() const
+    {
+      return call_method<Mantid::Geometry::IObjComponent_sptr>(py_self, "getSource");
+    }
+
     PyObject* py_self;
   };
 
-  /// A wrapper for IObjComponent
-  struct Mantid_Geometry_IObjComponent_Wrapper : Mantid::Geometry::IObjComponent
+  /// A wrapper for IComponent
+  struct Mantid_Geometry_IComponent_Wrapper : Mantid::Geometry::IComponent
   {
     Mantid::Geometry::V3D getPos() const
     {
@@ -374,6 +380,18 @@ namespace PythonAPI
 
     PyObject* py_self;
   };
+
+//   /// A wrapper for IObjComponent
+//   struct Mantid_Geometry_IObjComponent_Wrapper : Mantid::Geometry::IObjComponent
+//   {
+//     Mantid::Geometry::V3D getPos() const
+//     {
+//       return call_method<Mantid::Geometry::V3D>(py_self, "getPos");
+//     }
+
+//     PyObject* py_self;
+//   };
+
 
   ///A wrapper for IDetector
   struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
@@ -402,6 +420,17 @@ namespace PythonAPI
     double getDistance(const Mantid::Geometry::IComponent& comp) const
     {
       return call_method<double>(py_self, "getDistance");
+    }
+
+    double getTwoTheta(const Mantid::Geometry::V3D& observer, 
+		       const Mantid::Geometry::V3D& axis) const
+    {
+      return call_method<double>(py_self, "getTwoTheta");
+    }
+
+    double getPhi() const
+    {
+      return call_method<double>(py_self, "getPhi");
     }
 
     PyObject* py_self;
@@ -539,6 +568,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
   /// A pointer to an IObjComponent
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IObjComponent )
+  
+    /// A pointer to an IComponent
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::Geometry::IComponent )
   //@}
   
   //Make this namespace available
@@ -712,9 +744,13 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def(self_ns::str(self))
      ;
 
+   //IComponent class
+   class_< Mantid::Geometry::IComponent, boost::noncopyable, Mantid_Geometry_IComponent_Wrapper>("IComponent", no_init)
+     .def("getPos", pure_virtual(&Mantid::Geometry::IComponent::getPos))
+     ;
+
    //IObjComponent class
-   class_< Mantid::Geometry::IObjComponent, boost::noncopyable, Mantid_Geometry_IObjComponent_Wrapper>("IObjComponent", no_init)
-     .def("getPos", pure_virtual(&Mantid::Geometry::IObjComponent::getPos))
+   class_< Mantid::Geometry::IObjComponent, bases<Mantid::Geometry::IComponent>, boost::noncopyable>("IObjComponent", no_init)
      ;
 
    //IDetector Class
@@ -725,13 +761,17 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("solidAngle", pure_virtual(&Mantid::Geometry::IDetector::solidAngle))
      .def("getPos", pure_virtual(&Mantid::Geometry::IDetector::getPos))
      .def("getDistance", pure_virtual(&Mantid::Geometry::IDetector::getDistance))
+     .def("getTwoTheta", pure_virtual(&Mantid::Geometry::IDetector::getTwoTheta))
+     .def("getPhi", pure_virtual(&Mantid::Geometry::IDetector::getPhi))
      ;
    
    //IInstrument class
    class_< Mantid::API::IInstrument, boost::noncopyable, Mantid_API_IInstrument_Wrapper>("IInstrument", no_init)
      .def("getSample", pure_virtual(&Mantid::API::IInstrument::getSample))
+     .def("getSource", pure_virtual(&Mantid::API::IInstrument::getSource))
      ;
    
+   //Sample class
    class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
      .def("getLogData", (const std::vector<Mantid::Kernel::Property*>& (Mantid::API::Sample::*)() const)&Mantid::API::Sample::getLogData, return_value_policy<copy_const_reference>(),
 	  Mantid_API_Sample_getLogData_overloads_1())
