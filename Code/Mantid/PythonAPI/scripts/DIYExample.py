@@ -7,7 +7,7 @@ path = "C:/MantidInstall/"
 LoadRaw(Filename=path+"Data/GEM38370.raw", OutputWorkspace="GEM38370")
 
 #Step(2). Import the matrix starting at 200
-gridGEM = newMantidMatrix("GEM38370",200)
+gridGEM = importMatrixWorkspace("GEM38370",200)
 
 # Step(3)  - A contour plot with colour fill
 gridGEM.plotGraph2D(Layer.ColorMap)
