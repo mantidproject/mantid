@@ -185,7 +185,8 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 		d_user_step[i] = 0.0;
 
 	setGeometry(x, y, width, height);
-	setAttribute(Qt::WA_DeleteOnClose);
+	// Mantid
+	setAttribute(Qt::WA_DeleteOnClose, false);
 
 	d_plot = new Plot(width, height, this);
 	cp = new CanvasPicker(this);
@@ -1164,48 +1165,103 @@ void Graph::setScale(int axis, double start, double end, double step,
 	sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
 	sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
 
-	if (type == 1){
-		sc_engine->setType(QwtScaleTransformation::Log10);
-		if (start <= 0 || end <= 0){
-            QwtDoubleInterval intv = axisBoundingInterval(axis);
-            if (start < end)
-                start = intv.minValue();
-            else
-                end = intv.minValue();
-		}
-	} else
-		sc_engine->setType(QwtScaleTransformation::Linear);
+	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
+	
+// 	if (type == Graph::Log10)
+// 	{
+// 	  sc_engine->setType(QwtScaleTransformation::Log10);
+// 	  if (start <= 0 || end <= 0)
+// 	  {
+// 	    QwtDoubleInterval intv = axisBoundingInterval(axis);
+// 	    if (start < end) start = intv.minValue();
+// 	    else end = intv.minValue();
+// 	  }
+// 	} 
+// 	else
+// 	{
+// 	  sc_engine->setType(QwtScaleTransformation::Linear);
+// 	}
+	
+// 	int max_min_intervals = minorTicks;
+// 	if (minorTicks == 1)
+// 		max_min_intervals = 3;
+// 	if (minorTicks > 1)
+// 		max_min_intervals = minorTicks + 1;
 
-	int max_min_intervals = minorTicks;
-	if (minorTicks == 1)
-		max_min_intervals = 3;
-	if (minorTicks > 1)
-		max_min_intervals = minorTicks + 1;
+// 	QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
+// 	d_plot->setAxisMaxMajor (axis, majorTicks);
+// 	d_plot->setAxisMaxMinor (axis, minorTicks);
 
-	QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
-	d_plot->setAxisMaxMajor (axis, majorTicks);
-	d_plot->setAxisMaxMinor (axis, minorTicks);
+// 	if (inverted)
+// 		div.invert();
+// 	d_plot->setAxisScaleDiv (axis, div);
 
-	if (inverted)
-		div.invert();
-	d_plot->setAxisScaleDiv (axis, div);
+// 	d_zoomer[0]->setZoomBase();
+// 	d_zoomer[1]->setZoomBase();
 
-	d_zoomer[0]->setZoomBase();
-	d_zoomer[1]->setZoomBase();
+// 	d_user_step[axis] = step;
 
-	d_user_step[axis] = step;
+// 	if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft){
+//   		updateSecondaryAxis(QwtPlot::xTop);
+//   	    updateSecondaryAxis(QwtPlot::yRight);
+//   	}
 
-	if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft){
-  		updateSecondaryAxis(QwtPlot::xTop);
-  	    updateSecondaryAxis(QwtPlot::yRight);
-  	}
-
-	d_plot->replot();
-	//keep markers on canvas area
-	updateMarkersBoundingRect();
-	d_plot->replot();
-	d_plot->axisWidget(axis)->repaint();
+// 	d_plot->replot();
+// 	//keep markers on canvas area
+// 	updateMarkersBoundingRect();
+// 	d_plot->replot();
+// 	d_plot->axisWidget(axis)->repaint();
 }
+
+void Graph::setAxisScale(int axis, double start, double end, int type, double step,
+				  int majorTicks, int minorTicks)
+{
+  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+  if( !sc_engine ) return;
+
+  if (type == Graph::Log10)
+  {
+    sc_engine->setType(QwtScaleTransformation::Log10);
+    if (start <= 0 || end <= 0)
+    {
+      QwtDoubleInterval intv = axisBoundingInterval(axis);
+      if (start < end) start = intv.minValue();
+      else end = intv.minValue();
+    }
+  } 
+  else
+  {
+    sc_engine->setType(QwtScaleTransformation::Linear);
+  }
+
+  int max_min_intervals = minorTicks;
+  if (minorTicks == 1) max_min_intervals = 3;
+  if (minorTicks > 1) max_min_intervals = minorTicks + 1;
+  
+  QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
+  d_plot->setAxisMaxMajor (axis, majorTicks);
+  d_plot->setAxisMaxMinor (axis, minorTicks);
+
+  d_plot->setAxisScaleDiv (axis, div);
+
+  d_zoomer[0]->setZoomBase();
+  d_zoomer[1]->setZoomBase();
+  
+  d_user_step[axis] = step;
+
+  if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
+  {
+    updateSecondaryAxis(QwtPlot::xTop);
+    updateSecondaryAxis(QwtPlot::yRight);
+  }
+
+  d_plot->replot();
+  //keep markers on canvas area
+  updateMarkersBoundingRect();
+  d_plot->replot();
+  d_plot->axisWidget(axis)->repaint();
+}
+
 
 QStringList Graph::analysableCurvesList()
 {
@@ -2916,10 +2972,13 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 
 void Graph::insertCurve(Graph* g, int i)
 {
-  if( g == this ) return;
-  
+  if( g == this || !g ) return;
+
   DataCurve *dc = static_cast<DataCurve *>(g->curve(i));
-  if( dc ) addCurves(dc->table(), QStringList(dc->table()->colName(1)));
+  if( dc ) 
+  {
+    addCurves(dc->table(), QStringList(dc->table()->colName(1)));
+  }
 }
 
 

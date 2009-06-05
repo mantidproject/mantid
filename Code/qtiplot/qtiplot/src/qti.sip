@@ -616,6 +616,7 @@ public:
 				double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
 				double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
 				int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
+  void setAxisScale(int, double, double, int, double=0.0, int=5, int=5);
   void setAutoScale();
   void setMargin(int);
   void setFrame(int width = 1, const QColor& color = QColor(Qt::black));
@@ -1745,12 +1746,11 @@ sipTypeDef *t;
 
 public:  
   MultiLayer* plotSpectrum(const QString&,int,bool = true,bool = false);
+  void mergePlots(MultiLayer*, MultiLayer*);
   MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotTimeBin(const QString&,int,bool = false);  
-  MantidMatrix* newMantidMatrix(const QString&, int=-1, int=-1);
-%MethodCode
-  sipRes = sipCpp->newMantidMatrix(*a0, a1, a2);
-%End
+  MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
+  Table* importTableWorkspace(const QString&, bool = false, bool = false);	
   bool runAlgorithmAsynchronously(const QString &);
   bool createPropertyInputDialog(const QString &, const QString &, const QString&);
   QString getSelectedWorkspaceName();

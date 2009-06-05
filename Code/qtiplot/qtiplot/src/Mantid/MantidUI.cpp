@@ -365,11 +365,13 @@ MultiLayer* MantidUI::plotSpectrogram(Graph::CurveType type)
 
 /**  Import a MatrixWorkspace into a MantidMatrix.
      @param wsName Workspace name
+     @param lower An optional lower boundary 
+     @param upper An optional upper boundary 
      @param showDlg If true show a dialog box to set some import parameters
      @param makeVisible If true show the created MantidMatrix, hide otherwise.
      @return A pointer to the new MantidMatrix.
  */
-MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
+MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, int lower, int upper, bool showDlg, bool makeVisible)
 {
     MatrixWorkspace_sptr ws;
   	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -396,9 +398,9 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, bool showDl
     }
     else
     {
-        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, -1, -1 );
+        w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
     }
-    if (!w) return 0;
+    if ( !w ) return 0;
 
     connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
     connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
@@ -417,7 +419,7 @@ MantidMatrix* MantidUI::importMatrixWorkspace(const QString& wsName, bool showDl
  */
 void MantidUI::importWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
 {
-    MantidMatrix* mm = importMatrixWorkspace(wsName,showDlg,makeVisible);
+  MantidMatrix* mm = importMatrixWorkspace(wsName,-1, -1, showDlg,makeVisible);
     if (!mm) importTableWorkspace(wsName,showDlg,makeVisible);
 }
 
@@ -482,6 +484,7 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool showDlg, bool 
     appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
     t->askOnCloseEvent(false);
     if (makeVisible) t->showNormal();
+    else t->showMinimized(); 
 
     for(int i=0;i<ws->columnCount();i++)
     {
@@ -805,7 +808,7 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
 	    return;
     }
 
-    MantidMatrix *m = importMatrixWorkspace(QString::fromStdString(wsName),false, true);
+    MantidMatrix *m = importMatrixWorkspace(QString::fromStdString(wsName), -1, -1, false, true);
 
     int updateInterval = m_DAE_map[wsName];
     if (updateInterval > 0)
@@ -996,10 +999,6 @@ void MantidUI::menuMantidMatrixAboutToShow()
     }*/
 }
 
-
-
-
-
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 {
@@ -1019,7 +1018,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
-    m = importMatrixWorkspace(wsName, false, showMatrix);
+    m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -1055,7 +1054,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlo
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
-    m = importMatrixWorkspace(wsName, false, showMatrix);
+    m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -1073,6 +1072,26 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlo
   if( !showPlot ) ml->setVisible(false);
   return ml;
 }
+
+/**
+ * Merge the curves from the two given MultiLayer objects
+ */
+void MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
+{
+  if( !mlayer_1 || !mlayer_2 ) return;
+
+  int ncurves_on_two = mlayer_2->activeGraph()->visibleCurves();
+  for( int c = 0; c < ncurves_on_two; ++c )
+  {
+    mlayer_1->insertCurve(mlayer_2, c);
+  }
+  
+  // Hide the second graph for now as closing it
+  // deletes the curves that were associated with it
+  mlayer_2->hide();
+
+  return;
+};
 
 MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 {
@@ -1092,28 +1111,11 @@ MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 
 MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
 {
-  MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-    {
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-    }
-  
-  if (!ws.get()) return 0;
-
-  MantidMatrix* w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, start, end );
-  if (!w) return 0;
-  
-  connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
-  connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
-  connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
-  
-  appWindow()->d_workspace->addSubWindow(w);
-  w->showNormal(); 
-  return w;
+  return importMatrixWorkspace(wsName, false, false, start, end);
 }
 
 /**
- * This is for the scripting side of things.
+ * Run the named algorithm asynchronously
  */
 bool MantidUI::runAlgorithmAsynchronously(const QString & algName)
 {

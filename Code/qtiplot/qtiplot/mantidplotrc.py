@@ -7,6 +7,7 @@
 # Author Martyn Gigg, Tessella Support Services
 #
 #----------------------------------------------
+#
 # A tracing function to report the currently executing line number  
 #
 def traceit(frame, event, arg):
@@ -19,9 +20,17 @@ def traceit(frame, event, arg):
 sys.settrace(traceit)
 
 ## Make these functions available globally 
-# (i.e. so that the qti.qpp.mantidUI prefix is not needed)
-MantidUIImports = ['newMantidMatrix','plotSpectrum','plotTimeBin','getMantidMatrix',
-                   'getInstrumentView', 'getSelectedWorkspaceName']
+# (i.e. so that the qti.app.mantidUI prefix is not needed)
+MantidUIImports = [
+    'importMatrixWorkspace',
+    'importTableWorkspace',
+    'plotSpectrum',
+    'plotTimeBin',
+    'getMantidMatrix',
+    'getInstrumentView', 
+    'getSelectedWorkspaceName',
+    'mergePlots'
+    ]
 
 for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))

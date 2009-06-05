@@ -189,6 +189,7 @@ public:
    * Commands purely for python interaction
    */
   MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showPlot = true, bool showMatrix = false);
+  void mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
@@ -245,8 +246,9 @@ public slots:
     // Import a workspace wsName
     void importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
-    // Create a MantidMatrix from workspace wsName
-    MantidMatrix *importMatrixWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
+  // Create a MantidMatrix from workspace wsName
+  MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1, 
+				      bool showDlg = true, bool makeVisible = true);
 
     // Create a MantidMatrix from workspace wsName
     Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
