@@ -47,9 +47,9 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      ChangeBinOffset() : API::Algorithm() {};
+      ChangeBinOffset();
       /// Destructor
-      virtual ~ChangeBinOffset() {};
+      virtual ~ChangeBinOffset();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "ChangeBinOffset";}
       /// Algorithm's version for identification overriding a virtual method
@@ -62,8 +62,12 @@ namespace Mantid
       void init();
       void exec();
     
-       API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
-            
+      /// Create output workspace
+      API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
+       
+      /// The progress reporting object
+      API::Progress *m_progress;
+       
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };

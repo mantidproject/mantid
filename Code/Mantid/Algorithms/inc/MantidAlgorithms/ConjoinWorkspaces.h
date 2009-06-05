@@ -50,7 +50,9 @@ namespace Algorithms
 class DLLExport ConjoinWorkspaces : public API::Algorithm
 {
 public:
+  /// Empty constructor
   ConjoinWorkspaces();
+  /// Destructor
   virtual ~ConjoinWorkspaces();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "ConjoinWorkspaces"; }
@@ -66,6 +68,9 @@ private:
 
   void validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
   void checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const;
+
+  /// Progress reporting object
+  API::Progress *m_progress;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

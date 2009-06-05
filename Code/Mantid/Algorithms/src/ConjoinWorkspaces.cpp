@@ -24,10 +24,16 @@ using DataObjects::Workspace2D_const_sptr;
 Logger& ConjoinWorkspaces::g_log = Logger::get("ConjoinWorkspaces");
 
 /// Default constructor
-ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm() {}
+  ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
 
 /// Destructor
-ConjoinWorkspaces::~ConjoinWorkspaces() {}
+ConjoinWorkspaces::~ConjoinWorkspaces() 
+{
+  if( m_progress )
+  {
+    delete m_progress;
+  }
+}
 
 void ConjoinWorkspaces::init()
 {
@@ -61,18 +67,21 @@ void ConjoinWorkspaces::exec()
   DataObjects::Histogram1D::RCtype XValues;
   XValues.access() = ws1->readX(0);
 
+  // Initialize the progress reporting object
+  m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
+
   // Loop over the input workspaces in turn copying the data into the output one
-  int outIndex = 0;
-  Axis* outAxis = output2D->getAxis(1);
+    Axis* outAxis = output2D->getAxis(1);
   const int& nhist1 = ws1->getNumberHistograms();
   const Axis* axis1 = ws1->getAxis(1);
-  for (int i = 0; i < nhist1; ++i,++outIndex)
+  PARALLEL_FOR2(ws1, output2D)
+  for (int i = 0; i < nhist1; ++i)
   {
-    output2D->setX(outIndex,XValues);
-    output2D->dataY(outIndex) = ws1->readY(i);
-    output2D->dataE(outIndex) = ws1->readE(i);
+    output2D->setX(i,XValues);
+    output2D->dataY(i) = ws1->readY(i);
+    output2D->dataE(i) = ws1->readE(i);
     // Copy the spectrum number
-    outAxis->spectraNo(outIndex) = axis1->spectraNo(i);
+    outAxis->spectraNo(i) = axis1->spectraNo(i);
     // Propagate masking, if needed
     if ( ws1->hasMaskedBins(i) )
     {
@@ -80,19 +89,23 @@ void ConjoinWorkspaces::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        output->maskBin(outIndex,(*it).first,(*it).second);
+        output->maskBin(i,(*it).first,(*it).second);
       }
     }    
+    m_progress->report();
   }
+  //For second loop we use the offset from the first
   const int& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
-  for (int j = 0; j < nhist2; ++j,++outIndex)
+
+  PARALLEL_FOR2(ws2, output2D)
+  for (int j = 0; j < nhist2; ++j)
   {
-    output2D->setX(outIndex,XValues);
-    output2D->dataY(outIndex) = ws2->readY(j);
-    output2D->dataE(outIndex) = ws2->readE(j);
+    output2D->setX(nhist1 + j,XValues);
+    output2D->dataY(nhist1 + j) = ws2->readY(j);
+    output2D->dataE(nhist1 + j) = ws2->readE(j);
     // Copy the spectrum number
-    outAxis->spectraNo(outIndex) = axis2->spectraNo(j);
+    outAxis->spectraNo(nhist1 + j) = axis2->spectraNo(j);
     // Propagate masking, if needed
     if ( ws2->hasMaskedBins(j) )
     {
@@ -100,9 +113,10 @@ void ConjoinWorkspaces::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        output->maskBin(outIndex,(*it).first,(*it).second);
+        output->maskBin(nhist1 + j,(*it).first,(*it).second);
       }
-    }    
+    }
+    m_progress->report();
   }
 
   // Delete the input workspaces from the ADS

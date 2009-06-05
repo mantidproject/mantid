@@ -24,6 +24,22 @@ namespace Mantid
     // Get a reference to the logger
     Logger& ChangeBinOffset::g_log = Logger::get("ChangeBinOffset");
 
+    /**
+     * Default constructor
+     */
+    ChangeBinOffset::ChangeBinOffset() : API::Algorithm(), m_progress(NULL) {}
+
+    /**
+     * Destructor
+     */
+    ChangeBinOffset::~ChangeBinOffset()
+    {
+      if( m_progress )
+      {
+	delete m_progress;
+      }
+    }
+
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */
@@ -52,6 +68,9 @@ namespace Mantid
 	    //Get number of histograms
 	    int histnumber = inputW->getNumberHistograms();
 	    
+	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
+	    
+	    PARALLEL_FOR2(inputW, outputW)
 	    for (int i=0; i < histnumber; ++i)
 	    {		    
 		    //Do the offsetting
@@ -60,10 +79,10 @@ namespace Mantid
 			    //Change bin value by offset
 			    outputW->dataX(i)[j] = inputW->readX(i)[j] + offset;
 		    }
-		    
 		    //Copy y and e data
 		    outputW->dataY(i) = inputW->dataY(i);
 		    outputW->dataE(i) = inputW->dataE(i);
+		    m_progress->report();
 	    }
 	    
 	    // Copy units
