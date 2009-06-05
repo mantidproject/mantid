@@ -144,33 +144,28 @@ QString PythonScripting::errorMsg()
 	PyErr_NormalizeException(&exception, &value, &traceback);
 
 	//----- Mantid - Altered error message formatting -----
-	int start = getFirstLineNumber();
-	msg.append("Error:");
+	// There is no stack for a syntax error
 	if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
 	{
-	  msg.append(" " + toString(PyObject_GetAttrString(value, "msg"), true));
-	  msg.append(" '").append(toString(PyObject_GetAttrString(value, "filename"), true).remove("\n"));
-	  msg.append("' on line ");
-	  int offset = toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
-	  msg.append(QString::number(start+offset));
-	  Py_DECREF(exception);
-	  Py_DECREF(value);
-	} 
- 	else {
-	  msg.append(" " + toString(exception,true)).remove("exceptions.").append(" - ");
-	  msg.append(toString(value,true));
- 	}
-
-	if (traceback) {
-	  excit = (PyTracebackObject*)traceback;
-	  if( excit )
-	  {
-	    msg.append(" on line ");
-	    msg.append(QString::number(start + excit->tb_lineno));
-	  }
-	  Py_DECREF(traceback);
+	  int errline = getFirstLineNumber() + toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+	  msg = QString("Error on line ") + QString::number(errline) + ": " +
+	    toString(PyObject_GetAttrString(value, "msg"), true);
+ 	  Py_DECREF(exception);
+  	  Py_DECREF(value);
 	}
-	//	msg.append("\n");
+	else
+	{
+	  int errline(getFirstLineNumber());
+	  if( traceback )
+	  {
+	   excit = (PyTracebackObject*)traceback;
+	   if( excit ) errline += excit->tb_lineno;
+	   Py_DECREF(traceback);
+	  }
+	  //Format the exception in a nicer manner
+	  msg = toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
+	    QString::number(errline) + QString(" : ") + toString(value,true);
+	}
 	//----------------------------------------------
 	return msg;
 }
